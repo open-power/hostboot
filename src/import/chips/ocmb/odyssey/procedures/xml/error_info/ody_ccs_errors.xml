@@ -118,6 +118,8 @@
         CCS reports a read miscompare.
     </description>
     <ffdc>FAIL_TYPE</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_CCS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -142,6 +144,7 @@
         Chould be an indicator of corruption in the CCS program
     </description>
     <ffdc>FAIL_TYPE</ffdc>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_CCS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -164,6 +167,7 @@
     <description>
         Software reported that the machine is not seeing the CCS finish in the alloted time
     </description>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_CCS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -191,6 +195,7 @@
         CCS failed to return from in-progress status while trying to stop a previous program
         Software reported that CCS did not finish in alloted time after manually triggering stop
     </description>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_CCS_FAILURE</id>
       <target>MC_TARGET</target>

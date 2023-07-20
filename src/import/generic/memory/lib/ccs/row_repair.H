@@ -44,15 +44,18 @@
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/ccs/ccs_traits.H>
 #include <generic/memory/lib/dimm/mrs_traits.H>
-#include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port_traits.H>
 #include <generic/memory/lib/utils/mss_rank.H>
 #include <mss_generic_system_attribute_getters.H>
-#include <generic/memory/lib/ccs/ccs_ddr4_commands.H>
+#ifndef __PPE__
+    #include <generic/memory/lib/dimm/ddr4/mrs_load_ddr4.H>
+    #include <generic/memory/lib/ccs/ccs_ddr4_commands.H>
+#endif
 
 namespace mss
 {
 
+#ifndef __PPE__
 // CCS functions related to SPPR
 // Uses mrs and ccs api so here to utilize both
 namespace ccs
@@ -344,6 +347,7 @@ void set_wr_repeats( const uint64_t i_rep,
 }
 
 }// namespace ccs
+#endif
 
 // Row Repair specific functions
 namespace row_repair
@@ -499,6 +503,7 @@ fapi2::ReturnCode config_ccs_regs(const fapi2::Target<PT::MC_TARGET_TYPE>& i_mc_
     l_temp.template setBit<TT::IDLE_PAT_ADDRESS_16>();    // RASn Idle
     l_temp.template setBit<TT::IDLE_PAT_ADDRESS_15>();    // CASn Idle
     l_temp.template setBit<TT::IDLE_PAT_ADDRESS_14>();    // WEn Idle
+    // TODO:ZEN:MST-2262
     l_temp.template clearBit<TT::ARR0_DDR_PARITY>();      // 0 = hardware sets parity
     FAPI_TRY(mss::putScom(i_mc_target, TT::MODEQ_REG, l_temp));
 

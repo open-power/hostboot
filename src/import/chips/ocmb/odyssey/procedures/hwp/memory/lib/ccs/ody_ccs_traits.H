@@ -268,29 +268,13 @@ class ccsTraits<mss::mc_type::ODYSSEY>
         };
 
         // CSN Quad encoded settings - Not supported for Odyssey as we only have two ranks so we cannot have a quad encoded CS
-        static constexpr std::pair<uint64_t, uint64_t> CS_N[mss::MAX_RANK_PER_DIMM] =
-            {};
+        static const mss::pair<uint64_t, uint64_t> CS_N[mss::MAX_RANK_PER_DIMM];
 
         // CSN Setup for Dual Direct Mode
         // Odyssey only has one DIMM and only has up to two ranks
         // However, attributes can have up to 4 ranks per DIMM -> keeping this constant for consistent code between MC's
         // For Odyssey, CS2/3 (the second number in the pair) are command 1's chip selects
-        static constexpr std::pair<uint64_t, uint64_t> CS_ND[mss::MAX_RANK_PER_DIMM] =
-        {
-            // CMD0 CS0 L CMD0 CS1 H => CMD1 CS0 => H CMD1 CS1 => H Rank 0
-            { 0b01, 0b11 },
-
-            // CMD0 CS0 H CMD0 CS1 L => CMD1 CS0 => H CMD1 CS1 => H Rank 1
-            { 0b10, 0b11 },
-
-            // Note: Invalid for Odyssey as we can only have two ranks
-            // CMD0 CS0 H CMD0 CS1 H => CMD1 CS0 => L CMD1 CS1 => H Rank 2
-            { 0b11, 0b11 },
-
-            // Note: Invalid for Odyssey as we can only have two ranks
-            // CMD0 CS0 H CMD0 CS1 H => CMD1 CS0 => H CMD1 CS1 => L Rank 3
-            { 0b11, 0b11 },
-        };
+        static const mss::pair<uint64_t, uint64_t> CS_ND[mss::MAX_RANK_PER_DIMM];
 
         ///
         /// @brief Get and perform CS tied operation if needed

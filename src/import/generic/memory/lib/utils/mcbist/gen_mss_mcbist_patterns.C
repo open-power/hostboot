@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,7 @@ namespace mcbist
 
 /// Vector of cache lines, seaprated in to two 64B chunks
 // TK Real patterns from Marc representing the proper bits for ECC checking
-const std::vector< pattern > patterns =
+const pattern patterns[NUM_PATTERNS] =
 {
     // Pattern index 0 (Pattern 1 is this inverted)
     {
@@ -123,18 +123,20 @@ const std::vector< pattern > patterns =
 
 // TK Want a new RC for random 24
 /// Vector of 24b random data seeds
-const std::vector< random24_data_seed > random24_data_seeds =
+const random24_data_seed random24_data_seeds[] =
 {
     // 24 Bit Pattern index 0 Matches user input defaults
-    {   {0x010203},
-        {0x040506},
-        {0x070809},
+    {
+        0x010203,
+        0x040506,
+        0x070809,
     },
 
     // 24 Bit Pattern index 2 (Pattern 3 is this inverted)
-    {   {0x112233},
-        {0x445566},
-        {0x778899},
+    {
+        0x112233,
+        0x445566,
+        0x778899,
     },
 
 };
@@ -143,32 +145,34 @@ const std::vector< random24_data_seed > random24_data_seeds =
 /// Vector of 24b random data seed mappings
 //  Not sure how many mapping we will want, for now it should be sufficient to
 //  have all bytes point to a different LFSR or all bytes point to the same LFSR
-const std::vector< random24_seed_map > random24_seed_maps =
+const random24_seed_map random24_seed_maps[] =
 {
     // 8 Bit Pattern index 0
     // This selection maps every data byte to a different random LFSR
-    {   {0x0},
-        {0x1},
-        {0x2},
-        {0x3},
-        {0x4},
-        {0x5},
-        {0x6},
-        {0x7},
-        {0x8},
+    {
+        0x0,
+        0x1,
+        0x2,
+        0x3,
+        0x4,
+        0x5,
+        0x6,
+        0x7,
+        0x8,
     },
 
     // 8 Bit Pattern index 1
     // This selection maps every data byte to random LFSR 0
-    {   {0x0},
-        {0x0},
-        {0x0},
-        {0x0},
-        {0x0},
-        {0x0},
-        {0x0},
-        {0x0},
-        {0x0},
+    {
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
+        0x0,
     },
 
 };

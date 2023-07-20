@@ -69,6 +69,7 @@
     <description>A miscompare error was caused by the last MCBIST pattern</description>
     <ffdc>PORT</ffdc>
     <ffdc>SUBTEST</ffdc>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -86,6 +87,7 @@
     <description>An error was caused by the last MCBIST pattern</description>
     <ffdc>STATUS0</ffdc>
     <ffdc>STATUS1</ffdc>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -101,6 +103,7 @@
   <hwpError>
     <rc>RC_ODY_MEMDIAGS_MCBIST_FAILED_TO_START</rc>
     <description>The MCBIST engine failed to start its program</description>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -134,6 +137,7 @@
   <hwpError>
     <rc>RC_ODY_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT</rc>
     <description>A superfast init operation failed initialization</description>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -149,6 +153,7 @@
   <hwpError>
     <rc>RC_ODY_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT</rc>
     <description>A superfast read operation failed initialization</description>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -164,6 +169,7 @@
   <hwpError>
     <rc>RC_ODY_MEMDIAGS_MCBIST_FAILED_TO_STOP</rc>
     <description>The MCBIST engine failed to stop its program</description>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -195,6 +201,7 @@
   <hwpError>
     <rc>RC_ODY_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT</rc>
     <description>A continuous scrub operation failed initialization</description>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -229,6 +236,7 @@
         MCBIST program failed to return in the time allowed
         Software timer, MCBIST has not finished in the time allowed
     </description>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>
@@ -251,6 +259,7 @@
     <description>
         MCBIST program appeared to have failed, but set conflicting bits in the status register
     </description>
+    <ffdc>MC_TARGET</ffdc>
     <ffdc>STATUS_REGISTER</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
@@ -273,6 +282,7 @@
     <rc>RC_ODY_MCBIST_UNKNOWN_FAILURE</rc>
     <description>MCBIST program reported a failure but no error status was found</description>
     <ffdc>STATUS_REGISTER</ffdc>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>

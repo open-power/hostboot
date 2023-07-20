@@ -42,8 +42,19 @@ namespace mss
 {
 
 // Generates linkage
-constexpr std::pair<uint64_t, uint64_t>
-mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::PATTERN_REGS[];
+// Registers used to load data patterns
+const mss::pair<uint64_t, uint64_t>
+mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::PATTERN_REGS[EXPECTED_PATTERN_SIZE] =
+{
+    {scomt::ody::ODC_MCBIST_SCOM_MCBFD0Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD1Q},
+    {scomt::ody::ODC_MCBIST_SCOM_MCBFD2Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD3Q},
+    {scomt::ody::ODC_MCBIST_SCOM_MCBFD4Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD5Q},
+    {scomt::ody::ODC_MCBIST_SCOM_MCBFD6Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD7Q},
+    {scomt::ody::ODC_MCBIST_SCOM_MCBFD8Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD9Q},
+    {scomt::ody::ODC_MCBIST_SCOM_MCBFDAQ, scomt::ody::ODC_MCBIST_SCOM_MCBFDBQ},
+    {scomt::ody::ODC_MCBIST_SCOM_MCBFDCQ, scomt::ody::ODC_MCBIST_SCOM_MCBFDDQ},
+    {scomt::ody::ODC_MCBIST_SCOM_MCBFDEQ, scomt::ody::ODC_MCBIST_SCOM_MCBFDFQ},
+};
 
 ///
 /// @brief Gets the attribute for freq
@@ -66,7 +77,7 @@ fapi2::ReturnCode freq<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(
     return fapi2::FAPI2_RC_FALSE;
 }
 
-const std::pair<uint64_t, uint64_t> mcbistTraits<mss::mc_type::ODYSSEY>::address_pairs[] =
+const mss::pair<uint64_t, uint64_t> mcbistTraits<mss::mc_type::ODYSSEY>::address_pairs[] =
 {
     { START_ADDRESS_0, END_ADDRESS_0 },
     { START_ADDRESS_1, END_ADDRESS_1 },
@@ -74,21 +85,11 @@ const std::pair<uint64_t, uint64_t> mcbistTraits<mss::mc_type::ODYSSEY>::address
     { START_ADDRESS_3, END_ADDRESS_3 },
 };
 
-const std::vector< mss::mcbist::op_type > mcbistTraits<mss::mc_type::ODYSSEY>::FIFO_MODE_REQUIRED_OP_TYPES =
-{
-    mss::mcbist::op_type::WRITE            ,
-    mss::mcbist::op_type::READ             ,
-    mss::mcbist::op_type::READ_WRITE       ,
-    mss::mcbist::op_type::WRITE_READ       ,
-    mss::mcbist::op_type::READ_WRITE_READ  ,
-    mss::mcbist::op_type::READ_WRITE_WRITE ,
-    mss::mcbist::op_type::RAND_SEQ         ,
-    mss::mcbist::op_type::READ_READ_WRITE  ,
-};
+constexpr mss::mcbist::op_type mcbistTraits<mss::mc_type::ODYSSEY>::FIFO_MODE_REQUIRED_OP_TYPES[];
 
 // These values are pulled out of the MCBIST specification
 // The index is the fixed width - the value is the LFSR_MASK value to be used
-const std::vector< uint64_t > mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::LFSR_MASK_VALUES =
+const uint64_t mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::LFSR_MASK_VALUES[37] =
 {
     0x000000031,
     0x00000001F,

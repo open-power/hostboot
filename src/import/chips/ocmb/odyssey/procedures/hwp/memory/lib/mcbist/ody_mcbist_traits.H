@@ -301,7 +301,7 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t MCBAMR2A0Q_REG = scomt::ody::ODC_MCBIST_SCOM_MCBAMR2A0Q;
         static constexpr uint64_t MCBAMR3A0Q_REG = scomt::ody::ODC_MCBIST_SCOM_MCBAMR3A0Q;
         static constexpr uint64_t LFSR_REG = scomt::ody::ODC_MCBIST_SCOM_MCBLFSRA0Q;
-        static const std::vector<uint64_t> LFSR_MASK_VALUES;
+        static const uint64_t LFSR_MASK_VALUES[37];
 
         // TODO:ZEN-MST1396 Update Odyssey MCBIST fixed data and patten size
         // All of the pattern registers are calculated off of this base
@@ -350,11 +350,21 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 
         // Sometimes we want to access the start/end address registers based off
         // of an index, like master rank. This allows us to do that.
-        static const std::pair<uint64_t, uint64_t> address_pairs[];
+        static const mss::pair<uint64_t, uint64_t> address_pairs[];
         static constexpr uint64_t ADDRESS_PAIRS = 4;
 
         // Subtest types that need to be run in FIFO mode
-        static const std::vector< mss::mcbist::op_type > FIFO_MODE_REQUIRED_OP_TYPES;
+        static constexpr mss::mcbist::op_type FIFO_MODE_REQUIRED_OP_TYPES[] =
+        {
+            mss::mcbist::op_type::WRITE            ,
+            mss::mcbist::op_type::READ             ,
+            mss::mcbist::op_type::READ_WRITE       ,
+            mss::mcbist::op_type::WRITE_READ       ,
+            mss::mcbist::op_type::READ_WRITE_READ  ,
+            mss::mcbist::op_type::READ_WRITE_WRITE ,
+            mss::mcbist::op_type::RAND_SEQ         ,
+            mss::mcbist::op_type::READ_READ_WRITE  ,
+        };
 
         // Which bit in the end boundary which siginifies this is a slave rank detect situation
         static constexpr uint64_t SLAVE_RANK_INDICATED_BIT = 61;
@@ -678,17 +688,7 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
             NUM_COMPARE_LOG_ENTRIES = 64,
         };
 
-        static constexpr std::pair<uint64_t, uint64_t> PATTERN_REGS[EXPECTED_PATTERN_SIZE] =
-        {
-            {scomt::ody::ODC_MCBIST_SCOM_MCBFD0Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD1Q},
-            {scomt::ody::ODC_MCBIST_SCOM_MCBFD2Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD3Q},
-            {scomt::ody::ODC_MCBIST_SCOM_MCBFD4Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD5Q},
-            {scomt::ody::ODC_MCBIST_SCOM_MCBFD6Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD7Q},
-            {scomt::ody::ODC_MCBIST_SCOM_MCBFD8Q, scomt::ody::ODC_MCBIST_SCOM_MCBFD9Q},
-            {scomt::ody::ODC_MCBIST_SCOM_MCBFDAQ, scomt::ody::ODC_MCBIST_SCOM_MCBFDBQ},
-            {scomt::ody::ODC_MCBIST_SCOM_MCBFDCQ, scomt::ody::ODC_MCBIST_SCOM_MCBFDDQ},
-            {scomt::ody::ODC_MCBIST_SCOM_MCBFDEQ, scomt::ody::ODC_MCBIST_SCOM_MCBFDFQ},
-        };
+        static const mss::pair<uint64_t, uint64_t> PATTERN_REGS[EXPECTED_PATTERN_SIZE];
 };
 
 

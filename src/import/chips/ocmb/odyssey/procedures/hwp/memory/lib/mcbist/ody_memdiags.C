@@ -76,7 +76,7 @@ fapi_try_exit:
 
 namespace memdiags
 {
-
+#ifndef __PPE__
 ///
 /// @brief Helper to encapsualte the setting of multi-port address configurations - Odyssey specialization
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -281,7 +281,7 @@ mss::mcbist::subtest_t<mss::mc_type::ODYSSEY> get_scrub_subtest<mss::mc_type::OD
 {
     return mss::mcbist::steer_subtest<mss::mc_type::ODYSSEY>();
 }
-
+#endif
 ///
 /// @brief Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and return the original mask value - specialization for Odyssey
 /// @param[in] i_target the target

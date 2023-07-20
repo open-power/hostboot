@@ -233,6 +233,29 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
     return io_rc;
 #endif
 }
+#else
+
+
+///
+/// @brief Checks whether a FIR or unlocked PLL could be the root cause of another failure, if a check fir boolean is passed in
+/// @tparam MC MC type for which to check FIR's
+/// @tparam F the FIR reg checklist to be checked
+/// @tparam T the fapi2::TargetType which hold the FIR bits
+/// @param[in] i_target - the target on which to operate
+/// @param[in,out] io_rc - the return code for the function
+/// @param[in] i_check_fir - true IFF the FIR needs to be checked - defaults to true
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note PPE specific implementation -> just return the RC
+///
+// TODO:ZEN:MST-1678 Create PLL or FIR error functions for Odyssey
+template< mss::mc_type MC, firChecklist F, fapi2::TargetType T >
+fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
+                                   fapi2::ReturnCode& io_rc,
+                                   const bool i_check_fir = true )
+{
+    return io_rc;
+}
+
 #endif
 
 ///

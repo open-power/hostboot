@@ -86,17 +86,21 @@ constexpr uint64_t RANDOM24_SEED_MAP_FIELD_LEN = 4;
 
 
 /// Vector of cache lines, separated in to two 64B chunks
+constexpr uint64_t CACHE_LINE_PER_PATTERN = 8;
+constexpr uint64_t NUM_PATTERNS = 6;
 using cache_line = mss::pair<uint64_t, uint64_t> ;
-using pattern = std::vector< cache_line > ;
-extern const std::vector< pattern > patterns;
+using pattern = cache_line[CACHE_LINE_PER_PATTERN];
+extern const pattern patterns[NUM_PATTERNS];
 
 // Vector of 24b random data seeds
-using random24_data_seed = std::vector< uint64_t > ;
-extern const std::vector< random24_data_seed > random24_data_seeds;
+constexpr uint64_t NUM_DATA_SEEDS = 3;
+using random24_data_seed = uint64_t[NUM_DATA_SEEDS];
+extern const random24_data_seed random24_data_seeds[];
 
 // Vector of 24b random data seed maps
-using random24_seed_map = std::vector< uint64_t >;
-extern const std::vector< random24_seed_map > random24_seed_maps;
+constexpr uint64_t NUM_SEED_MAPS = 9;
+using random24_seed_map = uint64_t[NUM_SEED_MAPS];
+extern const random24_seed_map random24_seed_maps[];
 
 }// mcbist
 

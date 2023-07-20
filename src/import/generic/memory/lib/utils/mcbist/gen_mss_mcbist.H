@@ -106,9 +106,9 @@ inline fapi2::ReturnCode read_mcbfirmask( const fapi2::Target<T>& i_target, fapi
 {
     o_data = 0;
 
-    FAPI_TRY( fapi2::getScom(i_target, TT::MCBFIRMASK_REG, o_data ), "%s failed to read MCBISTFIRMASK regiser",
-              mss::c_str(i_target));
-    FAPI_DBG("%s MCBISTFIRMASK has data 0x%016lx", mss::c_str(i_target), o_data);
+    FAPI_TRY( fapi2::getScom(i_target, TT::MCBFIRMASK_REG, o_data ), TARGTIDFORMAT " failed to read MCBISTFIRMASK regiser",
+              TARGTID);
+    FAPI_DBG(TARGTIDFORMAT " MCBISTFIRMASK has data 0x%016lx", TARGTID, o_data);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -126,9 +126,9 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode write_mcbfirmask( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_TRY( fapi2::putScom(i_target, TT::MCBFIRMASK_REG, i_data ), "%s failed to write MCBISTFIRMASK regiser",
-              mss::c_str(i_target));
-    FAPI_DBG("%s MCBISTFIRMASK has data 0x%016lx", mss::c_str(i_target), i_data);
+    FAPI_TRY( fapi2::putScom(i_target, TT::MCBFIRMASK_REG, i_data ), TARGTIDFORMAT " failed to write MCBISTFIRMASK regiser",
+              TARGTID);
+    FAPI_DBG(TARGTIDFORMAT " MCBISTFIRMASK has data 0x%016lx", TARGTID, i_data);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -148,9 +148,9 @@ inline fapi2::ReturnCode read_mcbfirq( const fapi2::Target<T>& i_target, fapi2::
 {
     o_data = 0;
 
-    FAPI_TRY( fapi2::getScom(i_target, TT::MCBFIRQ_REG, o_data ), "%s failed to read MCBISTFIRQ regiser",
-              mss::c_str(i_target));
-    FAPI_DBG("%s MCBISTFIRQ has data 0x%016lx", mss::c_str(i_target), o_data);
+    FAPI_TRY( fapi2::getScom(i_target, TT::MCBFIRQ_REG, o_data ), TARGTIDFORMAT " failed to read MCBISTFIRQ regiser",
+              TARGTID);
+    FAPI_DBG(TARGTIDFORMAT " MCBISTFIRQ has data 0x%016lx", TARGTID, o_data);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -168,9 +168,9 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode write_mcbfirq( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
-    FAPI_TRY( fapi2::putScom(i_target, TT::MCBFIRQ_REG, i_data ), "%s failed to write MCBISTFIRQ regiser",
-              mss::c_str(i_target));
-    FAPI_DBG("%s MCBISTFIRQ has data 0x%016lx", mss::c_str(i_target), i_data);
+    FAPI_TRY( fapi2::putScom(i_target, TT::MCBFIRQ_REG, i_data ), TARGTIDFORMAT " failed to write MCBISTFIRQ regiser",
+              TARGTID);
+    FAPI_DBG(TARGTIDFORMAT " MCBISTFIRQ has data 0x%016lx", TARGTID, i_data);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -325,12 +325,13 @@ class subtest_t
             iv_mcbmr.extractToRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(l_value_to_find);
 
             // Finds if this op type is in the vector that stores the OP types that require FIFO mode to be run
-            const auto l_op_type_it = std::find(TT::FIFO_MODE_REQUIRED_OP_TYPES.begin(), TT::FIFO_MODE_REQUIRED_OP_TYPES.end(),
+            const auto l_op_type_it = std::find(std::begin(TT::FIFO_MODE_REQUIRED_OP_TYPES),
+                                                std::end(TT::FIFO_MODE_REQUIRED_OP_TYPES),
                                                 l_value_to_find);
 
             // If the op type is required (aka was found), it will be less than end
             // std::find returns the ending iterator if it was not found, so this will return false in that case
-            return l_op_type_it != TT::FIFO_MODE_REQUIRED_OP_TYPES.end();
+            return l_op_type_it != std::end(TT::FIFO_MODE_REQUIRED_OP_TYPES);
         }
 
         ///
@@ -2207,7 +2208,7 @@ class program
                          fapi2::MSS_ZERO_FREQ_OR_SIZE().
                          set_FREQ(i_freq).
                          set_SIZE(i_size),
-                         "%s received zero memory freq or size in calculate_min_cmd_gap", mss::c_str(i_target));
+                         TARGTIDFORMAT " received zero memory freq or size in calculate_min_cmd_gap", TARGTID);
 
             // MIN CMD GAP = TOTAL CYCLES / TOTAL ADDRESSES
             // TOTAL CYCLES = 12 hours x 60 min/hr x 60 sec/min x [DRAM freq] cycles/sec x
@@ -2238,13 +2239,13 @@ class program
 
                 if ((l_seconds - l_scrub_time_fff) > (l_scrub_time_001 - l_seconds))
                 {
-                    FAPI_INF("%s gap is greater than the field will allow. Setting to: 0x%03x", mss::c_str(i_target), MIN_CMD_GAP);
+                    FAPI_INF(TARGTIDFORMAT " gap is greater than the field will allow. Setting to: 0x%03x", TARGTID, MIN_CMD_GAP);
                     o_min_cmd_gap = MIN_CMD_GAP;
                     o_timebase = mss::ON;
                 }
                 else
                 {
-                    FAPI_INF("%s gap is greater than the field will allow. Setting to: 0x%03x", mss::c_str(i_target), MAX_CMD_GAP);
+                    FAPI_INF(TARGTIDFORMAT " gap is greater than the field will allow. Setting to: 0x%03x", TARGTID, MAX_CMD_GAP);
                     o_min_cmd_gap = MAX_CMD_GAP;
                     o_timebase = mss::OFF;
                 }
@@ -2291,8 +2292,10 @@ class program
 
                         FAPI_TRY( calculate_min_cmd_gap(i_target, l_freq, l_size, l_min_cmd_gap, l_timebase) );
 
-                        FAPI_INF("%s setting bg scrub speed: %dMT/s, memory: %dGB, duration: %ds, gap: %d",
-                                 mss::c_str(i_target), l_freq, l_size, l_seconds, l_min_cmd_gap);
+                        FAPI_INF(TARGTIDFORMAT " setting bg scrub speed: %dMT/s, memory: %dGB, duration: %ds",
+                                 TARGTID, l_freq, l_size, l_seconds);
+                        FAPI_INF(TARGTIDFORMAT " gap: %d",
+                                 TARGTID, l_min_cmd_gap);
 
                         change_min_cmd_gap(l_min_cmd_gap);
                         change_min_gap_timebase(l_timebase);
@@ -2634,7 +2637,7 @@ class program
                 fapi2::buffer<uint64_t> l_data;
                 uint64_t l_port = 0;
                 uint64_t l_subtest = 0;
-                FAPI_TRY( fapi2::getScom(i_target, TT::MCBSTATQ_REG, l_data), "%s Failed getScom", mss::c_str(i_target) );
+                FAPI_TRY( fapi2::getScom(i_target, TT::MCBSTATQ_REG, l_data), TARGTIDFORMAT " Failed getScom", TARGTID );
 
                 if (TT::MULTI_PORTS == mss::states::YES)
                 {
@@ -2648,7 +2651,7 @@ class program
                              .set_MC_TARGET(i_target)
                              .set_PORT(mss::first_bit_set(l_port))
                              .set_SUBTEST(l_subtest),
-                             "%s MCBIST error on port %d subtest %d", mss::c_str(i_target), mss::first_bit_set(l_port), l_subtest );
+                             TARGTIDFORMAT " MCBIST error on port %d subtest %d", TARGTID, mss::first_bit_set(l_port), l_subtest );
             }
 
             // Check for UE errors
@@ -2656,18 +2659,18 @@ class program
                 fapi2::buffer<uint64_t> l_read0;
                 fapi2::buffer<uint64_t> l_read1;
 
-                FAPI_TRY( fapi2::getScom(i_target, TT::SRERR0_REG, l_read0), "%s Failed getScom", mss::c_str(i_target) );
-                FAPI_TRY( fapi2::getScom(i_target, TT::SRERR1_REG, l_read1), "%s Failed getScom", mss::c_str(i_target) );
+                FAPI_TRY( fapi2::getScom(i_target, TT::SRERR0_REG, l_read0), TARGTIDFORMAT " Failed getScom", TARGTID );
+                FAPI_TRY( fapi2::getScom(i_target, TT::SRERR1_REG, l_read1), TARGTIDFORMAT " Failed getScom", TARGTID );
 
                 FAPI_ASSERT( ((l_read0 == 0) && (l_read1 == 0)),
                              ET::memdiags_error_in_last_pattern()
                              .set_MC_TARGET(i_target)
                              .set_STATUS0(l_read0)
                              .set_STATUS1(l_read1),
-                             "%s MCBIST scrub/read error reg0: 0x%016lx reg1: 0x%016lx", mss::c_str(i_target), l_read0, l_read1 );
+                             TARGTIDFORMAT " MCBIST scrub/read error reg0: 0x%016lx reg1: 0x%016lx", TARGTID, l_read0, l_read1 );
             }
 
-            FAPI_INF("%s Execution success - no errors seen from MCBIST program", mss::c_str(i_target));
+            FAPI_INF(TARGTIDFORMAT " Execution success - no errors seen from MCBIST program", TARGTID);
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2865,7 +2868,7 @@ class program
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_config( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    FAPI_INF("%s loading MCBIST Config 0x%016lx", mss::c_str(i_target), i_program.iv_config);
+    FAPI_INF(TARGTIDFORMAT " loading MCBIST Config 0x%016lx", TARGTID, i_program.iv_config);
 
     // Copy the program's config settings - we want to modify them if we're in sim.
     fapi2::buffer<uint64_t> l_config = i_program.iv_config;
@@ -2889,7 +2892,7 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    FAPI_INF("loading MCBIST Control 0x%016lx for %s", i_program.iv_control, mss::c_str(i_target));
+    FAPI_INF("loading MCBIST Control 0x%016lx for " TARGTIDFORMAT, i_program.iv_control, TARGTID);
     return fapi2::putScom(i_target, TT::CNTLQ_REG, i_program.iv_control);
 }
 
@@ -2906,7 +2909,7 @@ inline fapi2::ReturnCode load_control( const fapi2::Target<T>& i_target, const m
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_addr_gen( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    FAPI_INF("loading MCBIST Address Generation 0x%016lx for %s", i_program.iv_addr_gen, mss::c_str(i_target));
+    FAPI_INF("loading MCBIST Address Generation 0x%016lx for " TARGTIDFORMAT, i_program.iv_addr_gen, TARGTID);
     return fapi2::putScom(i_target, TT::MCBAGRAQ_REG, i_program.iv_addr_gen);
 }
 
@@ -2930,17 +2933,20 @@ inline fapi2::ReturnCode config_address_range( const fapi2::Target<T>& i_target,
         const uint64_t i_end,
         const uint64_t i_index )
 {
-    FAPI_INF("config MCBIST address range %d start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx)",
+#ifndef __PPE__
+    FAPI_INF("config MCBIST address range %d start: 0x%016lx (0x%016lx), end/len 0x%016lx (0x%016lx) " TARGTIDFORMAT,
              i_index,
              i_start, (i_start << AT::MAGIC_PAD),
              i_end, (i_end << AT::MAGIC_PAD),
-             mss::c_str(i_target));
+             TARGTID);
+#endif
+
     FAPI_ASSERT( i_index < TT::ADDRESS_PAIRS,
                  fapi2::MSS_MCBIST_INVALID_ADDRESS_PAIR_INDEX().
                  set_INDEX(i_index).
                  set_MC_TYPE(MC).
                  set_TARGET(i_target),
-                 "An invalid address pair index %d for %s", i_index, mss::c_str(i_target));
+                 "An invalid address pair index %d for " TARGTIDFORMAT, i_index, TARGTID);
     FAPI_TRY( fapi2::putScom(i_target, TT::address_pairs[i_index].first, i_start << AT::MAGIC_PAD) );
     FAPI_TRY( fapi2::putScom(i_target, TT::address_pairs[i_index].second, i_end << AT::MAGIC_PAD) );
 
@@ -3133,18 +3139,18 @@ fapi2::ReturnCode load_mcbmr( const fapi2::Target<T>& i_target, const mcbist::pr
     // Leave if there are no subtests.
     if (0 == i_program.iv_subtests.size())
     {
-        FAPI_INF("no subtests, nothing to do for %s", mss::c_str(i_target));
+        FAPI_INF("no subtests, nothing to do for " TARGTIDFORMAT, TARGTID);
         return fapi2::current_err;
     }
 
     // List of the 8 MCBIST registers - each holds 4 subtests.
-    const std::vector< uint64_t > l_memory_registers =
+    const uint64_t l_memory_registers[] =
     {
         TT::MCBMR0_REG, TT::MCBMR1_REG, TT::MCBMR2_REG, TT::MCBMR3_REG,
         TT::MCBMR4_REG, TT::MCBMR5_REG, TT::MCBMR6_REG, TT::MCBMR7_REG,
     };
 
-    std::vector< uint64_t > l_memory_register_buffers =
+    uint64_t l_memory_register_buffers[] =
     {
         0, 0, 0, 0, 0, 0, 0, 0,
     };
@@ -3209,16 +3215,16 @@ template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, 
 fapi2::ReturnCode load_mcbamr( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     // Vector? Can decide when we fully understand the methods to twiddle the maps themselves. BRS
-    FAPI_INF("load MCBIST address map register 0: 0x%016lx for %s", i_program.iv_addr_map0, mss::c_str(i_target));
+    FAPI_INF("load MCBIST address map register 0: 0x%016lx for " TARGTIDFORMAT, i_program.iv_addr_map0, TARGTID);
     FAPI_TRY( fapi2::putScom(i_target, TT::MCBAMR0A0Q_REG, i_program.iv_addr_map0) );
 
-    FAPI_INF("load MCBIST address map register 1: 0x%016lx for %s", i_program.iv_addr_map1, mss::c_str(i_target));
+    FAPI_INF("load MCBIST address map register 1: 0x%016lx for " TARGTIDFORMAT, i_program.iv_addr_map1, TARGTID);
     FAPI_TRY( fapi2::putScom(i_target, TT::MCBAMR1A0Q_REG, i_program.iv_addr_map1) );
 
-    FAPI_INF("load MCBIST address map register 2: 0x%016lx for %s", i_program.iv_addr_map2, mss::c_str(i_target));
+    FAPI_INF("load MCBIST address map register 2: 0x%016lx for " TARGTIDFORMAT, i_program.iv_addr_map2, TARGTID);
     FAPI_TRY( fapi2::putScom(i_target, TT::MCBAMR2A0Q_REG, i_program.iv_addr_map2) );
 
-    FAPI_INF("load MCBIST address map register 3: 0x%016lx for %s", i_program.iv_addr_map3, mss::c_str(i_target));
+    FAPI_INF("load MCBIST address map register 3: 0x%016lx for " TARGTIDFORMAT, i_program.iv_addr_map3, TARGTID);
     FAPI_TRY( fapi2::putScom(i_target, TT::MCBAMR3A0Q_REG, i_program.iv_addr_map3) );
 
 fapi_try_exit:
@@ -3238,7 +3244,7 @@ fapi_try_exit:
 template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_mcbparm( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
-    FAPI_INF("load MCBIST parameter register: 0x%016lx for %s", i_program.iv_parameters, mss::c_str(i_target));
+    FAPI_INF("load MCBIST parameter register: 0x%016lx for " TARGTIDFORMAT, i_program.iv_parameters, TARGTID);
     return fapi2::putScom(i_target, TT::MCBPARMQ_REG, i_program.iv_parameters);
 }
 
@@ -3254,7 +3260,7 @@ template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, 
 inline fapi2::ReturnCode clear_errors( const fapi2::Target<T> i_target )
 {
     // TK: Clear the more detailed errors checked above
-    FAPI_INF("Clear MCBIST error state for %s", mss::c_str(i_target));
+    FAPI_INF("Clear MCBIST error state for " TARGTIDFORMAT, TARGTID);
     FAPI_TRY( fapi2::putScom(i_target, TT::MCBSTATQ_REG, 0) );
     FAPI_TRY( fapi2::putScom(i_target, TT::SRERR0_REG, 0) );
     FAPI_TRY( fapi2::putScom(i_target, TT::SRERR1_REG, 0) );
@@ -3397,18 +3403,6 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const p
     auto l_it = std::begin(TT::PATTERN_REGS);
     const auto l_it_end = std::end(TT::PATTERN_REGS);
 
-    // Checks that the pattern is of the expected length, if not, error out
-    // Creates helpers for FAPI_ASSERT
-    const auto EXPECTED_SIZE = TT::EXPECTED_PATTERN_SIZE;
-    const auto ACTUAL_SIZE = i_pattern.size();
-    FAPI_ASSERT(EXPECTED_SIZE <= ACTUAL_SIZE,
-                fapi2::MSS_MCBIST_INCORRECT_PATTERN_LENGTH()
-                .set_TARGET(i_target)
-                .set_EXPECTED(EXPECTED_SIZE)
-                .set_ACTUAL(ACTUAL_SIZE),
-                "%s pattern expected size %u != actual size %u",
-                mss::c_str(i_target), EXPECTED_SIZE, ACTUAL_SIZE);
-
     // TK: algorithm for patterns which include ECC bits in them
     // Loop over the cache lines in the pattern. We write one half of the cache line
     // to the even register and half to the odd.
@@ -3425,7 +3419,9 @@ inline fapi2::ReturnCode load_pattern( const fapi2::Target<T>& i_target, const p
         const auto l_second_addr = l_it->second;
         const fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
         const fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
-        FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx for %s", l_value_first, l_value_second, mss::c_str(i_target));
+#ifndef __PPE__
+        FAPI_INF("Loading cache line pattern 0x%016lx 0x%016lx for " TARGTIDFORMAT, l_value_first, l_value_second, TARGTID);
+#endif
         FAPI_TRY( fapi2::putScom(i_target, l_first_addr, l_value_first) );
         FAPI_TRY( fapi2::putScom(i_target, l_second_addr, l_value_second) );
         ++l_it;
@@ -3579,7 +3575,7 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
 
     for (auto l_num_writes = 0; l_num_writes < 2; ++l_num_writes)
     {
-        FAPI_INF("Setting the array access control register for %s.", mss::c_str(i_target));
+        FAPI_INF("Setting the array access control register for " TARGTIDFORMAT ".", TARGTID);
         FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_CTL_REG, l_aacr) );
         uint64_t l_pattern_num = 0;
 
@@ -3597,8 +3593,11 @@ fapi2::ReturnCode load_maint_pattern( const fapi2::Target<T>& i_target, const pa
 
             fapi2::buffer<uint64_t> l_value_first  = i_invert ? ~l_cache_line.first : l_cache_line.first;
             fapi2::buffer<uint64_t> l_value_second = i_invert ? ~l_cache_line.second : l_cache_line.second;
-            FAPI_INF("Loading cache line pattern:%u 0x%016lx 0x%016lx for %s", l_pattern_num++, l_value_first, l_value_second,
-                     mss::c_str(i_target));
+#ifndef __PPE__
+            FAPI_INF("Loading cache line pattern:%u 0x%016lx 0x%016lx for " TARGTIDFORMAT, l_pattern_num++, l_value_first,
+                     l_value_second,
+                     TARGTID);
+#endif
             FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_DATA_REG, l_value_first));
 
             // In order for the data to actually be written into the RMW buffer, we must issue a putscom to the AAER register
@@ -3703,14 +3702,14 @@ fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
 
     for (const auto& l_seed : i_random24_data_seed)
     {
-        FAPI_INF("Loading 24b random seed index %ld for %s", l_index, mss::c_str(i_target));
+        FAPI_INF("Loading 24b random seed index %ld for " TARGTIDFORMAT, l_index, TARGTID);
         fapi2::buffer<uint64_t> l_value  = i_invert ? ~l_seed : l_seed;
 
         // Print an informational message to indicate if a random seed is 0
         // TK Do we want an error here? 0 may be used on purpose to hold a byte at all 0 on purpose
         if ( l_value == 0 )
         {
-            FAPI_INF("Warning: Random 24b data seed is set to 0 for seed index %d for %s", l_index, mss::c_str(i_target));
+            FAPI_INF("Warning: Random 24b data seed is set to 0 for seed index %d for " TARGTIDFORMAT, l_index, TARGTID);
         }
 
         // If we are processing the first 24b random data seed we will add it to the fapi buffer
@@ -3724,7 +3723,9 @@ fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
         else if (l_index == 1 )
         {
             l_mcbrsd0q.insertFromRight<TT::CFG_DGEN_RNDD_SEED1, TT::CFG_DGEN_RNDD_SEED1_LEN>(l_value);
-            FAPI_INF("Loading 24b random seeds 0 and 1 0x%016lx for %s", l_mcbrsd0q, mss::c_str(i_target));
+#ifndef __PPE__
+            FAPI_INF("Loading 24b random seeds 0 and 1 0x%016lx for " TARGTIDFORMAT, l_mcbrsd0q, TARGTID);
+#endif
             FAPI_TRY( fapi2::putScom(i_target, l_random_addr0, l_mcbrsd0q) );
         }
         // The third 24b random data seed occupies the same register as the random data byte maps.  Therefore we first
@@ -3747,7 +3748,9 @@ fapi2::ReturnCode load_random24b_seeds( const fapi2::Target<T>& i_target,
                 ++l_map_index;
             }
 
-            FAPI_INF("Loading 24b random seed 2 w/map  0x%016lx for %s", l_mcbrsd1q, mss::c_str(i_target));
+#ifndef __PPE__
+            FAPI_INF("Loading 24b random seed 2 w/map  0x%016lx for " TARGTIDFORMAT, l_mcbrsd1q, TARGTID);
+#endif
             FAPI_TRY( fapi2::putScom(i_target, l_random_addr1, l_mcbrsd1q) );
         }
 
@@ -3877,11 +3880,11 @@ template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, 
 inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, const mcbist::program<MC>& i_program )
 {
     // First load the data pattern registers
-    FAPI_INF("Loading the data pattern seeds for %s!", mss::c_str(i_target));
+    FAPI_INF("Loading the data pattern seeds for " TARGTIDFORMAT "!", TARGTID);
     FAPI_TRY( mss::mcbist::load_pattern<MC>(i_target, i_program.iv_pattern) );
 
     // Load the 24b random data pattern seeds registers
-    FAPI_INF("Loading the 24b Random data pattern seeds for %s!", mss::c_str(i_target));
+    FAPI_INF("Loading the 24b Random data pattern seeds for " TARGTIDFORMAT "!", TARGTID);
     FAPI_TRY( mss::mcbist::load_random24b_seeds<MC>(i_target, i_program.iv_random24_data_seed,
               i_program.iv_random24_seed_map) );
 
@@ -3889,10 +3892,10 @@ inline fapi2::ReturnCode load_data_config( const fapi2::Target<T>& i_target, con
     // TK Might want to only load the RMW buffer if maint commands are present in the program
     // The load takes 33 Putscoms to load 16 64B registers, might slow down mcbist programs that
     // don't need the RMW buffer maint entry loaded
-    FAPI_INF("Loading the maint data pattern into the RMW buffer for %s!", mss::c_str(i_target));
+    FAPI_INF("Loading the maint data pattern into the RMW buffer for " TARGTIDFORMAT "!", TARGTID);
     FAPI_TRY( mss::mcbist::load_maint_pattern<MC>(i_target, i_program.iv_pattern) );
 
-    FAPI_INF("Loading the data rotate config and seeds for %s!", mss::c_str(i_target));
+    FAPI_INF("Loading the data rotate config and seeds for " TARGTIDFORMAT "!", TARGTID);
     FAPI_TRY( fapi2::putScom(i_target, TT::DATA_ROTATE_CNFG_REG, i_program.iv_data_rotate_cnfg) );
     FAPI_TRY( fapi2::putScom(i_target, TT::DATA_ROTATE_SEED_REG, i_program.iv_data_rotate_seed) );
 
@@ -3943,7 +3946,7 @@ fapi_try_exit:
 template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, const uint64_t i_thresholds )
 {
-    FAPI_INF("load MCBIST threshold register: 0x%016lx for %s", i_thresholds, mss::c_str(i_target) );
+    FAPI_INF("load MCBIST threshold register: 0x%016lx for " TARGTIDFORMAT, i_thresholds, TARGTID );
     return fapi2::putScom(i_target, TT::THRESHOLD_REG, i_thresholds);
 }
 
@@ -4005,7 +4008,7 @@ fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
 
     set_rmw_address<MC, T>(l_array_addr, l_control_value);
 
-    FAPI_INF("Setting the RMW array access control register for %s.", mss::c_str(i_target));
+    FAPI_INF("Setting the RMW array access control register for " TARGTIDFORMAT ".", TARGTID);
     FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_CTL_REG, l_control_value) );
 
     for (uint8_t l_index = 0; l_index < i_num_entries; ++l_index)
@@ -4019,7 +4022,7 @@ fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
         // the array pointer so the next DATA_REG read will read the next array entry
         FAPI_TRY( fapi2::getScom(i_target, TT::WDF_BUF_DATA_REG, l_data) );
 
-        FAPI_INF("RMW data index %d is: %016lx for %s", l_array_addr, l_data, mss::c_str(i_target));
+        FAPI_INF("RMW data index %d is: %016lx for " TARGTIDFORMAT, l_array_addr, l_data, TARGTID);
         o_data.push_back(l_data);
 
         // Need to read ecc register to increment array index
@@ -4032,8 +4035,9 @@ fapi2::ReturnCode read_rmw_array(const fapi2::Target<T>& i_target,
         if (i_roll_over_for_compare_mode &&
             (l_array_addr >= TT::NUM_COMPARE_INFO_ENTRIES))
         {
-            FAPI_INF("Rolling over the RMW array access control register address from %d to %d for %s.", (i_start_addr + l_index),
-                     0, mss::c_str(i_target));
+            FAPI_INF("Rolling over the RMW array access control register address from %d to %d for " TARGTIDFORMAT ".",
+                     (i_start_addr + l_index),
+                     0, TARGTID);
             l_array_addr = 0;
             set_rmw_address<MC, T>(l_array_addr, l_control_value);
             FAPI_TRY( fapi2::putScom(i_target, TT::WDF_BUF_CTL_REG, l_control_value) );
@@ -4144,10 +4148,8 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_p
     const uint64_t l_in_progress = fapi2::buffer<uint64_t>().setBit<TT::MCBIST_IN_PROGRESS>();
 
     // A small vector of addresses to poll during the polling loop
-    const std::vector<mss::poll_probe<T>> l_probes =
-    {
-        {i_target, "mcbist current address", TT::LAST_ADDR_REG},
-    };
+    std::vector<mss::poll_probe<T>> l_probes;
+    l_probes.push_back({i_target, "mcbist current address", TT::LAST_ADDR_REG});
 
     mss::poll(i_target, TT::STATQ_REG, i_program.iv_poll,
               [&l_status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
@@ -4161,12 +4163,12 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_p
     // Check to see if we're still in progress - meaning we timed out.
     FAPI_ASSERT((l_status & l_in_progress) != l_in_progress,
                 ET::mcbist_timeout().set_MC_TARGET(i_target),
-                "MCBIST timed out %s", mss::c_str(i_target));
+                "MCBIST timed out " TARGTIDFORMAT, TARGTID);
 
     // The control register has a bit for done-and-happy and a bit for done-and-unhappy
     if ( ((l_status & l_done) == l_done) || ((l_status & l_fail) == l_fail) )
     {
-        FAPI_INF("MCBIST completed, processing errors for %s", mss::c_str(i_target));
+        FAPI_INF("MCBIST completed, processing errors for " TARGTIDFORMAT, TARGTID);
 
         // We're done. It doesn't mean that there were no errors.
         FAPI_TRY( i_program.process_errors(i_target) );
@@ -4176,8 +4178,8 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_p
                      ET::mcbist_unknown_failure()
                      .set_MC_TARGET(i_target)
                      .set_STATUS_REGISTER(l_status),
-                     "%s MCBIST reported a fail, but process_errors didn't find it 0x%016llx",
-                     mss::c_str(i_target), l_status );
+                     TARGTIDFORMAT " MCBIST reported a fail, but process_errors didn't find it 0x%016llx",
+                     TARGTID, l_status );
 
         // And if we're here all is good with the world.
         return fapi2::current_err;
@@ -4187,8 +4189,8 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_p
                 ET::mcbist_data_fail()
                 .set_MC_TARGET(i_target)
                 .set_STATUS_REGISTER(l_status),
-                "%s MCBIST executed but we got corrupted data in the control register 0x%016llx",
-                mss::c_str(i_target), l_status );
+                TARGTIDFORMAT " MCBIST executed but we got corrupted data in the control register 0x%016llx",
+                TARGTID, l_status );
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -4237,7 +4239,7 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& 
     // program. If not, we can save everyone the hassle
     FAPI_ASSERT(0 != i_program.iv_subtests.size(),
                 fapi2::MSS_MEMDIAGS_NO_MCBIST_SUBTESTS().set_MC_TARGET(i_target),
-                "Attempt to run an MCBIST program with no subtests on %s", mss::c_str(i_target));
+                "Attempt to run an MCBIST program with no subtests on " TARGTIDFORMAT, TARGTID);
 
     FAPI_TRY( clear_error_helper<MC>(i_target, const_cast<program<MC>&>(i_program)) );
 

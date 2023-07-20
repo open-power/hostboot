@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,7 +200,7 @@ class instruction_t
                         .set_PORT_TARGET(i_target)
                         .set_RANK(iv_port_rank)
                         .set_FUNCTION(generic_ffdc_codes::CCS_INST_CONFIGURE_RANK),
-                        "%s rank out of bounds rank%u", mss::c_str(i_target), iv_port_rank);
+                        TARGTIDFORMAT " rank out of bounds rank%u", TARGTID, iv_port_rank);
 
             // Now the fun happens and we can deal with the actual encoding
 
@@ -255,7 +255,7 @@ class instruction_t
                             .set_PORT_TARGET(i_target)
                             .set_RANK(iv_port_rank)
                             .set_FUNCTION(generic_ffdc_codes::CCS_INST_CONFIGURE_RANK),
-                            "%s rank out of bounds rank%u", mss::c_str(i_target), iv_port_rank);
+                            TARGTIDFORMAT " rank out of bounds rank%u", TARGTID, iv_port_rank);
             }
 
             return fapi2::FAPI2_RC_SUCCESS;

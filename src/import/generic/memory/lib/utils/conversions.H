@@ -80,13 +80,12 @@ static const uint64_t SIM_CYCLES_PER_CYCLE = 8;
 namespace mss
 {
 
-#ifndef __PPE__
 namespace dram_freq
 {
 //
 // DRAM clock and frequency information
 //
-static const std::vector<std::pair<uint64_t, uint64_t>> FREQ_TO_CLOCK_PERIOD =
+static const mss::pair<uint64_t, uint64_t> FREQ_TO_CLOCK_PERIOD[] =
 {
     {DIMM_SPEED_1600, 1250}, // DDR4
     {DIMM_SPEED_1866, 1071}, // DDR4
@@ -173,7 +172,6 @@ fapi_try_exit:
     return fapi2::current_err;
 
 }
-#endif
 
 ///
 /// @brief Translate from cycles to sim cycles
@@ -186,7 +184,6 @@ inline uint64_t cycles_to_simcycles( const uint64_t i_cycles )
     return i_cycles * SIM_CYCLES_PER_CYCLE;
 }
 
-#ifndef __PPE__
 ///
 /// @brief Return the number of cycles contained in a count of picoseconds
 /// @tparam T clock period input type
@@ -439,7 +436,6 @@ inline uint64_t cycles_to_us(const uint64_t i_clock_period, const uint64_t i_cyc
 
     return l_us;
 }
-#endif
 
 ///
 /// @brief Convert nanoseconds to picoseconds

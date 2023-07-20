@@ -80,10 +80,10 @@ namespace dimm
 ///
 inline uint8_t round_up_dimm_count(const uint8_t i_dimm_count)
 {
-    std::vector<uint8_t> l_supported_dimm_count = { 2, 4, 6, 8, 16, 32 };
+    constexpr uint64_t l_supported_dimm_count[] =  { 2, 4, 6, 8, 16, 32 };
 
-    std::vector<uint8_t>::iterator l_dimm_count;
-    l_dimm_count = std::lower_bound (l_supported_dimm_count.begin(), l_supported_dimm_count.end(), i_dimm_count);
+    auto l_dimm_count = std::lower_bound (std::begin(l_supported_dimm_count), std::end(l_supported_dimm_count),
+                                          i_dimm_count);
 
     return *l_dimm_count;
 }

@@ -50,6 +50,7 @@
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/ccs/ccs_instruction.H>
 #include <generic/memory/lib/workarounds/ccs_des_insert_workaround.H>
+#include <generic/memory/lib/utils/conversions.H>
 
 namespace mss
 {
@@ -96,8 +97,12 @@ inline fapi2::ReturnCode get_rank_config(const fapi2::Target<TT::MC_TARGET_TYPE>
         std::vector<rank_configuration>& o_rank_config)
 {
     o_rank_config.clear();
+
     // Create one per port, we then use relative indexing to get us the number we need
-    o_rank_config = std::vector<rank_configuration>(TT::PORTS_PER_MC_TARGET);
+    for(size_t l_port_pos = 0; l_port_pos < TT::PORTS_PER_MC_TARGET; ++l_port_pos)
+    {
+        o_rank_config.push_back(rank_configuration());
+    }
 
     for(const auto& l_port : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target))
     {
@@ -404,7 +409,7 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target,
 {
     fapi2::buffer<uint64_t> status;
 
-    FAPI_TRY(start_stop<MC>(i_target, mss::START), "%s Error in execute_inst_array", mss::c_str(i_port) );
+    FAPI_TRY(start_stop<MC>(i_target, mss::START), TARGTIDFORMAT " Error in execute_inst_array", GENTARGTID(i_port) );
 
     mss::poll(i_target, TT::STATQ_REG, i_program.iv_poll,
               [&status](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
@@ -418,7 +423,7 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target,
     // Check for done and success. DONE being the only bit set.
     if (status == TT::STAT_QUERY_SUCCESS)
     {
-        FAPI_INF("%s CCS Executed Successfully.", mss::c_str(i_port) );
+        FAPI_INF(TARGTIDFORMAT " CCS Executed Successfully.", GENTARGTID(i_port) );
         goto fapi_try_exit;
     }
 
@@ -487,7 +492,7 @@ fapi2::ReturnCode update_initial_delays( const fapi2::Target<T>& i_target,
     if (io_program.iv_poll.iv_initial_delay == 0)
     {
         io_program.iv_poll.iv_initial_delay = cycles_to_ns<T>(i_target, i_delay, l_rc);
-        FAPI_TRY(l_rc, "%s cycles_to_ns failed", mss::c_str(i_target));
+        FAPI_TRY(l_rc, TARGTIDFORMAT " cycles_to_ns failed", TARGTID);
     }
 
     if (io_program.iv_poll.iv_initial_sim_delay == 0)
@@ -517,14 +522,18 @@ static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_
         ccs::program<MC>& io_program,
         const std::vector< fapi2::Target<P> >& i_ports)
 {
-    FAPI_INF("loading ccs instructions (%d) for %s", io_program.iv_instructions.size(), mss::c_str(i_target));
+    // For some reason, this very innocuous print is causing SBE to fail to compile, so commenting it out in SBE
+#ifndef __PPE__
+    FAPI_INF("loading ccs instructions (%d) for " TARGTIDFORMAT, io_program.iv_instructions.size(), TARGTID);
+#endif
 
     // Pre CCS execution configuration
     FAPI_TRY(setup_to_execute<MC>(i_ports, io_program));
 
     // Stop the CCS engine just for giggles - it might be running ...
-    FAPI_TRY( start_stop<MC>(i_target, mss::states::STOP), "Error stopping CCS engine before ccs::execution on %s",
-              mss::c_str(i_target) );
+    FAPI_TRY( start_stop<MC>(i_target, mss::states::STOP),
+              "Error stopping CCS engine before ccs::execution on " TARGTIDFORMAT,
+              TARGTID );
 
     FAPI_ASSERT( mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
                            [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
@@ -532,7 +541,7 @@ static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_
         FAPI_INF("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
         return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
     }),
-    TT::setup_trying_to_stop_err(i_target), "CCS in progress bit timed out on %s", mss::c_str(i_target) );
+    TT::setup_trying_to_stop_err(i_target), "CCS in progress bit timed out on " TARGTIDFORMAT, TARGTID );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -583,15 +592,15 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
     {
         // First, update the current instruction's chip selects for the current port
         FAPI_TRY(io_inst_iter->configure_rank(i_port, l_rank_configs[l_port_index]),
-                 "Error configuring rank in ccs::execute on port %s", mss::c_str(i_port));
+                 "Error configuring rank in ccs::execute on port " TARGTIDFORMAT, GENTARGTID(i_port));
 
         // Now, configure the idles and repeats within this instruction
         FAPI_TRY(io_inst_iter->configure_idles_and_repeats(i_port),
-                 "Error configuring idles and repeats in ccs::execute on port %s", mss::c_str(i_port));
+                 "Error configuring idles and repeats in ccs::execute on port " TARGTIDFORMAT, GENTARGTID(i_port));
 
         // Finally, configure the parity if needed
         FAPI_TRY(io_inst_iter->compute_parity(i_port, l_rank_configs[l_port_index]),
-                 "Error computing and configuring parity in ccs::execute on port %s", mss::c_str(i_port));
+                 "Error computing and configuring parity in ccs::execute on port " TARGTIDFORMAT, GENTARGTID(i_port));
 
         io_inst_iter->get_cke_helper(l_current_cke);
 
@@ -609,19 +618,20 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
         l_repeat = io_inst_iter->iv_repeats;
 
         l_total_delay += l_delay * (l_repeat + 1);
-
-        FAPI_INF("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) %s",
+#ifndef __PPE__
+        FAPI_INF("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) " TARGTIDFORMAT,
                  l_inst_count, io_inst_iter->arr0, io_inst_iter->arr1,
                  CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count,
-                 l_delay, l_total_delay, mss::c_str(i_target));
+                 l_delay, l_total_delay, TARGTID);
+#endif
     }
 
     // Updates the initial delays
     FAPI_TRY(update_initial_delays<MC>(i_target, l_total_delay, io_program),
-             "Failed in update_initial_delays for ccs::execute_via_mcbist on %s", mss::c_str(i_target));
+             "Failed in update_initial_delays for ccs::execute_via_mcbist on " TARGTIDFORMAT, TARGTID);
 
-    FAPI_INF("executing ccs instructions via MCBIST (%d:%d, %d) for %s",
-             io_program.iv_instructions.size(), l_inst_count, io_program.iv_poll.iv_initial_delay, mss::c_str(i_target));
+    FAPI_INF("executing ccs instructions via MCBIST (%d:%d, %d) for " TARGTIDFORMAT,
+             io_program.iv_instructions.size(), l_inst_count, io_program.iv_poll.iv_initial_delay, TARGTID);
 
     // Deselect
     // Ody des insert with delay 1, Exp default
@@ -649,13 +659,13 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
         ccs::program<MC>& io_program,
         const std::vector< fapi2::Target<P> >& i_ports)
 {
-    FAPI_INF("Execution standalone CCS commands (%d) for %s", io_program.iv_instructions.size(), mss::c_str(i_target));
+    FAPI_INF("Execution standalone CCS commands (%d) for " TARGTIDFORMAT, io_program.iv_instructions.size(), TARGTID);
 
     auto l_inst_iter = io_program.iv_instructions.begin();
 
     // Run prelude to execution
     FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports),
-              "Error setting up ccs engine before execution on %s", mss::c_str(i_target) );
+              "Error setting up ccs engine before execution on " TARGTIDFORMAT, TARGTID );
 
     // Execute via standalone CCS
     while (l_inst_iter != io_program.iv_instructions.end())
@@ -667,13 +677,13 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 
             // Run ccs instruction setup
             FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
-                      "Error setting up ccs instructions in registers on %s", mss::c_str(i_target) );
+                      "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID );
 
-            FAPI_INF("executing CCS array for port %d (%s)", l_port_index, mss::c_str(p));
+            FAPI_INF("executing CCS array for port %d " TARGTIDFORMAT, l_port_index, GENTARGTID(p));
             FAPI_TRY( select_ports<MC>( i_target, l_port_index, io_program.iv_channel_select),
-                      "Error in port select for %s", mss::c_str(i_target) );
+                      "Error in port select for " TARGTIDFORMAT, TARGTID );
             FAPI_TRY( execute_inst_array<MC>(i_target, io_program, p),
-                      "Error in executing ccs array for %s", mss::c_str(i_target) );
+                      "Error in executing ccs array for " TARGTIDFORMAT, TARGTID );
         }
     }
 
@@ -704,7 +714,7 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     // Subtract one for the idle we insert at the end
     constexpr size_t CCS_INSTRUCTION_DEPTH = TT::CCS_ARRAY_LEN - 1;
 
-    FAPI_INF("Execution CCS commands (%d) via MCBIST for %s", io_program.iv_instructions.size(), mss::c_str(i_target));
+    FAPI_INF("Execution CCS commands (%d) via MCBIST for " TARGTIDFORMAT, io_program.iv_instructions.size(), TARGTID);
 
     // Get instruction count and rank info
     const uint64_t l_inst_count = io_program.iv_instructions.size();
@@ -716,18 +726,19 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
                 .set_MC_TARGET(i_target)
                 .set_REQUESTED_INSTRUCTIONS(io_program.iv_instructions.size())
                 .set_MAX_INSTRUCTIONS(CCS_INSTRUCTION_DEPTH),
-                "%s over CCS concurrent instructions limit, requested %d instructions",
-                mss::c_str(i_target), l_inst_count);
+                TARGTIDFORMAT " over CCS concurrent instructions limit, requested %d instructions",
+                TARGTID, l_inst_count);
 
 
     // Run prelude to execution
-    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports), "Error setting up ccs engine before execution on %s",
-              mss::c_str(i_target));
+    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports),
+              "Error setting up ccs engine before execution on " TARGTIDFORMAT,
+              TARGTID);
 
     // Stop any ongoing MCBIST command
     FAPI_TRY( mss::memdiags::stop<MC>(i_target),
-              "MCBIST engine failed to stop current command in progress on %s",
-              mss::c_str(i_target) );
+              "MCBIST engine failed to stop current command in progress on " TARGTIDFORMAT,
+              TARGTID );
 
     // Setup CCS per port
     for (const auto& p : i_ports)
@@ -736,12 +747,12 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
 
         // Run ccs instruction setup
         FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
-                  "Error setting up ccs instructions in registers on %s", mss::c_str(i_target) );
+                  "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID );
 
-        FAPI_INF("executing CCS via MCBIST for port %d (%s)", l_port_index, mss::c_str(p));
+        FAPI_INF("executing CCS via MCBIST for port %d " TARGTIDFORMAT, l_port_index, GENTARGTID(p));
         FAPI_TRY( select_ports<MC>( i_target, l_port_index, io_program.iv_channel_select),
-                  "Error in port select for ccs::execute_via_mcbist on %s", mss::c_str(i_target) );
-        FAPI_TRY( execute_inst_via_mcbist<MC>(i_target), "Error in ccs::execute_inst_via_mcbist on %s", mss::c_str(i_target) );
+                  "Error in port select for ccs::execute_via_mcbist on " TARGTIDFORMAT, TARGTID );
+        FAPI_TRY( execute_inst_via_mcbist<MC>(i_target), "Error in ccs::execute_inst_via_mcbist on " TARGTIDFORMAT, TARGTID );
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
@@ -769,7 +780,8 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
         const fapi2::Target<P>& i_port)
 {
     // Mmm. Might want to find a better way to do this - seems expensive. BRS
-    std::vector< fapi2::Target<P> > l_ports{ i_port };
+    std::vector< fapi2::Target<P> > l_ports;
+    l_ports.push_back(i_port);
     return execute<MC>(i_target, i_program, l_ports);
 }
 
@@ -790,7 +802,8 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
         const fapi2::Target<P>& i_port)
 {
     // Mmm. Might want to find a better way to do this - seems expensive. BRS
-    std::vector< fapi2::Target<P> > l_ports{ i_port };
+    std::vector< fapi2::Target<P> > l_ports;
+    l_ports.push_back(i_port);
     return execute_via_mcbist<MC>(i_target, io_program, l_ports);
 }
 
