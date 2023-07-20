@@ -70,9 +70,6 @@ errlHndl_t checkForIplAttentions()
 {
     errlHndl_t l_plidElog = nullptr;
 
-/* This causes a bunch of I2C NACK errors to show up during
-   the Odyssey boot */
-#ifndef CONFIG_ODYSSEY_BRINGUP
     errlHndl_t err = NULL;
     assert(!Service::getGlobalInstance()->running());
 
@@ -182,8 +179,6 @@ errlHndl_t checkForIplAttentions()
     }
 
     // ====================================================================
-
-#endif
 
     return l_plidElog;
 }
