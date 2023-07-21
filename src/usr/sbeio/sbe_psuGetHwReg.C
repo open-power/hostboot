@@ -1,4 +1,3 @@
-
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
@@ -6,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
 /**
 * @file sbe_psuGetHwReg.C
 * @brief Send command request to SBE for a HW register access (scom) for a given target
@@ -37,6 +37,7 @@
 #include <sbeio/sbeioreasoncodes.H>
 #include <targeting/common/utilFilter.H>
 #include <targeting/common/target.H>
+#include <i2c/i2c.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -65,6 +66,12 @@ namespace SBEIO
     {
         assert(i_target != nullptr, "sendPsuGetHwRegRequest passed nullptr target");
         errlHndl_t errl = nullptr;
+
+#ifndef __HOSTBOOT_RUNTIME
+        bool l_needUnlock = false;
+        mutex_t* l_engineLock = nullptr;
+#endif
+
         do{
 
         SBE_TRACD(ENTER_MRK "sending psu getHwReg request from HB to SBE for target 0x%08x",
@@ -142,6 +149,34 @@ namespace SBEIO
             break;
         }
 
+#ifndef __HOSTBOOT_RUNTIME
+        // If the target of the operation is an OCMB then we need to guard
+        // against i2c contention with the SBE.  Note that we could do
+        // this by implementing support for the pib atomic lock but since
+        // this path is so rarely used it wouldn't be worth the ROI or the
+        // performance hit in our normal i2c path.
+        if( SBE_TARGET_TYPE_OCMB_CHIP == sbe_target_type )
+        {
+            // Grab the engine info to lock the right mutex
+            auto l_i2cInfo = i_target->getAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>();
+            I2C::misc_args_t l_i2cArgs;
+            l_i2cArgs.engine = l_i2cInfo.engine;
+
+            // Lock the mutex to prevent HB from doing i2c ops
+            if( I2C::i2cGetEngineMutex( proc_chip,
+                                        l_i2cArgs,
+                                        l_engineLock ) )
+            {
+                recursive_mutex_lock( l_engineLock );
+                l_needUnlock = true;
+            }
+            else
+            {
+                SBE_TRACF("Could not lock i2c mutex, but going to just risk it");
+            }
+        }
+#endif
+
         errl = SbePsu::getTheInstance().performPsuChipOp(proc_chip,
                                                          &l_psuCommand,
                                                          &l_psuResponse,
@@ -161,6 +196,14 @@ namespace SBEIO
 
         SBE_TRACF(EXIT_MRK "returned value of 0x%016llx", o_value);
         }while(0);
+
+#ifndef __HOSTBOOT_RUNTIME
+        // Unlock the i2c mutex if needed
+        if ( l_needUnlock == true )
+        {
+            recursive_mutex_unlock( l_engineLock );
+        }
+#endif
 
         return errl;
     };
