@@ -39,9 +39,11 @@
 #include    <sys/task.h>
 #include    <initservice/istepdispatcherif.H>
 #include    <hwpThread.H>
+#include    <hwpThreadHelper.H>
 
 #include    <isteps/hwpisteperror.H>
 #include    <errl/errludtarget.H>
+#include    <targeting/targplatutil.H>
 
 #include    <initservice/isteps_trace.H>
 #include    <istepHelperFuncs.H>          // captureError
@@ -67,181 +69,150 @@ using   namespace   TARGETING;
 using   namespace   ISTEPS_TRACE;
 using   namespace   SBEIO;
 
+#define CONTEXT call_omi_setup
+
 namespace ISTEP_12
 {
-class WorkItem_omi_setup: public HwpWorkItem
+
+errlHndl_t run_omi_setup(IStepError& io_stepError, Target* const i_omic, const bool i_run_ody_hwp_from_host)
 {
-  public:
-    WorkItem_omi_setup(IStepError& i_stepError,
-                           Target& i_omic )
-      : HwpWorkItem( i_stepError, i_omic, "omi_setup" ) {}
+    errlHndl_t l_err = nullptr;
 
-    virtual errlHndl_t run_hwp( void ) override
+    do
     {
-        errlHndl_t l_err = nullptr;
-
-        // reset watchdog for each omic as this function can be very slow
-        INITSERVICE::sendProgressCode();
-
-        // get RUN_ODY_HWP_FROM_HOST
-        const auto l_runOdyHwpFromHost =
-           TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
 
         // call exp_omi_setup first with each target's associated OCMB
         // call p10_omi_setup second with each target
-        fapi2::Target<fapi2::TARGET_TYPE_OMIC> l_fapi_omic_target(iv_pTarget);
+        fapi2::Target<fapi2::TARGET_TYPE_OMIC> l_fapi_omic_target(i_omic);
 
         // each OMIC could have up to 2 child OMIs
-        auto l_childOMIs = l_fapi_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>();
+        const auto l_childOMIs = l_fapi_omic_target.getChildren<fapi2::TARGET_TYPE_OMI>();
 
         // Loop through the OMIs and find their child OCMB
         // Run exp_omi_setup with the OCMB
-        for (auto omi : l_childOMIs)
+        for (const auto omi : l_childOMIs)
         {
             // Get the OCMB from the OMI
-            auto l_childOCMB = omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>();
-            if (l_childOCMB.size() != 1)
+            const auto l_childOCMB = omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>();
+
+            assert(l_childOCMB.size() <= 1,
+                   "Unexpected number %d of OCMB children of OMI", l_childOCMB.size());
+
+            if (l_childOCMB.empty())
             {
                 continue;
             }
 
-            auto ocmb = l_childOCMB[0];
-            TARGETING::Target * l_ocmbTarget = ocmb.get();
+            const auto ocmb = l_childOCMB[0];
+            Target* const l_ocmbTarget = ocmb.get();
 
-            fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmbTarget);
-            uint32_t chipId = l_ocmbTarget->getAttr< ATTR_CHIP_ID>();
-
-            if (chipId == POWER_CHIPID::EXPLORER_16)
+            if (UTIL::isOdysseyChip(l_ocmbTarget))
             {
                 TRACFCOMP(g_trac_isteps_trace,
-                    INFO_MRK"exp_omi_setup HWP target HUID 0x%.08x ",
-                    get_huid(l_ocmbTarget));
+                          INFO_MRK"ody_omi_setup HWP target HUID 0x%.08x i_run_ody_hwp_from_host:%d",
+                          get_huid(l_ocmbTarget), i_run_ody_hwp_from_host);
 
-                FAPI_INVOKE_HWP(l_err, exp_omi_setup, ocmb);
-
-                //  process return code
-                if ( l_err )
+                if (i_run_ody_hwp_from_host)
                 {
-                    TRACFCOMP(g_trac_isteps_trace,
-                      ERR_MRK"exp_omi_setup HWP: failed on target 0x%08X. "
-                      TRACE_ERR_FMT,
-                      get_huid(l_ocmbTarget),
-                      TRACE_ERR_ARGS(l_err));
-                    mutex_lock(&cv_stepErrorMutex);
-                    captureError(l_err, *iv_pStepError, ISTEP_COMP_ID, l_ocmbTarget);
-                    mutex_unlock(&cv_stepErrorMutex);
-                    continue;
-                }
-
-                TRACFCOMP(g_trac_isteps_trace,
-                     INFO_MRK"SUCCESS running exp_omi_setup HWP on target HUID %.8X. ",
-                     get_huid(l_ocmbTarget));
-            }
-            else if (chipId == POWER_CHIPID::ODYSSEY_16)
-            {
-                TRACFCOMP(g_trac_isteps_trace,
-                    INFO_MRK"ody_omi_setup HWP target HUID 0x%.08x l_runOdyHwpFromHost:%d",
-                    get_huid(l_ocmbTarget), l_runOdyHwpFromHost);
-
-                if (l_runOdyHwpFromHost)
-                {
-                    FAPI_INVOKE_HWP(l_err, ody_omi_setup, ocmb);
+                    RUN_ODY_HWP(CONTEXT, io_stepError, l_err, l_ocmbTarget, ody_omi_setup, ocmb);
                 }
                 else
                 {
-                    l_err = sendExecHWPRequest(l_ocmbTarget, IO_ODY_OMI_SETUP);
+                    RUN_ODY_CHIPOP(CONTEXT, io_stepError, l_err, l_ocmbTarget, IO_ODY_OMI_SETUP);
                 }
 
-                //  process return code
-                if ( l_err )
+            ERROR_EXIT: // used by RUN_ODY_HWP/CHIPOP
+                if (l_err)
+                {
+                    HANDLE_ODY_HWP_ERROR(CONTEXT, ody_omi_setup, io_stepError, l_ocmbTarget, l_err);
+                }
+            }
+            else
+            {
+                TRACFCOMP(g_trac_isteps_trace,
+                          INFO_MRK"exp_omi_setup HWP target HUID 0x%.08x",
+                          get_huid(l_ocmbTarget));
+
+                FAPI_INVOKE_HWP(l_err, exp_omi_setup, ocmb);
+
+                if (l_err)
                 {
                     TRACFCOMP(g_trac_isteps_trace,
-                      ERR_MRK"call ody_omi_setup HWP: failed on target 0x%08X. "
-                      TRACE_ERR_FMT,
-                      get_huid(l_ocmbTarget),
-                      TRACE_ERR_ARGS(l_err));
-                    mutex_lock(&cv_stepErrorMutex);
-                    captureError(l_err, *iv_pStepError, ISTEP_COMP_ID, l_ocmbTarget);
-                    mutex_unlock(&cv_stepErrorMutex);
-                    continue;
+                              ERR_MRK"exp_omi_setup HWP: failed on target 0x%08X. "
+                              TRACE_ERR_FMT,
+                              get_huid(l_ocmbTarget),
+                              TRACE_ERR_ARGS(l_err));
+
+                    break; // have to quit here, we can only return one error
                 }
 
                 TRACFCOMP(g_trac_isteps_trace,
-                   INFO_MRK"SUCCESS running ody_omi_setup HWP on target HUID %.8X. ",
-                   get_huid(l_ocmbTarget));
+                          INFO_MRK"SUCCESS running exp_omi_setup HWP on target HUID %.8X.",
+                          get_huid(l_ocmbTarget));
             }
+
+            // reset the watchdog, this work may cause timeouts.
+            INITSERVICE::sendProgressCode();
         }
 
-        // Any deconfigs happening above are delayed, so need to exit
-        // early if istep errors out
-        if( !iv_pStepError->isNull() )
+        if (l_err)
         {
-            TRACFCOMP(g_trac_isteps_trace,
-                    INFO_MRK "call_omi_setup exited early because exp_omi_setup "
-                    "had failures");
-            goto ERROR_EXIT;
+            break;
         }
 
-        // Run p10_omi_setup on the OMIC target
-        TRACFCOMP(g_trac_isteps_trace,
-            INFO_MRK"p10_omi_setup HWP target HUID 0x%.08x ",
-            get_huid(iv_pTarget));
+        TRACISTEP(INFO_MRK"p10_omi_setup HWP target HUID 0x%.08x",
+                  get_huid(i_omic));
 
         FAPI_INVOKE_HWP(l_err, p10_omi_setup, l_fapi_omic_target);
 
-        // process return code
         if (l_err)
         {
-            TRACFCOMP(g_trac_isteps_trace,
-                ERR_MRK"call p10_omi_setup HWP: failed on target 0x%08X. "
-                TRACE_ERR_FMT,
-                get_huid(iv_pTarget),
-                TRACE_ERR_ARGS(l_err));
-            goto ERROR_EXIT;
+            TRACISTEP(ERR_MRK"call p10_omi_setup HWP: failed on target 0x%08X. "
+                      TRACE_ERR_FMT,
+                      get_huid(i_omic),
+                      TRACE_ERR_ARGS(l_err));
+            break;
         }
 
-        TRACFCOMP(g_trac_isteps_trace,
-                INFO_MRK"SUCCESS running p10_omi_setup HWP on target HUID %.8X.",
-                get_huid(iv_pTarget));
+        TRACISTEP(INFO_MRK"SUCCESS running p10_omi_setup HWP on target HUID %.8X.",
+                  get_huid(i_omic));
+    } while (false);
 
-        ERROR_EXIT:
-        return l_err;
-    }
-};
+    return l_err;
+}
 
 void* call_omi_setup (void *io_pArgs)
 {
     IStepError l_StepError;
-    Util::ThreadPool<HwpWorkItem> threadpool;
 
-    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_omi_setup " );
+    TRACISTEP(ENTER_MRK"call_omi_setup");
+
+    do
+    {
 
     // 12.6.a exp_omi_setup.C
     //        - Set any register (via I2C) on the Explorer before OMI is
     //          trained
-    TargetHandleList l_omicTargetList;
-    getAllChiplets(l_omicTargetList, TYPE_OMIC);
-    TRACFCOMP(g_trac_isteps_trace,
-            INFO_MRK"call_omi_setup: %d OMICs found ",
-            l_omicTargetList.size());
+    const auto l_omicTargetList = composable(getAllChiplets)(TYPE_OMIC, true);
+    TRACISTEP(INFO_MRK"call_omi_setup: %d OMICs found", l_omicTargetList.size());
 
-    for (auto l_omic_target : l_omicTargetList)
+    const auto sys = UTIL::assertGetToplevelTarget();
+
+    const auto run_ody_hwp_from_host = sys->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
+
+    parallel_for_each<HwpWorkItem_OCMBUpdateCheck>(l_omicTargetList,
+                                                   l_StepError,
+                                                   "omi_setup",
+                                                   [&](Target* const i_omic)
     {
-        //  Create a new workitem from this membuf and feed it to the
-        //  thread pool for processing.  Thread pool handles workitem
-        //  cleanup.
-        threadpool.insert(new WorkItem_omi_setup(l_StepError, *l_omic_target));
-    }
-
-    HwpWorkItem::start_threads(threadpool, l_StepError, l_omicTargetList.size());
+        return run_omi_setup(l_StepError, i_omic, run_ody_hwp_from_host);
+    });
 
     if (HwpWorkItem::cv_encounteredHwpError)
     {
-        TRACFCOMP(g_trac_isteps_trace,
-                  ERR_MRK"call_omi_setup: omi_setup error");
+        TRACISTEP(ERR_MRK"call_omi_setup: omi_setup error");
+        break;
     }
-
-    TargetHandle_t sys = UTIL::assertGetToplevelTarget();
 
     // Check explorer FW levels and do an i2c update if needed.
     // The update will fail before step 12.6 because the inbound doorbell
@@ -249,41 +220,30 @@ void* call_omi_setup (void *io_pArgs)
     // isn't clocked before we run the FW_BOOT_CONFIG0 command.
     // This prevents all inband commands from working, even using the i2c
     // interface, until after exp_omi_setup runs.
-    if (l_StepError.isNull())
+    // Check if explorer chips need an update (skipped on MPIPL)
+    if (sys->getAttr<ATTR_IS_MPIPL_HB>())
     {
-        // Check if explorer chips need an update (skipped on MPIPL)
-        if (sys->getAttr<ATTR_IS_MPIPL_HB>())
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                   "skipping ocmbFwI2cUpdateStatusCheck() due to MPIPL");
-        }
-        else
-        {
-            ocmbupd::ocmbFwI2cUpdateStatusCheck(l_StepError);
-        }
+        TRACISTEP("skipping ocmbFwI2cUpdateStatusCheck() due to MPIPL");
+    }
+    else
+    {
+        ocmbupd::ocmbFwI2cUpdateStatusCheck(l_StepError);
     }
 
     // Set ATTR_ATTN_CHK_OCMBS to let ATTN know that we may now get attentions
     // from Explorer, but interrupts from the OCMB are not enabled yet.
-    TargetHandleList l_allOCMBs;
-    getAllChips(l_allOCMBs, TYPE_OCMB_CHIP, true);
-    for (const auto & l_ocmb : l_allOCMBs)
+    if (UTIL::hasOdysseyOcmbChildren(UTIL::getCurrentNodeTarget()))
     {
-        uint32_t l_chipId = l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
-        if (l_chipId == POWER_CHIPID::EXPLORER_16)
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      "Enable attention processing for Explorer OCMBs");
-            sys->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
-        }
-        // There can be no mixing of OCMB types so only need to check one
-        break;
+        TRACISTEP("Enable attention processing for Explorer OCMBs");
+        sys->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
     }
 
-    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_omi_setup ");
+    } while (false);
+
+    TRACISTEP(EXIT_MRK"call_omi_setup");
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
 
-};
+}

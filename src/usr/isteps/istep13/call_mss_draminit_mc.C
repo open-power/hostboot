@@ -65,122 +65,62 @@ using namespace SBEIO;
 
 namespace ISTEP_13
 {
-class WorkItem_exp_draminit_mc: public HwpWorkItem_OCMBUpdateCheck
-{
-  public:
-    WorkItem_exp_draminit_mc( IStepError& i_stepError,
-                                  Target& i_ocmb )
-    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "exp_draminit_mc" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-        FAPI_INVOKE_HWP(l_err, exp_draminit_mc, l_fapi_target);
-        return l_err;
-    }
-};
-
-class Host_ody_draminit_mc: public HwpWorkItem_OCMBUpdateCheck
-{
-  public:
-    Host_ody_draminit_mc( IStepError& i_stepError,
-                              Target& i_ocmb )
-    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_draminit_mc" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-
-        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_draminit_mc, l_fapi_target);
-        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_enable_ecc,  l_fapi_target);
-
-        ERROR_EXIT:   // label is required by RUN_SUB_HWP
-        return l_err;
-    }
-};
-
-class ChipOp_ody_draminit_mc: public HwpWorkItem_OCMBUpdateCheck
-{
-  public:
-    ChipOp_ody_draminit_mc( IStepError& i_stepError,
-                                Target& i_ocmb )
-    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_draminit_mc" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-
-        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_DRAMINIT_MC);
-
-        l_err = SBEIO::sendAttrListRequest(iv_pTarget);
-        if(l_err)
-        {
-            goto ERROR_EXIT;
-        }
-
-        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_ENABLE_ECC);
-
-        ERROR_EXIT:   // label is required by RUN_SUB_HWP
-        return l_err;
-    }
-};
 
 void* call_mss_draminit_mc (void *io_pArgs)
 {
     IStepError l_StepError;
-    Util::ThreadPool<HwpWorkItem> threadpool;
 
-    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_mss_draminit_mc" );
+    TRACISTEP(ENTER_MRK"call_mss_draminit_mc");
 
-    // get RUN_ODY_HWP_FROM_HOST
     const auto l_runOdyHwpFromHost =
        TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
 
-    // Get all functional OCMB targets
-    TargetHandleList l_ocmbTargetList;
-    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
-
-    for (auto l_ocmb_target : l_ocmbTargetList)
+    parallel_for_each<HwpWorkItem_OCMBUpdateCheck>(composable(getAllChips)(TYPE_OCMB_CHIP, true),
+                                                   l_StepError,
+                                                   "exp/ody_draminit_mc",
+                                                   [&](Target* const i_ocmb)
     {
-        //  call the HWP with each target
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target(l_ocmb_target);
+        errlHndl_t l_err = nullptr;
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(i_ocmb);
 
-        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
-
-        //  Create a new workitem from this ocmb and feed it to the
-        //  thread pool for processing.  Thread pool handles workitem
-        //  cleanup.
-        if (chipId == POWER_CHIPID::EXPLORER_16)
-        {
-            threadpool.insert(new WorkItem_exp_draminit_mc(l_StepError, *l_ocmb_target));
-        }
-        else if (chipId == POWER_CHIPID::ODYSSEY_16)
+        if (UTIL::isOdysseyChip(i_ocmb))
         {
             if (l_runOdyHwpFromHost)
             {
-                threadpool.insert(new Host_ody_draminit_mc(l_StepError, *l_ocmb_target));
+                RUN_ODY_HWP(CONTEXT, l_StepError, l_err, i_ocmb, ody_draminit_mc, l_fapi_target);
+                RUN_ODY_HWP(CONTEXT, l_StepError, l_err, i_ocmb, ody_enable_ecc,  l_fapi_target);
             }
             else
             {
-                threadpool.insert(new ChipOp_ody_draminit_mc(l_StepError, *l_ocmb_target));
+                RUN_ODY_CHIPOP(CONTEXT, l_StepError, l_err, i_ocmb, MEM_ODY_DRAMINIT_MC);
+
+                l_err = SBEIO::sendAttrListRequest(i_ocmb);
+
+                if (l_err)
+                {
+                    goto ERROR_EXIT;
+                }
+
+                RUN_ODY_CHIPOP(CONTEXT, l_StepError, l_err, i_ocmb, MEM_ODY_ENABLE_ECC);
             }
         }
-    }
+        else
+        {
+            FAPI_INVOKE_HWP(l_err, exp_draminit_mc, { i_ocmb });
+        }
 
-    HwpWorkItem::start_threads( threadpool, l_StepError, l_ocmbTargetList.size());
+    ERROR_EXIT: // label is required by RUN_ODY_*
+        return l_err;
+    });
 
     if (HwpWorkItem::cv_encounteredHwpError)
     {
-        TRACFCOMP(g_trac_isteps_trace,
-                  ERR_MRK"call_mss_draminit_mc: *_draminit_mc error" );
+        TRACISTEP(ERR_MRK"call_mss_draminit_mc: exp/ody_draminit_mc error");
     }
 
-    TRACFCOMP( g_trac_isteps_trace, EXIT_MRK"call_mss_draminit_mc" );
+    TRACISTEP(EXIT_MRK"call_mss_draminit_mc");
 
     return l_StepError.getErrorHandle();
 }
 
-};
+}

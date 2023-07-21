@@ -41,6 +41,7 @@
 #include    <istepHelperFuncs.H>          // captureError
 #include    <hwpThread.H>
 #include    <hwpThreadHelper.H>
+#include    <ocmbupd_helpers.H>
 
 #include    <fapi2/plat_hwp_invoker.H>
 
@@ -58,201 +59,125 @@ using   namespace   ISTEPS_TRACE;
 using   namespace   TARGETING;
 using   namespace   SBEIO;
 
+#define CONTEXT call_omi_pre_trainadv
+
 namespace ISTEP_12
 {
-
-class Host_ody_omi_hss_tx_zcal: public HwpWorkItem
-{
-  public:
-    Host_ody_omi_hss_tx_zcal( IStepError& i_stepError,
-                                  Target& i_ocmb )
-    : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_hss_tx_zcal" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-        FAPI_INVOKE_HWP(l_err, ody_omi_hss_tx_zcal, l_fapi_target);
-        return l_err;
-    }
-};
-
-class ChipOp_ody_omi_hss_tx_zcal: public HwpWorkItem
-{
-  public:
-    ChipOp_ody_omi_hss_tx_zcal( IStepError& i_stepError,
-                                    Target& i_ocmb )
-    : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_hss_tx_zcal" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, IO_ODY_OMI_HSS_TX_ZCAL);
-        ERROR_EXIT:
-        return l_err;
-    }
-};
-
-class Host_ody_omi_pretrain_adv: public HwpWorkItem
-{
-  public:
-    Host_ody_omi_pretrain_adv( IStepError& i_stepError,
-                                   Target& i_ocmb )
-    : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_pretrain_adv" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-        FAPI_INVOKE_HWP(l_err, ody_omi_pretrain_adv, l_fapi_target);
-        return l_err;
-    }
-};
-
-class ChipOp_ody_omi_pretrain_adv: public HwpWorkItem
-{
-  public:
-    ChipOp_ody_omi_pretrain_adv( IStepError& i_stepError,
-                                     Target& i_ocmb )
-    : HwpWorkItem( i_stepError, i_ocmb, "ody_omi_pretrain_adv" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        l_err = sendExecHWPRequest(iv_pTarget, IO_ODY_OMI_PRETRAIN_ADV);
-        return l_err;
-    }
-};
 
 void* call_omi_pre_trainadv (void *io_pArgs)
 {
     IStepError l_StepError;
-    errlHndl_t l_err = nullptr;
-    Util::ThreadPool<HwpWorkItem> threadpool;
-    TargetHandleList l_procTargetList;
+
+    do
+    {
 
     // get RUN_ODY_HWP_FROM_HOST
     const auto l_runOdyHwpFromHost =
-       TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
-
-    TargetHandleList l_ocmbTargetList;
-    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+        TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
 
     // 12.5.a ody_omi_hss_tx_zcal
-    for (const auto l_ocmb_target : l_ocmbTargetList)
+    parallel_for_each<HwpWorkItem_OCMBUpdateCheck>(composable(getAllChips)(TYPE_OCMB_CHIP, true),
+                                                   l_StepError,
+                                                   "ody_omi_hss_tx_zcal",
+                                                   [&](Target* const i_ocmb)
     {
-        //  call the HWP with each target
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-            (l_ocmb_target);
+        errlHndl_t errl = nullptr;
 
-        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
-
-        //  Create a new workitem from this ocmb and feed it to the
-        //  thread pool for processing.  Thread pool handles workitem
-        //  cleanup.
-        if (chipId == POWER_CHIPID::ODYSSEY_16)
+        if (UTIL::isOdysseyChip(i_ocmb))
         {
+
             if (l_runOdyHwpFromHost)
             {
-                threadpool.insert(new Host_ody_omi_hss_tx_zcal(l_StepError,
-                                                              *l_ocmb_target));
+                RUN_ODY_HWP(CONTEXT, l_StepError, errl, i_ocmb, ody_omi_hss_tx_zcal, { i_ocmb });
             }
             else
             {
-                threadpool.insert(new ChipOp_ody_omi_hss_tx_zcal(l_StepError,
-                                                                *l_ocmb_target));
+                RUN_ODY_CHIPOP(CONTEXT, l_StepError, errl, i_ocmb, IO_ODY_OMI_HSS_TX_ZCAL);
             }
         }
-    }
 
-    HwpWorkItem::start_threads(threadpool, l_StepError, l_ocmbTargetList.size());
-
-    // Do not continue if an error was encountered
-    if(HwpWorkItem::cv_encounteredHwpError)
-    {
-        TRACFCOMP( g_trac_isteps_trace,
-            INFO_MRK "call_omi_pre_trainadv exited early because ody_omi_hss_tx_zcal "
-            "had failures");
-        goto ERROR_EXIT;
-    }
-
-    getAllChips(l_procTargetList, TYPE_PROC);
-    TRACFCOMP(g_trac_isteps_trace, ENTER_MRK"call_omi_pre_trainadv. "
-        "%d PROCs found", l_procTargetList.size());
-
-    // 12.5.b p10_io_omi_pre_trainadv.C
-    //        - Debug routine for IO characterization
-    for (const auto & l_proc_target : l_procTargetList)
-    {
-        TRACFCOMP(g_trac_isteps_trace,
-            INFO_MRK"p10_io_omi_pre_trainadv HWP target HUID 0x%.8x ",
-            get_huid(l_proc_target));
-
-        //  call the HWP with each target
-        fapi2::Target <fapi2::TARGET_TYPE_PROC_CHIP> l_fapi_proc_target
-                (l_proc_target);
-
-        FAPI_INVOKE_HWP(l_err, p10_io_omi_pre_trainadv, l_fapi_proc_target);
-
-        //  process return code.
-        if ( l_err )
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                ERR_MRK"call p10_io_omi_pre_trainadv HWP(): failed on "
-                "target 0x%08X. " TRACE_ERR_FMT,
-                get_huid(l_proc_target),
-                TRACE_ERR_ARGS(l_err));
-
-            captureError(l_err, l_StepError, HWPF_COMP_ID, l_proc_target);
-            goto ERROR_EXIT;
-        }
-
-        TRACFCOMP(g_trac_isteps_trace,
-                INFO_MRK"SUCCESS : p10_io_omi_pre_trainadv HWP ");
-    }
-
-    // 12.5.c ody_omi_pretrain_adv
-    for (const auto l_ocmb_target : l_ocmbTargetList)
-    {
-        //  call the HWP with each target
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb_target
-            (l_ocmb_target);
-
-        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
-
-        //  Create a new workitem from this ocmb and feed it to the
-        //  thread pool for processing.  Thread pool handles workitem
-        //  cleanup.
-        if (chipId == POWER_CHIPID::ODYSSEY_16)
-        {
-            if (l_runOdyHwpFromHost)
-            {
-                threadpool.insert(new Host_ody_omi_pretrain_adv(l_StepError,
-                                                               *l_ocmb_target));
-            }
-            else
-            {
-                threadpool.insert(new ChipOp_ody_omi_pretrain_adv(l_StepError,
-                                                                 *l_ocmb_target));
-            }
-        }
-    }
-
-    HwpWorkItem::start_threads(threadpool, l_StepError, l_ocmbTargetList.size());
+    ERROR_EXIT: // label used by RUN_ODY_* above
+        return errl;
+    });
 
     if (HwpWorkItem::cv_encounteredHwpError)
     {
-        TRACFCOMP(g_trac_isteps_trace,
-                  ERR_MRK"call_omi_pre_trainadv: ody_omi_pretrain_adv: error");
-        goto ERROR_EXIT;
+        TRACISTEP(INFO_MRK"call_omi_pre_trainadv exited early because ody_omi_hss_tx_zcal "
+                  "had failures");
+        break;
     }
 
-    ERROR_EXIT:
+    TargetHandleList l_procTargetList = composable(getAllChips)(TYPE_PROC, true);
 
-    TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_omi_pre_trainadv ");
+    TRACISTEP(INFO_MRK"call_omi_pre_trainadv. %d PROCs found", l_procTargetList.size());
+
+    // 12.5.b p10_io_omi_pre_trainadv.C
+    //        - Debug routine for IO characterization
+    for (const auto l_proc_target : l_procTargetList)
+    {
+        TRACISTEP(INFO_MRK"p10_io_omi_pre_trainadv HWP target HUID 0x%.8x ",
+                  get_huid(l_proc_target));
+
+        errlHndl_t errl = nullptr;
+        FAPI_INVOKE_HWP(errl, p10_io_omi_pre_trainadv, { l_proc_target });
+
+        if (errl)
+        {
+            TRACISTEP(ERR_MRK"call p10_io_omi_pre_trainadv HWP(): failed on "
+                      "target 0x%08X. " TRACE_ERR_FMT,
+                      get_huid(l_proc_target),
+                      TRACE_ERR_ARGS(errl));
+
+            captureError(errl, l_StepError, HWPF_COMP_ID, l_proc_target);
+            break;
+        }
+
+        TRACISTEP(INFO_MRK"SUCCESS : p10_io_omi_pre_trainadv HWP ");
+    }
+
+    if (!l_StepError.isNull())
+    {
+        TRACISTEP(ERR_MRK"At least one call to p10_io_omi_pre_trainadv failed; skipping the rest of the IStep");
+        break;
+    }
+
+    // 12.5.c ody_omi_pretrain_adv
+    parallel_for_each<HwpWorkItem_OCMBUpdateCheck>(composable(getAllChips)(TYPE_OCMB_CHIP, true),
+                                                   l_StepError,
+                                                   "ody_omi_pretrain_adv",
+                                                   [&](Target* const i_ocmb)
+    {
+        errlHndl_t errl = nullptr;
+
+        if (UTIL::isOdysseyChip(i_ocmb))
+        {
+
+            if (l_runOdyHwpFromHost)
+            {
+                RUN_ODY_HWP(CONTEXT, l_StepError, errl, i_ocmb, ody_omi_pretrain_adv, { i_ocmb });
+            }
+            else
+            {
+                RUN_ODY_CHIPOP(CONTEXT, l_StepError, errl, i_ocmb, IO_ODY_OMI_PRETRAIN_ADV);
+            }
+        }
+
+    ERROR_EXIT: // label used by RUN_ODY_* above
+        return errl;
+    });
+
+    if (HwpWorkItem::cv_encounteredHwpError)
+    {
+        TRACISTEP(ERR_MRK"call_omi_pre_trainadv: ody_omi_pretrain_adv: error");
+        break;
+    }
+
+    } while (false);
+
+    TRACISTEP(EXIT_MRK"call_omi_pre_trainadv");
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
 }
 
-};
+}

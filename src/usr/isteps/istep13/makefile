@@ -34,6 +34,7 @@ ODYSSEY_INC_PATH     = ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ocmbupd/
 
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles

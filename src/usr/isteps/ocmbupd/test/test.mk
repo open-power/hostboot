@@ -37,4 +37,5 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/ocmbupd
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/vpd
 EXTRAINCDIR += ${ROOTPATH}/src/usr/vpd
-
+EXTRAINCDIR += $(ROOTPATH)/src/import/chips/common/utils/
+EXTRAINCDIR += $(ROOTPATH)/src/usr/isteps/

@@ -34,6 +34,7 @@
 #include <hwas/common/hwas.H>
 
 #include <targeting/odyutil.H>
+#include <ocmbupd_helpers.H>
 
 using namespace HWAS;
 using namespace ERRORLOG;
@@ -47,6 +48,16 @@ using namespace SBEIO;
 
 namespace ocmbupd
 {
+
+// This is an owning handle to the OCMBFW PNOR partition, and is used
+// for all PNOR accesses in this module.
+ocmbupd::ocmbfw_owning_ptr_t OCMBFW_HANDLE;
+
+// @TODO: JIRA PFHB-522 Delete this function when OCMBFW header v1 is dropped
+bool odysseyCodeUpdateSupported()
+{
+    return OCMBFW_HANDLE != nullptr;
+}
 
 const char* codelevel_info_type_to_string(const codelevel_info_t::codelevel_info_type t)
 {
@@ -69,7 +80,6 @@ const char* codelevel_info_type_to_string(const codelevel_info_t::codelevel_info
  * @param[in] i_updates_required  The images to write.
  */
 errlHndl_t odyssey_update_code(Target* const i_ocmb,
-                               const ocmbfw_owning_ptr_t& i_fwhdr,
                                const ody_cur_version_new_image_t& i_updates_required)
 {
     TRACF(ENTER_MRK"odyssey_update_code(0x%08X)",
@@ -92,7 +102,7 @@ errlHndl_t odyssey_update_code(Target* const i_ocmb,
 
         errl = sendUpdateImageRequest(i_ocmb,
                                       clip,
-                                      get_ext_image_contents(i_fwhdr.get(), img),
+                                      get_ext_image_contents(OCMBFW_HANDLE.get(), img),
                                       img->image_size);
 
         if (errl)
@@ -157,7 +167,6 @@ void str_to_hex(char* const o_buf, const uint8_t* const i_bytes, const size_t i_
  *        to what exists in PNOR.
  */
 errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
-                                               const ocmbfw_owning_ptr_t& i_fwhdr,
                                                ody_cur_version_new_image_t& o_updates_required,
                                                uint64_t* const o_rt_hash_prefix,
                                                uint64_t* const o_bldr_hash_prefix)
@@ -223,7 +232,7 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
         /* Find the appropriate image in PNOR to compare hashes with. */
 
         const ocmbfw_ext_image_info* img = nullptr;
-        errl = find_ocmbfw_ext_image(img, i_fwhdr.get(), OCMB_TYPE_ODYSSEY, image_type,
+        errl = find_ocmbfw_ext_image(img, OCMBFW_HANDLE.get(), OCMB_TYPE_ODYSSEY, image_type,
                                      dd_level_major, dd_level_minor);
 
         if (errl)
@@ -290,8 +299,7 @@ void add_odyssey_callouts(errlHndl_t& i_errl, const Target* const i_ocmb)
 /**
  * @brief Update Odyssey OCMB firmware on the given target if necessary.
  */
-errlHndl_t odysseyUpdateImages(Target* const i_ocmb,
-                               const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition)
+errlHndl_t odysseyUpdateImages(Target* const i_ocmb)
 {
     errlHndl_t errl = nullptr;
 
@@ -301,9 +309,7 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb,
     if (UTIL::isOdysseyChip(i_ocmb))
     {
         ody_cur_version_new_image_t images_to_update;
-        errl = check_for_odyssey_codeupdate_needed(i_ocmb,
-                                                   i_ocmbfw_pnor_partition,
-                                                   images_to_update);
+        errl = check_for_odyssey_codeupdate_needed(i_ocmb, images_to_update);
 
         if (errl)
         {
@@ -311,9 +317,7 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb,
             break;
         }
 
-        errl = odyssey_update_code(i_ocmb,
-                                   i_ocmbfw_pnor_partition,
-                                   images_to_update);
+        errl = odyssey_update_code(i_ocmb, images_to_update);
 
         if (errl)
         {
@@ -325,6 +329,123 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb,
     } while (false);
 
     return errl;
+}
+
+/**
+ * @brief Initialize the global OCMBWF PNOR partition handle.
+ *
+ * The returned handle will cause the PNOR partition to be unloaded
+ * when this module is unloaded.
+ */
+int init_module_ocmbfw_pnor_handle()
+{
+    using namespace ISTEPS_TRACE;
+
+    errlHndl_t errl = nullptr;
+
+    OCMBFW_HANDLE = ocmbupd::load_ocmbfw_pnor_section(errl);
+
+    if (errl)
+    {
+        TRACISTEP(ERR_MRK"init_module_ocmbfw_pnor_handle(): load_ocmbfw_pnor_section failed: "
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(errl));
+
+        TRACISTEP(INFO_MRK"init_module_ocmbfw_pnor_handle: Ignoring error until support for "
+                  "OCMBFW PNOR partition version 1 is dropped");
+
+        // @TODO: JIRA PFHB-522 Capture this error when OCMBFW V1
+        // support is deprecated, this should fail the boot
+        delete errl;
+        errl = nullptr;
+
+        OCMBFW_HANDLE = nullptr;
+
+        //captureError(errl, l_StepError, ISTEP_COMP_ID);
+    }
+
+    return 0;
+}
+
+// This is just a mechanism to call the function when this module is
+// loaded.
+static int ocmbfw_pnor_init = init_module_ocmbfw_pnor_handle();
+
+/**
+ *  @brief  Determines if the error is recoverable by I2C OCMB update.
+ *          If recoverable, commits error as recovered and triggers reconfig loop.
+ *          If not-recoverable, will act as normal captureError() call.
+ *
+ *  @note See captureErrorOcmbUpdateCheck for parameter documentation.
+ */
+void odysseyCaptureErrorOcmbUpdateCheck(errlHndl_t& io_err,
+                                        ISTEP_ERROR::IStepError& io_stepError,
+                                        const compId_t i_componentId,
+                                        const TARGETING::Target* const i_target)
+{
+    static bool ody_fsm_global_event_processed = false; // we only want to do a
+                                                        // notify-all-odysseys operation for
+                                                        // a hwp fail at most one time per
+                                                        // boot (because the fsm handler is
+                                                        // not idempotent, and it doesn't
+                                                        // care about the particular error
+                                                        // when it happens on non-odyssey
+                                                        // targets), so we use this flag to
+                                                        // keep track of that.
+
+    static bool restart_needed = false; // whether a notify-all-odysseys event triggered a
+                                        // reconfig loop. If this is true, all the hwp
+                                        // errors are marked as recovered.
+
+    // We send the OTHER_HW_HWP_FAIL event to *all* the ocmbs. This lets them update if they
+    // need to, in hopes that the code update will fix the error on the next boot. We only
+    // want to do this one time at most in one boot (otherwise the fsm could think that a
+    // separate event happened again; the event processing is not idempotent) so if we do
+    // this once, we set a flag so that we don't do it again, and mark all the hwp errors as
+    // recovered.
+
+    if (!ody_fsm_global_event_processed)
+    {
+        TRACISTEP(INFO_MRK"odysseyCaptureErrorOcmbUpdateCheck: Broadcasting Odyssey code "
+                  "update FSM event to all functional OCMBs");
+
+        ody_fsm_global_event_processed = true;
+
+        auto upd_errl = ody_upd_all_process_event(OTHER_HW_HWP_FAIL,
+                                                  EVENT_ON_FUNCTIONAL_OCMBS,
+                                                  REQUEST_RECONFIG_IF_NEEDED,
+                                                  &restart_needed);
+
+        if (upd_errl)
+        {   // we had a real error that should halt the boot; commit the errors
+            // as-is.
+            TRACISTEP(ERR_MRK"odysseyCaptureErrorOcmbUpdateCheck: ody_upd_all_process_event "
+                      "failed with error when handling event OTHER_HW_HWP_FAIL "
+                      "for error on target 0x%08X "
+                      TRACE_ERR_FMT,
+                      get_huid(i_target),
+                      TRACE_ERR_ARGS(upd_errl));
+
+            captureError(upd_errl, io_stepError, i_componentId);
+        }
+    }
+
+    if (restart_needed)
+    {   // the call to ody_upd_all_process_event will have requested a reconfig
+        // loop; just suppress the error here and let that happen. If it didn't
+        // request a reconfig loop then that means it didn't do any code update and
+        // there's no chance that it will fix the hwp error next boot, so we don't
+        // modify the severity. (And if an error occurred, it won't have set
+        // restart_needed.)
+        TRACISTEP(INFO_MRK"odysseyCaptureErrorOcmbUpdateCheck: Setting error 0x%08X to RECOVERED",
+                  ERRL_GETEID_SAFE(io_err));
+        io_err->setSev(ERRL_SEV_RECOVERED);
+    }
+
+    io_err->collectTrace(ISTEP_COMP_NAME);
+    errlCommit(io_err, i_componentId);
+
+    TRACISTEP(EXIT_MRK"odysseyCaptureErrorOcmbUpdateCheck");
 }
 
 }

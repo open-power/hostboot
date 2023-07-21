@@ -89,53 +89,8 @@ using namespace SBEIO;
 
 using namespace ocmbupd;
 
-#define TRACF(...) TRACFCOMP(g_trac_isteps_trace, __VA_ARGS__)
-
 namespace ISTEP_11
 {
-
-errlHndl_t cfam_reset(Target* const i_proc)
-{
-    errlHndl_t errl = nullptr;
-
-    do
-    {
-
-    uint64_t data = 0;
-    uint64_t size = sizeof(uint64_t);
-
-    errl = deviceRead(i_proc, &data, size,
-                      DEVICE_SCOM_ADDRESS(scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL0_RW));
-
-    if (errl)
-    {
-        TRACF(ERR_MRK"ocmb_check_for_ready: Failed to read FSXCOMP_FSXLOG_ROOT_CTRL0_RW from 0x%08X - "
-              TRACE_ERR_FMT,
-              get_huid(i_proc),
-              TRACE_ERR_ARGS(errl));
-        break;
-    }
-
-    // Set the OCMB_RESET_EN bit in the register, which will reset all
-    // the OCMBs under this processor
-    data |= (0x80000000'00000000ull >> scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL0_TPFSI_IO_OCMB_RESET_EN);
-
-    errl = deviceWrite(i_proc, &data, size,
-                       DEVICE_SCOM_ADDRESS(scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL0_RW));
-
-    if (errl)
-    {
-        TRACF(ERR_MRK"ocmb_check_for_ready: Failed to write FSXCOMP_FSXLOG_ROOT_CTRL0_RW from 0x%08X - "
-              TRACE_ERR_FMT,
-              get_huid(i_proc),
-              TRACE_ERR_ARGS(errl));
-        break;
-    }
-
-    } while (false);
-
-    return errl;
-}
 
 /** @brief Check whether the given error has async FFDC or not.
  */
@@ -154,9 +109,9 @@ bool err_is_sppe_not_ready_with_async_ffdc(Target* const i_ocmb, const errlHndl_
 
         if (errl)
         {
-            TRACF("call_ocmb_check_for_ready: SCOM read failed on OCMB 0x%08X "
-                  "while trying to read the async FFDC bit; deleting error and continuing",
-                  get_huid(i_ocmb));
+            TRACISTEP("call_ocmb_check_for_ready: SCOM read failed on OCMB 0x%08X "
+                      "while trying to read the async FFDC bit; deleting error and continuing",
+                      get_huid(i_ocmb));
             delete errl;
             errl = nullptr;
         }
@@ -201,7 +156,6 @@ bool err_is_sppe_not_ready_with_async_ffdc(Target* const i_ocmb, const errlHndl_
  *
  *  @param[in] i_ocmb                   The OCMB.
  *  @param[in] i_hwpErrl                Any error returned by a HWP.
- *  @param[in] i_ocmbfw_pnor_partition  Owning handle to the OCMBFW PNOR partition.
  *  @param[out] o_restart_needed        Set to true if the Odyssey code update FSM indicates that the
  *                                      OCMB needs to run through check_for_ready again.
  *
@@ -209,12 +163,11 @@ bool err_is_sppe_not_ready_with_async_ffdc(Target* const i_ocmb, const errlHndl_
  */
 errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
                                     errlHndl_t& i_hwpErrl,
-                                    const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition,
                                     bool& o_restart_needed)
 {
     errlHndl_t errl = nullptr;
 
-    if (i_ocmbfw_pnor_partition) // no point in doing anything if we have no Odyssey images in PNOR.
+    if (odysseyCodeUpdateSupported()) // no point in doing anything if we have no Odyssey images in PNOR.
     {
         ody_upd_event_t event = NO_EVENT;
 
@@ -236,13 +189,13 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
 
         if (event != OCMB_BOOT_ERROR_NO_FFDC)
         { // If there is async FFDC, we might be able to read the code levels.
-            errl = set_ody_code_levels_state(i_ocmb, i_ocmbfw_pnor_partition);
+            errl = set_ody_code_levels_state(i_ocmb);
 
             if (errl)
             {
-                TRACF("call_ocmb_check_for_ready: set_ody_code_levels_state "
-                      "failed on OCMB 0x%X",
-                      get_huid(i_ocmb));
+                TRACISTEP("call_ocmb_check_for_ready: set_ody_code_levels_state "
+                          "failed on OCMB 0x%X",
+                          get_huid(i_ocmb));
 
                 // If we can't read code levels, treat this as a boot failure with no async
                 // FFDC.
@@ -263,11 +216,7 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
 
             i_hwpErrl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_HIGH, HWAS::DECONFIG, HWAS::GARD_NULL);
 
-            errl = ody_upd_process_event(i_ocmb,
-                                         event,
-                                         i_hwpErrl,
-                                         i_ocmbfw_pnor_partition,
-                                         o_restart_needed);
+            errl = ody_upd_process_event(i_ocmb, event, i_hwpErrl, o_restart_needed);
         }
     }
 
@@ -276,7 +225,7 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
 
 void* call_ocmb_check_for_ready (void *io_pArgs)
 {
-    TRACF(ENTER_MRK"call_ocmb_check_for_ready");
+    TRACISTEP(ENTER_MRK"call_ocmb_check_for_ready");
 
     errlHndl_t l_errl = nullptr;
     IStepError l_StepError;
@@ -285,27 +234,6 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
     do
     {
-
-    auto ocmbfw = load_ocmbfw_pnor_section(l_errl);
-
-    if (l_errl)
-    {
-        TRACF(ERR_MRK"call_ocmb_check_for_ready: load_ocmbfw_pnor_section failed: "
-              TRACE_ERR_FMT,
-              TRACE_ERR_ARGS(l_errl));
-
-        TRACF(INFO_MRK"call_ocmb_check_for_ready: Ignoring error until support for "
-              "OCMBFW PNOR partition version 1 is dropped");
-
-        // @TODO: JIRA PFHB-522 Capture this error when OCMBFW V1 support is deprecated
-        delete l_errl;
-        l_errl = nullptr;
-
-        ocmbfw = nullptr;
-
-        //captureError(errl, o_stepError, ISTEP_COMP_ID);
-        // continue to boot the Explorers
-    }
 
     // We need to do an explicit delay before our first i2c operation
     //  to the OCMBs to ensure we don't catch them too early in the boot
@@ -342,7 +270,9 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
             timespec_t l_ocmbCurrentTime = {};
             clock_gettime(CLOCK_MONOTONIC, &l_preLoopTime);
 
-            // If this variable is true,
+            // If this variable is set to true, we'll restart the
+            // check_for_ready loop on all the ocmbs under this
+            // processor.
             bool retry_odyssey_check_for_ready = false;
 
             const auto ocmbs = move(l_functionalOcmbChipList);
@@ -563,8 +493,8 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                 if (boot_side == SPPE_BOOT_SIDE_GOLDEN
                     || sys->getAttr<TARGETING::ATTR_OCMB_ISTEP_MODE>())
                 {
-                    TRACF("call_ocmb_check_for_ready: Disable autoboot for golden side on Odyssey OCMB 0x%08X",
-                          get_huid(l_ocmb));
+                    TRACISTEP("call_ocmb_check_for_ready: Disable autoboot for golden side on Odyssey OCMB 0x%08X",
+                              get_huid(l_ocmb));
 
                     // Disable autoboot on the golden side, so that we execute as
                     // little code as possible (and therefore have the smallest chance
@@ -574,9 +504,9 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                 }
                 else
                 {
-                    TRACF("call_ocmb_check_for_ready: Enable autoboot for side %d on Odyssey OCMB 0x%08X",
-                          boot_side,
-                          get_huid(l_ocmb));
+                    TRACISTEP("call_ocmb_check_for_ready: Enable autoboot for side %d on Odyssey OCMB 0x%08X",
+                              boot_side,
+                              get_huid(l_ocmb));
 
                     sys->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
                                                                   | OCMB_BOOT_FLAGS_AUTOBOOT_MODE);
@@ -595,18 +525,18 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
                     if(l_errl)
                     {
-                        TRACF("call_ocmb_check_for_ready: ody_sppe_config_update failed on OCMB 0x%x", get_huid(l_ocmb));
+                        TRACISTEP("call_ocmb_check_for_ready: ody_sppe_config_update failed on OCMB 0x%x", get_huid(l_ocmb));
                         break; // handle error
                     }
 
-                    TRACF("call_ocmb_check_for_ready: setting boot side to %d for OCMB 0x%X",
-                          boot_side,
-                          get_huid(l_ocmb));
+                    TRACISTEP("call_ocmb_check_for_ready: setting boot side to %d for OCMB 0x%X",
+                              boot_side,
+                              get_huid(l_ocmb));
 
                     FAPI_INVOKE_HWP(l_errl, ody_cbs_start, l_fapi_ocmb_target);
                     if(l_errl)
                     {
-                        TRACF("call_ocmb_check_for_ready: ody_cbs_start failed on OCMB 0x%x", get_huid(l_ocmb));
+                        TRACISTEP("call_ocmb_check_for_ready: ody_cbs_start failed on OCMB 0x%x", get_huid(l_ocmb));
                         break; // handle error
                     }
 
@@ -614,28 +544,24 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
                     if (l_errl)
                     {
-                        TRACF("call_ocmb_check_for_ready: ody_sppe_check_for_ready failed on OCMB 0x%x", get_huid(l_ocmb));
+                        TRACISTEP("call_ocmb_check_for_ready: ody_sppe_check_for_ready failed on OCMB 0x%x", get_huid(l_ocmb));
                         break;
                     }
                 } while (false);
 
                 bool retry_this_odyssey = false;
 
-                if (ocmbfw)
-                {
-                    l_errl = handle_ody_upd_hwps_done(l_ocmb,
-                                                      l_errl,
-                                                      ocmbfw,
-                                                      retry_this_odyssey);
-                }
+                l_errl = handle_ody_upd_hwps_done(l_ocmb,
+                                                  l_errl,
+                                                  retry_this_odyssey);
 
                 if (l_errl)
                 {
-                    TRACF("call_ocmb_check_for_ready: ody_upd fsm failed to handle "
-                          "a hwp error on OCMB 0x%X; failing the Istep - "
-                          TRACE_ERR_FMT,
-                          get_huid(l_ocmb),
-                          TRACE_ERR_ARGS(l_errl));
+                    TRACISTEP("call_ocmb_check_for_ready: ody_upd fsm failed to handle "
+                              "a hwp error on OCMB 0x%X; failing the Istep - "
+                              TRACE_ERR_FMT,
+                              get_huid(l_ocmb),
+                              TRACE_ERR_ARGS(l_errl));
 
                     captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
 
@@ -649,9 +575,9 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
                 if (retry_this_odyssey)
                 {
-                    TRACF("call_ocmb_check_for_ready: OCMB 0x%08X requires us to reboot all of the "
-                          "Odysseys under processor 0x%08X",
-                          get_huid(l_ocmb), get_huid(*l_proc_iter));
+                    TRACISTEP("call_ocmb_check_for_ready: OCMB 0x%08X requires us to reboot all of the "
+                              "Odysseys under processor 0x%08X",
+                              get_huid(l_ocmb), get_huid(*l_proc_iter));
 
                     continue; // We continue boot other Odysseys even though we're going
                               // to reboot them all anyway; that way, if we have, say, M
@@ -664,27 +590,23 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
                 if (!l_ocmb->getAttr<ATTR_HWAS_STATE>().functional)
                 {
-                    TRACF("call_ocmb_check_for_ready: OCMB 0x%08X was deconfigured",
-                          get_huid(l_ocmb));
+                    TRACISTEP("call_ocmb_check_for_ready: OCMB 0x%08X was deconfigured",
+                              get_huid(l_ocmb));
 
                     continue;
                 }
 
-                if (ocmbfw)
-                {
-                    errlHndl_t no_error = nullptr; // no error for this call
-                    l_errl = ody_upd_process_event(l_ocmb,
-                                                   CHECK_FOR_READY_COMPLETED,
-                                                   no_error,
-                                                   ocmbfw,
-                                                   retry_odyssey_check_for_ready);
-                }
+                errlHndl_t no_error = nullptr; // no error for this call
+                l_errl = ody_upd_process_event(l_ocmb,
+                                               CHECK_FOR_READY_COMPLETED,
+                                               no_error,
+                                               retry_odyssey_check_for_ready);
 
                 if (l_errl)
                 {
-                    TRACF("call_ocmb_check_for_ready: ody_upd fsm failed on OCMB 0x%x; "
-                          "failing the Istep",
-                          get_huid(l_ocmb));
+                    TRACISTEP("call_ocmb_check_for_ready: ody_upd fsm failed on OCMB 0x%x; "
+                              "failing the Istep",
+                              get_huid(l_ocmb));
 
                     captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
 
@@ -697,8 +619,8 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
             if (retry_odyssey_check_for_ready)
             {
-                TRACF("call_ocmb_check_for_ready: restarting all Odysseys under processor "
-                      " at the request of the Odyssey code update FSM");
+                TRACISTEP("call_ocmb_check_for_ready: restarting all Odysseys under processor "
+                          " at the request of the Odyssey code update FSM");
 
                 getChildAffinityTargets(l_functionalOcmbChipList,
                                         const_cast<Target*>(*l_proc_iter),
@@ -712,26 +634,20 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                               end(l_functionalOcmbChipList),
                               clear_ody_code_levels_state);
 
-                /* Perform a CFAM reset to reboot all the Odysseys under the given
-                   processor. We can't do this on an OCMB-by-OCMB basis, so we're limited to
-                   doing it at processor granularity. */
+                TRACISTEP(INFO_MRK"call_ocmb_check_for_ready: Calling p10_ocmb_enable on 0x%08X",
+                          get_huid(*l_proc_iter));
 
-                cfam_reset(*l_proc_iter);
-
-                TRACF(INFO_MRK"call_ocmb_check_for_ready: Calling p10_ocmb_enable on 0x%08X",
-                      get_huid(*l_proc_iter));
-
-                /* De-assert the CFAM reset. */
+                /* Assert and de-assert a CFAM reset. */
 
                 FAPI_INVOKE_HWP(l_errl, p10_ocmb_enable, { *l_proc_iter });
 
                 if (l_errl)
                 {
-                    TRACF(ERR_MRK"call_ocmb_check_for_ready: p10_ocmb_enable failed "
-                          "on target 0x%08X. Failing the Istep. "
-                          TRACE_ERR_FMT,
-                          get_huid(*l_proc_iter),
-                          TRACE_ERR_ARGS(l_errl));
+                    TRACISTEP(ERR_MRK"call_ocmb_check_for_ready: p10_ocmb_enable failed "
+                              "on target 0x%08X. Failing the Istep. "
+                              TRACE_ERR_FMT,
+                              get_huid(*l_proc_iter),
+                              TRACE_ERR_ARGS(l_errl));
 
                     // Capture error and fail the istep
                     captureError(l_errl, l_StepError, HWPF_COMP_ID, *l_proc_iter);
@@ -758,7 +674,6 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
             explorers.erase(std::remove_if(begin(explorers), end(explorers), UTIL::isOdysseyChip),
                             end(explorers));
 
-            // TODO: Make these for odyssey too
             // Grab informational Explorer logs (early IPL = true)
             EXPSCOM::createExplorerLogs(explorers, true);
         }
@@ -831,7 +746,7 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
  FAIL_ISTEP:
 
-    TRACF(EXIT_MRK"call_ocmb_check_for_ready");
+    TRACISTEP(EXIT_MRK"call_ocmb_check_for_ready");
     return l_StepError.getErrorHandle();
 }
 

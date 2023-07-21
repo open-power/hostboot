@@ -45,6 +45,8 @@
 #include <ody_code_getlevels.H>
 #include <ody_code_update.H>
 
+using namespace TARGETING;
+
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACD(printf_string,args...) \
@@ -102,7 +104,9 @@ fapi2::ReturnCode ody_chipop_getcodelevels(const fapi2::Target<fapi2::TARGET_TYP
     {
         for (const auto& sppe_clip : response.updatable_images)
         {
-            SBE_TRACF("ody_chipop_getcodelevels: Image type: %d", sppe_clip.type);
+            SBE_TRACF("ody_chipop_getcodelevels(0x%08X): Image type: %d",
+                      get_huid(i_target.get()),
+                      sppe_clip.type);
 
             const auto hash_words = reinterpret_cast<const uint32_t*>(&sppe_clip.hash);
 
@@ -168,7 +172,7 @@ fapi2::ReturnCode ody_chipop_codeupdate(const fapi2::Target<fapi2::TARGET_TYPE_O
 
 namespace SBEIO
 {
-    errlHndl_t sendGetCodeLevelsRequest(TARGETING::Target * i_chipTarget,
+    errlHndl_t sendGetCodeLevelsRequest(Target * i_chipTarget,
                                         std::vector<codelevel_info_t>& o_codelevels)
     {
         SBE_TRACF(ENTER_MRK"sendGetCodeLevelsRequest(0x%08X)", get_huid(i_chipTarget));
@@ -188,7 +192,7 @@ namespace SBEIO
                 break;
             }
 
-            if (!TARGETING::UTIL::isOdysseyChip(i_chipTarget))
+            if (!UTIL::isOdysseyChip(i_chipTarget))
             {
                 SBE_TRACF("sendGetCodeLevelsRequest: Chip 0x%08X is not an Odyssey",
                           get_huid(i_chipTarget));
@@ -255,7 +259,7 @@ namespace SBEIO
      * @return errlHndl_t Error log handle on failure.
      *
      */
-    errlHndl_t sendUpdateImageRequest(TARGETING::Target* const i_chipTarget,
+    errlHndl_t sendUpdateImageRequest(Target* const i_chipTarget,
                                       const codelevel_info_t& i_clip,
                                       const void* const i_img,
                                       const size_t i_img_size)
@@ -273,7 +277,7 @@ namespace SBEIO
                 break;
             }
 
-            if (!TARGETING::UTIL::isOdysseyChip(i_chipTarget))
+            if (!UTIL::isOdysseyChip(i_chipTarget))
             {
                 SBE_TRACF(EXIT_MRK"sendUpdateImageRequest(0x%08X): Not an Odyssey chip",
                           get_huid(i_chipTarget));
@@ -330,7 +334,7 @@ namespace SBEIO
     /**
      * @brief Sync the backup code image with the running code image.
      */
-    errlHndl_t sendSyncCodeLevelsRequest(TARGETING::Target* const i_chipTarget,
+    errlHndl_t sendSyncCodeLevelsRequest(Target* const i_chipTarget,
                                          const bool i_force_sync)
     {
         errlHndl_t errl = nullptr;

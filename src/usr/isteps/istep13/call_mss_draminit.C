@@ -72,127 +72,67 @@ using namespace SBEIO;
 namespace ISTEP_13
 {
 
-class WorkItem_exp_draminit: public HwpWorkItem_OCMBUpdateCheck
-{
-  public:
-    WorkItem_exp_draminit( IStepError& i_stepError,
-                               Target& i_ocmb )
-    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "exp_draminit" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-        FAPI_INVOKE_HWP(l_err, exp_draminit, l_fapi_target);
-        return l_err;
-    }
-};
-
-class Host_ody_draminit: public HwpWorkItem_OCMBUpdateCheck
-{
-  public:
-    Host_ody_draminit( IStepError& i_stepError,
-                           Target& i_ocmb )
-    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_draminit" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-        fapi2::hwp_data_unit writebuf[128] = {0};
-        fapi2::hwp_array_ostream ostream(writebuf, std::size(writebuf));
-
-        /*
-         * @todo JIRA:PFHB-434 Odyssey chipop for ody_load_imem/ody_load_dmem
-         *
-        RUN_SUB_HWP(CALLER_CONTEXT, l_err, iv_pTarget,
-                    ody_load_imem, l_fapi_target, ...);
-        RUN_SUB_HWP(CALLER_CONTEXT, l_err, iv_pTarget,
-                    ody_load_dmem, l_fapi_target, ...);
-         */
-
-        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_sppe_draminit, l_fapi_target, ostream);
-        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_host_draminit, l_fapi_target);
-        RUN_SUB_HWP(CONTEXT, l_err, iv_pTarget, ody_load_pie,      l_fapi_target);
-
-        ERROR_EXIT:   // label is required by RUN_SUB_HWP
-        return l_err;
-    }
-};
-
-class ChipOp_ody_draminit: public HwpWorkItem_OCMBUpdateCheck
-{
-  public:
-    ChipOp_ody_draminit( IStepError& i_stepError,
-                             Target& i_ocmb )
-    : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_draminit" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-
-        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_LOAD_IMEM);
-        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_LOAD_DMEM);
-        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_SPPE_DRAMINIT);
-        RUN_SUB_HWP   (CONTEXT, l_err, iv_pTarget, ody_host_draminit, l_fapi_target);
-        RUN_SUB_CHIPOP(CONTEXT, l_err, iv_pTarget, MEM_ODY_LOAD_PIE);
-
-        ERROR_EXIT:   // label is required by RUN_SUB_HWP
-        return l_err;
-    }
-};
-
 void* call_mss_draminit (void *io_pArgs)
 {
     IStepError l_stepError;
-    Util::ThreadPool<HwpWorkItem> threadpool;
 
-    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_mss_draminit" );
+    TRACISTEP(ENTER_MRK"call_mss_draminit");
 
-    // get RUN_ODY_HWP_FROM_HOST
     const auto l_runOdyHwpFromHost =
        TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
 
-    // Get all functional OCMB targets
-    TargetHandleList l_ocmbTargetList;
-    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
-
-    for (auto l_ocmb_target : l_ocmbTargetList)
+    parallel_for_each<HwpWorkItem_OCMBUpdateCheck>(composable(getAllChips)(TYPE_OCMB_CHIP, true),
+                                                   l_stepError,
+                                                   "exp/ody_draminit_mc",
+                                                   [&](Target* const i_ocmb)
     {
-        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(i_ocmb);
+        errlHndl_t l_err = nullptr;
 
-        //  Create a new workitem from this OCMB and feed it to the
-        //  thread pool for processing.  Thread pool handles workitem
-        //  cleanup.
-        if (chipId == POWER_CHIPID::EXPLORER_16)
-        {
-            threadpool.insert(new WorkItem_exp_draminit(l_stepError, *l_ocmb_target));
-        }
-        else if (chipId == POWER_CHIPID::ODYSSEY_16)
+        if (UTIL::isOdysseyChip(i_ocmb))
         {
             if (l_runOdyHwpFromHost)
             {
-                threadpool.insert(new Host_ody_draminit(l_stepError, *l_ocmb_target));
+                fapi2::hwp_data_unit writebuf[128] = {0};
+                fapi2::hwp_array_ostream ostream(writebuf, std::size(writebuf));
+
+                /*
+                 * @todo JIRA:PFHB-434 Odyssey chipop for ody_load_imem/ody_load_dmem
+                 *
+                 RUN_ODY_HWP(CONTEXT, l_err, i_ocmb, ody_load_imem, l_fapi_target, ...);
+                 RUN_ODY_HWP(CONTEXT, l_err, i_ocmb, ody_load_dmem, l_fapi_target, ...);
+                */
+
+                RUN_ODY_HWP(CONTEXT, l_stepError, l_err, i_ocmb, ody_sppe_draminit, l_fapi_target, ostream);
+                RUN_ODY_HWP(CONTEXT, l_stepError, l_err, i_ocmb, ody_host_draminit, l_fapi_target);
+                RUN_ODY_HWP(CONTEXT, l_stepError, l_err, i_ocmb, ody_load_pie,      l_fapi_target);
             }
             else
             {
-                threadpool.insert(new ChipOp_ody_draminit(l_stepError, *l_ocmb_target));
+                RUN_ODY_CHIPOP(CONTEXT, l_stepError, l_err, i_ocmb, MEM_ODY_LOAD_IMEM);
+                RUN_ODY_CHIPOP(CONTEXT, l_stepError, l_err, i_ocmb, MEM_ODY_LOAD_DMEM);
+                RUN_ODY_CHIPOP(CONTEXT, l_stepError, l_err, i_ocmb, MEM_ODY_SPPE_DRAMINIT);
+                RUN_ODY_HWP   (CONTEXT, l_stepError, l_err, i_ocmb, ody_host_draminit, l_fapi_target);
+                RUN_ODY_CHIPOP(CONTEXT, l_stepError, l_err, i_ocmb, MEM_ODY_LOAD_PIE);
             }
         }
-    }
-    HwpWorkItem::start_threads( threadpool, l_stepError, l_ocmbTargetList.size());
+        else
+        {
+            FAPI_INVOKE_HWP(l_err, exp_draminit, { i_ocmb });
+        }
+
+    ERROR_EXIT: // label is required by RUN_ODY_* above
+        return l_err;
+    });
 
     if (HwpWorkItem::cv_encounteredHwpError)
     {
-        TRACFCOMP(g_trac_isteps_trace,
-                  ERR_MRK"call_mss_draminit: *_draminit returned an error" );
+        TRACISTEP(ERR_MRK"call_mss_draminit: exp/ody_draminit returned an error");
     }
 
-    TRACFCOMP( g_trac_isteps_trace, EXIT_MRK"call_mss_draminit" );
+    TRACISTEP(EXIT_MRK"call_mss_draminit");
 
     return l_stepError.getErrorHandle();
 }
 
-
-};
+}

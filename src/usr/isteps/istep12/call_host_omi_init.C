@@ -34,6 +34,7 @@
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
 #include    <errl/errlentry.H>
+
 #include    <hwpThread.H>
 #include    <hwpThreadHelper.H>
 
@@ -74,153 +75,107 @@ using   namespace   ISTEPS_TRACE;
 
 namespace ISTEP_12
 {
-void enableInbandScomsOCMB( TargetHandleList i_ocmbTargetList );
-void enablePipeFifoOCMB( TargetHandleList i_ocmbTargetList );
-
-class WorkItem_exp_omi_init: public HwpWorkItem_OCMBUpdateCheck
-{
-  public:
-    WorkItem_exp_omi_init( IStepError& i_stepError,
-                               Target& i_ocmb )
-      : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "exp_omi_init" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-        FAPI_INVOKE_HWP(l_err, exp_omi_init, l_fapi_target);
-        return l_err;
-    }
-};
-
-class Host_ody_omi_init: public HwpWorkItem_OCMBUpdateCheck
-{
-  public:
-    Host_ody_omi_init( IStepError& i_stepError,
-                           Target& i_ocmb )
-      : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_ocmb, "ody_omi_init" ) {}
-
-    virtual errlHndl_t run_hwp( void ) override
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(iv_pTarget);
-        FAPI_INVOKE_HWP(l_err, ody_omi_init, l_fapi_target);
-        return l_err;
-    }
-};
-
-class WorkItem_p10_omi_init: public HwpWorkItem_OCMBUpdateCheck
-{
-  public:
-    WorkItem_p10_omi_init( IStepError& i_stepError,
-                               Target& i_mcc )
-      : HwpWorkItem_OCMBUpdateCheck( i_stepError, i_mcc, "p10_omi_init" ) {}
-
-    virtual errlHndl_t run_hwp( void )
-    {
-        errlHndl_t l_err = nullptr;
-        fapi2::Target<fapi2::TARGET_TYPE_MCC> l_fapi_target(iv_pTarget);
-        FAPI_INVOKE_HWP(l_err, p10_omi_init, l_fapi_target);
-        return l_err;
-    }
-
-    virtual void run_after_success( void ) override
-    {
-        // Now that the OMI link is active, switch to using inband
-        //  scoms for OCMB access
-        TargetHandleList l_ocmbTargetList;
-        getChildAffinityTargets(l_ocmbTargetList, iv_pTarget,
-                                CLASS_CHIP, TYPE_OCMB_CHIP);
-        enableInbandScomsOCMB(l_ocmbTargetList);
-        enablePipeFifoOCMB(l_ocmbTargetList);
-    }
-};
-
-void* call_host_omi_init (void *io_pArgs)
-{
-    IStepError l_StepError;
-    TRACFCOMP( g_trac_isteps_trace, "call_host_omi_init entry" );
-    Util::ThreadPool<HwpWorkItem> threadpool;
-    TargetHandleList l_ocmbTargetList;
-    TargetHandleList l_mccTargetList;
-
-    // 12.11.a - Initialize config space on the Explorer/Odyssey
-    getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
-    TRACFCOMP(g_trac_isteps_trace,
-              "call_host_omi_init: %d ocmb chips found",
-              l_ocmbTargetList.size());
-
-    for (auto l_ocmb_target : l_ocmbTargetList)
-    {
-        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
-
-        //  Create a new workitem from this ocmb and feed it to the
-        //  thread pool for processing.  Thread pool handles workitem
-        //  cleanup.
-        if (chipId == POWER_CHIPID::EXPLORER_16)
-        {
-            threadpool.insert(new WorkItem_exp_omi_init(l_StepError, *l_ocmb_target));
-        }
-        else if (chipId == POWER_CHIPID::ODYSSEY_16)
-        {
-            threadpool.insert(new Host_ody_omi_init(l_StepError, *l_ocmb_target));
-        }
-    }
-
-    HwpWorkItem::start_threads(threadpool, l_StepError, l_ocmbTargetList.size());
-
-    // Do not continue if an error was encountered
-    if(HwpWorkItem::cv_encounteredHwpError)
-    {
-        TRACFCOMP( g_trac_isteps_trace,
-            INFO_MRK "call_host_omi_init exited early because *_omi_init "
-            "had failures");
-        goto ERROR_EXIT;
-    }
-
-    // 12.11.b p10_omi_init.C - Finalize the OMI
-    getAllChiplets(l_mccTargetList, TYPE_MCC);
-    TRACFCOMP(g_trac_isteps_trace,
-              "call_host_omi_init: %d MCCs found",
-              l_mccTargetList.size());
-
-    for (auto l_mcc_target : l_mccTargetList)
-    {
-        //  Create a new workitem from this mmcc and feed it to the
-        //  thread pool for processing.  Thread pool handles workitem
-        //  cleanup.
-        threadpool.insert(new WorkItem_p10_omi_init(l_StepError, *l_mcc_target));
-    }
-    HwpWorkItem::start_threads(threadpool, l_StepError, l_mccTargetList.size());
-
-    if (HwpWorkItem::cv_encounteredHwpError)
-    {
-        TRACFCOMP(g_trac_isteps_trace,
-                  ERR_MRK"call_host_omi_init: error for p10_omi_init");
-        goto ERROR_EXIT;
-    }
-
-    ERROR_EXIT:
-
-    // Grab informational Explorer logs (early IPL = false)
-    EXPSCOM::createExplorerLogs(l_ocmbTargetList, false);
-
-    TRACFCOMP( g_trac_isteps_trace, "call_host_omi_init exit" );
-
-    // end task, returning any errorlogs to IStepDisp
-    return l_StepError.getErrorHandle();
-}
-
-
 /**
  * @brief Enable Inband Scom for the OCMB targets
  * @param i_ocmbTargetList - OCMB targets
  */
-void enableInbandScomsOCMB( TargetHandleList i_ocmbTargetList )
+void enableInbandScomsOCMB(const TargetHandleList& i_ocmbTargetList);
+
+/**
+ * @brief Enable the PIPE FIFO for the OCMB targets
+ * @param i_ocmbTargetList - OCMB targets
+ */
+void enablePipeFifoOCMB( const TargetHandleList& i_ocmbTargetList );
+
+#define CONTEXT call_host_omi_init
+
+void* call_host_omi_init (void *io_pArgs)
+{
+    IStepError l_StepError;
+
+    TRACISTEP(ENTER_MRK"call_host_omi_init entry");
+
+    const auto ocmbs = composable(getAllChips)(TYPE_OCMB_CHIP, true);
+
+    TRACISTEP("call_host_omi_init: %d ocmb chips found",
+              ocmbs.size());
+
+    do
+    {
+
+    // 12.11.a - Initialize config space on the Explorer/Odyssey
+    parallel_for_each<HwpWorkItem_OCMBUpdateCheck>(ocmbs,
+                                                   l_StepError,
+                                                   "exp/ody_omi_init",
+                                                   [&](Target* const i_ocmb)
+    {
+        errlHndl_t l_err = nullptr;
+
+        if (UTIL::isOdysseyChip(i_ocmb))
+        {
+            RUN_ODY_HWP(CONTEXT, l_StepError, l_err, i_ocmb, ody_omi_init, { i_ocmb });
+        }
+        else
+        {
+            FAPI_INVOKE_HWP(l_err, exp_omi_init, { i_ocmb });
+        }
+
+    ERROR_EXIT: // label used by RUN_ODY_* above
+        return l_err;
+    });
+
+    if (HwpWorkItem::cv_encounteredHwpError)
+    {
+        TRACISTEP(INFO_MRK"call_host_omi_init exited early because *_omi_init "
+                  "had failures");
+        break;
+    }
+
+    // 12.11.b p10_omi_init.C - Finalize the OMI
+    const auto mccs = composable(getAllChiplets)(TYPE_MCC, true);
+
+    TRACISTEP("call_host_omi_init: %d MCCs found",
+              mccs.size());
+
+    parallel_for_each<HwpWorkItem_OCMBUpdateCheck>(mccs,
+                                                   l_StepError,
+                                                   "p10_omi_init",
+                                                   [&](Target* const i_mcc)
+    {
+        errlHndl_t l_err = nullptr;
+        FAPI_INVOKE_HWP(l_err, p10_omi_init, { i_mcc });
+
+        if (!l_err)
+        {
+            const auto ocmbs = composable(getChildAffinityTargets)(i_mcc, CLASS_NA, TYPE_OCMB_CHIP, true);
+            enableInbandScomsOCMB(ocmbs);
+            enablePipeFifoOCMB(ocmbs);
+        }
+
+        return l_err;
+    });
+
+    if (HwpWorkItem::cv_encounteredHwpError)
+    {
+        TRACISTEP(ERR_MRK"call_host_omi_init: error for p10_omi_init");
+        break;
+    }
+
+    } while (false);
+
+    // Grab informational Explorer logs (early IPL = false)
+    EXPSCOM::createExplorerLogs(ocmbs, false);
+
+    TRACISTEP("call_host_omi_init exit");
+
+    return l_StepError.getErrorHandle();
+}
+
+void enableInbandScomsOCMB(const TargetHandleList& i_ocmbTargetList )
 {
     mutex_t* l_mutex = nullptr;
 
-    for ( const auto l_ocmb : i_ocmbTargetList )
+    for (const auto l_ocmb : i_ocmbTargetList)
     {
         //don't mess with attributes without the mutex (just to be safe)
         l_mutex = l_ocmb->getHbMutexAttr<ATTR_SCOM_ACCESS_MUTEX>();
@@ -236,11 +191,7 @@ void enableInbandScomsOCMB( TargetHandleList i_ocmbTargetList )
     }
 }
 
-/**
- * @brief Enable the PIPE FIFO for the OCMB targets
- * @param i_ocmbTargetList - OCMB targets
- */
-void enablePipeFifoOCMB( TargetHandleList i_ocmbTargetList )
+void enablePipeFifoOCMB( const TargetHandleList& i_ocmbTargetList )
 {
     errlHndl_t l_errl  = nullptr;
     mutex_t   *l_mutex = nullptr;
@@ -266,4 +217,4 @@ void enablePipeFifoOCMB( TargetHandleList i_ocmbTargetList )
     }
 }
 
-};
+}

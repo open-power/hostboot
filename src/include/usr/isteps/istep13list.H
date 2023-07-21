@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -115,8 +115,9 @@ const   TaskInfo    g_istep13[]  =   {
 
 const DepModInfo g_istep13Dependancies = {
     {
-        DEP_LIB(libistep13.so),
+        DEP_LIB(libocmbupd.so),
         DEP_LIB(libisteps_mss.so),
+        DEP_LIB(libistep13.so),
         NULL
     }
 };

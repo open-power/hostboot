@@ -23,11 +23,14 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 #include <hwpThread.H>
+#include <hwpThreadHelper.H>
 
 namespace ISTEP
 {
 mutex_t HwpWorkItem::cv_stepErrorMutex      = MUTEX_INITIALIZER;
 bool    HwpWorkItem::cv_encounteredHwpError = false;
+
+HwpWorkItem_OCMBUpdateCheck::error_list HwpWorkItem_OCMBUpdateCheck::cv_errors;
 
 // Generically run a single HWP against the given target
 void HwpWorkItem::operator()()

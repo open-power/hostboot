@@ -5935,6 +5935,7 @@
       </uint8_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>
@@ -6107,6 +6108,7 @@
       </uint8_t>
     </simpleType>
     <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>

@@ -56,8 +56,6 @@
 #include <targeting/odyutil.H>
 #include <ocmbupd/ody_upd_fsm.H>
 
-#define TRACF(...) TRACFCOMP(g_trac_isteps_trace, __VA_ARGS__)
-
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
@@ -71,7 +69,7 @@ namespace ISTEP_12
 void* call_update_omi_firmware (void *io_pArgs)
 {
     IStepError l_StepError;
-    TRACFCOMP( g_trac_isteps_trace, "call_update_omi_firmware entry" );
+    TRACISTEP("call_update_omi_firmware entry" );
 
     // Need to gather some information from the OCMBs before attempting
     //  the update flow
@@ -89,35 +87,31 @@ void* call_update_omi_firmware (void *io_pArgs)
         uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
         if (chipId == POWER_CHIPID::EXPLORER_16)
         {
-            TRACFCOMP( g_trac_isteps_trace,
-                       "Running exp_process_image_status HWP on target HUID 0x%.8X",
-                       get_huid(l_ocmb_target) );
+            TRACISTEP("Running exp_process_image_status HWP on target HUID 0x%.8X",
+                      get_huid(l_ocmb_target) );
             errlHndl_t hwp_err = nullptr;
             FAPI_INVOKE_HWP(hwp_err, exp_process_image_status, l_fapi_ocmb_target);
 
             if ( hwp_err )
             {
-                TRACFCOMP( g_trac_isteps_trace,
-                           "ERROR : call exp_process_image_status HWP(): failed on target 0x%08X. "
-                           TRACE_ERR_FMT,
-                           get_huid(l_ocmb_target),
-                           TRACE_ERR_ARGS(hwp_err));
+                TRACISTEP("ERROR : call exp_process_image_status HWP(): failed on target 0x%08X. "
+                          TRACE_ERR_FMT,
+                          get_huid(l_ocmb_target),
+                          TRACE_ERR_ARGS(hwp_err));
 
                 // Capture error and continue to the next chip
                 captureError(hwp_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
             }
             else
             {
-                TRACFCOMP( g_trac_isteps_trace,
-                           "SUCCESS running exp_process_image_status HWP on target HUID 0x%.8X",
-                           get_huid(l_ocmb_target) );
+                TRACISTEP("SUCCESS running exp_process_image_status HWP on target HUID 0x%.8X",
+                          get_huid(l_ocmb_target) );
             }
         }
         else if (!UTIL::isOdysseyChip(l_ocmb_target))
         {
-            TRACFCOMP( g_trac_isteps_trace,
-                       "call_update_omi_firmware: Unknown chip ID 0x%X on target HUID 0x%.8X",
-                       chipId, get_huid(l_ocmb_target) );
+            TRACISTEP("call_update_omi_firmware: Unknown chip ID 0x%X on target HUID 0x%.8X",
+                      chipId, get_huid(l_ocmb_target) );
         }
     } // OCMB loop
 
@@ -132,16 +126,15 @@ void* call_update_omi_firmware (void *io_pArgs)
     // (skipped on MPIPL)
     if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>())
     {
-        TRACFCOMP( g_trac_isteps_trace,
-                   "skipping OCMB firmware update due to MPIPL");
+        TRACISTEP("skipping OCMB firmware update due to MPIPL");
     }
     else
     {
-        TRACF("Updating Explorer OCMBs");
+        TRACISTEP("Updating Explorer OCMBs");
 
         ocmbupd::explorerUpdateAll(l_StepError);
 
-        TRACF("Processing Odyssey OCMB firmware update events");
+        TRACISTEP("Processing Odyssey OCMB firmware update events");
 
         using namespace ocmbupd;
         auto errl = ody_upd_all_process_event(UPDATE_OMI_FIRMWARE_REACHED,
@@ -150,18 +143,16 @@ void* call_update_omi_firmware (void *io_pArgs)
 
         if (errl)
         {
-            TRACF(ERR_MRK"call_update_omi_firmware: ody_upd_all_process_event(UPDATE_OMI_FIRMWARE_REACHED) failed: "
-                  TRACE_ERR_FMT,
-                  TRACE_ERR_ARGS(errl));
+            TRACISTEP(ERR_MRK"call_update_omi_firmware: ody_upd_all_process_event(UPDATE_OMI_FIRMWARE_REACHED) failed: "
+                      TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(errl));
             captureError(errl, l_StepError, HWPF_COMP_ID);
         }
     }
 
-    TRACFCOMP( g_trac_isteps_trace, "call_update_omi_firmware exit" );
+    TRACISTEP("call_update_omi_firmware exit");
 
-    // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();
-
 }
 
 }

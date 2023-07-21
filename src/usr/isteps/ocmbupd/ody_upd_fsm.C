@@ -58,6 +58,13 @@ using namespace errl_util;
 using namespace OCMBUPD;
 using namespace ocmbupd;
 
+namespace ocmbupd
+{
+
+extern ocmbupd::ocmbfw_owning_ptr_t OCMBFW_HANDLE;
+
+}
+
 #define TRACF(...) TRACFCOMP(g_trac_ocmbupd, __VA_ARGS__)
 
 /** @brief This enumeration describes the actions that can be taken in response to a code
@@ -209,7 +216,7 @@ struct state_transitions_t
 {
     // This array may need to be expanded in the future if
     // we need to handle more than 4 transitions.
-    static const int MAX_TRANSITIONS = 4;
+    static const int MAX_TRANSITIONS = 5;
 
     state_t state;
     state_transition_t transitions[MAX_TRANSITIONS];
@@ -238,15 +245,16 @@ const state_transitions_t transitions[] =
                                                                            | OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_HWP_FAIL_HASH_FAIL
                                                                            | OCMB_HWP_FAIL_OTHER
-                                                                           | ATTRS_INCOMPATIBLE        , {perform_code_update, switch_to_side_1, retry_check_for_ready  }},
+                                                                           | ATTRS_INCOMPATIBLE
+                                                                           | OTHER_HW_HWP_FAIL         , {perform_code_update, switch_to_side_1, retry_check_for_ready  }},
                                                                          { CODE_UPDATE_CHIPOP_FAILURE  , {switch_to_side_golden, retry_check_for_ready                  }} } },
 
     { { no            , no                     , SIDE0  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_golden,  retry_check_for_ready                 }},
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
+                                                                         { IMAGE_SYNC_CHIPOP_FAILURE
+                                                                           | MEAS_REGS_MISMATCH        , {switch_to_side_1, retry_check_for_ready                       }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
-                                                                           | OCMB_HWP_FAIL_OTHER
-                                                                           | IMAGE_SYNC_CHIPOP_FAILURE
-                                                                           | MEAS_REGS_MISMATCH        , {deconfigure_ocmb                                              }},
+                                                                           | OCMB_HWP_FAIL_OTHER       , {deconfigure_ocmb                                              }},
                                                                          { IPL_COMPLETE                , {sync_images_normal, reset_ocmb_upd_state                      }} } },
 
     //                |                        | Active |                |                             |
@@ -260,7 +268,8 @@ const state_transitions_t transitions[] =
                                                                            | OCMB_HWP_FAIL_HASH_FAIL   , {switch_to_side_golden, retry_check_for_ready                  }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | UPDATE_OMI_FIRMWARE_REACHED
-                                                                           | ATTRS_INCOMPATIBLE        , {perform_code_update, switch_to_side_0, retry_check_for_ready  }},
+                                                                           | ATTRS_INCOMPATIBLE
+                                                                           | OTHER_HW_HWP_FAIL         , {perform_code_update, switch_to_side_0, retry_check_for_ready  }},
                                                                          { CODE_UPDATE_CHIPOP_FAILURE  , {switch_to_side_golden, retry_check_for_ready                  }} } },
 
     { { no            , no                     , SIDE1  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_golden, retry_check_for_ready                  }},
@@ -350,6 +359,7 @@ const state_transitions_t transitions[] =
                                                                            | OCMB_HWP_FAIL_OTHER
                                                                            | CODE_UPDATE_CHIPOP_FAILURE, {deconfigure_ocmb                                              }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | CHECK_FOR_READY_COMPLETED
                                                                            | ATTRS_INCOMPATIBLE        , {perform_code_update, switch_to_side_0, retry_check_for_ready  }} } }, // Golden side's attrs are always incompatible
 };
 
@@ -386,6 +396,8 @@ std::array<char, 256> event_to_str(const ody_upd_event_t i_event)
             strcat(&str[0], "OCMB_HWP_FAIL_HASH_FAIL|"); break;
         case OCMB_HWP_FAIL_OTHER:
             strcat(&str[0], "OCMB_HWP_FAIL_OTHER|"); break;
+        case OTHER_HW_HWP_FAIL:
+            strcat(&str[0], "OTHER_HW_HWP_FAIL|"); break;
         case ATTRS_INCOMPATIBLE:
             strcat(&str[0], "ATTRS_INCOMPATIBLE|"); break;
         case CODE_UPDATE_CHIPOP_FAILURE:
@@ -579,10 +591,14 @@ errlHndl_t capture_state_in_errlog(const errlSeverity_t i_sev,
                                     bits{56, 63}, i_state_pattern.state.ocmb_fw_up_to_date),
                         i_sw_callout);
 
+    errl->collectTrace(OCMBUPD_COMP_NAME);
+    errl->collectTrace(ISTEP_COMP_NAME);
+    errl->collectTrace(SBEIO_COMP_NAME);
+
     const auto vsn_summary = i_ocmb->getAttrAsStdArr<ATTR_OCMB_CODE_LEVEL_SUMMARY>();
     char errl_vsn_details[sizeof(vsn_summary) + 32] = { };
     sprintf(errl_vsn_details,
-            "Odyssey code versions: %s", vsn_summary);
+            "Odyssey code versions: %s", vsn_summary.data());
     ErrlUserDetailsString(errl_vsn_details).addToLog(errl);
 
     return errl;
@@ -742,7 +758,6 @@ void create_firmware_update_log(Target* const i_ocmb,
  *  @param[in] i_event            The event that caused i_transition.
  *  @param[in] i_errlog           The error log associated with the event, if any. This
  *                                function does not take ownership of the error log.
- *  @param[in] i_ocmbfw_pnor_partition  Owning handle to the OCMBFW PNOR partition.
  *  @param[out] o_restart_needed  Whether the ocmb_check_for_ready loop should be
  *                                restarted on the given OCMB.
  *
@@ -756,7 +771,6 @@ errlHndl_t execute_actions(Target* const i_ocmb,
                            const state_transition_t& i_transition,
                            const ody_upd_event_t i_event,
                            errlHndl_t i_errlog,
-                           const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition,
                            bool& o_restart_needed)
 {
     errlHndl_t errl = nullptr;
@@ -797,7 +811,7 @@ errlHndl_t execute_actions(Target* const i_ocmb,
                 manually_set_errl_sev = true;
                 break;
             case perform_code_update:
-                if (auto update_err = odysseyUpdateImages(i_ocmb, i_ocmbfw_pnor_partition))
+                if (auto update_err = odysseyUpdateImages(i_ocmb))
                 {
                     TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): odysseyUpdateImages failed: "
                           TRACE_ERR_FMT,
@@ -807,7 +821,6 @@ errlHndl_t execute_actions(Target* const i_ocmb,
                     return ody_upd_process_event(i_ocmb,
                                                  CODE_UPDATE_CHIPOP_FAILURE,
                                                  update_err,
-                                                 i_ocmbfw_pnor_partition,
                                                  o_restart_needed);
                 }
 
@@ -884,7 +897,6 @@ errlHndl_t execute_actions(Target* const i_ocmb,
                     return ody_upd_process_event(i_ocmb,
                                                  IMAGE_SYNC_CHIPOP_FAILURE,
                                                  sync_err,
-                                                 i_ocmbfw_pnor_partition,
                                                  o_restart_needed);
                 }
                 break;
@@ -931,7 +943,6 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
                                  const state_t& i_state,
                                  const ody_upd_event_t i_event,
                                  errlHndl_t& i_errlog,
-                                 const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition,
                                  bool& o_restart_needed)
 {
     TRACF(ENTER_MRK"ody_upd_process_event(HUID=0x%08X): Current state+event %s + %s",
@@ -944,6 +955,15 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
     do
     {
 
+    if (!odysseyCodeUpdateSupported())
+    {
+        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring event until support for "
+              "OCMBFW PNOR partition version 1 is dropped");
+
+        // @TODO: JIRA PFHB-522 Error when OCMBFW V1 support is deprecated
+        break;
+    }
+
     const state_transitions_t* matched_state = nullptr;
     const state_transition_t* matched_event = nullptr;
 
@@ -953,7 +973,7 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
     if (!i_ocmb->getAttr<ATTR_HWAS_STATE>().functional && i_event == IPL_COMPLETE)
     {
         execute_actions(i_ocmb, i_state, /* state pattern */ { }, /* transition */ { },
-                        IPL_COMPLETE, i_errlog, i_ocmbfw_pnor_partition, o_restart_needed);
+                        IPL_COMPLETE, i_errlog, o_restart_needed);
         break;
     }
 
@@ -989,7 +1009,7 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
               state_to_str(matched_state->state).data(),
               event_to_str(matched_event->event).data());
 
-        execute_actions(i_ocmb, i_state, *matched_state, *matched_event, i_event, i_errlog, i_ocmbfw_pnor_partition, o_restart_needed);
+        execute_actions(i_ocmb, i_state, *matched_state, *matched_event, i_event, i_errlog, o_restart_needed);
     }
     else if (matched_state)
     {
@@ -1043,6 +1063,41 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
     return errl;
 }
 
+errlHndl_t ocmbupd::ody_upd_process_event(Target* const i_ocmb,
+                                          const ody_upd_event_t i_event,
+                                          errlHndl_t& i_errlog)
+{
+    if (!odysseyCodeUpdateSupported())
+    {
+        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring event until support for "
+              "OCMBFW PNOR partition version 1 is dropped");
+
+        // @TODO: JIRA PFHB-522 Error when OCMBFW V1 support is deprecated
+        return nullptr;
+    }
+
+    bool restart_needed = false;
+
+    const auto errl = ody_upd_process_event(i_ocmb, i_event, i_errlog, restart_needed);
+
+    if (!errl && restart_needed)
+    {
+#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
+        CONSOLE::displayf(CONSOLE::DEFAULT, nullptr,
+                          "Performing reconfig loop for updated OCMBs");
+#endif
+
+        TRACF(INFO_MRK"ody_upd_process_event(0x%08x): Requesting reconfig loop for "
+              "OCMB firmware update",
+              get_huid(i_ocmb));
+
+        setOrClearReconfigLoopReason(HWAS::ReconfigSetOrClear::RECONFIG_SET,
+                                     RECONFIGURE_LOOP_OCMB_FW_UPDATE);
+    }
+
+    return errl;
+}
+
 /** @brief Process an event on the given OCMB. If an error log is
  *  related to the event, it is passed in as well, and this function
  *  takes ownership of it.
@@ -1053,9 +1108,17 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
 errlHndl_t ocmbupd::ody_upd_process_event(Target* const i_ocmb,
                                           const ody_upd_event_t i_event,
                                           errlHndl_t& i_errlog,
-                                          const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition,
                                           bool& o_restart_needed)
 {
+    if (!odysseyCodeUpdateSupported())
+    {
+        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring event until support for "
+              "OCMBFW PNOR partition version 1 is dropped");
+
+        // @TODO: JIRA PFHB-522 Error when OCMBFW V1 support is deprecated
+        return nullptr;
+    }
+
     state_t state = { };
 
     state.update_performed = i_ocmb->getAttr<ATTR_OCMB_CODE_UPDATED>() ? yes : no;
@@ -1091,7 +1154,7 @@ errlHndl_t ocmbupd::ody_upd_process_event(Target* const i_ocmb,
         break;
     }
 
-    return ody_upd_process_event(i_ocmb, state, i_event, i_errlog, i_ocmbfw_pnor_partition, o_restart_needed);
+    return ody_upd_process_event(i_ocmb, state, i_event, i_errlog, o_restart_needed);
 }
 
 /** @brief Process an event that concerns all Odyssey OCMBs in the system. This is
@@ -1105,25 +1168,15 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
     errlHndl_t errl = nullptr;
     bool restart_needed = false;
 
-    const auto ocmbfw = ocmbupd::load_ocmbfw_pnor_section(errl);
-
     do
     {
 
-    if (errl)
+    if (!odysseyCodeUpdateSupported())
     {
-        TRACF(ERR_MRK"ody_upd_all_process_event: load_ocmbfw_pnor_section failed: "
-              TRACE_ERR_FMT,
-              TRACE_ERR_ARGS(errl));
-
-        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring error until support for "
+        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring event until support for "
               "OCMBFW PNOR partition version 1 is dropped");
 
-        // @TODO: JIRA PFHB-522 Capture this error when OCMBFW V1 support is deprecated
-        delete errl;
-        errl = nullptr;
-
-        //captureError(errl, o_stepError, ISTEP_COMP_ID);
+        // @TODO: JIRA PFHB-522 Error when OCMBFW V1 support is deprecated
         break;
     }
 
@@ -1140,7 +1193,7 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
               get_huid(ocmb));
 
         errlHndl_t event_errlog = nullptr; // no error to consider here
-        errlHndl_t fsm_error = ocmbupd::ody_upd_process_event(ocmb, i_event, event_errlog, ocmbfw, restart_needed);
+        errlHndl_t fsm_error = ocmbupd::ody_upd_process_event(ocmb, i_event, event_errlog, restart_needed);
 
         if (fsm_error)
         {
@@ -1155,7 +1208,7 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
     }
 
     if (errl)
-    {
+    { // do not set o_restart_needed or request a reconfig loop if there was an error.
         break;
     }
 
@@ -1166,11 +1219,16 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
                           "Performing reconfig loop for updated OCMBs");
 #endif
 
-        TRACF(INFO_MRK"host_ipl_complete: Requesting reconfig loop for "
+        TRACF(INFO_MRK"ody_upd_all_process_event: Requesting reconfig loop for "
               "OCMB firmware update");
 
         setOrClearReconfigLoopReason(HWAS::ReconfigSetOrClear::RECONFIG_SET,
                                      RECONFIGURE_LOOP_OCMB_FW_UPDATE);
+    }
+
+    if (o_restart_needed)
+    {
+        *o_restart_needed = restart_needed;
     }
 
     } while (false);
@@ -1182,15 +1240,13 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
  *  levels on the given target. Assumes that ATTR_SPPE_BOOT_SIDE is already
  *  set on the target.
  */
-errlHndl_t ocmbupd::set_ody_code_levels_state(Target* const i_ocmb,
-                                              const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition)
+errlHndl_t ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
 {
     errlHndl_t errl = nullptr;
 
     ody_cur_version_new_image_t images;
     uint64_t rt_vsn = 0, bldr_vsn = 0;
-    errl = check_for_odyssey_codeupdate_needed(i_ocmb, i_ocmbfw_pnor_partition, images,
-                                               &rt_vsn, &bldr_vsn);
+    errl = check_for_odyssey_codeupdate_needed(i_ocmb, images, &rt_vsn, &bldr_vsn);
 
     const auto boot_side = i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>();
 

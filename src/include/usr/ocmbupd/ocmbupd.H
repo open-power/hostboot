@@ -27,6 +27,8 @@
 
 #include <isteps/hwpisteperror.H>
 #include <targeting/common/target.H>
+#include <targeting/odyutil.H>
+#include <istepHelperFuncs.H>
 
 #include <sbeio/sbeioif.H>
 #include "ocmbFwImage_const.H"
@@ -73,18 +75,15 @@ using ocmbfw_owning_ptr_t = std::unique_ptr<const ocmbfw_ext_pnor_section_header
  * @brief Update Odyssey OCMB firmware on the given target if necessary.
  *
  * @param[in] i_ocmb                   OCMB to update.
- * @param[in] i_ocmbfw_pnor_partition  Owning handle for the OCMBFW PNOR partition.
  * @return                             Error if any, otherwise nullptr.
  */
-errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb,
-                               const ocmbfw_owning_ptr_t& i_ocmbfw_pnor_partition);
+errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb);
 
 /**
  * @brief Check which Odyssey images need to be updated in the given chip, compared
  *        to what exists in PNOR.
  *
  * @param[in] i_ocmb               The Odyssey chip.
- * @param[in] i_fwhdr              The OCMBFW PNOR partition header pointer.
  * @param[out] o_updates_required  The images needing update.
  * @param[out] o_rt_hash_prefix    The 64-bit prefix of the hash of the runtime code
  *                                 level on running the Odyssey (optional).
@@ -93,7 +92,6 @@ errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb,
  * @return                         Error if any, otherwise nullptr.
  */
 errlHndl_t check_for_odyssey_codeupdate_needed(TARGETING::Target* i_ocmb,
-                                               const ocmbfw_owning_ptr_t& i_fwhdr,
                                                ody_cur_version_new_image_t& o_updates_required,
                                                uint64_t* const o_rt_hash_prefix = nullptr,
                                                uint64_t* const o_bldr_hash_prefix = nullptr);
@@ -145,6 +143,93 @@ errlHndl_t find_ocmbfw_ext_image(const ocmbfw_ext_image_info*& o_img,
  */
 const void* get_ext_image_contents(const ocmbfw_ext_pnor_section_header* i_hdr,
                                    const ocmbfw_ext_image_info* i_img);
+
+/**
+ *  @brief  Determines if the error is recoverable by I2C OCMB update
+ *          If recoverable, commits error as recovered and triggers reconfig loop
+ *          If not-recoverable, will act as normal captureError() call
+ *
+ *  @note   This function is not meant to be used in multithreaded contexts. If
+ *          multiple errors need to be handled, call this function on each one
+ *          sequentially.
+ *
+ *  @param[in/out] io_err
+ *      An error log handle, that contains the error log info. Can be NULL.  If
+ *      NULL then this function becomes a no-op.  BEWARE: Upon exit of
+ *      this function, the handle will be NULL.
+ *
+ *  @param[out] io_stepError
+ *      The details from the error handle, io_err, which will be added to this.
+ *
+ *  @param[in] i_componentId
+ *      The component ID that will be associated with the error handler, io_err,
+ *      when the error is committed.
+ *
+ *  @param[in] i_target
+ *      The target that will be assimilated and have its knowledge
+ *      added to the collective and when I say collective, I mean the error log
+ *      handle, io_err ... resistance is futile. If not target is given, then
+ *      target data will not be collected.
+ */
+inline void captureErrorOcmbUpdateCheck(errlHndl_t& io_err,
+                                        ISTEP_ERROR::IStepError& io_stepError,
+                                        const compId_t i_componentId,
+                                        TARGETING::Target* const i_target)
+{
+    using namespace TARGETING;
+
+    // Chip-specific handling functions.
+    void explorerCaptureErrorOcmbUpdateCheck(errlHndl_t &io_err,
+                                             ISTEP_ERROR::IStepError &io_stepError,
+                                             compId_t i_componentId,
+                                             const Target*  i_target);
+
+    void odysseyCaptureErrorOcmbUpdateCheck(errlHndl_t &io_err,
+                                            ISTEP_ERROR::IStepError &io_stepError,
+                                            compId_t i_componentId,
+                                            const Target* i_target);
+
+    TRACISTEP(ENTER_MRK"captureErrorOcmbUpdateCheck: Handling error 0x%08X on target 0x%08X",
+              ERRL_GETEID_SAFE(io_err),
+              get_huid(i_target));
+
+    if (!UTIL::isOdysseyChip(i_target))
+    { // If this hwp was invoked on something other than an odyssey chip, but it's
+      // *related* to an odyssey chip, then
+        const auto parent_proc = (i_target->getAttr<ATTR_TYPE>() == TYPE_PROC
+                                  ? i_target
+                                  : getParent(i_target, TYPE_PROC));
+
+        if (UTIL::hasOdysseyOcmbChildren(parent_proc))
+        {
+            odysseyCaptureErrorOcmbUpdateCheck(io_err, io_stepError, i_componentId, i_target);
+        }
+        else
+        { // If the error isn't on an odyssey target or a target related to odyssey parts,
+          // let the Explorer update handler take it. This will capture the error if there
+          // is no update needed, or mark the part for an update otherwise.
+            explorerCaptureErrorOcmbUpdateCheck(io_err, io_stepError, i_componentId, i_target);
+        }
+    }
+    else
+    {
+        TRACISTEP(ENTER_MRK"captureErrorOcmbUpdateCheck: Comitting error on Odyssey chip");
+
+        captureError(io_err, io_stepError, i_componentId);
+    }
+
+    TRACISTEP(EXIT_MRK"captureErrorOcmbUpdateCheck");
+}
+
+/**
+ * @brief Whether Odyssey code update is supported. This boils down to
+ * checking whether the Odyssey firmware is available in PNOR. We are
+ * doing this for temporary backward compatibility with old OCMBFW
+ * partitions until we drop support.
+ *
+ * @TODO JIRA: PFHB-522 Remove this function and all calls.
+ */
+bool odysseyCodeUpdateSupported();
 
 }//namespace ocmbupd
 

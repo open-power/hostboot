@@ -268,10 +268,10 @@ const   TaskInfo    g_istep12[]  =   {
 
 const DepModInfo g_istep12Dependancies = {
     {
-        DEP_LIB(libistep12.so),
         DEP_LIB(libnestmemutils.so),
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libocmbupd.so),
+        DEP_LIB(libistep12.so),
         NULL
     }
 };

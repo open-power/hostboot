@@ -42,6 +42,7 @@
 
 #include    <hwas/common/deconfigGard.H>
 #include    <istepHelperFuncs.H>          // captureError
+#include    <ocmbupd_helpers.H>
 
 //  targeting support.
 #include    <targeting/common/commontargeting.H>
@@ -58,9 +59,9 @@
 #include  <chipids.H>
 #include  <exp_getecid.H>
 #include  <ody_getecid.H>
+#include  <hwpThreadHelper.H>
 #include  <p10_scom_proc.H>
 #include  <p10_init_mem_encryption.H>
-
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -68,6 +69,7 @@ using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 using   namespace   ISTEPS_TRACE;
 using   namespace   scomt::proc;
+using   namespace   ocmbupd;
 
 namespace ISTEP_12
 {
@@ -105,8 +107,7 @@ static errlHndl_t should_enable_memory_encryption(const TargetHandleList& i_proc
 
             if (errl)
             {
-                TRACFCOMP(g_trac_isteps_trace,
-                          ERR_MRK"Memory encryption: Failed to read export status SCOM register");
+                TRACISTEP(ERR_MRK"Memory encryption: Failed to read export status SCOM register");
                 break;
             }
 
@@ -148,7 +149,7 @@ static errlHndl_t should_enable_memory_encryption(const TargetHandleList& i_proc
  */
 static errlHndl_t init_memory_encryption()
 {
-    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"init_memory_encryption" );
+    TRACISTEP(ENTER_MRK"init_memory_encryption" );
 
     errlHndl_t errl = nullptr;
 
@@ -174,8 +175,7 @@ static errlHndl_t init_memory_encryption()
 
     if (enable_encryption)
     {
-        TRACFCOMP(g_trac_isteps_trace,
-                  "Memory encryption: Initializing encryption on %lu processors",
+        TRACISTEP("Memory encryption: Initializing encryption on %lu processors",
                   procs.size());
 
         // Set up the encryption SCOMs
@@ -184,16 +184,14 @@ static errlHndl_t init_memory_encryption()
 
         if (errl)
         {
-            TRACFCOMP(g_trac_isteps_trace,
-                      ERR_MRK"Memory encryption: p10_init_mem_encryption failed on processor 0x%08x",
+            TRACISTEP(ERR_MRK"Memory encryption: p10_init_mem_encryption failed on processor 0x%08x",
                       get_huid(failproc));
             break;
         }
     }
     else
     {
-        TRACFCOMP(g_trac_isteps_trace,
-                  "Memory encryption: Disabling encryption on %lu processors",
+        TRACISTEP("Memory encryption: Disabling encryption on %lu processors",
                   procs.size());
 
         for (const auto proc : procs)
@@ -204,18 +202,19 @@ static errlHndl_t init_memory_encryption()
 
     } while (false);
 
-    TRACFCOMP( g_trac_isteps_trace, EXIT_MRK"init_memory_encryption" );
+    TRACISTEP(EXIT_MRK"init_memory_encryption" );
 
     return errl;
 }
 
-void* call_mss_getecid (void *io_pArgs)
+#define CONTEXT call_mss_getecid
+
+void* call_mss_getecid(void* io_pArgs)
 {
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
-    compId_t  l_componentId = HWPF_COMP_ID;
 
-    TRACFCOMP( g_trac_isteps_trace, ENTER_MRK"call_mss_getecid entry" );
+    TRACISTEP(ENTER_MRK"call_mss_getecid entry" );
 
     const auto l_runOdyHwpFromHost =
       TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
@@ -226,81 +225,50 @@ void* call_mss_getecid (void *io_pArgs)
 
     for (const auto l_ocmb_target : l_ocmbTargetList)
     {
-        fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>
-            l_fapi_ocmb_target(l_ocmb_target);
-
-        // check EXPLORER first as this is most likely the configuration
-        uint32_t chipId = l_ocmb_target->getAttr< ATTR_CHIP_ID>();
-        if (chipId == POWER_CHIPID::EXPLORER_16)
+        if (TARGETING::UTIL::isOdysseyChip(l_ocmb_target))
         {
-            TRACFCOMP( g_trac_isteps_trace,
-                "Running exp_getecid HWP on target HUID 0x%.8X",
-                get_huid(l_ocmb_target) );
-            FAPI_INVOKE_HWP(l_err, exp_getecid, l_fapi_ocmb_target);
+            TRACISTEP("Running ody_getecid HWP on target HUID 0x%.8X l_runOdyHwpFromHost:%d",
+                      get_huid(l_ocmb_target), l_runOdyHwpFromHost);
 
-            if ( l_err )
+            RUN_ODY_HWP(CONTEXT, l_StepError, l_err, l_ocmb_target, ody_getecid, { l_ocmb_target });
+
+        ERROR_EXIT: // used by RUN_ODY_HWP
+            if (l_err)
             {
-                TRACFCOMP( g_trac_isteps_trace,
-                    "ERROR : call exp_getecid HWP(): failed on target 0x%08X. "
-                    TRACE_ERR_FMT,
-                    get_huid(l_ocmb_target),
-                    TRACE_ERR_ARGS(l_err));
-                l_componentId = HWPF_COMP_ID;
+                HANDLE_ODY_HWP_ERROR(CONTEXT, ody_getecid, l_StepError, l_ocmb_target, l_err);
+            }
+        }
+        else
+        {
+            TRACISTEP("Running exp_getecid HWP on target HUID 0x%.8X",
+                      get_huid(l_ocmb_target));
+            FAPI_INVOKE_HWP(l_err, exp_getecid, { l_ocmb_target });
 
-                // Capture error and continue to the next chip
-                captureError(l_err, l_StepError, l_componentId, l_ocmb_target);
+            if (l_err)
+            {
+                TRACISTEP(ERR_MRK"call exp_getecid HWP(): failed on target 0x%08X. "
+                          TRACE_ERR_FMT,
+                          get_huid(l_ocmb_target),
+                          TRACE_ERR_ARGS(l_err));
+
+                captureError(l_err, l_StepError, HWPF_COMP_ID, l_ocmb_target);
             }
             else
             {
-                TRACFCOMP( g_trac_isteps_trace,
-                    "SUCCESS running %s_getecid HWP on target HUID 0x%.8X",
-                    "exp", get_huid(l_ocmb_target) );
+                TRACISTEP("SUCCESS running exp_getecid HWP on target HUID 0x%.8X",
+                          get_huid(l_ocmb_target) );
             }
         }
-        // check ODYSSEY
-        else if (chipId == POWER_CHIPID::ODYSSEY_16)
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                "Running ody_getecid HWP on target HUID 0x%.8X l_runOdyHwpFromHost:%d",
-                get_huid(l_ocmb_target), l_runOdyHwpFromHost);
-
-            FAPI_INVOKE_HWP(l_err, ody_getecid, l_fapi_ocmb_target);
-
-            if ( l_err )
-            {
-                TRACFCOMP( g_trac_isteps_trace,
-                    "ERROR : call ody_getecid HWP(): failed on target 0x%08X. "
-                    TRACE_ERR_FMT,
-                    get_huid(l_ocmb_target),
-                    TRACE_ERR_ARGS(l_err));
-                l_componentId = HWPF_COMP_ID;
-
-                // Capture error and continue to the next chip
-                captureError(l_err, l_StepError, l_componentId, l_ocmb_target);
-            }
-            else
-            {
-                TRACFCOMP( g_trac_isteps_trace,
-                    "SUCCESS running ody_getecid HWP on target HUID 0x%.8X",
-                    get_huid(l_ocmb_target) );
-            }
-        }
-        else // unknown, continue to the next chip.
-        {
-            TRACFCOMP( g_trac_isteps_trace,
-                "call_mss_getecid: Unknown chip ID 0x%X on target HUID 0x%.8X",
-                chipId, get_huid(l_ocmb_target) );
-        }
-    } // OCMB loop
+    }
 
     l_err = init_memory_encryption();
 
     if (l_err)
     {
-        captureError(l_err, l_StepError, l_componentId);
+        captureError(l_err, l_StepError, HWPF_COMP_ID);
     }
 
-    TRACFCOMP( g_trac_isteps_trace, EXIT_MRK"call_mss_getecid exit" );
+    TRACISTEP(EXIT_MRK"call_mss_getecid exit");
 
     // end task, returning any errorlogs to IStepDisp
     return l_StepError.getErrorHandle();

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2019
+# Contributors Listed Below - COPYRIGHT 2016,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -27,6 +27,9 @@ ROOTPATH = ../../../..
 MODULE = pm
 
 SUBDIRS+=runtime.d
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ocmbupd
 
 ## Objects unique to HB IPL
 OBJS += ../istepHelperFuncs.o

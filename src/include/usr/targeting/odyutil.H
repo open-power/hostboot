@@ -30,7 +30,10 @@
 #ifndef TARGETING_ODYUTIL_H__
 #define TARGETING_ODYUTIL_H__
 
+#include <algorithm>
+
 #include <targeting/common/target.H>
+#include <targeting/common/utilFilter.H>
 #include <attributeenums.H>
 #include <chipids.H>
 
@@ -47,6 +50,16 @@ inline bool isOdysseyChip(const Target* i_target)
 {
     return (i_target->getAttr<ATTR_TYPE>() == TYPE_OCMB_CHIP &&
             i_target->getAttr<ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16);
+}
+
+inline bool hasOdysseyOcmbChildren(const Target* i_target, bool i_functional = false)
+{
+    const auto ocmbs = composable(getChildAffinityTargetsByState)(i_target, CLASS_NA, TYPE_OCMB_CHIP,
+                                                                  (i_functional
+                                                                   ? UTIL_FILTER_FUNCTIONAL
+                                                                   : UTIL_FILTER_PRESENT));
+
+    return std::find_if(begin(ocmbs), end(ocmbs), isOdysseyChip) != end(ocmbs);
 }
 
 } // namespace TARGETING::UTIL
