@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -85,6 +85,7 @@ package_directories = {
     "udparsers.be500":   "src/usr/diag/prdf/peltool/ud",
     "udparsers.helpers": "src/build/tools/ebmc",
     "udparsers.b2800":   "src/usr/sbeio/plugins/ebmc",
+    "udparsers.b2200":   "src/usr/sbe/plugins/ebmc",
 
     # SRC parsers packages.
     # The only required package is 'srcparsers.bsrc', but other modules can be

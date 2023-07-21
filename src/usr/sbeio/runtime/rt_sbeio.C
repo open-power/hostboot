@@ -30,6 +30,7 @@
 #include <sbeio/runtime/sbe_msg_passing.H>
 #include <sbeio/runtime/sbeio_vpd_override.H>
 #include <sbeio/runtime/sbeio_attr_override.H>
+#include <sbe/sbereasoncodes.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <sbeio/sbeioif.H>                 // getAllPmicHealthCheckData
 #include <errno.h>
@@ -129,9 +130,15 @@ namespace RT_SBEIO
             errl->addFFDC( SBE_COMP_ID,
                            &(i_sbeMessage),
                            sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                           0,                 // Version
-                           ERRL_UDT_NOFORMAT, // parser ignores data
-                           false );           // merge
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                           false );           // no merge
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage.data[0]),
+                           i_sbeMessage.cmdHdr.dataSize,
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                           false);           // no merge
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -165,9 +172,15 @@ namespace RT_SBEIO
             errl->addFFDC( SBE_COMP_ID,
                            &(i_sbeMessage),
                            sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                           0,                 // Version
-                           ERRL_UDT_NOFORMAT, // parser ignores data
-                           false );           // merge
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                           false );           // no merge
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage.data[0]),
+                           i_sbeMessage.cmdHdr.dataSize,
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                           false);           // no merge
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -201,9 +214,15 @@ namespace RT_SBEIO
             errl->addFFDC( SBE_COMP_ID,
                            &(i_sbeMessage),
                            sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                           0,                 // Version
-                           ERRL_UDT_NOFORMAT, // parser ignores data
-                           false );           // merge
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                           false );           // no merge
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage.data[0]),
+                           i_sbeMessage.cmdHdr.dataSize,
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                           false);           // no merge
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -245,9 +264,15 @@ namespace RT_SBEIO
             errl->addFFDC( SBE_COMP_ID,
                            &(i_sbeMessage),
                            sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                           0,                 // Version
-                           ERRL_UDT_NOFORMAT, // parser ignores data
-                           false );           // merge
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                           false );           // no merge
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage.data[0]),
+                           i_sbeMessage.cmdHdr.dataSize,
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                           false);           // no merge
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -314,10 +339,15 @@ namespace RT_SBEIO
             errl->addFFDC( SBE_COMP_ID,
                            &(i_request),
                            sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                           0,                 // Version
-                           ERRL_UDT_NOFORMAT, // parser ignores data
-                                              // ^^^ @TODO RTC:172362
-                           false );           // merge
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                           false );           // no merge
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_request.data[0]),
+                           i_request.cmdHdr.dataSize,
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                           false);           // no merge
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -351,10 +381,15 @@ namespace RT_SBEIO
             errl->addFFDC( SBE_COMP_ID,
                            &(i_request),
                            sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                           0,                 // Version
-                           ERRL_UDT_NOFORMAT, // parser ignores data
-                                              // ^^^ @TODO RTC:172362
-                           false );           // merge
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                           false );           // no merge
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_request.data[0]),
+                           i_request.cmdHdr.dataSize,
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                           false);           // no merge
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
@@ -395,9 +430,15 @@ namespace RT_SBEIO
                 errl->addFFDC( SBE_COMP_ID,
                                &(i_request),
                                sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                               0,                 // Version
-                               ERRL_UDT_NOFORMAT, // parser ignores data
-                               false );           // merge
+                               1,                 // Version
+                               SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                               false );           // no merge
+                errl->addFFDC( SBE_COMP_ID,
+                               &(i_request.data[0]),
+                               i_request.cmdHdr.dataSize,
+                               1,                 // Version
+                               SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                               false);           // no merge
                 errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(SBEIO_COMP_NAME);
@@ -434,10 +475,15 @@ namespace RT_SBEIO
                 errl->addFFDC( SBE_COMP_ID,
                                &(i_request),
                                sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                               0,                 // Version
-                               ERRL_UDT_NOFORMAT, // parser ignores data
-                                                  // ^^^ @TODO RTC:172362
-                               false );           // merge
+                               1,                 // Version
+                               SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                               false );           // no merge
+                errl->addFFDC( SBE_COMP_ID,
+                               &(i_request.data[0]),
+                               i_request.cmdHdr.dataSize,
+                               1,                 // Version
+                               SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                               false);           // no merge
                 errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
                 errl->collectTrace(SBEIO_COMP_NAME);
@@ -517,15 +563,27 @@ namespace RT_SBEIO
             errl->addFFDC( SBE_COMP_ID,
                            &(i_request),
                            sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                           0,                 // Version
-                           ERRL_UDT_NOFORMAT, // parser ignores data
-                           false );           // merge
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                           false );           // no merge
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_request.data[0]),
+                           i_request.cmdHdr.dataSize,
+                           1, // Using Version as magic number to tell message data apart.
+                           SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                           false);           // no merge
             errl->addFFDC( SBE_COMP_ID,
                            &(i_sbeMessage),
                            sizeof(sbeHeader_t) + sizeof(cmdHeader_t),
-                           0,                 // Version
-                           ERRL_UDT_NOFORMAT, // parser ignores data
-                           false );           // merge
+                           1,                 // Version
+                           SBE::SBE_UDT_SBE_MESSAGE_CMD,
+                           false );           // no merge
+            errl->addFFDC( SBE_COMP_ID,
+                           &(i_sbeMessage.data[0]),
+                           i_sbeMessage.cmdHdr.dataSize,
+                           2, // Using Version as magic number to tell message data apart.
+                           SBE::SBE_UDT_SBE_MESSAGE_DATA,
+                           false);           // no merge
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
