@@ -90,9 +90,6 @@ enum ody_scratch_regs
     ATTR_OCMB_BOOT_FLAGS_LENGTH                     = 32,
     ATTR_IS_SIMULATION_STARTBIT                     = 3,
     ATTR_IS_SIMULATION_LENGTH                       = 1,
-    ATTR_ENABLE_SECURITY_STARTBIT                   = 4,
-    ATTR_ENABLE_SECURITY_LENGTH                     = 1,
-
     ATTR_ENABLE_ABIST_DISABLE_BIT                   = 22,
     ATTR_ENABLE_LBIST_DISABLE_BIT                   = 23,
 

@@ -131,34 +131,39 @@
   <id>ATTR_OCMB_BOOT_FLAGS</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-    Controls boot, platform behavior of OCMB SBE
+    Controls boot, platform behavior of OCMB SPPE
 
-    Bit 0      : Indicates istep IPL (0b1)
-    Bit 1      : Indicates that SBE should go directly to runtime functionality (0b1)
-    Bit 2      : MPIPL indication
+    Bits 0-1   : Boot indication
+     - 0b00    : Autoboot
+     - 0b01    : Pause for code update check, then autoboot
+     - 0b10    : Boot to runtime, no code update check, no isteps
+               :   Command table execution is controlled separately (hreset vs CBS)
+     - 0b11    : Istep mode
+    Bit 2      : Reserved
     Bit 3      : Conveys ATTR_IS_SIMULATION state (0=HW, 1=AWAN/MESA)
-    Bit 4      : Security enable (0=default, 1=enable)
+    Bit 4      : Emulate Security Enable (SAB Set )
     Bit 5      : Indicates that the SBE should not send back internal FFDC on any ChipOp failure response
-    Bit 6      : Disable security, if permitted (can't disable security for Odyssey)
+    Bit 6      : Disable security, if permitted
     Bit 7      : Allow ATTR overrides in secure system
-    Bits 8-9   : Override SMT mode
-    Bit 10     : No xstop on master xstop
-    Bit 11     : Disable SCOM security
+    Bits 8-10  : Reserved
+    Bit 11     : Disable Scom Filtering
     Bit 12     : Disable Invalid Scom address check
     Bit 13     : Indicates MFG mode, where extra tests/isteps can be executed
-    Bit 14     : Enable SUART output
-    Bit 15     : Skip MPIPL dump
+    Bits 14-15 : Reserved
     Bit 16     : Enable ECDSA Signature enable (when not fused on)
     Bit 17     : Enable Dilithium Signature enable (when not fused on)
     Bit 18     : Enable ECID verification (when not fused on)
     Bit 19     : Enable HW key hash verification (when not fused on)
-    Bit 20     : Enforce matching security version for boot loader
-    Bit 21     : Disable IOBist
-    Bit 22     : Disable Abist
-    Bit 23     : Disable Lbist
-    Bit 24     : Enable Burn-In mode
-    Bit 25     : Graceful terminate of any istep (via HWP if supported) – only works when in imprint key mode
-    Bits 26-31 : Reserved
+    Bit 20     : Enable file hash calculation (when not fused on)
+    Bit 21     : Enforce matching security version for boot loader
+    Bit 22     : Set Secure Boot Validity Verification. Force enables strict secure boot failure
+    Bit 23     : Disable IOBist
+    Bit 24     : Disable Abist
+    Bit 25     : Disable Lbist
+    Bit 26     : Enable Burn-In mode
+    Bit 27     : Graceful terminate of any istep (via HWP if supported) – only works when in imprint key mode
+    Bit 28     : Force production Mode/ Production signed image.
+    Bits 29-31 : Reserved
   </description>
   <valueType>uint32</valueType>
   <writeable/>
@@ -196,20 +201,32 @@
   <id>ATTR_SECURITY_LEVEL</id>
   <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
   <description>
-    Reflects the boot security level of the given chip.
+    Reflects the boot security level of the given chip. This is purely informative and to be used by procedures
+    to adjust their behavior, e.g. by disabling some debugging functions.
+    This attribute is set by SBE during SBE boot flow. Once set by SBE the ATTR cannot be updated.
+    Settings for a higher security level done in OTPROM will always take precedence over
+    corresponding bits defined in scratch 11 for lab/test-only purposes.
 
     Level 0 - DISABLED   - Security disabled, SAB=0
     Level 1 - PERMISSIVE - Security enabled but not strictly enforced, SAB=1 but firmware signed with imprint keys
+                           If this is set, then users can still override (set to 1) the default setting for allow-deny
+                           list enable with bit 11 in scratch 11 to disable scom filtering but would
+                           still get a chip-op error for such scoms.
     Level 2 - ENFORCING  - Security enabled and strictly enforced, SAB=1 and firmware signed with production keys
   </description>
   <valueType>uint8</valueType>
-  <enum>
-    DISABLED   = 0,
-    PERMISSIVE = 1,
-    ENFORCING  = 2
-  </enum>
+    <enum>
+      DISABLED   = 0,
+      PERMISSIVE = 1,
+      ENFORCING  = 2
+    </enum>
+  <platInit/>
   <writeable/>
-  <initToZero/>
+  <default>ENFORCING</default>
+  <sbeAttrSync toSBE="0" fromSBE="1" chipTypes="ody">
+    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+  </sbeAttrSync>
+  <mrwHide/>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>

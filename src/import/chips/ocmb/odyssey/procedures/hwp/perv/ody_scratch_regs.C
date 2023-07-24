@@ -284,23 +284,12 @@ fapi2::ReturnCode ody_scratch_regs_update(
         fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         fapi2::ATTR_OCMB_BOOT_FLAGS_Type l_attr_ocmb_boot_flags;
         fapi2::ATTR_IS_SIMULATION_Type l_attr_is_simulation;
-        fapi2::ATTR_SECURITY_LEVEL_Type l_security_level = fapi2::ENUM_ATTR_SECURITY_LEVEL_DISABLED;
 
         // Read BOOT_FLAGS that was set from platform
         FAPI_DBG("Reading ATTR_OCMB_BOOT_FLAGS");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, FAPI_SYSTEM, l_attr_ocmb_boot_flags),
                  "Error from FAPI_ATTR_GET (ATTR_OCMB_BOOT_FLAGS)");
         l_scratch11_reg.insertFromRight<ATTR_OCMB_BOOT_FLAGS_STARTBIT, ATTR_OCMB_BOOT_FLAGS_LENGTH>(l_attr_ocmb_boot_flags);
-
-        // Read security setting attr for this Odyssey
-        // User can force security enabling by writing 2 (ENFORCING) to this attribute
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SECURITY_LEVEL, i_target, l_security_level));
-        FAPI_DBG("Reading ATTR_SECURITY_LEVEL: %d", l_security_level);
-
-        if (l_security_level > fapi2::ENUM_ATTR_SECURITY_LEVEL_DISABLED)
-        {
-            l_scratch11_reg.setBit<ATTR_ENABLE_SECURITY_STARTBIT>();
-        }
 
         FAPI_DBG("Reading ATTR_IS_SIMULATION");
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_attr_is_simulation));
