@@ -114,7 +114,7 @@ fapi2::ReturnCode nibble_enable_db_disable(const fapi2::buffer<uint32_t>& i_nibb
         uint8_t(&o_byte_disables)[10]);
 
 constexpr uint8_t NUM_RCW = 0x80;
-constexpr uint8_t NUM_SUPPORTED_RCW = 19;
+constexpr uint8_t NUM_SUPPORTED_RCW = 20;
 constexpr uint8_t DIMM_NUMBER = 2;
 constexpr uint8_t DIMM0 = 0;
 constexpr uint8_t DIMM1 = 1;
@@ -137,6 +137,17 @@ get_rcw[NUM_SUPPORTED_RCW][mss::ddr5::mr::ATTR_NUM_CHANNELS][DIMM_NUMBER] =
         {
             {0x00, mss::attr::get_ddr5_rcw00_chb_d0},
             {0x00, mss::attr::get_ddr5_rcw00_chb_d1}
+        }
+    },
+    //RCW01
+    {
+        {
+            {0x01, mss::attr::get_ddr5_rcw01_cha_d0},
+            {0x01, mss::attr::get_ddr5_rcw01_cha_d1}
+        },
+        {
+            {0x01, mss::attr::get_ddr5_rcw01_chb_d0},
+            {0x01, mss::attr::get_ddr5_rcw01_chb_d1}
         }
     },
     //RCW05
