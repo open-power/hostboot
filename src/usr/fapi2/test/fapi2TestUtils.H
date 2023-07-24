@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@
 #ifdef PROFILE_CODE
 #define SIMULATED_GOOD_CORES 8
 #else
-#define SIMULATED_GOOD_CORES 4
+#define SIMULATED_GOOD_CORES 8
 #endif
 
 // non-core and non-cache chiplet ids

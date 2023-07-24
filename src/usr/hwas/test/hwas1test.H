@@ -1027,7 +1027,7 @@ public:
 #ifdef PROFILE_CODE
             const size_t l_numCores = 8;
 #else
-            const size_t l_numCores = 4;
+            const size_t l_numCores = 8;
 #endif
 
             if( l_funcCores.size() != l_numCores )

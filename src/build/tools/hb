@@ -680,6 +680,9 @@ hb_startsimics()
             # enable more cores for 16MB backing cache
             export SIMICS_MORECACHE=1
             STARTSIMCMD+=(num_cores_per_chip=8)
+        else
+            # Use more cache by default until we sort out our boot performance
+            STARTSIMCMD+=(num_cores_per_chip=8)
         fi
 
         # Create a file (simcmd) to run under vexec

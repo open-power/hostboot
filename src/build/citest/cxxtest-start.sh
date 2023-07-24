@@ -117,6 +117,9 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     if [ "$HOSTBOOT_PROFILE" ] ; then
         export SIMICS_MORECACHE=1
         START_SIMICS_CMD+=" num_cores_per_chip=8"
+    else
+        # Use more cache by default until we sort out our boot performance
+        START_SIMICS_CMD+=" num_cores_per_chip=8"
     fi
 fi
 
