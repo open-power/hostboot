@@ -41,8 +41,12 @@ import sys
 # Listed in order of priority, i.e. HOSTBOOT_TRACE_DIR takes highest priority if found, etc.
 LID_SEARCH_DIRS = [ os.getenv('HOSTBOOT_TRACE_DIR'),                    # ENV VAR OVERRIDE HOSTBOOT
                     os.getenv('SBE_TRACE_DIR'),                         # ENV VAR OVERRIDE SBE
+                    os.getenv('OCC_TRACE_DIR'),                         # ENV VAR OVERRIDE SBE
+                    os.getenv('HCODE_TRACE_DIR'),                       # ENV VAR OVERRIDE SBE
                     os.path.join(sys.prefix, 'hostboot_data'),          # data_files exported from Hostboot
                     os.path.join(sys.prefix, 'sbe_data'),               # data_files exported from SBE
+                    os.path.join(sys.prefix, 'occ_data'),               # data_files exported from OCC
+                    os.path.join(sys.prefix, 'hcode_data'),             # data_files exported from HCODE
                     "/usr/local/share/hostfw/running",                  # The BMC patch directory
                     "/var/lib/phosphor-software-manager/hostfw/running" # The BMC running directory
                   ]
@@ -53,6 +57,10 @@ lid_dict = {
     "81e00685.lid" : "hbotStringFile",
     "81e00686.lid" : "hbicore.syms",
     "81e0068a.lid" : "sbeStringFile",
+    "81e00687.lid" : "occStringFile",
+    "81e0068f.lid" : "QMESTRINGFILE",
+    "81e00690.lid" : "XGPESTRINGFILE",
+    "81e00691.lid" : "PGPESTRINGFILE",
 }
 
 """ Searches the directories in the list 'LID_SEARCH_DIRS' for the given
