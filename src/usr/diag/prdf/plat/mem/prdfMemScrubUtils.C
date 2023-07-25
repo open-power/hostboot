@@ -351,6 +351,7 @@ uint32_t __odyCheckEccFirs( ExtensibleChip * i_chip, const uint8_t& i_port,
         if ( rdffir->IsBitSet(30) ) o_eccAttns |= MAINT_TCE;
         if ( rdffir->IsBitSet(31) ) o_eccAttns |= MAINT_SCE;
         if ( rdffir->IsBitSet(32) ) o_eccAttns |= MAINT_MCE;
+        if ( rdffir->IsBitSet(34) ) o_eccAttns |= MAINT_AUE;
         if ( rdffir->IsBitSet(35) ) o_eccAttns |= MAINT_UE;
         if ( rdffir->IsBitSet(38) ) o_eccAttns |= MAINT_IUE;
         if ( rdffir->IsBitSet(40) ) o_eccAttns |= MAINT_IMPE;

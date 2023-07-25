@@ -140,6 +140,8 @@ enum MaintEccAttns
     // Maintenance CEs
     MAINT_NCE           = 0x0020, ///< CE
     MAINT_TCE           = 0x0010, ///< CE on two symbols
+
+    MAINT_AUE           = 0x0008  ///< AUE
 };
 
 /**

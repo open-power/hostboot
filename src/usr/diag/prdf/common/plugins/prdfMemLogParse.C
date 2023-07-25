@@ -340,6 +340,7 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
             case FETCH_MPE: type_str = "FETCH_MPE    "; break;
             case SCRUB_UE:  type_str = "SCRUB_UE     "; break;
             case FETCH_UE:  type_str = "FETCH_UE     "; break;
+            case SCRUB_AUE: type_str = "SCRUB_AUE    "; break;
         }
 
         char header[HEADER_SIZE] = { '\0' };

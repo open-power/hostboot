@@ -196,7 +196,27 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
                                            io_sc );
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
+                PRDF_ERR( PRDF_FUNC "MAINT_UE: handleMemUe<T>(0x%08x) failed",
+                          i_chip->getHuid() );
+                break;
+            }
+        }
+        // For Odyssey, AUEs found during IPL/memdiags will be handled the same
+        // as UEs. Pause on AUE will be set in the superfast reads for memdiags.
+        else if ( 0 != (eccAttns & MAINT_AUE) )
+        {
+            // Add the signature to the multi-signature list. Also, since
+            // this will be a predictive callout, change the primary
+            // signature as well.
+            io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintAUE );
+            io_sc.service_data->setSignature(     huid, PRDFSIG_MaintAUE );
+
+            // Do memory UE handling.
+            o_rc = MemEcc::handleMemUe<T>( i_chip, i_addr, UE_TABLE::SCRUB_AUE,
+                                           io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MAINT_AUE: handleMemUe<T>(0x%08x) failed",
                           i_chip->getHuid() );
                 break;
             }

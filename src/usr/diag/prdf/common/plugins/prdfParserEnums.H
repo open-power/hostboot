@@ -180,6 +180,7 @@ namespace UE_TABLE
         FETCH_MPE,     ///< Chip mark placed by fetch
         SCRUB_UE,      ///< Scrub UE
         FETCH_UE,      ///< Fetch UE
+        SCRUB_AUE,     ///< Scrub AUE
     };
 
 } // namespace UE_TABLE

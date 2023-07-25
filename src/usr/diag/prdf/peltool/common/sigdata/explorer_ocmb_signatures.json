@@ -319,6 +319,7 @@
         "0xffff0014": "Maintenance SOFT CTE",
         "0xffff0015": "Maintenance INTER CTE",
         "0xffff0016": "Maintenance RETRY CTE",
+        "0xffff0017": "Maintenance AUE",
         "0xffff0020": "VCM: verified",
         "0xffff0021": "VCM: false alarm",
         "0xffff0022": "VCM: false alarm threshold",

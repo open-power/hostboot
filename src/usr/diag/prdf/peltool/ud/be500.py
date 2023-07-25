@@ -157,7 +157,13 @@ def mruCalloutToStr(i_mruCallout):
 
 
 def ueTypeToStr(i_ueType):
-    ueTypes = {1: "SCRUB_MPE", 2: "FETCH_MPE", 3: "SCRUB_UE", 4: "FETCH_UE"}
+    ueTypes = {
+        1: "SCRUB_MPE",
+        2: "FETCH_MPE",
+        3: "SCRUB_UE",
+        4: "FETCH_UE",
+        5: "SCRUB_AUE",
+    }
 
     ueStr = "Unknown " + str(i_ueType)
 
