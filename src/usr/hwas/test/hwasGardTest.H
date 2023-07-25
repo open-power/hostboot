@@ -1095,10 +1095,8 @@ public:
             err = hwasDiscovery.discoverTargets();
             if (errorExpected && err == nullptr)
             {
-#ifndef CONFIG_ODYSSEY_BRINGUP // TODO JIRA: PFHB-477 This is not working for some reason
                 TS_FAIL("Expected an error when  EC level "
                         "doesn't match what the installed PROC chips have.");
-#endif
             }
             if (!errorExpected && err != nullptr)
             {
@@ -1124,7 +1122,7 @@ public:
                 {POWER_CHIPID::P10_16, 0xFFFF},
                 // Test 2: System EXPLORER OCMB chip(s) don't match given MRW value. Done by setting invalid EC Level
                 //         value.
-                {POWER_CHIPID::EXPLORER_16, 0xFFFF},
+                {POWER_CHIPID::EXPLORER_16, 0xFFFF, POWER_CHIPID::ODYSSEY_16, 0xFFFF},
                 // Test 3: The MRW has no given values
                 {0,0},
             };
@@ -1135,7 +1133,7 @@ public:
                 {POWER_CHIPID::P10_16, 0x20, POWER_CHIPID::P10_16, 0x11},
                 // Test 2: System EXPLORER OCMB chips match at least 1 provided MRW value. Note, checking for mixing is
                 //         beyond scope of MSL checks logic.
-                {POWER_CHIPID::EXPLORER_16, 0x20, POWER_CHIPID::EXPLORER_16, 0x11},
+                {POWER_CHIPID::EXPLORER_16, 0x20, POWER_CHIPID::EXPLORER_16, 0x11, POWER_CHIPID::ODYSSEY_16, 0x10},
             };
 
             // Get the original value of the mfg flag
