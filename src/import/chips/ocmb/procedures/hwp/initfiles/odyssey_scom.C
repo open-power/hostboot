@@ -127,10 +127,10 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         uint64_t l_def_M_EN = (l_TGT1_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM[literal_0] == literal_2);
         uint64_t l_def_R16_EN = ((l_TGT1_ATTR_MEM_EFF_DRAM_DENSITY[literal_0] == literal_24)
                                  || (l_TGT1_ATTR_MEM_EFF_DRAM_DENSITY[literal_0] == literal_32));
+        uint64_t l_def_D_EN = (l_TGT0_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE == literal_3);
         fapi2::ATTR_MEM_EFF_DRAM_WIDTH_Type l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH));
         uint64_t l_def_C10_EN = (l_TGT1_ATTR_MEM_EFF_DRAM_WIDTH[literal_0] != literal_8);
-        uint64_t l_def_D_EN = (l_TGT0_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE == literal_3);
         fapi2::ATTR_MEM_3DS_HEIGHT_Type l_TGT1_ATTR_MEM_3DS_HEIGHT;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_3DS_HEIGHT, TGT1, l_TGT1_ATTR_MEM_3DS_HEIGHT));
         uint64_t l_def_S2_EN = (l_TGT1_ATTR_MEM_3DS_HEIGHT[literal_0] != literal_0);
@@ -388,13 +388,33 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             l_scom_buffer.insert<42, 1, 63, uint64_t>(l_def_R16_EN );
             l_scom_buffer.insert<33, 1, 63, uint64_t>(literal_0 );
             l_scom_buffer.insert<34, 1, 63, uint64_t>(literal_0 );
-            l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0 );
 
-            if ((l_TGT0_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE != literal_3))
+            if ((l_def_ATTR_MSS_OCMB_HALF_DIMM_MODE != ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM))
+            {
+                l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_0 );
+            }
+            else if (((l_def_D_EN == literal_0)
+                      && (l_def_ATTR_MSS_OCMB_HALF_DIMM_MODE == ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM)))
+            {
+                l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_1 );
+            }
+            else if (((l_def_D_EN == literal_1)
+                      && (l_def_ATTR_MSS_OCMB_HALF_DIMM_MODE == ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM)))
+            {
+                l_scom_buffer.insert<11, 5, 59, uint64_t>(literal_2 );
+            }
+
+            if ((l_def_D_EN == literal_0))
             {
                 l_scom_buffer.insert<3, 5, 59, uint64_t>(literal_0 );
             }
-            else if ((l_TGT0_ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE == literal_3))
+            else if (((l_def_D_EN == literal_1)
+                      && (l_def_ATTR_MSS_OCMB_HALF_DIMM_MODE == ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM)))
+            {
+                l_scom_buffer.insert<3, 5, 59, uint64_t>(literal_1 );
+            }
+            else if (((l_def_D_EN == literal_1)
+                      && (l_def_ATTR_MSS_OCMB_HALF_DIMM_MODE != ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM)))
             {
                 l_scom_buffer.insert<3, 5, 59, uint64_t>(literal_2 );
             }
