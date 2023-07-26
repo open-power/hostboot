@@ -186,6 +186,7 @@ namespace TARGETING
 const bool OVERRIDE_DEBUG_ENABLED = false;
 const size_t CONST_INVALID = 0xFFFFFFFF;
 const size_t ATTR_MAX_DIMS = 4;
+const size_t MAX_TRACE_LENGTH = 1024;
 const size_t MAX_OVD_LINE_LENGTH = 256;
 const size_t MAX_ATTR_NAME_LENGTH = 100;
 const size_t MAX_ATTR_VAL_LENGTH = 32;
@@ -194,8 +195,9 @@ const size_t MAX_ATTR_VAL_LENGTH = 32;
 // Avoids creating a trace buffer in each function or passing
 // the pointer to each function.
 char * g_ovd_trace = nullptr;
-#define OVD_TRACE() \
-            CONSOLE::displayf(CONSOLE::DEFAULT, "TARG", g_ovd_trace);
+#define OVD_TRACE( _fmt_, _args_...) \
+   snprintf( g_ovd_trace, MAX_TRACE_LENGTH-1, _fmt_, ##_args_ ); \
+   CONSOLE::displayf(CONSOLE::DEFAULT, "TARG", "%s", g_ovd_trace);
 
 /**
  * @brief Check if input char is the new-line character
@@ -365,8 +367,7 @@ errlHndl_t getAttrName( const char * i_line, char * o_attrName)
     // Check the name length, don't want to over-run the name string
     if (l_attrNameLen+1 > MAX_ATTR_NAME_LENGTH)
     {
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Attribute name exceeds max name length %d: %s", MAX_ATTR_NAME_LENGTH, i_line );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** Attribute name exceeds max name length %d: %s", MAX_ATTR_NAME_LENGTH, i_line);
         /*@
          * @errortype
          * @moduleid  TARG_MOD_ATTR_TEXT_OVERRIDE
@@ -430,8 +431,7 @@ errlHndl_t checkAttrValueLength(size_t i_length)
     // null terminator so add 1 to allow for it
     if ((i_length+1) > MAX_ATTR_VAL_LENGTH)
     {
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Override value exceeds max value length %d %d", MAX_ATTR_VAL_LENGTH, i_length+1 );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** Override value exceeds max value length %d %d", MAX_ATTR_VAL_LENGTH, i_length+1 );
         /*@
          * @errortype
          * @moduleid  TARG_MOD_ATTR_TEXT_OVERRIDE
@@ -525,8 +525,7 @@ errlHndl_t attrLineToFields( char * i_line,
     {
         l_valConstPtr = l_endLinePtr;
 
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Missing attribute value %s", i_line );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** Missing attribute value %s", i_line );
         /*@
             * @errortype
             * @moduleid  TARG_MOD_ATTR_LINE_TO_FIELDS
@@ -600,8 +599,7 @@ errlHndl_t attrLineToFields( char * i_line,
 
         if(l_dim > ATTR_MAX_DIMS)
         {
-            sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Override exceeds max dimensions %d: %s", ATTR_MAX_DIMS, i_line );
-            OVD_TRACE();
+            OVD_TRACE("Attribute Override: ***ERROR*** Override exceeds max dimensions %d: %s", ATTR_MAX_DIMS, i_line );
             /*@
                 * @errortype
                 * @moduleid  TARG_MOD_ATTR_LINE_TO_FIELDS
@@ -914,8 +912,7 @@ errlHndl_t targetLineToData(char * i_line,
                 reinterpret_cast<const uint64_t*>(l_targetType);
             const uint64_t* l_strAsUint2Ptr = l_strAsUint1Ptr + 1;
 
-            sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Could not find attribute override target, %s", i_line );
-            OVD_TRACE();
+            OVD_TRACE("Attribute Override: ***ERROR*** Could not find attribute override target, %s", i_line );
             /*@
                 * @errortype
                 * @moduleid  TARG_MOD_ATTR_TARGET_LINE_TO_DATA
@@ -1139,8 +1136,7 @@ errlHndl_t targetLineToData(char * i_line,
     if (o_targetLabels.size() == 0)
     {
         // No output data was generated
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** No attribute override target output generated: %s", i_line );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** No attribute override target output generated: %s", i_line );
         /*@
             * @errortype
             * @moduleid  TARG_MOD_ATTR_TARGET_LINE_TO_DATA
@@ -1190,8 +1186,7 @@ errlHndl_t getAttrEnumDataFromMap(const char * i_attrName,
             reinterpret_cast<const uint64_t*>(i_attrName);
         const uint64_t* l_strAsUint2Ptr = l_strAsUint1Ptr + 1;
 
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Could not find attribute to override: %s", i_attrName );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** Could not find attribute to override: %s", i_attrName );
         /*@
             * @errortype
             * @moduleid  TARG_MOD_ATTR_ENUM_DATA_FROM_MAP
@@ -1267,8 +1262,7 @@ errlHndl_t getAttrDataFromMap(const char * i_attrName,
             reinterpret_cast<const uint64_t*>(i_attrName);
         const uint64_t* l_strAsUint2Ptr = l_strAsUint1Ptr + 1;
 
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Could not find attribute data: %s", i_attrName );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** Could not find attribute data: %s", i_attrName );
         /*@
             * @errortype
             * @moduleid  TARG_MOD_ATTR_GET_DATA_FROM_MAP
@@ -1733,8 +1727,7 @@ TargetTypeRc validateSysSubstr( char * i_line )
     if ( l_strLen < 5 )
     {
         // Bad encoding
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Invalid target line: %s", i_line );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** Invalid target line: %s", i_line );
         rc = TARGET_TYPE_RC_ERROR;
         goto ERROR_EXIT;
     }
@@ -1753,8 +1746,7 @@ TargetTypeRc validateSysSubstr( char * i_line )
         else
         {
             // Bad encoding
-            sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Invalid system target line: %s", i_line );
-            OVD_TRACE();
+            OVD_TRACE("Attribute Override: ***ERROR*** Invalid system target line: %s", i_line );
             rc = TARGET_TYPE_RC_ERROR;
             goto ERROR_EXIT;
         }
@@ -1770,8 +1762,7 @@ TargetTypeRc validateSysSubstr( char * i_line )
     if ( strStrPos(i_line, "k0:s0") != 0)
     {
         // Bad encoding
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Unexpected system target: %s", i_line );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** Unexpected system target: %s", i_line );
         rc = TARGET_TYPE_RC_ERROR;
         goto ERROR_EXIT;
     }
@@ -1830,8 +1821,7 @@ TargetTypeRc validateSysSubstr( char * i_line )
         else
         {
             // Bad encoding
-            sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Invalid node in target line: %s", i_line );
-            OVD_TRACE();
+            OVD_TRACE("Attribute Override: ***ERROR*** Invalid node in target line: %s", i_line );
             rc = TARGET_TYPE_RC_ERROR;
             goto ERROR_EXIT;
         }
@@ -1841,8 +1831,7 @@ TargetTypeRc validateSysSubstr( char * i_line )
     if (strStrPos(l_nValString, ",") == CONST_INVALID)
     {
         // Bad encoding
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Invalid node list in target line: %s", i_line );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** Invalid node list in target line: %s", i_line );
         rc = TARGET_TYPE_RC_ERROR;
         goto ERROR_EXIT;
     }
@@ -1873,8 +1862,7 @@ TargetTypeRc validateSysSubstr( char * i_line )
                 (l_nValString[l_nValCurPosn] > '9') )
         {
             // Bad encoding
-            sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Invalid node in target line: %s", i_line );
-            OVD_TRACE();
+            OVD_TRACE("Attribute Override: ***ERROR*** Invalid node in target line: %s", i_line );
             rc = TARGET_TYPE_RC_ERROR;
             goto ERROR_EXIT;
         }
@@ -2150,8 +2138,7 @@ errlHndl_t pnorAttrDataCheck( const char * i_pnorData, size_t& o_dataSize )
     if (o_dataSize == 0)
     {
         // No printable or newline ascii char found in the override data
-        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** No printable or newline ascii char found in the override data" );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: ***ERROR*** No printable or newline ascii char found in the override data" );
         /*@
          * @errortype
          * @moduleid  TARG_MOD_ATTR_TEXT_OVERRIDE
@@ -2186,7 +2173,7 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
 {
     errlHndl_t l_err = nullptr;
 
-    char l_trace[1024] = {0};
+    char l_trace[MAX_TRACE_LENGTH] = {0};
     g_ovd_trace = l_trace;
 
     // Attribute Data
@@ -2221,16 +2208,12 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
     l_err = pnorAttrDataCheck(l_pPnorAttrData, l_attrDataSize);
     if (l_err)
     {
-        sprintf( g_ovd_trace,
-                 "Attribute Override: No ASCII attribute overrides found" );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: No ASCII attribute overrides found" );
         goto ERROR_EXIT;
     }
     if (l_attrDataSize)
     {
-        sprintf( g_ovd_trace,
-                 "Attribute Override: Found ASCII attribute overrides" );
-        OVD_TRACE();
+        OVD_TRACE("Attribute Override: Found ASCII attribute overrides" );
     }
 
     // In order to process the last line correctly it must end with a newline
@@ -2285,16 +2268,14 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
                 l_lastLine = true;
                 if ( OVERRIDE_DEBUG_ENABLED )
                 {
-                    sprintf( g_ovd_trace,"attrTextOverride: Last line" );
-                    OVD_TRACE();
+                    OVD_TRACE("attrTextOverride: Last line");
                 }
             }
 
             // Check the line size so we don't over-run the allocated string
             if (l_newlineOffset+1 > MAX_OVD_LINE_LENGTH)
             {
-                sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Override line exceeds max line length %d: %s", MAX_OVD_LINE_LENGTH, l_curStrPtr );
-                OVD_TRACE();
+                OVD_TRACE("Attribute Override: ***ERROR*** Override line exceeds max line length %d: %s", MAX_OVD_LINE_LENGTH, l_curStrPtr );
                 /*@
                  * @errortype
                  * @moduleid  TARG_MOD_ATTR_TEXT_OVERRIDE
@@ -2323,10 +2304,7 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
 
             if ( OVERRIDE_DEBUG_ENABLED )
             {
-                sprintf( g_ovd_trace,
-                         "attrTextOverride: Line %d: %s",
-                         l_lineCount,l_line );
-                OVD_TRACE();
+                OVD_TRACE("attrTextOverride: Line %d: %s",l_lineCount,l_line);
             }
 
             // Process the line.  Could be:
@@ -2351,8 +2329,7 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
                     l_validTargLine = validateTargLine( l_targetLine );
                     if (l_validTargLine == false)
                     {
-                        sprintf( g_ovd_trace, "Attribute Override: ***ERROR*** Override target validation failed: %s", l_line );
-                        OVD_TRACE();
+                        OVD_TRACE("Attribute Override: ***ERROR*** Override target validation failed: %s", l_line );
                         /*@
                         * @errortype
                         * @moduleid  TARG_MOD_ATTR_TEXT_OVERRIDE
@@ -2381,9 +2358,6 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
                     l_lineCount--;
                     break;
                 }
-
-                sprintf( g_ovd_trace, "%s", l_line );
-                OVD_TRACE();
             }
 
             // Attribute line
@@ -2417,9 +2391,6 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
                 memset(l_saveLine, 0, strlen(l_line)+1);
                 strcpy(l_saveLine, l_line);
                 l_attrLines.push_back(l_saveLine);
-
-                sprintf( g_ovd_trace, "%s", l_line);
-                OVD_TRACE();
 
                 // Reset the line string
                 memset(l_line, 0, sizeof l_line);
@@ -2512,7 +2483,7 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
                         sprintf(g_ovd_trace + strlen(g_ovd_trace), "%x", l_pVal[i]);
                     }
                     sprintf( g_ovd_trace + strlen(g_ovd_trace), "\n");
-                    OVD_TRACE();
+                    OVD_TRACE(g_ovd_trace);
                 }
 
             }  // End of target labels
