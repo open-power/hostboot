@@ -1148,18 +1148,37 @@ void getMemPowerMessageData(Occ *i_occ,
     TMGT_INF("getMemPowerMessageData: thermalCreditFactor=%d (CFM=%d)",
              thermalCredit, chipFanCfm);
 
+    // Get list of potential DIMMs associated with this processor
+    auto procTarget = TARGETING::getImmediateParentByAffinity(i_occ->getTarget());
+    TargetHandleList dimm_list;
+    getChildAffinityTargets(dimm_list, procTarget, CLASS_LOGICAL_CARD, TYPE_DIMM, false);
+    auto maxDimmPreheatPower = 0;
+    for(const auto & dimmTarget : dimm_list)
+    {
+        // Read the preheat percent for this DIMM (PREHEAT in 0.01%)
+        double dimmPreheatPercent = dimmTarget->getAttr<ATTR_PREHEAT_PERCENT>() / 10000.0;
+        // add the perheat power power for this DIMM
+        maxDimmPreheatPower += maxDimmPower * dimmPreheatPercent;
+    }
+    TMGT_INF("getMemPowerMessageData: proc has %d possible DIMMs (max preheat: %dcW)",
+             dimm_list.size(), maxDimmPreheatPower);
+
     o_data[index++] = thermalCredit >> 8;
     o_data[index++] = thermalCredit & 0xFF;
     o_data[index++] = (maxDimmPower >> 24) & 0xFF;
     o_data[index++] = (maxDimmPower >> 16) & 0xFF;
     o_data[index++] = (maxDimmPower >>  8) & 0xFF;
     o_data[index++] = maxDimmPower & 0xFF;
-    bzero(&o_data[index], 7);
-    index += 7;
+    o_data[index++] = (maxDimmPreheatPower >> 24) & 0xFF;
+    o_data[index++] = (maxDimmPreheatPower >> 16) & 0xFF;
+    o_data[index++] = (maxDimmPreheatPower >>  8) & 0xFF;
+    o_data[index++] = maxDimmPreheatPower & 0xFF;
+    bzero(&o_data[index], 3);
+    index += 3;
     size_t offsetNumOcmbs = index++; // fill in at end
 
     size_t numOcmbs = 0;
-    if ((chipFanCfm > 0) && (maxDimmPower > 0))
+    if ((chipFanCfm > 0) && (maxDimmPower > 0) && (maxDimmPreheatPower > 0))
     {
         // fill in details of the memory config
         numOcmbs = ocmbPowerData(i_occ, o_data, index);
@@ -1167,8 +1186,8 @@ void getMemPowerMessageData(Occ *i_occ,
     else
     {
         TMGT_INF("getMemPowerMessageData: CHIP_FAN_CFM=%d, MAX_DIMM_POWER=%d "
-                 "(WOF Memory power credit disabled)",
-                 chipFanCfm, maxDimmPower);
+                 "MAX_PREHEAT_POWER=%d (WOF Memory power credit disabled)",
+                 chipFanCfm, maxDimmPower, maxDimmPreheatPower);
     }
 
     o_data[offsetNumOcmbs] = numOcmbs;
