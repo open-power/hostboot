@@ -505,11 +505,11 @@ class reg2
         ///
         inline fapi2::ReturnCode write() const
         {
-            FAPI_TRY( mss::putScom(iv_target, RT::MASK_CLEAR, iv_mask_clear) );
             FAPI_TRY( mss::putScom(iv_target, RT::ATTN,      iv_attn) );
             FAPI_TRY( mss::putScom(iv_target, RT::LXSTOP,    iv_lxstop) );
             FAPI_TRY( mss::putScom(iv_target, RT::RECOV,     iv_recov) );
             FAPI_TRY( mss::putScom(iv_target, RT::XSTOP,     iv_xstop) );
+            FAPI_TRY( mss::putScom(iv_target, RT::MASK_CLEAR, iv_mask_clear) );
 
         fapi_try_exit:
             return fapi2::current_err;
