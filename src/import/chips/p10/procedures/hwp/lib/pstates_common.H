@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -535,6 +535,17 @@ typedef struct
 
     /// Core Sort Fixed Frequency (in MHz)
     uint16_t sort_fixed_freq_mhz;
+
+    /// Efficiency mode controls
+    uint8_t  bal_perf_ceff_pct;   // 0: sign; 1:7 percent (1% units)
+    uint8_t  fav_perf_ceff_pct;   // 0: sign; 1:7 percent (1% units)
+    uint8_t  fav_pow_ceff_pct;    // 0: sign; 1:7 percent (1% units)
+    uint8_t  non_det_ceff_pct;    // 0: sign; 1:7 percent (1% units)
+
+    uint16_t bal_perf_freq_limit_mhz;
+    uint16_t fav_perf_freq_limit_mhz;
+    uint16_t fav_pow_freq_limit_mhz;
+    uint16_t non_det_freq_limit_mhz;
 
     // Padding to 128B is left to the compiler via the following attribute.
 

@@ -492,6 +492,14 @@ void wfth_print(
 //    WFTH_PRINTS       (package_name);   // Commented as contents can be terminating
     WFTH_PRINT16_h4_d5(sort_power_save_freq_mhz);
     WFTH_PRINT16_h4_d5(sort_fixed_freq_mhz);
+    WFTH_PRINT8_h4_d5 (bal_perf_ceff_pct     );
+    WFTH_PRINT8_h4_d5 (fav_perf_ceff_pct     );
+    WFTH_PRINT8_h4_d5 (fav_pow_ceff_pct      );
+    WFTH_PRINT8_h4_d5 (non_det_ceff_pct      );
+    WFTH_PRINT16_h4_d5(bal_perf_freq_limit_mhz);
+    WFTH_PRINT16_h4_d5(fav_perf_freq_limit_mhz);
+    WFTH_PRINT16_h4_d5(fav_pow_freq_limit_mhz);
+    WFTH_PRINT16_h4_d5(non_det_freq_limit_mhz);
 }
 
 #ifndef VALIDATE_WOF_HEADER_DATA

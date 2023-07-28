@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,8 +94,9 @@ typedef struct
     uint8_t    icsq_all_cores_off_all_caches_off_racetrack_pct;
 
     uint8_t    mma_off_leakage_pct;
+    uint8_t    modeled_data;        //  0x01 = model data, 0x00 = measured data
 
-    uint8_t     spare0[18];
+    uint8_t    spare0[17];
 
     iddq_entry_t iddq_all_good_cores_on_caches_on_5ma[IDDQ_MEASUREMENTS];
     iddq_entry_t iddq_all_good_cores_off_good_caches_off_5ma[IDDQ_MEASUREMENTS];
@@ -106,7 +107,6 @@ typedef struct
     iddq_entry_t icsq_all_good_cores_off_good_caches_off_5ma[IDDQ_MEASUREMENTS];
     iddq_entry_t icsq_all_good_cores_off_good_caches_on_5ma[IDDQ_MEASUREMENTS];
     iddq_entry_t icsq_eqs_good_cores_on_good_caches_on_5ma[MAXIMUM_EQ_SETS][IDDQ_MEASUREMENTS];
-
 
     /// Temperatures of IDDQ measurements in 0.5C units
     avgtemp_entry_t avgtemp_all_cores_on_good_caches_on_p5c[IDDQ_MEASUREMENTS];
@@ -230,8 +230,19 @@ typedef struct
     // I/O Throttle Temperature from #V
     uint32_t            io_throttle_temp_0p5C;
 
+    // Efficiency mode controls
+    uint8_t             bal_perf_ceff_pct;   // 0: sign; 1:7 percent (1% units)
+    uint8_t             fav_perf_ceff_pct;   // 0: sign; 1:7 percent (1% units)
+    uint8_t             fav_pow_ceff_pct;    // 0: sign; 1:7 percent (1% units)
+    uint8_t             non_det_ceff_pct;    // 0: sign; 1:7 percent (1% units)
+
+    uint16_t            bal_perf_freq_limit_mhz;
+    uint16_t            fav_perf_freq_limit_mhz;
+    uint16_t            fav_pow_freq_limit_mhz;
+    uint16_t            non_det_freq_limit_mhz;
+
     // Pad to make the structure an even 1KB
-    uint8_t             pad_b[16];
+    uint8_t             pad_b[4];
 
 } OCCPstateParmBlock_t ;
 

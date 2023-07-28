@@ -875,6 +875,15 @@ class PlatPmPPB
         uint32_t                  iv_wts_vddFixedFreq;
         uint32_t                  iv_wts_sortPower;
 
+        uint8_t                   iv_wts_bal_perf_ceff_pct;
+        uint8_t                   iv_wts_fav_perf_ceff_pct;
+        uint8_t                   iv_wts_fav_pow_ceff_pct;
+        uint8_t                   iv_wts_non_det_ceff_pct;
+        uint16_t                  iv_wts_bal_perf_freq_limit_mhz;
+        uint16_t                  iv_wts_fav_perf_freq_limit_mhz;
+        uint16_t                  iv_wts_fav_pow_freq_limit_mhz;
+        uint16_t                  iv_wts_non_det_freq_limit_mhz;
+
         bool                      iv_wts_vddPsavFreqOverride;
         bool                      iv_wts_vddWofBaseFreqOverride;
         bool                      iv_wts_vddUTFreqOverride;

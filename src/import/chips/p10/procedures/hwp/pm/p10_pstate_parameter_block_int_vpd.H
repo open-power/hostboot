@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,9 +120,17 @@ const uint8_t g_wofData[] =
     // DW 13
     0x08, 0x02              /*Sort PS Freq - 2050 Mhz*/,
     0x0B, 0x86              /*Sort FF Freq - 2950 Mhz*/,
-    0x00, 0x00, 0x00, 0x00  /*Reserved 4B*/,
-    // DW 14-15
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /*Reserved 16B*/,
+    0x01                    /*Balanced Performance Ceff Adjust Pct */,
+    0x08                    /*Favor Performance Ceff Adjust Pct */,
+    0x0A                    /*Favor Power Ceff Adjust Pct*/,
+    0x10                    /*Non-Deterministic Ceff Adjust Pct*/,
+    // DW 14
+    0x0F, 0xA0              /*Balanced Performance Limit Freq MHz*/,
+    0x0F, 0x3C              /*Favor Performance Limit Freq MHz*/,
+    0x0D, 0xD8              /*Favor Power Ceff Limit Freq MHz*/,
+    0x10, 0x04              /*Non-Deterministic Limit Freq MHz*/,
+    // DW 15
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /*Reserved 8B*/,
 };
 #endif // __WOF_INTERNAL_HEADER__
 
