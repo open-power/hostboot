@@ -73,6 +73,7 @@
 #include <console/consoleif.H>
 
 using namespace ERRORLOG;
+using namespace TARGETING;
 
 namespace PLDM
 {
@@ -107,6 +108,57 @@ const std::map<uint64_t, vpdParms> special_record_keyword_parm_map {
   //   parm_index                     filehandle  type                             record keyword -> struct vpdParms
   { (((uint64_t) PSPD << 32) | pdD), {0x00000000,PLDM_FILE_TYPE_PSPD_VPD_PDD_KEYWORD,PSPD,pdD} }, // PSPD #D
 };
+
+/**
+ * @brief Used with hbstd::deduplicate to uniquify a container with
+ * multiple instances of targets that should be represented by the
+ * same entity instance PDR. Note that each PDR doesn't necessarily
+ * correspond with a FRU; on DCM systems, two processors can be in the
+ * same FRU, but they still each get an entity instance PDR.
+ *
+ * Currently this is done by deduplicating LOGICAL_CARDs by their
+ * PRD_ENTITY_INSTANCE.
+ */
+struct unique_by_pdr_entity_instance
+{
+    bool operator()(const Target* const i_lhs, const Target* const i_rhs) const
+    {
+        const auto lhs_class = i_lhs->getAttr<ATTR_CLASS>(),
+                   rhs_class = i_rhs->getAttr<ATTR_CLASS>();
+
+        // Only logical cards get deduplicated.
+        if (lhs_class != CLASS_LOGICAL_CARD || rhs_class != CLASS_LOGICAL_CARD)
+        {
+            return false;
+        }
+
+        // If the targets have the same type and PDR_ENTITY_INSTANCE number, only keep one.
+        return (i_lhs->getAttr<ATTR_TYPE>() == i_rhs->getAttr<ATTR_TYPE>())
+            && (i_lhs->getAttr<ATTR_PDR_ENTITY_INSTANCE>() == i_rhs->getAttr<ATTR_PDR_ENTITY_INSTANCE>());
+    }
+};
+
+struct sort_by_huid
+{
+    bool operator()(const Target* const i_lhs, const Target* const i_rhs) const
+    {
+        return get_huid(i_lhs) < get_huid(i_rhs);
+    }
+};
+
+/**
+ * @brief Get targets of the given class, type, and state, that are
+ * represented by PLDM entity instance PDRs.
+ */
+void getPdrResources(TargetHandleList& o_list,
+                     const CLASS i_targetClass,
+                     const TYPE i_targetType,
+                     const ResourceState i_state)
+{
+    getClassResources(o_list, i_targetClass, i_targetType, i_state);
+
+    o_list = hbstd::deduplicate(move(o_list), sort_by_huid{}, unique_by_pdr_entity_instance{});
+}
 
 /**
  *  @brief Given a complete fru record table's set of records, filter the

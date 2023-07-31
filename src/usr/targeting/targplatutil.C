@@ -301,8 +301,9 @@ uint32_t getSensorNumber(const TARGETING::Target* i_pTarget,
         }
         else
         {
-            // @TODO JIRA PFHB-222 will add support for Odyssey DDIMMs (where more than 1 dimm can
-            // get returned here) and make sure the right target is used
+            // all the dimms under a given OCMB have the same
+            // PDR_ENTITY_INSTANCE attribute, so it doesn't matter
+            // which one we use.
             i_pTarget = dimm.front();
         }
         sensor_id.target_type = occ_sensor_id_t::target_type_t::TARGET_TYPE_OCMB;

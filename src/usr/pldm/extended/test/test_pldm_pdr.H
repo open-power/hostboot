@@ -72,21 +72,17 @@ public:
 
         TS_INFO("enter test_fruRecordSetIdLookup");
 
-#if 0 // FIXME JIRA: PFHB-222 the test below expects 16 DIMM records to be created,
-      // but in the case of Odyssey, only 8 are created, because every other DIMM
-      // pair shares the PDR_ENTITY_INSTANCE number, and the PDR manager skips records
-      // with the same instance_num.
         PLDM::PdrManager pdrmgr;
         addHostbootPdrs(pdrmgr);
 
         const auto dimm_rsids = pdrmgr.findFruRecordSetIdsByType(ENTITY_TYPE_DIMM);
 
-        TargetHandleList dimm_targets;
+        TargetHandleList ocmb_targets;
 
-        { // collect a list of all the present DIMM targets in the system
+        { // collect a list of all the present OCMB targets in the system
             PredicateHwas l_predPres;
             l_predPres.present(true);
-            PredicateCTM l_CtmFilter(CLASS_LOGICAL_CARD, TYPE_DIMM);
+            PredicateCTM l_CtmFilter(CLASS_NA, TYPE_OCMB_CHIP);
             PredicatePostfixExpr l_present;
             l_present.push(&l_CtmFilter).push(&l_predPres).And();
             TargetRangeFilter l_presTargetList(targetService().begin(),
@@ -94,19 +90,22 @@ public:
                                                &l_present);
             for ( ; l_presTargetList; ++l_presTargetList)
             {
-                dimm_targets.push_back(*l_presTargetList);
+                ocmb_targets.push_back(*l_presTargetList);
             }
         }
 
-
-        if (dimm_rsids.size() != dimm_targets.size())
+        // We expect the number of DIMM FRU Record Sets to be the
+        // number of OCMBs in the system. For Explorer, there's one
+        // DIMM per OCMB = one DIMM per FRU; for Odyssey, there's two
+        // DIMMs per OCMB = two DIMMs per FRU. The code should handle
+        // either case and create only one FRU RSID per OCMB.
+        if (dimm_rsids.size() != ocmb_targets.size())
         {
             TS_FAIL("test_fruRecordSetIdLookup: findFruRecordSetIdsByType(ENTITY_TYPE_DIMM) "
-                    "returned %d RSIDs, expected %d",
+                    "returned %d RSIDs, expected %d (one per OCMB)",
                     static_cast<int>(dimm_rsids.size()),
-                    static_cast<int>(dimm_targets.size()));
+                    static_cast<int>(ocmb_targets.size()));
         }
-#endif
 
         TS_INFO("exit test_fruRecordSetIdLookup");
     }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,16 @@ namespace std
          * @return true if x < y otherwise false
          */
         bool operator()(const T& x, const T& y) const
+        {
+            return x < y;
+        }
+    };
+
+    template<>
+    struct less<void>
+    {
+        template<typename T1, typename T2>
+        bool operator()(const T1& x, const T2& y) const
         {
             return x < y;
         }
@@ -148,6 +158,16 @@ namespace std
          * @return true if x == y otherwise false
          */
         bool operator()(const T& x, const T& y) const
+        {
+            return x == y;
+        }
+    };
+
+    template<>
+    struct equal_to<void>
+    {
+        template<typename T1, typename T2>
+        bool operator()(const T1& x, const T2& y) const
         {
             return x == y;
         }

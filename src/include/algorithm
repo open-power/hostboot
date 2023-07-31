@@ -30,6 +30,7 @@
 #include <utility>
 #include <tuple>
 #include <limits>
+#include <functional>
 
 #ifdef __cplusplus
 
@@ -1133,13 +1134,14 @@ namespace hbstd
  * @param[in] i_container  The container
  * @return    T            Sorted container without duplicates
  */
-template<typename T>
-T deduplicate(T i_container)
+template<typename T, typename Lt = std::less<void>, typename Eq = std::equal_to<void>>
+T deduplicate(T i_container, Lt&& i_lt = { }, Eq&& i_eq = { })
 {
     using namespace std;
 
-    sort(begin(i_container), end(i_container));
-    i_container.erase(unique(begin(i_container), end(i_container)), end(i_container));
+    sort(begin(i_container), end(i_container), forward<Lt>(i_lt));
+    i_container.erase(unique(begin(i_container), end(i_container), forward<Eq>(i_eq)),
+                      end(i_container));
     return move(i_container);
 }
 

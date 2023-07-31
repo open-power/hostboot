@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,6 +34,7 @@
 
 #include <errl/errlentry.H>
 #include <pldm/pldm_const.H>
+#include <targeting/common/utilFilter.H>
 
 namespace PLDM
 {
@@ -79,6 +80,23 @@ errlHndl_t cacheRemoteFruVpd(void);
  */
 void printFruRecordTable(const uint8_t* i_pldm_fru_table_buf,
                          uint16_t i_record_count);
+
+
+/**
+ * @brief Get targets of the given class, type, and state, that are represented
+ * by PLDM entity instance PDRs.
+ *
+ * @note The distinction between this and getClassResources is that if
+ * there are multiple targets represented by the same PDR (i.e. DIMMs
+ * in the Odyssey case), this function only returns one of them (and
+ * it returns the same one on every call) whereas getClassResources
+ * will return all of them.
+ */
+void getPdrResources(TARGETING::TargetHandleList& o_list,
+                     TARGETING::CLASS i_targetClass,
+                     TARGETING::TYPE i_targetType,
+                     TARGETING::ResourceState i_state);
+
 }
 
 #endif

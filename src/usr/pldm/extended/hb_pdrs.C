@@ -37,6 +37,7 @@
 
 // PLDM
 #include <pldm/extended/hb_pdrs.H>
+#include <pldm/extended/hb_fru.H>
 #include <pldm/extended/pldm_fru.H>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/pldm_trace.H>
@@ -181,7 +182,6 @@ void createConnectorAssocPdrs(pldm_entity_association_tree *io_tree,
                              TARGETING::TYPE i_type,
                              ConnectionsMap &io_targetConnectionMap)
 {
-    TargetHandleList targetList;
     entity_type l_entityTypeOfChild = ENTITY_TYPE_DIMM;
     entity_type l_connectorEntityType = ENTITY_TYPE_DIMM_SLOT;
     if (i_type == TYPE_PROC)
@@ -190,7 +190,7 @@ void createConnectorAssocPdrs(pldm_entity_association_tree *io_tree,
         l_connectorEntityType = ENTITY_TYPE_SOCKET;
     }
 
-    getClassResources(targetList, i_class, i_type, UTIL_FILTER_ALL);
+    TargetHandleList targetList = composable(getPdrResources)(i_class, i_type, UTIL_FILTER_ALL);
 
     ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO_type connector_entity_id = { };
     do
@@ -325,7 +325,6 @@ void addCoreEntityAssocAndRecordSetPdrs(pldm_entity_association_tree *io_tree,
     }
 }
 
-
 /* @brief Add Entity Association and FRU Record Set PDRs for FRUs that Hostboot
  *        owns to the given PDR manager.
  *
@@ -361,7 +360,7 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
     struct cmp_str
     {
        // note: vectors contain strings (null-terminated)
-       bool operator()(std::vector<char> a, std::vector<char> b) const
+       bool operator()(const std::vector<char>& a, const std::vector<char>& b) const
        {
             return strcmp(a.data(), b.data()) > 0;
        }
@@ -375,18 +374,15 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
     bool hasConnectorPdr = false;
     for (const auto entity : fru_inventory_classes)
     {
-        TargetHandleList targets;
-
-        getClassResources(targets,
-                          entity.targetClass,
-                          entity.targetType,
-                          UTIL_FILTER_PRESENT);
+        TargetHandleList targets = composable(getPdrResources)(entity.targetClass, entity.targetType, UTIL_FILTER_PRESENT);
 
         std::sort(begin(targets), end(targets),
                   [](const Target* const t1, const Target* const t2) {
                       return t1->getAttr<ATTR_POSITION>() < t2->getAttr<ATTR_POSITION>();
                   });
+
         hasConnectorPdr = false;
+
         if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_PLDM_CONNECTOR_PDRS_ENABLED>())
         {
             l_targetConnectionMap.clear();
@@ -489,39 +485,12 @@ void addEntityAssociationAndFruRecordSetPdrs(PdrManager& io_pdrman, pldm_entity 
             else
             {
                 // non-proc types (DIMM, etc...)
-                // Temporary workaround for Odyssey chips
-                // @TODO JIRA PFHB-222 will add support for Odyssey DDIMMs and remove this code
-                auto ocmb_state = TARGETING::getOcmbChipTypesInSystem();
-//MAB
-                if (compareOcmbsInSystem(ocmb_state, UTIL_ODYSSEY_FOUND))
-                {
-                    static uint16_t saved_instance_num = 0xFEED;
-                    uint16_t requested_entity_instance_num =
-                             getEntityInstanceNumber(targets[i], entity.entityType);
-
-                    if (requested_entity_instance_num == saved_instance_num)
-                    {
-                        PLDM_INF("NON-PROC ENTITY: Skipping createEntityAssociationAndFruRecordSetPdrs "
-                                 "for entity_type 0x%04X, HUID 0x%x, req instance_num 0x%x "
-                                 "(repeated instance_num)",
-                                 entity.entityType, get_huid(targets[i]), requested_entity_instance_num);
-                        continue;
-                    }
-                    else
-                    {
-                        saved_instance_num = requested_entity_instance_num;
-                    }
-                } // end of Odyssey workaround
-
-                auto non_proc = createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
-                                                parent_entity_node,
-                                                PLDM_ENTITY_ASSOCIAION_PHYSICAL,
-                                                entity.entityType,
-                                                targets[i],
-                                                fru_record_set_map);
-                const auto entity_id = pldm_entity_extract(non_proc);
-                PLDM_DBG("NON-PROC ENTITY: entity_type 0x%04X, entity_instance_num 0x%04X, container_id 0x%04X",
-                    entity_id.entity_type, entity_id.entity_instance_num, entity_id.entity_container_id);
+                createEntityAssociationAndFruRecordSetPdrs(enttree.get(),
+                                                           parent_entity_node,
+                                                           PLDM_ENTITY_ASSOCIAION_PHYSICAL,
+                                                           entity.entityType,
+                                                           targets[i],
+                                                           fru_record_set_map);
             }
         }
     }
@@ -691,8 +660,7 @@ errlHndl_t addFruInventoryPdrs(PdrManager& io_pdrman)
 
     for (const auto& inventory : fru_inventory_classes)
     {
-        TargetHandleList targets;
-        getClassResources(targets, CLASS_NA, inventory.targetType, UTIL_FILTER_PRESENT);
+        const TargetHandleList targets = composable(getPdrResources)(CLASS_NA, inventory.targetType, UTIL_FILTER_PRESENT);
 
         /* Iterate over all present HB FRU targets */
 
@@ -716,24 +684,12 @@ errlHndl_t addFruInventoryPdrs(PdrManager& io_pdrman)
                  * @devdesc    Unable to find the entity associated with this RSID
                  * @custdesc   A software error occurred during system boot
                  */
-                // @TODO JIRA PFHB-222 will add support for Odyssey DDIMMs and will
-                // create this error log, if necessary
-                auto ocmb_state = TARGETING::getOcmbChipTypesInSystem();
-                if (!compareOcmbsInSystem(ocmb_state, UTIL_ODYSSEY_FOUND))
-                {
-                    errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                         MOD_ADD_INVENTORY_PDRS,
-                                         RC_NO_ENTITY_FROM_RSID,
-                                         target_rsid,
-                                         get_huid(target),
-                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                }
-                else
-                {
-                    PLDM_ERR("addFruInventoryPdrs> Odyssey found in the config: Skipping Error for "
-                             "MOD_ADD_INVENTORY_PDRS/RC_NO_ENTITY_FROM_RSID due to lack of "
-                             "Odyssey support");
-                }
+                errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                     MOD_ADD_INVENTORY_PDRS,
+                                     RC_NO_ENTITY_FROM_RSID,
+                                     target_rsid,
+                                     get_huid(target),
+                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 break;
             }
 

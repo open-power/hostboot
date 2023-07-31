@@ -205,6 +205,17 @@ bool tryGetAttributeInHierarchy(Target* const i_target,
 }
 
 /**
+ * @brief Compare the given attribute on two targets, and return
+ * whether the attribute value from lhs is less than the attribute
+ * value from rhs.
+ */
+template<ATTRIBUTE_ID Attr>
+inline bool attribute_less_than(const Target* const lhs, const Target* const rhs)
+{
+    return lhs->getAttr<Attr>() < rhs->getAttr<Attr>();
+}
+
+/**
  *  @brief Creates a standard error log of tracing type
  *
  *  @par Detailed Description:

@@ -34,6 +34,7 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_response.H>
 #include <pldm/pldm_trace.H>
+#include <pldm/extended/hb_fru.H>
 #include <pldm/extended/pldm_fru.H>
 #include <pldm/extended/pdr_manager.H>
 #include <pldm/extended/hb_pdrs.H>
@@ -235,10 +236,7 @@ void FruRecordTable::loadAllFruRecords()
             l_target_type = TYPE_FC;
         }
 
-        getClassResources(targets,
-                          info.targetClass,
-                          l_target_type,
-                          UTIL_FILTER_PRESENT);
+        getPdrResources(targets, info.targetClass, l_target_type, UTIL_FILTER_PRESENT);
 
         for (const auto target : targets)
         {
