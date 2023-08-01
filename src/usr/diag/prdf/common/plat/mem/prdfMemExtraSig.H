@@ -133,6 +133,10 @@ PRDR_ERROR_SIGNATURE(DsdDramSpared,   0xbbbb0030, "", "DSD: DRAM spared");
 PRDR_ERROR_SIGNATURE(DsdBadSpare,     0xbbbb0031, "", "DSD: DRAM spare is bad");
 PRDR_ERROR_SIGNATURE(RrdRowDeployed,  0xbbbb0032, "", "RRD: Spare row successfully deployed");
 PRDR_ERROR_SIGNATURE(RrdBadRow,       0xbbbb0033, "", "RRD: Bad spare row");
+PRDR_ERROR_SIGNATURE(RrdResume,       0xbbbb0034, "", "RRD: Resuming Procedure");
+PRDR_ERROR_SIGNATURE(RrdNoUninitRows, 0xbbbb0035, "", "RRD: ERROR - No uninitialized rows found");
+PRDR_ERROR_SIGNATURE(RrdNoMatching,   0xbbbb0036, "", "RRD: ERROR - No uninitialized rows match deployed row repair");
+PRDR_ERROR_SIGNATURE(RrdMatching,     0xbbbb0037, "", "RRD: Uninitialized row matching deployed row repair found");
 
 PRDR_ERROR_SIGNATURE(OmiDegradeFix0,    0xcccc0000, "", "MC_OMI_DL_FIR[5]: OMI-DL0 running in degraded mode, KVCO=2");
 PRDR_ERROR_SIGNATURE(OmiDegradeFix1,    0xcccc0001, "", "MC_OMI_DL_FIR[25]: OMI-DL1 running in degraded mode, KVCO=2");

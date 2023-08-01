@@ -39,11 +39,48 @@
 namespace PRDF
 {
 
+  // Row repair format, per primary rank:
+  // 32 bits per repair (Explorer):
+  //     5 bits : DRAM position (x8: 0-9, x4: 0-19)
+  //     3 bits : secondary rank (srank0-srank2)
+  //     2 bits : bank group (bg1-bg0)
+  //     3 bits : bank (b2-b0)
+  //     18 bits: row (r17-r0)
+  //     1 bit  : repair validity (0: invalid, 1: valid)
+  //
+  // 32 bits per repair (Odyssey):
+  //     5 bits : DRAM position (x8: 0-9, x4: 0-19)
+  //     3 bits : secondary rank (srank0-srank2)
+  //     3 bits : bank group (bg2-bg0)
+  //     2 bits : bank (b1-b0)
+  //     18 bits: row (r17-r0)
+  //     1 bit  : repair validity (0: invalid, 1: valid)
+
+
+  /** @brief Structure for FFDC to track address data of rows */
+  struct FfdcRrData
+  {
+      uint8_t prank;
+      uint8_t srank;
+      uint8_t bnkGrp;
+      uint8_t bnk;
+      uint32_t row;
+
+      bool operator==( const FfdcRrData & i_data ) const
+      {
+          return ( this->prank == i_data.prank &&
+                   this->srank == i_data.srank &&
+                   this->bnkGrp == i_data.bnkGrp &&
+                   this->bnk == i_data.bnk &&
+                   this->row == i_data.row );
+      }
+  };
+
 /** @brief Row Repair Deploy procedure. */
 template<TARGETING::TYPE T>
 class RrdEvent : public TdEntry
 {
-  public: // functions
+  public: // functions, structs
 
     /**
      * @brief Constructor
@@ -51,10 +88,13 @@ class RrdEvent : public TdEntry
      * @param i_rank Rank reporting the chip mark.
      * @param i_mark Chip mark placed by hardware.
      * @param i_port The port reporting the chip mark.
+     * @param i_deployedRr FFDC data for the deployed row repair
      */
     RrdEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,
-                 const MemMark & i_mark, const uint8_t& i_port ) :
-        TdEntry(RRD_EVENT, i_chip, i_port, i_rank), iv_mark(i_mark)
+                 const MemMark & i_mark, const uint8_t& i_port,
+                 FfdcRrData i_deployedRr ) :
+        TdEntry(RRD_EVENT, i_chip, i_port, i_rank), iv_mark(i_mark),
+        iv_deployedRr(i_deployedRr)
     {
         PRDF_ASSERT( nullptr != i_chip );
         PRDF_ASSERT( T == i_chip->getType() );
@@ -63,53 +103,7 @@ class RrdEvent : public TdEntry
 
   public: // overloaded functions from parent class
 
-    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done )
-    {
-        #define PRDF_FUNC "[RrdEvent::nextStep] "
-
-        uint32_t o_rc = SUCCESS;
-
-        // NOTE: Row repairs should already be supported if we get this far,
-        //       so just continue without checking for the support here
-
-        o_done = false;
-
-        do
-        {
-            // First, do analysis.
-            o_rc = analyzePhase( io_sc, o_done );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "analyzePhase() failed on 0x%08x,0x%2x",
-                          iv_chip->getHuid(), getKey() );
-                break;
-            }
-
-            if ( o_done ) break; // Nothing more to do.
-
-            // Then, start the next phase of the procedure.
-            o_rc = startNextPhase( io_sc );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "startNextPhase() failed on 0x%08x,0x%2x",
-                          iv_chip->getHuid(), getKey() );
-                break;
-            }
-
-        } while (0);
-
-        // Add the chip mark to the callout list if no callouts in the list.
-        if ( 0 == io_sc.service_data->getMruListSize() )
-        {
-            MemoryMru mm { iv_chip->getTrgt(), iv_rank, iv_port,
-                           iv_mark.getSymbol() };
-            io_sc.service_data->SetCallout( mm );
-        }
-
-        return o_rc;
-
-        #undef PRDF_FUNC
-    }
+    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
 
     uint32_t getKey() const
     { return MemRank(iv_rank.getMaster()).getKey(); } // Master rank only
@@ -141,65 +135,7 @@ class RrdEvent : public TdEntry
      * @param  o_done True if the procedure is complete or has aborted.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t analyzePhase( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done )
-    {
-        #define PRDF_FUNC "[RrdEvent::analyzePhase] "
-
-        uint32_t o_rc = SUCCESS;
-
-        do
-        {
-            if ( TD_PHASE_0 == iv_phase )
-            {
-                // Before starting the first command, deploy the row repair
-                o_rc = PlatServices::deployRowRepair<T>( iv_chip, iv_rank );
-                break; // Nothing to analyze yet.
-            }
-
-            // Look for any ECC errors that occurred during the command.
-            uint32_t eccAttns;
-            o_rc = checkEccFirs<T>( iv_chip, iv_port, eccAttns );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "checkEccFirs(0x%08x, %x) failed",
-                          iv_chip->getHuid(), iv_port );
-                break;
-            }
-
-            // Analyze the ECC errors, if needed.
-            o_rc = checkEcc( eccAttns, io_sc, o_done );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "checkEcc() failed on 0x%08x",
-                          iv_chip->getHuid() );
-                break;
-            }
-
-            if ( o_done ) break; // abort the procedure.
-
-            // Determine if the row repair was deployed successfully.
-            o_rc = verifyRowRepair( io_sc, o_done );
-            if ( SUCCESS != o_rc )
-            {
-                PRDF_ERR( PRDF_FUNC "verifyRowRepair() failed on 0x%08x",
-                          iv_chip->getHuid() );
-                break;
-            }
-
-        } while (0);
-
-        #ifdef __HOSTBOOT_RUNTIME
-        if ( (SUCCESS == o_rc) && o_done )
-        {
-            // Clear the ECC FFDC for this master rank.
-            MemDbUtils::resetEccFfdc<T>( iv_chip, iv_rank, MASTER_RANK );
-        }
-        #endif
-
-        return o_rc;
-
-        #undef PRDF_FUNC
-    }
+    uint32_t analyzePhase( STEP_CODE_DATA_STRUCT & io_sc, bool & o_done );
 
     /**
      * @brief  Starts the appropriate maintenance command for each phase of the
@@ -207,6 +143,7 @@ class RrdEvent : public TdEntry
      * @pre    iv_phase must be set appropriately before calling this function.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
+    template <mss::mc_type MC>
     uint32_t startCmd();
 
     /**
@@ -217,12 +154,34 @@ class RrdEvent : public TdEntry
      */
     uint32_t startNextPhase( STEP_CODE_DATA_STRUCT & io_sc );
 
+    /**
+     * @brief Gathers all data on the deployed row repair and uninitialized
+     *        rows that have been found to add to log.
+     * @param  io_sc  The step code data struct.
+     */
+    void addFfdc(STEP_CODE_DATA_STRUCT & io_sc);
+
   private: // instance variables
 
     const MemMark iv_mark;  ///< The chip mark from hardware.
+
+    // The following variables are used solely for FFDC
+    FfdcRrData iv_deployedRr; ///< The row repair that was deployed
+    std::vector<FfdcRrData> iv_uninitRows; ///< Uninitialized rows found
 };
+
+//##############################################################################
+//                              Utility Functions
+//##############################################################################
+
+  /**
+   * @brief  Returns the address information of a row in FfdcRrData format
+   * @param  i_ocmb An OCMB target
+   * @param  i_addr The address
+   * @return A FfdcRrData structure with the information of the input address.
+   */
+FfdcRrData getRrdFfdc(TARGETING::TargetHandle_t i_ocmb, const MemAddr & i_addr);
 
 } // end namespace PRDF
 
 #endif // __prdfMemRrd_H
-

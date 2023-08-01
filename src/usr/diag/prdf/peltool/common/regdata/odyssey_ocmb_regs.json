@@ -609,6 +609,16 @@
         "description": "TP Chiplet Recoverable FIR MASK",
         "name": "CFIR_TP_RE_MASK"
     },
+    "0x6fc4": {
+        "address": "0x000000000801180d",
+        "description": "Odyssey Error Inject Control Register 0",
+        "name": "MBEICR_0"
+    },
+    "0x6fc6": {
+        "address": "0x000000000801280d",
+        "description": "Odyssey Error Inject Control Register 1",
+        "name": "MBEICR_1"
+    },
     "0x6ff7": {
         "address": "0x0000000008011000",
         "description": "Odyssey chip SRQ_FIR",

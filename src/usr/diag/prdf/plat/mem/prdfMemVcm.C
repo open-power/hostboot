@@ -193,7 +193,7 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
         mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> stopCond;
 
         // If at phase 2, set to stop on MCEs
-        if ( TD_PHASE_2 == iv_phase )
+        if ( TD_PHASE_2 == iv_phase && !iv_disableStopOnMce )
         {
             stopCond.set_pause_on_mce_hard(mss::ON)
                     .set_pause_on_mce_soft(mss::ON)
@@ -418,7 +418,10 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::rowRepair( STEP_CODE_DATA_STRUCT & io_sc,
                     break;
                 }
 
-                // Continue scrub, don't set procedure to done
+                // Continue scrub, disabling stop on MCE. This way we will get
+                // the full MCE at the end of the rank if there are more.
+                // Don't set procedure to done.
+                iv_disableStopOnMce = true;
             }
         }
         // Else if scrub stops on second MCE
@@ -486,9 +489,11 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::rowRepairEndRank(
             break;
         }
 
+        FfdcRrData ffdc = getRrdFfdc(iv_chip->getTrgt(), iv_rowRepairFailAddr);
+
         // Add a row repair deploy event to the targeted diagnostics queue
         TdEntry * rrd = new RrdEvent<TYPE_OCMB_CHIP>{iv_chip, iv_rank, iv_mark,
-                                                     iv_port};
+                                                     iv_port, ffdc};
         MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, rrd );
 
         // Signature: "VCM: verified: common row fail"

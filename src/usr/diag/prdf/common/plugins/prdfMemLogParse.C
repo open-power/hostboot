@@ -34,9 +34,15 @@
 #include <utilmem.H>
 #include <iipconst.h>
 #include <prdfBitString.H>
+#include <prdfBufferStream.H>
 #include <prdfDramRepairUsrData.H>
 #include <prdfParserEnums.H>
 #include <prdfParserUtils.H>
+
+#ifdef __HOSTBOOT_MODULE
+#include <prdfMemRrd.H>
+#endif
+
 
 namespace PRDF
 {
@@ -766,6 +772,79 @@ bool parseTdCtlrStateData( uint8_t  * i_buffer, uint32_t i_buflen,
     }
 
     return o_rc;
+}
+
+//------------------------------------------------------------------------------
+
+bool parseRrdFfdc(void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser,
+                  errlver_t i_ver)
+{
+    // RrdFfdc Format:
+    // 1 byte: Dram Position
+    // 8 bytes: FfdcRrData entry for the deployed row repair
+    // 1 byte: Number of uninitialized row entries
+    // 8 bytes per entry: One FfdcRrData entry per uninitialized row found
+
+    bool rc = true;
+
+    #ifdef __HOSTBOOT_MODULE
+
+    i_parser.PrintBlank();
+    i_parser.PrintHeading("Row Repair Deploy FFDC");
+    i_parser.PrintBlank();
+
+    BufferReadStream ffdc{i_buffer, i_buflen};
+
+    if (ffdc.good())
+    {
+        // First get the dram position
+        uint8_t dramPos;
+        ffdc >> dramPos; // 1 byte
+
+        // Get the initial FfdcRrData entry for the deployed row repair
+        FfdcRrData deployedRow;
+        ffdc >> deployedRow.prank  // 1 byte
+             >> deployedRow.srank  // 1 byte
+             >> deployedRow.bnkGrp // 1 byte
+             >> deployedRow.bnk    // 1 byte
+             >> deployedRow.row;   // 4 bytes
+
+        // Print out the initial information
+        i_parser.PrintString("Deployed Row Repair:", "");
+        i_parser.PrintString(" Dram Position:", "%d", dramPos);
+        i_parser.PrintString(" Primary Rank:", "%d", deployedRow.prank);
+        i_parser.PrintString(" Secondary Rank:", "%d", deployedRow.srank);
+        i_parser.PrintString(" Bank Group:", "0x%02x", deployedRow.bnkGrp);
+        i_parser.PrintString(" Bank:", "0x%02x", deployedRow.bnk);
+        i_parser.PrintString(" Row:", "0x%08x", deployedRow.row);
+
+
+        uint8_t entries;
+        ffdc >> entries;
+
+        i_parser.PrintString("Uninitialized Rows Found, i.e. MCEs hit:", "");
+        // Loop through all entries for uninitialized rows and print their info
+        for (uint8_t i = 0; i < entries; i++)
+        {
+            FfdcRrData uninitRow;
+            ffdc >> uninitRow.prank  // 1 byte
+                 >> uninitRow.srank  // 1 byte
+                 >> uninitRow.bnkGrp // 1 byte
+                 >> uninitRow.bnk    // 1 byte
+                 >> uninitRow.row;   // 4 bytes
+
+            i_parser.PrintString("Uninitialized Row", "%d", i);
+            i_parser.PrintString(" Primary Rank:", "%d", uninitRow.prank);
+            i_parser.PrintString(" Secondary Rank:", "%d", uninitRow.srank);
+            i_parser.PrintString(" Bank Group:", "0x%02x", uninitRow.bnkGrp);
+            i_parser.PrintString(" Bank:", "0x%02x", uninitRow.bnk);
+            i_parser.PrintString(" Row:", "0x%08x", uninitRow.row);
+        }
+    }
+
+    #endif
+
+    return rc;
 }
 
 //------------------------------------------------------------------------------

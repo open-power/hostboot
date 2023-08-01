@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,6 +147,17 @@ bool parseBadDqBitmap( uint8_t * i_buffer, uint32_t i_buflen,
  */
 bool parseTdCtlrStateData( uint8_t * i_buffer, uint32_t i_buflen,
                            ErrlUsrParser & i_parser, uint32_t i_sigId );
+
+
+/**
+ * @brief Parses gathered FFDC data from a row repair deploy event.
+ * @param i_buffer The data buffer.
+ * @param i_buflen The buffer length.
+ * @param i_parser The error log parser.
+ * @param i_ver This error log section's version
+ */
+bool parseRrdFfdc(void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser,
+                  errlver_t i_ver);
 
 #if defined(PRDF_HOSTBOOT_ERRL_PLUGIN) || defined(PRDF_FSP_ERRL_PLUGIN)
 } // end namespace FSP/HOSTBOOT

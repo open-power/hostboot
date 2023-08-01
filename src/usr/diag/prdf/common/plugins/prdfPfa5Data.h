@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,7 @@ enum ErrlSubsect
     ErrlL2LineDeleteFfdc = 70,
     ErrlL3LineDeleteFfdc = 71,
     ErrlScratchSig       = 72,
+    ErrlRrdFfdc          = 73,
 };
 
 struct MsDumpStruct

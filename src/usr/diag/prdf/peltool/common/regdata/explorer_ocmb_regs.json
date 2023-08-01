@@ -64,6 +64,11 @@
         "description": "Explorer MCBIST Configuration Register",
         "name": "MCBCFG"
     },
+    "0x1b87": {
+        "address": "0x0000000008011c0d",
+        "description": "Explorer Error Inject Control Register",
+        "name": "MBEICR"
+    },
     "0x1fcc": {
         "address": "0x000000000801141c",
         "description": "Explorer SRQ Error Report Register",

@@ -410,6 +410,13 @@
         capture     group rdf_fir_0_regs;
     };
 
+    register MBEICR_0
+    {
+        name        "Odyssey Error Inject Control Register 0";
+        scomaddr    0x0801180D;
+        capture     group ocmb_regs;
+    };
+
     register HW_MS0_0
     {
         name        "Odyssey chip Hardware Mark Store Rank0 Register 0";
@@ -552,6 +559,13 @@
         name        "Odyssey chip Mark Shadow Register 1";
         scomaddr    0x0801280C;
         capture     group rdf_fir_1_regs;
+    };
+
+    register MBEICR_1
+    {
+        name        "Odyssey Error Inject Control Register 1";
+        scomaddr    0x0801280D;
+        capture     group ocmb_regs;
     };
 
     register HW_MS0_1

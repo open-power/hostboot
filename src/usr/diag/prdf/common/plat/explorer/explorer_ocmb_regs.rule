@@ -499,6 +499,13 @@
         capture     group ocmb_regs;
     };
 
+    register MBEICR
+    {
+        name        "Explorer Error Inject Control Register";
+        scomaddr    0x08011C0D;
+        capture     group ocmb_regs;
+    };
+
     ############################################################################
     # Explorer additional FFDC
     ############################################################################

@@ -344,6 +344,7 @@ class VcmEvent : public TdEntry
     const bool iv_rowRepairEnabled; ///< True if Row Repair is enabled.
     uint8_t iv_mceCount = 0; ///< MCEs hit count, currently for Row Repair only.
     MemAddr iv_rowRepairFailAddr; ///< Address stored to apply Row Repair on.
+    bool iv_disableStopOnMce = false; ///< Used to disable stop on MCE
 };
 
 //------------------------------------------------------------------------------

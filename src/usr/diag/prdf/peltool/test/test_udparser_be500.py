@@ -858,6 +858,41 @@ class TestUserDataParser(unittest.TestCase):
 
         self.assertEqual(jsonOut["String"], "TESTING[10] - Test Message")
 
+    def testUdRrdFfdc(self):
+        testData = bytearray.fromhex(
+            "00010203040102030402020304050304050603040" "50604050606"
+        )
+        mv = memoryview(testData)
+
+        testStr = udparsers.be500.be500.parseUDToJson(73, 1, mv)
+
+        jsonOut = json.loads(testStr)
+
+        print(json.dumps(jsonOut, indent=4))
+
+        rrd = "Row Repair Deploy FFDC"
+        drr = "Deployed Row Repair"
+        ur = "Uninitialized Rows"
+
+        self.assertEqual(jsonOut[rrd][drr]["Dram Position"], 0)
+        self.assertEqual(jsonOut[rrd][drr]["Primary Rank"], 1)
+        self.assertEqual(jsonOut[rrd][drr]["Secondary Rank"], 2)
+        self.assertEqual(jsonOut[rrd][drr]["Bank Group"], "0x03")
+        self.assertEqual(jsonOut[rrd][drr]["Bank"], "0x04")
+        self.assertEqual(jsonOut[rrd][drr]["Row"], "0x01020304")
+
+        self.assertEqual(jsonOut[rrd][ur]["0"]["Primary Rank"], 2)
+        self.assertEqual(jsonOut[rrd][ur]["0"]["Secondary Rank"], 3)
+        self.assertEqual(jsonOut[rrd][ur]["0"]["Bank Group"], "0x04")
+        self.assertEqual(jsonOut[rrd][ur]["0"]["Bank"], "0x05")
+        self.assertEqual(jsonOut[rrd][ur]["0"]["Row"], "0x03040506")
+
+        self.assertEqual(jsonOut[rrd][ur]["1"]["Primary Rank"], 3)
+        self.assertEqual(jsonOut[rrd][ur]["1"]["Secondary Rank"], 4)
+        self.assertEqual(jsonOut[rrd][ur]["1"]["Bank Group"], "0x05")
+        self.assertEqual(jsonOut[rrd][ur]["1"]["Bank"], "0x06")
+        self.assertEqual(jsonOut[rrd][ur]["1"]["Row"], "0x04050606")
+
 
 if __name__ == "__main__":
     test = TestUserDataParser()
@@ -875,3 +910,4 @@ if __name__ == "__main__":
     test.testUdL2LineDeleteFfdc()
     test.testUdL3LineDeleteFfdc()
     test.testUdString1()
+    test.testUdRrdFfdc()

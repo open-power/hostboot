@@ -1386,6 +1386,66 @@ class errludP_prdf:
 
         return json.dumps(d)
 
+    def UdRrdFfdc(ver: int, data: memoryview) -> str:
+        # RrdFfdc Format:
+        # 1 byte: Dram Position
+        # 8 bytes: FfdcRrData entry for the deployed row repair
+        # 1 byte: Number of uninitialized row entries
+        # 8 bytes per entry: One FfdcRrData entry per uninitialized row found
+
+        # FfdcRrData structure format:
+        # 1 byte: Primary rank
+        # 1 byte: Secondary rank
+        # 1 byte: Bank group
+        # 1 byte: Bank
+        # 4 bytes: Row
+
+        d = OrderedDict()
+        rrd = "Row Repair Deploy FFDC"
+        d[rrd] = OrderedDict()
+
+        i = 0
+        # Get the data for the deployed row repair
+        dramPos, i = intConcat(data, i, i + 1)
+        prank, i = intConcat(data, i, i + 1)
+        srank, i = intConcat(data, i, i + 1)
+        bnkGrp, i = hexConcat(data, i, i + 1)
+        bnk, i = hexConcat(data, i, i + 1)
+        row, i = hexConcat(data, i, i + 4)
+
+        drr = "Deployed Row Repair"
+        d[rrd][drr] = OrderedDict()
+        d[rrd][drr]["Dram Position"] = dramPos
+        d[rrd][drr]["Primary Rank"] = prank
+        d[rrd][drr]["Secondary Rank"] = srank
+        d[rrd][drr]["Bank Group"] = bnkGrp
+        d[rrd][drr]["Bank"] = bnk
+        d[rrd][drr]["Row"] = row
+
+        ur = "Uninitialized Rows"
+
+        d[rrd][ur] = OrderedDict()
+
+        # Get the data for all uninitialized rows
+        entries, i = intConcat(data, i, i + 1)
+        n = 0
+        for n in range(entries):
+            d[rrd][ur][n] = OrderedDict()
+
+            prank, i = intConcat(data, i, i + 1)
+            srank, i = intConcat(data, i, i + 1)
+            bnkGrp, i = hexConcat(data, i, i + 1)
+            bnk, i = hexConcat(data, i, i + 1)
+            row, i = hexConcat(data, i, i + 4)
+
+            d[rrd][ur][n]["Primary Rank"] = prank
+            d[rrd][ur][n]["Secondary Rank"] = srank
+            d[rrd][ur][n]["Bank Group"] = bnkGrp
+            d[rrd][ur][n]["Bank"] = bnk
+            d[rrd][ur][n]["Row"] = row
+
+        return json.dumps(d)
+
 
 # Dictionary with parser functions for each subtype
 # Values are from ErrlSubsect enum in:
@@ -1397,6 +1457,7 @@ UserDetailsTypes = {
     62: "UdParserPrdfMruData",
     70: "UdL2LineDeleteFfdc",
     71: "UdL3LineDeleteFfdc",
+    73: "UdRrdFfdc",
 }
 
 
