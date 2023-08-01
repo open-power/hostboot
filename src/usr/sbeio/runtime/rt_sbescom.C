@@ -148,60 +148,25 @@ errlHndl_t sbeScomPerformOp(DeviceFW::OperationType i_opType,
         {
             if (i_opType == DeviceFW::READ)
             {
-                /*@
-                 * @errortype
-                 * @moduleid     SBEIO::SBEIO_RT_SCOM
-                 * @reasoncode   SBEIO::SBEIO_SCOM_SUPPORT_READ
-                 * @userdata1    HUID of Target
-                 * @userdata2    Unused
-                 *
-                 * @devdesc      SBEIO RT Scom Support not available
-                 * @custdesc     SBEIO RT Scom Support not available
-                 */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                     SBEIO::SBEIO_RT_SCOM,
-                                     SBEIO::SBEIO_SCOM_SUPPORT_READ,
-                                     get_huid(i_ocmb),
-                                     0,
-                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-
-
-                // @TODO JIRA: PFHB-400
-                //l_err = SBEIO::getFifoScom(i_ocmb,
-                //                    l_addr,
-                //                *static_cast<uint64_t *>(io_buffer));
-                //if (l_err)
-                //{
-                //    TRACFCOMP(g_trac_sbeio, "rt_sbescom.C READ l_err !!");
-                //}
+                l_err = SBEIO::getFifoScom(i_ocmb,
+                                           l_addr,
+                                           *static_cast<uint64_t *>(io_buffer));
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_sbeio, ERR_MRK"rt_sbescom.C READ returned an error");
+                    break;
+                }
             }
             else if (i_opType == DeviceFW::WRITE)
             {
-                /*@
-                 * @errortype
-                 * @moduleid     SBEIO::SBEIO_RT_SCOM
-                 * @reasoncode   SBEIO::SBEIO_SCOM_SUPPORT_WRITE
-                 * @userdata1    HUID of Target
-                 * @userdata2    Unused
-                 *
-                 * @devdesc      SBEIO RT Scom Support not available
-                 * @custdesc     SBEIO RT Scom Support not available
-                 */
-                l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                     SBEIO::SBEIO_RT_SCOM,
-                                     SBEIO::SBEIO_SCOM_SUPPORT_WRITE,
-                                     get_huid(i_ocmb),
-                                     0,
-                                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-
-                // @TODO JIRA: PFHB-400
-                //l_err = SBEIO::putFifoScom(i_ocmb,
-                //                    l_addr,
-                //                *static_cast<uint64_t *>(io_buffer));
-                //if (l_err)
-                //{
-                //    TRACFCOMP(g_trac_sbeio, "rt_sbescom.C WRITE l_err !!");
-                //}
+                l_err = SBEIO::putFifoScom(i_ocmb,
+                                           l_addr,
+                                           *static_cast<uint64_t *>(io_buffer));
+                if (l_err)
+                {
+                    TRACFCOMP(g_trac_sbeio, ERR_MRK"rt_sbescom.C WRITE returned an error");
+                    break;
+                }
             }
         }
         else // EXPLORER_16
@@ -264,5 +229,28 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       DeviceFW::SBESCOM,
                       TARGETING::TYPE_OCMB_CHIP,
                       sbeScomPerformOp);
+
+// SRC Graveyard
+/*@
+ * @errortype
+ * @moduleid     SBEIO::SBEIO_RT_SCOM
+ * @reasoncode   SBEIO::SBEIO_SCOM_SUPPORT_READ
+ * @userdata1    HUID of Target
+ * @userdata2    Unused
+ *
+ * @devdesc      SBEIO RT Scom Support not available
+ * @custdesc     SBEIO RT Scom Support not available
+ */
+
+/*@
+ * @errortype
+ * @moduleid     SBEIO::SBEIO_RT_SCOM
+ * @reasoncode   SBEIO::SBEIO_SCOM_SUPPORT_WRITE
+ * @userdata1    HUID of Target
+ * @userdata2    Unused
+ *
+ * @devdesc      SBEIO RT Scom Support not available
+ * @custdesc     SBEIO RT Scom Support not available
+ */
 
 }; // end namespace SBESCOM

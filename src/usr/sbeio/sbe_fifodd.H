@@ -1085,26 +1085,7 @@ protected:
 
     ~SbeFifo();
 
-    /**
-     * @brief populate the iv_ffdcPackageBuffer
-     * @param[in]  i_data        FFDC error data
-     * @param[in]  i_len         data buffer len to copy
-     */
-
-    void writeFFDCBuffer(const void * i_data, uint32_t i_len);
-
 private:
-
-    /**
-     * @brief Write FFDC package buffer - holds information exchanged
-     * between SBE and HB
-     */
-    void * iv_ffdcPackageBuffer;
-
-    /**
-     * @brief zero out the FFDC package buffer
-     */
-    void initFFDCPackageBuffer();
 
     //-------------------------------------------------------------------
     // Local definitions for the device driver

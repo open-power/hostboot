@@ -52,32 +52,32 @@ namespace DeviceFW
 
     enum AccessType
     {
-        SCOM = 0,     // SCOM registers
-        PNOR,         // PNOR flash
-        MAILBOX,      // FSP mailbox
-        PRESENT,      // Presence detection
-        FSI,          // FSI/CFAM registers
-        SPD,          // Serial Presence Detect Data for JEDEC DIMMs
-        MVPD,         // Module (processor) VPD
-        SCAN,         // Scan rings
-        EEPROM,       // Standard EEPROM/SEEPROM over i2c
-        GPIO,         // GPIO registers
-        LPC,          // Low Pin Count bus
-        IPMIBT,       // As opposed to other phy's
-        PVPD,         // Planar VPD
-        TPM,          // Trusted Platform Module
-        SIO,          // BMC Super I/O registers
-        AHB_SIO,      // AST Hostbridge via SIO
-        DVPD,         // Direct access memory VPD (unsupported)
-        NODECOMM,     // Internode communication
-        NVDIMM,       // Non-volatile DIMM controller access
-        FAPI_I2C,     // FAPI2-triggered i2c accesses
-        MMIO,         // Memory Mapped I/O
-        IDEC,         // Read and set EC and CHIPID values
-        EEPROM_CACHE, // Read EEPROM over I2C and write to PNOR
-        VPD,          // Generic VPD access
-        CFAM,         // CFAM registers (regardless of physical layer)
-        LAST_ACCESS_TYPE,
+        SCOM             = 0,  // SCOM registers
+        PNOR             = 1,  // PNOR flash
+        MAILBOX          = 2,  // FSP mailbox
+        PRESENT          = 3,  // Presence detection
+        FSI              = 4,  // FSI/CFAM registers
+        SPD              = 5,  // Serial Presence Detect Data for JEDEC DIMMs
+        MVPD             = 6,  // Module (processor) VPD
+        SCAN             = 7,  // Scan rings
+        EEPROM           = 8,  // Standard EEPROM/SEEPROM over i2c
+        GPIO             = 9,  // GPIO registers
+        LPC              = 10, // Low Pin Count bus
+        IPMIBT           = 11, // As opposed to other phy's
+        PVPD             = 12, // Planar VPD
+        TPM              = 13, // Trusted Platform Module
+        SIO              = 14, // BMC Super I/O registers
+        AHB_SIO          = 15, // AST Hostbridge via SIO
+        DVPD             = 16, // Direct access memory VPD (unsupported)
+        NODECOMM         = 17, // Internode communication
+        NVDIMM           = 18, // Non-volatile DIMM controller access
+        FAPI_I2C         = 19, // FAPI2-triggered i2c accesses
+        MMIO             = 20, // Memory Mapped I/O
+        IDEC             = 21, // Read and set EC and CHIPID values
+        EEPROM_CACHE     = 22, // Read EEPROM over I2C and write to PNOR
+        VPD              = 23, // Generic VPD access
+        CFAM             = 24, // CFAM registers (regardless of physical layer)
+        LAST_ACCESS_TYPE = 25,
     };
 
 #ifndef PARSER

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,7 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 /**
  * @file sbe_fifodd.C
- * @brief SBE FIFO device driver
+ * @brief SBE FIFO device driver (common between IPL and RUNTIME)
  */
 
 #include <sys/time.h>
@@ -41,7 +41,6 @@
 #include "sbe_fifodd.H"
 #include <sbeio/sbe_ffdc_package_parser.H>
 #include <sbeio/sbe_ffdc_parser.H>
-#include <kernel/pagemgr.H>
 #include <fapi2.H>
 #include <set_sbe_error.H>
 #include <sbeio/sbe_sp_intf.H>
@@ -86,7 +85,6 @@ using namespace ERRORLOG;
 namespace SBEIO
 {
 
-
 SbeFifo & SbeFifo::getTheInstance()
 {
     return Singleton<SbeFifo>::instance();
@@ -97,8 +95,6 @@ SbeFifo & SbeFifo::getTheInstance()
  */
 SbeFifo::SbeFifo()
 {
-    iv_ffdcPackageBuffer = PageManager::allocatePage(SBE_FFDC_MAX_PAGES, true);
-    initFFDCPackageBuffer();
 }
 
 /**
@@ -106,10 +102,6 @@ SbeFifo::SbeFifo()
  */
 SbeFifo::~SbeFifo()
 {
-    if(iv_ffdcPackageBuffer != NULL)
-    {
-        PageManager::freePage(iv_ffdcPackageBuffer);
-    }
 }
 
 errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   * i_target,
@@ -160,6 +152,7 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
     if (errl) {SBE_TRACF(ERR_MRK  "performFifoChipOp");}
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
+
     return errl;
 }
 
@@ -511,6 +504,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
             // Log the end of the data buffer that we have
             l_numwords = std::min( (size_t)16, //last 16 words
                                    l_fifoBuffer.index() );
+
             if( l_numwords )
             {
                 errl->addFFDC( SBEIO_COMP_ID,
@@ -646,11 +640,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                 break;
             }
 
-            writeFFDCBuffer(l_fifoBuffer.getFFDCPtr(),
-                            l_fifoBuffer.getFFDCByteSize());
-
             SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
-            l_ffdc_parser->parseFFDCData(iv_ffdcPackageBuffer);
+            l_ffdc_parser->parseFFDCData(const_cast<void*>(l_fifoBuffer.getFFDCPtr()));
 
             // Go through the buffer, get the RC
             uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
@@ -968,6 +959,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
         // try later
         nanosleep( 0, 10000 ); //sleep for 10,000 ns
         l_elapsed_time_ns += 10000;
+
     }
     while (1);
 
@@ -1127,7 +1119,7 @@ errlHndl_t SbeFifo::readFifoReg(TARGETING::Target     *i_target,
                               o_pData,
                               l_32bitSize,
                               DEVICE_CFAM_ADDRESS(l_addr));
-            SBE_TRACU("  readFifoReg  SPPE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
+            SBE_TRACU("  readFifoReg   SPPE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
             if( o_meta )
             {
                 o_meta->type = DeviceFW::CFAM;
@@ -1144,7 +1136,7 @@ errlHndl_t SbeFifo::readFifoReg(TARGETING::Target     *i_target,
                           o_pData,
                           l_32bitSize,
                           DEVICE_CFAM_ADDRESS(l_addr));
-        SBE_TRACU("  readFifoReg  SBE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
+        SBE_TRACU("  readFifoReg   SBE addr=0x%08lx data=0x%08x", l_addr,*o_pData);
         if( o_meta )
         {
             o_meta->type = DeviceFW::CFAM;
@@ -1219,34 +1211,6 @@ errlHndl_t SbeFifo::writeFifoReg(TARGETING::Target     *i_target,
 }
 
 /**
- * @brief zero out FFDC Package Buffer
- */
-
-void SbeFifo::initFFDCPackageBuffer()
-{
-    memset(iv_ffdcPackageBuffer, 0x00, PAGESIZE * SBE_FFDC_MAX_PAGES);
-}
-
-/**
- * @brief populate FFDC package buffer
- * @param[in]  i_data        FFDC error data
- * @param[in]  i_len         data buffer len to copy
- */
-void SbeFifo::writeFFDCBuffer(const void * i_data, uint32_t i_len)
-{
-    if(i_len <= PAGESIZE * SBE_FFDC_MAX_PAGES)
-    {
-        initFFDCPackageBuffer();
-        memcpy(iv_ffdcPackageBuffer, i_data, i_len);
-    }
-    else
-    {
-        SBE_TRACF(ERR_MRK"writeFFDCBuffer: Buffer size too large: %d",
-                      i_len);
-    }
-}
-
-/**
  * @brief Collect appropriate registers for FFDC.
  */
 void SbeFifo::collectRegFFDC(TARGETING::Target * i_target,
@@ -1305,4 +1269,4 @@ void SbeFifo::collectRegFFDC(TARGETING::Target * i_target,
     l_regs.addToLog(i_errhdl);
 }
 
-} //end of namespace SBEIO
+}; // namespace SBEIO

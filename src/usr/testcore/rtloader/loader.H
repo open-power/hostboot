@@ -143,6 +143,10 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 SBEIO::SbePsu::getTheInstance().ignoreInterrupts(true);
 #endif //#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
 
+                // Set Odyssey OCMBs to use inband scoms for runtime tests.
+                // The tests that use SBE FIFO will have to explicitly set
+                // up the SCOM flags attribute before performing the test.
+                resetOdysseyOcmbFifoState();
 
                 hostInterfaces_t* intf = new hostInterfaces_t();
                 intf->interfaceVersion = HOSTBOOT_RUNTIME_INTERFACE_VERSION;
@@ -231,6 +235,25 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
         }
 
     private:
+        void resetOdysseyOcmbFifoState()
+        {
+            using namespace TARGETING;
+            TargetHandleList l_ocmbs;
+            getAllChips(l_ocmbs, TYPE_OCMB_CHIP, true /*functional only*/);
+            for(auto l_ocmb : l_ocmbs)
+            {
+                // Set up OCMB SCOM switches such that by default runtime tests
+                // use inband SCOMs. In order to use FIFO SCOMs, the tests will
+                // have to explicitly set the SCOM flags.
+                auto l_scomSwitches = l_ocmb->getAttr<ATTR_SCOM_SWITCHES>();
+                l_scomSwitches.useInbandScom = 1;
+                l_scomSwitches.useSbeScom = 0;
+                l_scomSwitches.useI2cScom = 0;
+                l_ocmb->setAttr<ATTR_SCOM_SWITCHES>(l_scomSwitches);
+                l_ocmb->setAttr<ATTR_USE_PIPE_FIFO>(1);
+            }
+        }
+
         void tearDown()
         {
             if (cv_hb_data_addr != 0)

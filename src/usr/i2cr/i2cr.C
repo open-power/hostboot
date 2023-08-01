@@ -1179,7 +1179,9 @@ errlHndl_t i2crCheckErrors( Target* i_target, uint64_t i_addr, uint32_t i_sftAdd
             l_regdata.addDataBuffer(reinterpret_cast<void *>(&l_configReg), sizeof(l_configReg),
                                     DEVICE_I2CR_SCOM_ADDRESS(I2CR_FIRST_ERROR_LOG_REG));
             l_regdata.addToLog(l_err);
+#ifndef __HOSTBOOT_RUNTIME
             SECUREBOOT::addSecureUserDetailsToErrlog(l_err);
+#endif
             break;
         }
 

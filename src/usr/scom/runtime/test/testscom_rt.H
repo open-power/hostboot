@@ -122,7 +122,7 @@ public:
                   // so as to not alter the expected test data to later compare results
                   uint64_t volatile_data = 0x0ULL;
                   volatile_data = test_data[x].data;
-                  l_err = deviceWrite( ocmb_target,
+                  l_err = deviceWrite(ocmb_target,
                                       &volatile_data,
                                       op_size,
                                       DEVICE_SCOM_ADDRESS(test_data[x].addr) );
@@ -216,10 +216,28 @@ public:
               l_switches.useSbeScom = 1;
               l_switches.useInbandScom = 0;
               ocmb_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+              ocmb_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
               recursive_mutex_unlock(l_mutex);
 
               for ( uint64_t x = 0; x < NUM_ADDRS; x++ )
               {
+                  // Re-write the test data into the regs. Channel failure will
+                  // use a different (I2CR) path to write the data, so we will
+                  // exercise a different code path with this write.
+                  total++;
+                  uint64_t volatile_data = 0x0ULL;
+                  volatile_data = test_data[x].data;
+                  l_err = deviceWrite( ocmb_target,
+                                      &volatile_data,
+                                      op_size,
+                                      DEVICE_SCOM_ADDRESS(test_data[x].addr) );
+                  if( l_err )
+                  {
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d WRITE: Error SCOM addr=0x%llX, RC=%llX", x, test_data[x].addr, l_err->reasonCode() );
+                      fails++;
+                      errlCommit(l_err,SCOM_COMP_ID);
+                  }
+
                   total++;
                   l_err = deviceRead( ocmb_target,
                                       &(read_data[x]),
@@ -227,9 +245,8 @@ public:
                                       DEVICE_SCOM_ADDRESS(test_data[x].addr) );
                   if( l_err )
                   {
-                      // @TODO PFHB-400
-                      TS_INFO("ScomTest::test_SCOMreadWrite_ocmb_ody> Read: CHANNEL FAIL Error UNSUPPORTED needs PFHB-400 SCOM addr=0x%llX, RC=%X", test_data[x].addr, l_err->reasonCode() );
-                      //fails++;
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> Read: CHANNEL FAIL Error UNSUPPORTED needs PFHB-400 SCOM addr=0x%llX, RC=%X", test_data[x].addr, l_err->reasonCode() );
+                      fails++;
                       errlCommit(l_err,SCOM_COMP_ID);
                   }
                   else if (read_data[x] != test_data[x].data)
@@ -248,6 +265,7 @@ public:
               l_switches.useSbeScom = 0;
               l_switches.useInbandScom = 1;
               ocmb_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+              ocmb_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(1);
               recursive_mutex_unlock(l_mutex);
 
           } // end FUNCTIONAL

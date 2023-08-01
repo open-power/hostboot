@@ -41,6 +41,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/sbe_utils/include
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
 EXTRAINCDIR += ${ROOTPATH}/src/import
+EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio
 
 #Common Objects
 OBJS += sbe_attn.o
@@ -57,6 +58,7 @@ OBJS += sbe_utils.o
 OBJS += sbe_psuSendMemConfig.o
 OBJS += sbe_psuSendCoreConfig.o
 OBJS += pmic_n_mode_detect.o
+OBJS += sbe_fifo_buffer.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common

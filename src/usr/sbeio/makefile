@@ -52,7 +52,6 @@ OBJS += sbe_codeUpdate.o
 OBJS += sbe_iplControl.o
 OBJS += sbe_memRegionMgr.o
 OBJS += sbe_psuTPMExtendMode.o
-OBJS += sbe_fifo_buffer.o
 OBJS += sbe_securityListBinDump.o
 OBJS += sbe_exitCacheContained.o
 OBJS += p10_extract_sbe_rc.o

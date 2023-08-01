@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2021
+# Contributors Listed Below - COPYRIGHT 2017,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,7 @@ ROOTPATH = ../../../..
 MODULE = sbeio_rt
 
 VPATH += ../
+VPATH += ${ROOTPATH}/src/usr/i2cr/
 PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
 
 # pull in .mk common between sbeio and sbeio_rt
@@ -45,9 +46,13 @@ OBJS += p10_clock_test_cmn.o
 OBJS += p10_ppe_utils.o
 OBJS += p10_ppe_common.o
 OBJS += rt_sbe_psudd.o
+OBJS += sbe_scomAccess.o
+OBJS += i2cr.o
+OBJS += sbe_fifodd.o
 
 # for PRDF channel failure cache registers
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/
 
 ## sbeio_rt's sub directories
 SUBDIRS += test.d
