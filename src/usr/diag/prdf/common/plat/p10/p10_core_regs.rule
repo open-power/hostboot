@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -119,6 +119,48 @@
     {
         name        "Core ISU Holdout 3";
         scomaddr    0x20028643;
+        capture     group eq_core_fir_ffdc;
+    };
+
+    register MMU_HOLD_OUT_REG0
+    {
+        name        "Core MMU Holdout 0";
+        scomaddr    0x20028680;
+        capture     group eq_core_fir_ffdc;
+    };
+
+    register MMU_HOLD_OUT_REG1
+    {
+        name        "Core MMU Holdout 1";
+        scomaddr    0x20028681;
+        capture     group eq_core_fir_ffdc;
+    };
+
+    register MMU_HOLD_OUT_REG2
+    {
+        name        "Core MMU Holdout 2";
+        scomaddr    0x20028682;
+        capture     group eq_core_fir_ffdc;
+    };
+
+    register MMU_HOLD_OUT_REG3
+    {
+        name        "Core MMU Holdout 3";
+        scomaddr    0x20028683;
+        capture     group eq_core_fir_ffdc;
+    };
+
+    register MMU_HOLD_OUT_REG4
+    {
+        name        "Core MMU Holdout 4";
+        scomaddr    0x20028684;
+        capture     group eq_core_fir_ffdc;
+    };
+
+    register MMU_HOLD_OUT_REG5
+    {
+        name        "Core MMU Holdout 5";
+        scomaddr    0x20028685;
         capture     group eq_core_fir_ffdc;
     };
 
