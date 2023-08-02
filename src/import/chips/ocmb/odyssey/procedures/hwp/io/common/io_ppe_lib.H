@@ -334,9 +334,9 @@ uint64_t io_ppe_regs<K, M, V>::calcAddress(const uint32_t i_section_addr,
         const uint32_t i_lane)
 {
     uint64_t l_reg_addr = ((i_lane << 4) | i_address) & 0xFFC;
-    l_reg_addr += (i_thread * i_thread_size);
     l_reg_addr <<= 1; //input address is 16bit register address, shift left to get byte addr
     uint64_t l_addr = i_section_addr + l_reg_addr;
+    l_addr += (i_thread * i_thread_size);
     l_addr <<= 32;
     return l_addr;
 }

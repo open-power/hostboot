@@ -50,9 +50,13 @@ fapi2::ReturnCode ody_omi_hss_ppe_start(const fapi2::Target<fapi2::TARGET_TYPE_O
     io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
             PHY_PPE_WRAP0_ARB_CSDR,
             PHY_ODY_OMI_BASE);
-    io_ppe_firs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_firs(FIR_SCOM_LFIR_RW_WCLEAR_REG, FIR_DL0_ERROR_MASK,
-            FIR_DL0_ERROR_ACTION, FIR_MC_OMI_RW_WCLEAR_REG,
-            FIR_DL0_SKIT_CTL, FIR_TLX_RW_WCLEAR);
+
+    io_ppe_firs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_firs(FIR_SCOM_LFIR_RW_WCLEAR_REG,
+            FIR_DL0_ERROR_MASK,
+            FIR_DL0_ERROR_ACTION,
+            FIR_MC_OMI_RW_WCLEAR_REG,
+            FIR_DL0_SKIT_CTL,
+            FIR_TLX_RW_WCLEAR);
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 
@@ -62,7 +66,7 @@ fapi2::ReturnCode ody_omi_hss_ppe_start(const fapi2::Target<fapi2::TARGET_TYPE_O
     FAPI_TRY(l_ppe_common.ppe_start(i_target, l_fail, l_iar));
 
     FAPI_ASSERT(
-        !(l_fail & 0x3),
+        !l_fail,
         fapi2::IO_PPE_RESET()
         .set_TARGET_CHIP(i_target)
         .set_IAR(l_iar),

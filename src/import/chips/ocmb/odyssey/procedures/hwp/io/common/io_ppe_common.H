@@ -506,6 +506,7 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init_thread(const fapi2::Target<K
         const uint8_t i_bist_timer_sel)
 {
     FAPI_DBG("Start");
+    constexpr uint32_t c_max_lanes = 32;
     uint32_t l_lane = 0;
     uint32_t l_rx_mask = i_rx_mask;
     uint8_t l_ppe_data_rate = calc_ppe_data_rate(i_freq);
@@ -530,7 +531,7 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init_thread(const fapi2::Target<K
     //"rx_ctle_peak1_cal_disable": 0, *
     FAPI_TRY(MEM_REG_RX_CTLE_PEAK1_CAL_DISABLE_PUT(iv_regs, i_target, i_thread, 0));
 
-    for (l_lane = 0; l_lane < 8; l_lane++)
+    for (l_lane = 0; l_lane < c_max_lanes; l_lane++)
     {
         if (l_rx_mask & 0x80000000)
         {
