@@ -94,6 +94,11 @@
         "description": "P10 chip EQ_NCU_FIR ACT1",
         "name": "EQ_NCU_FIR_ACT1"
     },
+    "0x30cd": {
+        "address": "0x0000000020028680",
+        "description": "Core MMU Holdout 0",
+        "name": "MMU_HOLD_OUT_REG0"
+    },
     "0x3103": {
         "address": "0x00000000200286c9",
         "description": "Core LSU Holdout 9",
@@ -104,10 +109,35 @@
         "description": "P10 chip EQ_L3_FIR MASK",
         "name": "EQ_L3_FIR_MASK"
     },
+    "0x31cd": {
+        "address": "0x0000000020028681",
+        "description": "Core MMU Holdout 1",
+        "name": "MMU_HOLD_OUT_REG1"
+    },
+    "0x32cd": {
+        "address": "0x0000000020028682",
+        "description": "Core MMU Holdout 2",
+        "name": "MMU_HOLD_OUT_REG2"
+    },
+    "0x33cd": {
+        "address": "0x0000000020028683",
+        "description": "Core MMU Holdout 3",
+        "name": "MMU_HOLD_OUT_REG3"
+    },
+    "0x34cd": {
+        "address": "0x0000000020028684",
+        "description": "Core MMU Holdout 4",
+        "name": "MMU_HOLD_OUT_REG4"
+    },
     "0x355f": {
         "address": "0x000000002001864e",
         "description": "NCU Error Report",
         "name": "NCU_ERR_RPT_REG"
+    },
+    "0x35cd": {
+        "address": "0x0000000020028685",
+        "description": "Core MMU Holdout 5",
+        "name": "MMU_HOLD_OUT_REG5"
     },
     "0x3a36": {
         "address": "0x0000000020018640",
