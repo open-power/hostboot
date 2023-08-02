@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Super Micro Computer, Inc.                                         */
 /*                                                                        */
@@ -483,6 +483,8 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
         {
             HDAT_ERR("PNOR::getSectionInfo returns error. Fill the size as 0");
             iv_mem.hdatHostRamSize = 0;
+            delete l_errlHndl;
+            l_errlHndl = nullptr;
         }
         else
         {
