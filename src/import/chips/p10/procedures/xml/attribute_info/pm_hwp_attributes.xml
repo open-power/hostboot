@@ -895,7 +895,7 @@
   </attribute>
   <!-- *********************************************************************-->
  <attribute>
-<id>ATTR_WOF_IO_START</id>
+    <id>ATTR_WOF_IO_START</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
     The starting power (in Watts) for the WOF I/O dimension.  This value will be
@@ -909,7 +909,7 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
-<attribute>
+  <attribute>
     <id>ATTR_WOF_IO_STEP</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -924,7 +924,7 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
- <attribute>
+  <attribute>
     <id>ATTR_WOF_IO_COUNT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -953,7 +953,7 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
-<attribute>
+  <attribute>
     <id>ATTR_WOF_TDP_IO_INDEX</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
@@ -968,37 +968,50 @@
     <initToZero/>
   </attribute>
   <!-- *********************************************************************-->
-<attribute>
+  <attribute>
   <id>ATTR_DEAD_CORE_MODE</id>
-  <targetType>TARGET_TYPE_CORE</targetType>
-  <description>
-   This tells core is dead or not. if it is dead, then this core shouldn't
-   be used in any of bringup activity
-   DISABLED: Not a dead core
-   ENABLED: Phyp marked dead core
-  </description>
-  <valueType>uint8</valueType>
-  <enum>DISABLED = 0x0, ENABLED = 0x1</enum>
-  <default>DISABLED</default>
-  <writeable/>
-</attribute>
+    <targetType>TARGET_TYPE_CORE</targetType>
+    <description>
+     This tells core is dead or not. if it is dead, then this core shouldn't
+     be used in any of bringup activity
+     DISABLED: Not a dead core
+     ENABLED: Phyp marked dead core
+    </description>
+    <valueType>uint8</valueType>
+    <enum>DISABLED = 0x0, ENABLED = 0x1</enum>
+    <default>DISABLED</default>
+    <writeable/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SAFE_MODE_THROTTLE_IDX</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    Set the index into a 64 entry Core Throttle Table to use while in Safe Mode.
 
- <!-- ********************************************************************* -->
-<attribute>
-  <id>ATTR_SAFE_MODE_THROTTLE_IDX</id>
-  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
-  <description>
-  Set the index into a 64 entry Core Throttle Table to use while in Safe Mode.
+    Legal values are 0 to 63.  All others are invalid.
 
-  Legal values are 0 to 63.  All others are invalid.
+    Consumer: p10_pstate_parameter_build ->
+              PGPE Hcode -> QME Hcode
+    </description>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <default>0</default>
+    <group>safe</group>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_PDW_TRACE_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enable VPD #W (DDS) content tracing.  This is lengthy so it's only enabled if requested.
 
-  Consumer: p10_pstate_parameter_build ->
-            PGPE Hcode -> QME Hcode
-  </description>
-  <valueType>uint8</valueType>
-  <writeable/>
-  <default>0</default>
-  <group>safe</group>
-</attribute>
-
+    Consumer: p10_pstate_parameter_build
+    </description>
+    <valueType>uint8</valueType>
+    <initToZero/>
+    <overrideOnly/>
+    <group>debug</group>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
