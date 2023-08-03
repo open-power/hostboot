@@ -139,7 +139,7 @@ public:
                         addrParams.push_back("  CFAM address");
                         break;
                     case DeviceFW::I2CR_SCOM:   // driverif.H
-                        i_parser.PrintString("AccessType", "DeviceFW::FSISCOM");
+                        i_parser.PrintString("AccessType", "DeviceFW::I2CR_SCOM");
                         numArgs = 1;
                         addrParams.push_back("  ISCR Scom address");
                         break;
