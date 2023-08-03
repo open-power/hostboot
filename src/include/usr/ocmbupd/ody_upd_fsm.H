@@ -152,11 +152,13 @@ errlHndl_t set_ody_code_levels_state(TARGETING::Target* i_ocmb);
  *  This is a separate function because this function is populated
  *  every Odyssey boot, whereas the other information needs to be
  *  preserved across Odyssey boots.
+ *
+ *  @note This function accepts any type of OCMB, not just Odyssey.
  */
 inline void clear_ody_code_levels_state(TARGETING::Target* const i_ocmb)
 {
     using namespace TARGETING;
-    if (UTIL::isOdysseyChip(i_ocmb))
+    if (i_ocmb->getAttr<ATTR_TYPE>() == TYPE_OCMB_CHIP)
     {
         i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_UNKNOWN);
 
@@ -172,12 +174,13 @@ inline void clear_ody_code_levels_state(TARGETING::Target* const i_ocmb)
  *
  *  @note This is inline in this header so that other libraries don't have to
  *        load libocmbupd to use it.
+ *  @note This function accepts any type of OCMB, not just Odyssey.
  */
 inline void ody_upd_reset_state(TARGETING::Target* const i_ocmb)
 {
     using namespace TARGETING;
 
-    if (UTIL::isOdysseyChip(i_ocmb))
+    if (i_ocmb->getAttr<ATTR_TYPE>() == TYPE_OCMB_CHIP)
     {
         i_ocmb->setAttr<ATTR_OCMB_CODE_UPDATED>(0);
         i_ocmb->setAttr<ATTR_OCMB_GOLDEN_BOOT_ATTEMPTED>(0);

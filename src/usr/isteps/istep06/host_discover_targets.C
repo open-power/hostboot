@@ -474,11 +474,11 @@ void* host_discover_targets( void *io_pArgs )
     // If we detect that an Odyssey target was added or removed, reset
     // its code update state, since it's no longer applicable.
     const auto part_change_callback_handle =
-        EEPROM::registerPartChangedCallback([](TARGETING::Target* const target,
+        EEPROM::registerPartChangedCallback([](TARGETING::Target* target,
                                                EEPROM::part_change_t)
         {
-            if (TARGETING::UTIL::isOdysseyChip(target))
-            {
+            if (target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
+            { // we don't care what kind of dimm this is, this function will handle it.
                 ocmbupd::ody_upd_reset_state(target);
             }
         });

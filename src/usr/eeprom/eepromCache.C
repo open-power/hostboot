@@ -492,6 +492,8 @@ bool updateCacheMap(TARGETING::Target  *       i_target,
                 && hasEepromChanged( i_partialRecordHeader ))
         {
             HWAS::markTargetChanged(i_target);
+
+            invokePartChangedCallbacks(i_target, PART_ADDED);
         }
         TRACSSCOMP(g_trac_eeprom,
                 "updateCacheMap() Eeprom w/ Role %d, HUID 0x%.08X already in global map of cached eeproms",
