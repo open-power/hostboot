@@ -286,17 +286,17 @@ void read_ivddq(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     // (SWA2 + SWB2)
     // (SWA3 + SWB2)
 
-    l_phase[0] = (io_health_check_info.iv_pmic0.iv_swa_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER) +
-                 (io_health_check_info.iv_pmic0.iv_swb_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
+    l_phase[0] = (io_health_check_info.iv_pmic0.iv_swa_current_mA) +
+                 (io_health_check_info.iv_pmic0.iv_swb_current_mA);
 
-    l_phase[1] = (io_health_check_info.iv_pmic1.iv_swa_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER) +
-                 (io_health_check_info.iv_pmic1.iv_swb_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
+    l_phase[1] = (io_health_check_info.iv_pmic1.iv_swa_current_mA) +
+                 (io_health_check_info.iv_pmic1.iv_swb_current_mA);
 
-    l_phase[2] = (io_health_check_info.iv_pmic2.iv_swa_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER) +
-                 (io_health_check_info.iv_pmic2.iv_swb_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
+    l_phase[2] = (io_health_check_info.iv_pmic2.iv_swa_current_mA) +
+                 (io_health_check_info.iv_pmic2.iv_swb_current_mA);
 
-    l_phase[3] = (io_health_check_info.iv_pmic3.iv_swa_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER) +
-                 (io_health_check_info.iv_pmic3.iv_swb_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
+    l_phase[3] = (io_health_check_info.iv_pmic3.iv_swa_current_mA) +
+                 (io_health_check_info.iv_pmic3.iv_swb_current_mA);
 
     phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
 }
@@ -317,8 +317,8 @@ void read_ivio(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     const uint8_t l_pmic[] = {1, 2};
 
     // IVIO is made up of SWD1 and SWC2
-    l_phase[0] = (io_health_check_info.iv_pmic1.iv_swd_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
-    l_phase[1] = (io_health_check_info.iv_pmic2.iv_swc_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
+    l_phase[0] = io_health_check_info.iv_pmic1.iv_swd_current_mA;
+    l_phase[1] = io_health_check_info.iv_pmic2.iv_swc_current_mA;
 
     phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
 }
@@ -339,8 +339,8 @@ void read_ivpp(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     const uint8_t l_pmic[] = {0, 2};
 
     // IVPP is made up of SWD0 and SWD2
-    l_phase[0] = (io_health_check_info.iv_pmic0.iv_swd_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
-    l_phase[1] = (io_health_check_info.iv_pmic2.iv_swd_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
+    l_phase[0] = (io_health_check_info.iv_pmic0.iv_swd_current_mA);
+    l_phase[1] = (io_health_check_info.iv_pmic2.iv_swd_current_mA);
 
     phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
 }
@@ -361,65 +361,11 @@ void read_ivdd(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     const uint8_t l_pmic[] = {0, 1, 3};
 
     // IVDD is made up of SWC0, SWC1 and SWC3
-    l_phase[0] = (io_health_check_info.iv_pmic0.iv_swc_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
-    l_phase[1] = (io_health_check_info.iv_pmic1.iv_swc_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
-    l_phase[2] = (io_health_check_info.iv_pmic3.iv_swc_current_mA * mss::pmic::ddr5::CURRENT_MULTIPLIER);
+    l_phase[0] = (io_health_check_info.iv_pmic0.iv_swc_current_mA);
+    l_phase[1] = (io_health_check_info.iv_pmic1.iv_swc_current_mA);
+    l_phase[2] = (io_health_check_info.iv_pmic3.iv_swc_current_mA);
 
     phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
-}
-
-///
-/// @brief Convert raw current values to readble hex values
-///
-/// @param[in,out] io_health_check_info health check struct for raw phase readings
-/// @return void
-/// @note This function should be called only once to convert the raw values else we will keep multiplying
-/// the values with 125 and get a wrong conversion.
-///
-void convert_raw_current_readable_values(mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
-{
-    // Overflow is not possible here as CURRENT_BITMAP_MULTIPLIER of 125 results in a max of
-    // 125 * 0xFF = 0x7C83 which is within the uint16_t bounds
-    // SWA
-    io_health_check_info.iv_pmic0.iv_swa_current_mA = io_health_check_info.iv_pmic0.iv_swa_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic1.iv_swa_current_mA = io_health_check_info.iv_pmic1.iv_swa_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic2.iv_swa_current_mA = io_health_check_info.iv_pmic2.iv_swa_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic3.iv_swa_current_mA = io_health_check_info.iv_pmic3.iv_swa_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-
-    // SWB
-    io_health_check_info.iv_pmic0.iv_swb_current_mA = io_health_check_info.iv_pmic0.iv_swb_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic1.iv_swb_current_mA = io_health_check_info.iv_pmic1.iv_swb_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic2.iv_swb_current_mA = io_health_check_info.iv_pmic2.iv_swb_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic3.iv_swb_current_mA = io_health_check_info.iv_pmic3.iv_swb_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-
-    // SWC
-    io_health_check_info.iv_pmic0.iv_swc_current_mA = io_health_check_info.iv_pmic0.iv_swc_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic1.iv_swc_current_mA = io_health_check_info.iv_pmic1.iv_swc_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic2.iv_swc_current_mA = io_health_check_info.iv_pmic2.iv_swc_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic3.iv_swc_current_mA = io_health_check_info.iv_pmic3.iv_swc_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-
-    // SWD
-    io_health_check_info.iv_pmic0.iv_swd_current_mA = io_health_check_info.iv_pmic0.iv_swd_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic1.iv_swd_current_mA = io_health_check_info.iv_pmic1.iv_swd_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic2.iv_swd_current_mA = io_health_check_info.iv_pmic2.iv_swd_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_health_check_info.iv_pmic3.iv_swd_current_mA = io_health_check_info.iv_pmic3.iv_swd_current_mA *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-
 }
 
 ///
@@ -447,8 +393,6 @@ void check_current_imbalance(mss::pmic::ddr5::target_info_redundancy_ddr5& io_ta
     // VDD
     FAPI_INF("Checking voltage domain VDD");
     read_ivdd(io_target_info, io_health_check_info);
-
-    convert_raw_current_readable_values(io_health_check_info);
 }
 
 ///
@@ -595,10 +539,14 @@ void fill_pmic_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_PMIC_REGS_RE
     io_pmic_health_check.iv_r09 = i_data[mss::pmic::ddr5::data_position::DATA_5];
     io_pmic_health_check.iv_r0a = i_data[mss::pmic::ddr5::data_position::DATA_6];
     io_pmic_health_check.iv_r0b = i_data[mss::pmic::ddr5::data_position::DATA_7];
-    io_pmic_health_check.iv_swa_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_8];
-    io_pmic_health_check.iv_swb_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_9];
-    io_pmic_health_check.iv_swc_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_10];
-    io_pmic_health_check.iv_swd_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_11];
+    io_pmic_health_check.iv_swa_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_8] *
+            mss::pmic::ddr5::CURRENT_MULTIPLIER;
+    io_pmic_health_check.iv_swb_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_9] *
+            mss::pmic::ddr5::CURRENT_MULTIPLIER;
+    io_pmic_health_check.iv_swc_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_10] *
+            mss::pmic::ddr5::CURRENT_MULTIPLIER;
+    io_pmic_health_check.iv_swd_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_11] *
+            mss::pmic::ddr5::CURRENT_MULTIPLIER;
 }
 
 ///

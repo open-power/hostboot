@@ -842,7 +842,7 @@ fapi_try_exit:
 /// @param[in] i_target_info target info struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-// TODO: ZEN:MST-1905 Implement health check
+// TODO: ZEN:MST-2171 Call health check and periodic telemetry at the end of pmic_enable
 fapi2::ReturnCode redundancy_check_all_pmics(const target_info_redundancy_ddr5& i_target_info)
 {
     return fapi2::FAPI2_RC_SUCCESS;
@@ -906,7 +906,7 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(mss::pmic::ddr5::clear_adc_events(l_target_info.iv_adc));
 
     // Fifth, verification
-    // TODO: ZEN:MST-1905 Implement health check
+    // TODO: ZEN:MST-2171 Call health check and periodic telemetry at the end of pmic_enable
     // Now, check that the PMICs were enabled properly. If any don't report on that are expected
     // to be on, create a unique case of breadcrumbs
     FAPI_TRY(mss::pmic::ddr5::redundancy_check_all_pmics(l_target_info));
