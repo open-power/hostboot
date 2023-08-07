@@ -85,7 +85,7 @@ package_directories = {
     "udparsers.be500":   "src/usr/diag/prdf/peltool/ud",
     "udparsers.helpers": "src/build/tools/ebmc",
     "udparsers.b2800":   "src/usr/sbeio/plugins/ebmc",
-    "udparsers.b2200":   "src/usr/sbe/plugins/ebmc"
+    "udparsers.b2200":   "src/usr/sbe/plugins/ebmc",
     "udparsers.b2900":   "src/import/chips/p10/procedures/ppe/fw_tools/b2900/",
     "udparsers.b2e00":   "src/import/chips/p10/procedures/ppe/fw_tools/b2e00/",
     "udparsers.b2f00":   "src/import/chips/p10/procedures/ppe/fw_tools/b2f00/",
