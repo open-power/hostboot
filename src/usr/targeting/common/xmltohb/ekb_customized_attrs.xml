@@ -997,6 +997,14 @@
          <persistency>volatile-zeroed</persistency>
     </attribute>
 
+    <attribute>
+         <!-- Set by HB during each boot based on value provided by SPPE -->
+         <id>ATTR_SECURITY_LEVEL</id>
+         <writeable/>
+         <no_export/>
+         <persistency>volatile</persistency>
+    </attribute>
+
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
