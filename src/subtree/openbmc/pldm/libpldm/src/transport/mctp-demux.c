@@ -278,8 +278,9 @@ LIBPLDM_ABI_TESTING
 int pldm_transport_mctp_demux_get_socket_fd(
 	struct pldm_transport_mctp_demux *ctx)
 {
-	if (ctx && ctx->socket) {
+	if (ctx) {
 		return ctx->socket;
 	}
+
 	return -1;
 }

@@ -23,10 +23,10 @@ struct pldm_transport;
  *            Specifying a timeout value of zero yields an immediate return.
  *            Specifying a negative value means an indefinite timeout.
  *
- * @return pldm_requester_rc_t (errno may be set)
+ * @return 0 if a timeout occurs, 1 if the transport becomes ready, PLDM_REQUESTER_INVALID_SETUP if
+ * 	   transport is NULL, or PLDM_REQUESTER_POLL_FAIL on failure.
  */
-pldm_requester_rc_t pldm_transport_poll(struct pldm_transport *transport,
-					int timeout);
+int pldm_transport_poll(struct pldm_transport *transport, int timeout);
 
 /**
  * @brief Asynchronously send a PLDM message. Control is immediately returned to

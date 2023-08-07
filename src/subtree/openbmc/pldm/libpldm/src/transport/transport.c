@@ -30,25 +30,31 @@ static inline int poll(struct pollfd *fds __attribute__((unused)),
 #endif
 
 LIBPLDM_ABI_TESTING
-pldm_requester_rc_t pldm_transport_poll(struct pldm_transport *transport,
-					int timeout)
+int pldm_transport_poll(struct pldm_transport *transport, int timeout)
 {
 	struct pollfd pollfd;
 	int rc = 0;
 	if (!transport) {
 		return PLDM_REQUESTER_INVALID_SETUP;
 	}
+
+	/* If polling isn't supported then always indicate the transport is ready */
 	if (!transport->init_pollfd) {
-		return PLDM_REQUESTER_SUCCESS;
+		return 1;
 	}
 
-	transport->init_pollfd(transport, &pollfd);
+	rc = transport->init_pollfd(transport, &pollfd);
+	if (rc < 0) {
+		return PLDM_REQUESTER_POLL_FAIL;
+	}
+
 	rc = poll(&pollfd, 1, timeout);
 	if (rc < 0) {
 		return PLDM_REQUESTER_POLL_FAIL;
 	}
 
-	return PLDM_REQUESTER_SUCCESS;
+	/* rc is 0 if poll(2) times out, or 1 if pollfd becomes active. */
+	return rc;
 }
 
 LIBPLDM_ABI_TESTING
@@ -156,12 +162,27 @@ pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 	struct timeval now;
 	struct timeval end;
 	int ret;
+	int cnt;
 
 	if (req_msg_len < sizeof(*req_hdr) || !resp_msg_len) {
 		return PLDM_REQUESTER_INVALID_SETUP;
 	}
 
 	req_hdr = pldm_req_msg;
+
+	for (cnt = 0; cnt <= (PLDM_INSTANCE_MAX + 1) * PLDM_MAX_TIDS &&
+		      pldm_transport_poll(transport, 0) == 1;
+	     cnt++) {
+		rc = pldm_transport_recv_msg(transport, tid, pldm_resp_msg,
+					     resp_msg_len);
+		if (rc == PLDM_REQUESTER_SUCCESS) {
+			/* This isn't the message we wanted */
+			free(*pldm_resp_msg);
+		}
+	}
+	if (cnt == (PLDM_INSTANCE_MAX + 1) * PLDM_MAX_TIDS) {
+		return PLDM_REQUESTER_TRANSPORT_BUSY;
+	}
 
 	rc = pldm_transport_send_msg(transport, tid, pldm_req_msg, req_msg_len);
 	if (rc != PLDM_REQUESTER_SUCCESS) {
@@ -181,10 +202,10 @@ pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 	do {
 		timersub(&end, &now, &remaining);
 		/* 0 <= `timeval_to_msec()` <= 4800, and 4800 < INT_MAX */
-		rc = pldm_transport_poll(transport,
-					 (int)(timeval_to_msec(&remaining)));
-		if (rc != PLDM_REQUESTER_SUCCESS) {
-			return rc;
+		ret = pldm_transport_poll(transport,
+					  (int)(timeval_to_msec(&remaining)));
+		if (ret <= 0) {
+			break;
 		}
 
 		rc = pldm_transport_recv_msg(transport, tid, pldm_resp_msg,
@@ -203,7 +224,7 @@ pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 		if (ret < 0) {
 			return PLDM_REQUESTER_POLL_FAIL;
 		}
-	} while (!timercmp(&now, &end, <));
+	} while (timercmp(&now, &end, <));
 
 	return PLDM_REQUESTER_RECV_FAIL;
 }

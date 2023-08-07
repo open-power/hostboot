@@ -22,16 +22,6 @@ extern "C" {
 #include <string.h>
 #include <sys/types.h>
 
-/*
- * Fix up C11's _Static_assert() vs C++'s static_assert().
- *
- * Can we please have nice things for once.
- */
-#ifdef __cplusplus
-// NOLINTNEXTLINE(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp)
-#define _Static_assert(...) static_assert(__VA_ARGS__)
-#endif
-
 struct pldm_msgbuf {
 	uint8_t *cursor;
 	ssize_t remaining;

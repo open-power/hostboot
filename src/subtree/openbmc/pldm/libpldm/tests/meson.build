@@ -24,6 +24,7 @@ tests = [
   'libpldm_pdr_test',
   'libpldm_firmware_update_test',
   'msgbuf',
+  'transport',
 ]
 
 if get_option('oem-ibm').allowed()
@@ -45,6 +46,11 @@ foreach t : tests
                          gmock_dep]),
        workdir: meson.current_source_dir())
 endforeach
+
+test('bios_table_iter', executable('bios_table_iter',
+                                   'bios_table_iter.c',
+                                   implicit_include_directories: false,
+                                   include_directories: src_includes))
 
 test('msgbuf_generic', executable('msgbuf_generic',
                                   'msgbuf_generic.c',

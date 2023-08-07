@@ -20,7 +20,11 @@ int pldm_socket_sndbuf_init(struct pldm_socket_sndbuf *ctx, int socket)
 	ctx->socket = socket;
 
 	fp = fopen("/proc/sys/net/core/wmem_max", "r");
-	if (fp == NULL || fgets(line, sizeof(line), fp) == NULL) {
+	if (fp == NULL) {
+		return -1;
+	}
+
+	if (fgets(line, sizeof(line), fp) == NULL) {
 		fclose(fp);
 		return -1;
 	}

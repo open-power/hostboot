@@ -156,6 +156,13 @@ enum pldm_state_set_operational_fault_status_values {
 	PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_STRESSED = 2,
 };
 
+/* @brief List of states for the Operational Stress status (ID 9).
+ */
+enum pldm_state_set_operational_stress_status_values {
+	PLDM_STATE_SET_OPERATIONAL_STRESS_STATUS_NORMAL = 1,
+	PLDM_STATE_SET_OPERATIONAL_STRESS_STATUS_STRESSED = 2,
+};
+
 /* @brief List of states for the Operational Running Status state set (ID 11).
  */
 enum pldm_state_set_operational_running_status_values {

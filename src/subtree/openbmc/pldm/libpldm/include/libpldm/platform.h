@@ -515,7 +515,10 @@ struct pldm_pdr_fru_record_set {
 	uint16_t terminus_handle;
 	uint16_t fru_rsi;
 	uint16_t entity_type;
-	uint16_t entity_instance_num;
+	union {
+		uint16_t entity_instance_num;
+		uint16_t entity_instance;
+	};
 	uint16_t container_id;
 } __attribute__((packed));
 
@@ -723,7 +726,10 @@ struct pldm_numeric_sensor_value_pdr {
 	uint16_t terminus_handle;
 	uint16_t sensor_id;
 	uint16_t entity_type;
-	uint16_t entity_instance_num;
+	union {
+		uint16_t entity_instance_num;
+		uint16_t entity_instance;
+	};
 	uint16_t container_id;
 	uint8_t sensor_init;
 	bool8_t sensor_auxiliary_names_pdr;
@@ -1490,7 +1496,6 @@ int decode_get_pdr_resp(const struct pldm_msg *msg, size_t payload_length,
  *         field parameter as sizeof(set_effecter_state_field) *
  *         comp_effecter_count
  *  @param[out] msg - Message will be written to this
- *  @param[in] payload_length - Length of request message payload
  *  @return pldm_completion_codes
  *  @note  Caller is responsible for memory alloc and dealloc of param
  *         'msg.payload'
@@ -1500,8 +1505,7 @@ int encode_set_state_effecter_states_req(uint8_t instance_id,
 					 uint16_t effecter_id,
 					 uint8_t comp_effecter_count,
 					 set_effecter_state_field *field,
-					 struct pldm_msg *msg,
-					 size_t payload_length);
+					 struct pldm_msg *msg);
 
 /** @brief Decode SetStateEffecterStates response data
  *

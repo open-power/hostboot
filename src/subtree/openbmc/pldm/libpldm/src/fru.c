@@ -206,15 +206,15 @@ int encode_fru_record(uint8_t *fru_table, size_t total_size, size_t *curr_size,
 static bool is_table_end(const struct pldm_fru_record_data_format *p,
 			 const void *table, size_t table_size)
 {
-	return p ==
+	return p >=
 	       (const struct pldm_fru_record_data_format *)((uint8_t *)table +
 							    table_size);
 }
 
 LIBPLDM_ABI_STABLE
-void get_fru_record_by_option(const uint8_t *table, size_t table_size,
-			      uint8_t *record_table, size_t *record_size,
-			      uint16_t rsi, uint8_t rt, uint8_t ft)
+int get_fru_record_by_option_check(const uint8_t *table, size_t table_size,
+				   uint8_t *record_table, size_t *record_size,
+				   uint16_t rsi, uint8_t rt, uint8_t ft)
 {
 	const struct pldm_fru_record_data_format *record_data_src =
 		(const struct pldm_fru_record_data_format *)table;
@@ -245,7 +245,9 @@ void get_fru_record_by_option(const uint8_t *table, size_t table_size,
 		len = sizeof(struct pldm_fru_record_data_format) -
 		      sizeof(struct pldm_fru_record_tlv);
 
-		assert(pos - record_table + len < *record_size);
+		if (pos - record_table + len >= *record_size) {
+			return PLDM_ERROR_INVALID_LENGTH;
+		}
 		memcpy(pos, record_data_src, len);
 
 		record_data_dest = (struct pldm_fru_record_data_format *)pos;
@@ -256,7 +258,9 @@ void get_fru_record_by_option(const uint8_t *table, size_t table_size,
 		for (int i = 0; i < record_data_src->num_fru_fields; i++) {
 			len = sizeof(*tlv) - 1 + tlv->length;
 			if (tlv->type == ft || ft == 0) {
-				assert(pos - record_table + len < *record_size);
+				if (pos - record_table + len >= *record_size) {
+					return PLDM_ERROR_INVALID_LENGTH;
+				}
 				memcpy(pos, tlv, len);
 				pos += len;
 				count++;
@@ -270,6 +274,8 @@ void get_fru_record_by_option(const uint8_t *table, size_t table_size,
 	}
 
 	*record_size = pos - record_table;
+
+	return PLDM_SUCCESS;
 }
 
 LIBPLDM_ABI_STABLE

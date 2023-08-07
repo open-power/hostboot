@@ -25,6 +25,7 @@ typedef enum pldm_requester_error_codes {
 	PLDM_REQUESTER_SETUP_FAIL = -10,
 	PLDM_REQUESTER_INVALID_SETUP = -11,
 	PLDM_REQUESTER_POLL_FAIL = -12,
+	PLDM_REQUESTER_TRANSPORT_BUSY = -13,
 } pldm_requester_rc_t;
 
 /* ------ Old API ---- deprecated */
@@ -110,6 +111,11 @@ pldm_requester_rc_t pldm_recv(mctp_eid_t eid, int mctp_fd, uint8_t instance_id,
 pldm_requester_rc_t pldm_recv_any(mctp_eid_t eid, int mctp_fd,
 				  uint8_t **pldm_resp_msg,
 				  size_t *resp_msg_len);
+
+/**
+ * @brief Shutdown the MCTP socket
+ */
+void pldm_close(void);
 
 #ifdef __cplusplus
 }

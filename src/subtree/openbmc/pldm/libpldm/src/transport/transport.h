@@ -1,9 +1,5 @@
-#ifndef TRANSPORT_H
-#define TRANSPORT_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef LIBPLDM_SRC_TRANSPORT_TRANSPORT_H
+#define LIBPLDM_SRC_TRANSPORT_TRANSPORT_H
 
 #include "libpldm/base.h"
 #include "libpldm/requester/pldm.h"
@@ -31,8 +27,4 @@ struct pldm_transport {
 			   struct pollfd *pollfd);
 };
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // TRANSPORT_H
+#endif // LIBPLDM_SRC_TRANSPORT_TRANSPORT_H

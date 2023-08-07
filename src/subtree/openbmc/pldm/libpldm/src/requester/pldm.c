@@ -3,6 +3,7 @@
 #include "libpldm/transport.h"
 
 #include <bits/types/struct_iovec.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,23 +29,30 @@ static struct pldm_transport_mctp_demux *open_transport;
 LIBPLDM_ABI_STABLE
 pldm_requester_rc_t pldm_open(void)
 {
-	int fd;
-	int rc;
+	int fd = PLDM_REQUESTER_OPEN_FAIL;
 
 	if (open_transport) {
 		fd = pldm_transport_mctp_demux_get_socket_fd(open_transport);
-		return fd;
+
+		/* If someone has externally issued close() on fd then we need to start again. Use
+		 * `fcntl(..., F_GETFD)` to test whether fd is valid. */
+		if (fd < 0 || fcntl(fd, F_GETFD) < 0) {
+			pldm_close();
+		}
 	}
 
-	struct pldm_transport_mctp_demux *demux = NULL;
-	rc = pldm_transport_mctp_demux_init(&demux);
-	if (rc) {
-		return rc;
+	/* We retest open_transport as it may have been set to NULL by pldm_close() above. */
+	if (!open_transport) {
+		struct pldm_transport_mctp_demux *demux = NULL;
+
+		if (pldm_transport_mctp_demux_init(&demux) < 0) {
+			return PLDM_REQUESTER_OPEN_FAIL;
+		}
+
+		open_transport = demux;
+
+		fd = pldm_transport_mctp_demux_get_socket_fd(open_transport);
 	}
-
-	fd = pldm_transport_mctp_demux_get_socket_fd(demux);
-
-	open_transport = demux;
 
 	return fd;
 }
@@ -145,7 +153,7 @@ pldm_requester_rc_t pldm_send_recv(mctp_eid_t eid, int mctp_fd,
 	if (rc != PLDM_REQUESTER_SUCCESS) {
 		return rc;
 	}
-	hdr = (struct pldm_msg_hdr *)pldm_resp_msg;
+	hdr = (struct pldm_msg_hdr *)(*pldm_resp_msg);
 	if (hdr && (hdr->request || hdr->datagram)) {
 		free(*pldm_resp_msg);
 		*pldm_resp_msg = NULL;
@@ -170,7 +178,7 @@ pldm_requester_rc_t pldm_send(mctp_eid_t eid, int mctp_fd,
 
 /* Adding this here for completeness in the case we can't smoothly
  * transition apps over to the new api */
-LIBPLDM_ABI_STABLE
+LIBPLDM_ABI_TESTING
 void pldm_close(void)
 {
 	if (open_transport) {
