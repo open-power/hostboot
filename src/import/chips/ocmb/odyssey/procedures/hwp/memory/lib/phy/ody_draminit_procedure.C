@@ -101,19 +101,26 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     }
     else
     {
-        // 4. Initialize mailbox protocol and start training
-        FAPI_TRY(mss::ody::phy::init_mailbox_protocol(i_target));
-        FAPI_TRY(mss::ody::phy::start_training(i_target));
+        // Array for keeping track of the starting bad bits
+        // The bytes are in the MC perspective, while the ranks and bits are in the PHY perspective
+        uint8_t l_start_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] =
+        {
+            {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+            {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+            {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+            {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+        };
 
-        // 5. Processes and handles training messages (aka poll for completion)
-        FAPI_TRY (mss::ody::phy::poll_for_completion(i_target, l_poll_count, l_status, o_log_data));
-
-        // 6. Cleans up after training
-        FAPI_TRY(mss::ody::phy::cleanup_training(i_target));
-
-        // 7a. Read the data from the message block structure
-        FAPI_TRY(mss::ody::phy::read_msg_block(i_target, l_msg_block));
+        // run_training_helper executes steps 4, 5, 6, and 7a
+        FAPI_TRY(mss::ody::phy::run_training_helper(i_target, l_status, l_start_bad_bits, l_msg_block, o_log_data));
         mss::ody::phy::display_msg_block(i_target, l_msg_block);
+
+        // Handle any error recovery cases here
+        FAPI_TRY(mss::ody::phy::handle_draminit_recovery(i_target,
+                 l_status,
+                 l_start_bad_bits,
+                 l_msg_block,
+                 o_log_data));
 
         // 7b. Load attibutes with the message block contents
         FAPI_TRY(mss::ody::phy::set_attributes(i_target, l_msg_block));

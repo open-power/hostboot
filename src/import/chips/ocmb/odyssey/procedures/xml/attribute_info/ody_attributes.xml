@@ -91,6 +91,38 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_DRAMINIT_RECOVERY_ENABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Attribute to enable or disable draminit recovery</description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE = 1
+        </enum>
+        <default>0</default>
+        <writeable/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+        </sbeAttrSync>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Attribute to enable or disable draminit's specialized FIR error code</description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE = 1
+        </enum>
+        <default>1</default>
+        <writeable/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+        </sbeAttrSync>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_DRAMINIT_STEP_ENABLE</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>

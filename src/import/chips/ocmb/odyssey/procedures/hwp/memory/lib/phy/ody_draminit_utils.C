@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/mss_bad_bits.H>
+#include <generic/memory/lib/utils/mss_generic_check.H>
 #include <ody_scom_mp_apbonly0.H>
 #include <ody_scom_mp_mastr_b0.H>
 #include <ody_scom_mp_drtub0.H>
@@ -7250,6 +7251,643 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Extracts the bad bits out of a structure for comparison purposes for the draminit recovery algorithm
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_bad_bits the bad bits to insert into the message block
+/// @param[in,out] io_struct message block to update
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode update_struct_for_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t (&iv_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct)
+{
+    constexpr uint8_t PHY_TO_MC_BYTE0 = 0;
+    constexpr uint8_t PHY_TO_MC_BYTE1 = 1;
+    constexpr uint8_t PHY_TO_MC_BYTE2 = 2;
+    constexpr uint8_t PHY_TO_MC_BYTE3 = 3;
+    constexpr uint8_t PHY_TO_MC_BYTE4 = 5;
+    constexpr uint8_t PHY_TO_MC_BYTE5 = 6;
+    constexpr uint8_t PHY_TO_MC_BYTE6 = 7;
+    constexpr uint8_t PHY_TO_MC_BYTE7 = 8;
+    constexpr uint8_t PHY_TO_MC_BYTE8 = 4;
+    constexpr uint8_t PHY_TO_MC_BYTE9 = 9;
+
+    // Assign the results to the bad bits internal structure
+    // Swizzle for DBytes is handled by above constants
+    // Swizzle of bits within a DByte is handled by swizzle_bad_bits_phy_to_mc
+    // Note that the rank indexes used below are PHY perspective
+    io_struct.DisabledDB0LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE0];
+    io_struct.DisabledDB1LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE1];
+    io_struct.DisabledDB2LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE2];
+    io_struct.DisabledDB3LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE3];
+    io_struct.DisabledDB4LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE4];
+    io_struct.DisabledDB5LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE5];
+    io_struct.DisabledDB6LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE6];
+    io_struct.DisabledDB7LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE7];
+    io_struct.DisabledDB8LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE8];
+    io_struct.DisabledDB9LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE9];
+
+    io_struct.DisabledDB0LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE0];
+    io_struct.DisabledDB1LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE1];
+    io_struct.DisabledDB2LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE2];
+    io_struct.DisabledDB3LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE3];
+    io_struct.DisabledDB4LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE4];
+    io_struct.DisabledDB5LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE5];
+    io_struct.DisabledDB6LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE6];
+    io_struct.DisabledDB7LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE7];
+    io_struct.DisabledDB8LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE8];
+    io_struct.DisabledDB9LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE9];
+
+    io_struct.DisabledDB0LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE0];
+    io_struct.DisabledDB1LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE1];
+    io_struct.DisabledDB2LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE2];
+    io_struct.DisabledDB3LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE3];
+    io_struct.DisabledDB4LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE4];
+    io_struct.DisabledDB5LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE5];
+    io_struct.DisabledDB6LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE6];
+    io_struct.DisabledDB7LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE7];
+    io_struct.DisabledDB8LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE8];
+    io_struct.DisabledDB9LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE9];
+
+    io_struct.DisabledDB0LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE0];
+    io_struct.DisabledDB1LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE1];
+    io_struct.DisabledDB2LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE2];
+    io_struct.DisabledDB3LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE3];
+    io_struct.DisabledDB4LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE4];
+    io_struct.DisabledDB5LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE5];
+    io_struct.DisabledDB6LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE6];
+    io_struct.DisabledDB7LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE7];
+    io_struct.DisabledDB8LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE8];
+    io_struct.DisabledDB9LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE9];
+
+    return fapi2::current_err;
+}
+
+///
+/// @brief Runs training and processes some of the results
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @param[in] i_update_bad_bits true if io_start_bad_bits should be updated prior to this run - defaults to TRUE
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode run_training_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                      uint64_t& io_status,
+                                      uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                                      PMU_SMB_DDR5U_1D_t& io_struct,
+                                      fapi2::hwp_data_ostream& o_log_data,
+                                      const bool i_update_bad_bits)
+{
+    if(i_update_bad_bits)
+    {
+        extract_disable_bits(io_struct, io_start_bad_bits);
+    }
+
+    fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
+    uint8_t l_fir_check_enable;
+    FAPI_TRY(mss::attr::get_draminit_training_timeout(i_target, l_poll_count));
+
+    // 4. Initialize mailbox protocol and start training
+    FAPI_TRY(mss::ody::phy::init_mailbox_protocol(i_target));
+    FAPI_TRY(mss::ody::phy::start_training(i_target));
+
+    // 5. Processes and handles training messages (aka poll for completion)
+    FAPI_TRY (mss::ody::phy::poll_for_completion(i_target, l_poll_count, io_status, o_log_data));
+
+    // 6. Cleans up after training
+    FAPI_TRY(mss::ody::phy::cleanup_training(i_target));
+
+    // 7a. Read the data from the message block structure
+    FAPI_TRY(mss::ody::phy::read_msg_block(i_target, io_struct));
+
+    // Blame a FIR if possible and requested by the user - PRD will find the FIR and callout and restart DRAMINIT
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_fir_check_enable) );
+
+    if(l_fir_check_enable == fapi2::ENUM_ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE_ENABLE)
+    {
+        bool l_fir_error = false;
+        fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_SUCCESS);
+
+        FAPI_TRY((mss::check::bad_fir_bits<mss::mc_type::ODYSSEY, mss::check::firChecklist::DRAMINIT>(
+                      i_target,
+                      l_rc,
+                      l_fir_error)));
+
+        // If we have a FIR error, assert out
+        FAPI_ASSERT(!l_fir_error,
+                    fapi2::ODY_DRAMINIT_FIR_FOUND()
+                    .set_PORT_TARGET(i_target),
+                    TARGTIDFORMAT " found a FIR. Exiting with a custom RC", TARGTID);
+    }
+    else
+    {
+        FAPI_INF(TARGTIDFORMAT " skipping checking FIR's. Training will continue", TARGTID);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Displays the disable bits
+/// @param[in] i_rank_info the rank information
+/// @param[in] i_bad_bits the bad bits structure - bytes in the MC perspective. Bits and ranks in the PHY perspective
+///
+void display_disable_bits(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                          const uint8_t (&i_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
+{
+    for(uint8_t l_byte = 0; l_byte < BAD_BITS_RANKS; ++l_byte)
+    {
+        FAPI_INF(TARGTIDFORMAT " rank%u mc_byte:%u disable bits 0x%02x", GENTARGTID(i_rank_info.get_port_target()),
+                 i_rank_info.get_port_rank(), l_byte, i_bad_bits[i_rank_info.get_phy_rank()][l_byte]);
+    }
+}
+
+///
+/// @brief Handles any address errors found in the prior run
+/// @param[in] i_rank_info the rank info class under test
+/// @param[in] i_dram the DRAM under test
+/// @param[in] i_nibble_enables the nibbles enabled for this port
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[in,out] io_bad_dram_on_rank
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_address_errors_internal(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+        const uint8_t i_dram,
+        const fapi2::buffer<uint32_t>& i_nibble_enables,
+        uint64_t& io_status,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct,
+        uint8_t& io_bad_dram_on_rank,
+        fapi2::hwp_data_ostream& o_log_data)
+{
+    constexpr uint8_t MSG_BLOCK_TRAIN_PASS = 0x00;
+    const auto& l_port = i_rank_info.get_port_target();
+
+    // TODO:ZEN:MST-2298 Update the Odyssey draminit train clean algorithm to support x8
+    const uint8_t i_dram_bit_pos = 31 - i_dram;
+    const auto l_byte = i_dram / 2;
+    const uint8_t l_inject = (i_dram % 2 == 0) ? 0xf0 : 0x0f;
+    const uint8_t l_mask_off = (i_dram % 2 == 0) ? 0x0f : 0xf0;
+
+    // Note: doing a hack to avoid some rank swizzles here
+    // The bytes will be kept in terms of the MC perspective and swizzled to the PHY perspective in update_struct_for_bad_bits
+    // The ranks will be in terms of the PHY perspective to avoid having to swizzle and copy the ranks as well
+    // In the case of an error, the ranks will be recorded in the PORT perspective
+    uint8_t l_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] =
+    {
+        {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+        {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+        {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+        {0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    };
+    io_struct.CsTestFail = MSG_BLOCK_TRAIN_PASS;
+
+    // Skip this DRAM if it's disabled - there's no point in wasting the cycles
+    if(!i_nibble_enables.getBit(i_dram_bit_pos))
+    {
+        FAPI_INF(TARGTIDFORMAT " 0x%08x has DRAM%u disabled, setting as bad and continuing", GENTARGTID(l_port),
+                 i_nibble_enables, i_dram);
+        io_start_bad_bits[0][l_byte] |= l_mask_off;
+        io_start_bad_bits[1][l_byte] |= l_mask_off;
+        io_start_bad_bits[2][l_byte] |= l_mask_off;
+        io_start_bad_bits[3][l_byte] |= l_mask_off;
+        ++io_bad_dram_on_rank;
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // If the whole nibble is bad, continue
+    const auto i_dram_bad_bits = io_start_bad_bits[i_rank_info.get_phy_rank()][l_byte] & l_mask_off;
+
+    if(i_dram_bad_bits == l_inject)
+    {
+        ++io_bad_dram_on_rank;
+        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u disabled due to bad bits, setting as bad and continuing", GENTARGTID(l_port),
+                 i_rank_info.get_port_rank());
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+    // If part of the nibble is bad, then run additional steps to see if the swizzle detect will work
+    // Swizzle detect will not work if DQ0 is bad in the nibble
+    else if(i_dram_bad_bits != 0x00)
+    {
+        uint16_t l_temp = 0;
+        // First up, clears all training steps EXCEPT for the swizzle detect and address ones
+        // The chance of us getting a fatal error is very rare from the steps after this point and this has signifcant time savings
+        // Swizzle detect could go bad if DQ0 is bad within this nibble
+        FAPI_TRY(SequenceCtrl_helper(l_port, 0xC00D, l_temp));
+        io_struct.SequenceCtrl = l_temp;
+        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u already has bad bits, so using an extended test. bad bits:0x%02x",
+                 GENTARGTID(l_port),
+                 i_rank_info.get_port_rank(), i_dram, i_dram_bad_bits);
+    }
+    else
+    {
+        uint16_t l_temp = 0;
+        // First up, clears all training steps EXCEPT for the address ones
+        // The chance of us getting a fatal error is very rare from the steps after this point and this has signifcant time savings
+        FAPI_TRY(SequenceCtrl_helper(l_port, 0xC001, l_temp));
+        io_struct.SequenceCtrl = l_temp;
+        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u has no bad bits. Using a simplified test", GENTARGTID(l_port),
+                 i_rank_info.get_port_rank(),
+                 i_dram);
+    }
+
+    // Configure the dram to test
+    l_bad_bits[i_rank_info.get_phy_rank()][l_byte] = l_inject | io_start_bad_bits[i_rank_info.get_phy_rank()][l_byte];
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(l_port, l_bad_bits));
+    FAPI_INF(TARGTIDFORMAT " DRAM%u has byte%u bad_bits inject:0x%02x", GENTARGTID(l_port), i_dram, l_byte,
+             l_bad_bits[i_rank_info.get_phy_rank()][l_byte]);
+    FAPI_TRY(update_struct_for_bad_bits( l_port, l_bad_bits, io_struct));
+
+    // Configure the bad bits
+    FAPI_TRY(load_msg_block(l_port, io_struct));
+
+    // Run training
+    FAPI_TRY(run_training_helper(l_port, io_status, io_start_bad_bits, io_struct, o_log_data, false));
+
+    // Record the results for which DRAM are bad
+    FAPI_INF(TARGTIDFORMAT " DRAM%u CS/CA only results. status passing:%u CsTest passing:%u", GENTARGTID(l_port), i_dram,
+             io_status == SUCCESSFUL_COMPLETION,
+             io_struct.CsTestFail == MSG_BLOCK_TRAIN_PASS);
+
+    if((io_status != SUCCESSFUL_COMPLETION) || (io_struct.CsTestFail != MSG_BLOCK_TRAIN_PASS))
+    {
+        ++io_bad_dram_on_rank;
+        io_start_bad_bits[i_rank_info.get_phy_rank()][l_byte] |= l_mask_off;
+        FAPI_INF(TARGTIDFORMAT " rank%u DRAM%u failed CS/CA only. Masking off bad bits 0x%02x", GENTARGTID(l_port),
+                 i_rank_info.get_port_rank(), i_dram,
+                 io_start_bad_bits[i_rank_info.get_phy_rank()][l_byte]);
+    }
+
+    // Resets the mask for future tests
+    io_struct.CsTestFail = MSG_BLOCK_TRAIN_PASS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Handles any address errors found in the prior run
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[in,out] io_is_first_addr_run true if this is the first address recovery run
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        uint64_t& io_status,
+                                        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                                        PMU_SMB_DDR5U_1D_t& io_struct,
+                                        bool& io_is_first_addr_run,
+                                        fapi2::hwp_data_ostream& o_log_data)
+{
+    constexpr uint8_t MAX_NIBBLE_REPAIRS = 3;
+
+    // If no address fails occurred, exit out of the function w/ a success
+    if(!has_address_fails(io_status, io_struct))
+    {
+        FAPI_INF(TARGTIDFORMAT " CS training passed successfully. skipping address error handling", TARGTID);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    io_status = mss::ody::phy::mailbox_consts::FAILED_COMPLETION;
+
+    // An address error occurred... now the fun begins
+    uint32_t iv_nibbles_enables[mss::ody::MAX_DIMM_PER_PORT] = {0};
+    fapi2::buffer<uint32_t> l_nibble_enables;
+
+    std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+
+    // Do not allow the address algorithm to run multiple times
+    // The algorithm is time consuming
+    FAPI_ASSERT(io_is_first_addr_run,
+                fapi2::ODY_DRAMINIT_PERDRAM_RECOVERY_ATTEMPTS_EXCEEDED()
+                .set_PORT_TARGET(i_target),
+                TARGTIDFORMAT " per DRAM algorithm attempts exceeded (it was attempted for a second time). Exiting", TARGTID);
+
+    // Doing the first attempt now, so just pre-emptively set that this is no longer the first attempt externally
+    // If the algorithm is called again, it will exit with an error
+    io_is_first_addr_run = false;
+
+    FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(i_target, l_rank_infos));
+    FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_nibbles_enables));
+    l_nibble_enables = iv_nibbles_enables[0];
+    io_struct.MsgMisc &= 0x7f;
+
+
+    // Loops through DRAM by DRAM disabling all other DRAM's
+    for(const auto& l_rank_info : l_rank_infos)
+    {
+        FAPI_INF(TARGTIDFORMAT " testing port rank:%u", TARGTID, l_rank_info.get_port_rank());
+        uint8_t l_bad_dram_on_rank = 0;
+
+        // TODO:ZEN:MST-2298 Update the Odyssey draminit train clean algorithm to support x8
+        for(uint32_t l_dram = 0; l_dram < mss::ody::MAX_NIBBLES_PER_PORT && l_bad_dram_on_rank <= MAX_NIBBLE_REPAIRS; ++l_dram)
+        {
+            FAPI_TRY(handle_address_errors_internal(l_rank_info, l_dram, l_nibble_enables,
+                                                    io_status, io_start_bad_bits, io_struct, l_bad_dram_on_rank, o_log_data));
+        }
+
+        // Display errors here so the user can see what failed
+        display_disable_bits(l_rank_info, io_start_bad_bits);
+
+        FAPI_ASSERT(l_bad_dram_on_rank <= MAX_NIBBLE_REPAIRS,
+                    fapi2::ODY_DRAMINIT_PERDRAM_REPAIRS_EXCEEDED()
+                    .set_PORT_TARGET(i_target)
+                    .set_MAX_REPAIRS(MAX_NIBBLE_REPAIRS)
+                    .set_FAILING_RANK(l_rank_info.get_port_rank())
+                    .set_DISABLES_BYTE0(io_start_bad_bits[l_rank_info.get_phy_rank()][0])
+                    .set_DISABLES_BYTE1(io_start_bad_bits[l_rank_info.get_phy_rank()][1])
+                    .set_DISABLES_BYTE2(io_start_bad_bits[l_rank_info.get_phy_rank()][2])
+                    .set_DISABLES_BYTE3(io_start_bad_bits[l_rank_info.get_phy_rank()][3])
+                    .set_DISABLES_BYTE4(io_start_bad_bits[l_rank_info.get_phy_rank()][4])
+                    .set_DISABLES_BYTE5(io_start_bad_bits[l_rank_info.get_phy_rank()][5])
+                    .set_DISABLES_BYTE6(io_start_bad_bits[l_rank_info.get_phy_rank()][6])
+                    .set_DISABLES_BYTE7(io_start_bad_bits[l_rank_info.get_phy_rank()][7])
+                    .set_DISABLES_BYTE8(io_start_bad_bits[l_rank_info.get_phy_rank()][8])
+                    .set_DISABLES_BYTE9(io_start_bad_bits[l_rank_info.get_phy_rank()][9]),
+                    TARGTIDFORMAT " rank%u exceeded max repairs of %u for the per DRAM recovery attempt", TARGTID,
+                    l_rank_info.get_port_rank(), MAX_NIBBLE_REPAIRS);
+    }
+
+    // Clones any fails over to the companion rank
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, io_start_bad_bits));
+
+    // Just reconfigures the message block as it will be safer for the final run
+    FAPI_TRY(configure_dram_train_message_block(i_target, false, // yeah, update this
+             io_struct));
+
+    // Update for the discovered bad DRAMs
+    FAPI_TRY(update_struct_for_bad_bits( i_target, io_start_bad_bits, io_struct));
+    FAPI_TRY(load_msg_block(i_target, io_struct));
+
+    // Does another training run here
+    FAPI_TRY(run_training_helper(i_target, io_status, io_start_bad_bits, io_struct, o_log_data));
+    mss::ody::phy::display_msg_block(i_target, io_struct);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks if the DQ errors have exceeded the potential number of repairs
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_status the status of the draminit run
+/// @param[in] i_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode check_for_dq_repairs_exceeded(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint64_t i_status,
+        const PMU_SMB_DDR5U_1D_t& i_struct)
+{
+    // If there was an address related fail, then the results here cannot be trusted, skip this check
+    if(mss::ody::phy::has_address_fails(i_status, i_struct))
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    constexpr uint64_t MAX_NIBBLE_REPAIRS = 4;
+
+    uint8_t l_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] =
+    {
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+    };
+    extract_disable_bits(i_struct, l_bad_bits);
+
+    std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+    uint8_t l_redundant_cs[mss::ody::MAX_DIMM_PER_PORT] = {};
+    FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(i_target, l_rank_infos));
+
+    // If this system uses redundant CS, or together this rank and the next rank
+    // This is because the PHY has 2 CS per MC rank and it's safer to or together the responses
+    FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(i_target, l_redundant_cs));
+
+    // Loop through all PHY ranks
+    for(const auto& l_rank_info : l_rank_infos)
+    {
+        // We can support up to 4 nibbles with bad bits, but not 5
+        // Going to ignore the edge case of all 4 nibbles as bad and let restore repairs catch that
+        uint8_t l_num_bad_nibbles = 0;
+        const auto l_phy_rank = l_rank_info.get_phy_rank();
+
+        // Or together the bad bits for the two PHY ranks if needed
+        if(l_redundant_cs[0] == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE)
+        {
+            for(uint8_t l_byte = 0; l_byte < BAD_DQ_BYTE_COUNT; ++l_byte)
+            {
+                l_bad_bits[l_phy_rank][l_byte] |= l_bad_bits[l_phy_rank + 1][l_byte];
+            }
+        }
+
+        // Loop over and count the bad nibbles
+        // TODO:ZEN:MST-2298 Update the Odyssey draminit train clean algorithm to support x8
+        for(uint8_t l_byte = 0; l_byte < BAD_DQ_BYTE_COUNT && l_num_bad_nibbles <= MAX_NIBBLE_REPAIRS; ++l_byte)
+        {
+            // Using the synopsys nomenclature here
+            constexpr uint8_t NIBBLE0_MASK = 0x0f;
+            constexpr uint8_t NIBBLE1_MASK = 0xf0;
+
+            l_num_bad_nibbles += (l_bad_bits[l_phy_rank][l_byte] & NIBBLE0_MASK) == 0x00 ? 0 : 1;
+            l_num_bad_nibbles += (l_bad_bits[l_phy_rank][l_byte] & NIBBLE1_MASK) == 0x00 ? 0 : 1;
+        }
+
+        // Display errors here so the user can see what failed
+        display_disable_bits(l_rank_info, l_bad_bits);
+
+        FAPI_ASSERT(l_num_bad_nibbles <= MAX_NIBBLE_REPAIRS,
+                    fapi2::ODY_DRAMINIT_REPAIRS_EXCEEDED()
+                    .set_PORT_TARGET(i_target)
+                    .set_MAX_REPAIRS(MAX_NIBBLE_REPAIRS)
+                    .set_FAILING_RANK(l_rank_info.get_port_rank())
+                    .set_DISABLES_BYTE0(l_bad_bits[l_rank_info.get_phy_rank()][0])
+                    .set_DISABLES_BYTE1(l_bad_bits[l_rank_info.get_phy_rank()][1])
+                    .set_DISABLES_BYTE2(l_bad_bits[l_rank_info.get_phy_rank()][2])
+                    .set_DISABLES_BYTE3(l_bad_bits[l_rank_info.get_phy_rank()][3])
+                    .set_DISABLES_BYTE4(l_bad_bits[l_rank_info.get_phy_rank()][4])
+                    .set_DISABLES_BYTE5(l_bad_bits[l_rank_info.get_phy_rank()][5])
+                    .set_DISABLES_BYTE6(l_bad_bits[l_rank_info.get_phy_rank()][6])
+                    .set_DISABLES_BYTE7(l_bad_bits[l_rank_info.get_phy_rank()][7])
+                    .set_DISABLES_BYTE8(l_bad_bits[l_rank_info.get_phy_rank()][8])
+                    .set_DISABLES_BYTE9(l_bad_bits[l_rank_info.get_phy_rank()][9]),
+                    TARGTIDFORMAT " rank%u exceeded max repairs of %u for standard training", TARGTID, l_rank_info.get_port_rank(),
+                    MAX_NIBBLE_REPAIRS);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Handles any DQ errors found in the prior run
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                   uint64_t& io_status,
+                                   uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                                   PMU_SMB_DDR5U_1D_t& io_struct,
+                                   fapi2::hwp_data_ostream& o_log_data)
+{
+    // If we have address fails, do not run regardless of new bad bits
+    // If this card has new bad bits, then run the recovery
+    if(!has_new_bad_bits(io_start_bad_bits, io_struct) || has_address_fails(io_status, io_struct))
+    {
+        FAPI_INF(TARGTIDFORMAT " no new bad bits found OR an address fail found. Skipping DQ error handling", TARGTID);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_INF(TARGTIDFORMAT " Attempting per-DQ draminit training recovery", TARGTID);
+
+    // Just run the training here
+    FAPI_TRY(run_training_helper(i_target, io_status, io_start_bad_bits, io_struct, o_log_data));
+    mss::ody::phy::display_msg_block(i_target, io_struct);
+
+    // Checks if the number of bad bits exceeded repairs
+    FAPI_TRY(check_for_dq_repairs_exceeded(i_target, io_status, io_struct));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Extracts the bad bits out of a structure for comparison purposes for the draminit recovery algorithm
+/// @param[in] i_struct the draminit message block structure
+/// @param[out] o_bad_bits the bad bits structure - bytes in the MC perspective. Bits and ranks in the PHY perspective
+///
+void extract_disable_bits(const PMU_SMB_DDR5U_1D_t& i_struct,
+                          uint8_t (&o_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
+{
+    constexpr uint8_t PHY_TO_MC_BYTE0 = 0;
+    constexpr uint8_t PHY_TO_MC_BYTE1 = 1;
+    constexpr uint8_t PHY_TO_MC_BYTE2 = 2;
+    constexpr uint8_t PHY_TO_MC_BYTE3 = 3;
+    constexpr uint8_t PHY_TO_MC_BYTE4 = 5;
+    constexpr uint8_t PHY_TO_MC_BYTE5 = 6;
+    constexpr uint8_t PHY_TO_MC_BYTE6 = 7;
+    constexpr uint8_t PHY_TO_MC_BYTE7 = 8;
+    constexpr uint8_t PHY_TO_MC_BYTE8 = 4;
+    constexpr uint8_t PHY_TO_MC_BYTE9 = 9;
+    o_bad_bits[0][PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR0;
+    o_bad_bits[0][PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR0;
+    o_bad_bits[0][PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR0;
+    o_bad_bits[0][PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR0;
+    o_bad_bits[0][PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR0;
+    o_bad_bits[0][PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR0;
+    o_bad_bits[0][PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR0;
+    o_bad_bits[0][PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR0;
+    o_bad_bits[0][PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR0;
+    o_bad_bits[0][PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR0;
+    o_bad_bits[1][PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR1;
+    o_bad_bits[1][PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR1;
+    o_bad_bits[1][PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR1;
+    o_bad_bits[1][PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR1;
+    o_bad_bits[1][PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR1;
+    o_bad_bits[1][PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR1;
+    o_bad_bits[1][PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR1;
+    o_bad_bits[1][PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR1;
+    o_bad_bits[1][PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR1;
+    o_bad_bits[1][PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR1;
+    o_bad_bits[2][PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR2;
+    o_bad_bits[2][PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR2;
+    o_bad_bits[2][PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR2;
+    o_bad_bits[2][PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR2;
+    o_bad_bits[2][PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR2;
+    o_bad_bits[2][PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR2;
+    o_bad_bits[2][PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR2;
+    o_bad_bits[2][PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR2;
+    o_bad_bits[2][PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR2;
+    o_bad_bits[2][PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR2;
+    o_bad_bits[3][PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR3;
+    o_bad_bits[3][PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR3;
+    o_bad_bits[3][PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR3;
+    o_bad_bits[3][PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR3;
+    o_bad_bits[3][PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR3;
+    o_bad_bits[3][PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR3;
+    o_bad_bits[3][PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR3;
+    o_bad_bits[3][PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR3;
+    o_bad_bits[3][PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR3;
+    o_bad_bits[3][PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR3;
+}
+
+///
+/// @brief Attempts to recover from any errors found during draminit - will not run if no errors occured
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_draminit_recovery(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint64_t& io_status,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct,
+        fapi2::hwp_data_ostream& o_log_data)
+{
+
+    uint8_t l_recovery_enable;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_RECOVERY_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_recovery_enable) );
+
+    // Only run the recovery if it's requested
+    // Default is to request this, but it gives the user an out for manufacturing modes or wanting to run quickly
+    if(l_recovery_enable == fapi2::ENUM_ATTR_ODY_DRAMINIT_RECOVERY_ENABLE_ENABLE)
+    {
+        // We should only ever have 16 loops (one bit at a time and a max of 16 bad bits)
+        // Using 17 as a "something went really wrong. exit out" case
+        constexpr uint64_t MAX_RECOVERY_LOOPS = 16;
+        uint64_t l_num_loop = 0;
+        bool l_is_first_addr_run = true;
+
+        // Loop while we have an error and have not exeeded our recovery attempts
+        while(is_recovery_loop_needed(io_status, io_start_bad_bits, io_struct, l_num_loop, MAX_RECOVERY_LOOPS))
+        {
+            FAPI_INF(TARGTIDFORMAT " handle recovery loop num%u address_fails:%u new_bad_bits:%u",
+                     TARGTID, l_num_loop, mss::ody::phy::has_address_fails(io_status, io_struct),
+                     mss::ody::phy::has_new_bad_bits(io_start_bad_bits, io_struct));
+
+            // Runs handle address errors first as if we took a fatal error the bad bits cannot be trusted
+            // Additionally, these fails are probably due to a CS/address calibration step
+            FAPI_TRY(mss::ody::phy::handle_address_errors(i_target, io_status, io_start_bad_bits, io_struct,
+                     l_is_first_addr_run, o_log_data));
+
+            // Then run the algorithm to handle DQ errors (if we have a new DQ fail)
+            FAPI_TRY(mss::ody::phy::handle_dq_errors(i_target, io_status, io_start_bad_bits, io_struct, o_log_data));
+            ++l_num_loop;
+        }
+
+        FAPI_ASSERT(l_num_loop <= MAX_RECOVERY_LOOPS,
+                    fapi2::ODY_DRAMINIT_TOTAL_RECOVERY_ATTEMPTS_EXCEEDED()
+                    .set_PORT_TARGET(i_target)
+                    .set_ATTEMPTS(l_num_loop)
+                    .set_MAX_ATTEMPTS(MAX_RECOVERY_LOOPS),
+                    TARGTIDFORMAT " total recovery attempts exceeded. Attempts:%u Max attempts:%u", TARGTID, l_num_loop,
+                    MAX_RECOVERY_LOOPS);
+    }
+    else
+    {
+        FAPI_INF(TARGTIDFORMAT " skipping recovery attempts. Training results will be off of the first run", TARGTID);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 } // namespace phy
 } // namespace ody

@@ -76,6 +76,12 @@
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr112.H>
 #include <lib/workarounds/ody_phy_workarounds.H>
 
+#ifdef __PPE__
+    #include <ppe42_string.h>
+#else
+    #include <cstring>
+#endif
+
 namespace mss
 {
 namespace ody
@@ -442,6 +448,51 @@ struct msg_block_vars
     uint8_t iv_VrefCA_Sweep_Max = 0;
     uint8_t iv_MR32_per_dram[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
 };
+
+///
+/// @brief Configures the sequence control based upon attributes and requested sequences
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_sequence_ctrl user requested sequence control attributes
+/// @param[out] o_output the sequence control that this part can support
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+inline fapi2::ReturnCode SequenceCtrl_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint16_t i_sequence_ctrl,
+        uint16_t& o_output)
+{
+    constexpr uint8_t RCD_CSCA = 1;
+    constexpr uint8_t LRDIMM_TESTS_START = 2;
+    constexpr uint8_t LRDIMM_TESTS_LEN = 4;
+    // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
+    constexpr uint8_t RFU8 = 7;
+    constexpr uint8_t RFU7 = 8;
+
+    fapi2::buffer<uint16_t> l_buffer(i_sequence_ctrl);
+    bool l_has_rcd = false;
+    FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
+
+    // Make sure Run RCD_CSCA is disabled for UDIMM
+    if (!l_has_rcd)
+    {
+        l_buffer.clearBit<RCD_CSCA>();
+    }
+
+    // Force LRDIMM tests to be disabled
+    l_buffer.clearBit<LRDIMM_TESTS_START, LRDIMM_TESTS_LEN>();
+
+    // Force RFU tests to be disabled
+    l_buffer.clearBit<RFU8>();
+    l_buffer.clearBit<RFU7>();
+
+#ifndef __PPE__
+    FAPI_INF(TARGTIDFORMAT "Applying overrides to SequenceCtrl before:0x%04x after:0x%04x", GENTARGTID(i_target),
+             i_sequence_ctrl, l_buffer);
+#endif
+    o_output = l_buffer;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @class msg_block_params
@@ -941,37 +992,10 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_SequenceCtrl(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            constexpr uint8_t RCD_CSCA = 1;
-            constexpr uint8_t LRDIMM_TESTS_START = 2;
-            constexpr uint8_t LRDIMM_TESTS_LEN = 4;
-            // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
-            constexpr uint8_t RFU8 = 7;
-            constexpr uint8_t RFU7 = 8;
+            uint16_t l_temp = 0;
+            FAPI_TRY(SequenceCtrl_helper(iv_target, iv_msg_block_vars.iv_SequenceCtrl, l_temp));
 
-            fapi2::buffer<uint16_t> l_buffer(iv_msg_block_vars.iv_SequenceCtrl);
-            bool l_has_rcd = false;
-            FAPI_TRY(mss::has_rcd(iv_target, l_has_rcd));
-
-            // Make sure Run RCD_CSCA is disabled for UDIMM
-            if (!l_has_rcd)
-            {
-                l_buffer.clearBit<RCD_CSCA>();
-            }
-
-            // Force LRDIMM tests to be disabled
-            l_buffer.clearBit<LRDIMM_TESTS_START, LRDIMM_TESTS_LEN>();
-
-            // Force RFU tests to be disabled
-            l_buffer.clearBit<RFU8>();
-            l_buffer.clearBit<RFU7>();
-
-#ifndef __PPE__
-            FAPI_INF(TARGTIDFORMAT "Applying overrides to SequenceCtrl before:0x%04x after:0x%04x", GENTARGTID(iv_target),
-                     iv_msg_block_vars.iv_SequenceCtrl, l_buffer);
-#endif
-
-            io_msg_block.SequenceCtrl = l_buffer;
-
+            io_msg_block.SequenceCtrl = l_temp;
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -4509,6 +4533,177 @@ fapi2::ReturnCode check_fw_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
 fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                         const uint64_t i_status,
                                         const _PMU_SMB_DDR5_1D_t& i_msg_block_response);
+
+///
+/// @brief Extracts the bad bits out of a structure for comparison purposes for the draminit recovery algorithm
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_bad_bits the bad bits to insert into the message block
+/// @param[in,out] io_struct message block to update
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode update_struct_for_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t (&i_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct);
+
+///
+/// @brief Handles any address errors found in the prior run
+/// @param[in] i_rank_info the rank info class under test
+/// @param[in] i_dram the DRAM under test
+/// @param[in] i_nibble_enables the nibbles enabled for this port
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[in,out] io_bad_dram_on_rank
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_address_errors_internal(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+        const uint8_t i_dram,
+        const fapi2::buffer<uint32_t>& i_nibble_enables,
+        uint64_t& io_status,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct,
+        uint8_t& io_bad_dram_on_rank,
+        fapi2::hwp_data_ostream& o_log_data);
+
+///
+/// @brief Handles any address errors found in the prior run
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[in,out] io_is_first_addr_run true if this is the first address recovery run
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        uint64_t& io_status,
+                                        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                                        PMU_SMB_DDR5U_1D_t& io_struct,
+                                        bool& io_is_first_addr_run,
+                                        fapi2::hwp_data_ostream& o_log_data);
+
+///
+/// @brief Handles any DQ errors found in the prior run
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                   uint64_t& io_status,
+                                   uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                                   PMU_SMB_DDR5U_1D_t& io_struct,
+                                   fapi2::hwp_data_ostream& o_log_data);
+
+///
+/// @brief Displays the disable bits
+/// @param[in] i_rank_info the rank information
+/// @param[in] i_bad_bits the bad bits structure - bytes in the MC perspective. Bits and ranks in the PHY perspective
+///
+void display_disable_bits(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                          const uint8_t (&i_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]);
+
+///
+/// @brief Extracts the bad bits out of a structure for comparison purposes for the draminit recovery algorithm
+/// @param[in] i_struct the draminit message block structure
+/// @param[out] o_bad_bits the bad bits structure - bytes in the MC perspective. Bits and ranks in the PHY perspective
+///
+void extract_disable_bits(const PMU_SMB_DDR5U_1D_t& i_struct,
+                          uint8_t (&o_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]);
+
+///
+/// @brief Returns true if this run could contain address fails
+/// @param[in] i_status the status from training
+/// @param[in] i_struct the draminit message block structure
+/// @return true if there is a potential address fail
+///
+inline bool has_address_fails(const uint8_t i_status, const PMU_SMB_DDR5U_1D_t& i_struct)
+{
+    constexpr uint8_t MSG_BLOCK_TRAIN_PASS = 0x00;
+    return (i_status != SUCCESSFUL_COMPLETION) || (i_struct.CsTestFail != MSG_BLOCK_TRAIN_PASS);
+}
+
+///
+/// @brief Returns true if this message block contains new bad bits
+/// @param[in] i_start_bad_bits the starting bad bits
+/// @param[in] i_struct the structure containing the current bad bits
+/// @return true if the bad bits are not the same between the starting bad bits and bad bits in this structure
+///
+inline bool has_new_bad_bits(const uint8_t (&i_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                             const PMU_SMB_DDR5U_1D_t& i_struct)
+{
+    uint8_t l_current_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT];
+    extract_disable_bits(i_struct, l_current_bad_bits);
+
+    return memcmp(l_current_bad_bits, i_start_bad_bits, sizeof i_start_bad_bits) != MEMCMP_EQUAL;
+}
+
+
+///
+/// @brief Returns true if this message block contains new bad bits
+/// @param[in] i_status the status from training
+/// @param[in] i_start_bad_bits the starting bad bits
+/// @param[in] i_struct the structure containing the current bad bits
+/// @param[in] i_loop_num the current loop number
+/// @param[in] i_max_loop_num the maximum loop number if i_loop_num is less than or equal to this, we can continue to loop
+/// @return true if the recovery loop needs to run
+///
+inline bool is_recovery_loop_needed(const uint8_t i_status,
+                                    const uint8_t (&i_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                                    const PMU_SMB_DDR5U_1D_t& i_struct,
+                                    const uint64_t i_loop_num,
+                                    const uint64_t i_max_loop_num)
+{
+    return (mss::ody::phy::has_address_fails(i_status, i_struct) ||
+            mss::ody::phy::has_new_bad_bits(i_start_bad_bits, i_struct)) &&
+           i_loop_num <= i_max_loop_num;
+}
+
+///
+/// @brief Checks if the DQ errors have exceeded the potential number of repairs
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_status the status of the draminit run
+/// @param[in] i_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode check_for_dq_repairs_exceeded(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint64_t i_status,
+        const PMU_SMB_DDR5U_1D_t& i_struct);
+
+///
+/// @brief Runs training and processes some of the results
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @param[in] i_update_bad_bits true if io_start_bad_bits should be updated prior to this run - defaults to TRUE
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode run_training_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                      uint64_t& io_status,
+                                      uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                                      PMU_SMB_DDR5U_1D_t& io_struct,
+                                      fapi2::hwp_data_ostream& o_log_data,
+                                      const bool i_update_bad_bits = true);
+
+///
+/// @brief Attempts to recover from any errors found during draminit - will not run if no errors occured
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_draminit_recovery(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint64_t& io_status,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct,
+        fapi2::hwp_data_ostream& o_log_data);
 
 } // namespace phy
 } // namespace ody

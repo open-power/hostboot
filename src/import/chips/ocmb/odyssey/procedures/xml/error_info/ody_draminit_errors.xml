@@ -26,6 +26,16 @@
   <format>poz</format>
 
   <hwpError>
+    <rc>RC_ODY_DRAMINIT_FIR_FOUND</rc>
+    <description>Ody draminit found a FIR. Custom assert so the caller can handle it</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_ODY_DRAMINIT_HARDCODE_UNSUPPORTED</rc>
     <description>Ody draminit using hardcoded values is unsupported on the SBE.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -36,6 +46,100 @@
     <callout>
       <target>PORT_TARGET</target>
       <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_PERDRAM_RECOVERY_ATTEMPTS_EXCEEDED</rc>
+    <description>Ody draminit's per DRAM recovery algorithm exceeded recovery attempts.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_TOTAL_RECOVERY_ATTEMPTS_EXCEEDED</rc>
+    <description>Ody draminit's recovery algorithm exceeded the total number of recovery attempts.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>ATTEMPTS</ffdc>
+    <ffdc>MAX_ATTEMPTS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_REPAIRS_EXCEEDED</rc>
+    <description>Ody draminit's recovery algorithm exceeded available repairs.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>MAX_REPAIRS</ffdc>
+    <ffdc>FAILING_RANK</ffdc>
+    <ffdc>DISABLES_BYTE0</ffdc>
+    <ffdc>DISABLES_BYTE1</ffdc>
+    <ffdc>DISABLES_BYTE2</ffdc>
+    <ffdc>DISABLES_BYTE3</ffdc>
+    <ffdc>DISABLES_BYTE4</ffdc>
+    <ffdc>DISABLES_BYTE5</ffdc>
+    <ffdc>DISABLES_BYTE6</ffdc>
+    <ffdc>DISABLES_BYTE7</ffdc>
+    <ffdc>DISABLES_BYTE8</ffdc>
+    <ffdc>DISABLES_BYTE9</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_DRAMINIT_PERDRAM_REPAIRS_EXCEEDED</rc>
+    <description>Ody per DRAM draminit's recovery algorithm exceeded available repairs.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>MAX_REPAIRS</ffdc>
+    <ffdc>FAILING_RANK</ffdc>
+    <ffdc>DISABLES_BYTE0</ffdc>
+    <ffdc>DISABLES_BYTE1</ffdc>
+    <ffdc>DISABLES_BYTE2</ffdc>
+    <ffdc>DISABLES_BYTE3</ffdc>
+    <ffdc>DISABLES_BYTE4</ffdc>
+    <ffdc>DISABLES_BYTE5</ffdc>
+    <ffdc>DISABLES_BYTE6</ffdc>
+    <ffdc>DISABLES_BYTE7</ffdc>
+    <ffdc>DISABLES_BYTE8</ffdc>
+    <ffdc>DISABLES_BYTE9</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
