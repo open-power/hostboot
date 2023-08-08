@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <devicefw/driverif.H>
 #include <vpd/mvpdenums.H>
 #include <arch/memorymap.H>
+#include <pldm/extended/hb_pdrs.H>
 
 using namespace VPD;
 using namespace MVPD;
@@ -1041,7 +1042,8 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         }
 
         iv_spPcrd->hdatChipData.hdatPcrdProcessorFruId =
-                            i_pProcTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+            PLDM::getEntityInstanceNumber(i_pProcTarget,
+                                          PLDM::ENTITY_TYPE_PROCESSOR_MODULE);
         HDAT_DBG("pcrd: ProcessorFruId=0x%8X",
                              iv_spPcrd->hdatChipData.hdatPcrdProcessorFruId);
 
@@ -1058,7 +1060,8 @@ errlHndl_t HdatPcrd::hdatSetProcessorInfo(
         }
         iv_spPcrd->hdatChipData.hdatPcrdChipECLevel = l_eclevel;
         iv_spPcrd->hdatChipData.hdatPcrdHwModuleId =
-                            i_pProcTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+            PLDM::getEntityInstanceNumber(i_pProcTarget,
+                                          PLDM::ENTITY_TYPE_PROCESSOR_MODULE);
         // Set Hardware Card ID
         uint32_t l_HWCardId  =  0;
         l_errl = hdatGetHwCardId(i_pProcTarget,l_HWCardId);
