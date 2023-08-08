@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,6 +101,15 @@ bool nvdimmBPMCallout(Target *i_nvdimm, uint8_t i_step, errlHndl_t& o_err);
  *      the error log.
  */
 errlHndl_t nvdimmHealthStatusCheck(Target *i_nvdimm, uint8_t i_step, bool& o_continue);
+
+/**
+ * @brief Read fw revision info and save into error log
+ *
+ * @param[in] i_nvdimm - nvdimm target
+ *
+ * @param[in] i_errhdl - pointer to error log, data will be saved here if not null
+ */
+void nvdimmReadFwLevels(Target *i_nvdimm, errlHndl_t i_errhdl);
 
 } //End NVDIMM namespace
 

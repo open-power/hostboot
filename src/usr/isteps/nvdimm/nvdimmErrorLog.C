@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,7 @@
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errludlogregister.H>
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
@@ -1330,6 +1331,65 @@ errlHndl_t nvdimmHealthStatusCheck(Target *i_nvdimm, uint8_t i_step, bool& o_con
     }
 
     return l_err;
+}
+
+/**
+ * @brief Read fw revision info and save into error log
+ */
+void nvdimmReadFwLevels(Target *i_nvdimm, errlHndl_t i_errhdl)
+{
+    errlHndl_t l_err = nullptr;
+
+    do
+    {
+        if (i_errhdl == nullptr)
+        {
+            TRACFCOMP(g_trac_nvdimm, "nvdimmReadFwLevels() io_err was nullptr.  Data will be traced but not saved as FFDC");
+        }
+
+        ERRORLOG::ErrlUserDetailsLogRegister l_regUD(i_nvdimm);
+        uint32_t l_regList[] = {
+            FW_SLOT_INFO,
+            SLOT0_FWREV0,
+            SLOT0_FWREV1,
+            SLOT1_FWREV0,
+            SLOT1_FWREV1,
+        };
+        uint8_t l_readData = 0;
+
+        for (auto l_reg : l_regList)
+        {
+            l_err = nvdimmReadReg(i_nvdimm,
+                                  l_reg,
+                                  l_readData);
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_nvdimm, ERR_MRK
+                        "nvdimmReadFwLevels() nvdimm[%X] error reading 0x%X",
+                        get_huid(i_nvdimm), l_reg);
+
+                // Don't commit, just delete the error and continue
+                delete l_err;
+                l_err = nullptr;
+                continue;
+            }
+
+            l_regUD.addDataBuffer(&l_readData,
+                                sizeof(l_readData),
+                                DEVICE_NVDIMM_ADDRESS(l_reg));
+            if( !i_errhdl )
+            {
+                TRACFCOMP(g_trac_nvdimm,INFO_MRK" Reg 0x%X = 0x%.2X",
+                          l_reg, l_readData);
+            }
+        }
+
+        if( i_errhdl )
+        {
+            l_regUD.addToLog(i_errhdl);
+        }     
+
+    } while(0);
 }
 
 } // end NVDIMM namespace

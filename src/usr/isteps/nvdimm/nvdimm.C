@@ -799,6 +799,7 @@ errlHndl_t nvdimmPollBackupDone(Target* i_nvdimm,
         // Collect register data for FFDC Traces
         nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
         nvdimmAddPage4Regs(i_nvdimm,l_err);
+        nvdimmReadFwLevels(i_nvdimm,l_err);
 
         // Add reg traces to the error log
         NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -864,6 +865,7 @@ errlHndl_t nvdimmPollRestoreDone(Target* i_nvdimm,
         nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
         nvdimmAddPage4Regs(i_nvdimm,l_err);
         nvdimmAddVendorLog(i_nvdimm, l_err);
+        nvdimmReadFwLevels(i_nvdimm,l_err);
 
         // Add reg traces to the error log
         NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -1065,6 +1067,7 @@ errlHndl_t nvdimmSetESPolicy(Target* i_nvdimm)
             nvdimmTraceRegs(i_nvdimm, l_RegInfo);
             nvdimmAddPage4Regs(i_nvdimm,l_err);
             nvdimmAddVendorLog(i_nvdimm, l_err);
+            nvdimmReadFwLevels(i_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -1445,6 +1448,7 @@ errlHndl_t nvdimmEraseCheck(Target *i_nvdimm, bool i_statusOnly)
         // Collect register data for FFDC Traces
         nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
         nvdimmAddPage4Regs(i_nvdimm,l_err);
+        nvdimmReadFwLevels(i_nvdimm,l_err);
 
         // Add reg traces to the error log
         NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -1526,6 +1530,7 @@ errlHndl_t nvdimmEraseCheck(Target *i_nvdimm, bool i_statusOnly)
            // Collect register data for FFDC Traces
            nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
            nvdimmAddPage4Regs(i_nvdimm,l_err);
+           nvdimmReadFwLevels(i_nvdimm,l_err);
 
            // Add reg traces to the error log
            NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -1906,6 +1911,7 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
             // Collect register data for FFDC Traces
             nvdimmTraceRegs ( l_nvdimm, l_RegInfo );
             nvdimmAddPage4Regs(l_nvdimm,l_err);
+            nvdimmReadFwLevels(l_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -1980,7 +1986,7 @@ void nvdimm_restore(TargetHandleList &i_nvdimmList)
  */
 void nvdimm_init(Target *i_nvdimm)
 {
-    TRACUCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_init() nvdimm[%X]",
+    TRACFCOMP(g_trac_nvdimm, ENTER_MRK"nvdimm_init() nvdimm[%X]",
               get_huid(i_nvdimm));
 
     errlHndl_t l_err = nullptr;
@@ -2192,6 +2198,7 @@ void nvdimm_init(Target *i_nvdimm)
             // Collect register data for FFDC Traces
             nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
             nvdimmAddPage4Regs(i_nvdimm,l_err);
+            nvdimmReadFwLevels(i_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -2259,6 +2266,7 @@ void nvdimm_init(Target *i_nvdimm)
             nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
             nvdimmAddPage4Regs(i_nvdimm,l_err);
             nvdimmAddVendorLog(i_nvdimm, l_err);
+            nvdimmReadFwLevels(i_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -2314,6 +2322,8 @@ void nvdimm_init(Target *i_nvdimm)
             nvdimmTraceRegs ( i_nvdimm, l_RegInfo );
             nvdimmAddPage4Regs(i_nvdimm,l_err);
             nvdimmAddVendorLog(i_nvdimm, l_err);
+            nvdimmReadFwLevels(i_nvdimm,l_err);
+
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -5172,6 +5182,7 @@ errlHndl_t nvdimmArmPreCheck(Target* i_nvdimm)
         nvdimmTraceRegs(i_nvdimm, l_RegInfo);
         nvdimmAddPage4Regs(i_nvdimm,l_err);
         nvdimmAddVendorLog(i_nvdimm, l_err);
+        nvdimmReadFwLevels(i_nvdimm,l_err);
 
         // Add reg traces to the error log
         NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -5258,6 +5269,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             nvdimmTraceRegs(l_nvdimm, l_RegInfo);
             nvdimmAddPage4Regs(l_nvdimm,l_err);
             nvdimmAddVendorLog(l_nvdimm, l_err);
+            nvdimmReadFwLevels(l_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -5527,6 +5539,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
                     // Dump Traces for error logs
                     nvdimmTraceRegs( l_nvdimm, l_RegInfo );
                     nvdimmAddPage4Regs(l_nvdimm,l_err);
+                    nvdimmReadFwLevels(l_nvdimm,l_err);
 
                     // Add reg traces to the error log
                     NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
@@ -5666,6 +5679,7 @@ bool nvdimmArm(TargetHandleList &i_nvdimmTargetList)
             nvdimmTraceRegs(l_nvdimm, l_RegInfo);
             nvdimmAddPage4Regs(l_nvdimm,l_err);
             nvdimmAddVendorLog(l_nvdimm, l_err);
+            nvdimmReadFwLevels(l_nvdimm,l_err);
 
             // Add reg traces to the error log
             NVDIMM::UdNvdimmOPParms( l_RegInfo ).addToLog(l_err);
