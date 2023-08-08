@@ -74,8 +74,17 @@ class OcmbDataBundle : public DataBundle
     {
         #ifdef __HOSTBOOT_MODULE
             #ifdef __HOSTBOOT_RUNTIME
-                delete iv_vcmFalseAlarmCounter;
-                delete iv_tpsFalseAlarmCounter;
+                for (const auto & counter : iv_vcmFalseAlarmCounter)
+                {
+                    delete counter.second;
+                }
+                iv_vcmFalseAlarmCounter.clear();
+
+                for (const auto & counter : iv_tpsFalseAlarmCounter)
+                {
+                    delete counter.second;
+                }
+                iv_tpsFalseAlarmCounter.clear();
             #else // IPL only
                 delete iv_iplCeStats;
             #endif
@@ -114,28 +123,36 @@ class OcmbDataBundle : public DataBundle
 
     #ifdef __HOSTBOOT_RUNTIME
 
-    /** @return The VCM false alarm counter. */
-    VcmFalseAlarm * getVcmFalseAlarmCounter()
+    /**
+     * @brief Gets the VCM false alarm counter for a given port.
+     * @param i_port The memory port.
+     * @return The VCM false alarm counter.
+     */
+    VcmFalseAlarm * getVcmFalseAlarmCounter(uint8_t i_port)
     {
-        if ( nullptr == iv_vcmFalseAlarmCounter )
+        if ( !iv_vcmFalseAlarmCounter.count(i_port) )
         {
-            iv_vcmFalseAlarmCounter = new VcmFalseAlarm(
+            iv_vcmFalseAlarmCounter[i_port] = new VcmFalseAlarm(
                        TimeBasedThreshold { 4, ThresholdResolution::ONE_DAY } );
         }
 
-        return iv_vcmFalseAlarmCounter;
+        return iv_vcmFalseAlarmCounter[i_port];
     }
 
-    /** @return The TPS false alarm counter. */
-    TpsFalseAlarm * getTpsFalseAlarmCounter()
+    /**
+     * @brief Gets the TPS false alarm counter for a given port.
+     * @param i_port The memory port.
+     * @return The TPS false alarm counter.
+     */
+    TpsFalseAlarm * getTpsFalseAlarmCounter(uint8_t i_port)
     {
-        if ( nullptr == iv_tpsFalseAlarmCounter )
+        if ( !iv_tpsFalseAlarmCounter.count(i_port) )
         {
-            iv_tpsFalseAlarmCounter = new TpsFalseAlarm(
+            iv_tpsFalseAlarmCounter[i_port] = new TpsFalseAlarm(
                 TimeBasedThreshold{ 3, ThresholdResolution::ONE_DAY } );
         }
 
-        return iv_tpsFalseAlarmCounter;
+        return iv_tpsFalseAlarmCounter[i_port];
     }
 
     #else // IPL only
@@ -208,11 +225,11 @@ class OcmbDataBundle : public DataBundle
 
     #ifdef __HOSTBOOT_RUNTIME
 
-    /** VCM false alarm counter. */
-    VcmFalseAlarm * iv_vcmFalseAlarmCounter = nullptr;
+    /** VCM false alarm counters, one per port. */
+    std::map<uint8_t, VcmFalseAlarm*> iv_vcmFalseAlarmCounter;
 
-    /** TPS false alarm counter. */
-    TpsFalseAlarm * iv_tpsFalseAlarmCounter = nullptr;
+    /** TPS false alarm counters, one per port. */
+    std::map<uint8_t, TpsFalseAlarm*> iv_tpsFalseAlarmCounter;
 
     /** Set to true if mainline NCEs and TCEs should be permanently masked. This
      *  is checked at the end of targeted diagnostics before background

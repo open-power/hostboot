@@ -43,12 +43,13 @@ using namespace PlatServices;
 //##############################################################################
 
 template<TARGETING::TYPE T>
-VcmFalseAlarm * __getFalseAlarmCounter( ExtensibleChip * i_chip );
+VcmFalseAlarm * __getFalseAlarmCounter(ExtensibleChip * i_chip, uint8_t i_port);
 
 template<>
-VcmFalseAlarm * __getFalseAlarmCounter<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip)
+VcmFalseAlarm * __getFalseAlarmCounter<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
+                                                       uint8_t i_port)
 {
-    return getOcmbDataBundle(i_chip)->getVcmFalseAlarmCounter();
+    return getOcmbDataBundle(i_chip)->getVcmFalseAlarmCounter(i_port);
 }
 
 //##############################################################################
@@ -198,7 +199,8 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
 
         // Increment the false alarm counter and check threshold.
         uint8_t dram = iv_mark.getSymbol().getDram();
-        if ( __getFalseAlarmCounter<T>(iv_chip)->inc(iv_rank, dram, io_sc) )
+        if ( __getFalseAlarmCounter<T>(iv_chip, iv_port)->inc(iv_rank, dram,
+                                                              io_sc) )
         {
             // False alarm threshold has been reached.
 

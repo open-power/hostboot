@@ -614,7 +614,7 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // a least one false alarm on any DRAM on this rank other than this
             // DRAM. This is required because of two symbol correction,
             VcmFalseAlarm * faCntr =
-                getOcmbDataBundle(i_chip)->getVcmFalseAlarmCounter();
+                getOcmbDataBundle(i_chip)->getVcmFalseAlarmCounter(i_port);
             if ( faCntr->queryDrams(i_rank, dram, io_sc) )
             {
                 // setting o_allRepairsUsed will set the service call flag to

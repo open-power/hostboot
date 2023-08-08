@@ -60,13 +60,14 @@ static const char *ocmbCeStatReg[CE_REGS_PER_PORT] =
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-TpsFalseAlarm * __getTpsFalseAlarmCounter( ExtensibleChip * i_chip );
+TpsFalseAlarm * __getTpsFalseAlarmCounter( ExtensibleChip * i_chip,
+                                           uint8_t i_port );
 
 template<>
 TpsFalseAlarm * __getTpsFalseAlarmCounter<TYPE_OCMB_CHIP>(
-    ExtensibleChip * i_chip )
+    ExtensibleChip * i_chip, uint8_t i_port )
 {
-    return getOcmbDataBundle(i_chip)->getTpsFalseAlarmCounter();
+    return getOcmbDataBundle(i_chip)->getTpsFalseAlarmCounter(i_port);
 }
 
 //------------------------------------------------------------------------------
@@ -85,14 +86,14 @@ void __maskMainlineNceTces<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
 template<TARGETING::TYPE T>
 void __getNextPhase( ExtensibleChip * i_chip, const MemRank & i_rank,
-                     STEP_CODE_DATA_STRUCT & io_sc,
+                     uint8_t i_port, STEP_CODE_DATA_STRUCT & io_sc,
                      TdEntry::Phase & io_phase, uint32_t & o_signature )
 {
     PRDF_ASSERT( TdEntry::Phase::TD_PHASE_0 == io_phase );
 
     // Only use phase 2 if the false alarm counter has exceeded threshold.
     // Otherwise, use phase 1.
-    TpsFalseAlarm * faCounter = __getTpsFalseAlarmCounter<T>( i_chip );
+    TpsFalseAlarm * faCounter = __getTpsFalseAlarmCounter<T>( i_chip, i_port );
     if ( faCounter->count(i_rank, io_sc) >= 1 )
     {
         io_phase    = TdEntry::Phase::TD_PHASE_2;
@@ -426,7 +427,7 @@ uint32_t TpsEvent<T>::handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
                                       PRDFSIG_TpsFalseAlarm );
 
     // Increase false alarm counter and check threshold.
-    if ( __getTpsFalseAlarmCounter<T>(iv_chip)->inc( iv_rank, io_sc) )
+    if ( __getTpsFalseAlarmCounter<T>(iv_chip, iv_port)->inc( iv_rank, io_sc) )
     {
         io_sc.service_data->setSignature( iv_chip->getHuid(),
                                           PRDFSIG_TpsFalseAlarmTH );
@@ -1258,10 +1259,10 @@ uint32_t TpsEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
 {
     uint32_t signature = 0;
 
-    __getNextPhase<T>( iv_chip, iv_rank, io_sc, iv_phase, signature );
+    __getNextPhase<T>( iv_chip, iv_rank, iv_port, io_sc, iv_phase, signature );
 
-    PRDF_TRAC( "[TpsEvent] Starting TPS Phase %d: 0x%08x,0x%02x",
-               iv_phase, iv_chip->getHuid(), getKey() );
+    PRDF_TRAC( "[TpsEvent] Starting TPS Phase %d: 0x%08x,0x%02x,%d",
+               iv_phase, iv_chip->getHuid(), getKey(), iv_port );
 
     io_sc.service_data->AddSignatureList( iv_chip->getTrgt(), signature );
 
