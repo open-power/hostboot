@@ -319,23 +319,4 @@
     </deconfigure>
   </hwpError>
 
-  <hwpError>
-    <rc>RC_ODY_TOO_MANY_RANKS_FOR_SUBTEST_SUPPORT</rc>
-    <description>
-        DIMM contains too many mranks/sranks to use an MCBIST subtest per port/rank.
-        Max number of subtest start/end address pairs is four, so a DIMM can have a
-        maximum of four mrank/sranks per port.
-    </description>
-    <ffdc>RANK_COUNT</ffdc>
-    <ffdc>MAX_RANK_COUNT</ffdc>
-    <ffdc>MC_TARGET</ffdc>
-    <callout>
-      <target>MC_TARGET</target>
-      <priority>HIGH</priority>
-    </callout>
-    <deconfigure>
-      <target>MC_TARGET</target>
-    </deconfigure>
-  </hwpError>
-
 </hwpErrors>

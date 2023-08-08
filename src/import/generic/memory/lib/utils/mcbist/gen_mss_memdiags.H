@@ -1166,8 +1166,8 @@ struct targeted_scrub_operation : public operation<MC>
         // Scrub operations run 128B
         this->iv_program.change_len64(mss::OFF);
 
-        // We're a single-port operation since targeted scrub runs on single mrank or srank
-        o_rc = this->single_port_init();
+        // We're a multi-port operation
+        o_rc = this->multi_port_init();
 
         // Targeted scrub needs to force a pause and the end boundary. So we make sure that happens here.
         // Note: the PAUSE_ON_ERROR_MODE setting should pause the test on errors, or at the end so we
@@ -1202,8 +1202,8 @@ struct targeted_steer_operation : public operation<MC>
         // Scrub operations run 128B
         this->iv_program.change_len64(mss::OFF);
 
-        // We're a single-port operation since targeted steer runs on single mrank or srank
-        o_rc = this->single_port_init();
+        // We're a multi-port operation
+        o_rc = this->multi_port_init();
 
         // Targeted steer needs to force a pause and the end boundary. So we make sure that happens here.
         // Note: the PAUSE_ON_ERROR_MODE setting should pause the test on errors, or at the end so we
