@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
 #include <targeting/common/utilFilter.H>
 #include <util/align.H>
 #include <arch/pirformat.H>
+#include <pldm/extended/hb_pdrs.H>
 
 using namespace TARGETING;
 
@@ -801,7 +802,7 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         //get the parent node id and set that
 
         //Ordinal Id of the fru containing this proc
-        uint32_t l_fruOrdId = i_pProcTarget->getAttr<TARGETING::ATTR_FRU_ID>();
+        uint32_t l_fruOrdId = PLDM::getEntityInstanceNumber(i_pProcTarget, PLDM::ENTITY_TYPE_PROCESSOR_MODULE);
         this->iv_spPcia[i_index].hdatCoreData.pciaFruId = l_fruOrdId;
 
         //Module id is same as FRU Ordinal ID
