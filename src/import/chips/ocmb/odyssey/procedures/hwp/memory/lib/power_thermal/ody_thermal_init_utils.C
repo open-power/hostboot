@@ -152,7 +152,7 @@ fapi2::ReturnCode thermal_sensor::i2c_read_helper(const fapi2::Target<fapi2::TAR
 fapi2::ReturnCode reset_i2cc(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
 {
     fapi2::ATTR_FREQ_OMI_MHZ_Type l_freq_omi_mhz;
-    fapi2::ATTR_IS_SIMULATION_Type l_is_sim;
+    fapi2::ATTR_IS_SIMICS_Type l_is_simics;
     uint64_t l_brd = 0;
     fapi2::buffer<uint64_t> l_i2cc_imm_reset_data = 0;
     fapi2::buffer<uint64_t> l_i2cc_mode_data = 0;
@@ -160,9 +160,9 @@ fapi2::ReturnCode reset_i2cc(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     fapi2::buffer<uint64_t> l_i2cc_status_data_exp = 0;
     fapi2::buffer<uint64_t> l_i2cc_status_data_act = 0;
 
-    FAPI_TRY(mss::attr::get_is_simulation(l_is_sim));
+    FAPI_TRY(mss::attr::get_is_simics(l_is_simics));
 
-    if (l_is_sim)
+    if (l_is_simics)
     {
         // skip in Simics
         return fapi2::FAPI2_RC_SUCCESS;
