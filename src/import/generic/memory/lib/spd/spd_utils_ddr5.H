@@ -543,12 +543,14 @@ fapi2::ReturnCode process_trfc_nck( const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
 ///
 /// @param[in] i_port port target
 /// @param[in] i_refresh_mode the refresh mode for this system
+/// @param[in] i_refresh_request_rate the refresh request_rate for this system
 /// @param[out] o_timing_ck the computed timing value in clock cycles
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note This is largely for unit testing. the refresh mode is an MRW which cannot be changed
 ///
 fapi2::ReturnCode process_trefi_nck( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
                                      const uint8_t i_refresh_mode,
+                                     const uint8_t i_refresh_request_rate,
                                      uint16_t& o_timing_ck);
 }// ddr5
 

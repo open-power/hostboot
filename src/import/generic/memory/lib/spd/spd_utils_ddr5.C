@@ -515,19 +515,50 @@ fapi_try_exit:
 ///
 /// @param[in] i_port port target
 /// @param[in] i_refresh_mode the refresh mode for this system
+/// @param[in] i_refresh_request_rate the refresh request_rate for this system
 /// @param[out] o_timing_ck the computed timing value in clock cycles
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note This is largely for unit testing. the refresh mode is an MRW which cannot be changed
 ///
 fapi2::ReturnCode process_trefi_nck( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
                                      const uint8_t i_refresh_mode,
+                                     const uint8_t i_refresh_request_rate,
                                      uint16_t& o_timing_ck)
 {
     // Grab the appropriate TREFI based upon the refresh mode - taken from 4.13.5 in JEDEC spec rev 1.7.1
     constexpr uint64_t TREFI1_PS = 3900000;
     constexpr uint64_t TREFI2_PS = 1950000;
-    const auto TREFI_PS = i_refresh_mode == fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL ? TREFI1_PS :
-                          TREFI2_PS;
+    constexpr uint64_t TREFI4_PS = 975000;
+    uint64_t TREFI_PS = 0;
+    //Since SBE might not Support Double / Float Pre-Calculate the Values
+    constexpr uint64_t TEN_PERCENT_FASTER_TREFI1 = TREFI1_PS - (TREFI1_PS / 10);
+    constexpr uint64_t TEN_PERCENT_FASTER_TREFI2 = TREFI2_PS - (TREFI2_PS / 10);
+    constexpr uint64_t TEN_PERCENT_FASTER_TREFI4 = TREFI4_PS - (TREFI4_PS / 10);
+
+    switch(i_refresh_request_rate)
+    {
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_SINGLE:
+            TREFI_PS = (i_refresh_mode == fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL) ? TREFI1_PS : TREFI2_PS;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_DOUBLE:
+            TREFI_PS = (i_refresh_mode == fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL) ? TREFI2_PS : TREFI4_PS;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_SINGLE_10_PERCENT_FASTER:
+            TREFI_PS = (i_refresh_mode == fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL) ?
+                       TEN_PERCENT_FASTER_TREFI1 : TEN_PERCENT_FASTER_TREFI2;
+            break;
+
+        case fapi2::ENUM_ATTR_MSS_MRW_REFRESH_RATE_REQUEST_DOUBLE_10_PERCENT_FASTER:
+            TREFI_PS = (i_refresh_mode == fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL) ?
+                       TEN_PERCENT_FASTER_TREFI2 : TEN_PERCENT_FASTER_TREFI4;
+            break;
+
+        default:
+            TREFI_PS = (i_refresh_mode == fapi2::ENUM_ATTR_MSS_MRW_FINE_REFRESH_MODE_NORMAL) ? TREFI1_PS : TREFI2_PS;
+            break;
+    }
 
     // Grab the value of tCK in picoseconds for this frequency
     uint64_t l_freq = 0;

@@ -1276,9 +1276,11 @@ class base_0_0 : public mss::spd::base
         {
             uint16_t l_trefi_nck = 0;
             uint8_t l_refresh_mode = 0;
+            uint8_t l_refresh_rate = 0;
 
             FAPI_TRY(mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode));
-            FAPI_TRY(mss::spd::ddr5::process_trefi_nck(iv_port, l_refresh_mode, l_trefi_nck));
+            FAPI_TRY(mss::attr::get_mrw_refresh_rate_request(l_refresh_rate));
+            FAPI_TRY(mss::spd::ddr5::process_trefi_nck(iv_port, l_refresh_mode, l_refresh_rate, l_trefi_nck));
             FAPI_TRY(mss::attr::set_dram_trefi(iv_port, l_trefi_nck));
 
         fapi_try_exit:
