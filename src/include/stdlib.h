@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,9 +32,59 @@ extern "C"
 {
 #endif
 
-void* malloc(size_t) __attribute__((malloc));
-void free(void*);
+ /**
+  * @brief allocates memory contiguous in physical memory
+  * @param[in]  size  size of allocation.
+  * @return Pointer to beginning of allocation block
+  */
+void* contiguous_malloc(size_t)__attribute__((malloc));
+
+ /**
+  * @brief allocates memory discontiguous in physical memory
+  * @param[in]  size  size of allocation.
+  * @return Pointer to beginning of allocation block
+  */
+void* discontiguous_malloc(size_t);
+
+ /**
+  * @brief Uses the currently active allocator (contiguous or
+  * discontiguous). Always uses the contiguous allocator in kernel
+  * mode.
+  * @param[in]  size  size of allocation.
+  * @return pointer to beginning of allocation block
+  */
+void* malloc(size_t)__attribute__((malloc));
+
+ /**
+  * @brief Function to free allocated block. Can be used with the
+  *        results of either contiguous or discontiguous allocator.
+  * @param[in]  ptr  pointer to allocation block needed to be freed
+  */
+void  free(void*);
+
+ /**
+  * @brief called in istep 6.5 to switch the default allocator to
+  * discontiguous malloc. This is the earliest point when the VMM
+  * system is ready to handle a call mm_alloc_block.
+  */
+void activate_discontiguous_malloc_heap();
+
+/**
+ * @brief Called in exit_cache_contained to return to the
+ * physically contiguous allocator. We do this because we
+ * currently have limited virtual address space, and after exiting
+ * cache, we don't have tight memory constraints.
+ */
+void deactivate_discontiguous_malloc_heap();
+
+/**
+ *  @brief Can be used with a pointer from either allocator.
+ */
 void* realloc(void*, size_t);
+
+/**
+ * @brief Uses the current allocator.
+ */
 void* calloc(size_t, size_t) __attribute__((malloc));
 
 /**

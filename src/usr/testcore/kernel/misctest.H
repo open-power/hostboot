@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,7 +69,7 @@ class MiscTest : public CxxTest::TestSuite
             uint64_t hrmor = cpu_spr_value(CPU_SPR_HRMOR);
 
             // Verify a regular heap address
-            uint8_t* heap = (uint8_t*)malloc(1);
+            uint8_t* heap = (uint8_t*)contiguous_malloc(1);
             *heap = 0xAB; //to make sure it gets paged in
             phys = mm_virt_to_phys( heap );
             if( phys != (reinterpret_cast<uint64_t>(heap)|hrmor) )

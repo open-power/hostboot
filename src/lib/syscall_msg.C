@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,7 +119,7 @@ msg_q_t msg_q_resolve(const char* name)
 
 msg_t* msg_allocate()
 {
-    msg_t* msg = reinterpret_cast<msg_t*>(malloc(sizeof(msg_t)));
+    msg_t* msg = reinterpret_cast<msg_t*>(contiguous_malloc(sizeof(msg_t)));
 
     memset(msg, 0, sizeof(msg_t));
 

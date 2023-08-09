@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,7 +142,8 @@ class ptmgrtest : public CxxTest::TestSuite
         uint64_t pn = 0;
 
         // 1) Initialize the Page Table
-        PageTableManager* ptmgr = new PageTableManager(true);
+        auto ptmgr = static_cast<PageTableManager*>(contiguous_malloc(sizeof(PageTableManager)));
+        ptmgr = new (ptmgr) PageTableManager(true);
 
         for( uint64_t x = 0; x < (sizeof(TEST_DATA)/sizeof(TEST_DATA[0])); x++ )
         {
@@ -162,15 +163,15 @@ class ptmgrtest : public CxxTest::TestSuite
             {
                 PASS_TRACE( "ptmgrtest::test_addEntry> PASS1 : 0x%.16lX", TEST_DATA[x].va );
 
-		PageTableManager::PageTableEntry* pte = ptmgr->findPTE(TEST_DATA[x].va);
-		uint64_t va = ptmgr->getVirtAddrFromPTE(pte);
-		if( va != (TEST_DATA[x].va - TEST_DATA[x].va%4096) )
-		{
-		    TS_FAIL( "ptmgrtest::test_addEntry> ERROR6 : VA doesn't match expected" );
-		    TS_TRACE( "Exp=%.16lX, Act=%.16lX", TEST_DATA[x].va, va );
-		    fails++;
-		}
-		total++;
+                PageTableManager::PageTableEntry* pte = ptmgr->findPTE(TEST_DATA[x].va);
+                uint64_t va = ptmgr->getVirtAddrFromPTE(pte);
+                if( va != (TEST_DATA[x].va - TEST_DATA[x].va%4096) )
+                {
+                    TS_FAIL( "ptmgrtest::test_addEntry> ERROR6 : VA doesn't match expected" );
+                    TS_TRACE( "Exp=%.16lX, Act=%.16lX", TEST_DATA[x].va, va );
+                    fails++;
+                }
+                total++;
             }
             else
             {

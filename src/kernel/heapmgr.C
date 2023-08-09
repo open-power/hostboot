@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,8 @@
 #include <usr/debugpointers.H>
 #include <arch/magic.H>
 #include <usr/vmmconst.h>
+#include <kernel/misc.H>
+#include <stdlib.h>
 
 #ifdef HOSTBOOT_DEBUG
 #define SMALL_HEAP_PAGES_TRACKED 64
@@ -264,16 +266,21 @@ void* _enforceBigFence(void* const i_pAddr)
 
 void * HeapManager::allocate(size_t i_sz)
 {
+
     HeapManager& hmgr = Singleton<HeapManager>::instance();
     size_t overhead = 0;
 
 #ifdef CONFIG_MALLOC_FENCING
     overhead = offsetof(fence_t,data) + sizeof(CHECK::END);
 #endif
-
+    // do not want huge allocations when in kernel mode (huge
+    // allocations use mm_alloc_block); kernel memory accesses don't
+    // go through page translation.
     if( (i_sz + overhead > MAX_BIG_ALLOC_SIZE)
-        && (i_sz + overhead <= HC_SLOT_SIZE) )
+        && (i_sz + overhead <= HC_SLOT_SIZE)
+        && !(KernelMisc::in_kernel_mode()))
     {
+
         printkd("allocateHuge=%ld [%d]\n", i_sz, task_gettid());
         void* ptr = hmgr._allocateHuge(i_sz);
         if( ptr )
@@ -859,7 +866,8 @@ void* HeapManager::_allocateBig(size_t i_sz)
     }
     if(!bc)
     {
-        bc = new big_chunk_t(v,pages);
+        bc = (big_chunk_t*) contiguous_malloc(sizeof(big_chunk_t));
+        bc = new (bc) big_chunk_t(v,pages);
         big_chunk_stack.push(bc);
     }
 
@@ -975,8 +983,8 @@ void* HeapManager::_allocateHuge(size_t i_sz)
              addr >= VMM_VADDR_MALLOC;
              addr -= HC_SLOT_SIZE )
         {
-            huge_chunk_t* hc =
-              new huge_chunk_t(reinterpret_cast<void*>(addr),0);
+            auto hc = static_cast<huge_chunk_t*>(contiguous_malloc(sizeof(huge_chunk_t)));
+            hc = new (hc) huge_chunk_t(reinterpret_cast<void*>(addr),0);
             huge_chunk_stack.push(hc);
         }
 
@@ -1019,6 +1027,7 @@ void* HeapManager::_allocateHuge(size_t i_sz)
     int rc = mm_set_permission(hc->addr,
                                pages*PAGESIZE,
                                WRITABLE | ALLOCATE_FROM_ZERO );
+
     if(rc != 0)
     {
         printk( "_allocateHuge> mm_set_permission failed for requested size=%ld!!\n", i_sz );
@@ -1137,4 +1146,3 @@ void* HeapManager::_reallocHuge(void* i_ptr, size_t i_sz)
 
     return i_ptr;
 }
-

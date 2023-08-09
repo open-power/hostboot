@@ -1,3 +1,4 @@
+
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
@@ -24,6 +25,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -60,6 +62,9 @@ void* host_set_ipl_parms( void *io_pArgs )
     ISTEP_ERROR::IStepError l_stepError;
 
     do{
+    // switch to allocator with discontiguous physical pages to
+    // alleviate fragmentation
+    activate_discontiguous_malloc_heap();
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms entry" );
 

@@ -720,7 +720,7 @@ hb_startsimics()
         fi
 
         # For GCOV, tell simics to enable the larger backing cache.
-        if [ "$HOSTBOOT_PROFILE" ] ; then
+        if [[ "$HOSTBOOT_PROFILE" || "$SIMICS_MORECACHE" ]] ; then
             # enable more cores for 16MB backing cache
             export SIMICS_MORECACHE=1
             STARTSIMCMD+=(num_cores_per_chip=8)

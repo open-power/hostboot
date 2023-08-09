@@ -28,8 +28,12 @@
 #include <ctype.h>
 #include <kernel/heapmgr.H>
 #include <kernel/pagemgr.H>
+#include <kernel/vmmmgr.H>
 #include <kernel/console.H>
+#include <kernel/misc.H>
+#include <usr/vmmconst.h>
 #include <assert.h>
+#include <errno.h>
 
 #ifdef HOSTBOOT_MEMORY_LEAKS
 #include <arch/ppc.H>
@@ -91,7 +95,489 @@ uint16_t g_2k = 0;
 uint16_t g_big = 0;
 #endif
 
-void* malloc(size_t s)
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+/**
+ * @brief Metadata structure for malloc heap allocations
+ */
+struct block{
+  int32_t is_free;      /* Set to 0x1231 to mean "free" or "0x1230" to
+                         * mean "occupied." */
+  uint32_t size;        /* size of associated allocation*/
+  block *next;          /* pointer to next allocation block*/
+  block *prev;          /* pointer to prev allocation block*/
+};
+
+#define BLOCK_IS_FREE 0x1231
+#define BLOCK_IS_OCCUPIED 0x1230
+
+// The size of allocation metadata.
+#define METASIZE sizeof(block)
+
+ /**
+  * @brief prints memory stats for discontiguous malloc heap for debugging
+  */
+void mallocDebug();
+
+mutex_t malloc_mutex = MUTEX_INITIALIZER;
+
+
+void *g_heap_start = reinterpret_cast<void*>(VMM_VADDR_MALLOC_VIRT);  /* pointer to beginning of discontiguous malloc heap*/
+void *g_heap_currPos = g_heap_start;                                    /* points to begininng of next free block in discontiguous malloc heap */
+void *g_heap_prevBlock = NULL;                                        /* points to previous allocation in discontiguous malloc heap for setting up list */
+void* (*g_active_alloc)(size_t) = &contiguous_malloc;                   /* function pointer switches to discontiguous malloc in switch_malloc */
+
+block* g_alloc_search = nullptr; /* Used for searching for a previously-freed block that can hold a new allocation. This variable points
+                                  to the block that the previous search left off at, to make searches more efficient. */
+
+//stats for debug
+uint64_t g_num_allocated_bytes = 0;
+uint64_t g_num_freed_bytes = 0;
+uint64_t g_num_bytes_removed = 0;
+
+
+void* malloc(size_t size)
+{
+    if (KernelMisc::in_kernel_mode())
+    {
+        return (contiguous_malloc(size));
+    }
+
+    return (g_active_alloc(size));
+}
+
+void mallocDebug()
+{
+    printk("currPos in malloc %p\n", g_heap_currPos);
+    printk("pages available before free %ld\n",PageManager::availPages());
+
+    for (auto i = static_cast<block*>(g_heap_start); i; i = i->next)
+    {
+        // A means "allocation"
+        printk("A %p %x %d -> %p\n", i, i->is_free, i->size, i->next);
+    }
+}
+
+void activate_discontiguous_malloc_heap()
+{
+    // @TODO: Make this work.
+    return;
+
+    auto lock = scoped_mutex_lock(malloc_mutex);
+
+    mm_virt_to_phys(reinterpret_cast<void*>(VMM_VADDR_MALLOC_VIRT));
+
+    int rc = mm_alloc_block(nullptr,
+                            reinterpret_cast<void*>(VMM_VADDR_MALLOC_VIRT),
+                            VMM_MALLOC_VIRT_SIZE );
+    if(rc != 0)
+    {
+        printk( "<switch_malloc> mm_alloc_block failed for %lX\n using contiguous allocator to allocate memory",
+                VMM_VADDR_MALLOC_VIRT );
+        return;
+    }
+
+    rc = mm_set_permission(reinterpret_cast<void*>(VMM_VADDR_MALLOC_VIRT),VMM_MALLOC_VIRT_SIZE,WRITABLE|ALLOCATE_FROM_ZERO);
+    if(rc != 0)
+    {
+        printk( "<malloc> mm_set_permissions failed for %lX\n using contiguous allocator to allocate memory",
+                VMM_VADDR_MALLOC_VIRT );
+        return;
+    }
+    g_active_alloc = &discontiguous_malloc;
+}
+
+
+void deactivate_discontiguous_malloc_heap()
+{
+    if(g_active_alloc ==  &contiguous_malloc)
+    {
+        printk( "<extend_malloc_heap> failed because switch to discontiguous malloc was previously unsuccesful\n");
+        return;
+    }
+
+    auto lock = scoped_mutex_lock(malloc_mutex);
+    g_active_alloc = contiguous_malloc;
+
+    return; // we are not growing the malloc heap here currently
+
+    int rc = mm_alloc_block(nullptr,
+                            reinterpret_cast<void*>(VMM_VADDR_MALLOC_VIRT + VMM_MALLOC_VIRT_SIZE),
+                            VMM_MALLOC_EXTENDED_SIZE);
+    if(rc != 0)
+    {
+        printk( "<extend_malloc_heap> mm_alloc_block failed for %lX\n",
+                (VMM_VADDR_MALLOC_VIRT + VMM_MALLOC_VIRT_SIZE));
+        return;
+    }
+
+    rc = mm_set_permission(reinterpret_cast<void*>(VMM_VADDR_MALLOC_VIRT + VMM_MALLOC_VIRT_SIZE),VMM_MALLOC_EXTENDED_SIZE,WRITABLE|ALLOCATE_FROM_ZERO);
+    if(rc != 0)
+    {
+        printk( "<extend_malloc_heap> mm_set_permissions failed for %lX\n",
+                (VMM_VADDR_MALLOC_VIRT + VMM_MALLOC_VIRT_SIZE));
+        return;
+    }
+}
+
+/** @brief Find a free block big enough to fit the given size,
+ *  starting at startnode, stopping after max_steps of not finding a
+ *  fit, and populating next_time_start with the node the search ended
+ *  with.
+ */
+block* find_big_enough_block(uint32_t aligned_size,
+                             block* startnode,
+                             int max_steps,
+                             block*& next_time_start)
+{
+    if (!g_heap_prevBlock)
+    {
+        return nullptr;
+    }
+
+    if (!startnode)
+    {
+        startnode = static_cast<block*>(g_heap_prevBlock);
+    }
+
+    block* i = nullptr;
+    bool looped = false;
+
+    for (i = static_cast<block*>(startnode); max_steps-- >= 0; i = static_cast<block*>(i)->prev)
+    {
+        if (!i)
+        {
+            if (looped)
+            {
+                break;
+            }
+
+            looped = true;
+            i = static_cast<block*>(g_heap_prevBlock);
+        }
+
+        if (i->is_free == BLOCK_IS_FREE && i->size > (aligned_size + METASIZE))
+        {
+            auto oldsize = i->size;
+            auto oldnext = i->next;
+
+            i->is_free = BLOCK_IS_OCCUPIED;
+            i->size = aligned_size;
+            i->next = reinterpret_cast<block*>(reinterpret_cast<char*>(i+1) + aligned_size);
+
+            i->next->is_free = BLOCK_IS_FREE;
+            i->next->size = oldsize - aligned_size - METASIZE;
+            i->next->next = oldnext;
+            i->next->prev = i;
+
+            if (i->next->next)
+            {
+                i->next->next->prev = i->next;
+            }
+            else
+            {
+                g_heap_prevBlock = i->next;
+            }
+
+            break;
+        }
+    }
+
+    if (i)
+    {
+        next_time_start = i->next;
+    }
+    else
+    {
+        next_time_start = nullptr;
+    }
+
+    return nullptr;
+}
+
+void* discontiguous_malloc(size_t size)
+{
+    if (size <= PAGE_SIZE || size >= 32*PAGESIZE)
+    { // Don't use the discontiguous allocator for things less than a
+      // page size (discontiguous pages don't help much in that case)
+      // or for greater than 32 pages (we want a separate allocated
+      // region for those, don't waste our heap space).
+        return contiguous_malloc(size);
+    }
+
+    auto lock = scoped_mutex_lock(malloc_mutex);
+
+    uint32_t aligned_size = ALIGN_8(size);
+    if(g_heap_currPos == g_heap_start)
+    {
+        //g_heap_prevBlock = NULL;
+    }
+
+    block *prev_block = static_cast<block*>(g_heap_prevBlock);
+    block *new_block = static_cast<block*>(g_heap_currPos);
+
+    if ((uint64_t)new_block + METASIZE + aligned_size > VMM_VADDR_MALLOC_VIRT + VMM_MALLOC_VIRT_SIZE)
+    {
+        // TODO: call contiguous malloc here
+        printk("Discontiguous malloc region is full!\n");
+        crit_assert(false);
+    }
+
+    if (aligned_size <= 0)
+    {
+        return NULL;
+    }
+
+    g_num_allocated_bytes += aligned_size;
+
+    /*
+    if (auto reused_block = find_big_enough_block(aligned_size, g_alloc_search, 8, g_alloc_search))
+    {
+        return reused_block + 1;
+    }
+
+    block* recent_reused_block = nullptr;
+    if (auto reused_block = find_big_enough_block(aligned_size, static_cast<block*>(g_heap_prevBlock), 8, recent_reused_block))
+    {
+        if (recent_reused_block && recent_reused_block->size > g_alloc_search->size)
+        {
+            g_alloc_search = recent_reused_block;
+        }
+        return reused_block + 1;
+    }
+    */
+
+    //allocate at new block
+    new_block->is_free = BLOCK_IS_OCCUPIED;
+    new_block->size = aligned_size;
+    new_block->next = NULL;
+    new_block->prev = prev_block;
+
+    if(new_block->prev)
+    {
+        prev_block->next = new_block;
+    }
+
+    g_heap_currPos = static_cast<void*>(static_cast<char*>(g_heap_currPos) + (aligned_size + METASIZE));
+    g_heap_prevBlock = new_block;
+
+    //return pointer to new block
+    return (new_block + 1);
+}
+
+void discontiguous_free(void *ptr)
+{
+    if(!ptr)
+    {
+        return;
+    }
+
+    auto lock = scoped_mutex_lock(malloc_mutex);
+
+    block *meta_data = static_cast<block*>(ptr) - 1;
+
+    if (meta_data->is_free != BLOCK_IS_OCCUPIED)
+    {
+        printk("meta_data->is_free != BLOCK_IS_OCCUPIED %p 0x%x",
+               meta_data, meta_data->is_free);
+        crit_assert(false);
+    }
+
+    const auto freed_size = meta_data->size;
+
+    //update stats for debug
+    g_num_freed_bytes += freed_size;
+
+    meta_data->is_free = BLOCK_IS_FREE;
+
+    block *next = meta_data->next;
+    block *prev = meta_data->prev;
+
+    //check if next block is free and combine
+    if((next) && (next->is_free == BLOCK_IS_FREE))
+    {
+        if (!((void*)meta_data->next == (void*)(meta_data->size + METASIZE + (char*)meta_data)))
+        {
+            printk("Discontiguous heap block 'next' pointer doesn't point to the end of block: %p 0x%08X %p ; %p 0x%08X %p ; %p 0x%08X %p\n",
+                   meta_data, meta_data->size, meta_data->next,
+                   prev, prev ? prev->size : 0, prev ? prev->next : nullptr,
+                   next, next->size, next->next);
+
+            crit_assert(false);
+        }
+
+        meta_data->size = meta_data->size + METASIZE + next->size;
+        meta_data->next = next->next;
+        if(next->next)
+        {
+            next->next->prev = meta_data;
+        }
+    }
+
+    next = meta_data->next;
+
+
+    //check if prev block is free and update
+    if((prev) && (prev->is_free == BLOCK_IS_FREE))
+    {
+        if (!((void*)meta_data == (void*)(prev->size + METASIZE + (char*)prev)))
+        {
+            printk("IS BAD: %p 0x%08X %p ; %p 0x%08X %p ; %p 0x%08X %p\n",
+                   meta_data, meta_data->size, meta_data->next,
+                   prev, prev->size, prev->next,
+                   next, next ? next->size : 0, next ? next->next : nullptr);
+
+            crit_assert(false);
+        }
+
+        prev->size = prev->size + METASIZE + meta_data->size;
+        prev->next = next;
+        meta_data = prev;
+        if(next)
+        {
+            next->prev = meta_data;
+        }
+    }
+
+    prev = meta_data->prev;
+
+    if(!next)
+    {
+        g_heap_prevBlock = meta_data;
+    }
+    if(!prev)
+    {
+        g_heap_start = meta_data;
+    }
+
+    uint64_t pgUp = ALIGN_PAGE((uint64_t)meta_data + METASIZE);
+    uint64_t pgDown = ALIGN_PAGE_DOWN((uint64_t)((char*)meta_data + METASIZE + meta_data->size));
+
+    int rc = 0;
+
+    //free page if free block occupies a >= PAGESIZE
+    if(pgUp < pgDown)
+    {
+        /*
+        if(!next && !prev)
+        {
+          g_heap_prevBlock = NULL;
+          g_heap_start = g_heap_currPos;
+        }
+        if(prev)
+        {
+            prev->next = next;
+        }
+        else if (!prev && next)
+        {
+            if(!(next->next))
+            {
+                //g_heap_prevBlock = next;
+            }
+            g_heap_start = next;
+        }
+
+        if(next)
+        {
+            next->prev = prev;
+        }
+        else if(!next)
+        {
+            g_heap_prevBlock  = prev;
+        }
+        */
+
+        // Set permissions before removing pages, so that a concurrent
+        // memory access doesn't re-page anything in between the two
+        // calls.
+        rc = mm_set_permission((void*)pgUp, (pgDown-pgUp), NO_ACCESS);
+
+        if(rc != 0)
+        {
+            printk( "new_free> mm_set_permission failed for ptr=%p (size=%ld)\n", (void*)pgUp, (pgDown-pgUp));
+            crit_assert(0);
+            return;
+        }
+
+        /* If we're freeing the block that contains g_alloc_search,
+           update it to point to a valid block nearby, so that it's
+           not dangling. */
+        if (!g_alloc_search
+            || ((char*)g_alloc_search >= (char*)meta_data
+                && (char*)g_alloc_search < (char*)meta_data + METASIZE + meta_data->size)
+            || g_alloc_search->size < meta_data->size)
+        {
+            g_alloc_search = meta_data;
+        }
+
+        for (auto init = pgUp; init < pgDown; init += PAGE_SIZE)
+        {
+            if (-mm_virt_to_phys((void*)init) != EFAULT)
+            {
+                g_num_bytes_removed += PAGE_SIZE;
+            }
+        }
+
+        const auto END_FIRST_VMM_REGION = VMM_VADDR_MALLOC_VIRT + VMM_MALLOC_VIRT_SIZE;
+
+        if (pgUp < END_FIRST_VMM_REGION
+            && pgDown > END_FIRST_VMM_REGION)
+        {
+            rc = mm_remove_pages(RELEASE,
+                                 (void*)pgUp,
+                                 END_FIRST_VMM_REGION - pgUp);
+
+            if(rc != 0)
+            {
+                printk( "new_free> mm_remove_pages 1 failed for ptr=%p (size=%ld)\n", (void*)pgUp, (pgDown-pgUp));
+                crit_assert(0);
+                return;
+            }
+
+            rc = mm_remove_pages(RELEASE,
+                                 (void*)END_FIRST_VMM_REGION,
+                                 pgDown - END_FIRST_VMM_REGION);
+
+            if(rc != 0)
+            {
+                printk( "new_free> mm_remove_pages 2 failed for ptr=%p (size=%ld)\n", (void*)pgUp, (pgDown-pgUp));
+                crit_assert(0);
+                return;
+            }
+        }
+        else
+        {
+            rc = mm_remove_pages(RELEASE, (void*)pgUp, (pgDown-pgUp));
+
+            if(rc != 0)
+            {
+                printk( "new_free> mm_remove_pages 3 failed for ptr=%p (size=%ld)\n", (void*)pgUp, (pgDown-pgUp));
+                crit_assert(0);
+                return;
+            }
+        }
+    }
+    else
+    {
+        /*
+        if (!g_alloc_search
+            || ((char*)g_alloc_search >= (char*)meta_data
+                && (char*)g_alloc_search < (char*)meta_data + METASIZE + meta_data->size))
+        {
+            g_alloc_search = meta_data;
+        }
+        */
+    }
+
+    g_alloc_search = nullptr;
+}
+
+extern "C"
+void* contiguous_malloc(size_t s)
 {
 #ifdef MEM_ALLOC_PROFILE
     if(s == 0) ++g_0;
@@ -106,7 +592,6 @@ void* malloc(size_t s)
     else if (s <= 2048) ++g_2k;
     else ++g_big;
 #endif
-
     void* result = HeapManager::allocate(s);
 
 #ifdef HOSTBOOT_MEMORY_LEAKS
@@ -116,7 +601,7 @@ void* malloc(size_t s)
     return result;
 }
 
-void free(void* p)
+void contiguous_free(void* p)
 {
     if (nullptr == p)
     {
@@ -130,14 +615,44 @@ void free(void* p)
     HeapManager::free(p);
 }
 
+void free(void* p)
+{
+    //frees block from discontiguous allocation if present in discontiguous malloc heap
+    if(((uint64_t)p >= VMM_VADDR_MALLOC_VIRT)
+       && ((uint64_t)p < (VMM_VADDR_MALLOC_VIRT + VMM_MALLOC_VIRT_SIZE + VMM_MALLOC_EXTENDED_SIZE)))
+    {
+        discontiguous_free(p);
+    }
+
+    //else frees allocation from contiguous malloc heap
+    else{
+        contiguous_free(p);
+    }
+}
+
 void* realloc(void* p, size_t s)
 {
+    void* result;
     if (nullptr == p)
     {
         return malloc(s);
     }
 
-    void* result = HeapManager::realloc(p,s);
+    // reallocates in discontiguous heap if original allocation lives
+    // within discontiguous heap
+    if (((uint64_t)p >= VMM_VADDR_MALLOC_VIRT)
+        && ((uint64_t)p < (VMM_VADDR_MALLOC_VIRT + VMM_MALLOC_VIRT_SIZE + VMM_MALLOC_EXTENDED_SIZE)))
+    {
+        block* src = static_cast<block*>(p) - 1;
+        result = discontiguous_malloc(s);
+        memcpy(result,p,std::min((size_t)src->size,(size_t)s));
+        free(p);
+    }
+    //else reallocates memory in contiguous heap
+    else
+    {
+        result = HeapManager::realloc(p,s);
+    }
 
 #ifdef HOSTBOOT_MEMORY_LEAKS
     memoryleak_magic_instruction(MEMORYLEAK_REALLOC, s, result, p);
@@ -268,3 +783,7 @@ int abs(int n)
 {
     return( (n < 0) ? -n : n );
 }
+
+#ifdef __cplusplus
+};
+#endif

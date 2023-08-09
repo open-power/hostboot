@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -328,7 +328,7 @@ PageTableManager::PageTableManager( bool i_userSpace )
     uint64_t l_hrmor = 0;
     if( i_userSpace )
     {
-        ivTABLE = new char[getSize()];
+        ivTABLE = static_cast<char*>(contiguous_malloc(getSize()));
         printk( "** PageTableManager running in USER_SPACE : ivTABLE = %p**\n", ivTABLE );
         l_hrmor = cpu_spr_value(CPU_SPR_HRMOR);
     }
@@ -1287,4 +1287,3 @@ void PageTableManager::_flush( void )
         ++pte;
     }
 }
-

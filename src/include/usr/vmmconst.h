@@ -155,6 +155,16 @@ enum VmmRestriction : uint64_t
 #define VMM_VADDR_MALLOC (16 * GIGABYTE)
 #define VMM_MALLOC_SIZE  (1 * GIGABYTE)
 
+/** Userspace for malloc backed by virtual memory*/
+#define VMM_VADDR_MALLOC_VIRT (70 * GIGABYTE)
+
+// Increasing this number will make more page table entries need to be
+// allocated; divide this number by 1024 to get the number of bytes
+// needed for the page tables (e.g. 128 mb heap = 128 kb of page
+// tables).
+#define VMM_MALLOC_VIRT_SIZE (128 * MEGABYTE)
+#define VMM_MALLOC_EXTENDED_SIZE (2 * GIGABYTE)
+
 /**
  * Other Constants
  */

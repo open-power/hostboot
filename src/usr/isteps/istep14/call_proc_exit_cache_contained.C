@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,7 @@
 #include <isteps/mem_utils.H>
 #include <arch/magic.H>
 #include <runtime/runtime.H>
+#include <stdlib.h>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -546,6 +547,12 @@ void* call_proc_exit_cache_contained (void *io_pArgs)
 
         // Commit Error
         errlCommit( l_errl, HWPF_COMP_ID );
+    }
+    else{
+        // We are operating out of main storage now, so we don't have
+        // as much memory pressure and we can switch back to the
+        // physically contiguous heap.
+        deactivate_discontiguous_malloc_heap();
     }
 
     TRACDCOMP( ISTEPS_TRACE::g_trac_isteps_trace,

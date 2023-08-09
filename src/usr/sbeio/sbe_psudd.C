@@ -87,7 +87,8 @@ sbeAllocationHandle_t sbeMalloc(const size_t i_bytes)
        + (SbePsu::SBE_ALIGNMENT_SIZE_IN_BYTES - 1));
 
     // Create buffer with enough size to be properly aligned
-    void* const l_sbeBuffer = malloc(l_totalAlignedSize);
+    //uses contiguous malloc because sbe expects physical address
+    void* const l_sbeBuffer = contiguous_malloc(l_totalAlignedSize);
 
     // Align the buffer
     const uint64_t l_sbeBufferAligned =

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -372,7 +372,11 @@ namespace TRACEDAEMON
                     // contBuffer pointer is transferred to mailbox now.
                 }
 
-                contBuffer = reinterpret_cast<char*>(malloc(PAGESIZE));
+                // We need this to be contiguous and identity-mapped
+                //  to physical address space, so that our simics
+                //  handler can extract them (it uses physical
+                //  addresses).
+                contBuffer = reinterpret_cast<char*>(contiguous_malloc(PAGESIZE));
                 memset(contBuffer, '\0', PAGESIZE);
                 contBuffer[0] = TRACE_BUF_CONT;
                 contBufferSize = 1;

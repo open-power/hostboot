@@ -230,7 +230,9 @@ void* handleInvokeDceRequest_task(void* i_transfer_type)
 
     const size_t READ_CHUNK_SIZE = 4096;
 
-    std::vector<uint8_t> lid_contents(READ_CHUNK_SIZE);
+    // Use the contiguous allocator in this code, so that we can use
+    // DCE to debug the discontiguous allocator.
+    auto lid_contents = static_cast<uint8_t*>(contiguous_malloc(READ_CHUNK_SIZE));
 
     errlHndl_t errl = nullptr;
 
@@ -240,6 +242,13 @@ void* handleInvokeDceRequest_task(void* i_transfer_type)
     /* Read the entire DCE LID from the BMC */
 
     uint32_t offset = 0;
+    size_t lid_contents_size = READ_CHUNK_SIZE;
+
+    // we only use one page, but the extra
+    // capacity allows us to align to a
+    // page boundary to give the physical
+    // address to the simics hook
+    auto tmpbuffer = static_cast<char*>(contiguous_malloc(PAGE_SIZE*2));
 
     while (true)
     {
@@ -254,20 +263,16 @@ void* handleInvokeDceRequest_task(void* i_transfer_type)
             errl = getLidFileFromOffset(DCE_LID_NUMBER,
                                         offset,
                                         bytes_read,
-                                        lid_contents.data() + offset,
+                                        lid_contents + offset,
                                         &eof);
         }
         else
         {
-            std::vector<char> buffer(PAGE_SIZE*2); // we only use one page, but the extra
-                                                   // capacity allows us to align to a
-                                                   // page boundary to give the physical
-                                                   // address to the simics hook
 
-            const uint64_t page_aligned_buffer_int = ALIGN_PAGE(reinterpret_cast<uint64_t>(buffer.data()));
+            const uint64_t page_aligned_buffer_int = ALIGN_PAGE(reinterpret_cast<uint64_t>(tmpbuffer));
             char* const page_aligned_buffer = reinterpret_cast<char*>(page_aligned_buffer_int);
             bytes_read = magic_dce_load_page(mm_virt_to_phys(page_aligned_buffer), offset);
-            memcpy(lid_contents.data() + offset, page_aligned_buffer, bytes_read);
+            memcpy(lid_contents + offset, page_aligned_buffer, bytes_read);
 
             PLDM_INF("Read %d bytes at offset %d and phys address 0x%x (0x%x) via MAGIC",
                      bytes_read, offset,
@@ -298,8 +303,13 @@ void* handleInvokeDceRequest_task(void* i_transfer_type)
             break;
         }
 
-        lid_contents.resize(lid_contents.size() + READ_CHUNK_SIZE); // allocate space for another chunk
+        lid_contents
+            = (uint8_t*)realloc(lid_contents, lid_contents_size + READ_CHUNK_SIZE);
+        lid_contents_size = lid_contents_size + READ_CHUNK_SIZE;
     }
+
+    free(tmpbuffer);
+    tmpbuffer = nullptr;
 
     if (errl)
     {
@@ -310,7 +320,7 @@ void* handleInvokeDceRequest_task(void* i_transfer_type)
 
     DCE_INF("   - DCE: Finished reading code, got %d bytes", offset);
 
-    const auto header = reinterpret_cast<lid_header*>(lid_contents.data());
+    const auto header = reinterpret_cast<lid_header*>(lid_contents);
 
     DCE_INF(" - DCE: Checking binary compatibility");
 
@@ -333,11 +343,11 @@ void* handleInvokeDceRequest_task(void* i_transfer_type)
 
     DCE_INF(" - DCE: Flushing data cache");
 
-    mm_icache_invalidate(lid_contents.data(), lid_contents.size() / 8);
+    mm_icache_invalidate(lid_contents, lid_contents_size / 8);
 
     DCE_INF("   - DCE: Done flushing");
 
-    const uint64_t physaddr = mm_virt_to_phys(lid_contents.data());
+    const uint64_t physaddr = mm_virt_to_phys(lid_contents);
 
     DCE_INF(" - DCE: Phys addr is %p", physaddr);
 
@@ -355,7 +365,7 @@ void* handleInvokeDceRequest_task(void* i_transfer_type)
     };
 
     DCE_INF(" - DCE: Invoking code (.data() = %p, nip = %p, toc = %p, stackaddr = %p, elf = %p)",
-                      lid_contents.data(),
+                      lid_contents,
                       entrypoint_func_ptr.nip,
                       entrypoint_func_ptr.toc,
                       &entrypoint_func_ptr,
@@ -380,9 +390,11 @@ void* handleInvokeDceRequest_task(void* i_transfer_type)
 
     DCE_INF(" - DCE: Setting permissions back to WRITABLE");
 
-    mm_set_permission(lid_contents.data(), lid_contents.size(), WRITABLE);
+    mm_set_permission(lid_contents, lid_contents_size, WRITABLE);
 
     } while (0);
+
+    free(lid_contents);
 
     DCE_INF("DCE: Finished");
 

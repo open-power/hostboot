@@ -87,7 +87,10 @@ class VmmBaseTest : public CxxTest::TestSuite
             }
         }
 
-        void testWriteToHugeInvalid()
+    /* This test is disabled because the discontiguous allocator
+     * doesn't support use-after-frees.
+     */
+        void disabled_testWriteToHugeInvalid()
         {
             int status;
             int invalid = 1;
@@ -100,7 +103,10 @@ class VmmBaseTest : public CxxTest::TestSuite
             }
         }
 
-        void testWriteOOB()
+        /* This test is disabled because we now use the discontiguous
+         * allocator, and it doesn't handle out-of-bounds writes.
+         */
+        void disabled_testWriteOOB()
         {
             int status;
             printk("testWriteOOB> Expect to see uncaught Data Storage exception!\n");
@@ -286,7 +292,6 @@ class VmmBaseTest : public CxxTest::TestSuite
             //}
 
             // Try a realloc FROM HUGE to BIG
-            uint32_t* test_original = test2;
             uint32_t* test3_new_ptr_shrink_to_big =
                 (uint32_t*)realloc( test2, HeapManager::MAX_BIG_ALLOC_SIZE);
             if (test3_new_ptr_shrink_to_big == nullptr)
@@ -295,18 +300,19 @@ class VmmBaseTest : public CxxTest::TestSuite
                         "test3_new_ptr_shrink_to_big=%p test2 ptr=%p\n",
                          test3_new_ptr_shrink_to_big, test2);
             }
-            test2 = test_original; // refresh with addr
 
-            if( (test2[0] != 0x55555555) || (test2[200] != 0x66666666) )
+            test2 = nullptr;
+
+            if( (test3_new_ptr_shrink_to_big[0] != 0x55555555) || (test3_new_ptr_shrink_to_big[200] != 0x66666666) )
             {
                 TS_FAIL( "testHugeMalloc> test3 realloc is bad : "
                          "Expected 0x55555555, got 0x%.8X, Expected 0x66666666, got 0x%.8X",
-                         test2[0], test2[200] );
+                         test3_new_ptr_shrink_to_big[0], test3_new_ptr_shrink_to_big[200] );
             }
 
             // Free everything
             free( test1 );
-            free( test2 );
+            free( test3_new_ptr_shrink_to_big );
             for( int i=0; i < 10; i++ )
             {
                 free( test[i] );

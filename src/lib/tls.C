@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015                             */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,18 @@
 #include <util/nolockfree/stack.H>
 #endif
 #include <sys/vfs.h>
+
+
+void* allocate(size_t size) {
+    /* HBRT uses PHYP for memory allocations, it doesn't have the
+     * allocators that Hostboot does, so we call malloc directly in
+     * that case. */
+#ifdef __HOSTBOOT_RUNTIME
+    return malloc(size);
+#else
+    return contiguous_malloc(size);
+#endif
+}
 
 /**
  *  @brief Mask which suppresses ignored portions of a TLS module ID.  When
@@ -242,7 +254,7 @@ void* __tls_get_addr(const __tls_linker_tuple* tuple)
             {
                 old_count = 0;
                 tls_info = reinterpret_cast<decltype(tls_info)>(
-                    malloc(new_size));
+                    allocate(new_size));
                 memset(&tls_info->dtors, '\0', sizeof(tls_info->dtors));
             }
             else
@@ -266,7 +278,7 @@ void* __tls_get_addr(const __tls_linker_tuple* tuple)
         mutex_lock(&__tls_mutex);
         {
             auto module = __tls_get_module(tuple);
-            auto blob = tls_info->blobs[tuple_module] = malloc(module->size);
+            auto blob = tls_info->blobs[tuple_module] = allocate(module->size);
             memcpy(blob, module->sect_addr, module->size);
         }
         mutex_unlock(&__tls_mutex);
@@ -366,7 +378,7 @@ int __cxa_thread_atexit(void (*dtor)(void*), void* arg, void* dso)
     }
 
     // Insert a new dtor registration.
-    auto dtor_info = reinterpret_cast<__tls_dtor*>(malloc(sizeof(__tls_dtor)));
+    auto dtor_info = reinterpret_cast<__tls_dtor*>(allocate(sizeof(__tls_dtor)));
     dtor_info->dtor = dtor;
     dtor_info->arg = arg;
     tls_info->dtors.push(dtor_info);
