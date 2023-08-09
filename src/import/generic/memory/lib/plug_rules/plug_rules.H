@@ -353,31 +353,23 @@ fapi_try_exit:
 ///
 /// @brief Plug rule for not allowing any DRAM generation mixing
 /// @tparam MC mss::mc_type, the memory controller type
+/// @param[in] i_targets vector of FAPI2 targets (ocmb_chip)
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note This function will commit error logs representing the mixing failure
 ///
 template< mss::mc_type MC >
-fapi2::ReturnCode dram_gen_mixing()
+fapi2::ReturnCode dram_gen_mixing(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>>& i_targets)
 {
     std::vector<mss::dimm::kind<MC>> l_kinds;
 
-    for (const auto& l_proc : mss::find_targets<fapi2::TARGET_TYPE_PROC_CHIP>(fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>()))
+    for(const auto& l_ocmb : i_targets)
     {
-        for (const auto& l_omic : mss::find_targets<fapi2::TARGET_TYPE_OMIC>(l_proc))
+        for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
         {
-            for (const auto& l_omi : mss::find_targets<fapi2::TARGET_TYPE_OMI>(l_omic))
-            {
-                for (const auto& l_ocmb : mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(l_omi))
-                {
-                    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
-                    {
-                        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-                        mss::dimm::kind<MC> l_kind(l_dimm, l_rc);
-                        FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
-                        l_kinds.push_back(l_kind);
-                    }
-                }
-            }
+            fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+            mss::dimm::kind<MC> l_kind(l_dimm, l_rc);
+            FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(l_dimm));
+            l_kinds.push_back(l_kind);
         }
     }
 
@@ -441,8 +433,40 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARG
     // Check if any DDR5 DIMM's are plugged
     FAPI_TRY( ddr5_allowed<MC>( l_omic, l_kinds ) );
 
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enforce the plug-rules we can do at the beginning of eff_config_thermal
+/// @tparam MC mss::mc_type, the memory controller type
+/// @param[in] i_targets vector of FAPI2 targets (ocmb_chip)
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+///
+template< mss::mc_type MC >
+fapi2::ReturnCode enforce_pre_eff_config_thermal(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>>&
+        i_targets)
+{
+    uint8_t l_ignore_plug_rules = 0;
+    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules(l_ignore_plug_rules) );
+
+    // Skip all plug rule checks if set to ignore (e.g. on Apollo)
+    if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
+    {
+        FAPI_INF("Attribute set to ignore plug rule checking");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    for(const auto& l_ocmb : i_targets)
+    {
+        FAPI_INF(GENTARGTIDFORMAT " Running enforce_pre_eff_config_thermal ", GENTARGTID(l_ocmb));
+        FAPI_TRY(enforce_pre_eff_config_thermal<MC>(l_ocmb),
+                 GENTARGTIDFORMAT " Fail encountered in enforce_pre_eff_config_thermal", GENTARGTID(l_ocmb));
+    }
+
     // Check if any DRAM technology generations are mixed
-    FAPI_TRY( dram_gen_mixing<MC>() );
+    FAPI_TRY( dram_gen_mixing<MC>(i_targets) );
+
 
 fapi_try_exit:
     return fapi2::current_err;

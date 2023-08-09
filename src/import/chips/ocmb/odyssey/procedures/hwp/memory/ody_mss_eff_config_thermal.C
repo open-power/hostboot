@@ -77,13 +77,10 @@ extern "C"
         const uint64_t l_min_util = TT::MIN_UTIL;
         uint8_t l_thermal_count = 0;
 
-        for (const auto& l_ocmb : i_targets)
-        {
-            // Run eff_config_thermal so that we can run plug rules.
-            FAPI_INF(GENTARGTIDFORMAT " Running enforce_pre_eff_config_thermal ", GENTARGTID(l_ocmb));
-            FAPI_TRY( mss::plug_rule::enforce_pre_eff_config_thermal<mss::mc_type::ODYSSEY>(l_ocmb),
-                      GENTARGTIDFORMAT " Fail encountered in enforce_pre_eff_config_thermal", GENTARGTID(l_ocmb));
-        }
+        // Enforces the plug rules on all targets passed in
+        // This should be on the per-backplane level
+        // Mixing of DRAM generation is not allowed w/in a backplane but is allowed in systems w/ multiple backplanes
+        FAPI_TRY( mss::plug_rule::enforce_pre_eff_config_thermal<mss::mc_type::ODYSSEY>(i_targets));
 
         for ( const auto& l_ocmb : i_targets)
         {
