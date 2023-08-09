@@ -39,6 +39,7 @@
 
 #include <fapi2.H>
 #include <mss_generic_attribute_getters.H>
+#include <generic/memory/lib/utils/num.H>
 #include <lib/ody_attribute_accessors_manual.H>
 
 namespace mss
@@ -117,6 +118,35 @@ fapi2::ReturnCode half_dimm_mode(
     // o_is_half_dimm_mode will be set by the helper function
     FAPI_TRY( half_dimm_mode_helper(i_target, l_half_dimm_attr, l_override_attr,
                                     o_is_half_dimm_mode));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Retrieves number of sub ranks per DIMM which is the number of total ranks divided by the number of master ranks
+/// @param[in] i_target DIMM target
+/// @param[in,out] io_num_sranks Count of sranks
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode get_srank_count(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t& io_num_sranks)
+{
+    uint8_t l_num_ranks = 0;
+    uint8_t l_num_mranks = 0;
+
+    FAPI_TRY( mss::attr::get_logical_ranks_per_dimm(i_target, l_num_ranks) );
+    FAPI_TRY( mss::attr::get_num_master_ranks_per_dimm(i_target, l_num_mranks) );
+
+    FAPI_ASSERT(l_num_mranks > 0 ,
+                fapi2::ODY_NUM_MRANKS_OUT_OF_BOUNDS().
+                set_OCMB_TARGET(i_target).
+                set_NUM_MRANKS(l_num_mranks),
+                TARGTIDFORMAT " returned an out of bounds number of %d mranks",
+                TARGTID, l_num_mranks);
+
+    io_num_sranks = l_num_ranks / l_num_mranks;
 
 fapi_try_exit:
     return fapi2::current_err;

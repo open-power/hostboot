@@ -68,7 +68,17 @@ fapi2::ReturnCode half_dimm_mode_helper(
 ///
 fapi2::ReturnCode half_dimm_mode(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    bool& o_is_half_dimm_mode );
+    bool& o_is_half_dimm_mode);
+
+///
+/// @brief Retrieves number of sub ranks per DIMM which is the number of total ranks divided by the number of master ranks
+/// @param[in] i_target DIMM target
+/// @param[in,out] io_num_sranks Count of sranks
+/// @return FAPI2_RC_SUCCESS if and only if ok
+///
+fapi2::ReturnCode get_srank_count(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    uint8_t& io_num_sranks);
 
 } // ns ody
 

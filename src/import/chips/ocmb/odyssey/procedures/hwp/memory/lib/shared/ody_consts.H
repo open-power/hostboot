@@ -74,11 +74,11 @@ enum sizes
 
     // This is used in the row repair code to determine how many sPPRs we can do. We used an artificial limit of one
     // per bank group on DDR4, but it's technically one per bank, per DRAM, so 40*16 per DIMM
-    // TODO: Zen:MST-1422 Update this for Odyssey
-    MAX_BG_PER_DIMM = 4,
+    MAX_BG_PER_DIMM = 8,
 
     MAX_DQ_BITS_PER_PORT = 80,
     MAX_SYMBOLS_PER_PORT = 72,
+    MAX_DIMM_PER_OCMB = MAX_PORT_PER_OCMB * HW_MAX_DIMM_PER_PORT,
     MAX_MRANK_PER_PORT = MAX_DIMM_PER_PORT * MAX_RANK_PER_DIMM,
     HW_MAX_MRANK_PER_PORT = HW_MAX_DIMM_PER_PORT * HW_MAX_RANK_PER_DIMM,
     MAX_BYTES_PER_PORT = MAX_DQ_BITS_PER_PORT / BITS_PER_BYTE,
@@ -249,6 +249,14 @@ enum phy_mem_types
     IMEM = 1,
 };
 
+///
+/// @brief ATTR_ROW_REPAIR_DATA Organization
+///
+enum row_repair_data
+{
+    ROW_REPAIR_BANK_GROUP_LEN = 3,
+    ROW_REPAIR_BANK_LEN = 2,
+};
 
 } // namespace ody
 

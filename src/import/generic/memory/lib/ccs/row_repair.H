@@ -366,7 +366,7 @@ namespace row_repair
 template< mss::mc_type MC >
 struct repair_entry
 {
-    const bool iv_valid = true;
+    bool iv_valid = true;
     uint8_t iv_dimm_rank = 0;
     uint8_t iv_dram = 0;
     uint8_t iv_srank = 0;
@@ -466,6 +466,23 @@ struct repair_entry
                iv_row == i_rhs.iv_row &&
                iv_valid == i_rhs.iv_valid;
     }
+
+    ///
+    /// @brief Equals assign operator
+    /// @param[in] i_rhs - the repair_entry to compare to
+    /// @return True if both instructions are equal
+    ///
+    inline void operator=( const repair_entry& i_rhs )
+    {
+        iv_dram = i_rhs.iv_dram;
+        iv_dimm_rank = i_rhs.iv_dimm_rank;
+        iv_srank = i_rhs.iv_srank;
+        iv_bg = i_rhs.iv_bg;
+        iv_bank = i_rhs.iv_bank;
+        iv_row = i_rhs.iv_row;
+        iv_valid = i_rhs.iv_valid;
+    }
+
 
     ///
     /// @brief default dtor

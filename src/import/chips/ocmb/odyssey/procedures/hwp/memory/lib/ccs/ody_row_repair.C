@@ -50,6 +50,7 @@
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_odyssey_attribute_getters.H>
+#include <ody_attribute_accessors_manual.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <ody_scom_ody_odc.H>
 
@@ -89,6 +90,92 @@ namespace row_repair
 {
 
 ///
+/// @brief Creates the DRAM bitmap for row repair on all DRAMS
+/// @return the DRAM bitmap for repairs on all DRAMs
+///
+fapi2::buffer<uint64_t> select_all_drams_for_repair()
+{
+    fapi2::buffer<uint64_t> l_dram_bitmap;
+    l_dram_bitmap.setBit<DRAM_START_BIT, DRAM_LEN>();
+    l_dram_bitmap.invert();
+    return l_dram_bitmap;
+}
+
+///
+/// @brief Initializes the DRAM repair entry array with invalid entries
+/// @param [in,out] io_repairs_per_dimm Array of repair enteries
+///
+void init_repair_entry_arr( REPAIR_ARR& io_repairs_per_dimm)
+{
+    for(uint8_t l_dimm_rank = 0; l_dimm_rank < mss::ody::MAX_RANK_PER_DIMM; l_dimm_rank++)
+    {
+        io_repairs_per_dimm[l_dimm_rank] = mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>();
+    }
+}
+
+///
+/// @brief Initializes the DRAM repair map with invalid entries per dimm
+/// @param [in,out] io_repair_map Array of Array repair enteries per dimm
+///
+void init_repair_map(REPAIR_MAP& io_repair_map)
+{
+    for(uint8_t l_port_pos = 0; l_port_pos < mss::ody::MAX_DIMM_PER_OCMB; l_port_pos++)
+    {
+        init_repair_entry_arr(io_repair_map[l_port_pos]);
+    }
+}
+
+///
+/// @brief Retrieves number of DRAM on DIMM
+/// @param[in] i_dram_width width of DRAM
+/// @param[in,out] io_dram_num DRAM index
+///
+void get_dram_count(const uint8_t i_dram_width,
+                    uint8_t& io_dram_num)
+{
+    io_dram_num = i_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ?
+                  mss::ody::generic_consts::ODY_NUM_DRAM_X4 : mss::ody::generic_consts::ODY_NUM_DRAM_X8;
+}
+
+///
+/// @brief Calculates appropriate byte and byte mask per DRAM width
+/// @param[in] i_target i_target DIMM target
+/// @param[in] i_dram_nibbles  DRAM nibbles
+/// @param[in] i_dram_width  DRAM width
+/// @param[in,out] io_byte  DRAM byte index
+/// @param[in,out] io_mask  Byte mask
+/// @return @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode get_dram_byte_mask(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+    const uint8_t i_dram_nibbles,
+    const uint8_t i_dram_width,
+    uint8_t& io_byte,
+    uint8_t& io_mask
+)
+{
+    constexpr size_t MASK_NIBBLE0 = 0xF0;
+    constexpr size_t MASK_NIBBLE1 = 0x0F;
+
+    // Grabs the numeric DRAM instance and ensures that the DRAM is inbounds
+    io_byte = (i_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8) ?
+              i_dram_nibbles :
+              i_dram_nibbles / mss::NIBBLES_PER_BYTE;
+
+    if (i_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4)
+    {
+        io_mask = mss::is_odd(i_dram_nibbles) ? MASK_NIBBLE1 : MASK_NIBBLE0;
+    }
+    else if(i_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8)
+    {
+        io_mask = 0xFF;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Creates the DRAM bitmap for row repair
 /// @param[in] i_dram the DRAM on which to conduct row repairs
 /// @param[out] o_dram_bitmap the DRAM bitmap on which to conduct row repairs
@@ -102,6 +189,182 @@ fapi2::ReturnCode create_dram_bitmap(const uint64_t i_dram, fapi2::buffer<uint64
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Build a table of PPR row repairs from attribute data for a given DIMM
+/// @param[in] i_target DIMM target
+/// @param[in] i_row_repair_data array of row repair attribute values for the DIMM
+/// @param[out] o_repairs_per_dimm array of row repair data buffers
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const uint8_t i_row_repair_data[mss::ody::MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK],
+        REPAIR_ARR& o_repairs_per_dimm)
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    constexpr uint8_t MAX_BANK_GROUP = 8;
+    constexpr uint8_t MAX_BANKS = 4;
+
+    uint8_t l_num_dram = 0;
+    uint8_t l_num_subrank = 0;
+
+    // Determine repair data bounds
+    mss::dimm::kind<mss::mc_type::ODYSSEY> l_kind(i_target, l_rc);
+    FAPI_TRY(l_rc, TARGTIDFORMAT" Failed to create dimm::kind instance", TARGTID);
+
+    // Clear repair entry array
+    init_repair_entry_arr(o_repairs_per_dimm);
+
+    get_dram_count(l_kind.iv_dram_width, l_num_dram);
+
+    if (l_kind.iv_master_ranks != 0)
+    {
+        l_num_subrank = l_kind.iv_total_ranks / l_kind.iv_master_ranks;
+    }
+
+    for (uint8_t l_dimm_rank = 0; l_dimm_rank < l_kind.iv_master_ranks; ++l_dimm_rank)
+    {
+        fapi2::buffer<uint32_t> l_row_repair_data;
+
+        // Convert each entry from an array of bytes into a fapi2::buffer
+        for (uint8_t l_byte = 0; l_byte < ROW_REPAIR_BYTES_PER_RANK; ++l_byte)
+        {
+            FAPI_TRY(l_row_repair_data.insertFromRight(i_row_repair_data[l_dimm_rank][l_byte],
+                     l_byte * BITS_PER_BYTE,
+                     BITS_PER_BYTE));
+        }
+
+        FAPI_INF(TARGTIDFORMAT " row repair entry for rank%u 0x%08x", TARGTID, l_dimm_rank, l_row_repair_data);
+
+        // Create repair entry
+        mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_entry(l_row_repair_data, l_dimm_rank);
+
+        if (l_entry.is_valid())
+        {
+            const uint64_t MAX_ROW = 1 << l_kind.iv_rows;
+            const uint64_t MAX_SRANK = 1 << l_num_subrank;
+
+            // srank, BG, BA, and row address are used bit-reversed in the row repair commands,
+            // so need to reverse them to print and do boundary checking
+            fapi2::buffer<uint32_t> l_logical_data;
+            fapi2::buffer<uint32_t> l_original_data(l_entry.iv_bg);
+            mss::swizzle < 32 - mss::ody::row_repair_data::ROW_REPAIR_BANK_GROUP_LEN,
+                mss::ody::row_repair_data::ROW_REPAIR_BANK_GROUP_LEN,
+                31 > (l_original_data, l_logical_data);
+            const uint64_t l_logical_bg = l_logical_data;
+
+            l_original_data.flush<0>();
+            l_logical_data.flush<0>();
+            l_original_data = l_entry.iv_bank;
+            mss::swizzle < 32 - mss::ody::row_repair_data::ROW_REPAIR_BANK_LEN,
+                mss::ody::row_repair_data::ROW_REPAIR_BANK_LEN,
+                31 > (l_original_data, l_logical_data);
+            const uint64_t l_logical_bank = l_logical_data;
+
+            l_original_data.flush<0>();
+            l_logical_data.flush<0>();
+            l_original_data = l_entry.iv_row;
+            mss::swizzle < 32 - ROW_REPAIR_ROW_ADDR_LEN,
+                ROW_REPAIR_ROW_ADDR_LEN,
+                31 > (l_original_data, l_logical_data);
+            const uint64_t l_logical_row = l_logical_data;
+
+            l_original_data.flush<0>();
+            l_logical_data.flush<0>();
+            l_original_data = l_entry.iv_srank;
+            mss::swizzle < 32 - ROW_REPAIR_SRANK_LEN,
+                ROW_REPAIR_SRANK_LEN,
+                31 > (l_original_data, l_logical_data);
+            const uint64_t l_logical_srank = l_logical_data;
+
+#ifndef __PPE__
+
+            FAPI_INF("Found valid row repair request in VPD for DIMM " TARGTIDFORMAT
+                     ", DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
+                     TARGTID, l_entry.iv_dram, l_entry.iv_dimm_rank, l_logical_srank,
+                     l_logical_bg, l_logical_bank, l_logical_row);
+
+            FAPI_INF("Maxes for dimm " TARGTIDFORMAT ": DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
+                     TARGTID, l_num_dram, l_kind.iv_master_ranks, l_num_subrank,
+                     MAX_BANK_GROUP, MAX_BANKS, MAX_ROW);
+#endif
+            // Do some sanity checking here
+            FAPI_ASSERT((l_entry.iv_dram < l_num_dram) &&
+                        (l_logical_srank < MAX_SRANK) &&
+                        (l_logical_bg < MAX_BANK_GROUP) &&
+                        (l_logical_bank < MAX_BANKS) &&
+                        (l_logical_row < MAX_ROW),
+                        fapi2::ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS().
+                        set_DIMM_TARGET(i_target).
+                        set_DRAM(l_entry.iv_dram).
+                        set_DRAM_MAX(l_num_dram).
+                        set_MRANK(l_dimm_rank).
+                        set_SRANK(l_logical_srank).
+                        set_SRANK_MAX(MAX_SRANK).
+                        set_BANK_GROUP(l_logical_bg).
+                        set_BANK_GROUP_MAX(MAX_BANK_GROUP).
+                        set_BANK(l_logical_bank).
+                        set_BANK_MAX(MAX_BANKS).
+                        set_ROW(l_logical_row).
+                        set_ROW_MAX(MAX_ROW),
+#ifndef __PPE__
+                        "%s SPD contained out of bounds row repair entry: DRAM: " TARGTIDFORMAT " MAX: %d mrank %d srank %d MAX: %d"
+                        "bg %d MAX: %d bank %d MAX: %d row 0x%05x MAX: 0x%05x",
+                        TARGTID, l_entry.iv_dram, l_num_dram, l_dimm_rank, l_logical_srank, MAX_SRANK,
+                        l_logical_bg, MAX_BANK_GROUP, l_logical_bank, MAX_BANKS, l_logical_row, MAX_ROW
+
+#else
+                        TARGTIDFORMAT" SPD contained out of bounds row repair entry: DRAM: %d MAX: %d mrank %d"
+                        TARGTID, l_entry.iv_dram, l_num_dram, l_dimm_rank
+
+#endif
+                       );
+            // Insert row repair request into list
+            o_repairs_per_dimm[l_dimm_rank] = l_entry;
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
+/// @brief Create an error log and return with a good error code if a valid row repair is found
+/// @param[in] i_target the DIMM target
+/// @param[in] i_repair the repair data to validate
+/// @return successful error code
+///
+fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair)
+{
+    FAPI_ASSERT((!i_repair.is_valid()),
+                fapi2::ODY_ROW_REPAIR_WITH_MNFG_REPAIRS_DISABLED().
+                set_DIMM_TARGET(i_target).
+                set_DRAM(i_repair.iv_dram).
+                set_MRANK(i_repair.iv_dimm_rank).
+                set_SRANK(i_repair.iv_srank).
+                set_BANK_GROUP(i_repair.iv_bg).
+                set_BANK(i_repair.iv_bank).
+                set_ROW(i_repair.iv_row),
+#ifndef __PPE__
+                TARGTIDFORMAT" Row repair valid but DRAM repairs are disabled for DRAM %d, mrank %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                TARGTID, i_repair.iv_dram, i_repair.iv_dimm_rank, i_repair.iv_srank, i_repair.iv_bg, i_repair.iv_bank,
+                i_repair.iv_row
+#else
+                TARGTIDFORMAT" Row repair valid but DRAM repairs are disabled for DRAM %d, mrank %d, subrank %d",
+                TARGTID, i_repair.iv_dram, i_repair.iv_dimm_rank, i_repair.iv_srank
+#endif
+               );
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    // We've found a valid row repair - log it as predictive, so we get callouts in MFG test but don't fail out
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    return fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
@@ -215,7 +478,8 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
     io_program.iv_instructions.push_back(mss::ccs::ddr5::precharge_all_command<mss::mc_type::ODYSSEY>(l_port_rank,
                                          l_repair.iv_srank, tRP));
 
-    FAPI_MFG( "Running srank fix on dimm " GENTARGTIDFORMAT "with srank %d", GENTARGTID(l_dimm_target), i_repair.iv_srank );
+    FAPI_MFG( "Running srank fix on dimm " GENTARGTIDFORMAT " with srank %d", GENTARGTID(l_dimm_target),
+              i_repair.iv_srank );
 
     // 4. Enable sPPR using MR23 bits "OP[2:1]=01" and wait tMRD.
     io_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>(l_port_rank, MR23_PPR,
@@ -344,7 +608,7 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSE
 
     // Stop any ongoing MCBIST command
     FAPI_TRY( mss::memdiags::stop<mss::mc_type::ODYSSEY>(l_ocmb_target),
-              "MCBIST engine failed to stop current command in progress on ",
+              "MCBIST engine failed to stop current command in progress on "
               GENTARGTIDFORMAT, GENTARGTID(l_ocmb_target) );
 
     // Verify that the in-progress bit has not been set for MCBIST, meaning the MCBIST is free
@@ -386,6 +650,230 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Deploy enough PPR row repairs to test all spare rows
+/// @param[in] i_target_ocmb ocmb target
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb)
+{
+    FAPI_INF(GENTARGTIDFORMAT" Deploying row repairs to test all spare rows", GENTARGTID(i_target_ocmb));
+
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target_ocmb))
+    {
+        constexpr bool REPAIR_VALID = 1;
+        constexpr uint8_t DRAM_POS = 0;
+        constexpr uint8_t BANK_POS = 0;
+
+        uint8_t l_num_sranks = 0;
+
+        // Set all DRAM select bits so we get repairs on all DRAMs
+        const auto l_dram_bitmap = select_all_drams_for_repair();
+
+        // Gets the rank info for this DIMM
+        std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+        FAPI_TRY(ranks_on_dimm(l_dimm, l_rank_infos),
+                 "Failed to retrieve ranks on dimm on " GENTARGTIDFORMAT,
+                 GENTARGTID(l_dimm) );
+
+        // Get dimm information
+        FAPI_TRY(mss::ody::get_srank_count(l_dimm, l_num_sranks));
+
+        // Loops thru RANKs
+        for (const auto& l_rank_info : l_rank_infos)
+        {
+            const auto l_dimm_rank = l_rank_info.get_dimm_rank();
+
+            for (uint8_t l_srank = 0; l_srank < l_num_sranks; ++l_srank)
+            {
+                // Note: setting row = rank so we don't use row0 for every repair
+                uint32_t l_row = l_dimm_rank;
+
+                // Note: DIMM can only support one repair per BG, so we loop on BG and use BA=0
+                // TODO: ZEN:MST-2222 likely hit the limitation on allowed PPR resources while doing this
+                for (uint8_t l_bg = 0; l_bg < mss::ody::MAX_BG_PER_DIMM; ++l_bg)
+                {
+                    mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair(REPAIR_VALID, l_dimm_rank, DRAM_POS, l_srank, l_bg,
+                            BANK_POS,
+                            l_row);
+#ifndef __PPE__
+                    FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                             GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
+#else
+                    FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d",
+                             GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank);
+                    FAPI_INF(" bg %d, bank %d, row 0x%05x", l_bg, BANK_POS, l_row);
+#endif
+                    FAPI_TRY( standalone_row_repair(l_rank_info, l_repair),
+                              "Failed standalone_row_repair on " GENTARGTIDFORMAT " rank %d",
+                              GENTARGTID(l_dimm), l_dimm_rank );
+                }
+            }
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Gets the number of bad bits on a DRAM for a given row repair
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[in] i_row_repair_dram_byte the byte of data that contains the row repair's DRAM information
+/// @param[in] i_bad_bits the array of bad bits for this rank
+/// @param[out] o_num_bad_bits_for_dram the number of bad bits on this DRAM
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode get_num_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                                   const uint8_t i_row_repair_dram_byte,
+                                   const uint8_t i_bad_bits[BAD_DQ_BYTE_COUNT],
+                                   uint8_t& o_num_bad_bits_for_dram)
+{
+    o_num_bad_bits_for_dram = 0;
+
+    uint8_t l_dram = 0;
+    const fapi2::buffer<uint8_t> l_buffer(i_row_repair_dram_byte);
+
+    // Note: we're using the 0-31 values here;
+    // however, the ones we want are on the first byte, so we should be ok
+    l_buffer.extractToRight<mss::ROW_REPAIR_DRAM_POS, ROW_REPAIR_DRAM_POS_LEN>(l_dram);
+    uint8_t l_byte = 0;
+
+    // Mask assuming a x8 DRAM, so the whole byte
+    uint8_t l_mask = 0xff;
+
+    uint8_t l_dram_width = 0;
+    FAPI_TRY( mss::attr::get_dram_width(i_target, l_dram_width) );
+
+    FAPI_TRY(get_dram_byte_mask(i_target, l_dram, l_dram_width, l_byte, l_mask));
+
+    // Protect our array index
+    FAPI_ASSERT(l_byte < mss::BAD_DQ_BYTE_COUNT,
+                fapi2::ODY_DRAM_INDEX_OUT_OF_BOUNDS().
+                set_DIMM_TARGET(i_target).
+                set_DRAM_WIDTH(l_dram_width).
+                set_INDEX(l_dram),
+                "DRAM index %d supplied to get_num_bad_bits is out of bounds on " TARGTIDFORMAT,
+                l_dram, TARGTID);
+
+
+    {
+        const uint8_t l_bad_bits_on_dram = i_bad_bits[l_byte] & l_mask;
+        o_num_bad_bits_for_dram = mss::bit_count(l_bad_bits_on_dram);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Gets the row repair attribute and clears out any unneeded repairs
+/// @param[in] i_target the DIMM target on which to operate
+/// @param[out] o_row_repair_data the row repair data to process for this DIMM
+/// @return FAPI2_RC_SUCCESS iff successful
+/// @note Clears out the repairs if there is more than one bad bit on the DRAM that would be repaired
+///
+fapi2::ReturnCode clear_row_repairs_on_bad_dram(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+        uint8_t (&o_row_repair_data)[mss::ody::MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK])
+{
+    constexpr uint8_t WHOLE_DRAM_BAD = 2;
+    constexpr uint8_t ROW_REPAIR_CLEAR_VALUE = 0;
+    constexpr uint8_t ROW_REPAIR_DRAM_BYTE = 0;
+    constexpr uint8_t ROW_REPAIR_VALID_BYTE = 3;
+    constexpr uint8_t ROW_REPAIR_VALID_BIT = 7;
+    uint8_t l_bad_dq_bitmap[mss::ody::MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
+    FAPI_TRY( mss::attr::get_bad_dq_bitmap(i_target, l_bad_dq_bitmap) );
+
+    // Load row repair data for the dimm
+    FAPI_TRY( mss::attr::get_row_repair_data(i_target, o_row_repair_data) );
+
+    // Loops through all of the possible ranks on this DIMM and checks the repair data
+    for(uint8_t l_rank = 0; l_rank < mss::ody::MAX_RANK_PER_DIMM; ++l_rank)
+    {
+        const fapi2::buffer<uint8_t> l_repair_valid_data(o_row_repair_data[l_rank][ROW_REPAIR_VALID_BYTE]);
+
+        // If this repair is not valid, skip it
+        if(!l_repair_valid_data.getBit<ROW_REPAIR_VALID_BIT>())
+        {
+            continue;
+        }
+
+        // Otherwise, ensure that the row repair is on a DRAM that won't have to be spared or marked off
+        // Note: DRAMs will have to be spared or marked off at two bad bits
+        uint8_t l_num_bad_bits = 0;
+
+        // Gets the number of bad bits for the DRAM associated with this repair data
+        FAPI_TRY(get_num_bad_bits(i_target,
+                                  o_row_repair_data[l_rank][ROW_REPAIR_DRAM_BYTE],
+                                  l_bad_dq_bitmap[l_rank],
+                                  l_num_bad_bits),
+                 "Failed to retrieve number of bad bits on rank %d on " TARGTIDFORMAT,
+                 l_rank, TARGTID);
+
+        // If the whole DRAM would be called out as bad, then clear the row repair data associated
+        // This way, we free up the row repair on this rank
+        if(l_num_bad_bits >= WHOLE_DRAM_BAD)
+        {
+            std::fill(std::begin(o_row_repair_data[l_rank]), std::end(o_row_repair_data[l_rank]), ROW_REPAIR_CLEAR_VALUE);
+        }
+    }
+
+    // Sets the row repair data
+    // This way, any repairs that were freed can be cleaned up
+    FAPI_TRY( mss::attr::set_row_repair_data(i_target, o_row_repair_data) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Map all repair data to dimm target
+/// @param[in] i_target_ocmb ocmb target
+/// @param[out] o_repair_map the map to fill with repair pairs
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode map_repairs_per_dimm( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb,
+                                        REPAIR_MAP& o_repair_map)
+{
+    // Clear map for new repairs
+    init_repair_map(o_repair_map);
+
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target_ocmb))
+    {
+        uint8_t l_row_repair_data[mss::ody::MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK] = {0};
+        REPAIR_ARR l_repairs_per_dimm;
+
+        // Load row repair data for the dimm
+        FAPI_TRY( mss::attr::get_row_repair_data(l_dimm, l_row_repair_data) );
+
+        // Clear out any repairs on bad DRAM
+        // This way, we can use those row repairs again if needed
+        FAPI_TRY( clear_row_repairs_on_bad_dram(l_dimm, l_row_repair_data),
+                  "Failed to clear row repairs on " GENTARGTIDFORMAT,
+                  GENTARGTID(l_dimm) );
+
+        // Build repair table
+        FAPI_TRY( build_row_repair_table(l_dimm, l_row_repair_data, l_repairs_per_dimm),
+                  "Failed to build row repair table on " GENTARGTIDFORMAT,
+                  GENTARGTID(l_dimm) );
+
+        // Add dimm repairs to map
+        const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm);
+        uint8_t l_port_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+
+        for(uint8_t l_dimm_rank = 0; l_dimm_rank < mss::ody::MAX_RANK_PER_DIMM; l_dimm_rank++)
+        {
+            o_repair_map[l_port_pos][l_dimm_rank] = l_repairs_per_dimm[l_dimm_rank];
+        }
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Perform a sPPR row repair operation during the IPL
 /// @param[in] i_rank_info rank info of the address to repair
 /// @param[in] i_repair the address repair information
@@ -420,12 +908,12 @@ fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODY
 
     // Setup SPPR CCS program
     FAPI_TRY( setup_sppr(i_rank_info, i_repair, l_program),
-              "Failed sppr program setup for dynamic_row_repair on ",
+              "Failed sppr program setup for dynamic_row_repair on "
               GENTARGTIDFORMAT, GENTARGTID(l_port_target) );
 
     // Stop the CCS engine just for giggles - it might be running ...
     FAPI_TRY( mss::ccs::start_stop<mss::mc_type::ODYSSEY>(l_ocmb_target, mss::states::STOP),
-              "Error stopping CCS engine before ccs::execution on ",
+              "Error stopping CCS engine before ccs::execution on "
               GENTARGTIDFORMAT, GENTARGTID(l_ocmb_target) );
 
     // Verify that the in-progress bit has not been set for CCS, meaning no other CCS is running
@@ -461,6 +949,76 @@ fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODY
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Deploy mapped row repairs
+/// @param[in] i_target ocmb target
+/// @param[in] i_repair_map the map with repair data pairs
+/// @param[in] i_runtime true if at runtime requiring dynamic
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode deploy_mapped_repairs(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const REPAIR_MAP& i_repair_map,
+    const bool i_runtime )
+{
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    // Iterate through DRAM repairs structure
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        uint8_t l_port_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
+                             (mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm));
+
+        // Loops thru repairs
+        for (const auto& l_repair : i_repair_map[l_port_pos])
+        {
+            const auto& l_dimm_rank = l_repair.iv_dimm_rank;
+            mss::rank::info<mss::mc_type::ODYSSEY> l_rank_info(l_dimm, l_dimm_rank, l_rc);
+            const auto& l_port_rank = l_rank_info.get_port_rank();
+
+            // Check rank info completed
+            FAPI_TRY(l_rc, "Failed creating rank info " GENTARGTIDFORMAT, GENTARGTID(l_dimm));
+
+            if (l_repair.is_valid())
+            {
+                // Deploy row repair and clear bad DQs
+#ifndef __PPE__
+                FAPI_INF(GENTARGTIDFORMAT" Deploying row repair on DRAM %d, dimm rank %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                         GENTARGTID(l_dimm), l_repair.iv_dram, l_dimm_rank, l_repair.iv_srank, l_repair.iv_bg, l_repair.iv_bank,
+                         l_repair.iv_row);
+#endif
+
+                // Check if at runtime for dynamic vs standalone
+                if (i_runtime)
+                {
+                    FAPI_TRY( dynamic_row_repair(l_rank_info, l_repair),
+                              "Failed dynamic_row_repair on " GENTARGTIDFORMAT " rank %d",
+                              GENTARGTID(l_dimm), l_dimm_rank );
+                }
+                else
+                {
+                    FAPI_TRY( standalone_row_repair(l_rank_info, l_repair),
+                              "Failed standalone_row_repair on " GENTARGTIDFORMAT " rank %d",
+                              GENTARGTID(l_dimm), l_dimm_rank );
+                }
+
+#ifndef __PPE__
+                // Clear bad DQ bits for this port, DIMM, rank that will be fixed by this row repair
+                FAPI_INF("Updating bad bits on DIMM " GENTARGTIDFORMAT
+                         " , DRAM %d, port rank %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                         GENTARGTID(l_dimm), l_repair.iv_dram, l_port_rank, l_repair.iv_srank, l_repair.iv_bg,
+                         l_repair.iv_bank, l_repair.iv_row);
+#endif
+            }
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
 
 } // namespace row_repair
 } // namespace ody
