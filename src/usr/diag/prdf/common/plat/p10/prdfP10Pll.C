@@ -39,7 +39,7 @@
 #include <prdfGlobal_common.H>
 #include <UtilHash.H>
 #include <prdfFsiCapUtil.H>
-#include <prdfPllDomain.H>
+#include <prdfP10PllDomain.H>
 #include <prdfRegisterCache.H>
 
 using namespace TARGETING;

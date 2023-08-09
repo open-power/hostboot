@@ -35,5 +35,8 @@ prd_incpath += ${PRD_SRC_PATH}/common/plat/odyssey
 # Object files common to both FSP and Hostboot
 ################################################################################
 
+# non-rule plugin related
+prd_obj += prdfOdyPllDomain.o
+
 # rule plugin related
 prd_rule_plugin += prdfOdysseyPlugins_common.o

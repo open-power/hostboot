@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,6 +42,9 @@
 #include <prdfP10ProcDomain.H>
 #include <prdfOcmbChipDomain.H>
 #include <prdfP10GenericDomain.H>
+
+#include <prdfP10PllDomain.H>
+#include <prdfOdyPllDomain.H>
 
 using namespace TARGETING;
 
@@ -248,16 +251,41 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
         sysChipLst.push_back( chip );
         io_domain->AddChip(   chip );
 
-        // Add to the PLL domains, if needed.
-        switch ( i_type )
+        // Add chip to PLL domain.
+        if (TYPE_PROC == i_type)
         {
-            case TYPE_PROC:
-                addChipToPllDomain( CLOCK_DOMAIN_FAB, sysRefPllDmnMap,
-                                    chip, trgt, TYPE_PROC,
-                                    scanFac, resFac );
-                break;
+            // The clock source for P10 processors is a clock card (or redundant
+            // clock pair) and there is only one per node.
 
-            default: ;
+            auto pos = getTargetPosition(getConnectedParent(trgt, TYPE_NODE));
+
+            if (sysRefPllDmnMap.end() == sysRefPllDmnMap.find(pos))
+            {
+                sysRefPllDmnMap[pos] = new P10PllDomain();
+            }
+
+            sysRefPllDmnMap[pos]->AddChip(chip);
+        }
+        // Odyssey-only OCMB chips (Explorer does not have PLL attentions)
+        else if (TYPE_OCMB_CHIP == i_type && isOdysseyOcmb(trgt))
+        {
+            // Ultimately, the clock source is the clock card that feeds the
+            // processors. However, since the processor PLL domains must be
+            // checked before the Odyssey clock domains, we can assume the clock
+            // card is not at fault when isolating to Odyssey PLL errors.
+            // Therefore, Odyssey PLL domains will be scoped to just the Odyssey
+            // chips connected to a single processor.
+
+            auto n = getTargetPosition(getConnectedParent(trgt, TYPE_NODE));
+            auto p = getTargetPosition(getConnectedParent(trgt, TYPE_PROC));
+            auto pos = n * MAX_PROC_PER_NODE + p;
+
+            if (sysRefPllDmnMap.end() == sysRefPllDmnMap.find(pos))
+            {
+                sysRefPllDmnMap[pos] = new OdyPllDomain();
+            }
+
+            sysRefPllDmnMap[pos]->AddChip(chip);
         }
     }
 
@@ -269,32 +297,6 @@ errlHndl_t PlatConfigurator::addDomainChips( TARGETING::TYPE i_type,
     Prdr::LoadChipCache::flushCache();
 
     return errl;
-}
-
-//------------------------------------------------------------------------------
-
-void PlatConfigurator::addChipToPllDomain( DOMAIN_ID i_domainId,
-                                           PllDomainMap & io_pllDmnMap,
-                                           RuleChip * i_chip,
-                                           TARGETING::TargetHandle_t i_trgt,
-                                           TARGETING::TYPE i_type,
-                                           ScanFacility & i_scanFac,
-                                           ResolutionFactory & i_resFac )
-{
-    // TODO: RTC 155673 - The position used here should be based on clock
-    //       domains. In the past there happened to be one clock source for each
-    //       node. In which case, we just used the node position. Unfortunately,
-    //       that is not very maintainable code. Instead, we should be querying
-    //       clock domain attributes so that this code does not need to be
-    //       modified if the clock domains change.
-    uint32_t pos = getTargetPosition( getConnectedParent( i_trgt, TYPE_NODE ) );
-
-    if ( io_pllDmnMap.end() == io_pllDmnMap.find(pos) )
-    {
-        io_pllDmnMap[pos] = new PllDomain(i_domainId);
-    }
-
-    io_pllDmnMap[pos]->AddChip( i_chip );
 }
 
 //------------------------------------------------------------------------------

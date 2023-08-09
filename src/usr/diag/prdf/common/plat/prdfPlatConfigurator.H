@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,24 +93,6 @@ class PlatConfigurator : public Configurator
     errlHndl_t addDomainChips( TARGETING::TYPE  i_type,
                                RuleChipDomain * io_domain,
                                PllDomainMapList & io_pllDmnLst );
-
-    /**
-     * @brief Adds a chip to its Pll Domain.
-     * @param i_domainId   PLL Domain ID (CLOCK_DOMAIN_FAB/_MEMBUF)
-     * @param io_pllDmnMap PLL domain map for this clock type.
-     * @param i_chip       Chip to add.
-     * @param i_trgt       Chip's target handle.
-     * @param i_type       Clock type.
-     * @param i_scanFac    Scan Facility.
-     * @param i_resFac     Resolution Factory.
-     */
-    void addChipToPllDomain( DOMAIN_ID                   i_domainId,
-                             PllDomainMap              & io_pllDmnMap,
-                             RuleChip                  * i_chip,
-                             TARGETING::TargetHandle_t   i_trgt,
-                             TARGETING::TYPE             i_type,
-                             ScanFacility              & i_scanFac,
-                             ResolutionFactory         & i_resFac );
 
     /**
      *  @brief Add PLL all of the PLL domains to System.

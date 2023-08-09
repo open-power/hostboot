@@ -27,7 +27,7 @@
  *  @brief Definition of PllDomain class
  */
 
-#include <prdfPllDomain.H>
+#include <prdfP10PllDomain.H>
 
 #include <iipscr.h>
 #include <iipsdbug.h>
@@ -51,28 +51,15 @@ using namespace PlatServices;
 
 //------------------------------------------------------------------------------
 
-PllDomain::PllDomain(DOMAIN_ID i_domainId) :
-    RuleChipDomain(i_domainId, PllDomain::CONTAINER_SIZE),
-    ExtensibleDomain("PllDomain")
-{}
-
-//------------------------------------------------------------------------------
-
-int32_t PllDomain::Initialize(void)
-{
-
-  int32_t rc = SUCCESS;
-  return(rc);
-}
-
-//------------------------------------------------------------------------------
-
-bool PllDomain::Query(ATTENTION_TYPE i_attnType)
+bool P10PllDomain::Query(ATTENTION_TYPE i_attnType)
 {
     bool atAttn = false;
 
-    // System always checks for RE's first, even if there is an XSTOP
-    // So we only need to check for PLL errors on RECOVERABLE type
+    // This is an overloaded function from the parent class, which requires the
+    // attention type parameter. PLL errors only report as recoverable
+    // attentions, which are always checked first in the case of a system
+    // checkstop. Therefore, this function only reports attentions if the given
+    // type is recoverable.
     if (RECOVERABLE == i_attnType)
     {
         int32_t rc = SUCCESS;
@@ -95,13 +82,13 @@ bool PllDomain::Query(ATTENTION_TYPE i_attnType)
 
             if (PRD_POWER_FAULT == rc)
             {
-                PRDF_ERR("[PllDomain::Query] Power Fault detected: "
+                PRDF_ERR("[P10PllDomain::Query] Power Fault detected: "
                          "chip=0x%08x", chip->getHuid());
                 break; // No need to continue.
             }
             else if (SUCCESS != rc)
             {
-                PRDF_ERR("[PllDomain::Query] SCOM failed: rc=%x "
+                PRDF_ERR("[P10PllDomain::Query] SCOM failed: rc=%x "
                          "chip=0x%08x", rc, chip->getHuid());
                 continue; // Try the next chip.
             }
@@ -156,8 +143,8 @@ void __clearServiceCallForIntegratedSpare(STEP_CODE_DATA_STRUCT& io_sc,
 
 //------------------------------------------------------------------------------
 
-int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
-                           ATTENTION_TYPE attentionType)
+int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
+                              ATTENTION_TYPE attentionType)
 {
     ExtensibleChipFunction* func = nullptr;
 
@@ -562,13 +549,6 @@ int32_t PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     #endif // __HOSTBOOT_MODULE
 
     return SUCCESS;
-}
-
-//------------------------------------------------------------------------------
-
-void PllDomain::Order(ATTENTION_TYPE attentionType)
-{
-    // Order is not important for PLL errors
 }
 
 //------------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/diag/prdf/common/plat/prdfPllDomain.H $               */
+/* $Source: src/usr/diag/prdf/common/plat/odyssey/prdfOdyPllDomain.H $    */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2023                             */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -23,32 +23,27 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
-#ifndef prdfPllDomain_H
-#define prdfPllDomain_H
+#pragma once
 
-#include <prdfExtensibleDomain.H>
-#include <prdfRuleChipDomain.H>
-#include <prdfThresholdUtils.H>
+#include <prdfPllDomain.H>
 
 namespace PRDF
 {
 
-//------------------------------------------------------------------------------
-
-class PllDomain : public RuleChipDomain, public ExtensibleDomain
+class OdyPllDomain : public PllDomain
 {
-  protected:
-    /**
-     * @brief Constructor
-     * @param i_domainId The domain ID.
-     */
-    explicit PllDomain(DOMAIN_ID i_domainId) :
-        RuleChipDomain(i_domainId, 8), ExtensibleDomain("PllDomain")
-    {}
-
   public:
+    /** @brief Default constructor. */
+    OdyPllDomain() : PllDomain(CLOCK_DOMAIN_MEMBUF) {}
+
     /** @brief Destructor. */
-    virtual ~PllDomain() = default;
+    ~OdyPllDomain() = default;
+
+    /** @brief Copy constructor. */
+    OdyPllDomain(const OdyPllDomain&) = default;
+
+    /** @brief Assignment operator. */
+    OdyPllDomain& operator=(const OdyPllDomain&) = default;
 
     /**
      * @brief  Queries this domain for active attentions of the given type.
@@ -56,7 +51,7 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
      * @return True, if attention of this type exists in this domain. False,
      *         otherwise.
      */
-    virtual bool Query(ATTENTION_TYPE i_attnType) = 0;
+    bool Query(ATTENTION_TYPE i_attnType) override;
 
     /**
      * @brief  Analyzes active attentions in this domain of the given type.
@@ -64,30 +59,17 @@ class PllDomain : public RuleChipDomain, public ExtensibleDomain
      * @param  i_attnType The target attention type.
      * @return Non-SUCCESS, if an internal error occurred. SUCCESS, otherwise.
      */
-    virtual int32_t Analyze(STEP_CODE_DATA_STRUCT& io_sc,
-                            ATTENTION_TYPE i_attnType) = 0;
+    int32_t Analyze(STEP_CODE_DATA_STRUCT& io_sc,
+                    ATTENTION_TYPE i_attnType) override;
 
-  protected:
+  private:
 #ifdef __HOSTBOOT_MODULE
 
-    /** A simple child class of TimeBasedThreshold designed specifically for
-     *  clock errors. */
-    class ClockErrorTH : public TimeBasedThreshold
-    {
-      public:
-        /** @brief Default constructor. */
-        ClockErrorTH() :
-            TimeBasedThreshold(PlatServices::mfgMode()
-                                   ? ThresholdResolution::cv_mnfgDefault
-                                   : ThresholdResolution::cv_pllDefault)
-        {}
-    };
+    /** Threshold counter for PLL unlock attentions on any chip in the
+     *  domain. */
+    ClockErrorTH iv_thPll;
 
 #endif // __HOSTBOOT_MODULE
 };
 
-//------------------------------------------------------------------------------
-
 } // end namespace PRDF
-
-#endif /* prdfPllDomain_H */
