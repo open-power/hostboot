@@ -87,7 +87,7 @@ fapi2::ReturnCode config_ccs_regs_for_concurrent<mss::mc_type::EXPLORER>(const
     l_temp.template setBit<TT::IDLE_PAT_ADDRESS_16>();    // RASn Idle
     l_temp.template setBit<TT::IDLE_PAT_ADDRESS_15>();    // CASn Idle
     l_temp.template setBit<TT::IDLE_PAT_ADDRESS_14>();    // WEn Idle
-    l_temp.template clearBit<TT::ARR0_DDR_PARITY>();      // 0 = hardware sets parity
+    l_temp.template clearBit<TT::DDR_PARITY_ENABLE>();    // 0 = hardware sets parity
     FAPI_TRY(mss::putScom(i_target, TT::MODEQ_REG, l_temp));
 
 fapi_try_exit:
