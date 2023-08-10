@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -191,6 +191,15 @@ uint32_t getAddrConfig( ExtensibleChip * i_chip, uint8_t i_dslct,
                         bool & o_twoDimmConfig, uint8_t & o_prnkBits,
                         uint8_t & o_srnkBits, uint8_t & o_extraRowBits,
                         bool & o_col3Config );
+
+/**
+ * @brief  Queries if there are any channel fails on the given memory chip
+ *         or it's parent processor.
+ * @param  i_chip OCMB chip
+ * @return True if there is a channel fail present, otherwise false.
+ */
+template<TARGETING::TYPE T>
+bool queryChnlFail(ExtensibleChip * i_chip);
 
 } // end namespace MemUtils
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -971,6 +971,30 @@ uint32_t getAddrConfig<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+bool queryChnlFail<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip)
+{
+    bool o_chnlFail = false;
+
+    TargetHandle_t omi = getConnectedParent( i_chip->getTrgt(), TYPE_OMI );
+
+    TargetHandle_t omic = getConnectedParent( omi, TYPE_OMIC );
+    ExtensibleChip * omicChip = (ExtensibleChip *)systemPtr->GetChip(omic);
+
+    TargetHandle_t mcc = getConnectedParent( omi, TYPE_MCC );
+    ExtensibleChip * mccChip = (ExtensibleChip *)systemPtr->GetChip(mcc);
+
+    if ( __queryUcsOmic(omicChip, mccChip, omi) ||
+         __queryUcsMcc(mccChip, omi) || __queryUcsOcmb(i_chip) )
+    {
+        o_chnlFail = true;
+    }
+
+    return o_chnlFail;
 }
 
 //------------------------------------------------------------------------------
