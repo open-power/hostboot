@@ -6144,6 +6144,59 @@
 
   <attribute>
     <description>
+      Code update rule that takes precedence over the code update
+      table. This can be used to override the default behavior of the
+      Odyssey Code Update FSM.
+
+      Structure:
+
+      Word 0           | Word 1
+      VVVVVVVVWWXXYYZZ | AABBCCDD00000000
+
+      VVVVVVVV: The event pattern to match. This is a bitwise-OR'd
+                collection of elements from ody_upd_event_t.
+
+      WWXXYYZZ: The state pattern to match.
+
+            WW: Bitwise-OR'd collection of tristate_t representing the
+                "update performed?" state variable.
+            XX: Bitwise-OR'd collection of tristate_t representing the
+                "golden boot performed?" state variable.
+            YY: Bitwise-OR'd collection of ocmb_boot_side_t representing the
+                "OCMB boot side" state variable.
+            ZZ: Bitwise-OR'd collection of tristate_t representing the
+                "OCMB FW up to date?" state variable.
+
+      AABBCCDD: The actions for the FSM to perform when the event and
+                state match the patterns in word 0. If these actions are taken,
+                the actions that would have otherwise been taken by the FSM are
+                ignored.
+
+            AA: A single element of the update_action_t enumeration
+                representing an action to take.
+            BB: A single element of the update_action_t enumeration
+                representing an action to take.
+            CC: A single element of the update_action_t enumeration
+                representing an action to take.
+            DD: A single element of the update_action_t enumeration
+                representing an action to take.
+
+      Note that if the perform_code_update action is taken by this
+      override, all code images on the OCMB are considered to be out
+      of date and will be updated.
+    </description>
+    <id>ODYSSEY_PRIORITY_CODE_UPDATE_RULE</id>
+    <simpleType>
+      <array>2</array>
+      <uint64_t/>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
         Physical entity path an OMI's associated OMIC parent target
     </description>
     <id>OMIC_PARENT</id>

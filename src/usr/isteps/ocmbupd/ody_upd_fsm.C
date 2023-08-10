@@ -52,6 +52,8 @@
 #include <errl/hberrltypes.H>
 #include <errl/errludstring.H>
 
+#include <hwpThreadHelper.H>
+
 using namespace TARGETING;
 using namespace ERRORLOG;
 using namespace errl_util;
@@ -70,28 +72,28 @@ extern ocmbupd::ocmbfw_owning_ptr_t OCMBFW_HANDLE;
 /** @brief This enumeration describes the actions that can be taken in response to a code
  *  update event.
  */
-enum update_action_t
+enum update_action_t : uint8_t
 {
-    do_nothing = 0,
+    do_nothing               = 0,
 
     // These alter the severity of the error log related to an event, if there is one. These
     // aren't used right now but may be used if an event (like an HWP error) needs to
     // suppress the error log that caused it. Currently the severity is captured in
     // higher-level operations, e.g. deconfigure_ocmb creates an unrecoverable log.
-    mark_error_predictive,
-    mark_error_recovered,
-    mark_error_unrecoverable,
+    mark_error_predictive    = 1,
+    mark_error_recovered     = 2,
+    mark_error_unrecoverable = 3,
 
-    perform_code_update,
+    perform_code_update      = 4,
 
-    deconfigure_ocmb,
-    fail_boot_bad_firmware,
+    deconfigure_ocmb         = 5,
+    fail_boot_bad_firmware   = 6,
 
     // Resets the code update FSM state on the given OCMB.
-    reset_ocmb_upd_state,
+    reset_ocmb_upd_state     = 7,
 
-    sync_images_normal,
-    sync_images_forced,
+    sync_images_normal       = 8,
+    sync_images_forced       = 9,
 
     // Side-switching actions.
 
@@ -101,26 +103,26 @@ enum update_action_t
     // alongside a switch_to_side_* in the action list for a transition, the explicit
     // mark_error_* action will take precedence over the implicit severity of these
     // side-switching actions.
-    switch_to_side_0,
-    switch_to_side_1,
-    switch_to_side_golden,
+    switch_to_side_0         = 0xA,
+    switch_to_side_1         = 0xB,
+    switch_to_side_golden    = 0xC,
 
     // This may mean a reconfig loop is necessary, depending on where in the IPL the event
     // happens. Whether one is required or not is determined by the caller.
-    retry_check_for_ready, // retry_check_for_ready must ALWAYS be preceded by a side switch
-                           // (even if that "side switch" is just switching to the side that
-                           // is currently active, in case you want to retry the check_for_ready
-                           // loop without switching sides) so that the FSM can keep track of what
-                           // sides have been attempted before.
+    retry_check_for_ready    = 0xD, // retry_check_for_ready must ALWAYS be preceded by a side switch
+                                    // (even if that "side switch" is just switching to the side that
+                                    // is currently active, in case you want to retry the check_for_ready
+                                    // loop without switching sides) so that the FSM can keep track of what
+                                    // sides have been attempted before.
 
     // This means that an invalid state/event combination has happened.
-    internal_error
+    internal_error           = 0xE
 };
 
 /** @brief Enumeration corresponding to Odyssey boot sides. These elements can be OR'd
  *  together to make a bit set.
  */
-enum ocmb_boot_side_t
+enum ocmb_boot_side_t : uint8_t
 {
     SIDE0 = 1 << 0,
     SIDE1 = 1 << 1,
@@ -129,7 +131,7 @@ enum ocmb_boot_side_t
 
 /** @brief A tristate enumeration. These elements can be OR'd together to make a bit set.
  */
-enum tristate_t
+enum tristate_t : uint8_t
 {
     yes = 1 << 0,
     no = 1 << 1,
@@ -193,7 +195,7 @@ struct state_t
     // performed?" is true.
     tristate_s golden_boot_performed = no; // can't be unknown
 
-    ocmb_boot_side_s ocmb_boot_side = SIDE0; // This variable must have only one bit set
+    ocmb_boot_side_s ocmb_boot_side = SIDE0;
     tristate_s ocmb_fw_up_to_date = no;
 };
 
@@ -231,8 +233,11 @@ struct state_transitions_t
  *  Note that "Golden boot performed?" is only true if Side was set to GOLDEN on some
  *  previous attempt. i.e. just because Side=Golden doesn't mean "Golden boot performed?"
  *  is true.
+ *
+ *  @note This table is not marked "const" or "static" so that it can be more easily
+ *        modified with DCE for testing.
  */
-const state_transitions_t transitions[] =
+state_transitions_t ody_fsm_transitions[] =
 {
     //                |                        | Active |                |                             |
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
@@ -437,7 +442,7 @@ bool state_pattern_matches(const state_t& lhs, const state_t& rhs)
     assert(__builtin_popcount(lhs.golden_boot_performed) == 1, "state_pattern_matches: Expected a single state for matching (golden_boot_performed)");
     assert(__builtin_popcount(lhs.ocmb_fw_up_to_date) == 1, "state_pattern_matches: Expected a single state for matching (ocmb_fw_up_to_date)");
 
-    return (lhs.ocmb_boot_side == rhs.ocmb_boot_side)
+    return (lhs.ocmb_boot_side & rhs.ocmb_boot_side)
         && (lhs.update_performed & rhs.update_performed)
         && (lhs.golden_boot_performed & rhs.golden_boot_performed)
         && (lhs.ocmb_fw_up_to_date & rhs.ocmb_fw_up_to_date);
@@ -495,17 +500,17 @@ std::array<char, 64> ocmb_boot_side_to_str(const ocmb_boot_side_t i_side)
 {
     std::array<char, 64> str = { };
 
-    if (i_side == SIDE0)
+    if (i_side & SIDE0)
     {
         strcat(&str[0], "SIDE0|");
     }
 
-    if (i_side == SIDE1)
+    if (i_side & SIDE1)
     {
         strcat(&str[0], "SIDE1|");
     }
 
-    if (i_side == GOLDEN)
+    if (i_side & GOLDEN)
     {
         strcat(&str[0], "GOLDEN|");
     }
@@ -771,6 +776,7 @@ errlHndl_t execute_actions(Target* const i_ocmb,
                            const state_transition_t& i_transition,
                            const ody_upd_event_t i_event,
                            errlHndl_t i_errlog,
+                           const bool i_on_update_force_all,
                            bool& o_restart_needed)
 {
     errlHndl_t errl = nullptr;
@@ -811,7 +817,7 @@ errlHndl_t execute_actions(Target* const i_ocmb,
                 manually_set_errl_sev = true;
                 break;
             case perform_code_update:
-                if (auto update_err = odysseyUpdateImages(i_ocmb))
+                if (auto update_err = odysseyUpdateImages(i_ocmb, i_on_update_force_all))
                 {
                     TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): odysseyUpdateImages failed: "
                           TRACE_ERR_FMT,
@@ -935,6 +941,64 @@ errlHndl_t execute_actions(Target* const i_ocmb,
     return errl;
 }
 
+/** @brief Masks bits out of a value and right-aligns the result.
+ */
+template<typename T = uint64_t>
+constexpr T extract_mask(const uint64_t value, const uint64_t mask)
+{
+    return static_cast<T>((value & mask) >> __builtin_ctz(mask));
+}
+
+/** @brief Reads the ODYSSEY_PRIORITY_CODE_UPDATE_RULE attribute from
+ *  the system target and converts it to an FSM rule. This attribute
+ *  is meant to be set via an attribute override to force particular
+ *  behavior from the FSM for testing.
+ *
+ *  If the attribute isn't set at all, the returned rule won't match
+ *  any states/events.
+ *
+ *  The structure of the attribute should match what is described in
+ *  the attribute XML.
+ */
+state_transitions_t parse_ody_upd_fsm_attribute_override()
+{
+    const auto sys = UTIL::assertGetToplevelTarget();
+
+    const auto attr = sys->getAttrAsStdArr<ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE>();
+
+    const uint64_t rule = attr[0],
+                   actions = attr[1];
+
+    state_transition_t transition = { };
+
+    transition.event = extract_mask(rule, 0xFFFFFFFF'00000000);
+
+    static_assert(sizeof(transition.actions) <= sizeof(actions));
+    memcpy(transition.actions, &actions, sizeof(transition.actions));
+
+    state_t state_pattern = { };
+
+    state_pattern.update_performed.state      = extract_mask<tristate_t>      (rule, 0x00000000'FF000000);
+    state_pattern.golden_boot_performed.state = extract_mask<tristate_t>      (rule, 0x00000000'00FF0000);
+    state_pattern.ocmb_boot_side.side         = extract_mask<ocmb_boot_side_t>(rule, 0x00000000'0000FF00);
+    state_pattern.ocmb_fw_up_to_date.state    = extract_mask<tristate_t>      (rule, 0x00000000'000000FF);
+
+    state_transitions_t transition_set = { };
+
+    transition_set.state = state_pattern;
+    transition_set.transitions[0] = transition;
+
+    TRACF("parse_ody_upd_fsm_attribute_override: event=0x%x, update_performed=0x%x "
+          "golden_boot_performed=0x%x, ocmb_boot_side=0x%x, ocmb_fw_up_to_date=0x%x",
+          transition.event,
+          state_pattern.update_performed.state,
+          state_pattern.golden_boot_performed.state,
+          state_pattern.ocmb_boot_side.side,
+          state_pattern.ocmb_fw_up_to_date.state);
+
+    return transition_set;
+}
+
 /** @brief Process an event on the given OCMB. If an error log is
  *  related to the event, it is passed in as well, and this function
  *  takes ownership of it.
@@ -967,34 +1031,69 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
     const state_transitions_t* matched_state = nullptr;
     const state_transition_t* matched_event = nullptr;
 
-    /* Special case for non-functional DIMMs upon event IPL_COMPLETE;
-       we just reset all state. */
+    /* If someone has done an attribute override for this transition,
+       prioritize that. */
 
-    if (!i_ocmb->getAttr<ATTR_HWAS_STATE>().functional && i_event == IPL_COMPLETE)
+    bool on_update_force_all = false;
+    const auto override_state_pattern = parse_ody_upd_fsm_attribute_override();
+
+    if (state_pattern_matches(i_state, override_state_pattern.state)
+        && event_pattern_matches(i_event, override_state_pattern.transitions[0].event))
     {
-        execute_actions(i_ocmb, i_state, /* state pattern */ { }, /* transition */ { },
-                        IPL_COMPLETE, i_errlog, o_restart_needed);
-        break;
+        TRACF("ody_upd_process_event(HUID=0x%08X): Current state+event %s + %s matches "
+              "attribute override; skipping normal FSM rules",
+              get_huid(i_ocmb),
+              state_to_str(i_state).data(),
+              event_to_str(i_event).data());
+
+        matched_state = &override_state_pattern;
+        matched_event = &override_state_pattern.transitions[0];
+
+        on_update_force_all = true; // if the override asks us to do a
+                                    // code update, force an update to
+                                    // everything
     }
 
-    /* Look for a match for this state+event in our state transition table */
+    /* If the attribute override didn't apply here, then apply the
+       normal FSM rules. */
 
-    for (const auto& state_pattern : transitions)
+    else
     {
-        if (state_pattern_matches(i_state, state_pattern.state))
+        /* Special case for non-functional DIMMs upon event IPL_COMPLETE;
+           we just reset all state. */
+
+        if (!i_ocmb->getAttr<ATTR_HWAS_STATE>().functional && i_event == IPL_COMPLETE)
         {
-            matched_state = &state_pattern;
+            TRACF("ody_upd_process_event(HUID=0x%08X): Current state+event %s + %s matches "
+                  "special case for non-functional OCMBs; clearing state and exiting",
+                  get_huid(i_ocmb),
+                  state_to_str(i_state).data(),
+                  event_to_str(i_event).data());
 
-            for (const auto& event_pattern : state_pattern.transitions)
-            {
-                if (event_pattern_matches(i_event, event_pattern.event))
-                {
-                    matched_event = &event_pattern;
-                    break;
-                }
-            }
-
+            execute_actions(i_ocmb, i_state, /* state pattern */ { }, /* transition */ { },
+                            IPL_COMPLETE, i_errlog, on_update_force_all, o_restart_needed);
             break;
+        }
+
+        /* Look for a match for this state+event in our state transition table */
+
+        for (const auto& state_pattern : ody_fsm_transitions)
+        {
+            if (state_pattern_matches(i_state, state_pattern.state))
+            {
+                matched_state = &state_pattern;
+
+                for (const auto& event_pattern : state_pattern.transitions)
+                {
+                    if (event_pattern_matches(i_event, event_pattern.event))
+                    {
+                        matched_event = &event_pattern;
+                        break;
+                    }
+                }
+
+                break;
+            }
         }
     }
 
@@ -1009,7 +1108,7 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
               state_to_str(matched_state->state).data(),
               event_to_str(matched_event->event).data());
 
-        execute_actions(i_ocmb, i_state, *matched_state, *matched_event, i_event, i_errlog, o_restart_needed);
+        execute_actions(i_ocmb, i_state, *matched_state, *matched_event, i_event, i_errlog, on_update_force_all, o_restart_needed);
     }
     else if (matched_state)
     {

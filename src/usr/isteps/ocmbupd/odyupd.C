@@ -169,7 +169,8 @@ void str_to_hex(char* const o_buf, const uint8_t* const i_bytes, const size_t i_
 errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
                                                ody_cur_version_new_image_t& o_updates_required,
                                                uint64_t* const o_rt_hash_prefix,
-                                               uint64_t* const o_bldr_hash_prefix)
+                                               uint64_t* const o_bldr_hash_prefix,
+                                               const bool i_force_all)
 {
     TRACF(ENTER_MRK"check_for_odyssey_codeupdate_needed(0x%08X)",
           get_huid(i_ocmb));
@@ -253,15 +254,16 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
            image. */
 
         if ((bootloader_needs_update && (codelevel.type == codelevel_info_t::runtime))
-             || memcmp(&img->image_hash, &codelevel.hash, sizeof(img->image_hash)))
+             || memcmp(&img->image_hash, &codelevel.hash, sizeof(img->image_hash))
+             || i_force_all)
         {
             char flashed_hash_str[25] = { }, hb_hash_str[25] = { };
             str_to_hex(flashed_hash_str, codelevel.hash, (sizeof(flashed_hash_str) - 1) / 2);
             str_to_hex(hb_hash_str, img->image_hash, (sizeof(hb_hash_str) - 1) / 2);
 
             TRACF("check_for_odyssey_codeupdate_needed: OCMB 0x%08X %s needs update "
-                  "(flashed level = %s, hostboot's level = %s)",
-                  get_huid(i_ocmb), image_type_str, flashed_hash_str, hb_hash_str);
+                  "(flashed level = %s, hostboot's level = %s, override = %d)",
+                  get_huid(i_ocmb), image_type_str, flashed_hash_str, hb_hash_str, i_force_all);
 
             o_updates_required.push_back({ codelevel, img });
 
@@ -299,9 +301,12 @@ void add_odyssey_callouts(errlHndl_t& i_errl, const Target* const i_ocmb)
 /**
  * @brief Update Odyssey OCMB firmware on the given target if necessary.
  */
-errlHndl_t odysseyUpdateImages(Target* const i_ocmb)
+errlHndl_t odysseyUpdateImages(Target* const i_ocmb, const bool i_force_update_all)
 {
     errlHndl_t errl = nullptr;
+
+    TRACF(ENTER_MRK"odysseyUpdateImages(0x%08X, i_on_update_force_all=%d)",
+          get_huid(i_ocmb), i_force_update_all);
 
     do
     {
@@ -309,7 +314,11 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb)
     if (UTIL::isOdysseyChip(i_ocmb))
     {
         ody_cur_version_new_image_t images_to_update;
-        errl = check_for_odyssey_codeupdate_needed(i_ocmb, images_to_update);
+        errl = check_for_odyssey_codeupdate_needed(i_ocmb,
+                                                   images_to_update,
+                                                   nullptr,
+                                                   nullptr,
+                                                   i_force_update_all);
 
         if (errl)
         {

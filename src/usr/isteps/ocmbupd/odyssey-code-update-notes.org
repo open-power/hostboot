@@ -166,3 +166,78 @@ type.
  | No                     | Yes                    |      Golden | yes         | (Can't happen) | (Can't do a golden boot twice)                                                                            |
  | Yes                    | No                     |      Golden | yes         | (Can't happen) | (Golden side fw is never considered current)                                                              |
  | Yes                    | Yes                    |      Golden | yes         | (Can't happen) | (Can't do a golden boot twice)                                                                            |
+
+** Controlling Code Update with Attribute Overrides
+
+Overriding the `ODYSSEY_PRIORITY_CODE_UPDATE_RULE` attribute on the
+system target allows a user to change the behavior of the FSM in order
+to e.g. prevent code updates, force code updates, etc.
+
+The attribute is an array of two 64-bit words with the following
+structure (also listed in attribute_types.xml):
+
+#+BEGIN_SRC
+      Word 0           | Word 1
+      VVVVVVVVWWXXYYZZ | AABBCCDD00000000
+
+      VVVVVVVV: The event pattern to match. This is a bitwise-OR'd
+                collection of elements from ody_upd_event_t.
+
+      WWXXYYZZ: The state pattern to match.
+
+            WW: Bitwise-OR'd collection of tristate_t representing the
+                "update performed?" state variable.
+            XX: Bitwise-OR'd collection of tristate_t representing the
+                "golden boot performed?" state variable.
+            YY: Bitwise-OR'd collection of ocmb_boot_side_t representing the
+                "OCMB boot side" state variable.
+            ZZ: Bitwise-OR'd collection of tristate_t representing the
+                "OCMB FW up to date?" state variable.
+
+      AABBCCDD: The actions for the FSM to perform when the event and
+                state match the patterns in word 0. If these actions are taken,
+                the actions that would have otherwise been taken by the FSM are
+                ignored.
+
+            AA: A single element of the update_action_t enumeration
+                representing an action to take.
+            BB: A single element of the update_action_t enumeration
+                representing an action to take.
+            CC: A single element of the update_action_t enumeration
+                representing an action to take.
+            DD: A single element of the update_action_t enumeration
+                representing an action to take.
+#+END_SRC
+
+Note that if the perform_code_update action is taken by this override,
+all code images on the OCMB are considered to be out of date and will
+be updated.
+
+For example, this attribute override will force a code update in istep
+12.12 on the first loop:
+
+#+BEGIN_SRC
+CLEAR
+
+target = k0:s0
+
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[0] 0x00000002FFFF01FF
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[1] 0x040B0D0000000000
+#+END_SRC
+
+In this case:
+
+#+BEGIN_SRC
+      VVVVVVVV = 00000002: UPDATE_OMI_FIRMWARE_REACHED
+
+            WW = FF: Matches any value for "Update performed?"
+            XX = FF: Matches any value for "Golden boot performed?"
+            YY = 01: Matches side 0 (we only match side 0 so that
+                     when we switch to side 1 we'll make forward progress)
+            ZZ = FF: Matches any value for "OCMB FW up to date?"
+
+            AA = 04: perform_code_update
+            BB = 0B: switch_to_side_1
+            CC = 0D: retry_check_for_ready (causes a reconfig loop)
+            DD = 00: do_nothing (no-op)
+#+END_SRC
