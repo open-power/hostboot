@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -493,7 +493,7 @@ errlHndl_t nvdimmReady(Target *i_nvdimm)
                            l_numBytes,
                            DEVICE_SPD_ADDRESS(SPD::NVM_INIT_TIME));
 
-        TRACUCOMP(g_trac_nvdimm, "nvdimmReady() HUID[%X] l_nvm_init_time = %u",
+        TRACFCOMP(g_trac_nvdimm, "nvdimmReady() HUID[%X] l_nvm_init_time = %u",
                   get_huid(i_nvdimm), l_nvm_init_time);
 
         if (l_err)
@@ -506,6 +506,10 @@ errlHndl_t nvdimmReady(Target *i_nvdimm)
         // Convert to ms for polling and double the value to avoid edge condition
         uint32_t l_nvm_init_time_ms = l_nvm_init_time * MS_PER_SEC * 2;
         uint32_t l_poll = 0;
+
+        // Newer NV levels take longer to reset so going to add enough to
+        // account for everything we've seen locally
+        l_nvm_init_time_ms += (30*MS_PER_SEC);
 
         do
         {
@@ -527,6 +531,7 @@ errlHndl_t nvdimmReady(Target *i_nvdimm)
             l_poll += NV_READY_POLL_TIME_MS;
 
         }while(l_poll < l_nvm_init_time_ms);
+        TRACFCOMP(g_trac_nvdimm,"Total polling time = %d ms  [%.8X]", l_poll, TARGETING::get_huid(i_nvdimm));
 
         if ((l_data != NV_READY) && !l_err)
         {
