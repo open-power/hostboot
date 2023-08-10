@@ -70,11 +70,14 @@ inline void log_fir_helper( const fapi2::Target<T>& i_target,
 {
     if(i_fir_error && (io_rc != fapi2::FAPI2_RC_SUCCESS))
     {
+        // TODO Zen:MST-2299: use log_related_error when available on PPE
 #ifndef __PPE__
         fapi2::log_related_error(i_target, io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-#endif
 
         io_rc = fapi2::FAPI2_RC_SUCCESS;
+#else
+        FAPI_ERR(TARGTIDFORMAT " HWP fail with related FIR bits set!", TARGTID);
+#endif
     }
 }
 
@@ -147,7 +150,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-#ifndef __PPE__
 ///
 /// @brief Checks whether a FIR or unlocked PLL could be the root cause of another failure
 /// @tparam MC MC type for which to check FIR's
@@ -167,19 +169,25 @@ fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target,
     // We didn't have an error, so return success
     if(io_rc == fapi2::FAPI2_RC_SUCCESS)
     {
-        FAPI_INF("%s has a good return code, returning success", mss::c_str(i_target));
+#ifndef __PPE__
+        FAPI_INF(TARGTIDFORMAT " has a good return code, returning success", TARGTID);
+#endif
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
     bool l_fir_error = false;
 
-    FAPI_ERR("%s has a bad return code, time to check some firs!", mss::c_str(i_target));
+#ifndef __PPE__
+    FAPI_ERR(TARGTIDFORMAT " has a bad return code, time to check some firs!", TARGTID);
+#endif
 
     // Check the fir bits against the mask and return fir status thru fapi2 RC
     io_fircheck_scom_err = bad_fir_bits<MC, F>(i_target, io_rc, l_fir_error);
 
-    FAPI_ERR("%s took a fail. FIR was %s", mss::c_str(i_target),
+#ifndef __PPE__
+    FAPI_ERR(TARGTIDFORMAT " took a fail. FIR was %s", TARGTID,
              l_fir_error ? "set - returning FIR RC" : "unset - returning inputted RC");
+#endif
 
     // If we had a FIR error, log the original error and return success
     // PRD will handle the original error
@@ -210,7 +218,7 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
                                    fapi2::ReturnCode& io_rc,
                                    const bool i_check_fir = true )
 {
-#ifdef __HOSTBOOT_MODULE
+#if defined(__HOSTBOOT_MODULE) || defined(__PPE__)
 
     fapi2::ReturnCode l_rc(io_rc);
     fapi2::ReturnCode l_fircheck_scom_err(fapi2::FAPI2_RC_SUCCESS);
@@ -222,6 +230,7 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
         l_rc = hostboot_fir_or_pll_fail<MC, F>(i_target, l_rc, l_fircheck_scom_err);
     }
 
+    // If we encountered a scom error while checking FIRs, return that RC
     if (l_fircheck_scom_err != fapi2::FAPI2_RC_SUCCESS)
     {
         return l_fircheck_scom_err;
@@ -233,30 +242,6 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
     return io_rc;
 #endif
 }
-#else
-
-
-///
-/// @brief Checks whether a FIR or unlocked PLL could be the root cause of another failure, if a check fir boolean is passed in
-/// @tparam MC MC type for which to check FIR's
-/// @tparam F the FIR reg checklist to be checked
-/// @tparam T the fapi2::TargetType which hold the FIR bits
-/// @param[in] i_target - the target on which to operate
-/// @param[in,out] io_rc - the return code for the function
-/// @param[in] i_check_fir - true IFF the FIR needs to be checked - defaults to true
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-/// @note PPE specific implementation -> just return the RC
-///
-// TODO:ZEN:MST-1678 Create PLL or FIR error functions for Odyssey
-template< mss::mc_type MC, firChecklist F, fapi2::TargetType T >
-fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
-                                   fapi2::ReturnCode& io_rc,
-                                   const bool i_check_fir = true )
-{
-    return io_rc;
-}
-
-#endif
 
 ///
 /// @brief Check GENERIC FIR checklist to see if we can blame any FIRs for a given DRAM training error code

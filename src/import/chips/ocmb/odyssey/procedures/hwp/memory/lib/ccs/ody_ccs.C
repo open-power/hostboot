@@ -619,11 +619,13 @@ fapi2::ReturnCode fail_type<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::T
     FAPI_ASSERT(TT::STAT_HUNG != i_type,
                 fapi2::MSS_ODY_CCS_HUNG().set_MC_TARGET(i_target),
                 TARGTIDFORMAT " CCS appears hung", GENTARGTID(i_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
-    // Due to the PRD update, we need to check for FIR's
-    // If any FIR's have lit up, this CCS fail could have been caused by the FIR
-    // So, let PRD retrigger this step to see if we can resolve the issue
-    return mss::check::fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::CCS>(i_target, fapi2::current_err);
+    // This fail could be related to a lit FIR, but for SPPE we rely on the ody_blame_firs HWP
+    // to check them and trigger PRD handling. So here we just return the failing RC
+    return fapi2::current_err;
 }
 
 ///

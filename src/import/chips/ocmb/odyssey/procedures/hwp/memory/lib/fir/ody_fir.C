@@ -36,11 +36,13 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/fir/gen_mss_fir.H>
-#include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <lib/fir/ody_fir.H>
 #include <ody_scom_ody_odc.H>
+#include <ody_scom_mp_odp.H>
+#include <ody_scom_perv_tcmc.H>
+#include <ody_scom_perv_tpchip.H>
 
 namespace mss
 {
@@ -48,52 +50,137 @@ namespace mss
 namespace check
 {
 
+namespace ody
+{
+
 ///
-/// @brief Helper for bad_fir_bits to check a fir register/mask pair against a desired mask value
-/// @param[in] i_target - the target on which to operate
-/// @param[in] i_fir_addr - address of the FIR register to compare against mask
-/// @param[in] i_mask_addr - address of the mask register for i_fir_addr
-/// @param[in] i_mask - the 64-bit mask that we want to compare the reg against
+/// @brief Helper to check port-specific FIR bits after draminit
+/// @param[in] i_target - the MEM_PORT target on which to operate
 /// @param[in,out] io_rc - the return code for the function
-/// @param[out] o_fir_error - true iff a FIR was hit
+/// @param[in,out] io_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 ///
-fapi2::ReturnCode bad_fir_bits_helper_with_mask(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        const uint64_t i_fir_addr,
-        const uint64_t i_mask_addr,
-        const fapi2::buffer<uint64_t>& i_mask,
-        fapi2::ReturnCode& io_rc,
-        bool& o_fir_error)
+fapi2::ReturnCode bad_fir_bits_draminit_internal(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    fapi2::ReturnCode& io_rc,
+    bool& io_fir_error)
 {
-    fapi2::buffer<uint64_t> l_mask_data;
-    fapi2::buffer<uint64_t> l_reg_data;
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+    const auto l_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    FAPI_TRY(fapi2::getScom(i_target, i_fir_addr, l_reg_data));
-    FAPI_TRY(fapi2::getScom(i_target, i_mask_addr, l_mask_data));
+    fapi2::buffer<uint64_t> l_check_mask(0xFFFFFFFFFFFFFFFF);
 
-    // OR together the input mask with the mask register value so we aren't checking any FIRs
-    // that are currently masked in hardware
-    o_fir_error = fir_with_mask_helper(l_reg_data, (i_mask | l_mask_data));
-
-#ifndef __PPE__
-    FAPI_INF(TARGTIDFORMAT " %s on reg 0x%016lx value 0x%016lx and mask value 0x%016lx", TARGTID,
-             o_fir_error ? "has FIR's set" : "has no FIR's set",
-             i_fir_addr, l_reg_data, (i_mask | l_mask_data));
-#endif
-
-    // Log the error if need be
-    log_fir_helper(i_target, o_fir_error, io_rc);
-
-    // Exit if we have found a FIR
-    if(o_fir_error)
+    // Check SRQFIR[4] or [33], [30] or [34], and [44] based on the port position
+    if (io_fir_error != true)
     {
-        return fapi2::FAPI2_RC_SUCCESS;
+        // Unmask bit 4 or 33 depending on which port we're on
+        constexpr uint32_t SRQ0_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN04;
+        constexpr uint32_t SRQ1_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN33;
+        // Unmask bit 30 or 34 depending on which port we're on
+        constexpr uint32_t SRQ0_DFI_ERROR = scomt::ody::ODC_SRQ_LFIR_IN30;
+        constexpr uint32_t SRQ1_DFI_ERROR = scomt::ody::ODC_SRQ_LFIR_IN34;
+
+        if (l_pos == 0)
+        {
+            l_check_mask.clearBit<SRQ0_RCD_PARITY_ERROR>()
+            .clearBit<SRQ0_DFI_ERROR>();
+        }
+        else
+        {
+            l_check_mask.clearBit<SRQ1_RCD_PARITY_ERROR>()
+            .clearBit<SRQ1_DFI_ERROR>();
+        }
+
+        l_check_mask.clearBit<scomt::ody::ODC_SRQ_LFIR_IN44>();
+
+        FAPI_TRY(bad_fir_bits_helper_with_mask(l_ocmb,
+                                               scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR,
+                                               scomt::ody::ODC_SRQ_MASK_RW_WCLEAR,
+                                               l_check_mask,
+                                               io_rc,
+                                               io_fir_error));
+    }
+
+    // Check ODP FIR [1,2,3,4,6,9,10,11,12,13]
+    if (io_fir_error != true)
+    {
+        l_check_mask.flush<1>()
+        .clearBit<scomt::mp::S_LFIR_FSMPERR>()
+        .clearBit<scomt::mp::S_LFIR_WPERR>()
+        .clearBit<scomt::mp::S_LFIR_PSLVPERR>()
+        .clearBit<scomt::mp::S_LFIR_ODPCTRLPERR>()
+        .clearBit<scomt::mp::S_LFIR_PHYSTICKYUNLOCKERR>()
+        .clearBit<scomt::mp::S_LFIR_PHYD5ACSM1PARITYERR>()
+        .clearBit<scomt::mp::S_LFIR_PHYD5ACSM0PARITYERR>()
+        .clearBit<scomt::mp::S_LFIR_PHYRXFIFOCHECKERR>()
+        .clearBit<scomt::mp::S_LFIR_PHYRXTXPPTERR>()
+        .clearBit<scomt::mp::S_LFIR_PHYECCERR>();
+
+        FAPI_TRY(bad_fir_bits_helper_with_mask(i_target,
+                                               scomt::mp::S_LFIR_RW_WCLEAR,
+                                               scomt::mp::S_MASK_RW_WCLEAR,
+                                               l_check_mask,
+                                               io_rc,
+                                               io_fir_error));
     }
 
 fapi_try_exit:
-
     return fapi2::current_err;
 }
+
+///
+/// @brief Helper to check chip level FIR bits after draminit
+/// @param[in] i_target - the OCMB_CHIP target on which to operate
+/// @param[in,out] io_rc - the return code for the function
+/// @param[in,out] io_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode bad_fir_bits_draminit_internal(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::ReturnCode& io_rc,
+    bool& io_fir_error)
+{
+    // Note: these addresses don't have the leading '8' or '1' in the reg headers, so define them here
+    constexpr uint64_t TCMC_LFIR_RW_WCLEAR = 0x8040100ull;
+    constexpr uint64_t TCMC_EPS_MASK_RW_WCLEAR = 0x8040102ull;
+    constexpr uint64_t TPCHIP_TPC_LFIR_RW_WCLEAR = 0x1040100ull;
+    constexpr uint64_t TPCHIP_TPC_EPS_MASK_RW_WCLEAR = 0x1040102ull;
+
+    fapi2::buffer<uint64_t> l_check_mask(0xFFFFFFFFFFFFFFFF);
+
+    // Check TCMC LFIR [3]
+    if (io_fir_error != true)
+    {
+        l_check_mask.clearBit<scomt::perv::TCMC_LFIR_CC_OTHERS>();
+
+        FAPI_TRY(bad_fir_bits_helper_with_mask(i_target,
+                                               TCMC_LFIR_RW_WCLEAR,
+                                               TCMC_EPS_MASK_RW_WCLEAR,
+                                               l_check_mask,
+                                               io_rc,
+                                               io_fir_error));
+    }
+
+    // Check TPC LFIR [3,18]
+    if (io_fir_error != true)
+    {
+        l_check_mask.flush<1>()
+        .clearBit<scomt::perv::TPCHIP_TPC_LFIR_CC_OTHERS>()
+        .clearBit<scomt::perv::TPCHIP_TPC_LFIR_IN18>();
+
+        FAPI_TRY(bad_fir_bits_helper_with_mask(i_target,
+                                               TPCHIP_TPC_LFIR_RW_WCLEAR,
+                                               TPCHIP_TPC_EPS_MASK_RW_WCLEAR,
+                                               l_check_mask,
+                                               io_rc,
+                                               io_fir_error));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+} // namespace ody
 
 ///
 /// @brief Checks whether any FIRs have lit up on a target
@@ -101,7 +188,7 @@ fapi_try_exit:
 /// @param[in,out] io_rc - the return code for the function
 /// @param[out] o_fir_error - true iff a FIR was hit
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-/// @note specialization for ODYSSEY and fir checklist for DRAMINIT regs
+/// @note specialization for ODYSSEY MEM_PORT and fir checklist for DRAMINIT regs
 ///
 template<>
 fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::DRAMINIT>(
@@ -110,33 +197,45 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::DRAMINIT>(
     bool& o_fir_error)
 {
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
-    const auto l_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
-
-    // For draminit case, we want to check SRQFIR[4] or [33] only based on the port position, so unmask checkbits
-    fapi2::buffer<uint64_t> l_check_mask(0xFFFFFFFFFFFFFFFF);
 
     // Start by assuming we do not have a FIR; if true at any point, skip other checks to preserve error
     o_fir_error = false;
 
-    // Unmask bit 4 or 33 depending on which port we're on
-    constexpr uint32_t SRQ0_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN04;
-    constexpr uint32_t SRQ1_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN33;
+    // Check port-specific FIRs first
+    FAPI_TRY(ody::bad_fir_bits_draminit_internal(i_target, io_rc, o_fir_error));
 
-    if (l_pos == 0)
+    // Check chip level FIRs
+    FAPI_TRY(ody::bad_fir_bits_draminit_internal(l_ocmb, io_rc, o_fir_error));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Checks whether any FIRs have lit up on a target
+/// @param[in] i_target - the OCMB_CHIP target on which to operate
+/// @param[in,out] io_rc - the return code for the function
+/// @param[out] o_fir_error - true iff a FIR was hit
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note specialization for ODYSSEY OCMB_CHIP and fir checklist for DRAMINIT regs
+///
+template<>
+fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::DRAMINIT>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::ReturnCode& io_rc,
+    bool& o_fir_error)
+{
+    // Start by assuming we do not have a FIR; if true at any point, skip other checks to preserve error
+    o_fir_error = false;
+
+    // Check port-specific FIRs first
+    for (const auto& l_port :  mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        l_check_mask.clearBit<SRQ0_RCD_PARITY_ERROR>();
-    }
-    else
-    {
-        l_check_mask.clearBit<SRQ1_RCD_PARITY_ERROR>();
+        FAPI_TRY(ody::bad_fir_bits_draminit_internal(l_port, io_rc, o_fir_error));
     }
 
-    FAPI_TRY(bad_fir_bits_helper_with_mask(l_ocmb,
-                                           scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR,
-                                           scomt::ody::ODC_SRQ_MASK_RW_WCLEAR,
-                                           l_check_mask,
-                                           io_rc,
-                                           o_fir_error));
+    // Check chip level FIRs
+    FAPI_TRY(ody::bad_fir_bits_draminit_internal(i_target, io_rc, o_fir_error));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -162,21 +261,7 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::CCS>(
     // Start by assuming we do not have a FIR; if true at any point, skip other checks to preserve error
     o_fir_error = false;
 
-    // Unmask bits 4 and 33
-    constexpr uint32_t SRQ0_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN04;
-    constexpr uint32_t SRQ1_RCD_PARITY_ERROR = scomt::ody::ODC_SRQ_LFIR_IN33;
-    l_check_mask.clearBit<SRQ0_RCD_PARITY_ERROR>()
-    .clearBit<SRQ1_RCD_PARITY_ERROR>();
-
-    FAPI_TRY(bad_fir_bits_helper_with_mask(i_target,
-                                           scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR,
-                                           scomt::ody::ODC_SRQ_MASK_RW_WCLEAR,
-                                           l_check_mask,
-                                           io_rc,
-                                           o_fir_error));
-
-    // Mask all, then unmask bits 3,4
-    if (o_fir_error != true)
+    // Check MCBISTFIR bits [3,4]
     {
         l_check_mask.flush<1>().clearBit<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_INTERNAL_FSM_ERROR>()
         .clearBit<scomt::ody::ODC_MCBIST_SCOM_MCBISTFIRQ_MCBISTFIRQ_CCS_ARRAY_UNCORRECT_CE_OR_UE>();
@@ -187,6 +272,14 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::CCS>(
                                                l_check_mask,
                                                io_rc,
                                                o_fir_error));
+    }
+
+    // Now check all the FIR bits in the DRAMINIT checklist
+    if (o_fir_error != true)
+    {
+        bool l_fir_error = false;
+        FAPI_TRY( (bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::DRAMINIT>(i_target, io_rc, l_fir_error)) );
+        o_fir_error |= l_fir_error;
     }
 
 fapi_try_exit:
