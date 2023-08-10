@@ -79,7 +79,6 @@ using   namespace   SBEIO;
 namespace ISTEP_14
 {
 // Forward declare these methods
-void ody_enable_periodic_sensor_poll(IStepError & io_iStepError);
 void p10_call_mss_thermal_init(IStepError & io_iStepError);
 void run_proc_throttle_sync(IStepError & io_iStepError);
 
@@ -110,19 +109,6 @@ void* call_mss_thermal_init (void*)
         goto ERROR_EXIT;
     }
 
-    ody_enable_periodic_sensor_poll(l_iStepError);
-
-    // Do not continue if the HWP call to p10_call_istep14_2b encounters an
-    // error. Breaking out here will facilitate in the efficiency of the
-    // reconfig loop and not cause confusion for the next HWP call.
-    if ( !l_iStepError.isNull() )
-    {
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                   "ERROR: call_mss_thermal_init exited early because "
-                   "ody_enable_periodic_sensor_poll had failures" );
-        goto ERROR_EXIT;
-    }
-
     // If no prior error, then call HWP to processor throttle
     // synchronization on a list of PROC chips
     run_proc_throttle_sync(l_iStepError);
@@ -135,77 +121,6 @@ void* call_mss_thermal_init (void*)
     // end task, returning any errorlogs to IStepDisp
     return l_iStepError.getErrorHandle();
 } // call_mss_thermal_init
-
-/**
- * @brief Run istep 14.2b on a list of Odyssey OCMB chips
- *
- * param[in/out] io_iStepError - Container for errors if an error occurs
- */
-void ody_enable_periodic_sensor_poll(IStepError & io_iStepError)
-{
-    uint32_t l_odySensorPollingPeriod = 0;
-    uint8_t  l_odyDqsTrackingPeriod = 0;
-    errlHndl_t l_err(nullptr);
-
-    // get RUN_ODY_HWP_FROM_HOST
-    const auto l_runOdyHwpFromHost =
-        TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
-
-    if (!l_runOdyHwpFromHost)
-    {
-        // We are in chipop mode.
-
-        for (const auto l_ocmbTarget : composable(getAllChips)(TYPE_OCMB_CHIP, true))
-        {
-            if (TARGETING::UTIL::isOdysseyChip(l_ocmbTarget))
-            {
-                l_odySensorPollingPeriod =
-                    l_ocmbTarget->getAttr<ATTR_ODY_SENSOR_POLLING_PERIOD_MS_INIT>();
-                l_odyDqsTrackingPeriod =
-                    l_ocmbTarget->getAttr<ATTR_ODY_DQS_TRACKING_PERIOD_INIT>();
-
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                           "Running istep14_2b HWP call on Odyssey chip, "
-                           "target HUID 0x%.8X sensor_polling=0x%x dqs_tracking=0x%x",
-                           TARGETING::get_huid(l_ocmbTarget), l_odySensorPollingPeriod,
-                           l_odyDqsTrackingPeriod );
-                /*
-                 * 14.2b
-                 *  ody_read_dts            [OSBE]
-                 *  ody_read_dimm_sensors   [OSBE]
-                 *  ody_update_sensor_cache [OSBE]
-                 */
-                l_err = sendExecHWPRequestForThermalSensorPolling(l_ocmbTarget,
-                                        l_odySensorPollingPeriod, l_odyDqsTrackingPeriod);
-                if (l_err)
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                               "ERROR: istep14_2b HWP call on Odyssey "
-                               "chip, target HUID 0x%08x failed."
-                               TRACE_ERR_FMT,
-                               get_huid(l_ocmbTarget),
-                               TRACE_ERR_ARGS(l_err) );
-
-                    // We don't want to fail the IPL, so just commit the log here.
-                    errlCommit(l_err, ISTEP_COMP_ID);
-                }
-                else
-                {
-                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
-                               "SUCCESS: istep14_2b HWP on Odyssey chip, "
-                               "target HUID 0x%.8X", TARGETING::get_huid(l_ocmbTarget) );
-                }
-            }
-        }
-    }
-    else
-    {
-        // We are in native HWP mode which is not supported.
-        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                   "Exiting ody_enable_periodic_sensor_poll as it's"
-                   " not supported in native HWP mode!");
-    }
-}
 
 /**
  * @brief Run Thermal Sensor Initialization on a list Explorer OCMB chips
@@ -242,7 +157,7 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
                        TARGETING::get_huid(l_ocmbTarget),
                        l_chipId );
 
-            // Call the HWP exp_mss_thermal_init call on each fapi2::Target
+            // Call the HWP exp_mss_thermal_init call on each fapi2::Target            
             FAPI_INVOKE_HWP(l_err, exp_mss_thermal_init, l_fapiOcmbTarget);
 
             if (l_err)
@@ -289,6 +204,8 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
             }
             else
             {
+                // Note - At the end of this HWP the polling loop on the SBE
+                // will be enabled
                 l_err = sendExecHWPRequest(l_ocmbTarget, MEM_ODY_THERMAL_INIT);
             }
 
