@@ -63,6 +63,12 @@ class OdyPllDomain : public PllDomain
                     ATTENTION_TYPE i_attnType) override;
 
   private:
+
+    /** When Query() is called, this list is cleared and then populated with all
+     *  chips in this domain with an active PLL attention. The list can then be
+     *  used in Analyze() instead of querying all chips a second time. */
+    std::vector<ExtensibleChip*> iv_pllChips;
+
 #ifdef __HOSTBOOT_MODULE
 
     /** Threshold counter for PLL unlock attentions on any chip in the
