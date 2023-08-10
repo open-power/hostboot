@@ -33,6 +33,7 @@
 #include <prdfMemCaptureData.H>
 #include <prdfMemScrubUtils.H>
 #include <prdfMemExtraSig.H>
+#include <prdfMemUtils.H>
 #include <prdfParserEnums.H>
 #include <UtilHash.H> // for Util::hashString
 
@@ -94,6 +95,21 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
     #define PRDF_FUNC "[MemTdCtlr::handleCmdComplete] "
 
     uint32_t o_rc = SUCCESS;
+
+    // To mitigate potential timing issues where the channel may have failed
+    // after PRD was called to analyze this command complete, check for any
+    // active channel fails. If there is one, just break out here and don't
+    // commit the log. The channel fail should be handled afterward.
+    if (MemUtils::queryChnlFail<T>(iv_chip))
+    {
+        PRDF_TRAC(PRDF_FUNC "Channel fail detected during handling of MCBIST "
+                  "cmd complete attention. Skipping analysis of cmd complete.");
+        io_sc.service_data->setDontCommitErrl();
+
+        // The channel has failed so writes won't be able to be performed.
+        // Don't clear the FIR bits to avoid fails on those writes.
+        return PRD_NO_CLEAR_FIR_BITS;
+    }
 
     // First, get the address in which the command stopped.
     MemAddr addr;

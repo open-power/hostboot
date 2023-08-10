@@ -212,6 +212,15 @@ uint32_t odyGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_portSlct,
                            bool & o_col3Config, bool & o_col10Config,
                            bool & o_bank1Config, bool & o_bankGrp2Config );
 
+/**
+ * @brief  Queries if there are any channel fails on the given memory chip
+ *         or it's parent processor.
+ * @param  i_chip OCMB chip
+ * @return True if there is a channel fail present, otherwise false.
+ */
+template<TARGETING::TYPE T>
+bool queryChnlFail(ExtensibleChip * i_chip);
+
 } // end namespace MemUtils
 
 } // end namespace PRDF
