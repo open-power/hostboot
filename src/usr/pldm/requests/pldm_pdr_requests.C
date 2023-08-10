@@ -370,11 +370,14 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
     {
         for (const auto& pdr : pdrs)
         {
-            pldm_pdr_add(io_repo,
-                         pdr.data.data(),
-                         pdr.data.size(),
-                         pdr.record_handle,
-                         false,thePdrManager().hostbootTerminusId());
+            uint32_t record_handle = pdr.record_handle;
+            assert(pldm_pdr_add_check(io_repo,
+                                      pdr.data.data(),
+                                      pdr.data.size(),
+                                      false,
+                                      thePdrManager().hostbootTerminusId(),
+                                      &record_handle)
+                   == PLDM_SUCCESS);
         }
     }
 

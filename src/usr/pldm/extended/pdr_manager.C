@@ -675,9 +675,10 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
 
     /* Add the PDR to the PDR repository. */
 
-    pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
-                 PDR_AUTO_CALCULATE_RECORD_HANDLE,
-                 PDR_IS_NOT_REMOTE,hostbootTerminusId());
+    uint32_t record_handle = PDR_AUTO_CALCULATE_RECORD_HANDLE;
+    assert(pldm_pdr_add_check(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
+                              PDR_IS_NOT_REMOTE, hostbootTerminusId(), &record_handle)
+           == PLDM_SUCCESS);
 
     PLDM_INF("Added state sensor PDR for target 0x%08x, sensor id = 0x%08x, state set ID = %d",
              get_huid(i_target),
@@ -762,9 +763,10 @@ void PdrManager::addStateEffecterPdr(Target* const i_target,
     assert(rc == PLDM_SUCCESS,
            "Failed to encode state effecter PDR");
 
-    pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
-                 PDR_AUTO_CALCULATE_RECORD_HANDLE,
-                 PDR_IS_NOT_REMOTE,hostbootTerminusId());
+    uint32_t record_handle = PDR_AUTO_CALCULATE_RECORD_HANDLE;
+    assert(pldm_pdr_add_check(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
+                              PDR_IS_NOT_REMOTE, hostbootTerminusId(), &record_handle)
+           == PLDM_SUCCESS);
 
     PLDM_INF("Added state effecter PDR for target 0x%08x, sensor id = 0x%08x, state set id = %d",
              get_huid(i_target),
@@ -822,12 +824,15 @@ void PdrManager::addTerminusLocatorPDR()
 
     pldm_terminus_locator_pdr l_pdr = { };
 
+    uint32_t record_handle = PDR_AUTO_CALCULATE_RECORD_HANDLE;
     generateTerminusLocatorPDR(&l_pdr);
-    pldm_pdr_add(iv_pdr_repo.get(),
-                 reinterpret_cast<const uint8_t*>(&l_pdr),
-                 sizeof(l_pdr),
-                 PDR_AUTO_CALCULATE_RECORD_HANDLE,
-                 PDR_IS_NOT_REMOTE,hostbootTerminusId());
+    assert(pldm_pdr_add_check(iv_pdr_repo.get(),
+                              reinterpret_cast<const uint8_t*>(&l_pdr),
+                              sizeof(l_pdr),
+                              PDR_IS_NOT_REMOTE,
+                              hostbootTerminusId(),
+                              &record_handle)
+           == PLDM_SUCCESS);
 }
 
 errlHndl_t PdrManager::setStateEffecterStates(const MCTP::mctp_outbound_msgq_t i_msgQ,
@@ -1228,13 +1233,15 @@ void PdrManager::addFruRecordSetPdr(const fru_record_set_id_t i_rsid,
     // assign the next record handle available to hostboot.
     const auto NEXT_RECORD_HANDLE = 0;
 
-    pldm_pdr_add_fru_record_set(iv_pdr_repo.get(),
-                                hostbootTerminusId(),
-                                i_rsid,
-                                i_entity.entity_type,
-                                i_entity.entity_instance_num,
-                                i_entity.entity_container_id,
-                                NEXT_RECORD_HANDLE);
+    uint32_t record_handle = NEXT_RECORD_HANDLE;
+    assert(pldm_pdr_add_fru_record_set_check(iv_pdr_repo.get(),
+                                             hostbootTerminusId(),
+                                             i_rsid,
+                                             i_entity.entity_type,
+                                             i_entity.entity_instance_num,
+                                             i_entity.entity_container_id,
+                                             &record_handle)
+           == PLDM_SUCCESS);
 }
 
 void PdrManager::addEntityAssociationPdrs(const pldm_entity_association_tree& i_tree, const bool i_is_remote)

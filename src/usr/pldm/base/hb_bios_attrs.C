@@ -285,7 +285,8 @@ static std::vector<char> decode_string_handle(const std::vector<uint8_t>& i_stri
     {
         const uint16_t string_length = pldm_bios_table_string_entry_decode_string_length(string_entry);
         string_contents.resize(string_length + 1);
-        pldm_bios_table_string_entry_decode_string(string_entry, string_contents.data(), string_contents.size());
+        assert(pldm_bios_table_string_entry_decode_string_check(string_entry, string_contents.data(), string_contents.size())
+               == PLDM_SUCCESS);
     }
 
     return string_contents;
@@ -401,7 +402,7 @@ errlHndl_t getCurrentAttrValue(const char *i_attr_string,
       const pldm_bios_attr_table_entry * attr_entry_ptr =
           reinterpret_cast<const pldm_bios_attr_table_entry * >(
             pldm_bios_table_iter_value(attr_table_iter));
-      if(pldm_bios_table_attr_entry_decode_string_handle(attr_entry_ptr) == string_handle)
+      if (pldm_bios_table_attr_entry_decode_string_handle(attr_entry_ptr) == string_handle)
       {
           attribute_handle =
             pldm_bios_table_attr_entry_decode_attribute_handle(attr_entry_ptr);
@@ -539,11 +540,13 @@ errlHndl_t lookupEnumAttrValuesInStringTable(const std::vector<uint8_t>& i_strin
     do
     {
 
-    auto num_possible_values = pldm_bios_table_attr_entry_enum_decode_pv_num(i_attr_entry);
+    uint8_t num_possible_values = 0;
+    assert(pldm_bios_table_attr_entry_enum_decode_pv_num_check(i_attr_entry, &num_possible_values) == PLDM_SUCCESS);
     uint16_t possible_values[num_possible_values] = {0};
-    pldm_bios_table_attr_entry_enum_decode_pv_hdls(i_attr_entry,
-                                                   possible_values,
-                                                   num_possible_values);
+    assert(pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(i_attr_entry,
+                                                                possible_values,
+                                                                num_possible_values)
+           == PLDM_SUCCESS);
 
     if(i_attr_value[0] != i_attr_value.size() - 1)
     {
@@ -819,9 +822,10 @@ errlHndl_t getDecodedEnumAttr(std::vector<uint8_t>& io_string_table,
     assert(max_possible_value_length > 1, "getDecodedEnumAttr: Passed possible string vector has incorrect size");
     o_decoded_value.resize(max_possible_value_length);
 
-    pldm_bios_table_string_entry_decode_string(cur_val_string_entry_ptr,
-                                               o_decoded_value.data(),
-                                               max_possible_value_length);
+    assert(pldm_bios_table_string_entry_decode_string_check(cur_val_string_entry_ptr,
+                                                            o_decoded_value.data(),
+                                                            max_possible_value_length)
+           == PLDM_SUCCESS);
     } while(0);
 
     return l_errl;
@@ -1376,9 +1380,8 @@ errlHndl_t systemStringAttrLookup(std::vector<uint8_t>& io_string_table,
     if (stringLength == 0)
     {
         // Get the default string length of the bios attribute
-        stringLength =
-            pldm_bios_table_attr_entry_string_decode_def_string_length(
-                attr_entry_ptr);
+        assert(pldm_bios_table_attr_entry_string_decode_def_string_length_check(attr_entry_ptr, &stringLength)
+               == PLDM_SUCCESS);
         useDefault = true;
     }
 
@@ -2077,11 +2080,13 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
     // This possible_values[] is an array of the bios table handles for the enum values.
     // The values for the enums are the indicies of this possible_values[] array for the
     // coresponding table handles
-    auto num_possible_values = pldm_bios_table_attr_entry_enum_decode_pv_num(attr_entry_ptr);
+    uint8_t num_possible_values = 0;
+    assert(pldm_bios_table_attr_entry_enum_decode_pv_num_check(attr_entry_ptr, &num_possible_values) == PLDM_SUCCESS);
     uint16_t possible_values[num_possible_values] = {0};
-    pldm_bios_table_attr_entry_enum_decode_pv_hdls(attr_entry_ptr,
-                                                   possible_values,
-                                                   num_possible_values);
+    assert(pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(attr_entry_ptr,
+                                                                possible_values,
+                                                                num_possible_values)
+           == PLDM_SUCCESS);
 
     PLDM_DBG("setBiosEnumAttrValue: num_possible_values for %s: %d", i_attr_string, num_possible_values);
 
