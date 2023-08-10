@@ -1096,20 +1096,6 @@ void ErrlEntry::checkForDeconfigAndGard()
                     }
                 }
             }
-            else if(callout_ud->type == HWAS::CLOCK_CALLOUT)
-            {
-                if(callout_ud->clkDeconfigState != HWAS::NO_DECONFIG)
-                {
-                    setDeconfigBit();
-                }
-                if(callout_ud->clkGardErrorType != HWAS::GARD_NULL)
-                {
-                    if(!skipPredictiveGard(callout_ud->gardErrorType))
-                    {
-                        setGardBit();
-                    }
-                }
-            }
             else if(callout_ud->type == HWAS::PART_CALLOUT)
             {
                 if(callout_ud->partDeconfigState != HWAS::NO_DECONFIG)
