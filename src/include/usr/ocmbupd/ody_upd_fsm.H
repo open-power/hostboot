@@ -130,6 +130,9 @@ enum functional_ocmbs_only_t
  *
  *  @note If an error is returned, o_restart_needed is unmodified and no reconfig
  *  loop is requested.
+ *
+ *  @note This function is not reentrant and should be called from one thread
+ *        at a time.
  */
 errlHndl_t ody_upd_all_process_event(const ody_upd_event_t i_event,
                                      functional_ocmbs_only_t i_which_ocmbs,

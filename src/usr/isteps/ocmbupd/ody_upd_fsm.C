@@ -1264,7 +1264,7 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
                                               const perform_reconfig_t i_perform_reconfig_if_needed,
                                               bool* const o_restart_needed)
 {
-    errlHndl_t errl = nullptr;
+    ISTEP_ERROR::IStepError error_accum;
     bool restart_needed = false;
 
     do
@@ -1279,11 +1279,14 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
         break;
     }
 
-    for (const auto ocmb : composable(getAllChips)(TYPE_OCMB_CHIP, i_which_ocmbs == EVENT_ON_FUNCTIONAL_OCMBS))
+    ISTEP::parallel_for_each(composable(getAllChips)(TYPE_OCMB_CHIP, i_which_ocmbs == EVENT_ON_FUNCTIONAL_OCMBS),
+                             error_accum,
+                             "ody_upd_all_process_event",
+                             [&](Target* const ocmb) -> errlHndl_t
     {
         if (!UTIL::isOdysseyChip(ocmb))
         {
-            continue;
+            return nullptr;
         }
 
         TRACF(INFO_MRK"ody_upd_all_process_event: Issuing Odyssey FSM event "
@@ -1301,12 +1304,12 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
                   get_huid(ocmb),
                   event_to_str(i_event).data(),
                   TRACE_ERR_ARGS(fsm_error));
-
-            foldErrors(errl, fsm_error, OCMBUPD_COMP_ID);
         }
-    }
 
-    if (errl)
+        return fsm_error;
+    });
+
+    if (!error_accum.isNull())
     { // do not set o_restart_needed or request a reconfig loop if there was an error.
         break;
     }
@@ -1332,7 +1335,7 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
 
     } while (false);
 
-    return errl;
+    return error_accum.getErrorHandle();
 }
 
 /** @brief Set the Odyssey code update state related to the firmware
