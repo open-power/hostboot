@@ -327,28 +327,38 @@ fapi_try_exit:
 ///
 /// @brief Configures the chip to properly execute CCS instructions
 /// @tparam MC the MC type on which to operate
+/// @tparam T  the MC chip type for this CCS engine - derived from i_target
 /// @tparam P  the port type for this CCS engine - derived from i_ports
+/// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_program the vector of instructions
+/// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @return FAPI2_RC_SUCCSS iff ok
 /// @note Code location for pre CCS execute workarounds
 ///
-template< mss::mc_type MC, fapi2::TargetType P>
-fapi2::ReturnCode setup_to_execute(const std::vector< fapi2::Target<P> >& i_ports,
-                                   const ccs::program<MC>& i_program);
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P>
+fapi2::ReturnCode setup_to_execute(const fapi2::Target<T>& i_target,
+                                   const std::vector< fapi2::Target<P> >& i_ports,
+                                   const ccs::program<MC>& i_program,
+                                   fapi2::buffer<uint64_t>& o_periodics_reg);
 
 ///
 /// @brief Cleans up the chip from executing CCS instructions
 /// @tparam MC the MC type on which to operate
+/// @tparam T  the MC chip type for this CCS engine - derived from i_target
 /// @tparam P  the port type for this CCS engine - derived from i_ports
+/// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports
+/// @param[in] i_periodics_reg the register used to enable periodic calibrations
 /// @return FAPI2_RC_SUCCSS iff ok
 /// @note Code location for post CCS execute workarounds
 ///
-template< mss::mc_type MC, fapi2::TargetType P>
-fapi2::ReturnCode cleanup_from_execute(const ccs::program<MC>& i_program,
-                                       const std::vector< fapi2::Target<P> >& i_ports);
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P>
+fapi2::ReturnCode cleanup_from_execute(const fapi2::Target<T>& i_target,
+                                       const ccs::program<MC>& i_program,
+                                       const std::vector< fapi2::Target<P> >& i_ports,
+                                       const fapi2::buffer<uint64_t> i_periodics_reg);
 
 ///
 /// @brief Start or stop the CCS engine
@@ -515,12 +525,14 @@ fapi_try_exit:
 /// @param[in] i_target the target to effect
 /// @param[in, out] io_program the vector of instructions
 /// @param[in] i_ports the vector of ports
+/// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_target,
         ccs::program<MC>& io_program,
-        const std::vector< fapi2::Target<P> >& i_ports)
+        const std::vector< fapi2::Target<P> >& i_ports,
+        fapi2::buffer<uint64_t>& o_periodics_reg)
 {
     // For some reason, this very innocuous print is causing SBE to fail to compile, so commenting it out in SBE
 #ifndef __PPE__
@@ -528,7 +540,7 @@ static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_
 #endif
 
     // Pre CCS execution configuration
-    FAPI_TRY(setup_to_execute<MC>(i_ports, io_program));
+    FAPI_TRY(setup_to_execute<MC>(i_target, i_ports, io_program, o_periodics_reg));
 
     // Stop the CCS engine just for giggles - it might be running ...
     FAPI_TRY( start_stop<MC>(i_target, mss::states::STOP),
@@ -628,7 +640,7 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
 
     // Updates the initial delays
     FAPI_TRY(update_initial_delays<MC>(i_target, l_total_delay, io_program),
-             "Failed in update_initial_delays for ccs::execute_via_mcbist on " TARGTIDFORMAT, TARGTID);
+             "Failed in update_initial_delays for ccs::setup_ccs_instructions on " TARGTIDFORMAT, TARGTID);
 
     FAPI_INF("executing ccs instructions via MCBIST (%d:%d, %d) for " TARGTIDFORMAT,
              io_program.iv_instructions.size(), l_inst_count, io_program.iv_poll.iv_initial_delay, TARGTID);
@@ -664,7 +676,8 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     auto l_inst_iter = io_program.iv_instructions.begin();
 
     // Run prelude to execution
-    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports),
+    fapi2::buffer<uint64_t> l_periodics_reg;
+    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports, l_periodics_reg),
               "Error setting up ccs engine before execution on " TARGTIDFORMAT, TARGTID );
 
     // Execute via standalone CCS
@@ -688,7 +701,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<MC>(io_program, i_ports)));
+    FAPI_TRY((cleanup_from_execute<MC>(i_target, io_program, i_ports, l_periodics_reg)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();
@@ -719,6 +732,7 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     // Get instruction count and rank info
     const uint64_t l_inst_count = io_program.iv_instructions.size();
     auto l_inst_iter = io_program.iv_instructions.begin();
+    fapi2::buffer<uint64_t> l_periodics_reg;
 
     // Check that we have less than the maximum CCS instructions
     FAPI_ASSERT(l_inst_count <= CCS_INSTRUCTION_DEPTH,
@@ -731,7 +745,7 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
 
 
     // Run prelude to execution
-    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports),
+    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports, l_periodics_reg),
               "Error setting up ccs engine before execution on " TARGTIDFORMAT,
               TARGTID);
 
@@ -756,7 +770,7 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<MC>(io_program, i_ports)));
+    FAPI_TRY((cleanup_from_execute<MC>(i_target, io_program, i_ports, l_periodics_reg)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();

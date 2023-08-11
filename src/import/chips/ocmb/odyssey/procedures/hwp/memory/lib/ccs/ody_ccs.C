@@ -406,17 +406,34 @@ fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::compute_parity(const fap
 
 ///
 /// @brief Configures the chip to properly execute CCS instructions - ODYSSEY specialization
+/// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_program the vector of instructions
+/// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
 fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
-    const ccs::program<mss::mc_type::ODYSSEY>& i_program)
+    const ccs::program<mss::mc_type::ODYSSEY>& i_program,
+    fapi2::buffer<uint64_t>& o_periodics_reg)
 {
+    fapi2::buffer<uint64_t> l_data;
+
     // Check for read/write commands, and set up workaround bits if needed
     FAPI_TRY(workarounds::setup_ccs_rdwr(i_ports, i_program));
+
+    // Per the design team, periodics needs to be disabled for CCS to function properly
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB9Q, o_periodics_reg));
+
+    // Clear periodics
+    l_data = o_periodics_reg;
+    l_data.clearBit<scomt::ody::ODC_SRQ_MBA_FARB9Q_ZQ_PER_CAL_ENABLE>()
+    .clearBit<scomt::ody::ODC_SRQ_MBA_FARB9Q_MC_PER_CAL_ENABLE>();
+
+    // Write the register
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB9Q, l_data));
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -425,16 +442,20 @@ fapi_try_exit:
 
 ///
 /// @brief Cleans up from a CCS execution - multiple ports - ODYSSEY specialization
+/// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports
+/// @param[in] i_periodics_reg the register used to enable periodic calibrations
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
-fapi2::ReturnCode cleanup_from_execute<mss::mc_type::ODYSSEY>
-(const ccs::program<mss::mc_type::ODYSSEY>& i_program,
- const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
+fapi2::ReturnCode cleanup_from_execute<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
+        const ccs::program<mss::mc_type::ODYSSEY>& i_program,
+        const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
+        const fapi2::buffer<uint64_t> i_periodics_reg)
 {
-    return fapi2::FAPI2_RC_SUCCESS;
+    return fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB9Q, i_periodics_reg);
 }
 
 ///

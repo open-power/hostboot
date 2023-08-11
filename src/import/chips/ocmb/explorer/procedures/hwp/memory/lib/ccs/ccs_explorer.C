@@ -275,14 +275,18 @@ fapi_try_exit:
 
 ///
 /// @brief Configures the chip to properly execute CCS instructions - EXPLORER specialization
+/// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_program the vector of instructions
+/// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
 fapi2::ReturnCode setup_to_execute<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
-    const ccs::program<mss::mc_type::EXPLORER>& i_program)
+    const ccs::program<mss::mc_type::EXPLORER>& i_program,
+    fapi2::buffer<uint64_t>& o_periodics_reg)
 {
     // Loops through all ports
     for(const auto& l_port : i_ports)
@@ -303,14 +307,18 @@ fapi_try_exit:
 
 ///
 /// @brief Cleans up from a CCS execution - multiple ports - EXPLORER specialization
+/// @param[in] i_target The MCBIST containing the CCS engine
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports
+/// @param[in] i_periodics_reg the register used to enable periodic calibrations
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
-fapi2::ReturnCode cleanup_from_execute<mss::mc_type::EXPLORER>
-(const ccs::program<mss::mc_type::EXPLORER>& i_program,
- const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
+fapi2::ReturnCode cleanup_from_execute<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target,
+        const ccs::program<mss::mc_type::EXPLORER>& i_program,
+        const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
+        const fapi2::buffer<uint64_t> i_periodics_reg)
 {
     // Loops through all ports
     for(const auto& l_port : i_ports)
