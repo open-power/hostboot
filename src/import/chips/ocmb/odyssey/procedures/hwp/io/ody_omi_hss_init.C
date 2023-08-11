@@ -157,9 +157,7 @@ fapi2::ReturnCode ody_omi_hss_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     const uint8_t l_ssc = 1;
     //fapi2::ATTR_OMI_SPREAD_SPECTRUM_Type l_ssc;
 
-    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
-            PHY_PPE_WRAP0_ARB_CSDR,
-            PHY_ODY_OMI_BASE);
+    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_ODY_OMI_BASE);
 
     ody_io::io_ppe_common<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_common(&l_ppe_regs);
 

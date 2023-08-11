@@ -63,13 +63,14 @@ fapi_try_exit:
 template<fapi2::TargetType K, fapi2::MulticastType M = fapi2::MULTICAST_OR, typename V = fapi2::plat_target_handle_t>
 class io_ppe_regs
 {
+    private:
+        const uint64_t csar_scom_offset = 0x0D;
+        const uint64_t csdr_scom_offset = 0x0E;
     public:
-        uint64_t csar_scom_addr;
-        uint64_t csdr_scom_addr;
         uint64_t base_addr;
 
-        io_ppe_regs(uint64_t i_csar, uint64_t i_csdr, uint64_t i_base_addr) :
-            csar_scom_addr(i_csar), csdr_scom_addr(i_csdr), base_addr(i_base_addr)
+        io_ppe_regs(uint64_t i_base_addr) :
+            base_addr(i_base_addr)
         {
 #if IO_PPE_MAX_CACHE_SIZE > 0
             FAPI_DBG("io_ppe_regs constructor");
@@ -231,8 +232,8 @@ template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_regs<K, M, V>::getData(const fapi2::Target<K, M, V>& i_target, const uint64_t i_addr,
         fapi2::buffer<uint64_t>& o_data)
 {
-    FAPI_TRY(fapi2::putScom(i_target, csar_scom_addr, i_addr));
-    FAPI_TRY(fapi2::getScom(i_target, csdr_scom_addr, o_data));
+    FAPI_TRY(fapi2::putScom(i_target, base_addr | csar_scom_offset, i_addr));
+    FAPI_TRY(fapi2::getScom(i_target, base_addr | csdr_scom_offset, o_data));
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -241,8 +242,8 @@ template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_regs<K, M, V>::putData(const fapi2::Target<K, M, V>& i_target, uint64_t i_addr,
         const fapi2::buffer<uint64_t> i_data)
 {
-    FAPI_TRY(fapi2::putScom(i_target, csar_scom_addr, i_addr));
-    FAPI_TRY(fapi2::putScom(i_target, csdr_scom_addr, i_data));
+    FAPI_TRY(fapi2::putScom(i_target, base_addr | csar_scom_offset, i_addr));
+    FAPI_TRY(fapi2::putScom(i_target, base_addr | csdr_scom_offset, i_data));
 fapi_try_exit:
     return fapi2::current_err;
 }

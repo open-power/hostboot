@@ -47,9 +47,7 @@ fapi2::ReturnCode ody_omi_hss_ppe_start(const fapi2::Target<fapi2::TARGET_TYPE_O
 {
     FAPI_DBG("Start - ODY PPE Start");
 
-    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_PPE_WRAP0_ARB_CSAR,
-            PHY_PPE_WRAP0_ARB_CSDR,
-            PHY_ODY_OMI_BASE);
+    io_ppe_regs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_regs(PHY_ODY_OMI_BASE);
 
     io_ppe_firs<fapi2::TARGET_TYPE_OCMB_CHIP> l_ppe_firs(FIR_SCOM_LFIR_RW_WCLEAR_REG,
             FIR_DL0_ERROR_MASK,
