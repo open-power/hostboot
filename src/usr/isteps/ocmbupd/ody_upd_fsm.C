@@ -817,6 +817,35 @@ errlHndl_t execute_actions(Target* const i_ocmb,
                 manually_set_errl_sev = true;
                 break;
             case perform_code_update:
+                /*
+                   Before performing a code update, we sync the code levels from the current side to
+                   the other side. This is to handle the scenario where the other side has a code
+                   level that is out of date, but it's not out of date on the current side, so we
+                   don't think we need to update it (and therefore skip it).
+
+                   We perform the sync just before the update so that we have the least chance of
+                   overwriting a good code level with a bad one here (since the code level we're
+                   syncing from has gotten us up to where the FSM thinks it's best/fastest to perform
+                   the actual code update).
+                */
+                if (i_state.ocmb_boot_side != GOLDEN)
+                {
+                    if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, false /* not forced */))
+                    {
+                        TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest failed in perform_code_update: "
+                              TRACE_ERR_FMT,
+                              get_huid(i_ocmb),
+                              TRACE_ERR_ARGS(sync_err));
+
+                        return ody_upd_process_event(i_ocmb,
+                                                     // this action is code update, so this is counted
+                                                     // as a CODE_UPDATE_CHIPOP_FAILURE
+                                                     CODE_UPDATE_CHIPOP_FAILURE,
+                                                     sync_err,
+                                                     o_restart_needed);
+                    }
+                }
+
                 if (auto update_err = odysseyUpdateImages(i_ocmb, i_on_update_force_all))
                 {
                     TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): odysseyUpdateImages failed: "
