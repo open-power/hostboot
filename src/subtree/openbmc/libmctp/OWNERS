@@ -37,7 +37,6 @@ owners:
 
 reviewers:
 - iwona.winiarska@intel.com
-- richard.marian.thomaiyar@linux.intel.com
 - sumanth.bhat@linux.intel.com
 
 matchers:
@@ -52,9 +51,6 @@ openbmc:
 - name: Jeremy Kerr
   email: jk@ozlabs.org
   discord: jk-
-- name: Richard Thomaiyar
-  email: richard.marian.thomaiyar@linux.intel.com
-  discord: rthomaiy
 - name: Sumanth Bhat
   email: sumanth.bhat@linux.intel.com
   discord: sumanthb

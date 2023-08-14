@@ -636,7 +636,7 @@ int main(int argc, char *const *argv)
 	ctx->buf_size = 4096;
 	ctx->buf = malloc(ctx->buf_size);
 
-	mctp_set_log_stdio(ctx->verbose ? MCTP_LOG_DEBUG : MCTP_LOG_WARNING);
+	mctp_set_log_stdio(ctx->verbose ? MCTP_LOG_DEBUG : MCTP_LOG_NOTICE);
 
 	ctx->mctp = mctp_init();
 	assert(ctx->mctp);

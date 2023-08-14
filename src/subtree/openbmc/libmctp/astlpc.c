@@ -41,10 +41,6 @@ static const char *lpc_path = "/dev/aspeed-lpc-ctrl";
 
 #endif
 
-// Workaround for libmctp since it assumes it picks up
-// the definition of the abstraction to mark a function unused
-#define __unused __attribute__((__unused__))
-
 enum mctp_astlpc_cmd {
 	cmd_initialise = 0x00,
 	cmd_tx_begin = 0x01,
@@ -157,6 +153,8 @@ struct mctp_binding_astlpc {
 	astlpc_prlog(ctx, MCTP_LOG_ERR, fmt, ##__VA_ARGS__)
 #define astlpc_prwarn(ctx, fmt, ...)                                           \
 	astlpc_prlog(ctx, MCTP_LOG_WARNING, fmt, ##__VA_ARGS__)
+#define astlpc_prnotice(ctx, fmt, ...)                                         \
+	astlpc_prlog(ctx, MCTP_LOG_NOTICE, fmt, ##__VA_ARGS__)
 #define astlpc_prinfo(ctx, fmt, ...)                                           \
 	astlpc_prlog(ctx, MCTP_LOG_INFO, fmt, ##__VA_ARGS__)
 #define astlpc_prdebug(ctx, fmt, ...)                                          \
@@ -352,6 +350,17 @@ static inline int mctp_astlpc_lpc_read(struct mctp_binding_astlpc *astlpc,
 	return 0;
 }
 
+static void
+mctp_astlpc_kcs_print_status_write(struct mctp_binding_astlpc *astlpc,
+				   uint8_t status)
+{
+	astlpc_prnotice(
+		astlpc, "Binding state is 0x%hhx: BMC %s, Channel %s, OBF %s",
+		status, status & KCS_STATUS_BMC_READY ? "active" : "inactive",
+		status & KCS_STATUS_CHANNEL_ACTIVE ? "active" : "inactive",
+		status & KCS_STATUS_OBF ? "preserved" : "cleared");
+}
+
 static int mctp_astlpc_kcs_set_status(struct mctp_binding_astlpc *astlpc,
 				      uint8_t status)
 {
@@ -371,6 +380,8 @@ static int mctp_astlpc_kcs_set_status(struct mctp_binding_astlpc *astlpc,
 		astlpc_prwarn(astlpc, "KCS status write failed");
 		return -1;
 	}
+
+	mctp_astlpc_kcs_print_status_write(astlpc, status);
 
 	rc = mctp_astlpc_kcs_write(astlpc, MCTP_ASTLPC_KCS_REG_DATA, data);
 	if (rc) {
@@ -1489,7 +1500,7 @@ struct mctp_binding_astlpc *mctp_astlpc_init_fileio(void)
 #else
 struct mctp_binding_astlpc *mctp_astlpc_init_fileio(void)
 {
-	// Missing support for file IO
+	mctp_prlog(MCTP_LOG_ERR, "%s: Missing support for file IO", __func__);
 	return NULL;
 }
 
