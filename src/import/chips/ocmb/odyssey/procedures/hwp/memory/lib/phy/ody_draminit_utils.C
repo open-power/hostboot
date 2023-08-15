@@ -160,7 +160,7 @@ fapi2::ReturnCode read_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
 {
     FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_UCTWRITEONLYSHADOW, o_mail));
 
-    if ( STREAMING_SMBUS_MSG_MODE == i_mode)
+    if (STREAMING_SMBUS_MSG_MODE == i_mode)
     {
         fapi2::buffer<uint64_t> l_data;
         FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_UCTDATWRITEONLYSHADOW, l_data));
@@ -294,16 +294,22 @@ fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TAR
         bool& o_loop_end)
 {
     o_loop_end = false;
+    bool l_log_msg = true;
+
+    const fapi2::buffer<uint64_t> ADD_MAJOR_MESSAGES(0xffff0000);
+    fapi2::buffer<uint64_t> l_full_msg;
 
     switch(i_mail)
     {
         case SUCCESSFUL_COMPLETION:
             o_loop_end = true;
+            l_log_msg = false;
             FAPI_INF(TARGTIDFORMAT" Successful completion, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case FAILED_COMPLETION:
             o_loop_end = true;
+            l_log_msg = false;
             FAPI_INF(TARGTIDFORMAT" Failed completion, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
@@ -388,18 +394,28 @@ fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TAR
             break;
 
         case STREAMING_MSG:
+            l_log_msg = false;
             // Decodes and prints streaming messages
             FAPI_TRY(process_streaming_message(i_target, o_log_data));
             break;
 
         case SMBUS_MSG:
+            l_log_msg = false;
             // Processes and handles the SMBus messages including sending out the RCW over i2c
             FAPI_TRY(process_smbus_message(i_target));
             break;
 
         default:
+            l_log_msg = false;
             FAPI_INF(TARGTIDFORMAT" Unknown major message: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
+    }
+
+    // Update the o_log_data with MAJOR_MSGs
+    if(l_log_msg)
+    {
+        l_full_msg = ADD_MAJOR_MESSAGES | i_mail;
+        FAPI_TRY(o_log_data.put(static_cast<fapi2::hwp_data_unit>(l_full_msg)));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
