@@ -348,6 +348,46 @@ bool isAttrLine( const char * i_line )
 
 
 /**
+ * @brief Removes the unused type field from attribute line
+ *        i.e. u8 or u32[4] or u64[2][2]
+ *
+ * @param[in]  i_line       String containing input line
+ *
+ */
+void removeUnusedTypeField(char * i_line)
+{
+    char * l_secondFieldPtr = nullptr;
+    char * l_thirdFieldPtr = nullptr;
+    size_t l_copyLength = 0;
+
+    // Find the end of the attr name
+    l_secondFieldPtr = nextWhiteSpaceChar(i_line);
+
+    // Find ther start of the second field
+    l_secondFieldPtr = nextVisibleChar(l_secondFieldPtr);
+
+    // Check for the optional and unused type field
+    if ( (strncmp(l_secondFieldPtr,"u8" , 2) == 0) ||
+         (strncmp(l_secondFieldPtr,"u16", 3) == 0) ||
+         (strncmp(l_secondFieldPtr,"u32", 3) == 0) ||
+         (strncmp(l_secondFieldPtr,"u64", 3) == 0) )
+    {
+        // Find the end of the type field value
+        l_thirdFieldPtr = nextWhiteSpaceChar(l_secondFieldPtr);
+
+        // Find the start of the third field
+        l_thirdFieldPtr = nextVisibleChar(l_thirdFieldPtr);
+
+        // Copy length is the strlen + 1 for the end string char
+        l_copyLength = strlen(l_thirdFieldPtr) + 1;
+
+        // Use memmove to remove the type field from the string
+        memmove(l_secondFieldPtr, l_thirdFieldPtr, l_copyLength);
+    }
+}
+
+
+/**
  * @brief Gets attribute name from attribute line
  *
  * @param[in]  i_line       String containing input line
@@ -360,12 +400,12 @@ errlHndl_t getAttrName( const char * i_line, char * o_attrName)
     errlHndl_t l_err = nullptr;
 
     // The attribute ID string terminates with either '[' or ' '
-    // ATTR_EXAMPLE[4]... l_attrNameLen = 12
-    size_t l_attrNameLen = strcspn(i_line, "[ ");
+    // ATTR_EXAMPLE[4]... l_nameLen = 12
+    size_t l_nameLen = strcspn(i_line, "[ ");
 
     // Found [ or space
     // Check the name length, don't want to over-run the name string
-    if (l_attrNameLen+1 > MAX_ATTR_NAME_LENGTH)
+    if (l_nameLen+1 > MAX_ATTR_NAME_LENGTH)
     {
         OVD_TRACE("Attribute Override: ***ERROR*** Attribute name exceeds max name length %d: %s", MAX_ATTR_NAME_LENGTH, i_line);
         /*@
@@ -381,15 +421,15 @@ errlHndl_t getAttrName( const char * i_line, char * o_attrName)
                                 ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                 TARG_MOD_ATTR_TEXT_OVERRIDE,
                                 TARG_RC_MAX_ATTR_NAME_LENGTH,
-                                l_attrNameLen+1,
+                                l_nameLen+1,
                                 MAX_ATTR_NAME_LENGTH,
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         goto ERROR_EXIT;
     }
     else
     {
-        strncpy(o_attrName, i_line, l_attrNameLen);
-        o_attrName[l_attrNameLen] = '\0';
+        strncpy(o_attrName, i_line, l_nameLen);
+        o_attrName[l_nameLen] = '\0';
     }
 
 ERROR_EXIT:
@@ -474,8 +514,9 @@ errlHndl_t attrLineToFields( char * i_line,
                              bool & o_attrConst )
 {
     //
+    // Note: at this point the type field has already been removed (u32[2][2])
     // e.g. "ATTR_MSS_DIMM_MFG_ID_CODE[0][1] u32[2][2] 0x12345678 CONST"
-    //                <field 1>              <field 2> <field 3 > <field 4>
+    //                <field 1>                        <field 2>  <field 3 >
     // - o_attrName = "ATTR_MSS_DIMM_MFG_ID_CODE"
     // - o_attrDims = {0, 1, 0, 0}
     // - o_attrVal = "0x12345678"
@@ -487,18 +528,14 @@ errlHndl_t attrLineToFields( char * i_line,
     char * l_endLinePtr = i_line + strlen(i_line);
 
     // First field: attribute name
-    char * l_attrNamePtr = nullptr;
-    size_t l_attrNameLen = 0;
+    char * l_namePtr = nullptr;
+    size_t l_nameLen = 0;
 
-    // Second field: attribute value or type
-    char * l_valTypePtr = nullptr;
-    size_t l_valTypeLen = 0;
+    // Second field: attribute value
+    char * l_valuePtr = nullptr;
+    size_t l_valueLen = 0;
 
-    // Third field: attribute value or const
-    char * l_valConstPtr = nullptr;
-    size_t l_valConstLen = 0;
-
-    // Fourth field: always const
+    // Third field: const
     char * l_constPtr = nullptr;
 
     // Attribute dimensions
@@ -508,22 +545,22 @@ errlHndl_t attrLineToFields( char * i_line,
     size_t l_closeOffset = 0;
 
     // Set the field pointers and lengths
-    // First field: attribute string
-    l_attrNamePtr = i_line;
+    // First field: attribute name
+    l_namePtr = i_line;
 
     // Find the end of the attr name
-    l_valTypePtr = nextWhiteSpaceChar(l_attrNamePtr);
+    l_valuePtr = nextWhiteSpaceChar(l_namePtr);
 
     // Calculate the attr name length
-    l_attrNameLen = l_valTypePtr - l_attrNamePtr;
+    l_nameLen = l_valuePtr - l_namePtr;
 
-    // Second field: value or type
-    l_valTypePtr = nextVisibleChar(l_valTypePtr);
+    // Second field: value string
+    l_valuePtr = nextVisibleChar(l_valuePtr);
 
     // Attribute value is required
-    if (l_valTypePtr == l_endLinePtr)
+    if (l_valuePtr == l_endLinePtr)
     {
-        l_valConstPtr = l_endLinePtr;
+        l_constPtr = l_endLinePtr;
 
         OVD_TRACE("Attribute Override: ***ERROR*** Missing attribute value %s", i_line );
         /*@
@@ -545,55 +582,44 @@ errlHndl_t attrLineToFields( char * i_line,
         goto ERROR_EXIT;
     }
 
-    // Find the end of the second string
-    l_valConstPtr = nextWhiteSpaceChar(l_valTypePtr);
+    // Find the end of the value string
+    l_constPtr = nextWhiteSpaceChar(l_valuePtr);
 
-    // Calculate the second string length
-    l_valTypeLen = l_valConstPtr - l_valTypePtr;
+    // Calculate the value string length
+    l_valueLen = l_constPtr - l_valuePtr;
 
-    // Third field: value or const, may be empty
-    l_valConstPtr = nextVisibleChar(l_valConstPtr);
+    // Third field: const, may be empty
+    l_constPtr = nextVisibleChar(l_constPtr);
 
-    if (l_valConstPtr == l_endLinePtr)
+    if (l_constPtr == l_endLinePtr)
     {
         l_constPtr = l_endLinePtr;
     }
-    else
-    {
-        // Find the end of the third string
-        l_constPtr = nextWhiteSpaceChar(l_valConstPtr);
-
-        // Calculate the third string length
-        l_valConstLen = l_constPtr - l_valConstPtr;
-
-        // Fourth field: const, may be empty
-        l_constPtr = nextVisibleChar(l_constPtr);
-    }
 
     // Save the attribute name, ignore any array dimensions
-    l_openOffset = strStrPos(l_attrNamePtr, "[");
-    l_closeOffset = strStrPos(l_attrNamePtr, "]");
+    l_openOffset = strStrPos(l_namePtr, "[");
+    l_closeOffset = strStrPos(l_namePtr, "]");
 
     if (l_openOffset != CONST_INVALID)
     {
         // Found an open bracket, copy up to open bracket
-        strncpy(o_attrName, l_attrNamePtr, l_openOffset);
+        strncpy(o_attrName, l_namePtr, l_openOffset);
     }
     else
     {
         // Not an array attr, copy the whole attr name
-        strncpy(o_attrName, l_attrNamePtr, l_attrNameLen);
+        strncpy(o_attrName, l_namePtr, l_nameLen);
     }
 
     // Make it a valid string
-    o_attrName[l_attrNameLen] = '\0';
+    o_attrName[l_nameLen] = '\0';
 
     // Get the attr dimensions
     while (l_openOffset != CONST_INVALID)
     {
         l_dimchars = l_closeOffset - l_openOffset;
         char l_dimstring[l_dimchars] = {0};
-        strncpy(l_dimstring, l_attrNamePtr+l_openOffset+1, l_dimchars);
+        strncpy(l_dimstring, l_namePtr+l_openOffset+1, l_dimchars);
         o_attrDims[l_dim] = strtoul(l_dimstring, nullptr, 10);
         l_dim++;
 
@@ -619,53 +645,27 @@ errlHndl_t attrLineToFields( char * i_line,
             goto ERROR_EXIT;
         }
 
-        l_openOffset = strStrPos(l_attrNamePtr+l_closeOffset+1, "[");
-        l_closeOffset = strStrPos(l_attrNamePtr+l_closeOffset+1, "]");
+        l_openOffset = strStrPos(l_namePtr+l_closeOffset+1, "[");
+        l_closeOffset = strStrPos(l_namePtr+l_closeOffset+1, "]");
     }
 
     // Check the value length, don't want to over-run the value string
-    l_err = checkAttrValueLength(l_valTypeLen);
+    l_err = checkAttrValueLength(l_valueLen);
     if (l_err)
     {
         goto ERROR_EXIT;
     }
 
-    // For now, assume the second field is the value
-    // If it is not, it will be over-written later
-    strncpy(o_attrVal, l_valTypePtr, l_valTypeLen);
+    // Save the output attr value
+    strncpy(o_attrVal, l_valuePtr, l_valueLen);
 
     // Make it a valid string
-    o_attrVal[l_valTypeLen] = '\0';
+    o_attrVal[l_valueLen] = '\0';
 
-    // Check for the optional and unused type field
-    if ( (strstr(o_attrVal,"u8") != nullptr) ||
-            (strstr(o_attrVal,"u16") != nullptr) ||
-            (strstr(o_attrVal,"u32") != nullptr) ||
-            (strstr(o_attrVal,"u64") != nullptr) )
+    // The third field is const
+    if (strstr(l_constPtr, "CONST") != nullptr)
     {
-        // Check the value length, don't want to over-run the value string
-        l_err = checkAttrValueLength(l_valConstLen);
-        if (l_err)
-        {
-            goto ERROR_EXIT;
-        }
-
-        // Then the third field is the attr value
-        strncpy(o_attrVal, l_valConstPtr, l_valConstLen);
-
-        // And the fourth field is const
-        if (strstr(l_constPtr, "CONST") != nullptr)
-        {
-            o_attrConst = true;
-        }
-    }
-    else
-    {
-        // The third field is const
-        if (strstr(l_valConstPtr, "CONST") != nullptr)
-        {
-            o_attrConst = true;
-        }
+        o_attrConst = true;
     }
 
 ERROR_EXIT:
@@ -1963,6 +1963,12 @@ bool validateTargLine(char * i_line )
     // Check for terms without values
     //------------------------------
 
+    // Remove trailing ':' if it is the last character
+    if ( l_line[strlen(l_line)-1] == ':' )
+    {
+        l_line[strlen(l_line)-1] = '\0';
+    }
+
     // Skip the system string portion k0:s0
     l_line = l_line + 5;
 
@@ -2003,7 +2009,7 @@ bool validateTargLine(char * i_line )
 
         else if ( (l_nextColonPosn - l_curColonPosn) < 3  )
         {
-            //  to hold a value
+            // Not enough characters to hold a value
             // Bad encoding
             l_isValidLine = false;
             goto ERROR_EXIT;
@@ -2329,7 +2335,7 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
                     l_validTargLine = validateTargLine( l_targetLine );
                     if (l_validTargLine == false)
                     {
-                        OVD_TRACE("Attribute Override: ***ERROR*** Override target validation failed: %s", l_line );
+                        OVD_TRACE("Attribute Override: ***ERROR*** Override target validation failed: %s", l_targetLine );
                         /*@
                         * @errortype
                         * @moduleid  TARG_MOD_ATTR_TEXT_OVERRIDE
@@ -2363,6 +2369,9 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
             // Attribute line
             else if (isAttrLine(l_line))
             {
+                // Remove the unused type field, i.e. u32
+                removeUnusedTypeField(l_line);
+
                 // Found an Attribute line, get the attr name
                 l_err = getAttrName(l_line, l_curAttrString);
                 if ( l_err )
