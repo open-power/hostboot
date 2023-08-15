@@ -554,15 +554,18 @@ void swizzle_repair_entry(mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& 
 }
 
 ///
-/// @brief Perform a sPPR row repair operation
+/// @brief Create the CCS program for either a sPPR or hPPR row repair operation
 /// @param[in] i_rank_info rank info of the address to repair
-/// @param[in] i_repair the address repair information
+/// @param[in] i_ppr_type the type of repair to perform
+/// @param[in] i_repair the address repair information (unswizzled)
 /// @param[in, out] io_program the ccs program to setup for row repair
 /// @return FAPI2_RC_SUCCESS iff successful
+/// @note hPPR needs to execute the program this produces, then run the program from setup_ppr_finale after the tPGM_hPPRa delay
 ///
-fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
-                              const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
-                              mss::ccs::program<mss::mc_type::ODYSSEY>& io_program)
+fapi2::ReturnCode setup_ppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                             const ppr_type i_ppr_type,
+                             const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
+                             mss::ccs::program<mss::mc_type::ODYSSEY>& io_program)
 {
     // Variable Declarations
     uint64_t l_freq = 0;
@@ -593,7 +596,8 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
     constexpr uint8_t MR24_GUARD_KEY = 24;
     constexpr uint8_t MR23_PPR = 23;
     constexpr uint8_t ENABLE_SPPR = 0b00000010;
-    constexpr uint8_t EXIT_SPPR = 0b00000000;
+    constexpr uint8_t ENABLE_HPPR = 0b00000001;
+    const uint8_t PPR_ENABLE = (i_ppr_type == ppr_type::SPPR) ? ENABLE_SPPR : ENABLE_HPPR;
 
     // Copy and update the inputted class's address swizzle
     auto l_repair = i_repair;
@@ -622,12 +626,11 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
 
     // Get freq from attributes:
     FAPI_TRY( mss::freq<mss::mc_type::ODYSSEY>(l_ocmb_target, l_freq),
-              "Failed to retrieve freq values on ",
+              "Failed to retrieve freq values on "
               GENTARGTIDFORMAT, GENTARGTID(l_ocmb_target) );
 
     // Get ODT bits for ccs
     FAPI_TRY( mss::attr::get_si_odt_wr(l_dimm_target, l_odt_attr) );
-    // TODO: ZEN-MST1680: Add DDR5 CCS ODT functionality
 
     //-------------------------------
     // SPPR COMMAND:
@@ -652,9 +655,9 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
     FAPI_INF_NO_SBE( "Running sPPR fix on dimm " GENTARGTIDFORMAT " with srank %d", GENTARGTID(l_dimm_target),
                      l_repair.iv_srank );
 
-    // 4. Enable sPPR using MR23 bits "OP[2:1]=01" and wait tMRD.
+    // 4. Enable either hPPR or sPPR mode in MR23
     io_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>(l_port_rank, MR23_PPR,
-                                         ENABLE_SPPR, tMRD));
+                                         PPR_ENABLE, tMRD));
 
     // 5. Guard Key Sequence:
     io_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
@@ -678,12 +681,25 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
         typedef ccsTraits<mss::mc_type::ODYSSEY> TT;
         constexpr auto BC_MODE = mss::states::OFF_N;
         constexpr auto PARTIAL_WRITE_MODE = mss::states::OFF_N;
+        mss::ccs::instruction_t<mss::mc_type::ODYSSEY> l_inst_temp;
+
         // The write to precharge delay is added after the data enables
+        // for sPPR it's WL+8tCK+tWR
         const uint64_t WR_TO_PRE_DELAY = 8 + tWR + WL;
 
-        // 7. WR Command with dq bits low:
-        auto l_inst_temp = mss::ccs::ddr5::wr_command<mss::mc_type::ODYSSEY>(l_port_rank, l_repair.iv_srank,
-                           l_repair.iv_bg, l_repair.iv_bank, l_repair.iv_row, BC_MODE, PARTIAL_WRITE_MODE);
+        // 7. sPPR: WR Command with dq bits low:
+        if (i_ppr_type == ppr_type::SPPR)
+        {
+            l_inst_temp = mss::ccs::ddr5::wr_command<mss::mc_type::ODYSSEY>(l_port_rank, l_repair.iv_srank,
+                          l_repair.iv_bg, l_repair.iv_bank, l_repair.iv_row, BC_MODE, PARTIAL_WRITE_MODE);
+        }
+        // hPPR: WRA command
+        else
+        {
+            l_inst_temp = mss::ccs::ddr5::wra_command<mss::mc_type::ODYSSEY>(l_port_rank, l_repair.iv_srank,
+                          l_repair.iv_bg, l_repair.iv_bank, l_repair.iv_row, BC_MODE, PARTIAL_WRITE_MODE);
+        }
+
         fapi2::buffer<uint64_t> l_dram_bitmap;
         FAPI_TRY(create_dram_bitmap(l_repair.iv_dram, l_dram_bitmap));
 
@@ -691,13 +707,55 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
         l_inst_temp.arr1.template insertFromRight<TT::ARR1_READ_OR_WRITE_DATA, TT::ARR1_READ_OR_WRITE_DATA_LEN>(l_dram_bitmap);
 
         // 8. After WL, DQ[3:0] of the individual Target DRAM must be LOW for 8tCK
-        // TODO: ZEN-MST1680: Add DDR5 CCS ODT functionality
         // update_ODT(l_idle = 0);
         FAPI_TRY(mss::ccs::ddr5::update_wr_to_wr_data_enable_timing<mss::mc_type::ODYSSEY>(l_port_target, l_inst_temp));
         io_program.iv_instructions.push_back(l_inst_temp);
         mss::ccs::ddr5::append_wr_data_enable_command<mss::mc_type::ODYSSEY>(l_port_rank, io_program.iv_instructions, false,
                 WR_TO_PRE_DELAY);
     }
+
+    // hPPR needs to split the CCS program into two parts due to the 2-second delay before the PRE to Bank command
+    // so only do the last two instructions here if we're doing sPPR
+    if (i_ppr_type == ppr_type::SPPR)
+    {
+        FAPI_TRY(setup_ppr_finale(i_rank_info, i_ppr_type, i_repair, io_program));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Create a CCS program for the post-repair portion of a sPPR or hPPR row repair operation
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_ppr_type the type of repair to perform
+/// @param[in] i_repair the address repair information (unswizzled)
+/// @param[in, out] io_program the ccs program to setup for row repair
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode setup_ppr_finale( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                                    const ppr_type i_ppr_type,
+                                    const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
+                                    mss::ccs::program<mss::mc_type::ODYSSEY>& io_program)
+{
+    constexpr uint8_t MR23_PPR = 23;
+    constexpr uint8_t EXIT_PPR = 0b00000000;
+
+    // tMRD value is taken from Table 20 of JEDEC spec revision JESD79-5B_v1.20
+    constexpr uint64_t tMRD = 34;
+    // tPGMPST is taken form Table 138 of JEDEC spce revision JESD79-5B_v1.20
+    constexpr uint64_t tPGMPST = 50;
+    const uint64_t EXIT_DELAY = (i_ppr_type == ppr_type::SPPR) ? tMRD : tPGMPST;
+
+    const auto& l_port_target = i_rank_info.get_port_target();
+    const auto& l_port_rank = i_rank_info.get_port_rank();
+
+    // Copy and update the inputted class's address swizzle
+    auto l_repair = i_repair;
+    swizzle_repair_entry(l_repair);
+
+    uint8_t tRP = 0;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRP, l_port_target, tRP) );
 
     // 9. PRE to Bank (and wait tPGM_Exit => tRP)
     // 10. Wait tRP to allow the DRAM to recognize repaired Row address (tRP comes from here)
@@ -708,9 +766,9 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
                                              l_repair.iv_bg, l_repair.iv_bank, tRP));
     }
 
-    // 11. Exit sPPR with setting MR23 bit "OP[2:1]=00" and wait tMRD
+    // 11. Exit PPR with setting MR23 bit "OP[2:0]=000" and wait tMRD
     io_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>(l_port_rank, MR23_PPR,
-                                         EXIT_SPPR, tMRD));
+                                         EXIT_PPR, EXIT_DELAY));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -744,8 +802,8 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSE
 
 
     // Setup SPPR CCS program
-    FAPI_TRY( setup_sppr(i_rank_info, i_repair, l_program),
-              "Failed sppr program setup for dynamic_row_repair on ",
+    FAPI_TRY( setup_ppr(i_rank_info, ppr_type::SPPR, i_repair, l_program),
+              "Failed sppr program setup for dynamic_row_repair on "
               GENTARGTIDFORMAT, GENTARGTID(l_port_target) );
 
     FAPI_INF(GENTARGTIDFORMAT " Deploying dynamic row repair", GENTARGTID(l_ocmb_target));
@@ -763,7 +821,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb)
 {
-    FAPI_INF_NO_SBE(GENTARGTIDFORMAT" Deploying row repairs to test all spare rows", GENTARGTID(i_target_ocmb));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying row repairs to test all spare rows", GENTARGTID(i_target_ocmb));
 
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target_ocmb))
     {
@@ -1042,8 +1100,8 @@ fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODY
     l_program.iv_instructions.push_back(mss::ccs::ddr5::des_command<mss::mc_type::ODYSSEY>(POWER_DOWN_EXIT_DELAY));
 
     // Setup SPPR CCS program
-    FAPI_TRY( setup_sppr(i_rank_info, i_repair, l_program),
-              "Failed sppr program setup for standalone_row_repair on "
+    FAPI_TRY( setup_ppr(i_rank_info, ppr_type::SPPR, i_repair, l_program),
+              "Failed sppr program setup for dynamic_row_repair on "
               GENTARGTIDFORMAT, GENTARGTID(l_port_target) );
 
     FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying row repair using standalone CCS", GENTARGTID(l_ocmb_target));
@@ -1053,6 +1111,129 @@ fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODY
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+#ifndef __PPE__
+///
+/// @brief Perform an hPPR row repair operation using the lab tool
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                                   const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair)
+{
+    using CCS = ccsTraits<mss::mc_type::ODYSSEY>;
+
+    fapi2::buffer<uint64_t> l_modeq_reg;
+    fapi2::buffer<uint64_t> l_refresh_reg;
+    fapi2::buffer<uint64_t> l_refresh_reg_saved;
+    fapi2::buffer<uint64_t> l_mcbist_status;
+    fapi2::buffer<uint64_t> l_ccs_status;
+    fapi2::buffer<uint64_t> l_reg_data;
+    bool l_poll_result = false;
+
+    // Get port rank and target
+    const auto& l_port_target = i_rank_info.get_port_target();
+
+    // Get OCMB Target
+    const auto& l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
+
+    // Create Program
+    mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
+
+    // Add des command to ensure that there's no timing violations between a refresh and another command
+    // The time for this is tRFC
+    // This is 410ns -> 984 clocks. rounded up to 1000 for saftey
+    // Note: assuming that we will not be in powerdown or selftime refresh as it's unclear what happens when a PDX/SRX is done on an idle DRAM
+    constexpr uint16_t POWER_DOWN_EXIT_DELAY = 1000;
+    l_program.iv_instructions.push_back(mss::ccs::ddr5::des_command<mss::mc_type::ODYSSEY>(POWER_DOWN_EXIT_DELAY));
+
+    // Setup HPPR CCS program, part 1
+    FAPI_TRY( setup_ppr(i_rank_info, ppr_type::HPPR, i_repair, l_program),
+              "Failed hppr program setup for hppr_row_repair on "
+              GENTARGTIDFORMAT, GENTARGTID(l_port_target) );
+
+    // Stop the CCS engine just for giggles - it might be running ...
+    FAPI_TRY( mss::ccs::start_stop<mss::mc_type::ODYSSEY>(l_ocmb_target, mss::states::STOP),
+              "Error stopping CCS engine before ccs::execution on "
+              GENTARGTIDFORMAT, GENTARGTID(l_ocmb_target) );
+
+    // Verify that the in-progress bit has not been set for CCS, meaning no other CCS is running
+    l_poll_result = mss::poll(l_ocmb_target, CCS::STATQ_REG, poll_parameters(),
+                              [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
+        // We're done polling when we see ccs is not in progress.
+        return stat_reg.getBit<CCS::CCS_IN_PROGRESS>() != 1;
+    });
+
+    // Check that ccs is not being used after poll
+    FAPI_ASSERT(l_poll_result == true,
+                fapi2::ODY_ROW_REPAIR_CCS_STUCK_IN_PROGRESS().
+                set_OCMB_TARGET(l_ocmb_target),
+                GENTARGTIDFORMAT
+                " CCS engine is in use and is not available for repair",
+                GENTARGTID(l_ocmb_target));
+
+
+
+    FAPI_INF(GENTARGTIDFORMAT " Deploying hPPR row repair", GENTARGTID(l_ocmb_target));
+
+    // Configure CCS regs for execution
+    FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_port_target, l_modeq_reg ) );
+
+    // Disable refresh
+    FAPI_TRY( fapi2::getScom(l_ocmb_target, scomt::ody::ODC_SRQ_MBAREF0Q, l_refresh_reg) );
+    l_refresh_reg_saved = l_refresh_reg;
+    l_refresh_reg.clearBit<scomt::ody::ODC_SRQ_MBAREF0Q_CFG_REFRESH_ENABLE>();
+    FAPI_TRY( fapi2::putScom(l_ocmb_target, scomt::ody::ODC_SRQ_MBAREF0Q, l_refresh_reg) );
+
+    // Run CCS standalone execution
+    FAPI_TRY( mss::ccs::execute<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target) );
+
+    // Delay for tPGM_hPPRa or b (1 second for x4 and x8 DIMMs, 2 for x16 - setting to 2 seconds for further safety)
+    FAPI_TRY(fapi2::delay(2 * mss::DELAY_1S, 200));
+
+    // Setup HPPR CCS program, part 2
+    l_program.iv_instructions.clear();
+    // Just in case, set up the channel again
+    {
+        bool l_is_half_dimm_mode = false;
+        FAPI_TRY(mss::ody::half_dimm_mode(l_ocmb_target, l_is_half_dimm_mode));
+
+        // Full dimm mode? just all the channels
+        if(l_is_half_dimm_mode)
+        {
+            uint8_t l_dram_width[mss::ody::MAX_PORT_PER_OCMB] = {};
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, l_port_target, l_dram_width) );
+
+            const auto MAX_NUM_DRAM = (l_dram_width[0] == 4) ? ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4 :
+                                      ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X8;
+
+            l_program.iv_channel_select = i_repair.iv_dram < (MAX_NUM_DRAM / 2) ? mss::ccs::channel_select::CHA :
+                                          mss::ccs::channel_select::CHB;
+        }
+    }
+
+    FAPI_TRY( setup_ppr_finale(i_rank_info, ppr_type::HPPR, i_repair, l_program),
+              "Failed hppr program setup, part 2 for hppr_row_repair on "
+              GENTARGTIDFORMAT, GENTARGTID(l_port_target) );
+
+    FAPI_INF(GENTARGTIDFORMAT " Exiting hPPR row repair mode", GENTARGTID(l_ocmb_target));
+
+    // Run CCS standalone execution
+    FAPI_TRY( mss::ccs::execute<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target) );
+
+    // Restore refresh setting
+    FAPI_TRY( fapi2::putScom(l_ocmb_target, scomt::ody::ODC_SRQ_MBAREF0Q, l_refresh_reg_saved) );
+
+    // Revert CCS regs after execution
+    FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+#endif
 
 ///
 /// @brief Deploy mapped row repairs
@@ -1155,8 +1336,6 @@ fapi2::ReturnCode deploy_mapped_repairs(
 fapi_try_exit:
     return fapi2::current_err;
 }
-
-
 
 } // namespace row_repair
 } // namespace ody

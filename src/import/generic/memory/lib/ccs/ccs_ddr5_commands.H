@@ -545,6 +545,43 @@ inline instruction_t<MC> wr_command( const uint64_t i_port_rank,
 }
 
 ///
+/// @brief Setup write w/auto precharge command (Fixed BL16 or BC8) instruction
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
+/// @param[in] i_port_rank the port rank
+/// @param[in] i_cid the CID for this instruction -> right justified CID[3:0]
+/// @param[in] i_bank_group_addr the bank group for this instruction -> right justified BG[2:0]
+/// @param[in] i_bank_addr the bank address for this instruction -> right justified BA[1:0]
+/// @param[in] i_column_addr the column address for this instruction -> COL[10:0] (only 10:3] is used)
+/// @param[in] i_burstchop_n sets the command to be in burst chop mode - either OFF_N or ON_N
+/// @param[in] i_write_partial_n sets the command to do a partial write - either OFF_N or ON_N
+/// @param[in] i_idle the idle time to the next command (default to 0)
+/// @return the write w/auto precharge command CCS instruction
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline instruction_t<MC> wra_command( const uint64_t i_port_rank,
+                                      const fapi2::buffer<uint64_t>& i_cid = 0,
+                                      const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
+                                      const fapi2::buffer<uint64_t>& i_bank_addr = 0,
+                                      const fapi2::buffer<uint64_t>& i_column_addr = 0,
+                                      const mss::states i_burstchop_n = mss::states::OFF_N,
+                                      const mss::states i_write_partial_n = mss::states::OFF_N,
+                                      const uint16_t i_idle = 0)
+{
+    auto l_inst = wr_command<MC>(i_port_rank,
+                                 i_cid,
+                                 i_bank_group_addr,
+                                 i_bank_addr,
+                                 i_column_addr,
+                                 i_burstchop_n,
+                                 i_write_partial_n,
+                                 i_idle);
+    l_inst.arr0.template clearBit<TT::AP>();
+
+    return l_inst;
+}
+
+///
 /// @brief Setup read command (Fixed BL8 or BC4) instruction
 /// @tparam MC The memory controller type of the traits
 /// @tparam TT the CCS traits related to MC
@@ -600,17 +637,16 @@ inline instruction_t<MC> rda_command( const uint64_t i_port_rank,
                                       const mss::states i_burstchop_n = mss::states::OFF_N,
                                       const uint16_t i_idle = 0 )
 {
-    fapi2::buffer<uint64_t> l_boilerplate_arr0 = wr_rd_cmd_boilerplate<MC>(i_cid, i_bank_group_addr, i_bank_addr,
-            i_column_addr, i_burstchop_n );
-    fapi2::buffer<uint64_t> l_boilerplate_arr1;
+    auto l_inst = rd_command<MC>(i_port_rank,
+                                 i_cid,
+                                 i_bank_group_addr,
+                                 i_bank_addr,
+                                 i_column_addr,
+                                 i_burstchop_n,
+                                 i_idle);
+    l_inst.arr0.template clearBit<TT::AP>();
 
-    l_boilerplate_arr0.template insertFromRight<TT::CMD, TT::CMD_LEN>(cmd_encoding::RDA)
-    .template clearBit<TT::AP>();
-
-    // This is a 2-phase command
-    l_boilerplate_arr0.setBit<TT::ARR0_CMD1_VLD>();
-
-    return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
+    return l_inst;
 }
 
 ///

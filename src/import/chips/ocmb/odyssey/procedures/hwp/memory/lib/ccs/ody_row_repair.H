@@ -54,6 +54,15 @@ namespace row_repair
 typedef mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> REPAIR_ARR[mss::ody::MAX_RANK_PER_DIMM];
 typedef REPAIR_ARR REPAIR_MAP[mss::ody::MAX_DIMM_PER_OCMB];
 
+///
+/// @brief Row repair type to apply
+///
+enum class ppr_type
+{
+    SPPR,
+    HPPR,
+};
+
 constexpr uint8_t DRAM_START_BIT = 44;
 constexpr uint8_t DRAM_LEN = 64 - DRAM_START_BIT;
 
@@ -205,15 +214,31 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
 void swizzle_repair_entry(mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& io_repair);
 
 ///
-/// @brief Perform a sPPR row repair operation
+/// @brief Create the CCS program for either a sPPR or hPPR row repair operation
 /// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_ppr_type the type of repair to perform
+/// @param[in] i_repair the address repair information
+/// @param[in, out] io_program the ccs program to setup for row repair
+/// @return FAPI2_RC_SUCCESS iff successful
+/// @note hPPR needs to execute the program this produces, then run the program from setup_ppr_finale after the tPGM_hPPRa delay
+///
+fapi2::ReturnCode setup_ppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                             const ppr_type i_ppr_type,
+                             const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
+                             mss::ccs::program<mss::mc_type::ODYSSEY>& io_program);
+
+///
+/// @brief Create a CCS program for the post-repair portion of a sPPR or hPPR row repair operation
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_ppr_type the type of repair to perform
 /// @param[in] i_repair the address repair information
 /// @param[in, out] io_program the ccs program to setup for row repair
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
-                              const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
-                              mss::ccs::program<mss::mc_type::ODYSSEY>& io_program);
+fapi2::ReturnCode setup_ppr_finale( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                                    const ppr_type i_ppr_type,
+                                    const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
+                                    mss::ccs::program<mss::mc_type::ODYSSEY>& io_program);
 
 ///
 /// @brief Perform a sPPR row repair operation at runtime
@@ -271,6 +296,17 @@ fapi2::ReturnCode map_repairs_per_dimm( const fapi2::Target<fapi2::TARGET_TYPE_O
 ///
 fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
         const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair);
+
+#ifndef __PPE__
+///
+/// @brief Perform an hPPR row repair operation using the lab tool
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                                   const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair);
+#endif
 
 ///
 /// @brief Deploy mapped row repairs
