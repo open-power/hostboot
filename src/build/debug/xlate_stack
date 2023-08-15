@@ -1,0 +1,133 @@
+#!/usr/bin/perl
+# IBM_PROLOG_BEGIN_TAG
+# This is an automatically generated prolog.
+#
+# $Source: src/build/debug/xlate_stack $
+#
+# OpenPOWER HostBoot Project
+#
+# Contributors Listed Below - COPYRIGHT 2023
+# [+] International Business Machines Corp.
+#
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied. See the License for the specific language governing
+# permissions and limitations under the License.
+#
+# IBM_PROLOG_END_TAG
+
+################################################################################
+# xlate_stack -l hbicore.list -s "<-0x347F8<-0x4001574C<-0x4001CDC8"
+################################################################################
+
+use strict;
+use warnings;
+use Fcntl qw(SEEK_SET);
+
+use bigint qw/hex/;
+use Getopt::Long qw(:config no_ignore_case);
+
+my $prev_addr;
+my $prev_info;
+my $tmp_file = "/tmp/junk";
+
+################################################################################
+# getopts
+################################################################################
+unless (defined($ARGV[0])) {usage(); exit 0;}
+
+GetOptions(
+            "help|?"        => sub {usage(); exit 0;},
+            "listing=s"     => \my $hbicore_list,
+            "stack_addrs=s" => \my $stack_addrs,
+            "rt_addr=s"     => \my $runtime_base_addr,
+            "Verbosity=i"   => \my $verbosity)
+   or die("Error in command line arguments\n");
+
+unless (defined($verbosity))    {$verbosity=0;}
+unless (defined($hbicore_list)) {usage(); exit 0;}
+unless (defined($stack_addrs))  {usage(); exit 0;}
+
+################################################################################
+# usage
+################################################################################
+sub usage
+{
+    print qq(-l [hbicore listing file]\n) .
+          qq(-s [stack addrs]\n) .
+          qq(-r [runtime image addr]\n) .
+          qq(    IF needed, from this trace:\n) .
+          qq(     HBRT_TEST       | 135|Runtime image loaded @ <addr>\n);
+}
+
+################################################################################
+# main
+#  -pull all function names from listing, with their addresses
+#  -search in that fcn list for each stack addr and print the fcn when found
+################################################################################
+(-e $hbicore_list) or die("Could not open $hbicore_list");
+
+# pull all of the functions from the listing into a temp file
+# This file lists all functions and their addrs in ascending order
+system("grep ^00000000 $hbicore_list > $tmp_file");
+
+open(DATA, $tmp_file) or die("Could not open $tmp_file");
+
+# loop through each of the stack addrs provided
+foreach my $addr (split /<-/,$stack_addrs)
+{
+    $addr or next;
+
+    my $hex_addr = hex($addr);
+
+    # bad stack addr, skip
+    if ($hex_addr > 0xffffffff)
+    {
+        printf "%-20s %-20s %s\n", $addr, " ", "OUT_OF_RANGE";
+        next;
+    }
+
+    # if a runtime offset was passed in, use it to modify the stack addr
+    if ($runtime_base_addr)
+    {
+        my $rt_addr = hex($runtime_base_addr);
+        if ($hex_addr > $rt_addr)
+        {
+            my $save = $hex_addr;
+            $hex_addr -= $rt_addr;
+            $verbosity and printf "$save - $runtime_base_addr = %x\n", $hex_addr;
+        }
+    }
+
+    # loop through all functions in the temp file
+    foreach my $line (<DATA>)
+    {
+        chomp $line;
+        my ($fn_addr,$info) = split / /,$line;
+
+        if (hex($fn_addr) > $hex_addr)
+        {
+            # found the function addr which is one function greater than
+            #   where the stack addr is from, print the previous function
+            printf "%-20s %-20s %s\n", $addr, $prev_addr, $prev_info;
+            last;
+        }
+        $prev_addr = $fn_addr;
+        $prev_info = $info;
+    }
+    seek DATA, 0, SEEK_SET;
+}
+
+# cleanup the temp file of functions from the listing
+(-e $tmp_file) and unlink $tmp_file;
+
+ exit 0;
+ 
