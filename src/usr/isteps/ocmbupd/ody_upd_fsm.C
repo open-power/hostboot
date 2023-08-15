@@ -1070,7 +1070,7 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
                   state_to_str(i_state).data(),
                   event_to_str(i_event).data());
 
-            execute_actions(i_ocmb, i_state, /* state pattern */ { }, /* transition */ { },
+            errl = execute_actions(i_ocmb, i_state, /* state pattern */ { }, /* transition */ { },
                             IPL_COMPLETE, i_errlog, on_update_force_all, o_restart_needed);
             break;
         }
@@ -1108,7 +1108,7 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
               state_to_str(matched_state->state).data(),
               event_to_str(matched_event->event).data());
 
-        execute_actions(i_ocmb, i_state, *matched_state, *matched_event, i_event, i_errlog, on_update_force_all, o_restart_needed);
+        errl = execute_actions(i_ocmb, i_state, *matched_state, *matched_event, i_event, i_errlog, on_update_force_all, o_restart_needed);
     }
     else if (matched_state)
     {
