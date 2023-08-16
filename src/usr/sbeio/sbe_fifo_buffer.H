@@ -51,6 +51,8 @@ namespace SBEIO
  */
 class SbeFifoRespBuffer
 {
+    // The SbeFifo should have access to protected members for error logging purposes.
+    friend class SbeFifo;
 public:
 
     /**
@@ -234,13 +236,6 @@ public:
     size_t getReturnDataWordSize();
 
     /*
-     * @brief Obtain the local buffer for debugging.
-     *
-     * @return A pointer to the local buffer.
-     */
-    const uint32_t * localBuffer() const {return iv_localMsgBuffer;}
-
-    /*
      * @brief Obtain the current index for debugging
      *
      * @return - The current Index
@@ -262,7 +257,7 @@ public:
      * @return - The offset to the status header.
      *
      */
-    size_t offset() const {return iv_localMsgBuffer[iv_offsetIndex];}
+    size_t offset() const {return iv_localMsgBuffer->at(iv_offsetIndex);}
 
     //=========================
     // Class Constants
@@ -272,6 +267,13 @@ public:
     static constexpr size_t INVALID_INDEX = size_t(-1);
 
 protected:
+
+    /*
+     * @brief Obtain the local buffer for debugging.
+     *
+     * @return A pointer to the local buffer.
+     */
+    const uint32_t * localBuffer() const { return &iv_localMsgBuffer->at(0); }
 
    //=====================
    // Unit Test Access
@@ -292,8 +294,8 @@ private:
    // Buffers
    //====================
 
-   uint32_t iv_localMsgBuffer[MSG_BUFFER_SIZE_WORDS]; /**< local buffer large enough
-                                                           to hold FFDC data */
+   std::unique_ptr<std::array<uint32_t, MSG_BUFFER_SIZE_WORDS>> iv_localMsgBuffer; /* local buffer large enough
+                                                                                      to hold FFDC data */
 
    uint32_t * const iv_callerBufferPtr{}; /**< caller supplied buffer should
                                              be large enough to hold at least
@@ -311,8 +313,7 @@ private:
    //====================
 
    size_t iv_index{}; /**< denotes the next insert position */
-   size_t iv_offsetIndex{INVALID_INDEX}; /**< position of offset to the
-                                              status header */
+   size_t iv_offsetIndex{INVALID_INDEX}; /**< position of offset to the status header */
    size_t iv_statusIndex{INVALID_INDEX}; /**< position of the status header */
    size_t iv_ffdcIndex{INVALID_INDEX}; /**< position of FFDC data if any */
    size_t iv_ffdcSize{0}; /**< size of ffdc data if any is present */

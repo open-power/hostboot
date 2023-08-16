@@ -160,6 +160,7 @@ public:
     {
         SBE_FIFO_CMD_GET_SBE_FFDC        = 0x01,
         SBE_FIFO_CMD_GET_CAPABILITIES    = 0x02,
+        SBE_FIFO_CMD_GET_SCRATCH_DATA    = 0x04,
         SBE_FIFO_CMD_GET_CAPABILITIES_2  = 0x07, // Deprecated for Odyssey
     };
 
@@ -619,6 +620,32 @@ public:
         }
     } PACKED;
 
+    enum fifoGetSbeScratchDataOps
+    {
+        FIFO_READ_AND_PURGE_SCRATCH_DATA = 0x1,
+        FIFO_PURGE_SCRATCH_DATA          = 0x2,
+    };
+    struct fifoGetSbeScratchDataRequest
+    {
+        uint32_t wordCnt;  // 0x03
+        uint8_t reserved;
+        uint8_t chipId;
+        uint8_t commandClass;
+        uint8_t command;
+        uint16_t reserved2;
+        uint8_t  reserved3;
+        uint8_t  operation;
+        fifoGetSbeScratchDataRequest() :
+            wordCnt(3),
+            reserved(0),
+            chipId(0),
+            commandClass(SBE_FIFO_CLASS_GENERIC_MESSAGE),
+            command(SBE_FIFO_CMD_GET_SCRATCH_DATA),
+            reserved2(0),
+            reserved3(0),
+            operation(FIFO_READ_AND_PURGE_SCRATCH_DATA)
+        {}
+    } PACKED;
     ///////////////////////////////////////////////////////////////////////
     //                     MPIPL Messages
     ///////////////////////////////////////////////////////////////////////

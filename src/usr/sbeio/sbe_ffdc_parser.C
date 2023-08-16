@@ -108,6 +108,7 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
     size_t   i           = 0; // offset into the buffer
     errlHndl_t errl      = nullptr;
     uint8_t * ffdcPackageBuffer = static_cast<uint8_t *>(i_ffdcPackageBuffer);
+    bool shouldSortBySlid = false;
 
     SBE_TRACF(ENTER_MRK "parseFFDCData");
     // Clear the internal vector of packages. If this function gets called more than once for any reason, we don't want
@@ -129,6 +130,7 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
             uint16_t slid = 0; // Invalid value
             if (l_magicByte == SbeFifo::FIFO_ODY_FFDC_MAGIC)
             {
+                shouldSortBySlid = true;
                 // For Odyssey, collect the SLID and severity
                 // Get the SLID from the package header. Word 2.
                 slid = UtilByte::bufferTo16uint(ffdcPackageBuffer
@@ -220,10 +222,13 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
         }
     } while (1);
 
-    // Done parsing, now sort by SLID
-    std::sort(iv_ffdcPackages.begin(), iv_ffdcPackages.end(),
-              [](auto & packageA, auto & packageB)
-              { return packageA->slid <= packageB->slid; });
+    // Done parsing, now sort by SLID. P10 doesn't have SLID, no need to sort in that case.
+    if (shouldSortBySlid)
+    {
+        std::sort(iv_ffdcPackages.begin(), iv_ffdcPackages.end(),
+                  [](auto & packageA, auto & packageB)
+                  { return packageA->slid < packageB->slid; });
+    }
 
 
     SBE_TRACD(EXIT_MRK "parseFFDCData");

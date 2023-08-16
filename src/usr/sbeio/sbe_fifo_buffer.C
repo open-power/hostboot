@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,8 +33,7 @@ extern trace_desc_t* g_trac_sbeio;
 #define SBE_TRACF(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio, printf_string,##args)
 
-constexpr size_t STATUS_WORD_SIZE =
-                         sizeof(SBEIO::SbeFifo::statusHeader)/sizeof(uint32_t);
+constexpr size_t STATUS_WORD_SIZE = sizeof(SBEIO::SbeFifo::statusHeader)/sizeof(uint32_t);
 
 namespace SBEIO
 {
@@ -54,17 +53,13 @@ const char* SbeFifoRespBuffer::cv_stateStrings[] = {
 //-------------------------------------------------------------------------
 SbeFifoRespBuffer::SbeFifoRespBuffer(uint32_t* i_fifoBuffer,
                                      size_t bufferWordSize,
-                                     bool i_getSbeFfdcFmt):
-                                            iv_callerBufferPtr(i_fifoBuffer),
-                                            iv_callerWordSize(
-                                                 std::min(bufferWordSize,
-                                                          MSG_BUFFER_SIZE_WORDS)
-                                                             ),
-                                            iv_getSbeFfdcFmt(i_getSbeFfdcFmt)
+                                     bool i_getSbeFfdcFmt)
+                        : iv_callerBufferPtr(i_fifoBuffer),
+                          iv_callerWordSize( std::min(bufferWordSize, MSG_BUFFER_SIZE_WORDS) ),
+                          iv_getSbeFfdcFmt(i_getSbeFfdcFmt)
 {
-    do
-    {
-        memset(iv_localMsgBuffer, 0, sizeof(iv_localMsgBuffer));
+    do {
+        iv_localMsgBuffer = std::make_unique<std::array<uint32_t, MSG_BUFFER_SIZE_WORDS>>();
 
         if(not i_fifoBuffer || iv_callerWordSize < STATUS_WORD_SIZE)
         {
@@ -92,7 +87,7 @@ bool SbeFifoRespBuffer::append(uint32_t i_value)
 
         if(iv_index < MSG_BUFFER_SIZE_WORDS)
         {
-            iv_localMsgBuffer[iv_index] = i_value;
+            iv_localMsgBuffer->at(iv_index) = i_value;
             ++iv_index;
             retval = true;
         }
@@ -144,33 +139,30 @@ void SbeFifoRespBuffer::completeMessage()
             iv_offsetIndex = (iv_index - 2);
 
             //Validate that the offset to the status header is in range
-            if((iv_localMsgBuffer[iv_offsetIndex] - 1) > iv_offsetIndex)
+            if((iv_localMsgBuffer->at(iv_offsetIndex) - 1) > iv_offsetIndex)
             {
                 //offset is to large - would go before the buffer.
                 SBE_TRACF(ERR_MRK"SbeFifoRespBuffer::completeMessage: "
                          "The offset to the StatusHeader is too large. "
                          "(%d > %d)",
-                         iv_localMsgBuffer[iv_offsetIndex] - 1,
+                         iv_localMsgBuffer->at(iv_offsetIndex) - 1,
                          iv_offsetIndex);
                 iv_state = MSG_INVALID_OFFSET;
                 break;
             }
-            else if(iv_localMsgBuffer[iv_offsetIndex] <
-                                                    (STATUS_WORD_SIZE + 1))
+            else if(iv_localMsgBuffer->at(iv_offsetIndex) < (STATUS_WORD_SIZE + 1))
             {
                 //Minimum offset (no ffdc) is StatusHeader size + 1
                 SBE_TRACF(ERR_MRK"SbeFifoRespBuffer::completeMessage: "
-                         "The offset to the StatusHeader is too small. "
-                         "(%d < %d)",
-                         iv_localMsgBuffer[iv_offsetIndex],
+                                 "The offset to the StatusHeader is too small. (%d < %d)",
+                         iv_localMsgBuffer->at(iv_offsetIndex),
                          STATUS_WORD_SIZE + 1);
                 iv_state = MSG_INVALID_OFFSET;
                 break;
             }
 
             //Set The StatusHeader index
-            iv_statusIndex = iv_offsetIndex -
-                                       (iv_localMsgBuffer[iv_offsetIndex] - 1);
+            iv_statusIndex = iv_offsetIndex - (iv_localMsgBuffer->at(iv_offsetIndex) - 1);
 
             //Determine if there is FFDC data in the buffer. We check if the
             //buffer contains a get SBE FFDC response. If so, the FFDC is at the
@@ -182,8 +174,7 @@ void SbeFifoRespBuffer::completeMessage()
             {
                 iv_ffdcIndex = 0;
                 iv_ffdcSize = iv_statusIndex;
-                assert( iv_localMsgBuffer[iv_offsetIndex] ==
-                        (STATUS_WORD_SIZE + 1),
+                assert( iv_localMsgBuffer->at(iv_offsetIndex) == (STATUS_WORD_SIZE + 1),
                         "Offset to status header is not 3");
             }
             else if((iv_statusIndex + STATUS_WORD_SIZE) < iv_offsetIndex)
@@ -223,8 +214,7 @@ const void * SbeFifoRespBuffer::getFFDCPtr()
 
     if(msgContainsFFDC())
     {
-        retval =
-            reinterpret_cast<const void*>(&iv_localMsgBuffer[iv_ffdcIndex]);
+        retval = reinterpret_cast<const void*>(&iv_localMsgBuffer->at(iv_ffdcIndex));
     }
 
     return retval;
@@ -263,8 +253,7 @@ const SbeFifo::statusHeader * SbeFifoRespBuffer::getStatusHeader()
 
     if(isMsgComplete())
     {
-        retval = reinterpret_cast<const SbeFifo::statusHeader *>
-                                       (&iv_localMsgBuffer[iv_statusIndex]);
+        retval = reinterpret_cast<const SbeFifo::statusHeader *>(&iv_localMsgBuffer->at(iv_statusIndex));
     }
 
     return retval;
@@ -290,7 +279,7 @@ const void * SbeFifoRespBuffer::getReturnData()
 
     if(msgContainsReturnData())
     {
-        retval = reinterpret_cast<const void*>(&iv_localMsgBuffer[0]);
+        retval = reinterpret_cast<const void*>(&iv_localMsgBuffer->at(0));
     }
 
     return retval;

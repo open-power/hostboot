@@ -56,7 +56,8 @@ namespace SBEIO
     // The maximum amount of pages hostboot will allow FFDC package buffers from SBE to be.
     // This is chosen arbitrarily as a defense against cases where the End-of-Transmission (EOT) is not
     // recieved from SBE.
-    static constexpr uint8_t SBE_FFDC_MAX_PAGES = 6;
+    // GetSBEScratchData chip-op requires at least 64k (16 pages) for the return data. Adding a couple extra for FFDC.
+    static constexpr uint8_t SBE_FFDC_MAX_PAGES = 18;
 
     // For 4U max is 181 bytes - setting max to 256 words
     // See fips1010 sbeiInternal.H
