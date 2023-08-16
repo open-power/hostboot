@@ -675,6 +675,19 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                     SBEIO_UDT_PARAMETERS,
                                     false );
                  }
+                 else if (l_rc == 0)
+                 {
+                     // For now, rc == 0 will have its data stuffed into the existing log. SBE team has said that RC=0
+                     // means no failure on the part of the SBE but they will sometimes send data back anyway.
+                     // At present there is no way to distingiush between PLAT error or HWP error RC=0 cases. So this
+                     // data may only be understood by SBE team.
+                     errl->addFFDC( SBEIO_COMP_ID,
+                                    l_package.ffdcPtr,
+                                    l_package.size,
+                                    0,
+                                    SBEIO_UDT_NO_FORMAT,
+                                    false );
+                 }
                  else
                  {
                      fapi2::ReturnCode l_fapiRC;
