@@ -422,5 +422,8 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::MODULE_M
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::DRAM_MFR_ID_CODE_LSB;
 constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, DDIMM_MODULE>::DRAM_MFR_ID_CODE_MSB;
 
+constexpr mss::field_t<mss::endian::LITTLE>
+fields<DDR5, DDIMM_MODULE>::SERIAL_NUMBER_FIELDS[fields<DDR5, DDIMM_MODULE>::SERIAL_NUMBER_LEN];
+
 }// spd
 }// mss

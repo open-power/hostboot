@@ -5051,6 +5051,27 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Set the 11s serial number field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_serial_number(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field[F::SERIAL_NUMBER_LEN] = {0};
+
+            for ( uint64_t l_count = 0; l_count < F::SERIAL_NUMBER_LEN; l_count++)
+            {
+                FAPI_TRY(get_field_spd(iv_ocmb, F::SERIAL_NUMBER_FIELDS[l_count], i_spd, SET_EFF_DIMM_SERIAL_NUMBER, l_field[l_count]));
+            }
+
+            FAPI_TRY(mss::attr::set_eff_dimm_serial_number(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 #if 0 // Fields are currently unused
 
         virtual fapi2::ReturnCode set_module_height_max(const std::vector<uint8_t>& i_spd) const
@@ -5407,6 +5428,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             FAPI_TRY(set_module_mfg_id(i_spd));
             FAPI_TRY(set_dram_mfg_id(i_spd));
             FAPI_TRY(set_rcd_mfg_id(i_spd));
+            FAPI_TRY(set_serial_number(i_spd));
 
         fapi_try_exit:
             return fapi2::current_err;

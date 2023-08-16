@@ -478,6 +478,8 @@ enum generic_ffdc_codes : uint16_t
     SET_TX_IMP_CTRL1 = 0x120D,
     SET_TX_IMP_CTRL2 = 0x120E,
 
+    SET_EFF_DIMM_SERIAL_NUMBER = 0x120F,
+
 };
 
 ///

@@ -76,11 +76,15 @@ use constant {
         "ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_AC"   => 1,
         "ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_AC"   => 1,
         "ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_CK"   => 1,
+        "ATTR_MEM_EFF_DIMM_SERIAL_NUMBER"     => 1,
     },
 
     # Special attributes which are multi-demensional but the second dimension doesn't represent the PORT but
     # rather the data on the port group
-    PER_PORT_GROUP_ATTRIBUTES => { "ATTR_MSS_MEM_MVPD_FWMS" => 1, },
+    PER_PORT_GROUP_ATTRIBUTES => {
+        "ATTR_MSS_MEM_MVPD_FWMS"          => 1,
+        "ATTR_MEM_EFF_DIMM_SERIAL_NUMBER" => 1,
+    },
 
     # Constants for code generation subroutines
     NO_TARGET           => 0,

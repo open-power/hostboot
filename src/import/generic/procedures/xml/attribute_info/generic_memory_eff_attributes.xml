@@ -1178,4 +1178,19 @@
     </sbeAttrSync>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_EFF_DIMM_SERIAL_NUMBER</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      IBM DDIMM Serial number and CCIN number
+      Decodes SPD Byte 416 - 441
+      Currently only DDR5 will be using this attribute
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <array>26</array>
+    <writeable/>
+    <mssAccessorName>eff_dimm_serial_number</mssAccessorName>
+  </attribute>
+
 </attributes>
