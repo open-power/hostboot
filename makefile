@@ -52,6 +52,13 @@ CPPCHECK := $(CPPCHECKTOOL) $(CPPCHECKFLAGS)
 export CXX_CHECK ?= true
 export C_CHECK ?= true
 
+.PHONY: gen_hb_tooldata_tar
+gen_hb_tooldata_tar:
+	rm -f $(ROOTPATH)/obj/genfiles/hb_tooldata.tar.gz
+	tar czf $(ROOTPATH)/obj/genfiles/hb_tooldata.tar.gz $(ROOTPATH)/img/*.syms.mangled
+
+FINAL_PASS += gen_hb_tooldata_tar
+
 include ./config.mk
 
 .PHONY: docs

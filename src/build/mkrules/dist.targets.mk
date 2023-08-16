@@ -85,6 +85,7 @@ COPY_FILES = \
     obj/genfiles/config.h:openpower,openpower-sim \
     obj/genfiles/attribute_types_full.xml:openpower,openpower-sim \
     obj/genfiles/target_types_full.xml:openpower,openpower-sim \
+    obj/genfiles/hb_tooldata.tar.gz:openpower,openpower-sim \
     src/usr/targeting/attroverride/README.attr_override:tools,openpower,openpower-sim \
     src/build/buildpnor/buildSbePart.pl:openpower,openpower-sim \
     src/build/buildpnor/buildSPDImages.pl:openpower,openpower-sim \

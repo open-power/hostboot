@@ -5,7 +5,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2013,2014
+# Contributors Listed Below - COPYRIGHT 2013,2023
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,10 +36,12 @@
 
 ALL_PASSES = $(DEFAULT_PASSES) $(OTHER_PASSES)
 
-# In order to build all, we just have to satisfy all of the dependencies for
+# In order to build everything, we just have to satisfy all of the dependencies for
 # the last pass's 'POST' stage.
+$(FINAL_PASS): _BUILD/PASSES/$(lastword $(DEFAULT_PASSES))/POST
+
 .PHONY: all
-all: _BUILD/PASSES/$(lastword $(DEFAULT_PASSES))/POST
+all: $(FINAL_PASS)
 
 # A bogus recipe to suppress makes 'nothing to do' messages.
 .PHONY: suppress_nothing_to_do

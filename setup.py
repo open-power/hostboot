@@ -161,5 +161,10 @@ setup(
     data_files      = custom_data_files,
     package_dir     = package_directories,
     package_data    = package_data,
-    scripts         = ['src/build/debug/hb-memdump.sh','src/build/trace/tracelite/weave.py'],
+    scripts         = [
+                          'src/build/debug/hb-memdump.sh',
+                          'src/build/trace/tracelite/weave.py',
+                          'src/build/tools/dce/dce-bmc-invoke.sh',
+                          'src/build/tools/dce/preplib.py',
+                      ],
 )
