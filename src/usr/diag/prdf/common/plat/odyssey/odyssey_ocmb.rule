@@ -1080,9 +1080,9 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(15|16|17)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[18]
-     *  Error reported from one or more PCB responder - PL
+     *  PCB Slave error (includes PLL unlocks)
      */
-    (rTP_LOCAL_FIR, bit(18)) ? TBDDefaultCallout;
+    (rTP_LOCAL_FIR, bit(18)) ? pcb_slave_internal_parity;
 
     /** TP_LOCAL_FIR[19]
      *  SBE - PPE internal hardware error

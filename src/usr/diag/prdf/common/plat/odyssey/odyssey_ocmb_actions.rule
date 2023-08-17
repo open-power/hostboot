@@ -746,6 +746,26 @@ actionclass phyEccErrArcEccInt_1
     mem_port1_M_th1;
 };
 
+################################################################################
+#                             PLL unlock attentions                            #
+################################################################################
+
+/** PLL threshold of 2 per 5 mins */
+actionclass thresholdPll
+{
+    threshold(field(2 / 5 min));
+};
+
+/** This action is needed when TP_LOCAL_FIR[18] is set and the attention was not
+ *  attributed to a PLL unlock error. */
+actionclass pcb_slave_internal_parity
+{
+    calloutOcmbHigh;
+    thresholdPll;
+    capture(pll_ffdc);
+    funccall("clearPcbSlaveParityError");
+    funccall("maskPcbSlaveParityError"); # must be called last for return code
+};
 
 ################################################################################
 # Analyze groups

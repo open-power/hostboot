@@ -23,6 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+#include <iipServiceDataCollector.h>
 #include <prdfBitString.H>
 #include <prdfExtensibleChip.H>
 #include <prdfPlatServices.H>
@@ -146,6 +147,86 @@ int32_t maskPllUnlock(ExtensibleChip* i_chip)
 PRDF_PLUGIN_DEFINE(odyssey_ocmb, maskPllUnlock);
 
 #endif // __HOSTBOOT_MODULE
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Clears PCB slave parity errors on this chip.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
+ */
+int32_t clearPcbSlaveParityError(ExtensibleChip* i_chip,
+                                 STEP_CODE_DATA_STRUCT& io_sc)
+{
+#ifdef __HOSTBOOT_MODULE
+
+    // Clear the attention by clearing everything except
+    // BC_OR_PCBSLV_ERROR[24:31]. Note this register is "write-to-clear". So
+    // setting a bit to 1 will tell hardware to clear the bit.
+    auto err = i_chip->getRegister("BC_OR_PCBSLV_ERROR");
+    err->setAllBits();
+    err->SetBitFieldJustified(24, 8, 0);
+    err->Write();
+
+#endif // __HOSTBOOT_MODULE
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, clearPcbSlaveParityError);
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Masks PCB slave parity errors on this chip, if at threshold.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return PRD_NO_CLEAR_FIR_BITS if at threshold and the PCB slave parity errors
+ *         have been masked in the xx_PCBSLV_CONFIG registers. SUCCESS,
+ *         otherwise.
+ */
+int32_t maskPcbSlaveParityError(ExtensibleChip* i_chip,
+                                STEP_CODE_DATA_STRUCT& io_sc)
+{
+#ifdef __HOSTBOOT_MODULE
+
+    // Mask only at threshold.
+    if (io_sc.service_data->IsAtThreshold())
+    {
+        // Mask the parity errors by setting xx_PCBSLV_CONFIG[8:11] in each
+        // chiplet to all 1's using a read-modify-write.
+
+        auto tp_config = i_chip->getRegister("TP_PCBSLV_CONFIG");
+        if (SUCCESS == tp_config->Read())
+        {
+            tp_config->SetBitFieldJustified(8, 4, 0xF);
+            tp_config->Write();
+        }
+
+        auto mem_config = i_chip->getRegister("MEM_PCBSLV_CONFIG");
+        if (SUCCESS == mem_config->Read())
+        {
+            mem_config->SetBitFieldJustified(8, 4, 0xF);
+            mem_config->Write();
+        }
+
+        // Returning PRD_NO_CLEAR_FIR_BITS below will tell the rule code to not
+        // clear the FIR bit. So we will have to do that manually.
+        auto fir = i_chip->getRegister("TP_LOCAL_FIR");
+        fir->clearAllBits();
+        fir->SetBit(18);
+        fir->Write();
+
+        // Returning this will ensure TP_LOCAL_FIR[18] is not masked. This
+        // will allow hardware to continue reporting PLL unlock attentions.
+        return PRD_NO_CLEAR_FIR_BITS;
+    }
+
+#endif // __HOSTBOOT_MODULE
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, maskPcbSlaveParityError);
 
 //------------------------------------------------------------------------------
 

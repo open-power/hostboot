@@ -481,7 +481,7 @@
         "0xcb42000f": "TP_LOCAL_FIR[15:17]: unused",
         "0xcb420010": "TP_LOCAL_FIR[15:17]: unused",
         "0xcb420011": "TP_LOCAL_FIR[15:17]: unused",
-        "0xcb420012": "TP_LOCAL_FIR[18]: Error reported from one or more PCB responder - PL",
+        "0xcb420012": "TP_LOCAL_FIR[18]: PCB Slave error (includes PLL unlocks)",
         "0xcb420013": "TP_LOCAL_FIR[19]: SBE - PPE internal hardware error",
         "0xcb420014": "TP_LOCAL_FIR[20]: SBE - PPE external hardware error",
         "0xcb420015": "TP_LOCAL_FIR[21]: SBE - PPE code error",
