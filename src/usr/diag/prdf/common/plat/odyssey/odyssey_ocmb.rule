@@ -1012,27 +1012,27 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[2]
      *  CC - PCB access error
      */
-    (rTP_LOCAL_FIR, bit(2)) ? ocmb_M_info_only;
+    (rTP_LOCAL_FIR, bit(2)) ? ocmb_M_info_only_clearTpErrStat;
 
     /** TP_LOCAL_FIR[3]
      *  CC - clock control error
      */
-    (rTP_LOCAL_FIR, bit(3)) ? ocmb_M_th_32perDay;
+    (rTP_LOCAL_FIR, bit(3)) ? ocmb_M_th_32perDay_clearTpErrStat;
 
     /** TP_LOCAL_FIR[4]
      *  PSC - PSCOM Access Error
      */
-    (rTP_LOCAL_FIR, bit(4)) ? ocmb_M_th_32perDay;
+    (rTP_LOCAL_FIR, bit(4)) ? ocmb_M_th_32perDay_clearTpPscomStat;
 
     /** TP_LOCAL_FIR[5]
      *  PSC - internal or ring interface error
      */
-    (rTP_LOCAL_FIR, bit(5)) ? ocmb_M_th_32perDay;
+    (rTP_LOCAL_FIR, bit(5)) ? ocmb_M_th_32perDay_clearTpPscomStat;
 
     /** TP_LOCAL_FIR[6]
      *  THERM - various errors
      */
-    (rTP_LOCAL_FIR, bit(6)) ? ocmb_M_info_only;
+    (rTP_LOCAL_FIR, bit(6)) ? ocmb_M_info_only_clearTpDtsErr;
 
     /** TP_LOCAL_FIR[7]
      *  DBG - SCOM parity fail
@@ -1057,7 +1057,7 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[11]
      *  ITR - FMU error
      */
-    (rTP_LOCAL_FIR, bit(11)) ? ocmb_M_info_only;
+    (rTP_LOCAL_FIR, bit(11)) ? ocmb_M_info_only_clearTpFmuErrRpt;
 
     /** TP_LOCAL_FIR[12]
      *  ITR - PCB error
@@ -1067,12 +1067,12 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[13]
      *  PCB master - timeout
      */
-    (rTP_LOCAL_FIR, bit(13)) ? ocmb_M_info_only;
+    (rTP_LOCAL_FIR, bit(13)) ? ocmb_M_info_only_clearPcbCtlErr;
 
     /** TP_LOCAL_FIR[14]
      *  I2CM - parity errors
      */
-    (rTP_LOCAL_FIR, bit(14)) ? ocmb_M_info_only;
+    (rTP_LOCAL_FIR, bit(14)) ? ocmb_M_info_only_clearResetRegB;
 
     /** TP_LOCAL_FIR[15:17]
      *  unused
@@ -1087,12 +1087,12 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[19]
      *  SBE - PPE internal hardware error
      */
-    (rTP_LOCAL_FIR, bit(19)) ? ocmb_M_th1;
+    (rTP_LOCAL_FIR, bit(19)) ? ppeHwErr;
 
     /** TP_LOCAL_FIR[20]
      *  SBE - PPE external hardware error
      */
-    (rTP_LOCAL_FIR, bit(20)) ? ocmb_M_th1;
+    (rTP_LOCAL_FIR, bit(20)) ? ppeHwErr;
 
     /** TP_LOCAL_FIR[21]
      *  SBE - PPE code error
@@ -1132,12 +1132,12 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[30]
      *  PCB controller - multicast group member count underrun
      */
-    (rTP_LOCAL_FIR, bit(30)) ? level2_M_ocmb_L_th1;
+    (rTP_LOCAL_FIR, bit(30)) ? level2_M_ocmb_L_th1_clearPcbCtlErr;
 
     /** TP_LOCAL_FIR[31]
      *  PCB controller - parity error
      */
-    (rTP_LOCAL_FIR, bit(31)) ? ocmb_M_th1;
+    (rTP_LOCAL_FIR, bit(31)) ? ocmb_M_th1_clearPcbCtlErr;
 
     /** TP_LOCAL_FIR[32:35]
      *  unused
@@ -1145,12 +1145,12 @@ group gTP_LOCAL_FIR
     (rTP_LOCAL_FIR, bit(32|33|34|35)) ? defaultMaskedError;
 
     /** TP_LOCAL_FIR[36]
-     *  PIBMEM
+     *  PIB interface - RAM UE ECC error
      */
     (rTP_LOCAL_FIR, bit(36)) ? ocmb_M_th1;
 
     /** TP_LOCAL_FIR[37]
-     *  PIBMEM
+     *  Direct interface to PIBMEM - RAM UE ECC error
      */
     (rTP_LOCAL_FIR, bit(37)) ? ocmb_M_th1;
 
@@ -1285,27 +1285,27 @@ group gMEM_LOCAL_FIR
     /** MEM_LOCAL_FIR[2]
      *  CC - PCB access error
      */
-    (rMEM_LOCAL_FIR, bit(2)) ? ocmb_M_info_only;
+    (rMEM_LOCAL_FIR, bit(2)) ? ocmb_M_info_only_clearMemErrStat;
 
     /** MEM_LOCAL_FIR[3]
      *  CC - clock control error
      */
-    (rMEM_LOCAL_FIR, bit(3)) ? ocmb_M_info_only;
+    (rMEM_LOCAL_FIR, bit(3)) ? ocmb_M_th_32perDay_clearMemErrStat;
 
     /** MEM_LOCAL_FIR[4]
      *  PSC - PSCOM Access Error
      */
-    (rMEM_LOCAL_FIR, bit(4)) ? ocmb_M_info_only;
+    (rMEM_LOCAL_FIR, bit(4)) ? ocmb_M_th_32perDay_clearMemPscomStat;
 
     /** MEM_LOCAL_FIR[5]
      *  PSC - internal or ring interface error
      */
-    (rMEM_LOCAL_FIR, bit(5)) ? ocmb_M_info_only;
+    (rMEM_LOCAL_FIR, bit(5)) ? ocmb_M_th_32perDay_clearMemPscomStat;
 
     /** MEM_LOCAL_FIR[6]
      *  THERM - various errors
      */
-    (rMEM_LOCAL_FIR, bit(6)) ? ocmb_M_info_only;
+    (rMEM_LOCAL_FIR, bit(6)) ? ocmb_M_info_only_clearMemDtsErr;
 
     /** MEM_LOCAL_FIR[7]
      *  DBG - SCOM parity fail
@@ -2855,16 +2855,6 @@ group gDLX_ERR_RPT
     filter singlebit,
            cs_root_cause(50,51,52,53,54,55,56,57,58,59,60,61,62,63)
 {
-    /** DLX_ERR_RPT[50]
-     *  buffer UE
-     */
-    (rDLX_ERR_RPT, bit(50)) ? TBDDefaultCallout;
-
-    /** DLX_ERR_RPT[51]
-     *  insufficient working lanes
-     */
-    (rDLX_ERR_RPT, bit(51)) ? TBDDefaultCallout;
-
     /** DLX_ERR_RPT[52]
      *  bad CRC from TLXT
      */
@@ -3004,7 +2994,7 @@ group gODP_FIR_0
     /** ODP_FIR_0[11]
      *  PHY RX FIFO Check Error
      */
-    (rODP_FIR_0, bit(11)) ? mem_port0_M_th1;
+    (rODP_FIR_0, bit(11)) ? phyRxFifoCheckErr_0;
 
     /** ODP_FIR_0[12]
      *  PHY RX TX PPT Error
@@ -3116,7 +3106,7 @@ group gODP_FIR_1
     /** ODP_FIR_1[11]
      *  PHY RX FIFO Check Error
      */
-    (rODP_FIR_1, bit(11)) ? mem_port1_M_th1;
+    (rODP_FIR_1, bit(11)) ? phyRxFifoCheckErr_1;
 
     /** ODP_FIR_1[12]
      *  PHY RX TX PPT Error

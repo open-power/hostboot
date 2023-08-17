@@ -704,7 +704,7 @@ actionclass srq_recov_parity_error
 };
 
 ################################################################################
-#                           ODP_FIR actions with FFDC                          #
+#                           Actions with FFDC                                  #
 ################################################################################
 
 # ODP_FIR[6]
@@ -717,6 +717,20 @@ actionclass phyStickyUnlockErr_0
 actionclass phyStickyUnlockErr_1
 {
     capture(lcdl_status_1_regs);
+    mem_port1_M_th1;
+};
+
+# ODP_FIR[11]
+
+actionclass phyRxFifoCheckErr_0
+{
+    capture(rx_fifo_0_regs);
+    mem_port0_M_th1;
+};
+
+actionclass phyRxFifoCheckErr_1
+{
+    capture(rx_fifo_1_regs);
     mem_port1_M_th1;
 };
 
@@ -746,6 +760,13 @@ actionclass phyEccErrArcEccInt_1
     mem_port1_M_th1;
 };
 
+# TP_LOCAL_FIR[19:20]
+actionclass ppeHwErr
+{
+    capture(sppe_hw_err);
+    ocmb_M_th1;
+};
+
 ################################################################################
 #                             PLL unlock attentions                            #
 ################################################################################
@@ -768,18 +789,102 @@ actionclass pcb_slave_internal_parity
 };
 
 ################################################################################
+#                  Actions with special clearing rules                         #
+################################################################################
+
+actionclass ocmb_M_info_only_clearTpErrStat
+{
+    ocmb_M_info_only;
+    funccall("clearTpErrStat");
+};
+
+actionclass ocmb_M_th_32perDay_clearTpErrStat
+{
+    ocmb_M_th_32perDay;
+    funccall("clearTpErrStat");
+};
+
+actionclass ocmb_M_th_32perDay_clearTpPscomStat
+{
+    ocmb_M_th_32perDay;
+    funccall("clearTpPscomStat");
+};
+
+actionclass ocmb_M_info_only_clearTpDtsErr
+{
+    ocmb_M_info_only;
+    funccall("clearTpDtsErr");
+};
+
+actionclass ocmb_M_info_only_clearTpFmuErrRpt
+{
+    ocmb_M_info_only;
+    funccall("clearTpFmuErrRpt");
+};
+
+actionclass ocmb_M_info_only_clearPcbCtlErr
+{
+    ocmb_M_info_only;
+    funccall("clearPcbCtlErr");
+};
+
+actionclass ocmb_M_info_only_clearResetRegB
+{
+    ocmb_M_info_only;
+    funccall("clearResetRegB");
+};
+
+actionclass level2_M_ocmb_L_th1_clearPcbCtlErr
+{
+    level2_M_ocmb_L_th1;
+    funccall("clearPcbCtlErr");
+};
+
+actionclass ocmb_M_th1_clearPcbCtlErr
+{
+    ocmb_M_th1;
+    funccall("clearPcbCtlErr");
+};
+
+actionclass ocmb_M_info_only_clearMemErrStat
+{
+    ocmb_M_info_only;
+    funccall("clearMemErrStat");
+};
+
+actionclass ocmb_M_th_32perDay_clearMemErrStat
+{
+    ocmb_M_th_32perDay;
+    funccall("clearMemErrStat");
+};
+
+actionclass ocmb_M_th_32perDay_clearMemPscomStat
+{
+    ocmb_M_th_32perDay;
+    funccall("clearMemPscomStat");
+};
+
+actionclass ocmb_M_info_only_clearMemDtsErr
+{
+    ocmb_M_info_only;
+    funccall("clearMemDtsErr");
+};
+
+################################################################################
 # Analyze groups
 ################################################################################
 
 actionclass analyzeTP_LOCAL_FIR
 {
     capture(ocmb_regs);
+    capture(tp_local_regs);
     analyze(gTP_LOCAL_FIR);
 };
 
 actionclass analyzeMEM_LOCAL_FIR
 {
     capture(ocmb_regs);
+    capture(mem_local_regs);
     analyze(gMEM_LOCAL_FIR);
 };
 

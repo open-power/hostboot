@@ -604,6 +604,156 @@ int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeMaintAue );
 
+//##############################################################################
+//
+//                      Special Clearing Plugins
+//
+//##############################################################################
+
+/**
+ * @brief  Helper function for clearing a register
+ * @param  i_chip OCMB chip.
+ * @param  i_regName Name of the register to clear.
+ * @return SUCCESS
+ */
+void __clearReg(ExtensibleChip * i_chip, const char * i_regName)
+{
+    SCAN_COMM_REGISTER_CLASS * reg = i_chip->getRegister(i_regName);
+    reg->clearAllBits();
+    uint32_t rc = reg->Write();
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR("Write to %s failed on 0x%08x", i_regName, i_chip->getHuid());
+    }
+}
+
+/**
+ * @brief  Clear TP_ERR_STATUS register
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t clearTpErrStat( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
+{
+    // Write 0 to the TP_ERR_STATUS to clear
+    __clearReg(i_chip, "TP_ERR_STATUS");
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, clearTpErrStat );
+
+/**
+ * @brief  Clear TP_PSCOM_STATUS_ERR register
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t clearTpPscomStat(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // Write 0 to the TP_PSCOM_STATUS_ERR to clear
+    __clearReg(i_chip, "TP_PSCOM_STAT_ERR");
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, clearTpPscomStat );
+
+/**
+ * @brief  Clear TP_DTS_ER register
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t clearTpDtsErr(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // Write 0 to the TP_DTS_ERR to clear
+    __clearReg(i_chip, "TP_DTS_ERR");
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, clearTpDtsErr );
+
+/**
+ * @brief  Clear TP_FMU_ERR_RPT register
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t clearTpFmuErrRpt(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // Write 0 to the TP_FMU_ERR_RPT to clear
+    __clearReg(i_chip, "TP_FMU_ERR_RPT");
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, clearTpFmuErrRpt );
+
+/**
+ * @brief  Clear PCBCTL_ERR register
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t clearPcbCtlErr(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // Write 0 to the PCBCTL_ERR to clear
+    __clearReg(i_chip, "PCBCTL_ERR");
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, clearPcbCtlErr );
+
+/**
+ * @brief  Clear RESET_REG_B register
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t clearResetRegB(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // Write 0 to the RESET_REG_B to clear
+    __clearReg(i_chip, "RESET_REG_B");
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, clearResetRegB );
+
+/**
+ * @brief  Clear MEM_ERR_STATUS register
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t clearMemErrStat(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // Write 0 to the MEM_ERR_STATUS to clear
+    __clearReg(i_chip, "MEM_ERR_STATUS");
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, clearMemErrStat );
+
+/**
+ * @brief  Clear MEM_PSCOM_STATUS_ERR register
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t clearMemPscomStat(ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // Write 0 to the MEM_PSCOM_STATUS_ERR to clear
+    __clearReg(i_chip, "MEM_PSCOM_STATUS_ERR");
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, clearMemPscomStat );
+
+/**
+ * @brief  Clear MEM_DTS_ERR register
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t clearMemDtsErr(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // Write 0 to the MEM_DTS_ERR to clear
+    __clearReg(i_chip, "MEM_DTS_ERR");
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, clearMemDtsErr );
+
 } // end namespace odyssey_ocmb
 
 } // end namespace PRDF

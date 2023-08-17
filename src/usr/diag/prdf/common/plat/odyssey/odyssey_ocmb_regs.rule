@@ -1070,6 +1070,76 @@
         capture     group arc_0_regs;
     };
 
+    register DBYTE0_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 0 RX FIFO Check Status Reg 0";
+        scomaddr    0x800100560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
+    register DBYTE1_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 1 RX FIFO Check Status Reg 0";
+        scomaddr    0x800110560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
+    register DBYTE2_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 2 RX FIFO Check Status Reg 0";
+        scomaddr    0x800120560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
+    register DBYTE3_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 3 RX FIFO Check Status Reg 0";
+        scomaddr    0x800130560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
+    register DBYTE4_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 4 RX FIFO Check Status Reg 0";
+        scomaddr    0x800140560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
+    register DBYTE5_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 5 RX FIFO Check Status Reg 0";
+        scomaddr    0x800150560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
+    register DBYTE6_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 6 RX FIFO Check Status Reg 0";
+        scomaddr    0x800160560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
+    register DBYTE7_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 7 RX FIFO Check Status Reg 0";
+        scomaddr    0x800170560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
+    register DBYTE8_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 8 RX FIFO Check Status Reg 0";
+        scomaddr    0x800180560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
+    register DBYTE9_RX_FIFO_CHECK_STATUS_0
+    {
+        name        "DBYTE 9 RX FIFO Check Status Reg 0";
+        scomaddr    0x800190560801303f;
+        capture     group rx_fifo_0_regs;
+    };
+
     ############################################################################
     # Odyssey chip ODP_FIR_1
     ############################################################################
@@ -1291,6 +1361,224 @@
         capture     group arc_1_regs;
     };
 
+    register DBYTE0_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 0 RX FIFO Check Status Reg 1";
+        scomaddr    0x800100560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    register DBYTE1_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 1 RX FIFO Check Status Reg 1";
+        scomaddr    0x800110560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    register DBYTE2_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 2 RX FIFO Check Status Reg 1";
+        scomaddr    0x800120560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    register DBYTE3_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 3 RX FIFO Check Status Reg 1";
+        scomaddr    0x800130560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    register DBYTE4_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 4 RX FIFO Check Status Reg 1";
+        scomaddr    0x800140560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    register DBYTE5_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 5 RX FIFO Check Status Reg 1";
+        scomaddr    0x800150560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    register DBYTE6_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 6 RX FIFO Check Status Reg 1";
+        scomaddr    0x800160560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    register DBYTE7_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 7 RX FIFO Check Status Reg 1";
+        scomaddr    0x800170560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    register DBYTE8_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 8 RX FIFO Check Status Reg 1";
+        scomaddr    0x800180560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    register DBYTE9_RX_FIFO_CHECK_STATUS_1
+    {
+        name        "DBYTE 9 RX FIFO Check Status Reg 1";
+        scomaddr    0x800190560801343f;
+        capture     group rx_fifo_1_regs;
+    };
+
+    ############################################################################
+    # Odyssey chip TP_LOCAL_FIR
+    ############################################################################
+
+    register RESET_REG_B
+    {
+        name        "Reset Register Fast Mode";
+        scomaddr    0x000A0001;
+        capture     group tp_local_regs;
+    };
+
+    register PPE_XIRAMDBG
+    {
+        name        "PPE External Interface RAMDBG";
+        scomaddr    0x000D0003;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_XIRAMEDR
+    {
+        name        "PPE External Interface RAMEDR";
+        scomaddr    0x000D0004;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_XIDBGPRO
+    {
+        name        "PPE External Interface DBGPRO";
+        scomaddr    0x000D0005;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_XIMEM
+    {
+        name        "PPE External Interface MEM Info";
+        scomaddr    0x000D0007;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_XIICAC
+    {
+        name        "PPE External Interface Icache Info";
+        scomaddr    0x000D0009;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_XIDBGINF
+    {
+        name        "PPE External Interface DBGINF";
+        scomaddr    0x000D000F;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_PIBMEM_CNTL_REG
+    {
+        name        "PPE PIBMEM Control Register";
+        scomaddr    0x000D0010;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_PIBMEM_ADDR_REG
+    {
+        name        "PPE PIBMEM Address Register";
+        scomaddr    0x000D0011;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_PIBMEM_STATUS_REG
+    {
+        name        "PPE PIBMEM Status Register";
+        scomaddr    0x000D0015;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_FIR_MASK_REG
+    {
+        name        "PPE FIR Error Mask register";
+        scomaddr    0x000D0018;
+        capture     group sppe_hw_err;
+    };
+
+    register PPE_ECC_CAPTURE_REG
+    {
+        name        "PPE ECC Capture Register";
+        scomaddr    0x000D001B;
+        capture     group sppe_hw_err;
+    };
+
+    register PCBCTL_ERR
+    {
+        name        "Internal PCB controller error register";
+        scomaddr    0x000F001F;
+        capture     group tp_local_regs;
+    };
+
+    register TP_PSCOM_STAT_ERR
+    {
+        name        "TP PSCOMLE error register";
+        scomaddr    0x01010001;
+        capture     group tp_local_regs;
+    };
+
+    register TP_FMU_ERR_RPT
+    {
+        name        "TP FMU Error Report";
+        scomaddr    0x01010786;
+        capture     group tp_local_regs;
+    };
+
+    register TP_ERR_STATUS
+    {
+        name        "TP Error Status";
+        scomaddr    0x0103000F;
+        capture     group tp_local_regs;
+    };
+
+    register TP_DTS_ERR
+    {
+        name        "TP DTS Error Register";
+        scomaddr    0x0105002F;
+        capture     group tp_local_regs;
+    };
+
+    ############################################################################
+    # Odyssey chip MEM_LOCAL_FIR
+    ############################################################################
+
+    register MEM_PSCOM_STATUS_ERR
+    {
+        name        "MEM PSCOMLE error register";
+        scomaddr    0x08010001;
+        capture     group mem_local_regs;
+    };
+
+    register MEM_ERR_STATUS
+    {
+        name        "MEM Error Status";
+        scomaddr    0x0803000F;
+        capture     group mem_local_regs;
+    };
+
+    register MEM_DTS_ERR
+    {
+        name        "MEM DTS Error Register";
+        scomaddr    0x0805002F;
+        capture     group mem_local_regs;
+    };
+
     ############################################################################
     # PLL FFDC Regs
     ############################################################################
@@ -1334,4 +1622,3 @@
         scomaddr    0x080F001F;
         capture     group pll_ffdc;
     };
-

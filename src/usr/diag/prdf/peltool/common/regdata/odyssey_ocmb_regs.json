@@ -44,6 +44,11 @@
         "description": "Odyssey chip DLX Skitter Control Register",
         "name": "DLX_SKIT_CTL"
     },
+    "0x0f7a": {
+        "address": "0x000000000803000f",
+        "description": "MEM Error Status",
+        "name": "MEM_ERR_STATUS"
+    },
     "0x0f95": {
         "address": "0x0000000008011004",
         "description": "Odyssey chip SRQ_FIR Checkstop Config",
@@ -84,15 +89,120 @@
         "description": "Odyssey chip MMIO_FIR Recoverable Config",
         "name": "MMIO_FIR_CFG_RE"
     },
+    "0x1a91": {
+        "address": "0x800100560801303f",
+        "description": "DBYTE 0 RX FIFO Check Status Reg 0",
+        "name": "DBYTE0_RX_FIFO_CHECK_STATUS_0"
+    },
+    "0x1a9e": {
+        "address": "0x800110560801303f",
+        "description": "DBYTE 1 RX FIFO Check Status Reg 0",
+        "name": "DBYTE1_RX_FIFO_CHECK_STATUS_0"
+    },
+    "0x1aab": {
+        "address": "0x800120560801303f",
+        "description": "DBYTE 2 RX FIFO Check Status Reg 0",
+        "name": "DBYTE2_RX_FIFO_CHECK_STATUS_0"
+    },
+    "0x1ab8": {
+        "address": "0x800130560801303f",
+        "description": "DBYTE 3 RX FIFO Check Status Reg 0",
+        "name": "DBYTE3_RX_FIFO_CHECK_STATUS_0"
+    },
+    "0x1ac5": {
+        "address": "0x800140560801303f",
+        "description": "DBYTE 4 RX FIFO Check Status Reg 0",
+        "name": "DBYTE4_RX_FIFO_CHECK_STATUS_0"
+    },
+    "0x1ad2": {
+        "address": "0x800150560801303f",
+        "description": "DBYTE 5 RX FIFO Check Status Reg 0",
+        "name": "DBYTE5_RX_FIFO_CHECK_STATUS_0"
+    },
+    "0x1adf": {
+        "address": "0x800160560801303f",
+        "description": "DBYTE 6 RX FIFO Check Status Reg 0",
+        "name": "DBYTE6_RX_FIFO_CHECK_STATUS_0"
+    },
+    "0x1aec": {
+        "address": "0x800170560801303f",
+        "description": "DBYTE 7 RX FIFO Check Status Reg 0",
+        "name": "DBYTE7_RX_FIFO_CHECK_STATUS_0"
+    },
     "0x1af6": {
         "address": "0x0000000008013007",
         "description": "Odyssey chip ODP_FIR Unit Checkstop Config 0",
         "name": "ODP_FIR_CFG_UCS_0"
     },
+    "0x1af9": {
+        "address": "0x800180560801303f",
+        "description": "DBYTE 8 RX FIFO Check Status Reg 0",
+        "name": "DBYTE8_RX_FIFO_CHECK_STATUS_0"
+    },
+    "0x1b06": {
+        "address": "0x800190560801303f",
+        "description": "DBYTE 9 RX FIFO Check Status Reg 0",
+        "name": "DBYTE9_RX_FIFO_CHECK_STATUS_0"
+    },
+    "0x1b91": {
+        "address": "0x800100560801343f",
+        "description": "DBYTE 0 RX FIFO Check Status Reg 1",
+        "name": "DBYTE0_RX_FIFO_CHECK_STATUS_1"
+    },
+    "0x1b9e": {
+        "address": "0x800110560801343f",
+        "description": "DBYTE 1 RX FIFO Check Status Reg 1",
+        "name": "DBYTE1_RX_FIFO_CHECK_STATUS_1"
+    },
+    "0x1bab": {
+        "address": "0x800120560801343f",
+        "description": "DBYTE 2 RX FIFO Check Status Reg 1",
+        "name": "DBYTE2_RX_FIFO_CHECK_STATUS_1"
+    },
+    "0x1bb8": {
+        "address": "0x800130560801343f",
+        "description": "DBYTE 3 RX FIFO Check Status Reg 1",
+        "name": "DBYTE3_RX_FIFO_CHECK_STATUS_1"
+    },
+    "0x1bc5": {
+        "address": "0x800140560801343f",
+        "description": "DBYTE 4 RX FIFO Check Status Reg 1",
+        "name": "DBYTE4_RX_FIFO_CHECK_STATUS_1"
+    },
+    "0x1bd2": {
+        "address": "0x800150560801343f",
+        "description": "DBYTE 5 RX FIFO Check Status Reg 1",
+        "name": "DBYTE5_RX_FIFO_CHECK_STATUS_1"
+    },
+    "0x1bdf": {
+        "address": "0x800160560801343f",
+        "description": "DBYTE 6 RX FIFO Check Status Reg 1",
+        "name": "DBYTE6_RX_FIFO_CHECK_STATUS_1"
+    },
+    "0x1bec": {
+        "address": "0x800170560801343f",
+        "description": "DBYTE 7 RX FIFO Check Status Reg 1",
+        "name": "DBYTE7_RX_FIFO_CHECK_STATUS_1"
+    },
+    "0x1bee": {
+        "address": "0x00000000000d0010",
+        "description": "PPE PIBMEM Control Register",
+        "name": "PPE_PIBMEM_CNTL_REG"
+    },
     "0x1bf6": {
         "address": "0x0000000008013407",
         "description": "Odyssey chip ODP_FIR Unit Checkstop Config 1",
         "name": "ODP_FIR_CFG_UCS_1"
+    },
+    "0x1bf9": {
+        "address": "0x800180560801343f",
+        "description": "DBYTE 8 RX FIFO Check Status Reg 1",
+        "name": "DBYTE8_RX_FIFO_CHECK_STATUS_1"
+    },
+    "0x1c06": {
+        "address": "0x800190560801343f",
+        "description": "DBYTE 9 RX FIFO Check Status Reg 1",
+        "name": "DBYTE9_RX_FIFO_CHECK_STATUS_1"
     },
     "0x1de4": {
         "address": "0x0000000008010c02",
@@ -138,6 +248,11 @@
         "address": "0x0000000008040001",
         "description": "MEM Chiplet Recoverable FIR",
         "name": "CFIR_MEM_RE"
+    },
+    "0x25a4": {
+        "address": "0x00000000000d0011",
+        "description": "PPE PIBMEM Address Register",
+        "name": "PPE_PIBMEM_ADDR_REG"
     },
     "0x2649": {
         "address": "0x0000000008012405",
@@ -214,10 +329,20 @@
         "description": "DX LCDL Status3 1",
         "name": "DX_LCDL_STATUS3_1"
     },
+    "0x3084": {
+        "address": "0x00000000000f001f",
+        "description": "Internal PCB controller error register",
+        "name": "PCBCTL_ERR"
+    },
     "0x311d": {
         "address": "0x0000000008013006",
         "description": "Odyssey chip ODP_FIR Special Attention Config 0",
         "name": "ODP_FIR_CFG_SPA_0"
+    },
+    "0x3135": {
+        "address": "0x00000000000d0003",
+        "description": "PPE External Interface RAMDBG",
+        "name": "PPE_XIRAMDBG"
     },
     "0x3139": {
         "address": "0x800140e40801303f",
@@ -263,6 +388,11 @@
         "address": "0x800160e40801303f",
         "description": "DX LCDL Status6 0",
         "name": "DX_LCDL_STATUS6_0"
+    },
+    "0x354e": {
+        "address": "0x00000000000d0004",
+        "description": "PPE External Interface RAMEDR",
+        "name": "PPE_XIRAMEDR"
     },
     "0x35d3": {
         "address": "0x0000000008012419",
@@ -334,6 +464,11 @@
         "description": "Odyssey chip WOF",
         "name": "MEM_LOCAL_FIR_WOF"
     },
+    "0x3ff6": {
+        "address": "0x00000000000d0018",
+        "description": "PPE FIR Error Mask register",
+        "name": "PPE_FIR_MASK_REG"
+    },
     "0x42df": {
         "address": "0x0000000001040106",
         "description": "Odyssey chip TP_LOCAL_FIR Special Attention Config",
@@ -368,6 +503,11 @@
         "address": "0x800100e40801343f",
         "description": "DX LCDL Status0 1",
         "name": "DX_LCDL_STATUS0_1"
+    },
+    "0x4a8a": {
+        "address": "0x000000000805002f",
+        "description": "MEM DTS Error Register",
+        "name": "MEM_DTS_ERR"
     },
     "0x4b39": {
         "address": "0x800110e40801303f",
@@ -559,6 +699,11 @@
         "description": "Odyssey chip RDF 0 Error Report 1",
         "name": "RDF_0_ERR_RPT_1"
     },
+    "0x676d": {
+        "address": "0x00000000000d0005",
+        "description": "PPE External Interface DBGPRO",
+        "name": "PPE_XIDBGPRO"
+    },
     "0x6879": {
         "address": "0x0000000008011469",
         "description": "Odyssey chip MBS Memory Scrub/Read Error Count Register",
@@ -588,6 +733,11 @@
         "address": "0x0000000008011402",
         "description": "Odyssey chip MCBIST_FIR MASK",
         "name": "MCBIST_FIR_MASK"
+    },
+    "0x6b57": {
+        "address": "0x0000000001010001",
+        "description": "TP PSCOMLE error register",
+        "name": "TP_PSCOM_STAT_ERR"
     },
     "0x6bb7": {
         "address": "0x000000000801280f",
@@ -664,6 +814,11 @@
         "description": "Global Checkstop Attention FIR",
         "name": "GFIR_CS"
     },
+    "0x7b6c": {
+        "address": "0x00000000000d0015",
+        "description": "PPE PIBMEM Status Register",
+        "name": "PPE_PIBMEM_STATUS_REG"
+    },
     "0x7b7b": {
         "address": "0x000000000801147e",
         "description": "Odyssey chip MBS Error Vector Trap Register 0",
@@ -694,6 +849,11 @@
         "description": "Odyssey chip DLX Configuration1 Register",
         "name": "DLX_CONFIG1"
     },
+    "0x7f46": {
+        "address": "0x00000000000d000f",
+        "description": "PPE External Interface DBGINF",
+        "name": "PPE_XIDBGINF"
+    },
     "0x7f95": {
         "address": "0x0000000008012416",
         "description": "Odyssey chip DLX Status Register",
@@ -703,6 +863,11 @@
         "address": "0x0000000008010c06",
         "description": "Odyssey chip OCMB_PHY_FIR Special Attention Config",
         "name": "OCMB_PHY_FIR_CFG_SPA"
+    },
+    "0x81a7": {
+        "address": "0x0000000001010786",
+        "description": "TP FMU Error Report",
+        "name": "TP_FMU_ERR_RPT"
     },
     "0x839d": {
         "address": "0x0000000001040104",
@@ -764,6 +929,11 @@
         "description": "Arc ECC Indications 0",
         "name": "ARC_ECC_INDICATIONS_0"
     },
+    "0x8c2e": {
+        "address": "0x00000000000d0009",
+        "description": "PPE External Interface Icache Info",
+        "name": "PPE_XIICAC"
+    },
     "0x8c78": {
         "address": "0x800c00820801343f",
         "description": "Arc ECC Indications 1",
@@ -823,6 +993,11 @@
         "address": "0x0000000008012804",
         "description": "Odyssey chip RDF_FIR Checkstop Config 1",
         "name": "RDF_FIR_CFG_CS_1"
+    },
+    "0x99f3": {
+        "address": "0x000000000105002f",
+        "description": "TP DTS Error Register",
+        "name": "TP_DTS_ERR"
     },
     "0x9baa": {
         "address": "0x000000000801241e",
@@ -954,6 +1129,11 @@
         "description": "Odyssey chip Address Translation Register 0",
         "name": "MC_ADDR_TRANS"
     },
+    "0xbb41": {
+        "address": "0x00000000000d001b",
+        "description": "PPE ECC Capture Register",
+        "name": "PPE_ECC_CAPTURE_REG"
+    },
     "0xbb73": {
         "address": "0x00000000080114d6",
         "description": "Odyssey chip Address Generator Configuration Register",
@@ -998,6 +1178,11 @@
         "address": "0x0000000008011401",
         "description": "Odyssey OCMB target MCBIST_FIR OR",
         "name": "MCBIST_FIR_OR"
+    },
+    "0xc504": {
+        "address": "0x0000000008010001",
+        "description": "MEM PSCOMLE error register",
+        "name": "MEM_PSCOM_STATUS_ERR"
     },
     "0xc537": {
         "address": "0x0000000008011455",
@@ -1053,6 +1238,11 @@
         "address": "0x000000000801240e",
         "description": "Odyssey chip DLX CMN Configuration Register",
         "name": "CMN_CONFIG"
+    },
+    "0xd700": {
+        "address": "0x00000000000a0001",
+        "description": "Reset Register Fast Mode",
+        "name": "RESET_REG_B"
     },
     "0xd79c": {
         "address": "0x000000000801146c",
@@ -1239,6 +1429,11 @@
         "description": "Odyssey chip MCBIST Modal Symbol Counter Register 1",
         "name": "MBSSYMEC1"
     },
+    "0xe771": {
+        "address": "0x00000000000d0007",
+        "description": "PPE External Interface MEM Info",
+        "name": "PPE_XIMEM"
+    },
     "0xe790": {
         "address": "0x0000000008012002",
         "description": "Odyssey chip TLX_FIR MASK",
@@ -1273,6 +1468,11 @@
         "address": "0x0000000008040040",
         "description": "MEM Chiplet Checkstop FIR MASK",
         "name": "CFIR_MEM_CS_MASK"
+    },
+    "0xeb21": {
+        "address": "0x000000000103000f",
+        "description": "TP Error Status",
+        "name": "TP_ERR_STATUS"
     },
     "0xec03": {
         "address": "0x000000000801145e",
