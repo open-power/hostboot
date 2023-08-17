@@ -27,6 +27,7 @@
 #define OCMBUPD_HELPERS_H
 
 #include <ody_upd_fsm.H>
+#include <hwp_return_codes.H>
 
 #define HANDLE_ODY_HWP_ERROR(ISTEP_NAME, HWP, STEP_ERR, OCMB, ERRL)     \
     ({                                                                  \
@@ -37,9 +38,18 @@
         {                                                               \
             if (ocmbupd::odysseyCodeUpdateSupported() && TARGETING::UTIL::isOdysseyChip(M_ocmb)) \
             {                                                           \
+                ocmbupd::ody_upd_event_t M_update_event = ocmbupd::OCMB_HWP_FAIL_OTHER; \
+                if(M_errl->getUserData1() == fapi2::RC_UNSUPPORTED_ATTR_LEVEL) \
+                {                                                       \
+                    TRACISTEP(INFO_MRK #ISTEP_NAME ": HWP signaled incompatible "\
+                              "attribute levels for Odyssey 0x%08x.",   \
+                              get_huid(M_ocmb));                                 \
+                    M_update_event = ocmbupd::ATTRS_INCOMPATIBLE;       \
+                }                                                       \
+                                                                        \
                 if (auto M_upd_errl =                                   \
                     ocmbupd::ody_upd_process_event(M_ocmb,              \
-                                                   ocmbupd::OCMB_HWP_FAIL_OTHER, \
+                                                   M_update_event,      \
                                                    M_errl))             \
                 {                                                       \
                     TRACISTEP(ERR_MRK #ISTEP_NAME ": ody_upd_process_event(0x%08x) " \
