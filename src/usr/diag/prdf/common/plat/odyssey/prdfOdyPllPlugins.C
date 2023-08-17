@@ -80,6 +80,75 @@ int32_t queryPllUnlock(ExtensibleChip* i_chip, bool& o_attn)
 PRDF_PLUGIN_DEFINE(odyssey_ocmb, queryPllUnlock);
 
 //------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
+
+/**
+ * @brief  Clears PLL unlock attentions on this chip.
+ * @param  i_chip An OCMB chip.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
+ */
+int32_t clearPllUnlock(ExtensibleChip* i_chip)
+{
+    // Clear the attention by clearing BC_OR_PCBSLV_ERROR[24:31]. Note this
+    // register is "write-to-clear". So setting a bit to 1 will tell hardware to
+    // clear the bit.
+    auto err = i_chip->getRegister("BC_OR_PCBSLV_ERROR");
+    err->clearAllBits();
+    err->SetBitFieldJustified(24, 8, 0xFF);
+    err->Write();
+
+    // Clear the PCB slave error bit in the TP_LOCAL_FIR (by setting the bit).
+    auto fir = i_chip->getRegister("TP_LOCAL_FIR");
+    fir->clearAllBits();
+    fir->SetBit(18);
+    fir->Write();
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, clearPllUnlock);
+
+#endif // __HOSTBOOT_MODULE
+
+//------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
+
+/**
+ * @brief  Masks PLL unlock attentions on this chip.
+ * @param  i_chip An OCMB chip.
+ * @return Non-SUCCESS on failure. SUCCESS, otherwise.
+ */
+int32_t maskPllUnlock(ExtensibleChip* i_chip)
+{
+    // Mask PLL unlock attentions by setting xx_PCBSLV_CONFIG[12:19] in each
+    // chiplet to all 1's using a read-modify-write.
+
+    auto tp_config = i_chip->getRegister("TP_PCBSLV_CONFIG");
+    if (SUCCESS == tp_config->Read())
+    {
+        tp_config->SetBitFieldJustified(12, 8, 0xFF);
+        tp_config->Write();
+    }
+
+    auto mem_config = i_chip->getRegister("MEM_PCBSLV_CONFIG");
+    if (SUCCESS == mem_config->Read())
+    {
+        mem_config->SetBitFieldJustified(12, 8, 0xFF);
+        mem_config->Write();
+    }
+
+    // Do NOT mask the PCB slave error bit in the TP_LOCAL_FIR because that bit
+    // also reports parity errors. Masking the underlying bits should be enough.
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, maskPllUnlock);
+
+#endif // __HOSTBOOT_MODULE
+
+//------------------------------------------------------------------------------
+
 } // end namespace odyssey_ocmb
 
 } // end namespace PRDF

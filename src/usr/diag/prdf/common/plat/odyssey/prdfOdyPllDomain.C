@@ -206,6 +206,32 @@ int32_t OdyPllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         }
     }
 
+#ifdef __HOSTBOOT_MODULE // Special cases for Hostboot/HBRT only
+
+    // Increment the threshold counter. If at threshold, make the log predictive
+    // and mask PLL unlock attentions on all chips in the domain.
+    if (iv_thPll.inc(io_sc))
+    {
+        io_sc.service_data->setPredictive();
+
+        for (unsigned int index = 0; index < GetSize(); ++index)
+        {
+            auto chip = LookUp(index);
+            auto func = chip->getExtensibleFunction("maskPllUnlock");
+            (*func)(chip, PluginDef::bindParm<void*>(nullptr));
+        }
+    }
+
+    // Clear PLL unlock attentions on all chips in the domain.
+    for (unsigned int index = 0; index < GetSize(); ++index)
+    {
+        auto chip = LookUp(index);
+        auto func = chip->getExtensibleFunction("clearPllUnlock");
+        (*func)(chip, PluginDef::bindParm<void*>(nullptr));
+    }
+
+#endif // Special cases
+
     return SUCCESS;
 }
 

@@ -42,6 +42,10 @@
 
 #include <prdfP10ProcExtraSig.H>
 
+#ifdef __HOSTBOOT_MODULE
+#include <prdfOcmbChipDomain.H>
+#endif
+
 using namespace TARGETING;
 
 namespace PRDF
@@ -513,6 +517,9 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // masking/clearing attentions on a single chip. However, if there were ANY
     // active attentions we would want clear/mask PLL unlock attentions on all
     // chips due to the rules specified in the design dococument.
+    // In addition, Odyssey PLL unlock attentions can be side effect attentions
+    // of RCS OSC errors and P10 PLL unlocks. Therefore, they must be masked
+    // and cleared as well.
     if (!maskErrTypes.empty())
     {
         for (unsigned int index = 0; index < GetSize(); ++index)
@@ -520,6 +527,19 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             ExtensibleChip* chip = LookUp(index);
             maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_0);
             maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_1);
+        }
+
+        // Mask PLL unlock attentions on all Odyssey chips. Note that this is
+        // the full system OCMB chip domain and not the PLL domains. 
+        auto ocmbDomain = (OcmbChipDomain *)systemPtr->GetDomain(OCMB_DOMAIN);
+        for (unsigned int index = 0; index < ocmbDomain->GetSize(); ++index)
+        {
+            auto chip = ocmbDomain->LookUp(index);
+            if (isOdysseyOcmb(chip->getTrgt()))
+            {
+                auto func = chip->getExtensibleFunction("maskPllUnlock");
+                (*func)(chip, PluginDef::bindParm<void*>(nullptr));
+            }
         }
     }
     if (!clearErrTypes.empty())
@@ -529,6 +549,19 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             ExtensibleChip* chip = LookUp(index);
             clearErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_0);
             clearErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_1);
+        }
+
+        // Clear PLL unlock attentions on all Odyssey chips. Note that this is
+        // the full system OCMB chip domain and not the PLL domains. 
+        auto ocmbDomain = (OcmbChipDomain *)systemPtr->GetDomain(OCMB_DOMAIN);
+        for (unsigned int index = 0; index < ocmbDomain->GetSize(); ++index)
+        {
+            auto chip = ocmbDomain->LookUp(index);
+            if (isOdysseyOcmb(chip->getTrgt()))
+            {
+                auto func = chip->getExtensibleFunction("clearPllUnlock");
+                (*func)(chip, PluginDef::bindParm<void*>(nullptr));
+            }
         }
     }
 
