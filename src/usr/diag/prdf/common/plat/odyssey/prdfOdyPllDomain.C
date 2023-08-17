@@ -25,6 +25,7 @@
 
 #include <UtilHash.H>
 #include <iipServiceDataCollector.h>
+#include <iipSystem.h>
 #include <iipsdbug.h>
 #include <prdfOdyExtraSig.H>
 #include <prdfOdyPllDomain.H>
@@ -55,6 +56,24 @@ bool OdyPllDomain::Query(ATTENTION_TYPE i_attnType)
     }
 
 #ifdef __HOSTBOOT_MODULE
+
+    // Due to clock issues some chips may be moved to non-functional during
+    // analysis. In this case, these chips will need to be removed from the
+    // domains. Only valid to do for Hostboot/HBRT because the functional status
+    // is only synched to FSP at select times.
+    std::vector<ExtensibleChip*> nfchips;
+    for (unsigned int index = 0; index < GetSize(); ++index)
+    {
+        ExtensibleChip* chip = LookUp(index);
+        if (!PlatServices::isFunctional(chip->getTrgt()))
+        {
+            nfchips.push_back(chip);
+        }
+    }
+    for (const auto& chip : nfchips)
+    {
+        systemPtr->RemoveStoppedChips(chip->getTrgt());
+    }
 
     // In an effort to avoid unnecessry SCOMs to hardware, we can query the
     // list of chips with attentions that ATTN passes to PRD. Note that this
@@ -172,6 +191,10 @@ int32_t OdyPllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         // captured by default during normal analysis.
         chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
                                Util::hashString("default_pll_ffdc"));
+
+        // PLL unlock attentions could have downstream effects. Link this log to
+        // any possible recent HWP failures.
+        PlatServices::hwpErrorIsolation(chip, io_sc);
     }
 
     // Capture more FFDC, if possible. The reason this is here in a separate
@@ -228,6 +251,29 @@ int32_t OdyPllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         auto chip = LookUp(index);
         auto func = chip->getExtensibleFunction("clearPllUnlock");
         (*func)(chip, PluginDef::bindParm<void*>(nullptr));
+    }
+
+#else // Special cases for FSP only
+
+    // Set the dump content for system checkstop analysis.
+    io_sc.service_data->SetDump(CONTENT_HW, procTrgt);
+
+    // TODO: RTC 184513 - It is possible to have a PLL unlock, a UE RE, and an
+    // SUE CS. Isolation should be to the PLL error and then the additional FFDC
+    // should show there was an SUE CS were the root is the UE RE. However, PRD
+    // does not know how to handle three attentions at the same time. For now
+    // this will remain a limitation due to time constraints, but there is a
+    // proposal in RTC 184513 that will be solved later. In the meantime, there
+    // is a hole in our analysis that needs to be fixed. If there is an SUE CS
+    // and no UE RE, PRD assumes the UE RE was already predictively called out
+    // in a previous error log. Therefore, nothing will be guarded in this error
+    // log. In the example stated above, the current PRD code will not see the
+    // UE RE because of the higher priority PLL unlock. So even though there is
+    // a UE RE present, nothing gets guarded. To circumvent this, we will set
+    // the UE RE flag here even though the PLL error is not the true SUE source.
+    if (CHECK_STOP == io_sc.service_data->getPrimaryAttnType())
+    {
+        io_sc.service_data->SetUERE();
     }
 
 #endif // Special cases
