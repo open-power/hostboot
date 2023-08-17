@@ -40,3 +40,4 @@ prd_obj += prdfOdyPllDomain.o
 
 # rule plugin related
 prd_rule_plugin += prdfOdysseyPlugins_common.o
+prd_rule_plugin += prdfOdyPllPlugins.o

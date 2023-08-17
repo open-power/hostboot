@@ -1291,3 +1291,19 @@
         capture     group arc_1_regs;
     };
 
+    ############################################################################
+    # PLL FFDC Regs
+    ############################################################################
+
+    # When reading this virtual register, we can query bits 24:31 to determine
+    # if there is a PLL error on at least one chiplet. This avoids looping on
+    # all chiplets. This virtual register also gives us the ability to write the
+    # same value to the PCBSLV_ERROR registers for all chiplets with a single
+    # SCOM access.
+    register BC_OR_PCBSLV_ERROR
+    {
+        name        "Broadcast OR of PCBSLV error registers from all chiplets";
+        scomaddr    0x470F001F;
+        capture     group pll_ffdc;
+    };
+

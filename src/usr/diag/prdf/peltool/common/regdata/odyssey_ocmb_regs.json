@@ -839,6 +839,11 @@
         "description": "Odyssey chip OCMB_PHY_FIR Checkstop Config",
         "name": "OCMB_PHY_FIR_CFG_CS"
     },
+    "0xa380": {
+        "address": "0x00000000470f001f",
+        "description": "Broadcast OR of PCBSLV error registers from all chiplets",
+        "name": "BC_OR_PCBSLV_ERROR"
+    },
     "0xa412": {
         "address": "0x000000000801201c",
         "description": "Odyssey chip TLX Error Report Register 0",

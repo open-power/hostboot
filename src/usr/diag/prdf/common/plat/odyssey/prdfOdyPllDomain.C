@@ -23,7 +23,9 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+#include <iipServiceDataCollector.h>
 #include <iipsdbug.h>
+#include <prdfOdyExtraSig.H>
 #include <prdfOdyPllDomain.H>
 #include <prdfPlatServices.H>
 
@@ -51,7 +53,7 @@ bool OdyPllDomain::Query(ATTENTION_TYPE i_attnType)
         return false;
     }
 
-    #ifdef __HOSTBOOT_MODULE
+#ifdef __HOSTBOOT_MODULE
 
     // In an effort to avoid unnecessry SCOMs to hardware, we can query the
     // list of chips with attentions that ATTN passes to PRD. Note that this
@@ -67,9 +69,9 @@ bool OdyPllDomain::Query(ATTENTION_TYPE i_attnType)
     // to the list of chips it passes to PRD. This will be checked later when we
     // iterate the chips in the domain.
     bool checkOcmbs = false;
-    #ifndef __HOSTBOOT_RUNTIME
+#ifndef __HOSTBOOT_RUNTIME
     checkOcmbs = (0 != getSystemTarget()->getAttr<ATTR_ATTN_CHK_OCMBS>());
-    #endif
+#endif
 
     // When the ATTR_ATTN_CHK_OCMBS attribute is set to zero, there will only be
     // processor chips in the attention list. So the best we can do is look at
@@ -87,13 +89,13 @@ bool OdyPllDomain::Query(ATTENTION_TYPE i_attnType)
         }
     }
 
-    #endif // __HOSTBOOT_MODULE
+#endif // __HOSTBOOT_MODULE
 
     for (unsigned int index = 0; index < GetSize(); ++index)
     {
         ExtensibleChip* chip = LookUp(index);
 
-        #ifdef __HOSTBOOT_MODULE
+#ifdef __HOSTBOOT_MODULE
 
         // When the ATTR_ATTN_CHK_OCMBS attribute is set to a non-zero value,
         // check if this chip is in the list of chips with active attentions.
@@ -106,21 +108,12 @@ bool OdyPllDomain::Query(ATTENTION_TYPE i_attnType)
             }
         }
 
-        #endif // __HOSTBOOT_MODULE
+#endif // __HOSTBOOT_MODULE
 
-        auto fir = chip->getRegister("TP_LOCAL_FIR");
-        auto msk = chip->getRegister("TP_LOCAL_FIR_MASK");
-        auto err = chip->getRegister("BC_OR_PCBSLV_ERROR");
-
-        int32_t rc = SUCCESS;
-
-        // clang-format off
-        do {
-            rc = fir->Read(); if (SUCCESS != rc) break;
-            rc = msk->Read(); if (SUCCESS != rc) break;
-            rc = err->Read(); if (SUCCESS != rc) break;
-        } while (0);
-        // clang-format on
+        // Query this chip for an active attention.
+        bool attn  = false;
+        auto func  = chip->getExtensibleFunction("queryPllUnlock");
+        int32_t rc = (*func)(chip, PluginDef::bindParm<bool&>(attn));
 
         if (PRD_POWER_FAULT == rc)
         {
@@ -130,16 +123,13 @@ bool OdyPllDomain::Query(ATTENTION_TYPE i_attnType)
         }
         else if (SUCCESS != rc)
         {
-            PRDF_ERR("[OdyPllDomain::Query] SCOM failed: rc=%x chip=0x%08x",
-                     rc, chip->getHuid());
+            PRDF_ERR("[OdyPllDomain::Query] SCOM failed: rc=%x chip=0x%08x", rc,
+                     chip->getHuid());
             continue; // Try the next chip.
         }
-
-        // If TP_LOCAL_FIR[18] set and BC_OR_PCBSLV_ERROR[24:31] has a non-zero
-        // value, there is a PLL unlock error on this chip.
-        if (fir->IsBitSet(18) && !msk->IsBitSet(18) &&
-            (0 != err->GetBitFieldJustified(24, 8)))
+        else if (attn)
         {
+            // There is an active attention. So add this chip to the list.
             iv_pllChips.push_back(chip);
         }
     }
@@ -152,7 +142,52 @@ bool OdyPllDomain::Query(ATTENTION_TYPE i_attnType)
 int32_t OdyPllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
                               ATTENTION_TYPE i_attnType)
 {
-    // TODO
+    // This function should never be called when iv_pllChips is empty. That
+    // would be an internal logic error.
+    if (iv_pllChips.empty())
+    {
+        PRDF_ERR("[OdyPllDomain::Analyze] no active attentions");
+        return PRD_INTERNAL_CODE_ERROR;
+    }
+
+    // Get the first OCMB in the list and the connected processor chip. These
+    // will be useful in several places where iterating will not be necessary.
+    // Reminder: there should only be one connected processor per Odyssey PLL
+    // domain.
+    auto firstTrgt = iv_pllChips.front()->getTrgt();
+    auto procTrgt  = getConnectedParent(firstTrgt, TYPE_PROC);
+
+    // Set the primary signature indicating there was a PLL unlock. Just use the
+    // first OCMB in the list if there are more than one.
+    io_sc.service_data->setSignature(getHuid(firstTrgt), PRDFSIG_PLL_UNLOCK);
+
+    for (const auto& chip : iv_pllChips)
+    {
+        // Add the error signature for each chip to the multi-signature list.
+        io_sc.service_data->AddSignatureList(chip->getTrgt(),
+                                             PRDFSIG_PLL_UNLOCK);
+    }
+
+    // The hardware callouts will be all OCMBs with PLL unlock attentions and
+    // the connected processor chip. The callout priorities are dependent on the
+    // number of chips at attention.
+    if (1 == iv_pllChips.size())
+    {
+        // There is only one OCMB chip with a PLL unlock. So, the error is
+        // likely in the OCMB.
+        io_sc.service_data->SetCallout(firstTrgt, MRU_HIGH, GARD);
+        io_sc.service_data->SetCallout(procTrgt, MRU_LOW, NO_GARD);
+    }
+    else
+    {
+        // There are more than one OCMB chip with a PLL unlock. So, the error is
+        // likely the clock source, which is the processor.
+        io_sc.service_data->SetCallout(procTrgt, MRU_HIGH, GARD);
+        for (const auto& ocmb : iv_pllChips)
+        {
+            io_sc.service_data->SetCallout(ocmb->getTrgt(), MRU_LOW, NO_GARD);
+        }
+    }
 
     return SUCCESS;
 }

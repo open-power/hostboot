@@ -620,6 +620,7 @@
         "0xcccc0000": "MC_OMI_DL_FIR[5]: OMI-DL0 running in degraded mode, KVCO=2",
         "0xcccc0001": "MC_OMI_DL_FIR[25]: OMI-DL1 running in degraded mode, KVCO=2",
         "0xcccc0002": "OMIDLFIR[5]: OMI-DL0 running in degraded mode, KVCO=2",
-        "0xffff009f": "Root cause of CRC error found in PAU_PHY_FIR"
+        "0xffff009f": "Root cause of CRC error found in PAU_PHY_FIR",
+        "0x00ed0007": "PLL unlock"
     }
 }
