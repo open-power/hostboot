@@ -23,6 +23,7 @@
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
 
+#include <UtilHash.H>
 #include <iipServiceDataCollector.h>
 #include <iipsdbug.h>
 #include <prdfOdyExtraSig.H>
@@ -166,6 +167,22 @@ int32_t OdyPllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
         // Add the error signature for each chip to the multi-signature list.
         io_sc.service_data->AddSignatureList(chip->getTrgt(),
                                              PRDFSIG_PLL_UNLOCK);
+
+        // Capture any registers needed for PLL analysis, which would be
+        // captured by default during normal analysis.
+        chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
+                               Util::hashString("default_pll_ffdc"));
+    }
+
+    // Capture more FFDC, if possible. The reason this is here in a separate
+    // loop from above is that there is only so much space for FFDC and we are
+    // capturing a lot of registers. The registers we captured above are
+    // essential for debug and the rest of the registers are only useful if we
+    // have the room.
+    for (const auto& chip : iv_pllChips)
+    {
+        chip->CaptureErrorData(io_sc.service_data->GetCaptureData(),
+                               Util::hashString("pll_ffdc"));
     }
 
     // The hardware callouts will be all OCMBs with PLL unlock attentions and

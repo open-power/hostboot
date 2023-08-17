@@ -1,4 +1,9 @@
 {
+    "0x0288": {
+        "address": "0x00000000080f001f",
+        "description": "MEM PCBSLV error register",
+        "name": "MEM_PCBSLV_ERROR"
+    },
     "0x0569": {
         "address": "0x0000000008013000",
         "description": "Odyssey chip ODP_FIR 0",
@@ -724,6 +729,11 @@
         "description": "Odyssey chip OCMB_PHY_FIR Unit Checkstop Config",
         "name": "OCMB_PHY_FIR_CFG_UCS"
     },
+    "0x865d": {
+        "address": "0x00000000010f001e",
+        "description": "TP PCBSLV config register",
+        "name": "TP_PCBSLV_CONFIG"
+    },
     "0x8675": {
         "address": "0x0000000008011007",
         "description": "Odyssey chip SRQ_FIR Unit Checkstop Config",
@@ -1114,6 +1124,11 @@
         "description": "Odyssey chip TLX Configuration Register 2",
         "name": "TLX_CFG_2"
     },
+    "0xe1c8": {
+        "address": "0x00000000010f001f",
+        "description": "TP PCBSLV error register",
+        "name": "TP_PCBSLV_ERROR"
+    },
     "0xe288": {
         "address": "0x000000000801200f",
         "description": "Odyssey chip TLX Configuration Register 3",
@@ -1278,6 +1293,11 @@
         "address": "0x0000000008011460",
         "description": "Odyssey chip MCBIST Modal Symbol Counter Register 8",
         "name": "MBSSYMEC8"
+    },
+    "0xee62": {
+        "address": "0x00000000080f001e",
+        "description": "MEM PCBSLV config register",
+        "name": "MEM_PCBSLV_CONFIG"
     },
     "0xeed7": {
         "address": "0x0000000008011810",

@@ -56,6 +56,7 @@ chip odyssey_ocmb
         name        "Global Checkstop Attention FIR";
         scomaddr    0x570F001C;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -67,6 +68,7 @@ chip odyssey_ocmb
         name        "Global Recoverable Attention FIR";
         scomaddr    0x570F001B;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -78,6 +80,7 @@ chip odyssey_ocmb
         name        "Global Special Attention FIR";
         scomaddr    0x570F001A;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -89,6 +92,7 @@ chip odyssey_ocmb
         name        "Global Unit Checkstop Attention FIR";
         scomaddr    0x570F002A;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -100,6 +104,7 @@ chip odyssey_ocmb
         name        "TP Chiplet Checkstop FIR";
         scomaddr    0x01040000;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register CFIR_TP_RE
@@ -107,6 +112,7 @@ chip odyssey_ocmb
         name        "TP Chiplet Recoverable FIR";
         scomaddr    0x01040001;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register CFIR_TP_SPA
@@ -114,6 +120,7 @@ chip odyssey_ocmb
         name        "TP Chiplet Special Attention FIR";
         scomaddr    0x01040002;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register CFIR_TP_UCS
@@ -121,6 +128,7 @@ chip odyssey_ocmb
         name        "TP Chiplet Unit Checkstop FIR";
         scomaddr    0x01040003;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register CFIR_TP_CS_MASK
@@ -128,6 +136,7 @@ chip odyssey_ocmb
         name        "TP Chiplet Checkstop FIR MASK";
         scomaddr    0x01040040;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register CFIR_TP_RE_MASK
@@ -135,6 +144,7 @@ chip odyssey_ocmb
         name        "TP Chiplet Recoverable FIR MASK";
         scomaddr    0x01040041;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register CFIR_TP_SPA_MASK
@@ -142,6 +152,7 @@ chip odyssey_ocmb
         name        "TP Chiplet Special Attention FIR MASK";
         scomaddr    0x01040042;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     register CFIR_TP_UCS_MASK
@@ -149,6 +160,7 @@ chip odyssey_ocmb
         name        "TP Chiplet Unit Checkstop FIR MASK";
         scomaddr    0x01040043;
         capture     group default;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################
@@ -162,6 +174,7 @@ chip odyssey_ocmb
         reset       (^, 0x01040100);
         mask        (|, 0x01040103);
         capture     group ocmb_regs;
+        capture     group default_pll_ffdc;
     };
 
     register TP_LOCAL_FIR_MASK
@@ -169,6 +182,7 @@ chip odyssey_ocmb
         name        "Odyssey chip TP_LOCAL_FIR MASK";
         scomaddr    0x01040102;
         capture     group ocmb_regs;
+        capture     group default_pll_ffdc;
     };
 
     register TP_LOCAL_FIR_CFG_CS
@@ -176,6 +190,7 @@ chip odyssey_ocmb
         name        "Odyssey chip TP_LOCAL_FIR Checkstop Config";
         scomaddr    0x01040104;
         capture     group ocmb_regs;
+        capture     group default_pll_ffdc;
     };
 
     register TP_LOCAL_FIR_CFG_RE
@@ -183,6 +198,7 @@ chip odyssey_ocmb
         name        "Odyssey chip TP_LOCAL_FIR Recoverable Config";
         scomaddr    0x01040105;
         capture     group ocmb_regs;
+        capture     group default_pll_ffdc;
     };
 
     register TP_LOCAL_FIR_CFG_SPA
@@ -190,6 +206,7 @@ chip odyssey_ocmb
         name        "Odyssey chip TP_LOCAL_FIR Special Attention Config";
         scomaddr    0x01040106;
         capture     group ocmb_regs;
+        capture     group default_pll_ffdc;
     };
 
     register TP_LOCAL_FIR_CFG_UCS
@@ -197,6 +214,7 @@ chip odyssey_ocmb
         name        "Odyssey chip TP_LOCAL_FIR Unit Checkstop Config";
         scomaddr    0x01040107;
         capture     group ocmb_regs;
+        capture     group default_pll_ffdc;
     };
 
     register TP_LOCAL_FIR_WOF
@@ -204,6 +222,7 @@ chip odyssey_ocmb
         name        "Odyssey chip TP_LOCAL_FIR WOF";
         scomaddr    0x01040108;
         capture     group ocmb_regs;
+        capture     group default_pll_ffdc;
     };
 
     ############################################################################

@@ -1307,3 +1307,31 @@
         capture     group pll_ffdc;
     };
 
+    register TP_PCBSLV_CONFIG
+    {
+        name        "TP PCBSLV config register";
+        scomaddr    0x010F001E;
+        capture     group pll_ffdc;
+    };
+
+    register TP_PCBSLV_ERROR
+    {
+        name        "TP PCBSLV error register";
+        scomaddr    0x010F001F;
+        capture     group pll_ffdc;
+    };
+
+    register MEM_PCBSLV_CONFIG
+    {
+        name        "MEM PCBSLV config register";
+        scomaddr    0x080F001E;
+        capture     group pll_ffdc;
+    };
+
+    register MEM_PCBSLV_ERROR
+    {
+        name        "MEM PCBSLV error register";
+        scomaddr    0x080F001F;
+        capture     group pll_ffdc;
+    };
+
