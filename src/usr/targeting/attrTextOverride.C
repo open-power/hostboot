@@ -239,6 +239,20 @@ bool isTab(char i_char)
 
 
 /**
+ * @brief Check if input char is a tab or space character
+ *
+ * @param[in]  i_char   Input char
+ *
+ * @return True if input char is a tab or space, else false
+ */
+bool isWhiteSpace(char i_char)
+{
+    return ( isspace(i_char) ||
+             isTab(i_char) );
+}
+
+
+/**
  * @brief Return string pointer to next char that is not white space
  *
  * @param[in]  i_strPtr   Input string pointer
@@ -247,8 +261,7 @@ bool isTab(char i_char)
  */
 char* nextVisibleChar( char* i_strPtr )
 {
-    while(isspace(*i_strPtr) ||
-          isTab(*i_strPtr))
+    while( isWhiteSpace(*i_strPtr) )
     {
         i_strPtr++;
     }
@@ -266,8 +279,7 @@ char* nextVisibleChar( char* i_strPtr )
 char* nextWhiteSpaceChar( char* i_strPtr )
 {
     while(isprint(*i_strPtr) &&
-          !isspace(*i_strPtr) &&
-          !isTab(*i_strPtr))
+          !isWhiteSpace(*i_strPtr))
     {
         i_strPtr++;
     }
@@ -291,8 +303,7 @@ void removeTrailingWhiteSpace( char* i_strPtr )
     // white space, will also prevent the array index from going negative
     if (l_strLen)
     {
-        while ( isspace(i_strPtr[l_strLen-1]) ||
-                isTab(i_strPtr[l_strLen-1]) )
+        while ( isWhiteSpace(i_strPtr[l_strLen-1]) )
         {
             // Make the last char the end-of-string
             // then get the new strlen
@@ -1937,9 +1948,6 @@ bool validateTargLine(char * i_line )
     // At this point the "target =" and
     //  any preceeding white space has been stripped
 
-    // Strip off trailing white space
-    removeTrailingWhiteSpace(l_line);
-
     // The header encoding needs to be validated for a System Target
     l_tgtTypeRc = validateSysSubstr( l_line );
 
@@ -2129,6 +2137,7 @@ errlHndl_t pnorAttrDataCheck( const char * i_pnorData, size_t& o_dataSize )
     do
     {
         if (isprint(*i_pnorData) ||
+            isWhiteSpace(*i_pnorData) ||
             isNewLine(*i_pnorData))
         {
             o_dataSize++;
@@ -2307,6 +2316,9 @@ errlHndl_t attrTextOverride( const PNOR::SectionInfo_t &i_sectionInfo )
 
             // Change the newline character to the end-of-string character
             l_line[l_newlineOffset] = '\0';
+
+            // Strip off trailing white space
+            removeTrailingWhiteSpace(l_line);
 
             if ( OVERRIDE_DEBUG_ENABLED )
             {
