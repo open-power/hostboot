@@ -1048,6 +1048,15 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
     do
     {
 
+    if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>())
+    {
+        TRACF(INFO_MRK"ody_upd_process_event(HUID=0x%08X): No handling for MPIPL; "
+              "committing error log, if any (0x%08X), and returning",
+              get_huid(i_ocmb),
+              ERRL_GETEID_SAFE(i_errlog));
+        break;
+    }
+
     if (!odysseyCodeUpdateSupported())
     {
         TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring event until support for "
@@ -1324,6 +1333,10 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
               get_huid(ocmb));
 
         errlHndl_t event_errlog = nullptr; // no error to consider here
+
+        // Note that all the threads have access to write to
+        // restart_needed in parallel; however, since they are doing
+        // simple stores (no reads), no synchronization is needed.
         errlHndl_t fsm_error = ocmbupd::ody_upd_process_event(ocmb, i_event, event_errlog, restart_needed);
 
         if (fsm_error)
