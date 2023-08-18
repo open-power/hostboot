@@ -210,6 +210,8 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
     // time for the check) because of the sort above.
     bool bootloader_needs_update = false;
 
+    const auto is_golden_side = i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>() == SPPE_BOOT_SIDE_GOLDEN;
+
     for (const auto& codelevel : codelevels)
     {
         image_type_t image_type = { };
@@ -248,14 +250,18 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
 
         static_assert(sizeof(img->image_hash) == sizeof(codelevel.hash));
 
-        /* If the hashes don't match (or if the bootloader needs
+        /* If the hashes don't match; or if the bootloader needs
            updating and this image is the runtime image (see comments
-           for bootloader_needs_update)), we need to update this
-           image. */
+           for bootloader_needs_update); or if this is the golden side
+           (the golden side is always considered out of date, because
+           it's only used to do code update); or if the caller asked
+           us to forcefully consider everything updateable; then we
+           need to update this image. */
 
         if ((bootloader_needs_update && (codelevel.type == codelevel_info_t::runtime))
-             || memcmp(&img->image_hash, &codelevel.hash, sizeof(img->image_hash))
-             || i_force_all)
+            || memcmp(&img->image_hash, &codelevel.hash, sizeof(img->image_hash))
+            || is_golden_side
+            || i_force_all)
         {
             char flashed_hash_str[25] = { }, hb_hash_str[25] = { };
             str_to_hex(flashed_hash_str, codelevel.hash, (sizeof(flashed_hash_str) - 1) / 2);

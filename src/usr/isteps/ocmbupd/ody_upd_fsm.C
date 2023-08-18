@@ -1392,11 +1392,9 @@ errlHndl_t ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
     uint64_t rt_vsn = 0, bldr_vsn = 0;
     errl = check_for_odyssey_codeupdate_needed(i_ocmb, images, &rt_vsn, &bldr_vsn);
 
-    const auto boot_side = i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>();
-
     if (!errl)
     {
-        if (!images.empty() || boot_side == SPPE_BOOT_SIDE_GOLDEN)
+        if (!images.empty())
         { // The golden side is always considered to be out of date for
           // the purposes of code update. This causes an update to always
           // happen when booting from the golden side.
@@ -1407,6 +1405,7 @@ errlHndl_t ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
             i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_UP_TO_DATE);
         }
 
+        const auto boot_side = i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>();
         const char* side_string = "golden side";
 
         if (boot_side == SPPE_BOOT_SIDE_SIDE0)

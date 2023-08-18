@@ -87,6 +87,8 @@ errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb,
  * @brief Check which Odyssey images need to be updated in the given chip, compared
  *        to what exists in PNOR.
  *
+ * @note  Assumes that ATTR_SPPE_BOOT_SIDE is set on the target.
+ *
  * @param[in] i_ocmb               The Odyssey chip.
  * @param[out] o_updates_required  The images needing update.
  * @param[out] o_rt_hash_prefix    The 64-bit prefix of the hash of the runtime code
