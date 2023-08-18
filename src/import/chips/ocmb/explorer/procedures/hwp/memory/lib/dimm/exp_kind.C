@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,94 +88,6 @@ fapi2::ReturnCode has_rcd<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TA
 {
     // Call manual accessor for ocmb_chip
     return mss::has_rcd(i_target, o_has_rcd);
-}
-
-///
-/// @brief Check if any dimm is hybrid type MDS - explorer/DIMM specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-        bool& o_is_mds )
-{
-    // Call manual accessor for dimm
-    return mss::is_mds(i_target, o_is_mds);
-}
-
-///
-/// @brief Check if any dimm is hybrid type MDS - explorer/DIMM specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        bool& o_is_mds )
-{
-    // Call manual accessor for mem_port
-    return mss::is_mds(i_target, o_is_mds);
-}
-
-///
-/// @brief Check if any dimm is hybrid type MDS - explorer/DIMM specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-        bool& o_is_mds )
-{
-    // Assume its not MDS to start
-    o_is_mds = false;
-
-    // Loop over all PORT's and determine if we have any MDS type DIMMs
-    for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
-    {
-        bool l_current_port_mds = false;
-        FAPI_TRY(is_mds<mss::mc_type::EXPLORER>(l_port, l_current_port_mds));
-        o_is_mds |= l_current_port_mds;
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-
-    return fapi2::current_err;
-}
-
-///
-/// @brief Check if any dimm is hybrid type MDS - explorer/DIMM specialization
-/// @param[in] i_target - the fapi2::Target we are starting from
-/// @param[out] o_is_mds - true iff any DIMM is hybrid type MDS
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
-///
-template<>
-fapi2::ReturnCode is_mds<mss::mc_type::EXPLORER>( const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_target,
-        bool& o_is_mds )
-{
-    // Assume it's not MDS to start
-    o_is_mds = false;
-
-    // Find and loop over omi targets
-    for (const auto& l_omi : i_target.getChildren<fapi2::TARGET_TYPE_OMI>(fapi2::TARGET_STATE_FUNCTIONAL))
-    {
-        // Find and loop over ocmb targets, checking for MDS dimms on each
-        for (const auto& l_ocmb : l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(fapi2::TARGET_STATE_FUNCTIONAL))
-        {
-            bool l_current_ocmb_mds = false;
-            FAPI_TRY(is_mds<mss::mc_type::EXPLORER>(l_ocmb, l_current_ocmb_mds));
-            o_is_mds |= l_current_ocmb_mds;
-        }
-    }
-
-    return fapi2::FAPI2_RC_SUCCESS;
-
-fapi_try_exit:
-
-    return fapi2::current_err;
 }
 
 } // end dimm ns

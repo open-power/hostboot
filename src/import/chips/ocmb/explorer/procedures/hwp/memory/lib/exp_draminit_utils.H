@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <lib/phy/exp_train_display.H>
 #include <lib/phy/exp_train_handler.H>

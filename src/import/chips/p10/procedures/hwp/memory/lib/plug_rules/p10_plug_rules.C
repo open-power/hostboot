@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/num.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <mss_explorer_attribute_getters.H>
@@ -68,7 +69,7 @@ fapi2::ReturnCode check_mds(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_targe
     bool l_mds_dimm = false;
 
     // Check if MCC contains MDS dimms
-    FAPI_TRY( mss::dimm::is_mds<mss::mc_type::EXPLORER>(i_target, l_is_mds) );
+    FAPI_TRY( mss::is_mds(i_target, l_is_mds) );
 
     // If no MDS dimms are present, skip
     if ( l_is_mds == false )
@@ -86,7 +87,7 @@ fapi2::ReturnCode check_mds(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_targe
             for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
             {
                 // Check if dimm is an MDS dimm
-                FAPI_TRY( mss::dimm::is_mds<mss::mc_type::EXPLORER>(l_dimm, l_mds_dimm) );
+                FAPI_TRY( mss::is_mds(l_dimm, l_mds_dimm) );
 
                 // If MCC contains MDS, ensure dimm is an MDS dimm
                 FAPI_ASSERT_NOEXIT( l_mds_dimm,
@@ -241,7 +242,7 @@ fapi2::ReturnCode enforce_pre_freq(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         FAPI_TRY( mss::plug_rule::check_mds(l_mcc) );
 
         // If an MDS MCC, check media targets
-        FAPI_TRY( mss::dimm::is_mds<mss::mc_type::EXPLORER>(l_mcc, l_is_mds) );
+        FAPI_TRY( mss::is_mds(l_mcc, l_is_mds) );
 
         if ( l_is_mds )
         {

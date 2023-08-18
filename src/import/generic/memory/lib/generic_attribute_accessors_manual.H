@@ -154,6 +154,19 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Check if the dimm is hybrid media type MDS
+/// @tparam T the fapi2::TargetType (derived)
+/// @param[in] i_target - the fapi2::Target we are starting from
+/// @param[out] o_is_mds - true iff any dimm is MDS
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+///
+template< fapi2::TargetType T >
+fapi2::ReturnCode is_mds( const fapi2::Target<T>& i_target,
+                          bool& o_is_mds );
+
+
+
 } // ns mss
 
 #endif

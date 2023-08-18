@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,7 @@ extern "C"
             FAPI_INF("phy scominit for %s", mss::c_str(l_port));
 
             // Check if mds and run appropriate initfile
-            FAPI_TRY( mss::dimm::is_mds<mss::mc_type::EXPLORER>(l_port, l_is_mds) );
+            FAPI_TRY( mss::is_mds(l_port, l_is_mds) );
 
             if (l_is_mds)
             {

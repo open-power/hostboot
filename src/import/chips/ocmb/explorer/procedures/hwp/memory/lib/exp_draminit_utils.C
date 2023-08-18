@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <lib/exp_attribute_accessors_manual.H>
 #include <lib/shared/exp_consts.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -177,7 +178,7 @@ fapi2::ReturnCode host_fw_phy_normal_init(
              "Failed getRSP() for  %s", mss::c_str(i_target));
 
     // Check if it is an MDS dimm to handle the correct response
-    FAPI_TRY(mss::dimm::is_mds<mss::mc_type::EXPLORER>(i_target, l_is_mds));
+    FAPI_TRY(mss::is_mds(i_target, l_is_mds));
     FAPI_MFG("%s MDS Dimms found for normal phy init", mss::c_str(i_target));
 
     // Because this is the last function before we handle the training errors, FAPI_TRY'ing here

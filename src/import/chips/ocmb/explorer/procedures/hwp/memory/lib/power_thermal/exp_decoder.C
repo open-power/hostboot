@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
+#include <generic/memory/lib/generic_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -363,7 +364,7 @@ fapi2::ReturnCode decoder<mss::mc_type::EXPLORER, throttle_traits<mss::mc_type::
     bool l_mds = false;
     uint8_t l_dimm_type = iv_kind.iv_dimm_type;
 
-    FAPI_TRY(mss::dimm::is_mds<mss::mc_type::EXPLORER>(iv_kind.iv_target, l_mds));
+    FAPI_TRY(mss::is_mds(iv_kind.iv_target, l_mds));
 
     if(l_mds)
     {
