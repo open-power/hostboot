@@ -313,9 +313,8 @@
 
   <hwpError>
     <rc>RC_ODY_INVALID_GI2C_TARGET_CONFIG</rc>
-    <description>Expected 4 GENERICI2CRESPONDER targets</description>
+    <description>RCD target not found. RCD should be at GI2C Target position 1</description>
     <ffdc>OCMB_TARGET</ffdc>
-    <ffdc>NUM_GI2CS</ffdc>
     <ffdc>RCD_TARGET_POS</ffdc>
     <callout>
       <procedure>CODE</procedure>

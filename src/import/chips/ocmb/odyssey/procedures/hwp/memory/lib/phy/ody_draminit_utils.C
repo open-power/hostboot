@@ -2814,27 +2814,35 @@ fapi_try_exit:
 fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER> get_rcd_target(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target, fapi2::ReturnCode& o_rc)
 {
-    // Get the i2c devices and grab only the one that has ATTR_REL_POS set to 1
-    const auto& I2C_DEVICES =
-        mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(i_target);
-    const uint8_t NUM_GENERICI2CRESPONDER = I2C_DEVICES.size();
     const uint8_t RCD_TARGET_POSITION = 1;
-    FAPI_ASSERT((NUM_GENERICI2CRESPONDER > RCD_TARGET_POSITION),
+
+    // Get the i2c devices and grab only the one that has ATTR_REL_POS set to 1
+    for (const auto& l_gi2c : mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(i_target))
+    {
+        uint8_t l_pos = 0;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_gi2c, l_pos));
+
+        if (l_pos == RCD_TARGET_POSITION)
+        {
+            o_rc = fapi2::FAPI2_RC_SUCCESS;
+            return l_gi2c;
+        }
+    }
+
+    // Assert if we didn't find the RCD target
+    FAPI_ASSERT(false,
                 fapi2::ODY_INVALID_GI2C_TARGET_CONFIG()
-                .set_NUM_GI2CS(NUM_GENERICI2CRESPONDER)
+                .set_OCMB_TARGET(i_target)
                 .set_RCD_TARGET_POS(RCD_TARGET_POSITION),
-                "Not enough targets %u GI2C, RCD Target position %u",
-                NUM_GENERICI2CRESPONDER,
+                TARGTIDFORMAT "RCD target not found. Looked for GI2C Target with position %d",
+                TARGTID,
                 RCD_TARGET_POSITION);
-
-    o_rc = fapi2::FAPI2_RC_SUCCESS;
-
-    return I2C_DEVICES[RCD_TARGET_POSITION];
 
 fapi_try_exit:
     o_rc = fapi2::current_err;
 
-// return empty target if fails
+    // return empty target if fails
     return fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>();
 }
 
