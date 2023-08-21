@@ -181,14 +181,31 @@ def write_pkg_header_info(pldm_fw_up_pkg, metadata):
         struct.pack("<BH", package_header_format_revision, package_header_size)
     )
 
-    try:
-        release_date_time = datetime.strptime(
-            metadata["PackageHeaderInformation"]["PackageReleaseDateTime"],
+    release_date_time_str = metadata["PackageHeaderInformation"].get(
+        "PackageReleaseDateTime", None
+    )
+
+    if release_date_time_str is not None:
+        formats = [
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%d %H:%M:%S",
             "%d/%m/%Y %H:%M:%S",
-        )
-        write_pkg_release_date_time(pldm_fw_up_pkg, release_date_time)
-    except KeyError:
-        write_pkg_release_date_time(pldm_fw_up_pkg, datetime.now())
+        ]
+        release_date_time = None
+        for fmt in formats:
+            try:
+                release_date_time = datetime.strptime(
+                    release_date_time_str, fmt
+                )
+                break
+            except ValueError:
+                pass
+        if release_date_time is None:
+            sys.exit("Can't parse release date '%s'" % release_date_time_str)
+    else:
+        release_date_time = datetime.now()
+
+    write_pkg_release_date_time(pldm_fw_up_pkg, release_date_time)
 
     component_bitmap_bit_length = write_component_bitmap_bit_length(
         pldm_fw_up_pkg, metadata

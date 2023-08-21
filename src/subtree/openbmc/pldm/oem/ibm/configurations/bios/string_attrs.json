@@ -200,6 +200,36 @@
                 "property_type": "string",
                 "property_name": "Model"
             }
+        },
+        {
+            "attribute_name": "pvm_ibmi_load_source",
+            "string_type": "ASCII",
+            "minimum_string_length": 0,
+            "maximum_string_length": 42,
+            "default_string_length": 0,
+            "default_string": "",
+            "helpText": "Specifies the load source the system will use to start the logical partition.",
+            "displayName": "Tagged IBMi Load Source"
+        },
+        {
+            "attribute_name": "pvm_ibmi_alt_load_source",
+            "string_type": "ASCII",
+            "minimum_string_length": 0,
+            "maximum_string_length": 42,
+            "default_string_length": 0,
+            "default_string": "",
+            "helpText": "Specifies the device the system will use when a D-mode initial program load (IPL) is performed.",
+            "displayName": "Tagged IBMi Alternate Load Source"
+        },
+        {
+            "attribute_name": "pvm_ibmi_console",
+            "string_type": "ASCII",
+            "minimum_string_length": 0,
+            "maximum_string_length": 42,
+            "default_string_length": 0,
+            "default_string": "",
+            "helpText": "Specifies the first workstation that the system will activate in the logical partition.",
+            "displayName": "Tagged IBMi Console"
         }
     ]
 }

@@ -27,7 +27,7 @@ MctpDiscovery::MctpDiscovery(sdbusplus::bus_t& bus,
     try
     {
         auto method = bus.new_method_call(
-            "xyz.openbmc_project.MCTP.Control", "/xyz/openbmc_project/mctp",
+            "xyz.openbmc_project.MCTP", "/xyz/openbmc_project/mctp",
             "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
         auto reply = bus.call(
             method,
@@ -50,7 +50,7 @@ MctpDiscovery::MctpDiscovery(sdbusplus::bus_t& bus,
                 if (properties.contains("EID") &&
                     properties.contains("SupportedMessageTypes"))
                 {
-                    auto eid = std::get<size_t>(properties.at("EID"));
+                    auto eid = std::get<mctp_eid_t>(properties.at("EID"));
                     auto types = std::get<std::vector<uint8_t>>(
                         properties.at("SupportedMessageTypes"));
                     if (std::find(types.begin(), types.end(), mctpTypePLDM) !=

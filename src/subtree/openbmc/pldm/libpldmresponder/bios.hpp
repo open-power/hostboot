@@ -33,9 +33,11 @@ class Handler : public CmdHandler
      *  @param[in] eid - MCTP EID of host firmware
      *  @param[in] instanceIdDb - pointer to an InstanceIdDb object
      *  @param[in] handler - PLDM request handler
+     *  @param[in] systemConfig - pointer to SystemConfig object
      */
     Handler(int fd, uint8_t eid, pldm::InstanceIdDb* instanceIdDb,
-            pldm::requester::Handler<pldm::requester::Request>* handler);
+            pldm::requester::Handler<pldm::requester::Request>* handler,
+            pldm::responder::oem_bios::Handler* oemBiosHandler);
 
     /** @brief Handler for GetDateTime
      *

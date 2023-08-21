@@ -109,6 +109,26 @@ class CommandInterface
         return mctp_eid;
     }
 
+    /**
+     * @brief get PLDM type
+     *
+     * @return pldm type
+     */
+    inline std::string getPLDMType()
+    {
+        return pldmType;
+    }
+
+    /**
+     * @brief get command name
+     *
+     * @return  the command name
+     */
+    inline std::string getCommandName()
+    {
+        return commandName;
+    }
+
   private:
     const std::string pldmType;
     const std::string commandName;

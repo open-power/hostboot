@@ -1,10 +1,10 @@
 project('pldm', ['c', 'cpp'],
-        version: '0.1', meson_version: '>=0.58.0',
+        version: '0.1', meson_version: '>=1.1.1',
         default_options: [
           'warning_level=3',
           'default_library=shared',
           'werror=true',
-          'cpp_std=c++20',
+          'cpp_std=c++23',
           'buildtype=debugoptimized'
         ])
 
@@ -66,6 +66,7 @@ config = configure_file(output: 'config.h',
 add_project_arguments('-include', '@0@'.format(config), language: 'cpp')
 
 cpp = meson.get_compiler('cpp')
+filesystem = import('fs')
 
 phosphor_dbus_interfaces = dependency('phosphor-dbus-interfaces')
 sdbusplus = dependency('sdbusplus')
@@ -83,17 +84,6 @@ if cpp.has_header('CLI/CLI.hpp')
   CLI11_dep = declare_dependency()
 else
   CLI11_dep = dependency('CLI11')
-endif
-
-if cpp.has_header_symbol('function2/function2.hpp', 'fu2::unique_function')
-  function2_dep = declare_dependency()
-else
-  subproject('function2')
-  function2_dep = declare_dependency(
-    include_directories: [
-      'subprojects/function2/include/function2'
-    ]
-  )
 endif
 
 if get_option('oe-sdk').enabled()
@@ -157,7 +147,6 @@ libpldmutils = declare_dependency(
   link_with: libpldmutils)
 
 deps = [
-  function2_dep,
   libpldm_dep,
   libpldmutils,
   nlohmann_json,
@@ -193,13 +182,11 @@ executable(
 if get_option('systemd').enabled()
   systemd_system_unit_dir = dependency('systemd').get_variable(
           'systemdsystemunitdir')
-
-  configure_file(
-    copy: true,
-    input: 'pldmd/service_files/pldmd.service',
+  filesystem.copyfile(
+    'pldmd/service_files/pldmd.service',
+    'pldmd.service',
     install: true,
-    install_dir: systemd_system_unit_dir,
-    output: 'pldmd.service',
+    install_dir: systemd_system_unit_dir
   )
 
   if get_option('oem-ibm').enabled()

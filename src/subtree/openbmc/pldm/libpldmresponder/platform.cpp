@@ -739,6 +739,11 @@ bool isOemStateSensor(Handler& handler, uint16_t sensorId,
 
     std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> stateSensorPdrRepo(
         pldm_pdr_init(), pldm_pdr_destroy);
+    if (!stateSensorPdrRepo)
+    {
+        error("Failed to instantiate state sensor PDR repository");
+        return false;
+    }
     Repo stateSensorPDRs(stateSensorPdrRepo.get());
     getRepoByType(handler.getRepo(), stateSensorPDRs, PLDM_STATE_SENSOR_PDR);
     if (stateSensorPDRs.empty())
@@ -803,6 +808,11 @@ bool isOemStateEffecter(Handler& handler, uint16_t effecterId,
 
     std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> stateEffecterPdrRepo(
         pldm_pdr_init(), pldm_pdr_destroy);
+    if (!stateEffecterPdrRepo)
+    {
+        error("Failed to instantiate state effecter PDR repository");
+        return false;
+    }
     Repo stateEffecterPDRs(stateEffecterPdrRepo.get());
     getRepoByType(handler.getRepo(), stateEffecterPDRs,
                   PLDM_STATE_EFFECTER_PDR);

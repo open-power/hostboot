@@ -29,7 +29,7 @@ class DeviceUpdater
     DeviceUpdater(const DeviceUpdater&) = delete;
     DeviceUpdater(DeviceUpdater&&) = default;
     DeviceUpdater& operator=(const DeviceUpdater&) = delete;
-    DeviceUpdater& operator=(DeviceUpdater&&) = default;
+    DeviceUpdater& operator=(DeviceUpdater&&) = delete;
     ~DeviceUpdater() = default;
 
     /** @brief Constructor

@@ -18,7 +18,6 @@ using InternalFailure =
 
 const Json emptyJson{};
 const std::vector<Json> emptyJsonList{};
-const std::vector<std::string> emptyStringVec{};
 
 const std::set<std::string_view> supportedDbusPropertyTypes = {
     "bool",     "uint8_t", "int16_t",  "uint16_t", "int32_t",

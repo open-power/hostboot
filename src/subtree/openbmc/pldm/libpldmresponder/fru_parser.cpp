@@ -24,7 +24,6 @@ using InternalFailure =
 
 const Json emptyJson{};
 const std::vector<Json> emptyJsonList{};
-const std::vector<std::string> emptyStringVec{};
 
 FruParser::FruParser(const std::string& dirPath,
                      const fs::path& fruMasterJsonPath)

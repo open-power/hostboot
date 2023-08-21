@@ -304,6 +304,11 @@ class Handler : public CmdHandler
 
         std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)>
             stateEffecterPdrRepo(pldm_pdr_init(), pldm_pdr_destroy);
+        if (!stateEffecterPdrRepo)
+        {
+            throw std::runtime_error(
+                "Failed to instantiate state effecter PDR repository");
+        }
         pldm::responder::pdr_utils::Repo stateEffecterPDRs(
             stateEffecterPdrRepo.get());
         getRepoByType(pdrRepo, stateEffecterPDRs, PLDM_STATE_EFFECTER_PDR);

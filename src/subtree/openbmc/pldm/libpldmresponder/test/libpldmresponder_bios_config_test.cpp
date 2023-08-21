@@ -2,6 +2,7 @@
 #include "common/test/mocked_utils.hpp"
 #include "libpldmresponder/bios_config.hpp"
 #include "libpldmresponder/bios_string_attribute.hpp"
+#include "libpldmresponder/oem_handler.hpp"
 #include "mocked_bios.hpp"
 
 #include <nlohmann/json.hpp>
@@ -18,6 +19,8 @@ using namespace pldm::utils;
 
 using ::testing::_;
 using ::testing::ElementsAreArray;
+using ::testing::Return;
+using ::testing::StrEq;
 using ::testing::Throw;
 
 class TestBIOSConfig : public ::testing::Test
@@ -74,15 +77,27 @@ class TestBIOSConfig : public ::testing::Test
 fs::path TestBIOSConfig::tableDir;
 std::vector<Json> TestBIOSConfig::jsons;
 
+class MockBiosSystemConfig : public pldm::responder::oem_bios::Handler
+{
+  public:
+    MockBiosSystemConfig(const pldm::utils::DBusHandler* dBusIntf) :
+        pldm::responder::oem_bios::Handler(dBusIntf)
+    {}
+    MOCK_METHOD(void, ibmCompatibleAddedCallback, (sdbusplus::message_t&), ());
+    MOCK_METHOD(std::optional<std::string>, getPlatformName, ());
+};
+
 TEST_F(TestBIOSConfig, buildTablesTest)
 {
     MockdBusHandler dbusHandler;
+
+    MockBiosSystemConfig mockBiosSystemConfig(&dbusHandler);
 
     ON_CALL(dbusHandler, getDbusPropertyVariant(_, _, _))
         .WillByDefault(Throw(std::exception()));
 
     BIOSConfig biosConfig("./bios_jsons", tableDir.c_str(), &dbusHandler, 0, 0,
-                          nullptr, nullptr);
+                          nullptr, nullptr, &mockBiosSystemConfig);
     biosConfig.buildTables();
 
     auto stringTable = biosConfig.getBIOSTable(PLDM_BIOS_STRING_TABLE);
@@ -100,6 +115,7 @@ TEST_F(TestBIOSConfig, buildTablesTest)
                                              "Perm",
                                              "Temp",
                                              "InbandCodeUpdate",
+                                             "Allowed",
                                              "Allowed",
                                              "NotAllowed",
                                              "CodeUpdatePolicy",
@@ -246,12 +262,87 @@ TEST_F(TestBIOSConfig, buildTablesTest)
     }
 }
 
+TEST_F(TestBIOSConfig, buildTablesSystemSpecificTest)
+{
+    MockdBusHandler dbusHandler;
+
+    MockBiosSystemConfig mockBiosSystemConfig(&dbusHandler);
+
+    ON_CALL(dbusHandler, getDbusPropertyVariant(_, _, _))
+        .WillByDefault(Throw(std::exception()));
+
+    BIOSConfig biosConfig("./system_type1/bios_jsons", tableDir.c_str(),
+                          &dbusHandler, 0, 0, nullptr, nullptr,
+                          &mockBiosSystemConfig);
+
+    biosConfig.buildTables();
+
+    auto stringTable = biosConfig.getBIOSTable(PLDM_BIOS_STRING_TABLE);
+    auto attrTable = biosConfig.getBIOSTable(PLDM_BIOS_ATTR_TABLE);
+    auto attrValueTable = biosConfig.getBIOSTable(PLDM_BIOS_ATTR_VAL_TABLE);
+
+    EXPECT_TRUE(stringTable);
+    EXPECT_TRUE(attrTable);
+    EXPECT_TRUE(attrValueTable);
+
+    BIOSStringTable biosStringTable(*stringTable);
+
+    for (auto entry : BIOSTableIter<PLDM_BIOS_ATTR_TABLE>(attrTable->data(),
+                                                          attrTable->size()))
+    {
+        auto header = table::attribute::decodeHeader(entry);
+        auto attrName = biosStringTable.findString(header.stringHandle);
+        auto jsonEntry = findJsonEntry(attrName);
+        EXPECT_TRUE(jsonEntry);
+        switch (header.attrType)
+        {
+            case PLDM_BIOS_STRING:
+            case PLDM_BIOS_STRING_READ_ONLY:
+            {
+                if (attrName == "str_example2")
+                {
+                    auto stringField =
+                        table::attribute::decodeStringEntry(entry);
+                    EXPECT_EQ(stringField.maxLength, 200);
+                }
+
+                break;
+            }
+            case PLDM_BIOS_INTEGER:
+            case PLDM_BIOS_INTEGER_READ_ONLY:
+            {
+                if (attrName == "SBE_IMAGE_MINIMUM_VALID_ECS")
+                {
+                    auto integerField =
+                        table::attribute::decodeIntegerEntry(entry);
+                    EXPECT_EQ(integerField.upperBound, 30);
+                }
+                break;
+            }
+            case PLDM_BIOS_ENUMERATION:
+            case PLDM_BIOS_ENUMERATION_READ_ONLY:
+            {
+                if (attrName == "FWBootSide")
+                {
+                    auto [pvHdls,
+                          defInds] = table::attribute::decodeEnumEntry(entry);
+                    auto defValue =
+                        biosStringTable.findString(pvHdls[defInds[0]]);
+                    EXPECT_EQ(defValue, "Temp");
+                }
+            }
+        }
+    }
+}
+
 TEST_F(TestBIOSConfig, setAttrValue)
 {
     MockdBusHandler dbusHandler;
 
+    MockBiosSystemConfig mockBiosSystemConfig(&dbusHandler);
+
     BIOSConfig biosConfig("./bios_jsons", tableDir.c_str(), &dbusHandler, 0, 0,
-                          nullptr, nullptr);
+                          nullptr, nullptr, &mockBiosSystemConfig);
     biosConfig.removeTables();
     biosConfig.buildTables();
 

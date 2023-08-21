@@ -41,7 +41,7 @@ class GetDateTime : public CommandInterface
     GetDateTime(const GetDateTime&) = delete;
     GetDateTime(GetDateTime&&) = default;
     GetDateTime& operator=(const GetDateTime&) = delete;
-    GetDateTime& operator=(GetDateTime&&) = default;
+    GetDateTime& operator=(GetDateTime&&) = delete;
 
     using CommandInterface::CommandInterface;
 
@@ -97,7 +97,7 @@ class SetDateTime : public CommandInterface
     SetDateTime(const SetDateTime&) = delete;
     SetDateTime(SetDateTime&&) = default;
     SetDateTime& operator=(const SetDateTime&) = delete;
-    SetDateTime& operator=(SetDateTime&&) = default;
+    SetDateTime& operator=(SetDateTime&&) = delete;
 
     explicit SetDateTime(const char* type, const char* name, CLI::App* app) :
         CommandInterface(type, name, app)
@@ -285,8 +285,9 @@ class GetBIOSTableHandler : public CommandInterface
         auto strLength =
             pldm_bios_table_string_entry_decode_string_length(stringEntry);
         std::vector<char> buffer(strLength + 1 /* sizeof '\0' */);
-        pldm_bios_table_string_entry_decode_string(stringEntry, buffer.data(),
-                                                   buffer.size());
+        // Preconditions are upheld therefore no error check necessary
+        pldm_bios_table_string_entry_decode_string_check(
+            stringEntry, buffer.data(), buffer.size());
 
         return std::string(buffer.data(), buffer.data() + strLength);
     }
@@ -332,9 +333,16 @@ class GetBIOSTableHandler : public CommandInterface
         {
             return displayString;
         }
-        auto pvNum = pldm_bios_table_attr_entry_enum_decode_pv_num(attrEntry);
+        uint8_t pvNum;
+        int rc = pldm_bios_table_attr_entry_enum_decode_pv_num_check(attrEntry,
+                                                                     &pvNum);
+        if (rc != PLDM_SUCCESS)
+        {
+            return displayString;
+        }
         std::vector<uint16_t> pvHandls(pvNum);
-        pldm_bios_table_attr_entry_enum_decode_pv_hdls(
+        // Preconditions are upheld therefore no error check necessary
+        pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(
             attrEntry, pvHandls.data(), pvHandls.size());
         return displayStringHandle(pvHandls[index], stringTable, false);
     }
@@ -448,9 +456,9 @@ class GetBIOSTable : public GetBIOSTableHandler
     ~GetBIOSTable() = default;
     GetBIOSTable() = delete;
     GetBIOSTable(const GetBIOSTable&) = delete;
-    GetBIOSTable(GetBIOSTable&&) = default;
+    GetBIOSTable(GetBIOSTable&&) = delete;
     GetBIOSTable& operator=(const GetBIOSTable&) = delete;
-    GetBIOSTable& operator=(GetBIOSTable&&) = default;
+    GetBIOSTable& operator=(GetBIOSTable&&) = delete;
 
     using Table = std::vector<uint8_t>;
 
@@ -554,13 +562,21 @@ class GetBIOSTable : public GetBIOSTableHandler
                 case PLDM_BIOS_ENUMERATION:
                 case PLDM_BIOS_ENUMERATION_READ_ONLY:
                 {
-                    auto pvNum =
-                        pldm_bios_table_attr_entry_enum_decode_pv_num(entry);
+                    uint8_t pvNum;
+                    // Preconditions are upheld therefore no error check
+                    // necessary
+                    pldm_bios_table_attr_entry_enum_decode_pv_num_check(entry,
+                                                                        &pvNum);
                     std::vector<uint16_t> pvHandls(pvNum);
-                    pldm_bios_table_attr_entry_enum_decode_pv_hdls(
+                    // Preconditions are upheld therefore no error check
+                    // necessary
+                    pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(
                         entry, pvHandls.data(), pvHandls.size());
-                    auto defNum =
-                        pldm_bios_table_attr_entry_enum_decode_def_num(entry);
+                    uint8_t defNum;
+                    // Preconditions are upheld therefore no error check
+                    // necessary
+                    pldm_bios_table_attr_entry_enum_decode_def_num_check(
+                        entry, &defNum);
                     std::vector<uint8_t> defIndices(defNum);
                     pldm_bios_table_attr_entry_enum_decode_def_indices(
                         entry, defIndices.data(), defIndices.size());
@@ -609,9 +625,11 @@ class GetBIOSTable : public GetBIOSTableHandler
                     auto max =
                         pldm_bios_table_attr_entry_string_decode_max_length(
                             entry);
-                    auto def =
-                        pldm_bios_table_attr_entry_string_decode_def_string_length(
-                            entry);
+                    uint16_t def;
+                    // Preconditions are upheld therefore no error check
+                    // necessary
+                    pldm_bios_table_attr_entry_string_decode_def_string_length_check(
+                        entry, &def);
                     std::vector<char> defString(def + 1);
                     pldm_bios_table_attr_entry_string_decode_def_string(
                         entry, defString.data(), defString.size());
@@ -756,11 +774,11 @@ class SetBIOSAttributeCurrentValue : public GetBIOSTableHandler
     ~SetBIOSAttributeCurrentValue() = default;
     SetBIOSAttributeCurrentValue() = delete;
     SetBIOSAttributeCurrentValue(const SetBIOSAttributeCurrentValue&) = delete;
-    SetBIOSAttributeCurrentValue(SetBIOSAttributeCurrentValue&&) = default;
+    SetBIOSAttributeCurrentValue(SetBIOSAttributeCurrentValue&&) = delete;
     SetBIOSAttributeCurrentValue&
         operator=(const SetBIOSAttributeCurrentValue&) = delete;
     SetBIOSAttributeCurrentValue&
-        operator=(SetBIOSAttributeCurrentValue&&) = default;
+        operator=(SetBIOSAttributeCurrentValue&&) = delete;
 
     explicit SetBIOSAttributeCurrentValue(const char* type, const char* name,
                                           CLI::App* app) :
@@ -807,10 +825,13 @@ class SetBIOSAttributeCurrentValue : public GetBIOSTableHandler
             {
                 entryLength =
                     pldm_bios_table_attr_value_entry_encode_enum_length(1);
-                auto pvNum =
-                    pldm_bios_table_attr_entry_enum_decode_pv_num(attrEntry);
+                uint8_t pvNum;
+                // Preconditions are upheld therefore no error check necessary
+                pldm_bios_table_attr_entry_enum_decode_pv_num_check(attrEntry,
+                                                                    &pvNum);
                 std::vector<uint16_t> pvHdls(pvNum, 0);
-                pldm_bios_table_attr_entry_enum_decode_pv_hdls(
+                // Preconditions are upheld therefore no error check necessary
+                pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(
                     attrEntry, pvHdls.data(), pvNum);
                 auto stringEntry = pldm_bios_table_string_find_by_string(
                     stringTable->data(), stringTable->size(),
@@ -841,9 +862,16 @@ class SetBIOSAttributeCurrentValue : public GetBIOSTableHandler
 
                 attrValueEntry.resize(entryLength);
                 std::vector<uint8_t> handles = {i};
-                pldm_bios_table_attr_value_entry_encode_enum(
+                int rc = pldm_bios_table_attr_value_entry_encode_enum_check(
                     attrValueEntry.data(), attrValueEntry.size(),
                     attrEntry->attr_handle, attrType, 1, handles.data());
+                if (rc != PLDM_SUCCESS)
+                {
+                    std::cout
+                        << "Failed to encode BIOS table attribute enum: " << rc
+                        << std::endl;
+                    return;
+                }
                 break;
             }
             case PLDM_BIOS_STRING:
@@ -855,9 +883,16 @@ class SetBIOSAttributeCurrentValue : public GetBIOSTableHandler
 
                 attrValueEntry.resize(entryLength);
 
-                pldm_bios_table_attr_value_entry_encode_string(
+                int rc = pldm_bios_table_attr_value_entry_encode_string_check(
                     attrValueEntry.data(), entryLength, attrEntry->attr_handle,
                     attrType, attrValue.size(), attrValue.c_str());
+                if (rc != PLDM_SUCCESS)
+                {
+                    std::cout
+                        << "Failed to encode BIOS table attribute string: "
+                        << rc << std::endl;
+                    return;
+                }
                 break;
             }
             case PLDM_BIOS_INTEGER:
@@ -867,9 +902,16 @@ class SetBIOSAttributeCurrentValue : public GetBIOSTableHandler
                 entryLength =
                     pldm_bios_table_attr_value_entry_encode_integer_length();
                 attrValueEntry.resize(entryLength);
-                pldm_bios_table_attr_value_entry_encode_integer(
+                int rc = pldm_bios_table_attr_value_entry_encode_integer_check(
                     attrValueEntry.data(), entryLength, attrEntry->attr_handle,
                     attrType, value);
+                if (rc != PLDM_SUCCESS)
+                {
+                    std::cout
+                        << "Failed to encode BIOS table attribute integer: "
+                        << rc << std::endl;
+                    return;
+                }
                 break;
             }
         }

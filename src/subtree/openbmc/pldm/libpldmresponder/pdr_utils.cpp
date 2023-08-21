@@ -23,8 +23,15 @@ pldm_pdr* Repo::getPdr() const
 
 RecordHandle Repo::addRecord(const PdrEntry& pdrEntry)
 {
-    return pldm_pdr_add(repo, pdrEntry.data, pdrEntry.size,
-                        pdrEntry.handle.recordHandle, false, TERMINUS_HANDLE);
+    uint32_t handle = pdrEntry.handle.recordHandle;
+    int rc = pldm_pdr_add_check(repo, pdrEntry.data, pdrEntry.size, false,
+                                TERMINUS_HANDLE, &handle);
+    if (rc)
+    {
+        // pldm_pdr_add() assert()ed on failure to add PDR
+        throw std::runtime_error("Failed to add PDR");
+    }
+    return handle;
 }
 
 const pldm_pdr_record* Repo::getFirstRecord(PdrEntry& pdrEntry)

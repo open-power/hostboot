@@ -174,6 +174,10 @@ void DbusToPLDMEvent::listenSensorEvent(const pdr_utils::Repo& repo,
     pldm_state_sensor_pdr* pdr = nullptr;
     std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> sensorPdrRepo(
         pldm_pdr_init(), pldm_pdr_destroy);
+    if (!sensorPdrRepo)
+    {
+        throw std::runtime_error("Unable to instantiate sensor PDR repository");
+    }
 
     for (auto pdrType : pdrTypes)
     {

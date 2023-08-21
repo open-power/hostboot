@@ -51,10 +51,16 @@ class BIOSTableIter
          *  @param[in] data - Pointer to a table
          *  @param[in] length - The length of the table
          */
-        explicit iterator(const void* data, size_t length) noexcept :
+        explicit iterator(const void* data, size_t length) :
             iter(pldm_bios_table_iter_create(data, length, tableType),
                  pldm_bios_table_iter_free)
-        {}
+        {
+            if (!iter)
+            {
+                throw std::runtime_error(
+                    "Unable to create bios table iterator");
+            }
+        }
 
         /** @brief Get the entry pointed by the iterator
          *

@@ -6,6 +6,7 @@
 #include "file_io_type_lid.hpp"
 #include "file_io_type_pel.hpp"
 #include "file_io_type_progress_src.hpp"
+#include "file_io_type_vpd.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <libpldm/base.h>
@@ -89,8 +90,9 @@ int FileHandler::transferFileData(const fs::path& path, bool upstream,
         if (offset >= fileSize)
         {
             error(
-                "Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE}",
-                "OFFSET", offset, "FILE_SIZE", fileSize);
+                "Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE}, FILE_HANDLE={FILE_HANDLE}",
+                "OFFSET", offset, "FILE_SIZE", fileSize, "FILE_HANDLE",
+                fileHandle);
             return PLDM_DATA_OUT_OF_RANGE;
         }
         if (offset + length > fileSize)
@@ -167,6 +169,10 @@ std::unique_ptr<FileHandler> getHandlerByType(uint16_t fileType,
             return std::make_unique<LidHandler>(fileHandle, false,
                                                 PLDM_FILE_TYPE_LID_RUNNING);
         }
+        case PLDM_FILE_TYPE_PSPD_VPD_PDD_KEYWORD:
+        {
+            return std::make_unique<keywordHandler>(fileHandle, fileType);
+        }
         default:
         {
             throw InternalFailure();
@@ -189,8 +195,9 @@ int FileHandler::readFile(const std::string& filePath, uint32_t offset,
     size_t fileSize = fs::file_size(filePath);
     if (offset >= fileSize)
     {
-        error("Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE}",
-              "OFFSET", offset, "FILE_SIZE", fileSize);
+        error(
+            "Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE} FILE_HANDLE={FILE_HANDLE}",
+            "OFFSET", offset, "FILE_SIZE", fileSize, "FILE_HANDLE", fileHandle);
         return PLDM_DATA_OUT_OF_RANGE;
     }
 

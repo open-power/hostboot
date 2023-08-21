@@ -18,9 +18,6 @@ namespace oem_ibm
 using namespace pldm::utils;
 using namespace sdbusplus::bus::match::rules;
 
-static constexpr auto resDumpObjPath =
-    "/xyz/openbmc_project/dump/resource/entry";
-static constexpr auto resDumpEntry = "com.ibm.Dump.Entry.Resource";
 static constexpr auto resDumpProgressIntf =
     "xyz.openbmc_project.Common.Progress";
 static constexpr auto resDumpStatus =

@@ -231,12 +231,13 @@ void HostPDRHandler::mergeEntityAssociations(const std::vector<uint8_t>& pdr)
         pldm_entity parent{};
         if (getParent(entities[i].entity_type, parent))
         {
-            auto node = pldm_entity_association_tree_find(entityTree, &parent);
+            auto node = pldm_entity_association_tree_find_with_locality(
+                entityTree, &parent, true);
             if (node)
             {
-                pldm_entity_association_tree_add(entityTree, &entities[i],
-                                                 0xFFFF, node,
-                                                 entityPdr->association_type);
+                pldm_entity_association_tree_add_entity(
+                    entityTree, &entities[i], 0xFFFF, node,
+                    entityPdr->association_type, false, true, 0xFFFF);
                 merged = true;
             }
         }
@@ -253,8 +254,14 @@ void HostPDRHandler::mergeEntityAssociations(const std::vector<uint8_t>& pdr)
         }
         else
         {
-            pldm_entity_association_pdr_add_from_node(
+            int rc = pldm_entity_association_pdr_add_from_node_check(
                 node, repo, &entities, numEntities, true, TERMINUS_HANDLE);
+            if (rc)
+            {
+                error(
+                    "Failed to add entity association PDR from node: {LIBPLDM_ERROR}",
+                    "LIBPLDM_ERROR", rc);
+            }
         }
     }
     free(entities);
@@ -525,8 +532,13 @@ void HostPDRHandler::processHostPDRs(mctp_eid_t /*eid*/,
                 }
                 else
                 {
-                    pldm_pdr_add(repo, pdr.data(), respCount, rh, true,
-                                 pdrTerminusHandle);
+                    rc = pldm_pdr_add_check(repo, pdr.data(), respCount, true,
+                                            pdrTerminusHandle, &rh);
+                    if (rc)
+                    {
+                        // pldm_pdr_add() assert()ed on failure to add a PDR.
+                        throw std::runtime_error("Failed to add PDR");
+                    }
                 }
             }
         }

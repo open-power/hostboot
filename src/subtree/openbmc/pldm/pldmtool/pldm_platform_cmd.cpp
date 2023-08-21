@@ -58,7 +58,7 @@ class GetPDR : public CommandInterface
     GetPDR(const GetPDR&) = delete;
     GetPDR(GetPDR&&) = default;
     GetPDR& operator=(const GetPDR&) = delete;
-    GetPDR& operator=(GetPDR&&) = default;
+    GetPDR& operator=(GetPDR&&) = delete;
 
     using CommandInterface::CommandInterface;
 
@@ -67,7 +67,7 @@ class GetPDR : public CommandInterface
     {
         auto pdrOptionGroup = app->add_option_group(
             "Required Option",
-            "Retrieve individual PDR, all PDRs, or PDRs of a requested type");
+            "Retrieve individual PDR, all PDRs, PDRs of a requested type or retrieve all PDRs of the requested terminusID");
         pdrOptionGroup->add_option(
             "-d,--data", recordHandle,
             "retrieve individual PDRs from a PDR Repository\n"
@@ -80,10 +80,57 @@ class GetPDR : public CommandInterface
                                    "[terminusLocator, stateSensor, "
                                    "numericEffecter, stateEffecter, "
                                    "EntityAssociation, fruRecord, ... ]");
+
+        getPDRGroupOption = pdrOptionGroup->add_option(
+            "-i, --terminusID", pdrTerminus,
+            "retrieve all PDRs of the requested terminusID\n"
+            "supported IDs:\n [1, 2, 208...]");
+
         allPDRs = false;
         pdrOptionGroup->add_flag("-a, --all", allPDRs,
                                  "retrieve all PDRs from a PDR repository");
+
         pdrOptionGroup->require_option(1);
+    }
+
+    void parseGetPDROptions()
+    {
+        optTIDSet = false;
+        if (getPDRGroupOption->count() > 0)
+        {
+            optTIDSet = true;
+            getPDRs();
+        }
+    }
+
+    void getPDRs()
+    {
+        // start the array
+        std::cout << "[";
+
+        recordHandle = 0;
+        do
+        {
+            CommandInterface::exec();
+        } while (recordHandle != 0);
+
+        // close the array
+        std::cout << "]\n";
+
+        if (handleFound)
+        {
+            recordHandle = 0;
+            uint32_t prevRecordHandle = 0;
+            do
+            {
+                CommandInterface::exec();
+                if (recordHandle == prevRecordHandle)
+                {
+                    return;
+                }
+                prevRecordHandle = recordHandle;
+            } while (recordHandle != 0);
+        }
     }
 
     void exec() override
@@ -178,8 +225,26 @@ class GetPDR : public CommandInterface
             return;
         }
 
-        printPDRMsg(nextRecordHndl, respCnt, recordData);
-        recordHandle = nextRecordHndl;
+        if (optTIDSet && !handleFound)
+        {
+            terminusHandle = getTerminusHandle(recordData, pdrTerminus);
+            if (terminusHandle.has_value())
+            {
+                recordHandle = 0;
+                return;
+            }
+            else
+            {
+                recordHandle = nextRecordHndl;
+                return;
+            }
+        }
+
+        else
+        {
+            printPDRMsg(nextRecordHndl, respCnt, recordData, terminusHandle);
+            recordHandle = nextRecordHndl;
+        }
     }
 
   private:
@@ -464,8 +529,8 @@ class GetPDR : public CommandInterface
         {PLDM_STATE_SET_BOOT_PROG_STATE_OSSTART, "OSStart"}};
 
     static inline const std::map<uint8_t, std::string> setOpFaultStatus{
-        {PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_NORMAL, "Normal"},
-        {PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_STRESSED, "Stressed"}};
+        {PLDM_STATE_SET_OPERATIONAL_STRESS_STATUS_NORMAL, "Normal"},
+        {PLDM_STATE_SET_OPERATIONAL_STRESS_STATUS_STRESSED, "Stressed"}};
 
     static inline const std::map<uint8_t, std::string> setSysPowerState{
         {PLDM_STATE_SET_SYS_POWER_STATE_OFF_SOFT_GRACEFUL,
@@ -960,6 +1025,69 @@ class GetPDR : public CommandInterface
         }
     }
 
+    bool checkTerminusHandle(const uint8_t* data,
+                             std::optional<uint16_t> terminusHandle)
+    {
+        struct pldm_pdr_hdr* pdr = (struct pldm_pdr_hdr*)data;
+
+        if (pdr->type == PLDM_TERMINUS_LOCATOR_PDR)
+        {
+            auto tlpdr =
+                reinterpret_cast<const pldm_terminus_locator_pdr*>(data);
+
+            if (tlpdr->terminus_handle != terminusHandle)
+            {
+                return true;
+            }
+        }
+        else if (pdr->type == PLDM_STATE_SENSOR_PDR)
+        {
+            auto sensor = reinterpret_cast<const pldm_state_sensor_pdr*>(data);
+
+            if (sensor->terminus_handle != terminusHandle)
+            {
+                return true;
+            }
+        }
+        else if (pdr->type == PLDM_NUMERIC_EFFECTER_PDR)
+        {
+            auto numericEffecter =
+                reinterpret_cast<const pldm_numeric_effecter_value_pdr*>(data);
+
+            if (numericEffecter->terminus_handle != terminusHandle)
+            {
+                return true;
+            }
+        }
+
+        else if (pdr->type == PLDM_STATE_EFFECTER_PDR)
+        {
+            auto stateEffecter =
+                reinterpret_cast<const pldm_state_effecter_pdr*>(data);
+            if (stateEffecter->terminus_handle != terminusHandle)
+            {
+                return true;
+            }
+        }
+        else if (pdr->type == PLDM_PDR_FRU_RECORD_SET)
+        {
+            data += sizeof(pldm_pdr_hdr);
+            auto fru = reinterpret_cast<const pldm_pdr_fru_record_set*>(data);
+
+            if (fru->terminus_handle != terminusHandle)
+            {
+                return true;
+            }
+        }
+        else
+        {
+            // Entity association PDRs does not have terminus handle
+            return true;
+        }
+
+        return false;
+    }
+
     void printTerminusLocatorPDR(const uint8_t* data, ordered_json& output)
     {
         const std::array<std::string_view, 4> terminusLocatorType = {
@@ -985,8 +1113,24 @@ class GetPDR : public CommandInterface
         }
     }
 
+    std::optional<uint16_t> getTerminusHandle(uint8_t* data,
+                                              std::optional<uint8_t> tid)
+    {
+        struct pldm_pdr_hdr* pdr = (struct pldm_pdr_hdr*)data;
+        if (pdr->type == PLDM_TERMINUS_LOCATOR_PDR)
+        {
+            auto pdr = reinterpret_cast<const pldm_terminus_locator_pdr*>(data);
+            if (pdr->tid == tid)
+            {
+                handleFound = true;
+                return pdr->terminus_handle;
+            }
+        }
+        return std::nullopt;
+    }
+
     void printPDRMsg(uint32_t& nextRecordHndl, const uint16_t respCnt,
-                     uint8_t* data)
+                     uint8_t* data, std::optional<uint16_t> terminusHandle)
     {
         if (data == NULL)
         {
@@ -1026,6 +1170,16 @@ class GetPDR : public CommandInterface
             }
         }
 
+        if (pdrTerminus.has_value())
+        {
+            if (checkTerminusHandle(data, terminusHandle))
+            {
+                std::cerr << "The Terminus handle doesn't match return"
+                          << std::endl;
+                return;
+            }
+        }
+
         printCommonPDRHeader(pdr, output);
 
         switch (pdr->type)
@@ -1055,9 +1209,14 @@ class GetPDR : public CommandInterface
     }
 
   private:
+    bool optTIDSet = false;
     uint32_t recordHandle;
     bool allPDRs;
     std::string pdrRecType;
+    std::optional<uint8_t> pdrTerminus;
+    std::optional<uint16_t> terminusHandle;
+    bool handleFound = false;
+    CLI::Option* getPDRGroupOption = nullptr;
 };
 
 class SetStateEffecter : public CommandInterface
@@ -1068,7 +1227,7 @@ class SetStateEffecter : public CommandInterface
     SetStateEffecter(const SetStateEffecter&) = delete;
     SetStateEffecter(SetStateEffecter&&) = default;
     SetStateEffecter& operator=(const SetStateEffecter&) = delete;
-    SetStateEffecter& operator=(SetStateEffecter&&) = default;
+    SetStateEffecter& operator=(SetStateEffecter&&) = delete;
 
     // compositeEffecterCount(value: 0x01 to 0x08) * stateField(2)
     static constexpr auto maxEffecterDataSize = 16;
@@ -1163,7 +1322,7 @@ class SetNumericEffecterValue : public CommandInterface
     SetNumericEffecterValue(const SetNumericEffecterValue&) = delete;
     SetNumericEffecterValue(SetNumericEffecterValue&&) = default;
     SetNumericEffecterValue& operator=(const SetNumericEffecterValue&) = delete;
-    SetNumericEffecterValue& operator=(SetNumericEffecterValue&&) = default;
+    SetNumericEffecterValue& operator=(SetNumericEffecterValue&&) = delete;
 
     explicit SetNumericEffecterValue(const char* type, const char* name,
                                      CLI::App* app) :
@@ -1245,7 +1404,7 @@ class GetStateSensorReadings : public CommandInterface
     GetStateSensorReadings(const GetStateSensorReadings&) = delete;
     GetStateSensorReadings(GetStateSensorReadings&&) = default;
     GetStateSensorReadings& operator=(const GetStateSensorReadings&) = delete;
-    GetStateSensorReadings& operator=(GetStateSensorReadings&&) = default;
+    GetStateSensorReadings& operator=(GetStateSensorReadings&&) = delete;
 
     explicit GetStateSensorReadings(const char* type, const char* name,
                                     CLI::App* app) :
@@ -1354,6 +1513,19 @@ void registerCommand(CLI::App& app)
         "GetStateSensorReadings", "get the state sensor readings");
     commands.push_back(std::make_unique<GetStateSensorReadings>(
         "platform", "getStateSensorReadings", getStateSensorReadings));
+}
+
+void parseGetPDROption()
+{
+    for (const auto& command : commands)
+    {
+        if (command.get()->getPLDMType() == "platform" &&
+            command.get()->getCommandName() == "getPDR")
+        {
+            auto getPDR = dynamic_cast<GetPDR*>(command.get());
+            getPDR->parseGetPDROptions();
+        }
+    }
 }
 
 } // namespace platform

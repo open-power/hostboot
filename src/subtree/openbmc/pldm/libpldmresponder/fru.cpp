@@ -10,7 +10,9 @@
 #include <sdbusplus/bus.hpp>
 
 #include <iostream>
+#include <optional>
 #include <set>
+#include <stack>
 
 PHOSPHOR_LOG2_USING;
 
@@ -18,6 +20,125 @@ namespace pldm
 {
 namespace responder
 {
+
+constexpr auto root = "/xyz/openbmc_project/inventory/";
+
+std::optional<pldm_entity>
+    FruImpl::getEntityByObjectPath(const dbus::InterfaceMap& intfMaps)
+{
+    for (const auto& intfMap : intfMaps)
+    {
+        try
+        {
+            pldm_entity entity{};
+            entity.entity_type = parser.getEntityType(intfMap.first);
+            return entity;
+        }
+        catch (const std::exception& e)
+        {
+            continue;
+        }
+    }
+
+    return std::nullopt;
+}
+
+void FruImpl::updateAssociationTree(const dbus::ObjectValueTree& objects,
+                                    const std::string& path)
+{
+    if (path.find(root) == std::string::npos)
+    {
+        return;
+    }
+
+    std::stack<std::string> tmpObjPaths{};
+    tmpObjPaths.emplace(path);
+
+    auto obj = pldm::utils::findParent(path);
+    while ((obj + '/') != root)
+    {
+        tmpObjPaths.emplace(obj);
+        obj = pldm::utils::findParent(obj);
+    }
+
+    std::stack<std::string> tmpObj = tmpObjPaths;
+    while (!tmpObj.empty())
+    {
+        std::string s = tmpObj.top();
+        std::cout << s << std::endl;
+        tmpObj.pop();
+    }
+    // Update pldm entity to assocition tree
+    std::string prePath = tmpObjPaths.top();
+    while (!tmpObjPaths.empty())
+    {
+        std::string currPath = tmpObjPaths.top();
+        tmpObjPaths.pop();
+
+        do
+        {
+            if (objToEntityNode.contains(currPath))
+            {
+                pldm_entity node =
+                    pldm_entity_extract(objToEntityNode.at(currPath));
+                if (pldm_entity_association_tree_find_with_locality(
+                        entityTree, &node, false))
+                {
+                    break;
+                }
+            }
+            else
+            {
+                if (!objects.contains(currPath))
+                {
+                    break;
+                }
+
+                auto entityPtr = getEntityByObjectPath(objects.at(currPath));
+                if (!entityPtr)
+                {
+                    break;
+                }
+
+                pldm_entity entity = *entityPtr;
+
+                for (auto& it : objToEntityNode)
+                {
+                    pldm_entity node = pldm_entity_extract(it.second);
+                    if (node.entity_type == entity.entity_type)
+                    {
+                        entity.entity_instance_num = node.entity_instance_num +
+                                                     1;
+                        break;
+                    }
+                }
+
+                if (currPath == prePath)
+                {
+                    auto node = pldm_entity_association_tree_add_entity(
+                        entityTree, &entity, 0xFFFF, nullptr,
+                        PLDM_ENTITY_ASSOCIAION_PHYSICAL, false, true, 0xFFFF);
+                    objToEntityNode[currPath] = node;
+                }
+                else
+                {
+                    if (objToEntityNode.contains(prePath))
+                    {
+                        auto node = pldm_entity_association_tree_add_entity(
+                            entityTree, &entity, 0xFFFF,
+                            objToEntityNode[prePath],
+                            PLDM_ENTITY_ASSOCIAION_PHYSICAL, false, true,
+                            0xFFFF);
+                        objToEntityNode[currPath] = node;
+                    }
+                }
+            }
+        } while (0);
+
+        prePath = currPath;
+    }
+}
+
 void FruImpl::buildFRUTable()
 {
     if (isBuilt)
@@ -69,35 +190,15 @@ void FruImpl::buildFRUTable()
                 // not have corresponding config jsons
                 try
                 {
+                    updateAssociationTree(objects, object.first.str);
                     pldm_entity entity{};
-                    entity.entity_type = parser.getEntityType(interface.first);
-                    pldm_entity_node* parent = nullptr;
-                    auto parentObj = pldm::utils::findParent(object.first.str);
-                    // To add a FRU to the entity association tree, we need to
-                    // determine if the FRU has a parent (D-Bus object). For eg
-                    // /system/backplane's parent is /system. /system has no
-                    // parent. Some D-Bus pathnames might just be namespaces
-                    // (not D-Bus objects), so we need to iterate upwards until
-                    // a parent is found, or we reach the root ("/").
-                    // Parents are always added first before children in the
-                    // entity association tree. We're relying on the fact that
-                    // the std::map containing object paths from the
-                    // GetManagedObjects call will have a sorted pathname list.
-                    do
+                    if (objToEntityNode.contains(object.first.str))
                     {
-                        auto iter = objToEntityNode.find(parentObj);
-                        if (iter != objToEntityNode.end())
-                        {
-                            parent = iter->second;
-                            break;
-                        }
-                        parentObj = pldm::utils::findParent(parentObj);
-                    } while (parentObj != "/");
+                        pldm_entity_node* node =
+                            objToEntityNode.at(object.first.str);
 
-                    auto node = pldm_entity_association_tree_add(
-                        entityTree, &entity, 0xFFFF, parent,
-                        PLDM_ENTITY_ASSOCIAION_PHYSICAL);
-                    objToEntityNode[object.first.str] = node;
+                        entity = pldm_entity_extract(node);
+                    }
 
                     auto recordInfos = parser.getRecordInfo(interface.first);
                     populateRecords(interfaces, recordInfos, entity);
@@ -116,8 +217,16 @@ void FruImpl::buildFRUTable()
         }
     }
 
-    pldm_entity_association_pdr_add(entityTree, pdrRepo, false,
-                                    TERMINUS_HANDLE);
+    int rc = pldm_entity_association_pdr_add_check(entityTree, pdrRepo, false,
+                                                   TERMINUS_HANDLE);
+    if (rc < 0)
+    {
+        // pldm_entity_assocation_pdr_add() assert()ed on failure
+        error("Failed to add PLDM entity association PDR: {LIBPLDM_ERROR}",
+              "LIBPLDM_ERROR", rc);
+        throw std::runtime_error("Failed to add PLDM entity association PDR");
+    }
+
     // save a copy of bmc's entity association tree
     pldm_entity_association_tree_copy_root(entityTree, bmcEntityTree);
 
@@ -233,10 +342,16 @@ void FruImpl::populateRecords(
             {
                 recordSetIdentifier = nextRSI();
                 bmc_record_handle = nextRecordHandle();
-                pldm_pdr_add_fru_record_set(
+                int rc = pldm_pdr_add_fru_record_set_check(
                     pdrRepo, TERMINUS_HANDLE, recordSetIdentifier,
                     entity.entity_type, entity.entity_instance_num,
-                    entity.entity_container_id, bmc_record_handle);
+                    entity.entity_container_id, &bmc_record_handle);
+                if (rc)
+                {
+                    // pldm_pdr_add_fru_record_set() assert()ed on failure
+                    throw std::runtime_error(
+                        "Failed to add PDR FRU record set");
+                }
             }
             auto curSize = table.size();
             table.resize(curSize + recHeaderSize + tlvs.size());
@@ -279,11 +394,11 @@ int FruImpl::getFRURecordByOption(std::vector<uint8_t>& fruData,
     size_t recordTableSize = table.size() - padBytes + 7;
     fruData.resize(recordTableSize, 0);
 
-    get_fru_record_by_option(table.data(), table.size() - padBytes,
-                             fruData.data(), &recordTableSize,
-                             recordSetIdentifer, recordType, fieldType);
+    int rc = get_fru_record_by_option_check(
+        table.data(), table.size() - padBytes, fruData.data(), &recordTableSize,
+        recordSetIdentifer, recordType, fieldType);
 
-    if (recordTableSize == 0)
+    if (rc != PLDM_SUCCESS || recordTableSize == 0)
     {
         return PLDM_FRU_DATA_STRUCTURE_TABLE_UNAVAILABLE;
     }

@@ -29,7 +29,7 @@ class RawOp : public CommandInterface
     RawOp(const RawOp&) = delete;
     RawOp(RawOp&&) = default;
     RawOp& operator=(const RawOp&) = delete;
-    RawOp& operator=(RawOp&&) = default;
+    RawOp& operator=(RawOp&&) = delete;
 
     explicit RawOp(const char* type, const char* name, CLI::App* app) :
         CommandInterface(type, name, app)
@@ -80,5 +80,6 @@ int main(int argc, char** argv)
 #endif
 
     CLI11_PARSE(app, argc, argv);
+    pldmtool::platform::parseGetPDROption();
     return 0;
 }

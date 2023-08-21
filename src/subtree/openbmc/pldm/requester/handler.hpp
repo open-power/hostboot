@@ -8,7 +8,6 @@
 #include <libpldm/pldm.h>
 #include <sys/socket.h>
 
-#include <function2/function2.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/timer.hpp>
 #include <sdeventplus/event.hpp>
@@ -16,6 +15,7 @@
 
 #include <cassert>
 #include <chrono>
+#include <functional>
 #include <memory>
 #include <tuple>
 #include <unordered_map>
@@ -60,7 +60,7 @@ struct RequestKeyHasher
     }
 };
 
-using ResponseHandler = fu2::unique_function<void(
+using ResponseHandler = std::move_only_function<void(
     mctp_eid_t eid, const pldm_msg* response, size_t respMsgLen)>;
 
 /** @class Handler

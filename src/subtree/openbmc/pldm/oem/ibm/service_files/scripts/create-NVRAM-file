@@ -3,5 +3,5 @@
 if [ -f /var/lib/pldm/PHYP-NVRAM ]; then
     mv /var/lib/pldm/PHYP-NVRAM /var/lib/phosphor-software-manager/hostfw/nvram/PHYP-NVRAM;
 else
-    dd if=/dev/zero of=/var/lib/phosphor-software-manager/hostfw/nvram/PHYP-NVRAM bs=1024 count=145408;
+    truncate -s $((1024 * 145408)) /var/lib/phosphor-software-manager/hostfw/nvram/PHYP-NVRAM
 fi

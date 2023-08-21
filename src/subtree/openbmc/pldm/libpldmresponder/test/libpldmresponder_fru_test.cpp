@@ -1,6 +1,14 @@
+#include "common/utils.hpp"
+#include "libpldmresponder/fru.hpp"
 #include "libpldmresponder/fru_parser.hpp"
 
+#include <config.h>
+#include <libpldm/pdr.h>
+
+#include <sdbusplus/message.hpp>
+
 #include <gtest/gtest.h>
+
 TEST(FruParser, allScenarios)
 {
     using namespace pldm::responder::fru_parser;
@@ -68,4 +76,109 @@ TEST(FruParser, allScenarios)
     ASSERT_THROW(
         parser.getRecordInfo("xyz.openbmc_project.Inventory.Item.DIMM"),
         std::exception);
+}
+
+TEST(FruImpl, updateAssociationTreeTest)
+{
+    using namespace pldm::responder;
+    using namespace pldm::responder::fru_parser;
+    using namespace pldm::responder::dbus;
+    std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> pdrRepo(
+        pldm_pdr_init(), pldm_pdr_destroy);
+    std::unique_ptr<pldm_entity_association_tree,
+                    decltype(&pldm_entity_association_tree_destroy)>
+        entityTree(pldm_entity_association_tree_init(),
+                   pldm_entity_association_tree_destroy);
+    std::unique_ptr<pldm_entity_association_tree,
+                    decltype(&pldm_entity_association_tree_destroy)>
+        bmcEntityTree(pldm_entity_association_tree_init(),
+                      pldm_entity_association_tree_destroy);
+
+    ObjectValueTree objects{
+        {sdbusplus::message::object_path(
+             "/xyz/openbmc_project/inventory/system"),
+         {{"xyz.openbmc_project.Inventory.Item.System", {}}}},
+        {sdbusplus::message::object_path(
+             "/xyz/openbmc_project/inventory/system/chassis"),
+         {{"xyz.openbmc_project.Inventory.Item.Chassis", {}}}},
+        {sdbusplus::message::object_path(
+             "/xyz/openbmc_project/inventory/system/chassis/motherboard"),
+         {{"xyz.openbmc_project.Inventory.Item.Board.Motherboard", {}}}}};
+
+    typedef struct test_pldm_entity_node
+    {
+        pldm_entity entity;
+        pldm_entity parent;
+        uint16_t host_container_id;
+        pldm_entity_node* first_child;
+        pldm_entity_node* next_sibling;
+        uint8_t association_type;
+    } test_pldm_entity_node;
+
+    pldm::responder::FruImpl mockedFruHandler(FRU_JSONS_DIR, FRU_MASTER_JSON,
+                                              pdrRepo.get(), entityTree.get(),
+                                              bmcEntityTree.get());
+
+    pldm_entity systemEntity{0x2d01, 1, 0};
+    pldm_entity chassisEntity{0x2d, 1, 1};
+    pldm_entity motherboardEntity{0x40, 1, 2};
+    pldm_entity panelEntity{0x45, 1, 3};
+
+    dbus::InterfaceMap systemIface{
+        {"xyz.openbmc_project.Inventory.Item.System", {}}};
+    dbus::InterfaceMap chassisIface{
+        {"xyz.openbmc_project.Inventory.Item.Chassis", {}}};
+    dbus::InterfaceMap motherboardIface{
+        {"xyz.openbmc_project.Inventory.Item.Board.Motherboard", {}}};
+
+    mockedFruHandler.updateAssociationTree(
+        objects, "/xyz/openbmc_project/inventory/system/chassis/motherboard");
+
+    pldm_entity_node* node = pldm_entity_association_tree_find(entityTree.get(),
+                                                               &systemEntity);
+    EXPECT_TRUE(node != NULL);
+
+    node = pldm_entity_association_tree_find(entityTree.get(), &chassisEntity);
+    EXPECT_TRUE(node != NULL);
+    test_pldm_entity_node* test_node = (test_pldm_entity_node*)node;
+    EXPECT_TRUE((test_node->parent).entity_type == systemEntity.entity_type);
+
+    node = pldm_entity_association_tree_find(entityTree.get(),
+                                             &motherboardEntity);
+    EXPECT_TRUE(node != NULL);
+    test_node = (test_pldm_entity_node*)node;
+    EXPECT_TRUE((test_node->parent).entity_type == chassisEntity.entity_type);
+
+    node = pldm_entity_association_tree_find(entityTree.get(), &panelEntity);
+    EXPECT_TRUE(node == NULL);
+}
+
+TEST(FruImpl, entityByObjectPath)
+{
+    using namespace pldm::responder::dbus;
+    std::unique_ptr<pldm_pdr, decltype(&pldm_pdr_destroy)> pdrRepo(
+        pldm_pdr_init(), pldm_pdr_destroy);
+    std::unique_ptr<pldm_entity_association_tree,
+                    decltype(&pldm_entity_association_tree_destroy)>
+        entityTree(pldm_entity_association_tree_init(),
+                   pldm_entity_association_tree_destroy);
+    std::unique_ptr<pldm_entity_association_tree,
+                    decltype(&pldm_entity_association_tree_destroy)>
+        bmcEntityTree(pldm_entity_association_tree_init(),
+                      pldm_entity_association_tree_destroy);
+
+    InterfaceMap iface = {{"xyz.openbmc_project.Inventory.Item.Chassis", {}}};
+    pldm::responder::FruImpl mockedFruHandler(FRU_JSONS_DIR, FRU_MASTER_JSON,
+                                              pdrRepo.get(), entityTree.get(),
+                                              bmcEntityTree.get());
+
+    // Good path
+    auto entityPtr = mockedFruHandler.getEntityByObjectPath(iface);
+    pldm_entity entity = *entityPtr;
+    EXPECT_TRUE(entity.entity_type == 45);
+    // Bad Path
+    InterfaceMap invalidIface = {
+        {"xyz.openbmc_project.Inventory.Item.Motherboard", {}}};
+    entityPtr = mockedFruHandler.getEntityByObjectPath(invalidIface);
+    ASSERT_TRUE(!entityPtr);
 }

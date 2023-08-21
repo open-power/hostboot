@@ -38,7 +38,7 @@ class TestAttribute : public BIOSAttribute
 
     void generateAttributeEntry(
         const std::variant<int64_t, std::string>& /*attributevalue*/,
-        Table& /*attrValueEntry*/)
+        Table& /*attrValueEntry*/) override
     {}
 };
 

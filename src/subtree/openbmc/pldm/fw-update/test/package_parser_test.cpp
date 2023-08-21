@@ -26,7 +26,8 @@ TEST(PackageParser, ValidPkgSingleDescriptorSingleComponent)
     constexpr uintmax_t pkgSize = 166;
     constexpr std::string_view pkgVersion{"VersionString1"};
     auto parser = parsePkgHeader(fwPkgHdr);
-    EXPECT_EQ(typeid(*parser).name(), typeid(PackageParserV1).name());
+    auto obj = parser.get();
+    EXPECT_EQ(typeid(*obj).name(), typeid(PackageParserV1).name());
     EXPECT_EQ(parser->pkgHeaderSize, fwPkgHdr.size());
     EXPECT_EQ(parser->pkgVersion, pkgVersion);
 
@@ -85,7 +86,8 @@ TEST(PackageParser, ValidPkgMultipleDescriptorsMultipleComponents)
     constexpr uintmax_t pkgSize = 407;
     constexpr std::string_view pkgVersion{"VersionString1"};
     auto parser = parsePkgHeader(fwPkgHdr);
-    EXPECT_EQ(typeid(*parser).name(), typeid(PackageParserV1).name());
+    auto obj = parser.get();
+    EXPECT_EQ(typeid(*obj).name(), typeid(PackageParserV1).name());
     EXPECT_EQ(parser->pkgHeaderSize, fwPkgHdr.size());
     EXPECT_EQ(parser->pkgVersion, pkgVersion);
 
@@ -173,7 +175,8 @@ TEST(PackageParser, InvalidPkgBadChecksum)
     constexpr uintmax_t pkgSize = 166;
     constexpr std::string_view pkgVersion{"VersionString1"};
     auto parser = parsePkgHeader(fwPkgHdr);
-    EXPECT_EQ(typeid(*parser).name(), typeid(PackageParserV1).name());
+    auto obj = parser.get();
+    EXPECT_EQ(typeid(*obj).name(), typeid(PackageParserV1).name());
     EXPECT_EQ(parser->pkgHeaderSize, fwPkgHdr.size());
     EXPECT_EQ(parser->pkgVersion, pkgVersion);
     EXPECT_THROW(parser->parse(fwPkgHdr, pkgSize), std::exception);

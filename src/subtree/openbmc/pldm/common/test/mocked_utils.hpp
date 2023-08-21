@@ -7,7 +7,6 @@ namespace pldm
 {
 namespace utils
 {
-
 /** @brief helper function for parameter matching
  *  @param[in] lhs - left-hand side value
  *  @param[in] rhs - right-hand side value
@@ -36,4 +35,8 @@ class MockdBusHandler : public pldm::utils::DBusHandler
 
     MOCK_METHOD(pldm::utils::PropertyValue, getDbusPropertyVariant,
                 (const char*, const char*, const char*), (const override));
+
+    MOCK_METHOD(pldm::utils::GetSubTreeResponse, getSubtree,
+                (const std::string&, int, const std::vector<std::string>&),
+                (const override));
 };

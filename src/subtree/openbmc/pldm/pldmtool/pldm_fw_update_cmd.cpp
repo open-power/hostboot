@@ -80,7 +80,7 @@ class GetStatus : public CommandInterface
     GetStatus(const GetStatus&) = delete;
     GetStatus(GetStatus&&) = default;
     GetStatus& operator=(const GetStatus&) = delete;
-    GetStatus& operator=(GetStatus&&) = default;
+    GetStatus& operator=(GetStatus&&) = delete;
 
     using CommandInterface::CommandInterface;
 
@@ -170,7 +170,7 @@ class GetFwParams : public CommandInterface
     GetFwParams(const GetFwParams&) = delete;
     GetFwParams(GetFwParams&&) = default;
     GetFwParams& operator=(const GetFwParams&) = delete;
-    GetFwParams& operator=(GetFwParams&&) = default;
+    GetFwParams& operator=(GetFwParams&&) = delete;
 
     using CommandInterface::CommandInterface;
 
@@ -416,7 +416,7 @@ class QueryDeviceIdentifiers : public CommandInterface
     QueryDeviceIdentifiers(const QueryDeviceIdentifiers&) = delete;
     QueryDeviceIdentifiers(QueryDeviceIdentifiers&&) = default;
     QueryDeviceIdentifiers& operator=(const QueryDeviceIdentifiers&) = delete;
-    QueryDeviceIdentifiers& operator=(QueryDeviceIdentifiers&&) = default;
+    QueryDeviceIdentifiers& operator=(QueryDeviceIdentifiers&&) = delete;
 
     /**
      * @brief Implementation of createRequestMsg for QueryDeviceIdentifiers

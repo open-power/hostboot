@@ -61,7 +61,7 @@ class BIOSIntegerAttribute : public BIOSAttribute
         Table& attrValueEntry) override;
 
     int updateAttrVal(Table& newValue, uint16_t attrHdl, uint8_t attrType,
-                      const pldm::utils::PropertyValue& newPropVal);
+                      const pldm::utils::PropertyValue& newPropVal) override;
 
   private:
     /** @brief Integer field from json */
