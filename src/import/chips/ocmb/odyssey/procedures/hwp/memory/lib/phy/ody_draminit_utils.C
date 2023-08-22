@@ -2737,6 +2737,13 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
     // Passing in a nullptr gets us the current time
     const auto l_start_time = time(nullptr);
 #endif
+
+    if (i_data_start == NULL && i_mem_size == 0)
+    {
+        FAPI_INF("Last HWP consume call after hash checking passed, nothing further to load");
+        return fapi2::current_err;
+    }
+
     FAPI_ASSERT(i_data_start != NULL,
                 fapi2::ODY_DRAMINIT_START_DATA_PTR_NULL().
                 set_TARGET(i_target),
