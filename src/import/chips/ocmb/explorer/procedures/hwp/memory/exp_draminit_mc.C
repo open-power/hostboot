@@ -41,6 +41,7 @@
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <lib/workarounds/exp_mds_workarounds.H>
+#include <lib/workarounds/exp_rcw_workarounds.H>
 #include <exp_deploy_row_repairs.H>
 #include <lib/exp_attribute_accessors_manual.H>
 #include <mss_explorer_attribute_getters.H>
@@ -62,6 +63,8 @@ extern "C"
     {
         mss::display_git_commit_info("exp_draminit_mc");
         bool l_is_mds = false;
+        uint8_t l_is_planar = 0;
+        bool l_has_rcd = false;
 
         FAPI_INF("%s Start exp_draminit MC", mss::c_str(i_target));
 
@@ -90,6 +93,11 @@ extern "C"
         // Set DFI init start requested from Stephen Powell
         FAPI_TRY( mss::change_dfi_init_start<mss::mc_type::EXPLORER>(i_target, mss::ON ), "%s Failed to change_dfi_init_start",
                   mss::c_str(i_target));
+
+        // Enable RCD parity checking if we're planar + RDIMM
+        FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+        FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+        FAPI_TRY(mss::exp::workarounds::planar_enable_rcd_parity(i_target, l_is_planar, l_has_rcd));
 
         // Start the refresh engines by setting MBAREF0Q(0) = 1. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.

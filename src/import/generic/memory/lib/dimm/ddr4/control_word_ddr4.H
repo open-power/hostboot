@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -692,7 +692,7 @@ inline fapi2::ReturnCode decode_rcw_and_run_engine(
         // Overwrite A7-A4 with iv_number for DATA_LEN_4 CWs
         if (i_cw_info.iv_data_len == DATA_LEN_4)
         {
-            l_f0rc6x_data.insert<F0RC6X_A7A4_START, F0RC6X_A7A4_LEN>(i_cw_info.iv_cw_data.iv_number);
+            l_f0rc6x_data.insertFromRight<F0RC6X_A7A4_START, F0RC6X_A7A4_LEN>(i_cw_info.iv_cw_data.iv_number);
         }
 
         l_info_list.push_back(cw_info(FUNCTION_SPACE_0,

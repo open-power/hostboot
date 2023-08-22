@@ -101,9 +101,14 @@ class planar_rdimm_ddr4_1_1 : public ddimm_0_4
         ///
         virtual fapi2::ReturnCode set_module_rcd(const std::vector<uint8_t>& i_spd) const
         {
-            uint8_t l_field = fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_RCD_PER_CHANNEL_1;
+            constexpr uint8_t RDIMM_BUFFER_DELAY = 2;
+
+            const uint8_t l_field = fapi2::ENUM_ATTR_MEM_EFF_SUPPORTED_RCD_RCD_PER_CHANNEL_1;
 
             FAPI_TRY(mss::attr::set_supported_rcd(iv_dimm, l_field));
+
+            // NOTE: we also set ATTR_MEM_RDIMM_BUFFER_DELAY here so scominit can set up latencies properly
+            FAPI_TRY(mss::attr::set_dimm_buffer_delay(iv_port, RDIMM_BUFFER_DELAY));
 
         fapi_try_exit:
             return fapi2::current_err;
