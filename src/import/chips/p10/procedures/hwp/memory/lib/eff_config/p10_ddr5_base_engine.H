@@ -1385,6 +1385,61 @@ class base_0_0 : public mss::spd::base
 
 };
 
+///
+/// @brief Class for base module section of SPD Rev 0.7.0
+///
+class base_0_7 : public base_0_0
+{
+        using FIELDS = mss::spd::fields<DDR5, BASE_CNFG>;
+
+    public:
+
+        ///
+        /// @brief Construct a new base rev 0.7.0 object
+        /// @param[in] i_dimm DIMM target
+        ///
+        base_0_7(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm) :  base_0_0(i_dimm) {}
+
+        ///
+        /// @brief Destroy the ddimm_0_3 object
+        ///
+        virtual ~base_0_7() = default;
+
+        ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const override
+        {
+            return mss::spd::rev::V0_7;
+        }
+
+        // Virtual function overloads go here
+
+        /// @brief Process the fields for base cnfg rev 0.7.0
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        fapi2::ReturnCode process(const std::vector<uint8_t>& i_spd) const
+        {
+
+            // The naming here is a bit tricky: 0.0 process will process fields
+            // that originated in 0.0, but will use any field processors/traits
+            // that were overridden for the current class type (ex. base_0_7)
+
+            // Only brand new fields for this revision should be explicitly
+            // called here below the call to this function
+            FAPI_TRY(base_0_0::process(i_spd));
+
+            // Base Cnfg 0.7.0 new field processing goes here
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+};
+
+
 } // ddr5
 
 } // spd

@@ -582,7 +582,33 @@ fapi2::ReturnCode bias_with_spd_volt_ranges(
     const mss::pmic::id i_id);
 
 ///
-/// @brief bias PMIC with SPD settings for startup sequence
+/// @brief Update PMIC sequence based on SPD rev 0.0
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id PMIC0 or PMIC1
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode update_seq_with_order_and_delay_attr(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id);
+
+///
+/// @brief Update PMIC sequence based on the SPD version 0.7.0
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_id PMIC2 or PMIC3 for DDR5
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode update_seq_with_reg_attr(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        const mss::pmic::id i_id);
+
+///
+/// @brief bias PMIC with SPD settings for startup sequence based
+///        on SPD revision
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic

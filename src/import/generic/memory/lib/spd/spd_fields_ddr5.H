@@ -985,6 +985,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC0_SWA_DELAY_LEN = 4,
             PMIC0_SWA_ORDER_START = 4,
             PMIC0_SWA_ORDER_LEN = 4,
+            PMIC0_SWA_SEQUENCE_START = 0,
+            PMIC0_SWA_SEQUENCE_LEN = 8,
 
             // Byte 309: PMIC0 SWB Voltage Setting
             PMIC0_SWB_VOLT_SET_BYTE = 309,
@@ -1006,6 +1008,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC0_SWB_DELAY_LEN = 4,
             PMIC0_SWB_ORDER_START = 4,
             PMIC0_SWB_ORDER_LEN = 4,
+            PMIC0_SWB_SEQUENCE_START = 0,
+            PMIC0_SWB_SEQUENCE_LEN = 8,
 
             // Byte 312: PMIC0 SWC Voltage Setting
             PMIC0_SWC_VOLT_SET_BYTE = 312,
@@ -1027,6 +1031,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC0_SWC_DELAY_LEN = 4,
             PMIC0_SWC_ORDER_START = 4,
             PMIC0_SWC_ORDER_LEN = 4,
+            PMIC0_SWC_SEQUENCE_START = 0,
+            PMIC0_SWC_SEQUENCE_LEN = 8,
 
             // Byte 315: PMIC0 SWD Voltage Setting
             PMIC0_SWD_VOLT_SET_BYTE = 315,
@@ -1048,6 +1054,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC0_SWD_DELAY_LEN = 4,
             PMIC0_SWD_ORDER_START = 4,
             PMIC0_SWD_ORDER_LEN = 4,
+            PMIC0_SWD_SEQUENCE_START = 0,
+            PMIC0_SWD_SEQUENCE_LEN = 8,
 
             // Byte 318: PMIC0 Phase Combination and redundancy
             PMIC0_PHASE_COMBIN_BYTE = 318,
@@ -1076,6 +1084,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC1_SWA_DELAY_LEN = 4,
             PMIC1_SWA_ORDER_START = 4,
             PMIC1_SWA_ORDER_LEN = 4,
+            PMIC1_SWA_SEQUENCE_START = 0,
+            PMIC1_SWA_SEQUENCE_LEN = 8,
 
             // Byte 322: PMIC1 SWB Voltage Setting
             PMIC1_SWB_VOLT_SET_BYTE = 322,
@@ -1097,6 +1107,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC1_SWB_DELAY_LEN = 4,
             PMIC1_SWB_ORDER_START = 4,
             PMIC1_SWB_ORDER_LEN = 4,
+            PMIC1_SWB_SEQUENCE_START = 0,
+            PMIC1_SWB_SEQUENCE_LEN = 8,
 
             // Byte 325: PMIC1 SWC Voltage Setting
             PMIC1_SWC_VOLT_SET_BYTE = 325,
@@ -1118,6 +1130,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC1_SWC_DELAY_LEN = 4,
             PMIC1_SWC_ORDER_START = 4,
             PMIC1_SWC_ORDER_LEN = 4,
+            PMIC1_SWC_SEQUENCE_START = 0,
+            PMIC1_SWC_SEQUENCE_LEN = 8,
 
             // Byte 328: PMIC1 SWD Voltage Setting
             PMIC1_SWD_VOLT_SET_BYTE = 328,
@@ -1139,6 +1153,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC1_SWD_DELAY_LEN = 4,
             PMIC1_SWD_ORDER_START = 4,
             PMIC1_SWD_ORDER_LEN = 4,
+            PMIC1_SWD_SEQUENCE_START = 0,
+            PMIC1_SWD_SEQUENCE_LEN = 8,
 
             // Byte 331: PMIC1 Phase Combination and Redundancy
             PMIC1_PHASE_COMBIN_BYTE = 331,
@@ -1167,6 +1183,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC2_SWA_DELAY_LEN = 4,
             PMIC2_SWA_ORDER_START = 4,
             PMIC2_SWA_ORDER_LEN = 4,
+            PMIC2_SWA_SEQUENCE_START = 0,
+            PMIC2_SWA_SEQUENCE_LEN = 8,
 
             // Byte 335: PMIC2 SWB Voltage Setting
             PMIC2_SWB_VOLT_SET_BYTE = 335,
@@ -1188,6 +1206,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC2_SWB_DELAY_LEN = 4,
             PMIC2_SWB_ORDER_START = 4,
             PMIC2_SWB_ORDER_LEN = 4,
+            PMIC2_SWB_SEQUENCE_START = 0,
+            PMIC2_SWB_SEQUENCE_LEN = 8,
 
             // Byte 338: PMIC2 SWC Voltage Setting
             PMIC2_SWC_VOLT_SET_BYTE = 338,
@@ -1209,6 +1229,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC2_SWC_DELAY_LEN = 4,
             PMIC2_SWC_ORDER_START = 4,
             PMIC2_SWC_ORDER_LEN = 4,
+            PMIC2_SWC_SEQUENCE_START = 0,
+            PMIC2_SWC_SEQUENCE_LEN = 8,
 
             // Byte 341: PMIC2 SWD Voltage Setting
             PMIC2_SWD_VOLT_SET_BYTE = 341,
@@ -1230,6 +1252,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC2_SWD_DELAY_LEN = 4,
             PMIC2_SWD_ORDER_START = 4,
             PMIC2_SWD_ORDER_LEN = 4,
+            PMIC2_SWD_SEQUENCE_START = 0,
+            PMIC2_SWD_SEQUENCE_LEN = 8,
 
             // Byte 344: PMIC2 Phase Combination and Redundancy
             PMIC2_PHASE_COMBIN_BYTE = 344,
@@ -1258,6 +1282,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC3_SWA_DELAY_LEN = 4,
             PMIC3_SWA_ORDER_START = 4,
             PMIC3_SWA_ORDER_LEN = 4,
+            PMIC3_SWA_SEQUENCE_START = 0,
+            PMIC3_SWA_SEQUENCE_LEN = 8,
 
             // Byte 348: PMIC3 SWB Voltage Setting
             PMIC3_SWB_VOLT_SET_BYTE = 348,
@@ -1279,6 +1305,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC3_SWB_DELAY_LEN = 4,
             PMIC3_SWB_ORDER_START = 4,
             PMIC3_SWB_ORDER_LEN = 4,
+            PMIC3_SWB_SEQUENCE_START = 0,
+            PMIC3_SWB_SEQUENCE_LEN = 8,
 
             // Byte 351: PMIC3 SWC Voltage Setting
             PMIC3_SWC_VOLT_SET_BYTE = 351,
@@ -1300,6 +1328,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC3_SWC_DELAY_LEN = 4,
             PMIC3_SWC_ORDER_START = 4,
             PMIC3_SWC_ORDER_LEN = 4,
+            PMIC3_SWC_SEQUENCE_START = 0,
+            PMIC3_SWC_SEQUENCE_LEN = 8,
 
             // Byte 354: PMIC3 SWD Voltage Setting
             PMIC3_SWD_VOLT_SET_BYTE = 354,
@@ -1321,6 +1351,8 @@ class fields<DDR5, DDIMM_MODULE>
             PMIC3_SWD_DELAY_LEN = 4,
             PMIC3_SWD_ORDER_START = 4,
             PMIC3_SWD_ORDER_LEN = 4,
+            PMIC3_SWD_SEQUENCE_START = 0,
+            PMIC3_SWD_SEQUENCE_LEN = 8,
 
             // Byte 357: PMIC3 Phase Combination and Redundancy
             PMIC3_PHASE_COMBIN_BYTE = 357,
@@ -1840,6 +1872,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 308: PMIC0 SWA Delay Sequence Order
         static constexpr field_t PMIC0_SWA_DELAY{PMIC0_SWA_DELAY_BYTE, PMIC0_SWA_DELAY_START, PMIC0_SWA_DELAY_LEN};
         static constexpr field_t PMIC0_SWA_ORDER{PMIC0_SWA_DELAY_BYTE, PMIC0_SWA_ORDER_START, PMIC0_SWA_ORDER_LEN};
+        static constexpr field_t PMIC0_SWA_SEQUENCE{PMIC0_SWA_DELAY_BYTE, PMIC0_SWA_SEQUENCE_START, PMIC0_SWA_SEQUENCE_LEN};
 
         // Byte 309: PMIC0 SWB Voltage Setting
         static constexpr field_t PMIC0_SWB_VOLT_SET{PMIC0_SWB_VOLT_SET_BYTE, PMIC0_SWB_VOLT_SET_START, PMIC0_SWB_VOLT_SET_LEN};
@@ -1852,6 +1885,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 311: PMIC0 SWB Delay Sequence Order
         static constexpr field_t PMIC0_SWB_DELAY{PMIC0_SWB_DELAY_BYTE, PMIC0_SWB_DELAY_START, PMIC0_SWB_DELAY_LEN};
         static constexpr field_t PMIC0_SWB_ORDER{PMIC0_SWB_DELAY_BYTE, PMIC0_SWB_ORDER_START, PMIC0_SWB_ORDER_LEN};
+        static constexpr field_t PMIC0_SWB_SEQUENCE{PMIC0_SWB_DELAY_BYTE, PMIC0_SWB_SEQUENCE_START, PMIC0_SWB_SEQUENCE_LEN};
 
         // Byte 312: PMIC0 SWC Voltage Setting
         static constexpr field_t PMIC0_SWC_VOLT_SET{PMIC0_SWC_VOLT_SET_BYTE, PMIC0_SWC_VOLT_SET_START, PMIC0_SWC_VOLT_SET_LEN};
@@ -1864,6 +1898,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 314: PMIC0 SWC Delay Sequence Order
         static constexpr field_t PMIC0_SWC_DELAY{PMIC0_SWC_DELAY_BYTE, PMIC0_SWC_DELAY_START, PMIC0_SWC_DELAY_LEN};
         static constexpr field_t PMIC0_SWC_ORDER{PMIC0_SWC_DELAY_BYTE, PMIC0_SWC_ORDER_START, PMIC0_SWC_ORDER_LEN};
+        static constexpr field_t PMIC0_SWC_SEQUENCE{PMIC0_SWC_DELAY_BYTE, PMIC0_SWC_SEQUENCE_START, PMIC0_SWC_SEQUENCE_LEN};
 
         // Byte 315: PMIC0 SWD Voltage Setting
         static constexpr field_t PMIC0_SWD_VOLT_SET{PMIC0_SWD_VOLT_SET_BYTE, PMIC0_SWD_VOLT_SET_START, PMIC0_SWD_VOLT_SET_LEN};
@@ -1876,6 +1911,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 317: PMIC0 SWD Delay Sequence Order
         static constexpr field_t PMIC0_SWD_DELAY{PMIC0_SWD_DELAY_BYTE, PMIC0_SWD_DELAY_START, PMIC0_SWD_DELAY_LEN};
         static constexpr field_t PMIC0_SWD_ORDER{PMIC0_SWD_DELAY_BYTE, PMIC0_SWD_ORDER_START, PMIC0_SWD_ORDER_LEN};
+        static constexpr field_t PMIC0_SWD_SEQUENCE{PMIC0_SWD_DELAY_BYTE, PMIC0_SWD_SEQUENCE_START, PMIC0_SWD_SEQUENCE_LEN};
 
         // Byte 318: PMIC0 Phase Combination and redundancy
         static constexpr field_t PMIC0_REDUNDANCY{PMIC0_PHASE_COMBIN_BYTE, PMIC0_REDUNDANCY_START, PMIC0_REDUNDANCY_LEN};
@@ -1892,6 +1928,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 321: PMIC1 SWA Delay Sequence Order
         static constexpr field_t PMIC1_SWA_DELAY{PMIC1_SWA_DELAY_BYTE, PMIC1_SWA_DELAY_START, PMIC1_SWA_DELAY_LEN};
         static constexpr field_t PMIC1_SWA_ORDER{PMIC1_SWA_DELAY_BYTE, PMIC1_SWA_ORDER_START, PMIC1_SWA_ORDER_LEN};
+        static constexpr field_t PMIC1_SWA_SEQUENCE{PMIC1_SWA_DELAY_BYTE, PMIC1_SWA_SEQUENCE_START, PMIC1_SWA_SEQUENCE_LEN};
 
         // Byte 322: PMIC1 SWB Voltage Setting
         static constexpr field_t PMIC1_SWB_VOLT_SET{PMIC1_SWB_VOLT_SET_BYTE, PMIC1_SWB_VOLT_SET_START, PMIC1_SWB_VOLT_SET_LEN};
@@ -1904,6 +1941,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 324: PMIC1 SWB Delay Sequence Order
         static constexpr field_t PMIC1_SWB_DELAY{PMIC1_SWB_DELAY_BYTE, PMIC1_SWB_DELAY_START, PMIC1_SWB_DELAY_LEN};
         static constexpr field_t PMIC1_SWB_ORDER{PMIC1_SWB_DELAY_BYTE, PMIC1_SWB_ORDER_START, PMIC1_SWB_ORDER_LEN};
+        static constexpr field_t PMIC1_SWB_SEQUENCE{PMIC1_SWB_DELAY_BYTE, PMIC1_SWB_SEQUENCE_START, PMIC1_SWB_SEQUENCE_LEN};
 
         // Byte 325: PMIC1 SWC Voltage Setting
         static constexpr field_t PMIC1_SWC_VOLT_SET{PMIC1_SWC_VOLT_SET_BYTE, PMIC1_SWC_VOLT_SET_START, PMIC1_SWC_VOLT_SET_LEN};
@@ -1916,6 +1954,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 327: PMIC1 SWC Delay Sequence Order
         static constexpr field_t PMIC1_SWC_DELAY{PMIC1_SWC_DELAY_BYTE, PMIC1_SWC_DELAY_START, PMIC1_SWC_DELAY_LEN};
         static constexpr field_t PMIC1_SWC_ORDER{PMIC1_SWC_DELAY_BYTE, PMIC1_SWC_ORDER_START, PMIC1_SWC_ORDER_LEN};
+        static constexpr field_t PMIC1_SWC_SEQUENCE{PMIC1_SWC_DELAY_BYTE, PMIC1_SWC_SEQUENCE_START, PMIC1_SWC_SEQUENCE_LEN};
 
         // Byte 328: PMIC1 SWD Voltage Setting
         static constexpr field_t PMIC1_SWD_VOLT_SET{PMIC1_SWD_VOLT_SET_BYTE, PMIC1_SWD_VOLT_SET_START, PMIC1_SWD_VOLT_SET_LEN};
@@ -1928,6 +1967,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 330: PMIC1 SWD Delay Sequence Order
         static constexpr field_t PMIC1_SWD_DELAY{PMIC1_SWD_DELAY_BYTE, PMIC1_SWD_DELAY_START, PMIC1_SWD_DELAY_LEN};
         static constexpr field_t PMIC1_SWD_ORDER{PMIC1_SWD_DELAY_BYTE, PMIC1_SWD_ORDER_START, PMIC1_SWD_ORDER_LEN};
+        static constexpr field_t PMIC1_SWD_SEQUENCE{PMIC1_SWD_DELAY_BYTE, PMIC1_SWD_SEQUENCE_START, PMIC1_SWD_SEQUENCE_LEN};
 
         // Byte 331: PMIC1 Phase Combination and redundancy
         static constexpr field_t PMIC1_REDUNDANCY{PMIC1_PHASE_COMBIN_BYTE, PMIC1_REDUNDANCY_START, PMIC1_REDUNDANCY_LEN};
@@ -1944,6 +1984,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 334: PMIC2 SWA Delay Sequence Order
         static constexpr field_t PMIC2_SWA_DELAY{PMIC2_SWA_DELAY_BYTE, PMIC2_SWA_DELAY_START, PMIC2_SWA_DELAY_LEN};
         static constexpr field_t PMIC2_SWA_ORDER{PMIC2_SWA_DELAY_BYTE, PMIC2_SWA_ORDER_START, PMIC2_SWA_ORDER_LEN};
+        static constexpr field_t PMIC2_SWA_SEQUENCE{PMIC2_SWA_DELAY_BYTE, PMIC2_SWA_SEQUENCE_START, PMIC2_SWA_SEQUENCE_LEN};
 
         // Byte 335: PMIC2 SWB Voltage Setting
         static constexpr field_t PMIC2_SWB_VOLT_SET{PMIC2_SWB_VOLT_SET_BYTE, PMIC2_SWB_VOLT_SET_START, PMIC2_SWB_VOLT_SET_LEN};
@@ -1956,6 +1997,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 337: PMIC2 SWB Delay Sequence Order
         static constexpr field_t PMIC2_SWB_DELAY{PMIC2_SWB_DELAY_BYTE, PMIC2_SWB_DELAY_START, PMIC2_SWB_DELAY_LEN};
         static constexpr field_t PMIC2_SWB_ORDER{PMIC2_SWB_DELAY_BYTE, PMIC2_SWB_ORDER_START, PMIC2_SWB_ORDER_LEN};
+        static constexpr field_t PMIC2_SWB_SEQUENCE{PMIC2_SWB_DELAY_BYTE, PMIC2_SWB_SEQUENCE_START, PMIC2_SWB_SEQUENCE_LEN};
 
         // Byte 338: PMIC2 SWC Voltage Setting
         static constexpr field_t PMIC2_SWC_VOLT_SET{PMIC2_SWC_VOLT_SET_BYTE, PMIC2_SWC_VOLT_SET_START, PMIC2_SWC_VOLT_SET_LEN};
@@ -1968,6 +2010,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 340: PMIC2 SWC Delay Sequence Order
         static constexpr field_t PMIC2_SWC_DELAY{PMIC2_SWC_DELAY_BYTE, PMIC2_SWC_DELAY_START, PMIC2_SWC_DELAY_LEN};
         static constexpr field_t PMIC2_SWC_ORDER{PMIC2_SWC_DELAY_BYTE, PMIC2_SWC_ORDER_START, PMIC2_SWC_ORDER_LEN};
+        static constexpr field_t PMIC2_SWC_SEQUENCE{PMIC2_SWC_DELAY_BYTE, PMIC2_SWC_SEQUENCE_START, PMIC2_SWC_SEQUENCE_LEN};
 
         // Byte 341: PMIC2 SWD Voltage Setting
         static constexpr field_t PMIC2_SWD_VOLT_SET{PMIC2_SWD_VOLT_SET_BYTE, PMIC2_SWD_VOLT_SET_START, PMIC2_SWD_VOLT_SET_LEN};
@@ -1980,6 +2023,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 343: PMIC2 SWD Delay Sequence Order
         static constexpr field_t PMIC2_SWD_DELAY{PMIC2_SWD_DELAY_BYTE, PMIC2_SWD_DELAY_START, PMIC2_SWD_DELAY_LEN};
         static constexpr field_t PMIC2_SWD_ORDER{PMIC2_SWD_DELAY_BYTE, PMIC2_SWD_ORDER_START, PMIC2_SWD_ORDER_LEN};
+        static constexpr field_t PMIC2_SWD_SEQUENCE{PMIC2_SWD_DELAY_BYTE, PMIC2_SWD_SEQUENCE_START, PMIC2_SWD_SEQUENCE_LEN};
 
         // Byte 344: PMIC2 Phase Combination and redundancy
         static constexpr field_t PMIC2_REDUNDANCY{PMIC2_PHASE_COMBIN_BYTE, PMIC2_REDUNDANCY_START, PMIC2_REDUNDANCY_LEN};
@@ -1996,6 +2040,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 347: PMIC3 SWA Delay Sequence Order
         static constexpr field_t PMIC3_SWA_DELAY{PMIC3_SWA_DELAY_BYTE, PMIC3_SWA_DELAY_START, PMIC3_SWA_DELAY_LEN};
         static constexpr field_t PMIC3_SWA_ORDER{PMIC3_SWA_DELAY_BYTE, PMIC3_SWA_ORDER_START, PMIC3_SWA_ORDER_LEN};
+        static constexpr field_t PMIC3_SWA_SEQUENCE{PMIC3_SWA_DELAY_BYTE, PMIC3_SWA_SEQUENCE_START, PMIC3_SWA_SEQUENCE_LEN};
 
         // Byte 348: PMIC3 SWB Voltage Setting
         static constexpr field_t PMIC3_SWB_VOLT_SET{PMIC3_SWB_VOLT_SET_BYTE, PMIC3_SWB_VOLT_SET_START, PMIC3_SWB_VOLT_SET_LEN};
@@ -2008,6 +2053,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 350: PMIC3 SWB Delay Sequence Order
         static constexpr field_t PMIC3_SWB_DELAY{PMIC3_SWB_DELAY_BYTE, PMIC3_SWB_DELAY_START, PMIC3_SWB_DELAY_LEN};
         static constexpr field_t PMIC3_SWB_ORDER{PMIC3_SWB_DELAY_BYTE, PMIC3_SWB_ORDER_START, PMIC3_SWB_ORDER_LEN};
+        static constexpr field_t PMIC3_SWB_SEQUENCE{PMIC3_SWB_DELAY_BYTE, PMIC3_SWB_SEQUENCE_START, PMIC3_SWB_SEQUENCE_LEN};
 
         // Byte 351: PMIC3 SWC Voltage Setting
         static constexpr field_t PMIC3_SWC_VOLT_SET{PMIC3_SWC_VOLT_SET_BYTE, PMIC3_SWC_VOLT_SET_START, PMIC3_SWC_VOLT_SET_LEN};
@@ -2020,6 +2066,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 353: PMIC3 SWC Delay Sequence Order
         static constexpr field_t PMIC3_SWC_DELAY{PMIC3_SWC_DELAY_BYTE, PMIC3_SWC_DELAY_START, PMIC3_SWC_DELAY_LEN};
         static constexpr field_t PMIC3_SWC_ORDER{PMIC3_SWC_DELAY_BYTE, PMIC3_SWC_ORDER_START, PMIC3_SWC_ORDER_LEN};
+        static constexpr field_t PMIC3_SWC_SEQUENCE{PMIC3_SWC_DELAY_BYTE, PMIC3_SWC_SEQUENCE_START, PMIC3_SWC_SEQUENCE_LEN};
 
         // Byte 354: PMIC3 SWD Voltage Setting
         static constexpr field_t PMIC3_SWD_VOLT_SET{PMIC3_SWD_VOLT_SET_BYTE, PMIC3_SWD_VOLT_SET_START, PMIC3_SWD_VOLT_SET_LEN};
@@ -2032,6 +2079,7 @@ class fields<DDR5, DDIMM_MODULE>
         // Byte 356: PMIC3 SWD Delay Sequence Order
         static constexpr field_t PMIC3_SWD_DELAY{PMIC3_SWD_DELAY_BYTE, PMIC3_SWD_DELAY_START, PMIC3_SWD_DELAY_LEN};
         static constexpr field_t PMIC3_SWD_ORDER{PMIC3_SWD_DELAY_BYTE, PMIC3_SWD_ORDER_START, PMIC3_SWD_ORDER_LEN};
+        static constexpr field_t PMIC3_SWD_SEQUENCE{PMIC3_SWD_DELAY_BYTE, PMIC3_SWD_SEQUENCE_START, PMIC3_SWD_SEQUENCE_LEN};
 
         // Byte 357: PMIC3 Phase Combination and redundancy
         static constexpr field_t PMIC3_REDUNDANCY{PMIC3_PHASE_COMBIN_BYTE, PMIC3_REDUNDANCY_START, PMIC3_REDUNDANCY_LEN};

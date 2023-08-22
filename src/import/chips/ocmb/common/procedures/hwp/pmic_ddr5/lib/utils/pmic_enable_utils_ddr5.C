@@ -768,7 +768,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 ///
 /// @brief Setup and initialize PMIC
 ///

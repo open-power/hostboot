@@ -109,6 +109,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SEQUENCE_CFG0_R40</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg0 will be enabled for PMIC0
+          and written to PMIC0 reg R40 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_sequence_cfg0_r40</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_SETTING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -178,6 +191,19 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>pmic0_swb_sequence_order</mssAccessorName>
+    </attribute>
+
+     <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SEQUENCE_CFG1_R41</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg1 will be enabled for PMIC0
+          and written to PMIC0 reg R41 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_sequence_cfg1_r41</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -253,6 +279,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SEQUENCE_CFG2_R42</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg2 will be enabled for PMIC0
+          and written to PMIC0 reg R42 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_sequence_cfg2_r42</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_SETTING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -322,6 +361,19 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>pmic0_swd_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC0_SEQUENCE_CFG3_R43</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg3 will be enabled for PMIC0
+          and written to PMIC0 reg R40 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic0_sequence_cfg3_r43</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -409,6 +461,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SEQUENCE_CFG0_R40</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg0 will be enabled for PMIC1
+          and written to PMIC1 reg R40 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic1_sequence_cfg0_r40</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_SETTING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -478,6 +543,19 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>pmic1_swb_sequence_order</mssAccessorName>
+    </attribute>
+
+     <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SEQUENCE_CFG1_R41</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg1 will be enabled for PMIC1
+          and written to PMIC1 reg R41 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic1_sequence_cfg1_r41</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -553,6 +631,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SEQUENCE_CFG2_R42</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg2 will be enabled for PMIC1
+          and written to PMIC1 reg R42 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic1_sequence_cfg2_r42</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_SETTING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -622,6 +713,19 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>pmic1_swd_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC1_SEQUENCE_CFG3_R43</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg3 will be enabled for PMIC1
+          and written to PMIC1 reg R43 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic1_sequence_cfg3_r43</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -709,6 +813,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC2_SEQUENCE_CFG0_R40</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg0 will be enabled for PMIC2
+          and written to PMIC2 reg R40 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic2_sequence_cfg0_r40</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_SETTING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -779,6 +896,20 @@
         <writeable/>
         <mssAccessorName>pmic2_swb_sequence_order</mssAccessorName>
     </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC2_SEQUENCE_CFG1_R41</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg1 will be enabled for PMIC2
+          and written to PMIC2 reg R41 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic2_sequence_cfg1_r41</mssAccessorName>
+    </attribute>
+
 
     <attribute>
         <id>ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_SETTING</id>
@@ -853,6 +984,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC2_SEQUENCE_CFG2_R42</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg2 will be enabled for PMIC2
+          and written to PMIC2 reg R42 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic2_sequence_cfg2_r42</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_SETTING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -922,6 +1066,19 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>pmic2_swd_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC2_SEQUENCE_CFG3_R43</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg3 will be enabled for PMIC2
+          and written to PMIC2 reg R43 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic2_sequence_cfg3_r43</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1009,6 +1166,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC3_SEQUENCE_CFG0_R40</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg0 will be enabled for PMIC3
+          and written to PMIC3 reg R40 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic3_sequence_cfg0_r40</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_SETTING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -1079,6 +1249,20 @@
         <writeable/>
         <mssAccessorName>pmic3_swb_sequence_order</mssAccessorName>
     </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC3_SEQUENCE_CFG1_R41</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg1 will be enabled for PMIC3
+          and written to PMIC3 reg R41 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic3_sequence_cfg1_r41</mssAccessorName>
+    </attribute>
+
 
     <attribute>
         <id>ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_SETTING</id>
@@ -1153,6 +1337,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MEM_EFF_PMIC3_SEQUENCE_CFG2_R42</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg2 will be enabled for PMIC3
+          and written to PMIC3 reg R42 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic3_sequence_cfg2_r42</mssAccessorName>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_SETTING</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -1222,6 +1419,19 @@
         <valueType>uint8</valueType>
         <writeable/>
         <mssAccessorName>pmic3_swd_sequence_order</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MEM_EFF_PMIC3_SEQUENCE_CFG3_R43</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+          The sequence for cfg3 will be enabled for PMIC3
+          and written to PMIC3 reg R43 when using SPD REV 0.7.0
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <mssAccessorName>pmic3_sequence_cfg3_r43</mssAccessorName>
     </attribute>
 
     <attribute>

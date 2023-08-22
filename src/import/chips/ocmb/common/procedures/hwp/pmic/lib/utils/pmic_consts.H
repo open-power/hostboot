@@ -263,6 +263,26 @@ enum ffdc_codes
     SET_PMIC3_SWB_VOLTAGE_COARSE_OFFSET     = 0x1121,
     SET_PMIC3_SWC_VOLTAGE_COARSE_OFFSET     = 0x1122,
     SET_PMIC3_SWD_VOLTAGE_COARSE_OFFSET     = 0x1123,
+
+    SET_PMIC0_SEQUENCE_CFG0_R40 = 0x1124,
+    SET_PMIC0_SEQUENCE_CFG1_R41 = 0x1125,
+    SET_PMIC0_SEQUENCE_CFG2_R42 = 0x1126,
+    SET_PMIC0_SEQUENCE_CFG3_R43 = 0x1127,
+
+    SET_PMIC1_SEQUENCE_CFG0_R40 = 0x1128,
+    SET_PMIC1_SEQUENCE_CFG1_R41 = 0x1129,
+    SET_PMIC1_SEQUENCE_CFG2_R42 = 0x112A,
+    SET_PMIC1_SEQUENCE_CFG3_R43 = 0x112B,
+
+    SET_PMIC2_SEQUENCE_CFG0_R40 = 0x112C,
+    SET_PMIC2_SEQUENCE_CFG1_R41 = 0x112D,
+    SET_PMIC2_SEQUENCE_CFG2_R42 = 0x112E,
+    SET_PMIC2_SEQUENCE_CFG3_R43 = 0x112F,
+
+    SET_PMIC3_SEQUENCE_CFG0_R40 = 0x1130,
+    SET_PMIC3_SEQUENCE_CFG1_R41 = 0x1131,
+    SET_PMIC3_SEQUENCE_CFG2_R42 = 0x1132,
+    SET_PMIC3_SEQUENCE_CFG3_R43 = 0x1133,
 };
 
 ///
@@ -348,6 +368,7 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
 
     // Despite the SPD max of 1000, the PMIC can only really support this value
     static constexpr uint8_t ORDER_LIMIT                = 0b0101;
+    static constexpr uint8_t ORDER_RESERVED_VALUE       = 0b1111;
 
     // Offset voltage from spd (+/-)
     static constexpr uint8_t OFFSET_PLUS                = 0;

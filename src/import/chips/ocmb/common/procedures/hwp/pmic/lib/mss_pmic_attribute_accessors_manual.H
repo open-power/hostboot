@@ -404,6 +404,38 @@ static constexpr const pmic_attr_ptr* get_sequence_delay[] =
     get_swd_sequence_delay
 };
 
+static constexpr pmic_attr_ptr get_sequence_order_reg40[] =
+{
+    mss::attr::get_pmic0_sequence_cfg0_r40,
+    mss::attr::get_pmic1_sequence_cfg0_r40,
+    mss::attr::get_pmic2_sequence_cfg0_r40,
+    mss::attr::get_pmic3_sequence_cfg0_r40
+};
+
+static constexpr pmic_attr_ptr get_sequence_order_reg41[] =
+{
+    mss::attr::get_pmic0_sequence_cfg1_r41,
+    mss::attr::get_pmic1_sequence_cfg1_r41,
+    mss::attr::get_pmic2_sequence_cfg1_r41,
+    mss::attr::get_pmic3_sequence_cfg1_r41
+};
+
+static constexpr pmic_attr_ptr get_sequence_order_reg42[] =
+{
+    mss::attr::get_pmic0_sequence_cfg2_r42,
+    mss::attr::get_pmic1_sequence_cfg2_r42,
+    mss::attr::get_pmic2_sequence_cfg2_r42,
+    mss::attr::get_pmic3_sequence_cfg2_r42
+};
+
+static constexpr pmic_attr_ptr get_sequence_order_reg43[] =
+{
+    mss::attr::get_pmic0_sequence_cfg3_r43,
+    mss::attr::get_pmic1_sequence_cfg3_r43,
+    mss::attr::get_pmic2_sequence_cfg3_r43,
+    mss::attr::get_pmic3_sequence_cfg3_r43
+};
+
 // Phase Combination
 static constexpr pmic_attr_ptr get_phase_comb[] =
 {

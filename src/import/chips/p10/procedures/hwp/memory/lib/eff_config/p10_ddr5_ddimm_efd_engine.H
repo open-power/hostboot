@@ -95,7 +95,7 @@ class ddimm_0_0 : public mss::efd::base
         }
 
         ///
-        /// @brief Destroy the ddimm_efd_0_3 object
+        /// @brief Destroy the ddimm_0_3 object
         ///
         virtual ~ddimm_0_0() = default;
 
@@ -4132,6 +4132,67 @@ class ddimm_0_0 : public mss::efd::base
         virtual fapi2::ReturnCode process_overrides(const std::vector<uint8_t>& i_spd) const
         {
             return fapi2::FAPI2_RC_SUCCESS;
+        }
+};
+
+///
+/// @brief Class for base EFD section of SPD - specifically DDR5 SPD REV 0.7
+///
+class ddimm_0_7 : public ddimm_0_0
+{
+        static constexpr uint8_t DRAMINIT_NUM_ADDR_DELAYS = 8;
+
+        using F = mss::efd::fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>;
+
+    protected:
+        uint8_t iv_port_rel_pos;
+
+    public:
+
+        ///
+        /// @brief Construct a new DDR5 DDIMM EFD rev 0.7 object
+        /// @param[in] i_dimm DIMM target
+        /// @param[in] i_dimm_rank the current DIMM rank to create rank info class
+        /// @param[out] o_rc return code
+        ///
+        ddimm_0_7(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                  const uint16_t i_dimm_rank,
+                  fapi2::ReturnCode& o_rc) :
+            ddimm_0_0(i_dimm,
+                      i_dimm_rank,
+                      o_rc)
+        {
+        }
+
+        ///
+        /// @brief Destroy the ddimm_0_7 object
+        ///
+        virtual ~ddimm_0_7() = default;
+
+        ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const override
+        {
+            return mss::spd::rev::V0_7;
+        }
+
+        /// @brief Process the fields for ddimm efd rev 0.4
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode process(const std::vector<uint8_t>& i_efd) const
+        {
+            // Only brand new fields for this revision should be explicitly
+            // called here below the call to this function
+            FAPI_TRY(ddimm_0_0::process(i_efd));
+
+            // DDIMM EFD Rev 0.7 new field processing goes here
+
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 };
 

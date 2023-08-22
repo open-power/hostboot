@@ -37,6 +37,7 @@
 #include <lib/i2c/i2c_pmic.H>
 #include <lib/utils/pmic_enable_utils.H>
 #include <lib/utils/pmic_consts.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <lib/utils/pmic_common_utils.H>
 #include <pmic_regs.H>
 #include <pmic_regs_fld.H>
@@ -627,14 +628,14 @@ fapi_try_exit:
 }
 
 ///
-/// @brief bias PMIC with SPD settings for startup sequence
+/// @brief Update PMIC sequence based on SPD rev 0.0
 ///
 /// @param[in] i_pmic_target PMIC target
 /// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
+/// @param[in] i_id PMIC0 or PMIC1
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode bias_with_spd_startup_seq(
+fapi2::ReturnCode update_seq_with_order_and_delay_attr(
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
     const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     const mss::pmic::id i_id)
@@ -665,7 +666,7 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
 
         // The SPD allows for up to 8 sequences, but there are only 4 on the PMIC. The SPD defaults never go higher than 2.
         // We put this check in here as with anything over 4, we don't really know what we can do.
-        FAPI_ASSERT((l_sequence_orders[l_rail_index] < CONSTS::ORDER_LIMIT),
+        FAPI_ASSERT((l_sequence_orders[l_rail_index] < CONSTS::ORDER_LIMIT ),
                     fapi2::PMIC_ORDER_OUT_OF_RANGE()
                     .set_PMIC_TARGET(i_pmic_target)
                     .set_OCMB_TARGET(i_ocmb_target)
@@ -721,6 +722,99 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
             fapi2::buffer<uint8_t> l_clear;
             FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, SEQUENCE_REGS[l_highest_sequence], l_power_on_sequence_config));
         }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Update PMIC sequence based on the SPD version 0.7.0
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_id PMIC2 or PMIC3
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode update_seq_with_reg_attr(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        const mss::pmic::id i_id)
+{
+    static constexpr auto J = mss::pmic::product::JEDEC_COMPLIANT;
+    using REGS = pmicRegs<J>;
+
+    uint8_t l_pmic_seq_cfg0_r40 = 0;
+    uint8_t l_pmic_seq_cfg1_r41 = 0;
+    uint8_t l_pmic_seq_cfg2_r42 = 0;
+    uint8_t l_pmic_seq_cfg3_r43 = 0;
+
+    FAPI_INF("Updating the PMIC sequence with register attributes " GENTARGTIDFORMAT, GENTARGTID(i_pmic_target));
+
+    // Get attributes that is for defined for SPD rev 0.7.0
+    FAPI_TRY(mss::attr::get_sequence_order_reg40[i_id](i_ocmb_target, l_pmic_seq_cfg0_r40));
+    FAPI_TRY(mss::attr::get_sequence_order_reg41[i_id](i_ocmb_target, l_pmic_seq_cfg1_r41));
+    FAPI_TRY(mss::attr::get_sequence_order_reg42[i_id](i_ocmb_target, l_pmic_seq_cfg2_r42));
+    FAPI_TRY(mss::attr::get_sequence_order_reg43[i_id](i_ocmb_target, l_pmic_seq_cfg3_r43));
+
+    // Write the attribute values to the PMIC regs
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R40_POWER_ON_SEQUENCE_CONFIG_1, l_pmic_seq_cfg0_r40));
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R41_POWER_ON_SEQUENCE_CONFIG_2, l_pmic_seq_cfg1_r41));
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R42_POWER_ON_SEQUENCE_CONFIG_3, l_pmic_seq_cfg2_r42));
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R43_POWER_ON_SEQUENCE_CONFIG_4, l_pmic_seq_cfg3_r43));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
+/// @brief bias PMIC with SPD settings for startup sequence either with
+/// sequence order and delay attr or sequence order attr depending on the
+/// SPD revision
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode bias_with_spd_startup_seq(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id)
+{
+    // Variables to store the attribute data
+    uint8_t l_sequence_order_swa;
+    uint8_t l_dram_gen = 0;
+
+    // Get the dram generation
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target))
+    {
+        FAPI_TRY(mss::attr::get_dram_gen(l_dimm, l_dram_gen));
+        break;
+    }
+
+    // Get the SWA attribute value just for checking purposes
+    // We are keying off the sequence order attribute which is set to invalid/reserved value when SPD rev is 0.7.0
+    // So just getting one attribute is good enough to check for that since all of the attributes that are
+    // defined for SPD rev 0.0 are made invalid
+    FAPI_TRY(((mss::attr::get_sequence_order[mss::pmic::rail::SWA][i_id]))(i_ocmb_target, l_sequence_order_swa));
+
+    // Checking for the sequence order attribute for an invalid value
+    // And if the dram gen is DDR5, only then use the attributes defined for SPD rev 0.7.0
+    if (l_sequence_order_swa == mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE &&
+        l_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5)
+    {
+        // Call the update seq to use attributes that are defined for SPD rev 0.7.0
+        FAPI_INF("DDR5 pmic_sequencing with reg attr");
+        return(update_seq_with_reg_attr(i_pmic_target, i_ocmb_target, i_id));
+    }
+    else
+    {
+        // Call the update seq to use original attributes that are defined for SPD rev 0.0
+        FAPI_INF("DDR4 pmic_sequencing with original attr");
+        return(update_seq_with_order_and_delay_attr(i_pmic_target, i_ocmb_target, i_id));
     }
 
 fapi_try_exit:

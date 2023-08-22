@@ -5473,6 +5473,554 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         }
 };
 
+///
+/// @brief Class for DDIMM SPD Rev 0.7
+///
+class ddimm_0_7 : public ddimm_0_0
+{
+        using F = mss::spd::fields<DDR5, DDIMM_MODULE>;
+
+    public:
+        ///
+        /// @brief Construct a new ddimm rev 0.7 object
+        ///
+        /// @param[in] i_dimm
+        ///
+        ddimm_0_7(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm) : ddimm_0_0(i_dimm)
+        {
+        }
+
+        virtual ~ddimm_0_7() = default;
+
+        ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const override
+        {
+            return mss::spd::rev::V0_7;
+        }
+
+        ///
+        /// @brief Set the pmic0 swa order field to write to PMIC0 reg R40
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic0_swa_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_SWA_SEQUENCE, i_spd, pmic::SET_PMIC0_SEQUENCE_CFG0_R40, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC0_SWA_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC0_SEQUENCE_CFG0_R40,
+                                  "PMIC0 SEQUENCE CFG0 R40"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic0_swa_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic0_sequence_cfg0_r40(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic0 swb order field to write to PMIC0 reg R40
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic0_swb_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_SWB_SEQUENCE, i_spd, pmic::SET_PMIC0_SEQUENCE_CFG1_R41, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC0_SWB_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC0_SEQUENCE_CFG1_R41,
+                                  "PMIC0 SEQUENCE CFG1 R41"));
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic0_swb_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic0_sequence_cfg1_r41(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic0 swc order field to write to PMIC0 reg R40
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic0_swc_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_SWC_SEQUENCE, i_spd, pmic::SET_PMIC0_SEQUENCE_CFG2_R42, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC0_SWC_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC0_SEQUENCE_CFG2_R42,
+                                  "PMIC0 SEQUENCE CFG2 R42"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic0_swc_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic0_sequence_cfg2_r42(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic0 swd order field to write to PMIC0 reg R40
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic0_swd_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_SWD_SEQUENCE, i_spd, pmic::SET_PMIC0_SEQUENCE_CFG3_R43, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC0_SWD_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC0_SEQUENCE_CFG3_R43,
+                                  "PMIC0 SEQUENCE CFG3 R43"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic0_swd_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic0_sequence_cfg3_r43(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic1 swa order field to write to PMIC1 reg R41
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic1_swa_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_SWA_SEQUENCE, i_spd, pmic::SET_PMIC1_SEQUENCE_CFG0_R40, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC1_SWA_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC1_SEQUENCE_CFG0_R40,
+                                  "PMIC1 SEQUENCE CFG0 R40"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic1_swa_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic1_sequence_cfg0_r40(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic1 swb order field to write to PMIC1 reg R41
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic1_swb_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_SWB_SEQUENCE, i_spd, pmic::SET_PMIC1_SEQUENCE_CFG1_R41, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC1_SWB_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC1_SEQUENCE_CFG1_R41,
+                                  "PMIC1 SEQUENCE CFG1 R41"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic1_swb_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic1_sequence_cfg1_r41(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic1 swc order field to write to PMIC1 reg R42
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic1_swc_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_SWC_SEQUENCE, i_spd, pmic::SET_PMIC1_SEQUENCE_CFG2_R42, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC1_SWC_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC1_SEQUENCE_CFG2_R42,
+                                  "PMIC1 SEQUENCE CFG2 R42"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic1_swc_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic1_sequence_cfg2_r42(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic1 swd order field to write to PMIC1 reg R41
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic1_swd_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_SWD_SEQUENCE, i_spd, pmic::SET_PMIC1_SEQUENCE_CFG3_R43, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC1_SWD_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC1_SEQUENCE_CFG3_R43,
+                                  "PMIC1 SEQUENCE CFG3 R43"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic1_swd_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic1_sequence_cfg3_r43(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic2 swa order field to write to PMIC2 reg R42
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic2_swa_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_SWA_SEQUENCE, i_spd, pmic::SET_PMIC2_SEQUENCE_CFG0_R40, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC2_SWA_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC2_SEQUENCE_CFG0_R40,
+                                  "PMIC2 SEQUENCE CFG0 R40"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic2_swa_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic2_sequence_cfg0_r40(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic2 swb order field to write to PMIC2 reg R42
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic2_swb_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_SWB_SEQUENCE, i_spd, pmic::SET_PMIC2_SEQUENCE_CFG1_R41, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC2_SWB_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC2_SEQUENCE_CFG1_R41,
+                                  "PMIC2 SEQUENCE CFG1 R41"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic2_swb_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic2_sequence_cfg1_r41(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic2 swc order field to write to PMIC2 reg R42
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic2_swc_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_SWC_SEQUENCE, i_spd, pmic::SET_PMIC2_SEQUENCE_CFG2_R42, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC2_SWC_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC2_SEQUENCE_CFG2_R42,
+                                  "PMIC2 SEQUENCE CFG2 R42"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic2_swc_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic2_sequence_cfg2_r42(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic2 swd order field to write to PMIC2 reg R42
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic2_swd_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC2_SWD_SEQUENCE, i_spd, pmic::SET_PMIC2_SEQUENCE_CFG3_R43, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC2_SWD_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC2_SEQUENCE_CFG3_R43,
+                                  "PMIC2 SEQUENCE CFG3 R43"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            FAPI_TRY(mss::attr::set_pmic2_swd_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic2_sequence_cfg3_r43(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic3 swa order field to write to PMIC3 reg R43
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic3_swa_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_SWA_SEQUENCE, i_spd, pmic::SET_PMIC3_SEQUENCE_CFG0_R40, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC3_SWA_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC3_SEQUENCE_CFG0_R40,
+                                  "PMIC3 SEQUENCE CFG0 R40"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic3_swa_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic3_sequence_cfg0_r40(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic3 swb order field to write to PMIC3 reg R43
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic3_swb_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_SWB_SEQUENCE, i_spd, pmic::SET_PMIC3_SEQUENCE_CFG1_R41, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC3_SWB_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC3_SEQUENCE_CFG1_R41,
+                                  "PMIC3 SEQUENCE CFG1 R41"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic3_swb_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic3_sequence_cfg1_r41(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic3 swc order field to write to PMIC3 reg R43
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic3_swc_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_SWC_SEQUENCE, i_spd, pmic::SET_PMIC3_SEQUENCE_CFG2_R42, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC3_SWC_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC3_SEQUENCE_CFG2_R42,
+                                  "PMIC3 SEQUENCE CFG2 R42"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic3_swc_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic3_sequence_cfg2_r42(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the pmic3 swd order field to write to PMIC3 reg R43
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_pmic3_swd_order(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC3_SWD_SEQUENCE, i_spd, pmic::SET_PMIC3_SEQUENCE_CFG3_R43, l_field));
+
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_pmic_rail_order(l_field),
+                                  F::PMIC3_SWD_SEQUENCE.get_byte(i_spd),
+                                  l_field,
+                                  pmic::SET_PMIC3_SEQUENCE_CFG3_R43,
+                                  "PMIC3 SEQUENCE CFG3 R43"));
+
+            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
+            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            FAPI_TRY(mss::attr::set_pmic3_swd_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
+            // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
+            FAPI_TRY(mss::attr::set_pmic3_sequence_cfg3_r43(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        // Virtual function overloads go here
+
+        /// @brief Process the fields for ddimm rev 0.7
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        fapi2::ReturnCode process(const std::vector<uint8_t>& i_spd) const
+        {
+            // The naming here is a bit tricky: 0.0 process will process fields
+            // that originated in 0.0, but will use any field processors/traits
+            // that were overridden for the current class type (ex. ddimm_0_7)
+
+            // Only brand new fields for this revision should be explicitly
+            // called here below the call to this function
+            FAPI_TRY(ddimm_0_0::process(i_spd));
+
+            // DDIMM 0.7 new field processing goes here
+            FAPI_TRY(set_pmic0_swa_order(i_spd));
+            FAPI_TRY(set_pmic0_swb_order(i_spd));
+            FAPI_TRY(set_pmic0_swc_order(i_spd));
+            FAPI_TRY(set_pmic0_swd_order(i_spd));
+            FAPI_TRY(set_pmic1_swa_order(i_spd));
+            FAPI_TRY(set_pmic1_swb_order(i_spd));
+            FAPI_TRY(set_pmic1_swc_order(i_spd));
+            FAPI_TRY(set_pmic1_swd_order(i_spd));
+            FAPI_TRY(set_pmic2_swa_order(i_spd));
+            FAPI_TRY(set_pmic2_swb_order(i_spd));
+            FAPI_TRY(set_pmic2_swc_order(i_spd));
+            FAPI_TRY(set_pmic2_swd_order(i_spd));
+            FAPI_TRY(set_pmic3_swa_order(i_spd));
+            FAPI_TRY(set_pmic3_swb_order(i_spd));
+            FAPI_TRY(set_pmic3_swc_order(i_spd));
+            FAPI_TRY(set_pmic3_swd_order(i_spd));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+};
+
+
 //
 // Can be updated with the earliest supported ddimm module revision
 //

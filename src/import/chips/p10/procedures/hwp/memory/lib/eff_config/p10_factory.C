@@ -38,6 +38,28 @@
 
 namespace mss
 {
+namespace spd
+{
+namespace ddr5
+{
+///
+/// @brief Return the correct fallback version for SPD
+/// @param[in] i_rev SPD revision
+/// @return SPD version
+///
+uint8_t get_fallback_rev(uint8_t i_rev)
+{
+    // Max unique version is 0.7.0
+    if (i_rev >= mss::spd::rev::DDIMM_DDR5_MAX)
+    {
+        return mss::spd::rev::DDIMM_DDR5_MAX;
+    }
+
+    // All earlier revisions use the 0.0.0 decoder
+    return mss::spd::rev::V0_0;
+}
+} //ns ddr5
+} //ns spd
 namespace efd
 {
 
@@ -60,7 +82,7 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 {
     // Poor man's fallback technique: if we receive a revision that's later than (or numerically
     // greater than) the latest supported, we'll decode as if it's the latest supported rev
-    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_DDR4_MAX) ? mss::spd::rev::DDIMM_DDR4_MAX : i_rev;
+    uint8_t l_fallback_rev = 0;
 
     // Return code to pass to the constructor
     fapi2::ReturnCode l_rc;
@@ -70,6 +92,10 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
     {
         case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4:
             {
+                // Poor man's fallback technique: if we receive a revision that's later than (or numerically
+                // greater than) the latest supported, we'll decode as if it's the latest supported rev
+                l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_DDR4_MAX) ? mss::spd::rev::DDIMM_DDR4_MAX : i_rev;
+
                 if (i_planar == fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_FALSE)
                 {
                     // Then switch over the SPD revision
@@ -135,8 +161,43 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 
         case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5:
             {
-                o_efd_engine = std::make_shared<mss::efd::ddr5::ddimm_0_0>(i_target, i_dimm_rank, l_rc);
-                return l_rc;
+                // Poor man's fallback technique: if we receive a revision that's later than (or numerically
+                // greater than) the latest supported, we'll decode as if it's the latest supported rev
+                l_fallback_rev = spd::ddr5::get_fallback_rev(i_rev);
+
+                switch (l_fallback_rev)
+                {
+                    case mss::spd::rev::V0_7:
+                        {
+
+                            o_efd_engine = std::make_shared<mss::efd::ddr5::ddimm_0_7>(i_target, i_dimm_rank, l_rc);
+                            return l_rc;
+                            break;
+                        }
+
+                    case mss::spd::rev::V0_0:
+                        {
+                            o_efd_engine = std::make_shared<mss::efd::ddr5::ddimm_0_0>(i_target, i_dimm_rank, l_rc);
+                            return l_rc;
+                            break;
+                        }
+
+                    default:
+                        {
+                            FAPI_ASSERT(false,
+                                        fapi2::MSS_INVALID_SPD_REVISION()
+                                        .set_SPD_REVISION(i_rev)
+                                        .set_DRAM_GENERATION(i_gen)
+                                        .set_IS_PLANAR(i_planar)
+                                        .set_FUNCTION_CODE(EFD_FACTORY)
+                                        .set_DIMM_TARGET(i_target),
+                                        "Unsupported DRAM generation received in EFD decoder factory 0x%02x for %s",
+                                        i_gen, spd::c_str(i_target));
+                        }
+
+
+                }
+
                 break;
             }
 
@@ -152,6 +213,8 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
                             "Unsupported DRAM generation received in EFD decoder factory 0x%02x for %s",
                             i_gen, spd::c_str(i_target));
             }
+
+
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -223,21 +286,52 @@ fapi2::ReturnCode base_module_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIM
         case fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5:
             // Poor man's fallback technique: if we receive a revision that's later than (or numerically
             // greater than) the latest supported, we'll decode as if it's the latest supported rev
-            l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_DDR5_MAX) ? mss::spd::rev::DDIMM_DDR5_MAX : i_rev;
-            o_base_engine = std::make_shared<mss::spd::ddr5::base_0_0>(i_target);
-            return fapi2::FAPI2_RC_SUCCESS;
+            l_fallback_rev = spd::ddr5::get_fallback_rev(i_rev);
+
+            switch (l_fallback_rev)
+            {
+                case mss::spd::rev::V0_7:
+                    {
+                        o_base_engine = std::make_shared<mss::spd::ddr5::base_0_7>(i_target);
+                        return fapi2::FAPI2_RC_SUCCESS;
+                        break;
+                    }
+
+                case mss::spd::rev::V0_0:
+                    {
+                        o_base_engine = std::make_shared<mss::spd::ddr5::base_0_0>(i_target);
+                        return fapi2::FAPI2_RC_SUCCESS;
+                        break;
+                    }
+
+                default:
+                    {
+                        FAPI_ASSERT(false,
+                                    fapi2::MSS_INVALID_SPD_REVISION()
+                                    .set_SPD_REVISION(i_rev)
+                                    .set_DRAM_GENERATION(i_gen)
+                                    .set_FUNCTION_CODE(SPD_FACTORY)
+                                    .set_DIMM_TARGET(i_target),
+                                    "Unsupported DRAM generation received in SPD decoder factory 0x%02x for %s",
+                                    i_gen, spd::c_str(i_target));
+                        break;
+                    }
+            }
+
             break;
 
         default:
-            FAPI_ASSERT(false,
-                        fapi2::MSS_INVALID_SPD_REVISION()
-                        .set_SPD_REVISION(i_rev)
-                        .set_DRAM_GENERATION(i_gen)
-                        .set_FUNCTION_CODE(SPD_FACTORY)
-                        .set_DIMM_TARGET(i_target),
-                        "Unsupported DRAM generation received in SPD decoder factory 0x%02x for %s",
-                        i_gen, spd::c_str(i_target));
-            break;
+            {
+                FAPI_ASSERT(false,
+                            fapi2::MSS_INVALID_SPD_REVISION()
+                            .set_SPD_REVISION(i_rev)
+                            .set_DRAM_GENERATION(i_gen)
+                            .set_FUNCTION_CODE(SPD_FACTORY)
+                            .set_DIMM_TARGET(i_target),
+                            "Unsupported DRAM generation received in SPD decoder factory 0x%02x for %s",
+                            i_gen, spd::c_str(i_target));
+                break;
+            }
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -355,7 +449,6 @@ fapi_try_exit:
 
 namespace ddr5
 {
-
 ///
 /// @brief Generates the DDR5 DDIMM module SPD engine based upon the SPD rev
 /// @param[in] i_target DIMM target
@@ -369,11 +462,17 @@ fapi2::ReturnCode ddimm_module_specific_factory(const fapi2::Target<fapi2::TARGE
 {
     // Poor man's fallback technique: if we receive a revision that's later than (or numerically
     // greater than) the latest supported, we'll decode as if it's the latest supported rev
-    const uint8_t l_fallback_rev = (i_rev > mss::spd::rev::DDIMM_DDR5_MAX) ? mss::spd::rev::DDIMM_DDR5_MAX : i_rev;
+    uint8_t l_fallback_rev = ddr5::get_fallback_rev(i_rev);
 
     // Then switch over the SPD revision
     switch (l_fallback_rev)
     {
+        case mss::spd::rev::V0_7:
+            {
+                o_module_specific_engine = std::make_shared<mss::spd::ddr5::ddimm_0_7>(i_target);
+                return fapi2::FAPI2_RC_SUCCESS;
+                break;
+            }
 
         case mss::spd::rev::V0_0:
             {

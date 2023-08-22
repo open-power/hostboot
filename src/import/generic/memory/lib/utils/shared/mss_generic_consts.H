@@ -1174,6 +1174,7 @@ enum rev : uint8_t
     V0_0 = 0x00, ///< represents Rev 0.0
     V0_3 = 0x03, ///< represents Rev 0.3
     V0_4 = 0x04, ///< represents Rev 0.4
+    V0_7 = 0x07, ///< represents Rev 0.7
     V1_0 = 0x10, ///< represents Rev 1.0
     V1_1 = 0x11, ///< represents Rev 1.1
     V1_2 = 0x12, ///< represents Rev 1.2
@@ -1184,7 +1185,7 @@ enum rev : uint8_t
     RDIMM_MAX = V1_1,
     LRDIMM_MAX = V1_2,
     DDIMM_DDR4_MAX = V0_4,
-    DDIMM_DDR5_MAX = V0_0,
+    DDIMM_DDR5_MAX = V0_7,
 };
 
 ///
@@ -1364,7 +1365,16 @@ enum mr
     VREF_MIN = 0,
 };
 
-}
+///
+/// @brief DDR5 PMIC reserved value for sequence order
+///        attribute for SPD rev 0.7.0
+///
+enum pmic_consts
+{
+    SEQ_ORDER_RESERVED_VALUE = 15,
+};
+
+}//ddr5
 
 }// mss
 
