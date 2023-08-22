@@ -81,6 +81,19 @@ GEN_PNOR_IMAGE_SCRIPT := ${BUILDPNOR}/genPnorImages.pl
 UNPKGD_OCMBFW_IMG := ${STAGINGDIR}/ocmbfw.bin
 SBE_BUILD_SCRIPT := ${BUILDPNOR}/buildSbePart.pl
 PSPD_BUILD_SCRIPT := ${BUILDPNOR}/buildSPDImages.pl
+
+# Figure out whether we need to build the OCMBFW PNOR partition based on whether
+# a pre-build one is available in the hb prime cache.
+BUILD_OCMBFW_IMAGE := 1
+ifdef HB_FAST_PRIME
+	SBE_CACHE_DIR := ${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/${SBE_SUBREPO_TOP_COMMIT}
+	SBE_CACHE_EXISTS := $(shell ls ${SBE_CACHE_DIR})
+	# The cache doesn't exist, we will need to build OCMBFW partition
+	ifneq ($(SBE_CACHE_EXISTS),)
+		BUILD_OCMBFW_IMAGE := 0
+	endif
+endif
+
 # Needed to sign SBE Image (which will add .sb_settings section to it)
 SBE_SIGN_SCRIPT := ${PPE_DIR}/src/tools/scripts/signSbeImage
 SBE_SCRATCH_DIR := ${STANDALONEDIR}/sbeScratchDir
@@ -364,7 +377,7 @@ gen_system_specific_image: ${GEN_BUILD}
 gen_default_images: copy_hb_bins build_standalone_payload
 	ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
 
-
+ifeq (${BUILD_OCMBFW_IMAGE},1)
 # Create 4k ocmbfw image for now (all zeroes)
 	dd if=/dev/zero of=${UNPKGD_OCMBFW_IMG} bs=1024 count=4
 
@@ -378,6 +391,10 @@ gen_default_images: copy_hb_bins build_standalone_payload
 	# PKG_OCMBFW_SCRIPT uses paktool from the SBE repo
 	PATH="$$PATH:${SBE_DIR}/public/src/import/public/common/utils/imageProcs/tools/" \
 	    ${PKG_OCMBFW_SCRIPT} --layout ocmbfw-layout.json --output ${OCMBFW_IMG}
+else
+# Grab the pre-built image
+	cp ${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/${SBE_SUBREPO_TOP_COMMIT}/fwhdr.ocmbfw.bin ${OCMBFW_IMG}
+endif
 
 # Remove offset from start of Bootloader image for HBBL partition
 # Actual code is offset from HRMOR by 12k = 12 1k-blocks (space

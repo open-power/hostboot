@@ -588,6 +588,20 @@ hb_startsimics()
         # Odyssey params/images
         SBE_ODY_DIR=${PROJECT_ROOT}/src/build/tools/extern/sbe/
 
+        ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
+
+        if [[ "${HB_FAST_PRIME}" ]]
+        then
+            # Pick up pre-built images
+            export SBE_SUBREPO_TOP_COMMIT=$(git submodule status $SBE_ODY_DIR | awk '{print $1}' | sed 's/^-//')
+            export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/$SBE_SUBREPO_TOP_COMMIT/
+            if [ -d ${ODYSSEY_SBE_IMAGES} ]; then
+                ODY_SBE_DEBUG_DIR=${ODYSSEY_SBE_IMAGES}/odyssey_debug_files_tools/
+            else
+                unset ODYSSEY_SBE_IMAGES
+            fi
+        fi
+
         if [ -n "${ODYSSEY_SBE_IMAGES}" ]; then
             ODYSSEY_SROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_srom_DD1.bin
             ODYSSEY_OTPROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_otprom_DD1.bin
@@ -642,8 +656,6 @@ hb_startsimics()
             #@FIXME-RTC:254475-Remove once this works everywhere
             STARTSIMCMD+=(hb_ignoresmpfail=0)
             if [ -n "${HB_USE_ODYSSEY}" ]; then
-                ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
-
                 STARTSIMCMD+=(sbe_project_type=odyssey)
                 STARTSIMCMD+=(sbe_image_type=pnor)
                 STARTSIMCMD+=(paths_to_add=$ODY_SBE_DEBUG_DIR,$ODY_SBE_DEBUG_DIR/simics,$PYTHON_USER_PACKAGE_PATH)

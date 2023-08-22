@@ -54,6 +54,21 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
 
     SBE_DIR=${PROJECT_ROOT}/src/build/tools/extern/sbe
 
+    ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
+    if [[ "${HB_FAST_PRIME}" ]]
+    then
+        # Pick up pre-built images
+        export SBE_SUBREPO_TOP_COMMIT=$(git submodule status $SBE_DIR | awk '{print $1}' | sed 's/^-//')
+        export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/$SBE_SUBREPO_TOP_COMMIT/
+        # Check if the cached images exist; rebuild the SBE submodule if they don't
+        if [ -d ${ODYSSEY_SBE_IMAGES} ]; then
+            echo "\n***Using default pre-built SBE Odyssey images from ${ODYSSEY_SBE_IMAGES}\n"
+            ODY_SBE_DEBUG_DIR=${ODYSSEY_SBE_IMAGES}/odyssey_debug_files_tools/
+        else
+            unset ODYSSEY_SBE_IMAGES
+        fi
+    fi
+
     # Use default paths for Odyssey images if no custom ones are specified
     if [ -z $ODYSSEY_SBE_IMAGES ]; then
         ODYSSEY_SROM_IMG=${SBE_DIR}/simics/sbe/odyssey_standalone/images/odyssey_srom_DD1.bin
@@ -83,8 +98,6 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     else
         # FIXME JIRA: PFHB-477 copy in customized DDR5 SPD for Odyssey.
         cp /gsa/ausgsa/home/i/s/ismirno/public/debug/odyssey/DDR5_new.bin ${STANDALONE}/simics
-
-        ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
 
         echo "Using DDR5/Odyssey DDIMMs"
         START_SIMICS_CMD+=" dimm_type=ody"

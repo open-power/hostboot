@@ -42,11 +42,6 @@ assemble_setup()
     # PPE is tracked as a git module
     (cd ${PROJECT_ROOT} && make ppe $1)
 
-    # Clone SBE repo to ${PROJECT_ROOT}/src/build/tools/extern/sbe
-    # SBE is tracked as a git module
-    (cd ${PROJECT_ROOT} && make sbe $1)
-
-
     source ${PROJECT_ROOT}/src/build/citest/etc/sbe
     source ${PROJECT_ROOT}/src/build/citest/etc/hcode
     source ${PROJECT_ROOT}/src/build/citest/etc/hdat
@@ -142,20 +137,35 @@ generate_sbe_odyssey_images()
 {
     SBE_DIR=${PROJECT_ROOT}/src/build/tools/extern/sbe
 
+    if [[ "${HB_FAST_PRIME}" ]]
+    then
+        export SBE_SUBREPO_TOP_COMMIT=$(git submodule status $SBE_DIR | awk '{print $1}' | sed 's/^-//')
+        export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/$SBE_SUBREPO_TOP_COMMIT/
+        # Check if the cached images exist; rebuild the SBE submodule if they don't
+        if [ -d ${ODYSSEY_SBE_IMAGES} ]; then
+            echo "\n***Using default pre-built SBE Odyssey images\n"
+            return 0
+        else
+            echo "${ODYSSEY_SBE_IMAGES} DNE: generating SBE submodule images"
+            unset ODYSSEY_SBE_IMAGES
+        fi
+    fi
+
     # Use default paths for Odyssey images if no custom ones are specified
     if [ -n "${ODYSSEY_SBE_IMAGES}" ]; then
         ODYSSEY_SROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_srom_DD1.bin
         ODYSSEY_OTPROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_otprom_DD1.bin
         ODYSSEY_PNOR_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_nor_DD1.img.ecc
+        ODYSSEY_DEBUG_TAR_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_sbe_debug_DD1.tar.gz
     fi
+
+    # Clone SBE repo to ${PROJECT_ROOT}/src/build/tools/extern/sbe
+    # SBE is tracked as a git module
+    (cd ${PROJECT_ROOT} && make sbe $1)
 
     # Use default paths for Odyssey images if no custom ones are specified
     if [ -z $ODYSSEY_SROM_IMG ]; then
         ODYSSEY_SROM_IMG=${SBE_DIR}/images/odyssey/onetime/srom/odyssey_srom_DD1.bin
-    fi
-
-    if [ -z $SPPE_SCRIPTS_PATH ]; then
-        SPPE_SCRIPTS_PATH=${SBE_DIR}/simics/sbe/odyssey_standalone/sbeTest
     fi
 
     if [ -z $ODYSSEY_OTPROM_IMG ]; then
@@ -166,17 +176,14 @@ generate_sbe_odyssey_images()
         ODYSSEY_PNOR_IMG=${SBE_DIR}/simics/sbe/odyssey_standalone/images/odyssey_nor_DD1.img.ecc
     fi
 
-    if [ -z $SPPE_SCRIPT_TO_RUN ]; then
-        SPPE_SCRIPT_TO_RUN=${SBE_DIR}/simics/sbe/odyssey_standalone/sbestartupodystandalone.simics
+    if [ -z $ODYSSEY_DEBUG_TAR_IMG ]; then
+        ODYSSEY_DEBUG_TAR_IMG=${SBE_DIR}/images/odyssey/odyssey_sbe_debug_DD1.tar.gz
     fi
 
     # If any of the Odyssey images don't exist, re-generate all of them
     if [ ! -f "$ODYSSEY_SROM_IMG" ] || \
        [ ! -f "$ODYSSEY_OTPROM_IMG" ] || \
        [ ! -f "$ODYSSEY_PNOR_IMG" ] || \
-       # Also rebuild if the SBE env scripts don't exist
-       [ ! -f "$SPPE_SCRIPT_TO_RUN" ] || \
-       [ ! -d "$SPPE_SCRIPTS_PATH" ] || \
        [ $HB_FORCE_REBUILD_ODY ]
     then
         echo -e "\n\n Generating SBE Odyssey images..."
@@ -189,7 +196,7 @@ generate_sbe_odyssey_images()
         ./sbe workon odyssey pnor <<< 'unset SIGNING_BASE_DIR && ./sbe build && ./sbe prime && exit'
         cd ${PROJECT_ROOT}
         STANDALONE_SIMICS=${PROJECT_ROOT}/standalone/simics
-        tar -xzvf ${SBE_DIR}/images/odyssey/odyssey_sbe_debug_DD1.tar.gz -C ${STANDALONE_SIMICS}/ || exit 1
+        tar -xzvf ${ODYSSEY_DEBUG_TAR_IMG} -C ${STANDALONE_SIMICS}/ || exit 1
     else
         echo "\nSkipping generation of SBE Odyssey images\n"
     fi
