@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,7 +76,6 @@ TRAC_INIT( & g_trac_tpmdd, TPMDD_COMP_NAME, KILOBYTE );
 // Defines
 // ----------------------------------------------
 // ----------------------------------------------
-
 
 namespace TPMDD
 {
@@ -1534,11 +1533,72 @@ errlHndl_t tpmReadReg ( tpm_info_t i_tpmInfo,
 errlHndl_t tpmReadSTSReg ( tpm_info_t i_tpmInfo,
                            tpm_sts_reg_t & o_stsReg)
 {
+    errlHndl_t err = nullptr;
     i_tpmInfo.offset = i_tpmInfo.sts;
+    size_t polls = 0;
 
-    return tpmRead(reinterpret_cast<void*>(&o_stsReg),
-                   1,
-                   i_tpmInfo);
+    do
+    {
+        err = tpmRead(reinterpret_cast<void*>(&o_stsReg), 1, i_tpmInfo);
+        if (err)
+        {
+            break;
+        }
+        if (!(o_stsReg.value == 0xFF))
+        {
+            // We want to catch the 0xFF, which indicates the following:
+            //
+            // SPI Aborts:
+            // 1.  For Read Cycles, the TPM SHALL abort a cycle by driving 1
+            //     on MISO and continue to hold MISO at 1 until its CS# signal
+            //     is deasserted.
+            // 2.  For Write Cycles, the TPM SHALL abort a cycle by driving 1
+            //     on MISO, then drop all incoming data.
+            // If 0xFF is encountered we poll until a valid signature is
+            // recognized in the STS register.
+            break;
+        }
+        if(polls > TPMDD::MAX_STS_POLLS)
+        {
+            TRACFCOMP( g_trac_tpmdd,
+                ERR_MRK"tpmReadSTSReg(): Timeout! "
+                "TPM HUID=0x%08X, SPI HUID=0x%08X, Engine=%d, %02X status",
+                TARGETING::get_huid(i_tpmInfo.tpmTarget),
+                TARGETING::get_huid(i_tpmInfo.spiTarget),
+                i_tpmInfo.spiEngine, o_stsReg.value );
+
+            /*@
+             * @errortype
+             * @reasoncode       TPM_TIMEOUT_REG
+             * @severity         ERRL_SEV_UNRECOVERABLE
+             * @moduleid         TPMDD_READSTSREG
+             * @userdata1        TPM HUID
+             * @userdata2[0:31]  i_tpmInfo.operation
+             * @userdata2[32:63] o_stsReg.value
+             * @devdesc          TPM timeout waiting for good sts register
+             * @custdesc         A problem occurred during the IPL of the
+             *                   system: TPM timeout
+             */
+            err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    TPMDD_READSTSREG,
+                                    TPM_TIMEOUT_REG,
+                                    TARGETING::get_huid(i_tpmInfo.tpmTarget),
+                                    TWO_UINT32_TO_UINT64(
+                                         i_tpmInfo.operation,
+                                         o_stsReg.value),
+                                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+            err->collectTrace( TPMDD_COMP_NAME );
+            break;
+        }
+        else
+        {
+            // Sleep 10ms before attempting another read
+            nanosleep(0, 10 * NS_PER_MSEC);
+            polls++;
+        }
+    } while(true);
+
+    return err;
 } // end tpmReadSTSReg
 
 errlHndl_t tpmReadSTSRegValid ( tpm_info_t i_tpmInfo,
