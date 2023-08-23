@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,7 @@ namespace Bootloader
         RC_TPM_TIMEOUT_D_1         = HBBL_COMP_ID | 0x1b,  /**< TPM hit the TPM D timeout (1) */
         RC_TPM_TIMEOUT_D_2         = HBBL_COMP_ID | 0x1c,  /**< TPM hit the TPM D timeout (2) */
         RC_TPM_IS_EXPECTING        = HBBL_COMP_ID | 0x1d,  /**< TPM expecting more data while it shouldn't be */
-        RC_TPM_STS_TIMEOUT         = HBBL_COMP_ID | 0x1e,  /**< Timeout out waiting for TPM status */
+        RC_TPM_STS_TIMEOUT         = HBBL_COMP_ID | 0x1e,  /**< Timeout out waiting for TPM status valid reg */
         RC_TPM_OVERFLOW            = HBBL_COMP_ID | 0x1f,  /**< TPM expected more data than we thought */
         RC_TPM_EXTRA_DATA_AVAIL    = HBBL_COMP_ID | 0x20,  /**< Data size mismatch */
         RC_TPM_READ_TIMEOUT        = HBBL_COMP_ID | 0x21,  /**< TPM read fifo timeout */
@@ -111,6 +111,7 @@ namespace Bootloader
         RC_SPI_CLR_ERR_FAIL        = HBBL_COMP_ID | 0x27,  /**< Failed to clear SPI status errors */
         //termination_rc
         RC_BAD_PROTECTED_SIZE_LEN  = HBBL_COMP_ID | 0x28,  /**< Protected Size of HBB is too large */
+        RC_TPM_STS_TIMEOUT_REG     = HBBL_COMP_ID | 0x29,  /**< Timeout out waiting for TPM status reg */
 
         RC_TPM_INITIALIZE          = 0x100, /**< Special TPM RC that signals if TPM's been initialized already */
 

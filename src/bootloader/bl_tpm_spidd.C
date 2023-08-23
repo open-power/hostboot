@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,12 +186,52 @@ Bootloader::hbblReasonCode tpm_write(const uint32_t i_offset, const void* i_buff
  *
  * @param[out] o_stsReg the value of the status register
  * @return 0 on success or error code on error
+ *
+ * Note:  tpmReadSTSReg is used for tpmIsCommandReady (versus
+ *        using tpmReadSTSRegValid) since only dataAvail and expect
+ *        (tpm_sts_reg_t) require the stsValid bit to be set.
  */
+
 static Bootloader::hbblReasonCode tpmReadSTSReg(TPMDD::tpm_sts_reg_t& o_stsReg)
 {
     size_t l_size = sizeof(o_stsReg);
-    o_stsReg = 0;
-    return tpm_read(TPMDD::TPM_REG_75x_STS, &o_stsReg, l_size);
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+    size_t l_polls = 0;
+    do
+    {
+        o_stsReg = 0;
+        l_rc = tpm_read(TPMDD::TPM_REG_75x_STS, &o_stsReg, l_size);
+        if (l_rc)
+        {
+            break;
+        }
+        if (!(o_stsReg.value == 0xFF))
+        {
+            // We want to catch the 0xFF, which indicates the following:
+            //
+            // SPI Aborts:
+            // 1.  For Read Cycles, the TPM SHALL abort a cycle by driving 1
+            //     on MISO and continue to hold MISO at 1 until its CS# signal
+            //     is deasserted.
+            // 2.  For Write Cycles, the TPM SHALL abort a cycle by driving 1
+            //     on MISO, then drop all incoming data.
+            // If 0xFF is encountered we poll until a valid signature is
+            // recognized in the STS register.
+            break;
+        }
+        if(l_polls > TPMDD::MAX_STS_POLLS)
+        {
+            l_rc = Bootloader::RC_TPM_STS_TIMEOUT_REG;
+            break;
+        }
+        else
+        {
+            bl_nanosleep(0, TPM_POLLING_TIMEOUT_NS); // 10 ms
+            ++l_polls;
+        }
+    } while(true);
+
+    return l_rc;
 }
 
 /**

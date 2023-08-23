@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@ enum tpm_timeouts
 enum
 {
     MAX_STSVALID_POLLS = 5, ///< Max poll of 50ms (5*10ms)
+    MAX_STS_POLLS      = 5, ///< Max poll of 50ms (5*10ms)
 };
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -209,10 +209,14 @@ errlHndl_t tpmReadReg ( tpm_info_t i_tpmInfo,
  * @param[in] i_tpmInfo Structure of SPI parameters needed to execute
  *      the command to the SPI device driver.
  *
- * @param[in] o_stsReg Value read from the register
+ * @param[out] o_stsReg Value read from the register
  *
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
+ *
+ * Note:  tpmReadSTSReg is used for tpmIsCommandReady (versus
+ *        using tpmReadSTSRegValid) since only dataAvail and expect
+ *        (tpm_sts_reg_t) require the stsValid bit to be set.
  */
 errlHndl_t tpmReadSTSReg ( tpm_info_t i_tpmInfo,
                            tpm_sts_reg_t & o_stsReg);
