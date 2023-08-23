@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,7 @@ enum tpmModuleId
     TPMDD_TPMPRESENCEDETECT                = 0x0C,
     TPMDD_TPMPRESENCE                      = 0x0D,
     TPMDD_GETSPICONTROLLERTARGET           = 0x0E,
+    TPMDD_READSTSREG                       = 0x0F,
 };
 
 /**
@@ -93,6 +94,7 @@ enum tpmReasonCode
     TPM_SPI_CONTROLLER_PATH_ERROR        = TPMDD_COMP_ID | 0x12,
     TPM_ATTR_TPM_ENABLED_NOT_FOUND       = TPMDD_COMP_ID | 0x13,
     TPM_EXTRA_DATA_AVAILABLE             = TPMDD_COMP_ID | 0x14,
+    TPM_TIMEOUT_REG                      = TPMDD_COMP_ID | 0x15,
 
 };
 
