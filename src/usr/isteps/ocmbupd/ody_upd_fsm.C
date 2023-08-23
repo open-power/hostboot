@@ -243,8 +243,7 @@ state_transitions_t ody_fsm_transitions[] =
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
     //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
     { { no            , no                     , SIDE0  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_1, retry_check_for_ready                       }},
-                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
-                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+                                                                         { ANY_EVENT                   , {internal_error                                                }} } },  // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
 
     { { no            , no                     , SIDE0  , no          },{{ UPDATE_OMI_FIRMWARE_REACHED
                                                                            | OCMB_BOOT_ERROR_WITH_FFDC
@@ -266,8 +265,7 @@ state_transitions_t ody_fsm_transitions[] =
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
     //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
     { { no            , no                     , SIDE1  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_golden, retry_check_for_ready                  }},
-                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
-                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+                                                                         { ANY_EVENT                   , {internal_error                                                }} } }, // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
 
     { { no            , no                     , SIDE1  , no          },{{ OCMB_HWP_FAIL_OTHER
                                                                            | OCMB_HWP_FAIL_HASH_FAIL   , {switch_to_side_golden, retry_check_for_ready                  }},
@@ -289,8 +287,7 @@ state_transitions_t ody_fsm_transitions[] =
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
     //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
     { { yes           , no                     , SIDE0  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_golden, retry_check_for_ready                  }},
-                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
-                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+                                                                         { ANY_EVENT                   , {internal_error                                                }} } }, // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
 
     { { yes           , no                     , SIDE0  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap
 
@@ -306,10 +303,9 @@ state_transitions_t ody_fsm_transitions[] =
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
     //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
     { { yes           , no                     , SIDE1  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_golden, retry_check_for_ready                  }},
-                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
-                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+                                                                         { ANY_EVENT                   , {internal_error                                                }} } }, // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
 
-    { { yes           , no                     , SIDE1  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap,
+    { { yes           , no                     , SIDE1  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap
 
     { { yes           , no                     , SIDE1  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL
                                                                            | OCMB_HWP_FAIL_OTHER       , {switch_to_side_golden, retry_check_for_ready                  }},
@@ -323,8 +319,7 @@ state_transitions_t ody_fsm_transitions[] =
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
     //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
     { { yes           , yes                    , SIDE0  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_1, retry_check_for_ready                       }},
-                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
-                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+                                                                         { ANY_EVENT                   , {internal_error                                                }} } }, // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
 
     { { yes           , yes                    , SIDE0  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap
 
@@ -337,11 +332,10 @@ state_transitions_t ody_fsm_transitions[] =
     //                |                        | Active |                |                             |
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
     //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
-    { { yes           , yes                    , SIDE1  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_golden, retry_check_for_ready                  }},
-                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
-                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+    { { yes           , yes                    , SIDE1  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {deconfigure_ocmb                                              }},
+                                                                         { ANY_EVENT                   , {internal_error                                                }} } }, // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
 
-    { { yes           , yes                    , SIDE1  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap,
+    { { yes           , yes                    , SIDE1  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap
 
     { { yes           , yes                    , SIDE1  , yes         },{{ OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_HWP_FAIL_HASH_FAIL
@@ -353,19 +347,16 @@ state_transitions_t ody_fsm_transitions[] =
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
     //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
     { { yes | no      , no                     , GOLDEN , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {deconfigure_ocmb                                              }},
-                                                                         { CHECK_FOR_READY_COMPLETED // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
-                                                                           ^ ANY_EVENT                 , {internal_error                                                }} } },
+                                                                         { ANY_EVENT                   , {internal_error                                                }} } }, // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
 
                                                           // golden side
                                                           // is never
                                                           // up to date
     { { yes | no      , no                     , GOLDEN , no          },{{ OCMB_HWP_FAIL_OTHER
                                                                            | OCMB_HWP_FAIL_HASH_FAIL
-                                                                           | OCMB_HWP_FAIL_OTHER
                                                                            | CODE_UPDATE_CHIPOP_FAILURE, {deconfigure_ocmb                                              }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
-                                                                           | CHECK_FOR_READY_COMPLETED
-                                                                           | ATTRS_INCOMPATIBLE        , {perform_code_update, switch_to_side_0, retry_check_for_ready  }} } }, // Golden side's attrs are always incompatible
+                                                                           | CHECK_FOR_READY_COMPLETED , {perform_code_update, switch_to_side_0, retry_check_for_ready  }} } },
 };
 
 /** @brief Convert an event to a string for logs and traces.
