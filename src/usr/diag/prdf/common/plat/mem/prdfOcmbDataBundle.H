@@ -214,7 +214,7 @@ class OcmbDataBundle : public DataBundle
 
     #ifdef __HOSTBOOT_MODULE
 
-    /** Threshold table for IUEs. Threshold per DIMM */
+    /** Threshold table for IUEs. Threshold per port */
     std::map<uint8_t, TimeBasedThreshold> iv_iueTh;
 
     /** Bool to indicate if we've triggered a channel fail because of IUEs. */

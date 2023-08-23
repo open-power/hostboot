@@ -139,15 +139,14 @@ int32_t PostAnalysis( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     // right away. Since PRD is running in the hypervisor, it is possible we
     // may not get the error log. To better our chances, we trigger the port
     // fail here.
-    // TODO: need to verify IUE threshold handling and update triggerChnlFail
-    //if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
-    //{
-    //    if ( SUCCESS != MemEcc::triggerChnlFail<TYPE_OCMB_CHIP>(i_chip) )
-    //    {
-    //        PRDF_ERR( PRDF_FUNC "triggerChnlFail(0x%08x) failed",
-    //        i_chip->getHuid() );
-    //    }
-    //}
+    if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
+    {
+       if ( SUCCESS != MemEcc::triggerChnlFail<TYPE_OCMB_CHIP>(i_chip) )
+       {
+           PRDF_ERR( PRDF_FUNC "triggerChnlFail(0x%08x) failed",
+           i_chip->getHuid() );
+       }
+    }
 
     #endif // __HOSTBOOT_RUNTIME
 
@@ -465,10 +464,23 @@ int32_t AnalyzeFetchAueIaue( ExtensibleChip * i_chip,
     }
     else
     {
+        PRDpriority dimmPriority = MRU_HIGH;
+        GARD_POLICY dimmGard = GARD;
+        // If there is a possible root cause in the ODP_FIR, adjust the
+        // callout to MEM_PORT high, DIMM low
+        if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, addr.getPort()))
+        {
+            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                TYPE_MEM_PORT, addr.getPort());
+            io_sc.service_data->SetCallout(memport, MRU_HIGH);
+            dimmPriority = MRU_LOW;
+            dimmGard = NO_GARD;
+        }
+
         MemRank rank = addr.getRank();
         MemoryMru mm { i_chip->getTrgt(), rank, addr.getPort(),
                        MemoryMruData::CALLOUT_RANK };
-        io_sc.service_data->SetCallout( mm, MRU_HIGH );
+        io_sc.service_data->SetCallout( mm, dimmPriority, dimmGard );
     }
 
     return SUCCESS; // nothing to return to rule code
@@ -592,10 +604,23 @@ int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
     }
     else
     {
+        PRDpriority dimmPriority = MRU_HIGH;
+        GARD_POLICY dimmGard = GARD;
+        // If there is a possible root cause in the ODP_FIR, adjust the
+        // callout to MEM_PORT high, DIMM low
+        if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, addr.getPort()))
+        {
+            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                TYPE_MEM_PORT, addr.getPort());
+            io_sc.service_data->SetCallout(memport, MRU_HIGH);
+            dimmPriority = MRU_LOW;
+            dimmGard = NO_GARD;
+        }
+
         MemRank rank = addr.getRank();
         MemoryMru mm { i_chip->getTrgt(), rank, addr.getPort(),
                        MemoryMruData::CALLOUT_RANK };
-        io_sc.service_data->SetCallout( mm, MRU_HIGH );
+        io_sc.service_data->SetCallout( mm, dimmPriority, dimmGard );
     }
 
     return SUCCESS; // nothing to return to rule code
@@ -603,6 +628,180 @@ int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
     #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeMaintAue );
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Checks for ODP data corruption root causes. Calls out MEM_PORT high,
+ *         DIMM low if root cause found, else returns
+ *         PRD_SCAN_COMM_REGISTER_ZERO so the rule code will make the callout
+ *         using a try statement.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_port The port position.
+ * @return SUCCESS if a root cause is found, else PRD_SCAN_COMM_REGISTER_ZERO.
+ */
+int32_t __odpDataCorruptSideEffect( ExtensibleChip * i_chip,
+    STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::odpDataCorruptSideEffect] "
+
+    int32_t o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+
+    if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, i_port))
+    {
+        TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+            TYPE_MEM_PORT, i_port);
+        io_sc.service_data->SetCallout(memport, MRU_HIGH);
+
+        for ( auto & dimm : getConnectedChildren(memport, TYPE_DIMM) )
+            io_sc.service_data->SetCallout(dimm, MRU_LOW, NO_GARD);
+
+        // Root cause found, return SUCCESS so the rule code doesn't make
+        // further callouts.
+        o_rc = SUCCESS;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+#define PLUGIN_ODP_DATA_CORRUPT_SIDE_EFFECT(PORT) \
+int32_t odpDataCorruptSideEffect_##PORT(ExtensibleChip * i_chip, \
+    STEP_CODE_DATA_STRUCT & io_sc) \
+{ \
+    return __odpDataCorruptSideEffect(i_chip, io_sc, PORT); \
+} \
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, odpDataCorruptSideEffect_##PORT);
+
+PLUGIN_ODP_DATA_CORRUPT_SIDE_EFFECT(0);
+PLUGIN_ODP_DATA_CORRUPT_SIDE_EFFECT(1);
+
+//##############################################################################
+//
+//                               SRQ_FIR
+//
+//##############################################################################
+/**
+ * @brief  In the case where SRQFIR[46] (Firmware initiated channel fail due to
+ *         IUE threshold) causes a system checkstop, the IUE bits which are
+ *         left on at threshold should be blamed as the root cause. A separate
+ *         log for the IUE threshold should already be committed.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t checkIueTh( ExtensibleChip * i_chip,
+                    STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::checkIueTh] "
+
+    // By default, let the rule code make the callout
+    uint32_t o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+
+    // If a system checkstop occurred
+    if ( CHECK_STOP == io_sc.service_data->getPrimaryAttnType() )
+    {
+        // Check for the IUE bits (RDFFIR[18,38])
+        SCAN_COMM_REGISTER_CLASS * rdffir0 = i_chip->getRegister("RDF_FIR_0");
+        SCAN_COMM_REGISTER_CLASS * rdffir1 = i_chip->getRegister("RDF_FIR_1");
+        if ( SUCCESS != rdffir0->Read() || SUCCESS != rdffir1->Read() )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed for RDF_FIR on 0x%08x",
+                      i_chip->getHuid() );
+        }
+        else
+        {
+            if ( rdffir0->IsBitSet(18) || rdffir0->IsBitSet(38) ||
+                 rdffir1->IsBitSet(18) || rdffir1->IsBitSet(38) )
+            {
+                o_rc = i_chip->Analyze(io_sc, RECOVERABLE);
+            }
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, checkIueTh );
+
+//##############################################################################
+//
+//                             ODP_FIR
+//
+//##############################################################################
+
+
+/**
+ * @brief  Masks bits in the ODP_FIR that are possible root causes of
+ *         ODP data corruption without clearing them.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_port The port position.
+ * @param  i_bit  The bit position.
+ * @return SUCCESS
+ */
+int32_t __odpDataCorruptRootCause(ExtensibleChip * i_chip,
+    STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port, uint8_t i_bit)
+{
+    #define PRDF_FUNC "[odyssey_ocmb::__odpDataCorruptRootCause] "
+
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == i_chip->getType());
+
+    // Certain bits in the ODP_FIR can be root causes of ODP data corruption
+    // which can cause side effect attentions elsewhere. To allow for
+    // correlation between the errors if the side effects come on later,
+    // these bits will be masked but not cleared if hit.
+
+    #ifdef __HOSTBOOT_MODULE
+    // Mask the bit in the ODP_FIR manually if we're at threshold
+    if ( io_sc.service_data->IsAtThreshold() )
+    {
+        char regName[64];
+        sprintf(regName, "ODP_FIR_MASK_OR_%x", i_port);
+        SCAN_COMM_REGISTER_CLASS * mask_or = i_chip->getRegister(regName);
+
+        mask_or->SetBit(i_bit);
+        if ( SUCCESS != mask_or->Write() )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed for %s on 0x%08x", regName,
+                      i_chip->getHuid() );
+        }
+
+        // Return PRD_NO_CLEAR_FIR_BITS so the rule code doesn't clear the bit
+        return PRD_NO_CLEAR_FIR_BITS;
+    }
+    #endif
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+#define PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(PORT, BIT) \
+int32_t odpDataCorruptRootCause_##PORT##_##BIT(ExtensibleChip * i_chip, \
+    STEP_CODE_DATA_STRUCT & io_sc) \
+{ \
+    return __odpDataCorruptRootCause(i_chip, io_sc, PORT, BIT); \
+} \
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, odpDataCorruptRootCause_##PORT##_##BIT);
+
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(0,6);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(0,9);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(0,10);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(0,11);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(0,12);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(0,13);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(1,6);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(1,9);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(1,10);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(1,11);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(1,12);
+PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(1,13);
+
 
 //##############################################################################
 //

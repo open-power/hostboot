@@ -1848,6 +1848,10 @@ group gSRQ_FIR
      */
     (rSRQ_FIR, bit(45)) ? mem_port1_M_th1_chnlFail;
 
+    /** SRQ_FIR[46]
+     *  Firmware initiated channel fail
+     */
+    (rSRQ_FIR, bit(46)) ? fwInitChnlFail;
 };
 
 ################################################################################
@@ -2984,12 +2988,12 @@ group gODP_FIR_0
     /** ODP_FIR_0[9]
      *  Parity Error (even parity) for D5ACSM Channel 1 Pa
      */
-    (rODP_FIR_0, bit(9)) ? mem_port0_M_th1;
+    (rODP_FIR_0, bit(9)) ? mem_port0_M_th1_odpRoot9;
 
     /** ODP_FIR_0[10]
      *  Parity Error (even parity) for D5ACSM Channel 0 Pa
      */
-    (rODP_FIR_0, bit(10)) ? mem_port0_M_th1;
+    (rODP_FIR_0, bit(10)) ? mem_port0_M_th1_odpRoot10;
 
     /** ODP_FIR_0[11]
      *  PHY RX FIFO Check Error
@@ -3096,12 +3100,12 @@ group gODP_FIR_1
     /** ODP_FIR_1[9]
      *  Parity Error (even parity) for D5ACSM Channel 1 Pa
      */
-    (rODP_FIR_1, bit(9)) ? mem_port1_M_th1;
+    (rODP_FIR_1, bit(9)) ? mem_port1_M_th1_odpRoot9;
 
     /** ODP_FIR_1[10]
      *  Parity Error (even parity) for D5ACSM Channel 0 Pa
      */
-    (rODP_FIR_1, bit(10)) ? mem_port1_M_th1;
+    (rODP_FIR_1, bit(10)) ? mem_port1_M_th1_odpRoot10;
 
     /** ODP_FIR_1[11]
      *  PHY RX FIFO Check Error

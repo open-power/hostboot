@@ -433,6 +433,7 @@
         "0x2bf5002b": "SRQ_FIR[43]: xlat addr error port1",
         "0x2bf5002c": "SRQ_FIR[44]: check on ccs in progress bit",
         "0x2bf5002d": "SRQ_FIR[45]: DSM errors port1",
+        "0x2bf5002e": "SRQ_FIR[46]: Firmware initiated channel fail",
         "0xa9b50000": "TLX_FIR[0]: Internal parity error",
         "0xa9b50001": "TLX_FIR[1]: TLXT control register parity error",
         "0xa9b50002": "TLX_FIR[2]: TLX VC0 return credit overflow",

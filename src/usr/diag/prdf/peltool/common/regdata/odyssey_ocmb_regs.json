@@ -249,6 +249,11 @@
         "description": "MEM Chiplet Recoverable FIR",
         "name": "CFIR_MEM_RE"
     },
+    "0x253d": {
+        "address": "0x0000000008011003",
+        "description": "Odyssey chip SRQ_FIR MASK OR",
+        "name": "SRQ_FIR_MASK_OR"
+    },
     "0x25a4": {
         "address": "0x00000000000d0011",
         "description": "PPE PIBMEM Address Register",
@@ -268,6 +273,11 @@
         "address": "0x0000000001040002",
         "description": "TP Chiplet Special Attention FIR",
         "name": "CFIR_TP_SPA"
+    },
+    "0x2857": {
+        "address": "0x0000000001040050",
+        "description": "TP Chiplet Checkstop FIR MASK OR",
+        "name": "CFIR_TP_CS_MASK_OR"
     },
     "0x2882": {
         "address": "0x0000000008012408",
@@ -348,6 +358,11 @@
         "address": "0x800140e40801303f",
         "description": "DX LCDL Status4 0",
         "name": "DX_LCDL_STATUS4_0"
+    },
+    "0x31c7": {
+        "address": "0x0000000001040053",
+        "description": "TP Chiplet Unit Checkstop FIR MASK OR",
+        "name": "CFIR_TP_UCS_MASK_OR"
     },
     "0x321d": {
         "address": "0x0000000008013406",
@@ -469,6 +484,11 @@
         "description": "PPE FIR Error Mask register",
         "name": "PPE_FIR_MASK_REG"
     },
+    "0x4011": {
+        "address": "0x0000000008040050",
+        "description": "MEM Chiplet Checkstop FIR MASK OR",
+        "name": "CFIR_MEM_CS_MASK_OR"
+    },
     "0x42df": {
         "address": "0x0000000001040106",
         "description": "Odyssey chip TP_LOCAL_FIR Special Attention Config",
@@ -498,6 +518,11 @@
         "address": "0x800100e40801303f",
         "description": "DX LCDL Status0 0",
         "name": "DX_LCDL_STATUS0_0"
+    },
+    "0x49ac": {
+        "address": "0x0000000008011001",
+        "description": "Odyssey chip SRQ_FIR OR",
+        "name": "SRQ_FIR_OR"
     },
     "0x4a39": {
         "address": "0x800100e40801343f",
@@ -653,6 +678,11 @@
         "address": "0x0000000008012412",
         "description": "Odyssey chip DLX Error Mask Register",
         "name": "DLX_ERR_MASK"
+    },
+    "0x54ac": {
+        "address": "0x0000000008040052",
+        "description": "MEM Chiplet Special Attention FIR MASK OR",
+        "name": "CFIR_MEM_SPA_MASK_OR"
     },
     "0x5530": {
         "address": "0x0000000008040003",
@@ -994,10 +1024,25 @@
         "description": "Odyssey chip RDF_FIR Checkstop Config 1",
         "name": "RDF_FIR_CFG_CS_1"
     },
+    "0x98b1": {
+        "address": "0x0000000008013003",
+        "description": "Odyssey chip ODP_FIR 0 MASK OR",
+        "name": "ODP_FIR_MASK_OR_0"
+    },
+    "0x99b1": {
+        "address": "0x0000000008013403",
+        "description": "Odyssey chip ODP_FIR 1 MASK OR",
+        "name": "ODP_FIR_MASK_OR_1"
+    },
     "0x99f3": {
         "address": "0x000000000105002f",
         "description": "TP DTS Error Register",
         "name": "TP_DTS_ERR"
+    },
+    "0x9a6b": {
+        "address": "0x0000000008040051",
+        "description": "MEM Chiplet Recoverable FIR MASK OR",
+        "name": "CFIR_MEM_RE_MASK_OR"
     },
     "0x9baa": {
         "address": "0x000000000801241e",
@@ -1054,6 +1099,11 @@
         "description": "Odyssey chip Maint Current Address Trap Register",
         "name": "MCBMCAT"
     },
+    "0xa726": {
+        "address": "0x0000000008040053",
+        "description": "MEM Chiplet Unit Checkstop FIR MASK OR",
+        "name": "CFIR_MEM_UCS_MASK_OR"
+    },
     "0xa9e6": {
         "address": "0x0000000008011458",
         "description": "ODC.MCBIST.SCOM.MBSSYMEC0Q",
@@ -1109,6 +1159,11 @@
         "description": "Odyssey chip ODP_FIR MASK 1",
         "name": "ODP_FIR_MASK_1"
     },
+    "0xac15": {
+        "address": "0x0000000001040052",
+        "description": "TP Chiplet Special Attention FIR MASK OR",
+        "name": "CFIR_TP_SPA_MASK_OR"
+    },
     "0xb228": {
         "address": "0x0000000008010872",
         "description": "Odyssey chip MMIO_FIR MASK",
@@ -1153,6 +1208,11 @@
         "address": "0x800200eb0801343f",
         "description": "LCDL Debug Control3 1",
         "name": "LCDL_DBG_CNTL3_1"
+    },
+    "0xc203": {
+        "address": "0x0000000001040051",
+        "description": "TP Chiplet Recoverable FIR MASK OR",
+        "name": "CFIR_TP_RE_MASK_OR"
     },
     "0xc3b1": {
         "address": "0x0000000008011803",

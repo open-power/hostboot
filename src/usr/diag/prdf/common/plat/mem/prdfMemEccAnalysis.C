@@ -31,6 +31,7 @@
 #include <prdfMemDbUtils.H>
 #include <prdfMemDqBitmap.H>
 #include <prdfMemExtraSig.H>
+#include <prdfMemUtils.H>
 #include <prdfPlatServices.H>
 
 #ifdef __HOSTBOOT_RUNTIME
@@ -67,9 +68,22 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         MemRank rank = i_addr.getRank();
 
         // Add the rank to the callout list.
+        PRDpriority rankPriority = MRU_MED;
+        GARD_POLICY rankGard = GARD;
+
+        if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip,
+                                                        i_addr.getPort()))
+        {
+            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                TYPE_MEM_PORT, i_addr.getPort());
+            io_sc.service_data->SetCallout(memport, MRU_HIGH);
+            rankPriority = MRU_LOW;
+            rankGard = NO_GARD;
+        }
+
         MemoryMru mm { i_chip->getTrgt(), rank, i_addr.getPort(),
                        MemoryMruData::CALLOUT_RANK };
-        io_sc.service_data->SetCallout( mm );
+        io_sc.service_data->SetCallout( mm, rankPriority, rankGard );
 
         // All memory UEs should be customer viewable.
         io_sc.service_data->setServiceCall();
@@ -113,12 +127,9 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 #ifdef __HOSTBOOT_MODULE
 
-template<>
-uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t i_port )
+uint32_t __expMaskMemPort( ExtensibleChip * i_chip, uint8_t i_port )
 {
-    #define PRDF_FUNC "[MemEcc::maskMemPort<TYPE_OCMB_CHIP>] "
-
-    // TODO Odyssey - register updates
+    #define PRDF_FUNC "[MemEcc::__expMaskMemPort] "
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
@@ -213,16 +224,158 @@ uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t i_port )
     #undef PRDF_FUNC
 }
 
+uint32_t __odyMaskMemPort( ExtensibleChip * i_chip, uint8_t i_port )
+{
+    #define PRDF_FUNC "[MemEcc::__odyMaskMemPort] "
+
+    PRDF_ASSERT( nullptr != i_chip );
+    PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Mask all FIRs on the OCMB in the chiplet FIRs.
+        SCAN_COMM_REGISTER_CLASS * tpCsMaskOr =
+            i_chip->getRegister("CFIR_TP_CS_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * tpReMaskOr =
+            i_chip->getRegister("CFIR_TP_RE_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * tpSpaMaskOr =
+            i_chip->getRegister("CFIR_TP_SPA_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * tpUcsMaskOr =
+            i_chip->getRegister("CFIR_TP_UCS_MASK_OR");
+
+        SCAN_COMM_REGISTER_CLASS * memCsMaskOr =
+            i_chip->getRegister("CFIR_MEM_CS_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * memReMaskOr =
+            i_chip->getRegister("CFIR_MEM_RE_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * memSpaMaskOr =
+            i_chip->getRegister("CFIR_MEM_SPA_MASK_OR");
+        SCAN_COMM_REGISTER_CLASS * memUcsMaskOr =
+            i_chip->getRegister("CFIR_MEM_UCS_MASK_OR");
+
+        // We need to leave bits unmasked so we can still analyze to
+        // SRQFIR[46] (to trigger a firmware initiated channel fail) and
+        // the IUE bits, RDFFIR[18,38] if one of the IUE bits is set.
+
+        tpCsMaskOr->setAllBits();
+        tpReMaskOr->setAllBits();
+        tpSpaMaskOr->setAllBits();
+        tpUcsMaskOr->setAllBits();
+        memCsMaskOr->setAllBits();
+        memReMaskOr->setAllBits();
+        memSpaMaskOr->setAllBits();
+        memUcsMaskOr->setAllBits();
+
+        // Clear bits 10 for CS/UCS so we can still analyze to the SRQFIR to
+        // trigger a firmware initiate channel fail.
+        memCsMaskOr->ClearBit(10);
+        memUcsMaskOr->ClearBit(10);
+
+        // Clear bits 8:9 for RE so we can still analyze to the RDFFIRs for IUEs
+        memReMaskOr->ClearBit(8);
+        memReMaskOr->ClearBit(9);
+
+        o_rc = tpCsMaskOr->Write()   | tpReMaskOr->Write()  |
+               tpSpaMaskOr->Write()  | tpUcsMaskOr->Write() |
+               memCsMaskOr->Write()  | memReMaskOr->Write() |
+               memSpaMaskOr->Write() | memUcsMaskOr->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR(PRDF_FUNC "Write() failed for chiplet masks on 0x%08x",
+                     i_chip->getHuid());
+            break;
+        }
+
+        // Mask off all bits in the SRQFIR except bit 46
+        SCAN_COMM_REGISTER_CLASS * srqfir_mask_or =
+            i_chip->getRegister("SRQ_FIR_MASK_OR");
+        srqfir_mask_or->setAllBits();
+        srqfir_mask_or->ClearBit(46);
+
+        o_rc = srqfir_mask_or->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed for SRQ_FIR_MASK_OR on 0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        // Mask off all bits in the RDFFIR except bits 18,38 (if they are set)
+        char maskName[64];
+        sprintf(maskName, "RDF_FIR_MASK_OR_%x", i_port);
+        SCAN_COMM_REGISTER_CLASS * rdffir_mask_or =
+            i_chip->getRegister(maskName);
+        rdffir_mask_or->setAllBits();
+
+        // We don't want to mask the IUE bits in the RDFFIR if they are on
+        // so if we trigger a channel fail that causes a checkstop we have
+        // something to blame it on.
+        char regName[64];
+        sprintf(regName, "RDF_FIR_%x", i_port);
+        SCAN_COMM_REGISTER_CLASS * rdffir = i_chip->getRegister(regName);
+
+        o_rc = rdffir->Read();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed for %s on 0x%08x",
+                      regName, i_chip->getHuid() );
+            break;
+        }
+
+        if ( rdffir->IsBitSet(18) ) rdffir_mask_or->ClearBit(18);
+        if ( rdffir->IsBitSet(38) ) rdffir_mask_or->ClearBit(38);
+
+        o_rc = rdffir_mask_or->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed for RDFFIR_MASK_OR on 0x%08x",
+                      i_chip->getHuid() );
+            break;
+        }
+
+        #ifdef __HOSTBOOT_RUNTIME
+
+        // Dynamically deallocate the port.
+        if ( SUCCESS != MemDealloc::port<TYPE_OCMB_CHIP>( i_chip, i_port ) )
+        {
+            PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_OCMB_CHIP>(0x%08x,%x) "
+                      "failed", i_chip->getHuid(), i_port );
+        }
+
+        #endif
+
+    } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t maskMemPort<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip, uint8_t i_port )
+{
+    // Odyssey OCMBs
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        return __odyMaskMemPort(i_chip, i_port);
+    }
+    // Explorer OCMBs
+    else
+    {
+        return __expMaskMemPort(i_chip, i_port);
+    }
+}
+
 #endif // __HOSTBOOT_MODULE
 
 //------------------------------------------------------------------------------
 
 #ifdef __HOSTBOOT_RUNTIME
 
-template<>
-uint32_t triggerChnlFail<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+uint32_t __expTriggerChnlFail( ExtensibleChip * i_chip )
 {
-    #define PRDF_FUNC "[MemEcc::triggerChnlFail<TYPE_OCMB_CHIP>] "
+    #define PRDF_FUNC "[MemEcc::__expTriggerChnlFail] "
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
@@ -320,13 +473,107 @@ uint32_t triggerChnlFail<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
 
         db->iv_iueChnlFail = true;
 
-        break;
     }while(0);
-
 
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+uint32_t __odyTriggerChnlFail( ExtensibleChip * i_chip )
+{
+    #define PRDF_FUNC "[MemEcc::__odyTriggerChnlFail] "
+
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == i_chip->getType());
+
+    uint32_t o_rc = SUCCESS;
+
+    do
+    {
+        // Trigger a channel fail by unmasking and setting SRQFIR[46]
+
+        // Set SRQ_FIR_CFG_CS[46]. Read, modify, write.
+        SCAN_COMM_REGISTER_CLASS * cfg = i_chip->getRegister("SRQ_FIR_CFG_CS");
+
+        o_rc = cfg->Read();
+        if (SUCCESS != o_rc)
+        {
+            PRDF_ERR(PRDF_FUNC "Read failed on SRQ_FIR_CFG_CS: i_chip=0x%08x",
+                     i_chip->getHuid());
+            break;
+        }
+
+        // If bit 46 is not set, set it.
+        if (!cfg->IsBitSet(46))
+        {
+            cfg->SetBit(46);
+            o_rc = cfg->Write();
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR(PRDF_FUNC "Write failed on SRQ_FIR_CFG_CS: "
+                         "i_chip=0x%08x", i_chip->getHuid());
+                break;
+            }
+        }
+
+        // Set SRQFIR[46]
+        SCAN_COMM_REGISTER_CLASS * srqfir_or =
+            i_chip->getRegister("SRQ_FIR_OR");
+
+        srqfir_or->clearAllBits();
+        srqfir_or->SetBit(46);
+
+        o_rc = srqfir_or->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR(PRDF_FUNC "Write failed on SRQ_FIR_OR: i_chip=0x%08x",
+                     i_chip->getHuid());
+            break;
+        }
+
+        // Unmask SRQFIR[46], write to clear
+        SCAN_COMM_REGISTER_CLASS * mask = i_chip->getRegister("SRQ_FIR_MASK");
+
+        mask->SetBit(46);
+        o_rc = mask->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR(PRDF_FUNC "Write failed on SRQ_FIR_MASK: "
+                     "i_chip=0x%08x", i_chip->getHuid());
+            break;
+        }
+
+        // Reset thresholds to prevent issuing multiple channel failures on
+        // the same port.
+        OcmbDataBundle * db = getOcmbDataBundle(i_chip);
+        for (auto & resetTh : db->iv_iueTh)
+        {
+            resetTh.second.reset();
+        }
+
+        db->iv_iueChnlFail = true;
+
+    }while(0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+template<>
+uint32_t triggerChnlFail<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+{
+    // Odyssey OCMBs
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        return __odyTriggerChnlFail(i_chip);
+    }
+    // Explorer OCMBs
+    else
+    {
+        return __expTriggerChnlFail(i_chip);
+    }
 }
 
 #endif // __HOSTBOOT_RUNTIME
@@ -817,10 +1064,24 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-    // Add the DIMM to the callout list.
+
     MemoryMru mm { i_chip->getTrgt(), i_rank, i_port,
                    MemoryMruData::CALLOUT_RANK };
-    io_sc.service_data->SetCallout( mm );
+
+    // For Odyssey check ODP_FIR for possible root cause
+    if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, i_port))
+    {
+        // Adjust callout to MEM_PORT high, DIMM low
+        TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                                                   TYPE_MEM_PORT, i_port);
+        io_sc.service_data->SetCallout( memport, MRU_HIGH );
+        io_sc.service_data->SetCallout( mm, MRU_LOW, NO_GARD );
+    }
+    else
+    {
+        // Add the DIMM to the callout list.
+        io_sc.service_data->SetCallout( mm );
+    }
 
     #ifdef __HOSTBOOT_MODULE
 
@@ -835,32 +1096,49 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         // If we have already caused a channel fail, mask the IUE bits.
         if ( true == db->iv_iueChnlFail )
         {
-            SCAN_COMM_REGISTER_CLASS * mask_or =
-                i_chip->getRegister("RDFFIR_MASK_OR");
-
-            mask_or->SetBit(17);
-            mask_or->SetBit(37);
-
-            o_rc = mask_or->Write();
-            if ( SUCCESS != o_rc )
+            // Odyssey OCMBs
+            if (isOdysseyOcmb(i_chip->getTrgt()))
             {
-                PRDF_ERR( PRDF_FUNC "Write() failed on 0x%08x",
-                          i_chip->getHuid() );
-                break;
+                char maskName[64];
+                sprintf(maskName, "RDF_FIR_MASK_OR_%x", i_port);
+
+                SCAN_COMM_REGISTER_CLASS * mask = i_chip->getRegister(maskName);
+                mask->SetBit(18); // mainline
+                mask->SetBit(38); // maintenance
+                o_rc = mask->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on RDF_FIR_MASK_OR_%x: "
+                              "0x%08x", i_port, i_chip->getHuid() );
+                    break;
+                }
+            }
+            else
+            {
+                SCAN_COMM_REGISTER_CLASS * mask_or =
+                    i_chip->getRegister("RDFFIR_MASK_OR");
+
+                mask_or->SetBit(17);
+                mask_or->SetBit(37);
+
+                o_rc = mask_or->Write();
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "Write() failed on 0x%08x",
+                              i_chip->getHuid() );
+                    break;
+                }
             }
         }
 
-        // Get the DIMM select.
-        uint8_t ds = i_rank.getDimmSlct();
-
         // Initialize threshold if it doesn't exist yet.
-        if ( 0 == db->iv_iueTh.count(ds) )
+        if ( 0 == db->iv_iueTh.count(i_port) )
         {
-            db->iv_iueTh[ds] = TimeBasedThreshold( getIueTh() );
+            db->iv_iueTh[i_port] = TimeBasedThreshold( getIueTh() );
         }
 
         // Increment the count and check if at threshold.
-        if ( db->iv_iueTh[ds].inc(io_sc) )
+        if ( db->iv_iueTh[i_port].inc(io_sc) )
         {
             // Make the error log predictive.
             io_sc.service_data->setServiceCall();

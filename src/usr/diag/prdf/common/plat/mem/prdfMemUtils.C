@@ -1143,6 +1143,43 @@ bool queryChnlFail<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip)
 
 //------------------------------------------------------------------------------
 
+template<>
+bool checkOdpRootCause<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip, uint8_t i_port)
+{
+    #define PRDF_FUNC "[MemUtils::checkOdpRootCause] "
+
+    bool o_rootCauseFound = false;
+
+    // Odyssey only
+    if (!isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        return false;
+    }
+
+    // Read the ODP_FIR
+    char regName[64];
+    sprintf(regName, "ODP_FIR_%x", i_port);
+    SCAN_COMM_REGISTER_CLASS * odpfir = i_chip->getRegister(regName);
+
+    if (SUCCESS != odpfir->Read())
+    {
+        PRDF_ERR(PRDF_FUNC "Read failed on %s huid 0x%08x", regName,
+                 i_chip->getHuid());
+    }
+    // Check for ODP_FIR[6,9:13], do not check the mask as the root cause
+    // bits will be masked but not cleared if they were hit first.
+    else if (odpfir->IsBitSet(6) || (0 != odpfir->GetBitFieldJustified(9,5)))
+    {
+        o_rootCauseFound = true;
+    }
+
+    return o_rootCauseFound;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 } // end namespace MemUtils
 
 } // end namespace PRDF

@@ -221,6 +221,16 @@ uint32_t odyGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_portSlct,
 template<TARGETING::TYPE T>
 bool queryChnlFail(ExtensibleChip * i_chip);
 
+/**
+ * @brief  Queries for ODP_FIR uncorrectable data corruption bits that may
+ *         cause side effects.
+ * @param  i_chip OCMB chip
+ * @param  i_port Port number
+ * @return True if a root cause found, otherwise false.
+ */
+template<TARGETING::TYPE T>
+bool checkOdpRootCause(ExtensibleChip * i_chip, uint8_t i_port);
+
 } // end namespace MemUtils
 
 } // end namespace PRDF

@@ -591,9 +591,7 @@ actionclass mainline_iue_handling
     # SUE just in case it is needed in the checkstop analysis.
     SueSource;
     # Thresholding done in the plugin
-    # TODO Odyssey
-    #funccall("AnalyzeMainlineIue");
-    TBDDefaultCallout;
+    funccall("AnalyzeMainlineIue");
 };
 
 /**  Handle Maintenance IUEs */
@@ -605,9 +603,7 @@ actionclass maintenance_iue_handling
     # SUE just in case it is needed in the checkstop analysis.
     SueSource;
     # Thresholding done in the plugin
-    #TODO Odyssey
-    #funccall("AnalyzeMaintIue");
-    TBDDefaultCallout;
+    funccall("AnalyzeMaintIue");
 };
 
 actionclass memory_impe_handling_0
@@ -643,16 +639,14 @@ actionclass maintenance_aue_handling1_chnlFail
 actionclass maintenance_iaue_handling0_chnlFail
 {
     SueSource;
-    dimm0_H;
-    mem_port0_L;
-    threshold1;
+    try(funccall("odpDataCorruptSideEffect_0"), dimm0_H_mem_port0_L_th1);
     funccall("returnNoClearFirBits");
 };
 
 actionclass maintenance_iaue_handling1_chnlFail
 {
     SueSource;
-    dimm0_H_mem_port0_L_th1;
+    try(funccall("odpDataCorruptSideEffect_1"), dimm1_H_mem_port1_L_th1);
     funccall("returnNoClearFirBits");
 };
 
@@ -671,13 +665,11 @@ actionclass mem_port1_failure_chnlFail
 };
 
 # During analysis of another attention. PRD is required to manually trigger a
-# channel failure. In which, cases we want to suppress this the extra log,
+# channel failure. In which, cases we want to suppress this extra log,
 # unless it resulted in a system checkstop.
 actionclass fwInitChnlFail
 {
-    # TODO
-    #try( funccall("checkIueTh"), calloutOcmbMed );
-    TBDDefaultCallout;
+    try( funccall("checkIueTh"), calloutOcmbMed );
     info_only_mnfgInfo_th1;
     SueSource;
 };
@@ -712,26 +704,29 @@ actionclass phyStickyUnlockErr_0
 {
     capture(lcdl_status_0_regs);
     mem_port0_M_th1;
+    funccall("odpDataCorruptRootCause_0_6"); # must be called after threshold
 };
 
 actionclass phyStickyUnlockErr_1
 {
     capture(lcdl_status_1_regs);
     mem_port1_M_th1;
+    funccall("odpDataCorruptRootCause_1_6"); # must be called after threshold
 };
 
 # ODP_FIR[11]
-
 actionclass phyRxFifoCheckErr_0
 {
     capture(rx_fifo_0_regs);
     mem_port0_M_th1;
+    funccall("odpDataCorruptRootCause_0_11"); # must be called after threshold
 };
 
 actionclass phyRxFifoCheckErr_1
 {
     capture(rx_fifo_1_regs);
     mem_port1_M_th1;
+    funccall("odpDataCorruptRootCause_1_11"); # must be called after threshold
 };
 
 # ODP_FIR[12]
@@ -739,12 +734,14 @@ actionclass phyRxTxPptErr_0
 {
     capture(ppt_info_0_regs);
     mem_port0_M_th1;
+    funccall("odpDataCorruptRootCause_0_12"); # must be called after threshold
 };
 
 actionclass phyRxTxPptErr_1
 {
     capture(ppt_info_1_regs);
     mem_port1_M_th1;
+    funccall("odpDataCorruptRootCause_1_12"); # must be called after threshold
 };
 
 # ODP_FIR[13]
@@ -752,12 +749,14 @@ actionclass phyEccErrArcEccInt_0
 {
     capture(arc_0_regs);
     mem_port0_M_th1;
+    funccall("odpDataCorruptRootCause_0_13"); # must be called after threshold
 };
 
 actionclass phyEccErrArcEccInt_1
 {
     capture(arc_1_regs);
     mem_port1_M_th1;
+    funccall("odpDataCorruptRootCause_1_13"); # must be called after threshold
 };
 
 # TP_LOCAL_FIR[19:20]
@@ -868,6 +867,32 @@ actionclass ocmb_M_info_only_clearMemDtsErr
 {
     ocmb_M_info_only;
     funccall("clearMemDtsErr");
+};
+
+# ODP_FIR[9]
+actionclass mem_port0_M_th1_odpRoot9
+{
+    mem_port0_M_th1;
+    funccall("odpDataCorruptRootCause_0_9"); # must be called after threshold
+};
+
+actionclass mem_port1_M_th1_odpRoot9
+{
+    mem_port1_M_th1;
+    funccall("odpDataCorruptRootCause_1_9"); # must be called after threshold
+};
+
+# ODP_FIR[10]
+actionclass mem_port0_M_th1_odpRoot10
+{
+    mem_port0_M_th1;
+    funccall("odpDataCorruptRootCause_0_10"); # must be called after threshold
+};
+
+actionclass mem_port1_M_th1_odpRoot10
+{
+    mem_port1_M_th1;
+    funccall("odpDataCorruptRootCause_1_10"); # must be called after threshold
 };
 
 ################################################################################
