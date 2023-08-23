@@ -650,6 +650,7 @@ void checkForSecurityAccessMismatch(const TargetHandleList& i_secondaryProcs,
 void* call_proc_build_smp (void *io_pArgs)
 {
     IStepError l_StepError;
+    errlHndl_t l_errl = nullptr;
 
     // General flow of this istep
     // a) Phase 1 build SMP
@@ -679,7 +680,6 @@ void* call_proc_build_smp (void *io_pArgs)
         TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
                    "call_proc_build_smp entry" );
 
-        errlHndl_t l_errl = nullptr;
         TargetHandleList l_cpuTargetList,
                          l_secondaryProcsList;  // all secondary/non-boot procs
 
@@ -1107,6 +1107,13 @@ void* call_proc_build_smp (void *io_pArgs)
         l_systemTarget->setAttr<ATTR_ATTN_CHK_ALL_PROCS>(l_useAllProcs);
 
     } while (0);
+
+    // check for an errant error log and add it to the istep handler
+    // note that this will cause the istep to fail
+    if( l_errl )
+    {
+        captureError(l_errl, l_StepError, HWPF_COMP_ID, nullptr);
+    }
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
             "call_proc_build_smp exit" );
