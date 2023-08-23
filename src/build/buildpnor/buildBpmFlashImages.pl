@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -95,8 +95,8 @@ for my $file (@files)
 #        to be used when preparing the output file's binary image. This function
 #        will only emit the binaries for the firmware portion of the BPM update.
 #        The final binary will be organized in the following way:
-#        Byte 1:     Major version number (MM)
-#        Byte 2:     Minor version number (mm)
+#        Byte 1:     Major version number (MM), in hex representation of decimal
+#        Byte 2:     Minor version number (mm), in hex representation of decimal
 #        Byte 3-4:   N number of blocks in the file (NN NN)
 #        Byte 5-EOF: Blocks of the form:
 #                  BLOCK_SIZE      Byte 1: X number of bytes in block excluding
@@ -279,8 +279,8 @@ sub generateFirmwareImage
 #        will only emit the binaries for the configuration data portion of the
 #        BPM update.
 #        The final binary will be organized in the following way:
-#        Byte 1:     Major version number (MM)
-#        Byte 2:     Minor version number (mm)
+#        Byte 1:     Major version number (MM), in hex representation of decimal
+#        Byte 2:     Minor version number (mm), in hex representation of decimal
 #        Byte 3:     N number of fragments in the file (NN)
 #        Byte 4-EOF: Fragments of the form:
 #                  FRAGMENT_SIZE   Byte 1:   X number of bytes in fragment data
@@ -702,13 +702,14 @@ sub generateOutputNameAndVersion
         die "NVDIMM Interface Type $nvdimmInterfaceNumber Unsupported";
     }
 
-    # Extract the version from the filename and convert it to a two one byte hex
-    # strings.
+    # Extract the version from the filename and convert each half into
+    # a decimal number.  Note that this value will be stored as a hex
+    # value in the binary, e.g. v1.11 = 0x0111 not 0x010B
     my @versionComponents = split(/\./, $name);
     my @version =
-        sprintf("%.2X", substr($versionComponents[0], -2, 2) =~ /([0-9]+)/g);
+        sprintf("%.2d", substr($versionComponents[0], -2, 2) =~ /([0-9]+)/g);
     push(@version,
-        sprintf("%.2X", substr($versionComponents[1], 0, 2) =~ /([0-9]+)/g));
+        sprintf("%.2d", substr($versionComponents[1], 0, 2) =~ /([0-9]+)/g));
 
 
     if ($verbose)
