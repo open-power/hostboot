@@ -444,6 +444,9 @@ enum fields : uint8_t
 
     CONFIGURATION_IO_MAP        = 0xFC,
     CONFIGURATION_IO_MAP_OFF    = 0xFF,
+
+    EFUSE_P0_P2_ENABLE          = 0,
+    EFUSE_P1_P3_ENABLE          = 1,
 };
 
 } // ns gpio
@@ -611,6 +614,19 @@ enum fields
     LOW_TH_CH3_4AB_VLOC_LOW_THRESHOLD_543mv             = 0x42,
     LOW_TH_CH5_4C_VLOC_LOW_THRESHOLD_391mv              = 0x28,
     LOW_TH_CH7_3AB_VLOC_LOW_THRESHOLD_543mv             = 0x42,
+
+    // Event reg flag bits
+    ADC1_PMIC0_SWA_SWB_FAIL = 1,
+    ADC1_PMIC0_SWC_FAIL     = 2,
+    ADC1_PMIC0_SWD_FAIL     = 3,
+    ADC1_PMIC2_SWC_FAIL     = 4,
+    ADC1_PMIC2_SWD_FAIL     = 5,
+    ADC1_PMIC2_SWA_SWB_FAIL = 7,
+    ADC2_PMIC1_SWC_FAIL     = 2,
+    ADC2_PMIC1_SWA_SWB_FAIL = 7,
+    ADC2_PMIC3_SWA_SWB_FAIL = 3,
+    ADC2_PMIC3_SWC_FAIL     = 5,
+
 };
 
 ///

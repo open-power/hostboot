@@ -40,6 +40,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/sbe_utils/include
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import
 
 #Common Objects

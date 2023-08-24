@@ -32,6 +32,7 @@
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
+// EKB-Mirror-To: hw/ppe
 
 #ifndef __PMIC_REGS_FLD__
 #define __PMIC_REGS_FLD__
