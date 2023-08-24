@@ -487,11 +487,16 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode pre_enable_steps(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
 {
+    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+    static constexpr uint8_t CLEAR_BREAD_CRUMBS = 0x00;
+
     // TPS VIN Latch workaround
     FAPI_TRY(setup_tps_vin_latch(i_pmic_target));
 
     // Increase soft start times to 4ms to avoid overcurrent warnings
     FAPI_TRY(mss::pmic::set_soft_start_time(i_pmic_target));
+
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, TPS_REGS::RA3_BREADCRUMB, CLEAR_BREAD_CRUMBS));
 
     return fapi2::FAPI2_RC_SUCCESS;
 

@@ -38,6 +38,8 @@
 #include <pmic_n_mode_detect.H>
 #include <lib/i2c/i2c_pmic.H>
 #include <lib/utils/pmic_consts.H>
+#include <pmic_regs.H>
+#include <pmic_regs_fld.H>
 
 #ifdef __PPE__
     #include <ppe42_string.h>
@@ -97,18 +99,175 @@ bool is_4u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
 }
 
 ///
+/// @brief Clear or set GPIO EFUSE bit of corresponding PMIC
+///
+/// @param[in] i_clear_set_bit clear of set EFUSE bit
+/// @param[in] i_pmic_pos relative positio of PMIC
+/// @param[in,out] io_reg value of EFUSE register
+/// @return None
+///
+void clear_set_efuse(bool i_clear_set_bit,
+                     const uint8_t i_pmic_pos,
+                     fapi2::buffer<uint8_t>& io_reg)
+{
+    // Clear or set PMIC0 or PMIC2
+    if ( i_pmic_pos == mss::pmic::id::PMIC0 || i_pmic_pos == mss::pmic::id::PMIC2 )
+    {
+        io_reg.writeBit<mss::gpio::fields::EFUSE_P0_P2_ENABLE>(i_clear_set_bit);
+    }
+
+    // Clear or set PMIC1 or PMIC3
+    if ( i_pmic_pos == mss::pmic::id::PMIC1 || i_pmic_pos == mss::pmic::id::PMIC3 )
+    {
+        io_reg.writeBit<mss::gpio::fields::EFUSE_P1_P3_ENABLE>(i_clear_set_bit);
+    }
+}
+
+///
+/// @brief Attempt recovery for a specific PMIC
+///
+/// @param[in,out] io_pmic pmic_info class including target / state info
+/// @param[in] i_gpio GPIO target
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
+/// @return None
+///
+void attempt_recovery(pmic_info& io_pmic,
+                      const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio,
+                      const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+                      const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+    using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
+    fapi2::buffer<uint8_t> l_reg;
+
+    FAPI_INF(TARGTIDFORMAT " Attempting Recovery", MSSTARGID(io_pmic.iv_pmic));
+
+    // Clear EFUSE
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_gpio, mss::gpio::regs::EFUSE_OUTPUT, l_reg));
+    clear_set_efuse(false, io_pmic.iv_rel_pos, l_reg);
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_gpio, mss::gpio::regs::EFUSE_OUTPUT, l_reg));
+
+    // Delay for 100 ms. Less delay is affecting recovery procedure.
+    // This amount should be ok as the recovery will rarely be used
+    fapi2::delay(100 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+    // Set EFUSE
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_gpio, mss::gpio::regs::EFUSE_OUTPUT, l_reg));
+    clear_set_efuse(true, io_pmic.iv_rel_pos, l_reg);
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_gpio, mss::gpio::regs::EFUSE_OUTPUT, l_reg));
+
+    // Delay for 50 ms. Less delay is affecting recovery procedure.
+    // This amount should be ok as the recovery will rarely be used
+    fapi2::delay(50 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+    // Clear VR_ENABLE
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(io_pmic.iv_pmic, REGS::R32, l_reg));
+    l_reg.clearBit<FIELDS::R32_VR_ENABLE>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(io_pmic.iv_pmic, REGS::R32, l_reg));
+
+    // Clear Global Status
+    FAPI_TRY(mss::pmic::i2c::reg_write(io_pmic.iv_pmic, REGS::R14, CLEAR_STATUS));
+
+    // Set VR_ENABLE
+    l_reg.setBit<FIELDS::R32_VR_ENABLE>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(io_pmic.iv_pmic, REGS::R32, l_reg));
+
+    // Delay for 200 ms. Less delay is affecting recovery procedure.
+    // This amount should be ok as the recovery will rarely be used
+    fapi2::delay(200 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+    // Clear ADC1 Events
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_adc1, mss::adc::regs::LOW_EVENT_FLAGS, CLEAR_LOW_EVENT_FLAGS));
+    // Clear ADC2 Events
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_adc2, mss::adc::regs::LOW_EVENT_FLAGS, CLEAR_LOW_EVENT_FLAGS));
+
+    return;
+
+fapi_try_exit:
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    io_pmic.iv_state = pmic_state::I2C_FAIL;
+    return;
+}
+
+///
+/// @brief Update breadcrumb register
+/// @param[in,out] aggregate_state Aggregate state
+/// @param[in,out] io_pmic pmic_info class including target / state info
+/// @param[in] i_gpio GPIO target
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
+/// @param[in,out] io_pmic_tele_data pmic telemetry data struct
+/// @return None
+///
+void update_breadcrumb(aggregate_state& io_state,
+                       pmic_info& io_pmic,
+                       const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio,
+                       const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+                       const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2,
+                       pmic_telemetry& io_pmic_tele_data)
+{
+    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+
+    fapi2::buffer<uint8_t> l_reg;
+
+    FAPI_INF(TARGTIDFORMAT " Updating bread crumb", MSSTARGID(io_pmic.iv_pmic));
+
+    switch(io_pmic_tele_data.iv_breadcrumb)
+    {
+        case bread_crumb::BREAD_CRUMB_ALL_GOOD:
+            {
+                // Set breadcrumb to FIRST_ATTEMPT
+                io_pmic_tele_data.iv_breadcrumb = bread_crumb::FIRST_ATTEMPT;
+                reg_write(io_pmic, TPS_REGS::RA3_BREADCRUMB, bread_crumb::FIRST_ATTEMPT);
+                io_state = aggregate_state::N_MODE_POSSIBLE;
+                break;
+            }
+
+        case bread_crumb::FIRST_ATTEMPT:
+            {
+                // Set breadcrumb to RECOVERY_ATTEMPTED
+                io_pmic_tele_data.iv_breadcrumb = bread_crumb::RECOVERY_ATTEMPTED;
+                reg_write(io_pmic, TPS_REGS::RA3_BREADCRUMB, bread_crumb::RECOVERY_ATTEMPTED);
+                attempt_recovery(io_pmic, i_gpio, i_adc1, i_adc2);
+                io_state = aggregate_state::N_MODE_RECOVERY_ATTEMPTED;
+                break;
+            }
+
+        case bread_crumb::RECOVERY_ATTEMPTED:
+        case bread_crumb::STILL_A_FAIL:
+            {
+                // Set breadcrumb to STILL_A_FAIL if previous state was RECOVERY_ATTEMPTED
+                // Do nothing if still a STILL_A_FAIL. Keep the state as is
+                io_pmic_tele_data.iv_breadcrumb = bread_crumb::STILL_A_FAIL;
+                reg_write(io_pmic, TPS_REGS::RA3_BREADCRUMB, bread_crumb::STILL_A_FAIL);
+                io_state = aggregate_state::N_MODE;
+                break;
+            }
+    }
+}
+
+///
 /// @brief Check the GPIO for n mode detection
 ///
 /// @param[in] i_gpio GPIO Expander target
 /// @param[in,out] io_pmic1 PMIC1/3 pmic_info class including target / state info
 /// @param[in,out] io_pmic2 PMIC2/4 pmic_info class including target / state info
 /// @param[in,out] io_failed_pmics Bit map of failed PMICS on a GPIO
+/// @param[in,out] io_pmic_data1 PMIC1/3 pmic telemetry data struct
+/// @param[in,out] io_pmic_data2 PMIC2/3 pmic telemetry data struct
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
 /// @return aggregate_state N mode state according to the status of GPIO and ADC only
 ///
 aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio,
                            pmic_info& io_pmic1,
                            pmic_info& io_pmic2,
-                           fapi2::buffer<uint8_t>& io_failed_pmics)
+                           fapi2::buffer<uint8_t>& io_failed_pmics,
+                           pmic_telemetry& io_pmic_data1,
+                           pmic_telemetry& io_pmic_data2,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2)
 {
     FAPI_INF(TARGTIDFORMAT " Performing GPIO N-Mode Detection", MSSTARGID(i_gpio));
 
@@ -124,6 +283,7 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESP
         FAPI_INF(TARGTIDFORMAT " INPUT_PORT_REG register read failed", MSSTARGID(i_gpio));
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         l_state = aggregate_state::GI2C_I2C_FAIL;
+        // no recovery
         return l_state;
     }
 
@@ -137,35 +297,136 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESP
 
     if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0>())
     {
-        FAPI_INF(TARGTIDFORMAT " Primary PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
+        FAPI_INF(TARGTIDFORMAT " PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
         io_pmic1.iv_state |= PWR_NOT_GOOD;
+        update_breadcrumb(l_state, io_pmic1, i_gpio, i_adc1, i_adc2, io_pmic_data1);
     }
 
     if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1>())
     {
-        FAPI_INF(TARGTIDFORMAT " Secondary PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
+        FAPI_INF(TARGTIDFORMAT " PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
         io_pmic2.iv_state |= PWR_NOT_GOOD;
-    }
-
-    // Check ADC_ALERT bit and declare n-mode if it is not set
-    if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_FAULT_N>())
-    {
-        FAPI_INF(TARGTIDFORMAT " ADC_ALERT bit flagged. Declaring n-mode", MSSTARGID(i_gpio));
-        l_state = static_cast<aggregate_state>(std::max(l_state, aggregate_state::N_MODE));
+        update_breadcrumb(l_state, io_pmic2, i_gpio, i_adc1, i_adc2, io_pmic_data2);
     }
 
     return l_state;
 }
 
 ///
+/// @brief Check ADC1 event bits
+///
+/// @param[in] i_reg_data register read data from reg 0x18 (EVENT_FLAG)
+/// @param[in,out] io_state aggregate state
+/// @param[in,out] io_pmic1 PMIC1/3 pmic_info class including target / state info
+/// @param[in,out] io_pmic2 PMIC2/4 pmic_info class including target / state info
+/// @param[in,out] io_pmic_data1 PMIC1/3 pmic telemetry data struct
+/// @param[in,out] io_pmic_data2 PMIC2/3 pmic telemetry data struct
+/// @param[in] i_gpio GPIO1 target
+/// @param[in] i_gpio GPIO2 target
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
+/// @return None
+///
+void check_adc1_event_bits(const fapi2::buffer<uint8_t>& i_reg_data,
+                           aggregate_state& io_state,
+                           pmic_info& io_pmic1,
+                           pmic_info& io_pmic2,
+                           pmic_telemetry& io_pmic_data1,
+                           pmic_telemetry& io_pmic_data2,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio1,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio2,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2)
+{
+    // Check for ADC1 PMIC0 fails
+    if (i_reg_data.getBit<mss::adc::fields::ADC1_PMIC0_SWA_SWB_FAIL>() ||
+        i_reg_data.getBit<mss::adc::fields::ADC1_PMIC0_SWC_FAIL>() ||
+        i_reg_data.getBit<mss::adc::fields::ADC1_PMIC0_SWD_FAIL>())
+    {
+        io_pmic1.iv_state |= ADC_ERROR;
+        update_breadcrumb(io_state, io_pmic1, i_gpio1, i_adc1, i_adc2, io_pmic_data1);
+    }
+
+    // Check for ADC1 PMIC2 fails
+    if (i_reg_data.getBit<mss::adc::fields::ADC1_PMIC2_SWC_FAIL>() ||
+        i_reg_data.getBit<mss::adc::fields::ADC1_PMIC2_SWD_FAIL>() ||
+        i_reg_data.getBit<mss::adc::fields::ADC1_PMIC2_SWA_SWB_FAIL>())
+    {
+        io_pmic2.iv_state |= ADC_ERROR;
+        update_breadcrumb(io_state, io_pmic2, i_gpio2, i_adc1, i_adc2, io_pmic_data2);
+    }
+}
+
+///
+/// @brief Check ADC2 event bits
+///
+/// @param[in] i_reg_data register read data from reg 0x18 (EVENT_FLAG)
+/// @param[in,out] io_state aggregate state
+/// @param[in,out] io_pmic1 PMIC1/3 pmic_info class including target / state info
+/// @param[in,out] io_pmic2 PMIC2/4 pmic_info class including target / state info
+/// @param[in,out] io_pmic_data1 PMIC1/3 pmic telemetry data struct
+/// @param[in,out] io_pmic_data2 PMIC2/3 pmic telemetry data struct
+/// @param[in] i_gpio GPIO1 target
+/// @param[in] i_gpio GPIO2 target
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
+/// @return None
+///
+void check_adc2_event_bits(const fapi2::buffer<uint8_t>& i_reg_data,
+                           aggregate_state& io_state,
+                           pmic_info& io_pmic1,
+                           pmic_info& io_pmic2,
+                           pmic_telemetry& io_pmic_data1,
+                           pmic_telemetry& io_pmic_data2,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio1,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio2,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+                           const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2)
+{
+    // Check for ADC1 PMIC0 fails
+    if (i_reg_data.getBit<mss::adc::fields::ADC2_PMIC1_SWC_FAIL>() ||
+        i_reg_data.getBit<mss::adc::fields::ADC2_PMIC1_SWA_SWB_FAIL>())
+    {
+        io_pmic1.iv_state |= ADC_ERROR;
+        update_breadcrumb(io_state, io_pmic1, i_gpio1, i_adc1, i_adc2, io_pmic_data1);
+    }
+
+    // Check for ADC1 PMIC2 fails
+    if (i_reg_data.getBit<mss::adc::fields::ADC2_PMIC3_SWA_SWB_FAIL>() ||
+        i_reg_data.getBit<mss::adc::fields::ADC2_PMIC3_SWC_FAIL>())
+    {
+        io_pmic2.iv_state |= ADC_ERROR;
+        update_breadcrumb(io_state, io_pmic2, i_gpio2, i_adc1, i_adc2, io_pmic_data2);
+    }
+}
+
+///
 /// @brief Check the ADC device for EVENT_FLAG
 ///
-/// @param[in] i_adc ADC target
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
+/// @param[in] i_gpio GPIO1 target
+/// @param[in] i_gpio GPIO2 target
+/// @param[in,out] io_pmic1 First pmic_info class including target / state info
+/// @param[in,out] io_pmic2 Second pmic_info class including target / state info
+/// @param[in] i_adc_number ADC number to process
+/// @param[in,out] io_pmic_data1 PMIC1/3 pmic telemetry data struct
+/// @param[in,out] io_pmic_data2 PMIC2/3 pmic telemetry data struct
+/// @return aggregate_state Aggregate state
 ///
-aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc)
+aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+                          const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2,
+                          const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio1,
+                          const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio2,
+                          pmic_info& io_pmic1,
+                          pmic_info& io_pmic2,
+                          const uint8_t i_adc_number,
+                          pmic_telemetry& io_pmic_data1,
+                          pmic_telemetry& io_pmic_data2)
 {
-    FAPI_INF(TARGTIDFORMAT " Checking ADC for EVENT_FLAG", MSSTARGID(i_adc));
+    FAPI_INF(TARGTIDFORMAT " Checking ADC for EVENT_FLAG", MSSTARGID(i_adc1));
 
+    aggregate_state l_state = aggregate_state::N_PLUS_1;
     constexpr uint8_t EVENT_FLAG_GOOD = 0x00;
 
     // Start with the buffer polluted. If the reg read fails, we assume l_reg will
@@ -173,9 +434,9 @@ aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPO
     fapi2::buffer<uint8_t> l_reg(0xFF);
 
     // We don't care if this read fails. We would treat it the same as a bad EVENT_FLAG reg
-    if (mss::pmic::i2c::reg_read(i_adc, mss::adc::regs::EVENT_FLAG, l_reg) != fapi2::FAPI2_RC_SUCCESS)
+    if (mss::pmic::i2c::reg_read_reverse_buffer(i_adc1, mss::adc::regs::EVENT_FLAG, l_reg) != fapi2::FAPI2_RC_SUCCESS)
     {
-        FAPI_INF(TARGTIDFORMAT " EVENT_FLAG register read failed", MSSTARGID(i_adc));
+        FAPI_INF(TARGTIDFORMAT " EVENT_FLAG register read failed", MSSTARGID(i_adc1));
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         return aggregate_state::GI2C_I2C_FAIL;
     }
@@ -183,29 +444,56 @@ aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPO
     // If the EVENT_FLAG register is not all zero, declare n-mode
     if (l_reg != EVENT_FLAG_GOOD)
     {
-        FAPI_INF(TARGTIDFORMAT " One or more EVENT_FLAG bits set. Declaring n-mode", MSSTARGID(i_adc));
-        return aggregate_state::N_MODE;
-    }
+        if (i_adc_number == mss::generic_i2c_responder_ddr4::ADC1)
+        {
+            check_adc1_event_bits(l_reg, l_state, io_pmic1, io_pmic2, io_pmic_data1, io_pmic_data2, i_gpio1, i_gpio2, i_adc1,
+                                  i_adc2);
+        }
+        else if (i_adc_number == mss::generic_i2c_responder_ddr4::ADC2)
+        {
+            check_adc2_event_bits(l_reg, l_state, io_pmic1, io_pmic2, io_pmic_data1, io_pmic_data2, i_gpio1, i_gpio2, i_adc1,
+                                  i_adc2);
+        }
 
-    return aggregate_state::N_PLUS_1;
+        return l_state;
+    }
+    else
+    {
+        return aggregate_state::N_PLUS_1;
+    }
 }
 
 ///
-/// @brief Compare two phases provided from two pmics, declaring N-mode & pmic states as needed
+/// @brief Compare two phases provided from two pmics, decide state based on breadcrumb
 ///
 /// @param[in,out] io_first_pmic First pmic_info class including target / state info
 /// @param[in,out] io_second_pmic Second pmic_info class including target / state info
 /// @param[in] i_phase0 One phase
 /// @param[in] i_phase1 Other phase
 /// @param[out] o_aggregate_state Aggregate state, to be updated if needed
+/// @param[in,out] io_first_pmic_data First pmic_info class including target / state info
+/// @param[in,out] io_second_pmic_data Second pmic_info class including target / state info
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
+/// @param[in] i_gpio GPIO1 target
+/// @param[in] i_gpio GPIO2 target
+/// @return None
 ///
 void phase_comparison(
     pmic_info& io_first_pmic,
     pmic_info& io_second_pmic,
     const uint32_t i_phase0,
     const uint32_t i_phase1,
-    aggregate_state& o_aggregate_state)
+    aggregate_state& o_aggregate_state,
+    pmic_telemetry& io_first_pmic_data,
+    pmic_telemetry& io_second_pmic_data,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio2)
 {
+    uint8_t l_rel_pos = 0;
+
     if ((io_first_pmic.iv_state & pmic_state::NOT_PRESENT) || (io_second_pmic.iv_state & pmic_state::NOT_PRESENT))
     {
         o_aggregate_state = aggregate_state::N_MODE;
@@ -214,19 +502,38 @@ void phase_comparison(
 
     if (((i_phase0 < PHASE_MIN) && i_phase1 > PHASE_MAX) || ((i_phase1 < PHASE_MIN) && (i_phase0 > PHASE_MAX)))
     {
-        o_aggregate_state = aggregate_state::N_MODE;
-
         // Set the flag for whichever had the imbalance
         if (i_phase0 < PHASE_MIN)
         {
-            io_first_pmic.iv_state |= CURRENT_IMBALANCE;
+            l_rel_pos = io_first_pmic.iv_rel_pos;
         }
         else
         {
-            io_second_pmic.iv_state |= CURRENT_IMBALANCE;
+            l_rel_pos = io_second_pmic.iv_rel_pos;
         }
+
+        switch (l_rel_pos)
+        {
+            case mss::pmic::id::PMIC0:
+            case mss::pmic::id::PMIC1:
+                {
+                    io_first_pmic.iv_state |= CURRENT_IMBALANCE;
+                    update_breadcrumb(o_aggregate_state, io_first_pmic, i_gpio1, i_adc1, i_adc2, io_first_pmic_data);
+                    break;
+                }
+
+            case mss::pmic::id::PMIC2:
+            case mss::pmic::id::PMIC3:
+                {
+                    io_second_pmic.iv_state |= CURRENT_IMBALANCE;
+                    update_breadcrumb(o_aggregate_state, io_second_pmic, i_gpio2, i_adc1, i_adc2, io_second_pmic_data);
+                    break;
+                }
+        }
+
     }
 }
+
 ///
 /// @brief Read a double phase voltage domain, check for N-Mode
 ///
@@ -235,14 +542,26 @@ void phase_comparison(
 /// @param[in] i_rail_1 One phase of voltage - register to read
 /// @param[in] i_rail_2 Other phase of voltage - register to read
 /// @param[out] o_aggregate_state Aggregate state output, to be updated if needed
-/// @return aggregate_state Aggregate state, updated to N-Mode if failed checks
+/// @param[in,out] io_first_pmic_data PMIC1/3 pmic telemetry data struct
+/// @param[in,out] io_second_pmic_data PMIC2/3 pmic telemetry data struct
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
+/// @param[in] i_gpio GPIO1 target
+/// @param[in] i_gpio GPIO2 target
+/// @return none
 ///
 void read_double_domain(
     pmic_info& io_first_pmic,
     pmic_info& io_second_pmic,
     const uint8_t i_rail_1,
     const uint8_t i_rail_2,
-    aggregate_state& o_aggregate_state)
+    aggregate_state& o_aggregate_state,
+    pmic_telemetry& io_first_pmic_data,
+    pmic_telemetry& io_second_pmic_data,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio2)
 {
     uint32_t l_phase0 = 0;
     uint32_t l_phase1 = 0;
@@ -260,7 +579,8 @@ void read_double_domain(
     l_phase0 = (l_reg0 * CURRENT_MULTIPLIER) + (l_reg1 * CURRENT_MULTIPLIER);
     l_phase1 = (l_reg2 * CURRENT_MULTIPLIER) + (l_reg3 * CURRENT_MULTIPLIER);
 
-    phase_comparison(io_first_pmic, io_second_pmic, l_phase0, l_phase1, o_aggregate_state);
+    phase_comparison(io_first_pmic, io_second_pmic, l_phase0, l_phase1, o_aggregate_state,
+                     io_first_pmic_data, io_second_pmic_data, i_adc1, i_adc2, i_gpio1, i_gpio2);
 }
 
 ///
@@ -270,13 +590,25 @@ void read_double_domain(
 /// @param[in,out] io_second_pmic Second pmic_info class including target / state info
 /// @param[in] i_rail_1 Rail register to read
 /// @param[out] o_aggregate_state Aggregate state output, to be updated if needed
-/// @return aggregate_state Aggregate state, updated to N-Mode if failed checks
+/// @param[in,out] io_first_pmic_data PMIC1/3 pmic telemetry data struct
+/// @param[in,out] io_second_pmic_data PMIC2/3 pmic telemetry data struct
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
+/// @param[in] i_gpio GPIO1 target
+/// @param[in] i_gpio GPIO2 target
+/// @return none
 ///
 void read_single_domain(
     pmic_info& io_first_pmic,
     pmic_info& io_second_pmic,
     const uint8_t i_rail_1,
-    aggregate_state& o_aggregate_state)
+    aggregate_state& o_aggregate_state,
+    pmic_telemetry& io_first_pmic_data,
+    pmic_telemetry& io_second_pmic_data,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio1,
+    const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio2)
 {
     uint32_t l_phase0 = 0;
     uint32_t l_phase1 = 0;
@@ -290,23 +622,34 @@ void read_single_domain(
     l_phase0 = (l_reg0 * CURRENT_MULTIPLIER);
     l_phase1 = (l_reg1 * CURRENT_MULTIPLIER);
 
-    phase_comparison(io_first_pmic, io_second_pmic, l_phase0, l_phase1, o_aggregate_state);
+    phase_comparison(io_first_pmic, io_second_pmic, l_phase0, l_phase1, o_aggregate_state,
+                     io_first_pmic_data, io_second_pmic_data, i_adc1, i_adc2, i_gpio1, i_gpio2);
 }
 
 ///
 /// @brief Perform voltage n mode checks
 ///
-/// @param[in] i_pmics PMICS in sorted order
+/// @param[in] io_pmics PMICS in sorted order
+/// @param[in,out] io_tele_data telemetry data struct
+/// @param[in] i_adc1 ADC target
+/// @param[in] i_adc2 ADC target
+/// @param[in] i_gpio1 GPIO target
+/// @param[in] i_gpio2 GPIO target
 /// @return aggregate_state state of the part
 ///
-aggregate_state voltage_checks(std::vector<pmic_info>& i_pmics)
+aggregate_state voltage_checks(std::vector<pmic_info>& io_pmics,
+                               telemetry_data& io_tele_data,
+                               const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
+                               const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2,
+                               const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio1,
+                               const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_gpio2)
 {
     aggregate_state l_aggregate_state = aggregate_state::N_PLUS_1;
 
     // Required regs
     static constexpr uint8_t SWA_CURRENT = 0x0C;
     static constexpr uint8_t SWB_CURRENT = 0x0D;
-    // SWC used for VIO, which we will not check as per spec
+    static constexpr uint8_t SWC_CURRENT = 0x0E;
     static constexpr uint8_t SWD_CURRENT = 0x0F;
 
     // VDDR1
@@ -314,21 +657,22 @@ aggregate_state voltage_checks(std::vector<pmic_info>& i_pmics)
     // We should read out close to 0A for both currents and therefore should not trigger
     // the N-mode condition.
     FAPI_INF("Checking voltage domain VDDR1");
-    read_double_domain(i_pmics[mss::pmic::id::PMIC0], i_pmics[mss::pmic::id::PMIC2], SWA_CURRENT, SWB_CURRENT,
-                       l_aggregate_state);
-
+    read_double_domain(io_pmics[mss::pmic::id::PMIC0], io_pmics[mss::pmic::id::PMIC2], SWA_CURRENT, SWB_CURRENT,
+                       l_aggregate_state, io_tele_data.iv_pmic1, io_tele_data.iv_pmic2, i_adc1, i_adc2, i_gpio1, i_gpio2);
     // VPP
     FAPI_INF("Checking voltage domain VPP");
-    read_single_domain(i_pmics[mss::pmic::id::PMIC0], i_pmics[mss::pmic::id::PMIC2], SWD_CURRENT, l_aggregate_state);
+    read_single_domain(io_pmics[mss::pmic::id::PMIC0], io_pmics[mss::pmic::id::PMIC2], SWD_CURRENT, l_aggregate_state,
+                       io_tele_data.iv_pmic1, io_tele_data.iv_pmic2, i_adc1, i_adc2, i_gpio1, i_gpio2);
 
     // VDDR2 (or VDDR for RCDless dimms)
     FAPI_INF("Checking voltage domain VDDR2");
-    read_double_domain(i_pmics[mss::pmic::id::PMIC1], i_pmics[mss::pmic::id::PMIC3], SWA_CURRENT, SWB_CURRENT,
-                       l_aggregate_state);
+    read_double_domain(io_pmics[mss::pmic::id::PMIC1], io_pmics[mss::pmic::id::PMIC3], SWA_CURRENT, SWB_CURRENT,
+                       l_aggregate_state, io_tele_data.iv_pmic3, io_tele_data.iv_pmic4, i_adc1, i_adc2, i_gpio1, i_gpio2);
 
     // VDD
     FAPI_INF("Checking voltage domain VDD");
-    read_single_domain(i_pmics[mss::pmic::id::PMIC1], i_pmics[mss::pmic::id::PMIC3], SWD_CURRENT, l_aggregate_state);
+    read_single_domain(io_pmics[mss::pmic::id::PMIC1], io_pmics[mss::pmic::id::PMIC3], SWC_CURRENT, l_aggregate_state,
+                       io_tele_data.iv_pmic3, io_tele_data.iv_pmic4, i_adc1, i_adc2, i_gpio1, i_gpio2);
 
     // VIO is intentionally skipped as the current draw
     // is too low to draw any meaningful conclusions
@@ -351,7 +695,13 @@ std::vector<pmic_info> get_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
     // Not a const reference as the pmic_info ctor discards qualifiers
     for (auto& l_pmic : i_ocmb_target.getChildren<fapi2::TARGET_TYPE_PMIC>(fapi2::TARGET_STATE_PRESENT))
     {
-        l_pmics.push_back(pmic_info(l_pmic, pmic_state::ALL_GOOD));
+        uint8_t l_relative_pmic_id = 0;
+#ifndef __PPE__
+        FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_pmic, l_relative_pmic_id);
+#else
+        l_relative_pmic_id = l_pmic.get().fields.chiplet_num % 4;
+#endif
+        l_pmics.push_back(pmic_info(l_pmic, pmic_state::ALL_GOOD, l_relative_pmic_id));
     }
 
     // If less then 4 PMICs then padd the vector with NOT_PRESENT pmics
@@ -623,6 +973,10 @@ void populate_adc_data(
     static constexpr uint8_t REG_SIZE_BITS = 8;
     fapi2::buffer<uint8_t> l_reg_contents;
 
+    mss::pmic::i2c::reg_read(i_adc, mss::adc::regs::LOW_EVENT_FLAGS, l_reg_contents);
+    o_adc_data.iv_event_low_flag = l_reg_contents;
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
     mss::pmic::i2c::reg_read(i_adc, mss::adc::regs::SYSTEM_STATUS, l_reg_contents);
     o_adc_data.iv_system_status = l_reg_contents;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -734,6 +1088,89 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Get bread crumb reg value for individual PMIC
+/// @param[in,out] io_pmic pmic_info class including target / state info
+/// @param[out] o_pmic_data pmic_data struct
+/// @return None
+///
+void get_bread_crumb_pmic(pmic_info& io_pmic,
+                          pmic_telemetry& o_pmic_data)
+{
+    fapi2::buffer<uint8_t> l_reg_contents;
+    static constexpr uint8_t RA3_BREADCRUMB = 0xA3;
+
+    reg_read(io_pmic, RA3_BREADCRUMB, l_reg_contents);
+
+    // 0xA3 register is not defaulted to 0. This logic is to set it to 0
+    // if there are no breadcrumbs present.
+    if((l_reg_contents < bread_crumb::FIRST_ATTEMPT) ||
+       (l_reg_contents > bread_crumb::STILL_A_FAIL))
+    {
+        l_reg_contents = bread_crumb::BREAD_CRUMB_ALL_GOOD;
+    }
+
+    o_pmic_data.iv_breadcrumb = l_reg_contents;
+}
+
+///
+/// @brief Get bread crumb reg value for all PMIC target
+/// @param[in,out] vector of io_pmic pmic_info class including target / state info
+/// @param[out] o_tele_data telemetry_data struct
+/// @return bread_crumb value
+///
+bread_crumb get_bread_crumbs(std::vector<pmic_info>& io_pmics,
+                             telemetry_data& o_tele_data)
+{
+    fapi2::buffer<uint8_t> l_reg_contents;
+
+    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC0], o_tele_data.iv_pmic1);
+    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC1], o_tele_data.iv_pmic3);
+    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC2], o_tele_data.iv_pmic2);
+    get_bread_crumb_pmic(io_pmics[mss::pmic::id::PMIC3], o_tele_data.iv_pmic4);
+
+    return static_cast<bread_crumb>(std::max(std::max(o_tele_data.iv_pmic1.iv_breadcrumb,
+                                    o_tele_data.iv_pmic2.iv_breadcrumb),
+                                    std::max(o_tele_data.iv_pmic3.iv_breadcrumb,
+                                            o_tele_data.iv_pmic4.iv_breadcrumb)));
+}
+
+///
+/// @brief Check and reset bread crumb reg value if PMIC status is clean
+/// @param[in,out] vector of io_pmic pmic_info class including target / state info
+/// @param[in,out] io_tele_data telemetry_data struct
+/// @return bread_crumb value
+///
+void check_and_reset_breadcrumb(std::vector<pmic_info>& io_pmics,
+                                telemetry_data& io_tele_data)
+{
+    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+
+    if (io_pmics[mss::pmic::id::PMIC0].iv_state == aggregate_state::N_PLUS_1)
+    {
+        reg_write(io_pmics[mss::pmic::id::PMIC0], TPS_REGS::RA3_BREADCRUMB, bread_crumb::BREAD_CRUMB_ALL_GOOD);
+        io_tele_data.iv_pmic1.iv_breadcrumb = bread_crumb::BREAD_CRUMB_ALL_GOOD;
+    }
+
+    if (io_pmics[mss::pmic::id::PMIC1].iv_state == aggregate_state::N_PLUS_1)
+    {
+        reg_write(io_pmics[mss::pmic::id::PMIC1], TPS_REGS::RA3_BREADCRUMB, bread_crumb::BREAD_CRUMB_ALL_GOOD);
+        io_tele_data.iv_pmic3.iv_breadcrumb = bread_crumb::BREAD_CRUMB_ALL_GOOD;
+    }
+
+    if (io_pmics[mss::pmic::id::PMIC2].iv_state == aggregate_state::N_PLUS_1)
+    {
+        reg_write(io_pmics[mss::pmic::id::PMIC2], TPS_REGS::RA3_BREADCRUMB, bread_crumb::BREAD_CRUMB_ALL_GOOD);
+        io_tele_data.iv_pmic2.iv_breadcrumb = bread_crumb::BREAD_CRUMB_ALL_GOOD;
+    }
+
+    if (io_pmics[mss::pmic::id::PMIC3].iv_state == aggregate_state::N_PLUS_1)
+    {
+        reg_write(io_pmics[mss::pmic::id::PMIC3], TPS_REGS::RA3_BREADCRUMB, bread_crumb::BREAD_CRUMB_ALL_GOOD);
+        io_tele_data.iv_pmic4.iv_breadcrumb = bread_crumb::BREAD_CRUMB_ALL_GOOD;
+    }
+}
+
+///
 /// @brief Runtime N-Mode detection for 4U parts
 /// @param[in] i_ocmb_target ocmb target
 /// @param[out] o_data hwp_data_ostream of struct information
@@ -756,6 +1193,12 @@ fapi2::ReturnCode pmic_n_mode_detect(
                               (fapi2::TARGET_STATE_PRESENT);
     auto PMICS = get_pmics(i_ocmb_target);
 
+    // Grab the targets
+    const auto& ADC1 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC1];
+    const auto& ADC2 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC2];
+    const auto& GPIO1 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO1];
+    const auto& GPIO2 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO2];
+
     if (PMICS.empty())
     {
         l_info.iv_aggregate_error = aggregate_state::LOST;
@@ -772,36 +1215,39 @@ fapi2::ReturnCode pmic_n_mode_detect(
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
+    // Skip to telemetry collection if already in n-mode
+    if (get_bread_crumbs(PMICS, l_info.iv_telemetry_data) != bread_crumb::STILL_A_FAIL)
     {
-        // Grab the targets
-        const auto& ADC1 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC1];
-        const auto& ADC2 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC2];
-        const auto& GPIO1 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO1];
-        const auto& GPIO2 = GI2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO2];
-
         // Start with the GPIOs
         aggregate_state l_output_state_1 = gpio_check(GPIO1, PMICS[mss::pmic::id::PMIC0], PMICS[mss::pmic::id::PMIC1],
-                                           l_failed_pmics_1);
+                                           l_failed_pmics_1, l_info.iv_telemetry_data.iv_pmic1, l_info.iv_telemetry_data.iv_pmic3, ADC1, ADC2);
         aggregate_state l_output_state_2 = gpio_check(GPIO2, PMICS[mss::pmic::id::PMIC2], PMICS[mss::pmic::id::PMIC3],
-                                           l_failed_pmics_2);
+                                           l_failed_pmics_2, l_info.iv_telemetry_data.iv_pmic2, l_info.iv_telemetry_data.iv_pmic4, ADC1, ADC2);
 
         get_gpio_pmic_state<PAIR0>(l_output_state_1, l_failed_pmics_1, l_failed_pmics_2);
         get_gpio_pmic_state<PAIR1>(l_output_state_2, l_failed_pmics_1, l_failed_pmics_2);
 
-        // Choose the largest of the two states, a double N-Mode declaration here is
-        // still just only N-Mode since the two GPIOs handle a separate set of redundant pmics
+        // Choose the largest of the two states
         l_state = static_cast<aggregate_state>(std::max(l_output_state_1, l_output_state_2));
 
-        l_output_state_1 = adc_check(ADC1);
-        l_output_state_2 = adc_check(ADC2);
+        if (l_state == aggregate_state::N_PLUS_1)
+        {
+            l_output_state_1 = adc_check(ADC1, ADC2, GPIO1, GPIO2, PMICS[mss::pmic::id::PMIC0], PMICS[mss::pmic::id::PMIC2],
+                                         mss::generic_i2c_responder_ddr4::ADC1, l_info.iv_telemetry_data.iv_pmic1, l_info.iv_telemetry_data.iv_pmic2);
+            l_output_state_2 = adc_check(ADC2, ADC1, GPIO1, GPIO2, PMICS[mss::pmic::id::PMIC1], PMICS[mss::pmic::id::PMIC3],
+                                         mss::generic_i2c_responder_ddr4::ADC2, l_info.iv_telemetry_data.iv_pmic3, l_info.iv_telemetry_data.iv_pmic4);
 
-        // Pick the largest error so far
-        l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_1));
-        l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_2));
+            // Pick the largest error so far
+            l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_1));
+            l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_2));
 
-        // Now, the voltages
-        l_output_state_1 = voltage_checks(PMICS);
-        l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_1));
+            if (l_state == aggregate_state::N_PLUS_1)
+            {
+                // Now, the voltages
+                l_output_state_1 = voltage_checks(PMICS, l_info.iv_telemetry_data, ADC1, ADC2, GPIO1, GPIO2);
+                l_state = static_cast<aggregate_state>(std::max(l_state, l_output_state_1));
+            }
+        }
 
         // This numbering is using the numbering as defined in the "Redundant Power
         // on DIMM – Functional Specification" in order to match the I2C command sequence
@@ -813,24 +1259,30 @@ fapi2::ReturnCode pmic_n_mode_detect(
         l_info.iv_pmic4_errors = PMICS[mss::pmic::id::PMIC3].iv_state;
         l_info.iv_aggregate_error = l_state;
 
-        // Get GPIO data
-        populate_gpio_data(GPIO1, GPIO2, l_info.iv_telemetry_data);
-
-        // Similar to above, this numbering translation is using the numbering
-        // as defined in the "Redundant Power on DIMM – Functional Specification"
-        populate_pmic_data(PMICS[mss::pmic::id::PMIC0], l_info.iv_telemetry_data.iv_pmic1);
-        populate_pmic_data(PMICS[mss::pmic::id::PMIC2], l_info.iv_telemetry_data.iv_pmic2);
-        populate_pmic_data(PMICS[mss::pmic::id::PMIC1], l_info.iv_telemetry_data.iv_pmic3);
-        populate_pmic_data(PMICS[mss::pmic::id::PMIC3], l_info.iv_telemetry_data.iv_pmic4);
-
-        // Finally, the ADCs
-        populate_adc_data(ADC1, mss::generic_i2c_responder_ddr4::ADC1, l_info.iv_telemetry_data.iv_adc1);
-        populate_adc_data(ADC2, mss::generic_i2c_responder_ddr4::ADC2, l_info.iv_telemetry_data.iv_adc2);
-
-        FAPI_TRY(send_struct(l_info, o_data));
-
-        FAPI_INF(TARGTIDFORMAT " Compeleted pmic_n_mode_detect procedure", MSSTARGID(i_ocmb_target));
+        check_and_reset_breadcrumb(PMICS, l_info.iv_telemetry_data);
     }
+    else
+    {
+        l_info.iv_aggregate_error = aggregate_state::N_MODE;
+    }
+
+    // Get GPIO data
+    populate_gpio_data(GPIO1, GPIO2, l_info.iv_telemetry_data);
+
+    // Similar to above, this numbering translation is using the numbering
+    // as defined in the "Redundant Power on DIMM – Functional Specification"
+    populate_pmic_data(PMICS[mss::pmic::id::PMIC0], l_info.iv_telemetry_data.iv_pmic1);
+    populate_pmic_data(PMICS[mss::pmic::id::PMIC2], l_info.iv_telemetry_data.iv_pmic2);
+    populate_pmic_data(PMICS[mss::pmic::id::PMIC1], l_info.iv_telemetry_data.iv_pmic3);
+    populate_pmic_data(PMICS[mss::pmic::id::PMIC3], l_info.iv_telemetry_data.iv_pmic4);
+
+    // Finally, the ADCs
+    populate_adc_data(ADC1, mss::generic_i2c_responder_ddr4::ADC1, l_info.iv_telemetry_data.iv_adc1);
+    populate_adc_data(ADC2, mss::generic_i2c_responder_ddr4::ADC2, l_info.iv_telemetry_data.iv_adc2);
+
+    FAPI_TRY(send_struct(l_info, o_data));
+
+    FAPI_INF(TARGTIDFORMAT " Compeleted pmic_n_mode_detect procedure", MSSTARGID(i_ocmb_target));
 
 fapi_try_exit:
     return fapi2::current_err;

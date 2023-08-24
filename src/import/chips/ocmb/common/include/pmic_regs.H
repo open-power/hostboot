@@ -32,6 +32,7 @@
 // *HWP Team: Memory
 // *HWP Level: 1
 // *HWP Consumed by: FSP:HB
+// EKB-Mirror-To: hw/ppe
 
 #ifndef __PMIC_REGS__
 #define __PMIC_REGS__
@@ -68,6 +69,7 @@ struct pmicRegs<mss::pmic::product::TPS5383X>
     static constexpr uint8_t R9C_ON_OFF_CONFIG_GLOBAL = 0x9C;
 
     static constexpr uint8_t RA2_REG_LOCK   = 0xA2;
+    static constexpr uint8_t RA3_BREADCRUMB = 0xA3;
 };
 
 ///
