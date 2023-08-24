@@ -32,6 +32,7 @@ SUBDIRS+=istep09.d
 SUBDIRS+=istep10.d
 SUBDIRS+=istep11.d
 SUBDIRS+=istep12.d
+SUBDIRS+=istep124.d
 SUBDIRS+=istep13.d
 SUBDIRS+=istep14.d
 SUBDIRS+=istep15.d

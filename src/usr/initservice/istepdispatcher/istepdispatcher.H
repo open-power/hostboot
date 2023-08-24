@@ -383,14 +383,25 @@ private:
      *      other istep headers to know what functions/tasks need to be started
      *      for the Istep/Substep that we are in.
      *
-     * @param[in] i_IStep - The Istep to run.
-     * @param[in] i_SubStep - The SubStep to run.
+     * @param[in]  i_IStep - The Istep to run.
+     * @param[in]  i_SubStep - The SubStep to run.
      *
      * @return TaskInfo - The task info for the task to start as a result of the
      *      requested Istep/Substep.
      */
     const TaskInfo * findTaskInfo(const uint32_t i_IStep,
                                   const uint32_t i_SubStep);
+
+    /**
+     * @brief This function checks for a valid istep and converts the istep
+     *        number for a manual istep into a g_istepsManual array index
+     *
+     * @param[in]  i_IStep - The Istep to check.
+     *
+     * @return ExtTaskInfo - The task info for the task to start as a result
+     *                       of the requested Istep/Substep.
+     */
+    const ExtTaskInfo * validIStep(uint32_t i_IStep) const;
 
     /**
      * @brief This function loads the modules for each new Istep

@@ -983,6 +983,7 @@ void doMagicAttributeWrites()
     }
 }
 
+
 // ----------------------------------------------------------------------------
 // IStepDispatcher::doIstep()
 // ----------------------------------------------------------------------------
@@ -1009,7 +1010,11 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
     // If the step has valid work to be done, then execute it.
     if(NULL != theStep)
     {
-        INITSERVICE::set_substep_valid(i_istep, i_substep, theStep->taskname);
+        // Skip this check for manual isteps
+        if (i_istep < MaxISteps)
+        {
+            INITSERVICE::set_substep_valid(i_istep,i_substep,theStep->taskname);
+        }
 #ifdef CONFIG_P9_VPO_COMPILE //extra traces to printk for vpo debug
         printk("doIstep: step %d, substep %d, "
                   "task %s\n", i_istep, i_substep, theStep->taskname);
@@ -1339,66 +1344,98 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
     return err;
 }
 
+
+const ExtTaskInfo* IStepDispatcher::validIStep(uint32_t i_IStep) const
+{
+    const ExtTaskInfo* l_retPtr = nullptr;
+
+    if (i_IStep <= MaxISteps)
+    {
+        l_retPtr = &(g_isteps[i_IStep]);
+    }
+    else
+    {
+        switch (i_IStep)
+        {
+            // Istep 12.4
+            case 124:
+                l_retPtr = &(g_istepsManual[ISTEP_124_INDEX]);
+                break;
+            default:
+                // Handle istep not found in calling function
+                break;
+        }
+    }
+
+    return l_retPtr;
+}
+
+
 // ----------------------------------------------------------------------------
 // findTaskInfo()
 // ----------------------------------------------------------------------------
 const TaskInfo * IStepDispatcher::findTaskInfo(const uint32_t i_IStep,
                                                const uint32_t i_SubStep)
 {
-   //  default return is NULL
-    const TaskInfo *l_pistep = NULL;
+    //  default return pointer to major/minor step is nullptr
+    const TaskInfo *l_pistep = nullptr;
+
+    //  pointer to major step
+    const ExtTaskInfo *l_stepPtr = nullptr;
 
     //  apply filters
     do
     {
-        //  Sanity check / dummy IStep
-        if(g_isteps[i_IStep].pti == NULL)
+        // get the major step pointer
+        l_stepPtr = validIStep(i_IStep);
+
+        // check major step invalid
+        if (l_stepPtr == nullptr)
         {
-            TRACDCOMP( g_trac_initsvc,
-                       "g_isteps[%d].pti == NULL (substep=%d)",
+            TRACFCOMP( g_trac_initsvc,
+                       "IStep=%d is not valid",
+                       i_IStep );
+            break;
+        }
+
+        //  check minor step invalid
+        if(l_stepPtr->pti == nullptr)
+        {
+            TRACFCOMP( g_trac_initsvc,
+                       "IStep=%d Substep=%d is not valid",
                        i_IStep,
                        i_SubStep );
             break;
         }
 
-        // check input range - IStep
-        if( i_IStep >= MaxISteps )
-        {
-            TRACDCOMP( g_trac_initsvc,
-                       "IStep %d out of range. (substep=%d) ",
-                       i_IStep,
-                       i_SubStep );
-            break;      // break out with l_pistep set to NULL
-        }
-
         //  check input range - ISubStep
-        if( i_SubStep >= g_isteps[i_IStep].numitems )
+        if( i_SubStep >= l_stepPtr->numitems )
         {
-            TRACDCOMP( g_trac_initsvc,
+            TRACFCOMP( g_trac_initsvc,
                        "IStep %d Substep %d out of range.",
                        i_IStep,
                        i_SubStep );
-            break;      // break out with l_pistep set to NULL
+            break;      // break out with l_pistep set to nullptr
         }
 
         //   check for end of list.
-        if( g_isteps[i_IStep].pti[i_SubStep].taskflags.task_type
+        if( l_stepPtr->pti[i_SubStep].taskflags.task_type
             == END_TASK_LIST )
         {
-            TRACDCOMP( g_trac_initsvc,
+            TRACFCOMP( g_trac_initsvc,
                        "IStep %d SubStep %d task_type==END_TASK_LIST.",
                        i_IStep,
                        i_SubStep );
             break;
         }
 
-        //  check to see if the pointer to the function is NULL.
+        //  check to see if the pointer to the function is nullptr.
         //  This is possible if some of the substeps aren't working yet
         //  and are just placeholders.
-        if( g_isteps[i_IStep].pti[i_SubStep].taskfn == NULL )
+        if( l_stepPtr->pti[i_SubStep].taskfn == nullptr )
         {
-            TRACDCOMP( g_trac_initsvc,
-                       "IStep %d SubStep %d fn ptr is NULL.",
+            TRACFCOMP( g_trac_initsvc,
+                       "IStep %d SubStep %d fn ptr is nullptr.",
                        i_IStep,
                        i_SubStep );
             break;
@@ -1406,12 +1443,12 @@ const TaskInfo * IStepDispatcher::findTaskInfo(const uint32_t i_IStep,
 
         //  check to see if we should skip this istep
         //  This is possible depending on which IPL mode we're in
-        uint8_t l_ipl_op = g_isteps[i_IStep].pti[i_SubStep].taskflags.ipl_op;
+        uint8_t l_ipl_op = l_stepPtr->pti[i_SubStep].taskflags.ipl_op;
         if (true == iv_mpiplMode)
         {
             if (!(l_ipl_op & MPIPL_OP))
             {
-                TRACDCOMP( g_trac_initsvc,
+                TRACFCOMP( g_trac_initsvc,
                            "Skipping IStep %d SubStep %d for MPIPL mode",
                            i_IStep,
                            i_SubStep );
@@ -1422,7 +1459,7 @@ const TaskInfo * IStepDispatcher::findTaskInfo(const uint32_t i_IStep,
         {
             if (!(l_ipl_op & NORMAL_IPL_OP))
             {
-                TRACDCOMP( g_trac_initsvc,
+                TRACFCOMP( g_trac_initsvc,
                            "Skipping IStep %d SubStep %d for non MPIPL mode",
                            i_IStep,
                            i_SubStep );
@@ -1431,7 +1468,7 @@ const TaskInfo * IStepDispatcher::findTaskInfo(const uint32_t i_IStep,
         }
 
         //  we're good, set the istep & return it to caller
-        l_pistep = &( g_isteps[i_IStep].pti[i_SubStep] );
+        l_pistep = &( l_stepPtr->pti[i_SubStep] );
     } while( 0 );
 
     return  l_pistep;
@@ -1445,27 +1482,36 @@ void IStepDispatcher::loadModules(uint32_t istepNumber) const
     errlHndl_t l_errl = NULL;
     do
     {
+        const ExtTaskInfo* l_stepPtr = nullptr;
+        l_stepPtr = validIStep(istepNumber);
+
+        // sanity check, this should not happen
+        if (l_stepPtr == nullptr)
+        {
+            break;
+        }
+
         //  if no dep modules then just exit out, let the call to
         //  executeFN load the module based on the function being
         //  called.
-        if( g_isteps[istepNumber].depModules == NULL)
+        if( l_stepPtr->depModules == nullptr)
         {
             TRACDCOMP( g_trac_initsvc,
-                    "g_isteps[%d].depModules == NULL",
-                    istepNumber );
+                       "g_isteps[%d].depModules == nullptr",
+                       istepNumber );
             break;
         }
         uint32_t i = 0;
 
-        while( ( l_errl == NULL ) &&
-                ( g_isteps[istepNumber].depModules->modulename[i] != NULL) )
+        while( ( l_errl == nullptr ) &&
+               ( l_stepPtr->depModules->modulename[i] != nullptr) )
         {
             TRACFCOMP( g_trac_initsvc,
                     "loading [%s]",
-                    g_isteps[istepNumber].depModules->modulename[i]);
+                    l_stepPtr->depModules->modulename[i]);
 
             l_errl = VFS::module_load(
-                    g_isteps[istepNumber].depModules->modulename[i] );
+                    l_stepPtr->depModules->modulename[i] );
             i++;
         }
 
@@ -1484,12 +1530,21 @@ void IStepDispatcher::unLoadModules(uint32_t istepNumber) const
 {
     do
     {
+        const ExtTaskInfo* l_stepPtr = nullptr;
+        l_stepPtr = validIStep(istepNumber);
+
+        // sanity check, this should not happen
+        if (l_stepPtr == nullptr)
+        {
+            break;
+        }
+
         //  if no dep modules then just exit out
-        if( g_isteps[istepNumber].depModules == NULL)
+        if( l_stepPtr->depModules == nullptr)
         {
             TRACDCOMP( g_trac_initsvc,
-                    "g_isteps[%d].depModules == NULL",
-                    istepNumber );
+                       "g_isteps[%d].depModules == nullptr",
+                       istepNumber );
             break;
         }
 
@@ -1501,16 +1556,16 @@ void IStepDispatcher::unLoadModules(uint32_t istepNumber) const
            order, and similarly the destruction of objects could also
            depend on the earlier modules still being loaded. */
 
-        while (g_isteps[istepNumber].depModules->modulename[i] != NULL)
+        while (l_stepPtr->depModules->modulename[i] != nullptr)
         {
             i++;
         }
 
-        errlHndl_t l_errl = NULL;
+        errlHndl_t l_errl = nullptr;
 
-        while (l_errl == NULL && i > 0)
+        while (l_errl == nullptr && i > 0)
         {
-            const char* const module_name = g_isteps[istepNumber].depModules->modulename[i-1];
+            const char* const module_name = l_stepPtr->depModules->modulename[i-1];
 
             TRACFCOMP(g_trac_initsvc, "unloading [%s]", module_name);
 
@@ -1524,7 +1579,7 @@ void IStepDispatcher::unLoadModules(uint32_t istepNumber) const
             TRACFCOMP( g_trac_initsvc,
                     " failed to unload module, commit error and move on");
             errlCommit(l_errl, INITSVC_COMP_ID );
-            l_errl = NULL;
+            l_errl = nullptr;
         }
 
     }while(0);
@@ -2764,7 +2819,8 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
                       l_time.format.minute,
                       l_time.format.second );
         }
-        const TaskInfo *taskinfo = findTaskInfo(iv_curIStep, iv_curSubStep);
+        const TaskInfo *taskinfo = findTaskInfo(iv_curIStep,
+                                                iv_curSubStep);
         CONSOLE::displayf(CONSOLE::VUART1, NULL, "%sISTEP %2d.%2d - %s",
                           l_timestring,
                           iv_curIStep, iv_curSubStep,

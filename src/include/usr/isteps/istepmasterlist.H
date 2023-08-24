@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,8 @@
 // istep 19, FSP only
 #include    "istep20list.H"
 #include    "istep21list.H"
+// manual isteps only
+#include    "istep124list.H"
 
 
 namespace   INITSERVICE
@@ -129,6 +131,13 @@ const  ExtTaskInfo  g_isteps[]    =   {
 // publish the size of the g_isteps array
 const   uint64_t    MaxISteps   =  sizeof(g_isteps)/sizeof(ExtTaskInfo) ;
 
+
+// Manual istep mode ExtTaskInfo array
+const uint32_t ISTEP_INVALID_INDEX = 0xFF;
+const uint32_t ISTEP_124_INDEX = 0;
+const  ExtTaskInfo  g_istepsManual[]    =   {
+        INITSERVICE::g_istep124TaskList                 // IStep 12.4 substeps
+};
 
 };  // namespace
 

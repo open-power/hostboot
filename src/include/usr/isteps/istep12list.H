@@ -72,6 +72,36 @@ namespace   ISTEP_12
 {
 
 /**
+ * @brief Defines the substeps within istep 12.4
+ */
+enum istep_12_4_ody_omi_hss_hwp
+{
+    ODY_OMI_HSS_LOAD_PPE     = 1 << 0,
+    ODY_OMI_HSS_CONFIG       = 1 << 1,
+    ODY_OMI_HSS_START_PPE    = 1 << 2,
+    ODY_OMI_HSS_BIST_INIT    = 1 << 3,
+    ODY_OMI_HSS_BIST_START   = 1 << 4,
+    ODY_OMI_HSS_BIST_POLL    = 1 << 5,
+    ODY_OMI_HSS_BIST_CLEANUP = 1 << 6,
+    ODY_OMI_HSS_INIT         = 1 << 7,
+    ODY_OMI_HSS_DCCAL_START  = 1 << 8,
+    ODY_OMI_HSS_DCCAL_POLL   = 1 << 9,
+    ODY_OMI_HSS_ALL_HWPS     = 0xFFFFFFFF,
+};
+
+
+/**
+* @brief Run an OCMB OMI scominit HWP
+*
+* @param[in] i_hwpNumber Procedure number to execute
+*
+* @return errlHndl_t Error log handle on failure
+*
+*/
+errlHndl_t run_ocmb_omi_scominit( istep_12_4_ody_omi_hss_hwp i_hwpNumber );
+
+
+/**
  *  @brief   mss_getecid
  *
  *  param[in,out]   -   pointer to any arguments, usually NULL
