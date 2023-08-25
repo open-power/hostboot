@@ -49,13 +49,6 @@ assemble_setup()
     source ${PROJECT_ROOT}/src/build/citest/etc/wof
     source ${PROJECT_ROOT}/src/build/citest/etc/devtree
 
-    # Clone EKB repo to ${PROJECT_ROOT}/src/build/tools/extern/ekb
-    # EKB is tracked as a git module
-    # This is skipped if user supplied an override image
-    if [[ -z ${HCODE_OVERRIDE_IMAGE} ]]; then
-        (cd ${PROJECT_ROOT} && make ekb $1)
-    fi
-
     if [ ! -z "${SECUREBOOT_KEY_TRANSITION_MODE}" ] &&
         [ ! -z "${CFM_TEST_IMAGE}" ]; then
         source ${PROJECT_ROOT}/src/build/citest/etc/cfmtest
@@ -267,7 +260,25 @@ generate_hcode_image()
     HCODE_IMAGE=${EKB_DIR}/output/images/hw_image/p10.hw_image.bin
 
     if [[ "$HB_FAST_PRIME" ]] ; then
-        HB_SKIP_GEN_HCODE=1
+        export EKB_SUBREPO_TOP_COMMIT=$(git submodule status $EKB_DIR | awk '{print $1}' | sed 's/^-//')
+        EKB_CACHE_DIR="${HOSTBOOT_ENVIRONMENT}/prime/ekb/master-p10/${EKB_SUBREPO_TOP_COMMIT}"
+        if [ -d ${EKB_CACHE_DIR} ]; then
+            echo "\n***Using default pre-built HCODE images\n"
+            cp ${EKB_CACHE_DIR}/p10.hw_image.bin \
+                ${PROJECT_ROOT}/standalone/staging/p10.hw_image.bin
+            cp ${EKB_CACHE_DIR}/p10.hw_image_lid.bin \
+                ${PROJECT_ROOT}/standalone/staging/p10.hw_image_lid.bin
+            return 0
+        else
+            echo "${EKB_CACHE_DIR} DNE - generating EKB submodule image"
+        fi
+    fi
+
+    # Clone EKB repo to ${PROJECT_ROOT}/src/build/tools/extern/ekb
+    # EKB is tracked as a git module
+    # This is skipped if user supplied an override image
+    if [[ -z ${HCODE_OVERRIDE_IMAGE} ]]; then
+        (cd ${PROJECT_ROOT} && make ekb $1)
     fi
 
     # Only [re]generate the HCODE image if the user hasn't asked us not to or
