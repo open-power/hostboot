@@ -1179,6 +1179,14 @@ public:
         return aggregate(log);
     }
 
+    /**
+     *  @brief Checks if we have any leaked logs
+     *  @param[out] o_logs  List of all leaked logs
+     *  @return  true: non-zero uncommitted/undeleted logs,
+     *           false: zero uncommitted/undeleted logs
+     */
+    static bool errlLeakedThisBoot( std::vector<ErrlEntry*>& o_logs );
+
 private:
 
     /**
@@ -1615,6 +1623,10 @@ private:
     // deleted together, and some accessor functions operate on all of
     // the logs in the aggregate.
     std::vector<ErrlEntry*> iv_aggregate_errors;
+
+    // keep track of every log that is created and destroyed in order
+    // to identify any leaks we might have
+    static std::vector<ErrlEntry*> cv_pendingLogs;
 };
 
 

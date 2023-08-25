@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <initservice/taskargs.H>
 #include <cxxtest/TestSuite.H>
 #include <console/consoleif.H>
+#include <errl/errludstring.H>
 
 namespace CxxTest
 {
@@ -114,6 +115,20 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
     if (ERRORLOG::ErrlManager::errlCommittedThisBoot())
     {
         TS_FAIL("Error logs committed previously during IPL.");
+    }
+
+    // Also check for any leaked logs since they could be an indication
+    // of a problem we missed.
+    std::vector<ERRORLOG::ErrlEntry*> l_leakedLogs;
+    if (ERRORLOG::ErrlEntry::errlLeakedThisBoot(l_leakedLogs))
+    {
+        for( auto l_err : l_leakedLogs )
+        {
+            TS_FAIL("Error log leaked during IPL - EID=0x%.8X",
+                    ERRL_GETEID_SAFE(l_err));
+            ERRORLOG::ErrlUserDetailsString("Leaked Log").addToLog(l_err);
+            errlCommit(l_err, CXXTEST_COMP_ID);
+        }
     }
 
     TRACFCOMP( g_trac_cxxtest,

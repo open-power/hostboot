@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -82,10 +82,14 @@ using namespace HWAS;
 using namespace TARGETING;
 using namespace PLDM;
 
+
+
 namespace ERRORLOG
 {
-// Initialize static variable
+
+// Initialize static variables
 uint32_t ErrlEntry::iv_maxSize = 0;
+std::vector<ErrlEntry*> ErrlEntry::cv_pendingLogs = {};
 
 #ifdef CONFIG_PLDM
 // 16K for PLDM supported error logging
@@ -245,6 +249,12 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
         addProcedureCallout( HWAS::EPUB_PRC_HB_CODE,
                              HWAS::SRCI_PRIORITY_HIGH );
     }
+
+    // Keep track of every log we create
+    mutex_lock(&g_sevMapMutex); //just reusing an existing mutex for simplicity
+    cv_pendingLogs.push_back(this);
+    mutex_unlock(&g_sevMapMutex);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -287,6 +297,13 @@ ErrlEntry::~ErrlEntry()
 
     delete iv_pBackTrace;
     iv_pBackTrace = NULL;
+
+    // Remove this log from the running list
+    mutex_lock(&g_sevMapMutex);
+    cv_pendingLogs.erase(std::find(cv_pendingLogs.begin(),
+                                   cv_pendingLogs.end(),
+                                   this));
+    mutex_unlock(&g_sevMapMutex);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3920,6 +3937,25 @@ bool ErrlEntry::skipPredictiveGard(HWAS::GARD_ErrorType i_gardType)
     } while(0);
 
     return l_skipGard;
+}
+
+/**
+ *  @brief Checks if we have any leaked logs
+ *  @return  true: non-zero uncommitted/undeleted logs,
+ *           false: zero uncommitted/undeleted logs
+ */
+bool ErrlEntry::errlLeakedThisBoot( std::vector<ErrlEntry*>& o_logs )
+{
+    bool l_leaked = false;
+    mutex_lock(&g_sevMapMutex);
+    for( auto x : cv_pendingLogs )
+    {
+        TRACFCOMP(g_trac_errl,"errlLeakedThisBoot: EID=%.8X", x->eid());
+        l_leaked = true;
+        o_logs.push_back(x);
+    }
+    mutex_unlock(&g_sevMapMutex);
+    return l_leaked;
 }
 
 } // End namespace
