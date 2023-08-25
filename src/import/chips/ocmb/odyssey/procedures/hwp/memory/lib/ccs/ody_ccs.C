@@ -410,6 +410,7 @@ fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::compute_parity(const fap
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_program the vector of instructions
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
+/// @param[out] o_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
@@ -417,9 +418,11 @@ fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
     const ccs::program<mss::mc_type::ODYSSEY>& i_program,
-    fapi2::buffer<uint64_t>& o_periodics_reg)
+    fapi2::buffer<uint64_t>& o_periodics_reg,
+    fapi2::buffer<uint64_t>& o_power_cntl_reg)
 {
     fapi2::buffer<uint64_t> l_data;
+    fapi2::buffer<uint64_t> l_pwr_cntl_reg_data;
 
     // Check for read/write commands, and set up workaround bits if needed
     FAPI_TRY(workarounds::setup_ccs_rdwr(i_ports, i_program));
@@ -435,6 +438,16 @@ fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
     // Write the register
     FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB9Q, l_data));
 
+    // Get the DDR Power control register data and store it away
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBARPC0Q, o_power_cntl_reg));
+
+    // Clear Domain Reduction Enable bit
+    l_pwr_cntl_reg_data = o_power_cntl_reg;
+    l_pwr_cntl_reg_data.clearBit<scomt::ody::ODC_SRQ_MBARPC0Q_CFG_MIN_DOMAIN_REDUCTION_ENABLE>();
+
+    // Write the register
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBARPC0Q, l_pwr_cntl_reg_data));
+
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
@@ -446,6 +459,7 @@ fapi_try_exit:
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_periodics_reg the register used to enable periodic calibrations
+/// @param[in] i_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
@@ -453,9 +467,15 @@ fapi2::ReturnCode cleanup_from_execute<mss::mc_type::ODYSSEY>(const fapi2::Targe
         i_target,
         const ccs::program<mss::mc_type::ODYSSEY>& i_program,
         const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
-        const fapi2::buffer<uint64_t> i_periodics_reg)
+        const fapi2::buffer<uint64_t> i_periodics_reg,
+        const fapi2::buffer<uint64_t> i_power_cntl_reg)
 {
-    return fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB9Q, i_periodics_reg);
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB9Q, i_periodics_reg));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBARPC0Q, i_power_cntl_reg));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///

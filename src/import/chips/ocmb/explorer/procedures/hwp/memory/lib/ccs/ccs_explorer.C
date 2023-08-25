@@ -317,6 +317,7 @@ fapi_try_exit:
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_program the vector of instructions
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
+/// @param[out] o_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
@@ -324,7 +325,8 @@ fapi2::ReturnCode setup_to_execute<mss::mc_type::EXPLORER>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
     const ccs::program<mss::mc_type::EXPLORER>& i_program,
-    fapi2::buffer<uint64_t>& o_periodics_reg)
+    fapi2::buffer<uint64_t>& o_periodics_reg,
+    fapi2::buffer<uint64_t>& o_power_cntl_reg)
 {
     // Loops through all ports
     for(const auto& l_port : i_ports)
@@ -349,6 +351,7 @@ fapi_try_exit:
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_periodics_reg the register used to enable periodic calibrations
+/// @param[in] i_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCSS iff ok
 ///
 template<>
@@ -356,7 +359,8 @@ fapi2::ReturnCode cleanup_from_execute<mss::mc_type::EXPLORER>(const fapi2::Targ
         i_target,
         const ccs::program<mss::mc_type::EXPLORER>& i_program,
         const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
-        const fapi2::buffer<uint64_t> i_periodics_reg)
+        const fapi2::buffer<uint64_t> i_periodics_reg,
+        const fapi2::buffer<uint64_t> i_power_cntl_reg)
 {
     // Loops through all ports
     for(const auto& l_port : i_ports)
