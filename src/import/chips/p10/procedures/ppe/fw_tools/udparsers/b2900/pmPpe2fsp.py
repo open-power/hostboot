@@ -2,7 +2,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p10/procedures/ppe/fw_tools/b2900/pmPpe2fsp.py $
+# $Source: src/import/chips/p10/procedures/ppe/fw_tools/udparsers/b2900/pmPpe2fsp.py $
 #
 # OpenPOWER HostBoot Project
 #

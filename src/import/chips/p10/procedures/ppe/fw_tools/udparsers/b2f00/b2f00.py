@@ -2,7 +2,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p10/procedures/ppe/fw_tools/b2e00/b2e00.py $
+# $Source: src/import/chips/p10/procedures/ppe/fw_tools/udparsers/b2f00/b2f00.py $
 #
 # OpenPOWER HostBoot Project
 #
@@ -33,7 +33,7 @@ import  udparsers.b2900.pmPpe2fsp
 
 #PARSER Version
 parserVersion = 1.0
-PGPE_STRING_LID_FILE = "81e00691.lid"
+XGPE_STRING_LID_FILE = "81e00690.lid"
 
 ##############################################################################
 # Function - Functions - Functions - Functions - Functions
@@ -42,10 +42,10 @@ PGPE_STRING_LID_FILE = "81e00691.lid"
 #verifies the integrity of trace parser buffer
 def checkForPpeTraceBuff():
     #buffer magic word
-    bufferMagicWord = "pgpe_p10dd"
+    bufferMagicWord = "xgpe_p10dd"
     bufferMagicWordHexCode = bytes(bufferMagicWord, 'utf-8')
 
-    fBin = open( "/tmp/pgpeElogBin.bin", 'rb' )
+    fBin = open( "/tmp/xgpeElogBin.bin", 'rb' )
     data_read = fBin.read()
 
     magicWordOffset = data_read.find( bufferMagicWordHexCode )
@@ -57,29 +57,29 @@ def checkForPpeTraceBuff():
         if version != 0x0002 :
             sys.exit( "Corrupt Trace File Buffer. Ver Read is " + str(version)  )
     else:
-        sys.exit("PGPE Trace Buffer Not Found" )
+        sys.exit("XGPE Trace Buffer Not Found" )
 
     fBin.close()
 
     return magicWordOffset
 
-def parsePgpeUserDataSection(data):
+def parseXgpeUserDataSection(data):
 
-    with open( "/tmp/pgpeElogBin.bin", "wb" ) as pgpeTraceBinFile:
-        pgpeTraceBinFile.write( data )
+    with open( "/tmp/xgpeElogBin.bin", "wb" ) as xgpeTraceBinFile:
+        xgpeTraceBinFile.write( data )
     magicWordOffset = checkForPpeTraceBuff()
-    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(1080) + " if=" + "/tmp/pgpeElogBin.bin " + " of=" + "/tmp/pgpeTrace.bin" + " bs=1 >/dev/null 2>&1"
+    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(1080) + " if=" + "/tmp/xgpeElogBin.bin " + " of=" + "/tmp/xgpeTrace.bin" + " bs=1 >/dev/null 2>&1"
     rc = os.system( cmd )
     if( rc ):
-        print( "Failed To Extract PGPE Trace Section. RC : " + str( rc ) )
+        print( "Failed To Extract XGPE Trace Section. RC : " + str( rc ) )
 
 
 def parseUDToJson(subType, ver, data):
-    parsePgpeUserDataSection( data )
+    parseXgpeUserDataSection( data )
     #Execute pmPpe2fsp tool to convert ppe trace to fsp trace.
     #This provide the right path to the tool as per BMC env
-    ppeFormatFile = "/tmp/pgpeTrace.bin"
-    fspFormatFile = "/tmp/pgpeTrace_fsp.bin"
+    ppeFormatFile = "/tmp/xgpeTrace.bin"
+    fspFormatFile = "/tmp/xgpeTrace_fsp.bin"
     udparsers.b2900.pmPpe2fsp.get_pm_trace_data_as_string(ppeFormatFile, fspFormatFile)
 
     with open( fspFormatFile, 'rb' ) as fspFormat:
@@ -87,10 +87,10 @@ def parseUDToJson(subType, ver, data):
 
     traceDict = dict()
 
-    traceStringFile = getLid(PGPE_STRING_LID_FILE)
+    traceStringFile = getLid(XGPE_STRING_LID_FILE)
 
     if traceStringFile == "":
-        traceDict["File not found"] = PGPE_STRING_LID_FILE
+        traceDict["File not found"] = XGPE_STRING_LID_FILE
         traceStr = json.dumps(traceDict)
         return traceStr
 
@@ -98,14 +98,14 @@ def parseUDToJson(subType, ver, data):
     numTraces = -1
     ( retVal, traceDataString, warningMessages ) = udparsers.helpers.hostfw_trace.get_binary_trace_data_as_string( readData, startPos, numTraces, traceStringFile )
 
-    traceDict["PGPE Traces" ]  = traceDataString.split( "\n" )
+    traceDict["XGPE Traces" ]  = traceDataString.split( "\n" )
     traceStr = json.dumps(traceDict)
 
-    if os.path.exists( "/tmp/pgpeElogBin.bin" ) :
-        os.remove( "/tmp/pgpeElogBin.bin" )
-    if os.path.exists( "/tmp/pgpeTrace_fsp.bin" ) :
-        os.remove( "/tmp/pgpeTrace_fsp.bin" )
-    if os.path.exists( "/tmp/pgpeTrace.bin" ):
-        os.remove( "/tmp/pgpeTrace.bin" )
+    if os.path.exists( "/tmp/xgpeElogBin.bin" ) :
+        os.remove( "/tmp/xgpeElogBin.bin" )
+    if os.path.exists( "/tmp/xgpeTrace_fsp.bin" ) :
+        os.remove( "/tmp/xgpeTrace_fsp.bin" )
+    if os.path.exists( "/tmp/xgpeTrace.bin" ):
+        os.remove( "/tmp/xgpeTrace.bin" )
 
     return traceStr

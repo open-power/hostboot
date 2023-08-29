@@ -2,7 +2,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/import/chips/p10/procedures/ppe/fw_tools/b2f00/b2f00.py $
+# $Source: src/import/chips/p10/procedures/ppe/fw_tools/udparsers/b2900/b2900.py $
 #
 # OpenPOWER HostBoot Project
 #
@@ -33,7 +33,7 @@ import  udparsers.b2900.pmPpe2fsp
 
 #PARSER Version
 parserVersion = 1.0
-XGPE_STRING_LID_FILE = "81e00690.lid"
+QME_STRING_LID_FILE = "81e0068f.lid"
 
 ##############################################################################
 # Function - Functions - Functions - Functions - Functions
@@ -42,10 +42,10 @@ XGPE_STRING_LID_FILE = "81e00690.lid"
 #verifies the integrity of trace parser buffer
 def checkForPpeTraceBuff():
     #buffer magic word
-    bufferMagicWord = "xgpe_p10dd"
+    bufferMagicWord = "qme_p10dd"
     bufferMagicWordHexCode = bytes(bufferMagicWord, 'utf-8')
 
-    fBin = open( "/tmp/xgpeElogBin.bin", 'rb' )
+    fBin = open( "/tmp/qmeElogBin.bin", 'rb' )
     data_read = fBin.read()
 
     magicWordOffset = data_read.find( bufferMagicWordHexCode )
@@ -57,29 +57,29 @@ def checkForPpeTraceBuff():
         if version != 0x0002 :
             sys.exit( "Corrupt Trace File Buffer. Ver Read is " + str(version)  )
     else:
-        sys.exit("XGPE Trace Buffer Not Found" )
+        sys.exit("QME Trace Buffer Not Found" )
 
     fBin.close()
 
     return magicWordOffset
 
-def parseXgpeUserDataSection(data):
+def parseQmeUserDataSection(data):
 
-    with open( "/tmp/xgpeElogBin.bin", "wb" ) as xgpeTraceBinFile:
-        xgpeTraceBinFile.write( data )
+    with open( "/tmp/qmeElogBin.bin", "wb" ) as qmeTraceBinFile:
+        qmeTraceBinFile.write( data )
     magicWordOffset = checkForPpeTraceBuff()
-    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(1080) + " if=" + "/tmp/xgpeElogBin.bin " + " of=" + "/tmp/xgpeTrace.bin" + " bs=1 >/dev/null 2>&1"
+    cmd = "dd skip=" + str(magicWordOffset - 4 ) + " count=" + str(312) + " if=" + "/tmp/qmeElogBin.bin " + " of=" + "/tmp/qmeTrace.bin" + " bs=1 >/dev/null 2>&1"
     rc = os.system( cmd )
     if( rc ):
-        print( "Failed To Extract XGPE Trace Section. RC : " + str( rc ) )
+        print( "Failed To Extract QME Trace Section. RC : " + str( rc ) )
 
 
 def parseUDToJson(subType, ver, data):
-    parseXgpeUserDataSection( data )
+    parseQmeUserDataSection( data )
     #Execute pmPpe2fsp tool to convert ppe trace to fsp trace.
     #This provide the right path to the tool as per BMC env
-    ppeFormatFile = "/tmp/xgpeTrace.bin"
-    fspFormatFile = "/tmp/xgpeTrace_fsp.bin"
+    ppeFormatFile = "/tmp/qmeTrace.bin"
+    fspFormatFile = "/tmp/qmeTrace_fsp.bin"
     udparsers.b2900.pmPpe2fsp.get_pm_trace_data_as_string(ppeFormatFile, fspFormatFile)
 
     with open( fspFormatFile, 'rb' ) as fspFormat:
@@ -87,10 +87,10 @@ def parseUDToJson(subType, ver, data):
 
     traceDict = dict()
 
-    traceStringFile = getLid(XGPE_STRING_LID_FILE)
+    traceStringFile = getLid(QME_STRING_LID_FILE)
 
     if traceStringFile == "":
-        traceDict["File not found"] = XGPE_STRING_LID_FILE
+        traceDict["File not found"] = QME_STRING_LID_FILE
         traceStr = json.dumps(traceDict)
         return traceStr
 
@@ -98,14 +98,14 @@ def parseUDToJson(subType, ver, data):
     numTraces = -1
     ( retVal, traceDataString, warningMessages ) = udparsers.helpers.hostfw_trace.get_binary_trace_data_as_string( readData, startPos, numTraces, traceStringFile )
 
-    traceDict["XGPE Traces" ]  = traceDataString.split( "\n" )
+    traceDict["QME Traces" ]  = traceDataString.split( "\n" )
     traceStr = json.dumps(traceDict)
 
-    if os.path.exists( "/tmp/xgpeElogBin.bin" ) :
-        os.remove( "/tmp/xgpeElogBin.bin" )
-    if os.path.exists( "/tmp/xgpeTrace_fsp.bin" ) :
-        os.remove( "/tmp/xgpeTrace_fsp.bin" )
-    if os.path.exists( "/tmp/xgpeTrace.bin" ):
-        os.remove( "/tmp/xgpeTrace.bin" )
+    if os.path.exists( "/tmp/qmeElogBin.bin" ) :
+        os.remove( "/tmp/qmeElogBin.bin" )
+    if os.path.exists( "/tmp/qmeTrace_fsp.bin" ) :
+        os.remove( "/tmp/qmeTrace_fsp.bin" )
+    if os.path.exists( "/tmp/qmeTrace.bin" ):
+        os.remove( "/tmp/qmeTrace.bin" )
 
     return traceStr
