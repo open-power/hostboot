@@ -69,7 +69,9 @@ const uint8_t g_wofData[] =
 {
     // DW 0
     0x57, 0x46, 0x54, 0x48  /*MAGIC CODE WFTH*/,
-    0x00, 0x00, 0x00, 0x01  /*Version*/,
+    0x02, 0x04              /*Major Minor*/,
+    0x64                    /*WOVCreditKnob*/,
+    0x01                    /*Version*/,
     // DW 1
     0x00, 0x10              /*VRT block size*/,
     0x00, 0x04              /*VRT header size*/,

@@ -360,7 +360,8 @@ fapi2::ReturnCode wof_get_tables(
                             // Restore the fixed structure
                             l_vrt.vrtHeader.value = revle32(l_vrt.vrtHeader.value);
 
-                            FAPI_DBG("VRT default: l_vrt fields value 0x%08X marker %X type %d content %d io %02d ac %02d vc %02d vd %02d",
+                            FAPI_DBG("VRT default: l_index 0x%X (%4u) l_vrt fields value 0x%08X marker %X type %d content %d io %02d ac %02d vc %02d vd %02d",
+                                     l_index, l_index,
                                      l_vrt.vrtHeader.value,
                                      l_vrt.vrtHeader.fields.marker,
                                      l_vrt.vrtHeader.fields.type,
@@ -428,6 +429,9 @@ void wfth_print(
 #define WFTH_PRINT8_h4_d2(_member) \
     FAPI_INF("%-25s = 0x%04X (%02d)", #_member, i_wfth->_member, i_wfth->_member);
 
+#define WFTH_PRINT8_h4_d3(_member) \
+    FAPI_INF("%-25s = 0x%04X (%03d)", #_member, i_wfth->_member, i_wfth->_member);
+
 #define WFTH_PRINT8_h4_d5(_member) \
     FAPI_INF("%-25s = 0x%04X (%05d)", #_member, i_wfth->_member, i_wfth->_member);
 
@@ -452,6 +456,7 @@ void wfth_print(
     FAPI_INF("---------------------------------------------------------------------------------------");
 
     WFTH_PRINTS       (magic_number.text     );
+    WFTH_PRINT8_h4_d3 (wov_credit_knob       );
     WFTH_PRINT8_h4_d1 (header_version        );
     WFTH_PRINT8_h4_d5 (vrt_block_size        );
     WFTH_PRINT8_h4_d5 (vrt_block_header_size );

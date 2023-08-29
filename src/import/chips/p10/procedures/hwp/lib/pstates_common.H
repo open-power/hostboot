@@ -372,7 +372,17 @@ typedef struct
         char     text[4];
     } magic_number;
 
-    uint8_t  reserved0[3];
+    /// Major DD Level
+    uint8_t  major_dd_level;
+
+    /// Minor DD Level
+    uint8_t  minor_dd_level;
+
+    /// UV/OV Crdit Knob (Control)
+    ///    WOV Credit Knob = 0 forces Fudge = 0 to disable
+    ///    WOV Credit Knob = 100 results a unity gain of the UV credit
+    ///    WOV Credit Knob = 255 would exaggerate the effect by 2.55X
+    uint8_t  wov_credit_knob;
 
     /// Layouut version of this structure
     uint8_t  header_version;
