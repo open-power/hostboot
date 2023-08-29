@@ -1454,7 +1454,7 @@ group gOCMB_PHY_FIR
     /** OCMB_PHY_FIR[1]
      *  RX state machine parity or mode register parity er
      */
-    (rOCMB_PHY_FIR, bit(1)) ? ocmb_M_info_only_th1;
+    (rOCMB_PHY_FIR, bit(1)) ? ocmb_M_info_only_th1_CrcRootPhy1;
 
     /** OCMB_PHY_FIR[2]
      *  reserved
@@ -1474,7 +1474,7 @@ group gOCMB_PHY_FIR
     /** OCMB_PHY_FIR[5]
      *  TX state machine parity or mode register parity er
      */
-    (rOCMB_PHY_FIR, bit(5)) ? ocmb_M_info_only_th1;
+    (rOCMB_PHY_FIR, bit(5)) ? ocmb_M_info_only_th1_CrcRootPhy5;
 
     /** OCMB_PHY_FIR[6]
      *  reserved
@@ -1514,32 +1514,32 @@ group gOCMB_PHY_FIR
     /** OCMB_PHY_FIR[13]
      *  PPE internal error
      */
-    (rOCMB_PHY_FIR, bit(13)) ? ocmb_M_th1;
+    (rOCMB_PHY_FIR, bit(13)) ? ocmb_M_th1_CrcRootPhy13;
 
     /** OCMB_PHY_FIR[14]
      *  PPE external error
      */
-    (rOCMB_PHY_FIR, bit(14)) ? ocmb_M_th1;
+    (rOCMB_PHY_FIR, bit(14)) ? ocmb_M_th1_CrcRootPhy14;
 
     /** OCMB_PHY_FIR[15]
      *  PPE Halt due to Watchdog or Interrupt
      */
-    (rOCMB_PHY_FIR, bit(15)) ? ocmb_M_level2_L_th1;
+    (rOCMB_PHY_FIR, bit(15)) ? ocmb_M_level2_L_th1_CrcRootPhy15;
 
     /** OCMB_PHY_FIR[16]
      *  PPE Halt due to Debug
      */
-    (rOCMB_PHY_FIR, bit(16)) ? level2_M_ocmb_L_th1;
+    (rOCMB_PHY_FIR, bit(16)) ? level2_M_ocmb_L_th1_CrcRootPhy16;
 
     /** OCMB_PHY_FIR[17]
      *  PPE Halted
      */
-    (rOCMB_PHY_FIR, bit(17)) ? ocmb_M_level2_L_th1;
+    (rOCMB_PHY_FIR, bit(17)) ? ocmb_M_level2_L_th1_CrcRootPhy17;
 
     /** OCMB_PHY_FIR[18]
      *  PPE Watchdog Timeout
      */
-    (rOCMB_PHY_FIR, bit(18)) ? ocmb_M_level2_L_th1;
+    (rOCMB_PHY_FIR, bit(18)) ? ocmb_M_level2_L_th1_CrcRootPhy18;
 
     /** OCMB_PHY_FIR[19]
      *  PPE Array Scrub was missed
@@ -1549,7 +1549,7 @@ group gOCMB_PHY_FIR
     /** OCMB_PHY_FIR[20]
      *  PPE Array uncorrectable error
      */
-    (rOCMB_PHY_FIR, bit(20)) ? ocmb_M_th1;
+    (rOCMB_PHY_FIR, bit(20)) ? ocmb_M_th1_CrcRootPhy20;
 
     /** OCMB_PHY_FIR[21]
      *  PPE Array correctable error
@@ -1564,7 +1564,7 @@ group gOCMB_PHY_FIR
     /** OCMB_PHY_FIR[23]
      *  PPE Code Fatal Error
      */
-    (rOCMB_PHY_FIR, bit(23)) ? level2_M_ocmb_L_th1;
+    (rOCMB_PHY_FIR, bit(23)) ? level2_M_ocmb_L_th1_CrcRootPhy23;
 
     /** OCMB_PHY_FIR[24]
      *  PPE Code Bad Lane Warning
@@ -1579,12 +1579,12 @@ group gOCMB_PHY_FIR
     /** OCMB_PHY_FIR[26]
      *  PPE Code Recal Not Run
      */
-    (rOCMB_PHY_FIR, bit(26)) ? level2_M_ocmb_L_th1;
+    (rOCMB_PHY_FIR, bit(26)) ? level2_M_ocmb_L_th1_CrcRootPhy26;
 
     /** OCMB_PHY_FIR[27]
      *  PPE Code Thread Locked
      */
-    (rOCMB_PHY_FIR, bit(27)) ? level2_M_ocmb_L_th1;
+    (rOCMB_PHY_FIR, bit(27)) ? level2_M_ocmb_L_th1_CrcRootPhy27;
 
     /** OCMB_PHY_FIR[28]
      *  PPE Code Thread Active Time Exceeded
@@ -2740,7 +2740,7 @@ group gDLX_FIR
     /** DLX_FIR[4]
      *  DL0 detected a CRC error
      */
-    (rDLX_FIR, bit(4)) ? omi_bus_info_only;
+    (rDLX_FIR, bit(4)) ? omi_bus_info_only_CRC;
 
     /** DLX_FIR[5]
      *  DL0 received a nack
@@ -2755,12 +2755,12 @@ group gDLX_FIR
     /** DLX_FIR[7]
      *  DL0 parity error detection on a lane
      */
-    (rDLX_FIR, bit(7)) ? omi_bus_info_only;
+    (rDLX_FIR, bit(7)) ? omi_bus_info_only_CRC;
 
     /** DLX_FIR[8]
      *  DL0 retrained due to no forward progress
      */
-    (rDLX_FIR, bit(8)) ? omi_bus_th_32perDay;
+    (rDLX_FIR, bit(8)) ? omi_bus_th_32perDay_CRC;
 
     /** DLX_FIR[9]
      *  DL0 remote side initiated a retrain
@@ -2775,7 +2775,7 @@ group gDLX_FIR
     /** DLX_FIR[11]
      *  DL0 threshold reached
      */
-    (rDLX_FIR, bit(11)) ? omi_bus_th_32perDay;
+    (rDLX_FIR, bit(11)) ? omi_bus_th_32perDay_CRC;
 
     /** DLX_FIR[12]
      *  DL0 trained
@@ -2825,7 +2825,7 @@ group gDLX_FIR
     /** DLX_FIR[21]
      *  DL0 skitter error
      */
-    (rDLX_FIR, bit(21)) ? ocmb_M_info_only_th1;
+    (rDLX_FIR, bit(21)) ? ocmb_M_info_only_th1_CrcRootDl21;
 
     /** DLX_FIR[22]
      *  DL0 skitter drift detected

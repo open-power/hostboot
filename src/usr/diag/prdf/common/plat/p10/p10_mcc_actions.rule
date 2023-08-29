@@ -176,19 +176,22 @@ actionclass ocmb_dimms1
 };
 
 # Bits using these actions are CRC-related errors that are potential
-# side-effects of bits in the PAU_PHY_FIR. There is additional handling
-# to determine the callout if a root cause bit is found on as well.
+# side-effects of bits in the PAU_PHY_FIR or on an Odyssey OCMB. There is
+# additional handling to determine the callout if a root cause bit is found on
+# as well.
 actionclass chnl0_timeout_th_1_CRC_UERE
 {
     SueSource;
-    try( funccall("CrcSideEffect_Mcc_0"), funccall("chnlTimeout_0") );
+    try( funccall("odyCrcSideEffect_Mcc_0"),
+         try(funccall("CrcSideEffect_Mcc_0"), funccall("chnlTimeout_0")) );
     threshold1;
 };
 
 actionclass chnl1_timeout_th_1_CRC_UERE
 {
     SueSource;
-    try( funccall("CrcSideEffect_Mcc_1"), funccall("chnlTimeout_1") );
+    try( funccall("odyCrcSideEffect_Mcc_1"),
+         try(funccall("CrcSideEffect_Mcc_1"), funccall("chnlTimeout_1")) );
     threshold1;
 };
 

@@ -218,7 +218,8 @@ PRDF_PLUGIN_DEFINE_NS(p10_mcc,  CommonPlugins, analyzeUcs);
 PRDF_PLUGIN_DEFINE_NS(p10_omic, CommonPlugins, analyzeUcs);
 
 /**
- * @brief  Plugin for CRC related error side effect handling
+ * @brief  Plugin for CRC related error side effect handling. Checking for
+ *         root causes in the PAU_PHY_FIR on the processor side.
  * @param  i_chip   An OMIC chip.
  * @param  io_sc    The step code data struct.
  * @param  i_omiPos OMI position relative to the OMIC/MCC (0:1)
@@ -393,6 +394,98 @@ int32_t CrcSideEffect_Ocmb( ExtensibleChip * i_chip,
     return CrcSideEffect( omic, io_sc, omiPos );
 }
 PRDF_PLUGIN_DEFINE_NS(explorer_ocmb, CommonPlugins, CrcSideEffect_Ocmb);
+
+/**
+ * @brief  Plugin for CRC related error side effect handling. Check for
+ *         root causes on an Odyssey OCMB.
+ * @param  i_chip   An OCMB chip.
+ * @param  io_sc    The step code data struct.
+ * @return SUCCESS if a root cause is found, else PRD_SCAN_COMM_REGISTER_ZERO.
+ */
+int32_t odyCrcSideEffect( ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc )
+{
+    #define PRDF_FUNC "[odyCrcSideEffect] "
+
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == i_chip->getType());
+
+    // Odyssey only
+    if (!isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        // Let the rule code make the callout.
+        return PRD_SCAN_COMM_REGISTER_ZERO;
+    }
+
+    SCAN_COMM_REGISTER_CLASS * dlx = i_chip->getRegister("DLX_FIR");
+    if (SUCCESS != dlx->Read())
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to read DLX_FIR on 0x%08x",
+                 i_chip->getHuid());
+    }
+    // Check for root cause on DLX_FIR[21], switch callout to Odyssey OCMB
+    else if (dlx->IsBitSet(21))
+    {
+        io_sc.service_data->SetCallout(i_chip->getTrgt());
+        return SUCCESS;
+    }
+
+    SCAN_COMM_REGISTER_CLASS * phy = i_chip->getRegister("OCMB_PHY_FIR");
+    if (SUCCESS != phy->Read())
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to read OCMB_PHY_FIR on 0x%08x",
+                 i_chip->getHuid());
+    }
+    // Check for root causes in OCMB_PHY_FIR[1,5,13,14,20,23] - switch callout
+    // to Odyssey OCMB.
+    else if (phy->IsBitSet(1) || phy->IsBitSet(5) || phy->IsBitSet(13) ||
+             phy->IsBitSet(14) || phy->IsBitSet(20) || phy->IsBitSet(23))
+    {
+        io_sc.service_data->SetCallout(i_chip->getTrgt());
+        return SUCCESS;
+    }
+    // Check for root causes in OCMB_PHY_FIR[15,17,18] - switch callout to
+    // Odyssey OCMB high, level2 low
+    else if (phy->IsBitSet(15) || phy->IsBitSet(17) || phy->IsBitSet(18))
+    {
+        io_sc.service_data->SetCallout(i_chip->getTrgt(), MRU_HIGH);
+        io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_LOW);
+        return SUCCESS;
+    }
+    // Check for root causes in OCMB_PHY_FIR[16,26,27] - switch callout to
+    // level2 high, Odyssey OCMB low
+    else if (phy->IsBitSet(16) || phy->IsBitSet(26) || phy->IsBitSet(27))
+    {
+        io_sc.service_data->SetCallout(LEVEL2_SUPPORT, MRU_HIGH);
+        io_sc.service_data->SetCallout(i_chip->getTrgt(), MRU_LOW);
+        return SUCCESS;
+    }
+
+    // Default to letting the rule code make the callout if no root cause found.
+    return PRD_SCAN_COMM_REGISTER_ZERO;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE_NS(odyssey_ocmb, CommonPlugins, odyCrcSideEffect);
+
+/**
+ * @brief  Plugin for CRC related error side effect handling. Check for
+ *         root causes on an Odyssey OCMB from an MCC target.
+ * @param  i_chip An MCC target.
+ * @param  io_sc  The step code data struct.
+ * @param  i_pos  The position of the connected OCMB (0:1)
+ * @return SUCCESS if a root cause is found, else PRD_SCAN_COMM_REGISTER_ZERO.
+ */
+#define ODY_CRC_SIDE_EFFECT_MCC_PLUGIN(POS) \
+int32_t odyCrcSideEffect_Mcc_##POS(ExtensibleChip * i_chip, \
+                                   STEP_CODE_DATA_STRUCT & io_sc) \
+{ \
+    ExtensibleChip * ocmb = getConnectedChild(i_chip, TYPE_OCMB_CHIP, POS); \
+    return odyCrcSideEffect(ocmb, io_sc); \
+} \
+PRDF_PLUGIN_DEFINE_NS(p10_mcc, CommonPlugins, odyCrcSideEffect_Mcc_##POS);
+ODY_CRC_SIDE_EFFECT_MCC_PLUGIN(0);
+ODY_CRC_SIDE_EFFECT_MCC_PLUGIN(1);
 
 } // namespace CommonPlugins ends
 

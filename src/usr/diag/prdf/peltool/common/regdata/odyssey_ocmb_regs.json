@@ -864,6 +864,11 @@
         "description": "Odyssey chip RDF_FIR Special Attention Config 1",
         "name": "RDF_FIR_CFG_SPA_1"
     },
+    "0x7e0d": {
+        "address": "0x0000000008012403",
+        "description": "Odyssey chip DLX_FIR MASK OR",
+        "name": "DLX_FIR_MASK_OR"
+    },
     "0x7e3f": {
         "address": "0x0000000008012410",
         "description": "Odyssey chip DLX Configuration0 Register",
@@ -1288,6 +1293,11 @@
         "address": "0x000000000801280c",
         "description": "Odyssey chip Mark Shadow Register 1",
         "name": "MSR_1"
+    },
+    "0xce71": {
+        "address": "0x0000000008010c03",
+        "description": "Odyssey chip OCMB_PHY_FIR MASK OR",
+        "name": "OCMB_PHY_FIR_MASK_OR"
     },
     "0xd339": {
         "address": "0x000000000801100f",

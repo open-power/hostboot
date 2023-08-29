@@ -237,6 +237,45 @@ PRDF_PLUGIN_DEFINE( odyssey_ocmb, ClearMainlineIue_##POS );
 CLEAR_MAINLINE_IUE(0);
 CLEAR_MAINLINE_IUE(1);
 
+/**
+ * @brief  Masks the given bit in the given FIR without clearing it.
+ * @param  i_chip    OCMB chip.
+ * @param  io_sc     The step code data struct.
+ * @param  i_bit     The bit position to mask.
+ * @param  i_regName The name of the register to mask. Should be the MASK_OR of
+ *                   the FIR.
+ * @return SUCCESS
+ */
+int32_t __maskButDontClear(ExtensibleChip * i_chip,
+    STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_bit, const char * i_regName)
+{
+    #define PRDF_FUNC "[odyssey_ocmb::__maskButDontClear] "
+
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == i_chip->getType());
+
+    #ifdef __HOSTBOOT_MODULE
+    // Only mask if at threshold
+    if ( io_sc.service_data->IsAtThreshold() )
+    {
+        SCAN_COMM_REGISTER_CLASS * mask_or = i_chip->getRegister(i_regName);
+        mask_or->SetBit(i_bit);
+        if ( SUCCESS != mask_or->Write() )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed for %s on 0x%08x", i_regName,
+                      i_chip->getHuid() );
+        }
+
+        // Return PRD_NO_CLEAR_FIR_BITS so the rule code doesn't clear the bit
+        return PRD_NO_CLEAR_FIR_BITS;
+    }
+    #endif
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
 //##############################################################################
 //
 //                             Callout plugins
@@ -733,7 +772,6 @@ PRDF_PLUGIN_DEFINE( odyssey_ocmb, checkIueTh );
 //
 //##############################################################################
 
-
 /**
  * @brief  Masks bits in the ODP_FIR that are possible root causes of
  *         ODP data corruption without clearing them.
@@ -743,49 +781,13 @@ PRDF_PLUGIN_DEFINE( odyssey_ocmb, checkIueTh );
  * @param  i_bit  The bit position.
  * @return SUCCESS
  */
-int32_t __odpDataCorruptRootCause(ExtensibleChip * i_chip,
-    STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port, uint8_t i_bit)
-{
-    #define PRDF_FUNC "[odyssey_ocmb::__odpDataCorruptRootCause] "
-
-    PRDF_ASSERT(nullptr != i_chip);
-    PRDF_ASSERT(TYPE_OCMB_CHIP == i_chip->getType());
-
-    // Certain bits in the ODP_FIR can be root causes of ODP data corruption
-    // which can cause side effect attentions elsewhere. To allow for
-    // correlation between the errors if the side effects come on later,
-    // these bits will be masked but not cleared if hit.
-
-    #ifdef __HOSTBOOT_MODULE
-    // Mask the bit in the ODP_FIR manually if we're at threshold
-    if ( io_sc.service_data->IsAtThreshold() )
-    {
-        char regName[64];
-        sprintf(regName, "ODP_FIR_MASK_OR_%x", i_port);
-        SCAN_COMM_REGISTER_CLASS * mask_or = i_chip->getRegister(regName);
-
-        mask_or->SetBit(i_bit);
-        if ( SUCCESS != mask_or->Write() )
-        {
-            PRDF_ERR( PRDF_FUNC "Write() failed for %s on 0x%08x", regName,
-                      i_chip->getHuid() );
-        }
-
-        // Return PRD_NO_CLEAR_FIR_BITS so the rule code doesn't clear the bit
-        return PRD_NO_CLEAR_FIR_BITS;
-    }
-    #endif
-
-    return SUCCESS;
-
-    #undef PRDF_FUNC
-}
-
 #define PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(PORT, BIT) \
 int32_t odpDataCorruptRootCause_##PORT##_##BIT(ExtensibleChip * i_chip, \
     STEP_CODE_DATA_STRUCT & io_sc) \
 { \
-    return __odpDataCorruptRootCause(i_chip, io_sc, PORT, BIT); \
+    char regName[64]; \
+    sprintf(regName, "ODP_FIR_MASK_OR_%x", PORT); \
+    return __maskButDontClear(i_chip, io_sc, BIT, regName); \
 } \
 PRDF_PLUGIN_DEFINE(odyssey_ocmb, odpDataCorruptRootCause_##PORT##_##BIT);
 
@@ -802,6 +804,59 @@ PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(1,11);
 PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(1,12);
 PLUGIN_ODP_DATA_CORRUPT_ROOT_CAUSE(1,13);
 
+
+//##############################################################################
+//
+//                          CRC related errors
+//
+//##############################################################################
+
+/**
+ * @brief  Masks bits in the OCMB_PHY_FIR that are possible root causes of
+ *         CRC errors without clearing them.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_bit  The bit position.
+ * @return SUCCESS
+ */
+#define PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(BIT) \
+int32_t crcErrorRootCausePhy_##BIT(ExtensibleChip * i_chip, \
+    STEP_CODE_DATA_STRUCT & io_sc) \
+{ \
+    return __maskButDontClear(i_chip, io_sc, BIT, "OCMB_PHY_FIR_MASK_OR"); \
+} \
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, crcErrorRootCausePhy_##BIT);
+
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(1);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(5);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(13);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(14);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(15);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(16);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(17);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(18);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(20);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(23);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(26);
+PLUGIN_CRC_ERROR_ROOT_CAUSE_PHY(27);
+
+/**
+ * @brief  Masks bits in the DLX_FIR_MASK_OR that are possible root causes of
+ *         CRC errors without clearing them.
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_bit  The bit position.
+ * @return SUCCESS
+ */
+#define PLUGIN_CRC_ERROR_ROOT_CAUSE_DLX(BIT) \
+int32_t crcErrorRootCauseDlx_##BIT(ExtensibleChip * i_chip, \
+    STEP_CODE_DATA_STRUCT & io_sc) \
+{ \
+    return __maskButDontClear(i_chip, io_sc, BIT, "DLX_FIR_MASK_OR"); \
+} \
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, crcErrorRootCauseDlx_##BIT);
+
+PLUGIN_CRC_ERROR_ROOT_CAUSE_DLX(21);
 
 //##############################################################################
 //

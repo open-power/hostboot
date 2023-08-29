@@ -818,6 +818,13 @@
     # Odyssey chip DLX_FIR
     ############################################################################
 
+    register DLX_FIR_MASK_OR
+    {
+        name        "Odyssey chip DLX_FIR MASK OR";
+        scomaddr    0x08012403;
+        capture     group never;
+    };
+
     register CMN_CONFIG
     {
         name        "Odyssey chip DLX CMN Configuration Register";
@@ -1665,6 +1672,17 @@
         name        "MEM DTS Error Register";
         scomaddr    0x0805002F;
         capture     group mem_local_regs;
+    };
+
+    ############################################################################
+    # Odyssey chip OCMB_PHY_FIR
+    ############################################################################
+
+    register OCMB_PHY_FIR_MASK_OR
+    {
+        name        "Odyssey chip OCMB_PHY_FIR MASK OR";
+        scomaddr    0x08010C03;
+        capture     group never;
     };
 
     ############################################################################

@@ -370,17 +370,6 @@ actionclass ocmb_th1_x4Root
     #funccall("x4RootCause"); # must be called after threshold
 };
 
-# Bits using these actions are CRC-related errors that are potential
-# side-effects of bits in the PAU_PHY_FIR. There is additional handling
-# to determine the callout if a root cause bit is found on as well.
-actionclass omi_bus_th_32perDay_CRC
-{
-    #TODO
-    #try ( funccall("CrcSideEffect_Ocmb"), omi_bus );
-    TBDDefaultCallout;
-    threshold32pday;
-};
-
 ################################################################################
 #                           Callouts with flags                                #
 ################################################################################
@@ -893,6 +882,113 @@ actionclass mem_port1_M_th1_odpRoot10
 {
     mem_port1_M_th1;
     funccall("odpDataCorruptRootCause_1_10"); # must be called after threshold
+};
+
+################################################################################
+# CRC related errors
+################################################################################
+
+# OCMB_PHY_FIR[1]
+actionclass ocmb_M_info_only_th1_CrcRootPhy1
+{
+    ocmb_M_info_only_th1;
+    funccall("crcErrorRootCausePhy_1"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[5]
+actionclass ocmb_M_info_only_th1_CrcRootPhy5
+{
+    ocmb_M_info_only_th1;
+    funccall("crcErrorRootCausePhy_5"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[13]
+actionclass ocmb_M_th1_CrcRootPhy13
+{
+    ocmb_M_th1;
+    funccall("crcErrorRootCausePhy_13"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[14]
+actionclass ocmb_M_th1_CrcRootPhy14
+{
+    ocmb_M_th1;
+    funccall("crcErrorRootCausePhy_14"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[15]
+actionclass ocmb_M_level2_L_th1_CrcRootPhy15
+{
+    ocmb_M_level2_L_th1;
+    funccall("crcErrorRootCausePhy_15"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[16]
+actionclass level2_M_ocmb_L_th1_CrcRootPhy16
+{
+    level2_M_ocmb_L_th1;
+    funccall("crcErrorRootCausePhy_16"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[17]
+actionclass ocmb_M_level2_L_th1_CrcRootPhy17
+{
+    ocmb_M_level2_L_th1;
+    funccall("crcErrorRootCausePhy_17"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[18]
+actionclass ocmb_M_level2_L_th1_CrcRootPhy18
+{
+    ocmb_M_level2_L_th1;
+    funccall("crcErrorRootCausePhy_18"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[20]
+actionclass ocmb_M_th1_CrcRootPhy20
+{
+    ocmb_M_th1;
+    funccall("crcErrorRootCausePhy_20"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[23]
+actionclass level2_M_ocmb_L_th1_CrcRootPhy23
+{
+    level2_M_ocmb_L_th1;
+    funccall("crcErrorRootCausePhy_23"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[26]
+actionclass level2_M_ocmb_L_th1_CrcRootPhy26
+{
+    level2_M_ocmb_L_th1;
+    funccall("crcErrorRootCausePhy_26"); # must be called after threshold
+};
+
+# OCMB_PHY_FIR[27]
+actionclass level2_M_ocmb_L_th1_CrcRootPhy27
+{
+    level2_M_ocmb_L_th1;
+    funccall("crcErrorRootCausePhy_27"); # must be called after threshold
+};
+
+# DLX_FIR[21]
+actionclass ocmb_M_info_only_th1_CrcRootDl21
+{
+    ocmb_M_info_only_th1;
+    funccall("crcErrorRootCauseDlx_21"); # must be called after threshold
+};
+
+actionclass omi_bus_info_only_CRC
+{
+    try(funccall("odyCrcSideEffect"), omi_bus);
+    info_only_th32;
+};
+
+actionclass omi_bus_th_32perDay_CRC
+{
+    try (funccall("odyCrcSideEffect"), omi_bus);
+    threshold32pday;
 };
 
 ################################################################################
