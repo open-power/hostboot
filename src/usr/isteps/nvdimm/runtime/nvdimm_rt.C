@@ -1403,6 +1403,7 @@ void nvdimmExternalStatus( Target* i_nvdimm,
     }
     o_status.bpmRuntime = TWO_UINT8_TO_UINT16(runtime_msb, runtime_lsb);
 
+
 }
 
 

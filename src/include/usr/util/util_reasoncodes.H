@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,8 @@ namespace Util
         UTIL_LIDMGR_INVAL_LID_REQUEST    = UTIL_COMP_ID | 0x1C,
         UTIL_LIDMGR_INVAL_COMP           = UTIL_COMP_ID | 0x1D,
         UTIL_RC_CHILD_TASK_FAILED        = UTIL_COMP_ID | 0x1E,
-        UTIL_LIDMGR_LID_TOO_BIG          = UTIL_COMP_ID | 0x1F,
+        UTIL_NVDIMM_VENDOR_LOGS          = UTIL_COMP_ID | 0x1F,
+        UTIL_LIDMGR_LID_TOO_BIG          = UTIL_COMP_ID | 0x20,
     };
 };
 

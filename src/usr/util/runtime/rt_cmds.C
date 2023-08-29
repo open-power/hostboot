@@ -1342,6 +1342,71 @@ void cmd_nvdimm_info( char* &o_output)
 }  // end cmd_nvdimm_info
 
 
+/**
+ * @brief Save off the NVDIMM Vendor Log into a PEL
+ * @param[out] o_output  Output display buffer, memory allocated here.
+ * @param[in] i_huid  Which DIMM to retrieve from, 0=all functional NVDIMMs
+ */
+void cmd_nvdimm_vendor_log( char* &o_output,
+                            uint32_t i_huid )
+{
+    errlHndl_t l_err = nullptr;
+    o_output = new char[500];
+    o_output[0] = '\0';
+
+    TARGETING::Target* l_targ{};
+    if( i_huid != 0 )
+    {
+        l_targ = getTargetFromHUID(i_huid);
+        if( l_targ == NULL )
+        {
+            sprintf( o_output, "HUID %.8X not found", i_huid );
+            return;
+        }
+    }
+
+    // Get the list of functional NVDIMM Targets from the system
+    TARGETING::TargetHandleList l_nvdimmTargetList;
+    NVDIMM::nvdimm_getNvdimmList(l_nvdimmTargetList);
+
+    for (const auto & l_nvdimm : l_nvdimmTargetList)
+    {
+        if( (i_huid == 0) || (l_nvdimm == l_targ) )
+        {
+            /*@
+             * @errortype
+             * @moduleid         UTIL_RT_CMDS
+             * @reasoncode       UTIL_NVDIMM_VENDOR_LOGS
+             * @userdata1        HUID of NVDIMM target
+             * @userdata2        <unused>
+             * @devdesc          User-initiated NVDIMM vendor log data, see PLID
+             *                   to identify all connected logs
+             * @custdesc         Informational log containing firmware data
+             */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                   UTIL_RT_CMDS,
+                                   UTIL_NVDIMM_VENDOR_LOGS,
+                                   TARGETING::get_huid(l_nvdimm),
+                                   0,
+                                   ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+            l_err->addHwCallout( l_nvdimm,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL );
+            NVDIMM::nvdimmAddVendorLog(l_nvdimm, l_err);
+
+            char l_tmp[200];
+            sprintf( l_tmp, "Created PEL for NVDIMM %.8X, plid=0x%.8X\n",
+                     TARGETING::get_huid(l_nvdimm), l_err->plid() );
+            strcat( o_output, l_tmp );
+
+            errlCommit(l_err, NVDIMM_COMP_ID);
+        }
+    }
+
+} //cmd_nvdimm_vendor_log
+
+
 
 #endif
 
@@ -1728,6 +1793,15 @@ int hbrtCommand( int argc,
             sprintf(*l_output, "Usage: nvdimm_info");
         }
     }
+    else if( !strcmp( argv[0], "nvdimm_vendor_log" ) )
+    {
+        uint32_t huid = 0;
+        if( argc == 2 )
+        {
+            huid = strtou64(argv[1], NULL, 16);
+        }
+        cmd_nvdimm_vendor_log( *l_output, huid );
+    }
 
 #endif
     else
@@ -1779,6 +1853,8 @@ int hbrtCommand( int argc,
                            "    0x40=nvm_healthcheck\n");
         strcat( *l_output, l_tmpstr );
         sprintf( l_tmpstr, "nvdimm_info\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf( l_tmpstr, "nvdimm_vendor_log\n");
         strcat( *l_output, l_tmpstr );
 
 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2107,6 +2107,12 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
                                        l_oldVersion, i_lidImage->getVersion(),
                                        l_installed_type),
                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            // Add callout of nvdimm with no deconfig/gard
+            // so that we get PN/SN in the log
+            l_err->addHwCallout( l_nvdimm,
+                                 HWAS::SRCI_PRIORITY_LOW,
+                                 HWAS::NO_DECONFIG,
+                                 HWAS::GARD_NULL);
             l_err->collectTrace(NVDIMM_UPD, 256);
             ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
             l_err = nullptr;
@@ -2198,6 +2204,12 @@ bool NvdimmsUpdate::runUpdateUsingLid(NvdimmLidImage * i_lidImage,
                                    l_oldVersion, curVersion,
                                    l_installed_type),
                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+                    // Add callout of nvdimm with no deconfig/gard
+                    // so that we get PN/SN in the log
+                    l_err->addHwCallout( l_nvdimm,
+                                         HWAS::SRCI_PRIORITY_LOW,
+                                         HWAS::NO_DECONFIG,
+                                         HWAS::GARD_NULL);
                     l_err->collectTrace(NVDIMM_UPD, 512);
                     ERRORLOG::errlCommit(l_err, NVDIMM_COMP_ID);
                     l_err = nullptr;

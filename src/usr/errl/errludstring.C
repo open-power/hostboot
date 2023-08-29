@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,7 +58,7 @@ ErrlUserDetailsString::~ErrlUserDetailsString()
 
 // ErrlUserDetailsStringSet implementation
 
-ErrlUserDetailsStringSet::ErrlUserDetailsStringSet()
+ErrlUserDetailsStringSet::ErrlUserDetailsStringSet( bool i_merge )
 {
     // Set up ErrlUserDetails instance variables
     iv_CompId = ERRL_COMP_ID;
@@ -66,7 +66,7 @@ ErrlUserDetailsStringSet::ErrlUserDetailsStringSet()
     iv_SubSection = ERRL_UDT_STRING_SET;
 
     // override the default of false.
-    iv_merge = true;
+    iv_merge = i_merge;
 }
 
 void ErrlUserDetailsStringSet::add(

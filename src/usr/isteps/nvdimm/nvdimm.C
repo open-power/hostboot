@@ -66,9 +66,14 @@ TRAC_INIT(&g_trac_nvdimm, NVDIMM_COMP_NAME, 2*KILOBYTE);
 // Easy macro replace for unit testing
 //#define TRACUCOMP(args...)  TRACFCOMP(args)
 #define TRACUCOMP(args...)
-#define SPLIT_SIZE 512
-#define BUFFER_SIZE 100
 
+// Our system libraries don't get included by HBRT image
+#ifdef __HOSTBOOT_RUNTIME
+#define strtoul Util::strtou64
+namespace Util {
+    extern uint64_t strtou64(const char *nptr, char **endptr, int base);
+}
+#endif
 
 namespace NVDIMM
 {
@@ -2149,13 +2154,18 @@ void nvdimm_init(Target *i_nvdimm)
             break;
         }
 
+        // Unlock encryption if enabled
+        TargetHandleList l_nvdimmTargetList;
+        l_nvdimmTargetList.push_back(i_nvdimm);
+        NVDIMM::nvdimm_encrypt_unlock(l_nvdimmTargetList);
+
         // Check NO_RESET_N bit for power loss without save
         l_err = nvdimmReadReg ( i_nvdimm, CSAVE_FAIL_INFO1, l_data);
         if (l_err)
         {
             break;
         }
-        else if ((l_data & NO_RESET_N) == NO_RESET_N)
+        else if ( (l_data & NO_RESET_N) == NO_RESET_N)
         {
             // Set ATTR_NV_STATUS_FLAG to partial working as data may persist
             nvdimmSetStatusFlag(i_nvdimm, NSTD_ERR_VAL_SR);
@@ -2285,7 +2295,6 @@ void nvdimm_init(Target *i_nvdimm)
             break;
         }
 
-
         // Apply mask for relevant 1:6 bits to failinfo1
         l_failinfo1 &= CSAVE_FAIL_BITS_MASK;
 
@@ -2359,10 +2368,6 @@ void nvdimm_init(Target *i_nvdimm)
             break;
         }
 
-        // Unlock encryption if enabled
-        TargetHandleList l_nvdimmTargetList;
-        l_nvdimmTargetList.push_back(i_nvdimm);
-        NVDIMM::nvdimm_encrypt_unlock(l_nvdimmTargetList);
 
     }while(0);
 
@@ -4496,6 +4501,22 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
         "nvdimmAddVendorLog: Target huid 0x%.8X",
         get_huid(i_nvdimm));
 
+    // Number of bytes per userdetails section
+    constexpr int SPLIT_SIZE = 512;
+
+    // Max bytes in description string
+    constexpr size_t BUFFER_SIZE = 26;
+
+#ifdef __HOSTBOOT_RUNTIME
+    // 4KB log at runtime, minus 1 KB for other data
+    constexpr size_t MAX_LOG_SIZE = (3*KILOBYTE);
+#else
+    // 16KB log during IPL, minus 1KB for other data
+    constexpr size_t MAX_LOG_SIZE = (15*KILOBYTE);
+#endif
+    // Max sections per log
+    constexpr size_t ENTRIES_PER_LOG = (MAX_LOG_SIZE/SPLIT_SIZE);
+
     /*
        1) Read VENDOR_LOG_PAGE_SIZE. Multiply the return value with BLOCKSIZE
           to get the total page size (LOG_PAGE_SIZE)
@@ -4613,57 +4634,191 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
             break;
         }
 
-        // Find first NUL char in the vendor log data
-        bool l_foundNull = false;
-        uint32_t l_idx = 0;
-        for (l_idx = 0; l_idx < l_fullData.size(); l_idx++)
+        /* Instructions from SMART for the latest version of logging code.
+
+         The START,NULL and Power cycle count are used for identifying from
+         where to start to printing. More than one "START* can happen,
+         Please follow the rules as below.
+
+         Search NULL, 'START', and 'Power cycle count:' strings in the Vendor
+         Log and use different heuristics to decide where  to start displaying
+         the Vendor Log:
+
+         1. If no 'Power cycle count:', 'START', and NULL found, then print
+            from offset 0.
+         2. If 'Power cycle count:' string found then start displaying after
+            the first NULL or 'START' found following the highest
+           'Power cycle count:' value.
+         3. If only NULL found in the Vendor Log, then start displaying after
+            the end of the first NULL sequence.
+         4. If one 'START' and one NULL found, then start displaying after the
+            NULL string.
+         5. If one or more 'START' and NULL found, then start displaying after
+            first NULL.
+
+         --- Adjustments done by our implementation ---
+         The references to START turned out to not be relevant.  Every START
+         is surrounded by NULLs so rules 4,5 devolve into the same logic as
+         rule 3.
+         */
+
+        // Find the largest 'Power cycle count'
+        const char* COMPARE_STR = "Power cycle count: 0x"; // Power cycle count: 0x1234
+        uint32_t l_biggestPower = 0;
+        uint32_t l_biggestPowerIndex = 0; //where to start NULL search
+        for (uint32_t l_idx = 0;
+             l_idx < (l_fullData.size()-strlen(COMPARE_STR));
+             l_idx++)
         {
-            if (l_fullData[l_idx] == 0x00)
+            char* strbuf = (char*)(l_fullData.data());
+            if( 0 == memcmp( &(strbuf[l_idx]),
+                             COMPARE_STR,
+                             strlen(COMPARE_STR) ) )
             {
-                l_foundNull = true;
+                // jump forward past the label
+                l_idx += strlen(COMPARE_STR);
+
+                // the number is 16-bit hex so we only need to take that many
+                // digits into account
+                constexpr uint32_t MAX_CYCLE_DIGITS = 4;
+
+                // Find the end of the number
+                uint32_t l_powerCount = 0;
+                uint32_t numidx = l_idx;
+                for( uint32_t l_idx2 = numidx;
+                     l_idx2 < (l_fullData.size()-MAX_CYCLE_DIGITS);
+                     l_idx2++ )
+                {
+                    // if we find a NULL it means we got wrapped/truncated
+                    if( l_fullData[l_idx2] == 0x00 )
+                    {
+                        break;
+                    }
+                    // space or newline indicates the end of the number
+                    else if( (l_fullData[l_idx2] == ' ')
+                             || (l_fullData[l_idx2] == '\n') )
+                    {
+                        // the number is 16-bit hex so if we find more
+                        // than 4 digits something went crazy, just
+                        // give up
+                        if( l_idx2-numidx > MAX_CYCLE_DIGITS )
+                        {
+                            break;
+                        }
+
+                        char numstr[50];
+                        snprintf( numstr,
+                                  l_idx2-numidx+1, //size of number + null
+                                  "%s", &(strbuf[numidx]) );
+                        l_powerCount = strtoul(numstr,nullptr,16);
+                        if( l_powerCount == 0xDEADBEEF )
+                        {
+                            //we couldn't decode the hex, force low value
+                            l_powerCount = 0;
+                        }
+                        break;
+                    }
+                }
+
+                // Couldn't find a valid count, ignore it and move on
+                if( l_powerCount == 0 )
+                {
+                    continue;
+                }
+                // Keep track of the biggest one
+                if( l_powerCount > l_biggestPower )
+                {
+                    l_biggestPower = l_powerCount;
+                    l_biggestPowerIndex = numidx;
+                }
+            }
+        }
+
+        // Find first NULL char in the vendor log data
+        uint32_t l_firstNull = 0;
+        uint32_t l_idx = l_biggestPowerIndex;
+        do {
+            if( l_fullData[l_idx] == 0x00 )
+            {
+                l_firstNull = l_idx;
                 break;
             }
-        }
 
-        // If NULL char not found
-        // then this is the old log format
-        if (l_foundNull == false)
-        {
-            // Add NUL terminator to ascii data
-            l_fullData.push_back(0x00);
-        }
-        // Else new log format
-        else
-        {
-            // If the next char is not NULL
-            // then the log has wrapped
-            // Re-arrange the data in chronological order
-            if (l_fullData[l_idx + 1] != 0x00)
+            l_idx++;
+
+            // wrap around to the beginning
+            if( l_idx == l_fullData.size() )
             {
-                // Save the data after the NULL char
-                // This is the start of the log
-                std::vector<uint8_t> l_tmpData;
-                l_tmpData.insert(l_tmpData.begin(),
-                                 l_fullData.begin() + l_idx + 1,
-                                 l_fullData.end());
-
-                // Erase this data from the vector
-                l_fullData.erase(l_fullData.begin() + l_idx + 1,
-                                 l_fullData.end());
-
-                // Place the saved data at the front
-                l_fullData.insert(l_fullData.begin(),
-                                  l_tmpData.begin(),
-                                  l_tmpData.end());
+                l_idx = 0;
             }
-            // Else log has not wrapped
+        } while( l_idx != l_biggestPowerIndex );
+
+        // At this point l_firstNull is pointing at one of these:
+        // 1. Zero = Log is exactly full with no wrapping (unlikely)
+        // 2. Wrap point = The next character is not NULL and is the
+        //    logical start of the wrapped log
+        // 3. End of partially full buffer = The next N characters are
+        //    all NULL since it is unwritten data
+
+        if( l_firstNull == 0 )
+        {
+            TRACFCOMP(g_trac_nvdimm, "nvdimmAddVendorLog: Not wrapped");
+        }
+        else if( (l_firstNull == l_fullData.size())
+                 || (l_fullData[l_firstNull + 1] == 0x00) )
+        {
+            TRACFCOMP(g_trac_nvdimm, "nvdimmAddVendorLog: End of non-full buffer");
+        }
+        // Re-arrange the data in chronological order
+        else if( l_fullData[l_firstNull + 1] != 0x00 )
+        {
+            TRACFCOMP(g_trac_nvdimm, "nvdimmAddVendorLog: Rearranging log from %d",
+                      l_firstNull);
+            // Save the data after the NULL char
+            // This is the start of the log
+            std::vector<uint8_t> l_tmpData;
+            l_tmpData.insert(l_tmpData.begin(),
+                             l_fullData.begin() + l_firstNull + 1,
+                             l_fullData.end());
+
+            // Erase this data from the vector
+            l_fullData.erase(l_fullData.begin() + l_firstNull + 1,
+                             l_fullData.end());
+
+            // Place the saved data at the front
+            l_fullData.insert(l_fullData.begin(),
+                              l_tmpData.begin(),
+                              l_tmpData.end());
+        }
+
+        // Replace all NULL characters with "~NULL~"
+        for( std::vector<uint8_t>::iterator itr = l_fullData.begin();
+             itr != l_fullData.end();
+             )
+        {
+            if( *itr == 0x00 )
+            {
+                // Any number of repeated NULLs will be replaced with one tag
+                while( (*itr == 0x00) && (itr != l_fullData.end()) )
+                {
+                    itr = l_fullData.erase(itr);
+                }
+                itr = l_fullData.insert(itr,'~');
+                itr = l_fullData.insert(itr,'L');
+                itr = l_fullData.insert(itr,'L');
+                itr = l_fullData.insert(itr,'U');
+                itr = l_fullData.insert(itr,'N');
+                itr = l_fullData.insert(itr,'~');
+            }
             else
             {
-                // Erase the data at the end of the vector
-                l_fullData.erase(l_fullData.begin() + l_idx + 1,
-                                 l_fullData.end());
+                ++itr;
             }
         }
+
+        // Add NULL terminator to ascii data to make sure it can
+        //  be treated as a valid string
+        l_fullData.push_back(0x00);
 
         // Add vendor data to error log as string
         const char* l_fullChar = reinterpret_cast<char*>(l_fullData.data());
@@ -4683,10 +4838,28 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
             l_copyChar += l_length - SPLIT_SIZE;
         }
 
-        ERRORLOG::ErrlUserDetailsStringSet l_stringSet;
+        // Most likely the main log won't be able to hold much more data.
+        // We will create additional informational logs and connect
+        // them to the main log to hold all of the data.
+        errlHndl_t l_extraLog = nullptr;
+        size_t l_numExtraLogs = (l_totalCount / ENTRIES_PER_LOG) + 1;
+        size_t l_logCount = 0; //number of info logs created so far
+        size_t l_entryCount = 0; //number of vendor entries added
+
         size_t l_copySize = SPLIT_SIZE;
         while (l_remaining > 0)
         {
+            // Data for original log
+            // Buffer will be split apart so that some can be
+            // truncated to fit the error log size
+            ERRORLOG::ErrlUserDetailsStringSet l_origData(false);
+
+            // Data for the extra log
+            // Buffer will be concatenated since we know the
+            // size will not overflow
+            ERRORLOG::ErrlUserDetailsStringSet l_extraData(true);
+
+
             char buffer[BUFFER_SIZE] = {0};
 
             // If at the last segment
@@ -4700,18 +4873,78 @@ void nvdimmAddVendorLog( TARGETING::Target* i_nvdimm, errlHndl_t& io_err )
             strncpy(l_blob, l_copyChar, l_copySize);
             l_blob[l_copySize+1] = '\0';
 
-            snprintf(buffer, SPLIT_SIZE, "Vendor Log: page %d of %d, "
-                "bytes %d to %d", l_count, l_totalCount,
-                l_remaining - l_copySize, l_remaining - 1);
-            l_stringSet.add(buffer, l_blob);
+            // Note that the errl parser only accepts a 25 character label
+            snprintf(buffer, BUFFER_SIZE,
+                     "Vendor Log: %d-%d",
+                     l_remaining - l_copySize,
+                     l_remaining - 1);
+            l_origData.add(buffer, l_blob);
+            l_extraData.add(buffer, l_blob);
 
             // Move string back 512 bytes
             l_copyChar -= SPLIT_SIZE;
             l_remaining -= l_copySize;
             l_count--;
+
+            // Put each chunk of information into its own
+            //  userdetails section so that they can be
+            //  truncated individually
+            l_origData.addToLog(io_err);
+
+            // Create an extra log to hold more data if we don't have one yet
+            if( !l_extraLog )
+            {
+                /*@
+                 * @errortype
+                 * @reasoncode    NVDIMM_VENDOR_LOG_EXTRA
+                 * @moduleid      NVDIMM_ADD_VENDOR_LOG
+                 * @userdata1[00:31]  NVDIMM HUID
+                 * @userdata1[32:63]  Reasoncode of original log
+                 * @userdata2[00:15]  Extra log count
+                 * @userdata2[16:31]  Total number of extra logs
+                 * @userdata2[32:63]  Unused
+                 * @devdesc       Additional NVDIMM vendor log data, see PLID
+                 *                to identify all connected logs
+                 * @custdesc      Informational log containing firmware data
+                 */
+                l_extraLog = new ERRORLOG::ErrlEntry(
+                                      ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                      NVDIMM_ADD_VENDOR_LOG,
+                                      NVDIMM_VENDOR_LOG_EXTRA,
+                                      TWO_UINT32_TO_UINT64(
+                                          get_huid(i_nvdimm),
+                                          io_err->reasonCode()),
+                                      FOUR_UINT16_TO_UINT64(
+                                          ++l_logCount,
+                                          l_numExtraLogs,
+                                          0,0),
+                                      ERRORLOG::ErrlEntry::NO_SW_CALLOUT );
+                l_err->addHwCallout( i_nvdimm,
+                                     HWAS::SRCI_PRIORITY_LOW,
+                                     HWAS::NO_DECONFIG,
+                                     HWAS::GARD_NULL );
+                l_extraLog->plid(io_err->plid());
+            }
+
+            // Save the same data to add to the extra log
+            l_extraData.addToLog(l_extraLog);
+
+            l_entryCount++;
+
+            // Commit the extra log when we've added enough entries
+            if( l_extraLog && (l_entryCount % ENTRIES_PER_LOG == 0) )
+            {
+                errlCommit(l_extraLog, NVDIMM_COMP_ID);
+                l_extraLog = nullptr;
+            }
         }
 
-        l_stringSet.addToLog(io_err);
+        // Commit the extra log with whatever is left
+        if( l_extraLog )
+        {
+            errlCommit(l_extraLog, NVDIMM_COMP_ID);
+            l_extraLog = nullptr;
+        }
 
         // Change back to default
         l_err = nvdimmWriteReg(i_nvdimm,

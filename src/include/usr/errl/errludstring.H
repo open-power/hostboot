@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,8 +85,9 @@ class ErrlUserDetailsStringSet : public ErrlUserDetails
 
     /**
      *  @brief Constructor; creates the object
+     *  @param[in]  Merge with adjacent FFDC sections of the same type
      */
-    ErrlUserDetailsStringSet();
+    ErrlUserDetailsStringSet( bool i_merge = true );
 
     /**
      *  @brief Adds a new tagged string to the object's string cache
