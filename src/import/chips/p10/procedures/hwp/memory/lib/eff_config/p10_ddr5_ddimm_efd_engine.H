@@ -2208,7 +2208,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        /// @note: Coding this for channel A / Rank 0 only.
+        /// @note: Coding this for channel A only.
         virtual fapi2::ReturnCode set_odtlon_wr(const std::vector<uint8_t>& i_efd) const
         {
             int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
@@ -2238,7 +2238,11 @@ class ddimm_0_0 : public mss::efd::base
             };
 
             FAPI_TRY(mss::attr::get_ddr5_dram_odtlon_wr(iv_dimm, l_field));
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODTL_WR_CNTRL_ON_OFFSET_BYTE0, i_efd, mss::SET_ODTLON_WR, l_odtlon_wr));
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb,
+                                             F::ODTL_WR_CNTRL_ON_OFFSET[mss::ddr5::mr::ATTR_CHANNEL_A][iv_port_rel_pos][iv_dimm_rank],
+                                             i_efd,
+                                             mss::SET_ODTLON_WR,
+                                             l_odtlon_wr));
 
             // Map SPD value to desired setting
             FAPI_TRY(lookup_table_check(iv_ocmb, ODTL_ON_WR_MAP, mss::SET_ODTLON_WR,
@@ -2256,7 +2260,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        /// @note: Coding this for channel A / Rank 0 only.
+        /// @note: Coding this for channel A only.
         virtual fapi2::ReturnCode set_odtloff_wr(const std::vector<uint8_t>& i_efd) const
         {
             int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
@@ -2285,7 +2289,11 @@ class ddimm_0_0 : public mss::efd::base
             };
 
             FAPI_TRY(mss::attr::get_ddr5_dram_odtloff_wr(iv_dimm, l_field));
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODTL_WR_CNTRL_OFF_OFFSET_BYTE0, i_efd, mss::SET_ODTLOFF_WR, l_odtloff_wr));
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb,
+                                             F::ODTL_WR_CNTRL_OFF_OFFSET[mss::ddr5::mr::ATTR_CHANNEL_A][iv_port_rel_pos][iv_dimm_rank],
+                                             i_efd,
+                                             mss::SET_ODTLOFF_WR,
+                                             l_odtloff_wr));
 
             // Map SPD value to desired setting
             FAPI_TRY(lookup_table_check(iv_ocmb, ODTL_OFF_WR_MAP, mss::SET_ODTLOFF_WR,
@@ -2303,7 +2311,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        /// @note: Coding this for channel A / Rank 0 only.
+        /// @note: Coding this for channel A only.
         virtual fapi2::ReturnCode set_odtlon_wr_nt(const std::vector<uint8_t>& i_efd) const
         {
             int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
@@ -2332,7 +2340,10 @@ class ddimm_0_0 : public mss::efd::base
             };
 
             FAPI_TRY(mss::attr::get_ddr5_dram_odtlon_wr_nt(iv_dimm, l_field));
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE0, i_efd, mss::SET_ODTLON_WR_NT,
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb,
+                                             F::ODTL_NT_WR_CNTRL_ON_OFFSET[mss::ddr5::mr::ATTR_CHANNEL_A][iv_port_rel_pos][iv_dimm_rank],
+                                             i_efd,
+                                             mss::SET_ODTLON_WR_NT,
                                              l_odtlon_wr_nt));
 
             // Map SPD value to desired setting
@@ -2351,7 +2362,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        /// @note: Coding this for channel A / Rank 0 only.
+        /// @note: Coding this for channel A only.
         virtual fapi2::ReturnCode set_odtloff_wr_nt(const std::vector<uint8_t>& i_efd) const
         {
             int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
@@ -2380,7 +2391,10 @@ class ddimm_0_0 : public mss::efd::base
             };
 
             FAPI_TRY(mss::attr::get_ddr5_dram_odtloff_wr_nt(iv_dimm, l_field));
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE0, i_efd, mss::SET_ODTLOFF_WR_NT,
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb,
+                                             F::ODTL_NT_WR_CNTRL_OFF_OFFSET[mss::ddr5::mr::ATTR_CHANNEL_A][iv_port_rel_pos][iv_dimm_rank],
+                                             i_efd,
+                                             mss::SET_ODTLOFF_WR_NT,
                                              l_odtloff_wr_nt));
 
             // Map SPD value to desired setting
@@ -2399,7 +2413,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        /// @note: Coding this for channel A / Rank 0 only.
+        /// @note: Coding this for channel A only.
         virtual fapi2::ReturnCode set_odtlon_rd_nt(const std::vector<uint8_t>& i_efd) const
         {
             int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
@@ -2425,7 +2439,10 @@ class ddimm_0_0 : public mss::efd::base
             };
 
             FAPI_TRY(mss::attr::get_ddr5_dram_odtlon_rd_nt(iv_dimm, l_field));
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE0, i_efd, mss::SET_ODTLON_RD_NT,
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb,
+                                             F::ODTL_NT_RD_CNTRL_ON_OFFSET[mss::ddr5::mr::ATTR_CHANNEL_A][iv_port_rel_pos][iv_dimm_rank],
+                                             i_efd,
+                                             mss::SET_ODTLON_RD_NT,
                                              l_odtlon_rd_nt));
 
             // Map SPD value to desired setting
@@ -2444,7 +2461,7 @@ class ddimm_0_0 : public mss::efd::base
         /// @param[in] i_efd EFD binary
         /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
         ///
-        /// @note: Coding this for channel A / Rank 0 only.
+        /// @note: Coding this for channel A only.
         virtual fapi2::ReturnCode set_odtloff_rd_nt(const std::vector<uint8_t>& i_efd) const
         {
             int8_t l_field[mss::ddr5::mr::ATTR_RANKS] = {0};
@@ -2470,7 +2487,10 @@ class ddimm_0_0 : public mss::efd::base
             };
 
             FAPI_TRY(mss::attr::get_ddr5_dram_odtloff_rd_nt(iv_dimm, l_field));
-            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE0, i_efd, mss::SET_ODTLOFF_RD_NT,
+            FAPI_TRY(mss::spd::get_field_spd(iv_ocmb,
+                                             F::ODTL_NT_RD_CNTRL_OFF_OFFSET[mss::ddr5::mr::ATTR_CHANNEL_A][iv_port_rel_pos][iv_dimm_rank],
+                                             i_efd,
+                                             mss::SET_ODTLOFF_RD_NT,
                                              l_odtloff_rd_nt));
 
             // Map SPD value to desired setting

@@ -1574,6 +1574,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         // Syntatic sugar to make member variable declaration easier
         using field_t = mss::field_t<mss::endian::LITTLE>;
 
+        static constexpr uint8_t MAX_CHANNELS = 2;
+        static constexpr uint8_t MAX_PORTS = 2;
+        static constexpr uint8_t MAX_RANKS = 2;
+
         // First field - SPD byte
         // Second field - start bit
         // Third field - bit length
@@ -1891,6 +1895,65 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         // BYTE7: B1 RANK1
         static constexpr field_t ODTL_WR_CNTRL_ON_OFFSET_BYTE7{ODTL_WR_CNTRL_OFFSET_BYTE7_BYTE, ODTL_WR_CNTRL_ON_OFFSET_BYTE7_START, ODTL_WR_CNTRL_ON_OFFSET_BYTE7_LEN};
         static constexpr field_t ODTL_WR_CNTRL_OFF_OFFSET_BYTE7{ODTL_WR_CNTRL_OFFSET_BYTE7_BYTE, ODTL_WR_CNTRL_OFF_OFFSET_BYTE7_START, ODTL_WR_CNTRL_OFF_OFFSET_BYTE7_LEN};
+        // Arrange fields for easier consumption in the SPD decoder
+        static constexpr field_t ODTL_WR_CNTRL_ON_OFFSET[MAX_CHANNELS][MAX_PORTS][MAX_RANKS] =
+        {
+            // CHA
+            {
+                // port0
+                {
+                    ODTL_WR_CNTRL_ON_OFFSET_BYTE0,
+                    ODTL_WR_CNTRL_ON_OFFSET_BYTE1,
+                },
+                // port1
+                {
+                    ODTL_WR_CNTRL_ON_OFFSET_BYTE4,
+                    ODTL_WR_CNTRL_ON_OFFSET_BYTE5,
+                },
+            },
+            // CHB
+            {
+                // port0
+                {
+                    ODTL_WR_CNTRL_ON_OFFSET_BYTE2,
+                    ODTL_WR_CNTRL_ON_OFFSET_BYTE3,
+                },
+                // port1
+                {
+                    ODTL_WR_CNTRL_ON_OFFSET_BYTE6,
+                    ODTL_WR_CNTRL_ON_OFFSET_BYTE7,
+                },
+            },
+        };
+        static constexpr field_t ODTL_WR_CNTRL_OFF_OFFSET[MAX_CHANNELS][MAX_PORTS][MAX_RANKS] =
+        {
+            // CHA
+            {
+                // port0
+                {
+                    ODTL_WR_CNTRL_OFF_OFFSET_BYTE0,
+                    ODTL_WR_CNTRL_OFF_OFFSET_BYTE1,
+                },
+                // port1
+                {
+                    ODTL_WR_CNTRL_OFF_OFFSET_BYTE4,
+                    ODTL_WR_CNTRL_OFF_OFFSET_BYTE5,
+                },
+            },
+            // CHB
+            {
+                // port0
+                {
+                    ODTL_WR_CNTRL_OFF_OFFSET_BYTE2,
+                    ODTL_WR_CNTRL_OFF_OFFSET_BYTE3,
+                },
+                // port1
+                {
+                    ODTL_WR_CNTRL_OFF_OFFSET_BYTE6,
+                    ODTL_WR_CNTRL_OFF_OFFSET_BYTE7,
+                },
+            },
+        };
 
         // Byte 282-289: ODTL NT Write Control Offset
         // BYTE0: A0 RANK0
@@ -1917,6 +1980,65 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         // BYTE7: B1 RANK1
         static constexpr field_t ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE7{ODTL_NT_WR_CNTRL_OFFSET_BYTE7_BYTE, ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE7_START, ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE7_LEN};
         static constexpr field_t ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE7{ODTL_NT_WR_CNTRL_OFFSET_BYTE7_BYTE, ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE7_START, ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE7_LEN};
+        // Arrange fields for easier consumption in the SPD decoder
+        static constexpr field_t ODTL_NT_WR_CNTRL_ON_OFFSET[MAX_CHANNELS][MAX_PORTS][MAX_RANKS] =
+        {
+            // CHA
+            {
+                // port0
+                {
+                    ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE0,
+                    ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE1,
+                },
+                // port1
+                {
+                    ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE4,
+                    ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE5,
+                },
+            },
+            // CHB
+            {
+                // port0
+                {
+                    ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE2,
+                    ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE3,
+                },
+                // port1
+                {
+                    ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE6,
+                    ODTL_NT_WR_CNTRL_ON_OFFSET_BYTE7,
+                },
+            },
+        };
+        static constexpr field_t ODTL_NT_WR_CNTRL_OFF_OFFSET[MAX_CHANNELS][MAX_PORTS][MAX_RANKS] =
+        {
+            // CHA
+            {
+                // port0
+                {
+                    ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE0,
+                    ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE1,
+                },
+                // port1
+                {
+                    ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE4,
+                    ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE5,
+                },
+            },
+            // CHB
+            {
+                // port0
+                {
+                    ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE2,
+                    ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE3,
+                },
+                // port1
+                {
+                    ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE6,
+                    ODTL_NT_WR_CNTRL_OFF_OFFSET_BYTE7,
+                },
+            },
+        };
 
         // Byte 290-297: ODTL NT Read Control Offset
         // BYTE0: A0 RANK0
@@ -1943,6 +2065,65 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         // BYTE7: B1 RANK1
         static constexpr field_t ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE7{ODTL_NT_RD_CNTRL_OFFSET_BYTE7_BYTE, ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE7_START, ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE7_LEN};
         static constexpr field_t ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE7{ODTL_NT_RD_CNTRL_OFFSET_BYTE7_BYTE, ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE7_START, ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE7_LEN};
+        // Arrange fields for easier consumption in the SPD decoder
+        static constexpr field_t ODTL_NT_RD_CNTRL_ON_OFFSET[MAX_CHANNELS][MAX_PORTS][MAX_RANKS] =
+        {
+            // CHA
+            {
+                // port0
+                {
+                    ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE0,
+                    ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE1,
+                },
+                // port1
+                {
+                    ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE4,
+                    ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE5,
+                },
+            },
+            // CHB
+            {
+                // port0
+                {
+                    ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE2,
+                    ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE3,
+                },
+                // port1
+                {
+                    ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE6,
+                    ODTL_NT_RD_CNTRL_ON_OFFSET_BYTE7,
+                },
+            },
+        };
+        static constexpr field_t ODTL_NT_RD_CNTRL_OFF_OFFSET[MAX_CHANNELS][MAX_PORTS][MAX_RANKS] =
+        {
+            // CHA
+            {
+                // port0
+                {
+                    ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE0,
+                    ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE1,
+                },
+                // port1
+                {
+                    ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE4,
+                    ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE5,
+                },
+            },
+            // CHB
+            {
+                // port0
+                {
+                    ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE2,
+                    ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE3,
+                },
+                // port1
+                {
+                    ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE6,
+                    ODTL_NT_RD_CNTRL_OFF_OFFSET_BYTE7,
+                },
+            },
+        };
 
         // Byte 306-313: Base Vref CA
         // BYTE0: A0 RANK0
