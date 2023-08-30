@@ -76,6 +76,9 @@
 // sendProgressCode
 #include <initservice/istepdispatcherif.H>
 
+#include    <hwpThread.H>
+#include    <hwpThreadHelper.H>
+
 // Code update
 #include <ocmbupd/ocmbupd.H>
 #include <ocmbupd/ocmbFwImage.H>
@@ -150,6 +153,356 @@ bool err_is_sppe_not_ready_with_async_ffdc(Target* const i_ocmb, const errlHndl_
     return is_sppe_not_ready_with_async_ffdc;
 }
 
+errlHndl_t handle_ody_upd_hwps_done(Target* const, errlHndl_t&, bool&); // forward declaration
+
+/** @brief Called to perform the attribute setup for the OCMB.
+ *
+ *  @param[in] i_ocmb                   The OCMB.
+ *
+ *  @return    errlHndl_t               Error if any, otherwise nullptr.
+ */
+errlHndl_t ody_attribute_setup(Target* const i_ocmb)
+{
+    errlHndl_t l_errl = nullptr;
+    const auto boot_flags = i_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>();
+    const auto boot_side = i_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_SIDE>();
+    i_ocmb->setAttr<TARGETING::ATTR_SPPE_BOOT_SIDE>(boot_side);
+
+    // See ody_perv_attributes.xml for these definitions
+    const uint32_t OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK = 0xC0000000;
+    const uint32_t OCMB_BOOT_FLAGS_AUTOBOOT_MODE = 0x00000000;
+    const uint32_t OCMB_BOOT_FLAGS_ISTEP_MODE = 0xC0000000;
+
+    const auto sys = UTIL::assertGetToplevelTarget();
+    if (boot_side == SPPE_BOOT_SIDE_GOLDEN || sys->getAttr<TARGETING::ATTR_OCMB_ISTEP_MODE>())
+    {
+        TRACISTEP("ody_attribute_setup: Disable autoboot for Odyssey golden side HUID=0x%X",
+                  get_huid(i_ocmb));
+
+        // Disable autoboot on the golden side, so that we execute as
+        // little code as possible (and therefore have the smallest chance
+        // of failing) before we update the chip.
+        i_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
+                                                      | OCMB_BOOT_FLAGS_ISTEP_MODE);
+    }
+    else
+    {
+        TRACISTEP("ody_attribute_setup: Enable autoboot for Odyssey side %d HUID=0x%X",
+                  boot_side, get_huid(i_ocmb));
+
+        i_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
+                                                      | OCMB_BOOT_FLAGS_AUTOBOOT_MODE);
+    }
+
+    TRACISTEP("ody_attribute_setup: Setting boot side to boot_side=%d HUID=x%X", boot_side, get_huid(i_ocmb));
+    return l_errl;
+}
+
+/** @brief Called to perform deviceWrite for the OCMB.
+ *
+ *         See ocmbIdecPhase2 description for details on the
+ *         cross-check performed for specifics on the data which
+ *         is synced.
+ *
+ *  @param[in] i_ocmb                   The OCMB.
+ *
+ *  @return    errlHndl_t               Error if any, otherwise nullptr.
+ */
+errlHndl_t ocmb_idec_sync(Target* const i_ocmb)
+{
+    errlHndl_t l_errl = nullptr;
+    size_t size = 0;
+
+    TRACISTEP("ocmb_idec_sync: Read IDEC HUID=0x%X", get_huid(i_ocmb));
+
+    // This write gets translated into a read of the ocmb chip
+    // in the device driver. First, a read of the chip's IDEC
+    // register occurs then ATTR_EC, ATTR_HDAT_EC, and ATTR_CHIP_ID
+    // are set with the values found in that register. So, this
+    // deviceWrite functions more as a setter for an OCMB target's
+    // attributes.
+    // Pass 2 as a va_arg to signal the ocmbIDEC function to execute
+    // phase 2 of its read process.
+    const uint64_t Phase2 = 2;
+    l_errl = DeviceFW::deviceWrite(i_ocmb,
+                                   nullptr,
+                                   size,
+                                   DEVICE_IDEC_ADDRESS(),
+                                   Phase2);
+    return l_errl;
+}
+
+/** @brief Called to perform the Explorer/Odyssey check_for_ready HWP.
+ *
+ *  @param[in] i_ocmb                   The OCMB.
+ *
+ *  @return    errlHndl_t               Error if any, otherwise nullptr.
+ */
+errlHndl_t check_for_ready_work(Target* const i_ocmb)
+{
+    errlHndl_t l_errl = nullptr;
+    fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi_ocmb_target(i_ocmb);
+
+    size_t l_maxTime_secs = 0;
+    timespec_t l_preLoopTime = {};
+    timespec_t l_ocmbCurrentTime = {};
+    clock_gettime(CLOCK_MONOTONIC, &l_preLoopTime);
+
+    bool l_one_more_try = false;
+
+    // Save the original timeout (to be restored after exp_check_for_ready)
+    // Units for the attribute are milliseconds; the value returned is > 1 second
+    const auto original_timeout_ms = i_ocmb->getAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>();
+
+    // Calculate MAX Wait Time - Round up on seconds
+    // - ATTR_MSS_CHECK_FOR_READY_TIMEOUT in msec (see exp_attributes.xml)
+    // - This assumes that all of the OCMBs on a processor were started at the same time
+    //   and that they all have the same original_timeout value
+    // - The calculation is as follows:
+    // 1) Start with the 'seconds' value of the pre-loop time
+    // 2) Add *double* the 'seconds' amount of the original timeout value
+    //    -- the *double* is just to be on the safe side, as we're only dealing with
+    //       seconds and not minutes here
+    // 3) Add 3 to round up for the nanoseconds of (1) and double the milliseconds of (2)
+    if (l_maxTime_secs == 0)
+    {
+        // If not set yet, then set it here:
+        l_maxTime_secs = l_preLoopTime.tv_sec
+            + (2 * (original_timeout_ms / MS_PER_SEC))
+            + 3;
+    }
+
+    // exp_check_for_ready will read this attribute to know how long to
+    // poll. If this number is too large and we get too many I2C error
+    // logs between calls to FAPI_INVOKE_HWP, we will run out of memory.
+    // So break the original timeout into smaller timeouts.
+    // This will not affect how the loop below will use l_maxTime_secs to look for a timeouts
+    const ATTR_MSS_CHECK_FOR_READY_TIMEOUT_type smaller_timeout_ms = 10;
+    i_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(smaller_timeout_ms);
+
+    TRACISTEP("check_for_ready_work: OCMB 0x%X: "
+              "original_timeout_ms = %d, smaller_timeout_ms = %d, "
+              "l_preLoopTime.tv_sec = %lu l_maxTime_secs = %lu",
+              get_huid(i_ocmb), original_timeout_ms, smaller_timeout_ms,
+              l_preLoopTime.tv_sec, l_maxTime_secs);
+
+    while (true)
+    {
+        // Delete the log from the previous iteration
+        if( l_errl )
+        {
+            delete l_errl;
+            l_errl = nullptr;
+        }
+
+        if (UTIL::isOdysseyChip(i_ocmb))
+        {
+            FAPI_INVOKE_HWP(l_errl, ody_check_for_ready, l_fapi_ocmb_target);
+        }
+        else
+        {
+            FAPI_INVOKE_HWP(l_errl, exp_check_for_ready, l_fapi_ocmb_target);
+        }
+        // On success, quit retrying.
+        if (!l_errl)
+        {
+            TRACISTEP("check_for_ready_work: exp/ody_check_for_ready DONE ! HUID=0x%X", get_huid(i_ocmb));
+            break;
+        }
+
+        clock_gettime(CLOCK_MONOTONIC, &l_ocmbCurrentTime);
+        if (l_ocmbCurrentTime.tv_sec > l_maxTime_secs)
+        {
+            if (l_one_more_try == false)
+            {
+                // Do one more attempt just to be safe
+                l_one_more_try = true;
+                TRACISTEP("check_for_ready_work: Setting 'one more try' based on times HUID=0x%X "
+                          "l_ocmbCurrentTime.tv_sec = %lu, l_maxTime_secs = %lu",
+                          get_huid(i_ocmb), l_ocmbCurrentTime.tv_sec, l_maxTime_secs);
+            }
+            else
+            {
+                // Already done "one more try" so just break
+                TRACISTEP("check_for_ready_work: Breaking as 'one more try' exhausted HUID=0x%X "
+                          "l_ocmbCurrentTime.tv_sec = %lu, l_maxTime_secs = %lu",
+                          get_huid(i_ocmb), l_ocmbCurrentTime.tv_sec, l_maxTime_secs);
+                break;
+            }
+        }
+    } // end while
+
+    // Restore original timeout value
+    i_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(original_timeout_ms);
+    return l_errl;
+}
+
+/** @brief Called to handle the OCMB boot process on a per PROC basis.
+ *
+ *         This function handles the boot of the OCMB's on a per PROC
+ *         basis.  Any OCMB operations or recovery actions will be
+ *         handled by leveraging the parallelization of the permittable
+ *         OCMB operations.
+ *
+ *         During each of the PROC's isolation of its children OCMBs, each PROC
+ *         will synchronize the necessary OCMB operations to accomplish the proper
+ *         OCMB boot sequences.
+ *
+ *  @param[in] i_proc                   The PROC.
+ *  @param[in/out] io_iStepError        The IStepError which will capture any problems.
+ *
+ *  @return    errlHndl_t               Error if any, otherwise nullptr.
+ */
+errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
+{
+    errlHndl_t l_errl = nullptr;
+    TargetHandleList l_functionalOcmbChipList;
+    getChildAffinityTargets( l_functionalOcmbChipList,
+                             i_proc,
+                             CLASS_CHIP,
+                             TYPE_OCMB_CHIP,
+                             true);
+
+    while (!l_functionalOcmbChipList.empty())
+    {
+        const auto ocmbs = move(l_functionalOcmbChipList);
+        // Not required in the standard for a moved-from vector to be empty
+        // Here for completeness
+        l_functionalOcmbChipList.clear();
+        bool proc_reboot_odysseys = false;
+
+        // Watchdog refresh - each i2c update may take approximately
+        // one minute, but this may re-occur, so sendProgressCode
+        // once per iteration in the loop
+        INITSERVICE::sendProgressCode();
+        TRACISTEP("boot_all_proc_ocmbs: sendProgressCode PROC HUID=0x%X", get_huid(i_proc));
+
+        ISTEP::parallel_for_each(ocmbs,
+                                 io_iStepError,
+                                 "check_for_ready_work",
+                                 [&](Target* const i_ocmb)
+        {
+            errlHndl_t i_ocmb_errl = nullptr;
+            TRACISTEP("parallel_for_each boot_all_proc_ocmbs: WORKING ON HUID=0x%X", get_huid(i_ocmb));
+            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi_ocmb_target(i_ocmb);
+            do
+            {
+                if (UTIL::isOdysseyChip(i_ocmb))
+                {
+                    i_ocmb_errl = ody_attribute_setup(i_ocmb);
+                    if (i_ocmb_errl)
+                    {
+                        TRACISTEP("parallel_for_each ody_attribute_setup: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
+                        break;
+                    }
+                }
+                i_ocmb_errl = check_for_ready_work(i_ocmb);
+                if (i_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each check_for_ready_work: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
+                    break;
+                }
+                i_ocmb_errl = ocmb_idec_sync(i_ocmb);
+                if (i_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each ocmb_idec_sync: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
+                    break;
+                }
+                // ABOVE COMPLETES EXPLORER
+                if (!UTIL::isOdysseyChip(i_ocmb))
+                {
+                    TRACISTEP("parallel_for_each DONE with EXPLORER HUID=0x%X", get_huid(i_ocmb));
+                    break;
+                }
+                FAPI_INVOKE_HWP(i_ocmb_errl, ody_sppe_config_update, l_fapi_ocmb_target);
+                if (i_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each ody_sppe_config_update: HUID=0x%X PROBLEM ! ", get_huid(i_ocmb));
+                    break;
+                }
+                FAPI_INVOKE_HWP(i_ocmb_errl, ody_cbs_start, l_fapi_ocmb_target);
+                if (i_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each ody_cbs_start: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
+                    break;
+                }
+                FAPI_INVOKE_HWP(i_ocmb_errl, ody_sppe_check_for_ready, l_fapi_ocmb_target);
+                if (i_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each HWP ody_sppe_check_for_ready: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
+                    break;
+                }
+            } while (false);
+
+            if (UTIL::isOdysseyChip(i_ocmb))
+            {
+                i_ocmb_errl = handle_ody_upd_hwps_done(i_ocmb, i_ocmb_errl, proc_reboot_odysseys); // handle_ody_upd_hwps_done may modify i_ocmb_errl
+                if (i_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each handle_ody_upd_hwps_done: OCMB HUID=0x%X proc_reboot_odysseys=%d", get_huid(i_ocmb), proc_reboot_odysseys);
+                    captureError(i_ocmb_errl, io_iStepError, HWPF_COMP_ID, i_ocmb);
+                    goto EXIT_OCMBS;
+                }
+                if (proc_reboot_odysseys)
+                {
+                    TRACISTEP("parallel_for_each boot_all_proc_ocmbs: OCMB HUID=0x%X proc_reboot_odysseys=%d EXIT_OCMBS", get_huid(i_ocmb), proc_reboot_odysseys);
+                    goto EXIT_OCMBS;
+                }
+                if (!i_ocmb->getAttr<ATTR_HWAS_STATE>().functional)
+                {
+                    TRACISTEP("parallel_for_each boot_all_proc_ocmbs: OCMB HUID=0x%X proc_reboot_odysseys=%d DECONFIG EXIT_OCMBS", get_huid(i_ocmb), proc_reboot_odysseys);
+                    goto EXIT_OCMBS;
+                }
+                errlHndl_t no_error = nullptr; // no error for this call
+                i_ocmb_errl = ody_upd_process_event(i_ocmb,
+                                               CHECK_FOR_READY_COMPLETED,
+                                               no_error,
+                                               proc_reboot_odysseys);
+                if (i_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each ody_upd_process_event: OCMB HUID=0x%X proc_reboot_odysseys=%d", get_huid(i_ocmb), proc_reboot_odysseys);
+                    captureError(i_ocmb_errl, io_iStepError, HWPF_COMP_ID, i_ocmb);
+                    goto EXIT_OCMBS;
+                }
+            }
+            else // EXPLORER
+            {
+                if (i_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each boot_all_proc_ocmbs: EXPLORER failed HUID=0x%X", get_huid(i_ocmb));
+                    captureError(i_ocmb_errl, io_iStepError, HWPF_COMP_ID, i_ocmb);
+                }
+            }
+            EXIT_OCMBS:
+                return nullptr; // No error should be passed back from the parallel_for_each
+        }); // parallel_for_each i_ocmb
+
+        if (proc_reboot_odysseys) // ODYSSEY ONLY PATH BELOW, EXPLORER will NOT set proc_reboot_odysseys
+        {
+            getChildAffinityTargets(l_functionalOcmbChipList, // this will re-seed the OCMBs to cycle again
+                                    i_proc,
+                                    CLASS_CHIP,
+                                    TYPE_OCMB_CHIP,
+                                    true /* functional */);
+
+            // After Odyssey restarts, clear their code levels
+            std::for_each(begin(l_functionalOcmbChipList),
+                          end(l_functionalOcmbChipList),
+                          clear_ody_code_levels_state);
+            FAPI_INVOKE_HWP(l_errl, p10_ocmb_enable, { i_proc }); // PROC level, ALL Odysseys reboot, Odyssey ONLY path here
+            if (l_errl)
+            {
+                TRACISTEP(ERR_MRK"boot_all_proc_ocmbs: PROBLEM restarting all Odysseys under PROC HUID=0x%X", get_huid(i_proc));
+                captureError(l_errl, io_iStepError, HWPF_COMP_ID, i_proc);
+                break;
+            }
+        }
+    } // end while (!l_functionalOcmbChipList.empty())
+
+    TRACISTEP(EXIT_MRK"boot_all_proc_ocmbs: HUID=0x%X", get_huid(i_proc));
+    return l_errl;
+}
+
 /** @brief Called when all of the check_for_ready HWPs have been invoked on the given OCMB,
  *  whether they failed or not. This function handles errors and checks the code version
  *  running on the OCMB if possible.
@@ -202,9 +555,12 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
 
                 event = OCMB_BOOT_ERROR_NO_FFDC;
 
-                errl->plid(i_hwpErrl->plid());
-                i_hwpErrl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                errlCommit(i_hwpErrl, HWPF_COMP_ID);
+                if (i_hwpErrl)
+                {
+                    errl->plid(i_hwpErrl->plid());
+                    i_hwpErrl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    errlCommit(i_hwpErrl, HWPF_COMP_ID);
+                }
                 i_hwpErrl = errl;
                 errl = nullptr;
             }
@@ -230,8 +586,6 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
     errlHndl_t l_errl = nullptr;
     IStepError l_StepError;
 
-    const auto sys = UTIL::assertGetToplevelTarget();
-
     do
     {
 
@@ -245,438 +599,19 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
     TargetHandleList functionalProcChipList;
 
     getAllChips(functionalProcChipList, TYPE_PROC, true);
-
-    // loop thru the list of processors
-    for (TargetHandleList::const_iterator
-            l_proc_iter = functionalProcChipList.begin();
-            l_proc_iter != functionalProcChipList.end();
-            ++l_proc_iter)
+    ISTEP::parallel_for_each(composable(getAllChips)(TYPE_PROC, true),
+                                                   l_StepError,
+                                                   "boot_all_proc_ocmbs",
+                                                   [&](Target* const i_proc)
     {
-        TargetHandleList l_functionalOcmbChipList;
-        getChildAffinityTargets( l_functionalOcmbChipList,
-                                 const_cast<Target*>(*l_proc_iter),
-                                 CLASS_CHIP,
-                                 TYPE_OCMB_CHIP,
-                                 true);
-
-        while (!l_functionalOcmbChipList.empty())
-        {
-            // For each loop on an OCMB below, multiply the timeout chunk
-            size_t loop_multiplier = 1;
-
-            // Keep track of overall time
-            size_t l_maxTime_secs = 0;
-            timespec_t l_preLoopTime = {};
-            timespec_t l_ocmbCurrentTime = {};
-            clock_gettime(CLOCK_MONOTONIC, &l_preLoopTime);
-
-            // If this variable is set to true, we'll restart the
-            // check_for_ready loop on all the ocmbs under this
-            // processor.
-            bool retry_odyssey_check_for_ready = false;
-
-            const auto ocmbs = move(l_functionalOcmbChipList);
-            l_functionalOcmbChipList.clear();
-
-            for (const auto l_ocmb : ocmbs)
-            {
-                TRACFCOMP(g_trac_isteps_trace,
-                          "Start : exp_check_for_ready "
-                          "for 0x%.08X", get_huid(l_ocmb));
-
-                fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>
-                    l_fapi_ocmb_target(l_ocmb);
-
-                // Save the original timeout (to be restored after exp_check_for_ready)
-                // Units for the attribute are milliseconds; the value returned is > 1 second
-                const auto original_timeout_ms
-                    = l_ocmb->getAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>();
-
-                // Calculate MAX Wait Time - Round up on seconds
-                // - ATTR_MSS_CHECK_FOR_READY_TIMEOUT in msec (see exp_attributes.xml)
-                // - This assumes that all of the OCMBs on a processor were started at the same time
-                //   and that they all have the same original_timeout value
-                // - The calculation is as follows:
-                // 1) Start with the 'seconds' value of the pre-loop time
-                // 2) Add *double* the 'seconds' amount of the original timeout value
-                //    -- the *double* is just to be on the safe side, as we're only dealing with
-                //       seconds and not minutes here
-                // 3) Add 3 to round up for the nanoseconds of (1) and double the milliseconds of (2)
-                if (l_maxTime_secs == 0)
-                {
-                    // If not set yet, then set it here:
-                    l_maxTime_secs = l_preLoopTime.tv_sec
-                        + (2 * (original_timeout_ms / MS_PER_SEC))
-                        + 3;
-                }
-
-                // exp_check_for_ready will read this attribute to know how long to
-                // poll. If this number is too large and we get too many I2C error
-                // logs between calls to FAPI_INVOKE_HWP, we will run out of memory.
-                // So break the original timeout into smaller timeouts.
-                // This will not affect how the loop below will use l_maxTime_secs to look for a timouts
-                const ATTR_MSS_CHECK_FOR_READY_TIMEOUT_type smaller_timeout_ms = 10 * loop_multiplier++;
-                l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(smaller_timeout_ms);
-
-                TRACFCOMP(g_trac_isteps_trace,"exp_check_for_ready: For OCMB 0x%X: "
-                          "original_timeout_ms = %d, smaller_timeout_ms = %d, "
-                          "l_preLoopTime.tv_sec = %lu l_maxTime_secs = %lu",
-                          get_huid(l_ocmb), original_timeout_ms, smaller_timeout_ms,
-                          l_preLoopTime.tv_sec, l_maxTime_secs);
-
-                // Variable used to track attempting one more time after max time has
-                // been succeeded
-                bool l_one_more_try = false;
-
-                // Retry exp_check_for_ready as many times as it takes to either
-                // succeed or time out
-                while (true)
-                {
-                    // Each attempt can take a few minutes so poke the
-                    //  watchdog before each attempt
-                    INITSERVICE::sendProgressCode();
-
-                    // Delete the log from the previous iteration
-                    if( l_errl )
-                    {
-                        delete l_errl;
-                        l_errl = nullptr;
-                    }
-
-                    if(l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
-                    {
-                        FAPI_INVOKE_HWP(l_errl,
-                                        ody_check_for_ready,
-                                        l_fapi_ocmb_target);
-                    }
-                    else
-                    {
-                        FAPI_INVOKE_HWP(l_errl,
-                                        exp_check_for_ready,
-                                        l_fapi_ocmb_target);
-                    }
-
-                    // On success, quit retrying.
-                    if (!l_errl)
-                    {
-                        break;
-                    }
-
-                    clock_gettime(CLOCK_MONOTONIC, &l_ocmbCurrentTime);
-                    if (l_ocmbCurrentTime.tv_sec > l_maxTime_secs)
-                    {
-                        if (l_one_more_try == false)
-                        {
-                            // Do one more attempt just to be safe
-                            l_one_more_try = true;
-                            TRACFCOMP(g_trac_isteps_trace,"exp_check_for_ready "
-                                      "Setting 'one more try' (%d) based on times: "
-                                      "l_ocmbCurrentTime.tv_sec = %lu, l_maxTime_secs = %lu",
-                                      l_one_more_try, l_ocmbCurrentTime.tv_sec, l_maxTime_secs);
-
-                        }
-                        else
-                        {
-                            // Already done "one more try" so just break
-                            TRACFCOMP(g_trac_isteps_trace,"exp_check_for_ready "
-                                      "Breaking as 'one more try' (%d) was already set. "
-                                      "l_ocmbCurrentTime.tv_sec = %lu, l_maxTime_secs = %lu",
-                                      l_one_more_try, l_ocmbCurrentTime.tv_sec, l_maxTime_secs);
-                            break;
-                        }
-                    }
-
-                } // end of timeout loop
-
-                // Restore original timeout value
-                l_ocmb->setAttr<ATTR_MSS_CHECK_FOR_READY_TIMEOUT>(original_timeout_ms);
-
-                if (l_errl)
-                {
-                    if (l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
-                    {
-                        TRACFCOMP(g_trac_isteps_trace,
-                                  "ERROR : call_ocmb_check_for_ready HWP(): "
-                                  "ody_check_for_ready failed on target 0x%08X."
-                                  TRACE_ERR_FMT,
-                                  get_huid(l_ocmb),
-                                  TRACE_ERR_ARGS(l_errl));
-                        // Do not capture the error or continue for Odyssey OCMBs; let the
-                        // subsequent error-handling code kick in.
-                    }
-                    else
-                    {
-                        TRACFCOMP(g_trac_isteps_trace,
-                                  "ERROR : call_ocmb_check_for_ready HWP(): "
-                                  "exp_check_for_ready failed on target 0x%08X."
-                                  TRACE_ERR_FMT,
-                                  get_huid(l_ocmb),
-                                  TRACE_ERR_ARGS(l_errl));
-
-                        // Capture error and continue to next OCMB
-                        captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
-                        continue;
-                    }
-                }
-                else
-                {
-                    TRACFCOMP(g_trac_isteps_trace,
-                              "SUCCESS : exp/ody check_for_ready "
-                              "completed ok");
-
-                    size_t size = 0;
-
-                    TRACFCOMP(g_trac_isteps_trace,
-                              "Read IDEC from OCMB 0x%.8X",
-                              get_huid(l_ocmb));
-
-                    // This write gets translated into a read of the ocmb chip
-                    // in the device driver. First, a read of the chip's IDEC
-                    // register occurs then ATTR_EC, ATTR_HDAT_EC, and ATTR_CHIP_ID
-                    // are set with the values found in that register. So, this
-                    // deviceWrite functions more as a setter for an OCMB target's
-                    // attributes.
-                    // Pass 2 as a va_arg to signal the ocmbIDEC function to execute
-                    // phase 2 of its read process.
-                    const uint64_t Phase2 = 2;
-                    l_errl = DeviceFW::deviceWrite(l_ocmb,
-                                                   nullptr,
-                                                   size,
-                                                   DEVICE_IDEC_ADDRESS(),
-                                                   Phase2);
-                    if (l_errl)
-                    {
-                        // read of ID/EC failed even though we THOUGHT we were
-                        // present.
-                        TRACFCOMP(g_trac_isteps_trace,
-                                  "ERROR : call_ocmb_check_for_ready HWP(): "
-                                  "read IDEC failed on target 0x%08X (eid 0x%X)."
-                                  TRACE_ERR_FMT,
-                                  get_huid(l_ocmb),
-                                  l_errl->eid(),
-                                  TRACE_ERR_ARGS(l_errl));
-
-                        if (l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>() != POWER_CHIPID::ODYSSEY_16)
-                        {
-                            // Capture error and continue to next OCMB for Explorer OCMBs. For
-                            // Odyssey, let the subsequent error-handling code kick in.
-                            captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
-                            continue;
-                        }
-                    }
-                }
-
-                // Odyssey chips require a few more HWPs to run to start them up:
-                // ody_sppe_config_update writes the SPPE config
-                // ody_cbs_start starts SPPE
-                // ody_sppe_check_for_ready makes sure that SPPE booted correctly
-                if(l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>() != POWER_CHIPID::ODYSSEY_16)
-                {
-                    continue;
-                }
-
-                /* Set the boot side and boot flags appropriately. */
-
-                const ATTR_OCMB_BOOT_FLAGS_type boot_flags
-                    = l_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>();
-
-                const auto boot_side
-                    = l_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_SIDE>();
-
-                l_ocmb->setAttr<TARGETING::ATTR_SPPE_BOOT_SIDE>(boot_side);
-
-                // See ody_perv_attributes.xml for these definitions
-                const uint32_t OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK = 0xC0000000;
-                const uint32_t OCMB_BOOT_FLAGS_AUTOBOOT_MODE = 0x00000000;
-                const uint32_t OCMB_BOOT_FLAGS_ISTEP_MODE = 0xC0000000;
-
-                if (boot_side == SPPE_BOOT_SIDE_GOLDEN
-                    || sys->getAttr<TARGETING::ATTR_OCMB_ISTEP_MODE>())
-                {
-                    TRACISTEP("call_ocmb_check_for_ready: Disable autoboot for golden side on Odyssey OCMB 0x%08X",
-                              get_huid(l_ocmb));
-
-                    // Disable autoboot on the golden side, so that we execute as
-                    // little code as possible (and therefore have the smallest chance
-                    // of failing) before we update the chip.
-                    l_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
-                                                                  | OCMB_BOOT_FLAGS_ISTEP_MODE);
-                }
-                else
-                {
-                    TRACISTEP("call_ocmb_check_for_ready: Enable autoboot for side %d on Odyssey OCMB 0x%08X",
-                              boot_side,
-                              get_huid(l_ocmb));
-
-                    l_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
-                                                                  | OCMB_BOOT_FLAGS_AUTOBOOT_MODE);
-                }
-
-                do
-                {
-                    if (l_errl)
-                    {
-                        // This could already be set from ody_check_for_ready or the IDEC
-                        // deviceWrite above.
-                        break;
-                    }
-
-                    FAPI_INVOKE_HWP(l_errl, ody_sppe_config_update, l_fapi_ocmb_target);
-
-                    if(l_errl)
-                    {
-                        TRACISTEP("call_ocmb_check_for_ready: ody_sppe_config_update failed on OCMB 0x%x", get_huid(l_ocmb));
-                        break; // handle error
-                    }
-
-                    TRACISTEP("call_ocmb_check_for_ready: setting boot side to %d for OCMB 0x%X",
-                              boot_side,
-                              get_huid(l_ocmb));
-
-                    FAPI_INVOKE_HWP(l_errl, ody_cbs_start, l_fapi_ocmb_target);
-                    if(l_errl)
-                    {
-                        TRACISTEP("call_ocmb_check_for_ready: ody_cbs_start failed on OCMB 0x%x", get_huid(l_ocmb));
-                        break; // handle error
-                    }
-
-                    FAPI_INVOKE_HWP(l_errl, ody_sppe_check_for_ready, l_fapi_ocmb_target);
-
-                    if (l_errl)
-                    {
-                        TRACISTEP("call_ocmb_check_for_ready: ody_sppe_check_for_ready failed on OCMB 0x%x", get_huid(l_ocmb));
-                        break;
-                    }
-                } while (false);
-
-                bool retry_this_odyssey = false;
-
-                l_errl = handle_ody_upd_hwps_done(l_ocmb,
-                                                  l_errl,
-                                                  retry_this_odyssey);
-
-                if (l_errl)
-                {
-                    TRACISTEP("call_ocmb_check_for_ready: ody_upd fsm failed to handle "
-                              "a hwp error on OCMB 0x%X; failing the Istep - "
-                              TRACE_ERR_FMT,
-                              get_huid(l_ocmb),
-                              TRACE_ERR_ARGS(l_errl));
-
-                    captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
-
-                    // If the ody_upd FSM fails, a fatal error
-                    // happened and we should stop the boot, so we
-                    // break out of the entire istep here.
-                    goto FAIL_ISTEP;
-                }
-
-                retry_odyssey_check_for_ready = retry_odyssey_check_for_ready || retry_this_odyssey;
-
-                if (retry_this_odyssey)
-                {
-                    TRACISTEP("call_ocmb_check_for_ready: OCMB 0x%08X requires us to reboot all of the "
-                              "Odysseys under processor 0x%08X",
-                              get_huid(l_ocmb), get_huid(*l_proc_iter));
-
-                    continue; // We continue boot other Odysseys even though we're going
-                              // to reboot them all anyway; that way, if we have, say, M
-                              // Odysseys and all of them are going to fail once, we do
-                              // 2*M boots total, instead of the 1+2+3+...+M boots that we
-                              // would do if we didn't continue here. (This is worse for M
-                              // < 3, but is better when M > 3, which is going to be the
-                              // common case).
-                }
-
-                if (!l_ocmb->getAttr<ATTR_HWAS_STATE>().functional)
-                {
-                    TRACISTEP("call_ocmb_check_for_ready: OCMB 0x%08X was deconfigured",
-                              get_huid(l_ocmb));
-
-                    continue;
-                }
-
-                errlHndl_t no_error = nullptr; // no error for this call
-                l_errl = ody_upd_process_event(l_ocmb,
-                                               CHECK_FOR_READY_COMPLETED,
-                                               no_error,
-                                               retry_odyssey_check_for_ready);
-
-                if (l_errl)
-                {
-                    TRACISTEP("call_ocmb_check_for_ready: ody_upd fsm failed on OCMB 0x%x; "
-                              "failing the Istep",
-                              get_huid(l_ocmb));
-
-                    captureError(l_errl, l_StepError, HWPF_COMP_ID, l_ocmb);
-
-                    // If the ody_upd FSM fails, a fatal error
-                    // happened and we should stop the boot, so we
-                    // break out of the entire istep here.
-                    goto FAIL_ISTEP;
-                }
-            } // End of OCMB Loop
-
-            if (retry_odyssey_check_for_ready)
-            {
-                TRACISTEP("call_ocmb_check_for_ready: restarting all Odysseys under processor "
-                          " at the request of the Odyssey code update FSM");
-
-                getChildAffinityTargets(l_functionalOcmbChipList,
-                                        const_cast<Target*>(*l_proc_iter),
-                                        CLASS_CHIP,
-                                        TYPE_OCMB_CHIP,
-                                        true /* functional */);
-
-                // After restarting the Odysseys, we assume that we don't know their code
-                // level any more.
-                std::for_each(begin(l_functionalOcmbChipList),
-                              end(l_functionalOcmbChipList),
-                              clear_ody_code_levels_state);
-
-                TRACISTEP(INFO_MRK"call_ocmb_check_for_ready: Calling p10_ocmb_enable on 0x%08X",
-                          get_huid(*l_proc_iter));
-
-                /* Assert and de-assert a CFAM reset. */
-
-                FAPI_INVOKE_HWP(l_errl, p10_ocmb_enable, { *l_proc_iter });
-
-                if (l_errl)
-                {
-                    TRACISTEP(ERR_MRK"call_ocmb_check_for_ready: p10_ocmb_enable failed "
-                              "on target 0x%08X. Failing the Istep. "
-                              TRACE_ERR_FMT,
-                              get_huid(*l_proc_iter),
-                              TRACE_ERR_ARGS(l_errl));
-
-                    // Capture error and fail the istep
-                    captureError(l_errl, l_StepError, HWPF_COMP_ID, *l_proc_iter);
-                    goto FAIL_ISTEP;
-                }
-
-                // We need to do an explicit delay before our first i2c operation
-                //  to the OCMBs to ensure we don't catch them too early in the boot
-                //  and lock them up.
-                const auto ocmb_delay = UTIL::assertGetToplevelTarget()->getAttr<ATTR_OCMB_RESET_DELAY_SEC>();
-                nanosleep(ocmb_delay, 0);
-
-                /* The fact that l_functionalOcmbChipList is non-empty will cause us to retry them all. */
-            }
-        } // End of Odyssey retry loop
-
-        {
-            auto explorers
-                = composable(getChildAffinityTargets)(const_cast<Target*>(*l_proc_iter),
-                                                      CLASS_CHIP,
-                                                      TYPE_OCMB_CHIP,
-                                                      true);
-
-            explorers.erase(std::remove_if(begin(explorers), end(explorers), UTIL::isOdysseyChip),
-                            end(explorers));
-
-            // Grab informational Explorer logs (early IPL = true)
-            EXPSCOM::createExplorerLogs(explorers, true);
-        }
+        return boot_all_proc_ocmbs(i_proc, l_StepError);
+    });
+
+    const auto reconfig = UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+    if ( (!l_StepError.isNull()) || reconfig )
+    {
+        TRACISTEP(ERR_MRK"call_ocmb_check_for_ready: ISTEPERROR or RECONFIG encountered");
+        goto FAIL_ISTEP;
     }
 
     // Loop thru the list of processors and send Memory config info to SBE
@@ -686,9 +621,8 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
         if (l_errl)
         {
-            TRACFCOMP(g_trac_isteps_trace,
-                      ERR_MRK"ERROR : call_ocmb_check_for_ready HWP(): "
-                      "psuSendSbeMemConfig failed for target 0x%.08X."
+            TRACISTEP(ERR_MRK"ERROR : call_ocmb_check_for_ready HWP(): "
+                      "psuSendSbeMemConfig failed HUID=0x%X"
                       TRACE_ERR_FMT,
                       get_huid(l_procTarget),
                       TRACE_ERR_ARGS(l_errl));
@@ -698,9 +632,8 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
         }
         else
         {
-            TRACFCOMP(g_trac_isteps_trace,
-                      INFO_MRK"SUCCESS : call_ocmb_check_for_ready HWP(): "
-                      "psuSendSbeMemConfig completed ok for target 0x%.08X.",
+            TRACISTEP(INFO_MRK"SUCCESS : call_ocmb_check_for_ready HWP(): "
+                      "psuSendSbeMemConfig completed ok HUID=0x%X",
                       get_huid(l_procTarget));
         }
     } // for (auto &l_procTarget: functionalProcChipList)
@@ -711,23 +644,19 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
     getAllChips(l_allOCMBs, TYPE_OCMB_CHIP, true);
     for (const auto l_ocmb : l_allOCMBs)
     {
-        uint32_t l_chipId = l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
-        if (l_chipId == POWER_CHIPID::ODYSSEY_16)
+        if (UTIL::isOdysseyChip(l_ocmb))
         {
-            TRACFCOMP(g_trac_isteps_trace,
-                      "Enable attention processing for Odyssey OCMBs");
+            TRACISTEP("call_ocmb_check_for_ready: Enable attention processing for Odyssey OCMBs");
             UTIL::assertGetToplevelTarget()->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
         }
         // There can be no mixing of OCMB types so only need to check one
         break;
     }
-
     // Enable scoms via the Odyssey SBE now that the the SBE is running
     // and we can send it chipops
     for (const auto l_ocmb : l_allOCMBs)
     {
-        uint32_t l_chipId = l_ocmb->getAttr<TARGETING::ATTR_CHIP_ID>();
-        if (l_chipId == POWER_CHIPID::ODYSSEY_16)
+        if (UTIL::isOdysseyChip(l_ocmb))
         {
             ScomSwitches l_switches = l_ocmb->getAttr<ATTR_SCOM_SWITCHES>();
 
@@ -742,7 +671,7 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
         }
     }
 
-    } while (false);
+    } while (false); // outer do
 
  FAIL_ISTEP:
 
