@@ -51,7 +51,7 @@ ReturnCode ody_sppe_check_for_ready(
     FAPI_DBG("Entering...");
 
     // fill common boot parms structure
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, FAPI_SYSTEM, l_boot_parms.boot_flags));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, i_target, l_boot_parms.boot_flags));
     l_boot_parms.max_polls = MAX_POLLS;
     l_boot_parms.poll_delay_cycles = POLL_DELAY_CYCLES;
     l_boot_parms.poll_delay_ns = POLL_DELAY_NS;

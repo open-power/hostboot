@@ -287,7 +287,7 @@ fapi2::ReturnCode ody_scratch_regs_update(
 
         // Read BOOT_FLAGS that was set from platform
         FAPI_DBG("Reading ATTR_OCMB_BOOT_FLAGS");
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, FAPI_SYSTEM, l_attr_ocmb_boot_flags),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCMB_BOOT_FLAGS, i_target, l_attr_ocmb_boot_flags),
                  "Error from FAPI_ATTR_GET (ATTR_OCMB_BOOT_FLAGS)");
         l_scratch11_reg.insertFromRight<ATTR_OCMB_BOOT_FLAGS_STARTBIT, ATTR_OCMB_BOOT_FLAGS_LENGTH>(l_attr_ocmb_boot_flags);
 
