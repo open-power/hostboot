@@ -824,6 +824,11 @@
         "description": "Odyssey chip Recoverable Config",
         "name": "MEM_LOCAL_FIR_CFG_RE"
     },
+    "0x71e0": {
+        "address": "0x0000000000070008",
+        "description": "SPI Controller Status Register",
+        "name": "SPICTL0_STATUS_REG"
+    },
     "0x7367": {
         "address": "0x000000000801241c",
         "description": "Odyssey chip DLX CYA2 Register",
@@ -1013,6 +1018,11 @@
         "address": "0x000000000801146d",
         "description": "Odyssey chip MBS Mainline UE Address Trap Register",
         "name": "MBUER"
+    },
+    "0x9454": {
+        "address": "0x0000000000070000",
+        "description": "SPI Controller Error Inject Register",
+        "name": "SPICTL0_ERROR_INJECT"
     },
     "0x95bb": {
         "address": "0x0000000001040105",

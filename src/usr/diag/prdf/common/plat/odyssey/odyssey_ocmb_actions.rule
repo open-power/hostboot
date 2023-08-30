@@ -755,6 +755,20 @@ actionclass ppeHwErr
     ocmb_M_th1;
 };
 
+# TP_LOCAL_FIR[36,37]
+actionclass pibRamUeEccErr
+{
+    capture(ppe_pibmem_status_reg);
+    ocmb_M_th1;
+};
+
+# TP_LOCAL_FIR[45]
+actionclass spiControllerErr
+{
+    capture(spi_controller);
+    ocmb_M_th1;
+};
+
 ################################################################################
 #                             PLL unlock attentions                            #
 ################################################################################
@@ -783,78 +797,91 @@ actionclass pcb_slave_internal_parity
 actionclass ocmb_M_info_only_clearTpErrStat
 {
     ocmb_M_info_only;
+    capture(tp_err_status);
     funccall("clearTpErrStat");
 };
 
 actionclass ocmb_M_th_32perDay_clearTpErrStat
 {
     ocmb_M_th_32perDay;
+    capture(tp_err_status);
     funccall("clearTpErrStat");
 };
 
 actionclass ocmb_M_th_32perDay_clearTpPscomStat
 {
     ocmb_M_th_32perDay;
+    capture(tp_pscom_stat_err);
     funccall("clearTpPscomStat");
 };
 
 actionclass ocmb_M_info_only_clearTpDtsErr
 {
     ocmb_M_info_only;
+    capture(tp_dts_err);
     funccall("clearTpDtsErr");
 };
 
 actionclass ocmb_M_info_only_clearTpFmuErrRpt
 {
     ocmb_M_info_only;
+    capture(tp_fmu_err_rpt);
     funccall("clearTpFmuErrRpt");
 };
 
 actionclass ocmb_M_info_only_clearPcbCtlErr
 {
     ocmb_M_info_only;
+    capture(pcbctl_err);
     funccall("clearPcbCtlErr");
 };
 
 actionclass ocmb_M_info_only_clearResetRegB
 {
     ocmb_M_info_only;
+    capture(reset_reg_b);
     funccall("clearResetRegB");
 };
 
 actionclass level2_M_ocmb_L_th1_clearPcbCtlErr
 {
     level2_M_ocmb_L_th1;
+    capture(pcbctl_err);
     funccall("clearPcbCtlErr");
 };
 
 actionclass ocmb_M_th1_clearPcbCtlErr
 {
     ocmb_M_th1;
+    capture(pcbctl_err);
     funccall("clearPcbCtlErr");
 };
 
 actionclass ocmb_M_info_only_clearMemErrStat
 {
     ocmb_M_info_only;
+    capture(mem_err_status);
     funccall("clearMemErrStat");
 };
 
 actionclass ocmb_M_th_32perDay_clearMemErrStat
 {
     ocmb_M_th_32perDay;
+    capture(mem_err_status);
     funccall("clearMemErrStat");
 };
 
 actionclass ocmb_M_th_32perDay_clearMemPscomStat
 {
     ocmb_M_th_32perDay;
+    capture(mem_pscom_status_err);
     funccall("clearMemPscomStat");
 };
 
 actionclass ocmb_M_info_only_clearMemDtsErr
 {
     ocmb_M_info_only;
+    capture(mem_dts_err);
     funccall("clearMemDtsErr");
 };
 
@@ -998,14 +1025,12 @@ actionclass omi_bus_th_32perDay_CRC
 actionclass analyzeTP_LOCAL_FIR
 {
     capture(ocmb_regs);
-    capture(tp_local_regs);
     analyze(gTP_LOCAL_FIR);
 };
 
 actionclass analyzeMEM_LOCAL_FIR
 {
     capture(ocmb_regs);
-    capture(mem_local_regs);
     analyze(gMEM_LOCAL_FIR);
 };
 

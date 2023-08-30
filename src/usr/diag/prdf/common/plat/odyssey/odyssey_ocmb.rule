@@ -1147,12 +1147,12 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[36]
      *  PIB interface - RAM UE ECC error
      */
-    (rTP_LOCAL_FIR, bit(36)) ? ocmb_M_th1;
+    (rTP_LOCAL_FIR, bit(36)) ? pibRamUeEccErr;
 
     /** TP_LOCAL_FIR[37]
      *  Direct interface to PIBMEM - RAM UE ECC error
      */
-    (rTP_LOCAL_FIR, bit(37)) ? ocmb_M_th1;
+    (rTP_LOCAL_FIR, bit(37)) ? pibRamUeEccErr;
 
     /** TP_LOCAL_FIR[38:44]
      *  unused
@@ -1162,7 +1162,7 @@ group gTP_LOCAL_FIR
     /** TP_LOCAL_FIR[45]
      *  SPI controller 0 error
      */
-    (rTP_LOCAL_FIR, bit(45)) ? ocmb_M_th1;
+    (rTP_LOCAL_FIR, bit(45)) ? spiControllerErr;
 
     /** TP_LOCAL_FIR[46:62]
      *  unused

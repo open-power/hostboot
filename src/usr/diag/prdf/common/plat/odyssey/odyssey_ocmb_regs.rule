@@ -1530,11 +1530,25 @@
     # Odyssey chip TP_LOCAL_FIR
     ############################################################################
 
+    register SPICTL0_ERROR_INJECT
+    {
+        name        "SPI Controller Error Inject Register";
+        scomaddr    0x00070000;
+        capture     group spi_controller;
+    };
+
+    register SPICTL0_STATUS_REG
+    {
+        name        "SPI Controller Status Register";
+        scomaddr    0x00070008;
+        capture     group spi_controller;
+    };
+
     register RESET_REG_B
     {
         name        "Reset Register Fast Mode";
         scomaddr    0x000A0001;
-        capture     group tp_local_regs;
+        capture     group reset_reg_b;
     };
 
     register PPE_XIRAMDBG
@@ -1598,6 +1612,7 @@
         name        "PPE PIBMEM Status Register";
         scomaddr    0x000D0015;
         capture     group sppe_hw_err;
+        capture     group ppe_pibmem_status_reg;
     };
 
     register PPE_FIR_MASK_REG
@@ -1618,35 +1633,35 @@
     {
         name        "Internal PCB controller error register";
         scomaddr    0x000F001F;
-        capture     group tp_local_regs;
+        capture     group pcbctl_err;
     };
 
     register TP_PSCOM_STAT_ERR
     {
         name        "TP PSCOMLE error register";
         scomaddr    0x01010001;
-        capture     group tp_local_regs;
+        capture     group tp_pscom_stat_err;
     };
 
     register TP_FMU_ERR_RPT
     {
         name        "TP FMU Error Report";
         scomaddr    0x01010786;
-        capture     group tp_local_regs;
+        capture     group tp_fmu_err_rpt;
     };
 
     register TP_ERR_STATUS
     {
         name        "TP Error Status";
         scomaddr    0x0103000F;
-        capture     group tp_local_regs;
+        capture     group tp_err_status;
     };
 
     register TP_DTS_ERR
     {
         name        "TP DTS Error Register";
         scomaddr    0x0105002F;
-        capture     group tp_local_regs;
+        capture     group tp_dts_err;
     };
 
     ############################################################################
@@ -1657,21 +1672,21 @@
     {
         name        "MEM PSCOMLE error register";
         scomaddr    0x08010001;
-        capture     group mem_local_regs;
+        capture     group mem_pscom_status_err;
     };
 
     register MEM_ERR_STATUS
     {
         name        "MEM Error Status";
         scomaddr    0x0803000F;
-        capture     group mem_local_regs;
+        capture     group mem_err_status;
     };
 
     register MEM_DTS_ERR
     {
         name        "MEM DTS Error Register";
         scomaddr    0x0805002F;
-        capture     group mem_local_regs;
+        capture     group mem_dts_err;
     };
 
     ############################################################################
