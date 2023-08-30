@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2023-08-10 Thu 12:18 -->
+<!-- 2023-08-30 Wed 16:20 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Odyssey code update - Side switching FSM</title>
@@ -201,15 +201,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgd3671f3">1. Definitions</a></li>
-<li><a href="#orgb270adf">2. Code update overview</a></li>
-<li><a href="#org17b3151">3. Error cases</a></li>
-<li><a href="#org3800516">4. Implementation details</a>
+<li><a href="#orge8492e3">1. Definitions</a></li>
+<li><a href="#org8771cf3">2. Code update overview</a></li>
+<li><a href="#orgfe9959d">3. Error cases</a></li>
+<li><a href="#org0186c51">4. Implementation details</a>
 <ul>
-<li><a href="#orgf130d08">4.1. State</a></li>
-<li><a href="#org2a4eedd">4.2. FSM events</a></li>
-<li><a href="#orgf48fd9e">4.3. FSM transitions</a></li>
-<li><a href="#org61decb7">4.4. Controlling Code Update with Attribute Overrides</a></li>
+<li><a href="#org9c2f184">4.1. State</a></li>
+<li><a href="#org36a240e">4.2. FSM events</a></li>
+<li><a href="#org30db44d">4.3. FSM transitions</a></li>
+<li><a href="#org0ec5b01">4.4. Controlling Code Update with Attribute Overrides</a></li>
 </ul>
 </li>
 </ul>
@@ -243,8 +243,8 @@ exposes the primary and backup SEEPROMs to Hostboot, and Hostboot has
 to manage the update process.
 </p>
 
-<div id="outline-container-orgd3671f3" class="outline-2">
-<h2 id="orgd3671f3"><span class="section-number-2">1.</span> Definitions</h2>
+<div id="outline-container-orge8492e3" class="outline-2">
+<h2 id="orge8492e3"><span class="section-number-2">1.</span> Definitions</h2>
 <div class="outline-text-2" id="text-1">
 <ul class="org-ul">
 <li>A <b>boot side</b> on an Odyssey chip refers to one of the boot SEEPROMs,
@@ -273,8 +273,8 @@ the only update method available to us.</li>
 </div>
 </div>
 
-<div id="outline-container-orgb270adf" class="outline-2">
-<h2 id="orgb270adf"><span class="section-number-2">2.</span> Code update overview</h2>
+<div id="outline-container-org8771cf3" class="outline-2">
+<h2 id="org8771cf3"><span class="section-number-2">2.</span> Code update overview</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The overall good-path process for a single OCMB chip goes like this
@@ -311,8 +311,8 @@ for reconfig loops though).
 </div>
 </div>
 
-<div id="outline-container-org17b3151" class="outline-2">
-<h2 id="org17b3151"><span class="section-number-2">3.</span> Error cases</h2>
+<div id="outline-container-orgfe9959d" class="outline-2">
+<h2 id="orgfe9959d"><span class="section-number-2">3.</span> Error cases</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Hostboot handles errors that occur between ocmb_check_for_ready and
@@ -335,8 +335,8 @@ out-of-date Odyssey).</li>
 </div>
 </div>
 
-<div id="outline-container-org3800516" class="outline-2">
-<h2 id="org3800516"><span class="section-number-2">4.</span> Implementation details</h2>
+<div id="outline-container-org0186c51" class="outline-2">
+<h2 id="org0186c51"><span class="section-number-2">4.</span> Implementation details</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 The Odyssey code update process is controlled by the Odyssey Code
@@ -344,8 +344,8 @@ Update Finite State Machine (FSM), implemented in ody_upd_fsm.C.
 </p>
 </div>
 
-<div id="outline-container-orgf130d08" class="outline-3">
-<h3 id="orgf130d08"><span class="section-number-3">4.1.</span> State</h3>
+<div id="outline-container-org9c2f184" class="outline-3">
+<h3 id="org9c2f184"><span class="section-number-3">4.1.</span> State</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 There are four state variables for the FSM to track. These variables
@@ -421,8 +421,8 @@ part is removed or added (or deconfigured); and at host_ipl_complete
 </div>
 </div>
 
-<div id="outline-container-org2a4eedd" class="outline-3">
-<h3 id="org2a4eedd"><span class="section-number-3">4.2.</span> FSM events</h3>
+<div id="outline-container-org36a240e" class="outline-3">
+<h3 id="org36a240e"><span class="section-number-3">4.2.</span> FSM events</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 When these events occur, the FSM is invoked to handle them and take
@@ -448,8 +448,8 @@ RC_POZ_SPPE_NOT_READY_ERR and async FFDC is present)</li>
 </div>
 </div>
 
-<div id="outline-container-orgf48fd9e" class="outline-3">
-<h3 id="orgf48fd9e"><span class="section-number-3">4.3.</span> FSM transitions</h3>
+<div id="outline-container-org30db44d" class="outline-3">
+<h3 id="org30db44d"><span class="section-number-3">4.3.</span> FSM transitions</h3>
 <div class="outline-text-3" id="text-4-3">
 <p>
 This table is a <b>template</b> for transitions that could happen in
@@ -706,8 +706,8 @@ type.
 </div>
 </div>
 
-<div id="outline-container-org61decb7" class="outline-3">
-<h3 id="org61decb7"><span class="section-number-3">4.4.</span> Controlling Code Update with Attribute Overrides</h3>
+<div id="outline-container-org0ec5b01" class="outline-3">
+<h3 id="org0ec5b01"><span class="section-number-3">4.4.</span> Controlling Code Update with Attribute Overrides</h3>
 <div class="outline-text-3" id="text-4-4">
 <p>
 Overriding the `ODYSSEY_PRIORITY_CODE_UPDATE_RULE` attribute on the
@@ -751,18 +751,86 @@ AABBCCDD: The actions for the FSM to perform when the event and
           representing an action to take.
       DD: A single element of the update_action_t enumeration
           representing an action to take.
-
-Note that if the perform_code_update action is taken by this
-override, all code images on the OCMB are considered to be out
-of date and will be updated.
 </pre>
+
+<p>
+Note that if the perform_code_update action is taken by this override,
+all code images on the OCMB are considered to be out of date and will
+be updated.
+</p>
+
+<p>
+For example, this attribute override will force a code update in istep
+12.12 on the first loop:
+</p>
+
+<pre class="example">
+CLEAR
+
+target = k0:s0
+
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[0] 0x00000002FFFF01FF
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[1] 0x040B0D0000000000
+</pre>
+
+<p>
+In this case:
+</p>
+
+<pre class="example">
+VVVVVVVV = 00000002: UPDATE_OMI_FIRMWARE_REACHED
+
+      WW = FF: Matches any value for "Update performed?"
+      XX = FF: Matches any value for "Golden boot performed?"
+      YY = 01: Matches side 0 (we only match side 0 so that
+               when we switch to side 1 we'll make forward progress)
+      ZZ = FF: Matches any value for "OCMB FW up to date?"
+
+      AA = 04: perform_code_update
+      BB = 0B: switch_to_side_1
+      CC = 0D: retry_check_for_ready (causes a reconfig loop)
+      DD = 00: do_nothing (no-op)
+</pre>
+
+<p>
+Similarly, this example forces an I2C code update on side 0 in step 11.4:
+</p>
+
+<pre class="example">
+CLEAR
+
+target = k0:s0
+
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[0] 0x00000001FFFF01FF
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[1] 0x040B0D0000000000
+</pre>
+
+<p>
+The following attribute override will prevent all code updates:
+</p>
+
+<pre class="example">
+CLEAR
+
+target = k0:s0
+
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[0] 0x000000FBFFFF03FF
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[1] 0x0000000000000000
+</pre>
+
+<p>
+This works by matching all events (0xFB), all "update performed?"
+states (0xFF), all "golden boot performed?" states (0xFF), on sides 0
+and 1 (0x3), and all "OCMB FW up to date?" values (0xFF), and
+performing the "do_nothing" action (0x00) from those states.
+</p>
 </div>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: zach</p>
-<p class="date">Created: 2023-08-10 Thu 12:18</p>
+<p class="date">Created: 2023-08-30 Wed 16:20</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

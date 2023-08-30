@@ -241,3 +241,30 @@ In this case:
             CC = 0D: retry_check_for_ready (causes a reconfig loop)
             DD = 00: do_nothing (no-op)
 #+END_SRC
+
+Similarly, this example forces an I2C code update on side 0 in step 11.4:
+
+#+BEGIN_SRC
+CLEAR
+
+target = k0:s0
+
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[0] 0x00000001FFFF01FF
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[1] 0x040B0D0000000000
+#+END_SRC
+
+The following attribute override will prevent all code updates:
+
+#+BEGIN_SRC
+CLEAR
+
+target = k0:s0
+
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[0] 0x000000FBFFFF03FF
+ATTR_ODYSSEY_PRIORITY_CODE_UPDATE_RULE[1] 0x0000000000000000
+#+END_SRC
+
+This works by matching all events (0xFB), all "update performed?"
+states (0xFF), all "golden boot performed?" states (0xFF), on sides 0
+and 1 (0x3), and all "OCMB FW up to date?" values (0xFF), and
+performing the "do_nothing" action (0x00) from those states.
