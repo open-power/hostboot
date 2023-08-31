@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
+#include <ody_deploy_row_repairs.H>
 
 #include <lib/mc/ody_port_traits.H>
 #include <lib/mc/ody_port.H>
@@ -94,6 +95,9 @@ extern "C"
         // Deasserts reset_n in certain simulation environments
         FAPI_TRY( mss::ody::workarounds::deassert_resetn( i_target ), TARGTIDFORMAT " Failed to deassert reset_n",
                   TARGTID );
+
+        // Deploy any necessary row repairs
+        FAPI_TRY(ody_deploy_row_repairs(i_target), TARGTIDFORMAT " Failed ody_deploy_row_repairs", TARGTID);
 
         // Start the refresh engines by setting MBAREF0Q(0) = 1. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.
