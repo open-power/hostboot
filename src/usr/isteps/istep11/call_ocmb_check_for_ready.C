@@ -478,7 +478,7 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                 /* Set the boot side and boot flags appropriately. */
 
                 const ATTR_OCMB_BOOT_FLAGS_type boot_flags
-                    = sys->getAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>();
+                    = l_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>();
 
                 const auto boot_side
                     = l_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_SIDE>();
@@ -499,7 +499,7 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                     // Disable autoboot on the golden side, so that we execute as
                     // little code as possible (and therefore have the smallest chance
                     // of failing) before we update the chip.
-                    sys->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
+                    l_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
                                                                   | OCMB_BOOT_FLAGS_ISTEP_MODE);
                 }
                 else
@@ -508,7 +508,7 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
                               boot_side,
                               get_huid(l_ocmb));
 
-                    sys->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
+                    l_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
                                                                   | OCMB_BOOT_FLAGS_AUTOBOOT_MODE);
                 }
 
