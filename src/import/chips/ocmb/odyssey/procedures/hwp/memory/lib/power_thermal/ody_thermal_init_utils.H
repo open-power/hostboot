@@ -40,7 +40,9 @@
 #include <fapi2.H>
 #include <i2c_access.H>
 #include <vector>
+#include <lib/shared/ody_consts.H>
 #include <mss_generic_attribute_getters.H>
+#include <mss_generic_attribute_setters.H>
 
 namespace mss
 {
@@ -70,6 +72,67 @@ fapi2::ReturnCode read_dts(const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& 
                            fapi2::buffer<uint16_t>& o_data);
 
 } // ns i2c
+
+// Attribute getter/setter pointers for thermal sensor details
+typedef fapi2::ReturnCode (*thermal_sensor_attr_getter_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        uint8_t& o_value);
+
+typedef fapi2::ReturnCode (*thermal_sensor_attr_setter_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        uint8_t i_value);
+
+// Sensor Location
+static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_location[] =
+{
+    mss::attr::get_therm_sensor_0_location,
+    mss::attr::get_therm_sensor_1_location,
+    mss::attr::get_therm_sensor_2_location,
+    mss::attr::get_therm_sensor_3_location,
+};
+
+static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_location[] =
+{
+    mss::attr::set_therm_sensor_0_location,
+    mss::attr::set_therm_sensor_1_location,
+    mss::attr::set_therm_sensor_2_location,
+    mss::attr::set_therm_sensor_3_location,
+};
+
+// Sensor Availability
+static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_availability[] =
+{
+    mss::attr::get_therm_sensor_0_availability,
+    mss::attr::get_therm_sensor_1_availability,
+    mss::attr::get_therm_sensor_2_availability,
+    mss::attr::get_therm_sensor_3_availability,
+};
+
+static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_availability[] =
+{
+    mss::attr::set_therm_sensor_0_availability,
+    mss::attr::set_therm_sensor_1_availability,
+    mss::attr::set_therm_sensor_2_availability,
+    mss::attr::set_therm_sensor_3_availability,
+};
+
+// Sensor Usage
+static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_usage[] =
+{
+    mss::attr::get_therm_sensor_0_usage,
+    mss::attr::get_therm_sensor_1_usage,
+    mss::attr::get_therm_sensor_2_usage,
+    mss::attr::get_therm_sensor_3_usage,
+};
+
+static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_usage[] =
+{
+    mss::attr::set_therm_sensor_0_usage,
+    mss::attr::set_therm_sensor_1_usage,
+    mss::attr::set_therm_sensor_2_usage,
+    mss::attr::set_therm_sensor_3_usage,
+};
+
+
+
 
 /// @brief constants to specify enable/disable of SMBus timeout
 enum sensor_timeout
@@ -139,6 +202,25 @@ class thermal_sensor
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode reset_i2cc(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb);
+
+///
+/// @brief Retrieves desired temp sensor for configuration
+/// @param[in] i_dimm_type type of dimm
+/// @param[in] i_airflow_direction direction of system airflow
+/// @param[in] i_num_port number of mem ports
+/// @return l_desired_dts_loc desired sensor location
+///
+uint8_t get_desired_dts_location(const uint8_t i_dimm_type,
+                                 const uint8_t i_airflow_direction,
+                                 const uint8_t i_num_port);
+///
+/// @brief Retrieves desired temp sensor for configuration
+/// @param[in] i_ocmb the OCMB target
+/// @param[out] o_desired_sensors_pos sensor position to be configured at desired location
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode get_desired_dts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                  uint8_t (&o_desired_sensors_pos)[NUM_CONFIG_DTS]);
 
 ///
 /// @brief Function that reads and processes all thermal sensors

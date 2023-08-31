@@ -107,6 +107,9 @@ enum sizes
     // Maximum number of external DTS sensors
     NUM_DTS = 4,
 
+    // Maximum number of external DTS sensors to configure (downstream)
+    NUM_CONFIG_DTS = 2,
+
     // Number of channels
     NUM_CHANNELS = 2,
 
@@ -194,6 +197,20 @@ enum ffdc_codes : uint16_t
     DDRPHYINIT_TX_SLEW_FALL_AC_OVERRIDE = 0x1080,
     DDRPHYINIT_TX_SLEW_RISE_CK_OVERRIDE = 0x1081,
 
+};
+
+///
+/// @brief const for sensor index
+///
+enum dts_consts
+{
+    SENSOR_0 = 0,
+    SENSOR_1 = 1,
+    SENSOR_2 = 2,
+    SENSOR_3 = 3,
+
+    DRAM_SENSOR_INDEX = 0,
+    PMIC_SENSOR_INDEX = 1,
 };
 
 ///

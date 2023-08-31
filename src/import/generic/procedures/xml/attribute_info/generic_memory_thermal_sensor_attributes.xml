@@ -123,6 +123,9 @@
         </enum>
         <writeable/>
         <default>DISABLED</default>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_0_usage</mssAccessorName>
     </attribute>
 
@@ -152,6 +155,9 @@
         </enum>
         <writeable/>
         <default>NOT_AVAILABLE</default>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_1_availability</mssAccessorName>
     </attribute>
 
@@ -211,6 +217,9 @@
         </enum>
         <writeable/>
         <default>DISABLED</default>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_1_usage</mssAccessorName>
     </attribute>
 
@@ -240,6 +249,9 @@
         </enum>
         <writeable/>
         <default>NOT_AVAILABLE</default>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_2_availability</mssAccessorName>
     </attribute>
 
@@ -282,6 +294,9 @@
         </enum>
         <writeable/>
         <default>DISABLED</default>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_2_usage</mssAccessorName>
     </attribute>
 
@@ -311,6 +326,9 @@
         </enum>
         <writeable/>
         <default>NOT_AVAILABLE</default>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_3_availability</mssAccessorName>
     </attribute>
 
@@ -353,6 +371,9 @@
         </enum>
         <writeable/>
         <default>DISABLED</default>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_3_usage</mssAccessorName>
     </attribute>
 
@@ -497,6 +518,9 @@
         <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
         <writeable/>
         <initToZero/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_3_location</mssAccessorName>
     </attribute>
 
@@ -510,6 +534,9 @@
         <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
         <writeable/>
         <initToZero/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_2_location</mssAccessorName>
     </attribute>
 
@@ -523,6 +550,10 @@
         <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
         <writeable/>
         <initToZero/>
+        <initToZero/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_1_location</mssAccessorName>
     </attribute>
 
@@ -536,6 +567,29 @@
         <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
         <writeable/>
         <initToZero/>
+        <initToZero/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_0_location</mssAccessorName>
     </attribute>
+
+    <attribute>
+      <id>ATTR_MEM_EFF_THERM_SENSOR_READ_OVERRIDE</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+        Thermal Sensor Init read override, by default thermal init should only read DRAM sensor
+        downstream of airflow direction. This override should only be used to force all on-board
+        temperature sensors to be configured for reading for DIMM testers and Memory Qual.
+      </description>
+      <valueType>uint8</valueType>
+      <enum>FALSE = 0, TRUE = 1</enum>
+      <writeable/>
+      <initToZero/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
+      <mssAccessorName>therm_sensor_read_override</mssAccessorName>
+    </attribute>
+
 </attributes>

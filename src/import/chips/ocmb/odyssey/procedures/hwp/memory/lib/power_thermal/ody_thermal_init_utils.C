@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <mss_generic_system_attribute_getters.H>
+#include <mss_generic_attribute_getters.H>
 #include <ody_dts_read.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
@@ -265,12 +266,147 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Retrieves desired temp sensor for configuration
+/// @param[in] i_dimm_type type of dimm
+/// @param[in] i_airflow_direction direction of system airflow
+/// @param[in] i_num_port number of mem ports
+/// @return l_desired_dts_loc desired sensor location
+///
+uint8_t get_desired_dts_location(const uint8_t i_dimm_type,
+                                 const uint8_t i_airflow_direction,
+                                 const uint8_t i_num_port)
+{
+    uint8_t l_desired_dts_loc = fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_LOCATION_LOWER_LEFT;
+
+    if (i_num_port == 1 && i_dimm_type == fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM)
+    {
+        // If we have a 32GB (one mem port) DDR5 DDIMM we want to read from the sensor on the right side of the DIMM
+        l_desired_dts_loc = fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_LOCATION_LOWER_RIGHT;
+
+    }
+    else
+    {
+        if(i_airflow_direction == fapi2::ENUM_ATTR_MSS_MRW_DIMM_SLOT_AIRFLOW_LEFT_TO_RIGHT )
+        {
+            l_desired_dts_loc = fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_LOCATION_LOWER_RIGHT;
+        }
+        else
+        {
+            l_desired_dts_loc = fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_LOCATION_LOWER_LEFT;
+        }
+    }
+
+    return l_desired_dts_loc;
+}
+
+///
+/// @brief Retrieves desired temp sensor for configuration
+/// @param[in] i_ocmb the OCMB target
+/// @param[out] o_desired_sensors_pos sensor position to be configured at desired location
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+fapi2::ReturnCode get_desired_dts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
+                                  uint8_t (&o_desired_sensors_pos)[NUM_CONFIG_DTS])
+{
+    // Default system airflow goes from right to left, making the default downstream sensor on the lower left
+    // We want to read only from the downstream sensor, the sensor on the opposite side of the direction of airflow if 64GB or larger cap
+    // Airflow direction is denoted by 0x00 being right to left, 0x01 being left to right
+    // Sensor Location is denoted by 0x00 bottom left, 0x01 top left, 0x02 bottom right, and 0x03 top right
+    // Current DDIM design has the DRAM temp sensors on the lower corners only
+
+    uint8_t l_airflow_direction = fapi2::ENUM_ATTR_MSS_MRW_DIMM_SLOT_AIRFLOW_RIGHT_TO_LEFT;
+    uint8_t l_desired_dts_loc = fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_LOCATION_LOWER_LEFT;
+    uint8_t l_desired_dts_loc_opp_corner = fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_LOCATION_UPPER_LEFT;
+    uint8_t l_usage = fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DISABLED;
+    uint8_t l_loc = fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_LOCATION_UPPER_LEFT;
+    uint8_t l_dimm_type[2] = {fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_EMPTY, fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_EMPTY};
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_ocmb);
+    bool l_desired_dram_sensor_found = false;
+
+    uint8_t l_sensor_availabilities[NUM_DTS] =
+    {
+        fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_NOT_AVAILABLE,
+        fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_NOT_AVAILABLE,
+        fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_NOT_AVAILABLE,
+        fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_NOT_AVAILABLE
+    };
+
+    // Check if any ports found, if not just exit out of procedure
+    if(l_ports.size() == 0)
+    {
+        FAPI_INF(GENTARGTIDFORMAT " No ports found, exiting get_desired_dts", GENTARGTID(i_ocmb));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    const uint8_t l_num_ports = l_ports.size();
+
+    FAPI_TRY(mss::attr::get_mrw_dimm_slot_airflow(l_airflow_direction));
+    FAPI_TRY(mss::attr::get_dimm_type(l_ports[0], l_dimm_type));
+
+    l_desired_dts_loc = get_desired_dts_location(l_dimm_type[0], l_airflow_direction, l_num_ports);
+    l_desired_dts_loc_opp_corner = l_desired_dts_loc + 1;
+
+    // Check availablity of all sensors
+    for(uint8_t l_sensor_index = 0; l_sensor_index < NUM_DTS; l_sensor_index++ )
+    {
+        FAPI_TRY(mss::ody::thermal::get_therm_sensor_availability[l_sensor_index](i_ocmb,
+                 l_sensor_availabilities[l_sensor_index]));
+    }
+
+    // Check usage for each availble sensors, we only want DRAM sensors for this case
+    for(const auto& l_sensor : mss::find_targets<fapi2::TARGET_TYPE_TEMP_SENSOR>(i_ocmb))
+    {
+        // Should be 0-3, but using a modulo operation for safety's sake
+        const auto l_sensor_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
+                                  (l_sensor) % NUM_DTS;
+
+        if (l_sensor_availabilities[l_sensor_pos] == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_AVAILABLE)
+        {
+            FAPI_TRY(mss::ody::thermal::get_therm_sensor_usage[l_sensor_pos](i_ocmb, l_usage));
+            FAPI_TRY(mss::ody::thermal::get_therm_sensor_location[l_sensor_pos](i_ocmb, l_loc));
+
+            if(l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM && l_loc == l_desired_dts_loc)
+            {
+                // Pass desired sensor pos out to procedure
+                l_desired_dram_sensor_found = true;
+                o_desired_sensors_pos[DRAM_SENSOR_INDEX] = l_sensor_pos;
+            }
+            else if(!l_desired_dram_sensor_found && l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM)
+            {
+                // Pass any DRAM sensor pos found if desired location isn't found
+                // Same side of desired loc just upper corner but still prioritize lower corners if found
+                if(l_loc == l_desired_dts_loc_opp_corner)
+                {
+                    l_desired_dram_sensor_found = true;
+                }
+
+                o_desired_sensors_pos[DRAM_SENSOR_INDEX] = l_sensor_pos;
+
+            }
+            else if (l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_PMIC)
+            {
+                // Pass pmic sensor pos for config
+                o_desired_sensors_pos[PMIC_SENSOR_INDEX] = l_sensor_pos;
+            }
+        }
+    }
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
 /// @brief Function that reads and processes all thermal sensors
 /// @param[in] i_ocmb the OCMB target
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
 {
+    static constexpr uint8_t NULL_SENSOR_POS = 4;
+    uint8_t l_override_check = fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_READ_OVERRIDE_FALSE;
+
     static constexpr thermal_sensor thermal_sensor_info[NUM_DTS] =
     {
         thermal_sensor(scomt::ody::ODC_MMIO_SNSC_D0THERM),
@@ -279,15 +415,49 @@ fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         thermal_sensor(scomt::ody::ODC_MMIO_SNSC_D3THERM),
     };
 
-    // Loops over and reads out all thermal sensor information
-    for(const auto& l_sensor : mss::find_targets<fapi2::TARGET_TYPE_TEMP_SENSOR>(i_ocmb))
-    {
-        // Should be 0-3, but using a modulo operation for safety's sake
-        const auto l_sensor_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
-                                  (l_sensor) % NUM_DTS;
+    // Check override attr if config on all sensors is needed
+    FAPI_TRY(mss::attr::get_therm_sensor_read_override(i_ocmb, l_override_check));
 
-        // Read and cache the sensor value
-        FAPI_TRY(thermal_sensor_info[l_sensor_pos].read(i_ocmb, l_sensor));
+    if(l_override_check != fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_READ_OVERRIDE_TRUE)
+    {
+        // Fetch downstream dram sensor if no override
+        uint8_t l_desired_sensors[NUM_CONFIG_DTS] = {NULL_SENSOR_POS, NULL_SENSOR_POS};
+        FAPI_TRY(get_desired_dts(i_ocmb, l_desired_sensors));
+
+        if(l_desired_sensors[DRAM_SENSOR_INDEX] == NULL_SENSOR_POS
+           && l_desired_sensors[PMIC_SENSOR_INDEX] == NULL_SENSOR_POS)
+        {
+            // If both are still null then no dts or ports were found
+            // Either is still null should will not interfere in following code
+            FAPI_INF(GENTARGTIDFORMAT " No ports or DTS were found, exiting read_dts_sensors", GENTARGTID(i_ocmb));
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+        else
+        {
+            for(const auto& l_sensor : mss::find_targets<fapi2::TARGET_TYPE_TEMP_SENSOR>(i_ocmb))
+            {
+                // Should be 0-3, but using a modulo operation for safety's sake
+                const auto l_sensor_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
+                                          (l_sensor) % NUM_DTS;
+
+                if(l_sensor_pos == l_desired_sensors[DRAM_SENSOR_INDEX] || l_sensor_pos == l_desired_sensors[PMIC_SENSOR_INDEX] )
+                {
+                    FAPI_TRY(thermal_sensor_info[l_sensor_pos].read(i_ocmb, l_sensor));
+                }
+            }
+        }
+    }
+    else
+    {
+        for(const auto& l_sensor : mss::find_targets<fapi2::TARGET_TYPE_TEMP_SENSOR>(i_ocmb))
+        {
+            // Should be 0-3, but using a modulo operation for safety's sake
+            const auto l_sensor_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
+                                      (l_sensor) % NUM_DTS;
+
+            // Read and cache the sensor value
+            FAPI_TRY(thermal_sensor_info[l_sensor_pos].read(i_ocmb, l_sensor));
+        }
     }
 
     FAPI_TRY(read_oc_results(i_ocmb));
