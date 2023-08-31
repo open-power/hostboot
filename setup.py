@@ -97,6 +97,9 @@ package_directories = {
     "srcparsers.bsrc":  "src/usr/errl/parser/ebmc",
     "srcparsers.be500": "src/usr/diag/prdf/peltool/src",
     "srcparsers.b2a00": "src/usr/htmgt/plugins/ebmc/src",
+    "srcparsers.b2900": "src/import/chips/p10/procedures/ppe/fw_tools/srcparsers/b2900/",
+    "srcparsers.b2e00": "src/import/chips/p10/procedures/ppe/fw_tools/srcparsers/b2e00/",
+    "srcparsers.b2f00": "src/import/chips/p10/procedures/ppe/fw_tools/srcparsers/b2f00/",
 
     # Additional parser packages.
     # These are useful when functions may be needed for both SRC and user data
