@@ -86,6 +86,9 @@ package_directories = {
     "udparsers.helpers": "src/build/tools/ebmc",
     "udparsers.b2800":   "src/usr/sbeio/plugins/ebmc",
     "udparsers.b2200":   "src/usr/sbe/plugins/ebmc",
+    "udparsers.b2900":   "src/import/chips/p10/procedures/ppe/fw_tools/b2900/",
+    "udparsers.b2e00":   "src/import/chips/p10/procedures/ppe/fw_tools/b2e00/",
+    "udparsers.b2f00":   "src/import/chips/p10/procedures/ppe/fw_tools/b2f00/",
 
     # SRC parsers packages.
     # The only required package is 'srcparsers.bsrc', but other modules can be
@@ -94,6 +97,9 @@ package_directories = {
     "srcparsers.bsrc":  "src/usr/errl/parser/ebmc",
     "srcparsers.be500": "src/usr/diag/prdf/peltool/src",
     "srcparsers.b2a00": "src/usr/htmgt/plugins/ebmc/src",
+    "srcparsers.b2900": "src/import/chips/p10/procedures/ppe/fw_tools/srcparsers/b2900/",
+    "srcparsers.b2e00": "src/import/chips/p10/procedures/ppe/fw_tools/srcparsers/b2e00/",
+    "srcparsers.b2f00": "src/import/chips/p10/procedures/ppe/fw_tools/srcparsers/b2f00/",
 
     # Additional parser packages.
     # These are useful when functions may be needed for both SRC and user data
@@ -158,5 +164,10 @@ setup(
     data_files      = custom_data_files,
     package_dir     = package_directories,
     package_data    = package_data,
-    scripts         = ['src/build/debug/hb-memdump.sh','src/build/trace/tracelite/weave.py'],
+    scripts         = [
+                          'src/build/debug/hb-memdump.sh',
+                          'src/build/trace/tracelite/weave.py',
+                          'src/build/tools/dce/dce-bmc-invoke.sh',
+                          'src/build/tools/dce/preplib.py',
+                      ],
 )
