@@ -62,7 +62,7 @@ endif
 .PRECIOUS: %.dce.test.lid.debug
 %.dce.test.lid.debug: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore_test.list.bz2
 	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -gz" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@ $(INCFLAGS) >/dev/null 2>&1
-	$(OBJDUMP) --source -d $@ > $@.list
+	$(OBJDUMP) --source -d -C $@ > $@.list
 
 .PRECIOUS: %.dce.test.lid.intermediate
 %.dce.test.lid.intermediate: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(PROJECT_ROOT)/img/hbicore_test.list.bz2
