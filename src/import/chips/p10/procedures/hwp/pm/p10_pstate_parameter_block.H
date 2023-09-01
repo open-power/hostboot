@@ -260,7 +260,7 @@ class PlatPmPPB
             iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
-            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_eco_count(0), iv_safe_mode_throt_idx(0),
+            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_eco_count(0), iv_spare_count(0), iv_safe_mode_throt_idx(0),
             iv_dccr_value(0), iv_flmr_value(0), iv_fmmr_value(0),
             iv_wts_vddPsavFreq(0), iv_wts_vddWofBaseFreq(0), iv_wts_vddUTFreq(0), iv_wts_vddFixedFreq(0)
 
@@ -834,6 +834,7 @@ class PlatPmPPB
         uint8_t                   iv_pdv_model_data;
         uint8_t                   iv_qrvrm_enable_flag;
         uint8_t                   iv_eco_count;
+        uint8_t                   iv_spare_count;
         uint32_t                  iv_safe_mode_throt_idx;
 
         PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];

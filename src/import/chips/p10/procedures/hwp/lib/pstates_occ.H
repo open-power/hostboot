@@ -241,8 +241,10 @@ typedef struct
     uint16_t            fav_pow_freq_limit_mhz;
     uint16_t            non_det_freq_limit_mhz;
 
+    uint8_t             spare_core_count;
+
     // Pad to make the structure an even 1KB
-    uint8_t             pad_b[4];
+    uint8_t             pad_b[3];
 
 } OCCPstateParmBlock_t ;
 

@@ -1228,7 +1228,24 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         // turn off voltage movement when the WAR MODE defect exists.
         io_globalppb->pgpe_flags[PGPE_FLAG_STATIC_VOLTAGE_ENABLE] =
                            (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU) ? 1 : 0;
-        io_globalppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] = 0x80 | iv_eco_count;
+
+        if ( iv_eco_count )
+        {
+            io_globalppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] = 0x80 | iv_eco_count;
+        }
+        else
+        {
+            io_globalppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] = iv_eco_count;
+        }
+
+        if ( iv_spare_count )
+        {
+           io_globalppb->pgpe_flags[PGPE_FLAG_SPARE_COUNT] = 0x80 | iv_spare_count;
+        }
+        else
+        {
+            io_globalppb->pgpe_flags[PGPE_FLAG_SPARE_COUNT] = iv_spare_count;
+        }
 
 #ifdef __HOSTBOOT_MODULE
         if (Util::isSimicsRunning())
@@ -1435,6 +1452,8 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         i_occppb->frequency_min_khz = iv_attrs.attr_pm_safe_frequency_mhz * 1000;
 
         i_occppb->frequency_min_khz = revle32(i_occppb->frequency_min_khz);
+
+        i_occppb->spare_core_count = iv_spare_count;
 
         // frequency_max_khz - Value from max pstate0
         i_occppb->frequency_max_khz = iv_attrs.attr_pstate0_freq_mhz * 1000;
@@ -3559,6 +3578,37 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
         iv_procChip.getChildren<fapi2::TARGET_TYPE_CORE>
         (fapi2::TARGET_STATE_PRESENT);
 
+    auto l_quad_vector =
+        iv_procChip.getChildren<fapi2::TARGET_TYPE_EQ>
+        (fapi2::TARGET_STATE_FUNCTIONAL);
+
+    for (auto quad_it : l_quad_vector)
+    {
+        fapi2::ATTR_PG_Type l_vpd_pg;
+        fapi2::buffer<uint32_t> l_vpd_pg_buf;
+        const auto l_perv = quad_it.getParent<fapi2::TARGET_TYPE_PERV>();
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv, l_vpd_pg),
+                                "Error from FAPI_ATTR_GET (ATTR_PG)");
+
+        l_vpd_pg_buf = l_vpd_pg;
+
+        // SPARE core count
+        if (!l_vpd_pg_buf.getBit(27))
+        {
+            ++iv_spare_count;
+        }
+    }
+
+    //Total Spare count from all the quad should be even number 
+    if ( iv_spare_count % 2 )
+    {
+        FAPI_IMP("Spare core count is invalid in PG keyword %d",iv_spare_count);
+        iv_spare_count = 0;
+    }
+
+    FAPI_INF("  Total spare core count", iv_spare_count);
+
     // For each present core,set region partial good and OCC CCSR bits
     for (auto core_present_it : l_core_present_vector)
     {
@@ -3580,16 +3630,23 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
         const auto l_perv = l_eq.getParent<fapi2::TARGET_TYPE_PERV>();
 
         fapi2::ATTR_PG_MVPD_Type l_eq_mvpd_pg;
+        fapi2::ATTR_PG_Type l_vpd_pg;
         fapi2::buffer<uint32_t> l_eq_mvpd_pg_buf;
+        fapi2::buffer<uint32_t> l_vpd_pg_buf;
 
         // retreive partial good information for EQ containing this core, via
         // the associated pervasive target
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG_MVPD, l_perv, l_eq_mvpd_pg),
                  "Error from FAPI_ATTR_GET (ATTR_PG_MVPD)");
 
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv, l_vpd_pg),
+                                "Error from FAPI_ATTR_GET (ATTR_PG)");
+
         l_eq_mvpd_pg_buf = l_eq_mvpd_pg;
 
-        FAPI_INF("  PG : 0x%08X", l_eq_mvpd_pg_buf);
+        l_vpd_pg_buf = l_vpd_pg;
+
+        FAPI_INF("  MVPD PG : 0x%08X   VPD PG : 0x%08X", l_eq_mvpd_pg_buf, l_vpd_pg_buf);
 
         // ECO mode is enabled if L3 ECO PG bit is 0
         if (!l_eq_mvpd_pg_buf.getBit(l_l3_eco_pg_start_bit + (l_present_core_unit_pos % 4)))
@@ -3597,6 +3654,14 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
             iv_eco_count++;
             FAPI_INF("  EC %d is an ECO core", l_present_core_unit_pos);
         }
+
+        // SPARE core count
+        if (!l_eq_mvpd_pg_buf.getBit(l_l3_eco_pg_start_bit + (l_present_core_unit_pos % 4)))
+        {
+            iv_eco_count++;
+            FAPI_INF("  EC %d is an ECO core", l_present_core_unit_pos);
+        }
+
 
     }  // Present core loop
 
