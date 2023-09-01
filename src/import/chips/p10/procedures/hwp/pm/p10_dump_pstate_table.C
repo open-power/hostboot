@@ -1007,6 +1007,10 @@ void pgpe_flags_print(FILE* stream,
     fprintf(stream, "\tPhantom Halt               = %s\n",
             (gppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE]) ? "ENABLED" : "DISABLED");
 
+
+    fprintf(stream, "\tSPARE COUNT NUM            = %d\n",
+            gppb->pgpe_flags[PGPE_FLAG_SPARE_COUNT]);
+
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");
     fprintf(stream, "PGPE FLAGS END\n");
