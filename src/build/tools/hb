@@ -570,7 +570,7 @@ hb_startsimics()
         STARTSIMCMD+=(bmc_files=/host/genEecache:/usr/local/share/hostfw/running/81e00679.lid)
         STARTSIMCMD+=(eecacheEcc=1)
 
-        STARTSIMCMD+=(dimm_card=\"4U\")
+        STARTSIMCMD+=(dimm_height=\"4U\")
         if [ -z "${HB_USE_ODYSSEY}" ]; then
             echo "Using DDR4/Explorer DDIMMs"
         else
