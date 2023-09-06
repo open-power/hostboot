@@ -257,22 +257,47 @@ find_targets( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 }
 
 ///
-/// @brief find all the DIMMS connected to an MI
-/// @param[in] i_target a fapi2::Target MI
+/// @brief find all the OCMB_CHIPs connected to an OMIC
+/// @param[in] i_target a fapi2::Target OMIC
 /// @param[in] i_state fapi2 target state
-/// @return a vector of fapi2::TARGET_TYPE_DIMM
+/// @return a vector of fapi2::TARGET_TYPE_OCMB_CHIP
 ///
 template<>
 inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >
 find_targets( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
               fapi2::TargetState i_state )
 {
-    std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> > l_dimms;
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> > l_ocmbs;
 
     for (const auto& l_omi : i_target.getChildren<fapi2::TARGET_TYPE_OMI>(i_state))
     {
-        auto l_these_dimms( l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(i_state) );
-        l_dimms.insert(l_dimms.end(), l_these_dimms.begin(), l_these_dimms.end());
+        auto l_these_ocmbs( l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(i_state) );
+        l_ocmbs.insert(l_ocmbs.end(), l_these_ocmbs.begin(), l_these_ocmbs.end());
+    }
+
+    return l_ocmbs;
+}
+
+///
+/// @brief find all the DIMMs connected to an OMIC
+/// @param[in] i_target a fapi2::Target OMIC
+/// @param[in] i_state fapi2 target state
+/// @return a vector of fapi2::TARGET_TYPE_DIMM
+///
+template<>
+inline std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> >
+find_targets( const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
+              fapi2::TargetState i_state )
+{
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_DIMM> > l_dimms;
+
+    for (const auto& l_omi : i_target.getChildren<fapi2::TARGET_TYPE_OMI>(i_state))
+    {
+        for (const auto& l_ocmb : l_omi.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>(i_state))
+        {
+            auto l_these_dimms( l_ocmb.getChildren<fapi2::TARGET_TYPE_DIMM>(i_state) );
+            l_dimms.insert(l_dimms.end(), l_these_dimms.begin(), l_these_dimms.end());
+        }
     }
 
     return l_dimms;

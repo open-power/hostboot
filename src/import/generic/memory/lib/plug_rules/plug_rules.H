@@ -41,6 +41,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/utils/dimm/kind.H>
+#include <generic/memory/lib/utils/memory_size.H>
 
 namespace mss
 {
@@ -50,14 +51,14 @@ namespace plug_rule
 /// @brief Plug rule helper for no mixing DIMM size
 /// @tparam MC mss::mc_type, the memory controller type
 /// @param[in] i_target omic target
-/// @param[in] i_kinds a vector of DIMMs plugged into target
+/// @param[in] i_ocmbs a vector of OCMB_CHIPs plugged into target
 /// @param[in] i_ignore_dimm_size_mix_plug_rule a uint8_t plug rule var
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note This function will commit error logs representing the mixing failure and make UT'ing the attr easy
 ///
 template< mss::mc_type MC >
 fapi2::ReturnCode dimm_size_mixing_helper(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
-        const std::vector<mss::dimm::kind<MC>>& i_kinds,
+        const std::vector<fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>>& i_ocmbs,
         const uint8_t i_ignore_dimm_size_mix_plug_rule)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -68,32 +69,38 @@ fapi2::ReturnCode dimm_size_mixing_helper(const fapi2::Target<fapi2::TARGET_TYPE
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // We know we should have more than one DIMM passed in
-    const auto& l_kind0 = i_kinds[0];
+    // We know we should have more than one OCMB passed in
+    const auto& l_ocmb0 = i_ocmbs[0];
+    uint64_t l_size0 = 0;
 
-    // Loops through and compares against all the DIMM's
-    for(const auto& l_kind : i_kinds)
+    FAPI_TRY(mss::eff_memory_size<MC>(l_ocmb0, l_size0));
+
+    // Loops through and compares against all the OCMBs
+    for(const auto& l_ocmb : i_ocmbs)
     {
-        // Check for difference in size on the 2 DIMMs; if different then exit out with an error
-        FAPI_ASSERT( (l_kind.iv_size <= l_kind0.iv_size),
+        uint64_t l_size = 0;
+        FAPI_TRY(mss::eff_memory_size<MC>(l_ocmb, l_size));
+
+        // Check for difference in size on the 2 OCMBs; if different then exit out with an error
+        FAPI_ASSERT( (l_size <= l_size0),
                      fapi2::MSS_PLUG_RULES_INVALID_DIMM_SIZE_MIX()
-                     .set_SMALLER_DIMM_TARGET(l_kind0.iv_target)
-                     .set_LARGER_DIMM_TARGET(l_kind.iv_target)
-                     .set_SMALLER_DIMM_SIZE(l_kind0.iv_size)
-                     .set_LARGER_DIMM_SIZE(l_kind.iv_size)
+                     .set_SMALLER_DIMM_TARGET(l_ocmb0)
+                     .set_LARGER_DIMM_TARGET(l_ocmb)
+                     .set_SMALLER_DIMM_SIZE(l_size0)
+                     .set_LARGER_DIMM_SIZE(l_size)
                      .set_OMIC_TARGET(i_target),
                      "%s has two different sizes of DIMM installed of size %d  and of size %d. Cannot mix DIMM sizes on OMIC channel pair",
-                     mss::c_str(i_target), l_kind.iv_size, l_kind0.iv_size );
+                     mss::c_str(i_target), l_size, l_size0 );
 
-        FAPI_ASSERT( (l_kind0.iv_size <= l_kind.iv_size),
+        FAPI_ASSERT( (l_size0 <= l_size),
                      fapi2::MSS_PLUG_RULES_INVALID_DIMM_SIZE_MIX()
-                     .set_SMALLER_DIMM_TARGET(l_kind.iv_target)
-                     .set_LARGER_DIMM_TARGET(l_kind0.iv_target)
-                     .set_SMALLER_DIMM_SIZE(l_kind.iv_size)
-                     .set_LARGER_DIMM_SIZE(l_kind0.iv_size)
+                     .set_SMALLER_DIMM_TARGET(l_ocmb)
+                     .set_LARGER_DIMM_TARGET(l_ocmb0)
+                     .set_SMALLER_DIMM_SIZE(l_size)
+                     .set_LARGER_DIMM_SIZE(l_size0)
                      .set_OMIC_TARGET(i_target),
                      "%s has two different sizes of DIMM installed of size %d and of size %d. Cannot mix DIMM sizes on OMIC channel pair",
-                     mss::c_str(i_target), l_kind0.iv_size, l_kind.iv_size );
+                     mss::c_str(i_target), l_size0, l_size );
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -105,20 +112,20 @@ fapi_try_exit:
 /// @brief Plug rule for no mixing DIMM size
 /// @tparam MC mss::mc_type, the memory controller type
 /// @param[in] i_target omic target
-/// @param[in] i_kinds a vector of DIMMs plugged into target
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 /// @note This function will commit error logs representing the mixing failure
 ///
 template< mss::mc_type MC >
-fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target,
-                                   const std::vector<mss::dimm::kind<MC>>& i_kinds)
+fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_target)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     uint8_t l_ignore_dimm_size_mix_plug_rule = 0;
     constexpr uint8_t CHECK_DIMM_PER_OMIC = 2;
 
+    const auto& l_ocmbs = mss::find_targets<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
     // If there are one or fewer DIMM's, we can just get out.
-    if (i_kinds.size() < CHECK_DIMM_PER_OMIC)
+    if (l_ocmbs.size() < CHECK_DIMM_PER_OMIC)
     {
         FAPI_INF("Skipping DIMM size mixing plug rule check on %s because it doesn't have 2 DIMMS", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
@@ -128,7 +135,7 @@ fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>&
     FAPI_TRY( mss::attr::get_ignore_mem_plug_rules_dimm_size_mix(l_ignore_dimm_size_mix_plug_rule) );
 
     // Helper function so that the attribute can be UT'ed
-    FAPI_TRY(dimm_size_mixing_helper(i_target, i_kinds, l_ignore_dimm_size_mix_plug_rule));
+    FAPI_TRY(dimm_size_mixing_helper<MC>(i_target, l_ocmbs, l_ignore_dimm_size_mix_plug_rule));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -425,7 +432,7 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARG
 
 
     // Checking the plug rule for dimm size mix
-    FAPI_TRY( dimm_size_mixing<MC>( l_omic, l_kinds ) );
+    FAPI_TRY( dimm_size_mixing<MC>( l_omic ) );
 
     // Checking the plug rule for dimm height mix
     FAPI_TRY( dimm_height_mixing<MC>( l_omic, l_kinds ) );
