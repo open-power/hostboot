@@ -341,13 +341,11 @@ actionclass ocmb_M_info_only_th1
 
 actionclass omi_degraded_mode
 {
-    # TODO
-    #try( funccall("OmiRunningInDegradedMode"),
-    #     try(funccall("CrcSideEffect_Ocmb"), omi_bus) );
+    #funccall("CheckKvcoFix");
+    try( funccall("odyCrcSideEffect"),
+         try(funccall("CrcSideEffect_Ocmb"), omi_bus) );
     #funccall("omiDegradeRetrainWorkaround");
-    TBDDefaultCallout;
     threshold1;
-    #TODO
     #funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
 };
 
@@ -361,13 +359,6 @@ actionclass info_only_mnfgInfo_th32
 {
     threshold32pday;
     funccall("ClearServiceCallFlag_mnfgInfo"); # must be called after threshold
-};
-
-actionclass ocmb_th1_x4Root
-{
-    ocmb_M_th1;
-    #TODO
-    #funccall("x4RootCause"); # must be called after threshold
 };
 
 ################################################################################

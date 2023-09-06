@@ -135,8 +135,6 @@ uint32_t writeChipMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     PRDF_ASSERT( i_mark.isValid() );
 
-    // TODO Odyssey - need adjustments to galois mapping for x8 drams
-
     uint32_t o_rc = SUCCESS;
 
     // get the register name
@@ -229,8 +227,6 @@ uint32_t readSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 {
     #define PRDF_FUNC "[readSymbolMark<TYPE_OCMB_CHIP>] "
 
-    // TODO Odyssey - need adjustments to galois mapping for x8 drams
-
     uint32_t o_rc = SUCCESS;
     o_mark = MemMark(); // ensure invalid
 
@@ -302,8 +298,6 @@ uint32_t writeSymbolMark<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     const MemRank & i_rank, const MemMark & i_mark )
 {
     #define PRDF_FUNC "[writeSymbolMark<TYPE_OCMB_CHIP>] "
-
-    // TODO Odyssey - need adjustments to galois mapping for x8 drams
 
     PRDF_ASSERT( i_mark.isValid() );
 

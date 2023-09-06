@@ -125,17 +125,19 @@ void pushToQueue<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
  * @brief  Wrapper to tell the TdCtlr to call handleDsdImpeTh
  * @param  i_chip  OCMB.
  * @param  io_sc   The step code data struct.
+ * @param  i_port  Target memory port.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t triggerDsdImpeTh( ExtensibleChip * i_chip,
-                           STEP_CODE_DATA_STRUCT & io_sc );
+                           STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port );
 
 template<> inline
 uint32_t triggerDsdImpeTh<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-        STEP_CODE_DATA_STRUCT & io_sc )
+        STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port )
 {
-    return getOcmbDataBundle(i_chip)->getTdCtlr()->handleDsdImpeTh( io_sc );
+    return getOcmbDataBundle(i_chip)->getTdCtlr()->handleDsdImpeTh(io_sc,
+                                                                   i_port);
 }
 
 #endif // Hostboot IPL/Runtime
@@ -175,37 +177,40 @@ MemIplCeStats<TARGETING::TYPE_OCMB_CHIP> * getIplCeStats(
  *         in the TD queue.
  * @param  i_chip  OCMB.
  * @param  io_sc   The step code data struct.
+ * @param  io_sc   Target memory port.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t handleTdEvent( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc );
+                        STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port );
 
 template<> inline
 uint32_t handleTdEvent<TARGETING::TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
-                                                  STEP_CODE_DATA_STRUCT & io_sc)
+                                                  STEP_CODE_DATA_STRUCT & io_sc,
+                                                  uint8_t i_port)
 {
-    return getOcmbDataBundle(i_chip)->getTdCtlr()->handleTdEvent( io_sc );
+    return getOcmbDataBundle(i_chip)->getTdCtlr()->handleTdEvent(io_sc, i_port);
 }
 
 /**
  * @brief Generic wrapper to tell the TD controller to ban TPS on a rank.
  * @param i_chip  OCMB.
  * @param i_rank  The target slave rank.
+ * @param i_port  Target memory port.
  */
 template<TARGETING::TYPE T>
-void banTps( ExtensibleChip * i_chip, const MemRank & i_rank );
+void banTps( ExtensibleChip * i_chip, const MemRank & i_rank, uint8_t i_port );
 
 template<> inline
 void banTps<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                        const MemRank & i_rank )
+                                        const MemRank & i_rank, uint8_t i_port )
 {
     // TODO Odyssey - need the port
     // Ban TPS on this rank.
     getOcmbDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
     // Permanently mask mainline NCEs and TCEs because of the TPS ban.
     getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
-    getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns();
+    getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns(i_port);
 }
 
 #endif // Hostboot Runtime only

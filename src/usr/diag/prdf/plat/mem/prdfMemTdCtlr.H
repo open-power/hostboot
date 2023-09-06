@@ -114,9 +114,10 @@ class MemTdCtlr
      *
      * @note   Initializes the TD controller, if needed.
      * @param  io_sc    The step code data struct.
+     * @param  i_port   Target memory port.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc );
+    uint32_t handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port );
 
 
     #ifdef __HOSTBOOT_RUNTIME
@@ -134,9 +135,10 @@ class MemTdCtlr
      *
      * @note   Initializes the TD controller, if needed.
      * @param  io_sc    The step code data struct.
+     * @param  i_port   Target memory port.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc );
+    uint32_t handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port );
 
     /**
      * @brief  Bans TPS on the given rank. Any attempts to add a TPS procedure
@@ -177,9 +179,10 @@ class MemTdCtlr
     /**
      * @brief  Masks NCE and TCE ECC attentions.
      * @note   Only intended to be used just before starting a new TD procedure.
+     * @param  i_port Target memory port.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t maskEccAttns();
+    uint32_t maskEccAttns(uint8_t i_port);
 
     #endif
 
@@ -312,9 +315,10 @@ class MemTdCtlr
      *         will unmask them because it is possible that UEs exceeded
      *         threshold and were masked by the rule code.
      * @note   Only intended to be used just after completing a TD procedure.
+     * @param  i_port Target memory port
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t unmaskEccAttns();
+    uint32_t unmaskEccAttns(uint8_t i_port);
 
     /**
      * @param  o_canResume True, if background scrubbing can be resumed. False,

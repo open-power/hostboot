@@ -200,10 +200,11 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
                 // At this point, there are new TD procedures in the queue so we
                 // want to mask certain fetch attentions to avoid the complication
                 // of handling the attentions during the TD procedures.
-                o_rc = maskEccAttns();
+                o_rc = maskEccAttns(addr.getPort());
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+                    PRDF_ERR(PRDF_FUNC "maskEccAttns(%x) failed",
+                             addr.getPort());
                     break;
                 }
             }
@@ -381,9 +382,10 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc,
+                                        uint8_t i_port )
 {
-    #define PRDF_FUNC "[MemTdCtlr::triggerDsdEventImpeTh] "
+    #define PRDF_FUNC "[MemTdCtlr::handleDsdImpeTh] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -401,15 +403,6 @@ uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc )
         // Don't interrupt a TD procedure if one is already in progress.
         if ( nullptr != iv_curProcedure ) break;
 
-        MemAddr addr;
-        o_rc = getMemMaintAddr<T>( iv_chip, addr );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
-                      iv_chip->getHuid() );
-            break;
-        }
-
         #ifdef __HOSTBOOT_RUNTIME
 
         // Stop background scrubbing.
@@ -421,16 +414,25 @@ uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc )
             break;
         }
 
+        MemAddr addr;
+        o_rc = getMemMaintAddr<T>( iv_chip, addr );
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
+                      iv_chip->getHuid() );
+            break;
+        }
+
         // Update the rank we stopped background scrub on
         iv_stoppedRank = getStopRank( addr );
 
         // At this point, there are new TD procedures in the queue so we
         // want to mask certain fetch attentions to avoid the complication
         // of handling the attentions during the TD procedures.
-        o_rc = maskEccAttns();
+        o_rc = maskEccAttns(addr.getPort());
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+            PRDF_ERR( PRDF_FUNC "maskEccAttns(%x) failed", addr.getPort() );
             break;
         }
 
@@ -443,11 +445,11 @@ uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc )
         collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
 
         // Move onto the next step in the state machine.
-        o_rc = nextStep( io_sc, addr.getPort() );
+        o_rc = nextStep( io_sc, i_port );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "nextStep(%x) failed on 0x%08x",
-                      addr.getPort(), iv_chip->getHuid() );
+                      i_port, iv_chip->getHuid() );
             break;
         }
 

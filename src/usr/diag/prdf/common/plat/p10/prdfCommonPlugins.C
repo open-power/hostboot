@@ -394,6 +394,7 @@ int32_t CrcSideEffect_Ocmb( ExtensibleChip * i_chip,
     return CrcSideEffect( omic, io_sc, omiPos );
 }
 PRDF_PLUGIN_DEFINE_NS(explorer_ocmb, CommonPlugins, CrcSideEffect_Ocmb);
+PRDF_PLUGIN_DEFINE_NS(odyssey_ocmb, CommonPlugins, CrcSideEffect_Ocmb);
 
 /**
  * @brief  Plugin for CRC related error side effect handling. Check for

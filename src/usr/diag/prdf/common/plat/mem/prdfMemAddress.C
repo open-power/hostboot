@@ -179,7 +179,7 @@ uint64_t MemAddr::expIncRowAddr( ExtensibleChip * i_ocmb ) const
     // extraRowBits will denote whether row15:row17 are used (0:3);
     bool twoDimmConfig, col3Config;
     uint8_t mrnkBits, srnkBits, extraRowBits;
-    // TODO Odyssey - needs odyssey version
+
     int32_t rc = MemUtils::expGetAddrConfig( i_ocmb, iv_rnk.getDimmSlct(),
         twoDimmConfig, mrnkBits, srnkBits, extraRowBits, col3Config );
     if ( SUCCESS != rc )

@@ -134,7 +134,7 @@ uint32_t RrdEvent<T>::checkEcc( const uint32_t & i_eccAttns,
             #ifdef __HOSTBOOT_RUNTIME
             // Because of the UE, any further TPS requests will likely have no
             // effect. So ban all subsequent requests.
-            MemDbUtils::banTps<T>( iv_chip, addr.getRank() );
+            MemDbUtils::banTps<T>( iv_chip, addr.getRank(), iv_port );
             #endif
 
             // Leave the mark in place and abort this procedure.

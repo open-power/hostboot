@@ -73,13 +73,14 @@ TpsFalseAlarm * __getTpsFalseAlarmCounter<TYPE_OCMB_CHIP>(
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-void __maskMainlineNceTces( ExtensibleChip * i_chip );
+void __maskMainlineNceTces( ExtensibleChip * i_chip, uint8_t i_port );
 
 template<>
-void __maskMainlineNceTces<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip )
+void __maskMainlineNceTces<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
+                                           uint8_t i_port)
 {
     getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
-    getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns();
+    getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns(i_port);
 }
 
 //------------------------------------------------------------------------------
@@ -351,7 +352,7 @@ uint32_t TpsEvent<T>::analyzeEccErrors( const uint32_t & i_eccAttns,
 
             // Because of the UE, any further TPS requests will likely have no
             // effect. So ban all subsequent requests.
-            MemDbUtils::banTps<T>( iv_chip, addr.getRank() );
+            MemDbUtils::banTps<T>( iv_chip, addr.getRank(), iv_port );
 
             // Abort this procedure because additional repairs will likely
             // not help (also avoids complication of having UE and MPE at
@@ -433,7 +434,7 @@ uint32_t TpsEvent<T>::handleFalseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
                                           PRDFSIG_TpsFalseAlarmTH );
 
         // Permanently mask mainline NCEs and TCEs
-        __maskMainlineNceTces<T>( iv_chip );
+        __maskMainlineNceTces<T>( iv_chip, iv_port );
     }
 
     return SUCCESS;
@@ -600,7 +601,8 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                         io_sc.service_data->setServiceCall();
 
                         // Permanently mask mainline NCEs and TCEs and ban TPS.
-                        MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
+                        MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                            iv_port );
                     }
                 }
                 else
@@ -637,7 +639,7 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             else
             {
                 // Permanently mask mainline NCEs and TCEs and ban TPS.
-                MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
+                MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port );
 
                 // If the symbol mark is available.
                 if ( !symMark.isValid() )
@@ -780,7 +782,8 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setServiceCall();
 
                     // Permanently mask mainline NCEs and TCEs
-                    MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
+                    MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                        iv_port );
                 }
             }
             else
@@ -807,7 +810,7 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 io_sc.service_data->setServiceCall();
 
                 // Permanently mask mainline NCEs and TCEs
-                MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
+                MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port );
             }
             // If the chip mark is available.
             if ( !chipMark.isValid() )
@@ -886,7 +889,8 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setServiceCall();
 
                     // Permanently mask mainline NCEs and TCEs.
-                    MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
+                    MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                        iv_port );
                 }
             }
             // If the symbol mark is available.
@@ -954,7 +958,8 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     io_sc.service_data->setServiceCall();
 
                     // Permanently mask mainline NCEs and TCEs.
-                    MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
+                    MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                        iv_port );
                 }
             }
 
@@ -977,7 +982,7 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             io_sc.service_data->setServiceCall();
 
             // Permanently mask mainline NCEs and TCEs.
-            MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank );
+            MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port );
         }
 
         // If analysis resulted in a false alarm.

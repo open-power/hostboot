@@ -138,7 +138,7 @@ int32_t __expGetPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
     // mrank (M0-M1), srnk (S0-S2), or extra row (R17-R15) bits are used.
     bool twoDimmConfig, col3Config;
     uint8_t mrnkBits, srnkBits, extraRowBits;
-    // TODO Odyssey - needs odyssey version
+
     o_rc = expGetAddrConfig( i_chip, dslct, twoDimmConfig, mrnkBits, srnkBits,
                              extraRowBits, col3Config );
     if ( SUCCESS != o_rc ) return o_rc;

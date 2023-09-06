@@ -734,11 +734,12 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 
         // The chip mark has already been added to the queue. Now tell the TD
         // controller to process it if not already in progress.
-        o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc );
+        o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc, addr.getPort() );
         if ( SUCCESS != o_rc )
         {
-                PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x) failed on rank "
-                          "0x%02x", i_chip->getHuid(), i_rank.getKey() );
+                PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x,%x) failed on rank "
+                          "0x%02x", i_chip->getHuid(), addr.getPort(),
+                          i_rank.getKey() );
             break;
         }
 
@@ -948,11 +949,12 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
 
             MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank,
                 addr.getPort()) );
-            o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc );
+            o_rc = MemDbUtils::handleTdEvent<T>(i_chip, io_sc, addr.getPort());
             if ( SUCCESS != o_rc )
             {
-                PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x) failed on rank "
-                          "0x%02x", i_chip->getHuid(), rank.getKey() );
+                PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x,%x) failed on rank "
+                          "0x%02x", i_chip->getHuid(), addr.getPort(),
+                          rank.getKey() );
                 break;
             }
 
@@ -1020,17 +1022,17 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
         MemRank rank = addr.getRank();
         MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank,
             addr.getPort()) );
-        o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc );
+        o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc, addr.getPort() );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x) failed on rank 0x%02x",
-                      i_chip->getHuid(), rank.getKey() );
+            PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x,%x) failed on rank 0x%02x",
+                      i_chip->getHuid(), addr.getPort(), rank.getKey() );
             break;
         }
 
         // Because of the UE, any further TPS requests will likely have no
         // effect. So ban all subsequent requests.
-        MemDbUtils::banTps<T>( i_chip, rank );
+        MemDbUtils::banTps<T>( i_chip, rank, addr.getPort() );
 
         #endif // __HOSTBOOT_RUNTIME
 
@@ -1363,7 +1365,7 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
                 // Also ban TPS on this rank since we don't want TPS making
                 // things worse by placing a chip mark later.
-                MemDbUtils::banTps<TYPE_OCMB_CHIP>( i_chip, rank );
+                MemDbUtils::banTps<TYPE_OCMB_CHIP>( i_chip, rank, i_port );
 
                 #endif // __HOSTBOOT_RUNTIME
             }
@@ -1395,7 +1397,8 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 {
                     // If a dram spare deploy procedure has been started,
                     // trigger the TD controller
-                    MemDbUtils::triggerDsdImpeTh<TYPE_OCMB_CHIP>(i_chip, io_sc);
+                    MemDbUtils::triggerDsdImpeTh<TYPE_OCMB_CHIP>(i_chip, io_sc,
+                                                                 i_port);
                 }
 
                 #endif

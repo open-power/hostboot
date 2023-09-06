@@ -401,7 +401,7 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
 
             // Because of the UE, any further TPS requests will likely have no
             // effect. So ban all subsequent requests.
-            MemDbUtils::banTps<T>( i_chip, rank );
+            MemDbUtils::banTps<T>( i_chip, rank, i_addr.getPort() );
         }
 
     } while (0);
@@ -420,7 +420,8 @@ uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
+                                      uint8_t i_port )
 {
     #define PRDF_FUNC "[MemTdCtlr::handleTdEvent] "
 
@@ -446,10 +447,10 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
         // that case, mask fetch attentions temporarily to prevent flooding.
         if ( iv_queue.empty() )
         {
-            o_rc = maskEccAttns();
-            if ( SUCCESS != o_rc )
+            o_rc = maskEccAttns(i_port);
+            if (SUCCESS != o_rc)
             {
-                PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+                PRDF_ERR(PRDF_FUNC "maskEccAttns(%x) failed", i_port);
                 break;
             }
 
@@ -521,10 +522,10 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc )
             // At this point, there are new TD procedures in the queue so we
             // want to mask certain fetch attentions to avoid the complication
             // of handling the attentions during the TD procedures.
-            o_rc = maskEccAttns();
-            if ( SUCCESS != o_rc )
+            o_rc = maskEccAttns(addr.getPort());
+            if (SUCCESS != o_rc)
             {
-                PRDF_ERR( PRDF_FUNC "maskEccAttns() failed" );
+                PRDF_ERR(PRDF_FUNC "maskEccAttns(%x) failed", addr.getPort());
                 break;
             }
         }
@@ -595,10 +596,10 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
 
         // Unmask the ECC attentions that were explicitly masked during the
         // TD procedure.
-        o_rc = unmaskEccAttns();
+        o_rc = unmaskEccAttns(i_port);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
+            PRDF_ERR( PRDF_FUNC "unmaskEccAttns(%x) failed", i_port );
         }
 
         // A TD procedure has completed. Restart background scrubbing on the
@@ -629,23 +630,44 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::maskEccAttns()
+uint32_t MemTdCtlr<T>::maskEccAttns(uint8_t i_port)
 {
     #define PRDF_FUNC "[MemTdCtlr<T>::maskEccAttns] "
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO Odyssey - reg updates
-    SCAN_COMM_REGISTER_CLASS * mask = iv_chip->getRegister( "RDFFIR_MASK_OR" );
-
-    mask->clearAllBits();
-    mask->SetBit(8); // Mainline read NCE
-    mask->SetBit(9); // Mainline read TCE
-
-    o_rc = mask->Write();
-    if ( SUCCESS != o_rc )
+    // Odyssey OCMBs
+    if (isOdysseyOcmb(iv_chip->getTrgt()))
     {
-        PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_OR" );
+        char maskName[64];
+        sprintf(maskName, "RDF_FIR_MASK_OR_%x", i_port);
+        SCAN_COMM_REGISTER_CLASS * mask = iv_chip->getRegister(maskName);
+
+        mask->clearAllBits();
+        mask->SetBit(9); // Mainline read NCE
+        mask->SetBit(10); // Mainline read TCE
+
+        o_rc = mask->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on %s", maskName );
+        }
+    }
+    // Explorer OCMBs
+    else
+    {
+        SCAN_COMM_REGISTER_CLASS * mask =
+            iv_chip->getRegister("RDFFIR_MASK_OR");
+
+        mask->clearAllBits();
+        mask->SetBit(8); // Mainline read NCE
+        mask->SetBit(9); // Mainline read TCE
+
+        o_rc = mask->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_OR" );
+        }
     }
 
     return o_rc;
@@ -656,7 +678,7 @@ uint32_t MemTdCtlr<T>::maskEccAttns()
 //------------------------------------------------------------------------------
 
 template<>
-uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns()
+uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns(uint8_t i_port)
 {
     #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns] "
 
@@ -667,30 +689,68 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns()
     // clear and unmask them. Also, it is possible that memory UEs have
     // thresholded so clear and unmask them as well.
 
-    SCAN_COMM_REGISTER_CLASS * fir  = iv_chip->getRegister( "RDFFIR_AND" );
-    SCAN_COMM_REGISTER_CLASS * mask = iv_chip->getRegister( "RDFFIR_MASK_AND" );
-
-    fir->setAllBits(); mask->setAllBits();
-
-    // Do not unmask NCE and TCE attentions if they have been permanently
-    // masked due to certain TPS conditions.
-    if ( !(getOcmbDataBundle(iv_chip)->iv_maskMainlineNceTce) )
+    // Odyssey OCMBs
+    if (isOdysseyOcmb(iv_chip->getTrgt()))
     {
-        fir->ClearBit(8);  mask->ClearBit(8);  // Mainline read NCE
-        fir->ClearBit(9);  mask->ClearBit(9);  // Mainline read TCE
+        // FIRs on Odyssey are write to clear so get the RDF_FIR and it's mask.
+        char firName[64];
+        sprintf(firName, "RDF_FIR_%x", i_port);
+        SCAN_COMM_REGISTER_CLASS * fir = iv_chip->getRegister(firName);
+
+        char maskName[64];
+        sprintf(maskName, "RDF_FIR_MASK_%x", i_port);
+        SCAN_COMM_REGISTER_CLASS * mask = iv_chip->getRegister(maskName);
+
+        // Do not unmask NCE and TCE attentions if they have been permanently
+        // masked due to certain TPS conditions.
+        if ( !(getOcmbDataBundle(iv_chip)->iv_maskMainlineNceTce) )
+        {
+            fir->SetBit(9);  mask->ClearBit(9);  // Mainline read NCE
+            fir->SetBit(10); mask->ClearBit(10); // Mainline read TCE
+        }
+        fir->SetBit(15); mask->SetBit(15); // Mainline read UE
+
+        o_rc = fir->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_AND" );
+        }
+
+        o_rc = mask->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_AND" );
+        }
     }
-    fir->ClearBit(14); mask->ClearBit(14); // Mainline read UE
-
-    o_rc = fir->Write();
-    if ( SUCCESS != o_rc )
+    // Explorer OCMBs
+    else
     {
-        PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_AND" );
-    }
+        SCAN_COMM_REGISTER_CLASS * fir = iv_chip->getRegister("RDFFIR_AND");
+        SCAN_COMM_REGISTER_CLASS * mask =
+            iv_chip->getRegister("RDFFIR_MASK_AND");
 
-    o_rc = mask->Write();
-    if ( SUCCESS != o_rc )
-    {
-        PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_AND" );
+        fir->setAllBits(); mask->setAllBits();
+
+        // Do not unmask NCE and TCE attentions if they have been permanently
+        // masked due to certain TPS conditions.
+        if ( !(getOcmbDataBundle(iv_chip)->iv_maskMainlineNceTce) )
+        {
+            fir->ClearBit(8);  mask->ClearBit(8);  // Mainline read NCE
+            fir->ClearBit(9);  mask->ClearBit(9);  // Mainline read TCE
+        }
+        fir->ClearBit(14); mask->ClearBit(14); // Mainline read UE
+
+        o_rc = fir->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_AND" );
+        }
+
+        o_rc = mask->Write();
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_AND" );
+        }
     }
 
     return o_rc;
@@ -812,19 +872,28 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::initialize()
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO Odyssey - updates needed in underlying functions
-
     do
     {
         if ( iv_initialized ) break; // nothing to do
 
         // Unmask the fetch attentions just in case there were masked during a
-        // TD procedure prior to a reset/reload.
-        o_rc = unmaskEccAttns();
+        // TD procedure prior to a reset/reload. For Odyssey, unmask both ports.
+        o_rc = unmaskEccAttns(0);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
+            PRDF_ERR( PRDF_FUNC "unmaskEccAttns(0) failed" );
             break;
+        }
+
+        // Odyssey only: unmask port 1
+        if (isOdysseyOcmb(iv_chip->getTrgt()))
+        {
+            o_rc = unmaskEccAttns(1);
+            if (SUCCESS != o_rc)
+            {
+                PRDF_ERR(PRDF_FUNC "unmaskEccAttns(1) failed");
+                break;
+            }
         }
 
         // Find all unverified chip marks.

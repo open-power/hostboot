@@ -104,7 +104,7 @@ int32_t RcdParityError( ExtensibleChip * i_chip,
                 TdEntry * entry = new TpsEvent<TYPE_OCMB_CHIP>( i_chip, r, 0 );
                 MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( i_chip, entry );
                 uint32_t rc = MemDbUtils::handleTdEvent<TYPE_OCMB_CHIP>(i_chip,
-                                                                        io_sc);
+                    io_sc, 0);
                 if ( SUCCESS != rc )
                 {
                     PRDF_ERR( PRDF_FUNC "handleTdEvent() failed on 0x%08x",
