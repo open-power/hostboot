@@ -585,7 +585,8 @@ fapi2::ReturnCode after_phy_reset<mss::mc_type::ODYSSEY>( const fapi2::Target<fa
                  .recoverable_error<scomt::mp::S_LFIR_ODPCTRLPERR>()
                  .recoverable_error<scomt::mp::S_LFIR_PHYD5ACSM0PARITYERR>()
                  .recoverable_error<scomt::mp::S_LFIR_PHYD5ACSM1PARITYERR>()
-                 .recoverable_error<scomt::mp::S_LFIR_PHYRXFIFOCHECKERR>()
+                 // Workaround: Leaving PHYRXFIFOCHECKERR masked since it is lighting erroneously at mainline
+                 //.recoverable_error<scomt::mp::S_LFIR_PHYRXFIFOCHECKERR>()
                  .recoverable_error<scomt::mp::S_LFIR_PHYRXTXPPTERR>()
                  .recoverable_error<scomt::mp::S_LFIR_PHYECCERR>()
                  .write(), "Failed to Write ODP FIR register " GENTARGTIDFORMAT, GENTARGTID(l_port));
