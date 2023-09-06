@@ -100,11 +100,21 @@ def get_symbol_and_offset_from_expression(symname):
 #   Type,DataOffset,FunctionOffset,SymbolLength,SymbolName
 def find_hb_fn_symbol_addr(symname, nohalt=False):
     symname, offset = get_symbol_and_offset_from_expression(symname)
-    return int(column(grep(',' + symname + '$', hbsyms)[0], 2, ','), 16) + offset
+    pos = int(column(grep(',' + symname + '$', hbsyms)[0], 2, ','), 16)
+
+    if pos == 0:
+        return 0
+
+    return pos + offset
 
 def find_hb_data_symbol_addr(symname, nohalt=False):
     symname, offset = get_symbol_and_offset_from_expression(symname)
-    return int(column(grep(',' + symname + '$', hbsyms)[0], 1, ','), 16) + offset
+    pos = int(column(grep(',' + symname + '$', hbsyms)[0], 1, ','), 16)
+
+    if pos == 0:
+        return 0
+
+    return pos + offset
 
 # See readelf documentation for the description of the output of
 # readelf -s -W, but for example it looks like this:
