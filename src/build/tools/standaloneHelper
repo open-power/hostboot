@@ -38,10 +38,6 @@ assemble_setup()
 
     build-ffs-tools
 
-    # Clone PPE repo to ${PROJECT_ROOT}/src/build/tools/extern/ppe
-    # PPE is tracked as a git module
-    (cd ${PROJECT_ROOT} && make ppe $1)
-
     source ${PROJECT_ROOT}/src/build/citest/etc/sbe
     source ${PROJECT_ROOT}/src/build/citest/etc/hcode
     source ${PROJECT_ROOT}/src/build/citest/etc/hdat
@@ -209,12 +205,19 @@ generate_sbe_odyssey_images()
 # repo, and build repo to generate ECC enabled SBE image
 generate_sbe_image()
 {
+    cd ${PROJECT_ROOT}
     PPE_DIR=${PROJECT_ROOT}/src/build/tools/extern/ppe
 
-    if [[ ! -f ${PPE_DIR}/Makefile ]];then
-        echo "Could not find PPE's Makefile."
-        echo "Please run \"hb prime\" to clone PPE repo."
-        exit 1
+    if [[ "${HB_FAST_PRIME}" ]]; then
+        export PPE_SUBREPO_TOP_COMMIT=$(git submodule status ${PPE_DIR} | awk '{print $1}' | sed 's/^-//')
+        PPE_CACHE_DIR="${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}"
+        if [ -d ${PPE_CACHE_DIR} ]; then
+            echo "\n***Using default pre-built SBE images from ${PPE_CACHE_DIR}\n"
+            return 0
+        else
+            echo "${PPE_CACHE_DIR} DNE - generating PPE submodule images"
+        fi
+
     fi
 
     mkdir -p "$PROJECT_ROOT/standalone/imghash"
@@ -223,6 +226,16 @@ generate_sbe_image()
     SBE_MEASUREMENT_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_measurement_p10.bin.ecc
     SBE_OTPROM_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_otprom_p10.bin
     SBE_SEEPROM_IMAGE_DD1=${PROJECT_ROOT}/src/build/tools/extern/ppe/images/sbe_seeprom_DD1.bin
+
+    # Clone PPE repo to ${PROJECT_ROOT}/src/build/tools/extern/ppe
+    # PPE is tracked as a git module
+    (cd ${PROJECT_ROOT} && make ppe $1)
+
+    if [[ ! -f ${PPE_DIR}/Makefile ]];then
+        echo "Could not find PPE's Makefile."
+        echo "Please run \"hb prime\" to clone PPE repo."
+        exit 1
+    fi
 
     if ! diff "$HBIBL_HASH_FILE" <(hash_file "$PROJECT_ROOT/img/hbibl.bin") &>/dev/null \
         || [ ! -f "$SBE_SEEPROM_IMG" ] \

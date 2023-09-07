@@ -51,7 +51,6 @@ BUILDPNOR := ${PROJECT_ROOT}/src/build/buildpnor
 BASEIMAGESDIR := ${PROJECT_ROOT}/img
 SBE_DIR := ${PROJECT_ROOT}/src/build/tools/extern/sbe
 PPE_DIR=${PROJECT_ROOT}/src/build/tools/extern/ppe
-SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
 STANDALONEDIR := ${PROJECT_ROOT}/standalone
 # FSS tools directory
 FFSTOOLS := ${STANDALONEDIR}/ffs
@@ -95,9 +94,22 @@ ifdef HB_FAST_PRIME
 endif
 
 # Needed to sign SBE Image (which will add .sb_settings section to it)
-SBE_SIGN_SCRIPT := ${PPE_DIR}/src/tools/scripts/signSbeImage
+PPE_CACHE_DIR := ${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}
+PPE_CACHE_EXISTS := $(shell ls ${PPE_CACHE_DIR})
+ifdef HB_FAST_PRIME
+	SBE_SIGN_SCRIPT := ${PPE_CACHE_DIR}/signSbeImage
+	SBE_TOOL        := ${PPE_CACHE_DIR}/ipl_image_tool
+	SBE_SEEPROM_IMAGE_DD1 := ${PPE_CACHE_DIR}/sbe_seeprom_DD1.bin
+endif
+
+# Cache DNE - fall back to local-built images
+ifeq (${PPE_CACHE_EXISTS},)
+	SBE_SIGN_SCRIPT := ${PPE_DIR}/src/tools/scripts/signSbeImage
+	SBE_TOOL        := ${PPE_DIR}/images/ipl_image_tool
+	SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
+endif
+
 SBE_SCRATCH_DIR := ${STANDALONEDIR}/sbeScratchDir
-SBE_TOOL        := ${PPE_DIR}/images/ipl_image_tool
 
 ## Variables and Files Setup
 
@@ -120,7 +132,6 @@ OCMBFW_IMG = fwhdr.ocmbfw.bin
 VERSION_IMG := version.txt
 
 SBE_BASE_IMAGES := ${SBE_SEEPROM_IMAGE_DD1}
-SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
 SBE_SEEPROM_HDR_SHA_DD1 := ${STANDALONEDIR}/pnor/sbe_seeprom.sha.bin.DD1
 SBE_SEEPROM_HDR_BIN_DD1 := ${STANDALONEDIR}/pnor/sbe_seeprom.hdr.bin.DD1
 
