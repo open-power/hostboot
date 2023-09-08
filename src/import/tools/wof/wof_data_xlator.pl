@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2021
+# Contributors Listed Below - COPYRIGHT 2017,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -87,11 +87,6 @@ my $G_ATTR_disp_axis_vdd    = 'vdd';
 my $G_ATTR_disp_axis_amb    = 'amb';
 my $G_ATTR_disp_axis_io     = 'io';
 my $G_ATTR_disp_axis_vratio = 'vratio';
-
-my $G_DEF_IO_POWER_SIZE = 6;
-my $G_DEF_VCS_CEFF_SIZE = 4;
-my $G_DEF_VDD_CEFF_SIZE = 26;
-my $G_DEF_AMB_COND_SIZE = 4;
 
 my $g_io_power_size;
 my $g_vcs_ceff_size;
@@ -416,18 +411,23 @@ our $CSV_ATTR_tdp_amb_cond_index        = 'tdp_amb_cond_index';
 our $CSV_ATTR_io_full_power             = 'io_full_power';
 our $CSV_ATTR_io_disabled_power         = 'io_disabled_power';
 our $CSV_ATTR_core_count                = 'core_count';
+our $CSV_ATTR_wov_credit_knob           = 'wov_credit_knob';
 our $CSV_ATTR_pdv_sort_power_save_freq  = 'pdv_sort_power_save_freq';
 our $CSV_ATTR_pdv_sort_wof_base_freq    = 'pdv_sort_wof_base_freq';
 our $CSV_ATTR_pdv_sort_ultra_turbo_freq = 'pdv_sort_ultra_turbo_freq';
 our $CSV_ATTR_pdv_sort_throttle_freq    = 'pdv_sort_throttle_freq';
 our $CSV_ATTR_vdd_ceff_start            = 'vdd_ceff_start';
 our $CSV_ATTR_vdd_ceff_step             = 'vdd_ceff_step';
+our $CSV_ATTR_vdd_ceff_size             = 'vdd_ceff_size';
 our $CSV_ATTR_vcs_ceff_start            = 'vcs_ceff_start';
 our $CSV_ATTR_vcs_ceff_step             = 'vcs_ceff_step';
+our $CSV_ATTR_vcs_ceff_size             = 'vcs_ceff_size';
 our $CSV_ATTR_io_power_start            = 'io_power_start';
 our $CSV_ATTR_io_power_step             = 'io_power_step';
+our $CSV_ATTR_io_power_size             = 'io_power_size';
 our $CSV_ATTR_amb_cond_start            = 'amb_cond_start';
 our $CSV_ATTR_amb_cond_step             = 'amb_cond_step';
+our $CSV_ATTR_amb_cond_size             = 'amb_cond_size';
 our $CSV_ATTR_vratio_start              = 'vratio_start';
 our $CSV_ATTR_vratio_step               = 'vratio_step';
 our $CSV_ATTR_vdd_ceff                  = 'vdd_ceff';
@@ -445,20 +445,33 @@ our $CSV_ATTR_wof_ceff_ratio_overage    = 'wof_ceff_ratio_overage';
 our $CSV_ATTR_override_match_freq       = 'override_match_freq';
 our $CSV_ATTR_override_match_power      = 'override_match_power';
 our $CSV_ATTR_pdv_sort_fixed_freq       = 'pdv_sort_fixed_freq';
+our $CSV_ATTR_bal_perf_ceff_adj_pct     = 'bal_perf_ceff_adj_pct';
+our $CSV_ATTR_fav_perf_ceff_adj_pct     = 'fav_perf_ceff_adj_pct';
+our $CSV_ATTR_fav_powr_ceff_adj_pct     = 'fav_powr_ceff_adj_pct';
+our $CSV_ATTR_non_det_ceff_adj_pct      = 'non_det_ceff_adj_pct';
+our $CSV_ATTR_bal_perf_freq_lim_mhz     = 'bal_perf_freq_lim_mhz';
+our $CSV_ATTR_fav_perf_freq_lim_mhz     = 'fav_perf_freq_lim_mhz';
+our $CSV_ATTR_fav_powr_freq_lim_mhz     = 'fav_powr_freq_lim_mhz';
+our $CSV_ATTR_non_det_freq_lim_mhz      = 'non_det_freq_lim_mhz';
 
 # columns of csv file scope in csv files.
 our @CSV_FILE_SCOPE_COLUMN_NAMES = (
-    $CSV_ATTR_sort,                     $CSV_ATTR_package,                   $CSV_ATTR_table_version,
-    $CSV_ATTR_table_date,               $CSV_ATTR_PN,                        $CSV_ATTR_ocs_mode,
-    $CSV_ATTR_socket_power,             $CSV_ATTR_rdp_current,               $CSV_ATTR_boost_current,
-    $CSV_ATTR_tdp_vcs_ceff_index,       $CSV_ATTR_tdp_vdd_ceff_index,        $CSV_ATTR_tdp_io_power_index,
-    $CSV_ATTR_tdp_amb_cond_index,       $CSV_ATTR_io_full_power,             $CSV_ATTR_io_disabled_power,
-    $CSV_ATTR_core_count,               $CSV_ATTR_pdv_sort_ultra_turbo_freq, $CSV_ATTR_pdv_sort_throttle_freq,
-    $CSV_ATTR_pdv_sort_power_save_freq, $CSV_ATTR_pdv_sort_wof_base_freq,    $CSV_ATTR_vdd_ceff_start,
-    $CSV_ATTR_vdd_ceff_step,            $CSV_ATTR_vcs_ceff_start,            $CSV_ATTR_vcs_ceff_step,
-    $CSV_ATTR_io_power_start,           $CSV_ATTR_io_power_step,             $CSV_ATTR_amb_cond_start,
-    $CSV_ATTR_amb_cond_step,            $CSV_ATTR_vratio_start,              $CSV_ATTR_vratio_step,
-    $CSV_ATTR_override_match_freq,      $CSV_ATTR_override_match_power,      $CSV_ATTR_pdv_sort_fixed_freq,
+    $CSV_ATTR_sort,                  $CSV_ATTR_package,                   $CSV_ATTR_table_version,
+    $CSV_ATTR_table_date,            $CSV_ATTR_PN,                        $CSV_ATTR_ocs_mode,
+    $CSV_ATTR_socket_power,          $CSV_ATTR_rdp_current,               $CSV_ATTR_boost_current,
+    $CSV_ATTR_tdp_vcs_ceff_index,    $CSV_ATTR_tdp_vdd_ceff_index,        $CSV_ATTR_tdp_io_power_index,
+    $CSV_ATTR_tdp_amb_cond_index,    $CSV_ATTR_io_full_power,             $CSV_ATTR_io_disabled_power,
+    $CSV_ATTR_core_count,            $CSV_ATTR_pdv_sort_ultra_turbo_freq, $CSV_ATTR_pdv_sort_throttle_freq,
+    $CSV_ATTR_wov_credit_knob,       $CSV_ATTR_pdv_sort_power_save_freq,  $CSV_ATTR_pdv_sort_wof_base_freq,
+    $CSV_ATTR_vdd_ceff_start,        $CSV_ATTR_vdd_ceff_step,             $CSV_ATTR_vdd_ceff_size,
+    $CSV_ATTR_vcs_ceff_start,        $CSV_ATTR_vcs_ceff_step,             $CSV_ATTR_vcs_ceff_size,
+    $CSV_ATTR_io_power_start,        $CSV_ATTR_io_power_step,             $CSV_ATTR_io_power_size,
+    $CSV_ATTR_amb_cond_start,        $CSV_ATTR_amb_cond_step,             $CSV_ATTR_amb_cond_size,
+    $CSV_ATTR_vratio_start,          $CSV_ATTR_vratio_step,               $CSV_ATTR_override_match_freq,
+    $CSV_ATTR_override_match_power,  $CSV_ATTR_pdv_sort_fixed_freq,       $CSV_ATTR_bal_perf_ceff_adj_pct,
+    $CSV_ATTR_fav_perf_ceff_adj_pct, $CSV_ATTR_fav_powr_ceff_adj_pct,     $CSV_ATTR_non_det_ceff_adj_pct,
+    $CSV_ATTR_bal_perf_freq_lim_mhz, $CSV_ATTR_fav_perf_freq_lim_mhz,     $CSV_ATTR_fav_powr_freq_lim_mhz,
+    $CSV_ATTR_non_det_freq_lim_mhz,
 );
 
 # columns of csv vrt scope in csv files.
@@ -486,7 +499,7 @@ my %CSV_FILE_SCOPE_COLUMN_NOT_FOUND_DEFAULT_VALUES = (
     $CSV_ATTR_pdv_sort_fixed_freq  => 0,
 );
 
-# If the column is really skipped in CSV file, but in teh table above, added to this array.
+# If the column is really skipped in CSV file, but in the table above, added to this array.
 our @CSV_FILE_SCOPE_COLUMN_NOT_FOUND;
 
 sub new
@@ -504,6 +517,33 @@ sub new
     foreach my $column (@CSV_COLUMN_NAMES)
     {
         $self->{$column} = undef;
+    }
+
+    bless($self);
+    return $self;
+}
+
+sub init
+{
+    my ($self) = @_;
+
+    # If command options are 0 for the below global variables,
+    # then read the value from the CSV file
+    if ( $g_amb_cond_size == 0 )
+    {
+        $g_amb_cond_size = int( $self->access($CSV_ATTR_amb_cond_size) );
+    }
+    if ( $g_io_power_size == 0 )
+    {
+        $g_io_power_size = int( $self->access($CSV_ATTR_io_power_size) );
+    }
+    if ( $g_vdd_ceff_size == 0 )
+    {
+        $g_vdd_ceff_size = int( $self->access($CSV_ATTR_vdd_ceff_size) );
+    }
+    if ( $g_vcs_ceff_size == 0 )
+    {
+        $g_vcs_ceff_size = int( $self->access($CSV_ATTR_vcs_ceff_size) );
     }
 
     # set index counts from global variable read from command options
@@ -531,8 +571,6 @@ sub new
             }
         }
     }
-    bless($self);
-    return $self;
 }
 
 sub access
@@ -592,6 +630,10 @@ sub parse
 
             # Verify and store column values that have file scope
             $self->_store_file_scope_columns( $row_number, \@columns );
+
+            # Initialize these global variables
+            # g_vcs_ceff_size, g_vdd_ceff_size, g_io_power_size, g_amb_cond_size
+            $self->init();
 
             # Save VRT scope values.
             # Verify and store column values that are scoped to a specific VRT entry
@@ -1542,6 +1584,7 @@ our $CSV_WOF_CONV_MULTIPLIER_VALUE           = 1;
 our $WOF_ATTR_magic_value               = 'magic_value';
 our $WOF_ATTR_major_dd_level            = 'major_dd_level';
 our $WOF_ATTR_minor_dd_level            = 'minor_dd_level';
+our $WOF_ATTR_wov_credit_knob           = 'wov_credit_knob';
 our $WOF_ATTR_header_version            = 'header_version';
 our $WOF_ATTR_vrt_block_size            = 'vrt_block_size';
 our $WOF_ATTR_vrt_block_header_size     = 'vrt_block_header_size';
@@ -1582,6 +1625,14 @@ our $WOF_ATTR_table_version             = 'table_version';
 our $WOF_ATTR_package_name              = 'package_name';
 our $WOF_ATTR_sort_power_save_freq_mhz  = 'sort_power_save_freq_mhz';
 our $WOF_ATTR_sort_fixed_freq_mhz       = 'sort_fixed_freq_mhz';
+our $WOF_ATTR_bal_perf_ceff_adj_pct     = 'bal_perf_ceff_adj_pct';
+our $WOF_ATTR_fav_perf_ceff_adj_pct     = 'fav_perf_ceff_adj_pct';
+our $WOF_ATTR_fav_powr_ceff_adj_pct     = 'fav_powr_ceff_adj_pct';
+our $WOF_ATTR_non_det_ceff_adj_pct      = 'non_det_ceff_adj_pct';
+our $WOF_ATTR_bal_perf_freq_lim_mhz     = 'bal_perf_freq_lim_mhz';
+our $WOF_ATTR_fav_perf_freq_lim_mhz     = 'fav_perf_freq_lim_mhz';
+our $WOF_ATTR_fav_powr_freq_lim_mhz     = 'fav_powr_freq_lim_mhz';
+our $WOF_ATTR_non_det_freq_lim_mhz      = 'non_det_freq_lim_mhz';
 
 sub new
 {
@@ -1593,6 +1644,7 @@ sub new
         $WOF_ATTR_magic_value               => $WOF_TABLES_HEADER_MAGIC_VALUE,
         $WOF_ATTR_major_dd_level            => undef,
         $WOF_ATTR_minor_dd_level            => undef,
+        $WOF_ATTR_wov_credit_knob           => undef,
         $WOF_ATTR_header_version            => $WOF_TABLES_HEADER_HEADER_VERSION,
         $WOF_ATTR_vrt_block_size            => $WOF_TABLES_HEADER_VRT_BLOCK_SIZE,
         $WOF_ATTR_vrt_block_header_size     => $WOF_TABLES_HEADER_VRT_BLOCK_HEADER_SIZE,
@@ -1633,6 +1685,14 @@ sub new
         $WOF_ATTR_package_name              => undef,
         $WOF_ATTR_sort_power_save_freq_mhz  => undef,
         $WOF_ATTR_sort_fixed_freq_mhz       => undef,
+        $WOF_ATTR_bal_perf_ceff_adj_pct     => undef,
+        $WOF_ATTR_fav_perf_ceff_adj_pct     => undef,
+        $WOF_ATTR_fav_powr_ceff_adj_pct     => undef,
+        $WOF_ATTR_non_det_ceff_adj_pct      => undef,
+        $WOF_ATTR_bal_perf_freq_lim_mhz     => undef,
+        $WOF_ATTR_fav_perf_freq_lim_mhz     => undef,
+        $WOF_ATTR_fav_powr_freq_lim_mhz     => undef,
+        $WOF_ATTR_non_det_freq_lim_mhz      => undef,
 
     };
     bless($self);
@@ -1664,10 +1724,10 @@ sub read
     my $pos = $file->get_pos();
 
     # Read field values from binary file
-    $self->access( $WOF_ATTR_magic_value,    $file->read_ascii_text(4) );
-    $self->access( $WOF_ATTR_major_dd_level, $file->read_uint8() );
-    $self->access( $WOF_ATTR_minor_dd_level, $file->read_uint8() );
-    $file->skip_bytes(1);    # Reserved 1 bytes
+    $self->access( $WOF_ATTR_magic_value,               $file->read_ascii_text(4) );
+    $self->access( $WOF_ATTR_major_dd_level,            $file->read_uint8() );
+    $self->access( $WOF_ATTR_minor_dd_level,            $file->read_uint8() );
+    $self->access( $WOF_ATTR_wov_credit_knob,           $file->read_uint8() );
     $self->access( $WOF_ATTR_header_version,            $file->read_uint8() );
     $self->access( $WOF_ATTR_vrt_block_size,            $file->read_uint16() );
     $self->access( $WOF_ATTR_vrt_block_header_size,     $file->read_uint16() );
@@ -1708,7 +1768,16 @@ sub read
     $self->access( $WOF_ATTR_package_name,              $file->read_ascii_text(16) );
     $self->access( $WOF_ATTR_sort_power_save_freq_mhz,  $file->read_uint16() );
     $self->access( $WOF_ATTR_sort_fixed_freq_mhz,       $file->read_uint16() );
-    $file->skip_bytes(20);    # Reserved 20 bytes
+    $self->access( $WOF_ATTR_bal_perf_ceff_adj_pct,     $file->read_uint8() );
+    $self->access( $WOF_ATTR_fav_perf_ceff_adj_pct,     $file->read_uint8() );
+    $self->access( $WOF_ATTR_fav_powr_ceff_adj_pct,     $file->read_uint8() );
+    $self->access( $WOF_ATTR_non_det_ceff_adj_pct,      $file->read_uint8() );
+    $self->access( $WOF_ATTR_bal_perf_freq_lim_mhz,     $file->read_uint16() );
+    $self->access( $WOF_ATTR_fav_perf_freq_lim_mhz,     $file->read_uint16() );
+    $self->access( $WOF_ATTR_fav_powr_freq_lim_mhz,     $file->read_uint16() );
+    $self->access( $WOF_ATTR_non_det_freq_lim_mhz,      $file->read_uint16() );
+
+    $file->skip_bytes(8);    # Reserved 8 bytes
 
     my $actual_data_size = $file->get_pos() - $pos;
     Log::log_print $p_log_lvl, "actual_data_size: $actual_data_size.\n";
@@ -1758,7 +1827,7 @@ sub write
     $file->write_ascii_text( $self->access($WOF_ATTR_magic_value), 4 );
     $file->write_uint8( $self->access($WOF_ATTR_major_dd_level) );
     $file->write_uint8( $self->access($WOF_ATTR_minor_dd_level) );
-    $file->fill_bytes( 1, 0x00 );    # Reserved 1 bytes
+    $file->write_uint8( $self->access($WOF_ATTR_wov_credit_knob) );
     $file->write_uint8( $self->access($WOF_ATTR_header_version) );
     $file->write_uint16( $self->access($WOF_ATTR_vrt_block_size) );
     $file->write_uint16( $self->access($WOF_ATTR_vrt_block_header_size) );
@@ -1799,7 +1868,15 @@ sub write
     $file->write_ascii_text( $self->access($WOF_ATTR_package_name),  16 );
     $file->write_uint16( $self->access($WOF_ATTR_sort_power_save_freq_mhz) );
     $file->write_uint16( $self->access($WOF_ATTR_sort_fixed_freq_mhz) );
-    $file->fill_bytes( 20, 0x00 );    # Reserved 20 bytes
+    $file->write_uint8( $self->access($WOF_ATTR_bal_perf_ceff_adj_pct) );
+    $file->write_uint8( $self->access($WOF_ATTR_fav_perf_ceff_adj_pct) );
+    $file->write_uint8( $self->access($WOF_ATTR_fav_powr_ceff_adj_pct) );
+    $file->write_uint8( $self->access($WOF_ATTR_non_det_ceff_adj_pct) );
+    $file->write_uint16( $self->access($WOF_ATTR_bal_perf_freq_lim_mhz) );
+    $file->write_uint16( $self->access($WOF_ATTR_fav_perf_freq_lim_mhz) );
+    $file->write_uint16( $self->access($WOF_ATTR_fav_powr_freq_lim_mhz) );
+    $file->write_uint16( $self->access($WOF_ATTR_non_det_freq_lim_mhz) );
+    $file->fill_bytes( 8, 0x00 );    # Reserved 8 bytes
 
     my $actual_data_size = $file->get_pos() - $pos;
     Log::log_print $p_log_lvl, "actual_data_size: $actual_data_size.\n";
@@ -1834,6 +1911,7 @@ sub print
     printf( "  Magic Value                    : %s\n", $self->access($WOF_ATTR_magic_value) );
     printf( "  Major DD Level                 : %s\n", $self->access($WOF_ATTR_major_dd_level) );
     printf( "  Minor DD Level                 : %s\n", $self->access($WOF_ATTR_minor_dd_level) );
+    printf( "  WOV Credit Knob                : %u\n", $self->access($WOF_ATTR_wov_credit_knob) );
     printf( "  Header Version                 : %u\n", $self->access($WOF_ATTR_header_version) );
     printf( "  VRT Block Size                 : %u\n", $self->access($WOF_ATTR_vrt_block_size) );
     printf( "  VRT Block Header Size          : %u\n", $self->access($WOF_ATTR_vrt_block_header_size) );
@@ -1874,6 +1952,15 @@ sub print
     printf( "  Package Name                   : %s\n", $self->access($WOF_ATTR_package_name) );
     printf( "  Sort Power Save Frequency MHz  : %s\n", $self->access($WOF_ATTR_sort_power_save_freq_mhz) );
     printf( "  Sort Fixed Frequency MHz       : %s\n", $self->access($WOF_ATTR_sort_fixed_freq_mhz) );
+    printf( "  Balance Perf Ceff Adj Pct      : %s\n", $self->access($WOF_ATTR_bal_perf_ceff_adj_pct) );
+    printf( "  Favor Perf Ceff Adj Pct        : %s\n", $self->access($WOF_ATTR_fav_perf_ceff_adj_pct) );
+    printf( "  Favor Powr Ceff Adj Pct        : %s\n", $self->access($WOF_ATTR_fav_powr_ceff_adj_pct) );
+    printf( "  Non deterministic Ceff Adj Pct : %s\n", $self->access($WOF_ATTR_non_det_ceff_adj_pct) );
+    printf( "  Balance Perf Limit Freq MHz    : %s\n", $self->access($WOF_ATTR_bal_perf_freq_lim_mhz) );
+    printf( "  Favor Perf Limit Freq MHz      : %s\n", $self->access($WOF_ATTR_fav_perf_freq_lim_mhz) );
+    printf( "  Favor Powr Ceff Limit Freq MHz : %s\n", $self->access($WOF_ATTR_fav_powr_freq_lim_mhz) );
+    printf( "  Non deterministic Lmt Frq MHz  : %s\n", $self->access($WOF_ATTR_non_det_freq_lim_mhz) );
+
     printf("\n");
 }
 ################################################################################
@@ -2622,7 +2709,8 @@ sub _set_wof_tables_header
     # vrt_block_header_size hardcoded in WOF_HEADER class.
     # vrt_data_size hardcoded in WOF_HEADER class.
     # ocs_mode hardcoded in WOF_HEADER class.
-    $wof_tables_header->access( $WOF_ATTR_core_count, $csv_file->access($CSV_ATTR_core_count) );
+    $wof_tables_header->access( $WOF_ATTR_wov_credit_knob, $csv_file->access($CSV_ATTR_wov_credit_knob) );
+    $wof_tables_header->access( $WOF_ATTR_core_count,      $csv_file->access($CSV_ATTR_core_count) );
     $wof_tables_header->access( $WOF_ATTR_vcs_start,
         int( $csv_file->access($CSV_ATTR_vcs_ceff_start) * $CSV_WOF_CONV_MULTIPLIER_PERCENT ) );
     $wof_tables_header->access( $WOF_ATTR_vcs_step,
@@ -2674,7 +2762,15 @@ sub _set_wof_tables_header
     $wof_tables_header->access( $WOF_ATTR_package_name,         $csv_file->access($CSV_ATTR_package) );
     $wof_tables_header->access( $WOF_ATTR_sort_power_save_freq_mhz,
         $csv_file->access($CSV_ATTR_pdv_sort_power_save_freq) );
-    $wof_tables_header->access( $WOF_ATTR_sort_fixed_freq_mhz, $csv_file->access($CSV_ATTR_pdv_sort_fixed_freq) );
+    $wof_tables_header->access( $WOF_ATTR_sort_fixed_freq_mhz,   $csv_file->access($CSV_ATTR_pdv_sort_fixed_freq) );
+    $wof_tables_header->access( $WOF_ATTR_bal_perf_ceff_adj_pct, $csv_file->access($CSV_ATTR_bal_perf_ceff_adj_pct) );
+    $wof_tables_header->access( $WOF_ATTR_fav_perf_ceff_adj_pct, $csv_file->access($CSV_ATTR_fav_perf_ceff_adj_pct) );
+    $wof_tables_header->access( $WOF_ATTR_fav_powr_ceff_adj_pct, $csv_file->access($CSV_ATTR_fav_powr_ceff_adj_pct) );
+    $wof_tables_header->access( $WOF_ATTR_non_det_ceff_adj_pct,  $csv_file->access($CSV_ATTR_non_det_ceff_adj_pct) );
+    $wof_tables_header->access( $WOF_ATTR_bal_perf_freq_lim_mhz, $csv_file->access($CSV_ATTR_bal_perf_freq_lim_mhz) );
+    $wof_tables_header->access( $WOF_ATTR_fav_perf_freq_lim_mhz, $csv_file->access($CSV_ATTR_fav_perf_freq_lim_mhz) );
+    $wof_tables_header->access( $WOF_ATTR_fav_powr_freq_lim_mhz, $csv_file->access($CSV_ATTR_fav_powr_freq_lim_mhz) );
+    $wof_tables_header->access( $WOF_ATTR_non_det_freq_lim_mhz,  $csv_file->access($CSV_ATTR_non_det_freq_lim_mhz) );
 
     # Write header to image file
     $wof_tables_header->write( $self->access($IMF_ATTR_binary_file_io) );
@@ -2685,6 +2781,8 @@ sub _print_wof_tables_header
 {
     my ( $self, $wof_tables_header ) = @_;
     Log::log_print $p_log_lvl, "_print_wof_tables_header():\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_wov_credit_knob" . $wof_tables_header->access($WOF_ATTR_wov_credit_knob) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_core_count:" . $wof_tables_header->access($WOF_ATTR_core_count) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_vcs_start:" . $wof_tables_header->access($WOF_ATTR_vcs_start) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_vcs_step:" . $wof_tables_header->access($WOF_ATTR_vcs_step) . "\n";
@@ -2742,6 +2840,22 @@ sub _print_wof_tables_header
         "  WOF_ATTR_sort_power_save_freq_mhz:" . $wof_tables_header->access($WOF_ATTR_sort_power_save_freq_mhz) . "\n";
     Log::log_print $p_log_lvl,
         "  WOF_ATTR_sort_fixed_freq_mhz:" . $wof_tables_header->access($WOF_ATTR_sort_fixed_freq_mhz) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_bal_perf_ceff_adj_pct:" . $wof_tables_header->access($WOF_ATTR_bal_perf_ceff_adj_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_fav_perf_ceff_adj_pct:" . $wof_tables_header->access($WOF_ATTR_fav_perf_ceff_adj_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_fav_powr_ceff_adj_pct:" . $wof_tables_header->access($WOF_ATTR_fav_powr_ceff_adj_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_non_det_ceff_adj_pct:" . $wof_tables_header->access($WOF_ATTR_non_det_ceff_adj_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_bal_perf_freq_lim_mhz:" . $wof_tables_header->access($WOF_ATTR_bal_perf_freq_lim_mhz) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_fav_perf_freq_lim_mhz:" . $wof_tables_header->access($WOF_ATTR_fav_perf_freq_lim_mhz) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_fav_powr_freq_lim_mhz:" . $wof_tables_header->access($WOF_ATTR_fav_powr_freq_lim_mhz) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_non_det_freq_lim_mhz:" . $wof_tables_header->access($WOF_ATTR_non_det_freq_lim_mhz) . "\n";
 }
 
 sub _write_tables_vrts
@@ -4931,30 +5045,6 @@ sub _verify_create_options
         {
             die "Error: --dd option is invalid: $self->access($OPT_ATTR_dd_level).\n";
         }
-    }
-
-    # If optional --io_power_size was not specified, set it to the default value
-    if ( !defined( $self->access($OPT_ATTR_io_power_size) ) )
-    {
-        $self->access( $OPT_ATTR_io_power_size, $G_DEF_IO_POWER_SIZE );
-    }
-
-    # If optional --vcs_ceff_size was not specified, set it to the default value
-    if ( !defined( $self->access($OPT_ATTR_vcs_ceff_size) ) )
-    {
-        $self->access( $OPT_ATTR_vcs_ceff_size, $G_DEF_VCS_CEFF_SIZE );
-    }
-
-    # If optional --vdd_ceff_size was not specified, set it to the default value
-    if ( !defined( $self->access($OPT_ATTR_vdd_ceff_size) ) )
-    {
-        $self->access( $OPT_ATTR_vdd_ceff_size, $G_DEF_VDD_CEFF_SIZE );
-    }
-
-    # If optional --am_cond_size was not specified, set it to the default value
-    if ( !defined( $self->access($OPT_ATTR_amb_cond_size) ) )
-    {
-        $self->access( $OPT_ATTR_amb_cond_size, $G_DEF_AMB_COND_SIZE );
     }
 
     $g_io_power_size = $self->access($OPT_ATTR_io_power_size);
