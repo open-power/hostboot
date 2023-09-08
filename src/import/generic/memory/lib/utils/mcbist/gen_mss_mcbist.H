@@ -2304,9 +2304,17 @@ class program
                     }
                     break;
 
-                // Otherwise it's SAME_SPEED or something else in which case we do nothing
+                // Otherwise it's SAME_SPEED or something else in which case we get the current values from the target
                 default:
-                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    {
+                        fapi2::buffer<uint64_t> l_data;
+                        FAPI_TRY(fapi2::getScom(i_target, TT::MCBPARMQ_REG, l_data));
+
+                        get_current_min_cmd_gap(l_data);
+                        get_current_min_gap_timebase(l_data);
+
+                        return fapi2::FAPI2_RC_SUCCESS;
+                    }
                     break;
             };
 
@@ -2361,6 +2369,17 @@ class program
         }
 
         ///
+        /// @brief Get the current mcbist min command gap and set in iv_parameters
+        /// @param[in] i_data the data from the MCBIST parameter register
+        /// @return void
+        ///
+        inline void get_current_min_cmd_gap( const fapi2::buffer<uint64_t>& i_data )
+        {
+            i_data.extract<TT::MIN_CMD_GAP, TT::MIN_CMD_GAP_LEN, TT::MIN_CMD_GAP>(iv_parameters);
+            return;
+        }
+
+        ///
         /// @brief Change the mcbist gap timebase
         /// @param[in] i_tb When set to mss::ON and cfg_en_randcmd_gap is a 0, then the number of minimum
         /// cycles between commands will be cfg_min_cmd_gap multiplied by 2^13.
@@ -2370,6 +2389,17 @@ class program
         inline void change_min_gap_timebase( const bool i_tb )
         {
             iv_parameters.writeBit<TT::MIN_GAP_TIMEBASE>(i_tb);
+            return;
+        }
+
+        ///
+        /// @brief Get the current mcbist gap timebase and set in iv_parameters
+        /// @param[in] i_data the data from the MCBIST parameter register
+        /// @return void
+        ///
+        inline void get_current_min_gap_timebase( const fapi2::buffer<uint64_t>& i_data )
+        {
+            iv_parameters.writeBit<TT::MIN_GAP_TIMEBASE>(i_data.getBit<TT::MIN_GAP_TIMEBASE>());
             return;
         }
 
