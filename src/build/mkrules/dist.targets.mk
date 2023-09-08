@@ -299,6 +299,8 @@ simics.tar_CONTENTS = \
 # Common code delivered to FSP builds.
 #
 fsp.tar_CONTENTS = \
+    src/build/buildpnor/ocmbfw-layout.json.template \
+    src/build/buildpnor/pkgOcmbFw_ext.py \
     obj/genfiles/hwp_id.html \
     src/build/mkrules/hbfw/fsp/makefile \
     src/build/tools/eecache_editor.pl \
