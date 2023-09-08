@@ -1,0 +1,80 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/error_info/ody_sbe_common_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- This is an automatically generated file. -->
+<!-- File: ody_sbe_common_errors.xml. -->
+<!-- Halt codes for ody_sbe_common -->
+<hwpErrors>
+   <!-- ******************************************************************** -->
+    <registerFfdc>
+       <id>CBS_STATUS_REGS_FSI</id>
+       <cfamRegister>scomt::perv::FSXCOMP_FSXLOG_CBS_CS_FSI</cfamRegister>
+       <cfamRegister>scomt::perv::FSXCOMP_FSXLOG_SB_CS_FSI</cfamRegister>
+       <cfamRegister>scomt::perv::FSXCOMP_FSXLOG_SB_MSG_FSI</cfamRegister>
+    </registerFfdc>
+    <registerFfdc>
+       <id>CBS_STATUS_REGS_SCOM</id>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_CBS_CS</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_CBS_ENVSTAT_RO</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SB_CS</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SB_MSG</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_CBS_STAT_RO</scomRegister>
+    </registerFfdc>
+    <registerFfdc>
+       <id>ROOT_CTRL_REGS_SCOM</id>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL0_RW</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL1_RW</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL2_RW</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL3_RW</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL4_RW</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL5_RW</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL6_RW</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL7_RW</scomRegister>
+       <scomRegister>scomt::perv::FSXCOMP_FSXLOG_ROOT_CTRL8_RW</scomRegister>
+    </registerFfdc>
+    <registerFfdc>
+        <id>SBE_IPL_SCRATCH_REGS_SCOM</id>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW</scomRegister>
+        <scomRegister>scomt::perv::FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_RW</scomRegister>
+    </registerFfdc>
+   <!-- ******************************************************************** -->
+    <hwpError>
+      <sbeError/>
+      <rc>RC_INVALID_SBE_FFDC</rc>
+      <description>Invalid data detected in the SBE FFDC buffer</description>
+      <buffer>FFDC_BUFFER</buffer>
+      <ffdc>INVALID_ERRVAL</ffdc>
+    </hwpError>
+   <!-- ******************************************************************** -->
+</hwpErrors>
