@@ -152,6 +152,20 @@ hb_helptext()
         echo "  See also:"
         echo "      simsetup"
         ;;
+    buildmodules)
+        echo " Topic 'buildmodules'"
+        echo
+        echo " Usags:"
+        echo "      hb buildmodules"
+        echo
+        echo " Builds the Hostboot submodules (sbe, ppe, and ekb subrepos) but"
+        echo " does not perform other prime activities like building PNOR or"
+        echo " copying images. Use this command if you need to rebuild the"
+        echo " internal submodules."
+        echo
+        echo " See also:"
+        echo "      prime"
+        ;;
     startsimics)
         echo "  Topic 'startsimics'"
         echo
@@ -306,6 +320,14 @@ hb_workon()
         echo "Spawning new shell (${SHELL})..."
         ${SHELL} && exit 0
     fi
+}
+
+hb_buildmodules()
+{
+    export_key_variables
+    source standaloneHelper --generateHcodeImage
+    source standaloneHelper --generateSbeOdysseyImages
+    source standaloneHelper --generateSbeImage
 }
 
 hb_prime()
@@ -923,7 +945,7 @@ hb_flags()
     echo "HOSTBOOT_DEBUG : Enable debug output, including TRACD, see src/build/mkrules/env.mk"
     echo " "
     echo "= Prime Options ="
-    echo "HB_FAST_PRIME : Enable all prime optimizations"
+    echo "HB_FAST_PRIME : Enable all prime optimizations - do not build submodules locally and pick the cached submodule images"
     echo "HB_FORCE_REBUILD_SBE : Force rebuild of proc ppe submodule regardless of existing images"
     echo "HB_FORCE_REBUILD_ODY : Force rebuild of odyssey sbe submodule regardless of existing images"
     echo "HB_NFS_DIR : Copies FSP patch data after prime"
@@ -956,6 +978,9 @@ workon)
     ;;
 prime)
     hb_prime $*
+    ;;
+buildmodules)
+    hb_buildmodules $*
     ;;
 fipssetup)
     hb_fipssetup $*
