@@ -232,4 +232,15 @@ namespace PLDM
     * @custdesc    A software error occurred during system boot
     */
 
+    /*@
+    * @errortype   ERRL_SEV_UNRECOVERABLE
+    * @moduleid    MOD_GET_POWER_SUPPLY_CONFIG
+    * @reasoncode  RC_PS_INPUT_VOLTAGE_NOT_FOUND
+    * @userdata1   Unused
+    * @userdata2   Unused
+    * @devdesc     Software problem, PS input Voltage Data from BMC not found.
+    * @custdesc    A software error occurred during system boot
+    */
+
+
 #endif
