@@ -130,20 +130,35 @@ fapi2::ReturnCode power_down_sequence_2u(const fapi2::Target<fapi2::TARGET_TYPE_
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
 
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-    fapi2::buffer<uint8_t> l_pmic_buffer;
 
     auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_target);
 
     // Next, sort them by the sequence attributes
     FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_target, l_pmics));
 
-    for (const auto& l_pmic : l_pmics)
+    // Reverse loop, so we disable in the opposite order as the enable
+    for (int16_t l_i = (l_pmics.size() - 1); l_i >= 0; --l_i)
     {
-        // Disable VR Enable (0 --> Bit 7)
-        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
-        l_pmic_buffer.clearBit<FIELDS::R32_VR_ENABLE>();
-        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R32, l_pmic_buffer));
+        const auto& PMIC = l_pmics[l_i];
+        fapi2::buffer<uint8_t> l_reg_contents;
+
+        // Redundant clearBit, but just so it's clear what we're doing
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(PMIC, REGS::R32, l_reg_contents));
+        l_reg_contents.clearBit<FIELDS::R32_VR_ENABLE>();
+
+        // We are opting here to log RC's here as recovered. If this register write fails,
+        // the ones later in the procedure will fail as well.
+        l_rc = mss::pmic::i2c::reg_write_reverse_buffer(PMIC, REGS::R32, l_reg_contents);
+
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
     }
+
+    // Delay for 40 ms.
+    fapi2::delay(40 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -326,6 +341,9 @@ fapi2::ReturnCode power_down_sequence_4u(const fapi2::Target<fapi2::TARGET_TYPE_
     // Second. Disable PMIC
     FAPI_INF("Disable PMIC using ADC " GENTARGTIDFORMAT, GENTARGTID(l_target_info.iv_adc));
     FAPI_TRY(mss::pmic::ddr5::enable_disable_pmic(l_target_info.iv_adc, CONSTS::DISABLE_PMIC_EN));
+
+    // Delay for 60 ms.
+    fapi2::delay(60 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
     // Third, post config PMIC for power down
     FAPI_TRY(mss::pmic::ddr5::post_config(l_target_info, CONSTS::DISABLE));
