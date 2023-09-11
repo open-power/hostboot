@@ -249,7 +249,7 @@ fapi2::ReturnCode execute_concurrent_ccs(
 
     FAPI_TRY(mss::ccs::stop_ccs_and_mcbist<mss::mc_type::ODYSSEY>(l_ocmb));
 
-    FAPI_INF(GENTARGTIDFORMAT " Executing DQS drift track and recal via concurrent CCS", GENTARGTID(l_ocmb));
+    FAPI_DBG(GENTARGTIDFORMAT " Executing DQS drift track and recal via concurrent CCS", GENTARGTID(l_ocmb));
 
     // Configure CCS regs for execution
     FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(l_ocmb, l_modeq_reg, mss::states::OFF ) );
