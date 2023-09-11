@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -84,7 +84,7 @@ class DebugFrameworkIPCMessage:
                 self.msg.encode("hex") + "\" ]\n")
 
     def loads(self,string):
-        pattern = re.compile("\[ \"([^\"]+)\", \"([0-9a-f]*)\" ]")
+        pattern = re.compile(r"\[ \"([^\"]+)\", \"([0-9a-f]*)\" ]")
         match = pattern.search(string.decode())
         if  match is None:
             print(  "error: empty message >%s< received from perl"%(string))
@@ -165,7 +165,7 @@ class DebugFrameworkProcess:
     # Read data from memory.
     #    This message has data of the format "0dADDRESS,0dSIZE".
     def read_data(self,data):
-        pattern = re.compile("([0-9]+),([0-9]+)")
+        pattern = re.compile(r"([0-9]+),([0-9]+)")
         match = pattern.search(data)
 
         addr = int(match.group(1))
@@ -178,7 +178,7 @@ class DebugFrameworkProcess:
     # Write data to memory.
     #    This message has data of the format "0dADDR,0dSIZE,hDATA".
     def write_data(self,data):
-        pattern = re.compile("([0-9]+),([0-9]+),([0-9A-Fa-f]+)")
+        pattern = re.compile(r"([0-9]+),([0-9]+),([0-9A-Fa-f]+)")
         match = pattern.search(data)
 
         addr = int(match.group(1))
@@ -190,7 +190,7 @@ class DebugFrameworkProcess:
     # Read data from PNOR.
     #    This message has data of the format "0dADDRESS,0dSIZE".
     def read_pnor(self,data):
-        pattern = re.compile("([0-9]+),([0-9]+)")
+        pattern = re.compile(r"([0-9]+),([0-9]+)")
         match = pattern.search(data)
 
         addr = int(match.group(1))
@@ -203,7 +203,7 @@ class DebugFrameworkProcess:
     # Clock forward the model.
     #    This message had data of the format "0dCYCLES".
     def execute_instrs(self,data):
-        pattern = re.compile("([0-9]+)")
+        pattern = re.compile(r"([0-9]+)")
         match = pattern.search(data)
 
         cycles = int(match.group(1))
@@ -235,7 +235,7 @@ class DebugFrameworkProcess:
     # Read data from xscom address.
     #    This message has data of the format "0dADDRESS,0dSIZE".
     def read_xscom(self,data):
-        pattern = re.compile("([0-9]+),([0-9]+)")
+        pattern = re.compile(r"([0-9]+),([0-9]+)")
         match = pattern.search(data)
 
         addr = int(match.group(1))
@@ -251,7 +251,7 @@ class DebugFrameworkProcess:
     # Write data to xscom address..
     #    This message has data of the format "0dADDR,0dSIZE,hDATA".
     def write_xscom(self,data):
-        pattern = re.compile("([0-9]+),([0-9]+),([0-9]+)")
+        pattern = re.compile(r"([0-9]+),([0-9]+),([0-9]+)")
         match = pattern.search(data)
 
         addr = int(match.group(1))
@@ -271,7 +271,7 @@ class DebugFrameworkProcess:
         self.sendMsg("data-response", "%d"%(hrmor) )
 
     def decode_rc(self,data):
-        pattern = re.compile("([0-9]+)")
+        pattern = re.compile(r"([0-9]+)")
         match = pattern.search(data)
         rc = int(match.group(1))
         syscmd = "shell hb_decoderc %x"%(rc)
@@ -328,23 +328,23 @@ def register_hb_debug_framework_tools():
     files = os.listdir(os.environ['HB_TOOLPATH']+"/Hostboot")
 
     # Filter out any prefixed with '_' (utility module) or a '.' (hidden file).
-    pattern = re.compile("[^\._]");
+    pattern = re.compile(r"[^\._]");
     files = [f for f in files if pattern.match(f)]
 
     # Filter out modules written for vbu only
-    pattern = re.compile("AutoIpl|ContTrace");
+    pattern = re.compile(r"AutoIpl|ContTrace");
     files = [f for f in files if not pattern.match(f)]
 
     # Remove the .pm extension from the tool modules.
-    files = [re.sub("\.pm","",f) for f in files];
+    files = [re.sub(r"\.pm","",f) for f in files];
 
     # Create an entry for each module.
     for tool in files:
         # Get usage information for each module, fix text to HTML-like.
         usage = run_hb_debug_framework(tool, usage = 1)
-        usage = re.sub("<","&lt;", usage);
-        usage = re.sub(">","&gt;", usage);
-        usage = re.sub("\t","        ",usage)
+        usage = re.sub(r"<","&lt;", usage);
+        usage = re.sub(r">","&gt;", usage);
+        usage = re.sub(r"\t","        ",usage)
         usage = "<pre>"+usage+"</pre>"
 
         # Create command hook.
