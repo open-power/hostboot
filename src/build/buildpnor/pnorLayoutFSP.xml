@@ -215,9 +215,9 @@ Layout Description - Used when building an FSP driver
         <preserved/>
     </section>
     <section>
-        <description>Open CAPI Memory Buffer (OCMB) Firmware (1164K)</description>
+        <description>Open CAPI Memory Buffer (OCMB) Firmware (4 MB)</description>
         <eyeCatch>OCMBFW</eyeCatch>
-        <physicalRegionSize>0x123000</physicalRegionSize>
+        <physicalRegionSize>0x400000</physicalRegionSize>
         <side>sideless</side>
         <sha512Version/>
         <readOnly/>
