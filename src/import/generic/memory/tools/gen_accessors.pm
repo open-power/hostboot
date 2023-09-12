@@ -917,7 +917,7 @@ sub identify_mc_port_helper
     my ($system) = @ARG;
 
     my @mc_port_target_types = ();
-    foreach my $type ( keys( %{ ${ +TARGET_TYPES }{$system} } ) )
+    foreach my $type ( sort keys( %{ ${ +TARGET_TYPES }{$system} } ) )
     {
         push( @mc_port_target_types, ${ +TARGET_TYPES }{$system}{$type} ) if ( $type ne "DIMM" );
     }
