@@ -651,6 +651,7 @@ hb_startsimics()
                 STARTSIMCMD+=(odyssey_pnor_img=$ODYSSEY_PNOR_IMG)
                 STARTSIMCMD+=(odyssey_srom_img=$ODYSSEY_SROM_IMG)
                 STARTSIMCMD+=(run_till_boot=FALSE)
+                STARTSIMCMD+=(min_dimm=TRUE)
             fi
         else
             # This allows to not run SBE automatically

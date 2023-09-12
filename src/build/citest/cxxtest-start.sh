@@ -96,6 +96,7 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         START_SIMICS_CMD+=" odyssey_otprom_img=${ODYSSEY_OTPROM_IMG}"
         START_SIMICS_CMD+=" odyssey_pnor_img=${ODYSSEY_PNOR_IMG}"
         START_SIMICS_CMD+=" run_till_boot=FALSE"
+        START_SIMICS_CMD+=" min_dimm=TRUE"
     fi
     START_SIMICS_CMD+=" fused_core=TRUE"
     START_SIMICS_CMD+=" xive_gen=2"
