@@ -43,6 +43,10 @@
 #include <lib/shared/ody_consts.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_attribute_setters.H>
+#include <mss_odyssey_attribute_getters.H>
+#include <mss_odyssey_attribute_setters.H>
+#include <generic/memory/lib/utils/power_thermal/gen_thermal_init_utils.H>
+#include <lib/power_thermal/ody_temp_sensor_traits.H>
 
 namespace mss
 {
@@ -80,6 +84,15 @@ typedef fapi2::ReturnCode (*thermal_sensor_attr_getter_ptr)(const fapi2::Target<
 typedef fapi2::ReturnCode (*thermal_sensor_attr_setter_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         uint8_t i_value);
 
+typedef fapi2::ReturnCode (*thermal_sensor_prev_value_attr_getter_ptr)(const
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        int16_t& o_value);
+
+typedef fapi2::ReturnCode (*thermal_sensor_prev_value_attr_setter_ptr)(const
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        int16_t i_value);
+
+
 // Sensor Location
 static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_location[] =
 {
@@ -98,7 +111,8 @@ static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_location[] =
 };
 
 // Sensor Availability
-static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_availability[] =
+static constexpr thermal_sensor_attr_getter_ptr
+get_therm_sensor_availability[] =
 {
     mss::attr::get_therm_sensor_0_availability,
     mss::attr::get_therm_sensor_1_availability,
@@ -106,7 +120,8 @@ static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_availability[] 
     mss::attr::get_therm_sensor_3_availability,
 };
 
-static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_availability[] =
+static constexpr thermal_sensor_attr_setter_ptr
+set_therm_sensor_availability[] =
 {
     mss::attr::set_therm_sensor_0_availability,
     mss::attr::set_therm_sensor_1_availability,
@@ -115,7 +130,8 @@ static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_availability[] 
 };
 
 // Sensor Usage
-static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_usage[] =
+static constexpr thermal_sensor_attr_getter_ptr
+get_therm_sensor_usage[] =
 {
     mss::attr::get_therm_sensor_0_usage,
     mss::attr::get_therm_sensor_1_usage,
@@ -123,7 +139,8 @@ static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_usage[] =
     mss::attr::get_therm_sensor_3_usage,
 };
 
-static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_usage[] =
+static constexpr thermal_sensor_attr_setter_ptr
+set_therm_sensor_usage[] =
 {
     mss::attr::set_therm_sensor_0_usage,
     mss::attr::set_therm_sensor_1_usage,
@@ -131,8 +148,26 @@ static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_usage[] =
     mss::attr::set_therm_sensor_3_usage,
 };
 
+// Sensor Previous value
+static constexpr thermal_sensor_prev_value_attr_getter_ptr
+get_therm_sensor_prev_value[] =
+{
+    mss::attr::get_therm_sensor_0_prev_value,
+    mss::attr::get_therm_sensor_1_prev_value,
+    mss::attr::get_therm_sensor_2_prev_value,
+    mss::attr::get_therm_sensor_3_prev_value,
+    mss::attr::get_therm_sensor_diff_prev_value,
+};
 
-
+static constexpr thermal_sensor_prev_value_attr_setter_ptr
+set_therm_sensor_prev_value[] =
+{
+    mss::attr::set_therm_sensor_0_prev_value,
+    mss::attr::set_therm_sensor_1_prev_value,
+    mss::attr::set_therm_sensor_2_prev_value,
+    mss::attr::set_therm_sensor_3_prev_value,
+    mss::attr::set_therm_sensor_diff_prev_value,
+};
 
 /// @brief constants to specify enable/disable of SMBus timeout
 enum sensor_timeout

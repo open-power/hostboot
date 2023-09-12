@@ -42,16 +42,190 @@
 #include <lib/shared/ody_consts.H>
 #include <ody_scom_ody_odc.H>
 #include <ody_scom_ody_t.H>
+#include <ody_scom_ody_odc.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <mss_generic_system_attribute_getters.H>
-#include <mss_generic_attribute_getters.H>
+#include <mss_odyssey_attribute_getters.H>
 #include <ody_dts_read.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
+#include <ody_temp_sensor_traits.H>
+
 
 namespace mss
 {
+///
+/// @brief calculate DIMM0 and DIMM1 temperature from sensor cache thermal register scom data - ODYSSEY specialization
+///
+/// @param[in]  i_scom_data  temperature register scom data to calculate temperature from
+///
+/// @return int16_t temperature value with sign
+///
+template<>
+int16_t calc_dimm_temp_X100<mss::mc_type::ODYSSEY>(const fapi2::buffer<uint64_t>& i_scom_data)
+{
+    uint16_t l_sensor_temp_msb = 0;
+    uint16_t l_sensor_temp_lsb = 0;
+    int16_t l_temperature_value;
+    bool l_sign_negative;
+    using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
+
+    static constexpr uint16_t MIN_NEGATIVE_TEMP_VALUE = (TT::SENSOR_TEMP_MSB_INT_LENGTH + TT::SENSOR_TEMP_LSB_INT_LENGTH)
+            * (TT::SENSOR_TEMP_MSB_INT_LENGTH + TT::SENSOR_TEMP_LSB_INT_LENGTH);
+
+    l_sign_negative = i_scom_data.getBit<TT::SENSOR_SIGN_BIT>();
+    i_scom_data.extractToRight<TT::SENSOR_TEMP_MSB_INT_START, TT::SENSOR_TEMP_MSB_INT_LENGTH>(l_sensor_temp_msb);
+    i_scom_data.extractToRight<TT::SENSOR_TEMP_LSB_INT_START, TT::SENSOR_TEMP_LSB_INT_LENGTH>(l_sensor_temp_lsb);
+
+    // calculate temperature (integer value, precision values will be added on later)
+    l_temperature_value = (l_sensor_temp_msb * TT::SENSOR_TEMP_MSB_START_VALUE) + l_sensor_temp_lsb;
+
+    if (l_sign_negative)
+    {
+        // negative temperature (temperatures from register is expressed in a two's complement format)
+        // We don't know resolution of sensor, so use a value that will be supported by all devices (0.5 C)
+        // This will get us within 0.5 C of the actual reading if it's a negative temperature which is close enough
+        // Not worth reading resolution register to be able to calculate exact temperature value when negative
+        l_temperature_value = MIN_NEGATIVE_TEMP_VALUE - l_temperature_value;
+        l_temperature_value = (i_scom_data.getBit<TT::SENSOR_TEMP_LSB_BIT3_BIT>()) ?
+                              (l_temperature_value - TT::SENSOR_TEMP_BIT3_VALUE_X100) : l_temperature_value;
+    }
+    else
+    {
+        // add on decimal values to the postive temperature value
+        l_temperature_value = (i_scom_data.getBit<TT::SENSOR_TEMP_LSB_BIT3_BIT>()) ?
+                              (l_temperature_value + TT::SENSOR_TEMP_BIT3_VALUE_X100) : l_temperature_value;
+        l_temperature_value = (i_scom_data.getBit<TT::SENSOR_TEMP_LSB_BIT2_BIT>()) ?
+                              (l_temperature_value + TT::SENSOR_TEMP_BIT2_VALUE_X100) : l_temperature_value;
+        l_temperature_value = (i_scom_data.getBit<TT::SENSOR_TEMP_LSB_BIT1_BIT>()) ?
+                              (l_temperature_value + TT::SENSOR_TEMP_BIT1_VALUE_X100) : l_temperature_value;
+        l_temperature_value = (i_scom_data.getBit<TT::SENSOR_TEMP_LSB_BIT0_BIT>()) ?
+                              (l_temperature_value + TT::SENSOR_TEMP_BIT0_VALUE_X100) : l_temperature_value;
+
+    }
+
+    return l_temperature_value;
+}
+
+///
+/// @brief calculate OCMB temperature from sensor cache thermal register scom data
+///        comes from internal thermal diode read from external temperature sensor - ODYSSEY specialization
+/// @note The temperature is stored in 1/8th but we multiply by 100 to get integers only
+///
+/// @param[in]  i_scom_data  temperature register scom data to calculate temperature from
+///
+/// @return int16_t temperature value with sign
+///
+template<>
+int16_t calc_ocmb_thermal_diode_temp_X100<mss::mc_type::ODYSSEY>(const fapi2::buffer<uint64_t>& i_scom_data)
+{
+    int16_t l_sensor_temp = 0;
+    int16_t l_temperature_value;
+    using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
+
+    i_scom_data.extractToRight<TT::EXT_SENSOR_TEMP_START_BIT, TT::EXT_SENSOR_TEMP_BIT_LENGTH>(l_sensor_temp);
+
+    // calculate temperature
+    l_temperature_value = (l_sensor_temp * 100) / TT::EXT_SENSOR_TEMP_DIVISOR;
+
+    return l_temperature_value;
+
+}
+
+///
+/// @brief calculate OCMB temperature from sensor cache thermal register scom data comes from internal DTM - ODYSSEY specialization
+/// @note The temperature is stored in 1/8th but we multiply by 100 to get integers only
+///
+/// @param[in]  i_scom_data  temperature register scom data to calculate temperature from
+///
+/// @return int16_t temperature value with sign
+///
+template<>
+int16_t calc_ocmb_dtm_temp_X100<mss::mc_type::ODYSSEY>(const fapi2::buffer<uint64_t>& i_scom_data)
+{
+    int16_t l_sensor_temp = 0;
+    int16_t l_temperature_value;
+    using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
+
+    i_scom_data.extractToRight<TT::DTM_SENSOR_TEMP_START_BIT, TT::DTM_SENSOR_TEMP_BIT_LENGTH>(l_sensor_temp);
+
+    // calculate temperature
+    l_temperature_value = (l_sensor_temp * 100) / TT::DTM_SENSOR_TEMP_DIVISOR;
+
+    return l_temperature_value;
+}
+
+///
+/// @brief calculate and display temperature sensor temperature data for ocmb - ODYSSEY spacialization
+/// @note The temperature is stored in 1/8th but we multiply by 100 to get integers only
+///
+/// @param[in]  i_ocmb_target  ocmb chip target
+/// @param[in]  i_temperature_scom_data  temperature value from the sensor to read
+/// @param[out] o_present value of the sensor's present bit
+/// @param[out] o_error value of the sensor's error bit
+/// @param[out] o_temperature temperature_value from the given sensor in centigrade
+///
+/// @return FAPI2_RC_SUCCESS if success, else error code
+///
+template<>
+fapi2::ReturnCode get_sensor_data_for_ocmb_x100<mss::mc_type::ODYSSEY>( const
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        const fapi2::buffer<uint64_t>& i_temperature_scom_data,
+        uint8_t& o_present,
+        uint8_t& o_error,
+        int16_t& o_temperature)
+{
+    uint8_t l_differential_usage = 0;
+
+    // Get the present and error bits
+    o_present = i_temperature_scom_data.getBit<mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::SENSOR_PRESENT_BIT>();
+    o_error = i_temperature_scom_data.getBit<mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::SENSOR_ERROR_BIT>();
+
+    if (o_present && !o_error)
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE, i_ocmb_target, l_differential_usage));
+        o_temperature = (l_differential_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE_MB_INT_DTM_REM) ?
+                        calc_ocmb_thermal_diode_temp_X100<mss::mc_type::ODYSSEY>(i_temperature_scom_data) :
+                        calc_ocmb_dtm_temp_X100<mss::mc_type::ODYSSEY>(i_temperature_scom_data);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief calculate and display temperature sensor temperature data for ddimms - ODYSSEY spacialization
+///
+/// @param[in]  i_ocmb_target  ocmb chip target
+/// @param[in]  i_temperature_scom_data  temperature value from the sensor to read
+/// @param[out] o_present value of the sensor's present bit
+/// @param[out] o_error value of the sensor's error bit
+///
+/// @return temperature_value from the given sensor in centigrade
+///
+template<>
+int16_t get_sensor_data_for_ddimm_x100<mss::mc_type::ODYSSEY>(
+    const fapi2::buffer<uint64_t>& i_temperature_scom_data,
+    uint8_t& o_present,
+    uint8_t& o_error)
+{
+    int16_t l_temperature = 0;
+
+    // Get the present and error bits
+    o_present = i_temperature_scom_data.getBit<mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::SENSOR_PRESENT_BIT>();
+    o_error = i_temperature_scom_data.getBit<mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::SENSOR_ERROR_BIT>();
+
+    if (o_present && !o_error)
+    {
+        l_temperature = calc_dimm_temp_X100<mss::mc_type::ODYSSEY>(i_temperature_scom_data);
+    }
+
+    return l_temperature;
+}
+
 namespace ody
 {
 namespace thermal

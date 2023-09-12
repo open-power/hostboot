@@ -208,6 +208,19 @@
         </sbeAttrSync>
     </attribute>
 
+     <attribute>
+        <id>ATTR_ODY_THERMAL_SENSOR_DIFF_PREVIOUS_VALUE</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Value of differential thermal sensor the previous time DQS tracking executed.
+            Updated in DQS tracking procedure.
+        </description>
+        <valueType>int16</valueType>
+        <initToZero></initToZero>
+        <mssAccessorName>therm_sensor_diff_prev_value</mssAccessorName>
+        <writeable/>
+    </attribute>
+
     <attribute>
         <id>ATTR_ODY_THERMAL_SENSOR_0_PREVIOUS_VALUE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -215,8 +228,9 @@
             Value of thermal sensor 0 the previous time DQS tracking executed.
             Updated in DQS tracking procedure.
         </description>
-        <valueType>uint16</valueType>
+        <valueType>int16</valueType>
         <initToZero></initToZero>
+        <mssAccessorName>therm_sensor_0_prev_value</mssAccessorName>
         <writeable/>
     </attribute>
 
@@ -227,8 +241,9 @@
             Value of thermal sensor 1 the previous time DQS tracking executed.
             Updated in DQS tracking procedure.
         </description>
-        <valueType>uint16</valueType>
+        <valueType>int16</valueType>
         <initToZero></initToZero>
+        <mssAccessorName>therm_sensor_1_prev_value</mssAccessorName>
         <writeable/>
     </attribute>
 
@@ -239,8 +254,9 @@
             Value of thermal sensor 2 the previous time DQS tracking executed.
             Updated in DQS tracking procedure.
         </description>
-        <valueType>uint16</valueType>
+        <valueType>int16</valueType>
         <initToZero></initToZero>
+        <mssAccessorName>therm_sensor_2_prev_value</mssAccessorName>
         <writeable/>
     </attribute>
 
@@ -251,8 +267,9 @@
             Value of thermal sensor 3 the previous time DQS tracking executed.
             Updated in DQS tracking procedure.
         </description>
-        <valueType>uint16</valueType>
+        <valueType>int16</valueType>
         <initToZero></initToZero>
+        <mssAccessorName>therm_sensor_3_prev_value</mssAccessorName>
         <writeable/>
     </attribute>
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <lib/mcbist/ody_mcbist_traits.H>
 #include <lib/ccs/ody_ccs.H>
 #include <generic/memory/lib/ccs/ccs_ddr5_commands.H>
+#include <lib/power_thermal/ody_thermal_init_utils.H>
 
 namespace mss
 {
@@ -323,6 +324,255 @@ fapi_try_exit:
 
 }
 
+///
+/// @brief Helper function to calculate the temperature delta of the ocmb sensor
+/// @param [in] i_target OCMB target
+/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor
+/// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
+/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
+/// @param [out] o_current_temp_values vector of current temperature of all the sensors
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode calc_ocmb_sensor_temp_delta_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const int16_t i_thermal_sensor_prev_attr,
+        const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
+        int16_t& o_temp_delta_value,
+        int16_t& o_current_temp_value
+                                                    )
+{
+    using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
+
+    uint8_t l_thermal_present = 0;
+    uint8_t l_thermal_error = 0;
+
+    // Get the present bit and the error bit for OCMB temp sensor
+    l_thermal_present = i_snsc_thermal_scom_data.getBit<TT::SENSOR_PRESENT_BIT>();
+    l_thermal_error = i_snsc_thermal_scom_data.getBit<TT::SENSOR_ERROR_BIT>();
+
+    // Get the decoding for OCMB temp sensor in centigrade
+    if(l_thermal_present && !(l_thermal_error))
+    {
+        FAPI_TRY(mss::get_sensor_data_for_ocmb_x100<mss::mc_type::ODYSSEY>(i_target,
+                 i_snsc_thermal_scom_data,
+                 l_thermal_present,
+                 l_thermal_error,
+                 o_current_temp_value));
+
+        // Put the difference of the previous attr and the register value in the array
+        // Using the if condition instead of abs(), since hostboot is failing with abs()
+        o_temp_delta_value =  i_thermal_sensor_prev_attr - o_current_temp_value;
+
+        if(o_temp_delta_value < 0)
+        {
+            o_temp_delta_value *= -1;
+        }
+    }
+    else  // If the sensor is not present or if the sensor has an error bit then delta is 0
+    {
+        // No update in the temperature value and the delta value is 0
+        o_current_temp_value = i_thermal_sensor_prev_attr;
+        o_temp_delta_value = 0;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper function calculate the temperature delta of the DDIMM sensor
+/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor
+/// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
+/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
+/// @return int16_t current temperature value
+///
+int16_t calc_thermal_sensor_temp_delta_helper(const int16_t i_thermal_sensor_prev_attr,
+        const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
+        int16_t& o_temp_delta_value
+                                             )
+{
+    using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
+
+    uint8_t l_thermal_present = 0;
+    uint8_t l_thermal_error = 0;
+    int16_t l_current_temp_value = 0;
+
+    // Get the present bit and the error bit for OCMB temp sensor
+    l_thermal_present = i_snsc_thermal_scom_data.getBit<TT::SENSOR_PRESENT_BIT>();
+    l_thermal_error = i_snsc_thermal_scom_data.getBit<TT::SENSOR_ERROR_BIT>();
+
+    // Get the decoding for OCMB temp sensor in centigrade
+    if(l_thermal_present && !(l_thermal_error))
+    {
+        l_current_temp_value = mss::get_sensor_data_for_ddimm_x100<mss::mc_type::ODYSSEY>(i_snsc_thermal_scom_data,
+                               l_thermal_present,
+                               l_thermal_error);
+
+        // Put the difference of the previous attr and the register value in the array
+        // Using the if condition instead of abs(), since hostboot is failing with abs()
+        o_temp_delta_value =  i_thermal_sensor_prev_attr - l_current_temp_value;
+
+        if(o_temp_delta_value < 0)
+        {
+            o_temp_delta_value *= -1;
+        }
+    }
+    else  // If the sensor is not present or if the sensor has an error bit then delta is 0
+    {
+        // No update in the temperature value and the delta value is 0
+        l_current_temp_value = i_thermal_sensor_prev_attr;
+        o_temp_delta_value = 0;
+    }
+
+    return l_current_temp_value;
+}
+
+
+///
+/// @brief Check if sensor exists and get the index number of that sensor
+/// @param [in] i_thermal_sensor_usage attr for thermal sensor usage
+/// @param [in] i_thermal_sensor_avail attr for thermal sensor avail
+/// @param [in] i_sensor_index index of the sensor that is being checked
+/// @param [out] o_sensor_info structure of the sensor info
+/// @return none
+///
+void check_sensor_exists_and_get_index(const uint8_t i_thermal_sensor_usage,
+                                       const uint8_t i_thermal_sensor_avail,
+                                       const uint8_t i_sensor_index,
+                                       mss::ody::sensor_info_vars& o_sensor_info)
+{
+    // Checking against sensor0 enums since the enum values for all sensors are the same.
+    // DRAM
+    if (i_thermal_sensor_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM &&
+        i_thermal_sensor_avail == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_AVAILABLE)
+    {
+        o_sensor_info.iv_dram_exists = true;
+        o_sensor_info.iv_dram_index = i_sensor_index;
+    }
+
+    // PMIC
+    if(i_thermal_sensor_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_PMIC &&
+       i_thermal_sensor_avail == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_AVAILABLE)
+    {
+        o_sensor_info.iv_pmic_exists = true;
+        o_sensor_info.iv_pmic_index = i_sensor_index;
+    }
+
+    // MEM_BUF_EXT
+    if (i_thermal_sensor_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_MEM_BUF_EXT &&
+        i_thermal_sensor_avail == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_AVAILABLE)
+    {
+        o_sensor_info.iv_mem_buf_ext_exists = true;
+        o_sensor_info.iv_mem_buf_ext_index = i_sensor_index;
+    }
+
+    return;
+}
+
+///
+/// @brief Calculate the temperature delta of the sensor
+/// @param [in] i_target OCMB target
+/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
+/// @param [out] o_current_temp_values vector of current temperature of all the sensors
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        int16_t& o_temp_delta,
+        int16_t (&o_current_temp_values)[mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::temp_sensor::NUM_SENSORS])
+{
+    using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
+
+    // Various arrays to store the usage, availability, previous, reg scom data
+    uint8_t l_thermal_sensor_usage[TT::temp_sensor::NUM_SENSORS] = {0};
+    uint8_t l_thermal_sensor_avail[TT::temp_sensor::NUM_SENSORS] = {0};
+    int16_t l_thermal_sensor_prev_attr[TT::temp_sensor::NUM_SENSORS] = {0};
+    const uint64_t l_thermal_sensors_scom_regs[TT::temp_sensor::NUM_SENSORS] = {scomt::ody::ODC_MMIO_SNSC_D0THERM,
+                                                                                scomt::ody::ODC_MMIO_SNSC_D1THERM,
+                                                                                scomt::ody::ODC_MMIO_SNSC_D2THERM,
+                                                                                scomt::ody::ODC_MMIO_SNSC_D3THERM,
+                                                                                scomt::ody::ODC_MMIO_SNSC_OCTHERM
+                                                                               };
+    fapi2::buffer<uint64_t> l_snsc_therm_data[TT::temp_sensor::NUM_SENSORS] = {0};
+    int16_t l_temp_delta_values[TT::temp_sensor::NUM_SENSORS] = {0};
+
+    // Index values for the sensors
+    mss::ody::sensor_info_vars l_sensor_info;
+
+    // Get all the temperature deltas for DDIMM temperature sensors
+    for(uint8_t l_sensor_index = 0; l_sensor_index < TT::temp_sensor::NUM_SENSORS; l_sensor_index++)
+    {
+        if(l_sensor_index != mss::ody::sensor_types::DIFFERENTIAL_SENSOR)
+        {
+            FAPI_TRY(mss::ody::thermal::get_therm_sensor_usage[l_sensor_index](i_target,
+                     l_thermal_sensor_usage[l_sensor_index]));
+            FAPI_TRY(mss::ody::thermal::get_therm_sensor_availability[l_sensor_index](i_target,
+                     l_thermal_sensor_avail[l_sensor_index]));
+        }
+        // Have to fill up the differential sensor values into the array
+        // which are not part of the setter and getter pointer arrays
+        else
+        {
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE, i_target,
+                                    l_thermal_sensor_usage[l_sensor_index]) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_AVAIL, i_target,
+                                    l_thermal_sensor_avail[l_sensor_index]) );
+        }
+
+        FAPI_TRY(mss::ody::thermal::get_therm_sensor_prev_value[l_sensor_index](i_target,
+                 l_thermal_sensor_prev_attr[l_sensor_index]));
+        FAPI_TRY(fapi2::getScom(i_target,
+                                l_thermal_sensors_scom_regs[l_sensor_index],
+                                l_snsc_therm_data[l_sensor_index]));
+
+        if(l_sensor_index == mss::ody::sensor_types::DIFFERENTIAL_SENSOR)
+        {
+            // Get the temperature delta and the current value for OCMB sensor
+            FAPI_TRY(calc_ocmb_sensor_temp_delta_helper(i_target,
+                     l_thermal_sensor_prev_attr[l_sensor_index],
+                     l_snsc_therm_data[l_sensor_index],
+                     l_temp_delta_values[l_sensor_index],
+                     o_current_temp_values[l_sensor_index]));
+        }
+        else // For all other thermal sensors
+        {
+            o_current_temp_values[l_sensor_index] = calc_thermal_sensor_temp_delta_helper(
+                    l_thermal_sensor_prev_attr[l_sensor_index],
+                    l_snsc_therm_data[l_sensor_index],
+                    l_temp_delta_values[l_sensor_index]);
+        }
+
+    }
+
+    // Check which sensor is available and mark the index
+    for (uint8_t l_sensor_index = 0; l_sensor_index < TT::temp_sensor::NUM_SENSORS - 1; l_sensor_index++)
+    {
+        check_sensor_exists_and_get_index(l_thermal_sensor_usage[l_sensor_index],
+                                          l_thermal_sensor_avail[l_sensor_index],
+                                          l_sensor_index,
+                                          l_sensor_info);
+    }
+
+    // Now check which index exists and choose that temp delta
+    if (l_sensor_info.iv_dram_exists )
+    {
+        o_temp_delta = l_temp_delta_values[l_sensor_info.iv_dram_index];
+    }
+    else if(l_sensor_info.iv_pmic_exists)
+    {
+        o_temp_delta = l_temp_delta_values[l_sensor_info.iv_pmic_index];
+    }
+    else if(l_sensor_info.iv_mem_buf_ext_exists)
+    {
+        o_temp_delta = l_temp_delta_values[l_sensor_info.iv_mem_buf_ext_index];
+    }
+    else // if none of the above sensors exist use the differential one
+    {
+        o_temp_delta = l_temp_delta_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR];
+    }
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Ody DQS track procedure
@@ -331,16 +581,36 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
+    using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
 
-    for(auto& l_port_target : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target) )
-    {
-        FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(l_port_target, l_rank_infos));
+    // Threshold is 5C but this code uses 100x the temperature to avoid the use of floats
+    const uint16_t l_threshold = 500;
+    int16_t l_temp_delta = 0;
+    int16_t l_curr_temp_values[TT::temp_sensor::NUM_SENSORS] = {0};
 
-        for(auto l_rank_info : l_rank_infos)
+    // Get the temperature delta and the current temperature values
+    FAPI_TRY(ody_calc_temp_sensors_delta(i_target, l_temp_delta, l_curr_temp_values));
+
+    // Run DQS tracking only if the delta is more than the threshold and update the previous value attributes
+    if(l_temp_delta > l_threshold)
+    {
+        for(auto& l_port_target : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target) )
         {
-            FAPI_TRY(dqs_recal(l_rank_info));
+            FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(l_port_target, l_rank_infos));
+
+            for(auto l_rank_info : l_rank_infos)
+            {
+                FAPI_TRY(dqs_recal(l_rank_info));
+            }
         }
+
+        // Update the attr temp sensors with the delta values
+        for (uint8_t l_sensor_index = 0; l_sensor_index < TT::temp_sensor::NUM_SENSORS; l_sensor_index++)
+        {
+            FAPI_TRY(mss::ody::thermal::set_therm_sensor_prev_value[l_sensor_index](i_target, l_curr_temp_values[l_sensor_index]));
+        }
+
     }
 
 fapi_try_exit:

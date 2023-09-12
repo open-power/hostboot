@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 
 #include <fapi2.H>
 #include <lib/dimm/ody_rank.H>
+#include <lib/power_thermal/ody_temp_sensor_traits.H>
 #include <lib/ccs/ody_ccs.H>
 
 namespace mss
@@ -63,6 +64,32 @@ enum class mpc_command
 {
     OSCILLATOR_START = 0x7,
     OSCILLATOR_STOP  = 0x6,
+};
+
+///
+/// @brief Enum to keep track of the thype of sensors
+///
+enum sensor_types
+{
+    THERMAL_SENSOR0 = 0,
+    THERMAL_SENSOR1 = 1,
+    THERMAL_SENSOR2 = 2,
+    THERMAL_SENSOR3 = 3,
+    DIFFERENTIAL_SENSOR = 4,
+};
+
+///
+/// @brief Structure for exists and index vars of sensors
+///
+struct sensor_info_vars
+{
+    bool iv_dram_exists = false;
+    bool iv_pmic_exists = false;
+    bool iv_mem_buf_ext_exists = false;
+    uint8_t iv_dram_index = 0;
+    uint8_t iv_pmic_index = 0;
+    uint8_t iv_mem_buf_ext_index = 0;
+    uint16_t iv_pad = 0;
 };
 
 ///
@@ -140,6 +167,61 @@ fapi2::ReturnCode execute_concurrent_ccs(
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dqs_recal(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info);
+
+///
+/// @brief Helper function to calculate the temperature delta of the ocmb sensor
+/// @param [in] i_target OCMB target
+/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor
+/// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
+/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
+/// @param [out] o_current_temp_values vector of current temperature of all the sensors
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode calc_ocmb_sensor_temp_delta_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const int16_t i_thermal_sensor_prev_attr,
+        const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
+        int16_t& o_temp_delta_value,
+        int16_t& o_current_temp_value
+                                                    );
+
+
+///
+/// @brief Helper function calculate the temperature delta of the DDIMM sensor
+/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor
+/// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
+/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
+/// @return int16_t current temperature value
+///
+int16_t calc_thermal_sensor_temp_delta_helper(const int16_t i_thermal_sensor_prev_attr,
+        const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
+        int16_t& o_temp_delta_value
+                                             );
+
+///
+/// @brief Check if sensor exists and get the index number of that sensor
+/// @param [in] i_thermal_sensor_usage attr for thermal sensor usage
+/// @param [in] i_thermal_sensor_avail attr for thermal sensor avail
+/// @param [in] i_sensor_index index of the sensor that is being checked
+/// @param [out] o_sensor_info structure of the sensor info
+/// @return none
+///
+void check_sensor_exists_and_get_index(const uint8_t i_thermal_sensor_usage,
+                                       const uint8_t i_thermal_sensor_avail,
+                                       const uint8_t i_sensor_index,
+                                       mss::ody::sensor_info_vars& o_sensor_info
+                                      );
+
+///
+/// @brief Calculate the temperature delta of the sensor
+/// @param [in] i_target OCMB target
+/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
+/// @param [out] o_current_temp_values vector of current temperature of all the sensors
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        int16_t& o_temp_delta,
+        int16_t (&o_current_temp_values)[mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::temp_sensor::NUM_SENSORS]
+                                             );
 
 ///
 /// @brief Ody DQS track procedure

@@ -100,9 +100,11 @@ prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memor
 prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/ccs/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/power_thermal/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
@@ -229,11 +231,13 @@ prd_obj_no_sim += exp_maint_cmds.o
 prd_obj_no_sim += exp_ccs_des_insert_workaround.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mc/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/eff_config/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/power_thermal/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/utils/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/ecc/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/fir/
@@ -255,6 +259,7 @@ prd_obj_no_sim += ody_ccs.o
 prd_obj_no_sim += ody_ccs_read_processing.o
 prd_obj_no_sim += ody_fir.o
 prd_obj_no_sim += ody_dqs_track_utils.o
+prd_obj_no_sim += ody_thermal_init_utils.o
 
 # Needed for the exp_deploy_row_repairs procedure
 prd_obj_no_sim += exp_deploy_row_repairs.o
@@ -283,12 +288,14 @@ prd_obj_no_sim += ody_kind.o
 ifeq (${HOSTBOOT_RUNTIME},1)
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/corecache/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv/
 prd_obj_no_sim += p10_l2err_linedelete.o
 prd_obj_no_sim += p10_l2err_extract.o
 prd_obj_no_sim += p10_l3err_linedelete.o
 prd_obj_no_sim += p10_l3err_extract.o
 prd_obj_no_sim += p10_l2_flush.o
 prd_obj_no_sim += p10_pm_callout.o
+prd_obj_no_sim += ody_dts_read.o
 
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/dimm/
 #prd_vpath += ${ROOTPATH}/src/import/chips/p9/procedures/hwp/memory/lib/eff_config/
