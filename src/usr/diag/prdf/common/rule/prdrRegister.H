@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -302,9 +302,7 @@ class Register
             PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             std::for_each( cv_resets.begin(), cv_resets.end(),
-                           std::bind2nd(
-                               std::mem_fun_ref(&ResetOrMaskStruct::output),
-                               l_file) );
+                           [&l_file](ResetOrMaskStruct& e) { e.output(l_file); } );
         }
 
         if (cv_flags & Prdr::PRDR_REGISTER_MASKS)
@@ -313,9 +311,7 @@ class Register
             PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             std::for_each( cv_masks.begin(), cv_masks.end(),
-                           std::bind2nd(
-                               std::mem_fun_ref(&ResetOrMaskStruct::output),
-                               l_file) );
+                           [&l_file](ResetOrMaskStruct& e) { e.output(l_file); } );
         }
 
         if (cv_flags & Prdr::PRDR_REGISTER_CAPTURE)
@@ -324,9 +320,7 @@ class Register
             PRDR_FWRITE(&l_temp16, sizeof(l_temp16), 1, l_file);
 
             std::for_each( cv_captures.begin(), cv_captures.end(),
-                           std::bind2nd(
-                                std::mem_fun_ref(&CaptureReqStruct::output),
-                                l_file) );
+                           [&l_file](CaptureReqStruct& e) { e.output(l_file); } );
         }
 
         return 0;
