@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,7 @@ const uint8_t PHY_ODY_NUM_LANES = 8;
 const uint8_t PHY_ODY_NUM_THREADS = 1;
 
 const uint64_t FIR_SCOM_LFIR_RW_WCLEAR_REG = 0x8010C00ull;
+const uint64_t FIR_SCOM_LFIR_MASK_RW_WCLEAR_REG = 0x8010C02ull;
 const uint64_t FIR_DL0_ERROR_MASK = 0x8012412ull;
 const uint64_t FIR_DL0_ERROR_ACTION = 0x801241Dull;
 const uint64_t FIR_MC_OMI_RW_WCLEAR_REG = 0x8012400ull;

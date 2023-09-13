@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,8 @@ namespace check
 /// @brief Making an enum for switch/case in bad_fir_bits. Both will need
 ///       to be updated if additional FIR checklists are needed
 ///
-enum firChecklist {GENERIC, OMI, DRAMINIT, CCS};
+enum firChecklist {GENERIC, OMI, DRAMINIT, CCS, IO_GENERAL, IO_TRAIN};
+
 
 ///
 /// @brief Helper function to log an error as related if needed

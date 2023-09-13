@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 #pragma once
 
 #include <fapi2.H>
-
+// #include <ody_io_ppe_common.H>
 
 enum IOPPE_FIR_BITS
 {
@@ -76,6 +76,7 @@ enum IOPPE_FIR_BITS
 enum ERROR_MASK_FIR_BITS
 {
     MASK_INSUFFICIENT_WORKING_LANES = 51,
+    MASK_NACK_RECEIVED = 46,
     MASK_TX_DEGRADE_MODE = 45,
     MASK_LOST_BLOCK_LOCK = 30,
     MASK_EDPL_THRESH_REACHED = 27,
@@ -102,12 +103,15 @@ enum SKIT_CTL_FIR_BITS
 
 enum MC_OMI_FIR_BITS
 {
+    LFIR_PAR_ERR = 0,
     DL0_FATAL_ERROR = 1,
     DL0_DATA_UE = 2,
     DL0_CRC_ERROR = 4,
+    DL0_NACK = 5,
     DL0_X4_MODE = 6,
     DL0_EDPL = 7,
     DL0_TIMEOUT = 8,
+    DL0_REMOTE_RETRAIN = 9,
     DL0_ERROR_RETRAIN = 10,
     DL0_EDPL_RETRAIN = 11,
     DL0_SKITTER_ERROR = 21,
@@ -138,13 +142,26 @@ class io_ppe_firs
 
         }
 
+        /// @brief  Set the FIRs prior to the PPE start to ensure proper start
+        /// @param i_target     Chip target to start
+        /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode ioppe_fir_set_pre_start(const fapi2::Target<K, M, V>& i_target);
 
+        /// @brief  Set the FIRs after PPE start to ensure proper running environment
+        /// @param i_target     Chip target to start
+        /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode ioppe_fir_set_post_start(const fapi2::Target<K, M, V>& i_target);
 
+        /// @brief  Set the MC OMI FIRs for IO PPEs
+        /// @param i_target     Chip target to start
+        /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode mc_omi_fir_set(const fapi2::Target<K, M, V>& i_target);
 
+        /// @brief  Set the MC OMI FIRs for IO PPEs
+        /// @param i_target     Chip target to start
+        /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode tlx_fir_set(const fapi2::Target<K, M, V>& i_target);
+
     private:
         // The FIR registers are RW_Clear
         // Mask/recoverable/checkstop regs
@@ -274,6 +291,7 @@ fapi2::ReturnCode io_ppe_firs<K, M, V>::mc_omi_fir_set(const fapi2::Target<K, M,
     // Unmask FIRs
     l_buffer.setBit<DL0_FATAL_ERROR>();
     l_buffer.setBit<DL0_DATA_UE>();
+    l_buffer.setBit<DL0_NACK>();
     l_buffer.setBit<DL0_X4_MODE>();
     l_buffer.setBit<DL0_TIMEOUT>();
     l_buffer.setBit<DL0_ERROR_RETRAIN>();

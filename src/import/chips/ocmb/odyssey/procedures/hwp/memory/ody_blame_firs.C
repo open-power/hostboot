@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,6 +94,35 @@ extern "C"
                         l_scom_error = l_port_scom_error;
                     }
                 }
+
+                break;
+
+            case mss::ipl_substep::OCMB_OMI_SCOMINIT:
+                l_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::IO_GENERAL>(i_target,
+                        l_rc, l_scom_error);
+
+                break;
+
+            case mss::ipl_substep::OMI_TRAIN_CHECK:
+                // General check of the FIRs
+                l_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::IO_GENERAL>(i_target,
+                        l_rc, l_scom_error);
+
+                // If the blame-a-fir function returns a non-successful RC, return that
+                if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    break;
+                }
+
+                // If we got a scom error, capture and keep it
+                if (l_scom_error != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    break;
+                }
+
+                // Check the FIRs after training (includes P10 checks)
+                l_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::IO_TRAIN>(i_target,
+                        l_rc, l_scom_error);
 
                 break;
 

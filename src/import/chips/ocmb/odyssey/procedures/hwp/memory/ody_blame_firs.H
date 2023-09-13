@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,8 +44,10 @@ namespace mss
 
 enum class ipl_substep
 {
-    DRAMINIT    = 132,
-    DRAMINIT_MC = 133
+    OCMB_OMI_SCOMINIT   = 124,
+    OMI_TRAIN_CHECK     = 128,
+    DRAMINIT            = 132,
+    DRAMINIT_MC         = 133
 };
 
 } // namespace mss
