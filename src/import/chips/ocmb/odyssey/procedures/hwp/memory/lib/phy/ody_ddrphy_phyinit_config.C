@@ -5550,6 +5550,23 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Post Phyinit override for setting the RX fifo reset
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_set_rxfifo_reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    fapi2::buffer<uint64_t> l_data;
+
+    FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PGCR, l_data));
+    l_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PGCR_DFICTRLRXFIFORST>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PGCR, l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Post Phyinit decode for TxSlew values
 /// @param[in] i_target - the memory port on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -5561,6 +5578,7 @@ fapi2::ReturnCode post_phyinit_overrides(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(post_phyinit_override_tx_slew_rise_ck(i_target));
     FAPI_TRY(post_phyinit_setup_pll(i_target));
     FAPI_TRY(post_phyinit_configure_redundant_cs(i_target));
+    FAPI_TRY(post_phyinit_set_rxfifo_reset(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

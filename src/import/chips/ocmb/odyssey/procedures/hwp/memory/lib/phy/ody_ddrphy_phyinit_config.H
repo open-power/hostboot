@@ -253,6 +253,13 @@ fapi2::ReturnCode post_phyinit_setup_pll(const fapi2::Target<fapi2::TARGET_TYPE_
 fapi2::ReturnCode post_phyinit_configure_redundant_cs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
 
 ///
+/// @brief Post Phyinit override for setting the RX fifo reset
+/// @param[in] i_target - the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode post_phyinit_set_rxfifo_reset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
 /// @brief Post Phyinit decode for TxSlew values
 /// @param[in] i_target - the memory port on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
