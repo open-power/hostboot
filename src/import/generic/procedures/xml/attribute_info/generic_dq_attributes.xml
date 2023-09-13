@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -40,6 +40,9 @@
       <platInit/>
       <initToZero/>
       <writeable/>
+      <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
+        <targetTypes>TARGET_TYPE_DIMM</targetTypes>
+      </sbeAttrSync>
     </attribute>
 
 </attributes>
