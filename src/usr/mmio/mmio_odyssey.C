@@ -171,63 +171,6 @@ errlHndl_t determineOdyCallouts(const TARGETING::TargetHandle_t i_odyTarget,
             break;
         }
 
-        //@fixme JIRA:PFHB-403 -- Update this logic for Odyssey
-#if 0
-
-        // We were accessing a SCOM reg, MSCC reg, or SRAM
-
-        pib2gifErrorReg_t l_pib2gif;
-        gif2pcbErrorReg_t l_gif2pcb;
-
-        TRACFCOMP(g_trac_mmio,
-                  "determineOdyCallouts: getting callouts for failed MMIO space"
-                  " transaction on OCMB[0x%08x]", get_huid(i_odyTarget));
-
-        // Read the PIB2GIF error reg
-        // NOTE: This register is ONLY accessible through MMIO path, not I2C.
-        l_reqSize = sizeof(l_pib2gif.word64);
-        l_err = DeviceFW::deviceRead(
-                   i_odyTarget,
-                   &l_pib2gif.word64,
-                   l_reqSize,
-                   DEVICE_SCOM_ADDRESS(EXPLR_TP_MB_UNIT_TOP_PIB2GIF_ERROR_REG));
-        if(l_err)
-        {
-            TRACFCOMP(g_trac_mmio, ERR_MRK
-                    "determineOdyCallouts: getscom(PIB2GIF_ERROR_REG) failed"
-                    " on OCMB[0x%08x]", get_huid(i_odyTarget));
-            break;
-        }
-
-        TRACFCOMP(g_trac_mmio,
-                  "determineOdyCallouts: PIB2GIF_ERROR_REG: 0x%016llx"
-                  " on OCMB[0x%08x]", l_pib2gif.word64, get_huid(i_odyTarget));
-
-        // The pib2gif error register contains a copy of the gif2pcb error reg.
-        // No need to read it again, just copy it into our struct.
-        l_gif2pcb.word64 = 0;
-        l_gif2pcb.used_bits = l_pib2gif.gif2pcb_error;
-
-        TRACFCOMP(g_trac_mmio,
-                  "determineOdyCallouts: GIF2PCB_ERROR_REG: 0x%016llx"
-                  " on OCMB[0x%08x]", l_gif2pcb.word64, get_huid(i_odyTarget));
-
-        // Check for software errors
-        if((l_pib2gif.invalid_address_error) ||
-           (l_gif2pcb.invalid_access) ||
-           (l_gif2pcb.pcb_err_code == PCB_INVALID_ADDRESS))
-        {
-            l_fwFailure = true;
-        }
-
-        // dump some regs specific to MMIO failures
-        l_regDump.addDataBuffer(&l_pib2gif.word64, sizeof(l_pib2gif.word64),
-                   DEVICE_SCOM_ADDRESS(EXPLR_TP_MB_UNIT_TOP_PIB2GIF_ERROR_REG));
-        l_regDump.addData(
-                   DEVICE_SCOM_ADDRESS(EXPLR_TP_MB_UNIT_TOP_GIF2PCB_ERROR_REG));
-        l_regDump.addData(DEVICE_SCOM_ADDRESS(EXPLR_MMIO_MMIOERR));
-        break;
-#endif
     }while(0);
 
     if(!l_err)

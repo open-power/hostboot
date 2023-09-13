@@ -54,20 +54,17 @@ static_assert( sizeof(REG_ADDRS)/sizeof(REG_ADDRS[0])
                == MMIOCOMMON::RegNames_t_SIZE,
                "Odyssey REG_ADDRS wrong size" );
 
-// Odyssey Scoms - @TODO-JIRA:PFHB-403 update this list
-const uint32_t FFDC_REGISTERLIST[] = {
-    0x08012800,   // OMI_FIR REG
-    0x08010870,   // MMIOFIR
-    0x08011800,   // MCBISTFIR
-    0x08011c00,   // RDFFIR
-    0x08011400,   // SRQFIR
-    0x08012400,   // TLXFIR
-    0x0804000A,   // OCMB_LFIR
-    0x08040000,   // XFIR
-    0x08040001,   // RFIR
-    0x08040004,   // Special Attention
-    0x08040018 }; // Local Checkstop FIR
-
+// Odyssey Scoms
+const uint32_t FFDC_REGISTERLIST[] =
+{
+    0x08010870, // MMIOFIR
+    0x08011400, // MCBISTFIR
+    0x08011000, // SRQFIR
+    0x08012000, // TLXFIR
+    0x08012400, // DLXFIR
+    0x08011800, // RDF0 FIR
+    0x08012800, // RDF1 FIR
+};
 
 /**
  *
