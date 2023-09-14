@@ -607,18 +607,20 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
 
         TdRankListEntry nextRank = iv_rankList.getNext( iv_stoppedRank );
 
-        PRDF_TRAC( PRDF_FUNC "Calling startBgScrub<T>(0x%08x, m%ds%d)",
+        PRDF_TRAC( PRDF_FUNC "Calling startBgScrub<T>(0x%08x, m%ds%d, %x)",
                    nextRank.getChip()->getHuid(),
                    nextRank.getRank().getMaster(),
-                   nextRank.getRank().getSlave() );
+                   nextRank.getRank().getSlave(),
+                   nextRank.getPort() );
 
-        o_rc = startBgScrub<T>(nextRank.getChip(), nextRank.getRank(), i_port);
+        o_rc = startBgScrub<T>(nextRank.getChip(), nextRank.getRank(),
+                               nextRank.getPort());
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "startBgScrub<T>(0x%08x,m%ds%d,%x) failed",
                       nextRank.getChip()->getHuid(),
                       nextRank.getRank().getMaster(),
-                      nextRank.getRank().getSlave(), i_port );
+                      nextRank.getRank().getSlave(), nextRank.getPort() );
         }
     }
 

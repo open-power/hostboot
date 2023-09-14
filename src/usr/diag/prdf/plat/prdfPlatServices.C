@@ -642,7 +642,7 @@ uint32_t __convertMssMcbistAddr( ExtensibleChip * i_chip,
     }
 
     uint64_t bnkFull = (bnk << 3) | bnk_grp;
-    o_addr = MemAddr ( MemRank ( prnk, srnk ), bnkFull, row, col, 0 );
+    o_addr = MemAddr ( MemRank ( prnk, srnk ), bnkFull, row, col, port );
 
     return o_rc;
 

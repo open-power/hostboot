@@ -116,21 +116,22 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
         else // There is memory left to test.
         {
             PRDF_TRAC( PRDF_FUNC "There is still memory left to test. "
-                       "Calling startSfRead<T>(0x%08x, m%ds%d)",
+                       "Calling startSfRead<T>(0x%08x, m%ds%d, %x)",
                        nextRank.getChip()->getHuid(),
                        nextRank.getRank().getMaster(),
-                       nextRank.getRank().getSlave() );
+                       nextRank.getRank().getSlave(),
+                       nextRank.getPort() );
 
             // Start a super fast command to the end of memory.
             o_rc = startSfRead<T>( nextRank.getChip(), nextRank.getRank(),
-                                   i_port );
+                                   nextRank.getPort() );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "startSfRead<T>(0x%08x,m%ds%d,%x) failed",
                           nextRank.getChip()->getHuid(),
                           nextRank.getRank().getMaster(),
                           nextRank.getRank().getSlave(),
-                          i_port );
+                          nextRank.getPort() );
                 break;
             }
         }
