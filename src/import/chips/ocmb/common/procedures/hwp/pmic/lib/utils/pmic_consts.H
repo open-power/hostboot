@@ -687,6 +687,7 @@ namespace dt
 ///
 enum regs
 {
+    NVM_TRIM_RP_MAX      = 0x3C,
     VAUX_RANGE           = 0x62,
     OPS_STATE            = 0x90,
     FAULTS_STATUS_0      = 0x92,
@@ -705,10 +706,13 @@ enum regs
     NEG_ORFET_CNT        = 0xBB,
     RO_INPUTS_1          = 0xBC,
     RO_INPUTS_0          = 0xBE,
+    TRIM_LOCK            = 0xD2,
     FAULTS_CLEAR_0       = 0xD4,
     FAULTS_CLEAR_1       = 0xD6,
+    NVM_COMMAND          = 0x3C,
     EN_REGISTER          = 0xDE,
     BREADCRUMB           = 0xE0,
+    TRIM_TRY_PASSWORD    = 0xE2,
     OR_FET_CNT_SEL       = 0xE6,
 };
 

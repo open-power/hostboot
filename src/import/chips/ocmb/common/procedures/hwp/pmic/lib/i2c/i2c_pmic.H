@@ -176,6 +176,33 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Perform a register write operation on the Default DT Addr which shares address with ADC
+/// @param[in] i_target the DT/I2C device target
+/// @param[in] i_addr address to write to
+/// @param[in] i_data_buffer buffer of data to write to the register
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode reg_write_default_dt(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_target,
+        const uint8_t i_addr,
+        const fapi2::buffer<uint8_t>& i_data_buffer)
+{
+    std::vector<uint8_t> l_command;
+
+    // Default DT shares address with ADC
+    // This by passes the ADC op code addition in the write helper funct for this target type
+    l_command.push_back(i_addr);
+    l_command.push_back(uint8_t(i_data_buffer));
+
+    // Use fapi2 putI2c interface to execute command
+    FAPI_TRY(fapi2::putI2c(i_target, l_command),
+             "putI2C returned error for WRITE operation to 0x%02X on " TARGTIDFORMAT,
+             i_addr, MSSTARGID(i_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Perform a register read operation on the given target
 /// @tparam T target type (PMIC, GENERICI2CRESPONDER, etc.)
 /// @param[in] i_target the target
@@ -251,6 +278,58 @@ inline fapi2::ReturnCode reg_read(const fapi2::Target<T>& i_target,
     std::vector<uint8_t> l_command;
 
     reg_read_helper(i_target, i_addr, l_command);
+
+    FAPI_TRY(fapi2::getI2c(i_target, mss::pmic::i2c::sizes::DATA_LENGTH, l_command, l_data),
+             "i2C read failed on " TARGTIDFORMAT " for address 0x%02x", MSSTARGID(i_target), i_addr);
+
+    // Flush o_data_buffer to avoid stale data
+    o_data_buffer.flush<0>();
+
+#ifndef __PPE__
+    FAPI_ASSERT( (l_data.size() == mss::pmic::i2c::sizes::DATA_LENGTH),
+                 fapi2::I2C_PMIC_INVALID_READ_SIZE()
+                 .set_TARGET(i_target)
+                 .set_ADDRESS(i_addr)
+                 .set_SIZE_REQUESTED(mss::pmic::i2c::sizes::DATA_LENGTH)
+                 .set_SIZE_RETURNED(l_data.size()),
+                 TARGTIDFORMAT " I2C read returned vector size of %u. Expected %u",
+                 MSSTARGID(i_target), l_data.size(), mss::pmic::i2c::sizes::DATA_LENGTH);
+
+    o_data_buffer = l_data[0];
+#else // if PPE
+
+    if (l_data.size() > 0)
+    {
+        o_data_buffer = l_data[0];
+    }
+
+    // Otherwise, leave it as-is, this will be fine for PPE.
+#endif
+
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform a register read operation on the given Default DT/ADC Target
+/// @param[in] i_target the DT/I2C device target
+/// @param[in] i_addr address to read
+/// @param[out] o_data_buffer buffer of data we will write the contents of the register to
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode reg_read_default_dt(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_target,
+        const uint8_t i_addr,
+        fapi2::buffer<uint8_t>& o_data_buffer)
+{
+    std::vector<uint8_t> l_data;
+    std::vector<uint8_t> l_command;
+
+    // Default DT shares address with ADC
+    // This by passes the ADC op code addition in the write helper funct for this target type
+    l_command.push_back(i_addr);
 
     FAPI_TRY(fapi2::getI2c(i_target, mss::pmic::i2c::sizes::DATA_LENGTH, l_command, l_data),
              "i2C read failed on " TARGTIDFORMAT " for address 0x%02x", MSSTARGID(i_target), i_addr);
@@ -387,6 +466,7 @@ inline void reg_write_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_G
     io_command.push_back(i_addr);
 }
 
+
 ///
 /// @brief Perform register write operation on a contiguous address of given target
 /// @tparam T target type
@@ -404,6 +484,35 @@ inline fapi2::ReturnCode reg_write_contiguous(const fapi2::Target<T>& i_target,
     std::vector<uint8_t> l_data;
 
     mss::pmic::i2c::reg_write_contiguous_helper(i_target, i_addr, l_data);
+
+    for(uint32_t l_count = 0; l_count < N; l_count++)
+    {
+        l_data.push_back(uint8_t(i_data_buffer[l_count]));
+    }
+
+    // Use fapi2 putI2c interface to execute command
+    return fapi2::putI2c(i_target, l_data);
+}
+
+///
+/// @brief Perform register write operation on a contiguous address of the Default DT/ADC target as they share the same address
+/// @tparam N size of the data buffer
+/// @param[in] i_target the I2C/DT device target
+/// @param[in] i_addr starting register address to write to
+/// @param[in] i_data_buffer buffer of data to be writen to register addresses
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <size_t N>
+inline fapi2::ReturnCode reg_write_default_dt_contiguous(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>&
+        i_target,
+        const uint8_t i_addr,
+        const fapi2::buffer<uint8_t> (&i_data_buffer)[N])
+{
+    std::vector<uint8_t> l_data;
+
+    // Default DT shares address with ADC
+    // This by passes the ADC op code addition in the write helper funct for this target type
+    l_data.push_back(i_addr);
 
     for(uint32_t l_count = 0; l_count < N; l_count++)
     {
@@ -507,6 +616,53 @@ inline fapi2::ReturnCode reg_read_contiguous(const fapi2::Target<T>& i_target,
 
     // The array indexing will not run over as we are passing the number of bytes to be read to getI2C()
     for(auto l_data : l_data_vector)
+    {
+        o_data_buffer[l_count] = l_data;
+        l_count++;
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Perform register read operation on a contiguous address of the Default DT/ADC target
+/// @tparam N size of the data buffer
+/// @param[in] i_target the I2C/DT device target
+/// @param[in] i_addr starting register address to read from
+/// @param[out] o_data_buffer buffer of data to be read from given register addresses
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <size_t N>
+inline fapi2::ReturnCode reg_read_default_dt_contiguous(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>&
+        i_target,
+        const uint8_t i_addr,
+        fapi2::buffer<uint8_t> (&o_data_buffer)[N])
+{
+    std::vector<uint8_t> l_data_vector;
+    std::vector<uint8_t> l_command;
+    uint32_t l_count = 0;
+
+    // Default DT shares address with ADC
+    // This by passes the ADC op code addition in the write helper funct for this target type
+    l_command.push_back(i_addr);
+
+    // Flush o_data_buffer to avoid stale data
+    for(l_count = 0; l_count < N; l_count++)
+    {
+        o_data_buffer[l_count] = 0;
+    }
+
+    FAPI_TRY(fapi2::getI2c(i_target, N, l_command, l_data_vector),
+             "i2C read failed on " TARGTIDFORMAT " for address 0x%02x", MSSTARGID(i_target), i_addr);
+
+    // Fill the array o_data_buffer from the read vector
+    l_count = 0;
+
+    // The array indexing will not run over as we are passing the number of bytes to be read to getI2C()
+    for(const auto l_data : l_data_vector)
     {
         o_data_buffer[l_count] = l_data;
         l_count++;
