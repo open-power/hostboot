@@ -295,6 +295,20 @@ enum data_position : uint8_t
     DATA_15  = 15,
 };
 
+
+
+///
+/// @brief Trim read reset data
+///
+enum trim_rd_reset : uint16_t
+{
+    TRIM_UNLOCK            = 0x000E,
+    TRIM_LOCK              = 0x000F,
+    TRIM_RD_INIT           = 0x3F21,
+    EXTENDABLE_RD_PULSE_EN = 0x4080,
+    TRIM_PASSWORD          = 0xA55A,
+};
+
 ///
 /// @brief Bread crumb values to return
 ///
