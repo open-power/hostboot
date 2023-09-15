@@ -675,13 +675,14 @@ class errludP_prdf:
 
                     # autopep8: off
                     rankCount = (headerData >> 12) & 0xF
-                    reserved1 = (headerData >> 11) & 0x1
+                    port = (headerData >> 11) & 0x1
                     isSpareDram = (headerData >> 10) & 0x1
                     reserved2 = (headerData >> 8) & 0x3
                     wiringType = headerData & 0xFF
                     # autopep8: on
 
                     d[cd]["Dram Repairs Data"] = OrderedDict()
+                    d[cd]["Dram Repairs Data"]["Port"] = port
 
                     for y in range(rankCount):
                         # 5 bytes (40 bits) per entry:

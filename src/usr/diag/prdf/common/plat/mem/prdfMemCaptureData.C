@@ -232,6 +232,7 @@ void captureDramRepairsData<TYPE_OCMB_CHIP>(TARGETING::TargetHandle_t i_trgt,
         if ( data.rankDataList.size() > 0 )
         {
             data.header.rankCount = data.rankDataList.size();
+            data.header.port = i_port;
 
             UtilMem dramStream;
             dramStream << data;
@@ -498,8 +499,14 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     // Add DRAM repairs data from hardware.
     captureDramRepairsData<TYPE_OCMB_CHIP>( ocmbTrgt, cd, i_port );
 
-    // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, i_port );
+    // Add DRAM repairs data from VPD. Port 0 for both Explorer and Odyssey
+    captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 0 );
+
+    // Add DRAM repairs data from VPD. Port 1 for Odyssey only
+    if (isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 1 );
+    }
 
     // Add Row Repair data from VPD
     captureRowRepairVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, i_port );

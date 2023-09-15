@@ -97,7 +97,7 @@ int32_t collectCeStats<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         TargetHandle_t ocmbTrgt = i_chip->getTrgt();
         TargetHandle_t memPortTrgt = getConnectedChild( ocmbTrgt,
                                                         TYPE_MEM_PORT, i_port );
-        TargetHandle_t dimm = getConnectedDimm( memPortTrgt, i_rank );
+        TargetHandle_t dimm = getConnectedDimm( memPortTrgt, i_rank, i_port );
         const bool isX4 = isDramWidthX4( dimm );
 
         // Use this map to keep track of the total counts per DRAM.

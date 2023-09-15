@@ -294,6 +294,7 @@ class TestUserDataParser(unittest.TestCase):
         self.assertEqual(jsonOut[cd][td]["0"]["TD Type"], "DSD")
 
         drd = "Dram Repairs Data"
+        self.assertEqual(jsonOut[cd][drd]["Port"], 1)
         self.assertEqual(jsonOut[cd][drd]["0"]["Rank"], 0)
         self.assertEqual(jsonOut[cd][drd]["0"]["Chip Mark"], 68)
         self.assertEqual(jsonOut[cd][drd]["0"]["Symbol Mark"], "--")

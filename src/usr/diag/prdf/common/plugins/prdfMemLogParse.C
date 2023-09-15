@@ -496,8 +496,10 @@ bool parseDramRepairsData( uint8_t  * i_buffer, uint32_t i_buflen,
         l_membuf >> usrData;
 
         uint8_t rankCount = usrData.header.rankCount;
+        uint8_t port = usrData.header.port;
 
-        i_parser.PrintNumber( " DRAM_REPAIRS_DATA", "%d", rankCount );
+        i_parser.PrintNumber(" DRAM_REPAIRS_DATA", "%d", rankCount);
+        i_parser.PrintNumber(" Port", "%d", port);
 
         // Iterate over all ranks
         for ( uint8_t rankIdx = 0; rankIdx < rankCount; rankIdx++ )
