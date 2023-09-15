@@ -186,33 +186,30 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
 
     /* Get the code levels on the Odyssey and see whether there are
      * any hash mismatches. */
+    std::vector<codelevel_info_t> l_codelevels;
 
-    std::vector<codelevel_info_t> codelevels;
-    errl = sendGetCodeLevelsRequest(i_ocmb, codelevels);
-
-    if (errl)
-    {
-        break;
-    }
-
-    std::sort(begin(codelevels), end(codelevels),
-              [](const codelevel_info_t& lhs, const codelevel_info_t& rhs)
-              {
-                  // Each type should only appear once in the vector.
-                  return lhs.type < rhs.type;
-              });
+    // create an ordered codelevel vector for the loop below, with the
+    // bootloader coming first, before the runtime
+    auto l_boot_codelevel    = i_ocmb->getAttrAsStdArr<ATTR_SBE_BOOTLOADER_CODELEVEL>();
+    auto l_runtime_codelevel = i_ocmb->getAttrAsStdArr<ATTR_SBE_RUNTIME_CODELEVEL>();
+    codelevel_info_t l_boot_info(codelevel_info_t::codelevel_info_type::bootloader,
+                                 l_boot_codelevel.data());
+    codelevel_info_t l_runtime_info(codelevel_info_t::codelevel_info_type::runtime,
+                                    l_runtime_codelevel.data());
+    l_codelevels.push_back(l_boot_info);   // push BOOTLOADER_CODELEVEL first
+    l_codelevels.push_back(l_runtime_info);
 
     // If the bootloader needs to be updated, then we will always
     // update the runtime, because a change in size of the bootloader
     // can cause the runtime to break (even if the runtime hash
     // doesn't change). We will always evaluate the bootloader image
     // before the runtime image (so that this variable will be set in
-    // time for the check) because of the sort above.
+    // time for the check).
     bool bootloader_needs_update = false;
 
     const auto is_golden_side = i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>() == SPPE_BOOT_SIDE_GOLDEN;
 
-    for (const auto& codelevel : codelevels)
+    for (const auto& codelevel : l_codelevels)
     {
         image_type_t image_type = { };
         const char* image_type_str = nullptr;

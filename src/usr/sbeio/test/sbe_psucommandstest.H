@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,45 +188,73 @@ class SbePsuCommandTest : public CxxTest::TestSuite
           // loop around every functional proc
           TARGETING::TargetHandleList l_procList;
           getAllChips(l_procList, TARGETING::TYPE_PROC);
+
           for( auto l_proc : l_procList )
           {
+              uint32_t huid = get_huid(l_proc);
+
+              TS_INFO("testSBEPsuGetCap: START %.8X", huid);
+
               // Save off a few values with what we read during boot to compare
               //  with later
-              auto l_sbeVersion = l_proc->getAttr<ATTR_SBE_VERSION_INFO>();
+              auto l_sbeVersion  = l_proc->getAttr<ATTR_SBE_VERSION_INFO>();
               auto l_sbeCommitId = l_proc->getAttr<ATTR_SBE_COMMIT_ID>();
+
+              TS_INFO("testSBEPsuGetCap: %.8X IPL VERSION_INFO : %.8X",
+                      huid, l_sbeVersion);
+              TS_INFO("testSBEPsuGetCap: %.8X IPL COMMIT_ID    : %.8X",
+                      huid, l_sbeCommitId);
+
+              // Do a little bit of sanity checking as well
+              if( (l_sbeVersion == 0) || (l_sbeCommitId == 0) )
+              {
+                  TS_FAIL("testSBEPsuGetCap: %.8X IPL SBE ATTR is "
+                          "invalid : version=%.8X, commitid=%.8X",
+                          huid, l_sbeVersion, l_sbeCommitId);
+              }
 
               // Call SBE
               errlHndl_t l_errl = getPsuSbeCapabilities(l_proc);
               if (l_errl)
               {
-                  TS_FAIL("testSBEPsuGetCapabilities> Error from getPsuSbeCapabilities on %.8X: rc=0x%X, plid=0x%X",
-                          TARGETING::get_huid(l_proc),
-                          ERRL_GETRC_SAFE(l_errl), ERRL_GETPLID_SAFE(l_errl));
+                  TS_FAIL("testSBEPsuGetCap: Error from "
+                          "getPsuSbeCapabilities on %.8X: rc=0x%X, plid=0x%X",
+                          huid,
+                          ERRL_GETRC_SAFE(l_errl),
+                          ERRL_GETPLID_SAFE(l_errl));
                   errlCommit(l_errl, CXXTEST_COMP_ID);
                   break;
               }
 
               // Verify that we got the same answers as during IPL
               // (mostly for runtime test)
-              auto l_sbeVersionNew = l_proc->getAttr<ATTR_SBE_VERSION_INFO>();
-              if( l_sbeVersion != l_sbeVersionNew )
-              {
-                  TS_FAIL("testSBEPsuGetCapabilities> ATTR_SBE_VERSION_INFO changed : old=%.8X, new=%.8X",
-                          l_sbeVersion, l_sbeVersionNew);
-              }
-
+              auto l_sbeVersionNew  = l_proc->getAttr<ATTR_SBE_VERSION_INFO>();
               auto l_sbeCommitIdNew = l_proc->getAttr<ATTR_SBE_COMMIT_ID>();
-              if( l_sbeCommitId != l_sbeCommitIdNew )
-              {
-                  TS_FAIL("testSBEPsuGetCapabilities> ATTR_SBE_COMMIT_ID changed : old=%.8X, new=%.8X",
-                          l_sbeCommitId, l_sbeCommitIdNew);
-              }
+
+              TS_INFO("testSBEPsuGetCap: %.8X NEW VERSION_INFO : %.8X",
+                      huid, l_sbeVersionNew);
+              TS_INFO("testSBEPsuGetCap: %.8X NEW COMMIT_ID    : %.8X",
+                      huid, l_sbeCommitIdNew);
 
               // Do a little bit of sanity checking as well
-              if( (l_sbeVersionNew == 0) || (l_sbeCommitId == 0) )
+              if ( (l_sbeVersionNew == 0) || (l_sbeCommitIdNew == 0) )
               {
-                  TS_FAIL("testSBEPsuGetCapabilities> SBE version is invalid : version=%.8X, commitid=%.8X",
-                          l_sbeVersionNew, l_sbeCommitIdNew);
+                  TS_FAIL("testSBEPsuGetCap: %.8X NEW SBE ATTR is "
+                          "invalid: VERSION_INFO=%.8X, COMMIT_ID=%.8X",
+                          huid, l_sbeVersionNew, l_sbeCommitIdNew);
+              }
+
+              if( l_sbeVersion != l_sbeVersionNew )
+              {
+                  TS_FAIL("testSBEPsuGetCap: %.8X VERSION_INFO changed:"
+                          " old=%.8X, new=%.8X",
+                          huid, l_sbeVersion, l_sbeVersionNew);
+              }
+              if( l_sbeCommitId != l_sbeCommitIdNew )
+              {
+                  TS_FAIL("testSBEPsuGetCap: %.8X COMMIT_ID changed: "
+                          "old=%.8X, new=%.8X",
+                          huid, l_sbeCommitId, l_sbeCommitIdNew);
               }
           }
 

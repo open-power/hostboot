@@ -458,13 +458,31 @@
       <id>OCMB_GOLDEN_BOOT_ATTEMPTED</id>
     </attribute>
     <attribute>
+      <id>SBE_BOOTLOADER_CODELEVEL</id>
+    </attribute>
+    <attribute>
+      <id>SBE_BUILD_TAG</id>
+    </attribute>
+    <attribute>
       <id>SBE_COMMIT_ID</id>
+    </attribute>
+    <attribute>
+      <id>SBE_EKB_BUILD_TAG</id>
     </attribute>
     <attribute>
       <id>SBE_FIFO_CAPABILITIES</id>
     </attribute>
     <attribute>
+      <id>SBE_NUM_CAPABILITIES</id>
+    </attribute>
+    <attribute>
+      <id>SBE_NUM_IMAGES</id>
+    </attribute>
+    <attribute>
       <id>SBE_RELEASE_TAG</id>
+    </attribute>
+    <attribute>
+      <id>SBE_RUNTIME_CODELEVEL</id>
     </attribute>
     <attribute>
       <id>SBE_VERSION_INFO</id>

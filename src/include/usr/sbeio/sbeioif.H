@@ -630,6 +630,12 @@ namespace SBEIO
 
         codelevel_info_type type;
         uint8_t hash[64];
+        codelevel_info_t() {};
+        codelevel_info_t(codelevel_info_type i_type, uint8_t *i_hash)
+        {
+            type = i_type;
+            memcpy(hash,i_hash,64);
+        }
     };
 
     /**
@@ -637,12 +643,10 @@ namespace SBEIO
      *
      * @param[in] i_chipTarget   The chip you would like to perform the chipop on
      *                           NOTE: Only valid on Odyssey chips.
-     * @param[out] o_codelevels  The image levels on the device.
      *
      * @return errlHndl_t        Error log handle on failure.
      */
-    errlHndl_t sendGetCodeLevelsRequest(TARGETING::Target * i_chipTarget,
-                                        std::vector<codelevel_info_t>& o_codelevels);
+    errlHndl_t sendGetCodeLevelsRequest(TARGETING::Target * i_chipTarget);
 
     /**
      * @brief Update the image described by the given codelevel info

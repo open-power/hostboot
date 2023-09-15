@@ -503,48 +503,110 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
     return l_errl;
 }
 
+/** @brief Commit an info log if required, and set io_return_errl and io_local_errl
+ *         as appropriate.
+ *         We want the first error to be visible and all secondary errors to be info.
+ *         The first error is most relevant to a failure.
+ *
+ *  @param[in,out] io_return_errl  The errl to be returned from the calling fcn
+ *  @param[in,out] io_local_errl   The errl which was just hit in the calling fcn
+ */
+void check_and_set_errl(errlHndl_t& io_return_errl, errlHndl_t& io_local_errl)
+{
+    if (io_return_errl)
+    {
+        // a return errl already exists, so log the new errl as info
+        io_local_errl->plid(io_return_errl->plid());
+        io_local_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        errlCommit(io_local_errl, HWPF_COMP_ID);
+    }
+    else
+    {
+        io_return_errl = io_local_errl;
+    }
+    io_local_errl = nullptr;
+}
+
 /** @brief Called when all of the check_for_ready HWPs have been invoked on the given OCMB,
  *  whether they failed or not. This function handles errors and checks the code version
  *  running on the OCMB if possible.
  *
- *  @param[in] i_ocmb                   The OCMB.
- *  @param[in] i_hwpErrl                Any error returned by a HWP.
- *  @param[out] o_restart_needed        Set to true if the Odyssey code update FSM indicates that the
- *                                      OCMB needs to run through check_for_ready again.
+ *  @param[in]     i_ocmb               The OCMB.
+ *  @param[in/out] io_hwpErrl           Any error returned by a HWP.
+ *  @param[out]    o_restart_needed     Set to true if the Odyssey code update
+ *                                      FSM indicates that the OCMB needs to run
+ *                                      through check_for_ready again.
  *
  *  @return    errlHndl_t               Error if any, otherwise nullptr.
+ *                                       If io_hwpErrl, return io_hwpErrl
+ *                                       If only a local_error, return local_error
+ *                                       Except when code update FSM chooses to
+ *                                       switch sides, then no errl is returned
  */
 errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
-                                    errlHndl_t& i_hwpErrl,
+                                    errlHndl_t& io_hwpErrl,
                                     bool& o_restart_needed)
 {
-    errlHndl_t errl = nullptr;
+    errlHndl_t      l_return_errl = io_hwpErrl;
+    ody_upd_event_t l_event       = NO_EVENT;
 
-    if (odysseyCodeUpdateSupported()) // no point in doing anything if we have no Odyssey images in PNOR.
-    {
-        ody_upd_event_t event = NO_EVENT;
+    if (io_hwpErrl)
+    { // If there was a HWP error, check whether there is async FFDC.
+        l_event = OCMB_BOOT_ERROR_NO_FFDC;
 
-        if (i_hwpErrl)
-        { // If there was a HWP error, check whether there is async FFDC.
-            event = OCMB_BOOT_ERROR_NO_FFDC;
+        // @TODO: Can we could have async FFDC without a HWP error? If so we should check this
+        // in the HWP success path as well.
+        if (err_is_sppe_not_ready_with_async_ffdc(i_ocmb, io_hwpErrl))
+        {
+            l_event = OCMB_BOOT_ERROR_WITH_FFDC;
+        }
+        else
+        {
+            // @TODO: call ody_extract_sbe_rc
+        }
+    }
 
-            // @TODO: Can we could have async FFDC without a HWP error? If so we should check this
-            // in the HWP success path as well.
-            if (err_is_sppe_not_ready_with_async_ffdc(i_ocmb, i_hwpErrl))
+    if (l_event != OCMB_BOOT_ERROR_NO_FFDC)
+    { // If there is async FFDC, we might be able to read the code levels.
+
+        if (i_ocmb->getAttr<ATTR_SBE_NUM_CAPABILITIES>() == 0)
+        {
+            // This attr is unset, so run the get code levels chipop to pull
+            // the data which contains the number of capabilities supported
+
+            if (auto l_local_errl = sendGetCodeLevelsRequest(i_ocmb))
             {
-                event = OCMB_BOOT_ERROR_WITH_FFDC;
-            }
-            else
-            {
-                // @TODO: call ody_extract_sbe_rc
+                TRACISTEP("handle_ody_upd_hwps_done: sendGetCodeLevelsRequest "
+                          "failed on OCMB 0x%X", get_huid(i_ocmb));
+
+                // If we can't get code levels, treat this as a boot failure with
+                // no async FFDC
+                l_event = OCMB_BOOT_ERROR_NO_FFDC;
+
+                check_and_set_errl(l_return_errl, l_local_errl);
             }
         }
 
-        if (event != OCMB_BOOT_ERROR_NO_FFDC)
-        { // If there is async FFDC, we might be able to read the code levels.
-            errl = set_ody_code_levels_state(i_ocmb);
+        if (auto l_local_errl = getFifoSbeCapabilities(i_ocmb))
+        {
+            TRACISTEP("handle_ody_upd_hwps_done: getFifoSbeCapabilities "
+                      "failed on OCMB 0x%X", get_huid(i_ocmb));
 
-            if (errl)
+            // If we can't capabilities, treat this as a boot failure with
+            // no async FFDC
+            l_event = OCMB_BOOT_ERROR_NO_FFDC;
+
+            check_and_set_errl(l_return_errl, l_local_errl);
+        }
+    }
+
+    if (odysseyCodeUpdateSupported()) // no point in doing anything if we have
+                                      // no Odyssey images in PNOR.
+    {
+
+        if (l_event != OCMB_BOOT_ERROR_NO_FFDC)
+        {
+            if (auto l_local_errl = set_ody_code_levels_state(i_ocmb))
             {
                 TRACISTEP("call_ocmb_check_for_ready: set_ody_code_levels_state "
                           "failed on OCMB 0x%X",
@@ -552,31 +614,33 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
 
                 // If we can't read code levels, treat this as a boot failure with no async
                 // FFDC.
+                l_event = OCMB_BOOT_ERROR_NO_FFDC;
 
-                event = OCMB_BOOT_ERROR_NO_FFDC;
-
-                if (i_hwpErrl)
-                {
-                    errl->plid(i_hwpErrl->plid());
-                    i_hwpErrl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    errlCommit(i_hwpErrl, HWPF_COMP_ID);
-                }
-                i_hwpErrl = errl;
-                errl = nullptr;
+                check_and_set_errl(l_return_errl, l_local_errl);
             }
         }
 
-        if (i_hwpErrl)
+        if (io_hwpErrl)
         {
             // Pass any HWP error to the code update FSM and let it tell us what to do.
 
-            i_hwpErrl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_HIGH, HWAS::DECONFIG, HWAS::GARD_NULL);
-
-            errl = ody_upd_process_event(i_ocmb, event, i_hwpErrl, o_restart_needed);
+            io_hwpErrl->addHwCallout(i_ocmb,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DECONFIG,
+                                     HWAS::GARD_NULL);
+            l_return_errl = ody_upd_process_event(i_ocmb,
+                                                  l_event,
+                                                  l_return_errl,
+                                                  o_restart_needed);
         }
     }
 
-    return errl;
+    // cleanup this errlHndl_t, since we processed the error logs returned
+    // in this function, and we will return an appropriate error log handle
+    // using l_return_errl
+    io_hwpErrl = nullptr;
+
+    return l_return_errl;
 }
 
 void* call_ocmb_check_for_ready (void *io_pArgs)
@@ -609,9 +673,9 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
 
     const auto reconfig = UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
     if ( (!l_StepError.isNull()) || reconfig )
-    {
+        {
         TRACISTEP(ERR_MRK"call_ocmb_check_for_ready: ISTEPERROR or RECONFIG encountered");
-        goto FAIL_ISTEP;
+                    goto FAIL_ISTEP;
     }
 
     // Loop thru the list of processors and send Memory config info to SBE

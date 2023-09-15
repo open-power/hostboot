@@ -171,6 +171,8 @@ enum sbeioReasonCode
     // Attr exchange errors
     SBEIO_ATTR_MISMATCH_DETECTED       = SBEIO_COMP_ID | 0x6F,
 
+    SBEIO_RECEIVE_CODE_LEVELS_BAD_MSG  = SBEIO_COMP_ID | 0x70,
+
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
     SBEIO_HWSV_COLLECT_SBE_RC          = SBEIO_COMP_ID | 0xFF,

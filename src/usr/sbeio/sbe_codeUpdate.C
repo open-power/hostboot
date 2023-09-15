@@ -36,6 +36,7 @@
 #include <sbeio/sbeioreasoncodes.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/odyutil.H>
+#include "sbe_getCodeLevels.H"
 
 //  FAPI support
 #include <fapi2.H>
@@ -55,22 +56,6 @@ TRACDCOMP(g_trac_sbeio,"CodeUpdate: " printf_string,##args)
 #define SBE_TRACF(printf_string,args...) \
 TRACFCOMP(g_trac_sbeio,"CodeUpdate: " printf_string,##args)
 
-const int UPDATABLE_IMG_SECTION_CNT = 4;
-
-/**
- * @brief Response structures for Odyssey getCodeLevels chipops.
- */
-struct get_code_levels_response
-{
-    uint16_t num_capabilities;
-    uint16_t num_sub_images;
-
-    // @TODO: This is now a major/minor version
-    uint32_t reserved;
-
-    sppeCLIP_t updatable_images[UPDATABLE_IMG_SECTION_CNT];
-};
-
 /** @brief Implementation for the chipop used by ody_code_getlevels.
  *
  *  @param[in] i_target         The OCMB target
@@ -86,14 +71,9 @@ fapi2::ReturnCode ody_chipop_getcodelevels(const fapi2::Target<fapi2::TARGET_TYP
 
     o_sppeCLIPdata.clear();
 
-    get_code_levels_response response = { };
+    getCodeLevelsResponse_t l_response{};
 
-    SbeFifo::fifoGetCodeLevelsRequest req;
-    auto errl = SbeFifo::getTheInstance().performFifoChipOp(i_target.get(),
-                                                            reinterpret_cast<uint32_t*>(&req),
-                                                            reinterpret_cast<uint32_t*>(&response),
-                                                            sizeof(response));
-
+    auto errl = getFifoSbeCodeLevels(i_target.get(), l_response);
     if (errl)
     {
         SBE_TRACF("ody_chipop_getcodelevels failed: " TRACE_ERR_FMT,
@@ -102,7 +82,7 @@ fapi2::ReturnCode ody_chipop_getcodelevels(const fapi2::Target<fapi2::TARGET_TYP
     }
     else
     {
-        for (const auto& sppe_clip : response.updatable_images)
+        for (const auto& sppe_clip : l_response.updatable_images)
         {
             SBE_TRACF("ody_chipop_getcodelevels(0x%08X): Image type: %d",
                       get_huid(i_target.get()),
@@ -172,82 +152,61 @@ fapi2::ReturnCode ody_chipop_codeupdate(const fapi2::Target<fapi2::TARGET_TYPE_O
 
 namespace SBEIO
 {
-    errlHndl_t sendGetCodeLevelsRequest(Target * i_chipTarget,
-                                        std::vector<codelevel_info_t>& o_codelevels)
+    errlHndl_t sendGetCodeLevelsRequest(Target * i_chipTarget)
     {
         SBE_TRACF(ENTER_MRK"sendGetCodeLevelsRequest(0x%08X)", get_huid(i_chipTarget));
 
-        errlHndl_t errl = nullptr;
-        o_codelevels.clear();
+        std::vector<sppeCLIP_t> clips;
+        errlHndl_t              errl = nullptr;
 
-        do
+        // Make sure the target is one of the supported types.
+        errl = sbeioInterfaceChecks(i_chipTarget,
+                                    SbeFifo::SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES,
+                                    SbeFifo::SBE_FIFO_CMD_GET_CODE_LEVELS);
+        if (errl) {goto ERROR_EXIT;}
+
+        if (!UTIL::isOdysseyChip(i_chipTarget))
         {
-            // Make sure the target is one of the supported types.
-            errl = sbeioInterfaceChecks(i_chipTarget,
-                                        SbeFifo::SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES,
-                                        SbeFifo::SBE_FIFO_CMD_GET_CODE_LEVELS);
+            SBE_TRACF("sendGetCodeLevelsRequest: Chip 0x%08X is not an Odyssey",
+                      get_huid(i_chipTarget));
+            goto ERROR_EXIT;
+        }
 
-            if(errl)
+        FAPI_INVOKE_HWP(errl, ody_code_getlevels, { i_chipTarget }, clips);
+
+        if (errl)
+        {
+            SBE_TRACF("sendGetCodeLevelsRequest: ody_code_getlevels failed: " TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(errl));
+            goto ERROR_EXIT;
+        }
+
+        // We only want the bootloader and runtime clips, and
+        // then we save them as attributes
+
+        clips.erase(std::remove_if(begin(clips), end(clips),
+                                   [](const auto& clip)
+                                   { return (clip.type != Bootloader
+                                             && clip.type != Runtime); }),
+                    end(clips));
+
+        for (const auto& clip : clips)
+        {
+            switch (clip.type)
             {
+              case Bootloader:
+                i_chipTarget->setAttr<ATTR_SBE_BOOTLOADER_CODELEVEL>(clip.hash.x);
                 break;
-            }
-
-            if (!UTIL::isOdysseyChip(i_chipTarget))
-            {
-                SBE_TRACF("sendGetCodeLevelsRequest: Chip 0x%08X is not an Odyssey",
-                          get_huid(i_chipTarget));
+              case Runtime:
+                i_chipTarget->setAttr<ATTR_SBE_RUNTIME_CODELEVEL>(clip.hash.x);
                 break;
+              default:
+                assert(false); // this can't happen because the remove_if above
+                               // filters out all but the two cases
             }
+        }
 
-            std::vector<sppeCLIP_t> clips;
-            FAPI_INVOKE_HWP(errl, ody_code_getlevels, { i_chipTarget }, clips);
-
-            if (errl)
-            {
-                SBE_TRACF("sendGetCodeLevelsRequest: ody_code_getlevels failed: " TRACE_ERR_FMT,
-                          TRACE_ERR_ARGS(errl));
-
-                break;
-            }
-
-            // We only want the bootloader and runtime clips, and
-            // then we transform those into our own
-            // codelevel_info_t data structure.
-
-            clips.erase(std::remove_if(begin(clips), end(clips),
-                                       [](const auto& clip)
-                                       { return (clip.type != Bootloader
-                                                 && clip.type != Runtime); }),
-                        end(clips));
-
-            o_codelevels.resize(clips.size());
-
-            std::transform(begin(clips), end(clips), begin(o_codelevels),
-                           [](const auto& clip)
-                           {
-                               codelevel_info_t::codelevel_info_type codelevel_type = { };
-
-                               switch (clip.type)
-                               {
-                               case Bootloader:
-                                   codelevel_type = codelevel_info_t::bootloader;
-                                   break;
-                               case Runtime:
-                                   codelevel_type = codelevel_info_t::runtime;
-                                   break;
-                               default:
-                                   assert(false); // this can't happen
-                               }
-
-                               codelevel_info_t info = { };
-                               info.type = codelevel_type;
-                               static_assert(sizeof(info.hash) == sizeof(clip.hash));
-                               memcpy(&info.hash, &clip.hash, sizeof(info.hash));
-                               return info;
-                           });
-
-        }while(0);
-
+        ERROR_EXIT:
         SBE_TRACF(EXIT_MRK"sendGetCodeLevelsRequest(0x%08X)", get_huid(i_chipTarget));
         return errl;
     }

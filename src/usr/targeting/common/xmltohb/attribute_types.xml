@@ -8120,6 +8120,36 @@
   </attribute>
 
   <attribute>
+    <id>SBE_BOOTLOADER_CODELEVEL</id>
+    <description>
+      SBE Bootloader code level (hash of the sbe bootloader)
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>64</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>SBE_BUILD_TAG</id>
+    <description>
+        An ascii value of the SBE build tag
+    </description>
+    <simpleType>
+      <string>
+        <default/>
+        <sizeInclNull>21</sizeInclNull>
+      </string>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>SBE_COMMIT_ID</id>
     <description>
         A hexadecimal value of the commit ID associated
@@ -8127,6 +8157,22 @@
     </description>
     <simpleType>
       <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>SBE_EKB_BUILD_TAG</id>
+    <description>
+        An ascii value of the SBE EKB build tag
+    </description>
+    <simpleType>
+      <string>
+        <default/>
+        <sizeInclNull>21</sizeInclNull>
+      </string>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8186,6 +8232,32 @@
   </attribute>
 
   <attribute>
+    <description>
+        Number of SBE capabilities for a given target.
+    </description>
+    <id>SBE_NUM_CAPABILITIES</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <description>
+        Number of SBE images for a given target.
+    </description>
+    <id>SBE_NUM_IMAGES</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint32_t/>
+    </simpleType>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>SBE_RELEASE_TAG</id>
     <description>
         An ascii value of the SBE release tag
@@ -8195,6 +8267,20 @@
         <default/>
         <sizeInclNull>21</sizeInclNull>
       </string>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>SBE_RUNTIME_CODELEVEL</id>
+    <description>
+      SBE Runtime code level.
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>64</array>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

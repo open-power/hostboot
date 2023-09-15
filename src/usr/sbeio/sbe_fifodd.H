@@ -576,12 +576,9 @@ public:
 
 
     /**
-     * @brief Struct for FIFO Get Capabilities Request. This message type is only supported for Odyssey chips. P10 chips
-     *        will continue to use fifoGetCapabilities2Request.
-     *
-     *        Struct for FIFO Get Capabilities response end uses fifoStandardResponse
-     *        A variation of sbeCapabilities_t comes before that struct.
-     *
+     * @brief Struct for FIFO Get Capabilities Request. This message type is only
+     *        supported for Odyssey chips.
+     *        P10 chips will continue to use fifoGetCapabilities2Request.
      */
     struct fifoGetCapabilitiesRequest
     {
@@ -601,11 +598,9 @@ public:
     } PACKED;
 
     /**
-     * @brief Struct for FIFO Get Capabilities 2 Request including new additions. This message type is not supported for
-     *        Odyssey chips. Odyssey chips should use fifoGetCapabilitiesRequest (note the lack of the 2).
-     *
-     *        Struct for FIFO Get Capabilities response end uses fifoStandardResponse
-     *        A variation of sbeCapabilities2_t comes before that struct.
+     * @brief Struct for FIFO Get Capabilities 2 Request including new additions.
+     *        This message type is not supported for Odyssey chips.
+     *        Odyssey chips should use fifoGetCapabilitiesRequest (note the lack of the 2).
      *
      * Complies with document FipS_SBE_Interface_Specification_v1.5b-1.pdf
      */
@@ -1425,6 +1420,63 @@ inline stream_cat<sizeof...(Args)> cat_streams(Args&&... args)
 {
     return stream_cat<sizeof...(Args)>({ args... });
 }
+
+/**
+ * @brief This Base Class supports a variable size response buffer
+ *
+ *   The default ctor does nothing but init vars to zero
+ *   The init method allocates the response buffer to the requested size
+ *   Methods exist to get a pointer for each section
+ */
+class sbeFifo_rsp_t
+{
+  protected:
+    std::vector <uint16_t> iv_sections; // vector of section sizes
+    std::vector <uint8_t>  iv_rsp;      // ptr to the entire buffer
+
+  public:
+    virtual ~sbeFifo_rsp_t() {}
+     /**
+     * @brief allocate/bzero the response buffer, and save the section sizes
+     */
+    void init(std::vector<uint16_t> i_sections)
+    {
+        iv_sections = std::move(i_sections);
+        iv_rsp.assign(getBufSize(),0);      // resize and bzero
+    };
+    /**
+     * @brief return a ptr to the response buffer
+     */
+    const uint8_t* getBufPtr() const
+    {
+        return iv_rsp.data();
+    }
+    /**
+     * @brief return the total size of the response buffer in bytes
+     */
+    uint16_t getBufSize() const
+    {
+        uint16_t l_size{};
+        for (auto x : iv_sections)
+        {
+            l_size += x;
+        }
+        return l_size;
+    }
+    /**
+     * @brief return a ptr to section s
+     */
+    const uint8_t* getSectionPtr(uint16_t i_index) const
+    {
+        uint16_t l_offset{};
+        uint16_t l_end = (uint16_t)iv_sections.size();
+        for (auto i=0; i<l_end && i<i_index; i++)
+        {
+            l_offset += iv_sections[i];
+        }
+        return &iv_rsp[l_offset];
+    }
+};
 
 }
 

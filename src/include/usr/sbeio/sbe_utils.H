@@ -35,14 +35,20 @@
 namespace SBEIO
 {
     static constexpr size_t SBE_MAX_LENGTH_IMAGE_HASH = 16;
+
     /**
-    * @brief Struct for the SBE Capabilities
+    * @brief constexpr for the SBE Capabilities
     *
-    * Complies with document Host_SBE_Interface_Specification_v0.9e.pdf
+    *   Complies with document Host_SBE_Interface_Specification_v0.9e.pdf
     */
-    static constexpr uint8_t SBE_RELEASE_TAG_MAX_CHARS = 20;
-    static constexpr uint8_t SBE_MAX_CAPABILITIES = 24;
+    // POZ SBE FIFO Interface Specification v1.1 shows a max of 16 capabilities
+    static constexpr uint8_t POZ_SBE_MAX_CAPABILITIES = 16;
+    // SBE FIFO Interface Specification for P10 Systems v2.1 shows a max of
+    //  26 for Get Capabilities 2
     static constexpr uint8_t SBE_MAX_CAPABILITIES_2 = 26;
+
+    static constexpr uint8_t SBE_RELEASE_TAG_MAX_CHARS = 20;
+
     // access values into capabilities array
     static constexpr uint8_t  SBE_CAPABILITY_HALT_OFFSET = 22;
     static constexpr uint32_t SBE_CMD_HALT_SUPPORTED = 0xAB000001;
@@ -51,38 +57,6 @@ namespace SBEIO
     // This is chosen arbitrarily as a defense against cases where the End-of-Transmission (EOT) is not
     // recieved from SBE.
     static constexpr uint8_t SBE_FFDC_MAX_PAGES = 6;
-
-    struct sbeCapabilities_t
-    {
-        uint16_t majorVersion;
-        uint16_t minorVersion;
-        uint32_t commitId;
-        char     releaseTag[SBE_RELEASE_TAG_MAX_CHARS];  // AKA build tag
-        uint32_t capabilities[];
-        sbeCapabilities_t() :
-              majorVersion(0),
-              minorVersion(0),
-              commitId(0),
-              releaseTag{ 0 }
-        {}
-    } PACKED;
-
-    struct sbeCapabilities2_t
-    {
-        uint16_t majorVersion;
-        uint16_t minorVersion;
-        uint32_t commitId;
-        char     releaseTag[SBE_RELEASE_TAG_MAX_CHARS];  // AKA build tag
-        uint32_t capabilities[SBE_MAX_CAPABILITIES_2];
-        sbeCapabilities2_t() :
-            majorVersion(0),
-            minorVersion(0),
-            commitId(0),
-            releaseTag{ 0 },
-            capabilities{ 0 }
-        {
-        }
-    } PACKED;  // end struct sbeCapabilities2_t
 
     // For 4U max is 181 bytes - setting max to 256 words
     // See fips1010 sbeiInternal.H
@@ -99,7 +73,7 @@ namespace SBEIO
         SBE_TARGET_TYPE_UNKNOWN  = 0xFF
     };
 
-    /// @brief translates HB target types to SBE target type groups
+    /// @brief translates HB target types tob SBE target type groups
     /// @param[in] i_hbTarget includes the HB target type
     /// @return SBEIO::SBE_TARGET_TYPES returns SBE_TARGET_TYPE_UNKNOWN in error
     SBE_TARGET_TYPES translateToSBETargetType(TARGETING::Target * i_hbTarget);
