@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <p10_omi_degrade_dl_reconfig.H>
 #include <p10_scom_mcc.H>
 #include <p10_scom_omi.H>
+#include <ody_scom_omi_odc.H>
 
 /// @brief Reconfigure DL logic post-OMI degrade (from x8->x4)
 ///
@@ -70,12 +71,25 @@ fapi2::ReturnCode p10_omi_degrade_dl_reconfig(
         {
             FAPI_DBG("Polling buffer side DL status...");
 
-            for (auto l_exp_target : i_target.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>())
+            for (auto l_ocmb_target : i_target.getChildren<fapi2::TARGET_TYPE_OCMB_CHIP>())
             {
-                const uint64_t EXP_DL_STATUS_ADDR = 0x8012816ull;
-                FAPI_TRY(fapi2::getScom(l_exp_target, EXP_DL_STATUS_ADDR, l_dl_status));
-                l_dl_status.extractToRight<STATUS_ACTUAL_LN_WIDTH, STATUS_ACTUAL_LN_WIDTH_LEN>
-                (l_dl_actual_ln_width);
+                fapi2::ATTR_NAME_Type l_ocmb_name;
+                FAPI_TRY(FAPI_ATTR_GET_PRIVILEGED(fapi2::ATTR_NAME, l_ocmb_target, l_ocmb_name));
+
+                if (l_ocmb_name == fapi2::ENUM_ATTR_NAME_EXPLORER)
+                {
+                    const uint64_t EXP_DL_STATUS_ADDR = 0x8012816ull;
+                    FAPI_TRY(fapi2::getScom(l_ocmb_target, EXP_DL_STATUS_ADDR, l_dl_status));
+                    l_dl_status.extractToRight<STATUS_ACTUAL_LN_WIDTH, STATUS_ACTUAL_LN_WIDTH_LEN>
+                    (l_dl_actual_ln_width);
+                }
+                else
+                {
+                    FAPI_TRY(fapi2::getScom(l_ocmb_target, D_REG_DL0_STATUS, l_dl_status));
+                    l_dl_status.extractToRight<D_REG_DL0_STATUS_ACTUAL_TX_WIDTH, D_REG_DL0_STATUS_ACTUAL_TX_WIDTH_LEN>
+                    (l_dl_actual_ln_width);
+                }
+
                 l_x4 = (l_dl_actual_ln_width == DL_LN_WIDTH_X4);
                 FAPI_DBG("  Width encoded: 0x%X (x4: %d)",
                          l_dl_actual_ln_width, ((l_x4) ? (1) : (0)));
