@@ -423,6 +423,29 @@ int32_t CollectOmiFfdc( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, CollectOmiFfdc );
 
+/**
+ * @brief   Whenever an OMI link has degraded, the bus must be reconfigured to
+ *          avoid infinite retrains.
+ * @param   i_chip An OCMB chip.
+ * @param   io_sc  The step code data struct.
+ * @returns SUCCESS always.
+ */
+int32_t omiDegradeRetrainWorkaround(ExtensibleChip* i_chip,
+                                    STEP_CODE_DATA_STRUCT& io_sc)
+{
+    #ifdef __HOSTBOOT_MODULE
+    auto omiTarget = getConnectedParent(i_chip->getTrgt(), TYPE_OMI);
+
+    if (nullptr != omiTarget)
+    {
+        PlatServices::omiDegradeDlReconfig(omiTarget);
+    }
+    #endif
+
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, omiDegradeRetrainWorkaround);
+
 //##############################################################################
 //
 //                               RDF_FIR

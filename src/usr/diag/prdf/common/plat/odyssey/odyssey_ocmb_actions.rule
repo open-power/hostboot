@@ -341,12 +341,10 @@ actionclass ocmb_M_info_only_th1
 
 actionclass omi_degraded_mode
 {
-    #funccall("CheckKvcoFix");
     try( funccall("odyCrcSideEffect"),
          try(funccall("CrcSideEffect_Ocmb"), omi_bus) );
-    #funccall("omiDegradeRetrainWorkaround");
+    funccall("omiDegradeRetrainWorkaround");
     threshold1;
-    #funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
 };
 
 actionclass info_only_mnfgInfo_th1
