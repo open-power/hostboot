@@ -116,6 +116,9 @@ if [ "$CHIP" == "ODYSSEY" ]; then
     export HB_USE_ODYSSEY="1"
 fi
 
+# Use the cached HB prime images wherever possible
+export HB_FAST_PRIME=1
+
 #export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 
 # Create simics sandbox.
