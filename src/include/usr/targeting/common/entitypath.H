@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -332,6 +332,25 @@ class EntityPath
          */
         const PathElement& operator[](
             uint32_t i_index) const;
+
+        /**
+         *  @brief Replaces the path element at the specified index
+         *
+         *  Replaces the path element at the specified index (zero based).  The
+         *  routine will assert if the index exceeds this->size()-1;
+         *
+         *  @param[in] i_index Path element to replace (0 based indexing)
+         *  @param[in] i_element Value to replace element with
+         *
+         *  @pre N/A
+         *
+         *  @post Path element modified on valid index.  Assert
+         *      triggered on invalid index.
+         *
+         *  @return n/a
+         */
+        void replace(uint32_t i_index,
+                     PathElement i_element);
 
         /**
          *  @brief Returns the first path element of the given type
