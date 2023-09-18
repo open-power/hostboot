@@ -324,6 +324,7 @@ enum i2cReg : uint16_t
     BPM_SERIAL_NO_LAST      = 0x5B6,
     BPM_FW_VERSION_FIRST    = 0x5B7,
     BPM_FW_VERSION_LAST     = 0x5B8,
+    BPM_POLLING_ENABLE      = 0x5D6,
 };
 
 // i2cReg macros

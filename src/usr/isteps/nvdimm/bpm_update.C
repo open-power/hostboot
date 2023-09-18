@@ -42,6 +42,7 @@
 #include <targeting/common/targetservice.H>
 #include <attributeenums.H>
 
+
 namespace NVDIMM
 {
 namespace BPM
@@ -1291,9 +1292,9 @@ errlHndl_t Bpm::inUpdateMode()
 errlHndl_t Bpm::transitionToUpdateMode()
 {
     errlHndl_t errl = nullptr;
+    TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::transitionToUpdateMode()");
 
     do {
-
         // Enter Update mode
         errl = enterUpdateMode();
         if (errl != nullptr)
@@ -1331,8 +1332,19 @@ errlHndl_t Bpm::transitionToUpdateMode()
 errlHndl_t Bpm::transitionToNormalMode()
 {
     errlHndl_t errl;
+    TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::transitionToNormalMode()");
 
     do {
+        // Now that we are done we need to reenable the background
+        // register polling done by the NV controller
+        errl = controlBackgroundPolling(true);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
+        // *IMPORTANT*
+        // BPM Polling must be enabled for the BSL check to work
 
         // Reset the device. This will exit BSL mode.
         errl = resetDevice();
@@ -1347,7 +1359,6 @@ errlHndl_t Bpm::transitionToNormalMode()
         {
             break;
         }
-
     } while(0);
 
     return errl;
@@ -1723,6 +1734,13 @@ errlHndl_t Bpm::updateConfig()
     errlHndl_t errl = nullptr;
 
     do {
+        // Before writing any segments we need to disable the background
+        // register polling done by the NV controller.
+        errl = controlBackgroundPolling(false);
+        if (errl != nullptr)
+        {
+            break;
+        }
 
         // Erase Segment D on the BPM via the BSL interface.
         errl = eraseSegment(SEGMENT_D_CODE);
@@ -1757,6 +1775,13 @@ errlHndl_t Bpm::updateConfig()
         {
             TRACFCOMP(g_trac_bpm, ERR_MRK"Bpm::updateConfig(): "
                       "Failed to write Segment B.");
+            break;
+        }
+
+        // Put things back to normal once we've finished
+        errl = controlBackgroundPolling(true);
+        if (errl != nullptr)
+        {
             break;
         }
 
@@ -2749,6 +2774,14 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
             }
         }
 
+        // Before reading any segments we need to disable the background
+        // register polling done by the NV controller.
+        errl = controlBackgroundPolling(false);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
         // First the NVDIMM MAGIC registers BPM_MAGIC_REG1 and BPM_MAGIC_REG2
         // must be programmed to 0xBA and 0xAB respectively.
         const uint8_t magic_values[NUM_MAGIC_REGISTERS] = {0xBA, 0xAB};
@@ -2824,6 +2857,26 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
 
             }
 
+            // Check if the segment got flipped on us
+            // This can happen if one of the background polling operations
+            // happens to run while we're reading the segment data out
+            uint8_t segval = 0xFF;
+            errl = readViaScapRegister(SPECIAL_CONTROL_COMMAND2,
+                                       segval);
+            if (errl != nullptr)
+            {
+                break;
+            }
+            TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::dumpSegment : segval=0x%.2X",segval);
+            if( segval == 0x90 )
+            {
+                TRACFCOMP(g_trac_bpm, INFO_MRK"Bpm::dumpSegment "
+                          "Unexpected segment 0x%.2X!",
+                          segval);
+                wrongPage = true;
+                continue;
+            }
+
             TRACUBIN(g_trac_bpm, "Segment BIN DUMP", o_buffer, SEGMENT_SIZE);
 
             if ((errl != nullptr) || (wrongPage == false))
@@ -2875,25 +2928,34 @@ errlHndl_t Bpm::dumpSegment(uint16_t const i_segmentCode,
 
     } while(0);
 
+    TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
+              "Closing Segment %X's page.",
+              getSegmentIdentifier(i_segmentCode));
+
+    // Close the Segment page by switching back to the default page.
+    errlHndl_t closeSegmentErrl = switchBpmPage(DEFAULT_REG_PAGE);
+    if (closeSegmentErrl != nullptr)
+    {
+        handleMultipleErrors(errl, closeSegmentErrl);
+    }
+
+    // Write back the production magic values.
+    errlHndl_t magicErrl = writeToMagicRegisters(PRODUCTION_MAGIC_VALUES);
+    if (magicErrl != nullptr)
+    {
         TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
-                 "Closing Segment %X's page.",
-                 getSegmentIdentifier(i_segmentCode));
+                  "Failed to write update mode magic numbers.");
+        handleMultipleErrors(errl, magicErrl);
+    }
 
-        // Close the Segment page by switching back to the default page.
-        errlHndl_t closeSegmentErrl = switchBpmPage(DEFAULT_REG_PAGE);
-        if (closeSegmentErrl != nullptr)
-        {
-            handleMultipleErrors(errl, closeSegmentErrl);
-        }
-
-        // Write back the production magic values.
-        errlHndl_t magicErrl = writeToMagicRegisters(PRODUCTION_MAGIC_VALUES);
-        if (magicErrl != nullptr)
-        {
-            TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
-                      "Failed to write update mode magic numbers.");
-            handleMultipleErrors(errl, magicErrl);
-        }
+    // Put things back to normal now that we're done reading
+    errlHndl_t poll_errl = controlBackgroundPolling(true);
+    if (poll_errl != nullptr)
+    {
+        TRACFCOMP(g_trac_bpm, "Bpm::dumpSegment(): "
+                  "Failed to enable register polling.");
+        handleMultipleErrors(errl, poll_errl);
+    }
 
     return errl;
 }
@@ -3871,8 +3933,7 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
     errlHndl_t errl = nullptr;
 
     do {
-
-        // Before the entering BSL mode, we must do preprocessing prior to the
+        // Before entering BSL mode, we must do preprocessing prior to the
         // config part of the update. Segment B needs to be dumped from the
         // BPM into a buffer and then the config data from the image needs to be
         // inserted into it. To dump segment data, it is required to have
@@ -3929,7 +3990,7 @@ errlHndl_t Bpm::runConfigUpdates(BpmConfigLidImage i_configImage)
                     break;
                 }
 
-                TRACFCOMP(g_trac_bpm, "Bpm::updateFirmware(): "
+                TRACFCOMP(g_trac_bpm, "Bpm::runConfigUpdates(): "
                           "Performing BSL_MASS_ERASE on BPM to force full "
                           "update on any subsequent attempt. Sleep for 5 "
                           "seconds.");
@@ -3966,6 +4027,14 @@ errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
             break;
         }
 
+        // Before starting the update process we need to disable
+        // the background register polling done by the NV controller.
+        errl = controlBackgroundPolling(false);
+        if (errl != nullptr)
+        {
+            break;
+        }
+
         // Run Firmware Update
         errl = updateFirmware(i_image);
         if (errl != nullptr)
@@ -3992,6 +4061,7 @@ errlHndl_t Bpm::runFirmwareUpdates(BpmFirmwareLidImage i_image)
     } while(0);
 
     // Reset the device. This will exit BSL mode.
+    // Note that this will also reenable register polling
     errlHndl_t exitErrl = transitionToNormalMode();
     if (exitErrl != nullptr)
     {
@@ -4255,6 +4325,39 @@ errlHndl_t Bpm::readSerialNumber( uint8_t o_serial[7] )
 
     return l_err;
 }
+
+/**
+ *  @brief Enables/Disables the background polling of BPM registers to
+ *         mirror into the NV register space.
+ */
+errlHndl_t Bpm::controlBackgroundPolling( bool i_enable )
+{
+    TRACFCOMP(g_trac_bpm, ENTER_MRK"Bpm::controlBackgroundPolling(%d)",
+              i_enable);
+    uint8_t l_enablePoll = 0x01;
+    if( !i_enable )
+    {
+        l_enablePoll = 0x00;
+    }
+    errlHndl_t l_errl = nvdimmWriteReg(iv_nvdimm,
+                                       BPM_POLLING_ENABLE,
+                                       l_enablePoll);
+    if (l_errl != nullptr)
+    {
+        l_errl->collectTrace(BPM_COMP_NAME);
+        nvdimmAddVendorLog(iv_nvdimm, l_errl);
+    }
+
+    // polls happen every 1 second so wait 2 seconds to be sure
+    // register data has been updated before we read it
+    if( i_enable )
+    {
+        nanosleep(2, 0);
+    }
+
+    return l_errl;
+}
+
 
 #ifdef __HOSTBOOT_RUNTIME
 // A much reduced version for use at runtime

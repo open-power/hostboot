@@ -1080,6 +1080,15 @@ private:
      */
     errlHndl_t disableWriteProtection();
 
+    /**
+     *  @brief Enables/Disables the background polling of BPM registers to
+     *         mirror into the NV register space.
+     *  @param[in] i_enable  true:enable polling, false:disable polling.
+     *
+     *  @return     errlHndl_t      nullptr on success. Otherwise, an error.
+     */
+    errlHndl_t controlBackgroundPolling( bool i_enable );
+
 };
 
 typedef std::vector<Bpm> bpmList_t;
