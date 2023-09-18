@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -106,6 +106,9 @@ static bool getGardSectionInfoCalled;
 void _flush(void *i_addr);
 const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target);
 errlHndl_t _GardRecordIdSetup(void *&io_platDeconfigGard);
+errlHndl_t setGuardWriteInProgress(DeconfigGard::GardRecordsBinary& io_gard_records_header,
+                                   const DeconfigGard::GardFlagPnorWriteInProgress i_write_in_progress);
+
 
 errlHndl_t DeconfigGard::platLogEvent(
     const Target * const i_pTarget,
@@ -911,59 +914,106 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
         HWAS_INF_BIN("_GardRecordIdSetup:l_pGardRecordsBinary header BINARY DUMP",
             l_pGardRecordsBinary, sizeof(DeconfigGard::GardRecordsBinary) );
 
+        DeconfigGard::GardRecord *l_pGardRecords =
+                (DeconfigGard::GardRecord *)l_hbDeconfigGard->iv_pGardRecords;
+
         // exclude the size of header info of GardRecordsBinary
         l_hbDeconfigGard->iv_maxGardRecords =
             (l_section.size - sizeof(DeconfigGard::GardRecordsBinary)) /
             sizeof(DeconfigGard::GardRecord);
 
-        l_hbDeconfigGard->iv_nextGardRecordId = 0;
-
-        // Figure out the next GARD Record ID to use
-        uint32_t l_numGardRecords = 0;
-        const uint32_t l_maxGardRecords = l_hbDeconfigGard->iv_maxGardRecords;
-        DeconfigGard::GardRecord *l_pGardRecords =
-                (DeconfigGard::GardRecord *)l_hbDeconfigGard->iv_pGardRecords;
-
-        for (uint32_t i = 0; i < l_maxGardRecords; i++)
-        {
-            // if this gard record is already filled out
-            if (l_pGardRecords[i].iv_recordId
-                    != EMPTY_GARD_RECORDID)
-            {
-                // count how many gard records are already defined
-                HWAS_INF("_GardRecordIdSetup: Non-EMPTY i=%d iv_recordId=0x%X",
-                    i, l_pGardRecords[i].iv_recordId);
-                l_numGardRecords++;
-
-                // find the 'last' recordId, so that we can start after it
-                if (l_pGardRecords[i].iv_recordId >
-                        l_hbDeconfigGard->iv_nextGardRecordId)
-                {
-                    // helps in debug if needed
-                    HWAS_INF("_GardRecordIdSetup: PRE iv_nextGardRecordId=0x%X i=%d",
-                        l_hbDeconfigGard->iv_nextGardRecordId, i);
-                    l_hbDeconfigGard->iv_nextGardRecordId =
-                        l_pGardRecords[i].iv_recordId;
-                    HWAS_INF("_GardRecordIdSetup: POST Setting NEXT to the LAST recordID iv_recordId=0x%X i=%d",
-                        l_pGardRecords[i].iv_recordId, i);
-                }
-            }
-        } // for
-
-        // next record will start after the highest Id we found
-        l_hbDeconfigGard->iv_nextGardRecordId++;
         HWAS_INF("_GardRecordIdSetup: INITIAL SETUP MEMORY starts as l_hbDeconfigGard->iv_GardVersion=0x%X",
             l_hbDeconfigGard->iv_GardVersion);
         HWAS_INF("_GardRecordIdSetup: INITIAL SETUP READ FROM BINARY l_pGardRecordsBinary->iv_version=0x%X",
             l_pGardRecordsBinary->iv_version);
 
+        // Deal with any mismatches between the version of the guard
+        // structure in the current version of Hostboot code versus
+        // the version of the persistent data itself.
         switch (l_pGardRecordsBinary->iv_version)
         {
-            case HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT:
+            // Nothing to do if we're already running the more recent
+            case(HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT):
                 l_hbDeconfigGard->iv_GardVersion = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
                 HWAS_INF("_GardRecordIdSetup: CASE CURRENT l_hbDeconfigGard->iv_GardVersion=0x%X",
                     l_hbDeconfigGard->iv_GardVersion);
                 break;
+
+#ifndef __HOSTBOOT_RUNTIME  // No need to migrate at runtime, ipl did it
+            // Need to convert some DIMM numbers that changed
+            // This handles the case where a system was back-leveled
+            case(HWAS::DeconfigGard::GARD_VERSION_NEW_DIMM_NUMBERS):
+                {
+                HWAS_INF("_GardRecordIdSetup: CASE DIMM Migration Backward: l_hbDeconfigGard->iv_GardVersion=0x%X",
+                    l_hbDeconfigGard->iv_GardVersion);
+                std::vector<DeconfigGard::GardRecordPair_t> l_changes;
+                l_pErr = theDeconfigGard().migrateDimmGardRecordsBack( l_changes );
+                if( l_pErr )
+                {
+                    HWAS_ERR("Problem calling migrateDimmGardRecords, falling through to default version update path that will clear out all records");
+                    l_pErr->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                    errlCommit(l_pErr, HWAS_COMP_ID);
+                }
+                else if( l_changes.empty() )
+                {
+                    // No records to migrate so we can safely bump the version
+                    //  without doing anything else.
+                    HWAS_INF("No DIMM records found");
+                    l_hbDeconfigGard->iv_GardVersion = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+                    l_pGardRecordsBinary->iv_version = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+                    // _flush iv_version
+                    _flush((void *)&(l_pGardRecordsBinary->iv_version));
+                    break;
+                }
+                else
+                {
+                    l_hbDeconfigGard->iv_GardVersion = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+                    l_pErr = setGuardWriteInProgress( *l_pGardRecordsBinary,
+                                                      DeconfigGard::GARD_FLAG_PNOR_WRITE_IS_IN_PROGRESS );
+                    if( l_pErr )
+                    {
+                        HWAS_ERR("Problem calling setGuardWriteInProgress, falling through to default version update path that will clear out all records");
+                        l_pErr->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                        errlCommit(l_pErr, HWAS_COMP_ID);
+                    }
+                    else
+                    {
+                        for (uint32_t i = 0;
+                             i < l_hbDeconfigGard->iv_maxGardRecords;
+                             i++)
+                        {
+                            // look for the match
+                            for( auto pair : l_changes )
+                            {
+                                if( 0 == memcmp(&(l_pGardRecords[i]),
+                                                &(pair._old),
+                                                sizeof(DeconfigGard::GardRecord)) )
+                                {
+                                    // replace it with the new one
+                                    l_pGardRecords[i] = pair._new;
+                                    break;
+                                }
+                            }
+                        }
+
+                        l_pGardRecordsBinary->iv_version = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
+                        l_pGardRecordsBinary->iv_flags = HWAS::DeconfigGard::GARD_FLAGS_DEFAULT;
+
+#ifdef FLUSH_PNOR
+                        // Write the entire file back to pnor
+                        PNOR::flush(PNOR::GUARD_DATA);
+#endif
+
+                        // everything worked, jump out of the switch
+                        break;
+                    }
+                }
+                // Deliberately fall through to default path if anything goes
+                //  wrong.  That way we will at least start fresh.
+                }
+#endif //__HOSTBOOT_RUNTIME
+
+            // Otherwise wipe it out and start fresh
             default:
                 // initialize
                 const uint32_t gard_ffdc_len = 512; // just a good size to capture
@@ -1010,7 +1060,9 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
                 // _flush iv_version
                 _flush((void *)&(l_pGardRecordsBinary->iv_version));
                 //  clear the MEMORY structure
-                for (uint32_t i = 0; i < l_maxGardRecords; i++)
+                for (uint32_t i = 0;
+                     i < l_hbDeconfigGard->iv_maxGardRecords;
+                     i++)
                 {
                     l_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
                     _flush(&l_pGardRecords[i]);
@@ -1018,8 +1070,44 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
                 l_hbDeconfigGard->iv_nextGardRecordId = 1;
                 break;
         }
+        // Done with version checking
+
         HWAS_INF("_GardRecordIdSetup: SETUP BINARY set to l_pGardRecordsBinary->iv_version=0x%X",
             l_pGardRecordsBinary->iv_version);
+
+        // Figure out the next GARD Record ID to use
+        l_hbDeconfigGard->iv_nextGardRecordId = 0;
+        uint32_t l_numGardRecords = 0;
+
+        for (uint32_t i = 0; i < l_hbDeconfigGard->iv_maxGardRecords; i++)
+        {
+            // if this gard record is already filled out
+            if (l_pGardRecords[i].iv_recordId
+                    != EMPTY_GARD_RECORDID)
+            {
+                // count how many gard records are already defined
+                HWAS_INF("_GardRecordIdSetup: Non-EMPTY i=%d iv_recordId=0x%X",
+                    i, l_pGardRecords[i].iv_recordId);
+                l_numGardRecords++;
+
+                // find the 'last' recordId, so that we can start after it
+                if (l_pGardRecords[i].iv_recordId >
+                        l_hbDeconfigGard->iv_nextGardRecordId)
+                {
+                    // helps in debug if needed
+                    HWAS_INF("_GardRecordIdSetup: PRE iv_nextGardRecordId=0x%X i=%d",
+                        l_hbDeconfigGard->iv_nextGardRecordId, i);
+                    l_hbDeconfigGard->iv_nextGardRecordId =
+                        l_pGardRecords[i].iv_recordId;
+                    HWAS_INF("_GardRecordIdSetup: POST Setting NEXT to the LAST recordID iv_recordId=0x%X i=%d",
+                        l_pGardRecords[i].iv_recordId, i);
+                }
+            }
+        } // for
+
+        // next record will start after the highest Id we found
+        l_hbDeconfigGard->iv_nextGardRecordId++;
+
         HWAS_INF("_GardRecordIdSetup: GARD setup MEMORY iv_Gardversion 0x%X, iv_maxGardRecords %d, iv_nextGardRecordId %d, l_numGardRecords %d",
                  l_hbDeconfigGard->iv_GardVersion,
                  l_hbDeconfigGard->iv_maxGardRecords,

@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -37,15 +39,15 @@
 mutable mutex_t
 
 #define HWAS_MUTEX_INIT(_t) \
- mutex_init(&(_t))
+ recursive_mutex_init(&(_t))
 
 #define HWAS_MUTEX_DESTROY(_t) \
- mutex_destroy(&(_t))
+ recursive_mutex_destroy(&(_t))
 
 #define HWAS_MUTEX_LOCK(_t) \
- mutex_lock(&(_t))
+ recursive_mutex_lock(&(_t))
 
 #define HWAS_MUTEX_UNLOCK(_t) \
- mutex_unlock(&(_t))
+ recursive_mutex_unlock(&(_t))
 
 #endif // __HWAS_PLAT_THREAD_H

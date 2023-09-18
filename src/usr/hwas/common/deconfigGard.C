@@ -3752,4 +3752,105 @@ errlHndl_t DeconfigGard::deconfigureTargetAtRuntime(
 //******************************************************************************
 #endif  // end #ifdef __HOSTBOOT_MODULE
 
+#ifndef __HOSTBOOT_RUNTIME
+/******************************************************************************/
+// migrateDimmGardRecordsBack
+/******************************************************************************/
+errlHndl_t DeconfigGard::migrateDimmGardRecordsBack( std::vector<GardRecordPair_t>& o_modifiedRecords )
+{
+    HWAS_INF(">>>migrateDimmGardRecordsBack() - num=%d", o_modifiedRecords.size());
+    errlHndl_t l_err = nullptr;
+    char* l_pathStr = nullptr;
+
+    //  Changes required to support Odyssey/DDR5 that resulted
+    //  in some of the numbering schemes (specifically PHYS_PATH) having
+    //  to be modified to support double the number of memory ports behind
+    //  the OCMB. What that means is that if a system were to have a guard
+    //  record present for a (logical) DIMM then that system was updated
+    //  to the level of code without this change, the meaning of that guard
+    //  record would change.  For example, a guard of DIMM4=C44 would
+    //  mutate to be a guard of (new)DIMM4=C45.
+    //
+    //  To solve this problem we incremented the version number of the
+    //  guard record format.  The version will be used as the key
+    //  to know if we need to transform data from an existing guard record
+    //  into the numbering scheme that we now have.
+
+
+    do {
+        // Grab every gard record
+        GardRecords_t l_gardRecords;
+        l_err = getGardRecords(nullptr, l_gardRecords);
+        if( l_err )
+        {
+            break;
+        }
+
+        // Loop through them all looking for any DIMMs
+        std::vector<uint32_t> errlLogEidList;
+        // Apply ALL gard records (NO Resource Recovery Support)
+        for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
+             l_itr != l_gardRecords.end();
+             ++l_itr)
+        {
+            GardRecord l_gardRecord = *l_itr;
+
+            // Find the associated Target
+            EntityPath l_dimmPath = l_gardRecord.iv_targetId;
+            EntityPath::PathElement l_pe = l_dimmPath.pathElementOfType(TYPE_DIMM);
+            if( TYPE_NA == l_pe.type ) //not a DIMM
+            {
+                continue;
+            }
+            l_pathStr = l_dimmPath.toString();
+            HWAS_INF("Migrating target %s",l_pathStr);
+            free(l_pathStr);
+
+            // Build up a new path as the replacement
+            EntityPath l_newPath;
+
+            // The DIMM numbers were doubled between versions 1 and 2
+            // so update the path to reflect that
+            for( uint32_t p = 0; p < l_dimmPath.size(); p++ )
+            {
+                EntityPath::PathElement pe = l_dimmPath[p];
+                if( TYPE_DIMM != pe.type )
+                {
+                    continue;
+                }
+
+                pe.instance /= 2; //(pe.instance)/2;
+                l_dimmPath.replace(p,pe);
+                l_pathStr = l_dimmPath.toString();
+                HWAS_INF("New target %s",l_pathStr);
+                free(l_pathStr);
+
+                GardRecordPair_t l_pair;
+
+                // add the original record to the list of all modified records
+                l_pair._old = l_gardRecord;
+
+                // update the record itself with the new content
+                l_gardRecord.iv_targetId = l_dimmPath;
+
+                // add the updated record to the list of all modified records
+                l_pair._new = l_gardRecord;
+                o_modifiedRecords.push_back(l_pair);
+
+                // Note - Technically there are 2 DIMM targets behind each
+                //  OCMB (Dx2,Dx2+1) now but since the odd one is only
+                //  valid for Odyssey and the new format is always present
+                //  in that case we can ignore that consideration.
+                break;
+            }
+        }
+
+    } while(0);
+
+    HWAS_INF("<<<migrateDimmGardRecordsBack()");
+    return l_err;
+}
+#endif //#ifndef __HOSTBOOT_RUNTIME
+
+
 } // namespace HWAS

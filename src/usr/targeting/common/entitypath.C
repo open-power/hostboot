@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -256,6 +256,24 @@ const EntityPath::PathElement& EntityPath::operator[](
         "path subscript of %d when size is only %d",i_index,size());
 
     return iv_pathElement[i_index];
+
+    #undef TARG_FN
+}
+
+//******************************************************************************
+// EntityPath::replace
+//******************************************************************************
+
+void EntityPath::replace(
+    const uint32_t i_index,
+    PathElement i_element)
+{
+    #define TARG_FN "operator[](...)"
+
+    TARG_ASSERT(i_index < size(), TARG_LOC "Caller specified invalid entity "
+        "path subscript of %d when size is only %d",i_index,size());
+
+    iv_pathElement[i_index] = i_element;
 
     #undef TARG_FN
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -302,8 +302,13 @@ public:
      */
 
     // clear ALL gard records will reset to CURRENT
-    static const uint8_t PREVIOUS_GARD_VERSION_LAYOUT = 0x0;
+    static const uint8_t GARD_VERSION_NEW_DIMM_NUMBERS = 0x2;
     static const uint8_t CURRENT_GARD_VERSION_LAYOUT = 0x1;
+    /**
+     * Version History
+     *  1 : Initial P10 GA
+     *  2 : Marker for DIMM target translation, no structure change
+     */
 
     struct GardRecord
     {
@@ -1142,6 +1147,29 @@ public:
      *
      */
     void setXAOBusEndpointDeconfigured(bool deconfig);
+
+#ifndef __HOSTBOOT_RUNTIME
+    /**
+     *  @brief Pair of records to represent the pre/post migration
+     */
+    typedef struct GardRecordPair
+    {
+        GardRecord _old;
+        GardRecord _new;
+    } GardRecordPair_t;
+
+    /**
+     *  @brief Update guard records whose format changed between
+     *         code levels.
+     *
+     *  @param[out] o_modifiedRecords  List of any records that
+     *      require modification
+     *
+     *  @return errlHndl_t. Error log handle.
+     *
+     */
+    errlHndl_t migrateDimmGardRecordsBack( std::vector<GardRecordPair_t>& o_modifiedRecords );
+#endif //#ifndef __HOSTBOOT_RUNTIME
 
 private:
 
