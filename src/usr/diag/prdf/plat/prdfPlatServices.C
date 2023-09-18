@@ -65,6 +65,7 @@
 #include <kind.H>
 #include <hwp_wrappers.H>
 #include <exp_deploy_row_repairs.H>
+#include <ody_deploy_row_repairs.H>
 #include <plat_hwp_invoker.H>
 
 #include <p10_fbc_tdm_inject.H>
@@ -867,9 +868,7 @@ uint32_t deployRowRepair<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     if (isOdysseyOcmb(i_chip->getTrgt()))
     {
-        // TODO Odyssey - need odyssey version of this hwp
-        PRDF_TRAC(PRDF_FUNC "TODO: no ody_deploy_dynamic_row_repairs yet");
-        //FAPI_INVOKE_HWP( errl, ody_deploy_dynamic_row_repairs, fapiOcmb );
+        FAPI_INVOKE_HWP( errl, ody_deploy_dynamic_row_repairs, fapiOcmb );
     }
     else
     {

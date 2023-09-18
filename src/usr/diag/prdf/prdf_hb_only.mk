@@ -100,8 +100,10 @@ prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memor
 prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
+prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 
 ################################################################################
 # Hostboot only object files common to both IPL and runtime
@@ -226,6 +228,7 @@ prd_obj_no_sim += exp_ccs_des_insert_workaround.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/dimm/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mc/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/eff_config/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/
@@ -261,6 +264,11 @@ prd_obj_no_sim += mrs_load_ddr4_explorer.o
 prd_obj_no_sim += p10_rcs_transient_check.o
 prd_obj_no_sim += p10_perv_sbe_cmn.o   # required by p10_rcs_transient_check
 prd_obj_no_sim += p10_clock_test_cmn.o # required by p10_rcs_transient_check
+
+# Needed for the ody_deploy_row_repairs procedure
+prd_obj_no_sim += ody_deploy_row_repairs.o
+prd_obj_no_sim += ody_row_repair.o
+prd_obj_no_sim += ody_kind.o
 
 ################################################################################
 # The following are hardware procedure utilities that we are pulling into the
