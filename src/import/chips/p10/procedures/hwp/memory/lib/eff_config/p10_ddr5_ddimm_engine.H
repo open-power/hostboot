@@ -5072,6 +5072,42 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Set the raw card reference design revision number
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_raw_card_reference_design(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::DESIGN_REF_CARD, i_spd, SET_EFF_DIMM_RAW_CARD_REF_DESIGN_REV, l_field));
+
+            FAPI_TRY(mss::attr::set_eff_dimm_raw_card_reference_design(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the raw card design revision number
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_raw_card_design_revision(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::DESIGN_REV, i_spd, SET_EFF_DIMM_RAW_CARD_DESIGN_REVISION, l_field));
+
+            FAPI_TRY(mss::attr::set_eff_dimm_raw_card_design_revision(iv_ocmb, l_field));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
 #if 0 // Fields are currently unused
 
         virtual fapi2::ReturnCode set_module_height_max(const std::vector<uint8_t>& i_spd) const
@@ -5429,6 +5465,8 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             FAPI_TRY(set_dram_mfg_id(i_spd));
             FAPI_TRY(set_rcd_mfg_id(i_spd));
             FAPI_TRY(set_serial_number(i_spd));
+            FAPI_TRY(set_raw_card_reference_design(i_spd));
+            FAPI_TRY(set_raw_card_design_revision(i_spd));
 
         fapi_try_exit:
             return fapi2::current_err;

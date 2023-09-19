@@ -480,6 +480,8 @@ enum generic_ffdc_codes : uint16_t
 
     SET_EFF_DIMM_SERIAL_NUMBER = 0x120F,
 
+    SET_EFF_DIMM_RAW_CARD_REF_DESIGN_REV = 0x1210,
+    SET_EFF_DIMM_RAW_CARD_DESIGN_REVISION = 0x1211,
 };
 
 ///

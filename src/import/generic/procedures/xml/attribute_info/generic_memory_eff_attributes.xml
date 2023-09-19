@@ -1193,4 +1193,32 @@
     <mssAccessorName>eff_dimm_serial_number</mssAccessorName>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MEM_EFF_DIMM_RAW_CARD_REFERENCE_DESIGN</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      DDIMM RAW card reference design SPD encoding
+      Decodes SPD Byte 232 bits 0-4
+      Currently only DDR5 will be using this attribute
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>eff_dimm_raw_card_reference_design</mssAccessorName>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_EFF_DIMM_RAW_CARD_DESIGN_REVISION</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+      DDIMM RAW card design revision number
+      Decodes SPD Byte 232 bits 5-7
+      Currently only DDR5 will be using this attribute
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <mssAccessorName>eff_dimm_raw_card_design_revision</mssAccessorName>
+  </attribute>
+
 </attributes>
