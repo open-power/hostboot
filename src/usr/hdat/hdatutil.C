@@ -25,6 +25,7 @@
 
 #include "hdatutil.H"
 #include "hdatbldda.H"
+#include <attribute_service.H>
 #include <eeprom/eepromif.H>
 #include <stdio.h>
 #include <string.h>
@@ -2048,41 +2049,65 @@ void generatePoundAKeyword(std::vector<uint8_t> & io_ipzVpdData,
     size_t keywordSize = 0;
     errlHndl_t err = nullptr;
 
-    // Fetch the size
-    err = deviceRead( i_target,
-            nullptr,
-            keywordSize,
-            DEVICE_SPD_ADDRESS( SPD::DIMM_BAD_DQ_DATA ) );
-    if (err != nullptr)
+    TARGETING::TargetHandleList dimmList;
+
+    if (TARGETING::TYPE_DIMM == i_target->getAttr<ATTR_TYPE>())
     {
-        HDAT_INF("Could not read #A keyword size from target with HUID=0x%0.8X", get_huid(i_target));
-        delete err;
-        err = nullptr;
-        goto ERROR_EXIT;
+        dimmList.push_back(i_target);
+    }
+    else if (TARGETING::TYPE_OCMB_CHIP == i_target->getAttr<ATTR_TYPE>())
+    {
+        PredicateCTM predType(CLASS_NA, TARGETING::TYPE_DIMM);
+        PredicateIsFunctional predFunc;
+        PredicatePostfixExpr predAnd;
+        predAnd.push(&predType).push(&predFunc).And();
+
+        targetService().getAssociated(dimmList, i_target,
+            TargetService::CHILD_BY_AFFINITY, TargetService::ALL, &predAnd);
     }
 
+    for (const auto & dimm : dimmList)
     {
-    uint8_t keywordData[keywordSize] = {0};
+        // Fetch the size
+        size_t tmpSize = 0;
+        err = deviceRead(dimm, nullptr, tmpSize, DEVICE_SPD_ADDRESS(
+            fapi2::platAttrSvc::getDimmRepairSpdKey(dimm)));
+        if (err != nullptr)
+        {
+            HDAT_INF("Could not read #A keyword size from target with HUID=0x%0.8X", get_huid(dimm));
+            delete err;
+            err = nullptr;
+            return;
+        }
+        keywordSize += tmpSize;
+    }
 
-    // Fetch the data
-    err = deviceRead( i_target,
-            keywordData,
-            keywordSize,
-            DEVICE_SPD_ADDRESS( SPD::DIMM_BAD_DQ_DATA ) );
-    if (err != nullptr)
+    uint8_t keywordData[keywordSize] = {0};
+    size_t sectionSize = keywordSize/dimmList.size();
+
+    uint8_t count = 0;
+    for (const auto & dimm : dimmList)
     {
-        HDAT_INF("Could not read #A keyword data from target with HUID=0x%0.8X", get_huid(i_target));
-        delete err;
-        err = nullptr;
-        goto ERROR_EXIT;
+        // Fetch the data
+        uint8_t tmpData[sectionSize] = {0};
+        err = deviceRead(dimm, tmpData, sectionSize, DEVICE_SPD_ADDRESS(
+            fapi2::platAttrSvc::getDimmRepairSpdKey(dimm)));
+        if (err != nullptr)
+        {
+            HDAT_INF("Could not read #A keyword data from target with HUID=0x%0.8X", get_huid(dimm));
+            delete err;
+            err = nullptr;
+            return;
+        }
+        memcpy(&keywordData[sectionSize*count], &tmpData, sectionSize);
+        count++;
     }
 
     copyPoundKeywordIntoIpzVpdData(io_ipzVpdData,
                                    VPD::POUND_A,
                                    keywordSize,
                                    keywordData);
-    }
-ERROR_EXIT:
+
     return;
 }
 

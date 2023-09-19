@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -262,6 +262,16 @@ ReturnCode platGetPoundWBucketData(const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 ///
 ReturnCode platGetWOFTableData(const Target<TARGET_TYPE_ALL>& i_fapiProcTarg,
                                uint8_t * o_wofTableData);
+
+
+///
+/// @brief This function will return the appropriate keyword for the
+///        DIMM repairs section of SPD based on the input DIMM.
+///
+/// @param[in]  i_dimm  DIMM target.
+/// @return The keyword for the DIMM repairs section of SPD for the input DIMM.
+///
+uint64_t getDimmRepairSpdKey(TARGETING::TargetHandle_t i_dimm);
 
 ///
 /// @brief This function is called by the FAPI_ATTR_GET macro when getting

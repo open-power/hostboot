@@ -63,7 +63,7 @@ enum
 };
 
 /**
- * @brief Memory Type address/size/constants for DDRx (DDR3, DDR4, etc) per JEDEC 
+ * @brief Memory Type address/size/constants for DDRx (DDR3, DDR4, etc) per JEDEC
  */
 enum spdMemType_t : uint8_t
 {
@@ -79,7 +79,7 @@ enum spdMemType_t : uint8_t
 };
 
 /**
- * @brief Module Type address/size/mask/constants for DDRx (DDR3, DDR4, etc) per JEDEC 
+ * @brief Module Type address/size/mask/constants for DDRx (DDR3, DDR4, etc) per JEDEC
  */
 enum spdModType_t : uint8_t
 {
@@ -235,7 +235,14 @@ enum
     SN_BYTE1                         = SPD_FIRST_NORM_KEYWORD | 0x63,
     SN_BYTE2                         = SPD_FIRST_NORM_KEYWORD | 0x64,
     SN_BYTE3                         = SPD_FIRST_NORM_KEYWORD | 0x65,
-    SPD_LAST_NORM_KEYWORD            = SPD_FIRST_NORM_KEYWORD | 0x65,
+
+    // ==============================================================
+    // Normal SPD Keywords (Available for DDR5 DIMMs only)
+    DIMM_BAD_DQ_DATA_0               = SPD_FIRST_NORM_KEYWORD | 0x66,
+    DIMM_BAD_DQ_DATA_1               = SPD_FIRST_NORM_KEYWORD | 0x67,
+    DIMM_BAD_DQ_DATA_2               = SPD_FIRST_NORM_KEYWORD | 0x68,
+    DIMM_BAD_DQ_DATA_3               = SPD_FIRST_NORM_KEYWORD | 0x69,
+    SPD_LAST_NORM_KEYWORD            = SPD_FIRST_NORM_KEYWORD | 0x69,
 
     // ==============================================================
     // Module Specific Keywords (Available for both DDR3 and DDR4 DIMMs)

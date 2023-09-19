@@ -58,6 +58,7 @@
 #include <p10_frequency_buckets.H>
 #include <errl/errlmanager.H>
 #include <lib/shared/exp_consts.H>
+#include <lib/shared/ody_consts.H>
 
 #include <targeting/common/targetservice.H>
 #include <targeting/common/predicates/predicatectm.H>
@@ -1084,6 +1085,53 @@ fapi_try_exit:
 }
 
 //******************************************************************************
+// fapi2::platAttrSvc::getDimmRepairSpdKey function
+//******************************************************************************
+
+uint64_t getDimmRepairSpdKey(TARGETING::TargetHandle_t i_dimm)
+{
+    // Default to the DIMM_BAD_DQ_DATA keyword used for Explorer/DDR4
+    uint64_t key = SPD::DIMM_BAD_DQ_DATA;
+
+    // If this is DDR5/Odyssey, adjust the key based on the position of the
+    // dimm target relative to it's parent OCMB.
+    TARGETING::TargetHandle_t port = getAffinityParent(i_dimm,
+        TARGETING::TYPE_MEM_PORT);
+    TARGETING::TargetHandle_t ocmb = getAffinityParent(port,
+        TARGETING::TYPE_OCMB_CHIP);
+
+    if (ocmb->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+    {
+        uint8_t dimmRelPos = i_dimm->getAttr<TARGETING::ATTR_REL_POS>();
+        uint8_t portRelPos = port->getAttr<TARGETING::ATTR_REL_POS>();
+
+        uint8_t pos = (mss::ody::MAX_DIMM_PER_PORT*portRelPos) + dimmRelPos;
+
+        switch (pos)
+        {
+            case 0:
+                key = SPD::DIMM_BAD_DQ_DATA_0;
+                break;
+            case 1:
+                key = SPD::DIMM_BAD_DQ_DATA_1;
+                break;
+            case 2:
+                key = SPD::DIMM_BAD_DQ_DATA_2;
+                break;
+            case 3:
+                key = SPD::DIMM_BAD_DQ_DATA_3;
+                break;
+            default:
+                FAPI_ERR("getDimmRepairSpdKey: Invalid DIMM pos %d", pos);
+                key = SPD::INVALID_SPD_KEYWORD;
+                break;
+        }
+    }
+
+    return key;
+}
+
+//******************************************************************************
 // fapi2::platAttrSvc::fapiAttrGetBadDqBitmap function
 //******************************************************************************
 ReturnCode fapiAttrGetBadDqBitmap(
@@ -1119,7 +1167,7 @@ ReturnCode fapiAttrGetBadDqBitmap(
         FAPI_TRY( __badDqBitmapGetHelperAttrs(l_fapiDimm, l_wiringData, l_ps) );
 
         l_errl = deviceRead( l_dimmTarget, l_badDqData, DIMM_BAD_DQ_SIZE_BYTES,
-                             DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+            DEVICE_SPD_ADDRESS(getDimmRepairSpdKey(l_dimmTarget)) );
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrGetBadDqBitmap: Failed to read DIMM Bad DQ "
@@ -1281,9 +1329,9 @@ ReturnCode fapiAttrSetBadDqBitmap(
 
         // We need to make sure the rest of the data in VPD beyond the bad dq
         // bitmap is unchanged.
-        l_errl = deviceRead( l_dimmTarget, l_badDqData,
-                             DIMM_BAD_DQ_SIZE_BYTES,
-                             DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+        uint64_t spdKey = getDimmRepairSpdKey(l_dimmTarget);
+        l_errl = deviceRead( l_dimmTarget, l_badDqData, DIMM_BAD_DQ_SIZE_BYTES,
+            DEVICE_SPD_ADDRESS(spdKey) );
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Failed to read DIMM Bad DQ "
@@ -1312,7 +1360,7 @@ ReturnCode fapiAttrSetBadDqBitmap(
                                         l_spareByte, l_ps, true) );
 
         l_errl = deviceWrite( l_dimmTarget, &l_spdData, DIMM_BAD_DQ_SIZE_BYTES,
-                              DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+            DEVICE_SPD_ADDRESS(spdKey) );
         if ( l_errl )
         {
             FAPI_ERR( "fapiAttrSetBadDqBitmap: Failed to write DIMM "
@@ -1478,7 +1526,7 @@ ReturnCode getRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 
         // Read the data
         l_errl = deviceRead( l_dimmTarget, l_data, DIMM_BAD_DQ_SIZE_BYTES,
-                             DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+            DEVICE_SPD_ADDRESS(getDimmRepairSpdKey(l_dimmTarget)) );
         if ( l_errl )
         {
             FAPI_ERR( "getRowRepairData: Failed to call deviceRead to get "
@@ -1556,8 +1604,9 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
         Target<TARGET_TYPE_DIMM> l_fapiDimm( l_dimmTarget );
 
         // Get the original data.
+        uint64_t spdKey = getDimmRepairSpdKey(l_dimmTarget);
         l_errl = deviceRead( l_dimmTarget, l_data, DIMM_BAD_DQ_SIZE_BYTES,
-                             DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+            DEVICE_SPD_ADDRESS(spdKey) );
         if ( l_errl )
         {
             FAPI_ERR( "setRowRepairData: Failed to call deviceRead to get "
@@ -1588,7 +1637,7 @@ ReturnCode setRowRepairData( const Target<TARGET_TYPE_ALL>& i_fapiTarget,
 
         // Write the data back to VPD.
         l_errl = deviceWrite( l_dimmTarget, &l_spdData, DIMM_BAD_DQ_SIZE_BYTES,
-                              DEVICE_SPD_ADDRESS(SPD::DIMM_BAD_DQ_DATA) );
+            DEVICE_SPD_ADDRESS(spdKey) );
         if ( l_errl )
         {
             FAPI_ERR( "setRowRepairData: Failed to call deviceWrite to set "

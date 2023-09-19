@@ -32,6 +32,7 @@
 // Includes
 /******************************************************************************/
 
+#include    <attribute_service.H>
 #include    <errl/errlentry.H>
 #include    <errl/errlmanager.H>
 #include    <isteps/hwpisteperror.H>
@@ -91,8 +92,9 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
             size_t l_size = 0;
 
             // Do a read to get the DIMM_BAD_DQ_DATA keyword size
+            uint64_t spdKey = fapi2::platAttrSvc::getDimmRepairSpdKey(l_Dimm);
             l_err = deviceRead(l_Dimm, NULL, l_size,
-                               DEVICE_SPD_ADDRESS( SPD::DIMM_BAD_DQ_DATA ));
+                               DEVICE_SPD_ADDRESS(spdKey));
             if (l_err)
             {
                 TRACFCOMP( g_trac_isteps_trace,
@@ -111,7 +113,7 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
                 memset(l_data, 0, l_size);
 
                 l_err = deviceWrite(l_Dimm, l_data, l_size,
-                                    DEVICE_SPD_ADDRESS( SPD::DIMM_BAD_DQ_DATA));
+                                    DEVICE_SPD_ADDRESS(spdKey));
                 if (l_err)
                 {
                     TRACFCOMP( g_trac_isteps_trace,
