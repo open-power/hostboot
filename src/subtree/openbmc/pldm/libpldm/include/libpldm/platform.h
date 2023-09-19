@@ -1089,7 +1089,7 @@ struct pldm_get_numeric_effecter_value_resp {
 	uint8_t completion_code;
 	uint8_t effecter_data_size;
 	uint8_t effecter_oper_state;
-	uint8_t pending_and_present_values[1];
+	uint8_t pending_and_present_values[8];
 } __attribute__((packed));
 
 /** @struct pldm_get_sensor_reading_req
