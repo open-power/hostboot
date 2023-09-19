@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,8 +47,6 @@ namespace PRDF
 
 template <bool Type>
 struct ResetAndMaskTransformer
-    : public std::unary_function<Prdr::Register::ResetOrMaskStruct,
-                                 ResetAndMaskErrorRegister::ResetRegisterStruct>
 {
     ResetAndMaskTransformer( ScanFacility & i_scanFactory,size_t i_scomlen ,
                                 TARGETING::TYPE i_type )

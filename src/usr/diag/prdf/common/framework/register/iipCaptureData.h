@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,7 +80,6 @@
 
 #include <iipconst.h>
 #include <prdfPlatServices.H>
-#include <functional>  // @jl04 a Needed for the unary function in new predicate.
 
 #include <endian.h>
 
@@ -318,7 +317,7 @@ private:
                          RegType i_type = PRIMARY );
 
   // Predicate for deciding to delete an element of data from a Capture Data list.
-  class prdfCompareCaptureDataType : public std::unary_function<Data &, bool>
+  class prdfCompareCaptureDataType
   {
     public:
       prdfCompareCaptureDataType(RegType i_ctor_input) : __private_storage(i_ctor_input){};
@@ -336,8 +335,7 @@ private:
 
   // Predicate for deciding whether to delete an
   // element of data from a Capture Data list.
-  class prdfCompareCaptureDataEntry :
-      public std::unary_function<Data &, bool>
+  class prdfCompareCaptureDataEntry
   {
     public:
       prdfCompareCaptureDataEntry(

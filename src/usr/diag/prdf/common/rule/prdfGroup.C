@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -134,16 +134,14 @@ void Group::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
 
         // Add resets.
         std::for_each(i_resets.first.begin(), i_resets.first.end(),
-                      std::bind1st(
-                          std::mem_fun(&ResetAndMaskErrorRegister::addReset),
-                          l_errReg)
+                      [l_errReg](ResetAndMaskErrorRegister::ResetRegisterStruct& e)
+                      { l_errReg->addReset(e); }
                       );
 
         // Add masks.
         std::for_each(i_resets.second.begin(), i_resets.second.end(),
-                      std::bind1st(
-                          std::mem_fun(&ResetAndMaskErrorRegister::addMask),
-                          l_errReg)
+                      [l_errReg](ResetAndMaskErrorRegister::ResetRegisterStruct& e)
+                      { l_errReg->addMask(e); }
                       );
     }
 
@@ -205,16 +203,14 @@ void Group::Add(SCAN_COMM_REGISTER_CLASS * i_reg,
 
         // Add resets.
         std::for_each(i_resets.first.begin(), i_resets.first.end(),
-                      std::bind1st(
-                          std::mem_fun(&ResetAndMaskErrorRegister::addReset),
-                          l_errReg)
+                      [l_errReg](ResetAndMaskErrorRegister::ResetRegisterStruct& e)
+                      { l_errReg->addReset(e); }
                       );
 
         // Add masks.
         std::for_each(i_resets.second.begin(), i_resets.second.end(),
-                      std::bind1st(
-                          std::mem_fun(&ResetAndMaskErrorRegister::addMask),
-                          l_errReg)
+                      [l_errReg](ResetAndMaskErrorRegister::ResetRegisterStruct& e)
+                      { l_errReg->addMask(e); }
                       );
     }
 

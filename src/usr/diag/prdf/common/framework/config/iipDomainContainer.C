@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,7 +72,7 @@ namespace PRDF
 
 // This is used with the CHIP_CLASS vectors to remove one that matches a chipID
 // Predicate function for comparing chip IDs.  This is required by remove_if from STL.
-class prdfCompareChipIds: public std::unary_function<void*&, bool>
+class prdfCompareChipIds
 {
   public:
     //Constructor allows a value to be passed in to compare against.

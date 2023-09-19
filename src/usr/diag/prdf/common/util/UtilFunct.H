@@ -30,8 +30,6 @@
 #ifndef __UTIL_UTILFUNCT_H
 #define __UTIL_UTILFUNCT_H
 
-#include <functional>
-
 namespace PRDF
 {
 
@@ -44,8 +42,7 @@ namespace Util
      */
     template <typename Type,
               typename Stream>
-    struct unary_input :
-        public std::unary_function<void, Type>
+    struct unary_input
     {
         Stream & stream;
 

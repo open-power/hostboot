@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016                             */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,7 +29,6 @@
 #include <map>
 #include <prdfPluginDef.H>
 #include <string.h>
-#include <functional>
 
 namespace PRDF
 {
@@ -40,7 +39,7 @@ class ExtensibleChip;
   * @brief custom comparison functor to pass to a map container
   *        that uses char* as the key
   */
-struct StrCompare : public std::binary_function<const char*, const char*, bool>
+struct StrCompare
 {
     public:
       bool operator() (const char* str1, const char* str2) const
