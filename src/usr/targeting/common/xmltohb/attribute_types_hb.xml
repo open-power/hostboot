@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2023                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1594,6 +1594,10 @@
     <enumerator>
       <name>TPM_REQUIRED</name>
       <value>0xCC03</value>
+    </enumerator>
+    <enumerator>
+      <name>DISABLE_TPM</name>
+      <value>0xCC04</value>
     </enumerator>
     <enumerator>
       <name>PCI_BIFURCATED</name>

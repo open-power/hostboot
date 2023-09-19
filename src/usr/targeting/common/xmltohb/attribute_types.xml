@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -826,6 +826,27 @@
         <default>1</default>
       </uint8_t>
     </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+        Setting that determins if the TPM(s) on the system should be disabled
+        0x00 - Do NOT Disable TPM
+        0x01 - Disable TPM
+    </description>
+    <id>DISABLE_TPM</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <range>
+      <min>0</min>
+      <max>1</max>
+    </range>
   </attribute>
 
   <attribute>
