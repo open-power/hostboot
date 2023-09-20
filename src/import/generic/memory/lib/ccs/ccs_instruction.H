@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,15 +90,27 @@ class instruction_t
         bool iv_update_rank;
 
         ///
+        /// @brief Sets the chip selects to inactive for this instruction
+        ///
+        void set_chipselects_inactive();
+
+        ///
         /// @brief Sets any signals associated with the chip selects for this instruction
+        /// @param[in] i_target the port target for this instruction
         /// @param[in] i_csn01 chip selects 0 and 1
         /// @param[in] i_csn23 chip selects 2 and 3
         /// @param[in] i_cid the chip ID values to set
         /// @param[in] i_update_cid if true, the CID is updated, if not it is ignored
+        /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
         /// @note This helper is created to allow different memory controllers to handle the ranks differently
         /// Largely, this is to allow for different DRAM generations between memory controllers
         ///
-        void set_chipselects_helper(const uint8_t i_csn01, const uint8_t i_csn23, const uint8_t i_cid, const bool i_update_cid);
+        fapi2::ReturnCode set_chipselects_helper(
+            const fapi2::Target<TT::PORT_TARGET_TYPE>& i_target,
+            const uint8_t i_csn01,
+            const uint8_t i_csn23,
+            const uint8_t i_cid,
+            const bool i_update_cid);
 
         ///
         /// @brief Gets the CKE signals (Memory controller and DRAM technology dependent)
@@ -141,7 +153,7 @@ class instruction_t
             {
                 // Set the chip selects to be 1's (not active)
                 // We'll fix these up before executing the instructions
-                set_chipselects_helper(0b11, 0b11, 0b00, false);
+                set_chipselects_inactive();
             }
         }
 
@@ -173,7 +185,7 @@ class instruction_t
 
         ///
         /// @brief Updates the rank based upon the passed in rank configuration encoding
-        /// @param[in] i_target the port target for this instruction - for error logging
+        /// @param[in] i_target the port target for this instruction
         /// @param[in] i_rank_config the rank configuration
         /// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
         ///
@@ -190,7 +202,7 @@ class instruction_t
             // Regardless of rank configurations, if we have NO_CHIP_SELECT_ACTIVE, deactivate all CS
             if(iv_port_rank == NO_CHIP_SELECT_ACTIVE)
             {
-                set_chipselects_helper(0b11, 0b11, 0b00, false);
+                set_chipselects_inactive();
                 return fapi2::FAPI2_RC_SUCCESS;
             }
 
@@ -226,7 +238,7 @@ class instruction_t
                 FAPI_TRY(TT::cs_tied(i_target, CS01, CS23));
 
                 // Setup that rank
-                set_chipselects_helper(CS01, CS23, TT::CS_N[l_dimm_rank].second, true);
+                FAPI_TRY(set_chipselects_helper(i_target, CS01, CS23, TT::CS_N[l_dimm_rank].second, true));
             }
 
             // Otherwise, setup for dual-direct mode (our only other supported mode at the moment)
@@ -243,7 +255,7 @@ class instruction_t
                 FAPI_TRY(TT::cs_tied(i_target, CS01, CS23));
 
                 // Setup that rank
-                set_chipselects_helper(CS01, CS23, 0b00, false);
+                FAPI_TRY(set_chipselects_helper(i_target, CS01, CS23, 0b00, false));
 
                 // Check that we don't have a rank out of bounds case here
                 // We can only have that if

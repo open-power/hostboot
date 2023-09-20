@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,15 +72,21 @@ instruction_t<mss::mc_type::ODYSSEY> des_command<mss::mc_type::ODYSSEY>(const ui
 
 ///
 /// @brief Sets any signals associated with the chip selects for this instruction - Odyssey specialization
+/// @param[in] i_target the port target for this instruction
 /// @param[in] i_csn01 chip selects 0 and 1
 /// @param[in] i_csn23 chip selects 2 and 3
 /// @param[in] i_cid the chip ID values to set
 /// @param[in] i_update_cid if true, the CID is updated, if not it is ignored
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
 /// @note Odyssey specialization CS01 is for command 0, while CS23 is for command 1
 ///
 template<>
-void instruction_t<mss::mc_type::ODYSSEY>::set_chipselects_helper(const uint8_t i_csn01, const uint8_t i_csn23,
-        const uint8_t i_cid, const bool i_update_cid);
+fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::set_chipselects_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const uint8_t i_csn01,
+    const uint8_t i_csn23,
+    const uint8_t i_cid,
+    const bool i_update_cid);
 
 ///
 /// @brief Gets the CKE signals (Memory controller and DRAM technology dependent) - Odyssey specialization

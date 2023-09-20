@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -950,6 +950,45 @@ inline bool is_write_or_read(const instruction_t<MC>& i_inst)
             (l_command == cmd_encoding::WRA) ||
             (l_command == cmd_encoding::RD) ||
             (l_command == cmd_encoding::RDA));
+}
+
+///
+/// @brief Return true if this instruction type needs NT read ODT applied
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
+/// @param[in] i_inst the CCS instruction to check
+/// @return true if this instruction needs RD NT ODT applied
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline bool needs_nt_odt_rd(const instruction_t<MC>& i_inst)
+{
+    uint8_t l_command = 0;
+
+    i_inst.arr0.template extractToRight<TT::CMD, TT::CMD_LEN>(l_command);
+
+    return ((l_command == cmd_encoding::RD)  ||
+            (l_command == cmd_encoding::RDA) ||
+            (l_command == cmd_encoding::MRR));
+}
+
+///
+/// @brief Return true if this instruction type needs NT write ODT applied
+/// @tparam MC The memory controller type of the traits
+/// @tparam TT the CCS traits related to MC
+/// @param[in] i_inst the CCS instruction to check
+/// @return true if this instruction needs WR NT ODT applied
+///
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
+inline bool needs_nt_odt_wr(const instruction_t<MC>& i_inst)
+{
+    uint8_t l_command = 0;
+
+    i_inst.arr0.template extractToRight<TT::CMD, TT::CMD_LEN>(l_command);
+
+    return ((l_command == cmd_encoding::WRP)  ||
+            (l_command == cmd_encoding::WRPA) ||
+            (l_command == cmd_encoding::WR)   ||
+            (l_command == cmd_encoding::WRA));
 }
 
 } // ends namespace ddr5

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,27 @@ const mss::pair<uint64_t, uint64_t> ccsTraits<mss::mc_type::ODYSSEY>::CS_ND[mss:
 
     // Note: Invalid for Odyssey as we can only have two ranks
     // CMD0 CS0 H CMD0 CS1 H => CMD1 CS0 => H CMD1 CS1 => L Rank 3
+    { 0b11, 0b11 },
+};
+
+// CSN Setup for NT ODT commands
+// Odyssey only has one DIMM and only has up to two ranks
+// However, attributes can have up to 4 ranks per DIMM -> keeping this constant for consistent code between MC's
+// For Odyssey, CS2/3 (the second number in the pair) are command 1's chip selects
+const mss::pair<uint64_t, uint64_t> ccsTraits<mss::mc_type::ODYSSEY>::CS_NTODT[mss::MAX_RANK_PER_DIMM] =
+{
+    // CMD0 CS0 L CMD0 CS1 L => CMD1 CS0 H CMD1 CS1 L Rank 0
+    { 0b00, 0b10 },
+
+    // CMD0 CS0 L CMD0 CS1 L => CMD1 CS0 L CMD1 CS1 H Rank 1
+    { 0b00, 0b01 },
+
+    // Note: Invalid for Odyssey as we can only have two ranks
+    // Rank 2
+    { 0b11, 0b11 },
+
+    // Note: Invalid for Odyssey as we can only have two ranks
+    // Rank 3
     { 0b11, 0b11 },
 };
 
@@ -213,25 +234,69 @@ instruction_t<mss::mc_type::ODYSSEY> des_command<mss::mc_type::ODYSSEY>(const ui
 }
 
 ///
-/// @brief Sets any signals associated with the chip selects for this instruction - Odyssey specialization
-/// @param[in] i_csn01 chip selects 0 and 1
-/// @param[in] i_csn23 chip selects 2 and 3
-/// @param[in] i_cid the chip ID values to set
-/// @param[in] i_update_cid if true, the CID is updated, if not it is ignored
-/// @note Odyssey specialization CS01 is for command 0, while CS23 is for command 1
+/// @brief Sets the chip selects to inactive for this instruction - Odyssey specialization
 ///
 template<>
-void instruction_t<mss::mc_type::ODYSSEY>::set_chipselects_helper(const uint8_t i_csn01, const uint8_t i_csn23,
-        const uint8_t i_cid, const bool i_update_cid)
+void instruction_t<mss::mc_type::ODYSSEY>::set_chipselects_inactive()
 {
     using TT = ccsTraits<mss::mc_type::ODYSSEY>;
 
     arr0.insertFromRight<TT::ARR0_CMD0_CSN_0_1,
-                         TT::ARR0_CMD0_CSN_0_1_LEN>(i_csn01);
+                         TT::ARR0_CMD0_CSN_0_1_LEN>(0b11);
     arr0.insertFromRight<TT::ARR0_CMD1_CSN_0_1,
-                         TT::ARR0_CMD1_CSN_0_1_LEN>(i_csn23);
+                         TT::ARR0_CMD1_CSN_0_1_LEN>(0b11);
+}
+
+///
+/// @brief Sets any signals associated with the chip selects for this instruction - Odyssey specialization
+/// @param[in] i_target the port target for this instruction
+/// @param[in] i_csn01 chip selects 0 and 1
+/// @param[in] i_csn23 chip selects 2 and 3
+/// @param[in] i_cid the chip ID values to set
+/// @param[in] i_update_cid if true, the CID is updated, if not it is ignored
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+/// @note Odyssey specialization CS01 is for command 0, while CS23 is for command 1
+///
+template<>
+fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::set_chipselects_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const uint8_t i_csn01,
+    const uint8_t i_csn23,
+    const uint8_t i_cid,
+    const bool i_update_cid)
+{
+    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+    const auto l_dimm_rank = mss::index(iv_port_rank);
+    uint8_t l_csn01 = i_csn01;
+    uint8_t l_csn23 = i_csn23;
+    uint8_t l_rtt_park_rd[mss::ody::MAX_DIMM_PER_PORT][mss::MAX_RANK_PER_DIMM] = {};
+    uint8_t l_rtt_park_wr[mss::ody::MAX_DIMM_PER_PORT][mss::MAX_RANK_PER_DIMM] = {};
+    bool l_nt_odt_needed = false;
+
+    // Note: Non-target ODT enablement info is stored in the RTT_PARK_RD/WR attributes
+    // and is encoded as 0=enable, 1=disable
+    FAPI_TRY(mss::attr::get_ddr5_rtt_park_rd(i_target, l_rtt_park_rd));
+    FAPI_TRY(mss::attr::get_ddr5_rtt_park_wr(i_target, l_rtt_park_wr));
+
+    l_nt_odt_needed = (mss::ccs::ddr5::needs_nt_odt_rd(*this) && (l_rtt_park_rd[0][l_dimm_rank] == 0)) ||
+                      (mss::ccs::ddr5::needs_nt_odt_wr(*this) && (l_rtt_park_wr[0][l_dimm_rank] == 0));
+
+    // DDR5 requires different CSN settings for commands requiring non-target ODT
+    if (l_nt_odt_needed)
+    {
+        l_csn01 = TT::CS_NTODT[l_dimm_rank].first;
+        l_csn23 = TT::CS_NTODT[l_dimm_rank].second;
+    }
+
+    arr0.insertFromRight<TT::ARR0_CMD0_CSN_0_1,
+                         TT::ARR0_CMD0_CSN_0_1_LEN>(l_csn01);
+    arr0.insertFromRight<TT::ARR0_CMD1_CSN_0_1,
+                         TT::ARR0_CMD1_CSN_0_1_LEN>(l_csn23);
 
     // CID and update CID are unused (no quad encoded chip select in DDR5)
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
