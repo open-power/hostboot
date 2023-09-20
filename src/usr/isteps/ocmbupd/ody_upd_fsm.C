@@ -1369,47 +1369,43 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
  *  levels on the given target. Assumes that ATTR_SPPE_BOOT_SIDE is already
  *  set on the target.
  */
-errlHndl_t ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
+void ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
 {
-    errlHndl_t errl = nullptr;
-
     ody_cur_version_new_image_t images;
     uint64_t rt_vsn = 0, bldr_vsn = 0;
-    errl = check_for_odyssey_codeupdate_needed(i_ocmb, images, &rt_vsn, &bldr_vsn);
 
-    if (!errl)
+    check_for_odyssey_codeupdate_needed(i_ocmb, images, &rt_vsn, &bldr_vsn);
+
+    if (!images.empty())
+    { // The golden side is always considered to be out of date for
+      // the purposes of code update. This causes an update to always
+      // happen when booting from the golden side.
+        i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_OUT_OF_DATE);
+    }
+    else
     {
-        if (!images.empty())
-        { // The golden side is always considered to be out of date for
-          // the purposes of code update. This causes an update to always
-          // happen when booting from the golden side.
-            i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_OUT_OF_DATE);
-        }
-        else
-        {
-            i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_UP_TO_DATE);
-        }
-
-        const auto boot_side = i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>();
-        const char* side_string = "golden side";
-
-        if (boot_side == SPPE_BOOT_SIDE_SIDE0)
-        {
-            side_string = "side 0";
-        }
-        else if (boot_side == SPPE_BOOT_SIDE_SIDE1)
-        {
-            side_string = "side 1";
-        }
-
-        ATTR_OCMB_CODE_LEVEL_SUMMARY_type vsn_string = { };
-
-        snprintf(vsn_string, sizeof(vsn_string),
-                 "(%s) bldr vsn=0x%16lx, rt vsn=0x%16lx",
-                 side_string, bldr_vsn, rt_vsn);
-
-        i_ocmb->setAttr<ATTR_OCMB_CODE_LEVEL_SUMMARY>(vsn_string);
+        i_ocmb->setAttr<ATTR_OCMB_FW_STATE>(OCMB_FW_STATE_UP_TO_DATE);
     }
 
-    return errl;
+    const auto boot_side = i_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>();
+    const char* side_string = "golden side";
+
+    if (boot_side == SPPE_BOOT_SIDE_SIDE0)
+    {
+        side_string = "side 0";
+    }
+    else if (boot_side == SPPE_BOOT_SIDE_SIDE1)
+    {
+        side_string = "side 1";
+    }
+
+    ATTR_OCMB_CODE_LEVEL_SUMMARY_type vsn_string = { };
+
+    snprintf(vsn_string, sizeof(vsn_string),
+             "(%s) bldr vsn=0x%16lx, rt vsn=0x%16lx",
+             side_string, bldr_vsn, rt_vsn);
+
+    i_ocmb->setAttr<ATTR_OCMB_CODE_LEVEL_SUMMARY>(vsn_string);
+
+    return;
 }

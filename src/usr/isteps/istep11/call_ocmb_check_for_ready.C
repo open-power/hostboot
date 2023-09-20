@@ -606,18 +606,7 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
 
         if (l_event != OCMB_BOOT_ERROR_NO_FFDC)
         {
-            if (auto l_local_errl = set_ody_code_levels_state(i_ocmb))
-            {
-                TRACISTEP("call_ocmb_check_for_ready: set_ody_code_levels_state "
-                          "failed on OCMB 0x%X",
-                          get_huid(i_ocmb));
-
-                // If we can't read code levels, treat this as a boot failure with no async
-                // FFDC.
-                l_event = OCMB_BOOT_ERROR_NO_FFDC;
-
-                check_and_set_errl(l_return_errl, l_local_errl);
-            }
+            set_ody_code_levels_state(i_ocmb);
         }
 
         if (io_hwpErrl)

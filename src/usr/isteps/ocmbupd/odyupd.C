@@ -166,16 +166,14 @@ void str_to_hex(char* const o_buf, const uint8_t* const i_bytes, const size_t i_
  * @brief Check which Odyssey images need to be updated in the given chip, compared
  *        to what exists in PNOR.
  */
-errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
-                                               ody_cur_version_new_image_t& o_updates_required,
-                                               uint64_t* const o_rt_hash_prefix,
-                                               uint64_t* const o_bldr_hash_prefix,
-                                               const bool i_force_all)
+void check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
+                                         ody_cur_version_new_image_t& o_updates_required,
+                                         uint64_t* const o_rt_hash_prefix,
+                                         uint64_t* const o_bldr_hash_prefix,
+                                         const bool i_force_all)
 {
     TRACF(ENTER_MRK"check_for_odyssey_codeupdate_needed(0x%08X)",
           get_huid(i_ocmb));
-
-    errlHndl_t errl = nullptr;
 
     do
     {
@@ -230,18 +228,18 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
         }
 
         /* Find the appropriate image in PNOR to compare hashes with. */
-
         const ocmbfw_ext_image_info* img = nullptr;
-        errl = find_ocmbfw_ext_image(img, OCMBFW_HANDLE.get(), OCMB_TYPE_ODYSSEY, image_type,
-                                     dd_level_major, dd_level_minor);
-
-        if (errl)
+        if (auto errl = find_ocmbfw_ext_image(img,
+                                              OCMBFW_HANDLE.get(),
+                                              OCMB_TYPE_ODYSSEY,
+                                              image_type,
+                                              dd_level_major,
+                                              dd_level_minor))
         {
             TRACF("check_for_odyssey_codeupdate_needed: Cannot locate image with ocmb type = %d, "
                   "image type = %d, dd = %d.%d in OCMBFW PNOR partition; skipping firmware update",
                   OCMB_TYPE_ODYSSEY, image_type, dd_level_major, dd_level_minor);
             delete errl;
-            errl = nullptr;
             break;
         }
 
@@ -284,9 +282,9 @@ errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
 
     } while (false);
 
-    TRACF(EXIT_MRK"check_for_odyssey_codeupdate_needed = 0x%08X", ERRL_GETPLID_SAFE(errl));
+    TRACF(EXIT_MRK"check_for_odyssey_codeupdate_needed");
 
-    return errl;
+    return;
 }
 
 /** @brief Add callouts and collect traces for the given Odyssey code
@@ -317,17 +315,12 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb, const bool i_force_update_a
     if (UTIL::isOdysseyChip(i_ocmb))
     {
         ody_cur_version_new_image_t images_to_update;
-        errl = check_for_odyssey_codeupdate_needed(i_ocmb,
-                                                   images_to_update,
-                                                   nullptr,
-                                                   nullptr,
-                                                   i_force_update_all);
 
-        if (errl)
-        {
-            add_odyssey_callouts(errl, i_ocmb);
-            break;
-        }
+        check_for_odyssey_codeupdate_needed(i_ocmb,
+                                            images_to_update,
+                                            nullptr,
+                                            nullptr,
+                                            i_force_update_all);
 
         errl = odyssey_update_code(i_ocmb, images_to_update);
 

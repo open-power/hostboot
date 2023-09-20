@@ -97,13 +97,12 @@ errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb,
  *                                 code level running on the Odyssey (optional).
  * @param[in]  i_force_update_all  If true, will consider all images in need of update.
  *                                 (Optional.)
- * @return                         Error if any, otherwise nullptr.
  */
-errlHndl_t check_for_odyssey_codeupdate_needed(TARGETING::Target* i_ocmb,
-                                               ody_cur_version_new_image_t& o_updates_required,
-                                               uint64_t* const o_rt_hash_prefix = nullptr,
-                                               uint64_t* const o_bldr_hash_prefix = nullptr,
-                                               bool i_force_update_all = false);
+void check_for_odyssey_codeupdate_needed(TARGETING::Target* i_ocmb,
+                                         ody_cur_version_new_image_t& o_updates_required,
+                                         uint64_t* const o_rt_hash_prefix = nullptr,
+                                         uint64_t* const o_bldr_hash_prefix = nullptr,
+                                         bool i_force_update_all = false);
 
 /**
  * @brief Checks if update is needed and will perform i2c update if necessary
