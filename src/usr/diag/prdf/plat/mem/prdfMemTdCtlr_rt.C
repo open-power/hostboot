@@ -880,15 +880,19 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::initialize()
 
         // Unmask the fetch attentions just in case there were masked during a
         // TD procedure prior to a reset/reload. For Odyssey, unmask both ports.
-        o_rc = unmaskEccAttns(0);
-        if ( SUCCESS != o_rc )
+        if (nullptr != getConnectedChild(iv_chip->getTrgt(), TYPE_MEM_PORT, 0))
         {
-            PRDF_ERR( PRDF_FUNC "unmaskEccAttns(0) failed" );
-            break;
+            o_rc = unmaskEccAttns(0);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "unmaskEccAttns(0) failed" );
+                break;
+            }
         }
 
         // Odyssey only: unmask port 1
-        if (isOdysseyOcmb(iv_chip->getTrgt()))
+        if (isOdysseyOcmb(iv_chip->getTrgt()) &&
+            nullptr != getConnectedChild(iv_chip->getTrgt(), TYPE_MEM_PORT, 1))
         {
             o_rc = unmaskEccAttns(1);
             if (SUCCESS != o_rc)

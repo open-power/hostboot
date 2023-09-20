@@ -65,18 +65,36 @@ uint32_t startInitialBgScrub( ExtensibleChip * i_chip )
 
     do
     {
+        // Get the port we want to start scrub on. Default to port0
+        uint8_t port = 0;
+
+        // If port0 doesn't exist, switch to port1
+        if (nullptr == PlatServices::getConnectedChild(i_chip->getTrgt(),
+            TYPE_MEM_PORT, port))
+        {
+            port = 1;
+            // If port1 also doesn't exist, something's wrong, return FAIL.
+            if (nullptr == PlatServices::getConnectedChild(i_chip->getTrgt(),
+                TYPE_MEM_PORT, port))
+            {
+                PRDF_ERR(PRDF_FUNC "No port enabled on 0x%08x",
+                         i_chip->getHuid());
+                return FAIL;
+            }
+        }
+
         // Get the first configured rank.
         std::vector<MemRank> ranklist;
-        PlatServices::getMasterRanks<T>( i_chip->getTrgt(), 0, ranklist );
+        PlatServices::getMasterRanks<T>( i_chip->getTrgt(), port, ranklist );
         PRDF_ASSERT( !ranklist.empty() ); // i_chip configured with no ranks
         MemRank rank = ranklist.front();
 
         // Start background scrubbing.
-        o_rc = PlatServices::startBgScrub<T>( i_chip, rank, 0 );
+        o_rc = PlatServices::startBgScrub<T>( i_chip, rank, port );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "startBgScrub(0x%08x,%d) failed",
-                      i_chip->getHuid(), rank.getMaster() );
+            PRDF_ERR( PRDF_FUNC "startBgScrub(0x%08x,%d,%d) failed",
+                      i_chip->getHuid(), rank.getMaster(), port );
             break;
         }
 

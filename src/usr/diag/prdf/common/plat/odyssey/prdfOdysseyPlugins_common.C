@@ -313,8 +313,17 @@ int32_t CalloutAttachedDimmsHigh( ExtensibleChip * i_chip,
 {
     TargetHandle_t memPort = getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT,
                                                i_port);
-    for ( auto & dimm : getConnectedChildren(memPort, TYPE_DIMM) )
-        io_sc.service_data->SetCallout( dimm, MRU_HIGH );
+
+    if (nullptr == memPort)
+    {
+        PRDF_ERR("odyssey_ocmb::CalloutAttachedDimmsHigh: Could not get child "
+                 "MEM_PORT %d from 0x%08x", i_port, i_chip->getHuid());
+    }
+    else
+    {
+        for ( auto & dimm : getConnectedChildren(memPort, TYPE_DIMM) )
+            io_sc.service_data->SetCallout( dimm, MRU_HIGH );
+    }
 
     return SUCCESS; // nothing to return to rule code
 }

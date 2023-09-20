@@ -238,17 +238,6 @@ void getDimmDqAttr<TYPE_MEM_PORT>( TargetHandle_t i_target,
     #undef PRDF_FUNC
 } // end function getDimmDqAttr
 
-template<>
-void getDimmDqAttr<TYPE_OCMB_CHIP>( TargetHandle_t i_target,
-                                    uint8_t (&o_dqMapPtr)[DQS_PER_DIMM] )
-{
-    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_target) );
-
-    // TODO RTC 210072 - Support for multiple ports per OCMB
-    TargetHandle_t memPort = getConnectedChild( i_target, TYPE_MEM_PORT, 0 );
-    getDimmDqAttr<TYPE_MEM_PORT>( memPort, o_dqMapPtr );
-}
-
 //------------------------------------------------------------------------------
 
 template<>
@@ -432,6 +421,15 @@ int32_t getDimmSpareConfig<TYPE_OCMB_CHIP>( TargetHandle_t i_ocmb,
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_ocmb) );
 
     TargetHandle_t memPort = getConnectedChild( i_ocmb, TYPE_MEM_PORT, i_ps );
+
+    // If the returned MEM_PORT is null, just return.
+    if (nullptr == memPort)
+    {
+        PRDF_ERR("getDimmSpareConfig: Could not get child MEM_PORT %d from "
+                 "0x%08x", i_ps, getHuid(i_ocmb));
+        return FAIL;
+    }
+
     return getDimmSpareConfig<TYPE_MEM_PORT>( memPort, i_rank, i_ps,
                                               o_spareConfig );
 }
@@ -477,6 +475,15 @@ uint32_t isDramSparingEnabled<TYPE_OCMB_CHIP>( TARGETING::TargetHandle_t i_trgt,
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, i_ps );
+
+    // If the returned MEM_PORT is null, just return.
+    if (nullptr == memPort)
+    {
+        PRDF_ERR("isDramSparingEnabled: Could not get child MEM_PORT %d from "
+                 "0x%08x", i_ps, getHuid(i_trgt));
+        return FAIL;
+    }
+
     return isDramSparingEnabled<TYPE_MEM_PORT>( memPort, i_rank, i_ps,
                                                 o_spareEnable );
 }

@@ -1129,6 +1129,15 @@ void getMasterRanks<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt, uint8_t i_port,
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, i_port );
+
+    // If the returned MEM_PORT is null, just return.
+    if (nullptr == memPort)
+    {
+        PRDF_ERR("getMasterRanks: Could not get child MEM_PORT %d from 0x%08x",
+                 i_port, getHuid(i_trgt));
+        return;
+    }
+
     __getMasterRanks<TYPE_MEM_PORT>( memPort, o_ranks, i_ds );
 }
 
@@ -1219,6 +1228,15 @@ uint8_t getNumMasterRanksPerDimm<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, i_port );
+
+    // If the returned MEM_PORT is null, just return 0.
+    if (nullptr == memPort)
+    {
+        PRDF_ERR("getNumMasterRanksPerDimm: Could not get child MEM_PORT %d "
+                 "from 0x%08x", i_port, getHuid(i_trgt));
+        return 0;
+    }
+
     return __getNumMasterRanksPerDimm<TYPE_MEM_PORT>( memPort, i_ds );
 }
 //------------------------------------------------------------------------------
@@ -1258,6 +1276,15 @@ uint8_t getNumRanksPerDimm<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt, uint8_t i_ds,
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 
     TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, i_port );
+
+    // If the returned MEM_PORT is null, just return 0.
+    if (nullptr == memPort)
+    {
+        PRDF_ERR("getNumRanksPerDimm: Could not get child MEM_PORT %d "
+                 "from 0x%08x", i_port, getHuid(i_trgt));
+        return 0;
+    }
+
     return __getNumRanksPerDimm<TYPE_MEM_PORT>( memPort, i_ds );
 }
 

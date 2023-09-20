@@ -256,25 +256,6 @@ uint8_t getDramSize<TYPE_MEM_PORT>( TargetHandle_t i_trgt, uint8_t i_dimmSlct )
     #undef PRDF_FUNC
 }
 
-template<>
-uint8_t getDramSize<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt, uint8_t i_dimmSlct )
-{
-    #define PRDF_FUNC "[MemUtils::getDramSize] "
-
-    PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
-    PRDF_ASSERT( i_dimmSlct < DIMM_SLCT_PER_PORT );
-
-    // TODO RTC 210072 - Explorer only has one port, however, multiple ports
-    // will be supported in the future. Updates will need to be made here so we
-    // can get the relevant port.
-
-    TargetHandle_t memPort = getConnectedChild( i_trgt, TYPE_MEM_PORT, 0 );
-
-    return getDramSize<TYPE_MEM_PORT>( memPort, i_dimmSlct );
-
-    #undef PRDF_FUNC
-}
-
 //------------------------------------------------------------------------------
 
 template<>
@@ -1080,10 +1061,6 @@ uint32_t odyGetAddrConfig( ExtensibleChip * i_chip, uint8_t i_portSlct,
     // The 'half' bit (prank0) of the primary rank is not used in two port mode
     if (!o_twoPortConfig)
     {
-        // This is unexpected, as two port mode should always be enabled.
-        // Print an error trace just in case it happens.
-        PRDF_ERR(PRDF_FUNC "OCMB 0x%08x unexpectedly not in two port mode",
-                 i_chip->getHuid());
         o_prnkBits++;
     }
     if ( mc_addr_trans0.isBitSet(i_portSlct ? 18: 17) ) o_prnkBits++;

@@ -63,10 +63,12 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
     do
     {
         TargetHandle_t trgt = i_memMru.getTrgt();
+        uint8_t port = extMemMru.mmMeld.s.port;
 
         if ( TYPE_OCMB_CHIP == getTargetType(trgt) )
         {
-            TargetHandle_t dimm = getConnectedDimm( trgt, i_memMru.getRank() );
+            TargetHandle_t dimm = getConnectedDimm( trgt, i_memMru.getRank(),
+                                                    port );
             extMemMru.isX4Dram = isDramWidthX4( dimm ) ? 1 : 0;
         }
         else
@@ -92,7 +94,9 @@ void addExtMemMruData( const MemoryMru & i_memMru, errlHndl_t io_errl )
 
                 if ( TYPE_OCMB_CHIP == getTargetType(trgt) )
                 {
-                    getDimmDqAttr<TYPE_OCMB_CHIP>( trgt, extMemMru.dqMapping );
+                    TargetHandle_t memport = getConnectedChild(trgt,
+                        TYPE_MEM_PORT, port);
+                    getDimmDqAttr<TYPE_MEM_PORT>(memport, extMemMru.dqMapping);
                 }
                 else
                 {
@@ -181,6 +185,12 @@ void captureDramRepairsData<TYPE_OCMB_CHIP>(TARGETING::TargetHandle_t i_trgt,
 
         TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT,
                                                    i_port);
+        if (nullptr == memport)
+        {
+            PRDF_ERR(PRDF_FUNC "Failed to get child MEM_PORT %x from parent "
+                     "0x%08x", i_port, getHuid(i_trgt));
+            return;
+        }
 
         // Iterate all ranks to get DRAM repair data
         for ( auto & rank : masterRanks )
@@ -315,6 +325,12 @@ void captureDramRepairsVpd<TYPE_OCMB_CHIP>(TargetHandle_t i_trgt,
         // Get the MEM_PORT target
         TargetHandle_t memport = getConnectedChild(i_trgt, TYPE_MEM_PORT,
                                                    i_port);
+        if (nullptr == memport)
+        {
+            PRDF_ERR(PRDF_FUNC "Failed to get child MEM_PORT %x from parent "
+                     "0x%08x", i_port, getHuid(i_trgt));
+            return;
+        }
 
         // Iterate all ranks to get VPD data
         uint32_t idx = 0;
@@ -500,10 +516,14 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     captureDramRepairsData<TYPE_OCMB_CHIP>( ocmbTrgt, cd, i_port );
 
     // Add DRAM repairs data from VPD. Port 0 for both Explorer and Odyssey
-    captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 0 );
+    if (nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 0))
+    {
+        captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 0 );
+    }
 
     // Add DRAM repairs data from VPD. Port 1 for Odyssey only
-    if (isOdysseyOcmb(i_chip->getTrgt()))
+    if (isOdysseyOcmb(i_chip->getTrgt()) &&
+        nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 1))
     {
         captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 1 );
     }
