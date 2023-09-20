@@ -789,21 +789,31 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                             errlCommit(errhdl, INITSVC_COMP_ID);
                         }
 
-                        #ifdef CONFIG_CONSOLE
-                        auto l_reconfigAttr =
-                            l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
-                        bool l_deconfig = false;
-                        if( l_reconfigAttr ==
-                            TARGETING::RECONFIGURE_LOOP_DECONFIGURE )
+#ifdef CONFIG_CONSOLE
+                        const auto l_reconfigAttr = l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+
+                        char reconfig_reason[128] = { };
+
+                        if (l_reconfigAttr & TARGETING::RECONFIGURE_LOOP_DECONFIGURE)
                         {
-                            l_deconfig = true;
+                            strcat(reconfig_reason, "part deconfigured, ");
+                        }
+                        if (l_reconfigAttr & TARGETING::RECONFIGURE_LOOP_OCMB_FW_UPDATE)
+                        {
+                            strcat(reconfig_reason, "OCMB firmware update, ");
+                        }
+
+                        if (*reconfig_reason)
+                        { // remove the final ", "
+                            reconfig_reason[strlen(reconfig_reason)-2] = '\0';
                         }
 
                         CONSOLE::displayf(CONSOLE::VUART1, NULL,
-                            "System Shutting Down To Perform Reconfiguration After %s",
-                            l_deconfig ? "Deconfig" : "Recoverable Error" );
+                                          "System shutting down to perform reconfiguration%s%s",
+                                          *reconfig_reason ? " after " : "",
+                                          reconfig_reason);
                         CONSOLE::flush();
-                        #endif
+#endif
 
                         TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending reboot request");
                         // Request BMC to do power cycle that sends shutdown

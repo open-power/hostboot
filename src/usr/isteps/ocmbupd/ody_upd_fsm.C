@@ -1349,13 +1349,7 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
 
     if (restart_needed && (i_perform_reconfig_if_needed == REQUEST_RECONFIG_IF_NEEDED))
     {
-#if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))
-        CONSOLE::displayf(CONSOLE::DEFAULT, nullptr,
-                          "Performing reconfig loop for updated OCMBs");
-#endif
-
-        TRACF(INFO_MRK"ody_upd_all_process_event: Requesting reconfig loop for "
-              "OCMB firmware update");
+        TRACF(INFO_MRK"ody_upd_all_process_event: Requesting reconfig loop");
 
         setOrClearReconfigLoopReason(HWAS::ReconfigSetOrClear::RECONFIG_SET,
                                      RECONFIGURE_LOOP_OCMB_FW_UPDATE);
