@@ -47,6 +47,15 @@
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
 #include <map>
 
+///
+/// @brief Indicating runtime execution or not
+///
+enum runtime_exec
+{
+    MAINT_REPAIR = false,
+    RUNTIME_REPAIR = true,
+};
+
 extern "C"
 {
 

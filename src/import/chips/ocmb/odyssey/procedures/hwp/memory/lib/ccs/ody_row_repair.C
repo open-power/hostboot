@@ -171,7 +171,6 @@ fapi2::ReturnCode get_dram_byte_mask(
         io_mask = 0xFF;
     }
 
-fapi_try_exit:
     return fapi2::current_err;
 }
 

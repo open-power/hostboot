@@ -33,20 +33,11 @@
 // EKB-Mirror-To: hostboot
 
 #ifndef __ODY_DEPLOY_ROW_REPAIR__
-#define __ODY_DELPOY_ROW_REPAIR__
+#define __ODY_DEPLOY_ROW_REPAIR__
 
 #include <fapi2.H>
 
 typedef fapi2::ReturnCode (*ody_deploy_row_repairs_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
-
-///
-/// @brief Indicating runtime execution or not
-///
-enum runtime_exec
-{
-    MAINT_REPAIR = false,
-    RUNTIME_REPAIR = true,
-};
 
 extern "C"
 {
