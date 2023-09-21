@@ -31,6 +31,8 @@
 #include <sbeio/sbe_utils.H>
 #include <targeting/common/utilFilter.H>
 #include <sbeio/sbeioreasoncodes.H>
+#include <errl/hberrltypes.H>
+
 extern trace_desc_t* g_trac_sbeio;
 
 #define VIRTUAL_CHIPLET_ID_BASE_MCS_TARGET_TYPE (0x80)
@@ -48,11 +50,10 @@ errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
 {
     errlHndl_t errl = NULL;
     TRACDCOMP(g_trac_sbeio, ENTER_MRK"sbeioInterfaceChecks");
-    // Most of these errors have room leftover to add other useful data to the unused bits in userdata2
-    // Shifting the command and class to bits 0-15 and leaving the unused bits after.
-    uint64_t userdata2 = static_cast<uint64_t>(TWO_UINT8_TO_UINT16(i_commandClass, i_command)) << 48;
+
     do
     {
+        using namespace errl_util;
         // look for NULL
         if( NULL == i_target )
         {
@@ -71,7 +72,8 @@ errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
                                            SBEIO_FIFO,
                                            SBEIO_FIFO_NULL_TARGET,
                                            i_addr,
-                                           userdata2,
+                                           SrcUserData(bits{0, 7},  i_commandClass,
+                                                       bits{8, 15}, i_command),
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
@@ -98,7 +100,8 @@ errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
                                            SBEIO_FIFO,
                                            SBEIO_FIFO_SENTINEL_TARGET,
                                            i_addr,
-                                           userdata2,
+                                           SrcUserData(bits{0, 7},  i_commandClass,
+                                                       bits{8, 15}, i_command),
                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             errl->collectTrace(SBEIO_COMP_NAME);
             break;
@@ -109,8 +112,7 @@ errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
         (void)TARGETING::targetService().masterProcChipTargetHandle(l_boot);
         if( l_boot == i_target )
         {
-            TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: "
-                                "Target is Primary Proc" );
+            TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: Target is Primary Proc" );
             /*@
              * @errortype
              * @moduleid         SBEIO_FIFO
@@ -127,12 +129,9 @@ errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
                             SBEIO_FIFO,
                             SBEIO_FIFO_MASTER_TARGET,
                             i_addr,
-                            TWO_UINT32_TO_UINT64(
-                                TARGETING::get_huid(i_target),
-                                TWO_UINT16_TO_UINT32(
-                                    TWO_UINT8_TO_UINT16(i_commandClass,
-                                                        i_command),
-                                    0)),
+                            SrcUserData(bits{0, 31},  TARGETING::get_huid(i_target),
+                                        bits{32, 39}, i_commandClass,
+                                        bits{40, 47}, i_command),
                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             errl->collectTrace(SBEIO_COMP_NAME);
             break;
@@ -142,8 +141,7 @@ errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
         if ((i_target->getAttr<ATTR_TYPE>() == TYPE_OCMB_CHIP)
             && (i_target->getAttr<ATTR_CHIP_ID>() != POWER_CHIPID::ODYSSEY_16))
         {
-                TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: "
-                                    "Target is an OCMB but not an Odyssey OCMB." );
+                TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: Target is an OCMB but not an Odyssey OCMB." );
                 /*@
                  * @errortype
                  * @moduleid     SBEIO_FIFO
@@ -159,10 +157,10 @@ errlHndl_t sbeioInterfaceChecks(TARGETING::Target * i_target,
                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                 SBEIO_FIFO,
                                 SBEIO_FIFO_NOT_ODYSSEY_OCMB,
-                                TWO_UINT32_TO_UINT64(
-                                    TARGETING::get_huid(i_target),
-                                    i_target->getAttr<ATTR_CHIP_ID>()),
-                                userdata2,
+                                SrcUserData(bits{0, 31},  get_huid(i_target),
+                                            bits{32, 63}, i_target->getAttr<ATTR_CHIP_ID>()),
+                                SrcUserData(bits{0, 7},  i_commandClass,
+                                            bits{8, 15}, i_command),
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 errl->collectTrace(SBEIO_COMP_NAME);
                 break;
@@ -185,19 +183,43 @@ errlHndl_t sbeioOdysseyCheck(TARGETING::Target * i_target,
 
     do
     {
-        // must be Odyssey chip
-        if ((i_target->getAttr<ATTR_TYPE>() != TYPE_OCMB_CHIP) ||
-            (i_target->getAttr<ATTR_CHIP_ID>() != POWER_CHIPID::ODYSSEY_16))
+        using namespace errl_util;
+        // look for NULL target
+        if( nullptr == i_target )
         {
-            // Shifting the command and class to bits 0-15 and leaving the unused bits after.
-            uint64_t userdata2 = static_cast<uint64_t>(TWO_UINT8_TO_UINT16(i_commandClass, i_command)) << 48;
-
-            TRACFCOMP(g_trac_sbeio, ERR_MRK
-                "sbeioOdysseyCheck: Target is not Odyssey and/or not OCMB.");
+            TRACFCOMP(g_trac_sbeio, ERR_MRK "sbeioInterfaceChecks: Target is NULL" );
             /*@
              * @errortype
-             * @moduleid     SBEIO_FIFO
-             * @reasoncode   SBEIO_FIFO_NOT_ODYSSEY_OR_NOT_OCMB
+             * @moduleid        SBEIO_FIFO_ODY_CHECKS
+             * @reasoncode      SBEIO_FIFO_NULL_TARGET
+             * @userdata1[0:7]  SBE FIFO Command Class
+             * @userdata1[8:15] SBE FIFO Command
+             * @userdata2       unused
+             * @devdesc         Null target passed
+             * @custdesc        Firmware error communicating with a chip
+             */
+            errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                           SBEIO_FIFO_ODY_CHECKS,
+                                           SBEIO_FIFO_NULL_TARGET,
+                                           SrcUserData(bits{0, 7},  i_commandClass,
+                                                       bits{8, 15}, i_command),
+                                           0,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
+            errl->collectTrace(SBEIO_COMP_NAME);
+            break;
+        }
+        // must be Odyssey chip
+        if ( ! ((i_target->getAttr<ATTR_TYPE>() == TYPE_OCMB_CHIP) &&
+               (i_target->getAttr<ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)) )
+        {
+            TRACFCOMP(g_trac_sbeio, ERR_MRK
+                "sbeioOdysseyCheck: Target is not an Odyssey OCMB.");
+            /*@
+             * @errortype
+             * @moduleid     SBEIO_FIFO_ODY_CHECKS
+             * @reasoncode   SBEIO_FIFO_NOT_ODYSSEY_OCMB
              * @userdata1[0:31]  HUID of OCMB chip
              * @userdata1[32:63] ATTR_CHIP_ID of OCMB chip
              * @userdata2[0:7]   SBE FIFO Command Class
@@ -207,12 +229,12 @@ errlHndl_t sbeioOdysseyCheck(TARGETING::Target * i_target,
              */
             errl = new ERRORLOG::ErrlEntry(
                             ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                            SBEIO_FIFO,
-                            SBEIO_FIFO_NOT_ODYSSEY_OR_NOT_OCMB,
-                            TWO_UINT32_TO_UINT64(
-                                TARGETING::get_huid(i_target),
-                                i_target->getAttr<ATTR_CHIP_ID>()),
-                            userdata2,
+                            SBEIO_FIFO_ODY_CHECKS,
+                            SBEIO_FIFO_NOT_ODYSSEY_OCMB,
+                            SrcUserData(bits{0, 31},  get_huid(i_target),
+                                        bits{32, 63}, i_target->getAttr<ATTR_CHIP_ID>()),
+                            SrcUserData(bits{0, 7},  i_commandClass,
+                                        bits{8, 15}, i_command),
                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             errl->collectTrace(SBEIO_COMP_NAME);
             break;

@@ -67,6 +67,7 @@ enum sbeioModuleId
     SBEIO_PSU_PMIC_HEALTH_CHECK         = 0x16,
     SBEIO_RT_SCOM                       = 0x17,
     SBEIO_PROCESS_ATTR_ARRAY            = 0x18,
+    SBEIO_FIFO_ODY_CHECKS               = 0x19,
 };
 
 /**
@@ -192,6 +193,19 @@ enum UserDetailsTypes
 // Contains error log descriptions for SRCs that were
 // removed from the code but we need to still provide
 // backward compatible parser logic for.
+
+
+/*@
+ * @errortype
+ * @moduleid     SBEIO_FIFO
+ * @reasoncode   SBEIO_FIFO_NOT_ODYSSEY_OR_NOT_OCMB
+ * @userdata1[0:31]  HUID of OCMB chip
+ * @userdata1[32:63] ATTR_CHIP_ID of OCMB chip
+ * @userdata2[0:7]   SBE FIFO Command Class
+ * @userdata2[8:15]  SBE FIFO Command
+ * @devdesc      Odyssey target is expected
+ * @custdesc     Firmware error communicating with a chip
+ */
 
 /*@
  * @errortype    ERRORLOG::ERRL_SEV_INFORMATIONAL

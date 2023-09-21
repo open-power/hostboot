@@ -52,6 +52,38 @@ using namespace TARGETING;
 
 namespace SBEIO
 {
+
+    errlHndl_t sendPurgeScratchDataRequest(TARGETING::Target      * i_chipTarget,
+                                           uint32_t               * o_pFifoResponse,
+                                           const uint32_t           i_responseSize)
+    {
+        errlHndl_t errl = nullptr;
+
+        do
+        {
+            // Only support Odyssey OCMB targets.
+            errl = sbeioOdysseyCheck(i_chipTarget,
+                                     SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
+                                     SbeFifo::SBE_FIFO_CMD_GET_SCRATCH_DATA);
+            if(errl)
+            {
+                break;
+            }
+
+            SbeFifo::fifoGetSbeScratchDataRequest l_fifoRequest;
+            l_fifoRequest.operation = SbeFifo::FIFO_PURGE_SCRATCH_DATA;
+
+            errl = SbeFifo::getTheInstance().performFifoChipOp(i_chipTarget,
+                                                               reinterpret_cast<uint32_t *>(&l_fifoRequest),
+                                                               o_pFifoResponse,
+                                                               i_responseSize);
+
+        } while(0);
+
+        SBE_TRACD(EXIT_MRK "sendPurgeScratchDataRequest");
+        return errl;
+    };
+
     /**
      * @brief Retrieves data stored in the SBE Scratch area. Due to tight memory constraints, the SBE scratch area will
      *        always be cleared on successful execution of this command. The data in the scratch area is typically
@@ -71,15 +103,7 @@ namespace SBEIO
 
         do
         {
-            // Make sure the target is one of the supported types.
-            errl = sbeioInterfaceChecks(i_chipTarget,
-                                        SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
-                                        SbeFifo::SBE_FIFO_CMD_GET_SCRATCH_DATA);
-            if(errl)
-            {
-                break;
-            }
-            // Only support OCMB targets. Interface checks above already verified this is an odyssey chip.
+            // Only support Odyssey OCMB targets.
             errl = sbeioOdysseyCheck(i_chipTarget,
                                      SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
                                      SbeFifo::SBE_FIFO_CMD_GET_SCRATCH_DATA);

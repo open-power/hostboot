@@ -438,6 +438,21 @@ namespace SBEIO
                               uint32_t *o_pFifoResponse,
                               uint32_t &i_responseSize);
 
+
+    /**
+     * @brief Purges data stored in the SBE Scratch area.
+     *
+     * @param[in] i_chipTarget The chip you would like to perform the chipop on
+     *                       NOTE: HB should only be sending this to Odyssey chips
+     * @param[out]    o_pFifoResponse Pointer to response
+     * @param[in]     i_responseSize  Size of response in bytes
+     *
+     * @return errlHndl_t Error log handle on failure.
+     *
+     */
+    errlHndl_t sendPurgeScratchDataRequest(TARGETING::Target      * i_chipTarget,
+                                           uint32_t               * o_pFifoResponse,
+                                           uint32_t                 i_responseSize);
     /**
      * @brief Retrieves data stored in the SBE Scratch area. Due to tight memory constraints, the SBE scratch area will
      *        always be cleared on successful execution of this command. The data in the scratch area is typically
