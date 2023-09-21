@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -879,13 +879,24 @@ void* call_mss_attr_update( void *io_pArgs )
             errlCommit( l_err, HWPF_COMP_ID );
         }
 
+        // If the boot proc's SBE does not support SMP TPM extend then it is downlevel from the rest of the system.
+        // SBE capabilities for the boot proc have already been gathered and this setting is stored on the node instead
+        // of the proc.
+        TargetHandle_t l_nodeTarget = UTIL::getCurrentNodeTarget();
+
+        auto sbeSupportsTpmExtendMode = l_nodeTarget->getAttr<ATTR_SBE_HANDLES_SMP_TPM_EXTEND>();
+        TRACFCOMP(g_trac_isteps_trace,"call_mss_attr_update: Boot Proc SBE supports TPM Extend Mode: %d",
+                  sbeSupportsTpmExtendMode);
+        bool downlevelBootProc = ! sbeSupportsTpmExtendMode;
 
         // Check for any previous reason to force a SBE update
-        ATTR_FORCE_SBE_UPDATE_type l_sbe_update =
-            l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>();
+        ATTR_FORCE_SBE_UPDATE_type l_sbe_update = l_sys->getAttr<ATTR_FORCE_SBE_UPDATE>();
         TRACFCOMP(g_trac_isteps_trace, "Checking FORCE_SBE_UPDATE=0x%X",
-            l_sbe_update);
-        if (l_sbe_update != 0)
+                  l_sbe_update);
+
+        // If there are any reasons to force an SBE update via the attribute or there is a downlevel boot proc then
+        // do an SBE update.
+        if ((l_sbe_update != 0) || downlevelBootProc)
         {
             if (l_sys->getAttr<ATTR_IS_MPIPL_HB>() == true)
             {
