@@ -208,20 +208,22 @@ uint32_t __odyClearEccFirs( ExtensibleChip * i_chip )
                                            0x03e0000000000000ull );
         if ( SUCCESS != o_rc ) break;
 
-        // Maintenance AUEs/IAUEs will be reported as system checkstops.
+        // Maintenance IAUEs will be reported as system checkstops.
         // Maintenance IMPEs will be reported as recoverable attentions at
         // all times. Maintence IUEs will be masked during Memory
-        // Diagnostics and handled in the Targeted diagnostics code. After
-        // Memory Diagnostics, maintenance IUEs will be reported as
-        // recoverable in the field (no stop-on-error), but will remain
-        // masked if MNFG thresholds are enabled. In this case, the command
-        // will stop on RCE ETE in order to get a more accuracy callout. So
-        // clear RDFFIR[21:33,35:36,39] always and RDFFIR[38] in MNFG
-        // mode or during Memory Diagnostics.
+        // Diagnostics and handled in the Targeted diagnostics code. Maintenance
+        // AUEs will also be masked during Memory Diagnostics and handled in the
+        // Targeted Diagnostics code. After Memory Diagnostics, maintenance
+        // IUEs will be reported as recoverable in the field (no stop-on-error),
+        // but will remain masked if MNFG thresholds are enabled. In this case,
+        // the command will stop on RCE ETE in order to get a more accuracy
+        // callout. So clear RDFFIR[21:33,35:36,39] always and RDFFIR[38] in
+        // MNFG mode or during Memory Diagnostics and RDFFIR[34] in Memory
+        // Diagnostics.
         uint64_t              mask  = 0x000007ffd9000000ull;
         if ( mfgMode() )      mask |= 0x0000000002000000ull;
         #ifndef __HOSTBOOT_RUNTIME
-        if ( isInMdiaMode() ) mask |= 0x0000000002000000ull;
+        if ( isInMdiaMode() ) mask |= 0x0000000022000000ull;
         #endif
 
         // Clear both RDF_FIRs
