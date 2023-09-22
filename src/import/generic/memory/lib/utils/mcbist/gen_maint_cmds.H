@@ -100,6 +100,7 @@ template<mss::mc_type MC, mux_type MT>
 class steerTraits
 {
     public:
+        // For multi-port MC's regs at indices 0-1 are port 0 and at indices 2-3 are port 1
         static const std::vector<uint32_t> muxregs_left;
         static const std::vector<uint32_t> muxregs_right;
 
@@ -465,6 +466,19 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Updates steer mux index with respect to OCMB
+/// @tparam MC the memory controller type
+/// @param[in] i_target Mem Port target
+/// @param[in, out] io_steer_mux_index index we want to read/write steer mux for.
+///
+template<mss::mc_type MC>
+void update_steer_mux_instance(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    uint8_t& io_steer_mux_index);
+
+
+
+///
 /// @brief Gets either the read or write steer mux control register for the given rank
 /// @tparam MC the memory controller type
 /// @tparam MT the read-write mux_type
@@ -496,6 +510,7 @@ fapi2::ReturnCode get_steer_mux(
     fapi2::buffer<uint64_t> l_data;
     uint8_t l_dramSpare0Index = 0;
     uint8_t l_dramSpare1Index = 0;
+    uint8_t l_steer_mux_index = i_port_rank;
 
     o_dram_spare0_symbol = genSteerTraits<MC>::INVALID_SYMBOL;
     o_dram_spare1_symbol = genSteerTraits<MC>::INVALID_SYMBOL;
@@ -508,6 +523,9 @@ fapi2::ReturnCode get_steer_mux(
     //    We cannot use PHY rank due to rank swizzling caused by JIRA355
     FAPI_TRY( check::rank<MC>(i_target, i_port_rank) );
 
+    // updates rank index for multi port ocmbs
+    update_steer_mux_instance<MC>(i_target, l_steer_mux_index);
+
     // Read Steer Mux
     FAPI_TRY(fapi2::getScom(l_scom_target, TT::MUX_REGISTER, l_steer_mux));
 
@@ -515,7 +533,7 @@ fapi2::ReturnCode get_steer_mux(
     {
         // Get correct ranks spare data for spare0
         FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare0Index,
-                                            TT::muxregs_left[i_port_rank],
+                                            TT::muxregs_left[l_steer_mux_index],
                                             TT::SPARE_MUX_LEN));
 
         l_dramSpare1Index = genSteerTraits<MC>::SPARE_UNUSED;
@@ -524,11 +542,11 @@ fapi2::ReturnCode get_steer_mux(
     {
         // Get correct ranks spare data for spare0
         FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare0Index,
-                                            TT::muxregs_left[i_port_rank],
+                                            TT::muxregs_left[l_steer_mux_index],
                                             TT::SPARE_MUX_LEN));
         // Get correct ranks spare data for spare1
         FAPI_TRY(l_steer_mux.extractToRight(l_dramSpare1Index,
-                                            TT::muxregs_right[i_port_rank],
+                                            TT::muxregs_right[l_steer_mux_index],
                                             TT::SPARE_MUX_LEN));
     }
 
@@ -586,6 +604,7 @@ fapi2::ReturnCode put_steer_mux(
     fapi2::buffer<uint64_t> l_steer_mux;
     fapi2::buffer<uint64_t> l_data;
     uint8_t l_dramSpareIndex = 0;
+    uint8_t l_steer_mux_index = i_port_rank;
 
     // Get rank information
     mss::rank::info<MC> l_rank_info(i_target, i_port_rank, l_rc);
@@ -598,6 +617,9 @@ fapi2::ReturnCode put_steer_mux(
     //    We cannot use DIMM rank as we would have overlap on ranks 0/1
     //    We cannot use PHY rank due to rank swizzling caused by JIRA355
     FAPI_TRY( check::rank<MC>(i_target, i_port_rank) );
+
+    update_steer_mux_instance<MC>(i_target, l_steer_mux_index);
+
     FAPI_TRY( check::mux_type(i_target, i_steer_type) );
 
     // Allow the user to write a "clear this value" constant
@@ -608,6 +630,7 @@ fapi2::ReturnCode put_steer_mux(
 
     // Convert from i_symbol to Dram Spare Index
     FAPI_TRY( symbol_to_spare<MC>(i_symbol, l_dramSpareIndex) );
+
 
     if(i_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X8)
     {
@@ -620,14 +643,14 @@ fapi2::ReturnCode put_steer_mux(
     {
         // Get correct ranks spare data for spare0
         FAPI_TRY(l_steer_mux.insertFromRight(l_dramSpareIndex,
-                                             TT::muxregs_left[i_port_rank],
+                                             TT::muxregs_left[l_steer_mux_index],
                                              TT::SPARE_MUX_LEN));
     }
     else
     {
         // Get correct ranks spare data for spare1
         FAPI_TRY(l_steer_mux.insertFromRight(l_dramSpareIndex,
-                                             TT::muxregs_right[i_port_rank],
+                                             TT::muxregs_right[l_steer_mux_index],
                                              TT::SPARE_MUX_LEN));
     }
 

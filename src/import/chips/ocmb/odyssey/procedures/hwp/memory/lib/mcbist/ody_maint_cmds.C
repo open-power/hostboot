@@ -64,39 +64,72 @@ const std::vector<uint8_t> genSteerTraits< mss::mc_type::ODYSSEY>::spare_to_symb
 
 ///
 /// @brief Used to determine spare info for Spare0 WriteMux
+/// @note Regs at indices 0-1 are port 0 and at indices 2-3 are port 1
 ///
 const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >::muxregs_left =
 {
     scomt::ody::ODC_WDF_REGS_WSPAR_R0_LEFT,
     scomt::ody::ODC_WDF_REGS_WSPAR_R1_LEFT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_R2_LEFT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_R3_LEFT,
 };
 
 ///
 /// @brief Used to determine spare info for Spare1 WriteMux
+/// @note Regs at indices 0-1 are port 0 and at indices 2-3 are port 1
 ///
 const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >::muxregs_right =
 {
     scomt::ody::ODC_WDF_REGS_WSPAR_R0_RIGHT,
     scomt::ody::ODC_WDF_REGS_WSPAR_R1_RIGHT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_R2_RIGHT,
+    scomt::ody::ODC_WDF_REGS_WSPAR_R3_RIGHT,
 };
 
 ///
 /// @brief Used to determine spare info for Spare0 ReadMux
+/// @note Regs at indices 0-1 are port 0 and at indices 2-3 are port 1
 ///
 const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::READ_MUX >::muxregs_left =
 {
     scomt::ody::ODC_RDF0_SCOM_RSPAR_R0_LEFT,
     scomt::ody::ODC_RDF0_SCOM_RSPAR_R1_LEFT,
+    scomt::ody::ODC_RDF1_SCOM_RSPAR_R0_LEFT,
+    scomt::ody::ODC_RDF1_SCOM_RSPAR_R1_LEFT,
 };
 
 ///
 /// @brief Used to determine spare info for Spare1 ReadMux
+/// @note Regs at indices 0-1 are port 0 and at indices 2-3 are port 1
 ///
 const std::vector< uint32_t > steerTraits< mss::mc_type::ODYSSEY, mux_type::READ_MUX >::muxregs_right =
 {
     scomt::ody::ODC_RDF0_SCOM_RSPAR_R0_RIGHT,
     scomt::ody::ODC_RDF0_SCOM_RSPAR_R1_RIGHT,
+    scomt::ody::ODC_RDF1_SCOM_RSPAR_R0_RIGHT,
+    scomt::ody::ODC_RDF1_SCOM_RSPAR_R1_RIGHT,
 };
+
+///
+/// @brief Updates steer mux index with respect to OCMB ODYSSEY specialization
+/// @param[in] i_target Mem Port target
+/// @param[in, out] io_steer_mux_index steer mux index we want to read/write steer mux for.
+///
+template<>
+void update_steer_mux_instance<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    uint8_t& io_steer_mux_index)
+{
+    constexpr uint8_t PORT_1 = 1;
+    constexpr uint8_t RANK_OFFSET = 2;
+    const uint8_t l_port_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    // If were looking at port 1/side 1 (ODYSSEY) check muxregs[2] and muxregs[3]
+    if(l_port_pos == PORT_1)
+    {
+        io_steer_mux_index = io_steer_mux_index + RANK_OFFSET;
+    }
+}
 
 } // ns steer
 

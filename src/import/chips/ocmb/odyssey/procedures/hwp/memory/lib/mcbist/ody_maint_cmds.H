@@ -79,6 +79,7 @@ template<>
 class steerTraits< mss::mc_type::ODYSSEY, mux_type::READ_MUX >
 {
     public:
+        // Regs at indices 0-1 are port 0 and at indices 2-3 are port 1
         static const std::vector<uint32_t> muxregs_left;
         static const std::vector<uint32_t> muxregs_right;
 
@@ -110,6 +111,7 @@ template<>
 class steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >
 {
     public:
+        // Regs at indices 0-1 are port 0 and at indices 2-3 are port 1
         static const std::vector<uint32_t> muxregs_left;
         static const std::vector<uint32_t> muxregs_right;
 
@@ -132,6 +134,16 @@ class steerTraits< mss::mc_type::ODYSSEY, mux_type::WRITE_MUX >
         };
 
 };
+
+///
+/// @brief Updates steer mux index with respect to OCMB ODYSSEY specialization
+/// @param[in] i_target Mem Port target
+/// @param[in, out] io_steer_mux_index Rank we want to read/write steer mux for.
+///
+template<>
+void update_steer_mux_instance<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    uint8_t& io_steer_mux_index);
 
 
 } // ns steer

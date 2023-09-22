@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,6 +112,17 @@ const std::vector< uint32_t > steerTraits< mss::mc_type::EXPLORER, mux_type::REA
     EXPLR_RDF_RSPAR_CFG_STEERING_R2_RIGHT,
     EXPLR_RDF_RSPAR_CFG_STEERING_R3_RIGHT,
 };
+
+///
+/// @brief Updates steer mux index with respect to OCMB EXPLORER specialization does nothing
+/// @param[in] i_target Mem Port target
+/// @param[in, out] io_steer_mux_index mux index we want to read/write steer mux for.
+///
+template<>
+void update_steer_mux_instance<mss::mc_type::EXPLORER>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    uint8_t& io_steer_mux_index)
+{}
 
 } // ns steer
 
