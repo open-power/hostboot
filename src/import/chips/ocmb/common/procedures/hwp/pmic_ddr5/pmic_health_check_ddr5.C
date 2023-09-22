@@ -514,11 +514,10 @@ mss::pmic::ddr5::dt_state check_dt_faults(mss::pmic::ddr5::target_info_redundanc
     reverse_dt_regs(io_health_check_info.iv_dt2);
     reverse_dt_regs(io_health_check_info.iv_dt3);
 
-    return static_cast<mss::pmic::ddr5::dt_state>(std::max({io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state,
-            io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt_state,
-            io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt_state,
-            io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_dt_state
-                                                           }));
+    return static_cast<mss::pmic::ddr5::dt_state>(std::max(std::max(io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state,
+            io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt_state),
+            std::max(io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt_state,
+                     io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_dt_state)));
 }
 
 ///
@@ -683,11 +682,11 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
 ///
 mss::pmic::ddr5::aggregate_state check_n_mode(mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
-    const auto l_max_breadcrumb = std::max({io_health_check_info.iv_dt0.iv_breadcrumb,
-                                            io_health_check_info.iv_dt1.iv_breadcrumb,
-                                            io_health_check_info.iv_dt2.iv_breadcrumb,
-                                            io_health_check_info.iv_dt3.iv_breadcrumb
-                                           });
+    const auto l_max_breadcrumb = std::max(std::max(io_health_check_info.iv_dt0.iv_breadcrumb,
+                                           io_health_check_info.iv_dt1.iv_breadcrumb),
+                                           std::max(io_health_check_info.iv_dt2.iv_breadcrumb,
+                                                   io_health_check_info.iv_dt3.iv_breadcrumb));
+
     mss::pmic::ddr5::bread_crumb l_breadcrumb_value = static_cast<mss::pmic::ddr5::bread_crumb>(l_max_breadcrumb);
 
     switch(l_breadcrumb_value)
