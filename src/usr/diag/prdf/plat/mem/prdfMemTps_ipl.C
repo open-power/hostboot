@@ -177,6 +177,31 @@ uint32_t TpsEvent<T>::analyzeEccErrors( const uint32_t & i_eccAttns,
             // Leave the mark in place and abort this procedure.
             o_done = true; break;
         }
+        // For Odyssey, AUEs found during IPL/memdiags will be handled the same
+        // as UEs. Pause on AUE will be set in the superfast reads for memdiags.
+        else if ( 0 != (i_eccAttns & MAINT_AUE) )
+        {
+            // Add the signature to the multi-signature list. Also, since
+            // this will be a predictive callout, change the primary
+            // signature as well.
+            io_sc.service_data->AddSignatureList( iv_chip->getTrgt(),
+                                                  PRDFSIG_MaintAUE );
+            io_sc.service_data->setSignature( iv_chip->getHuid(),
+                                              PRDFSIG_MaintAUE );
+
+            // Do memory UE handling.
+            o_rc = MemEcc::handleMemUe<T>( iv_chip, addr, UE_TABLE::SCRUB_AUE,
+                                           io_sc );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "MAINT_AUE: handleMemUe<T>(0x%08x) failed",
+                          iv_chip->getHuid() );
+                break;
+            }
+
+            // Leave the mark in place and abort this procedure.
+            o_done = true; break;
+        }
         else if ( i_eccAttns & MAINT_MPE )
         {
             PRDF_TRAC( PRDF_FUNC "MPE Detected: 0x%08x,0x%02x",
