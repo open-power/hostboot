@@ -1014,4 +1014,18 @@
     <group>debug</group>
   </attribute>
   <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_MIN_PROC_POWER_PER_CHIP</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Indicates maximum power (in Watts) at the minimum frequency per processor chip
+        as defined by the WOF Table for all the parts used in the machine. This will be
+        used to calculate the (Hard Min Power Cap). If not set, the calculation will
+        use DEFAULT_MIN_PROC_POWER_PER_CHIP from the MRW.
+    </description>
+    <valueType>uint16</valueType>
+    <writeable/>
+    <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
 </attributes>
