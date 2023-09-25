@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,7 @@ const uint32_t OFFSET_64K     = 0x00010000;
 //------------------------------------------------------------------------------
 // Function pointer typedef definition for HWP call support
 typedef fapi2::ReturnCode(*ody_omi_hss_ppe_load_FP_t) (
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+    const fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>&,
     const uint8_t*,
     const uint32_t,
     const uint32_t,

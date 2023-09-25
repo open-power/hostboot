@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,8 +76,12 @@ enum IO_PPE_CONSTS
     IO_PPE_HARD_RESET_DELAY_SIM_CYCLES = 10000000,
     IO_PPE_RESUME_DELAY_NS = 5000,
     IO_PPE_RESUME_DELAY_SIM_CYCLES = 10000000,
+};
 
-    MAX_LANES = 32
+enum IO_PPE_IAR_CONSTS
+{
+    PPE_RESET_IAR = 0xfffe0040 >> 2,
+    PPE_PROGRAM_EXCEPTION_IAR = 0xfffe00e0 >> 2
 };
 
 //WARNING!!  Since these are hard coded and not generated
@@ -108,6 +112,9 @@ enum IO_PPE_EXT_CMD_REQ_BITS
     BIST_START_CMD    = HW_REG_INIT_PG | DCCAL_PL | POWER_ON_PL | TX_BIST_TESTS_PL | TRAIN_PL | RECAL_PL | BIST_FINAL,
 };
 
+///
+/// @brief Common PPE procedures bewteen POZ
+///
 template<fapi2::TargetType K, fapi2::MulticastType M = fapi2::MULTICAST_OR, typename V = fapi2::plat_target_handle_t>
 class io_ppe_common
 {
@@ -120,43 +127,134 @@ class io_ppe_common
             FAPI_DBG("io_ppe_common constructor");
         }
 
+        ///
+        /// @brief Calculate the PPE data rate number from the data rate value
+        ///
+        /// @param[in] i_data_rate  Input data rate as GBps
+        ///
+        /// @return uint32_t value of 0..6 based on datarate
         uint32_t calc_ppe_data_rate(const uint32_t i_data_rate);
+        ///
+        /// @brief Calculate the PCIE data rate number from the data rate value
+        ///
+        /// @param[in] i_data_rate  Input data rate as GBps
+        ///
+        /// @return uint32_t value of 0..4 based on datarate
+        uint32_t calc_pcie_data_rate(const uint32_t i_data_rate);
 
+        ///
+        /// @brief Sets the LTE Gain & LTE Zero
+        ///
+        /// @param[in] i_target     Chip target to start
+        /// @param[in] i_thread     The thread LTE is being set on
+        /// @param[in] i_lane       The lane LTE is being set on
+        /// @param[in] i_rx_lte_g   LTE Gain value to be set
+        /// @param[in] i_rx_lte_z   LTE Zero value to be set
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode set_lte_gain_zero(const fapi2::Target<K, M, V>& i_target,
                                             const uint8_t i_thread,
                                             const uint8_t i_lane,
                                             const uint32_t i_rx_lte_g,
                                             const uint32_t i_rx_lte_z);
 
+        ///
+        ///
+        /// @brief Sets the CTLE Peak 1/2 values
+        ///
+        /// @param[in] i_target     Chip target to start
+        /// @param[in] i_thread     The thread LTE is being set on
+        /// @param[in] i_lane       The lane LTE is being set on
+        /// @param[in] i_rx_peak1   Rx Peak1 value
+        /// @param[in] i_rx_peak2   Rx Peak2 value
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code. error code.
         fapi2::ReturnCode set_ctle_peaking(const fapi2::Target<K, M, V>& i_target,
                                            const uint8_t i_thread,
                                            const uint8_t i_lane,
                                            const int32_t i_rx_peak1,
                                            const int32_t i_rx_peak2);
 
-        fapi2::ReturnCode ppe_start(const fapi2::Target<K, M, V>& i_target, bool& o_fail,
-                                    uint32_t& o_iar);
+        ///
+        /// @brief Starts the PPE and checks that it's in a healthy state
+        ///
+        /// @param[in] i_target    Chip target to start
+        /// @param[out] o_fail     If in PPE start failed
+        /// @param[out] o_iar      IAR value for debug print outs
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
+        fapi2::ReturnCode ppe_start(const fapi2::Target<K, M, V>& i_target, bool& o_fail, uint32_t& o_iar);
 
+        ///
+        /// @brief Configures the PPEs threads and VIO voltage
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_num_threads    Number of threads to initialize
+        /// @param[in] i_vio_volts      VIO voltage to be set in mV
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode config_ppe(const fapi2::Target<K, M, V>& i_target,
                                      const uint8_t i_num_threads,
                                      const uint32_t i_vio_volts);
 
+        ///
+        /// @brief Configures the threads of the PPE with the number of lanes
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_thread         Thread to run on
+        /// @param[in] i_gcr_id         GCR ID to run on
+        /// @param[in] i_num_rx_lanes   Number of Rx lanes to initialize
+        /// @param[in] i_num_tx_lanes   Number of Tx lanes to initialize
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode config_thread(const fapi2::Target<K, M, V>& i_target,
                                         const uint8_t i_thread,
                                         const uint8_t i_gcr_id,
                                         const uint8_t i_num_rx_lanes,
                                         const uint8_t i_num_tx_lanes);
-
+        ///
+        /// @brief BIST Initialization per thread
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_thread         Thread to run on
+        /// @param[in] i_rx_mask        Rx lane mask
+        /// @param[in] i_freq           Frequency lanes are being run at
+        /// @param[in] i_bist_timer_sel BIST Timer value to set
+        /// @param[in] i_pcie_mode      If link being set is PCIE link
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode bist_init_thread(const fapi2::Target<K, M, V>& i_target,
                                            const uint8_t i_thread,
                                            const uint32_t i_rx_mask,
                                            const uint32_t i_freq,
-                                           const uint8_t i_bist_timer_sel);
+                                           const uint8_t i_bist_timer_sel,
+                                           const uint8_t i_pcie_mode);
 
+        ///
+        /// @brief BIST Initialization per PPE
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_group          Group to run on
+        /// @param[in] i_dacTest        DAC Test avlue to set
+        /// @param[in] i_esdTest        ESD Test value to set
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode bist_init(const fapi2::Target<K, M, V>& i_target,
+                                    const uint8_t i_group,
                                     const uint8_t i_dacTest,
                                     const uint8_t i_esdTest);
 
+        ///
+        /// @brief BIST PPE cleanup to prepare for DCCAL
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_thread         Thread to run on
+        /// @param[in] i_rx_lanes_0_31  Rx lane mask
+        /// @param[in] i_tx_lanes_0_31  Tx lane mask
+        /// @param[out] o_done          Done value for cleanup external command
+        /// @param[out] o_fail          Fail value for cleanup external command
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode bist_cleanup(const fapi2::Target<K, M, V>& i_target,
                                        const uint8_t i_thread,
                                        const uint32_t i_rx_lanes_0_31,
@@ -164,6 +262,18 @@ class io_ppe_common
                                        uint8_t& o_done,
                                        uint32_t& o_fail);
 
+        ///
+        /// @brief PPE initialization for DCCAL
+        ///
+        /// @param[in] i_target             Chip target to start
+        /// @param[in] i_thread             Thread to run on
+        /// @param[in] i_date_rate          Date rate PPE is running at
+        /// @param[in] i_channel_length     Channel length of the PPE's lanes
+        /// @param[in] i_spread_en          Spread spectrum enable
+        /// @param[in] i_pcie_mode          If the PPE is PCIE
+        /// @param[in] i_auto_recal_mask    Auto Recal mask
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode hss_init(const fapi2::Target<K, M, V>& i_target,
                                    const uint8_t i_thread,
                                    const uint32_t i_data_rate,
@@ -171,6 +281,20 @@ class io_ppe_common
                                    const uint8_t i_spread_en,
                                    const uint8_t i_pcie_mode,
                                    const uint32_t i_auto_recal_mask);
+
+        ///
+        /// @brief Tx initialization for DCCAL
+        ///
+        /// @param[in] i_target             Chip target to start
+        /// @param[in] i_thread             Thread to run on
+        /// @param[in] i_lane_mask          Tx lane mask
+        /// @param[in] i_tx_pre1            Tx Pre1 value
+        /// @param[in] i_tx_pre2            Tx Pre2 value
+        /// @param[in] i_tx_post            Tx Post value
+        /// @param[in] i_tx_fifo_l2u_dly    FIFO L2U Delay
+        /// @param[in] i_tx_unload_sel      Unload select value
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode hss_init_tx(const fapi2::Target<K, M, V>& i_target,
                                       const uint8_t i_thread,
                                       const uint32_t i_lane_mask,
@@ -179,6 +303,19 @@ class io_ppe_common
                                       const uint8_t i_tx_post,
                                       const uint32_t i_tx_fifo_l2u_dly,
                                       const uint32_t i_tx_unload_sel);
+
+        ///
+        /// @brief Rx initialization for DCCAL
+        ///
+        /// @param[in] i_target             Chip target to start
+        /// @param[in] i_thread             Thread to run on
+        /// @param[in] i_lane_mask          Rx lane mask
+        /// @param[in] i_rx_lte_g           Rx LTE Gain value
+        /// @param[in] i_rx_lte_z           Rx LTE Zero value
+        /// @param[in] i_rx_peak1           Rx Peak 1 value
+        /// @param[in] i_rx_peak2           Rx Peak 2 value
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode hss_init_rx(const fapi2::Target<K, M, V>& i_target,
                                       const uint8_t i_thread,
                                       const uint32_t i_lane_mask,
@@ -187,51 +324,141 @@ class io_ppe_common
                                       const int32_t i_rx_peak1,
                                       const int32_t i_rx_peak2);
 
+        ///
+        /// @brief Set the functional margins for HSS Init
+        ///
+        /// @param[in] i_target                 Chip target to start
+        /// @param[in] i_thread                 Thread to run on
+        /// @param[in] i_lane_mask              Rx lane mask
+        /// @param[in] i_rx_vert_offset         Rx vertical offset
+        /// @param[in] i_rx_horiz_data_offset   Rx hoirzontal data offset
+        /// @param[in] i_rx_horiz_edge_offset   Rx hoirzontal edge offset
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode setup_func_margin(const fapi2::Target<K, M, V>& i_target,
                                             const uint8_t i_thread,
                                             const uint8_t i_rx_vert_offset,
                                             const uint8_t i_rx_horiz_data_offset,
                                             const uint8_t i_rx_horiz_edge_offset);
 
+        ///
+        /// @brief Set the ext_cmd_req bits and start the PPE running those functions
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_thread         Thread to run on
+        /// @param[in] i_rx_lanes_0_31  Rx lane mask
+        /// @param[in] i_tx_lanes_0_31  Tx lane mask
+        /// @param[in] i_ext_cmd_req    External command to set/run
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode ext_cmd_start(const fapi2::Target<K, M, V>& i_target,
                                         const uint8_t i_thread,
                                         const uint32_t i_rx_lanes_0_31,
                                         const uint32_t i_tx_lanes_0_31,
                                         const uint32_t i_ext_cmd_req);
 
+        ///
+        /// @brief Check the status ext_cmd_done and ext_cmd_fail bits
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_thread         Thread to run on
+        /// @param[in] i_ext_cmd_req    External command to check
+        /// @param[out] o_done          Done value for cleanup external command
+        /// @param[out] o_fail          Fail value for cleanup external command
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode ext_cmd_check(const fapi2::Target<K, M, V>& i_target,
                                         const uint8_t i_thread,
                                         const uint32_t i_ext_cmd_req,
                                         uint8_t& o_done,
                                         uint32_t& o_fail);
 
+        ///
+        /// @brief Poll the status ext_cmd_done and ext_cmd_fail bits 1000 times
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_thread         Thread to run on
+        /// @param[in] i_ext_cmd_req    External command to check
+        /// @param[out] o_done          Done value for cleanup external command
+        /// @param[out] o_fail          Fail value for cleanup external command
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode ext_cmd_poll(const fapi2::Target<K, M, V>& i_target,
                                        const uint8_t i_thread,
                                        const uint32_t i_ext_cmd_req,
                                        uint8_t& o_done,
                                        uint32_t& o_fail);
 
+        ///
+        /// @brief Print debug info, primarily BIST and PPE statuses
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_thread         Thread to run on
+        /// @param[in] i_rx_lanes_0_31  Rx lane mask
+        /// @param[in] i_tx_lanes_0_31  Tx lane mask
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode debug_display(const fapi2::Target<K, M, V>& i_target,
                                         const uint8_t i_thread,
                                         const uint32_t i_rx_lanes_0_31,
                                         const uint32_t i_tx_lanes_0_31);
 
+        ///
+        /// @brief Enable lanes procedure POWER_ON_PL | TX_FIFO_INIT_PL
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_num_threads    Threads to run on
+        /// @param[in] i_rx_lanes_0_31  Rx lane mask
+        /// @param[in] i_tx_lanes_0_31  Tx lane mask
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode enable_lanes(const fapi2::Target<K, M, V>& i_target,
                                        const fapi2::buffer<uint64_t> i_num_threads,
                                        const uint32_t i_rx_lanes_0_31,
                                        const uint32_t i_tx_lanes_0_31);
 
+        ///
+        /// @brief Check if enable lanes is completed
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_num_threads    Threads to run on
+        /// @param[out] o_done          Done value for cleanup external command
+        /// @param[out] o_fail          Fail value for cleanup external command
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode check_enable_lanes_done(const fapi2::Target<K, M, V>& i_target,
                 const fapi2::buffer<uint64_t> i_num_threads,
                 fapi2::buffer<uint64_t>& o_done,
                 fapi2::buffer<uint64_t>& o_fail);
 
+
+        ///
+        /// @brief Start the IOBIST external commands
+        ///
+        /// @param[in] i_target             Chip target to start
+        /// @param[in] i_thread             Thread to run on
+        /// @param[in] i_rx_lanes_0_31      Rx lane mask
+        /// @param[in] i_tx_lanes_0_31      Tx lane mask
+        /// @param[in] i_ext_cmd_override   External command to run instead of BIST_START
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode bist_start(const fapi2::Target<K, M, V>& i_target,
                                      const uint8_t i_thread,
                                      const uint32_t i_rx_lanes_0_31,
                                      const uint32_t i_tx_lanes_0_31,
                                      const uint32_t i_ext_cmd_override);
 
+        ///
+        /// @brief Poll for done on the IOBIST external commands
+        ///
+        /// @param[in] i_target             Chip target to start
+        /// @param[in] i_thread             Thread to run on
+        /// @param[out] o_done              Done value for cleanup external command
+        /// @param[out] o_fail              Fail value for cleanup external command
+        /// @param[in] i_ext_cmd_override   External command to run instead of BIST_START
+        /// @param[in] i_poll_count         Number of times to poll for
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode bist_poll(const fapi2::Target<K, M, V>& i_target,
                                     const uint8_t i_num_threads,
                                     uint8_t& o_done,
@@ -239,11 +466,53 @@ class io_ppe_common
                                     const uint32_t i_ext_cmd_override,
                                     const uint32_t i_poll_count);
 
+        ///
+        /// @brief Sim speed up options
+        ///
+        /// @param[in] i_target             Chip target to start
+        /// @param[in] i_thread             Thread to run on
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode fast_mode(const fapi2::Target<K, M, V>& i_target,
                                     const uint8_t i_thread);
 
+        ///
+        /// @brief Gets the number of lanes from the mask
+        ///
+        /// @param[in] i_lane_mask  Lane mask to check
+        ///
+        /// @return uint8_t     The number of lanes
         uint8_t get_num_lanes(uint32_t);
 
+        ///
+        /// @brief Clears the DL IFC Ignore bit
+        ///
+        /// @param[in] i_target             Chip target to start
+        /// @param[in] i_thread             Thread to run on
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
+        fapi2::ReturnCode clear_dl_ignore(const fapi2::Target<K, M, V>& i_target,
+                                          const uint8_t i_thread);
+
+        ///
+        /// @brief Sets the DL IFC Ignore bit
+        ///
+        /// @param[in] i_target             Chip target to start
+        /// @param[in] i_thread             Thread to run on
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
+        fapi2::ReturnCode set_dl_ignore(const fapi2::Target<K, M, V>& i_target,
+                                        const uint8_t i_thread);
+
+        ///
+        /// @brief Sets the PCIE presets for all gens and lanes
+        ///
+        /// @param[in] i_target             Chip target to start
+        /// @param[in] i_thread             Thread to run on
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
+        fapi2::ReturnCode set_pcie_presets(const fapi2::Target<K, M, V>& i_target,
+                                           const uint8_t i_thread);
 };
 
 // ===============================================================
@@ -288,6 +557,39 @@ uint32_t io_ppe_common<K, M, V>::calc_ppe_data_rate(const uint32_t i_data_rate)
     }
 
     return l_ppe_data_rate;
+}
+
+template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
+uint32_t io_ppe_common<K, M, V>::calc_pcie_data_rate(const uint32_t i_data_rate)
+{
+    uint32_t l_pcie_data_rate = 0;
+
+    if (i_data_rate <= 2500)
+    {
+        l_pcie_data_rate = 0;
+    }
+    else if (i_data_rate <= 5000)
+    {
+        l_pcie_data_rate = 1;
+    }
+    else if (i_data_rate <= 8000)
+    {
+        l_pcie_data_rate = 2;
+    }
+    else if (i_data_rate <= 16000)
+    {
+        l_pcie_data_rate = 3;
+    }
+    else if (i_data_rate <= 32000)
+    {
+        l_pcie_data_rate = 4;
+    }
+    else
+    {
+        l_pcie_data_rate = 5;
+    }
+
+    return l_pcie_data_rate;
 }
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
@@ -370,7 +672,6 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::config_ppe(const fapi2::Target<K, M, V
         l_vio_volts = 3;
     }
 
-
     FAPI_TRY(IMG_REG_PPE_NUM_THREADS_PUT(iv_regs, i_target, i_num_threads));
 
     //"ppe_vio_volts": 2, >850mv && <=900mv
@@ -420,26 +721,14 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     const uint64_t c_xixcr       = (iv_regs->base_addr + 0x10);
     const uint64_t c_xidbgpro    = (iv_regs->base_addr + 0x15);
 
-    const uint64_t c_ppe_start_reset_iar = 0xfffe0040 >> 2;
     const uint8_t c_sram_scrub_enable_bit = 1;
     const uint8_t c_xidbgpro_bit = 32;
     const uint8_t c_xidbgpro_len = 30;
 
     const uint8_t c_ppe_halted_bit = 17;
+    const uint8_t c_ppe_status_bit = 0;
 
     fapi2::buffer<uint64_t> l_buffer = 0;
-
-    // Check if the IAR is already set
-    FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer));
-    l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(o_iar);
-
-    if (o_iar == c_ppe_start_reset_iar)
-    {
-        FAPI_DBG("PPE is already running");
-        goto fapi_try_exit;
-    }
-
-    l_buffer.flush<0>();
 
     // SRAM Scrub, set via Write-OR to CSCR
     FAPI_DBG("SRAM Scrub");
@@ -458,10 +747,10 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer));
     l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(o_iar);
 
-    if (o_iar != c_ppe_start_reset_iar)
+    if ((o_iar != PPE_RESET_IAR) || (o_iar == PPE_PROGRAM_EXCEPTION_IAR))
     {
         o_fail = true;
-        FAPI_DBG("IAR (0x%8x) did not reset.", o_iar);
+        FAPI_DBG("IAR (0x%8x) did not reset correctly.", o_iar);
         return fapi2::current_err;
     }
 
@@ -477,7 +766,7 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer));
     l_buffer.extractToRight<c_xidbgpro_bit, c_xidbgpro_len, uint32_t>(o_iar);
 
-    if (o_iar == c_ppe_start_reset_iar)
+    if (o_iar == PPE_RESET_IAR)
     {
         o_fail = true;
         FAPI_DBG("IAR (0x%8x) did not resume.", o_iar);
@@ -491,6 +780,17 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ppe_start(const fapi2::Target<K, M, V>
     l_buffer.setBit<c_ppe_halted_bit>();
     FAPI_TRY(fapi2::putScom(i_target, c_lfir_wclear, l_buffer),
              "Error putscom to MAC0_LFIR_REG (clear halt).");
+
+    FAPI_DBG("Check PPE halted state");
+    FAPI_TRY(fapi2::getScom(i_target, c_xidbgpro, l_buffer),
+             "Error putscom to XIDBGPRO (get halted state).");
+
+    if (l_buffer.getBit<c_ppe_status_bit>())
+    {
+        o_fail = true;
+        FAPI_DBG("PPE is halted.");
+        return fapi2::current_err;
+    }
 
 fapi_try_exit:
     FAPI_DBG("End");
@@ -506,14 +806,19 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init_thread(const fapi2::Target<K
         const uint8_t i_thread,
         const uint32_t i_rx_mask,
         const uint32_t i_freq,
-        const uint8_t i_bist_timer_sel)
+        const uint8_t i_bist_timer_sel,
+        const uint8_t i_pcie_mode)
 {
     FAPI_DBG("Start");
-    uint32_t l_lane = 0;
-    uint32_t l_rx_mask = i_rx_mask;
-    uint8_t l_ppe_data_rate = calc_ppe_data_rate(i_freq);
 
-    MEM_REG_PPE_DATA_RATE_PUT(iv_regs, i_target, i_thread, l_ppe_data_rate);
+    uint8_t l_ppe_data_rate = calc_ppe_data_rate(i_freq);
+    uint8_t l_pcie_data_rate = calc_pcie_data_rate(i_freq);
+
+    // Set PCIe Data rate
+    FAPI_TRY(FW_REG_FW_BIST_PCIE_RATE_PUT(iv_regs, i_target, i_thread, l_pcie_data_rate));
+
+    // Set PPE Data rate
+    FAPI_TRY(MEM_REG_PPE_DATA_RATE_PUT(iv_regs, i_target, i_thread, l_ppe_data_rate));
 
     // Cleanup of previous run
     FAPI_TRY(MEM_REG_BIST_OVERALL_PASS_PUT(iv_regs, i_target, i_thread, 0));
@@ -530,21 +835,8 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init_thread(const fapi2::Target<K
     //"ppe_channel_loss": 2,
     FAPI_TRY(MEM_REG_PPE_CHANNEL_LOSS_PUT(iv_regs, i_target, i_thread, 2));
 
-    //"rx_ctle_peak1_cal_disable": 0, *
-    FAPI_TRY(MEM_REG_RX_CTLE_PEAK1_CAL_DISABLE_PUT(iv_regs, i_target, i_thread, 0));
-
-    for (l_lane = 0; l_lane < MAX_LANES; l_lane++)
-    {
-        if (l_rx_mask & 0x80000000)
-        {
-            //"rx_quad_ph_adj_min_check": 0, *
-            FAPI_TRY(MEM_REG_RX_QUAD_PH_ADJ_MIN_CHECK_PL_PUT(iv_regs, i_target, i_thread, l_lane, 0));
-            //"rx_quad_ph_adj_max_check": 31 *
-            FAPI_TRY(MEM_REG_RX_QUAD_PH_ADJ_MAX_CHECK_PL_PUT(iv_regs, i_target, i_thread, l_lane, 31));
-        }
-
-        l_rx_mask <<= 1;
-    }
+    // Set FW PCIE Mode
+    FAPI_TRY(FW_REG_FW_PCIE_MODE_PUT(iv_regs, i_target, i_thread, i_pcie_mode));
 
     FAPI_TRY(iv_regs->flushCache(i_target));
 
@@ -553,8 +845,9 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
+template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init(const fapi2::Target<K, M, V>& i_target,
+        const uint8_t i_group,
         const uint8_t i_dacTest,
         const uint8_t i_esdTest)
 {
@@ -571,7 +864,8 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init(const fapi2::Target<K, M, V>
     fapi2::buffer<uint64_t> l_buffer;
     uint64_t l_addr = 0;
 
-    l_addr = buildAddr(iv_regs->base_addr, 0, 0, c_reg_rx_datasm_cnt22);
+    l_addr = buildAddr(iv_regs->base_addr, i_group, 0, c_reg_rx_datasm_cnt22);
+    FAPI_DBG("RX_DATASM_CNTL22 Address 0x%08X%08X", (l_addr >> 32) & 0xFFFFFFFF, l_addr & 0xFFFFFFFF);
 
     // Write rx_dac_test_check_en = 0
     FAPI_DBG("Setting RX DAC test Check enabled");
@@ -586,7 +880,8 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_init(const fapi2::Target<K, M, V>
 
     l_buffer.flush<0>();
 
-    l_addr = buildAddr(iv_regs->base_addr, 0, 0, c_reg_rx_ctl_cntl5);
+    l_addr = buildAddr(iv_regs->base_addr, i_group, 0, c_reg_rx_ctl_cntl5);
+    FAPI_DBG("RX_CTL_CNTL5 Address 0x%08X%08X", (l_addr >> 32) & 0xFFFFFFFF, l_addr & 0xFFFFFFFF);
 
     // Write rx_pervasive_capt = 1
     FAPI_DBG("Setting RX Pervasive Capt enabled");
@@ -627,7 +922,17 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_cleanup(const fapi2::Target<K, M,
 
     fapi2::buffer<uint64_t> l_buffer;
     uint64_t l_addr = 0;
+    uint8_t l_max_lanes = 0;
     uint8_t l_lane = 0;
+
+    // Get the max number of lanes from the lane mask
+    for (uint32_t l_shift = 0; l_shift < 32; l_shift++)
+    {
+        if ((0x1 << l_shift) & i_rx_lanes_0_31)
+        {
+            l_max_lanes++;
+        }
+    }
 
     FAPI_DBG("Starting BIST cleanup");
 
@@ -641,28 +946,28 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_cleanup(const fapi2::Target<K, M,
 
     // Set rx_ctl_cntl5_pg to 0
     l_buffer = 0;
-    l_addr = buildAddr(iv_regs->base_addr, 0, 0, c_reg_rx_ctl_cntl5);
+    l_addr = buildAddr(iv_regs->base_addr, i_thread, 0, c_reg_rx_ctl_cntl5);
     FAPI_TRY(putScom(i_target, l_addr, l_buffer),
              "Error putscom to address 0x%08X.", l_addr);
 
-    for (l_lane = 0; l_lane < 8; l_lane++)
+    for (l_lane = 0; l_lane < l_max_lanes; l_lane++)
     {
         if (i_rx_lanes_0_31 & 0x80000000)
         {
             // Set rx_pr_fw_inertia_amt to 4
-            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, c_reg_rx_bit_mode4);
+            l_addr = buildAddr(iv_regs->base_addr, i_thread, l_lane, c_reg_rx_bit_mode4);
             FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 4, 48 + 0, 4),
                      "Error rmwIoHardwareReg to address 0x%08X.", l_addr);
 
             // Set rx_pr_fw_inertia_amt_coarse to 7
-            l_addr = buildAddr(iv_regs->base_addr, 0, l_lane, c_reg_rx_bit_mode5);
+            l_addr = buildAddr(iv_regs->base_addr, i_thread, l_lane, c_reg_rx_bit_mode5);
             FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 7, 48 + 0, 4),
                      "Error rmwIoHardwareReg to address 0x%08X.", l_addr);
         }
     }
 
     // Set tx_bist_en_alias to 0
-    l_addr = buildAddr(iv_regs->base_addr, 0, 0, c_reg_tx_ctl_mode1);
+    l_addr = buildAddr(iv_regs->base_addr, i_thread, 0, c_reg_tx_ctl_mode1);
     FAPI_TRY(rmwIoHardwareReg(i_target, l_addr, 0, 48 + 6, 3),
              "Error rmwIoHardwareReg to address 0x%08X.", l_addr);
 
@@ -789,10 +1094,9 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::hss_init_rx(const fapi2::Target<K, M, 
         const int32_t i_rx_peak2)
 {
     FAPI_DBG("Starting io_ppe_common::hss_init_rx");
-
     uint8_t l_lane = 0;
 
-    for (l_lane = 0; l_lane < MAX_LANES; l_lane++)
+    for (l_lane = 0; l_lane < 32; l_lane++)
     {
         if (i_lane_mask & (0x80000000 >> l_lane))
         {
@@ -871,6 +1175,9 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_start(const fapi2::Target<K, M
     FAPI_TRY(FW_REG_EXT_CMD_REQ_00_15_PUT(iv_regs, i_target, i_thread, l_ext_cmd_req_0_15));
     FAPI_TRY(FW_REG_EXT_CMD_REQ_16_31_PUT(iv_regs, i_target, i_thread, l_ext_cmd_req_16_31));
 
+    // Flush lanes before start
+    FAPI_TRY(iv_regs->flushCache(i_target));
+
 fapi_try_exit:
     FAPI_DBG("Ending io_ppe_common::ext_cmd_start_thread");
     return fapi2::current_err;
@@ -886,6 +1193,10 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_check(const fapi2::Target<K, M
     FAPI_DBG("Starting io_ppe_common::ext_cmd_check");
 
     fapi2::buffer<uint64_t> l_data = 0;
+
+    // Need to flush to clear the cache before checking so
+    // The HW is read again
+    FAPI_TRY(iv_regs->flushCache(i_target));
 
     FAPI_TRY(FW_REG_EXT_CMD_DONE_00_15_GET(iv_regs, i_target, i_thread, l_data));
     o_done = ((l_data << 16) & (0xFFFF0000 & i_ext_cmd_req)) == (0xFFFF0000 & i_ext_cmd_req);
@@ -958,6 +1269,8 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::debug_display(const fapi2::Target<K, M
 
     fapi2::buffer<uint64_t> l_data = 0;
     uint32_t l_lane = 0;
+
+    FAPI_DBG("BASE ADDRESS: 0x%X%X, thread: %d", (iv_regs->base_addr >> 32), iv_regs->base_addr, i_thread);
 
     FAPI_TRY(iv_regs->flushCache(i_target));
 
@@ -1041,7 +1354,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
+template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::bist_poll(const fapi2::Target<K, M, V>& i_target,
         const uint8_t i_thread,
         uint8_t& o_done,
@@ -1064,17 +1377,19 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::bist_poll(const fapi2::Target<K, M, V>
 
     while (!o_done && (l_loop_count < i_poll_count))
     {
-        FAPI_DBG("Loop: %d", l_loop_count);
         FAPI_TRY(iv_regs->flushCache(i_target));
         FAPI_TRY(ext_cmd_check(i_target, i_thread, l_cmd, o_done, o_fail));
 
+
         if (!o_done)
         {
-            fapi2::delay(2000000, 2000000); // ns, sim cycles. 1ms
+            fapi2::delay(20000000, 20000000); // ns, 20000000 sim cycles. 20ms
         }
 
         l_loop_count++;
     }
+
+    FAPI_DBG("Final loop count %d", l_loop_count);
 
     FAPI_TRY(MEM_REG_BIST_OVERALL_PASS_GET(iv_regs, i_target, i_thread, l_data));
     IO_PPE_COMMON_PRINT(l_data == 0, "Thread %d BIST_OVERALL_PASS: 0x%04x", i_thread, l_data)
@@ -1153,11 +1468,138 @@ uint8_t io_ppe_common<K, M, V>::get_num_lanes(uint32_t i_lane_mask)
 {
     uint8_t count = 0;
 
-    while (i_lane_mask)
+    while(i_lane_mask)
     {
         count += i_lane_mask & 0x1;
         i_lane_mask >>= 0x1;
     }
 
     return count;
+}
+
+template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
+fapi2::ReturnCode io_ppe_common<K, M, V>::clear_dl_ignore(const fapi2::Target<K, M, V>& i_target,
+        const uint8_t i_thread)
+{
+    FAPI_TRY(MEM_REG_PPE_DL_IFC_IGNORE_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(iv_regs->flushCache(i_target));
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
+fapi2::ReturnCode io_ppe_common<K, M, V>::set_dl_ignore(const fapi2::Target<K, M, V>& i_target,
+        const uint8_t i_thread)
+{
+    FAPI_DBG("Setting DL Ignore bit")
+    FAPI_TRY(MEM_REG_PPE_DL_IFC_IGNORE_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(iv_regs->flushCache(i_target));
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
+}
+
+template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
+fapi2::ReturnCode io_ppe_common<K, M, V>::set_pcie_presets(const fapi2::Target<K, M, V>& i_target,
+        const uint8_t i_thread)
+{
+    FAPI_DBG("Setting PCIE Presets")
+    // Gen1
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN1_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN1_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN1_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN1_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN1_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN1_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN1_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN1_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN1_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN1_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN1_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN1_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN1_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN1_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN1_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN1_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+
+    // Gen 2
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN2_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN2_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN2_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN2_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN2_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN2_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN2_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN2_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN2_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN2_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN2_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN2_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN2_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN2_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN2_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN2_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+
+    // Gen3
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN3_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN3_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN3_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN3_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN3_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN3_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN3_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN3_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN3_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN3_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN3_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN3_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN3_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN3_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN3_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN3_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+
+    // Gen 4
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN4_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN4_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN4_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN4_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN4_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN4_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN4_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN4_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN4_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN4_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN4_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN4_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN4_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 4));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN4_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN4_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN4_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+
+    // Gen 5
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN5_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN5_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN5_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE0_GEN5_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN5_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN5_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN5_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE1_GEN5_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN5_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN5_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN5_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE2_GEN5_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN5_PRESET_RX_CTLE_PEAK1_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN5_PRESET_RX_CTLE_PEAK2_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN5_PRESET_RX_LTE_GAIN_PUT(iv_regs, i_target, i_thread, 7));
+    FAPI_TRY(MEM_REG_PCIE_LANE3_GEN5_PRESET_RX_LTE_ZERO_PUT(iv_regs, i_target, i_thread, 1));
+
+    FAPI_TRY(iv_regs->flushCache(i_target));
+
+fapi_try_exit:
+    FAPI_DBG("End");
+    return fapi2::current_err;
 }

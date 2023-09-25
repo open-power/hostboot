@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -231,7 +231,7 @@ void stream_mem_data_pt(const fapi2::Target<K, M, V>& i_target,
     auto_increment_ctrl(i_target, i_base_addr, false);
 }
 
-/// @brief                  Stream the per lane data back to file
+/// @brief                      Stream the HW data back to file
 /// @param[in] i_target         Target Chip
 /// @param[out] o_ostream       Target chip's base address
 /// @param[in] i_base_addr      Streaming object to write data to
@@ -240,7 +240,7 @@ void stream_mem_data_pt(const fapi2::Target<K, M, V>& i_target,
 /// @param[in] i_start          Starting register value
 /// @param[in] i_end            Ending register value
 template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
-void stream_pl_data(const fapi2::Target<K, M, V>& i_target,
+void stream_hw_data(const fapi2::Target<K, M, V>& i_target,
                     fapi2::hwp_bit_ostream& o_ostream,
                     const uint64_t i_base_addr,
                     const uint16_t i_num_groups,
@@ -272,74 +272,5 @@ void stream_pl_data(const fapi2::Target<K, M, V>& i_target,
                 o_ostream.put16(l_data);
             }
         }
-    }
-}
-
-/// @brief                  Stream the per lane data back to file
-/// @param[in] i_target         Target Chip
-/// @param[out] o_ostream       Target chip's base address
-/// @param[in] i_base_addr      Streaming object to write data to
-/// @param[in] i_num_groups     Number of groups to loop over
-/// @param[in] i_start          Starting register value
-/// @param[in] i_end            Ending register value
-template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
-void stream_pg_data(const fapi2::Target<K, M, V>& i_target,
-                    fapi2::hwp_bit_ostream& o_ostream,
-                    const uint64_t i_base_addr,
-                    const uint16_t i_num_groups,
-                    const uint16_t i_start,
-                    const uint16_t i_end)
-{
-    fapi2::buffer<uint64_t> l_data = 0;
-    uint64_t l_addr = 0;
-    uint32_t l_rc = 0; // FAPI_RC_SUCCESS
-
-    for (uint32_t l_reg_addr = i_start; l_reg_addr <= i_end; l_reg_addr += 0x10)
-    {
-        for (uint32_t l_ioo_unit = 0; l_ioo_unit < i_num_groups; l_ioo_unit++)
-        {
-            l_addr = buildAddr(i_base_addr, l_ioo_unit, 0, l_reg_addr);
-
-            l_rc = fapi2::getScom(i_target, l_addr, l_data);
-
-            if (l_rc)
-            {
-                l_data = 0xDEADDEADDEADDEAD;
-            }
-
-            o_ostream.put16(l_data);
-        }
-    }
-}
-
-/// @brief                  Stream the per lane data back to file
-/// @param[in] i_target         Target Chip
-/// @param[out] o_ostream       Target chip's base address
-/// @param[in] i_base_addr      Streaming object to write data to
-/// @param[in] i_start          Starting register value
-/// @param[in] i_end            Ending register value
-template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
-void stream_pb_data(const fapi2::Target<K, M, V>& i_target,
-                    fapi2::hwp_bit_ostream& o_ostream,
-                    const uint64_t i_base_addr,
-                    const uint16_t i_start,
-                    const uint16_t i_end)
-{
-    fapi2::buffer<uint64_t> l_data = 0;
-    uint64_t l_addr = 0;
-    uint32_t l_rc = 0; // FAPI_RC_SUCCESS
-
-    for (uint32_t l_reg_addr = i_start; l_reg_addr <= i_end; l_reg_addr += 0x10)
-    {
-        l_addr = buildAddr(i_base_addr, 0, 0, l_reg_addr);
-
-        l_rc = fapi2::getScom(i_target, l_addr, l_data);
-
-        if (l_rc)
-        {
-            l_data = 0xDEADDEADDEADDEAD;
-        }
-
-        o_ostream.put16(l_data);
     }
 }

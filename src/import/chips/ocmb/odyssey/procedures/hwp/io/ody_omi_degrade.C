@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -160,7 +160,7 @@ fapi2::ReturnCode ody_omi_degrade(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
         }
     }
 
-    FAPI_ASSERT((l_disabled_lanes & 0xFF),
+    FAPI_ASSERT(!l_disabled_lanes,
                 fapi2::IO_PPE_UNDEGRADE_FAIL()
                 .set_TARGET(i_target)
                 .set_DISABLED_LANES(l_disabled_lanes),

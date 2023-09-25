@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,10 +98,10 @@ fapi2::ReturnCode ody_omi_hss_bist_init(const fapi2::Target<fapi2::TARGET_TYPE_O
     l_dl0_cya.set_PRBS15_NPRBS7(1);
     FAPI_TRY(l_dl0_cya.putScom(i_target));
 
-    FAPI_TRY(l_ppe_common.bist_init(i_target, l_dacTest, l_esdTest),
+    FAPI_TRY(l_ppe_common.bist_init(i_target, 0, l_dacTest, l_esdTest),
              "Failed to run common HSS BIST init");
 
-    FAPI_TRY(l_ppe_common.bist_init_thread(i_target, c_thread, l_rx_mask, l_omi_freq, l_bist_timer),
+    FAPI_TRY(l_ppe_common.bist_init_thread(i_target, c_thread, l_rx_mask, l_omi_freq, l_bist_timer, 0),
              "Failed to run common HSS BIST init");
 
     if ( l_omi_freq < 32000)
