@@ -7473,30 +7473,18 @@ fapi2::ReturnCode handle_address_errors_internal(const mss::rank::info<mss::mc_t
                  i_rank_info.get_port_rank());
         return fapi2::FAPI2_RC_SUCCESS;
     }
-    // If part of the nibble is bad, then run additional steps to see if the swizzle detect will work
-    // Swizzle detect will not work if DQ0 is bad in the nibble
-    else if(i_dram_bad_bits != 0x00)
+    else
     {
         uint16_t l_temp = 0;
         // First up, clears all training steps EXCEPT for the swizzle detect and address ones
         // The chance of us getting a fatal error is very rare from the steps after this point and this has signifcant time savings
         // Swizzle detect could go bad if DQ0 is bad within this nibble
-        FAPI_TRY(SequenceCtrl_helper(l_port, 0xC00D, l_temp));
+        // Up to write leveling needs to be run to ensure swizzle detect is run
+        FAPI_TRY(SequenceCtrl_helper(l_port, 0xC00F, l_temp));
         io_struct.SequenceCtrl = l_temp;
         FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u already has bad bits, so using an extended test. bad bits:0x%02x",
                  GENTARGTID(l_port),
                  i_rank_info.get_port_rank(), i_dram, i_dram_bad_bits);
-    }
-    else
-    {
-        uint16_t l_temp = 0;
-        // First up, clears all training steps EXCEPT for the address ones
-        // The chance of us getting a fatal error is very rare from the steps after this point and this has signifcant time savings
-        FAPI_TRY(SequenceCtrl_helper(l_port, 0xC001, l_temp));
-        io_struct.SequenceCtrl = l_temp;
-        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u has no bad bits. Using a simplified test", GENTARGTID(l_port),
-                 i_rank_info.get_port_rank(),
-                 i_dram);
     }
 
     // Configure the dram to test
