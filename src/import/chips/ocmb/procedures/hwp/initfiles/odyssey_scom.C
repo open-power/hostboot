@@ -69,6 +69,9 @@ constexpr uint64_t literal_0x0 = 0x0;
 constexpr uint64_t literal_512 = 512;
 constexpr uint64_t literal_640 = 640;
 constexpr uint64_t literal_768 = 768;
+constexpr uint64_t literal_3312 = 3312;
+constexpr uint64_t literal_4140 = 4140;
+constexpr uint64_t literal_4968 = 4968;
 constexpr uint64_t literal_30 = 30;
 constexpr uint64_t literal_36 = 36;
 constexpr uint64_t literal_0b11111 = 0b11111;
@@ -160,6 +163,8 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR, TGT1, l_TGT1_ATTR_MEM_EFF_DRAM_TRFC_DLR));
         fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_Type l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, TGT2, l_TGT2_ATTR_MSS_MRW_POWER_CONTROL_REQUESTED));
+        uint64_t l_def_RDIMM_TYPE = ((l_TGT1_ATTR_MEM_EFF_DIMM_TYPE[literal_0] == literal_1)
+                                     || (l_TGT1_ATTR_MEM_EFF_DIMM_TYPE[literal_0] == literal_3));
         uint64_t l_def_NUM_UPPER_ADDR_BITS = (((((l_def_D_EN + l_def_M_EN) + l_def_S2_EN) + l_def_S1_EN) + l_def_R16_EN) +
                                               l_def_C10_EN);
         fapi2::buffer<uint64_t> l_scom_buffer;
@@ -1055,6 +1060,23 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             FAPI_TRY(fapi2::getScom( TGT0, 0x8011038ull, l_scom_buffer ));
 
             l_scom_buffer.insert<0, 4, 60, uint64_t>(literal_4 );
+
+            if ((l_def_RDIMM_TYPE == literal_0))
+            {
+                l_scom_buffer.insert<16, 13, 51, uint64_t>(literal_2 );
+            }
+            else if (((l_def_RDIMM_TYPE == literal_1) && (l_def_MEM_EFF_FREQ_EQ_3200 == literal_1)))
+            {
+                l_scom_buffer.insert<16, 13, 51, uint64_t>(literal_3312 );
+            }
+            else if (((l_def_RDIMM_TYPE == literal_1) && (l_def_MEM_EFF_FREQ_EQ_4000 == literal_1)))
+            {
+                l_scom_buffer.insert<16, 13, 51, uint64_t>(literal_4140 );
+            }
+            else if (((l_def_RDIMM_TYPE == literal_1) && (l_def_MEM_EFF_FREQ_EQ_4800 == literal_1)))
+            {
+                l_scom_buffer.insert<16, 13, 51, uint64_t>(literal_4968 );
+            }
 
             if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
             {
