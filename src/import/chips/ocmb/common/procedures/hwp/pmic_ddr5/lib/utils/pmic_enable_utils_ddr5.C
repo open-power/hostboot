@@ -534,6 +534,8 @@ fapi2::ReturnCode enable_2u(
     FAPI_INF("Enabling PMICs on " GENTARGTIDFORMAT " with 2U mode", GENTARGTID(i_ocmb_target));
 
     auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
+    // We're guaranteed to have at least one PMIC here due to the check in pmic_enable
+    auto l_current_pmic = l_pmics[0];
     uint8_t l_first_pmic_id = 0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_pmics[PMIC0], l_first_pmic_id));
 
@@ -554,6 +556,7 @@ fapi2::ReturnCode enable_2u(
 
     for (const auto& l_pmic : l_pmics)
     {
+        l_current_pmic = l_pmic;
         // PMIC position/ID under OCMB target
         uint8_t l_relative_pmic_id = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_pmic, l_relative_pmic_id));
@@ -596,12 +599,15 @@ fapi2::ReturnCode enable_2u(
     }
 
     FAPI_INF("Executing VR_ENABLE for PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC0]));
+    l_current_pmic = l_pmics[PMIC0];
     // Start VR Enable (1 --> Bit 7)
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
     l_pmic_buffer.setBit<FIELDS::R32_VR_ENABLE>();
     FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
 
     FAPI_INF("Executing VR_ENABLE for PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC1]));
+    // We have 2 PMICs here as check_number_pmics_received_2u() above makes sure we have 2 PMICs
+    l_current_pmic = l_pmics[PMIC1];
     // Start VR Enable (1 --> Bit 7)
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC1], REGS::R32, l_pmic_buffer));
     l_pmic_buffer.setBit<FIELDS::R32_VR_ENABLE>();
@@ -612,12 +618,14 @@ fapi2::ReturnCode enable_2u(
     {
         // TI will be enabled by releasing the CAMP control first and then re-instating it
         FAPI_INF("Executing CAMP control release for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC0]));
+        l_current_pmic = l_pmics[PMIC0];
         FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
         // Release CAMP control (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (1 --> Bit 3)
         l_pmic_buffer.setBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
         FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
 
         FAPI_INF("Executing CAMP control release for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC1]));
+        l_current_pmic = l_pmics[PMIC1];
         FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC1], REGS::R32, l_pmic_buffer));
         // Release CAMP control (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (1 --> Bit 3)
         l_pmic_buffer.setBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
@@ -628,12 +636,14 @@ fapi2::ReturnCode enable_2u(
 
         // Re-instate CAMP control
         FAPI_INF("Re-instating CAMP control for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC0]));
+        l_current_pmic = l_pmics[PMIC0];
         FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
         // Re-instate CAMP control (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (0 --> Bit 3)
         l_pmic_buffer.clearBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
         FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmics[PMIC0], REGS::R32, l_pmic_buffer));
 
         FAPI_INF("Re-instating CAMP control for TI PMIC " GENTARGTIDFORMAT, GENTARGTID(l_pmics[PMIC1]));
+        l_current_pmic = l_pmics[PMIC1];
         FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmics[PMIC1], REGS::R32, l_pmic_buffer));
         // Re-instate CAMP control (R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL) (0 --> Bit 3)
         l_pmic_buffer.clearBit<FIELDS::R32_CAMP_PWR_GOOD_OUTPUT_SIGNAL_CONTROL>();
@@ -645,12 +655,26 @@ fapi2::ReturnCode enable_2u(
         FAPI_ERR("Renesas not yet supported");
     }
 
-
-    FAPI_INF("Successfully enabled PMICs on" GENTARGTIDFORMAT " with 2U mode", GENTARGTID(i_ocmb_target));
+    // Check that all the PMIC statuses are good post-enable
+    FAPI_TRY(mss::pmic::status::check_all_pmics(i_ocmb_target),
+             "Bad statuses returned, or error checking statuses of PMICs on " GENTARGTIDFORMAT, GENTARGTID(i_ocmb_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
+
+    // Logs the current error as prective, as it predicts that we had a PMIC enable fail
+    // Deconfigures happen at the end of an istep, so this should be ok with hostboot
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_ASSERT_NOEXIT(false,
+                       fapi2::PMIC_ENABLE_FAIL_DDR5_2U()
+                       .set_OCMB_TARGET(i_ocmb_target)
+                       .set_PMIC_TARGET(l_current_pmic)
+                       .set_RETURN_CODE(static_cast<uint32_t>(fapi2::current_err)),
+                       "PMIC " GENTARGTIDFORMAT " failed to enable. See previous errors for details.",
+                       GENTARGTID(l_current_pmic));
     return fapi2::current_err;
 }
 

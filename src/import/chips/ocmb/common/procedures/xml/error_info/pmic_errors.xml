@@ -400,6 +400,37 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_PMIC_ENABLE_FAIL_DDR5_2U</rc>
+    <description>
+       A DDR5 2U PMIC had errors during pmic_enable. See previous recoverable errors to further diagnose.
+       Note: this return code is used for OCMB without PMIC redundancy
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PMIC_TARGET</ffdc>
+    <ffdc>RETURN_CODE</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>PMIC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>OCMB_TARGET</target>
+    </gard>
+    <deconfigure>
+      <target>PMIC_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>PMIC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
     <rc>RC_PMIC_NON_REDUNDANT_FAIL</rc>
     <description>
        A PMIC had errors during pmic_enable and does not have a redundant backup.

@@ -449,7 +449,11 @@ static const std::vector<std::pair<uint8_t, std::vector<status_field>>> STATUS_F
             {FIELDS::R0A_SWD_OUTPUT_OVER_VOLTAGE_STATUS,  "SWD_OUTPUT_OVER_VOLTAGE", true},
             {FIELDS::R0A_PEC_ERROR_STATUS,                "PEC_ERROR", true},
             {FIELDS::R0A_PARITY_ERROR_STATUS,             "PARITY_ERROR", true},
-            {FIELDS::R0A_IBI_STATUS,                      "PENDING_IBI", true},
+            // This is aglobal status bit. If any of the other status bits are set, this sets (including the warnings).
+            // We do not want to trigger on warnings. Hence have commented this out.
+            // This functionality is the same for DDR4. COmmenting this out here should not be an issue for DDR4
+            // This can go into DDR4 1060FW release.
+            //{FIELDS::R0A_IBI_STATUS,                      "PENDING_IBI", true},
         }
     }
 };
