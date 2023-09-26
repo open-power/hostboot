@@ -38,7 +38,7 @@ ALL_PASSES = $(DEFAULT_PASSES) $(OTHER_PASSES)
 
 # In order to build everything, we just have to satisfy all of the dependencies for
 # the last pass's 'POST' stage.
-$(FINAL_PASS): _BUILD/PASSES/$(lastword $(DEFAULT_PASSES))/POST
+all $(FINAL_PASS): _BUILD/PASSES/$(lastword $(DEFAULT_PASSES))/POST
 
 .PHONY: all
 all: $(FINAL_PASS)
@@ -138,4 +138,3 @@ endif
 _BUILD/CLEAN/% :
 	$(C2) "    RM         $(notdir $@)"
 	$(C1) rm -f $(subst _BUILD/CLEAN/,,$@)
-
