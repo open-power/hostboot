@@ -85,6 +85,10 @@ namespace std
 
         default_delete() = default;
 
+        template<typename U>
+        default_delete(const default_delete<U>& other)
+        { }
+
         void operator()(T* ptr) const
             { delete(ptr);}
 
@@ -98,6 +102,10 @@ namespace std
         using pointer = T*;
 
         default_delete() = default;
+
+        template<typename U>
+        default_delete(const default_delete<U>& other)
+        { }
 
         void operator()(T* ptr) const
             { delete[](ptr);}
