@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <diag/prdf/prdfMain.H>
 #include <plat_hwp_invoker.H>     // for FAPI_INVOKE_HWP
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H> // mss::unmask::after_background_scrub
+#include <chipids.H> // for POWER_CHIPID
 
 using namespace ERRORLOG;
 using namespace TARGETING;
@@ -126,9 +127,26 @@ void* call_mss_scrub(void* const io_pArgs)
             {
                 fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> ft (maintTrgt);
 
-                FAPI_INVOKE_HWP(errl,
-                    mss::unmask::after_background_scrub<mss::mc_type::EXPLORER>,
-                    ft);
+                uint32_t l_chipId = maintTrgt->getAttr<ATTR_CHIP_ID>();
+
+                if (l_chipId == POWER_CHIPID::EXPLORER_16)
+                {
+                    FAPI_INVOKE_HWP(errl, mss::unmask::after_background_scrub<
+                        mss::mc_type::EXPLORER>, ft);
+                }
+                else if (l_chipId == POWER_CHIPID::ODYSSEY_16)
+                {
+                    FAPI_INVOKE_HWP(errl, mss::unmask::after_background_scrub<
+                        mss::mc_type::ODYSSEY>, ft);
+                }
+                else
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ISTEP_FUNC
+                        "Skipping call to mss::unmask::after_background_scrub "
+                        "on target HUID 0x%.8X, chipId 0x%.8X is not an "
+                        "Explorer or Odyssey OCMB.",
+                        TARGETING::get_huid(maintTrgt), l_chipId);
+                }
 
                 if (errl)
                 {
