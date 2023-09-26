@@ -1434,6 +1434,75 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     ATTR_MIN_POWER_CAP_WATTS_type min_pcap =
         sys->getAttr<ATTR_CURRENT_MIN_POWER_CAP_WATTS>();
 
+
+    // Read from MRW Misc power per system and if 0 skip EKB read
+    //      and use default MRW Min power cap.
+    uint16_t l_misc_power_per_system = 0;
+    if ((!sys->tryGetAttr<ATTR_MISC_POWER_PER_SYSTEM>(l_misc_power_per_system)) ||
+        (l_misc_power_per_system == 0))
+    {
+        TMGT_ERR("getPowerCapMessageData: Failed to read MRW ATTR_MISC_POWER_PER_SYSTEM");
+    }
+    else
+    {
+        uint16_t l_min_proc_power_per_chip = 0;
+        if ((!sys->tryGetAttr<ATTR_MIN_PROC_POWER_PER_CHIP>(l_min_proc_power_per_chip)) ||
+            (l_min_proc_power_per_chip == 0))
+        {
+            TMGT_ERR("getPowerCapMessageData: Failed to read EKB ATTR_MIN_PROC_POWER_PER_CHIP");
+
+            if ((!sys->tryGetAttr<ATTR_DEFAULT_MIN_PROC_POWER_PER_CHIP>(l_min_proc_power_per_chip))
+                    || (l_min_proc_power_per_chip == 0))
+            {
+                TMGT_ERR("getPowerCapMessageData: Failed to read MRW "
+                    "ATTR_DEFAULT_MIN_PROC_POWER_PER_CHIP");
+            }
+        }
+
+        // get the number of OCCs in system
+        uint16_t l_num_of_occs = OccManager::getNumOccs();
+
+        // Get the memory power at min throttles from istep 18
+        uint16_t l_mem_power_min_throttle = 0;
+        if ((!sys->tryGetAttr<ATTR_CURRENT_MEM_POWER_MIN_THROTTLE>(l_mem_power_min_throttle)) ||
+            (l_mem_power_min_throttle == 0))
+        {
+            TMGT_ERR("getPowerCapMessageData: Failed to read MRW "
+                    "ATTR_CURRENT_MEM_POWER_MIN_THROTTLE");
+        }
+
+        // if we have valid data, do the calculation.
+        // NOTE Number of OCCs not checked, has to be one or more.
+        if ((l_min_proc_power_per_chip > 0) &&
+            (l_misc_power_per_system > 0)   &&
+            (l_mem_power_min_throttle >0 ))
+        {
+            TMGT_INF("getPowerCapMessageData: Calculate HARD MIN POWER CAP "
+                "-NUM_OCCs(%d)"
+                "-MIN_PROC_POWER_PER_CHIP(%d) "
+                "-MISC_POWER_PER_SYSTEM(%d) "
+                "-MIN_MEM_POWER(%d) ",
+                l_num_of_occs,
+                l_min_proc_power_per_chip,
+                l_misc_power_per_system,
+                l_mem_power_min_throttle);
+
+            min_pcap = (l_min_proc_power_per_chip * l_num_of_occs)
+                                + l_misc_power_per_system
+                                + l_mem_power_min_throttle;
+        }
+        else
+        {
+            TMGT_ERR("getPowerCapMessageData: ERROR in data to calculate Hard Min Power cap "
+                "use MRW ATTR_CURRENT_MIN_POWER_CAP_WATTS : Data: -NUM_OCCs(%d) "
+                "-MIN_PROC_POWER_PER_CHIP(%d) -MISC_POWER_PER_SYSTEM(%d) "
+                "-MIN_MEM_POWER(%d) ",  l_num_of_occs,
+                                        l_min_proc_power_per_chip,
+                                        l_misc_power_per_system,
+                                        l_mem_power_min_throttle);
+        }
+    }
+
     // Minimum SOFT Power Cap
     ATTR_SOFT_MIN_POWER_CAP_WATTS_type soft_pcap;
     if ( ! sys->tryGetAttr
@@ -1466,7 +1535,7 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     UINT16_PUT(&o_data[index], opl_pcap);
     index += 2;
 
-    TMGT_INF("getPowerCapMessageData: pcaps - soft min: %d, min: %d, max: %d,"
+    TMGT_INF("getPowerCapMessageData: pcaps - soft min: %d, hard min: %d, max: %d,"
              " Oversubscription: %d (in Watts)",
              soft_pcap, min_pcap, max_pcap, opl_pcap);
     o_size = index;

@@ -295,6 +295,9 @@
       <id>CUMULATIVE_PMCOMPLEX_RESET_COUNT</id>
     </attribute>
     <attribute>
+      <id>CURRENT_MEM_POWER_MIN_THROTTLE</id>
+    </attribute>
+    <attribute>
       <id>CURRENT_MIN_POWER_CAP_WATTS</id>
     </attribute>
     <attribute>
@@ -347,6 +350,9 @@
     </attribute>
     <attribute>
       <id>DDR5_PMIC_THROTTLE_TEMP_DEG_C</id>
+    </attribute>
+    <attribute>
+      <id>DEFAULT_MIN_PROC_POWER_PER_CHIP</id>
     </attribute>
     <attribute>
       <id>DIMM_ERROR_TEMP_DEG_C</id>
@@ -434,6 +440,9 @@
     </attribute>
     <attribute>
       <id>MIN_POWER_CAP_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>MISC_POWER_PER_SYSTEM</id>
     </attribute>
     <attribute>
       <id>NUM_PLDM_STATE_QUERY_RECORDS</id>

@@ -1084,6 +1084,13 @@ errlHndl_t memPowerThrottleRedPower(
         }
         TMGT_INF("memPowerThrottleRedPower: Total Redundant Memory Power: %dcW (input)",
                  tot_mem_power_cw);
+
+        // Take memory power at min throttles and push to runtime.
+        Target* sys = UTIL::assertGetToplevelTarget();
+        if (!sys->trySetAttr<ATTR_CURRENT_MEM_POWER_MIN_THROTTLE>(tot_mem_power_cw/100))
+        {
+            TMGT_ERR("memPowerThrottleRedPower: Failed to set MEM_POWER_PER_SYSTEM");
+        }
     }
 
     if (err)

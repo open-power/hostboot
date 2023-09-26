@@ -379,6 +379,21 @@
   </attribute>
 
   <attribute>
+    <id>CURRENT_MEM_POWER_MIN_THROTTLE</id>
+    <description>
+      System minimum memory power cap at min throttle.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
     <id>CURRENT_MIN_POWER_CAP_WATTS</id>
     <description>
       System minimum power cap in output watts.
@@ -686,6 +701,20 @@
     <readable/>
     <writeable/>
     <no_export/>
+  </attribute>
+
+  <attribute>
+    <id>DEFAULT_MIN_PROC_POWER_PER_CHIP</id>
+    <description>
+        if MIN_PROC_POWER_PER_CHIP is not filled in from WOF table, use this value.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
   </attribute>
 
   <attribute>
@@ -1576,6 +1605,21 @@ ID for the sensor number returned with the elog. -->
     <simpleType>
       <uint16_t>
         <default>2700</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>MISC_POWER_PER_SYSTEM</id>
+    <description>
+        Fixed power to account for all non-processor, non-memory power of
+        the system in watts.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>0</default>
       </uint16_t>
     </simpleType>
     <persistency>non-volatile</persistency>
