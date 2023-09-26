@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -432,7 +432,7 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
 
                 // reset the SBE
                 // Get the SBE Retry Handler
-                SBEIO::SbeRetryHandler l_SBEobj = SBEIO::SbeRetryHandler(
+                const auto l_SBEobj = SBEIO::make_sbe_retry_handler(
                     i_target,
                     SBEIO::SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
                     SBEIO::SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
@@ -440,8 +440,8 @@ errlHndl_t i2cPerformOp( DeviceFW::OperationType i_opType,
                     SBEIO::NOT_INITIAL_POWERON);
 
                 //Attempt to recover the SBE
-                l_SBEobj.main_sbe_handler();
-                if (l_SBEobj.isSbeAtRuntime())
+                l_SBEobj->main_sbe_handler();
+                if (l_SBEobj->isSbeAtRuntime())
                 {
                     TRACFCOMP(g_trac_i2c, "SBE Restarted successfully");
                 }

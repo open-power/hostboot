@@ -69,6 +69,7 @@
 #include <fapi2/target.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <targeting/targplatutil.H>
+#include <targeting/odyutil.H>
 #include <initservice/mboxRegs.H>
 
 // FAPI2 Infrastructure
@@ -79,6 +80,7 @@
 #include <p10_sbe_hreset.H>
 #include <p10_get_sbe_msg_register.H>
 #include <p10_scom_perv_a.H>
+#include <ody_extract_sbe_rc.H>
 
 // Generated
 #include <set_sbe_error.H>
@@ -125,11 +127,11 @@ constexpr uint64_t SBE_RETRY_TIMEOUT_HW_SEC     = 60;  // 60 seconds
 constexpr uint64_t SBE_RETRY_TIMEOUT_SIMICS_SEC = 600; // 600 seconds
 constexpr uint32_t SBE_RETRY_NUM_LOOPS          = 60;
 
-SbeRetryHandler::SbeRetryHandler(TARGETING::Target * const i_proc,
-                                 SBE_MODE_OF_OPERATION i_sbeMode,
-                                 SBE_RESTART_METHOD i_restartMethod,
-                                 const uint32_t i_plid,
-                                 const bool i_isInitialPoweron)
+SbeRetryHandler::ProcSbeRetryHandler(TARGETING::Target * const i_proc,
+                                     SBE_MODE_OF_OPERATION i_sbeMode,
+                                     SBE_RESTART_METHOD i_restartMethod,
+                                     const uint32_t i_plid,
+                                     const bool i_isInitialPoweron)
 : iv_useSDB(false)
 , iv_masterErrorLogPLID(i_plid)
 , iv_switchSidesCount(0)
@@ -150,18 +152,46 @@ SbeRetryHandler::SbeRetryHandler(TARGETING::Target * const i_proc,
 , iv_sbeTestMode(SBE_FORCED_TEST_PATH::TEST_ERROR_RECOVERED)
 #endif
 {
-    SBE_TRACF(ENTER_MRK "SbeRetryHandler::SbeRetryHandler() proc %08X, sbe_mode %X, restart %X",
+    SBE_TRACF(ENTER_MRK "ProcSbeRetryHandler::ProcSbeRetryHandler() proc %08X, sbe_mode %X, restart %X",
         get_huid(i_proc), i_sbeMode, i_restartMethod);
 
     // Initialize members that have no default initialization
     iv_sbeRegister.reg = 0;
 
-    SBE_TRACF(EXIT_MRK "SbeRetryHandler::SbeRetryHandler()");
+    SBE_TRACF(EXIT_MRK "ProcSbeRetryHandler::ProcSbeRetryHandler()");
 }
 
-SbeRetryHandler::~SbeRetryHandler() {}
+ProcSbeRetryHandler::~ProcSbeRetryHandler() {}
 
-void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
+errlHndl_t ProcSbeRetryHandler::ExtractRC()
+{
+    // Default the return action to be NO_RECOVERY , if something goes
+    // wrong in p10_extract_sbe_rc and l_ret doesn't get set in that function
+    // then we want to fall back on NO_RECOVERY which we will handle
+    // accordingly in bestEffortCheck
+    P10_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
+        P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+
+    /**
+     * @brief This param is only used in the lab when running this HWP with
+     *        cronus. Hostboot offered to have this param set based on the
+     *        security settings of the system, however, HW team said it
+     *        would be safer for us to always assume the system is in
+     *        secure mode.
+     */
+    const bool UNSECURE_MODE_disabled = false;
+
+    errlHndl_t l_errl = nullptr;
+    FAPI_INVOKE_HWP( l_errl,
+                     p10_extract_sbe_rc, { iv_proc },
+                     l_ret, iv_useSDB, UNSECURE_MODE_disabled);
+
+    iv_currentAction = l_ret;
+
+    return l_errl;
+}
+
+void ProcSbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
 {
     SBE_TRACF(ENTER_MRK "main_sbe_handler()");
 
@@ -837,7 +867,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                               l_mside,
                               this->iv_currentSBEState,
                               l_errl->plid() );
-                    this->iv_currentSBEState = SbeRetryHandler::SBE_STATUS::SBE_NOT_AT_RUNTIME;
+                    this->iv_currentSBEState = ProcSbeRetryHandler::SBE_STATUS::SBE_NOT_AT_RUNTIME;
                     l_errl->collectTrace(SBEIO_COMP_NAME, 256 );
                     l_errl->collectTrace(FAPI_IMP_TRACE_NAME, 256);
                     l_errl->collectTrace(FAPI_TRACE_NAME, 384);
@@ -955,7 +985,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
             if (this->iv_sbeTestMode == TEST_SBE_FAILURE)
             {
                 (this->iv_sbeRegister).currState = SBE_STATE_FAILURE;
-                this->iv_currentSBEState = SbeRetryHandler::SBE_STATUS::SBE_NOT_AT_RUNTIME;
+                this->iv_currentSBEState = ProcSbeRetryHandler::SBE_STATUS::SBE_NOT_AT_RUNTIME;
             }
 #endif
 
@@ -1075,7 +1105,7 @@ void SbeRetryHandler::main_sbe_handler( bool i_sbeHalted )
                       this->iv_currentSideBootAttempts, this->iv_currentSideBootAttempts_mseeprom, this->iv_boot_restart_count);
 }
 
-bool SbeRetryHandler::sbe_run_extract_msg_reg()
+bool ProcSbeRetryHandler::sbe_run_extract_msg_reg()
 {
     SBE_TRACF(ENTER_MRK "sbe_run_extract_msg_reg()");
 
@@ -1140,14 +1170,14 @@ bool SbeRetryHandler::sbe_run_extract_msg_reg()
 
 }
 
-errlHndl_t SbeRetryHandler::sbe_poll_status_reg()
+errlHndl_t ProcSbeRetryHandler::sbe_poll_status_reg()
 {
     SBE_TRACF(ENTER_MRK "sbe_poll_status_reg()");
 
     errlHndl_t l_errl = nullptr;
 
     this->iv_currentSBEState =
-            SbeRetryHandler::SBE_STATUS::SBE_NOT_AT_RUNTIME;
+            ProcSbeRetryHandler::SBE_STATUS::SBE_NOT_AT_RUNTIME;
 
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
             l_fapi2_proc_target(iv_proc);
@@ -1193,7 +1223,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg()
             l_errl->collectTrace(FAPI_TRACE_NAME, 384);
 
             this->iv_currentSBEState =
-                    SbeRetryHandler::SBE_STATUS::FAILED_COLLECTING_REG;
+                    ProcSbeRetryHandler::SBE_STATUS::FAILED_COLLECTING_REG;
             break;
         }
         else if ((this->iv_sbeRegister).currState == SBE_STATE_RUNTIME)
@@ -1204,7 +1234,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg()
                       (this->iv_sbeRegister).reg,
                       l_loops);
             this->iv_currentSBEState =
-                  SbeRetryHandler::SBE_STATUS::SBE_AT_RUNTIME;
+                  ProcSbeRetryHandler::SBE_STATUS::SBE_AT_RUNTIME;
             break;
         }
         else if ((this->iv_sbeRegister).asyncFFDC)
@@ -1260,7 +1290,7 @@ errlHndl_t SbeRetryHandler::sbe_poll_status_reg()
 }
 
 #ifndef __HOSTBOOT_RUNTIME
-void SbeRetryHandler::handleFspIplTimeFail()
+void ProcSbeRetryHandler::handleFspIplTimeFail()
 {
     // If we found that there was async FFDC available we need to notify hwsv of this
     // even if we did not find anything useful in the ffdc for us, its possible hwsv
@@ -1291,7 +1321,7 @@ void SbeRetryHandler::handleFspIplTimeFail()
         errlHndl_t l_errhdl = TARGETING::AttrRP::disableAttributeSyncToSP();
         if( l_errhdl )
         {
-            SBE_TRACF("SbeRetryHandler::handleFspIplTimeFail> Error disabling shutdown");
+            SBE_TRACF("ProcSbeRetryHandler::handleFspIplTimeFail> Error disabling shutdown");
             errlCommit(l_errhdl, INITSVC_COMP_ID);
         }
     }
@@ -1303,7 +1333,7 @@ void SbeRetryHandler::handleFspIplTimeFail()
 }
 #endif
 
-void SbeRetryHandler::sbe_get_ffdc_handler()
+void ProcSbeRetryHandler::sbe_get_ffdc_handler()
 {
     SBE_TRACF(ENTER_MRK "sbe_get_ffdc_handler()");
     uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS;
@@ -1475,8 +1505,7 @@ void SbeRetryHandler::sbe_get_ffdc_handler()
     SBE_TRACF(EXIT_MRK "sbe_get_ffdc_handler()");
 }
 
-
-void SbeRetryHandler::sbe_run_extract_rc()
+void ProcSbeRetryHandler::sbe_run_extract_rc()
 {
     SBE_TRACF(ENTER_MRK "sbe_run_extract_rc()");
 
@@ -1486,27 +1515,8 @@ void SbeRetryHandler::sbe_run_extract_rc()
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapi2ProcTarget(
                         const_cast<TARGETING::Target*> (iv_proc));
 
-    // Default the return action to be NO_RECOVERY , if something goes
-    // wrong in p10_extract_sbe_rc and l_ret doesn't get set in that function
-    // then we want to fall back on NO_RECOVERY which we will handle
-    // accordingly in bestEffortCheck
-    P10_EXTRACT_SBE_RC::RETURN_ACTION l_ret =
-        P10_EXTRACT_SBE_RC::NO_RECOVERY_ACTION;
+    l_errl = ExtractRC();
 
-    /**
-     * @brief This param is only used in the lab when running this HWP with
-     *        cronus. Hostboot offered to have this param set based on the
-     *        security settings of the system, however, HW team said it
-     *        would be safer for us to always assume the system is in
-     *        secure mode.
-     */
-    const bool UNSECURE_MODE_disabled = false;
-
-    FAPI_INVOKE_HWP( l_errl,
-                     p10_extract_sbe_rc, l_fapi2ProcTarget,
-                     l_ret, iv_useSDB, UNSECURE_MODE_disabled);
-
-    this->iv_currentAction = l_ret;
     SBE_TRACF("sbe_run_extract_rc p10_extract_sbe_rc returned iv_currentAction=%d", this->iv_currentAction);
 
     // This call will look at what p10_extact_sbe_rc had set the return action to
@@ -1549,7 +1559,7 @@ void SbeRetryHandler::sbe_run_extract_rc()
                         this->iv_currentAction);
 }
 
-void SbeRetryHandler::bestEffortCheck()
+void ProcSbeRetryHandler::bestEffortCheck()
 {
     SBE_TRACF(ENTER_MRK"bestEffortCheck: iv_switchSidesCount=%llx iv_switchSidesCount_mseeprom=%llx "
                       "iv_currentSideBootAttempts=%llx iv_currentSideBootAttempts_mseeprom=%llx iv_boot_restart_count=%d",
@@ -1668,7 +1678,7 @@ void SbeRetryHandler::bestEffortCheck()
                       this->iv_currentSideBootAttempts, this->iv_currentSideBootAttempts_mseeprom, this->iv_boot_restart_count);
 }
 
-errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i_action,
+errlHndl_t ProcSbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i_action,
                                              bool i_updateMVPD)
 {
     SBE_TRACF(ENTER_MRK "switch_sbe_sides: i_action=0x%X i_updateMVPD=%d iv_currentAction=0x%X "
@@ -1907,7 +1917,7 @@ errlHndl_t SbeRetryHandler::switch_sbe_sides(P10_EXTRACT_SBE_RC::RETURN_ACTION i
 /**
  * @brief  Read or write the Selfboot Control/Status register
  */
-errlHndl_t SbeRetryHandler::accessControlReg( bool i_writeNotRead,
+errlHndl_t ProcSbeRetryHandler::accessControlReg( bool i_writeNotRead,
                                               uint32_t& io_ctlreg )
 {
     errlHndl_t l_errl = nullptr;
@@ -2033,7 +2043,7 @@ errlHndl_t SbeRetryHandler::accessControlReg( bool i_writeNotRead,
 /**
  * @brief  Collect register data for FFDC to add to a log.
  */
-void SbeRetryHandler::addRegisterFFDC( errlHndl_t i_errhdl )
+void ProcSbeRetryHandler::addRegisterFFDC( errlHndl_t i_errhdl )
 {
     SBE_TRACF("addRegisterFFDC=%.8X",i_errhdl->eid());
     ErrlUserDetailsLogRegister l_regdata(iv_proc);
@@ -2086,6 +2096,27 @@ void SbeRetryHandler::addRegisterFFDC( errlHndl_t i_errhdl )
     }
 
     l_regdata.addToLog(i_errhdl);
+}
+
+std::unique_ptr<GenericSbeRetryHandler>
+make_sbe_retry_handler(TARGETING::Target* const i_target,
+                       const ProcSbeRetryHandler::SBE_MODE_OF_OPERATION i_sbeMode,
+                       const ProcSbeRetryHandler::SBE_RESTART_METHOD i_restartMethod,
+                       const uint32_t i_plid,
+                       const bool i_isInitialPoweron)
+{
+    if (TARGETING::UTIL::isOdysseyChip(i_target))
+    {
+        return std::make_unique<OdysseySbeRetryHandler>(i_target);
+    }
+    else
+    {
+        return std::make_unique<ProcSbeRetryHandler>(i_target,
+                                                     i_sbeMode,
+                                                     i_restartMethod,
+                                                     i_plid,
+                                                     i_isInitialPoweron);
+    }
 }
 
 } // End of namespace SBEIO

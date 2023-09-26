@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -25,6 +25,7 @@
 #ifndef __TIME_H
 #define __TIME_H
 
+#include <sys/time.h>
 #include <stdint.h>
 
 // POSIX structure for time (sec / nsec pairs).
@@ -85,5 +86,79 @@ struct base_time_t
  *
  */
 int clock_gettime(clockid_t clk_id, timespec_t* tp);
+
+#ifdef __cplusplus
+
+namespace hbstd
+{
+
+enum class timeout_t
+{
+    STOP,
+    CONTINUE
+};
+
+/**
+ * @brief Run a function once per interval for a given duration of time at most.
+ *
+ * @tparam    F                    Type of the given functor.
+ * @param[in] seconds_timeout      The maximum time to run the function for.
+ * @param[in] nanoseconds_timeout  Nanoseconds to add to seconds_timeout.
+ * @param[in] seconds_between      The number of seconds between function invocations.
+ * @param[in] nanoseconds_between  Nanoseconds to add to seconds_between.
+ * @param[in] functor              The code to run.
+ * @return    bool                 True if this function halted because the timeout
+ *                                 duration expired, false if it halted because the
+ *                                 functor asked the loop to stop.
+ * @note                           The function will always be invoked at least once.
+ * @note                           If the function returns timeout_t::CONTINUE, the timer
+ *                                 will continue to count down and the function may be
+ *                                 invoked again. If the function returns timeout_t::STOP,
+ *                                 the timer will halt and with_timeout will immediately
+ *                                 return false.
+ */
+template<typename F>
+bool with_timeout(const uint64_t seconds_timeout,
+                  const uint64_t nanoseconds_timeout,
+                  const uint64_t seconds_between,
+                  const uint64_t nanoseconds_between,
+                  F&& functor)
+{
+    timespec_t start_time { }, current_time { };
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+
+    const timespec_t end_time
+    {
+        .tv_sec = start_time.tv_sec + seconds_timeout + (nanoseconds_timeout / NS_PER_SEC),
+        .tv_nsec = start_time.tv_nsec + (nanoseconds_timeout % NS_PER_SEC)
+    };
+
+    while (true)
+    {
+        const timeout_t action = functor();
+
+        if (action == timeout_t::STOP)
+        {
+            return false;
+        }
+
+        clock_gettime(CLOCK_MONOTONIC, &current_time);
+
+        if (current_time.tv_sec > end_time.tv_sec
+            || (current_time.tv_sec == end_time.tv_sec
+                && (current_time.tv_nsec >= end_time.tv_nsec)))
+        {
+            break;
+        }
+
+        nanosleep(seconds_between, nanoseconds_between);
+    }
+
+    return true;
+}
+
+}
+
+#endif
 
 #endif

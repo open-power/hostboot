@@ -37,15 +37,18 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/sbe_utils/include
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
 EXTRAINCDIR += ${ROOTPATH}/src/import
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 
 #Common Objects
 OBJS += sbe_attn.o
 OBJS += sbe_retry_handler.o
+OBJS += ody_sbe_retry_handler.o
 OBJS += p10_sbe_hreset.o
 OBJS += p10_start_cbs.o
 OBJS += p10_get_sbe_msg_register.o
@@ -59,6 +62,7 @@ OBJS += sbe_psuSendMemConfig.o
 OBJS += sbe_psuSendCoreConfig.o
 OBJS += pmic_n_mode_detect.o
 OBJS += sbe_fifo_buffer.o
+OBJS += ody_extract_sbe_rc.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common
@@ -67,3 +71,4 @@ VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe/
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv
