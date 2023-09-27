@@ -29,3 +29,6 @@
 
 /* Using signature that does not overlap with the processor RCS/PLL. */
 PRDR_ERROR_SIGNATURE(PLL_UNLOCK, 0x00ed0007, "", "PLL unlock");
+
+PRDR_ERROR_SIGNATURE(NceTceInvAddr, 0x00ef0000, "", "Mainline NCE/TCE on both ports. Invalid Address");
+PRDR_ERROR_SIGNATURE(UeInvAddr, 0x00ef0001, "", "Mainline UE on both ports. Invalid Address");

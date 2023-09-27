@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,8 +74,10 @@ class MemUeTable
      *        moved to the end of the queue.
      * @param i_type See enum UE_TABLE::Type.
      * @param i_addr The address in which the UE occurred.
+     * @param i_invalidAddr TRUE if the address information may be invalid
      */
-    void addEntry( UE_TABLE::Type i_type, const MemAddr & i_addr );
+    void addEntry( UE_TABLE::Type i_type, const MemAddr & i_addr,
+                   bool i_invalidAddr = false );
 
     /**
      * @brief Gathers all table data to be stored in capture data.
@@ -91,6 +93,7 @@ class MemUeTable
         UE_TABLE::Type  type;  ///< See enum UE_TABLE::Type
         MemAddr         addr;  ///< The address in which the UE occurred
         uint8_t         count; ///< Number of times the entry is detected
+        bool invalidAddr; ///< True if the address info may be invalid
 
         /** @brief Default constructor. */
         UeTableData() {}
@@ -100,8 +103,9 @@ class MemUeTable
          * @param i_type See enum UE_TABLE::Type.
          * @param i_addr The address in which the UE occurred.
          */
-        UeTableData( UE_TABLE::Type i_type, const MemAddr & i_addr ) :
-            type(i_type), addr(i_addr), count(1)
+        UeTableData( UE_TABLE::Type i_type, const MemAddr & i_addr,
+                     bool i_invalidAddr = false ) :
+            type(i_type), addr(i_addr), count(1), invalidAddr(i_invalidAddr)
         {}
 
         /** An entry is equivalent if the type and address match. */

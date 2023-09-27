@@ -50,33 +50,37 @@ namespace MemEcc
  * @brief  Adds the memory CE to the callout list and CE table. Will also issue
  *         dynamic memory deallocation when appropriate. Returns true if TPS is
  *         required.
- * @param  i_chip   OCMB.
- * @param  i_addr   Failed address.
- * @param  i_symbol Failed symbol.
- * @param  o_doTps  True if TPS is required. False otherwise.
- * @param  io_sc    The step code data struct.
- * @param  i_isHard True if this is a hard CE. Default is false.
+ * @param  i_chip    OCMB.
+ * @param  i_addr    Failed address.
+ * @param  i_symbol  Failed symbol.
+ * @param  o_doTps   True if TPS is required. False otherwise.
+ * @param  io_sc     The step code data struct.
+ * @param  i_invAddr True if the input address is potentially invalid.
+ * @param  i_isHard  True if this is a hard CE. Default is false.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
                       const MemSymbol & i_symbol, bool & o_doTps,
-                      STEP_CODE_DATA_STRUCT & io_sc, bool i_isHard = false );
+                      STEP_CODE_DATA_STRUCT & io_sc,
+                      bool i_invAddr = false, bool i_isHard = false );
 
 /**
  * @brief  Adds the memory UE to the callout list and UE table. Makes the error
  *         log predictive. Will also issue dynamic memory deallocation when
  *         appropriate.
  *
- * @param  i_chip   OCMB.
- * @param  i_addr   Failed address.
- * @param  i_type   The type of UE.
- * @param  io_sc    The step code data struct.
+ * @param  i_chip    OCMB.
+ * @param  i_addr    Failed address.
+ * @param  i_type    The type of UE.
+ * @param  io_sc     The step code data struct.
+ * @param  i_invAddr True if the input address is potentially invalid.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
-                      UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc );
+                      UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc,
+                      bool i_invAddr = false );
 
 /**
  * @brief Does mainline and maintenance IUE handling.
@@ -94,11 +98,13 @@ uint32_t handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
  * @param  i_rank Rank containing the IUE.
  * @param  i_port Target port.
  * @param  io_sc  The step code data struct.
+ * @param  i_mainline  True if handling a mainline IUE, false if maintenance IUE
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t handleMemIue( ExtensibleChip * i_chip, const MemRank & i_rank,
-                       uint8_t i_port, STEP_CODE_DATA_STRUCT & io_sc );
+                       uint8_t i_port, STEP_CODE_DATA_STRUCT & io_sc,
+                       bool i_mainline = false );
 
 /**
  * @brief  Handles a MPE attention.
@@ -155,21 +161,23 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
 /**
  * @brief  Analyzes a fetch UE attention.
  * @param  i_chip   OCMB.
+ * @param  i_port   Target port select.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
+uint32_t analyzeFetchUe( ExtensibleChip * i_chip, uint8_t i_port,
                          STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief  Analyzes a fetch mainline IUE attention.
  * @param  i_chip   OCMB.
+ * @param  i_port   Target port select.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
+uint32_t analyzeMainlineIue( ExtensibleChip * i_chip, uint8_t i_port,
                              STEP_CODE_DATA_STRUCT & io_sc );
 
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,10 +40,11 @@ using namespace UE_TABLE;
 
 //------------------------------------------------------------------------------
 
-void MemUeTable::addEntry( UE_TABLE::Type i_type, const MemAddr & i_addr )
+void MemUeTable::addEntry( UE_TABLE::Type i_type, const MemAddr & i_addr,
+                           bool i_invalidAddr )
 {
     // Create the new entry.
-    UeTableData data ( i_type, i_addr );
+    UeTableData data ( i_type, i_addr, i_invalidAddr );
 
     // First, check if the entry already exists. If so, increment its count and
     // move it to the end of the queue.
@@ -91,6 +92,7 @@ void MemUeTable::addCapData( CaptureData & io_cd )
         uint32_t bnk  = it->addr.getBank();             //  5-bit
         uint32_t row  = it->addr.getRow();              // 18-bit
         uint32_t col  = it->addr.getCol();              //  9-bit
+        uint8_t port  = it->addr.getPort();             //  1-bit
 
         uint8_t row0_1   = (row & 0x30000) >> 16;
         uint8_t row2_9   = (row & 0x0ff00) >>  8;
@@ -99,8 +101,11 @@ void MemUeTable::addCapData( CaptureData & io_cd )
         uint8_t col0     = (col & 0x100) >> 8;
         uint8_t col1_8   =  col & 0x0ff;
 
+        uint8_t invAddr = it->invalidAddr ? 1 : 0;
+
         data[sz_actData  ] = it->count;
-        data[sz_actData+1] = it->type << 4; // 4 bits to spare.
+        data[sz_actData+1] = (it->type << 4) | ((port & 0x1) << 3) |
+                             (invAddr << 2); // 2 bits to spare.
         data[sz_actData+2] = (mrnk << 5) | (srnk << 2) | row0_1;
         data[sz_actData+3] = row2_9;
         data[sz_actData+4] = row10_17;

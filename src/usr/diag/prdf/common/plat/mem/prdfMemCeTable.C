@@ -46,18 +46,19 @@ using namespace CE_TABLE;
 
 template <TARGETING::TYPE T>
 uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
-                                  const MemSymbol & i_symbol, bool i_isHard )
+    const MemSymbol & i_symbol, bool i_isHard, bool i_invalidAddr )
 {
     uint32_t o_rc = NO_TH_REACHED;
 
     TableData data (i_addr, i_symbol.getDram(), i_symbol.getDramPins(),
-                    i_addr.getPort(), i_isHard, i_symbol.isDramSpared());
+                    i_addr.getPort(), i_isHard, i_symbol.isDramSpared(),
+                    i_invalidAddr);
 
     // First, check if the entry already exists. If so, increment its count and
     // move it to the end of the queue.
     typename CeTable::iterator it = std::find( iv_table.begin(), iv_table.end(),
                                                data );
-    if ( iv_table.end() != it )
+    if ( iv_table.end() != it && (!i_invalidAddr || it->invalidAddr))
     {
         // Update the count only if the entry is active. Otherwise, use the
         // reset count from the contructor.
@@ -230,13 +231,15 @@ void MemCeTable<T>::addCapData( CaptureData & io_cd )
         uint8_t col0     = (col & 0x100) >> 8;
         uint8_t col1_8   =  col & 0x0ff;
 
-        uint8_t active = entry.active ? 1 : 0;
-        uint8_t isHard = entry.isHard ? 1 : 0;
-        uint8_t isSp   = entry.isDramSpared ? 1 : 0;
+        uint8_t active  = entry.active ? 1 : 0;
+        uint8_t isHard  = entry.isHard ? 1 : 0;
+        uint8_t isSp    = entry.isDramSpared ? 1 : 0;
+        uint8_t invAddr = entry.invalidAddr ? 1 : 0;
 
         data[sz_actData  ] = entry.count;
         data[sz_actData+1] = // 5 bits spare here.
-                             (isSp << 2); // 2 bits spare at end.
+                             (isSp << 2) | (invAddr << 1) |
+                             (entry.portSlct & 0x1);
         data[sz_actData+2] = (isHard << 7) | (active << 6) |
                              (entry.dram & 0x3f);
         data[sz_actData+3] = entry.dramPins;

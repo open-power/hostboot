@@ -515,91 +515,54 @@ PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchNceTce );
 //------------------------------------------------------------------------------
 
 /**
- * @brief  RDF_FIR[14,17] - Mainline AUE and IAUE
- * @param  i_chip OCMB chip.
- * @param  io_sc  The step code data struct.
- * @return SUCCESS
- */
-int32_t AnalyzeFetchAueIaue( ExtensibleChip * i_chip,
-                             STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[odyssey_ocmb::AnalyzeFetchAueIaue] "
-
-    MemAddr addr;
-    if ( SUCCESS != getMemReadAddr<TYPE_OCMB_CHIP>(i_chip,
-                                                   MemAddr::READ_AUE_ADDR,
-                                                   addr) )
-    {
-        PRDF_ERR( PRDF_FUNC "getMemReadAddr(0x%08x,READ_AUE_ADDR) failed",
-                  i_chip->getHuid() );
-    }
-    else
-    {
-        PRDpriority dimmPriority = MRU_HIGH;
-        GARD_POLICY dimmGard = GARD;
-        // If there is a possible root cause in the ODP_FIR, adjust the
-        // callout to MEM_PORT high, DIMM low
-        if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, addr.getPort()))
-        {
-            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
-                TYPE_MEM_PORT, addr.getPort());
-            io_sc.service_data->SetCallout(memport, MRU_HIGH);
-            dimmPriority = MRU_LOW;
-            dimmGard = NO_GARD;
-        }
-
-        MemRank rank = addr.getRank();
-        MemoryMru mm { i_chip->getTrgt(), rank, addr.getPort(),
-                       MemoryMruData::CALLOUT_RANK };
-        io_sc.service_data->SetCallout( mm, dimmPriority, dimmGard );
-    }
-
-    return SUCCESS; // nothing to return to rule code
-
-    #undef PRDF_FUNC
-}
-PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchAueIaue );
-
-//------------------------------------------------------------------------------
-
-/**
  * @brief  RDF_FIR[15] - Mainline UE.
  * @param  i_chip OCMB chip.
  * @param  io_sc  The step code data struct.
  * @return SUCCESS
  */
-int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
-                        STEP_CODE_DATA_STRUCT & io_sc )
-{
-    MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, io_sc );
-    return SUCCESS; // nothing to return to rule code
-}
-PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchUe );
+#define ANALYZE_FETCH_UE_PLUGIN(POS) \
+int32_t AnalyzeFetchUe_##POS( ExtensibleChip * i_chip, \
+                              STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, POS, io_sc ); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchUe_##POS );
+
+ANALYZE_FETCH_UE_PLUGIN(0);
+ANALYZE_FETCH_UE_PLUGIN(1);
 
 //------------------------------------------------------------------------------
 
 /**
  * @brief  RDF_FIR[18] - Mainline read IUE.
  * @param  i_chip OCMB chip.
+ * @param  i_port Target port select.
  * @param  io_sc  The step code data struct.
  * @return PRD_NO_CLEAR_FIR_BITS if IUE threshold is reached, else SUCCESS.
  */
-int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
+int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip, uint8_t i_port,
                             STEP_CODE_DATA_STRUCT & io_sc )
 {
     int32_t rc = SUCCESS;
-    MemEcc::analyzeMainlineIue<TYPE_OCMB_CHIP>( i_chip, io_sc );
-
+    MemEcc::analyzeMainlineIue<TYPE_OCMB_CHIP>( i_chip, i_port, io_sc );
     #ifdef __HOSTBOOT_MODULE
-
     if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
         rc = PRD_NO_CLEAR_FIR_BITS;
-
     #endif
-
-    return rc; // nothing to return to rule code
+    return rc;
 }
-PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeMainlineIue );
+
+#define ANALYZE_MAINLINE_IUE_PLUGIN(POS) \
+int32_t AnalyzeMainlineIue_##POS( ExtensibleChip * i_chip, \
+                                  STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    return AnalyzeMainlineIue(i_chip, POS, io_sc); \
+} \
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeMainlineIue_##POS );
+
+ANALYZE_MAINLINE_IUE_PLUGIN(0);
+ANALYZE_MAINLINE_IUE_PLUGIN(1);
 
 //------------------------------------------------------------------------------
 

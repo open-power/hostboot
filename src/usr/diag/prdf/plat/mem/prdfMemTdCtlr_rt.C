@@ -149,7 +149,7 @@ uint32_t __handleNceEte( ExtensibleChip * i_chip,
             // Add the symbol(s) to the callout list and CE table.
             bool doTps;
             o_rc = MemEcc::handleMemCe<T>( i_chip, i_addr, d.symbol, doTps,
-                                           io_sc, i_isHard );
+                                           io_sc, false, i_isHard );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x) failed",

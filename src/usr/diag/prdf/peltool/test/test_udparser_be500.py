@@ -317,6 +317,7 @@ class TestUserDataParser(unittest.TestCase):
 
         cet = "CE Table"
         self.assertEqual(jsonOut[cd][cet]["0"]["Count"], 1)
+        self.assertEqual(jsonOut[cd][cet]["0"]["Port"], 0)
         self.assertEqual(jsonOut[cd][cet]["0"]["Primary Rank"], 1)
         self.assertEqual(jsonOut[cd][cet]["0"]["Secondary Rank"], 0)
         self.assertEqual(jsonOut[cd][cet]["0"]["Bank"], "0x3")
@@ -327,8 +328,10 @@ class TestUserDataParser(unittest.TestCase):
         self.assertEqual(jsonOut[cd][cet]["0"]["On Spare"], "Yes")
         self.assertEqual(jsonOut[cd][cet]["0"]["Hard CE"], "No")
         self.assertEqual(jsonOut[cd][cet]["0"]["Is Active"], "No")
+        self.assertEqual(jsonOut[cd][cet]["0"]["Valid Addr"], "Yes")
 
         self.assertEqual(jsonOut[cd][cet]["17"]["Count"], 1)
+        self.assertEqual(jsonOut[cd][cet]["17"]["Port"], 0)
         self.assertEqual(jsonOut[cd][cet]["17"]["Primary Rank"], 0)
         self.assertEqual(jsonOut[cd][cet]["17"]["Secondary Rank"], 0)
         self.assertEqual(jsonOut[cd][cet]["17"]["Bank"], "0x11")
@@ -339,8 +342,10 @@ class TestUserDataParser(unittest.TestCase):
         self.assertEqual(jsonOut[cd][cet]["17"]["On Spare"], "Yes")
         self.assertEqual(jsonOut[cd][cet]["17"]["Hard CE"], "No")
         self.assertEqual(jsonOut[cd][cet]["17"]["Is Active"], "No")
+        self.assertEqual(jsonOut[cd][cet]["17"]["Valid Addr"], "Yes")
 
         self.assertEqual(jsonOut[cd][cet]["31"]["Count"], 1)
+        self.assertEqual(jsonOut[cd][cet]["31"]["Port"], 0)
         self.assertEqual(jsonOut[cd][cet]["31"]["Primary Rank"], 0)
         self.assertEqual(jsonOut[cd][cet]["31"]["Secondary Rank"], 0)
         self.assertEqual(jsonOut[cd][cet]["31"]["Bank"], "0x13")
@@ -351,6 +356,7 @@ class TestUserDataParser(unittest.TestCase):
         self.assertEqual(jsonOut[cd][cet]["31"]["On Spare"], "Yes")
         self.assertEqual(jsonOut[cd][cet]["31"]["Hard CE"], "No")
         self.assertEqual(jsonOut[cd][cet]["31"]["Is Active"], "No")
+        self.assertEqual(jsonOut[cd][cet]["31"]["Valid Addr"], "Yes")
 
     def testCaptureDataParserUeTable(self):
         testData = bytearray.fromhex(
@@ -403,12 +409,14 @@ class TestUserDataParser(unittest.TestCase):
         cd = "Capture Data"
         uet = "UE Table"
         self.assertEqual(jsonOut[cd][uet]["0"]["Count"], 1)
+        self.assertEqual(jsonOut[cd][uet]["0"]["Port"], 0)
         self.assertEqual(jsonOut[cd][uet]["0"]["Type"], "SCRUB_MPE")
         self.assertEqual(jsonOut[cd][uet]["0"]["Primary Rank"], "0x0")
         self.assertEqual(jsonOut[cd][uet]["0"]["Secondary Rank"], "0x0")
         self.assertEqual(jsonOut[cd][uet]["0"]["Bank"], "0x1b")
         self.assertEqual(jsonOut[cd][uet]["0"]["Column"], "0x7f")
         self.assertEqual(jsonOut[cd][uet]["0"]["Row"], "0x3fffe")
+        self.assertEqual(jsonOut[cd][uet]["0"]["Valid Addr"], "Yes")
 
     def testCaptureDataParserRowRepairData(self):
         testData = bytearray.fromhex(

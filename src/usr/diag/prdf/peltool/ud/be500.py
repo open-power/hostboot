@@ -521,7 +521,9 @@ class errludP_prdf:
                     # 7 bytes (56 bits) per entry:
                     # 8-bits:  count
                     # 4-bits:  type
-                    # 4-bits:  reserved
+                    # 1-bit:   port select
+                    # 1-bit:   invalid address
+                    # 2-bits:  reserved
                     # 3-bits:  primary rank
                     # 3-bits:  secondary rank
                     # 18-bits: row (r0:17)
@@ -539,7 +541,9 @@ class errludP_prdf:
                         # autopep8: off
                         count = (entryData >> 48) & 0xFF
                         entryType = (entryData >> 44) & 0xF
-                        reserved1 = (entryData >> 40) & 0xF
+                        portSlct = (entryData >> 43) & 0x1
+                        invAddr = (entryData >> 42) & 0x1
+                        reserved1 = (entryData >> 40) & 0x3
                         prank = (entryData >> 37) & 0x7
                         srank = (entryData >> 34) & 0x7
                         row = (entryData >> 16) & 0x3FFFF
@@ -550,12 +554,16 @@ class errludP_prdf:
 
                         d[cd]["UE Table"][y] = OrderedDict()
                         d[cd]["UE Table"][y]["Count"] = count
+                        d[cd]["UE Table"][y]["Port"] = portSlct
                         d[cd]["UE Table"][y]["Type"] = ueTypeToStr(entryType)
                         d[cd]["UE Table"][y]["Primary Rank"] = hex(prank)
                         d[cd]["UE Table"][y]["Secondary Rank"] = hex(srank)
                         d[cd]["UE Table"][y]["Bank"] = hex(bank)
                         d[cd]["UE Table"][y]["Column"] = hex(col)
                         d[cd]["UE Table"][y]["Row"] = hex(row)
+                        d[cd]["UE Table"][y]["Valid Addr"] = (
+                            "No" if (invAddr == 1) else "Yes"
+                        )
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
@@ -574,7 +582,8 @@ class errludP_prdf:
                     # 8-bits:  count
                     # 5-bits:  reserved
                     # 1-bit:   isSpare
-                    # 2-bits:  reserved
+                    # 1-bit:   invalidAddr
+                    # 1-bit:   port select
                     # 1-bit:   isHardCe
                     # 1-bit:   isActive
                     # 6-bits:  dram
@@ -600,7 +609,8 @@ class errludP_prdf:
                         count = (entryData >> 64) & 0xFF
                         reserved1 = (entryData >> 59) & 0x1F
                         isSp = (entryData >> 58) & 0x1
-                        reserved2 = (entryData >> 56) & 0x3
+                        invAddr = (entryData >> 57) & 0x1
+                        portSlct = (entryData >> 56) & 0x1
                         isHard = (entryData >> 55) & 0x1
                         active = (entryData >> 54) & 0x1
                         dram = (entryData >> 48) & 0x3F
@@ -616,6 +626,7 @@ class errludP_prdf:
                         cet = "CE Table"
                         d[cd][cet][y] = OrderedDict()
                         d[cd][cet][y]["Count"] = count
+                        d[cd][cet][y]["Port"] = portSlct
                         d[cd][cet][y]["Primary Rank"] = prank
                         d[cd][cet][y]["Secondary Rank"] = srank
                         d[cd][cet][y]["Bank"] = hex(bank)
@@ -626,6 +637,7 @@ class errludP_prdf:
                         d[cd][cet][y]["On Spare"] = "Yes" if (isSp == 1) else "No"
                         d[cd][cet][y]["Hard CE"] = "Yes" if (isHard == 1) else "No"
                         d[cd][cet][y]["Is Active"] = "Yes" if (active == 1) else "No"
+                        d[cd][cet][y]["Valid Addr"] = "No" if (invAddr == 1) else "Yes"
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength

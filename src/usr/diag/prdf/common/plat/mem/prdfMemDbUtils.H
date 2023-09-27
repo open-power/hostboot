@@ -45,20 +45,23 @@ namespace MemDbUtils
  * @param  i_addr   CE address.
  * @param  i_symbol CE symbol.
  * @param  i_isHard True if this was a hard CE. False otherwise.
+ * @param  i_invalidAddr TRUE if the address information may be invalid
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t addCeTableEntry( ExtensibleChip * i_chip, const MemAddr & i_addr,
-                          const MemSymbol & i_symbol, bool i_isHard );
+                          const MemSymbol & i_symbol, bool i_isHard,
+                          bool i_invalidAddr );
 
 template<> inline
 uint32_t addCeTableEntry<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                                      const MemAddr & i_addr,
                                                      const MemSymbol & i_symbol,
-                                                     bool i_isHard )
+                                                     bool i_isHard,
+                                                     bool i_invalidAddr )
 {
     return getOcmbDataBundle(i_chip)->iv_ceTable.addEntry( i_addr, i_symbol,
-                                                           i_isHard );
+        i_isHard, i_invalidAddr );
 }
 
 /**
@@ -66,18 +69,21 @@ uint32_t addCeTableEntry<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
  * @param  i_chip OCMB.
  * @param  i_type UE table entry type.
  * @param  i_addr UE address.
+ * @param  i_invalidAddr TRUE if the address information may be invalid
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 void addUeTableEntry( ExtensibleChip * i_chip, UE_TABLE::Type i_type,
-                      const MemAddr & i_addr );
+                      const MemAddr & i_addr, bool i_invalidAddr );
 
 template<> inline
 void addUeTableEntry<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                                  UE_TABLE::Type i_type,
-                                                 const MemAddr & i_addr )
+                                                 const MemAddr & i_addr,
+                                                 bool i_invalidAddr )
 {
-    getOcmbDataBundle(i_chip)->iv_ueTable.addEntry( i_type, i_addr );
+    getOcmbDataBundle(i_chip)->iv_ueTable.addEntry( i_type, i_addr,
+                                                    i_invalidAddr );
 }
 
 /**

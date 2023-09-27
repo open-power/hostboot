@@ -657,7 +657,7 @@ PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchNceTce );
 int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
-    MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, io_sc );
+    MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, 0, io_sc );
     return SUCCESS; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchUe );
@@ -674,7 +674,7 @@ int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
                             STEP_CODE_DATA_STRUCT & io_sc )
 {
     int32_t rc = SUCCESS;
-    MemEcc::analyzeMainlineIue<TYPE_OCMB_CHIP>( i_chip, io_sc );
+    MemEcc::analyzeMainlineIue<TYPE_OCMB_CHIP>( i_chip, 0, io_sc );
 
     #ifdef __HOSTBOOT_MODULE
 

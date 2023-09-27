@@ -106,10 +106,11 @@ class MemCeTable
      * @param  i_addr   The address reporting the CE.
      * @param  i_symbol The symbol reporting the CE.
      * @param  i_isHard TRUE if a hard CE was detected on this address/symbol.
+     * @param  i_invalidAddr TRUE if the address information may be invalid
      * @return Mask of possible return codes (see enum AddEntryRc).
      */
     uint32_t addEntry( const MemAddr & i_addr, const MemSymbol & i_symbol,
-                       bool i_isHard = false );
+                       bool i_isHard = false, bool i_invalidAddr = false );
 
     /**
      * @brief Deactivates all entries covered by a rank.
@@ -137,11 +138,12 @@ class MemCeTable
         uint8_t portSlct;            ///< The port select of the DRAM
         bool    isHard;              ///< TRUE if a hard CE was detected
         bool    isDramSpared;        ///< TRUE if on spare DRAM
+        bool    invalidAddr;         ///< True if the addr info may be invalid
 
         /** @brief Default constructor. */
         TableData() :
             active(false), count(0), addr(), dram(0), dramPins(0), portSlct(0),
-            isHard(false), isDramSpared(false)
+            isHard(false), isDramSpared(false), invalidAddr(false)
         {}
 
         /**
@@ -152,11 +154,17 @@ class MemCeTable
          * @param i_type     The wiring type (for DRAM site locations).
          */
         TableData( const MemAddr & i_addr, uint8_t i_dram, uint8_t i_dramPins,
-                   uint8_t i_portSlct, bool i_isHard, bool i_isDramSpared ) :
+                   uint8_t i_portSlct, bool i_isHard, bool i_isDramSpared,
+                   bool i_invalidAddr = false ) :
             active(true), count(1), addr(i_addr), dram(i_dram),
             dramPins(i_dramPins), portSlct(i_portSlct), isHard(i_isHard),
-            isDramSpared(i_isDramSpared)
-        {}
+            isDramSpared(i_isDramSpared), invalidAddr(i_invalidAddr)
+        {
+            if (i_invalidAddr)
+            {
+                active = false;
+            }
+        }
 
         /** An entry is equivalent if the address and DRAM match. */
         bool operator==( const TableData & i_data ) const

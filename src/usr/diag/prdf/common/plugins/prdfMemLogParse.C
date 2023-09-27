@@ -313,10 +313,10 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
     i_parser.PrintNumber( " MEM_UE_TABLE", "%d", entries );
 
     const char * hh = "   Count Type";
-    const char * hd = "Rank Bank Row     Column";
+    const char * hd = "Rank Bank Row     Column Port Valid";
     i_parser.PrintString( hh, hd );
     hh = "   ----- -------------";
-    hd = "---- ---- ------- ------";
+    hd = "---- ---- ------- ------ ---- -----";
     i_parser.PrintString( hh, hd );
 
     for ( uint32_t i = 0; i < entries; i++ )
@@ -324,8 +324,10 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         uint32_t idx = i * ENTRY_SIZE;
 
         uint32_t count    =  i_buffer[idx  ];                           // 8-bit
-        uint32_t type     =  i_buffer[idx+1] >> 4;                      // 4-bit
-        // 4 spare bits                                                 // 4-bit
+        uint32_t type     =  (i_buffer[idx+1] >> 4) & 0xf;              // 4-bit
+        uint32_t port     =  (i_buffer[idx+1] >> 3) & 0x1;              // 1-bit
+        uint32_t invAddr  =  (i_buffer[idx+1] >> 2) & 0x1;              // 1-bit
+        // 2 spare bits                                                 // 4-bit
         uint32_t mrnk     = (i_buffer[idx+2] >> 5) & 0x7;               // 3-bit
         uint32_t srnk     = (i_buffer[idx+2] >> 2) & 0x7;               // 3-bit
         uint32_t row0_1   =  i_buffer[idx+2]       & 0x3;               // 2-bit
@@ -349,12 +351,14 @@ bool parseMemUeTable( uint8_t  * i_buffer, uint32_t i_buflen,
             case SCRUB_AUE: type_str = "SCRUB_AUE    "; break;
         }
 
+        char validAddr = (1 == invAddr) ? 'N':'Y';
+
         char header[HEADER_SIZE] = { '\0' };
         snprintf( header, HEADER_SIZE, "    %3d  %s", count, type_str );
 
         char data[DATA_SIZE]     = { '\0' };
-        snprintf( data, DATA_SIZE, "m%ds%d 0x%02x 0x%05x  0x%03x",
-                  mrnk, srnk, bnk, row, col );
+        snprintf( data, DATA_SIZE, "m%ds%d 0x%02x 0x%05x  0x%03x    %1d     %c",
+                  mrnk, srnk, bnk, row, col, port, validAddr );
 
         i_parser.PrintString( header, data );
     }
@@ -380,10 +384,10 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
     i_parser.PrintNumber( " MEM_CE_TABLE", "%d", entries );
 
     const char * hh = "   A H Count RC";
-    const char * hd = "Rank P Bank Row     Column DRAM Pins S E Site";
+    const char * hd = "Rank P Bank Row     Column DRAM Pins S Valid";
     i_parser.PrintString( hh, hd );
     hh = "   - - ----- ----";
-    hd = "---- - ---- ------- ------ ---- ---- - - ------";
+    hd = "---- - ---- ------- ------ ---- ---- - -----";
     i_parser.PrintString( hh, hd );
 
     // Get the metadata info.
@@ -397,7 +401,8 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         uint32_t count    =  i_buffer[idx  ];                           // 8-bit
         // 5 spare bits                                                 // 5-bit
         uint32_t isSp     = (i_buffer[idx+1] >> 2) & 0x1;               // 1-bit
-        // 2 spare bits                                                 // 2-bit
+        uint32_t invAddr  = (i_buffer[idx+1] >> 1) & 0x1;               // 1-bit
+        uint32_t portSlct =  i_buffer[idx+1]       & 0x1;               // 1-bit
         uint32_t isHard   = (i_buffer[idx+2] >> 7) & 0x1;               // 1-bit
         uint32_t active   = (i_buffer[idx+2] >> 6) & 0x1;               // 1-bit
         uint32_t dram     =  i_buffer[idx+2]       & 0x3f;              // 6-bit
@@ -415,13 +420,12 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         uint32_t row = (row0_1 << 16) | (row2_9 << 8) | row10_17;
         uint32_t col =                  (col0   << 8) | col1_8;
 
-        char active_char = ( 1 == active ) ? 'Y':'N';
-        char isHard_char = ( 1 == isHard ) ? 'Y':'N';
-        char isSp_char   = ( 1 == isSp   ) ? 'Y':'N';
+        char active_char  = ( 1 == active ) ? 'Y':'N';
+        char isHard_char  = ( 1 == isHard ) ? 'Y':'N';
+        char isSp_char    = ( 1 == isSp   ) ? 'Y':'N';
+        char validAddr    = ( 1 == invAddr) ? 'N':'Y';
 
         const char * cardName_str = "";
-        const char * portSlct_str = " "; // intentionally an empty space.
-        const char * dramSite_str = "";
 
         // Build the header string.
         char header[HEADER_SIZE] = { '\0' };
@@ -431,9 +435,9 @@ bool parseMemCeTable( uint8_t  * i_buffer, uint32_t i_buflen,
         // Build the data string.
         char data[DATA_SIZE] = { '\0' };
         snprintf( data, DATA_SIZE,
-                  "m%ds%d %s 0x%02x 0x%05x  0x%03x   %2d 0x%02x %c %s",
-                  mrnk, srnk, portSlct_str, bnk, row, col, dram, dramPins,
-                  isSp_char, dramSite_str );
+                  "m%ds%d %1d 0x%02x 0x%05x  0x%03x   %2d 0x%02x %c     %c",
+                  mrnk, srnk, portSlct, bnk, row, col, dram, dramPins,
+                  isSp_char, validAddr );
 
         // Print the line.
         i_parser.PrintString( header, data );

@@ -522,8 +522,7 @@ actionclass mainline_nce_tce_handling
 actionclass mainline_aue_iaue_handling0_chnlFail
 {
     SueSource;
-    funccall("AnalyzeFetchAueIaue");
-    mem_port0_L;
+    mem_port0_M;
     threshold1;
     funccall("returnNoClearFirBits");
 };
@@ -531,37 +530,33 @@ actionclass mainline_aue_iaue_handling0_chnlFail
 actionclass mainline_aue_iaue_handling1_chnlFail
 {
     SueSource;
-    funccall("AnalyzeFetchAueIaue");
-    mem_port1_L;
+    mem_port1_M;
     threshold1;
     funccall("returnNoClearFirBits");
-};
-
-/** Mainline UE handling */
-actionclass mainline_ue_handling
-{
-    threshold( field(33 / 30 min ) ); # To prevent flooding. Will be unmasked
-                                      # when background scrubbing resumes after
-                                      # targeted diagnostics is complete.
-    funccall("AnalyzeFetchUe");
 };
 
 actionclass mainline_ue_handling_0_UERE
 {
     SueSource;
-    mainline_ue_handling;
+    threshold( field(33 / 30 min ) ); # To prevent flooding. Will be unmasked
+                                      # when background scrubbing resumes after
+                                      # targeted diagnostics is complete.
+    funccall("AnalyzeFetchUe_0");
     funccall("ClearMainlineIue_0");
 };
 
 actionclass mainline_ue_handling_1_UERE
 {
     SueSource;
-    mainline_ue_handling;
+    threshold( field(33 / 30 min ) ); # To prevent flooding. Will be unmasked
+                                      # when background scrubbing resumes after
+                                      # targeted diagnostics is complete.
+    funccall("AnalyzeFetchUe_1");
     funccall("ClearMainlineIue_1");
 };
 
 /** Handle Mainline IUEs */
-actionclass mainline_iue_handling
+actionclass mainline_iue_handling_0
 {
     # An IUE itself is not a SUE source, however, a threshold of IUEs will
     # trigger a port failure, which will generate SUEs. The port failure could
@@ -569,7 +564,18 @@ actionclass mainline_iue_handling
     # SUE just in case it is needed in the checkstop analysis.
     SueSource;
     # Thresholding done in the plugin
-    funccall("AnalyzeMainlineIue");
+    funccall("AnalyzeMainlineIue_0");
+};
+
+actionclass mainline_iue_handling_1
+{
+    # An IUE itself is not a SUE source, however, a threshold of IUEs will
+    # trigger a port failure, which will generate SUEs. The port failure could
+    # also crash the machine so we want to make sure this bit is flagged as an
+    # SUE just in case it is needed in the checkstop analysis.
+    SueSource;
+    # Thresholding done in the plugin
+    funccall("AnalyzeMainlineIue_1");
 };
 
 /**  Handle Maintenance IUEs */

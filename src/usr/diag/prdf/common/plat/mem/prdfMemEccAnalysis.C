@@ -31,6 +31,7 @@
 #include <prdfMemDbUtils.H>
 #include <prdfMemDqBitmap.H>
 #include <prdfMemExtraSig.H>
+#include <prdfOdyExtraSig.H>
 #include <prdfMemUtils.H>
 #include <prdfPlatServices.H>
 
@@ -52,9 +53,8 @@ namespace MemEcc
 
 template<>
 uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                      const MemAddr & i_addr,
-                                      UE_TABLE::Type i_type,
-                                      STEP_CODE_DATA_STRUCT & io_sc )
+    const MemAddr & i_addr, UE_TABLE::Type i_type,
+    STEP_CODE_DATA_STRUCT & io_sc, bool i_invAddr )
 {
     #define PRDF_FUNC "[MemEcc::handleMemUe<TYPE_OCMB_CHIP>] "
 
@@ -67,41 +67,101 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     {
         MemRank rank = i_addr.getRank();
 
-        // Add the rank to the callout list.
-        PRDpriority rankPriority = MRU_MED;
-        GARD_POLICY rankGard = GARD;
-
-        if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip,
-                                                        i_addr.getPort()))
-        {
-            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
-                TYPE_MEM_PORT, i_addr.getPort());
-            io_sc.service_data->SetCallout(memport, MRU_HIGH);
-            rankPriority = MRU_LOW;
-            rankGard = NO_GARD;
-        }
-
-        MemoryMru mm { i_chip->getTrgt(), rank, i_addr.getPort(),
-                       MemoryMruData::CALLOUT_RANK };
-        io_sc.service_data->SetCallout( mm, rankPriority, rankGard );
-
         // All memory UEs should be customer viewable.
         io_sc.service_data->setServiceCall();
 
-        // Add entry to UE table.
-        MemDbUtils::addUeTableEntry<TYPE_OCMB_CHIP>( i_chip, i_type, i_addr );
-
-        #ifdef __HOSTBOOT_RUNTIME
-
-        // Dynamically deallocate the rank.
-        if ( SUCCESS != MemDealloc::rank<TYPE_OCMB_CHIP>(i_chip, rank,
-                                                         i_addr.getPort()) )
+        // Actions if we have potentially invalid address information
+        if (i_invAddr)
         {
-            PRDF_ERR( PRDF_FUNC "MemDealloc::rank<TYPE_OCMB_CHIP>(0x%08x,m%ds%d"
-                      ",%x) failed", i_chip->getHuid(), rank.getMaster(),
-                      rank.getSlave(), i_addr.getPort() );
+            // Since there's a UE on both ports and we don't have valid address
+            // information, just callout both ports.
+            TargetHandle_t port0 = getConnectedChild(i_chip->getTrgt(),
+                                                     TYPE_MEM_PORT, 0);
+            if (nullptr == port0)
+            {
+                PRDF_ERR(PRDF_FUNC "Invalid address for UE, but port0 on OCMB "
+                         "0x%08x does not exist", i_chip->getHuid());
+                io_sc.service_data->SetCallout(i_chip->getTrgt());
+                return FAIL;
+            }
+
+            TargetHandle_t port1 = getConnectedChild(i_chip->getTrgt(),
+                                                     TYPE_MEM_PORT, 1);
+            if (nullptr == port1)
+            {
+                PRDF_ERR(PRDF_FUNC "Invalid address for UE, but port1 on OCMB "
+                         "0x%08x does not exist", i_chip->getHuid());
+                io_sc.service_data->SetCallout(i_chip->getTrgt());
+                return FAIL;
+            }
+
+            io_sc.service_data->SetCallout(port0, MRU_MEDA);
+            io_sc.service_data->SetCallout(port1, MRU_MEDA);
+
+            // The address value is invalid, but add the address that was read
+            // to the table anyway so something is there.
+            MemAddr port0Addr = MemAddr(i_addr.getRank(), i_addr.getBank(),
+                i_addr.getRow(), i_addr.getCol(), 0);
+            MemAddr port1Addr = MemAddr(i_addr.getRank(), i_addr.getBank(),
+                i_addr.getRow(), i_addr.getCol(), 1);
+
+            MemDbUtils::addUeTableEntry<TYPE_OCMB_CHIP>( i_chip, i_type,
+                port0Addr, i_invAddr );
+            MemDbUtils::addUeTableEntry<TYPE_OCMB_CHIP>( i_chip, i_type,
+                port1Addr, i_invAddr );
+
+            #ifdef __HOSTBOOT_RUNTIME
+            // Dynamically deallocate the ports.
+            if ( SUCCESS != MemDealloc::port<TYPE_OCMB_CHIP>(i_chip, 0) )
+            {
+                PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_OCMB_CHIP>(0x%08x,0)"
+                          " failed", i_chip->getHuid() );
+            }
+            if ( SUCCESS != MemDealloc::port<TYPE_OCMB_CHIP>(i_chip, 1) )
+            {
+                PRDF_ERR( PRDF_FUNC "MemDealloc::port<TYPE_OCMB_CHIP>(0x%08x,1)"
+                          " failed", i_chip->getHuid() );
+            }
+            #endif
+        }
+        // Actions if we have valid address information
+        else
+        {
+            // Since we have valid address information, callout the rank.
+            PRDpriority rankPriority = MRU_MED;
+            GARD_POLICY rankGard = GARD;
+
+            if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip,
+                                                            i_addr.getPort()))
+            {
+                TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                    TYPE_MEM_PORT, i_addr.getPort());
+                io_sc.service_data->SetCallout(memport, MRU_HIGH);
+                rankPriority = MRU_LOW;
+                rankGard = NO_GARD;
+            }
+
+            MemoryMru mm { i_chip->getTrgt(), rank, i_addr.getPort(),
+                           MemoryMruData::CALLOUT_RANK };
+            io_sc.service_data->SetCallout( mm, rankPriority, rankGard );
+
+            MemDbUtils::addUeTableEntry<TYPE_OCMB_CHIP>( i_chip, i_type, i_addr,
+                                                         i_invAddr );
+
+            #ifdef __HOSTBOOT_RUNTIME
+            // Dynamically deallocate the rank.
+            if ( SUCCESS != MemDealloc::rank<TYPE_OCMB_CHIP>(i_chip, rank,
+                                                             i_addr.getPort()) )
+            {
+                PRDF_ERR( PRDF_FUNC "MemDealloc::rank<TYPE_OCMB_CHIP>(0x%08x,"
+                          "m%ds%d,%x) failed", i_chip->getHuid(),
+                          rank.getMaster(), rank.getSlave(), i_addr.getPort() );
+            }
+            #endif
+
         }
 
+        #ifdef __HOSTBOOT_RUNTIME
         // Increment the UE counter and store the rank we're on, resetting
         // the UE and CE counts if we have stopped on a new port/rank.
         OcmbDataBundle * ocmbdb = getOcmbDataBundle(i_chip);
@@ -645,7 +705,7 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemAddr & i_addr,
         io_sc.service_data->SetCallout( mm );
 
         // Add entry to UE table.
-        MemDbUtils::addUeTableEntry<T>( i_chip, i_type, i_addr );
+        MemDbUtils::addUeTableEntry<T>( i_chip, i_type, i_addr, false );
 
         // Add a VCM request to the TD queue if at runtime or at memdiags.
         #ifdef __HOSTBOOT_MODULE
@@ -769,7 +829,8 @@ uint32_t analyzeFetchMpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 template<TARGETING::TYPE T>
 uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
                       const MemSymbol & i_symbol, bool & o_doTps,
-                      STEP_CODE_DATA_STRUCT & io_sc, bool i_isHard )
+                      STEP_CODE_DATA_STRUCT & io_sc,  bool i_invAddr,
+                      bool i_isHard )
 {
     #define PRDF_FUNC "[MemEcc::handleMemCe] "
 
@@ -784,9 +845,29 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
     MemoryMru memmru ( trgt, rank, i_addr.getPort(), i_symbol );
     io_sc.service_data->SetCallout( memmru, MRU_MEDA );
 
-    // Add data to the CE table.
-    uint32_t ceTableRc = MemDbUtils::addCeTableEntry<T>( i_chip, i_addr,
-                                                         i_symbol, i_isHard );
+    uint32_t ceTableRc;
+    // Add data to the CE table. If the address is potentially invalid, add an
+    // entry for each port.
+    if (i_invAddr)
+    {
+        // The address value is invalid, but add the address that was read
+        // to the table anyway so something is there.
+        MemAddr port0Addr = MemAddr(i_addr.getRank(), i_addr.getBank(),
+            i_addr.getRow(), i_addr.getCol(), 0);
+        MemAddr port1Addr = MemAddr(i_addr.getRank(), i_addr.getBank(),
+            i_addr.getRow(), i_addr.getCol(), 1);
+
+        ceTableRc = MemDbUtils::addCeTableEntry<T>(i_chip, port0Addr, i_symbol,
+                                                   i_isHard, i_invAddr);
+        ceTableRc = MemDbUtils::addCeTableEntry<T>(i_chip, port1Addr, i_symbol,
+                                                   i_isHard, i_invAddr);
+
+    }
+    else
+    {
+        ceTableRc = MemDbUtils::addCeTableEntry<T>(i_chip, i_addr, i_symbol,
+                                                   i_isHard, i_invAddr);
+    }
 
     // Check MNFG thresholds, if needed.
     // NOTE: We will only check the MNFG thresholds if DRAM repairs is disabled.
@@ -889,6 +970,50 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
         return o_rc;
     }
 
+    // Odyssey only: Check if the address is potentially invalid. On Odyssey
+    // OCMBs, if there is a CE reporting on both RDF/ports at the same time,
+    // the address within the mainline address trap register may be invalid.
+    bool invAddr = false;
+    if (isOdysseyOcmb(i_chip->getTrgt()) &&
+        nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 0) &&
+        nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 1))
+    {
+        // Check both RDF_FIR[9:10] for mainline NCE/TCEs
+        SCAN_COMM_REGISTER_CLASS * rdf0 = i_chip->getRegister("RDF_FIR_0");
+        SCAN_COMM_REGISTER_CLASS * rdf1 = i_chip->getRegister("RDF_FIR_1");
+        SCAN_COMM_REGISTER_CLASS * msk0 = i_chip->getRegister("RDF_FIR_MASK_0");
+        SCAN_COMM_REGISTER_CLASS * msk1 = i_chip->getRegister("RDF_FIR_MASK_1");
+        if ( SUCCESS != (rdf0->Read() | rdf0->Read() |
+                         msk0->Read() | msk1->Read()) )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on RDF_FIRs: i_chip=0x%08x",
+                      i_chip->getHuid() );
+        }
+        else if ( (0 != (rdf0->GetBitFieldJustified(9,2) &
+                        ~msk0->GetBitFieldJustified(9,2))) &&
+                  (0 != (rdf1->GetBitFieldJustified(9,2) &
+                        ~msk1->GetBitFieldJustified(9,2))) )
+        {
+            // Set a flag indicating the address is invalid
+            invAddr = true;
+
+            // Clear NCE/TCE FIR bits on both RDFs. Write to clear.
+            rdf0->clearAllBits();
+            rdf1->clearAllBits();
+            rdf0->SetBitFieldJustified(9, 2, 0x3);
+            rdf1->SetBitFieldJustified(9, 2, 0x3);
+            if (SUCCESS != (rdf0->Write() | rdf1->Write()))
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on RDF_FIRs: i_chip=0x%08x",
+                          i_chip->getHuid() );
+            }
+
+            // Adjust the signature
+            io_sc.service_data->setSignature(i_chip->getHuid(),
+                                             PRDFSIG_NceTceInvAddr);
+        }
+    }
+
     do
     {
         MemRank rank = addr.getRank();
@@ -907,7 +1032,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
         bool doTps = false;
         if ( sym1.isValid() )
         {
-            o_rc = handleMemCe<T>( i_chip, addr, sym1, doTps, io_sc );
+            o_rc = handleMemCe<T>( i_chip, addr, sym1, doTps, io_sc, invAddr );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x,0x%02x,%d) failed",
@@ -928,7 +1053,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
         if ( sym2.isValid() )
         {
             bool tmp;
-            o_rc = handleMemCe<T>( i_chip, addr, sym2, tmp, io_sc );
+            o_rc = handleMemCe<T>( i_chip, addr, sym2, tmp, io_sc, invAddr );
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleMemCe(0x%08x,0x%02x,%d) failed",
@@ -979,7 +1104,7 @@ uint32_t analyzeFetchNceTce<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
+uint32_t analyzeFetchUe( ExtensibleChip * i_chip, uint8_t i_port,
                          STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::analyzeFetchUe] "
@@ -1003,10 +1128,53 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
         return o_rc;
     }
 
+    // Odyssey only: Check if the address is potentially invalid. On Odyssey
+    // OCMBs, if there is a UE reporting on both RDF/ports at the same time,
+    // the address within the mainline address trap register may be invalid.
+    bool invAddr = false;
+    if (isOdysseyOcmb(i_chip->getTrgt()) &&
+        nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 0) &&
+        nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 1))
+    {
+        // Check both RDF_FIR[9:10] for mainline NCE/TCEs
+        SCAN_COMM_REGISTER_CLASS * rdf0 = i_chip->getRegister("RDF_FIR_0");
+        SCAN_COMM_REGISTER_CLASS * rdf1 = i_chip->getRegister("RDF_FIR_1");
+        SCAN_COMM_REGISTER_CLASS * msk0 = i_chip->getRegister("RDF_FIR_MASK_0");
+        SCAN_COMM_REGISTER_CLASS * msk1 = i_chip->getRegister("RDF_FIR_MASK_1");
+        if ( SUCCESS != (rdf0->Read() | rdf0->Read() |
+                         msk0->Read() | msk1->Read()) )
+        {
+            PRDF_ERR( PRDF_FUNC "Read() failed on RDF_FIRs: i_chip=0x%08x",
+                      i_chip->getHuid() );
+        }
+        else if ( (rdf0->IsBitSet(15) && !msk0->IsBitSet(15)) &&
+                  (rdf1->IsBitSet(15) && !msk1->IsBitSet(15)) )
+        {
+            // Set a flag indicating the address is invalid
+            invAddr = true;
+
+            // Clear NCE/TCE FIR bits on both RDFs. Write to clear.
+            rdf0->clearAllBits();
+            rdf1->clearAllBits();
+            rdf0->SetBit(15);
+            rdf1->SetBit(15);
+            if (SUCCESS != (rdf0->Write() | rdf1->Write()))
+            {
+                PRDF_ERR( PRDF_FUNC "Write() failed on RDF_FIRs: i_chip=0x%08x",
+                          i_chip->getHuid() );
+            }
+
+            // Adjust the signature
+            io_sc.service_data->setSignature(i_chip->getHuid(),
+                                             PRDFSIG_UeInvAddr);
+        }
+    }
+
     do
     {
         // Do memory UE handling.
-        o_rc = MemEcc::handleMemUe<T>( i_chip, addr, UE_TABLE::FETCH_UE, io_sc);
+        o_rc = MemEcc::handleMemUe<T>(i_chip, addr, UE_TABLE::FETCH_UE, io_sc,
+                                      invAddr);
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
@@ -1049,15 +1217,14 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip,
 // To resolve template linker errors.
 template
 uint32_t analyzeFetchUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                         STEP_CODE_DATA_STRUCT & io_sc );
+    uint8_t i_port, STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
 template<>
 uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                       const MemRank & i_rank,
-                                       uint8_t i_port,
-                                       STEP_CODE_DATA_STRUCT & io_sc )
+    const MemRank & i_rank, uint8_t i_port, STEP_CODE_DATA_STRUCT & io_sc,
+    bool i_mainline )
 {
     #define PRDF_FUNC "[MemEcc::handleMemIue] "
 
@@ -1066,23 +1233,34 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     uint32_t o_rc = SUCCESS;
 
-
-    MemoryMru mm { i_chip->getTrgt(), i_rank, i_port,
-                   MemoryMruData::CALLOUT_RANK };
-
-    // For Odyssey check ODP_FIR for possible root cause
-    if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, i_port))
+    // Mainline IUEs on Odyssey may have invalid rank information, so the port
+    // will be called out instead.
+    if (isOdysseyOcmb(i_chip->getTrgt()) && i_mainline)
     {
-        // Adjust callout to MEM_PORT high, DIMM low
         TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
                                                    TYPE_MEM_PORT, i_port);
-        io_sc.service_data->SetCallout( memport, MRU_HIGH );
-        io_sc.service_data->SetCallout( mm, MRU_LOW, NO_GARD );
+        io_sc.service_data->SetCallout(memport);
     }
     else
     {
-        // Add the DIMM to the callout list.
-        io_sc.service_data->SetCallout( mm );
+        MemoryMru mm { i_chip->getTrgt(), i_rank, i_port,
+                    MemoryMruData::CALLOUT_RANK };
+
+        // For Odyssey check ODP_FIR for possible root cause
+        if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, i_port))
+        {
+            // Adjust callout to MEM_PORT high, DIMM low
+            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                                                       TYPE_MEM_PORT, i_port);
+            io_sc.service_data->SetCallout( memport, MRU_HIGH );
+            io_sc.service_data->SetCallout( mm, MRU_LOW, NO_GARD );
+        }
+        else
+        {
+            // Add the DIMM to the callout list.
+            io_sc.service_data->SetCallout( mm );
+        }
+
     }
 
     #ifdef __HOSTBOOT_MODULE
@@ -1170,7 +1348,7 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
+uint32_t analyzeMainlineIue( ExtensibleChip * i_chip, uint8_t i_port,
                              STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::analyzeMainlineIue] "
@@ -1195,12 +1373,12 @@ uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
         }
         MemRank rank = addr.getRank();
 
-        o_rc = handleMemIue<T>( i_chip, rank, addr.getPort(), io_sc );
+        o_rc = handleMemIue<T>( i_chip, rank, i_port, io_sc, true );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "handleMemIue(0x%08x,m%ds%d,%x) failed",
                       i_chip->getHuid(), rank.getMaster(), rank.getSlave(),
-                      addr.getPort() );
+                      i_port );
             break;
         }
 
@@ -1213,7 +1391,7 @@ uint32_t analyzeMainlineIue( ExtensibleChip * i_chip,
 
 template
 uint32_t analyzeMainlineIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                             STEP_CODE_DATA_STRUCT & io_sc );
+    uint8_t i_port, STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
