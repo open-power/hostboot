@@ -121,7 +121,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                     * @userdata1[00:31] Last  OCMB Target HUID
                     * @userdata2[32:47] Reserved 0xFFFF default
                     * @userdata2[48:55] Number of OCMBs in log
-                    * @userdata2[56:63] pmic combined status
+                    * @userdata2[56:63] Worst pmic status
                     * @devdesc          PMIC Health Check Data
                     * @custdesc         PMIC Health Check Data
                     */
@@ -153,6 +153,11 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                             get_huid(i_proc), get_huid(l_pOcmb), l_InstanceId,
                             l_err->plid());
                     l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    // Produce a visible log in Mfg Mode for failed health check
+                    if( TARGETING::areAllSrcsTerminating() )
+                    {
+                        l_err->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                    }
                     l_err->collectTrace(SBEIO_COMP_NAME);
                     errlCommit(l_err, SBEIO_COMP_ID);
                     continue;
@@ -167,11 +172,66 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                 l_last_ocmb_huid_num = get_huid(l_pOcmb);
 
 
-                SbePsu::pmic_health_data_t &l_pmic_health_data =
-                        * reinterpret_cast<SbePsu::pmic_health_data_t *>(&l_ocmb_pmic_data[0]);
+                runtime_n_mode_telem_info l_pmic_health_data =
+                        * reinterpret_cast<runtime_n_mode_telem_info*>(&l_ocmb_pmic_data[0]);
+
+                uint8_t l_pmic_revision = l_pmic_health_data.iv_revision;
+                uint8_t l_pmic_status = l_pmic_health_data.iv_aggregate_error;
+                TRACFCOMP( g_trac_sbeio, "getPmicHealthCheckData: l_pmic_revision=0x%X l_pmic_status=0x%X",
+                           l_pmic_revision, l_pmic_status);
 
                 // Update mask for this pmic status in the SRC word 9
-                l_pmic_combined_status |= l_pmic_health_data.pmic_status;
+                if( l_pmic_status > l_pmic_combined_status )
+                {
+                    l_pmic_combined_status = l_pmic_status;
+                }
+
+                // Produce a visible log in Mfg Mode for failed health check
+                errlHndl_t mfg_err = nullptr;
+                if( (l_pmic_status != N_PLUS_1) && TARGETING::areAllSrcsTerminating() )
+                {
+                    /*@
+                     * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
+                     * @reasoncode       SBEIO_PMIC_FAILED_HEALTH_CHECK
+                     * @userdata1[00:31] PROC Target HUID
+                     * @userdata1[32:63] OCMB Target HUID
+                     * @userdata2[00:07] PMIC Revision
+                     * @userdata2[08:15] PMIC Status (see pmic_n_mode_detect.H)
+                     * @userdata2[16:23] OCMB position relative to proc
+                     * @userdata2[24:31] True if we should have non-zero addFFDC data
+                     * @userdata2[32:47] deprecated: l_psuResponse.primaryStatus
+                     * @userdata2[48:63] deprecated: l_psuResponse.secondaryStatus
+                     * @devdesc          PMIC Health Check Data Failed in Mfg Mode
+                     * @custdesc         PMIC Health Check Data Failed in Mfg Mode
+                     */
+                    mfg_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                       SBEIO_PSU_PMIC_HEALTH_CHECK,
+                                                       SBEIO_PMIC_FAILED_HEALTH_CHECK,
+                                                       TWO_UINT32_TO_UINT64(
+                                                         get_huid(i_proc),
+                                                         get_huid(l_pOcmb)),
+                                                       TWO_UINT32_TO_UINT64(
+                                                         FOUR_UINT8_TO_UINT32(
+                                                           l_pmic_revision,
+                                                           l_pmic_status,
+                                                           l_InstanceId,
+                                                           true),
+                                                         0)
+                                                       );
+
+                    // If MFG mode add a HW Callout to properly identify the location code,
+                    // but continue to create the Health Check Data entry to show a complete
+                    // set of expected logs for OCMBs as usual, additional data logged may
+                    // aide in root cause problem determination
+                    //
+                    // Identify this OCMB for the MFG check failure
+                    mfg_err->addHwCallout( l_pOcmb,
+                                           HWAS::SRCI_PRIORITY_HIGH,
+                                           HWAS::NO_DECONFIG,
+                                           HWAS::GARD_NULL);
+                    mfg_err->collectTrace(FAPI_IMP_TRACE_NAME,256);
+                    mfg_err->collectTrace(FAPI_TRACE_NAME,384);
+                }
 
                 l_response_size = l_pmic_data.getLength() * 4; // data size
                 if (l_response_size == 0)
@@ -239,6 +299,33 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                             102,                         // Version
                             SBEIO_UDT_NO_FORMAT,         // parser ignores data
                             false );                     // merge
+
+                    // Add to mfg log too
+                    if( mfg_err )
+                    {
+                        // Identify this OCMB for the Health Check Data Log
+                        mfg_err->addFFDC( HWPF_COMP_ID,
+                            full_location_code.data(),
+                            0x10,                      // 16 bytes of location ex:ND:#-Pxx-Cyy
+                            101,                       // Version
+                            SBEIO_UDT_NO_FORMAT,       // parser ignores data
+                            false );                   // merge
+
+                        // OCMB Health Check Data Log
+                        mfg_err->addFFDC( HWPF_COMP_ID,
+                            &l_ocmb_pmic_data[0],
+                            l_response_size,
+                            102,                         // Version
+                            SBEIO_UDT_NO_FORMAT,         // parser ignores data
+                            false );                     // merge
+                    }
+                }
+
+                // Commit the manufacturing log now if we have one
+                if( mfg_err )
+                {
+                    mfg_err->collectTrace(SBEIO_COMP_NAME);
+                    errlCommit(mfg_err, SBEIO_COMP_ID);
                 }
 
                 // Summary - We are logging all the data we can to aide analysis
@@ -250,8 +337,8 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                         "l_InstanceId=%d OCMB location=%s ",
                         get_huid(i_proc), get_huid(l_pOcmb),
                         l_response_size,
-                        l_pmic_health_data.pmic_revision,
-                        l_pmic_health_data.pmic_status,
+                        l_pmic_revision,
+                        l_pmic_status,
                         l_InstanceId,
                         full_location_code.data());
 
