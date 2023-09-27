@@ -952,31 +952,36 @@ void* call_proc_build_smp (void *io_pArgs)
                       "Draining interrupt queue");
             INTR::drainQueue();
 
-            // 5) Flush TPM state
-            l_errl = TRUSTEDBOOT::flushTpmQueue();
-            if (l_errl)
+            // Do not attempt to flush the TPM or unlock the SPI engine
+            // if there is no good TPM on the system.
+            if(TRUSTEDBOOT::functionalPrimaryTpmExists())
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          ERR_MRK"Unable to flushTpmQueue");
-                break;
-            }
+                // 5) Flush TPM state
+                l_errl = TRUSTEDBOOT::flushTpmQueue();
+                if (l_errl)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              ERR_MRK"Unable to flushTpmQueue");
+                    break;
+                }
 
-            // Unlock the TPM SPI engine
-            SpiControlHandle l_spi_handle(l_fapi2_boot_proc,
-                                          TPM_SPI_ENGINE,
-                                          TPM_SPI_USE_CHIP_SELECT_0,
-                                          true); // i_pib_access
-            FAPI_INVOKE_HWP( l_errl,
-                             spi_master_unlock,
-                             l_spi_handle,
-                             HOSTBOOT_PIB_MASTER_ID );
-            if (l_errl != nullptr)
-            {
-                TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
-                    "call_proc_build_smp: Failure trying to release TPM SPI atomic lock, proc 0x%.8X. Returning errorlog, reason=0x%x",
-                    TARGETING::get_huid(l_bootProc),
-                    l_errl->reasonCode() );
-                break;
+                // Unlock the TPM SPI engine
+                SpiControlHandle l_spi_handle(l_fapi2_boot_proc,
+                                              TPM_SPI_ENGINE,
+                                              TPM_SPI_USE_CHIP_SELECT_0,
+                                              true); // i_pib_access
+                FAPI_INVOKE_HWP( l_errl,
+                                 spi_master_unlock,
+                                 l_spi_handle,
+                                 HOSTBOOT_PIB_MASTER_ID );
+                if (l_errl != nullptr)
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                        "call_proc_build_smp: Failure trying to release TPM SPI atomic lock, proc 0x%.8X. Returning errorlog, reason=0x%x",
+                        TARGETING::get_huid(l_bootProc),
+                        l_errl->reasonCode() );
+                    break;
+                }
             }
 
             // 6) Send TPM Extend Mode chip-op with Enter control flag
