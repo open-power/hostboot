@@ -86,9 +86,9 @@ package_directories = {
     "udparsers.helpers": "src/build/tools/ebmc",
     "udparsers.b2800":   "src/usr/sbeio/plugins/ebmc",
     "udparsers.b2200":   "src/usr/sbe/plugins/ebmc",
-    "udparsers.b2900":   "src/import/chips/p10/procedures/ppe/fw_tools/b2900/",
-    "udparsers.b2e00":   "src/import/chips/p10/procedures/ppe/fw_tools/b2e00/",
-    "udparsers.b2f00":   "src/import/chips/p10/procedures/ppe/fw_tools/b2f00/",
+    "udparsers.b2900":   "src/import/chips/p10/procedures/ppe/fw_tools/udparsers/b2900/",
+    "udparsers.b2e00":   "src/import/chips/p10/procedures/ppe/fw_tools/udparsers/b2e00/",
+    "udparsers.b2f00":   "src/import/chips/p10/procedures/ppe/fw_tools/udparsers/b2f00/",
 
     # SRC parsers packages.
     # The only required package is 'srcparsers.bsrc', but other modules can be
