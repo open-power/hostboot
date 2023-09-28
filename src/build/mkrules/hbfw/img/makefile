@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2022
+# Contributors Listed Below - COPYRIGHT 2012,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -62,7 +62,9 @@ build_all: $(BUILD_ALL_DEPS)
 .endif
 
 build_all: $(BUILD_ALL_DEPS)
-install_all: gen_system_specific_images build_sbe_partitions build_pnor_images
+install_all: build_all gen_system_specific_images build_sbe_partitions build_pnor_images
+
+.NOTPARALLEL: install_all
 
 #Some useful search paths
 HBFW_OBJPATH  = ${.PATH:M*obj*}
