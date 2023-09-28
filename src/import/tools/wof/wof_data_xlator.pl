@@ -453,6 +453,7 @@ our $CSV_ATTR_bal_perf_freq_lim_mhz     = 'bal_perf_freq_lim_mhz';
 our $CSV_ATTR_fav_perf_freq_lim_mhz     = 'fav_perf_freq_lim_mhz';
 our $CSV_ATTR_fav_powr_freq_lim_mhz     = 'fav_powr_freq_lim_mhz';
 our $CSV_ATTR_non_det_freq_lim_mhz      = 'non_det_freq_lim_mhz';
+our $CSV_ATTR_max_pwr_min_freq          = 'max_pwr_min_freq';
 
 # columns of csv file scope in csv files.
 our @CSV_FILE_SCOPE_COLUMN_NAMES = (
@@ -471,7 +472,7 @@ our @CSV_FILE_SCOPE_COLUMN_NAMES = (
     $CSV_ATTR_override_match_power,  $CSV_ATTR_pdv_sort_fixed_freq,       $CSV_ATTR_bal_perf_ceff_adj_pct,
     $CSV_ATTR_fav_perf_ceff_adj_pct, $CSV_ATTR_fav_powr_ceff_adj_pct,     $CSV_ATTR_non_det_ceff_adj_pct,
     $CSV_ATTR_bal_perf_freq_lim_mhz, $CSV_ATTR_fav_perf_freq_lim_mhz,     $CSV_ATTR_fav_powr_freq_lim_mhz,
-    $CSV_ATTR_non_det_freq_lim_mhz,
+    $CSV_ATTR_non_det_freq_lim_mhz,  $CSV_ATTR_max_pwr_min_freq,
 );
 
 # columns of csv vrt scope in csv files.
@@ -1633,6 +1634,7 @@ our $WOF_ATTR_bal_perf_freq_lim_mhz     = 'bal_perf_freq_lim_mhz';
 our $WOF_ATTR_fav_perf_freq_lim_mhz     = 'fav_perf_freq_lim_mhz';
 our $WOF_ATTR_fav_powr_freq_lim_mhz     = 'fav_powr_freq_lim_mhz';
 our $WOF_ATTR_non_det_freq_lim_mhz      = 'non_det_freq_lim_mhz';
+our $WOF_ATTR_max_pwr_min_freq          = 'max_pwr_min_freq';
 
 sub new
 {
@@ -1693,7 +1695,7 @@ sub new
         $WOF_ATTR_fav_perf_freq_lim_mhz     => undef,
         $WOF_ATTR_fav_powr_freq_lim_mhz     => undef,
         $WOF_ATTR_non_det_freq_lim_mhz      => undef,
-
+        $WOF_ATTR_max_pwr_min_freq          => undef,
     };
     bless($self);
     return $self;
@@ -1776,8 +1778,9 @@ sub read
     $self->access( $WOF_ATTR_fav_perf_freq_lim_mhz,     $file->read_uint16() );
     $self->access( $WOF_ATTR_fav_powr_freq_lim_mhz,     $file->read_uint16() );
     $self->access( $WOF_ATTR_non_det_freq_lim_mhz,      $file->read_uint16() );
+    $self->access( $WOF_ATTR_max_pwr_min_freq,          $file->read_uint16() );
 
-    $file->skip_bytes(8);    # Reserved 8 bytes
+    $file->skip_bytes(6);    # Reserved 6 bytes
 
     my $actual_data_size = $file->get_pos() - $pos;
     Log::log_print $p_log_lvl, "actual_data_size: $actual_data_size.\n";
@@ -1876,7 +1879,8 @@ sub write
     $file->write_uint16( $self->access($WOF_ATTR_fav_perf_freq_lim_mhz) );
     $file->write_uint16( $self->access($WOF_ATTR_fav_powr_freq_lim_mhz) );
     $file->write_uint16( $self->access($WOF_ATTR_non_det_freq_lim_mhz) );
-    $file->fill_bytes( 8, 0x00 );    # Reserved 8 bytes
+    $file->write_uint16( $self->access($WOF_ATTR_max_pwr_min_freq) );
+    $file->fill_bytes( 6, 0x00 );    # Reserved 6 bytes
 
     my $actual_data_size = $file->get_pos() - $pos;
     Log::log_print $p_log_lvl, "actual_data_size: $actual_data_size.\n";
@@ -1960,7 +1964,7 @@ sub print
     printf( "  Favor Perf Limit Freq MHz      : %s\n", $self->access($WOF_ATTR_fav_perf_freq_lim_mhz) );
     printf( "  Favor Powr Ceff Limit Freq MHz : %s\n", $self->access($WOF_ATTR_fav_powr_freq_lim_mhz) );
     printf( "  Non deterministic Lmt Frq MHz  : %s\n", $self->access($WOF_ATTR_non_det_freq_lim_mhz) );
-
+    printf( "  Max Power Min Frequency W      : %s\n", $self->access($WOF_ATTR_max_pwr_min_freq) );
     printf("\n");
 }
 ################################################################################
@@ -2771,6 +2775,7 @@ sub _set_wof_tables_header
     $wof_tables_header->access( $WOF_ATTR_fav_perf_freq_lim_mhz, $csv_file->access($CSV_ATTR_fav_perf_freq_lim_mhz) );
     $wof_tables_header->access( $WOF_ATTR_fav_powr_freq_lim_mhz, $csv_file->access($CSV_ATTR_fav_powr_freq_lim_mhz) );
     $wof_tables_header->access( $WOF_ATTR_non_det_freq_lim_mhz,  $csv_file->access($CSV_ATTR_non_det_freq_lim_mhz) );
+    $wof_tables_header->access( $WOF_ATTR_max_pwr_min_freq,      $csv_file->access($CSV_ATTR_max_pwr_min_freq) );
 
     # Write header to image file
     $wof_tables_header->write( $self->access($IMF_ATTR_binary_file_io) );
@@ -2856,6 +2861,8 @@ sub _print_wof_tables_header
         "  WOF_ATTR_fav_powr_freq_lim_mhz:" . $wof_tables_header->access($WOF_ATTR_fav_powr_freq_lim_mhz) . "\n";
     Log::log_print $p_log_lvl,
         "  WOF_ATTR_non_det_freq_lim_mhz:" . $wof_tables_header->access($WOF_ATTR_non_det_freq_lim_mhz) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_max_pwr_min_freq" . $wof_tables_header->access($WOF_ATTR_max_pwr_min_freq) . "\n";
 }
 
 sub _write_tables_vrts
