@@ -4705,6 +4705,13 @@ fapi2::ReturnCode handle_draminit_recovery(const fapi2::Target<fapi2::TARGET_TYP
         PMU_SMB_DDR5U_1D_t& io_struct,
         fapi2::hwp_data_ostream& o_log_data);
 
+///
+/// @brief Checks verbosity of draminit debug logs
+/// @param[in] i_target the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff verbosity is no higher than COURSE_DEBUG on both
+///
+fapi2::ReturnCode check_draminit_verbosity(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_targets);
+
 } // namespace phy
 } // namespace ody
 } // namespace mss

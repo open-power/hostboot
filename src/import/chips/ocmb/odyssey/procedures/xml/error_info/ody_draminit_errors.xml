@@ -433,4 +433,24 @@
     </deconfigure>
   </hwpError>
 
+  <hwpError>
+    <rc>RC_ODY_INVALID_VERBOSITY_CONFIG</rc>
+    <description>DRAMINIT verbosity cannot be configured to higher than COARSE_DEBUG on more than one port</description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>COARSE_DEBUG_VALUE</ffdc>
+    <ffdc>PORT0_VERBOSITY</ffdc>
+    <ffdc>PORT1_VERBOSITY</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

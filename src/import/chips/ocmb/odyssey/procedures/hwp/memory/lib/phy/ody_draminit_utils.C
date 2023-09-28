@@ -7877,6 +7877,42 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Checks verbosity of draminit debug logs
+/// @param[in] i_targets the memory ports on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff verbosity is no higher than COURSE_DEBUG on both
+///
+fapi2::ReturnCode check_draminit_verbosity(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+    uint8_t l_port_0_verbosity = fapi2::ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_COARSE_DEBUG;
+    uint8_t l_port_1_verbosity = fapi2::ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_COARSE_DEBUG;
+
+    if(l_ports.size() < mss::ody::sizes::MAX_PORT_PER_OCMB)
+    {
+        FAPI_INF(TARGTIDFORMAT " only one port or less was found, skipping verbosity check", TARGTID);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY(mss::attr::get_ody_draminit_verbosity(l_ports[0], l_port_0_verbosity));
+    FAPI_TRY(mss::attr::get_ody_draminit_verbosity(l_ports[1], l_port_1_verbosity));
+
+    // Higher level of verbosity are encoded with a lower numerical value
+    FAPI_ASSERT((l_port_0_verbosity >= fapi2::ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_COARSE_DEBUG) ||
+                (l_port_1_verbosity >= fapi2::ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_COARSE_DEBUG),
+                fapi2::ODY_INVALID_VERBOSITY_CONFIG().
+                set_OCMB_TARGET(i_target).
+                set_COARSE_DEBUG_VALUE(fapi2::ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_COARSE_DEBUG).
+                set_PORT0_VERBOSITY(l_port_0_verbosity).
+                set_PORT1_VERBOSITY(l_port_1_verbosity),
+                TARGTIDFORMAT
+                " has both ports (%d port 0, %d port 1) configured at higher level (lower numerical value than %d) of verbosity than desired, only one port should be configured at this level or higher",
+                TARGTID, l_port_0_verbosity, l_port_1_verbosity, fapi2::ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_COARSE_DEBUG);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // namespace phy
 } // namespace ody
 } // namespace mss
