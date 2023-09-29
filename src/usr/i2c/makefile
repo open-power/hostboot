@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,20 @@ ROOTPATH = ../../..
 MODULE = i2c
 
 EXTRAINCDIR += $(ROOTPATH)/src/include/
+
+EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/include/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/common/procedures/hwp/pmic/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/i2c
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/lib/utils
 
 #include common objects between hb and runtime
 include i2c.mk

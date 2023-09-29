@@ -31,6 +31,7 @@ OBJS += host_discover_targets.o
 OBJS += call_host_update_primary_tpm.o
 OBJS += host_gard.o
 OBJS += call_host_voltage_config.o
+OBJS += dt_trim_read_restart_ddr5.o
 
 SUBDIRS += thread_activate.d
 
@@ -38,10 +39,12 @@ PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
 PM_HWP_PATH   += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm
 LIB_HWP_PATH  += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib
 PMLIB_PATH += ${ROOTPATH}/src/import/chips/p10/common/pmlib/
+DDR5_HWP_PATH += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/
 
 VPATH += ${PERV_HWP_PATH}
 VPATH += ${PM_HWP_PATH}
 VPATH += ${LIB_HWP_PATH}
+VPATH += ${DDR5_HWP_PATH}
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/
@@ -65,6 +68,13 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt
 EXTRAINCDIR += ${ROOTPATH}/src/usr/
 EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/include/libpldm
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/i2c
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/utils
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/lib/utils
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/common/procedures/hwp/pmic/lib/
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk

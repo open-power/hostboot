@@ -36,6 +36,8 @@
 #include <fapiwrap/fapiWrapif.H>
 #include "../eeprom/eepromCache.H"
 #include <attributeenums.H>
+#include <plat_hwp_invoker.H>
+#include <dt_trim_read_restart_ddr5.H>
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -652,6 +654,128 @@ errlHndl_t tempSensorPresencePerformOp(DeviceFW::OperationType i_opType,
 }
 
 
+/**
+ * @brief Performs a presence detect operation on a POWER_IC (DoubleTop)
+ *        target that is part of a DDR5 DDIMM.
+ *
+ * @param[in]   i_opType        Operation type, see DeviceFW::OperationType
+ *                              in driverif.H
+ * @param[in]   i_target        Presence detect target
+ * @param[in/out] io_buffer     Read: Pointer to output data storage
+ *                              Write: Pointer to input data storage
+ * @param[in/out] io_buflen     Input: size of io_buffer (in bytes, always 1)
+ *                              Output: Success = 1, Failure = 0
+ * @param[in]   i_accessType    DeviceFW::AccessType enum (userif.H)
+ * @param[in]   i_args          This is an argument list for DD framework.
+ *                              In this function, there are no arguments.
+ * @return  errlHndl_t
+ */
+errlHndl_t powerICPresence(DeviceFW::OperationType i_opType,
+                           TARGETING::Target* i_target,
+                           void* io_buffer,
+                           size_t& io_buflen,
+                           int64_t i_accessType,
+                           va_list i_args)
+{
+    assert(1 == io_buflen, "powerICPresence(): Expected buffer length (io_buflen) to be 1, received %d", io_buflen);
+    assert(nullptr != io_buffer, "powerICPresence(): Expected a non-null io_buffer");
+
+    errlHndl_t l_errl = nullptr;
+    bool l_devPresent = false;
+
+    do{
+        // First try the generic presence detection
+        l_errl = ddimmDynamicI2CPresence( i_opType,
+                                          i_target,
+                                          &l_devPresent,
+                                          io_buflen,
+                                          i_accessType,
+                                          i_args );
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"powerICPresence() "
+                       "Error calling ddimmDynamicI2CPresence-1 on 0x%.08X",
+                       TARGETING::get_huid(i_target));
+            break;
+        }
+
+        // If target is present then we're done
+        if( l_devPresent )
+        {
+            break;
+        }
+
+        // If the parent chip is not present, then neither is the temperature sensor
+        // so just break out and return not present
+        TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
+        auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        if( !l_parentHwasState.present )
+        {
+            TRACSSCOMP( g_trac_i2c, INFO_MRK"powerICPresence() "
+                       "Tgt HUID 0x%08X has non-present Parent HUID 0x%08X",
+                        TARGETING::get_huid(i_target),
+                        TARGETING::get_huid(l_parentOcmb));
+
+            break;
+        }
+
+        // Otherwise we may need to perform a workaround on the doubletop.
+        // Sometimes the chip can power on into a bad state where it doesn't
+        // recognize its own i2c address.  Instead it defaults to another
+        // address that we have to use to manually reset things.
+
+        // Only do the workaround if we think the target could be there.
+        // This can be determined by checking that the dynamic i2c address
+        // is set to something valid.  For example, the value will not
+        // be changed if we detect this is a DDR4 DDIMM.
+        auto l_devAddr = i_target->getAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>();
+        if( FAPIWRAP::NO_DEV_ADDR == l_devAddr )
+        {
+            break;
+        }
+
+        // Call the workaround
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_ocmb(l_parentOcmb);
+        FAPI_INVOKE_HWP( l_errl, dt_trim_read_restart_ddr5, l_fapi_ocmb );
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"powerICPresence() "
+                        "Error calling dt_trim_read_restart_ddr5 for 0x%.8X's address on OCMB 0x%.08X",
+                        TARGETING::get_huid(i_target),
+                        TARGETING::get_huid(l_parentOcmb));
+            break;
+        }
+
+        // Now do the generic detection again and use whatever result it gives.
+        l_errl = ddimmDynamicI2CPresence( i_opType,
+                                          i_target,
+                                          &l_devPresent,
+                                          io_buflen,
+                                          i_accessType,
+                                          i_args );
+        if (l_errl)
+        {
+            TRACFCOMP( g_trac_i2c, ERR_MRK"powerICPresence() "
+                       "Error calling ddimmDynamicI2CPresence-2 on 0x%.08X",
+                       TARGETING::get_huid(i_target));
+            break;
+        }
+
+    }while(0);
+
+    if(l_errl)
+    {
+        l_devPresent = false;
+    }
+
+    // Copy variable describing if target is present or not to i/o buffer param
+    memcpy(io_buffer, &l_devPresent, sizeof(l_devPresent));
+    io_buflen = sizeof(l_devPresent);
+
+    return l_errl;
+}
+
+
 
 // Register the ocmb presence detect function with the device framework
 DEVICE_REGISTER_ROUTE(DeviceFW::READ,
@@ -693,5 +817,5 @@ DEVICE_REGISTER_ROUTE( DeviceFW::READ,
 DEVICE_REGISTER_ROUTE( DeviceFW::READ,
                        DeviceFW::PRESENT,
                        TARGETING::TYPE_POWER_IC,
-                       ddimmDynamicI2CPresence );
+                       powerICPresence );
 }
