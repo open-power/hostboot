@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,12 +53,18 @@
 #include <initservice/initserviceif.H>
 #include <p10_scom_addr.H>
 #include <p10_scominfo.H>
+#include <odyssey_scom_addr.H>
+#include <odyssey_scominfo.H>
 #include <hw_access_def.H>
 #include <fapi2/fapiPlatTrace.H>
+#include <chipids.H>
+#include <errl/hberrltypes.H>
 
 #if __HOSTBOOT_RUNTIME
   #include <scom/wakeup.H>
 #endif
+
+using namespace errl_util;
 
 // Trace definition
 extern trace_desc_t* g_trac_scom;
@@ -263,8 +269,14 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
     // Get the type attribute.
     TARGETING::TYPE l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
-    // No translation is required for MEM_PORT targets
-    if( TARGETING::TYPE_MEM_PORT != l_type )
+    // Figure out what kind of chip we're talking to
+    auto l_chip = TARGETING::getParentChip(i_target);
+    auto l_chiptype = l_chip->getAttr<TARGETING::ATTR_TYPE>();
+    auto l_chipid = l_chip->getAttr<TARGETING::ATTR_CHIP_ID>();
+
+    // Note that we can't rely on the chipid for the PROC because there
+    // scoms performed before we have set the value.
+    if( TARGETING::TYPE_PROC == l_chiptype )
     {
         l_err = p10_translation(i_target,
                                 l_type,
@@ -272,6 +284,14 @@ errlHndl_t scomTranslate(TARGETING::Target * &i_target,
                                 o_needsWakeup,
                                 i_opMode);
     }
+    else if( POWER_CHIPID::ODYSSEY_16 == l_chipid )
+    {
+        l_err = ody_translation(i_target,
+                                l_type,
+                                io_addr,
+                                i_opMode);
+    }
+    // No translation is required for any other chips (e.g. Explorer)
 
     return l_err;
 }
@@ -292,7 +312,7 @@ errlHndl_t p10_translation (TARGETING::Target * &i_target,
         bool l_scomAddrAndTargetTypeMatch = false;
 
         uint16_t l_instance = 0;
-        p10ChipUnits_t l_chipUnit = NONE;
+        p10ChipUnits_t l_chipUnit = PU_NONE;
         std::vector<p10_chipUnitPairing_t> l_scomPairings;
 
         //Need to pass the chip/ec level into the translate function
@@ -659,6 +679,267 @@ bool getChipUnitP10 (TARGETING::TYPE i_type,
     }
 
     return l_isError;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+errlHndl_t ody_translation (TARGETING::Target * &i_target,
+                            TARGETING::TYPE i_type,
+                            uint64_t &io_addr,
+                            uint64_t i_opMode)
+{
+    errlHndl_t l_err = nullptr;
+
+    do  {
+        uint64_t l_original_addr = io_addr;
+        odysseyTranslationMode_t l_chip_mode = ODYSSEY_DEFAULT_MODE;
+        bool l_scomAddrIsRelatedToUnit = false;
+        bool l_scomAddrAndTargetTypeMatch = false;
+
+        uint16_t l_instance = i_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+        std::vector<odyssey_chipUnitPairing_t> l_scomPairings;
+
+        // Translate our target types to the scominfo types
+        odysseyChipUnits_t l_chipUnit = ODYSSEY_NO_CU;
+        switch(i_type)
+        {
+            case(TARGETING::TYPE_MEM_PORT) :
+                l_chipUnit = ODYSSEY_MEMPORT_CHIPUNIT;
+                break;
+            case(TARGETING::TYPE_PERV) :
+                l_chipUnit = ODYSSEY_PERV_CHIPUNIT;
+                break;
+            default:
+                l_chipUnit = ODYSSEY_NONE;
+                break;
+        }
+
+        if( ODYSSEY_NONE == l_chipUnit )
+        {
+            //Send an errorlog because we are targeting an unsupported type.
+            TRACFCOMP(g_trac_scom, "ody_translation.. Invalid Odyssey target type=0x%X", i_type);
+
+            /*@
+            * @errortype
+            * @moduleid         SCOM::SCOM_TRANSLATE_ODY
+            * @reasoncode       SCOM::SCOM_ODY_TRANS_INVALID_TYPE
+            * @userdata1        Address
+            * @userdata2[0:31]  Target's Type
+            * @userdata2[32:63] Target's Huid
+            * @devdesc          Scom Translate not supported for this type
+            * @custdesc         Firmware error during system IPL
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                SCOM_TRANSLATE_ODY,
+                SCOM_ODY_TRANS_INVALID_TYPE,
+                io_addr,
+                SrcUserData(bits{0,31}, i_type,
+                            bits{32,63}, TARGETING::get_huid(i_target)),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
+                .addToLog(l_err);
+
+            l_err->collectTrace(SCOM_COMP_NAME);
+            break;
+        }
+
+        //Need to pass the chip/ec level into the translate function
+        uint32_t l_chipLevel = getChipLevel(i_target);
+
+        //Make sure that scom addr is related to a chip unit
+        uint32_t isChipUnitScomRC
+            = odyssey_scominfo_isChipUnitScom(l_chipUnit,
+                                          l_chipLevel,
+                                          io_addr,
+                                          l_scomAddrIsRelatedToUnit,
+                                          l_scomPairings,
+                                          l_chip_mode);
+
+        if(isChipUnitScomRC)
+        {
+            /*@
+             * @errortype
+             * @moduleid     SCOM::SCOM_TRANSLATE_ODY
+             * @reasoncode   SCOM::SCOM_ISCHIPUNITSCOM_INVALID
+             * @userdata1    Input address
+             * @userdata2[0:31] Target huid
+             * @userdata2[32:63] Target Type
+             * @devdesc      EKB code has detected and error in the scom
+             * @custdesc     Firmware error during system IPL
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           SCOM_TRANSLATE_ODY,
+                           SCOM_ISCHIPUNITSCOM_INVALID,
+                           l_original_addr,
+                           SrcUserData(bits{0,31}, TARGETING::get_huid(i_target),
+                                       bits{32,63}, i_type),
+                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
+              .addToLog(l_err);
+
+            l_err->collectTrace(SCOM_COMP_NAME);
+            break;
+        }
+
+
+        if(!l_scomAddrIsRelatedToUnit)
+        {
+            TRACFCOMP(g_trac_scom, "Address provided does not match any targets.");
+            TRACFCOMP(g_trac_scom, "scomTranslate-Invalid Address io_addr=0x%X, Type 0x%.8X, HUID 0x%.8X",
+                      io_addr, i_type, TARGETING::get_huid(i_target));
+
+            /*@
+            * @errortype
+            * @moduleid          SCOM::SCOM_TRANSLATE_ODY
+            * @reasoncode        SCOM::SCOM_INVALID_ADDR
+            * @userdata1         Scom Address
+            * @userdata2[00:15]  Target's Type
+            * @userdata2[16:31]  Instance of this type
+            * @userdata2[32:39]  Is this SCOM addr related to a chip unit?
+            * @userdata2[40:47]  Does the target type and addr type match?
+            * @userdata2[48:55]  Chip unit of the target
+            * @userdata2[56:63]  <unused>
+            * @devdesc           The scom address provided was invalid, check
+            *                    to see if the address matches a target in the
+            *                    scomdef file.
+            * @custdesc          Firmware error during system IPL
+            */
+            l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                           SCOM_TRANSLATE_ODY,
+                           SCOM_INVALID_ADDR,
+                           io_addr,
+                           SrcUserData(bits{ 0,15}, i_type,
+                                       bits{16,31}, l_instance,
+                                       bits{32,39}, l_scomAddrIsRelatedToUnit,
+                                       bits{40,47}, l_scomAddrAndTargetTypeMatch,
+                                       bits{48,55}, l_chipUnit,
+                                       bits{56,63}, 0),
+                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
+                .addToLog(l_err);
+
+            l_err->collectTrace(SCOM_COMP_NAME);
+            break;
+        }
+
+        //Check that the target_type that the scom was requested
+        //for matches up with one of the possible targets allowed
+        //for this particular scom.
+        for(uint32_t i = 0; i < l_scomPairings.size(); i++)
+        {
+            if( (l_scomPairings[i].chipUnitType == l_chipUnit) &&
+                (l_scomPairings[i].chipUnitNum == 0))
+            {
+                l_scomAddrAndTargetTypeMatch = true;
+                break;
+            }
+
+        }
+
+        if(!l_scomAddrAndTargetTypeMatch)
+        {
+            TRACFCOMP(g_trac_scom, "Target type and scom Addr do not match.");
+            TRACFCOMP(g_trac_scom, "scomTranslate-Invalid Address io_addr=0x%X, Type 0x%.8X, HUID 0x%.8X",
+            io_addr, i_type, TARGETING::get_huid(i_target));
+            for(uint32_t i = 0; i < l_scomPairings.size(); i++)
+            {
+                TRACFCOMP(g_trac_scom, "Scom Pairing: chipUnitType=%d, chipUnitNum=%d",
+                          l_scomPairings[i].chipUnitType, l_scomPairings[i].chipUnitNum);
+            }
+
+
+            /*@
+            * @errortype
+            * @moduleid          SCOM::SCOM_TRANSLATE_ODY
+            * @reasoncode        SCOM::SCOM_TARGET_ADDR_MISMATCH
+            * @userdata1         Address
+            * @userdata2[0:15]   Target's Type
+            * @userdata2[16:31]  Instance of this type
+            * @userdata2[32:39]  Is this SCOM addr related to a chip unit?
+            * @userdata2[40:47]  Does the target type and addr type match?
+            * @userdata2[48:55]  Chip unit of the target
+            * @userdata2[56:63]  <unused>
+            * @devdesc           The scom target did not match the provided
+            *                    address
+            * @custdesc          Firmware error during system IPL
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                SCOM_TRANSLATE_ODY,
+                SCOM_TARGET_ADDR_MISMATCH,
+                io_addr,
+                SrcUserData(bits{ 0,15}, i_type,
+                            bits{16,31}, l_instance,
+                            bits{32,39}, l_scomAddrIsRelatedToUnit,
+                            bits{40,47}, l_scomAddrAndTargetTypeMatch,
+                            bits{48,55}, l_chipUnit,
+                            bits{56,63}, 0),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
+                .addToLog(l_err);
+
+            l_err->collectTrace(SCOM_COMP_NAME);
+            l_err->collectTrace(FAPI_TRACE_NAME, 256 );
+            l_err->collectTrace(FAPI_IMP_TRACE_NAME, 384 );
+            break;
+        }
+
+        io_addr = odyssey_scominfo_createChipUnitScomAddr(l_chipUnit,
+                                                          l_chipLevel,
+                                                          l_instance,
+                                                          io_addr,
+                                                          l_chip_mode);
+
+        if(io_addr == FAILED_TRANSLATION)
+        {
+            TRACFCOMP(g_trac_scom, "Address failed to translate.");
+            TRACFCOMP(g_trac_scom, "Scom Target HUID: 0x%x", TARGETING::get_huid(i_target));
+            TRACFCOMP(g_trac_scom, "Scom Address: 0x%lx", io_addr);
+            TRACFCOMP(g_trac_scom, "Scom Target Type: 0x%x", i_type);
+            for(uint32_t i = 0; i < l_scomPairings.size(); i++)
+            {
+                TRACFCOMP(g_trac_scom, "Scom Pairing %d: %d",
+                          i, l_scomPairings[i].chipUnitType);
+            }
+            /*@
+            * @errortype
+            * @moduleid     SCOM::SCOM_TRANSLATE_ODY
+            * @reasoncode   SCOM::SCOM_INVALID_TRANSLATION
+            * @userdata1    Original Address
+            * @userdata2[0:15]  l_chipUnit
+            * @userdata2[16:31] instance of target
+            * @userdata2[32:63] HUID of target
+            * @devdesc      Scom Translation did not modify the address
+            */
+            l_err = new ERRORLOG::ErrlEntry(
+                ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                SCOM_TRANSLATE_ODY,
+                SCOM_INVALID_TRANSLATION,
+                l_original_addr,
+                SrcUserData(bits{ 0,15}, l_chipUnit,
+                            bits{16,31}, l_instance,
+                            bits{32,63}, TARGETING::get_huid(i_target)),
+                ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"SCOM Target")
+                .addToLog(l_err);
+
+            l_err->collectTrace(SCOM_COMP_NAME);
+            break;
+        }
+
+    } while (0);
+    return l_err;
 }
 
 //////////////////////////////////////////////////////////////////////////////

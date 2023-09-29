@@ -48,6 +48,7 @@ namespace SCOM
         SCOM_TRANSLATE_P10              = 0x11,
         // 0x12 reserved
         MOD_ROUTE_IBSCOM                = 0x13,
+        SCOM_TRANSLATE_ODY              = 0x14,
     };
 
     enum scomReasonCode
@@ -88,6 +89,7 @@ namespace SCOM
         SCOM_SPCWKUP_COUNT_INCONSISTENT = SCOM_COMP_ID | 0x23,
         SCOM_UNSUPPORTED_CHIPID        = SCOM_COMP_ID | 0x24,
         SCOM_MULTICAST_WRITE_INVALID   = SCOM_COMP_ID | 0x25,
+        SCOM_ODY_TRANS_INVALID_TYPE    = SCOM_COMP_ID | 0x26,
     };
 
     enum UserDetailsTypes

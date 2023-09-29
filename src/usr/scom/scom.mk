@@ -25,7 +25,9 @@
 
 
 VPATH += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/scominfo/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/scominfo/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/scominfo/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 
 
@@ -52,3 +54,5 @@ OBJS += ibscom.o
 # Objects From Import Directory
 OBJS += p10_scominfo.o
 OBJS += p10_scom_addr.o
+OBJS += odyssey_scominfo.o
+OBJS += odyssey_scom_addr.o

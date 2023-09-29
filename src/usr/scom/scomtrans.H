@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 
 #include <devicefw/driverif.H>
 #include <p10_cu.H>
+#include <odyssey_cu.H>
 
 /** @file  scomtrans.H
  *  @brief Provides the interfaces to perform a SCom
@@ -97,6 +98,20 @@ bool getChipUnitP10 (TARGETING::TYPE i_type,
  */
 uint32_t getChipLevel (TARGETING::Target* i_target);
 
+/**
+ * @brief This function translates a odyssey scom address using
+ *        the interface that the HW team provided.
+ *
+ * @param[in]      i_target      SCom target is passed in
+ * @param[in]      i_type        Type of the target
+ * @param[in|out]  io_addr       Address to be translated
+ * @param[in]      i_opMode      Defaults to 0 (Standard)
+ * @return         errlHndl_t
+ */
+errlHndl_t ody_translation( TARGETING::Target * &i_target,
+                            TARGETING::TYPE i_type,
+                            uint64_t &io_addr,
+                            uint64_t i_opMode = 0);
 
 
 }; // End namespace
