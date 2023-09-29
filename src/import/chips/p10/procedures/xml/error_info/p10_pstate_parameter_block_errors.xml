@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -321,6 +321,19 @@
     <ffdc>SYS_SP</ffdc>
     <ffdc>CHIP_RC</ffdc>
     <ffdc>SYS_RC</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_WOF_HEADER_DATA_MAX_POWR_INVALID</rc>
+    <description>Max powr value in WOF header and attribute value are 0.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>WFTH_MAX_POWR_MIN_FREQ</ffdc>
+    <ffdc>ATTR_MAX_POWR_MIN_FREQ</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

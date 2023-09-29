@@ -505,6 +505,7 @@ void wfth_print(
     WFTH_PRINT16_h4_d5(fav_perf_freq_limit_mhz);
     WFTH_PRINT16_h4_d5(fav_pow_freq_limit_mhz);
     WFTH_PRINT16_h4_d5(non_det_freq_limit_mhz);
+    WFTH_PRINT16_h4_d5(max_powr_min_freq_watts);
 }
 
 #ifndef VALIDATE_WOF_HEADER_DATA
@@ -635,6 +636,33 @@ fapi2::ReturnCode wof_validate_header(
         {
             break;
         }
+
+        //Set Max powr
+        fapi2::ATTR_MIN_PROC_POWER_PER_CHIP_Type attr_max_powr_min_freq;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MIN_PROC_POWER_PER_CHIP, FAPI_SYSTEM, attr_max_powr_min_freq));
+
+        uint16_t l_max_powr = revle16(p_wfth->max_powr_min_freq_watts);
+
+        if (!attr_max_powr_min_freq && l_max_powr)
+        {
+            attr_max_powr_min_freq = l_max_powr;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MIN_PROC_POWER_PER_CHIP, FAPI_SYSTEM, attr_max_powr_min_freq));
+        }
+        else if ( attr_max_powr_min_freq && !l_max_powr)
+        {
+            p_wfth->max_powr_min_freq_watts = attr_max_powr_min_freq;
+        }
+        else
+        {
+            FAPI_ASSERT_NOEXIT(false,
+                               fapi2::WOF_HEADER_DATA_MAX_POWR_INVALID(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                               .set_CHIP_TARGET(i_proc_target)
+                               .set_WFTH_MAX_POWR_MIN_FREQ(revle16(p_wfth->max_powr_min_freq_watts))
+                               .set_ATTR_MAX_POWR_MIN_FREQ(attr_max_powr_min_freq),
+                               "WOF header data -max_powr_min_freq_watts- value is invalid.");
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+
 
         //Set IO attributes
         //

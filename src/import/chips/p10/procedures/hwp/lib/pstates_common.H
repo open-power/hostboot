@@ -557,6 +557,8 @@ typedef struct
     uint16_t fav_pow_freq_limit_mhz;
     uint16_t non_det_freq_limit_mhz;
 
+    uint16_t max_powr_min_freq_watts;
+
     // Padding to 128B is left to the compiler via the following attribute.
 
 } __attribute__((packed, aligned(128))) WofTablesHeader_t;
