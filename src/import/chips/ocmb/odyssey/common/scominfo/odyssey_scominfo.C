@@ -32,10 +32,8 @@
 ///
 
 // includes
-#include <stdio.h>
 #include <odyssey_scominfo.H>
 #include <odyssey_scom_addr.H>
-#include <odyssey_cu_utils.H>
 
 #define ODYSSEY_SCOMINFO_C
 
@@ -86,27 +84,27 @@ extern "C"
                     {
                         uint8_t l_ring = l_scom.getRingId();
 
-                        if (l_ring == MEMPORT0_RING_ID || l_ring == MEMPORT1_RING_ID)
+                        if (l_ring == ODY_MEMPORT0_RING_ID || l_ring == ODY_MEMPORT1_RING_ID)
                         {
                             if (i_chipUnitNum == 0)
                             {
-                                l_scom.setRingId(MEMPORT0_RING_ID);
+                                l_scom.setRingId(ODY_MEMPORT0_RING_ID);
                             }
                             else
                             {
-                                l_scom.setRingId(MEMPORT1_RING_ID);
+                                l_scom.setRingId(ODY_MEMPORT1_RING_ID);
                             }
                         }
 
-                        if (l_ring == MEMPORT0_PHY_RING_ID || l_ring == MEMPORT1_PHY_RING_ID)
+                        if (l_ring == ODY_MEMPORT0_PHY_RING_ID || l_ring == ODY_MEMPORT1_PHY_RING_ID)
                         {
                             if (i_chipUnitNum == 0)
                             {
-                                l_scom.setRingId(MEMPORT0_PHY_RING_ID);
+                                l_scom.setRingId(ODY_MEMPORT0_PHY_RING_ID);
                             }
                             else
                             {
-                                l_scom.setRingId(MEMPORT1_PHY_RING_ID);
+                                l_scom.setRingId(ODY_MEMPORT1_PHY_RING_ID);
                             }
                         }
                     }
@@ -124,7 +122,7 @@ extern "C"
 
         if (l_rc)
         {
-            l_scom.setAddr(FAILED_TRANSLATION);
+            l_scom.setAddr(ODY_FAILED_TRANSLATION);
         }
 
         return l_scom.getAddr();
@@ -215,6 +213,49 @@ extern "C"
         o_odysseyCU = i_odysseyCU;
         o_modifiedChipUnitNum = i_targetChipUnitNum;
         return l_rc;
+    }
+
+    // See header file for function description
+    uint8_t odyssey_validateChipUnitNum(const uint8_t i_chipUnitNum,
+                                        const odysseyChipUnits_t i_chipUnitType)
+    {
+        uint8_t l_rc = 0;
+        uint8_t l_index;
+
+        for (l_index = 0;
+             l_index < (sizeof(odysseyChipUnitDescriptionTable) / sizeof(odyssey_chipUnitDescription_t));
+             l_index++)
+        {
+            // Looking for input chip unit type in table
+            if (i_chipUnitType == odysseyChipUnitDescriptionTable[l_index].enumVal)
+            {
+                // Found a match, check input i_chipUnitNum to be <= max chip unit num
+                // for this unit type
+                if (i_chipUnitNum > odysseyChipUnitDescriptionTable[l_index].maxChipUnitNum)
+                {
+                    l_rc = 1;
+                }
+
+                // Additional check for PERV targets, where there are gaps between instances
+                else if (i_chipUnitType == ODYSSEY_PERV_CHIPUNIT)
+                {
+                    if (i_chipUnitNum > MAX_ODYSSEY_PERV_CHIPUNIT) //invalid for pervasive target
+                    {
+                        l_rc = 1;
+                    }
+                }
+
+                break;
+            }
+        }
+
+        // Can't find i_chipUnitType in table
+        if ( l_index >= (sizeof(odysseyChipUnitDescriptionTable) / sizeof(odyssey_chipUnitDescription_t)) )
+        {
+            l_rc = 1;
+        }
+
+        return (l_rc);
     }
 
 } // extern "C"

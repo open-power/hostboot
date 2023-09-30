@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,6 @@
 
 extern "C"
 {
-
     /// P10 chip unit type enumeration
     typedef enum
     {
@@ -59,7 +58,8 @@ extern "C"
         PU_OMIC_CHIPUNIT    = 12,           ///< OMIC
         PU_PAU_CHIPUNIT     = 13,           ///< PAU
         PU_PAUC_CHIPUNIT    = 14,           ///< PAUC
-        NONE                = 0xFF,         ///< None/Invalid
+        NONE                = 0xFF,         ///< TODO: Remove after HB successfuly built to avoid co-req
+        PU_NONE             = 0xFF,         ///< None/Invalid
     } p10ChipUnits_t;
 
     /// P10 chip unit pairing struct
@@ -67,7 +67,7 @@ extern "C"
     {
         /// @brief Default constructor
         p10_chipUnitPairing_t()
-            : chipUnitType(NONE), chipUnitNum(0) {}
+            : chipUnitType(PU_NONE), chipUnitNum(0) {}
         /// @brief Construct from type/instance number
         p10_chipUnitPairing_t (p10ChipUnits_t type, uint32_t num)
             : chipUnitType(type), chipUnitNum(num) {}

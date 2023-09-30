@@ -56,7 +56,7 @@ extern "C"
         ODYSSEY_PERV_CHIPUNIT    =  1,           ///< Pervasive
         ODYSSEY_MEMPORT_CHIPUNIT =  2,
         ODYSSEY_OMI_CHIPUNIT     =  3,
-        NONE                     = 0xFF,         ///< None/Invalid
+        ODYSSEY_NONE             = 0xFF,         ///< None/Invalid
     } odysseyChipUnits_t;
 
     /// ODYSSEY chip unit pairing struct
@@ -64,7 +64,7 @@ extern "C"
     {
         /// @brief Default constructor
         odyssey_chipUnitPairing_t()
-            : chipUnitType(NONE), chipUnitNum(0) {}
+            : chipUnitType(ODYSSEY_NONE), chipUnitNum(0) {}
         /// @brief Construct from type/instance number
         odyssey_chipUnitPairing_t (odysseyChipUnits_t type, uint32_t num)
             : chipUnitType(type), chipUnitNum(num) {}

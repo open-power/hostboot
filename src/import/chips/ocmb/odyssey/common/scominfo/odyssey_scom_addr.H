@@ -44,41 +44,41 @@ extern "C"
     /// ODYSSEY Chiplet ID enumeration
     typedef enum
     {
-        PIB_CHIPLET_ID       = 0x00,    ///< PIB chiplet (FSI)
-        PERV_CHIPLET_ID      = 0x01,    ///< TP chiplet
-        MEM_CHIPLET_ID       = 0x08,
+        ODY_PIB_CHIPLET_ID       = 0x00,    ///< PIB chiplet (FSI)
+        ODY_PERV_CHIPLET_ID      = 0x01,    ///< TP chiplet
+        ODY_MEM_CHIPLET_ID       = 0x08,
     } odysseyChipletId_t;
 
     /// ODYSSEY SCOM Endpoint ID enumeration
     typedef enum
     {
-        CHIPLET_CTRL_ENDPOINT   = 0x0,    ///< Chiplet Control
-        PSCOM_ENDPOINT          = 0x1,    ///< PSCOM
-        CLOCK_CTRL_ENDPOINT     = 0x3,    ///< Clock controller
-        FIR_ENDPOINT            = 0x4,    ///< FIR
-        THERMAL_ENDPOINT        = 0x5,    ///< Thermal
-        PCBSLV_ENDPOINT         = 0xF,    ///< PCB Slave registers
+        ODY_CHIPLET_CTRL_ENDPOINT   = 0x0,    ///< Chiplet Control
+        ODY_PSCOM_ENDPOINT          = 0x1,    ///< PSCOM
+        ODY_CLOCK_CTRL_ENDPOINT     = 0x3,    ///< Clock controller
+        ODY_FIR_ENDPOINT            = 0x4,    ///< FIR
+        ODY_THERMAL_ENDPOINT        = 0x5,    ///< Thermal
+        ODY_PCBSLV_ENDPOINT         = 0xF,    ///< PCB Slave registers
     } odysseyEndpointID_t;
 
     /// ODYSSEY PERV chiplet and PSCOM ring ID enumeration
     typedef enum
     {
-        PSCOM_RING_ID = 0x0,
-        PERV_RING_ID  = 0x1,
+        ODY_PSCOM_RING_ID = 0x0,
+        ODY_PERV_RING_ID  = 0x1,
     } odyssey_PSCOM_PERV_RingId_t;
     typedef enum
     {
-        OMI0_RING_ID = 0x3,
-        DLX_RING_ID  = 0x9,
+        ODY_OMI0_RING_ID = 0x3,
+        ODY_DLX_RING_ID  = 0x9,
     } odyssey_MC_RingId_t;
 
     /// ODYSSEY MEMPORT chiplet ring ID enumeration
     typedef enum
     {
-        MEMPORT0_RING_ID = 0x6,  // RDF0
-        MEMPORT1_RING_ID = 0xA,  // RDF1
-        MEMPORT0_PHY_RING_ID = 0xC,
-        MEMPORT1_PHY_RING_ID = 0xD,
+        ODY_MEMPORT0_RING_ID = 0x6,  // RDF0
+        ODY_MEMPORT1_RING_ID = 0xA,  // RDF1
+        ODY_MEMPORT0_PHY_RING_ID = 0xC,
+        ODY_MEMPORT1_PHY_RING_ID = 0xD,
     } odyssey_MEMPORT_RingId_t;
 
     /// ODYSSEY SCOM address class

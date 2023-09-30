@@ -47,25 +47,25 @@ extern "C"
 
         if (getChipletId() <= 0x1)  // Allow PIB (0x00) and Perv chiplet (0x01)
         {
-            if (getEndpoint() == PSCOM_ENDPOINT)            // 0x1
+            if (getEndpoint() == ODY_PSCOM_ENDPOINT)            // 0x1
             {
-                if ( (getRingId() == PSCOM_RING_ID) ||    // 0x0
-                     (getRingId() == PERV_RING_ID) )    // 0x1
+                if ( (getRingId() == ODY_PSCOM_RING_ID) ||    // 0x0
+                     (getRingId() == ODY_PERV_RING_ID) )    // 0x1
                 {
                     l_pervTarget = true;
                 }
             }
-            else if (getEndpoint() == CLOCK_CTRL_ENDPOINT)  // 0x3
+            else if (getEndpoint() == ODY_CLOCK_CTRL_ENDPOINT)  // 0x3
             {
                 l_pervTarget = true;
             }
             // Check if Endpoint is a PERV endpoint
-            else if ( (getEndpoint() == CHIPLET_CTRL_ENDPOINT) ||     // 0x0
-                      (getEndpoint() == FIR_ENDPOINT)          ||     // 0x4
-                      (getEndpoint() == THERMAL_ENDPOINT)      ||     // 0x5
-                      (getEndpoint() == PCBSLV_ENDPOINT) )            // 0xF
+            else if ( (getEndpoint() == ODY_CHIPLET_CTRL_ENDPOINT) ||     // 0x0
+                      (getEndpoint() == ODY_FIR_ENDPOINT)          ||     // 0x4
+                      (getEndpoint() == ODY_THERMAL_ENDPOINT)      ||     // 0x5
+                      (getEndpoint() == ODY_PCBSLV_ENDPOINT) )            // 0xF
             {
-                if ( getRingId() == PSCOM_RING_ID)                    // 0x0
+                if ( getRingId() == ODY_PSCOM_RING_ID)                    // 0x0
                 {
                     l_pervTarget = true;
                 }
@@ -86,8 +86,8 @@ extern "C"
     {
         bool l_omiTarget = false;
 
-        if ( ( getRingId() == OMI0_RING_ID ||
-               getRingId() == DLX_RING_ID ) && ( getChipletId() == MEM_CHIPLET_ID ) )
+        if ( ( getRingId() == ODY_OMI0_RING_ID ||
+               getRingId() == ODY_DLX_RING_ID ) && ( getChipletId() == ODY_MEM_CHIPLET_ID ) )
         {
             l_omiTarget = true;
         }
@@ -107,11 +107,11 @@ extern "C"
     {
         bool l_memportTarget = false;
 
-        if ( (getChipletId() == MEM_CHIPLET_ID) &&
-             ( (getRingId() == MEMPORT0_RING_ID) ||
-               (getRingId() == MEMPORT1_RING_ID) ||
-               (getRingId() == MEMPORT0_PHY_RING_ID) ||
-               (getRingId() == MEMPORT1_PHY_RING_ID) ))
+        if ( (getChipletId() == ODY_MEM_CHIPLET_ID) &&
+             ( (getRingId() == ODY_MEMPORT0_RING_ID) ||
+               (getRingId() == ODY_MEMPORT1_RING_ID) ||
+               (getRingId() == ODY_MEMPORT0_PHY_RING_ID) ||
+               (getRingId() == ODY_MEMPORT1_PHY_RING_ID) ))
         {
             l_memportTarget = true;
         }
@@ -124,12 +124,12 @@ extern "C"
     {
         uint8_t l_instance = 0;
 
-        if (getRingId() == MEMPORT1_RING_ID)
+        if (getRingId() == ODY_MEMPORT1_RING_ID)
         {
             l_instance = 1;
         }
 
-        if (getRingId() == MEMPORT1_PHY_RING_ID)
+        if (getRingId() == ODY_MEMPORT1_PHY_RING_ID)
         {
             l_instance = 1;
         }

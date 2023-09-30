@@ -50,7 +50,7 @@ extern "C"
 
     typedef enum
     {
-        FAILED_TRANSLATION = 0xFFFFFFFFFFFFFFF1ull
+        ODY_FAILED_TRANSLATION = 0xFFFFFFFFFFFFFFF1ull
     } odysseyTranslationResult_t;
 
     /// @brief Creates the actual SCOM address based on the chip unit type, instance, and the input SCOM address (relative to chip unit instance 0)
@@ -111,6 +111,14 @@ extern "C"
             odysseyChipUnits_t& o_odysseyCU,
             uint32_t& o_modifiedChipUnitNum,
             const odysseyTranslationMode_t i_mode = ODYSSEY_DEFAULT_MODE);
+
+    /// @brief Validate the chip unit number to be within range
+    ///        of a chip unit type.
+    /// @param[in] i_chipUnitNum   Value of chip unit number (instance)
+    /// @param[in] i_chipUnitType  Chip unit type
+    /// @retval Non-zero if error
+    uint8_t odyssey_validateChipUnitNum(const uint8_t i_chipUnitNum,
+                                        const odysseyChipUnits_t i_chipUnitType);
 
 } // extern "C"
 
