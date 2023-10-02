@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,9 +94,6 @@ void* call_host_secure_rng(void* const io_pArgs)
     TARGETING::TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
-    do
-    {
-
     // Loop through all processors including master
     for (const auto& l_cpu_target : l_cpuTargetList)
     {
@@ -145,12 +142,21 @@ void* call_host_secure_rng(void* const io_pArgs)
 
             l_StepError.addErrorDetails(l_err);
             errlCommit(l_err, HWPF_COMP_ID);
+
+            // Continue to the next proc
+            continue;
         }
-        else
-        {
-            // All good now so process OCMBs
+
+        // All good now so process OCMBs
 #ifdef CONFIG_SECUREBOOT
-            if(SECUREBOOT::enabled())
+        if(SECUREBOOT::enabled())
+        {
+            // Blocking the I2C connection is only required for Explorer systems.
+            // Odyssey systems have security built in and the I2C connection is
+            // required in some failure recovery cases.
+            // A separate check will ensure there are not both Explorers and
+            // Odysseys in the system.
+            if (getOcmbChipTypesInSystem() == UTIL_EXPLORER_FOUND)
             {
                 const bool overrideForceDisable = false; // No need to force security
                 const bool overrideSULsetup = false;     // Flag for the HWP to skip the
@@ -212,7 +218,7 @@ void* call_host_secure_rng(void* const io_pArgs)
                             "call_host_secure_rng: Deconfiguring OCMBs "
                             "due to HWP p10_disable_ocmb_i2c failure: "
                             "PROC HUID=0x%08X OCMB HUID=0x%08X ",
-                             get_huid(l_cpu_target), get_huid(l_ocmb));
+                                get_huid(l_cpu_target), get_huid(l_ocmb));
                         l_err->addHwCallout(l_ocmb,
                                             HWAS::SRCI_PRIORITY_MED,
                                             HWAS::DECONFIG,
@@ -251,11 +257,10 @@ void* call_host_secure_rng(void* const io_pArgs)
                     TRACDCOMP(ISTEPS_TRACE::g_trac_isteps_trace, "call_host_secure_rng: DIAG MODE RESET "
                         "SET Engine E=%d", l_engine_E_inhibit);
                 }
-            } // end SECUREBOOT::enabled
+            } // end UTIL_EXPLORER_FOUND
+        } // end SECUREBOOT::enabled
 #endif
-        }  // end else
     } // end of going through all processors
-    } while (0);
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_host_secure_rng exit");
