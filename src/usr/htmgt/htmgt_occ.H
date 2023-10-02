@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -404,6 +404,8 @@ namespace HTMGT
              *                                 reported to BMC
              */
             void elogProcessActions(const uint8_t  i_actions,
+                                    const occErrlCallout* i_occCallout,
+                                    const uint8_t  i_occCalloutCount,
                                     const uint32_t i_src,
                                     const uint32_t i_data,
                                     ERRORLOG::errlSeverity_t & io_errlSeverity,

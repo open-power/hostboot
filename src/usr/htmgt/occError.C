@@ -38,6 +38,13 @@
 #include <targeting/targplatutil.H>
 #include <targeting/common/mfgFlagAccessors.H>
 
+//  Targeting support
+#include <targeting/common/attributes.H>
+#include <targeting/common/targetservice.H>
+#include <targeting/common/attributeTank.H>
+#include <chips/common/utils/chipids.H>
+
+using namespace TARGETING;
 
 namespace HTMGT
 {
@@ -185,8 +192,11 @@ namespace HTMGT
                     }
 
                     // Process Actions
+                    // NOTE: severity can be changed for the bldErrLog.
                     bool l_call_home_event = false;
                     elogProcessActions(l_occElog->actions,
+                                       l_occElog->callout,
+                                       l_occElog->maxCallouts,
                                        l_occSrc,
                                        l_usrDtls_ptr->userData1,
                                        severity,
@@ -583,6 +593,8 @@ namespace HTMGT
 
 
     void Occ::elogProcessActions(const uint8_t  i_actions,
+                                 const occErrlCallout* i_occCallout,
+                                 const uint8_t  i_occCalloutCount,
                                  const uint32_t i_src,
                                  uint32_t       i_data,
                                  ERRORLOG::errlSeverity_t & io_errlSeverity,
@@ -601,7 +613,7 @@ namespace HTMGT
                 io_errlSeverity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
             }
         }
-        else if (i_actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED)
+        if (i_actions & TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED)
         {
             iv_failed = false;
             iv_resetReason = OCC_RESET_REASON_WOF_RESET;
@@ -711,6 +723,157 @@ namespace HTMGT
             iv_needsReset = true;
             OccManager::updateSafeModeReason(i_src, iv_instance);
         }
+        // if not resetting OCCs and request for memory buffer reset.
+        else if (i_actions & TMGT_ERRL_ACTIONS_OCMB_RECOVERY_REQUEST)
+        {
+            TMGT_INF("elogProcessActions: OCC%d requested a Memory "
+                         "buffer chip reset", iv_instance);
+
+            uint64_t l_CurrentCalloutValue = 0;
+            bool l_HwpCalled = false;
+
+            // Loop through all callouts, Memory Buffer could be any of them.
+            // NOTE: supporting multiple Memory Buffer callout in list.
+            for (uint8_t l_loop = 0; l_loop < i_occCalloutCount; l_loop++)
+            {
+                bool l_occMemoryReset = false;
+
+                // Extract the target from the given SensorID
+                uint64_t l_occCalloutValue = i_occCallout[l_loop].calloutValue;
+                TARGETING::Target* l_target =
+                    TARGETING::UTIL::getSensorTarget((uint32_t)l_occCalloutValue, iv_target);
+
+                // if valid target, and Memory Buffer allow Memory buffer reset.
+                if (nullptr != l_target)
+                {
+                    // from target get chip type of target
+                    TARGETING::TYPE l_chip_type;
+                    l_target->tryGetAttr<TARGETING::ATTR_TYPE>(l_chip_type);
+
+                    // from target get chipId of target
+                    const uint32_t l_chip_id = l_target->getAttr<ATTR_CHIP_ID>();
+
+                    if(l_chip_type == TARGETING::TYPE_OCMB_CHIP)
+                    {
+                        //if we found an OCMB target store callout for call back to OCC on status.
+                        l_CurrentCalloutValue = l_occCalloutValue;
+
+                        if(l_chip_id  == POWER_CHIPID::ODYSSEY_16)
+                        {
+                            TMGT_INF("elogProcessActions: Index:%d SensorID(0x%X) is Odyssey OCMB",
+                                    l_loop, l_occCalloutValue);
+                            //OCMB ODYSSEY callout go ahead and call reset HWP
+                            l_occMemoryReset = true;
+                        }
+                        else
+                        {
+                            TMGT_INF("elogProcessActions: Index:%d SensorID(0x%08X) OCMB is not an"
+                                " Odyssey -> chipType(0x%X)  chip_id(0x%X)",
+                                l_loop,
+                                l_occCalloutValue,
+                                l_chip_type,
+                                l_chip_id);
+                        }
+                    }
+                    else
+                    {
+                        TMGT_INF("elogProcessActions: Index:%d SensorID(0x%08X) is not an OCMB"
+                            " -> chipType(0x%X)  chip_id(0x%X)",
+                            l_loop,
+                            l_occCalloutValue,
+                            l_chip_type,
+                            l_chip_id);
+                        if(l_CurrentCalloutValue == 0)
+                        {
+                            //if we found a target that is not OCMB, and we do not have a HW callout
+                            //   stored already, store in case we get to the bottom, and no OCMB.
+                            l_CurrentCalloutValue = l_occCalloutValue;
+                            TMGT_ERR("elogProcessActions: Index:%d SensorID(0x%08X)"
+                                " chipType(0x%X)  chip_id(0x%X) store in case no OCMB's in callout",
+                                l_loop,
+                                l_occCalloutValue,
+                                l_chip_type,
+                                l_chip_id);
+                        }
+                    }
+                }
+                else if (l_occCalloutValue != 0)
+                {
+                    TMGT_INF("elogProcessActions: Index:%d SensorID(0x%08X) has No Target!",
+                                l_loop,
+                                l_occCalloutValue);
+                }
+
+                uint8_t l_recovery_status = OCC_MEMORY_BUFFER_RECOVERY_UNSUPPORTED;
+
+                // Call hostboot function to perform hreset on memory buffer.
+                if (l_occMemoryReset == true)
+                {
+                    errlHndl_t l_errl = nullptr;
+                    l_recovery_status = OCC_MEMORY_BUFFER_RECOVERY_SUCCESS;
+                    l_HwpCalled = true;
+
+                    // @TODO JIRA: PFES-27 Implement call to reset
+                    TMGT_ERR("!!!!!!!!!!!! CALL HWP NOW !!!!!!!!!!!!!!!!");
+
+                    if (l_errl != nullptr)
+                    {
+                        l_recovery_status = OCC_MEMORY_BUFFER_RECOVERY_FAILED;
+                        TMGT_ERR("elogProcessActions: Error Log from reset! (rc=0x%04X)",
+                                    l_errl->reasonCode());
+                        l_errl->collectTrace("HTMGT");
+                        ERRORLOG::errlCommit(l_errl, HTMGT_COMP_ID);
+                    }// end if reset returned an error log.
+                }// end if need to call reset.
+
+                // if in this loop we success OR
+                //    in this loop we Failed  OR
+                //    at end of loop and we have Not Supported and we have not called HWP.
+                if ((l_recovery_status == OCC_MEMORY_BUFFER_RECOVERY_SUCCESS) ||
+                    (l_recovery_status == OCC_MEMORY_BUFFER_RECOVERY_FAILED) ||
+                    ((l_recovery_status == OCC_MEMORY_BUFFER_RECOVERY_UNSUPPORTED) &&
+                     (l_loop == i_occCalloutCount-1) &&
+                     (l_HwpCalled == false)))
+                {
+                    TMGT_INF("elogProcessActions: Send OCC%d SensorID(0x%08X) "
+                                "recovery status(0x%X)",
+                                iv_instance,
+                                l_CurrentCalloutValue,
+                                l_recovery_status);
+
+                    // Call OCC with Memory Buffer Recovery Status.
+                    errlHndl_t  l_errlHndl = nullptr;
+                    uint8_t l_CalloutValue[8];
+                    memcpy(l_CalloutValue, &l_CurrentCalloutValue,
+                                    sizeof(l_CurrentCalloutValue));
+
+                    const uint8_t l_cmdData[] = {   0x01/* version*/,
+                                                    l_CalloutValue[0],/*Memory Buffer ID*/
+                                                    l_CalloutValue[1],/*Memory Buffer ID*/
+                                                    l_CalloutValue[2],/*Memory Buffer ID*/
+                                                    l_CalloutValue[3],/*Memory Buffer ID*/
+                                                    l_CalloutValue[4],/*Memory Buffer ID*/
+                                                    l_CalloutValue[5],/*Memory Buffer ID*/
+                                                    l_CalloutValue[6],/*Memory Buffer ID*/
+                                                    l_CalloutValue[7],/*Memory Buffer ID*/
+                                                    l_recovery_status,/*Status*/
+                                                    0x00,/*reserved*/
+                                                    0x00 /*resderved*/};
+                    OccCmd l_cmd(this,OCC_CMD_MEM_BUFFER_RECOVERY,
+                                    sizeof(l_cmdData),l_cmdData);
+                    l_errlHndl = l_cmd.sendOccCmd();
+                    if (l_errlHndl != nullptr)
+                    {
+                        TMGT_ERR("elogProcessActions: Failed to send memory buffer"
+                                " recovery status 0x%X to OCC%d (rc=0x%04X)",
+                                l_recovery_status, iv_instance, l_errlHndl->reasonCode());
+                        l_errlHndl->collectTrace("HTMGT");
+                        addOccTrace(l_errlHndl);
+                        ERRORLOG::errlCommit(l_errlHndl, HTMGT_COMP_ID);
+                    }
+                }// end send status back to OCC.
+            }// end loop on callouts.
+        }// end if TMGT_ERRL_ACTIONS_OCMB_RECOVERY_REQUEST
 
     } // end Occ::elogProcessActions()
 

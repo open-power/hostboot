@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,7 @@ namespace HTMGT
     {
         OCC_CMD_POLL                    = 0x00,
         OCC_CMD_CLEAR_ERROR_LOG         = 0x12,
+        OCC_CMD_MEM_BUFFER_RECOVERY     = 0x13,
         OCC_CMD_SET_STATE               = 0x20,
         OCC_CMD_SETUP_CFG_DATA          = 0x21,
         OCC_CMD_SET_POWER_CAP           = 0x22,

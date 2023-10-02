@@ -126,6 +126,7 @@ namespace HTMGT
         const static struct string_data_t L_cmd_string[] = {
             {OCC_CMD_POLL, "POLL"},
             {OCC_CMD_CLEAR_ERROR_LOG, "CLEAR_ELOG"},
+            {OCC_CMD_MEM_BUFFER_RECOVERY, "MEM_BUFFER_RECOVERY_STATUS"},
             {OCC_CMD_SET_STATE, "SET_STATE"},
             {OCC_CMD_SETUP_CFG_DATA, "SET_CFG_DATA"},
             {OCC_CMD_SET_POWER_CAP, "SET_POWER_CAP"},

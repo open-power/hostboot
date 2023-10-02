@@ -48,8 +48,11 @@ using namespace TARGETING;
 /**
  * Uses system attributes:
  *   ATTR_REGULATOR_EFFICIENCY_FACTOR    - Power supply efficiency
- *   ATTR_N_MAX_MEM_POWER_WATTS          - Max memory power for N
- *   ATTR_N_PLUS_ONE_MAX_MEM_POWER_WATTS - Max memory power for N+1
+ *   ATTR_N_MAX_MEM_POWER_WATTS          - DDR4 Max memory power for N
+ *   ATTR_N_PLUS_ONE_MAX_MEM_POWER_WATTS - DDR4 Max memory power for N+1
+ *   ATTR_DDR5_N_MAX_MEM_POWER_WATTS          - DDR5 Max memory power for N
+ *   ATTR_DDR5_N_PLUS_ONE_MAX_MEM_POWER_WATTS - DDR5 Max memory power for N+1
+
  *
  * Calculates the memory throttling numerator values/power for:
  * - OT  : System in over-temperature condition
@@ -890,8 +893,19 @@ errlHndl_t memPowerThrottleRedPower(
 
     init_bulk_power_limits();
 
+    //Get OCMB chip id to see if explorer or odyssey should be used.
+    TARGETING::Target * ocmb_target = i_fapi_target_list[0].get();
+    const uint32_t chipId = ocmb_target->getAttr<ATTR_CHIP_ID>();
     //Get the max redundant (N+1) power allocated to memory
-    power = sys->getAttr<ATTR_N_PLUS_ONE_MAX_MEM_POWER_WATTS>();
+    if (chipId == POWER_CHIPID::EXPLORER_16)//DDR4
+    {
+        power = sys->getAttr<ATTR_N_PLUS_ONE_MAX_MEM_POWER_WATTS>();
+    }
+    else//DDR5
+    {
+        power = sys->getAttr<ATTR_DDR5_N_PLUS_ONE_MAX_MEM_POWER_WATTS>();
+    }
+    TMGT_INF("memPowerThrottleRedPower: N_PLUS_ONE_MAX_MEM_POWER_WATTS: %dW", power);
     power *= 100; // convert to centiWatts
 
     //Account for the regulator efficiency (percentage), if supplied
@@ -1121,8 +1135,19 @@ errlHndl_t memPowerThrottleOversub(
     uint32_t power = 0;
     uint32_t wattTarget = 0;
 
+    //Get OCMB chip id to see if explorer or odyssey should be used.
+    TARGETING::Target * ocmb_target = i_fapi_target_list[0].get();
+    const uint32_t chipId = ocmb_target->getAttr<ATTR_CHIP_ID>();
     //Get the max oversubscribed (N) power allocated to memory
-    power = sys->getAttr<ATTR_N_MAX_MEM_POWER_WATTS>();
+    if (chipId == POWER_CHIPID::EXPLORER_16)//DDR4
+    {
+        power = sys->getAttr<ATTR_N_MAX_MEM_POWER_WATTS>();
+    }
+    else//DDR5
+    {
+        power = sys->getAttr<ATTR_DDR5_N_MAX_MEM_POWER_WATTS>();
+    }
+    TMGT_INF("memPowerThrottleOversub: N_MAX_MEM_POWER_WATTS: %dW", power);
     power *= 100; // convert to centiWatts
 
     //Account for the regulator efficiency (percentage), if supplied

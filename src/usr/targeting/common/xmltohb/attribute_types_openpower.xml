@@ -638,6 +638,45 @@
   </attribute>
 
   <attribute>
+    <id>DDR5_N_MAX_MEM_POWER_WATTS</id>
+    <description>
+        The amount of DDR5 N Bulk Power to allocate to memory, this value will
+        be used to calculate memory throttles to cap memory to this power.
+        This value must be the left over power from N Bulk Power after
+        allocating power for fixed resources and processor power to guarantee
+        WOF base.  NOTE:  This value is first reduced by Regulator Efficiency
+        Factor before running the procedure to account for regulator loss.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>1885</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DDR5_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
+    <description>
+        The amount of DDR5 N+1 Bulk Power to allocate to memory, this value will
+        be used to calculate memory throttles to cap memory to this power.  This
+        value must be the left over power from N+1 Bulk Power after allocating
+        power for fixed resources and processor power to guarantee WOF base.
+        NOTE:  This value is first reduced by Regulator Efficiency Factor
+        before running the procedure to account for regulator loss before
+        running the HW procedure.
+    </description>
+    <simpleType>
+      <uint16_t>
+        <default>1885</default>
+      </uint16_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>DDR5_PMIC_ERROR_TEMP_DEG_C</id>
     <description>
         DDR5 PMIC temperature where an error will be generated

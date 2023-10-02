@@ -343,6 +343,12 @@
       <id>DDR5_MEMCTRL_THROTTLE_TEMP_DEG_C</id>
     </attribute>
     <attribute>
+      <id>DDR5_N_MAX_MEM_POWER_WATTS</id>
+    </attribute>
+    <attribute>
+      <id>DDR5_N_PLUS_ONE_MAX_MEM_POWER_WATTS</id>
+    </attribute>
+    <attribute>
       <id>DDR5_PMIC_ERROR_TEMP_DEG_C</id>
     </attribute>
     <attribute>

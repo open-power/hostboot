@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@ namespace HTMGT
     // Error Actions
     enum tmgtErrlActionsType
     {
+        TMGT_ERRL_ACTIONS_OCMB_RECOVERY_REQUEST    = 0x04,
         TMGT_ERRL_ACTIONS_MANUFACTURING_ERROR      = 0x08,
         TMGT_ERRL_ACTIONS_FORCE_ERROR_POSTED       = 0x10,
         TMGT_ERRL_ACTIONS_WOF_RESET_REQUIRED       = 0x20,
@@ -55,6 +56,15 @@ namespace HTMGT
         OCC_CALLOUT_TYPE_COMPONENT_ID  = 0x02,
         OCC_CALLOUT_TYPE_GPU_SENSOR    = 0x03,
     };
+
+    // OCC memory buffer recovery status id
+    enum occMemoryBufferRecoveryStatus
+    {
+        OCC_MEMORY_BUFFER_RECOVERY_SUCCESS       = 0x00,
+        OCC_MEMORY_BUFFER_RECOVERY_FAILED        = 0xF0,
+        OCC_MEMORY_BUFFER_RECOVERY_UNSUPPORTED   = 0x11,
+    };
+
 
     // TMGT-OCC Component Ids
     enum occCompIdType
