@@ -333,21 +333,30 @@ def hb_enableDCE():
     print('DCE enabled.')
 
 def hb_pauseIstepsAt(major, minor):
-    # Enable Istep pausing
-    hb_writeAttribute(0x10000,   # system target
-                      0x5171c01, # ATTR_ISTEP_PAUSE_ENABLE
-                      [ 1 ])     # value 1 = enable pause
 
-    # Set pause to the given istep
-    hb_writeAttribute(0x10000,   # system target
-                      0x2cf6852, # ATTR_ISTEP_PAUSE_CONFIG
+    if major != "":
+        if minor == "":
+            # minor was not given, assume user wants to pause at the start of an istep
+            minor = 1
 
-                      # pause infinitely at the given major/minor
-                      # istep. (these bytes are a istepPauseConfig_t
-                      # structure)
-                      [ major, minor, 0xff, 0, 0, 0, 0, 0 ])
+        # Enable Istep pausing
+        hb_writeAttribute(0x10000,   # system target
+                          0x5171c01, # ATTR_ISTEP_PAUSE_ENABLE
+                          [ 1 ])     # value 1 = enable pause
 
-    print('Pausing isteps at {}.{}'.format(major, minor))
+        # Set pause to the given istep
+        hb_writeAttribute(0x10000,   # system target
+                          0x2cf6852, # ATTR_ISTEP_PAUSE_CONFIG
+
+                          # pause infinitely at the given major/minor
+                          # istep. (these bytes are a istepPauseConfig_t
+                          # structure)
+                          [ major, minor, 0xff, 0, 0, 0, 0, 0 ])
+
+        print('Pausing isteps at {}.{}'.format(major, minor))
+    else:
+        print('No major istep was given, please provide an istep to pause at. e.g. hb-pauseIstepsAt 6 8 for pause at 6.8')
+
 
 def hb_simicsLPCConsole():
     SIM_run_alone(run_command, '(get-lpc-console)[0].capture-stop')
