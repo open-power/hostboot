@@ -98,6 +98,7 @@ OBJS += p10_pm_get_poundv_bucket.o
 OBJS += p10_pm_get_poundw_bucket.o
 OBJS += p10_pm_get_poundv_bucket_attr.o
 OBJS += p10_pm_get_poundw_bucket_attr.o
+OBJS += c_str.o
 
 #Add any object files that are referenced for FFDC functions inside
 # error xmls
@@ -195,4 +196,5 @@ VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib/
 VPATH += ${HWP_PATH_1}/hwp/perv/
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/initfiles/
+VPATH += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 VPATH += ${GENPATH}

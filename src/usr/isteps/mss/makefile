@@ -370,6 +370,7 @@ VPATH += ${ROOTPATH}/src/import/hwpf/sbe_utils/src/
 VPATH += ${ROOTPATH}/obj/genfiles/attr/
 
 OBJS += $(MSS_MODULE_OBJS)
+OBJS := $(filter-out c_str.o, $(OBJS))
 $(call BUILD_MODULE)
 
 VPATH += ${MSS_LIB}

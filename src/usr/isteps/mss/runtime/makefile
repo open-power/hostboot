@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2022
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -90,7 +90,6 @@ VPATH += ${MSS_LIB}
 
 #######
 # Add the specific files we need for HBRT
-OBJS += c_str.o
 OBJS += gen_mss_mcbist_patterns.o
 OBJS += exp_attribute_accessors_manual.o
 

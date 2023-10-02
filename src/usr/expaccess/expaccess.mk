@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2021
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -47,7 +47,6 @@ OBJS += mmioscomdd.o
 OBJS += exp_fw_log.o
 OBJS += exp_fw_log_data.o
 OBJS += errlud_expscom.o
-OBJS += c_str.o
 OBJS += exp_i2c.o
 OBJS += exp_fw_adapter_properties.o
 OBJS += exp_collect_explorer_log.o
