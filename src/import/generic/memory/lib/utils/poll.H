@@ -182,8 +182,8 @@ inline bool poll(const fapi2::Target<T>& i_target,
             // PPE cannot print 64-bit numbers and only allows for 4 variables per print statement
             // using an ifdef to keep the nice inline format for non-PPE applications
 #ifdef __PPE__
-            FAPI_INF( TARGTIDFORMAT ": %s REG: " UINT64FORMAT, GENTARGTID(p.iv_target), p.iv_tag, UINT64_VALUE(p.iv_register));
-            FAPI_INF( TARGTIDFORMAT ": %s ADDR:" UINT64FORMAT, GENTARGTID(p.iv_target), p.iv_tag, UINT64_VALUE(l_data));
+            FAPI_DBG( TARGTIDFORMAT ": %s REG: " UINT64FORMAT, GENTARGTID(p.iv_target), p.iv_tag, UINT64_VALUE(p.iv_register));
+            FAPI_DBG( TARGTIDFORMAT ": %s ADDR:" UINT64FORMAT, GENTARGTID(p.iv_target), p.iv_tag, UINT64_VALUE(l_data));
 #else
             FAPI_INF( TARGTIDFORMAT ": %s 0x%016llx 0x%016llx", GENTARGTID(p.iv_target), p.iv_tag, p.iv_register, l_data);
 #endif

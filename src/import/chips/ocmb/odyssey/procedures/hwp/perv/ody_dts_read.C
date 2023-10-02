@@ -60,11 +60,11 @@ ReturnCode ody_dts_read(
     buffer<uint64_t> l_fuse_value;
     ody_dts_calib_coeffs l_coeffs;
 
-    FAPI_INF("Entering ...");
+    FAPI_DBG("Entering ...");
 
     const auto l_mc = i_target.getChildren<TARGET_TYPE_PERV>(TARGET_FILTER_MC, TARGET_STATE_PRESENT)[0];
 
-    FAPI_INF("Triggering DTS read-out");
+    FAPI_DBG("Triggering DTS read-out");
     l_clear_results = 0;
     l_clear_results.set_PCB_WRITE_CLEAR_RESULTS(1);
     FAPI_TRY(l_clear_results.putScom(l_mc));
@@ -74,7 +74,7 @@ ReturnCode ody_dts_read(
     l_measure_req.set_DTS_MEASURE_REQUEST(1);
     FAPI_TRY(l_measure_req.putScom(l_mc));
 
-    FAPI_INF("Waiting for raw DTS result");
+    FAPI_DBG("Waiting for raw DTS result");
 
     for (int l_timeout = DATA_POLL_COUNT; l_timeout;)
     {
@@ -102,19 +102,19 @@ ReturnCode ody_dts_read(
     l_measure_req = 0;
     FAPI_TRY(l_measure_req.putScom(l_mc));
 
-    FAPI_INF("Reading calibration coefficients from OTPROM");
+    FAPI_DBG("Reading calibration coefficients from OTPROM");
     FAPI_TRY(getScom(i_target, DTS_COEFFICIENTS_FUSE_ADDRESS, l_fuse_value));
     ody_dts_decode_calib_coeffs(l_fuse_value, l_coeffs);
 
-    FAPI_INF("Calculating calibrated temperature");
+    FAPI_DBG("Calculating calibrated temperature");
     o_temperature = ody_dts_get_calibrated_temp(l_raw_data.get_DTS0_DTR0_RAW_VALUE(), l_coeffs);
 
-    FAPI_INF("Raw reading: %d, P/M/B: %d/%d/%d",
+    FAPI_DBG("Raw reading: %d, P/M/B: %d/%d/%d",
              l_raw_data.get_DTS0_DTR0_RAW_VALUE(),
              l_coeffs.p, l_coeffs.m, l_coeffs.b);
-    FAPI_INF("    => Temperature: %d", o_temperature);
+    FAPI_DBG("    => Temperature: %d", o_temperature);
 
 fapi_try_exit:
-    FAPI_INF("Exiting ...");
+    FAPI_DBG("Exiting ...");
     return current_err;
 }
