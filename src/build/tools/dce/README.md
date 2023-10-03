@@ -216,9 +216,20 @@ Then, if your backtrace looks like this, for example:
 you can see that several of the stack frames such as 0x40000BF2C and 0x40000C1CC etc. are within your ELF file. (The
 other addresses like 0xE2E4 and 0x122E8 are in Hostboot proper.)
 
-To find these address in your DCE listing, subtract the ELF base address from the return address, and look up that
+To find these addresses in your DCE listing, subtract the ELF base address from the return address, and look up that
 address in your listing file. For example, the address 0x40000BF2C in memory corresponds to the address 0x40000BF2C -
 0x400002000 = 0x9F2C in your DCE listing file.
+
+There is a tool, `src/build/debug/xlate_stack`, which can do this for you. It will print out the nearest function for
+the address which is typically enough to know where to go from there. Do note that the hbicore listing file needs to be
+unzipped for the `xlate_stack` tool. A usage based on the example above would be:
+
+```
+bzip2 -dk img/hbicore[_test].list.bz2
+
+src/build/debug/xlate_stack -l img/hbicore[_test].list -d code.dce[.test].lid.debug.list -e 0x400002000 -s "<-0xE2E4<-0x122E8<-0x107F0<-0x166F4<-0x40000BF2C<-0x40000C1CC<-0x40000A000<-0x400007D84<-0x400008258<-0x40A6D644<-0x26E4"
+```
+
 
 ### Module include directories
 

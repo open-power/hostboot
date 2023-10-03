@@ -27,6 +27,9 @@
 ################################################################################
 # simple usage:
 #   xlate_stack -l hbicore.list -s "<-0x347F8<-0x4001574C<-0x4001CDC8"
+# usage for DCE built for standalone simics:
+#   xlate_stack -l hbicore_test.list -d ody.dce.test.lid.debug.list -e 0xb92000
+#       -s "<-0x3B818<-0x4001E614<-0xB960A0<-0xB9628C<-0x40C5EDEC<-0x26E4"
 ################################################################################
 
 use strict;
@@ -144,24 +147,28 @@ foreach my $addr (split /<-/,$stack_addrs)
 
     my $hex_addr = hex($addr);
 
-    # potentially bad stack addr
-    if ($hex_addr > 0xffffffff)
+    if ($dce_elf and ($hex_addr > $dce_elf))
     {
-        # if a DCE elf was passed in, use it to modify the stack addr before giving up.
-        if ($dce_elf and ($hex_addr > $dce_elf))
+        my $unmodified_addr = $hex_addr;
+        $hex_addr -= hex($dce_elf);
+        # The new hex addr should be less than the DCE ELF now. If it is not then do not proceed with the lookup
+        # in the DCE listing. Instead, fall through to the checks for the other listing file.
+        if ($hex_addr < $dce_elf)
         {
-            my $unmodified_addr = $hex_addr;
-            $hex_addr -= hex($dce_elf);
             $verbosity and printf "$unmodified_addr - $dce_elf = %x\n", $hex_addr;
             print_fcn_from_addr($dce_fh, $hex_addr);
             next;
         }
-        else
-        {
-            # just skip it
-            printf "%-20s %-20s %s\n", $addr, " ", "OUT_OF_RANGE";
-            next;
-        }
+        # reset the hex_addr to the unmodified_addr
+        $hex_addr = $unmodified_addr;
+    }
+
+    # potentially bad stack addr
+    if ($hex_addr > 0xffffffff)
+    {
+        # just skip it
+        printf "%-20s %-20s %s\n", $addr, " ", "OUT_OF_RANGE";
+        next;
     }
 
     # if a runtime offset was passed in, use it to modify the stack addr
