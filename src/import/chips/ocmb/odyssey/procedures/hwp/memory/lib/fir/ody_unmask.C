@@ -252,8 +252,6 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::ODYSSEY>(const fapi2::Target<f
 {
     fapi2::buffer<uint64_t> l_reg_data;
 
-    bool l_mfg_omi_crc_edpl_screen = false;
-
     // Create registers and check success for SRQFIR
     mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
 
@@ -261,9 +259,6 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::ODYSSEY>(const fapi2::Target<f
     mss::fir::reg2<scomt::ody::ODC_MMIO_MFIR_RW_WCLEAR> l_mmio_mfir_reg(i_target);
     mss::fir::reg2<scomt::ody::ODC_TLXT_REGS_TLX_LFIR_RW_WCLEAR> l_tlx_lfir_reg(i_target);
     mss::fir::reg2<scomt::omi::D_REG_MC_OMI_FIR_RW_WCLEAR> l_mc_omi_fir_reg(i_target);
-
-    // Check MNFG OMI_CRC_EDPL_SCREEN Policy flag
-    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN, l_mfg_omi_crc_edpl_screen));
 
     // Unmask MMIO_MFIR
     FAPI_TRY(l_mmio_mfir_reg.checkstop<scomt::ody::ODC_MMIO_MFIR_FSM_PERR>()
@@ -298,18 +293,9 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::ODYSSEY>(const fapi2::Target<f
     .clearBit<scomt::omi::D_REG_DL0_ERROR_MASK_16>();
     FAPI_TRY(fapi2::putScom(i_target, scomt::omi::D_REG_DL0_ERROR_MASK, l_reg_data));
 
-
     // Unmask MC_OMI_FIR
-    l_mc_omi_fir_reg.recoverable_error<scomt::omi::D_REG_MC_OMI_FIR_DL0_FLIT_CE>();
-
-    // Conditional unmasks
-    if (!l_mfg_omi_crc_edpl_screen)
-    {
-        l_mc_omi_fir_reg.recoverable_error<scomt::omi::D_REG_MC_OMI_FIR_DL0_CRC_ERROR>()
-        .recoverable_error<scomt::omi::D_REG_MC_OMI_FIR_DL0_EDPL>();
-    }
-
-    FAPI_TRY(l_mc_omi_fir_reg.write(), "Failed to Write MC OMI FIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
+    FAPI_TRY(l_mc_omi_fir_reg.recoverable_error<scomt::omi::D_REG_MC_OMI_FIR_DL0_FLIT_CE>()
+             .write(), "Failed to Write MC OMI FIR register " GENTARGTIDFORMAT, GENTARGTID(i_target));
 
     // Unmask IPOLL bits to enable interrupts
     FAPI_TRY(fapi2::getScom(i_target, scomt::poz::PCBCTL_COMP_INTR_HOST_MASK_REG, l_reg_data));
