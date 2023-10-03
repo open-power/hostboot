@@ -484,7 +484,7 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
     // Various arrays to store the usage, availability, previous, reg scom data
     uint8_t l_thermal_sensor_usage[TT::temp_sensor::NUM_SENSORS] = {0};
     uint8_t l_thermal_sensor_avail[TT::temp_sensor::NUM_SENSORS] = {0};
-    int16_t l_thermal_sensor_prev_attr[TT::temp_sensor::NUM_SENSORS] = {0};
+    int16_t l_thermal_sensor_prev_attr[TT::temp_sensor::NUM_SENSORS] __attribute__ ((__aligned__(8))) = {0};
     const uint64_t l_thermal_sensors_scom_regs[TT::temp_sensor::NUM_SENSORS] = {scomt::ody::ODC_MMIO_SNSC_D0THERM,
                                                                                 scomt::ody::ODC_MMIO_SNSC_D1THERM,
                                                                                 scomt::ody::ODC_MMIO_SNSC_D2THERM,
@@ -492,7 +492,7 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
                                                                                 scomt::ody::ODC_MMIO_SNSC_OCTHERM
                                                                                };
     fapi2::buffer<uint64_t> l_snsc_therm_data[TT::temp_sensor::NUM_SENSORS] = {0};
-    int16_t l_temp_delta_values[TT::temp_sensor::NUM_SENSORS] = {0};
+    int16_t l_temp_delta_values[TT::temp_sensor::NUM_SENSORS] __attribute__ ((__aligned__(8))) = {0};
 
     // Index values for the sensors
     mss::ody::sensor_info_vars l_sensor_info;
@@ -596,7 +596,7 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     uint8_t l_threshold = 0;
     int16_t l_temp_delta = 0;
-    int16_t l_curr_temp_values[TT::temp_sensor::NUM_SENSORS] = {0};
+    int16_t l_curr_temp_values[TT::temp_sensor::NUM_SENSORS] __attribute__ ((__aligned__(8))) = {0};
     uint16_t l_count = 0;
     uint16_t l_count_threshold = 0;
 

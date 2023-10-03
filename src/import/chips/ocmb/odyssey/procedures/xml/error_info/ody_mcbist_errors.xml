@@ -63,6 +63,24 @@
     <scomRegister>scomt::ody::ODC_MCBIST_SCOM_MCBEA3Q</scomRegister>
   </registerFfdc>
 
+  <hwpError>
+    <rc>RC_ODY_DQS_DRIFT_TRACK_DID_NOT_STOP</rc>
+    <description>
+        DQS drift track failed to exit in the time allowed
+    </description>
+    <ffdc>MC_TARGET</ffdc>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
     <sbeError/>

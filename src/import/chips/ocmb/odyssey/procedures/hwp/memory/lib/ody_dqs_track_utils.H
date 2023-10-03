@@ -56,7 +56,6 @@ enum class drift_track_mr
     MSB_MR = 47,
 };
 
-
 ///
 /// @brief Enum to keep track of starting and stopping oscilators
 ///

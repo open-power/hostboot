@@ -269,6 +269,24 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_SUSPENDED</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Status attribute to tell if the DDR5 DQS tracking algorithm is
+            running or suspended. Value is updated automatically by suspend
+            and resume software functions, so this attribute should not
+            need to be written manually.
+        </description>
+        <enum>
+            TRUE  = 0x01,
+            FALSE = 0x00
+        </enum>
+        <default>FALSE</default>
+        <writeable/>
+        <valueType>uint8</valueType>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_THERMAL_SENSOR_0_PREVIOUS_VALUE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
@@ -458,7 +476,8 @@
         <enum>
             40_OHM  = 40,
             120_OHM = 120,
-            240_OHM = 240
+            240_OHM = 240,
+            RESERVED = 0xFF
         </enum>
         <default>240_OHM</default>
         <writeable/>
