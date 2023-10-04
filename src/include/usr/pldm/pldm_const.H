@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,6 +44,10 @@ namespace PLDM
 
     // used to match any terminus id
     const terminus_id_t TERMINUS_ID_ALL = 0xFFFF;
+    // used to flag the reboot count as invalid
+    const uint32_t INVALID_REBOOT_COUNT = 0xFF;
+    // BMC max reboot count
+    const uint32_t MAX_REBOOT_COUNT = 3;
 
     // These are Entity Types used in Entity Association PDRs
     enum entity_type : uint16_t

@@ -505,7 +505,7 @@ int decode_set_numeric_effecter_value_req(const struct pldm_msg *msg,
 					  size_t payload_length,
 					  uint16_t *effecter_id,
 					  uint8_t *effecter_data_size,
-					  uint8_t *effecter_value)
+					  uint8_t effecter_value[4])
 {
 	if (msg == NULL || effecter_id == NULL || effecter_data_size == NULL ||
 	    effecter_value == NULL) {
@@ -1371,8 +1371,7 @@ int decode_get_numeric_effecter_value_resp(
     uint8_t *pending_value, uint8_t *present_value)
 {
 	if (msg == NULL || effecter_data_size == NULL ||
-	    effecter_oper_state == NULL || pending_value == NULL ||
-	    present_value == NULL) {
+	    effecter_oper_state == NULL || pending_value == NULL || present_value == NULL) {
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
@@ -1406,8 +1405,7 @@ int decode_get_numeric_effecter_value_resp(
 			return PLDM_ERROR_INVALID_LENGTH;
 		}
 		memcpy(pending_value, response->pending_and_present_values, 1);
-		memcpy(present_value, &response->pending_and_present_values[1],
-		       1);
+		memcpy(present_value, &response->pending_and_present_values[1], 1);
 
 	} else if (*effecter_data_size == PLDM_EFFECTER_DATA_SIZE_UINT16 ||
 		   *effecter_data_size == PLDM_EFFECTER_DATA_SIZE_SINT16) {

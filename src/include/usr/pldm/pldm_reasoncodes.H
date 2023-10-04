@@ -100,7 +100,7 @@ namespace PLDM
         MOD_HANDLE_SBE_HRESET_REQUEST_RT             = 0x3B, // handleSbeHresetRequest
         MOD_GET_ENLARGED_CAPACITY                    = 0x3C, // getEnlargedCapacity
         MOD_GET_INHIBIT_BMC_RESET_VALUE              = 0x3D, // getInhibitBmcResetValue
-        MOD_RESET_REBOOT_COUNT                       = 0x3E, // sendResetRebootCountRequest
+        MOD_RESET_REBOOT_COUNT                       = 0x3E, // sendRebootCounterUpdateRequest
         MOD_GET_PDR                                  = 0x3F, // getPDR
         MOD_GET_DATE_TIME                            = 0x40, // getDateTime
         MOD_PLDM_SEND_REQ_RETRY                      = 0x41, // sendReqWithRetry
@@ -116,6 +116,7 @@ namespace PLDM
         MOD_GET_PROC_FAVOR_AGGRESSIVE_PREFETCH       = 0x4B, // getProcFavorAggressivePrefetch
         MOD_GET_POWER_SUPPLY_CONFIG                  = 0x4C, // parse_hb_ps_config
         MOD_APPEND_KEYWORDS                          = 0x4D, // append_keywords
+        MOD_SEND_GET_NUMERIC_EFFECTER_VALUE_REQUEST  = 0x4E, // sendGetNumericEffecterValueRequest
     };
 
     enum PLDMReasonCode
@@ -241,6 +242,5 @@ namespace PLDM
     * @devdesc     Software problem, PS input Voltage Data from BMC not found.
     * @custdesc    A software error occurred during system boot
     */
-
 
 #endif

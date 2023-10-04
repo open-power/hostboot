@@ -826,7 +826,7 @@ struct pldm_event_message_supported_resp {
 struct pldm_set_numeric_effecter_value_req {
 	uint16_t effecter_id;
 	uint8_t effecter_data_size;
-	uint8_t effecter_value[1];
+	uint8_t effecter_value[4];
 } __attribute__((packed));
 
 /** @struct pldm_get_state_sensor_readings_req
@@ -946,7 +946,7 @@ struct pldm_get_numeric_effecter_value_resp {
 	uint8_t completion_code;
 	uint8_t effecter_data_size;
 	uint8_t effecter_oper_state;
-	uint8_t pending_and_present_values[1];
+	uint8_t pending_and_present_values[8];
 } __attribute__((packed));
 
 /** @struct pldm_get_sensor_reading_req
@@ -993,7 +993,7 @@ int decode_set_numeric_effecter_value_req(const struct pldm_msg *msg,
 					  size_t payload_length,
 					  uint16_t *effecter_id,
 					  uint8_t *effecter_data_size,
-					  uint8_t *effecter_value);
+					  uint8_t effecter_value[8]);
 
 /** @brief Create a PLDM response message for SetNumericEffecterValue
  *
@@ -1651,6 +1651,9 @@ int decode_numeric_sensor_data(const uint8_t *sensor_data,
  *
  *  @param[in] instance_id - Message's instance id
  *  @param[in] effecter_id - used to identify and access the effecter
+ *  @param[in] effecter_data_size - The bit width and format of the setting
+ *               value for the effecter.
+ *               value:{uint8,sint8,uint16,sint16,uint32,sint32}
  *  @param[out] msg - Message will be written to this
  *  @return pldm_completion_codes
  *  @note  Caller is responsible for memory alloc and dealloc of param
@@ -1673,8 +1676,8 @@ int encode_get_numeric_effecter_value_req(uint8_t instance_id,
  *              effecter. The effecterDataSize field indicates the number of
  *              bits used for this field
  *  @param[out] present_value - The present numeric value setting of the
- *              effecter. The effecterDataSize indicates the number of bits
- *              used for this field
+ *              effecter. The effecterDataSize field indicates the number of
+ *              bits used for this field
  *  @return pldm_completion_codes
  */
 int decode_get_numeric_effecter_value_resp(

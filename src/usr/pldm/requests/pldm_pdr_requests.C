@@ -33,6 +33,7 @@
 #include <cstdint>
 #include <memory>
 #include <map>
+#include <algorithm>
 
 // Error logs
 #include <errl/errlentry.H>
@@ -81,6 +82,26 @@ struct pdr
     pdr_handle_t record_handle;
     std::vector<uint8_t> data;
 };
+
+/* @brief A wrapper around encode_get_numeric_effecter_value_req that takes
+ * in an additional size parameter to accommodate Hostboot PLDM APIs.  The size
+ * parameter is actually unused.
+ *
+ * @param[in]  i_instance_id - the PLDM instance ID
+ * @param[in]  i_effecter_id - the effecter id
+ * @param[in]  i_unused_payload_length - payload size
+ * @param[out] o_msg         - the encoded PLDM message
+ *
+ */
+int encode_get_numeric_effecter_value_req_hb(uint8_t i_instance_id,
+                                          uint16_t i_effecter_id,
+                                          pldm_msg* const o_msg,
+                                          const size_t i_unused_payload_length)
+{
+    return encode_get_numeric_effecter_value_req(i_instance_id,
+                                                 i_effecter_id,
+                                                 o_msg);
+}
 
 /* @brief Retrieves one PDR from the BMC.
  *
@@ -766,6 +787,111 @@ struct cc_only_response
     uint8_t completion_code = 0;
 };
 
+errlHndl_t sendGetNumericEffecterValueRequest(const effecter_id_t i_effecter_id, uint32_t& io_reboot_count, uint8_t& io_byte_data_size)
+{
+    errlHndl_t errl = nullptr;
+    io_byte_data_size = 0; // Will be properly set later, ignored if INVALID_REBOOT_COUNT
+    io_reboot_count = INVALID_REBOOT_COUNT; // set to an invalid value in case something fails we just ignore
+
+    pldm_get_numeric_effecter_value_req  get_req
+    {
+        .effecter_id = i_effecter_id,
+    };
+
+    do
+    {
+
+    std::vector<uint8_t> response_bytes;
+
+    errl = sendrecv_pldm_request<PLDM_GET_NUMERIC_EFFECTER_VALUE_REQ_BYTES>
+        (response_bytes,
+         g_outboundPldmReqMsgQ,
+         encode_get_numeric_effecter_value_req_hb,
+         DEFAULT_INSTANCE_ID, // let the PLDM service fill this in
+         get_req.effecter_id);
+
+    if (errl)
+    {
+        PLDM_ERR("sendGetNumericEffecterValueRequest: failed to send/recv PLDM request; "
+                 TRACE_ERR_FMT,
+                 TRACE_ERR_ARGS(errl));
+        break;
+    }
+    pldm_get_numeric_effecter_value_resp  response { };
+    uint8_t l_pending_value[4] = {}; // BMC sets both pending and present values same for AttemptsLeft
+    uint8_t l_present_value[4] = {}; // BMC will return AttemptsLeft in l_present_value
+
+    errl = decode_pldm_response(decode_get_numeric_effecter_value_resp,
+                                response_bytes,
+                                &response.completion_code,
+                                &response.effecter_data_size,
+                                &response.effecter_oper_state,
+                                l_pending_value,
+                                l_present_value);
+    if (errl)
+    {
+        PLDM_ERR("sendGetNumericEffecterValueRequest: failed to decode PLDM response; "
+                 TRACE_ERR_FMT,
+                 TRACE_ERR_ARGS(errl));
+        break;
+    }
+
+    if (response.completion_code == PLDM_ERROR_UNSUPPORTED_PLDM_CMD)
+    {
+        PLDM_INF("sendGetNumericEffecterValueRequest: PLDM_ERROR_UNSUPPORTED_PLDM_CMD io_reboot_count=0x%X", INVALID_REBOOT_COUNT);
+        break;
+    }
+    else
+    {
+        /*@
+          * @moduleid   MOD_SEND_GET_NUMERIC_EFFECTER_VALUE_REQUEST
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                             MOD_SEND_GET_NUMERIC_EFFECTER_VALUE_REQUEST,
+                             RC_BAD_COMPLETION_CODE, response_bytes);
+        if(errl)
+        {
+            PLDM_INF("sendGetNumericEffecterValueRequest validate_resp RC_BAD_COMPLETION_CODE ! Will addPldmFrData");
+            break;
+        }
+        if (response.effecter_data_size == PLDM_EFFECTER_DATA_SIZE_UINT8 ||
+            response.effecter_data_size == PLDM_EFFECTER_DATA_SIZE_SINT8)
+        {
+            io_byte_data_size = 1;
+            io_reboot_count = l_present_value[0]; // take the present value position
+        }
+        else if (response.effecter_data_size == PLDM_EFFECTER_DATA_SIZE_UINT16 ||
+                   response.effecter_data_size == PLDM_EFFECTER_DATA_SIZE_SINT16)
+        {
+            io_byte_data_size = 2;
+            memcpy(&io_reboot_count, l_present_value, sizeof(uint16_t));
+        }
+        else if (response.effecter_data_size == PLDM_EFFECTER_DATA_SIZE_UINT32 ||
+                   response.effecter_data_size == PLDM_EFFECTER_DATA_SIZE_SINT32)
+        {
+            io_byte_data_size = 4;
+            memcpy(&io_reboot_count, l_present_value, sizeof(uint32_t));
+        }
+    }
+
+    } while (false);
+
+    addPdrCounts(errl);
+
+    // checks for PLDM error and adds flight recorder data to log
+    addPldmFrData(errl);
+
+    PLDM_EXIT("sendGetNumericEffecterValueRequest i_effecter_id=0x%X (%d) SEEDING with io_reboot_count=0x%X (%d) io_byte_data_size=%d",
+                 i_effecter_id, i_effecter_id, io_reboot_count, io_reboot_count, io_byte_data_size);
+
+    return errl;
+}
+
 errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
                                               const uint32_t i_effecter_value,
                                               const uint8_t i_value_size)
@@ -782,6 +908,8 @@ errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
     uint8_t effecter_value_8 = i_effecter_value;
     uint16_t effecter_value_16 = i_effecter_value;
     uint32_t effecter_value_32 = i_effecter_value;
+
+    // See for enum pldm_effecter_data_size for i_value_size info
 
     if (i_value_size == 1)
     {
@@ -956,9 +1084,9 @@ errlHndl_t sendSetStateEffecterStatesRequest(
     return errl;
 }
 
-errlHndl_t sendResetRebootCountRequest()
+errlHndl_t sendRebootCounterUpdateRequest()
 {
-    PLDM_ENTER("sendResetRebootCountRequest()");
+    PLDM_ENTER("sendRebootCounterUpdateRequest()");
     errlHndl_t errl = nullptr;
     do {
 
@@ -996,14 +1124,33 @@ errlHndl_t sendResetRebootCountRequest()
             break;
     }
 
-    // BMC reboot counter defaults to three and regardless of value sent BMC will treat it as three. So just send three.
-    const uint8_t MAX_REBOOT_COUNT = 3;
-    errl = sendSetNumericEffecterValueRequest(reboot_count_effecter, MAX_REBOOT_COUNT, sizeof(MAX_REBOOT_COUNT));
 
+    uint32_t reboot_count = 0;
+    uint8_t l_byte_data_size = 0; // sendSetNumericEffecterValueRequest translates to bytes
+    // https://www.dmtf.org/sites/default/files/standards/documents/DSP0248_1.2.0.pdf
+    // See Section 22.3, Table 48, enum8 effecterDataSize
+    errl = sendGetNumericEffecterValueRequest(reboot_count_effecter, reboot_count, l_byte_data_size);
     if (errl)
     {
-        PLDM_ERR("sendResetRebootCountRequest(): Failed to send numeric effecter value set request for system target.");
+        PLDM_ERR("sendRebootCounterUpdateRequest(): PROBLEM with GET numeric effecter value failure.");
         break;
+    }
+
+    if (reboot_count != INVALID_REBOOT_COUNT) // only if its a valid value
+    {
+        uint32_t bump_value = ++reboot_count;
+        PLDM_INF("sendRebootCounterUpdateRequest(): SENDING BUMP MINIMUM=0x%X bump_value=0x%X", std::min(bump_value, MAX_REBOOT_COUNT), bump_value);
+        errl = sendSetNumericEffecterValueRequest(reboot_count_effecter, std::min(bump_value, MAX_REBOOT_COUNT), l_byte_data_size);
+
+        if (errl)
+        {
+            PLDM_ERR("sendRebootCounterUpdateRequest(): Failed to send numeric effecter value set request for system target.");
+            break;
+        }
+    }
+    else
+    {
+        PLDM_INF("sendRebootCounterUpdateRequest(): SKIPPED sendSetNumericEffecterValueRequest INVALID reboot_count=0x%X", reboot_count);
     }
 
     } while(0);
@@ -1013,7 +1160,7 @@ errlHndl_t sendResetRebootCountRequest()
     // checks for PLDM error and adds flight recorder data to log
     addPldmFrData(errl);
 
-    PLDM_EXIT("sendResetRebootCountRequest()");
+    PLDM_EXIT("sendRebootCounterUpdateRequest()");
     return errl;
 }
 
@@ -1023,7 +1170,7 @@ errlHndl_t sendGracefulRestartRequest()
 
     do
     {
-        errl = sendResetRebootCountRequest();
+        errl = sendRebootCounterUpdateRequest();
         if (errl)
         {
             // Commit the log and continue to give the system a chance at recovery.
