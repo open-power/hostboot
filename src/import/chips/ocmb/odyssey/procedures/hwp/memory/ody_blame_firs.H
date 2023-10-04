@@ -44,6 +44,7 @@ namespace mss
 
 enum class ipl_substep
 {
+    DRAMINIT    = 132,
     DRAMINIT_MC = 133
 };
 
@@ -51,8 +52,9 @@ enum class ipl_substep
 
 // Required for Cronus
 typedef fapi2::ReturnCode (*ody_blame_firs_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
-        const mss::ipl_substep i_substep,
-        const fapi2::ReturnCode& i_rc);
+        const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>&,
+        const mss::ipl_substep,
+        const fapi2::ReturnCode&);
 
 extern "C"
 {
@@ -60,14 +62,16 @@ extern "C"
     ///
     /// @brief Check for FIR bits related to a HWP fail
     /// @param[in] i_target OCMB chip
+    /// @param[in] i_ports vector of failing MEM_PORT targets
     /// @param[in] i_substep the IPL substep to check FIRs for
     /// @param[in] i_rc return code from the IPL substep
     /// @return FAPI2_RC_SUCCESS iff ok
-    /// @note This procedure should be called when a failing RC is received from SPPE draminit or draminit_mc chip-ops
+    /// @note This procedure should be called when a failing RC is received from SPPE draminit or draminit_mc chip-ops.
     ///       It will return the original RC if no unmasked FIR could be blamed for the fail, or
     ///       log a recovered error if an unmasked FIR was set and return SUCCESS
     ///
     fapi2::ReturnCode ody_blame_firs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                     const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports,
                                      const mss::ipl_substep i_substep,
                                      const fapi2::ReturnCode& i_rc);
 

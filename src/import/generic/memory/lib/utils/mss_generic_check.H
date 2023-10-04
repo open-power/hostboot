@@ -70,7 +70,7 @@ inline void log_fir_helper( const fapi2::Target<T>& i_target,
 {
     if(i_fir_error && (io_rc != fapi2::FAPI2_RC_SUCCESS))
     {
-        // TODO Zen:MST-2299: use log_related_error when available on PPE
+        // PPE does not implement log_related_error
 #ifndef __PPE__
         fapi2::log_related_error(i_target, io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
 

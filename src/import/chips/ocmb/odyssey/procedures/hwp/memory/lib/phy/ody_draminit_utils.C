@@ -52,6 +52,7 @@
 #include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/utils/num.H>
 #include <lib/dimm/ody_rank.H>
+#include <lib/fir/ody_fir.H>
 #include <generic/memory/lib/utils/fapi_try_lambda.H>
 
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr3.H>
@@ -6092,6 +6093,7 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
     uint8_t l_is_sim = 0;
     uint8_t l_is_simics = 0;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    bool l_fir_error = false;
 
     mss::ody::phy::bad_bit_interface l_interface(i_target, i_msg_block_response, l_rc);
     FAPI_TRY(l_rc, TARGTIDFORMAT " bad_bit_interface constructor failed", TARGTID);
@@ -6125,11 +6127,17 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
                 "in the message block: 0x%02x (expected 0x%02x)",
                 TARGTID, i_msg_block_response.CsTestFail, MSG_BLOCK_TRAIN_PASS);
 
-    // Check for FIRs then record the bad bits data into our attribute if there are no FIRs set
-    // Hostboot will consume the bad bits attribute in the memdiags procedure
-    FAPI_TRY( (mss::check::fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::DRAMINIT>(i_target,
-               fapi2::current_err)) );
-    FAPI_TRY(mss::record_bad_bits(i_target, l_interface));
+    // Official FIR checking will run on Hostboot in FW, which will check the procedure RC
+    // But we only want to record the bad bits here if we can't blame any FIRs for the fail
+    FAPI_TRY( (mss::check::bad_fir_bits<mss::mc_type::ODYSSEY, mss::check::firChecklist::DRAMINIT>(
+                   i_target,
+                   l_rc,
+                   l_fir_error)) );
+
+    if (!l_fir_error)
+    {
+        FAPI_TRY(mss::record_bad_bits(i_target, l_interface));
+    }
 
     FAPI_INF(TARGTIDFORMAT " DRAM training returned PASSING status", TARGTID);
     return fapi2::FAPI2_RC_SUCCESS;

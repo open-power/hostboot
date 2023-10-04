@@ -145,11 +145,32 @@ fapi_try_exit:
 fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                            fapi2::hwp_data_ostream& o_log_data)
 {
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
     for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        // Note: This will need to be updated to allow training to fail on one port but continue on the second
-        FAPI_TRY(draminit(l_port, o_log_data));
+        fapi2::ReturnCode l_port_rc = fapi2::FAPI2_RC_SUCCESS;
+
+        // Allow training to fail on one port but continue on the second
+        l_port_rc = draminit(l_port, o_log_data);
+
+        if (l_port_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+// TODO: Zen:MST-2412 Uncomment logError once supported on SPPE
+#ifndef __PPE__
+            // Log error from previous port if it failed
+            if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
+            }
+
+#endif
+            // Set HWP RC to last port's fail so it gets logged upon HWP exit
+            l_rc = l_port_rc;
+        }
     }
+
+    FAPI_TRY(l_rc, TARGTIDFORMAT " failure during draminit", TARGTID);
 
     // Unmask FIRs (done on the OCMB chip level)
     FAPI_TRY(mss::unmask::after_draminit_training<mss::mc_type::ODYSSEY>(i_target));

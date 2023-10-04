@@ -46,14 +46,18 @@ extern "C"
     ///
     /// @brief Check for FIR bits related to a HWP fail
     /// @param[in] i_target OCMB chip
+    /// @param[in] i_ports vector of failing MEM_PORT targets, derived from FFDC of draminit fails
     /// @param[in] i_substep the IPL substep to check FIRs for
     /// @param[in] i_rc return code from the IPL substep
     /// @return FAPI2_RC_SUCCESS iff ok
     /// @note This procedure should be called when a failing RC is received from SPPE draminit or draminit_mc chip-ops.
     ///       It will return the original RC if no unmasked FIR could be blamed for the fail, or
     ///       log a recovered error if an unmasked FIR was set and return SUCCESS
+    /// @note Hostboot should collect the failing mem_port target(s) from the FFDC to populate the i_ports
+    ///       vector for any port-specific fails, such as from draminit
     ///
     fapi2::ReturnCode ody_blame_firs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                     const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports,
                                      const mss::ipl_substep i_substep,
                                      const fapi2::ReturnCode& i_rc)
     {
@@ -65,8 +69,32 @@ extern "C"
         switch (i_substep)
         {
             case mss::ipl_substep::DRAMINIT_MC:
-                l_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::CCS>(i_target, l_rc,
-                        l_scom_error);
+                l_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::CCS>
+                       (i_target, l_rc, l_scom_error);
+                break;
+
+            case mss::ipl_substep::DRAMINIT:
+                for (const auto& l_port : i_ports)
+                {
+                    fapi2::ReturnCode l_port_rc(i_rc);
+                    fapi2::ReturnCode l_port_scom_error(fapi2::FAPI2_RC_SUCCESS);
+
+                    l_port_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::DRAMINIT>
+                                (l_port, l_port_rc, l_scom_error);
+
+                    // If the blame-a-fir function returns a non-successful RC, return that
+                    if (l_port_rc != fapi2::FAPI2_RC_SUCCESS)
+                    {
+                        l_rc = l_port_rc;
+                    }
+
+                    // If we got a scom error, capture and keep it
+                    if (l_port_scom_error != fapi2::FAPI2_RC_SUCCESS)
+                    {
+                        l_scom_error = l_port_scom_error;
+                    }
+                }
+
                 break;
 
             default:
