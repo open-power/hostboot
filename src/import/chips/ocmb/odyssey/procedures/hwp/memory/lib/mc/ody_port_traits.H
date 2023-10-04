@@ -235,6 +235,7 @@ class portTraits< mss::mc_type::ODYSSEY >
             //       Retaining the later two for generic implementation
             ROQ_FIFO_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_FIFO_MODE,
             RRQ_FIFO_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_FIFO_MODE,
+            RRQ_DISABLE_PAGE_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_DISABLE_PG_MODE,
             WRQ_FIFO_MODE = scomt::ody::ODC_SRQ_MBA_ROQ0Q_CFG_FIFO_MODE,
 
             SRQ_MBAREFAQ_CFG_TSTAB = scomt::ody::ODC_SRQ_MBAREFAQ_CFG_TSTAB,
