@@ -2778,7 +2778,13 @@ errlHndl_t checkMinimumHardware(const TARGETING::ConstTargetHandle_t i_nodeOrSys
 
                     // Initiate a graceful power cycle
                     HWAS_INF("checkMinimumHardware(): reconfig loop for backing cache adjustment");
-                    INITSERVICE::requestReboot("backing cache adjustment");
+                    #ifdef CONFIG_FSP_BUILD
+                        // FSP
+                        INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
+                    #else
+                        // BMC
+                        INITSERVICE::requestReboot("backing cache adjustment");
+                    #endif
                 }
 
             }
