@@ -3654,15 +3654,6 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
             iv_eco_count++;
             FAPI_INF("  EC %d is an ECO core", l_present_core_unit_pos);
         }
-
-        // SPARE core count
-        if (!l_eq_mvpd_pg_buf.getBit(l_l3_eco_pg_start_bit + (l_present_core_unit_pos % 4)))
-        {
-            iv_eco_count++;
-            FAPI_INF("  EC %d is an ECO core", l_present_core_unit_pos);
-        }
-
-
     }  // Present core loop
 
 fapi_try_exit:
