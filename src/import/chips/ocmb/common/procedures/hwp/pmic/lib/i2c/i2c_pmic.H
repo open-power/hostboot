@@ -466,7 +466,6 @@ inline void reg_write_contiguous_helper(const fapi2::Target<fapi2::TARGET_TYPE_G
     io_command.push_back(i_addr);
 }
 
-
 ///
 /// @brief Perform register write operation on a contiguous address of given target
 /// @tparam T target type
@@ -688,7 +687,7 @@ inline fapi2::ReturnCode reg_read_contiguous_reverse(const fapi2::Target<T>& i_t
         const uint8_t i_addr,
         fapi2::buffer<uint8_t> (&o_data_buffer)[N])
 {
-    reg_read_contiguous(i_target, i_addr, o_data_buffer);
+    FAPI_TRY(reg_read_contiguous(i_target, i_addr, o_data_buffer));
 
     // Reverse the read data
     for(uint32_t l_count = 0; l_count < N; l_count++)
@@ -696,6 +695,36 @@ inline fapi2::ReturnCode reg_read_contiguous_reverse(const fapi2::Target<T>& i_t
         o_data_buffer[l_count].reverse();
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reverse the buffer then perform register write operation on a contiguous address of given target
+/// @tparam T target type
+/// @tparam N size of the data buffer
+/// @param[in] i_target the PMIC/I2C/DT device target
+/// @param[in] i_addr starting register address to write to
+/// @param[in] i_data_buffer buffer of data to be writen to register addresses
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+template <fapi2::TargetType T, size_t N>
+inline fapi2::ReturnCode reg_write_contiguous_reverse(const fapi2::Target<T>& i_target,
+        const uint8_t i_addr,
+        const fapi2::buffer<uint8_t> (&i_data_buffer)[N])
+{
+    fapi2::buffer<uint8_t> l_buffer_copy[N];
+
+    // Reverse the input buffer and append to write data
+    for(uint32_t l_count = 0; l_count < N; l_count++)
+    {
+        l_buffer_copy[l_count] = i_data_buffer[l_count];
+        l_buffer_copy[l_count].reverse();
+    }
+
+    FAPI_TRY(reg_write_contiguous(i_target, i_addr, l_buffer_copy));
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:

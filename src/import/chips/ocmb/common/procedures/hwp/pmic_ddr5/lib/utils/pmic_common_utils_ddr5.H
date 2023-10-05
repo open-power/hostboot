@@ -882,6 +882,37 @@ void dt_reg_write_contiguous(target_info_pmic_dt_pair& io_pmic_dt, const uint8_t
     }
 }
 
+///
+/// @brief Get the nominal rail voltage of a JEDEC-compliant PMIC via attribute
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_pmic_id PMIC being adressed in sorted array
+/// @param[in] i_rail rail to read from
+/// @param[out] o_nominal_voltage voltage calculated
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_target_info,
+        const uint8_t i_pmic_id,
+        const mss::pmic::rail i_rail,
+        uint32_t& o_nominal_voltage);
+
+//
+/// @brief Calculates update over voltage threshold setting using formula from spec
+/// @param[in] i_voltage given voltage the pmic is being set to
+/// @return bitmap of voltage threshold to set DT's Over voltage protect regs
+//
+uint8_t calculate_ov_threshold_voltage(const uint32_t i_voltage);
+
+///
+/// @brief Updates OV threshold voltages in respective dt's per voltage domain
+/// @param i_ocmb_target OCMB Target
+/// @param i_volt_domain Voltage domain to ensure we're setting the proper rails
+/// @param i_voltage Voltage being set to PMIC
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                                      const uint8_t i_volt_domain,
+                                      const uint32_t i_voltage);
 } // ddr5
 } // pmic
 } // mss

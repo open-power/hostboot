@@ -58,6 +58,15 @@ namespace ddr5
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
 ///
+/// @brief Updates VDD domain during dt enable sequence
+/// @param[in] i_target_info target info struct
+/// @param[in] i_pmic_id PMIC being addressed in sorted array
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode update_vdd_ov_threshold(const target_info_redundancy_ddr5& i_target_info,
+        const uint8_t i_pmic_id);
+
+///
 /// @brief Setup and enable DT
 ///
 /// @param[in] i_target_info target info struct

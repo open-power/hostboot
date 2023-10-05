@@ -43,6 +43,7 @@
 #include <pmic_common_utils_ddr5.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/lib/utils/mss_math.H>
 #include <mss_pmic_attribute_accessors_manual.H>
 
 namespace mss
@@ -473,6 +474,320 @@ void dt_reg_read_reverse_buffer(target_info_pmic_dt_pair& io_pmic_dt, const uint
         }
     }
 }
+
+///
+/// @brief Get the nominal rail voltage of a JEDEC-compliant PMIC via attribute
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_pmic_id PMIC being adressed in sorted array
+/// @param[in] i_rail rail to read from
+/// @param[out] o_nominal_voltage voltage calculated
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_target_info,
+        const uint8_t i_pmic_id,
+        const mss::pmic::rail i_rail,
+        uint32_t& o_nominal_voltage)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
+
+    uint8_t l_voltage_setting = 0;
+    uint8_t l_range_selection = 0;
+    uint16_t l_range_min_value = 0;
+
+    bool l_pmic_is_ti = false;
+    fapi2::buffer<uint8_t> l_pmic_rev;
+
+    const mss::pmic::id l_id = static_cast<mss::pmic::id>(i_pmic_id);
+    uint16_t l_r78_range_min_value_mv = 0;
+    uint16_t l_r2b_range_min_value_mv = 0;
+    bool l_use_R78_for_range = false;
+    fapi2::buffer<uint8_t> l_voltage_setting_reg_contents;
+    fapi2::buffer<uint8_t> l_voltage_range_reg_contents;
+    fapi2::buffer<uint8_t> l_pmic_vid_offset_coarse_reg;
+
+    const auto& l_pmic_target = i_target_info.iv_pmic_dt_map[i_pmic_id].iv_pmic;
+
+    FAPI_TRY(mss::pmic::pmic_is_ti(l_pmic_target, l_pmic_is_ti));
+
+    // If TI PMIC get the revision and height
+    if (l_pmic_is_ti)
+    {
+        FAPI_TRY(mss::pmic::i2c::reg_read(l_pmic_target, REGS::R3B_REVISION, l_pmic_rev));
+        FAPI_ASSERT(l_pmic_rev >= TPS_CONSTS::TI_REV_23,
+                    fapi2::PMIC_NOT_DDR5_REVISION().
+                    set_PMIC_REVISION(l_pmic_rev).
+                    set_PMIC_TARGET(l_pmic_target),
+                    GENTARGTIDFORMAT " PMIC is not DDR5 revision %d exiting get_nominal_voltage_ddr5", GENTARGTID(l_pmic_target),
+                    l_pmic_rev);
+    }
+    else
+    {
+        FAPI_INF(GENTARGTIDFORMAT " PMIC is not from TI, exiting get_nominal_voltage_ddr5", GENTARGTID(l_pmic_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_TRY(mss::pmic::calculate_voltage_bitmap_from_attr(l_pmic_target, l_id, i_rail, l_voltage_setting));
+
+    // Unlock register R78 for reading for TPS53831 (TI revision >= 0x23)
+    FAPI_TRY(mss::pmic::status::unlock_pmic_r70_to_ra3(l_pmic_target));
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic_target, TPS_REGS::R78_VID_OFFSET_COARSE,
+             l_pmic_vid_offset_coarse_reg));
+
+    // Identify range for R78
+    switch (i_rail)
+    {
+        case mss::pmic::rail::SWA:
+            l_pmic_vid_offset_coarse_reg.extractToRight<TPS_FIELDS::R78_SWA_VID_OFFSET_COARSE_START,
+                                                        TPS_FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_range_selection);
+            break;
+
+        case mss::pmic::rail::SWB:
+            l_pmic_vid_offset_coarse_reg.extractToRight<TPS_FIELDS::R78_SWB_VID_OFFSET_COARSE_START,
+                                                        TPS_FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_range_selection);
+            break;
+
+        case mss::pmic::rail::SWC:
+            l_pmic_vid_offset_coarse_reg.extractToRight<TPS_FIELDS::R78_SWC_VID_OFFSET_COARSE_START,
+                                                        TPS_FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_range_selection);
+            break;
+
+        case mss::pmic::rail::SWD:
+            l_pmic_vid_offset_coarse_reg.extractToRight<TPS_FIELDS::R78_SWD_VID_OFFSET_COARSE_START,
+                                                        TPS_FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_range_selection);
+            break;
+
+        default:
+            FAPI_TRY(fapi2::FAPI2_RC_INVALID_PARAMETER, "get_nominal_voltage_ddr5 rail %u not found",
+                     i_rail);
+            break;
+    }
+
+    // Get range minimum voltage for rail using R78
+    l_r78_range_min_value_mv = mss::pmic::VOLT_RANGE_VID_OFFSET_COARSE_MINS[i_rail][l_range_selection];
+
+    // If range setting for rail is not at default value then use it for the range
+    l_use_R78_for_range = (l_range_selection != mss::pmic::VOLT_VID_OFFSET_COARSE_DEFAULT[i_rail]);
+
+    // If R78 is not used to define range then get range from R2B
+    if (!l_use_R78_for_range)
+    {
+        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic_target, REGS::R2B, l_voltage_range_reg_contents),
+                 "get_nominal_voltage_ddr5: Error reading 0x%02hhX of PMIC " GENTARGTIDFORMAT, REGS::R2B, GENTARGTID(l_pmic_target));
+
+        // Identify range for R2B
+        l_range_selection = l_voltage_range_reg_contents.getBit(mss::pmic::VOLT_RANGE_FLDS[i_rail]);
+
+        // Get range minimum voltage for rail using R2B
+        l_r2b_range_min_value_mv = mss::pmic::VOLT_RANGE_MINS[i_rail][l_range_selection];
+    }
+
+    // Get range minimum voltage that is being used by pmic
+    l_range_min_value = (l_use_R78_for_range) ? l_r78_range_min_value_mv : l_r2b_range_min_value_mv;
+
+    // While it's technically possible that we could just have a attribute value of 0 ( == 800mV),
+    // we don't currently use this for any rail in any SPD, and it's unlikely that we would ever do so.
+    // So, if both the voltage setting and range are 0, it's safe to assume the attributes are not set
+    // and we should not continue.
+    if(l_voltage_setting == 0 && l_range_selection == 0)
+    {
+        FAPI_ERR( "Nominal PMIC voltages are not defined for rail being biased. This could mean the rail is "
+                  "disabled, or eff_config was not run, meaning biasing by percentage is not supported.");
+    }
+
+
+    // Get nominial voltage using: range_min + (step * setting)
+    o_nominal_voltage = l_range_min_value + (CONSTS::VOLT_STEP * l_voltage_setting);
+
+    FAPI_INF(GENTARGTIDFORMAT " Rail %u Nominal voltage: %lumV", GENTARGTID(l_pmic_target), i_rail,
+             o_nominal_voltage);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+//
+/// @brief Calculates update over voltage threshold setting using formula from spec
+/// @param[in] i_voltage given voltage the pmic is being set to
+/// @return bitmap of voltage threshold to set DT's Over voltage protect regs
+//
+uint8_t calculate_ov_threshold_voltage(const uint32_t i_voltage)
+{
+    static constexpr uint32_t THRESHOLD_MULT = 110;
+    static constexpr uint32_t THRESHOLD_DIFF = 600;
+    static constexpr uint32_t THRESHOLD_STEP = 25;
+
+    // Calculate new threshold using equation in 10-1 in PMIC SPEC units in mV's
+    uint32_t l_ov_mv = ((i_voltage * THRESHOLD_MULT) / 100);
+
+    // Round to nearest step
+    l_ov_mv = mss::round_to_nearest_multiple(l_ov_mv, THRESHOLD_STEP);
+    return(uint8_t((l_ov_mv - THRESHOLD_DIFF) / THRESHOLD_STEP));
+}
+
+///
+/// @brief Updates OV threshold voltages in respective dt's per voltage domain
+/// @param i_ocmb_target OCMB Target
+/// @param i_volt_domain Voltage domain to ensure we're setting the proper rails
+/// @param i_voltage Voltage being set to PMIC
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                                      const uint8_t i_volt_domain,
+                                      const uint32_t i_voltage)
+{
+    using DT_REGS  = mss::dt::regs;
+    using DT_FIELDS  = mss::dt::fields;
+    using DT_POS  = mss::dt::dt_i2c_devices;
+
+    static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
+    auto l_threshold_voltage = calculate_ov_threshold_voltage(i_voltage);
+
+    const auto& l_dts = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_POWER_IC>(i_ocmb_target);
+    fapi2::buffer<uint8_t> l_dt_thresh_buffer[NUM_BYTES_TO_WRITE];
+
+    // Check volt domain to see which dt's/rails need to be written to
+
+    // Over Voltage threshold is programmed into 2 6-bit fields across a 16-bit contiguous reg (0x5A & 0x5B for Rails A & B, 0x5C & 0x5D for Rails C & D)
+    // In order to properly inject the bits into these regs, we read the current setting into two 8-bit buffers
+    // During the read out the date is byte reversed into the buffers
+    // To program rails B & D we inject into the first 6-bits of the DT reg 0x5A/5C which are bits 2:7 of our fapi buffer[0]
+    // To program rails A & C we inject into the last 4-bits of the DT reg 0x5A/5C which are bits 4:7 of our fapi buffer[1]
+    //                                       and first 2-bits of the DT reg 0x5B/5D which are bits 0:1 of our fapi buffer[0]
+    // More detailed explaination can be found in pmic_const.H - mss::dt::fields
+    switch(i_volt_domain)
+    {
+        case mss::pmic::volt_domains::VDDQ:
+
+            // All DTs on A & B rails
+            for(const auto& l_dt : l_dts)
+            {
+                FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dt, DT_REGS::OV_THRESHOLD_AB, l_dt_thresh_buffer));
+
+                // Insert data to first buffer for rail B/D
+                l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_BD, DT_FIELDS::OV_THRESH_LENGTH_BD>
+                (l_threshold_voltage);
+
+                // Insert data to first & second buffer for rail A/C
+                l_dt_thresh_buffer[1].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_FIRST_BYTE, DT_FIELDS::THRESHOLD_AC_FIRST_BYTE_LEN>
+                (l_threshold_voltage >> DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN);
+                l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE, DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
+                (l_threshold_voltage);
+                FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dt, DT_REGS::OV_THRESHOLD_AB, l_dt_thresh_buffer));
+            }
+
+            break;
+
+        case mss::pmic::volt_domains::VDD:
+
+            // DT0, DT1, DT3 on rail C
+            // DT0
+            FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT0], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
+
+            // Insert data to first & second buffer for rail A/C
+
+            l_dt_thresh_buffer[1].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_FIRST_BYTE, DT_FIELDS::THRESHOLD_AC_FIRST_BYTE_LEN>
+            (l_threshold_voltage >> DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN);
+            l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE, DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
+            (l_threshold_voltage);
+
+            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT0], DT_REGS::OV_THRESHOLD_CD,
+                     l_dt_thresh_buffer));
+
+            // DT1
+            FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT1], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
+
+            // Insert data to first & second buffer for rail A/C
+            l_dt_thresh_buffer[1].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_FIRST_BYTE, DT_FIELDS::THRESHOLD_AC_FIRST_BYTE_LEN>
+            (l_threshold_voltage >> DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN);
+            l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE, DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
+            (l_threshold_voltage);
+
+            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT1], DT_REGS::OV_THRESHOLD_CD,
+                     l_dt_thresh_buffer));
+            // DT 3
+            FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT3], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
+
+            // Insert data to first & second buffer for rail A/C
+            l_dt_thresh_buffer[1].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_FIRST_BYTE, DT_FIELDS::THRESHOLD_AC_FIRST_BYTE_LEN>
+            (l_threshold_voltage >> DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN);
+            l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE , DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
+            (l_threshold_voltage);
+
+            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT3], DT_REGS::OV_THRESHOLD_CD,
+                     l_dt_thresh_buffer));
+
+            break;
+
+        case mss::pmic::volt_domains::VPP:
+
+            // DT0, DT2 on rail D
+
+            // DT0
+            FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT0], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
+
+            // VPP domain threshold voltage should be calculated with 1/2 input voltage
+            l_threshold_voltage = calculate_ov_threshold_voltage(i_voltage / 2);
+
+
+            // Insert data to first buffer for rail B/D
+            l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_BD, DT_FIELDS::OV_THRESH_LENGTH_BD>
+            (l_threshold_voltage);
+
+            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT0], DT_REGS::OV_THRESHOLD_CD,
+                     l_dt_thresh_buffer));
+
+            // DT2
+            FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT2], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
+
+            // Insert data to first buffer for rail B/D
+            l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_BD, DT_FIELDS::OV_THRESH_LENGTH_BD>
+            (l_threshold_voltage);
+
+            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT2], DT_REGS::OV_THRESHOLD_CD,
+                     l_dt_thresh_buffer));
+
+            break;
+
+        case mss::pmic::volt_domains::VIO:
+
+            // DT1 Rail D, DT2 Rail C
+
+            // DT1
+            FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT1], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
+
+            // Insert data to first buffer for rail B/D
+            l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_BD, DT_FIELDS::OV_THRESH_LENGTH_BD>
+            (l_threshold_voltage);
+
+            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT1], DT_REGS::OV_THRESHOLD_CD,
+                     l_dt_thresh_buffer));
+
+            // DT2
+            FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT2], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
+
+            // Insert data to first & second buffer for rail A/C
+            l_dt_thresh_buffer[1].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_FIRST_BYTE, DT_FIELDS::THRESHOLD_AC_FIRST_BYTE_LEN>
+            (l_threshold_voltage >> DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN);
+            l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE, DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
+            (l_threshold_voltage);
+
+            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT2], DT_REGS::OV_THRESHOLD_CD,
+                     l_dt_thresh_buffer));
+            break;
+
+        default:
+            FAPI_ERR(GENTARGTIDFORMAT" Invaild volt domain %u", GENTARGTID(i_ocmb_target), i_volt_domain);
+            break;
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
 
 } // ddr5
 } // pmic

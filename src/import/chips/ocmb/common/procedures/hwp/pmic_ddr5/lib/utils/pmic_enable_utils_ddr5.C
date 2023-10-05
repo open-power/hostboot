@@ -56,6 +56,33 @@ namespace pmic
 
 namespace ddr5
 {
+
+///
+/// @brief Updates VDD domain during dt enable sequence
+/// @param[in] i_target_info target info struct
+/// @param[in] i_pmic_id PMIC being addressed in sorted array
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode update_vdd_ov_threshold(const target_info_redundancy_ddr5& i_target_info,
+        const uint8_t i_pmic_id)
+{
+    uint32_t l_nominal_voltage = 0;
+    // Get nominal ddr5 voltage
+    FAPI_TRY(mss::pmic::ddr5::get_nominal_voltage_ddr5(
+                 i_target_info,
+                 i_pmic_id,
+                 mss::pmic::rail::SWC,
+                 l_nominal_voltage));
+
+    // Update VDD OV threshold
+    FAPI_TRY(mss::pmic::ddr5::update_ov_threshold(i_target_info.iv_ocmb,
+             mss::pmic::volt_domains::VDD,
+             l_nominal_voltage));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief Setup and enable DT
 ///
@@ -150,7 +177,9 @@ fapi2::ReturnCode power_down_sequence_2u(const fapi2::Target<fapi2::TARGET_TYPE_
 
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
         {
+#ifndef __PPE__
             fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+#endif
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
     }
@@ -410,7 +439,9 @@ fapi2::ReturnCode disable_and_reset_pmics(const fapi2::Target<fapi2::TARGET_TYPE
 
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
         {
+#ifndef __PPE__
             fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+#endif
             fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         }
     }
@@ -666,7 +697,9 @@ fapi_try_exit:
 
     // Logs the current error as prective, as it predicts that we had a PMIC enable fail
     // Deconfigures happen at the end of an istep, so this should be ok with hostboot
+#ifndef __PPE__
     fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
+#endif
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
     FAPI_ASSERT_NOEXIT(false,
@@ -934,6 +967,9 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
 
     // 3a, Pre config pmic for power off seq, disable soft-stop, set global on_off_config
     FAPI_TRY(mss::pmic::ddr5::pre_config(l_target_info, CONSTS::ENABLE));
+
+    // Update dynamic VDD Overvoltage Threshold
+    FAPI_TRY(update_vdd_ov_threshold(l_target_info, mss::pmic::id::PMIC0));
 
     // 3b, Enable PMIC
     FAPI_TRY(mss::pmic::ddr5::enable_disable_pmic(l_target_info.iv_adc, CONSTS::SET_PMIC_EN));

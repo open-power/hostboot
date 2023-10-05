@@ -114,6 +114,15 @@ enum rail
     SWB = 1,
     SWC = 2,
     SWD = 3,
+
+};
+
+enum volt_domains
+{
+    VDDQ = 0,
+    VDD  = 1,
+    VIO  = 2,
+    VPP  = 3,
 };
 
 ///
@@ -725,6 +734,8 @@ namespace dt
 enum regs
 {
     NVM_TRIM_RP_MAX      = 0x3C,
+    OV_THRESHOLD_AB      = 0x5A,
+    OV_THRESHOLD_CD      = 0x5C,
     VAUX_RANGE           = 0x62,
     OPS_STATE            = 0x90,
     FAULTS_STATUS_0      = 0x92,
@@ -758,16 +769,36 @@ enum regs
 ///
 enum fields
 {
-    GPI_1                  = 13,
-    SWIN_FAULT_A           = 13,
-    SWIN_FAULT_B           = 9,
-    SWIN_FAULT_C           = 5,
-    SWIN_FAULT_D           = 1,
-    VAUX_A_SCALER_POSITION = 6,
-    VAUX_B_SCALER_POSITION = 4,
-    VAUX_C_SCALER_POSITION = 2,
-    VAUX_D_SCALER_POSITION = 0,
-    VAUX_SCALER_LENGTH     = 2,
+    GPI_1                          = 13,
+    SWIN_FAULT_A                   = 13,
+    SWIN_FAULT_B                   = 9,
+    SWIN_FAULT_C                   = 5,
+    SWIN_FAULT_D                   = 1,
+    VAUX_A_SCALER_POSITION         = 6,
+    VAUX_B_SCALER_POSITION         = 4,
+    VAUX_C_SCALER_POSITION         = 2,
+    VAUX_D_SCALER_POSITION         = 0,
+    VAUX_SCALER_LENGTH             = 2,
+    // Due to endianess of DT regs and Fapi buffers the following values differ from spec
+    // In the procedure we read & reverse the contiguous reg bit field into two uint8_t buffers
+    // Rail A/C bit field 11:6 in spec, written into  FAPI Buffer[0] 0:1 + FAPI Buffer[1] 4:7
+    // Rail B/D bit field 5:0 in spec, written into FAPI Buffer[0] 2:7
+    // 15:12 is reserved and should remain as 0x0
+    // DT REG[15:0]   :    15  14  13  12     11  10  9  8     7  6  5  4     3  2  1  0
+    // Bit fields     :    | - Reserved - |    |  -  - A & C -  - | | -  - B & D -  -  |
+    // Default data   :     0   0   0   0      0   0  1  0     0  1  0  0     1  1  1  1  = 0x024F = 0x9 field A/C, 0xF field B/D
+
+    //                       *** Bytes are flipped when read out to buffers ***
+    // FAPI Buffers   :    | - - buffer[0] 0:7 - -|    | -  - buffer[1] 0:7 -  - |
+    // Bit fields     :    |A&C| | - - B & D -  - |    |-Reserved-|    |- -A&C- -|
+    // Reverse        :    0  1  0  0    1  1  1  1     0  0  0  0     0  0  1  0      = 0x4F02
+    // Data is inserted to the bits relative to buffers rather than DT REG MAP
+    OV_THRESH_START_AC_FIRST_BYTE  = 4,
+    THRESHOLD_AC_FIRST_BYTE_LEN    = 4,
+    OV_THRESH_START_AC_SECOND_BYTE = 0,
+    THRESHOLD_AC_SECOND_BYTE_LEN   = 2,
+    OV_THRESH_START_BD             = 2,
+    OV_THRESH_LENGTH_BD            = 6,
 };
 
 ///
