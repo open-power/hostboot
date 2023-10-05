@@ -768,6 +768,28 @@ namespace SBEIO
                                                          uint32_t i_interval,
                                                          uint8_t i_dqa);
 
+    /**
+     * @brief Grab the Odyssey FIFO FFDC and create informational error log(s) with
+     *        the returned data (SBE traces and attribute data). The function
+     *        uses a chipop to Odyssey to get the data.
+     *
+     * @param[in] i_chipTarget The Odyssey chip to perform the chipop on
+     *
+     * @return std::vector<errlHndl_t> all error logs returned from SBE as FFDC
+     *
+     * @note If a failure occurred during the chip op to the SBE, the error log
+     *       returned will be included in the vector.
+     */
+    std::vector<errlHndl_t> genFifoSBEFFDCErrls(TARGETING::Target* i_chipTarget);
+
+    /**
+     * @brief Calls genFifoSBEFFDCErrl per each functional Odyssey OBMC chip
+     *        on the system.
+     *
+     * @note  All errors are committed internally.
+     */
+    void handleGenFifoSBEFFDCErrlRequest();
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */

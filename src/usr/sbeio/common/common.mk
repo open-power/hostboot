@@ -63,6 +63,7 @@ OBJS += sbe_psuSendCoreConfig.o
 OBJS += pmic_n_mode_detect.o
 OBJS += sbe_fifo_buffer.o
 OBJS += ody_extract_sbe_rc.o
+OBJS += sbe_getSBEFFDC.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common

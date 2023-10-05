@@ -68,6 +68,7 @@ enum sbeioModuleId
     SBEIO_RT_SCOM                       = 0x17,
     SBEIO_PROCESS_ATTR_ARRAY            = 0x18,
     SBEIO_FIFO_ODY_CHECKS               = 0x19,
+    SBEIO_FIFO_SBE_FFDC                 = 0x1A,
 };
 
 /**
@@ -173,6 +174,7 @@ enum sbeioReasonCode
     SBEIO_ATTR_MISMATCH_DETECTED       = SBEIO_COMP_ID | 0x6F,
 
     SBEIO_RECEIVE_CODE_LEVELS_BAD_MSG  = SBEIO_COMP_ID | 0x70,
+    SBEIO_FIFO_SBE_FFDC_INFORMATIONAL  = SBEIO_COMP_ID | 0x71,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

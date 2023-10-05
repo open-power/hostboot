@@ -46,7 +46,6 @@ OBJS += sbe_fifodd.o
 OBJS += sbe_scomAccess.o
 OBJS += sbe_scomAccessdd.o
 OBJS += sbe_setFFDCAddr.o
-OBJS += sbe_getSBEFFDC.o
 OBJS += sbe_attributeAccess.o
 OBJS += sbe_codeUpdate.o
 OBJS += sbe_iplControl.o

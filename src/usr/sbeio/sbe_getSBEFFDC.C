@@ -32,6 +32,9 @@
 #include "sbe_fifodd.H"
 #include <sbeio/sbeioreasoncodes.H>
 #include <targeting/common/targetservice.H>
+#include "sbe_fifo_buffer.H"
+#include <sbeio/sbe_ffdc_parser.H>
+#include <targeting/odyutil.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -82,5 +85,65 @@ namespace SBEIO
 
         return l_errl;
     };
+
+    std::vector<errlHndl_t> genFifoSBEFFDCErrls(TARGETING::Target* i_chipTarget)
+    {
+        std::vector<errlHndl_t> l_errls;
+        do {
+        uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS;
+        uint32_t *l_pFifoResponse =
+            reinterpret_cast<uint32_t *>(malloc(l_responseSize));
+
+        errlHndl_t l_errl = getFifoSBEFFDC(i_chipTarget,
+                                           l_pFifoResponse,
+                                           l_responseSize);
+        if(l_errl)
+        {
+            SBE_TRACF(ERR_MRK"genFifoSBEFFDCErrl: Error returned from SBE FFDC chip op");
+            l_errls.push_back(l_errl);
+            break;
+        }
+
+        auto l_ffdcParser = std::make_shared<SbeFFDCParser>();
+        l_ffdcParser->parseFFDCData(l_pFifoResponse);
+        l_errls = l_ffdcParser->generateSbeErrors(SBEIO_FIFO_SBE_FFDC,
+                                                  SBEIO_FIFO_SBE_FFDC_INFORMATIONAL,
+                                                  get_huid(i_chipTarget), // userdata1
+                                                  0);                     // userdata2
+        }while(0);
+
+        return l_errls;
+    }
+
+    void handleGenFifoSBEFFDCErrlRequest()
+    {
+        using namespace TARGETING;
+        std::vector<errlHndl_t> l_errls;
+
+        TargetHandleList l_ocmbs;
+        getAllChips(l_ocmbs, TYPE_OCMB_CHIP); // Functional and non-functional
+
+        for(auto l_ocmb : l_ocmbs)
+        {
+            if(!UTIL::isOdysseyChip(l_ocmb))
+            {
+                continue;
+            }
+
+            l_errls = SBEIO::genFifoSBEFFDCErrls(l_ocmb);
+            for(auto l_errl : l_errls)
+            {
+                SBE_TRACF(INFO_MRK"handleGenFifoSBEFFDCErrlRequest: Committing errl PLID 0x%x for OCMB 0x%x", l_errl->plid(), get_huid(l_ocmb));
+
+                // Force these to be informational so there is no potential
+                // callouts logged/parts deconfigured.
+                if(l_errl)
+                {
+                    l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                }
+                errlCommit(l_errl, SBEIO_COMP_ID);
+            }
+        }
+    }
 
 } //end namespace SBEIO
