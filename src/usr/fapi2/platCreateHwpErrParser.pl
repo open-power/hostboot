@@ -320,6 +320,7 @@ print EDISFILE "#include <p10_scom_pau.H>\n";
 print EDISFILE "#include <p10_scom_nmmu.H>\n";
 print EDISFILE "#include <ody_scom_ody_odc.H>\n";
 print EDISFILE "#include <ody_scom_perv_tcmc.H>\n";
+print EDISFILE "#include <ody_scom_perv_cfam.H>\n";
 print EDISFILE "namespace fapi2\n";
 print EDISFILE "{\n\n";
 
