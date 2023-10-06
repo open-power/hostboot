@@ -37,7 +37,9 @@
 #include <prdfMemUtils.H>
 #include <prdfMemVcm.H>
 #include <prdfMemExtraSig.H>
+#include <prdfOdyExtraSig.H>
 #include <prdfPlatServices.H>
+#include <prdfRegisterCache.H>
 
 
 #ifdef __HOSTBOOT_RUNTIME
@@ -266,6 +268,258 @@ uint32_t __handleRceEte<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
+template<TARGETING::TYPE T>
+bool __handleSteerRetries(ExtensibleChip * i_chip, const MemAddr & i_addr,
+    MaintEccAttns i_attn, STEP_CODE_DATA_STRUCT & io_sc);
+
+template<>
+bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
+    const MemAddr & i_addr, MaintEccAttns i_attn, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #define PRDF_FUNC "[__handleSteerRetries] "
+
+    bool errHandled = false;
+
+    // Background steer for Odyssey OCMBs reports all CEs and UEs as hard
+    // errors. To determine whether the errors were possibly intermittent
+    // a steer command will be run on the single address that was stopped on
+    // with appropriate handling depending on the errors then found from that
+    // single address steer.
+
+    do
+    {
+        // This workaround only applies to Odyssey where background steer is
+        // performed instead of background scrub. Break out if not Odyssey.
+        if (!isOdysseyOcmb(i_chip->getTrgt()))
+        {
+            break; // do normal handling
+        }
+
+        // Check MCBMR0[0:3] to determine if the mcbist command being run was a
+        // steer or not.
+        SCAN_COMM_REGISTER_CLASS * mcbmr0 = i_chip->getRegister("MCBMR0");
+        if (SUCCESS != mcbmr0->Read())
+        {
+            PRDF_ERR(PRDF_FUNC "Error from Read of MCBMR0 on 0x%08x",
+                     i_chip->getHuid());
+            break; // do normal handling
+        }
+
+        // 0b1010 in MCBMR0[0:3] indicates the MAINTSTEER value
+        if (0b1010 != mcbmr0->GetBitFieldJustified(0,4))
+        {
+            // Not a steer command, so just break out and do normal handling.
+            break;
+        }
+
+        // Clear command complete, ECC errors, and counters
+        if (SUCCESS != prepareNextCmd<TYPE_OCMB_CHIP>(i_chip))
+        {
+            PRDF_ERR(PRDF_FUNC "Error from prepareNextCmd(0x%08x)",
+                     i_chip->getHuid());
+            break; // do normal handling
+        }
+
+        // Run the single address steer
+        if (SUCCESS != singleAddrSteer<TYPE_OCMB_CHIP>(i_chip, i_addr))
+        {
+            PRDF_ERR(PRDF_FUNC "Error from singleAddrSteer(0x%08x, 0x%016llx)",
+                     i_chip->getHuid(),
+                     i_addr.toMaintAddr<TYPE_OCMB_CHIP>(i_chip->getTrgt()));
+            break; // do normal handling
+        }
+
+        // Check to make sure the command complete bit is set
+        SCAN_COMM_REGISTER_CLASS * mcbistfir =
+            i_chip->getRegister("MCBIST_FIR");
+
+        if (SUCCESS != mcbistfir->ForceRead())
+        {
+            PRDF_ERR(PRDF_FUNC "Error from ForceRead of MCBIST_FIR on 0x%08x",
+                     i_chip->getHuid());
+            break; // do normal handling
+        }
+
+        // Check to make sure the single address steer command has finished
+        if (!mcbistfir->IsBitSet(11))
+        {
+            // Wait a bit and try again
+            milliSleep(0,20); // 20 milliseconds
+            if (SUCCESS != mcbistfir->ForceRead())
+            {
+                PRDF_ERR(PRDF_FUNC "Error from ForceRead of MCBIST_FIR on "
+                         "0x%08x", i_chip->getHuid());
+                break; // do normal handling
+            }
+
+            // If the command complete is still not set, give up, assume hard error
+            if (!mcbistfir->IsBitSet(11))
+            {
+                PRDF_ERR(PRDF_FUNC "Command complete bit still not set after "
+                         "waiting, assuming hard error.");
+                break; // do normal handling
+            }
+        }
+
+        // The single address steer has finished, check ECC errors
+        // First clear the RDF_FIR from the cache so it will collect the new
+        // data from the steer. The MCBIST_FIR does not need to be cleared from
+        // the cache as a ForceRead was performed on it above.
+        char rdfName[64];
+        sprintf(rdfName, "RDF_FIR_%x", i_addr.getPort());
+        RegDataCache & cache = RegDataCache::getCachedRegisters();
+        SCAN_COMM_REGISTER_CLASS * rdffir = i_chip->getRegister(rdfName);
+        cache.flush(i_chip, rdffir);
+
+        uint32_t eccAttns;
+        if ( SUCCESS != checkEccFirs<TYPE_OCMB_CHIP>(i_chip, i_addr.getPort(),
+                                                     eccAttns) )
+        {
+            PRDF_ERR(PRDF_FUNC "checkEccFirs(0x%08x, %d) failed",
+                     i_chip->getHuid(), i_addr.getPort());
+            break; // do normal handling
+        }
+
+        if (i_attn == MAINT_HARD_NCE_ETE)
+        {
+            // if maint UE found
+            if (eccAttns & MAINT_UE)
+            {
+                // Handle the error as a UE
+                io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                                     PRDFSIG_SteerUe);
+                if (SUCCESS != MemEcc::handleMemUe<TYPE_OCMB_CHIP>(i_chip,
+                    i_addr, UE_TABLE::SCRUB_UE, io_sc))
+                {
+                    PRDF_ERR(PRDF_FUNC "handleMemUe(0x%08x) failed",
+                             i_chip->getHuid());
+                    break;
+                }
+                errHandled = true;
+            }
+            // else if maint MPE found
+            else if (eccAttns & MAINT_MPE)
+            {
+                // Handle the error as an MPE to trigger VCM
+                io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                                     PRDFSIG_SteerMpe);
+                if (SUCCESS != MemEcc::handleMpe<TYPE_OCMB_CHIP>(i_chip,
+                    i_addr, UE_TABLE::SCRUB_MPE, io_sc))
+                {
+                    PRDF_ERR(PRDF_FUNC "handleMpe(0x%08x) failed",
+                             i_chip->getHuid());
+                    break;
+                }
+                errHandled = true;
+            }
+            // else if maint NCE/TCE found
+            else if (eccAttns & MAINT_HARD_NCE_ETE)
+            {
+                // Handle as a hard CE, let the calling code take normal action
+                io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                                     PRDFSIG_SteerCe);
+                break;
+            }
+            // else no error found
+            else
+            {
+                io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                                     PRDFSIG_SteerNone);
+                // Handle as a soft/intermittent CE
+                if (SUCCESS != __handleSoftInterCeEte<TYPE_OCMB_CHIP>(i_chip,
+                    i_addr, io_sc))
+                {
+                    PRDF_ERR(PRDF_FUNC "__handleSoftInterCeEte(0x%08x) failed",
+                             i_chip->getHuid());
+                }
+                errHandled = true;
+            }
+        }
+        else if (i_attn == MAINT_UE)
+        {
+            // if maint UE found
+            if (eccAttns & MAINT_UE)
+            {
+                // Handle as a UE, let the calling code take normal action
+                io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                                     PRDFSIG_SteerUe);
+                break;
+            }
+            // else if maint MPE found
+            else if (eccAttns & MAINT_MPE)
+            {
+                io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                                     PRDFSIG_SteerMpe);
+                // Handle as an IUE
+                if (SUCCESS != MemEcc::handleMemIue<TYPE_OCMB_CHIP>(i_chip,
+                    i_addr.getRank(), i_addr.getPort(), io_sc))
+                {
+                    PRDF_ERR(PRDF_FUNC "handleMemIue(0x%08x,0x%02x,%x) failed",
+                             i_chip->getHuid(), i_addr.getRank().getKey(),
+                             i_addr.getPort());
+                    break;
+                }
+                // Handle the MPE to trigger VCM
+                if (SUCCESS != MemEcc::handleMpe<TYPE_OCMB_CHIP>(i_chip,
+                    i_addr.getRank(), i_addr.getPort(), UE_TABLE::SCRUB_MPE,
+                    io_sc))
+                {
+                    PRDF_ERR(PRDF_FUNC "handleMpe<T>(0x%08x, 0x%02x) failed",
+                             i_chip->getHuid(), i_addr.getRank().getKey());
+                    break;
+                }
+
+                errHandled = true;
+            }
+            // else if maint NCE/TCE
+            else if (eccAttns & MAINT_HARD_NCE_ETE)
+            {
+                io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                                     PRDFSIG_SteerCe);
+                // Handle as an IUE
+                if (SUCCESS != MemEcc::handleMemIue<TYPE_OCMB_CHIP>(i_chip,
+                    i_addr.getRank(), i_addr.getPort(), io_sc))
+                {
+                    PRDF_ERR(PRDF_FUNC "handleMemIue(0x%08x,0x%02x,%x) failed",
+                             i_chip->getHuid(), i_addr.getRank().getKey(),
+                             i_addr.getPort());
+                    break;
+                }
+                errHandled = true;
+            }
+            // Else no error found
+            else
+            {
+                io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
+                                                     PRDFSIG_SteerNone);
+                // Handle as an IUE
+                if (SUCCESS != MemEcc::handleMemIue<TYPE_OCMB_CHIP>(i_chip,
+                    i_addr.getRank(), i_addr.getPort(), io_sc))
+                {
+                    PRDF_ERR(PRDF_FUNC "handleMemIue(0x%08x,0x%02x,%x) failed",
+                             i_chip->getHuid(), i_addr.getRank().getKey(),
+                             i_addr.getPort());
+                    break;
+                }
+                errHandled = true;
+            }
+
+        }
+        else
+        {
+            PRDF_ERR(PRDF_FUNC "Invalid input ECC attn type: 0x%x", i_attn);
+            break; // do normal handling
+        }
+
+    } while(0);
+
+    return errHandled;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 template <TARGETING::TYPE T>
 uint32_t __checkEcc( ExtensibleChip * i_chip,
                      const MemAddr & i_addr, bool & o_errorsFound,
@@ -330,12 +584,17 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
             o_errorsFound = true;
             io_sc.service_data->AddSignatureList( trgt, PRDFSIG_MaintHARD_CTE );
 
-            o_rc = __handleNceEte<T>( i_chip, i_addr, io_sc, true );
-            if ( SUCCESS != o_rc )
+            // Confirm the hard CE with __handleSteerRetries
+            if (!__handleSteerRetries<T>(i_chip, i_addr, MAINT_HARD_NCE_ETE,
+                                         io_sc))
             {
-                PRDF_ERR( PRDF_FUNC "__handleNceEte<T>(0x%08x) failed",
-                          huid );
-                break;
+                o_rc = __handleNceEte<T>( i_chip, i_addr, io_sc, true );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "__handleNceEte<T>(0x%08x) failed",
+                              huid );
+                    break;
+                }
             }
 
             // Any hard CEs in MNFG should be immediately reported.
@@ -383,25 +642,29 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
             // signature as well.
             io_sc.service_data->setSignature( huid, PRDFSIG_MaintUE );
 
-            // Add the rank to the callout list.
-            o_rc = MemEcc::handleMemUe<T>( i_chip, i_addr, UE_TABLE::SCRUB_UE,
-                                           io_sc );
-            if ( SUCCESS != o_rc )
+            // Confirm the UE with __handleSteerRetries
+            if (!__handleSteerRetries<T>(i_chip, i_addr, MAINT_UE, io_sc))
             {
-                PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
-                          i_chip->getHuid() );
-                break;
+                // Add the rank to the callout list.
+                o_rc = MemEcc::handleMemUe<T>( i_chip, i_addr,
+                                               UE_TABLE::SCRUB_UE, io_sc );
+                if ( SUCCESS != o_rc )
+                {
+                    PRDF_ERR( PRDF_FUNC "handleMemUe<T>(0x%08x) failed",
+                              i_chip->getHuid() );
+                    break;
+                }
+
+                // Add a TPS request to the TD queue for additional analysis. It is
+                // unlikely the procedure will result in a repair because of the UE.
+                // However, we want to run TPS once just to see how bad the rank is.
+                TdEntry * e = new TpsEvent<T>{ i_chip, rank, i_addr.getPort() };
+                MemDbUtils::pushToQueue<T>( i_chip, e );
+
+                // Because of the UE, any further TPS requests will likely have no
+                // effect. So ban all subsequent requests.
+                MemDbUtils::banTps<T>( i_chip, rank, i_addr.getPort() );
             }
-
-            // Add a TPS request to the TD queue for additional analysis. It is
-            // unlikely the procedure will result in a repair because of the UE.
-            // However, we want to run TPS once just to see how bad the rank is.
-            TdEntry * e = new TpsEvent<T>{ i_chip, rank, i_addr.getPort() };
-            MemDbUtils::pushToQueue<T>( i_chip, e );
-
-            // Because of the UE, any further TPS requests will likely have no
-            // effect. So ban all subsequent requests.
-            MemDbUtils::banTps<T>( i_chip, rank, i_addr.getPort() );
         }
 
     } while (0);
@@ -686,7 +949,6 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns(uint8_t i_port)
 
     uint32_t o_rc = SUCCESS;
 
-    // TODO Odyssey - reg updates
     // Memory CEs were masked at the beginning of the TD procedure, so
     // clear and unmask them. Also, it is possible that memory UEs have
     // thresholded so clear and unmask them as well.
@@ -1079,7 +1341,6 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume,
 {
     #define PRDF_FUNC "[MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub] "
 
-    // TODO Odyssey - reg updates
     uint32_t o_rc = SUCCESS;
 
     o_canResume = false;
@@ -1094,6 +1355,29 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::canResumeBgScrub( bool & o_canResume,
 
     do
     {
+        // Check MCBMR0[0:3] to determine if the mcbist command being run was a
+        // steer or not. If the command was a steer command we must start a new
+        // background scrub command as any error that gets stopped on will
+        // result in a targeted diagnostics procedure or a single address steer
+        // to confirm the error. Currently this will only be relevant for
+        // Odyssey OCMBs.
+        if (isOdysseyOcmb(iv_chip->getTrgt()))
+        {
+            SCAN_COMM_REGISTER_CLASS * mcbmr0 = iv_chip->getRegister("MCBMR0");
+            if (SUCCESS != mcbmr0->Read())
+            {
+                PRDF_ERR(PRDF_FUNC "Error from Read of MCBMR0 on 0x%08x",
+                         iv_chip->getHuid());
+                break;
+            }
+
+            // 0b1010 in MCBMR0[0:3] indicates the MAINTSTEER value
+            if (0b1010 == mcbmr0->GetBitFieldJustified(0,4))
+            {
+                break;
+            }
+        }
+
         SCAN_COMM_REGISTER_CLASS * reg = iv_chip->getRegister( "MBSTR" );
         o_rc = reg->Read();
         if ( SUCCESS != o_rc )

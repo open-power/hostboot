@@ -1309,6 +1309,11 @@
         "description": "Odyssey chip OCMB_PHY_FIR MASK OR",
         "name": "OCMB_PHY_FIR_MASK_OR"
     },
+    "0xd053": {
+        "address": "0x00000000080114a8",
+        "description": "Odyssey chip MCBIST Memory Register 0",
+        "name": "MCBMR0"
+    },
     "0xd339": {
         "address": "0x000000000801100f",
         "description": "Odyssey chip SRQ Reorder Queue Control Register 0",

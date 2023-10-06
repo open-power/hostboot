@@ -416,6 +416,13 @@
         capture     group mcbist_fir_regs;
     };
 
+    register MCBMR0
+    {
+        name        "Odyssey chip MCBIST Memory Register 0";
+        scomaddr    0x080114A8;
+        capture     group mcbist_fir_regs;
+    };
+
     register MCBAGRA
     {
         name        "Odyssey chip Address Generator Configuration Register";

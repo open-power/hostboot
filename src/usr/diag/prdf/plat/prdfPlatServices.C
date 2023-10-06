@@ -1022,7 +1022,7 @@ void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid)
 }
 
 //##############################################################################
-//##                Explorer Maintenance Command wrappers
+//##                OCMB Maintenance Command wrappers
 //##############################################################################
 
 template<>
@@ -1547,6 +1547,65 @@ uint32_t startTdScrubOnNextRow<TYPE_OCMB_CHIP>(
     return o_rc;
 
     #undef PRDF_FUNC
+}
+
+
+template<>
+uint32_t singleAddrSteer<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
+                                          const MemAddr & i_addr )
+{
+    #define PRDF_FUNC "[PlatServices::singleAddrSteer<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == i_chip->getType());
+
+    uint32_t o_rc = SUCCESS;
+
+    // Odyssey only
+    if (!isOdysseyOcmb(i_chip->getTrgt()))
+    {
+        PRDF_ERR(PRDF_FUNC "singleAddrSteer called for non-Odyssey OCMB 0x%08x",
+                 i_chip->getHuid());
+        return FAIL;
+    }
+
+    MemRank rank = i_addr.getRank();
+    // Note: the uint64_t will be right justified as that is the format needed
+    // for passing into the constructor of mss::mcbist::address.
+    // Odyssey format of mss::mcbist::address, bits in ascending order
+    // 0:1   unused
+    // 2     port select
+    // 3     mrank
+    // 4:6   srank(0 to 2)
+    // 7:24  row(0 to 17)
+    // 25:32 col(3 to 10)
+    // 33:34 bank(0 to 1)
+    // 35:37 bank_group(0 to 2)
+    uint64_t addr64 =
+    (
+        ((uint64_t)(i_addr.getPort()     & 0x1    ) << 35) | // 2
+        ((uint64_t)(rank.getRankSlct()   & 0x1    ) << 34) | // 3
+        ((uint64_t)(rank.getSlave()      & 0x7    ) << 31) | // 4:6
+        ((uint64_t)(i_addr.getRow()      & 0x3ffff) << 13) | // 7:24
+        ((uint64_t)(i_addr.getCol()      & 0xff   ) <<  5) | // 25:32
+        ((uint64_t)(i_addr.getBank()     & 0x1f   ))         // 33:37
+    );
+
+    mss::mcbist::address<mss::mc_type::ODYSSEY> mssAddr(addr64);
+
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt(i_chip->getTrgt());
+
+    errlHndl_t errl = nullptr;
+    FAPI_INVOKE_HWP(errl, ody_single_address_steer, fapiTrgt, mssAddr);
+    if ( nullptr != errl )
+    {
+        PRDF_ERR(PRDF_FUNC "ody_single_address_steer(0x%08x) failed",
+                 i_chip->getHuid());
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+        o_rc = FAIL;
+    }
+
+    return o_rc;
 }
 
 //##############################################################################

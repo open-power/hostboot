@@ -294,6 +294,16 @@ uint32_t startTdScrubOnNextRow( ExtensibleChip * i_chip, const MemRank & i_rank,
         const MemAddr & i_addr, AddrRangeType i_rangeType, SCT i_stopCond,
         mss::mcbist::end_boundary i_endBound = mss::mcbist::NONE );
 
+
+/**
+ * @brief  Starts a single address steer command for the input address.
+ * @param  i_chip      OCMB chip.
+ * @param  i_addr      Target address.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE T>
+uint32_t singleAddrSteer( ExtensibleChip * i_chip, const MemAddr & i_addr );
+
 //##############################################################################
 //##                  Core/cache trace array functions
 //##############################################################################

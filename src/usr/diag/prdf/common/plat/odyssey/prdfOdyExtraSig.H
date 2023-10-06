@@ -32,3 +32,8 @@ PRDR_ERROR_SIGNATURE(PLL_UNLOCK, 0x00ed0007, "", "PLL unlock");
 
 PRDR_ERROR_SIGNATURE(NceTceInvAddr, 0x00ef0000, "", "Mainline NCE/TCE on both ports. Invalid Address");
 PRDR_ERROR_SIGNATURE(UeInvAddr, 0x00ef0001, "", "Mainline UE on both ports. Invalid Address");
+
+PRDR_ERROR_SIGNATURE(SteerCe, 0x00ef0002, "", "Single Address Steer found Maint NCE/TCE");
+PRDR_ERROR_SIGNATURE(SteerUe, 0x00ef0003, "", "Single Address Steer found Maint UE");
+PRDR_ERROR_SIGNATURE(SteerMpe, 0x00ef0004, "", "Single Address Steer found Maint MPE");
+PRDR_ERROR_SIGNATURE(SteerNone, 0x00ef0005, "", "Single Address Steer found no error");

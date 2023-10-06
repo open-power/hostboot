@@ -622,6 +622,10 @@
         "0xffff009f": "Root cause of CRC error found in PAU_PHY_FIR",
         "0x00ed0007": "PLL unlock",
         "0x00ef0000": "Mainline NCE/TCE on both ports. Invalid Address",
-        "0x00ef0001": "Mainline UE on both ports. Invalid Address"
+        "0x00ef0001": "Mainline UE on both ports. Invalid Address",
+        "0x00ef0002": "Single Address Steer found Maint NCE/TCE",
+        "0x00ef0003": "Single Address Steer found Maint UE",
+        "0x00ef0004": "Single Address Steer found Maint MPE",
+        "0x00ef0005": "Single Address Steer found no error"
     }
 }

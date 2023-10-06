@@ -239,6 +239,7 @@ uint64_t MemAddr::odyIncRowAddr( ExtensibleChip * i_ocmb ) const
     // 7:24  row(0 to 17)
     // 25:32 col(3 to 10)
     // 33:34 bank(0 to 1)
+    // 35:37 bank_group(0 to 2)
 
     // Note: we should not be calling this function for the last address of the
     // master rank.
