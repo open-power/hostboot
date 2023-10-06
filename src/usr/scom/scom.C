@@ -162,6 +162,57 @@ DEVICE_REGISTER_ROUTE(DeviceFW::WILDCARD,
                       TARGETING::TYPE_MDS_CTLR,
                       scomPerformOp);
 
+errlHndl_t checkODPCtrlWorkaround(TARGETING::Target* i_target,
+                         int64_t i_accessType,
+                         uint64_t i_scomAddr)
+{
+    using namespace TARGETING;
+    errlHndl_t err = nullptr;
+
+    if (MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target)
+    {
+        goto EXIT;
+    }
+
+    {
+        ATTR_CHIP_ID_type id = 0;
+        bool hasChipId = i_target->tryGetAttr<ATTR_CHIP_ID>(id);
+
+        if (( ! hasChipId ) || (id != POWER_CHIPID::ODYSSEY_16))
+        {
+            goto EXIT;
+        }
+    }
+    // Work around for EWM 299799
+    // If the call/request is for 0801300a/0801340a:
+    // Do an indirect SCOM for the first functional child memport (chip unit relative) physical addresses are:
+    //     0x800d004b0801303f (-c0)
+    //     0x800d004b0801343f (-c1)
+    //  Discard the indirect SCOM read data
+    //  Proceed to read 0801300a/0801340a and return the data to the caller
+    if ((i_scomAddr == 0x0801300a) || (i_scomAddr == 0x081340a))
+    {
+        TargetHandleList memports;
+        getChildChiplets(memports, i_target, TYPE_MEM_PORT, true);
+        Target * memport = memports[0];
+        uint64_t data = 0;
+        size_t size = sizeof(data);
+        uint64_t addr = 0x800d004b0801303full;
+        if (memport->getAttr<ATTR_CHIP_UNIT>() != 0)
+        {
+            addr |= 0x400;
+        }
+        err = checkIndirectAndDoScom(DeviceFW::READ,
+                                     i_target,
+                                     &data,
+                                     size,
+                                     i_accessType,
+                                     addr);
+    }
+EXIT:
+    return err;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
@@ -172,7 +223,6 @@ errlHndl_t scomPerformOp(DeviceFW::OperationType i_opType,
                          va_list i_args)
 {
     errlHndl_t l_err = NULL;
-
 
     uint64_t l_scomAddr = va_arg(i_args,uint64_t);
 
@@ -199,6 +249,14 @@ errlHndl_t checkIndirectAndDoScom(DeviceFW::OperationType i_opType,
     errlHndl_t l_err = NULL;
 
     do {
+        l_err = checkODPCtrlWorkaround(i_target,
+                                       i_accessType,
+                                       i_addr);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_scom, "scomPerformOp: checkODPCtrlWorkaround returned an error!");
+            break;
+        }
 
         // Do we need to do the indirect logic or not?
         bool l_runIndirectLogic = true;
@@ -361,10 +419,8 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
 
             mutex_lock(l_mutex);
             need_unlock = true;
-
             // turn the read bit on.
             l_io_buffer = l_io_buffer | 0x8000000000000000;
-
             // perform write before the read with the new
             // IO_buffer with the imbedded indirect scom addr.
             l_err = doScomOp(DeviceFW::WRITE,
@@ -417,10 +473,8 @@ errlHndl_t doForm0IndirectScom(DeviceFW::OperationType i_opType,
                 elapsed_indScom_time_ns += 10000;
 
             }while ( elapsed_indScom_time_ns <= MAX_INDSCOM_TIMEOUT_NS);
-
             mutex_unlock(l_mutex);
             need_unlock = false;
-
             if (l_err) { break; }
 
             // Check for a PCB/PIB Error
