@@ -282,6 +282,10 @@ void disableInbandScomsOcmb(const TargetHandle_t i_ocmbTarget)
 
     // Modify attribute
     i_ocmbTarget->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
+
+    // disable the PIPE FIFO, because it uses mmio
+    i_ocmbTarget->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
+
     recursive_mutex_unlock(l_mutex);
 }
 
@@ -910,7 +914,6 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
     errlHndl_t l_err         = nullptr;
     uint64_t   l_offset      = va_arg(i_args, uint64_t);
     uint64_t   l_accessLimit = va_arg(i_args, uint64_t);
-    bool invalidParmError = false;
 
     TRACDCOMP(g_trac_mmio, ENTER_MRK"ocmbMmioPerformOp");
     TRACDCOMP(g_trac_mmio, INFO_MRK"op=%d, target=0x%.8X",
@@ -936,7 +939,6 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                    l_accessLimit);
         if(l_err)
         {
-            invalidParmError = true;
             break;
         }
 
@@ -973,6 +975,10 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                  "ocmbMmioPerformOp: unable to complete"
                                  " MMIO read of offset 0x%08x from OCMB 0x%08x",
                                  l_offset, get_huid(i_ocmbTarget));
+
+                // Switch over to requesting the SBE to perform i2c scoms to prevent
+                // further MMIO access to this OCMB
+                disableInbandScomsOcmb(i_ocmbTarget);
 
                 // Check for channel checkstops (this reads a processor reg)
                 bool l_checkstopExists = false;
@@ -1014,10 +1020,6 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                     ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
 
                     addDefaultCallouts(l_err, i_ocmbTarget);
-
-                    // Switch over to requesting the SBE to perform i2c scoms to prevent
-                    // further MMIO access to this OCMB
-                    disableInbandScomsOcmb(i_ocmbTarget);
 
                     // Dump some debug registers to the error log
                     addChannelFailureRegisterData(i_ocmbTarget, l_err);
@@ -1157,6 +1159,10 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                  " MMIO write to offset 0x%08x on OCMB 0x%08x",
                                  l_offset, get_huid(i_ocmbTarget));
 
+                // Switch over to requesting the SBE to perform i2c scoms to prevent
+                // further MMIO access to this OCMB
+                disableInbandScomsOcmb(i_ocmbTarget);
+
                 /*@
                  * @errortype
                  * @moduleid         MMIO::MOD_MMIO_PERFORM_OP
@@ -1245,15 +1251,6 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
 
     if (l_err)
     {
-        // Only disable if HW error, not for user parameter failures
-        if (!invalidParmError)
-        {
-            // Switch over to requesting the SBE to perform i2c scoms to prevent
-            // further MMIO access to this OCMB (error regs cannot be cleared
-            // on OCMB).
-            disableInbandScomsOcmb(i_ocmbTarget);
-        }
-
         l_err->collectTrace(MMIO_COMP_NAME);
     }
 
