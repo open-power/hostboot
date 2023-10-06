@@ -472,7 +472,7 @@ errlHndl_t HdatPcrd::hdatLoadPcrd(uint32_t &o_size, uint32_t &o_count)
                 if( o_fmtKwd != NULL )
                 {
                     delete[] l_keyword;
-                    l_keyword = new char [o_fmtkwdSize];
+                    l_keyword = new char [o_fmtkwdSize]();
                     memcpy(l_keyword,o_fmtKwd,o_fmtkwdSize);
                     l_asciiKeywordSize = o_fmtkwdSize;
                     delete[] o_fmtKwd;

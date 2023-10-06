@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,7 +148,7 @@ iv_kwdSize(0), iv_kwd(NULL)
                 }
                 break;
             }
-            o_fmtKwd = new char [o_fmtkwdSize];
+            o_fmtKwd = new char [o_fmtkwdSize]();
             l_bpFile.read((void *)&o_fmtKwd[0],o_fmtkwdSize);
             HDAT_DBG("constructed bp vpd data");
             o_errlHndl = l_bpFile.close();
@@ -162,7 +162,7 @@ iv_kwdSize(0), iv_kwd(NULL)
     if( o_fmtKwd != NULL )
     {
         delete[] iv_kwd;
-        iv_kwd = new char [o_fmtkwdSize];
+        iv_kwd = new char [o_fmtkwdSize]();
         memcpy(iv_kwd,o_fmtKwd,o_fmtkwdSize);
         iv_kwdSize = o_fmtkwdSize;
         delete[] o_fmtKwd;
@@ -270,7 +270,7 @@ iv_kwdSize(0), iv_kwd(NULL)
                 }
                 break;
             }
-            iv_kwd = new char [iv_kwdSize];
+            iv_kwd = new char [iv_kwdSize]();
             l_bpFile.read((void *)&iv_kwd[0], iv_kwdSize);
             o_errlHndl = l_bpFile.close();
             if (o_errlHndl)

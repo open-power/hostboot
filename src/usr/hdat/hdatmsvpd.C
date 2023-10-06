@@ -109,11 +109,11 @@ void HdatMsVpd::hdatInit(hdatMsAddr_t &i_maxMsAddr,
     iv_maxRHBAddrRngCnt = HDAT_RHB_MAX_RANGE_ENTRIES * hdatGetMaxCecNodes();
 
     // Allocate space for the mainstore area entries and IMT Addr Range array
-    iv_msAreaPtrs = new HdatMsArea*[iv_maxMsAreaCnt];
-    iv_IMTaddrRangeArray = new hdatMsVpdImtAddrRange_t[iv_maxIMTAddrRngCnt];
-    iv_UEaddrRangeArray = new hdatMsVpdUEAddrRange_t[iv_maxUEAddrRngCnt];
+    iv_msAreaPtrs = new HdatMsArea*[iv_maxMsAreaCnt]();
+    iv_IMTaddrRangeArray = new hdatMsVpdImtAddrRange_t[iv_maxIMTAddrRngCnt]();
+    iv_UEaddrRangeArray = new hdatMsVpdUEAddrRange_t[iv_maxUEAddrRngCnt]();
     // Allocate space for the host boot memory reserve range
-    iv_RHBaddrRangeArray = new hdatMsVpdRhbAddrRange_t[iv_maxRHBAddrRngCnt];
+    iv_RHBaddrRangeArray = new hdatMsVpdRhbAddrRange_t[iv_maxRHBAddrRngCnt]();
 
     // Update the base class internal data pointers.
     // When the data is written to the file by commit(), it must be done in the

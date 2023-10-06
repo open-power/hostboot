@@ -95,7 +95,7 @@ HdatRam::HdatRam(errlHndl_t &o_errlHndl,
             ipzVpdSize = ipzVpdData.size();
             // Padding extra 8 bytes to keep data alignment similar to FSP
             // data
-            iv_kwd = new char [ipzVpdSize + 8];
+            iv_kwd = new char [ipzVpdSize + 8]();
             memcpy(iv_kwd, ipzVpdData.data(), ipzVpdSize);
             iv_kwdSize = ipzVpdSize + 8;
             HDAT_INF("Ram iv_kwdSize = %d", iv_kwdSize);

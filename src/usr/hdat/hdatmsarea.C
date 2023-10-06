@@ -122,7 +122,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
             ipzVpdSize = ipzVpdData.size();
             // Padding extra 8 bytes to keep data alignment similar to FSP
             // data
-            iv_kwd = new char [ipzVpdSize + 8];
+            iv_kwd = new char [ipzVpdSize + 8]();
             memcpy(iv_kwd, ipzVpdData.data(), ipzVpdSize);
             iv_kwdSize = ipzVpdSize + 8;
             HDAT_INF("MS iv_kwdSize = %d", iv_kwdSize);
@@ -160,7 +160,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     // Allocate space for the address range array
     if (NULL == o_errlHndl)
     {
-        iv_addrRange = new hdatMsAreaAddrRange_t[iv_maxAddrRngCnt];
+        iv_addrRange = new hdatMsAreaAddrRange_t[iv_maxAddrRngCnt]();
         memset(iv_addrRange,0,
                 (sizeof(hdatMsAreaAddrRange_t) * iv_maxAddrRngCnt));
     }
@@ -169,7 +169,7 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     if (NULL == o_errlHndl)
     {
         iv_mmioAddrRngArray =
-            new hdatMsAreaMmioAddrRange_t[iv_maxMmioAddrRngCnt];
+            new hdatMsAreaMmioAddrRange_t[iv_maxMmioAddrRngCnt]();
         memset(iv_mmioAddrRngArray,0,
                 (sizeof(hdatMsAreaMmioAddrRange_t) * iv_maxMmioAddrRngCnt));
     }
@@ -178,12 +178,12 @@ HdatMsArea::HdatMsArea(errlHndl_t &o_errlHndl,
     if (NULL == o_errlHndl)
     {
         iv_fru.hdatSlcaIdx = l_slcaIdx;
-        iv_ecLvl = new hdatEcLvl_t[iv_maxEcCnt];
+        iv_ecLvl = new hdatEcLvl_t[iv_maxEcCnt]();
     }
     // Allocate space for the RAM entries
     if (NULL == o_errlHndl)
     {
-        iv_ramPtrs = new HdatRam*[i_ramCnt];
+        iv_ramPtrs = new HdatRam*[i_ramCnt]();
     }
 
     HDAT_EXIT();

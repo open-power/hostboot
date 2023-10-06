@@ -567,7 +567,7 @@ errlHndl_t HdatSpSubsys::hdatFillDataPtrs()
             if( o_fmtKwd != NULL )
             {
                 delete[] iv_kwd;
-                iv_kwd = new char [o_fmtkwdSize + 8];
+                iv_kwd = new char [o_fmtkwdSize + 8]();
                 memcpy(iv_kwd,o_fmtKwd,o_fmtkwdSize);
                 iv_kwdSize = o_fmtkwdSize + 8;
                 delete[] o_fmtKwd;

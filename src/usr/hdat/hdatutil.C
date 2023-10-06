@@ -902,7 +902,7 @@ errlHndl_t hdatGetPvpdFullRecord(TARGETING::Target * i_target,
             {
                 continue;
             }
-            theData = new uint8_t [theSize[curRec]];
+            theData = new uint8_t [theSize[curRec]]();
 
             HDAT_DBG("hdatGetPvpdFullRecord: reading %dth record of size %d",
                       curRec,theSize[curRec]);
@@ -1182,7 +1182,7 @@ errlHndl_t hdatGetMvpdFullRecord(TARGETING::Target * i_target,
         uint8_t l_endTag = 0x78;
         uint32_t l_RecTagSize = 2 * sizeof(uint8_t);
         uint32_t l_wholeTagSize = l_RecTagSize * i_num;
-        o_kwd = new char[o_kwdSize + l_wholeTagSize ];
+        o_kwd = new char[o_kwdSize + l_wholeTagSize ]();
 
         uint32_t loc = 0;
         for( uint32_t curRec = 0; curRec < i_num; curRec++ )
@@ -1437,7 +1437,7 @@ errlHndl_t hdatFetchRawSpdData(TARGETING::Target * i_target,
             break;
         }
 
-        o_kwd = new char[o_kwdSize];
+        o_kwd = new char[o_kwdSize]();
 
         l_err = deviceRead( i_target,
                             o_kwd,
@@ -2465,7 +2465,7 @@ errlHndl_t hdatGetFullEepromVpd(TARGETING::Target * i_target,
     HDAT_ENTER();
     if(i_target != nullptr)
     {
-        o_data = new char[io_dataSize];
+        o_data = new char[io_dataSize]();
 
         //Collecting Full module VPD data
         err = deviceOp( DeviceFW::READ,
@@ -2725,7 +2725,7 @@ void hdatGetSMPLinkInfo(TARGETING::Target* i_pTarget,
 
             if(l_err == nullptr)
             {
-                l_NVKwd = new uint8_t[sizeof(hdatNVKwdStruct_t)];
+                l_NVKwd = new uint8_t[sizeof(hdatNVKwdStruct_t)]();
                 memcpy(l_NVKwd, l_kwd, sizeof(hdatNVKwdStruct_t));
             }
             else

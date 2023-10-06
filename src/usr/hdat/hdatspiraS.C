@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -696,7 +696,7 @@ void HdatSpiraS::getSpirasObject(uint8_t* &io_spiras,uint32_t& o_size,
     io_spiras = NULL;
 
     //user is responsible to free up the memory
-    io_spiras = new uint8_t[iv_spirasSize];
+    io_spiras = new uint8_t[iv_spirasSize]();
 
     o_size = iv_spirasSize;
 
