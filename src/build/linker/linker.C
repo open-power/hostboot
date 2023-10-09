@@ -336,7 +336,7 @@ map<string, uint64_t> tls_offsets;
 bool includes_extended_image = false;
 bool relocation = true;
 
-size_t next_tls_id = 0;
+size_t next_tls_id = 1;
 
 /**
  *  @brief Marker (ASCII 'TLS' + 0x00) or'd into bit 0 position of a TLS module
@@ -900,6 +900,13 @@ bool Object::read_relocation()
 
                 // store the name in a map of offsets to TLS variable names
                 tls_vars[bfd_asymbol_value(syms[i])] = s.name;
+
+                // We add this to tls_modules so that the global
+                // (inter-module) relocation code knows that it's a
+                // TLS variable, even when there are no local
+                // (intra-module) relocations to it.
+                tls_modules[syms[i]->name] = get_tls_module();
+                tls_offsets[syms[i]->name] = bfd_asymbol_value(syms[i]) - VFS_PPC64_DTPREL_OFFSET;
             }
             cout << endl;
         }
@@ -1216,6 +1223,7 @@ bool Object::perform_global_relocations()
                                 // relocation processing code.  This is safe
                                 // since it would take 4 giga-modules to over
                                 // flow into that space.
+
                                 symbol_addr |= TLS_MARKER;
                             }
                             else if (i->type & Symbol::TLS_OFFSET)
