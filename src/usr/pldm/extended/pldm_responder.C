@@ -119,10 +119,11 @@ const msg_type_handler pldm_fru_data_handlers[] =
 
 const msg_type_handler pldm_oem_handlers[] =
 {
-    { PLDM_GET_ATTR_DUMP, handleGetPldmAttrDumpRequest }
+    { PLDM_GET_ATTR_DUMP, handleGetPldmAttrDumpRequest },
 #ifdef CONFIG_HTMGT
-    ,{ PLDM_HTMGT_REQUEST, handleHtmgtRequest }
+    { PLDM_HTMGT_REQUEST, handleHtmgtRequest },
 #endif
+    { PLDM_GET_ODY_FFDC, handleOdyFFDCRequest }
 };
 
 /*** Top-level table of handler tables ***/

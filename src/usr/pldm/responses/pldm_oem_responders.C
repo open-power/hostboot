@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <pldm/pldm_response.H> // send_cc_only_response
 #include <pldm/pldm_trace.H>    // PLDM_INF
 #include <htmgt/htmgt.H>
+#include <sbeio/sbeioif.H>
 
 namespace PLDM
 {
@@ -109,6 +110,13 @@ errlHndl_t handleHtmgtRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
 #endif
 
     return l_errl;
+}
+
+errlHndl_t handleOdyFFDCRequest(const MCTP::mctp_outbound_msgq_t i_msgQ,
+                                const pldm_mctp_message& i_msg)
+{
+    SBEIO::handleGenFifoSBEFFDCErrlRequest();
+    return nullptr;
 }
 
 } // namespace PLDM

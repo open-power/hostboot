@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,6 +59,19 @@ errlHndl_t handleGetPldmAttrDumpRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
  */
 errlHndl_t handleHtmgtRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
                               const pldm_mctp_message& i_msg);
+
+/**
+ * @brief handleOdyFFDCRequest
+ *
+ *        Handler for intercepting the Odyssey FIFO FFDC request from BMC.
+ *
+ * @param[in] i_msgQ          Handle to the MCTP outbound message queue
+ * @param[in] i_msg           Request message object
+ *
+ * @return always nullptr
+ */
+errlHndl_t handleOdyFFDCRequest(MCTP::mctp_outbound_msgq_t i_msgQ,
+                                const pldm_mctp_message& i_msg);
 
 } // namespace PLDM
 #endif

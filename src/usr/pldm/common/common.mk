@@ -52,6 +52,7 @@ EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/common/utils/imageProcs
+EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/common/utils/
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe
 EXTRAINCDIR += ${COMMON_ROOTPATH}/src/import/chips/p10/procedures/hwp/perv

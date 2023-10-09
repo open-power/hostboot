@@ -26,6 +26,7 @@ enum pldm_fileio_commands {
 	PLDM_NEW_FILE_AVAILABLE_WITH_META_DATA = 0xE,
 	PLDM_FILE_ACK_WITH_META_DATA = 0xF,
 
+    PLDM_GET_ODY_FFDC  = 0xD, // Note overlap with earlier commands
 	PLDM_GET_ATTR_DUMP = 0xE, // Note overlap with earlier commands
 	PLDM_HTMGT_REQUEST = 0xF, // Note overlap with earlier commands
 };
