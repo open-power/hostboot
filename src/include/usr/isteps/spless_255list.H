@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,7 @@ namespace   INITSERVICE
     const   uint8_t     SET_ATTR_OVERRIDES     =   0x04;
     const   uint8_t     CLEAR_ATTR_OVERRIDES   =   0x05;
     const   uint8_t     GET_FAPI_ATTR          =   0x06;
+    const   uint8_t     GET_ODY_FFDC           =   0x07;
 
 
     const   TaskInfo    g_istep255[]  =   {
@@ -104,9 +105,14 @@ namespace   INITSERVICE
                 NULL,
                 { NONE, EXT_IMAGE, IPL_NOOP, false }
         },
+        {
+                ISTEPNAME(255,7, "get_ody_ffdc"),
+                NULL,
+                { NONE, EXT_IMAGE, IPL_NOOP, false }
+        },
 };
 
-const DepModInfo g_istep255Dependancies = {
+const DepModInfo g_istep255Dependencies = {
     {
         NULL
     }
@@ -115,7 +121,7 @@ const DepModInfo g_istep255Dependancies = {
 const ExtTaskInfo g_istep255TaskList = {
     &(g_istep255[0]),
     ( sizeof(g_istep255)/sizeof(TaskInfo) ),
-    &g_istep255Dependancies
+    &g_istep255Dependencies
 };
 
 };  // end namespace

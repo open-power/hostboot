@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,7 @@
 #include    "istepdispatcher.H"
 #include    "splesscommon.H"
 
+#include    <sbeio/sbeioif.H>
 
 
 namespace   INITSERVICE
@@ -126,6 +127,10 @@ void handleControlCmd( SPLessCmd & io_cmd )
 
     case CLEAR_ATTR_OVERRIDES:
         fapi2::theAttrOverrideSync().clearAttrOverrides();
+        break;
+
+    case GET_ODY_FFDC:
+        SBEIO::handleGenFifoSBEFFDCErrlRequest();
         break;
 
     default:
