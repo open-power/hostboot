@@ -40,6 +40,8 @@
 #include <pmic_enable_utils_ddr5.H>
 #include <pmic_regs.H>
 #include <pmic_regs_fld.H>
+#include <lib/utils/pmic_health_check_utils_ddr5.H>
+#include <lib/utils/pmic_periodic_telemetry_utils_ddr5.H>
 #include <generic/memory/lib/utils/index.H>
 #include <generic/memory/lib/utils/find.H>
 #include <mss_generic_attribute_getters.H>
@@ -913,15 +915,320 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Verify if the pmics have been enabled properly and if not create a unique case of breadcrumbs
+/// @brief Check all the breadcrumbs
 ///
-/// @param[in] i_target_info target info struct
+/// @param[in] i_health_check_info health check info struct
+/// @param[in] i_dt_number DT number to read bread crumb from
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-// TODO: ZEN:MST-2171 Call health check and periodic telemetry at the end of pmic_enable
-fapi2::ReturnCode redundancy_check_all_pmics(const target_info_redundancy_ddr5& i_target_info)
+uint8_t get_breadcrumb_state(const mss::pmic::ddr5::health_check_telemetry_data& i_health_check_info,
+                             const uint8_t i_dt_number)
 {
+    uint8_t l_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+
+    switch (i_dt_number)
+    {
+        case mss::dt::dt_i2c_devices::DT0:
+            {
+                l_breadcrumb = i_health_check_info.iv_dt0.iv_breadcrumb;
+                break;
+            }
+
+        case mss::dt::dt_i2c_devices::DT1:
+            {
+                l_breadcrumb = i_health_check_info.iv_dt1.iv_breadcrumb;
+                break;
+            }
+
+        case mss::dt::dt_i2c_devices::DT2:
+            {
+                l_breadcrumb = i_health_check_info.iv_dt2.iv_breadcrumb;
+                break;
+            }
+
+        case mss::dt::dt_i2c_devices::DT3:
+            {
+                l_breadcrumb = i_health_check_info.iv_dt3.iv_breadcrumb;
+                break;
+            }
+    }
+
+    return l_breadcrumb;
+}
+
+///
+/// @brief Check all the breadcrumbs
+///
+/// @param[in] io_target_info target info struct
+/// @param[in] i_health_check_info health check struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_target_info,
+                                        const mss::pmic::ddr5::health_check_telemetry_data& i_health_check_info)
+{
+    uint8_t l_simics = 0;
+
+    // Start success so we can't log and return the same error in loop logic
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    // Reset N Mode attributes
+    FAPI_TRY(mss::pmic::check::reset_n_mode_attrs(i_target_info.iv_ocmb));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_simics));
+
+    for (auto l_dt_count = 0; l_dt_count < i_target_info.iv_number_of_target_infos_present; l_dt_count++)
+    {
+        // If the pmic is not overridden to disabled, run the status checking
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present_dt(i_target_info, l_dt_count, [l_dt_count, &i_health_check_info,
+                          &i_target_info, l_simics]
+                          (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
+        {
+            uint8_t l_breadcrumb = get_breadcrumb_state(i_health_check_info, l_dt_count);
+
+            if (l_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL)
+            {
+                // The simics check has been added here as some PMIC and DT regs are not supported in simics yets.
+                // The below function is throwing error in simics as the DT and PMIC regs read from health_check()
+                // are throwing errors and entering n-mode which is cauing the HWP to crash at the end.
+                // This check has been skipped for now.
+                // TODO: ZEN:MST-2454 Get simics support for DT, PMIC and ADC regs for health_check
+                if (!l_simics)
+                {
+                    FAPI_ASSERT_NOEXIT(false,
+                    fapi2::PMIC_ENABLE_FAIL_DDR5_4U()
+                    .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                    .set_PMIC_TARGET(i_target_info.iv_pmic_dt_map[l_dt_count].iv_pmic)
+                    .set_RETURN_CODE(static_cast<uint32_t>(fapi2::current_err)),
+                    "PMIC " GENTARGTIDFORMAT " failed to enable.",
+                    GENTARGTID(i_target_info.iv_pmic_dt_map[l_dt_count].iv_pmic));
+
+                    mss::attr::set_n_mode_helper(i_target_info.iv_ocmb, l_dt_count, mss::pmic::n_mode::N_MODE);
+                }
+                else
+                {
+                    FAPI_DBG("Simulation mode detected. Skipping health_check bread_crumb check");
+                }
+            }
+
+            return fapi2::FAPI2_RC_SUCCESS;
+        }));
+    }
+
     return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check the statuses of all PMICs present on the given OCMB chip
+///
+/// @param[in,out] io_target_info target info struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode redundancy_check_all_pmics(target_info_redundancy_ddr5& io_target_info)
+{
+    mss::pmic::ddr5::health_check_telemetry_data l_health_check_info;
+    mss::pmic::ddr5::additional_n_mode_telemetry_data l_additional_info;
+    mss::pmic::ddr5::periodic_telemetry_data l_periodic_telemetry_data;
+
+    // Run Telemetry to reset/clear various trackers
+    collect_periodic_tele_data(io_target_info, l_periodic_telemetry_data);
+
+    // Calling health check 3 times here to ensure if any PMICs had any issue during IPL, they would be
+    // attempted to recover here and would not be in n_mode if not for major issues
+    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data);
+    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data);
+    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data);
+
+    // Check all bread crumbs. If any PMIC has bread crumb not set to ALL_GOOD, report those errors
+    FAPI_TRY(check_all_breadcrumbs(io_target_info, l_health_check_info));
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Log recoverable errors for each PMIC that declared N-mode
+///
+/// @param[in] i_target_info Target info struct
+/// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
+///
+void log_n_modes_as_recoverable_errors_ddr5(
+    const target_info_redundancy_ddr5& i_target_info,
+    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic)
+{
+    for (uint8_t l_idx = PMIC0; l_idx < CONSTS::NUM_PMICS_4U; ++l_idx)
+    {
+        // FAPI_ASSERT_NOEXIT's behavior differs from FAPI_ASSERT:
+        // NOEXIT commits the error log as soon as the FFDC execute function is called,
+        // so we do not need to manually log the error, like with FAPI_ASSERT,
+        // so long as we pass in the right severity as an argument
+        FAPI_ASSERT_NOEXIT((i_n_mode_pmic[l_idx] == mss::pmic::n_mode::N_PLUS_1_MODE),
+                           fapi2::PMIC_DROPPED_INTO_N_MODE_DDR5(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                           .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                           .set_PMIC_ID(l_idx),
+                           GENTARGTIDFORMAT " PMIC%u had errors which caused a drop into N-Mode",
+                           GENTARGTID(i_target_info.iv_ocmb), l_idx);
+
+        // Set back to success
+        if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
+    }
+}
+
+///
+/// @brief Assert the resulting n-mode states with the proper error FFDC
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
+/// @param[in] i_mnfg_thresholds thresholds policy setting
+/// @return fapi2::ReturnCode iff no n-modes, else, relevant error FFDC
+///
+fapi2::ReturnCode assert_n_mode_states_ddr5(
+    const target_info_redundancy_ddr5& i_target_info,
+    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic,
+    const bool i_mnfg_thresholds)
+{
+    // Check if we have lost a redundant pair :(
+    FAPI_ASSERT(!(mss::pmic::ddr5::check::bad_two_or_more(i_n_mode_pmic)),
+                fapi2::PMIC_REDUNDANCY_FAIL_DDR5()
+                .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
+                .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
+                .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
+                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
+#ifndef __PPE__
+                "Two or more PMICs have declared N-Mode. Procedure will not be able "
+                "to turn on and provide power to the OCMB " GENTARGTIDFORMAT " N-Mode States:"
+                "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
+                GENTARGTID(i_target_info.iv_ocmb),
+                i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
+#else
+                "Two or more PMICs have declared N-Mode. Procedure will not be able "
+                "to turn on and provide power to the OCMB. N-Mode States:"
+                "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
+                i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
+#endif
+
+    // Now in the other case, if at least one is down, assert this error. However, depending on the
+    // thresholds policy setting, in most cases this error will be logged as recoverable in the
+    // fapi_try_exit of process_n_mode_results(...)
+    FAPI_ASSERT(!(mss::pmic::check::bad_any(i_n_mode_pmic)),
+                fapi2::DIMM_RUNNING_IN_N_MODE_DDR5()
+                .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
+                .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
+                .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
+                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
+#ifndef __PPE__
+                GENTARGTIDFORMAT " Warning: At least one of the 4 PMICs had errors which caused a drop into N-Mode. "
+                "MNFG_THRESHOLDS has asserted that we %s. N-Mode States:"
+                "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
+                GENTARGTID(i_target_info.iv_ocmb),
+                (i_mnfg_thresholds) ? "EXIT." : "DO NOT EXIT. Continuing boot normally with redundant parts.",
+                i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
+#else
+                "Warning: At least one of the 4 PMICs had errors which caused a drop into N-Mode. "
+                "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
+                i_n_mode_pmic[PMIC0], i_n_mode_pmic[PMIC1], i_n_mode_pmic[PMIC2], i_n_mode_pmic[PMIC3]);
+#endif
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Process the results of the N-Mode declarations (if any)
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, or error code based on the
+///                           n mode results
+/// @note Logs a recoverable error per bad PMIC to aid FW, but will return good/bad code
+///       whether we are able to continue or not given those states
+///
+fapi2::ReturnCode process_n_mode_results(const target_info_redundancy_ddr5& i_target_info)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    using mss::pmic::id;
+
+    // Hold N-Mode states
+    std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U> l_n_mode_pmic =
+    {
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+    };
+
+    // Force an n-mode configuration via lab override
+    uint8_t l_force_n_mode = 0;
+    fapi2::buffer<uint8_t> l_force_n_mode_buffer;
+
+    // MFG flags vars/consts
+    bool l_mnfg_thresholds = false;
+
+    // Grab N mode attributes
+    FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC0, l_n_mode_pmic[PMIC0]));
+    FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC1, l_n_mode_pmic[PMIC1]));
+    FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC2, l_n_mode_pmic[PMIC2]));
+    FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC3, l_n_mode_pmic[PMIC3]));
+
+    // Overridden to an N mode configuration
+    FAPI_TRY(mss::attr::get_pmic_force_n_mode(i_target_info.iv_ocmb, l_force_n_mode));
+    l_force_n_mode_buffer = l_force_n_mode;
+
+    // Check N-mode override attribute states
+    for (uint8_t l_idx = PMIC0; l_idx < CONSTS::NUM_PMICS_4U; ++l_idx)
+    {
+        // l_force_n_mode_buffer is expected to have an "n-mode configuration" as high bits.
+        // in other words, a setting such as 0b11110000 would say to use the n-mode configuration of
+        // PMIC0, PMIC1, PMIC2 and PMIC3. Therefore, if bits are not set, we are considering those overridden
+        // to be disabled. (Default value is 0xF0). (This logic is not the same as the live n-mode states)
+        if (!l_force_n_mode_buffer.getBit(l_idx))
+        {
+            // Hardcode it to N-Mode, since this pmic is disabled or not-present.
+            l_n_mode_pmic[l_idx] = mss::pmic::n_mode::N_MODE;
+        }
+    }
+
+    // First, we want to log a recoverable error for each PMIC that is in an N-mode state.
+    // This helps FW identify which parts are bad if we do have a full redundancy fail which
+    // causes a procedure exit. No RC from this function.
+    log_n_modes_as_recoverable_errors_ddr5(i_target_info, l_n_mode_pmic);
+
+    // Easy case first, return success if they're all N_PLUS1_MODE (not N-mode)
+    if (!l_n_mode_pmic[PMIC0] &&
+        !l_n_mode_pmic[PMIC1] &&
+        !l_n_mode_pmic[PMIC2] &&
+        !l_n_mode_pmic[PMIC3])
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Get mnfg thresholds policy setting
+    FAPI_TRY(mss::pmic::get_mnfg_thresholds(l_mnfg_thresholds));
+
+    // If we have any n-modes, we will jump to fapi_try_exit
+    FAPI_TRY(assert_n_mode_states_ddr5(i_target_info, l_n_mode_pmic, l_mnfg_thresholds));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    // If we are allowing redundancy, log the N_MODE error as recovered
+    if (fapi2::current_err == static_cast<uint32_t>(fapi2::RC_DIMM_RUNNING_IN_N_MODE_DDR5))
+    {
+        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    return fapi2::current_err;
 }
 
 ///
@@ -985,10 +1292,12 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(mss::pmic::ddr5::clear_adc_events(l_target_info.iv_adc));
 
     // Fifth, verification
-    // TODO: ZEN:MST-2171 Call health check and periodic telemetry at the end of pmic_enable
     // Now, check that the PMICs were enabled properly. If any don't report on that are expected
-    // to be on, create a unique case of breadcrumbs
+    // to be on, declare N-mode there.
     FAPI_TRY(mss::pmic::ddr5::redundancy_check_all_pmics(l_target_info));
+
+    // Finally, process the N-Mode results
+    FAPI_TRY(mss::pmic::ddr5::process_n_mode_results(l_target_info));
 
     FAPI_INF("Successfully enabled PMICs on" GENTARGTIDFORMAT " with 4U/redundancy mode", GENTARGTID(i_ocmb_target));
 
@@ -1046,6 +1355,36 @@ fapi2::ReturnCode pmic_enable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+namespace check
+{
+
+///
+/// @brief Check if two or more PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false if two or more pmics are bad
+///
+bool bad_two_or_more(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic)
+{
+    // For readability
+    static constexpr mss::pmic::n_mode N_MODE = mss::pmic::n_mode::N_MODE;
+    static constexpr uint8_t NUMBER_PMICS_FAIL_NOT_ACCEPTABLE = 2;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    uint8_t l_number_pmic_n_mode = 0;
+
+    for (auto l_count = 0; l_count < CONSTS::NUM_PMICS_4U; l_count++)
+    {
+        if(i_n_mode_pmic[l_count] == N_MODE)
+        {
+            l_number_pmic_n_mode++;
+        }
+    }
+
+    return (l_number_pmic_n_mode >= NUMBER_PMICS_FAIL_NOT_ACCEPTABLE);
+}
+
+} // ns check
 
 } // ns ddr5
 } // ns pmic

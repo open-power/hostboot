@@ -361,6 +361,14 @@ inline mss::pmic::id get_relative_pmic_id(const fapi2::Target<fapi2::TARGET_TYPE
     return static_cast<mss::pmic::id>(mss::index(i_pmic_target) % CONSTS::NUM_PRIMARY_PMICS);
 }
 
+///
+/// @brief Get the mnfg thresholds policy setting
+///
+/// @param[out] o_thresholds thresholds policy setting
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode get_mnfg_thresholds(bool& o_thresholds);
+
 namespace status
 {
 
@@ -702,6 +710,23 @@ fapi2::ReturnCode matching_vendors_helper(
     const uint16_t i_vendor_attr,
     const uint8_t i_vendor_reg_lo,
     const uint8_t i_vendor_reg_hi);
+
+///
+/// @brief Check if at least one PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false at least one pmic is bad
+///
+bool bad_any(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
+
+///
+/// @brief Reset N Mode attributes
+///
+/// @param[in] i_ocmb OCMB target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS, else error code
+/// @note For 4U only. Has no effect on 1U/2U.
+///
+fapi2::ReturnCode reset_n_mode_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb);
 
 } // check
 } // pmic

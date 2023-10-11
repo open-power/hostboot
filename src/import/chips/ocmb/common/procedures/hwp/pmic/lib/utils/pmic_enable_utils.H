@@ -803,13 +803,6 @@ fapi2::ReturnCode assert_n_mode_states(
     const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic,
     const bool i_mnfg_thresholds);
 
-///
-/// @brief Get the mnfg thresholds policy setting
-///
-/// @param[out] o_thresholds thresholds policy setting
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode get_mnfg_thresholds(bool& o_thresholds);
 
 ///
 /// @brief Process the results of the N-Mode declarations (if any)
@@ -832,29 +825,12 @@ namespace check
 bool bad_pair(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
 
 ///
-/// @brief Check if at least one PMIC has declared N mode
-///
-/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
-/// @return true/false at least one pmic is bad
-///
-bool bad_any(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
-
-///
 /// @brief Check if at least one primary PMIC has declared N mode
 ///
 /// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
 /// @return true/false either primary pmic is bad
 ///
 bool bad_primary(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
-
-///
-/// @brief Reset N Mode attributes
-///
-/// @param[in] i_target_info OCMB, PMIC and I2C target struct
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS, else error code
-/// @note For 4U only. Has no effect on 1U/2U.
-///
-fapi2::ReturnCode reset_n_mode_attrs(const target_info_redundancy& i_target_info);
 
 ///
 ///

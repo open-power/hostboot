@@ -220,13 +220,66 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 fapi2::ReturnCode clear_adc_events(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc);
 
 ///
-/// @brief Verify if the pmics have been enabled properly and if not create a unique case of breadcrumbs
+/// @brief Check all the breadcrumbs
 ///
-/// @param[in] i_target_info target info struct
+/// @param[in] i_health_check_info health check info struct
+/// @param[in] i_dt_number DT number to read bread crumb from
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-// TODO: ZEN:MST-1905 Implement health check
-fapi2::ReturnCode redundancy_check_all_pmics(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info);
+uint8_t get_breadcrumb_state(const mss::pmic::ddr5::health_check_telemetry_data& i_health_check_info,
+                             const uint8_t i_dt_number);
+
+///
+/// @brief Check all the breadcrumbs
+///
+/// @param[in] io_target_info target info struct
+/// @param[in] i_health_check_info health check struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_target_info,
+                                        const mss::pmic::ddr5::health_check_telemetry_data& i_health_check_info);
+
+///
+/// @brief Check the statuses of all PMICs present on the given OCMB chip
+///
+/// @param[in,out] io_target_info target info struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode redundancy_check_all_pmics(target_info_redundancy_ddr5& io_target_info);
+
+///
+/// @brief Log recoverable errors for each PMIC that declared N-mode
+///
+/// @param[in] i_target_info Target info struct
+/// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
+///
+void log_n_modes_as_recoverable_errors_ddr5(
+    const target_info_redundancy_ddr5& i_target_info,
+    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
+
+///
+/// @brief Assert the resulting n-mode states with the proper error FFDC
+///
+/// @param[in] i_target_info target info struct
+/// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
+/// @param[in] i_mnfg_thresholds thresholds policy setting
+/// @return fapi2::ReturnCode iff no n-modes, else, relevant error FFDC
+///
+fapi2::ReturnCode assert_n_mode_states_ddr5(
+    const target_info_redundancy_ddr5& i_target_info,
+    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic,
+    const bool i_mnfg_thresholds);
+
+///
+/// @brief Process the results of the N-Mode declarations (if any)
+///
+/// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, or error code based on the
+///                           n mode results
+/// @note Logs a recoverable error per bad PMIC to aid FW, but will return good/bad code
+///       whether we are able to continue or not given those states
+///
+fapi2::ReturnCode process_n_mode_results(const target_info_redundancy_ddr5& i_target_info);
 
 ///
 /// @brief Set the up DTs, ADCs, PMICs for a redundancy configuration / 4U
@@ -247,6 +300,19 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
 ///
 fapi2::ReturnCode pmic_enable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                               const mss::pmic::enable_mode i_mode = mss::pmic::enable_mode::SPD);
+
+namespace check
+{
+
+///
+/// @brief Check if two or more PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false if two or more pmics are bad
+///
+bool bad_two_or_more(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
+
+} // ns check
 } // ns ddr5
 } // ns pmic
 } // ns mss
