@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,7 +36,9 @@
 #ifndef _MSS_DATA_ENGINE_TRAITS_DEF_H_
 #define _MSS_DATA_ENGINE_TRAITS_DEF_H_
 
-#include <cstring>
+#ifndef __PPE__
+    #include <cstring>
+#endif
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss

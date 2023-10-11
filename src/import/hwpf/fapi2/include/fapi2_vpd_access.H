@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,16 +34,20 @@
 #include <return_code.H>
 #include <target_types.H>
 #include <vpd_access_defs.H>
-#include <plat_vpd_access.H>
+#ifndef __PPE__
+    #include <plat_vpd_access.H>
+#endif
 
 namespace fapi2
 {
 
 /// constants for VPD Info
+constexpr uint64_t VPD_INFO_INVALID_32  = 0xffffffff; // only for PPE compilation
 constexpr uint64_t VPD_INFO_INVALID_64  = 0xffffffffffffffff;
 constexpr uint64_t VPD_INFO_INVALID_16  = 0xffff;
 constexpr uint64_t VPD_INFO_INVALID_8   = 0xff;
 
+#ifndef __PPE__
 /// @brief  Specialized class representing required VPDInfo to be used
 ///         in collecting VPD for the MCS target type.
 /// @tparam T fapi2::TARGET_TYPE_MCS
@@ -77,7 +81,7 @@ class VPDInfo<TARGET_TYPE_MCS>
         // set to false to avoid collecting a real ReturnCode
         bool     iv_is_config_ffdc_enabled;
 };
-
+#endif
 /// @brief  Specialized class representing required VPDInfo to be used
 ///         in collecting VPD for the OCMB_CHIP target type.
 /// @tparam T fapi2::TARGET_TYPE_OCMB_CHIP
@@ -87,8 +91,11 @@ class VPDInfo<TARGET_TYPE_OCMB_CHIP>
     public:
         /// @brief VPDInfo constructor
         /// @param[in] i_vpd_type Type of VPD data to return
+
         VPDInfo( const fapi2::MemVpdData& i_vpd_type)
             : iv_vpd_type(i_vpd_type),
+#ifndef __PPE__
+//VPD_INFO_INVALID_64 is not able to initialize the data members here when compiling for PPE.
               iv_size(VPD_INFO_INVALID_64),
               iv_omi_freq_mhz(VPD_INFO_INVALID_64),
               iv_rank(VPD_INFO_INVALID_64),
@@ -101,8 +108,21 @@ class VPDInfo<TARGET_TYPE_OCMB_CHIP>
               iv_total_ranks_dimm0(VPD_INFO_INVALID_64),
               iv_total_ranks_dimm1(VPD_INFO_INVALID_64),
               iv_dimm_type(VPD_INFO_INVALID_64)
+#else
+              iv_size(VPD_INFO_INVALID_32),
+              iv_omi_freq_mhz(VPD_INFO_INVALID_32),
+              iv_rank(VPD_INFO_INVALID_32),
+              iv_is_config_ffdc_enabled(true),
+              iv_efd_type(VPD_INFO_INVALID_8),
+              iv_dmb_mfg_id(VPD_INFO_INVALID_16),
+              iv_dmb_revision(VPD_INFO_INVALID_8),
+              iv_ddr_mode(VPD_INFO_INVALID_8),
+              iv_dimm_count(VPD_INFO_INVALID_32),
+              iv_total_ranks_dimm0(VPD_INFO_INVALID_32),
+              iv_total_ranks_dimm1(VPD_INFO_INVALID_32),
+              iv_dimm_type(VPD_INFO_INVALID_32)
+#endif
         {};
-
         // *** INPUT DATA ***
 
         // type of vpd field to return

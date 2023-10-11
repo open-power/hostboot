@@ -39,12 +39,35 @@
 
 
   <hwpError>
-    <rc>RC_MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH</rc>
+    <rc>RC_MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH_RANK0</rc>
     <description>
        Mirroring settings mismatch between channels in DDR5 SPD byte 365
     </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>VALUE_CHA_CS0</ffdc>
     <ffdc>VALUE_CHB_CS0</ffdc>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>OCMB_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH_RANK1</rc>
+    <description>
+       Mirroring settings mismatch between channels in DDR5 SPD byte 365
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
     <ffdc>VALUE_CHA_CS1</ffdc>
     <ffdc>VALUE_CHB_CS1</ffdc>
     <callout>
@@ -69,6 +92,7 @@
        An invalid value was detected in ATTR_DDR5_DRAM_WR_PREAMBLE
     </description>
     <ffdc>VALUE</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -89,6 +113,7 @@
        This is probably due to a bad part or bad values accidentally burned to the VPD
     </description>
     <ffdc>SIZE</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>MEDIUM</priority>
@@ -279,6 +304,7 @@
     <ffdc>TRCD</ffdc>
     <ffdc>TCK</ffdc>
     <ffdc>MC_TYPE</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
@@ -318,6 +344,7 @@
     </description>
     <ffdc>TCK_MIN</ffdc>
     <ffdc>MC_TYPE</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
@@ -383,6 +410,7 @@
     <ffdc>PROPOSED_TCK</ffdc>
     <ffdc>IS_3DS</ffdc>
     <ffdc>MC_TYPE</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
         <procedure>CODE</procedure>
         <priority>MEDIUM</priority>
@@ -442,6 +470,7 @@
     </description>
     <ffdc>MC_TYPE</ffdc>
     <ffdc>CL_SUPPORTED</ffdc>
+    <ffdc>PORT_TARGET</ffdc>
     <callout>
       <childTargets>
           <parent>PORT_TARGET</parent>
@@ -472,6 +501,7 @@
     <ffdc>SUPPORTED_FREQ_3</ffdc>
     <ffdc>FREQ</ffdc>
     <ffdc>MC_TYPE</ffdc>
+    <ffdc>TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -610,6 +640,7 @@
     </description>
     <ffdc>DRAM_GEN</ffdc>
     <ffdc>FUNCTION</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
       <procedure>MEMORY_PLUGGING_ERROR</procedure>
       <priority>HIGH</priority>
@@ -848,6 +879,7 @@
     </description>
     <ffdc>FUNCTION_CODE</ffdc>
     <ffdc>FAILING_VALUE</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -873,6 +905,7 @@
     <description>Invalid value calculated for timing value based on MTB and FTB from SPD.</description>
     <ffdc>VALUE</ffdc>
     <ffdc>FUNCTION</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
     <callout>
       <target>DIMM_TARGET</target>
       <priority>MEDIUM</priority>
@@ -933,6 +966,7 @@
   <ffdc>KEY</ffdc>
   <ffdc>DATA</ffdc>
   <ffdc>FUNCTION</ffdc>
+  <ffdc>TARGET</ffdc>
   <callout>
     <target>TARGET</target>
     <priority>MEDIUM</priority>
@@ -1388,6 +1422,7 @@
     <ffdc>UPPER_BOUND</ffdc>
     <ffdc>LOWER_BOUND</ffdc>
     <ffdc>TIMING</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>

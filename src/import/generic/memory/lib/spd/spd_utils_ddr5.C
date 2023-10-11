@@ -217,6 +217,29 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Retrieves SDRAM Minimum Cycle Time (tCKmin) from SPD
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[out] o_value tCKmin value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+/// Note : PPE compatible version of function
+fapi2::ReturnCode get_tckmin(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const uint8_t (&i_spd)[mss::spd::DDR5_SPD_SIZE],
+    uint64_t& o_value)
+{
+    using F = mss::spd::fields<mss::spd::device_type::DDR5, mss::spd::module_params::BASE_CNFG>;
+
+    const auto BYTE = F::TCK_MIN_LSB.get_byte(i_spd);
+    FAPI_TRY(get_timing(i_dimm, i_spd, BYTE, GET_TCKMIN, o_value), GENTARGTIDFORMAT " failed to get TCK_MIN",
+             GENTARGTID(i_dimm));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD
 /// @param[in] i_dimm DIMM target
 /// @param[in] i_spd SPD binary
@@ -232,6 +255,29 @@ fapi2::ReturnCode get_tckmax(
 
     const auto BYTE = F::TCK_MAX_LSB.get_byte(i_spd);
     FAPI_TRY(get_timing(i_dimm, i_spd, BYTE, GET_TCKMAX, o_value), "%s failed to get TCK_MAX", mss::spd::c_str(i_dimm));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[out] o_value tCKmax value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+/// Note : PPE compatible version of function
+fapi2::ReturnCode get_tckmax(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const uint8_t (&i_spd)[mss::spd::DDR5_SPD_SIZE],
+    uint64_t& o_value)
+{
+    using F = mss::spd::fields<mss::spd::device_type::DDR5, mss::spd::module_params::BASE_CNFG>;
+
+    const auto BYTE = F::TCK_MAX_LSB.get_byte(i_spd);
+    FAPI_TRY(get_timing(i_dimm, i_spd, BYTE, GET_TCKMAX, o_value), GENTARGTIDFORMAT " failed to get TCK_MAX",
+             GENTARGTID(i_dimm));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -104,6 +104,20 @@ fapi2::ReturnCode get_tckmin(
     uint64_t& o_value);
 
 ///
+/// @brief Retrieves SDRAM Minimum Cycle Time (tCKmin) from SPD
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[out] o_value tCKmin value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+/// Note : PPE compatible version of function
+fapi2::ReturnCode get_tckmin(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const uint8_t (&i_spd)[mss::spd::DDR5_SPD_SIZE],
+    uint64_t& o_value);
+
+
+///
 /// @brief Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD
 /// @param[in] i_dimm DIMM target
 /// @param[in] i_spd SPD binary
@@ -113,6 +127,19 @@ fapi2::ReturnCode get_tckmin(
 fapi2::ReturnCode get_tckmax(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
     const std::vector<uint8_t>& i_spd,
+    uint64_t& o_value);
+
+///
+/// @brief Retrieves SDRAM Maximum Cycle Time (tCKmax) from SPD
+/// @param[in] i_dimm DIMM target
+/// @param[in] i_spd SPD binary
+/// @param[out] o_value tCKmax value in ps
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+/// Note : PPE compatible version of function
+fapi2::ReturnCode get_tckmax(
+    const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+    const uint8_t (&i_spd)[mss::spd::DDR5_SPD_SIZE],
     uint64_t& o_value);
 
 ///

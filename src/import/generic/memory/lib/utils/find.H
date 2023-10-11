@@ -43,6 +43,8 @@
 #include <vector>
 #include <generic/memory/lib/utils/pos.H>
 #ifndef __PPE__
+    #include <vector>
+    #include <generic/memory/lib/utils/pos.H>
     #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #endif
 
@@ -545,7 +547,7 @@ inline fapi2::ReturnCode lookup_table_check(const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
-
+#endif // __PPE__
 ///
 /// @brief find a key value from a C-style array of STL pairs
 /// @tparam T  input type
@@ -605,15 +607,14 @@ inline fapi2::ReturnCode lookup_table_check(const fapi2::Target<T>& i_target,
                  .set_DATA(o_output)
                  .set_FUNCTION(i_ffdc_code)
                  .set_TARGET(i_target),
-                 "Failed to find a mapped value for %d on TARGTIDFORMAT",
+                 "Failed to find a mapped value for %d on " GENTARGTIDFORMAT,
                  i_key,
-                 TARGTID );
+                 GENTARGTID(i_target) );
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
 }
 
-#endif // __PPE__
 }// mss
 
 #endif

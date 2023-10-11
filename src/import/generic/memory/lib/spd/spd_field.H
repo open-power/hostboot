@@ -37,7 +37,9 @@
 #ifndef _MSS_SPD_FIELD_H_
 #define _MSS_SPD_FIELD_H_
 
-#include <cstdint>
+#ifndef __PPE__
+    #include <cstdint>
+#endif
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/mss_field.H>
 

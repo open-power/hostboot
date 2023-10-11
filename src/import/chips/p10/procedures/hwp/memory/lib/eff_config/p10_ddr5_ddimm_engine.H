@@ -913,16 +913,23 @@ class ddimm_0_0 : public mss::spd::module_specific_base
 
             // First check that our mirroring setting matches between channels if both channels are enabled
             FAPI_ASSERT((l_num_channel != mss::ddr5::ATTR_NUM_CHANNELS) ||
-                        ((l_mirror_cha_cs0 == l_mirror_chb_cs0) &&
-                         (l_mirror_cha_cs1 == l_mirror_chb_cs1)),
-                        fapi2::MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH().
+                        (l_mirror_cha_cs0 == l_mirror_chb_cs0),
+                        fapi2::MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH_RANK0().
                         set_PORT_TARGET(iv_port).
                         set_VALUE_CHA_CS0(l_mirror_cha_cs0).
-                        set_VALUE_CHB_CS0(l_mirror_chb_cs0).
+                        set_VALUE_CHB_CS0(l_mirror_chb_cs0),
+                        GENTARGTIDFORMAT "Mirroring settings mismatch between channels: rank0 CHA/B: %d/%d",
+                        GENTARGTID(iv_port), l_mirror_cha_cs0, l_mirror_chb_cs0);
+
+            // First check that our mirroring setting matches between channels if both channels are enabled
+            FAPI_ASSERT((l_num_channel != mss::ddr5::ATTR_NUM_CHANNELS) ||
+                        (l_mirror_cha_cs1 == l_mirror_chb_cs1),
+                        fapi2::MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH_RANK1().
+                        set_PORT_TARGET(iv_port).
                         set_VALUE_CHA_CS1(l_mirror_cha_cs1).
                         set_VALUE_CHB_CS1(l_mirror_chb_cs1),
-                        "%s Mirroring settings mismatch between channels: rank0 CHA/B: %d/%d, rank1 CHA/B: %d/%d",
-                        spd::c_str(iv_port), l_mirror_cha_cs0, l_mirror_chb_cs0, l_mirror_cha_cs1, l_mirror_chb_cs1);
+                        GENTARGTIDFORMAT "Mirroring settings mismatch between channels: rank1 CHA/B: %d/%d",
+                        GENTARGTID(iv_port), l_mirror_cha_cs1, l_mirror_chb_cs1);
 
             // Combine the settings between channels so the attribute is set up the same as on DDR4
             l_field.writeBit<ATTR_CS0>(l_mirror_cha_cs0 | l_mirror_chb_cs0);
