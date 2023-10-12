@@ -495,9 +495,10 @@ void MemTdCtlr<TYPE_OCMB_CHIP>::recaptureRegs( STEP_CODE_DATA_STRUCT & io_sc )
         const char * odyRegs[] =
         {
             "MCBIST_FIR", "RDF_FIR_0", "RDF_FIR_1", "MBSEC0", "MBSEC1",
-            "MBSSYMEC0", "MBSSYMEC1", "MBSSYMEC2", "MBSSYMEC3", "MBSSYMEC4",
-            "MBSSYMEC5", "MBSSYMEC6", "MBSSYMEC7", "MBSSYMEC8", "MBSSYMEC9",
-            "MBSMSEC", "MCBMCAT",
+            "OCMB_MBSSYMEC0", "OCMB_MBSSYMEC1", "OCMB_MBSSYMEC2",
+            "OCMB_MBSSYMEC3", "OCMB_MBSSYMEC4", "OCMB_MBSSYMEC5",
+            "OCMB_MBSSYMEC6", "OCMB_MBSSYMEC7", "OCMB_MBSSYMEC8",
+            "OCMB_MBSSYMEC9", "MBSMSEC", "MCBMCAT",
         };
 
         for ( uint32_t i = 0; i < sizeof(odyRegs)/sizeof(char*); i++ )

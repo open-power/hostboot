@@ -32,65 +32,82 @@
 
     register OCMB_MBSSYMEC0
     {
-        name        "ODC.MCBIST.SCOM.MBSSYMEC0Q";
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 0";
         scomaddr    0x08011458;
-        capture     group ocmb_regs;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register OCMB_MBSSYMEC1
     {
-        name        "ODC.MCBIST.SCOM.MBSSYMEC1Q";
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 1";
         scomaddr    0x08011459;
-        capture     group ocmb_regs;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register OCMB_MBSSYMEC2
     {
-        name        "ODC.MCBIST.SCOM.MBSSYMEC2Q";
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 2";
         scomaddr    0x0801145A;
-        capture     group ocmb_regs;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register OCMB_MBSSYMEC3
     {
-        name        "ODC.MCBIST.SCOM.MBSSYMEC3Q";
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 3";
         scomaddr    0x0801145B;
-        capture     group ocmb_regs;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register OCMB_MBSSYMEC4
     {
-        name        "ODC.MCBIST.SCOM.MBSSYMEC4Q";
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 4";
         scomaddr    0x0801145C;
-        capture     group ocmb_regs;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register OCMB_MBSSYMEC5
     {
-        name        "ODC.MCBIST.SCOM.MBSSYMEC5Q";
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 5";
         scomaddr    0x0801145D;
-        capture     group ocmb_regs;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register OCMB_MBSSYMEC6
     {
-        name        "ODC.MCBIST.SCOM.MBSSYMEC6Q";
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 6";
         scomaddr    0x0801145E;
-        capture     group ocmb_regs;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register OCMB_MBSSYMEC7
     {
-        name        "ODC.MCBIST.SCOM.MBSSYMEC7Q";
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 7";
         scomaddr    0x0801145F;
-        capture     group ocmb_regs;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     register OCMB_MBSSYMEC8
     {
-        name        "ODC.MCBIST.SCOM.MBSSYMEC8Q";
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 8";
         scomaddr    0x08011460;
-        capture     group ocmb_regs;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
+    };
+
+    register OCMB_MBSSYMEC9
+    {
+        name        "Odyssey chip MCBIST Modal Symbol Counter Register 9";
+        scomaddr    0x08011461;
+        capture     group mcbist_fir_regs;
+        capture     group MaintCmdRegs_ocmb;
     };
 
     ############################################################################
@@ -270,86 +287,6 @@
         name        "Odyssey chip MBS Memory Scrub/Read Error Threshold Reg";
         scomaddr    0x08011457;
         capture     group mcbist_fir_regs;
-    };
-
-    register MBSSYMEC0
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 0";
-        scomaddr    0x08011458;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
-    };
-
-    register MBSSYMEC1
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 1";
-        scomaddr    0x08011459;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
-    };
-
-    register MBSSYMEC2
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 2";
-        scomaddr    0x0801145A;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
-    };
-
-    register MBSSYMEC3
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 3";
-        scomaddr    0x0801145B;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
-    };
-
-    register MBSSYMEC4
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 4";
-        scomaddr    0x0801145C;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
-    };
-
-    register MBSSYMEC5
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 5";
-        scomaddr    0x0801145D;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
-    };
-
-    register MBSSYMEC6
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 6";
-        scomaddr    0x0801145E;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
-    };
-
-    register MBSSYMEC7
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 7";
-        scomaddr    0x0801145F;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
-    };
-
-    register MBSSYMEC8
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 8";
-        scomaddr    0x08011460;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
-    };
-
-    register MBSSYMEC9
-    {
-        name        "Odyssey chip MCBIST Modal Symbol Counter Register 9";
-        scomaddr    0x08011461;
-        capture     group mcbist_fir_regs;
-        capture     group MaintCmdRegs_ocmb;
     };
 
     register MBSMSEC

@@ -1121,48 +1121,53 @@
     },
     "0xa9e6": {
         "address": "0x0000000008011458",
-        "description": "ODC.MCBIST.SCOM.MBSSYMEC0Q",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 0",
         "name": "OCMB_MBSSYMEC0"
     },
     "0xa9e8": {
         "address": "0x0000000008011459",
-        "description": "ODC.MCBIST.SCOM.MBSSYMEC1Q",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 1",
         "name": "OCMB_MBSSYMEC1"
     },
     "0xa9ea": {
         "address": "0x000000000801145a",
-        "description": "ODC.MCBIST.SCOM.MBSSYMEC2Q",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 2",
         "name": "OCMB_MBSSYMEC2"
     },
     "0xa9ec": {
         "address": "0x000000000801145b",
-        "description": "ODC.MCBIST.SCOM.MBSSYMEC3Q",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 3",
         "name": "OCMB_MBSSYMEC3"
     },
     "0xa9ee": {
         "address": "0x000000000801145c",
-        "description": "ODC.MCBIST.SCOM.MBSSYMEC4Q",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 4",
         "name": "OCMB_MBSSYMEC4"
     },
     "0xa9f0": {
         "address": "0x000000000801145d",
-        "description": "ODC.MCBIST.SCOM.MBSSYMEC5Q",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 5",
         "name": "OCMB_MBSSYMEC5"
     },
     "0xa9f2": {
         "address": "0x000000000801145e",
-        "description": "ODC.MCBIST.SCOM.MBSSYMEC6Q",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 6",
         "name": "OCMB_MBSSYMEC6"
     },
     "0xa9f4": {
         "address": "0x000000000801145f",
-        "description": "ODC.MCBIST.SCOM.MBSSYMEC7Q",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 7",
         "name": "OCMB_MBSSYMEC7"
     },
     "0xa9f6": {
         "address": "0x0000000008011460",
-        "description": "ODC.MCBIST.SCOM.MBSSYMEC8Q",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 8",
         "name": "OCMB_MBSSYMEC8"
+    },
+    "0xa9f8": {
+        "address": "0x0000000008011461",
+        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 9",
+        "name": "OCMB_MBSSYMEC9"
     },
     "0xab8f": {
         "address": "0x0000000008013002",
@@ -1504,16 +1509,6 @@
         "description": "Odyssey chip Firmware Mark Store Rank7 Register 1",
         "name": "FW_MS7_1"
     },
-    "0xe603": {
-        "address": "0x0000000008011458",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 0",
-        "name": "MBSSYMEC0"
-    },
-    "0xe703": {
-        "address": "0x0000000008011459",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 1",
-        "name": "MBSSYMEC1"
-    },
     "0xe771": {
         "address": "0x00000000000d0007",
         "description": "PPE External Interface MEM Info",
@@ -1524,30 +1519,10 @@
         "description": "Odyssey chip TLX_FIR MASK",
         "name": "TLX_FIR_MASK"
     },
-    "0xe803": {
-        "address": "0x000000000801145a",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 2",
-        "name": "MBSSYMEC2"
-    },
-    "0xe903": {
-        "address": "0x000000000801145b",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 3",
-        "name": "MBSSYMEC3"
-    },
     "0xe95f": {
         "address": "0x0000000008012406",
         "description": "Odyssey chip DLX_FIR Special Attention Config",
         "name": "DLX_FIR_CFG_SPA"
-    },
-    "0xea03": {
-        "address": "0x000000000801145c",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 4",
-        "name": "MBSSYMEC4"
-    },
-    "0xeb03": {
-        "address": "0x000000000801145d",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 5",
-        "name": "MBSSYMEC5"
     },
     "0xeb13": {
         "address": "0x0000000008040040",
@@ -1559,25 +1534,10 @@
         "description": "TP Error Status",
         "name": "TP_ERR_STATUS"
     },
-    "0xec03": {
-        "address": "0x000000000801145e",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 6",
-        "name": "MBSSYMEC6"
-    },
-    "0xed03": {
-        "address": "0x000000000801145f",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 7",
-        "name": "MBSSYMEC7"
-    },
     "0xed79": {
         "address": "0x0000000008011005",
         "description": "Odyssey chip SRQ_FIR Recoverable Config",
         "name": "SRQ_FIR_CFG_RE"
-    },
-    "0xee03": {
-        "address": "0x0000000008011460",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 8",
-        "name": "MBSSYMEC8"
     },
     "0xee62": {
         "address": "0x00000000080f001e",
@@ -1663,11 +1623,6 @@
         "address": "0x0000000008012817",
         "description": "Odyssey chip Hardware Mark Store Rank7 Register 1",
         "name": "HW_MS7_1"
-    },
-    "0xef03": {
-        "address": "0x0000000008011461",
-        "description": "Odyssey chip MCBIST Modal Symbol Counter Register 9",
-        "name": "MBSSYMEC9"
     },
     "0xf3ab": {
         "address": "0x000000000801146e",
