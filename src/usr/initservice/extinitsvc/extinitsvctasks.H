@@ -65,7 +65,7 @@ const TaskInfo g_exttaskinfolist[]   =   {
             NULL,                                  // no function to run
             {
                 START_TASK,                        // task type
-                EXT_IMAGE,                         // extended image module
+                BASE_IMAGE,                         // base image module
             }
         },
 #endif
