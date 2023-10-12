@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,6 +105,21 @@ const TaskInfo    g_taskinfolist[]   =   {
                         BASE_IMAGE,                 // Base Module
                 }
         },
+
+        /**
+         * @brief console library
+         */
+#ifdef CONFIG_CONSOLE
+        {
+                "libconsole.so",                    // taskname
+                NULL,                               // no function to run
+                {
+                    START_TASK,                     // start task
+                    BASE_IMAGE,                     // Base Module
+                }
+        },
+#endif
+
         //  -----   Extended Image  -----------------------------------------------------
         /**
          * @brief   extinitsvc, initializes extended module area
