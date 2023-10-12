@@ -470,17 +470,17 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::ODYSSEY>( const fapi2::Target<
         // Create register for RDFFIR
         mss::fir::reg2<scomt::ody::ODC_RDF0_SCOM_FIR_RW_WCLEAR> l_rdf_reg(l_port);
 
-        // Set this to mask off missing dfi_rddata_valid from triggering ODC_RDF0_SCOM_FIR_RDDATA_VALID_ERROR
+        // These checkers should reset to '0' (unmasked state) but we clear them just in case
         FAPI_TRY(fapi2::getScom(l_port, scomt::ody::ODC_RDF0_SCOM_MASK1, l_reg_data));
-        l_reg_data.setBit<scomt::ody::ODC_RDF0_SCOM_MASK1_MISSING_RDDATA_VALID>();
+        l_reg_data.clearBit<scomt::ody::ODC_RDF0_SCOM_MASK1_UNEXPECTED_RDDATA_VALID>();
+        l_reg_data.clearBit<scomt::ody::ODC_RDF0_SCOM_MASK1_MISSING_RDDATA_VALID>();
         FAPI_TRY(fapi2::putScom(l_port, scomt::ody::ODC_RDF0_SCOM_MASK1, l_reg_data));
 
         // Write RDF FIR register per Odyssey unmask spec
-        FAPI_TRY(l_rdf_reg.recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_AUE>()
-                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IAUE>()
+        FAPI_TRY(l_rdf_reg.recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IAUE>()
                  .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_IRCD>()
                  .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_MAINTENANCE_RCD>()
-                 .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_RDDATA_VALID_ERROR>()
+                 .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_RDDATA_VALID_ERROR>()
                  .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_SCOM_PARITY_CLASS_STATUS>()
                  .recoverable_error<scomt::ody::ODC_RDF0_SCOM_FIR_SCOM_PARITY_CLASS_RECOVERABLE>()
                  .checkstop<scomt::ody::ODC_RDF0_SCOM_FIR_SCOM_PARITY_CLASS_UNRECOVERABLE>()
