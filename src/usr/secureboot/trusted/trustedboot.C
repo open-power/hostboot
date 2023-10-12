@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,6 +237,8 @@ void* host_update_master_tpm( void *io_pArgs )
         "host_update_master_tpm: Found %d TPM(s) in blueprint",
         tpmList.size());
 
+    bool primary_tpm_was_disabled = false;
+
     do
     {
         if (tpmList.empty())
@@ -299,9 +301,32 @@ void* host_update_master_tpm( void *io_pArgs )
             }
         }
 
-        // Initialize primary TPM
+        // Get primary TPM
         TARGETING::Target* pPrimaryTpm = nullptr;
         (void)getPrimaryTpm(pPrimaryTpm);
+
+        // First check if we need to disable the TPM
+        primary_tpm_was_disabled = disableTpmCheck(pPrimaryTpm);
+        if (primary_tpm_was_disabled == false)
+        {
+            TRACFCOMP(g_trac_trustedboot,"host_update_master_tpm: "
+                      "Primary TPM was NOT Disabled (%d). Continue Init",
+                      primary_tpm_was_disabled);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_trustedboot,"host_update_master_tpm: "
+                      "Primary TPM was Disabled (%d). Skip Init and "
+                      "Skip setting as UNUSABLE (to avoid a failover)",
+                      primary_tpm_was_disabled);
+
+            // Mark this so init is not attempted again
+            pPrimaryTpm->setAttr<TARGETING::ATTR_HB_TPM_INIT_ATTEMPTED>(true);
+
+            break;
+        }
+
+        // Initialize primary TPM
         if(pPrimaryTpm)
         {
             auto hwasState = pPrimaryTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
@@ -1208,12 +1233,15 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
     // if the SBE lock bit is set, then we will call the HWP here
     if (!(l_regValue & static_cast<uint64_t>(SECUREBOOT::ProcSecurity::SULBit)))
     {
+        TRACFCOMP(g_trac_trustedboot,
+            INFO_MRK"tpmMarkFailed - Skipping call to p9_update_security_ctrl "
+                    "because SBE lock bit has not been set yet");
         break;
     }
 
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> l_fapiTarg(l_proc);
-
-    FAPI_INVOKE_HWP(l_err, p9_update_security_ctrl, l_fapiTarg);
+    bool l_force_security = true;
+    FAPI_INVOKE_HWP(l_err, p9_update_security_ctrl, l_fapiTarg, l_force_security);
 
     if (l_err)
     {
@@ -1509,6 +1537,25 @@ void doInitBackupTpm()
                     l_backupHwasState);
                 break;
             }
+        }
+
+        // Backup TPM found. Now check if it should be disabled.
+        bool l_backup_tpm_was_disabled = false;
+        l_backup_tpm_was_disabled = disableTpmCheck(l_backupTpm);
+        if (l_backup_tpm_was_disabled == false)
+        {
+            TRACFCOMP(g_trac_trustedboot,"doInitBackupTpm: "
+                      "Backup TPM was NOT Disabled (%d). Continue Init",
+                      l_backup_tpm_was_disabled);
+        }
+        else
+        {
+            TRACFCOMP(g_trac_trustedboot,"doInitBackupTpm: "
+                      "Backup TPM was Disabled (%d). Skip Init and "
+                      "Skip setting as UNUSABLE (to avoid a failover)",
+                      l_backup_tpm_was_disabled);
+
+            break;
         }
 
         mutex_lock(l_backupTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>());
@@ -2118,7 +2165,6 @@ bool isTpmRequired()
             retVal = false;
         }
 
-
         // Since sensor isn't available, use ATTR_TPM_REQUIRED
         TARGETING::Target* pTopLevel = nullptr;
         (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
@@ -2217,6 +2263,181 @@ bool getTpmRequiredSensorValue(bool& o_isTpmRequired)
 
     return retVal;
 }
+
+bool disableTpmCheck(TpmTarget* i_pTpm)
+{
+    bool retVal = false;
+
+    // Setup target service and system target, as they are used below
+    TARGETING::Target* pTopLevel = nullptr;
+    (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
+    assert(pTopLevel != nullptr, "Unable to get top level target");
+
+
+    do
+    {
+        TRACFCOMP( g_trac_trustedboot,ENTER_MRK"disableTpmCheck: i_pTpm=0x%X",
+                   TARGETING::get_huid(i_pTpm));
+
+        // First determine if the TPM should be disabled
+
+        // If sensor is available, use that value
+        bool l_disableTpm = false;
+        if ( getDisableTpmSensorValue(l_disableTpm) )
+        {
+            // Sensor is available so use its setting of retVal
+            TRACUCOMP( g_trac_trustedboot, "disableTpmCheck: Sensor is "
+                       "available: using l_disableTpm=%d",
+                       l_disableTpm );
+        }
+        else
+        {
+            // Since sensor isn't available, use ATTR_DISABLE_TPM
+            l_disableTpm = pTopLevel->getAttr<TARGETING::ATTR_DISABLE_TPM>();
+
+            TRACUCOMP( g_trac_trustedboot, "disableTpmCheck: "
+                       "Using ATTR_DISABLE_TPM: l_disableTpm=%d",
+                       l_disableTpm );
+        }
+
+        // Check if TPM needs to be disabled
+        if (l_disableTpm == false)
+        {
+            TRACFCOMP( g_trac_trustedboot, "disableTpmCheck: "
+                       "Per Settings, Do NOT Disable TPM i_pTpm=0x%X",
+                       TARGETING::get_huid(i_pTpm));
+            retVal = l_disableTpm;
+            break;
+        }
+        else
+        {
+            // Disable TPM
+            retVal = l_disableTpm;
+            TRACFCOMP( g_trac_trustedboot, "disableTpmCheck: "
+                       "Per Settings, Must Disable TPM i_pTpm=0x%X",
+                       TARGETING::get_huid(i_pTpm));
+
+            // First unset TPM Required if it is set
+            bool l_isTpmRequired = isTpmRequired();
+            if (l_isTpmRequired == false)
+            {
+                TRACUCOMP( g_trac_trustedboot, "disableTpmCheck: "
+                           "TPM Required is already NOT set, so nothing to do");
+            }
+            else
+            {
+                // Must unset TPM Required
+                // First unset Attribute
+                TRACFCOMP( g_trac_trustedboot, "disableTpmCheck: "
+                           "Since TPM will be disabled, unset TPM Required");
+                pTopLevel->setAttr<TARGETING::ATTR_TPM_REQUIRED>(false);
+
+
+                // Second unset/clear TPM Required Sensor
+                // @TODO STGD 589636
+                // This is optional. Technically the "Disable TPM" setting
+                // supersedes the "TPM Required" setting and this clear
+                // isn't necessary
+
+            }
+
+            // Now that TPM Required is not set, call tpmMarkFailed to set
+            // TDP bit and set the TPM as non-functional
+            TRACFCOMP( g_trac_trustedboot, "disableTpmCheck: "
+                       "Mark TPM as failed, which will set TDP Bit");
+            errlHndl_t l_err = nullptr;
+            tpmMarkFailed(i_pTpm, l_err);
+        }
+
+    } while(0);
+
+    TRACFCOMP( g_trac_trustedboot,EXIT_MRK"disableTpmCheck: i_pTpm=0x%X, "
+               "retVal = %d",
+               TARGETING::get_huid(i_pTpm), retVal);
+
+    return retVal;
+}
+
+bool getDisableTpmSensorValue(bool& o_disableTpm)
+{
+    bool retVal = false;
+    o_disableTpm = false;
+
+    // Get Disable TPM Sensor
+#ifdef CONFIG_BMC_IPMI
+
+    TARGETING::Target* pTopLevel = nullptr;
+    (void)TARGETING::targetService().getTopLevelTarget(pTopLevel);
+    assert(pTopLevel != nullptr, "Unable to get top level target");
+
+    uint32_t sensorNum = TARGETING::UTIL::getSensorNumber(pTopLevel,
+                                        TARGETING::SENSOR_NAME_DISABLE_TPM);
+
+    TRACUCOMP( g_trac_trustedboot,"getDisableTpmSensorValue: sensorNum=0x%X, "
+               "enum=0x%X",
+               sensorNum, TARGETING::SENSOR_NAME_DISABLE_TPM);
+
+    // VALID IPMI sensors are 0-0xFE
+    if (TARGETING::UTIL::INVALID_IPMI_SENSOR != sensorNum)
+    {
+        // Check if Disable TPM is required by BMC
+        SENSOR::getSensorReadingData disableTpmData;
+        SENSOR::SensorBase disableTpmSensor(TARGETING::SENSOR_NAME_DISABLE_TPM,
+                                            pTopLevel);
+
+        errlHndl_t err = disableTpmSensor.readSensorData(disableTpmData);
+        if (nullptr == err)
+        {
+            // Sensor is available and found without error
+            retVal = true;
+
+            // 0x02 == Asserted bit (Disable TPM is required)
+            if ((disableTpmData.event_status &
+                 (1 << SENSOR::ASSERTED)) ==
+                (1 << SENSOR::ASSERTED))
+            {
+                o_disableTpm = true;
+            }
+        }
+        else
+        {
+            // error reading sensor, so consider sensor not available
+            TRACFCOMP( g_trac_trustedboot,ERR_MRK"getDisableTpmSensorValue: "
+                       "Unable to read Disable Tpm Sensor: rc = 0x%04X "
+                       "(sensorNum=0x%X, enum=0x%X) Deleting Error plid=0x%04X."
+                       " Considering Sensor NOT required",
+                       err->reasonCode(), sensorNum,
+                       TARGETING::SENSOR_NAME_DISABLE_TPM,
+                       err->plid());
+            delete err;
+            err = nullptr;
+            retVal = false;
+        }
+    }
+    else
+    {
+        // Sensor not available
+        retVal = false;
+        TRACUCOMP( g_trac_trustedboot, "getDisableTpmSensorValue: Sensor "
+                   "not available: retVal=%d (sensorNum=0x%X)",
+                   retVal, sensorNum );
+    }
+
+    TRACFCOMP( g_trac_trustedboot,
+               "getDisableTpmSensorValue: isAvail=%s, o_disableTpm=%s",
+               (retVal ? "Yes" : "No"),
+               (o_disableTpm ? "Yes" : "No") );
+#else
+    // IPMI support not there, so consider sensor not available
+    retVal = false;
+    TRACUCOMP( g_trac_trustedboot, "getDisableTpmSensorValue: IPMI Support "
+               "not found; retVal=%d",
+               retVal );
+#endif
+
+    return retVal;
+}
+
 
 
 #ifdef CONFIG_DRTM

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -229,7 +229,7 @@ void getTpmWithRoleOf(
     TARGETING::Target*& o_pTpm);
 
 /**
- *  @brief Returns value of TPM Sensor if it is available
+ *  @brief Returns value of TPM Required Sensor if it is available
  *         All error handing is contained in the function and the output value
  *         is only valid if the function returns TRUE
  *
@@ -242,6 +242,35 @@ void getTpmWithRoleOf(
  */
 bool getTpmRequiredSensorValue(
     bool& o_isTpmRequired);
+
+/**
+ *  @brief Returns value of Disable TPM Sensor if it is available
+ *         All error handing is contained in the function and the output value
+ *         is only valid if the function returns TRUE
+ *
+ *  @param[out] o_disableTpm Value returned from Disable TPM sensor:
+ *              TRUE if hostboot needs to disable TPM;
+ *              FALSE if Hostboot does NOT need to disable TPM
+ *              NOTE: this parameter is only valid if this function returns TRUE
+ *
+ *  @return bool  Returns TRUE if sensor was available and found without error;
+ *                otherwise returns FALSE
+ */
+bool getDisableTpmSensorValue(
+    bool& o_disableTpm);
+
+/**
+ *  @brief Disables TPM, if necessary
+ *
+ *  First, it check if the TPM passed in should be disabled.
+ *  If it should, then the TPM will be disabled in this function.
+ *  All errors will be handled internally
+ *
+ *  @return bool Whether or not the TPM was disabled
+ *  @retval true The TPM was disabled
+ *  @retval false The TPM was NOT disabled
+ */
+bool disableTpmCheck(TpmTarget*  i_pTpm);
 
 /**
  * @brief Marks the input TPM as UNUSABLE and creates an unrecoverable errorlog

@@ -830,7 +830,7 @@
 
   <attribute>
     <description>
-        Setting that determins if the TPM(s) on the system should be disabled
+        Setting that determines if the TPM(s) on the system should be disabled
         0x00 - Do NOT Disable TPM
         0x01 - Disable TPM
     </description>
