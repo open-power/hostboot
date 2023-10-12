@@ -958,40 +958,10 @@ uint32_t getChipLevel (TARGETING::Target* i_target)
         l_chip = l_parentChip;
     }
 
-    TARGETING::ATTR_MODEL_type l_model =
-      l_chip->getAttr<TARGETING::ATTR_MODEL>();
     TARGETING::ATTR_EC_type l_ec =
       l_chip->getAttr<TARGETING::ATTR_EC>();
 
-    // @TODO RTC 213022: remove this when the EKB constant is available
-    const uint32_t P10_DD1_SI_MODE = 0x0;
-
-    // convert to scominfo types
-    uint32_t l_chipLevel = 0;
-    switch( l_model )
-    {
-        case(TARGETING::MODEL_POWER10):
-            switch(l_ec)
-            {
-                // @TODO RTC 213022: fix this case and make default the error
-                // case when ATTR_EC actually gets set for P10
-                default:
-                case(0x10):
-                    l_chipLevel = P10_DD1_SI_MODE;
-                    break;
-                //default:
-                    TRACFCOMP( g_trac_scom,
-                               "Unsupported P10 EC 0x%X", l_ec );
-                    assert(false,"Unsupported P10 EC");
-            }
-            break;
-        default:
-            TRACFCOMP( g_trac_scom,
-                       "Unsupported Chip Type %d", l_model );
-            assert(false,"Unsupported Chip Type");
-    }
-
-    return l_chipLevel;
+    return l_ec;
 }
 
 
