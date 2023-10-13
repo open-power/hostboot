@@ -119,6 +119,7 @@
         name        "TP Chiplet Checkstop FIR MASK OR";
         scomaddr    0x01040050;
         capture     group never;
+        access      write_only;
     };
 
     register CFIR_TP_RE_MASK_OR
@@ -126,6 +127,7 @@
         name        "TP Chiplet Recoverable FIR MASK OR";
         scomaddr    0x01040051;
         capture     group never;
+        access      write_only;
     };
 
     register CFIR_TP_SPA_MASK_OR
@@ -133,6 +135,7 @@
         name        "TP Chiplet Special Attention FIR MASK OR";
         scomaddr    0x01040052;
         capture     group never;
+        access      write_only;
     };
 
     register CFIR_TP_UCS_MASK_OR
@@ -140,6 +143,7 @@
         name        "TP Chiplet Unit Checkstop FIR MASK OR";
         scomaddr    0x01040053;
         capture     group never;
+        access      write_only;
     };
 
     register CFIR_MEM_CS_MASK_OR
@@ -147,6 +151,7 @@
         name        "MEM Chiplet Checkstop FIR MASK OR";
         scomaddr    0x08040050;
         capture     group never;
+        access      write_only;
     };
 
     register CFIR_MEM_RE_MASK_OR
@@ -154,6 +159,7 @@
         name        "MEM Chiplet Recoverable FIR MASK OR";
         scomaddr    0x08040051;
         capture     group never;
+        access      write_only;
     };
 
     register CFIR_MEM_SPA_MASK_OR
@@ -161,6 +167,7 @@
         name        "MEM Chiplet Special Attention FIR MASK OR";
         scomaddr    0x08040052;
         capture     group never;
+        access      write_only;
     };
 
     register CFIR_MEM_UCS_MASK_OR
@@ -168,6 +175,7 @@
         name        "MEM Chiplet Unit Checkstop FIR MASK OR";
         scomaddr    0x08040053;
         capture     group never;
+        access      write_only;
     };
 
     ############################################################################
@@ -197,6 +205,7 @@
         name        "Odyssey chip SRQ_FIR OR";
         scomaddr    0x08011001;
         capture     group never;
+        access      write_only;
     };
 
     register SRQ_FIR_MASK_OR
@@ -204,6 +213,7 @@
         name        "Odyssey chip SRQ_FIR MASK OR";
         scomaddr    0x08011003;
         capture     group never;
+        access      write_only;
     };
 
     register SRQ_ERR_RPT
@@ -405,6 +415,7 @@
         name        "Odyssey chip RDF_FIR 0 MASK OR";
         scomaddr    0x08011803;
         capture     group never;
+        access      write_only;
     };
 
     register RDF_0_ERR_RPT_0
@@ -556,6 +567,7 @@
         name        "Odyssey chip RDF_FIR 1 MASK OR";
         scomaddr    0x08012803;
         capture     group never;
+        access      write_only;
     };
 
     register RDF_1_ERR_RPT_0
@@ -767,6 +779,7 @@
         name        "Odyssey chip DLX_FIR MASK OR";
         scomaddr    0x08012403;
         capture     group never;
+        access      write_only;
     };
 
     register CMN_CONFIG
@@ -883,6 +896,7 @@
         name        "Odyssey chip ODP_FIR 0 MASK OR";
         scomaddr    0x08013003;
         capture     group never;
+        access      write_only;
     };
 
     register PHY_INTERRUPT_STATUS_0
@@ -1181,6 +1195,7 @@
         name        "Odyssey chip ODP_FIR 1 MASK OR";
         scomaddr    0x08013403;
         capture     group never;
+        access      write_only;
     };
 
     register PHY_INTERRUPT_STATUS_1
@@ -1642,6 +1657,7 @@
         name        "Odyssey chip OCMB_PHY_FIR MASK OR";
         scomaddr    0x08010C03;
         capture     group never;
+        access      write_only;
     };
 
     ############################################################################
