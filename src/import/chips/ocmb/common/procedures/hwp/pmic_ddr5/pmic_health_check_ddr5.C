@@ -41,6 +41,7 @@
 #include <lib/utils/pmic_consts.H>
 #include <pmic_regs.H>
 #include <pmic_regs_fld.H>
+#include <mss_generic_attribute_getters.H>
 
 ///
 /// @brief Reset bread crumbs for all PMICs
@@ -352,20 +353,39 @@ void read_ivpp(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
 /// @param[in,out] io_health_check_info health check struct for raw phase readings
 /// @return None
 /// @note The domain current calculations has been taken from the document provided by the Power team
-///      "Redundant PoD5 - Functional Specification dated 20230421 version 0.08".
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.08".
+///       PMIC3 SWC (supplied VDD) has a misplaced sensing signal.
+///       That misplacement will cause a current imbalance where PMIC3 SWC may not contribute much current to VDD although it is functional.
+///       The SPD was fixed but some of the RAW cards still have this issue.
+///       In order to be sure that the RAW cards dont cause the system to go into n-mode at IPL and during run time,
+///       we're skipping VDD current imbalance check only for raw card C (which per SPD is 0x02), revision 0
 ///
 void read_ivdd(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
     uint32_t l_phase[3] = {};
     const uint8_t l_pmic[] = {0, 1, 3};
+    uint8_t l_raw_card_ref_design = 0;
+    uint8_t l_raw_card_design = 0;
 
-    // IVDD is made up of SWC0, SWC1 and SWC3
-    l_phase[0] = (io_health_check_info.iv_pmic0.iv_swc_current_mA);
-    l_phase[1] = (io_health_check_info.iv_pmic1.iv_swc_current_mA);
-    l_phase[2] = (io_health_check_info.iv_pmic3.iv_swc_current_mA);
+    static constexpr uint8_t RAW_CARD_REF_DESIGN_C = 0x02;
+    static constexpr uint8_t RAW_CARD_REV = 0x00;
 
-    phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
+    // Get OCMB target
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(io_target_info.iv_pmic_dt_map[0].iv_pmic);
+    // Get the RAW card attribute
+    mss::attr::get_eff_dimm_raw_card_reference_design(l_ocmb, l_raw_card_ref_design);
+    mss::attr::get_eff_dimm_raw_card_design_revision(l_ocmb, l_raw_card_design);
+
+    if (!((l_raw_card_ref_design == RAW_CARD_REF_DESIGN_C) && (l_raw_card_design == RAW_CARD_REV)))
+    {
+        // IVDD is made up of SWC0, SWC1 and SWC3
+        l_phase[0] = (io_health_check_info.iv_pmic0.iv_swc_current_mA);
+        l_phase[1] = (io_health_check_info.iv_pmic1.iv_swc_current_mA);
+        l_phase[2] = (io_health_check_info.iv_pmic3.iv_swc_current_mA);
+
+        phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
+    }
 }
 
 ///
