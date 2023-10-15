@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,7 +185,7 @@ enum PM_QME_SCRB_DEFS
     QME_SCRB_STOP2_TO_STOP0                = 16,
     QME_SCRB_STOP3_TO_STOP2                = 17,
     QME_SCRB_STOP11_TO_STOP5               = 18,
-    QME_SCRB_RESERVED                      = 19,
+    QME_SCRB_USE_LPAR_ATTRIBUTE            = 19,
     QME_SCRB_CORE_LPAR_MODE_VECTOR_BASE    = 20, // 20,21,22,23
     QME_SCRB_CORE_LPAR_MODE_VECTOR_SIZE    = 4,
     QME_SCRB_STOP11_ENTRY_REQUESTED_BASE   = 24, // 24,25,26,27
