@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <fapi2.H>
 #include <ody_sppe_draminit.H>
 #include <lib/phy/ody_draminit_procedure.H>
+#include <lib/phy/ody_draminit_utils.H>
 #include <generic/memory/mss_git_data_helper.H>
 extern "C"
 {
@@ -50,7 +51,12 @@ extern "C"
     {
         mss::display_git_commit_info("ody_sppe_draminit");
 
-        return mss::ody::draminit(i_target, o_log_data);
+
+        FAPI_TRY(mss::ody::phy::check_draminit_verbosity(i_target));
+        FAPI_TRY(mss::ody::draminit(i_target, o_log_data));
+
+    fapi_try_exit:
+        return fapi2::current_err;
 
     }
 

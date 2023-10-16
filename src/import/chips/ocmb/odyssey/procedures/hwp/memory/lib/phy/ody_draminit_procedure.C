@@ -64,12 +64,10 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
 
     // Create the stucture to configure
     PMU_SMB_DDR5U_1D_t l_msg_block;
-    const auto& l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
     uint64_t l_status = mss::ody::phy::mailbox_consts::FAILED_COMPLETION;
     uint8_t l_draminit_step_enable = 0;
     fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
 
-    FAPI_TRY(mss::ody::phy::check_draminit_verbosity(l_ocmb_target));
     FAPI_TRY(mss::attr::get_draminit_training_timeout(i_target , l_poll_count));
     FAPI_TRY(mss::attr::get_ody_draminit_step_enable(l_draminit_step_enable));
 
