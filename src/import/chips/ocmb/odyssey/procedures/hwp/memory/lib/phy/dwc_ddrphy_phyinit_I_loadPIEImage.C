@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -95,9 +95,11 @@ fapi_try_exit:
 ///
 /// @brief Generates structures, loads registers and programs the PHY initialization engine (PIE) after training
 /// @param[in] i_target - the memory port on which to operate
+/// @param[in] i_code_data - hwp_data_istream for the PIE image data
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        fapi2::hwp_data_istream& i_code_data)
 {
     // Configuring the runtime config via hard codes -> none of these values should change for firmware
     runtime_config_t l_runtime_config;
@@ -150,7 +152,8 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
              l_runtime_config,
              l_user_input_basic,
              l_user_input_advanced,
-             l_dram_config));
+             l_dram_config,
+             i_code_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -163,13 +166,15 @@ fapi_try_exit:
 /// @param[in] i_user_input_basic - Synopsys basic user input structure
 /// @param[in] i_user_input_advanced - Synopsys advanced user input structure
 /// @param[in] i_dram_config the draminit message block
+/// @param[in] i_code_data - hwp_data_istream for the PIE image data
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         runtime_config_t& io_runtime_config,
         const user_input_basic_t& i_user_input_basic,
         const user_input_advanced_t& i_user_input_advanced,
-        const user_input_dram_config_t& i_dram_config)
+        const user_input_dram_config_t& i_dram_config,
+        fapi2::hwp_data_istream& i_code_data)
 {
 
     int skip_training = io_runtime_config.skip_train;
@@ -214,13 +219,16 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
 
         FAPI_DBG (TARGTIDFORMAT " // [phyinit_I_loadPIEImage] Programming PIE Production Code", TARGTID);
 
+        // Convert istream into bit_istream so we can grab 16 bits at a time
+        fapi2::hwp_bit_istream l_istream(i_code_data);
+
         if(i_user_input_basic.DimmType == UDIMM)
         {
-            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode(i_target, io_runtime_config));
+            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode(i_target, io_runtime_config, l_istream));
         }
         else
         {
-            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode_rdimm(i_target, io_runtime_config));
+            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode_rdimm(i_target, io_runtime_config, l_istream));
         }
 
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tINITENG | csr_Seq0BDisableFlag0_ADDR), 0x0000));
@@ -704,7 +712,7 @@ int dwc_ddrphy_phyinit_TestPIEProdEnableBits( const runtime_config_t& i_runtime_
 /// @param[in] i_runtime_config - the runtime configuration
 /// @param[in] code_sections Array of structures for continuous address sections of code
 /// @param[in] code_section_count Size of the code_sections array
-/// @param[in] code_data     Array of words that make up data for the code sections
+/// @param[in] code_data - hwp_bit_istream for the PIE image data
 /// @param[in] code_data_count Size of the code_data array
 /// @param[in] code_markers  Array of code_markers, sorted by code index
 /// @param[in] code_marker_count Size of the code_markers array
@@ -719,7 +727,7 @@ int dwc_ddrphy_phyinit_TestPIEProdEnableBits( const runtime_config_t& i_runtime_
 fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const runtime_config_t& i_runtime_config,
         code_section_t* code_sections, size_t code_section_count,
-        uint16_t* code_data, size_t code_data_count,
+        fapi2::hwp_bit_istream& code_data, size_t code_data_count,
         code_marker_t* code_markers, size_t code_marker_count)
 {
     FAPI_DBG (TARGTIDFORMAT " // [phyinit_LoadPIECodeSections] Start of dwc_ddrphy_phyinit_LoadPIECodeSections()",
@@ -756,6 +764,14 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fap
                     {
                         FAPI_DBG (TARGTIDFORMAT " // [phyinit_LoadPIECodeSections] No match for ANY enable_bits = %x, type = %x", TARGTID,
                                   current_code_section->enable_bits, current_code_section->enable_type);
+
+                        // fast forward istream to the next code section
+                        for (uint16_t l_addr_count = 0; l_addr_count < current_code_section->section_len; l_addr_count++)
+                        {
+                            uint16_t current_data = 0;
+                            FAPI_TRY(code_data.get16(current_data));
+                        }
+
                         continue;
                     }
 
@@ -771,6 +787,14 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fap
                     {
                         FAPI_DBG (TARGTIDFORMAT " // [phyinit_LoadPIECodeSections] No match for NO enable_bits = %x, type = %x", TARGTID,
                                   current_code_section->enable_bits, current_code_section->enable_type);
+
+                        // fast forward istream to the next code section
+                        for (uint16_t l_addr_count = 0; l_addr_count < current_code_section->section_len; l_addr_count++)
+                        {
+                            uint16_t current_data = 0;
+                            FAPI_TRY(code_data.get16(current_data));
+                        }
+
                         continue;
                     }
 
@@ -786,6 +810,14 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fap
                     {
                         FAPI_DBG (TARGTIDFORMAT " // [phyinit_LoadPIECodeSections] No match for ALL enable_bits = %x, type = %x", TARGTID,
                                   current_code_section->enable_bits, current_code_section->enable_type);
+
+                        // fast forward istream to the next code section
+                        for (uint16_t l_addr_count = 0; l_addr_count < current_code_section->section_len; l_addr_count++)
+                        {
+                            uint16_t current_data = 0;
+                            FAPI_TRY(code_data.get16(current_data));
+                        }
+
                         continue;
                     }
 
@@ -823,9 +855,7 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fap
             break;
         }
 
-        uint16_t* current_data = &(code_data[data_index]);
-
-        for (uint16_t j = 0; j < section_len; ++j, ++current_address, ++current_data)
+        for (uint16_t j = 0; j < section_len; ++j, ++current_address)
         {
             if ((current_address == ((csr_SequenceReg0b175s2_ADDR | tINITENG) + 0x1))  && ((pubRev >= 0x0350 && pubRev < 0x0400)
                     || (pubRev >= 0x0420)))   // 40 bit 176 PIE instructions
@@ -868,7 +898,13 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fap
             }
             else
             {
-                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, current_address, *current_data));
+                // IMPORTANT: The original reference code from Synopsys uses a random-access pointer to load the
+                // PIE image data, but loads it sequentially. We take advantage of that here, which allows us to
+                // use a hwp_istream to get the image data (sequentially) from the NOR FLASH. If this code ever
+                // changes to jump around in the image data, this will need to be revisited.
+                uint16_t current_data = 0;
+                FAPI_TRY(code_data.get16(current_data));
+                FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, current_address, current_data));
             }
         }
     }

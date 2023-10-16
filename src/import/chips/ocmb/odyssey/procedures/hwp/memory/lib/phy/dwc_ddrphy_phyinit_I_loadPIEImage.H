@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -46,6 +46,7 @@
 #define _ODY_STEPI_LOAD_PIE_IMAGE_H_
 
 #include <fapi2.H>
+#include <hwp_data_stream.H>
 
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/c_str.H>
@@ -55,9 +56,11 @@
 ///
 /// @brief Generates structures, loads registers and programs the PHY initialization engine (PIE) after training
 /// @param[in] i_target - the memory port on which to operate
+/// @param[in] i_code_data - hwp_data_istream for the PIE image data
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        fapi2::hwp_data_istream& i_code_data);
 
 ///
 /// @brief Loads registers and programs the PHY initialization engine (PIE) after training
@@ -66,12 +69,14 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
 /// @param[in] i_user_input_basic - Synopsys basic user input structure
 /// @param[in] i_user_input_advanced - Synopsys advanced user input structure
 /// @param[in] i_dram_config the draminit message block
+/// @param[in] i_code_data - hwp_data_istream for the PIE image data
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         runtime_config_t& io_runtime_config,
         const user_input_basic_t& i_user_input_basic,
         const user_input_advanced_t& i_user_input_advanced,
-        const user_input_dram_config_t& i_dram_config);
+        const user_input_dram_config_t& i_dram_config,
+        fapi2::hwp_data_istream& i_code_data);
 
 #endif

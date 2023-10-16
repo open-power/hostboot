@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -55,9 +55,13 @@ extern "C"
 ///
 /// @brief Load the PHY Initialization Engine (PIE) to initialize the PHY to mainline mode
 /// @param[in] i_target, the MC of the ports
+/// @param[in] i_code_data0 - hwp_data_istream for the PIE image data for port0
+/// @param[in] i_code_data1 - hwp_data_istream for the PIE image data for port1
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode ody_load_pie( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
+    fapi2::ReturnCode ody_load_pie( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    fapi2::hwp_data_istream& i_code_data0,
+                                    fapi2::hwp_data_istream& i_code_data1 )
     {
         mss::display_git_commit_info("ody_load_pie");
 
@@ -74,7 +78,11 @@ extern "C"
 
         for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
         {
-            FAPI_TRY(dwc_ddrphy_phyinit_I_loadPIEImage(l_port));
+            uint8_t l_pos = 0;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_port, l_pos));
+
+            FAPI_TRY(dwc_ddrphy_phyinit_I_loadPIEImage(l_port, (l_pos == 0) ? i_code_data0 : i_code_data1));
 
             // Throws the DRAM into self-time refresh mode
             FAPI_TRY(mss::change_force_str<mss::mc_type::ODYSSEY>( i_target, mss::states::ON ));

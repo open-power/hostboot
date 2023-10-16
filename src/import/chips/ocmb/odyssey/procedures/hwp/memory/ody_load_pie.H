@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,18 +38,26 @@
 #define _ODY_LOAD_PIE_H_
 
 #include <fapi2.H>
+#include <hwp_data_stream.H>
 
-typedef fapi2::ReturnCode (*ody_load_pie_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+typedef fapi2::ReturnCode (*ody_load_pie_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
+        fapi2::hwp_data_istream&,
+        fapi2::hwp_data_istream&);
 
 extern "C"
 {
 
-    ///
-    /// @brief Load the PHY Initialization Engine (PIE) to initialize the PHY to mainline mode
-    /// @param[in] i_target the OCMB target to operate on
-    /// @return FAPI2_RC_SUCCESS iff ok
-    ///
-    fapi2::ReturnCode ody_load_pie(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+///
+/// @brief Load the PHY Initialization Engine (PIE) to initialize the PHY to mainline mode
+/// @param[in] i_target, the MC of the ports
+/// @param[in] i_code_data0 - hwp_data_istream for the PIE image data for port0
+/// @param[in] i_code_data1 - hwp_data_istream for the PIE image data for port1
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+    fapi2::ReturnCode ody_load_pie( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    fapi2::hwp_data_istream& i_code_data0,
+                                    fapi2::hwp_data_istream& i_code_data1 );
+
 }
 
 #endif
