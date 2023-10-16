@@ -307,41 +307,6 @@
         capture     group MaintCmdRegs_ocmb;
     };
 
-    register MBNCER
-    {
-        name        "Odyssey chip MBS Mainline NCE Address Trap Register";
-        scomaddr    0x0801146A;
-        capture     group mcbist_fir_regs;
-    };
-
-    register MBRCER
-    {
-        name        "Odyssey chip MBS Mainline RCE Address Trap Register";
-        scomaddr    0x0801146B;
-        capture     group mcbist_fir_regs;
-    };
-
-    register MBMPER
-    {
-        name        "Odyssey chip MBS Mainline MPE Address Trap Register";
-        scomaddr    0x0801146C;
-        capture     group mcbist_fir_regs;
-    };
-
-    register MBUER
-    {
-        name        "Odyssey chip MBS Mainline UE Address Trap Register";
-        scomaddr    0x0801146D;
-        capture     group mcbist_fir_regs;
-    };
-
-    register MBAUER
-    {
-        name        "Odyssey chip MBS Mainline AUE Address Trap Register";
-        scomaddr    0x0801146E;
-        capture     group mcbist_fir_regs;
-    };
-
     register MBA_ERR_MASK_0
     {
         name        "Odyssey chip MBA Error Mask0 Register";
@@ -353,13 +318,6 @@
     {
         name        "Odyssey chip MBA Error Mask1 Register";
         scomaddr    0x08011474;
-        capture     group mcbist_fir_regs;
-    };
-
-    register MBSEVR0
-    {
-        name        "Odyssey chip MBS Error Vector Trap Register 0";
-        scomaddr    0x0801147E;
         capture     group mcbist_fir_regs;
     };
 
@@ -404,6 +362,58 @@
         name        "Odyssey chip MCBIST Configuration Register";
         scomaddr    0x080114E0;
         capture     group ocmb_regs;
+    };
+
+    ############################################################################
+    # Odyssey chip RDF_FIR (both 0 and 1)
+    ############################################################################
+
+    register MBNCER
+    {
+        name        "Odyssey chip MBS Mainline NCE Address Trap Register";
+        scomaddr    0x0801146A;
+        capture     group rdf_fir_0_regs;
+        capture     group rdf_fir_1_regs;
+    };
+
+    register MBRCER
+    {
+        name        "Odyssey chip MBS Mainline RCE Address Trap Register";
+        scomaddr    0x0801146B;
+        capture     group rdf_fir_0_regs;
+        capture     group rdf_fir_1_regs;
+    };
+
+    register MBMPER
+    {
+        name        "Odyssey chip MBS Mainline MPE Address Trap Register";
+        scomaddr    0x0801146C;
+        capture     group rdf_fir_0_regs;
+        capture     group rdf_fir_1_regs;
+    };
+
+    register MBUER
+    {
+        name        "Odyssey chip MBS Mainline UE Address Trap Register";
+        scomaddr    0x0801146D;
+        capture     group rdf_fir_0_regs;
+        capture     group rdf_fir_1_regs;
+    };
+
+    register MBAUER
+    {
+        name        "Odyssey chip MBS Mainline AUE Address Trap Register";
+        scomaddr    0x0801146E;
+        capture     group rdf_fir_0_regs;
+        capture     group rdf_fir_1_regs;
+    };
+
+    register MBSEVR0
+    {
+        name        "Odyssey chip MBS Error Vector Trap Register 0";
+        scomaddr    0x0801147E;
+        capture     group rdf_fir_0_regs;
+        capture     group rdf_fir_1_regs;
     };
 
     ############################################################################

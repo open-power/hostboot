@@ -641,7 +641,7 @@ PLUGIN_FETCH_MPE_ERROR( 7 )
 int32_t AnalyzeFetchNceTce( ExtensibleChip * i_chip,
                             STEP_CODE_DATA_STRUCT & io_sc )
 {
-    MemEcc::analyzeFetchNceTce<TYPE_OCMB_CHIP>( i_chip, io_sc );
+    MemEcc::analyzeFetchNceTce<TYPE_OCMB_CHIP>( i_chip, 0, io_sc );
     return SUCCESS; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchNceTce );

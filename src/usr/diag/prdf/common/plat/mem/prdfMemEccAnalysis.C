@@ -950,7 +950,7 @@ uint32_t handleMemCe( ExtensibleChip * i_chip, const MemAddr & i_addr,
 //------------------------------------------------------------------------------
 
 template<TARGETING::TYPE T>
-uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
+uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip, uint8_t i_port,
                              STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemEcc::analyzeFetchNceTce] "
@@ -1020,7 +1020,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
 
         // Get the symbols for the NCE/TCE attention.
         MemSymbol sym1, sym2;
-        o_rc = getMemReadSymbol<T>( i_chip, rank, addr.getPort(), sym1, sym2 );
+        o_rc = getMemReadSymbol<T>( i_chip, rank, i_port, sym1, sym2 );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "getMemReadSymbol(0x%08x) failed",
@@ -1073,12 +1073,12 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
             // termination policy.
 
             MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank,
-                addr.getPort()) );
-            o_rc = MemDbUtils::handleTdEvent<T>(i_chip, io_sc, addr.getPort());
+                i_port) );
+            o_rc = MemDbUtils::handleTdEvent<T>(i_chip, io_sc, i_port);
             if ( SUCCESS != o_rc )
             {
                 PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x,%x) failed on rank "
-                          "0x%02x", i_chip->getHuid(), addr.getPort(),
+                          "0x%02x", i_chip->getHuid(), i_port,
                           rank.getKey() );
                 break;
             }
@@ -1089,7 +1089,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    MemCaptureData::addEccData<T>( i_chip, io_sc, addr.getPort() );
+    MemCaptureData::addEccData<T>( i_chip, io_sc, i_port );
 
     return o_rc;
 
@@ -1099,7 +1099,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
 // To resolve template linker errors.
 template
 uint32_t analyzeFetchNceTce<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                             STEP_CODE_DATA_STRUCT & io_sc );
+    uint8_t i_port, STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -1189,25 +1189,25 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip, uint8_t i_port,
         // However, we want to run TPS once just to see how bad the rank is.
         MemRank rank = addr.getRank();
         MemDbUtils::pushToQueue<T>( i_chip, new TpsEvent<T>(i_chip, rank,
-            addr.getPort()) );
-        o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc, addr.getPort() );
+            i_port) );
+        o_rc = MemDbUtils::handleTdEvent<T>( i_chip, io_sc, i_port );
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "handleTdEvent(0x%08x,%x) failed on rank 0x%02x",
-                      i_chip->getHuid(), addr.getPort(), rank.getKey() );
+                      i_chip->getHuid(), i_port, rank.getKey() );
             break;
         }
 
         // Because of the UE, any further TPS requests will likely have no
         // effect. So ban all subsequent requests.
-        MemDbUtils::banTps<T>( i_chip, rank, addr.getPort() );
+        MemDbUtils::banTps<T>( i_chip, rank, i_port );
 
         #endif // __HOSTBOOT_RUNTIME
 
     } while (0);
 
     // Add ECC capture data for FFDC.
-    MemCaptureData::addEccData<T>( i_chip, io_sc, addr.getPort() );
+    MemCaptureData::addEccData<T>( i_chip, io_sc, i_port );
 
     return o_rc;
 

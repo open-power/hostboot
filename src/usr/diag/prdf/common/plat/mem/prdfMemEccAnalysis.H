@@ -151,11 +151,12 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
 /**
  * @brief  Analyzes a fetch NCE/TCE attention.
  * @param  i_chip   OCMB.
+ * @param  i_port   Target port select.
  * @param  io_sc    The step code data struct.
  * @return Non-SUCCESS if an interal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
-uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip,
+uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip, uint8_t i_port,
                              STEP_CODE_DATA_STRUCT & io_sc );
 
 /**

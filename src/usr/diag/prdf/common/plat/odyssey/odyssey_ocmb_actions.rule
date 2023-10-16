@@ -513,9 +513,14 @@ actionclass verify_chip_mark_port1_rank7
 };
 
 /** Mainline NCE/TCE handling */
-actionclass mainline_nce_tce_handling
+actionclass mainline_nce_tce_handling_0
 {
-    funccall("AnalyzeFetchNceTce");
+    funccall("AnalyzeFetchNceTce_0");
+};
+
+actionclass mainline_nce_tce_handling_1
+{
+    funccall("AnalyzeFetchNceTce_1");
 };
 
 /** Handle Mainline AUEs/IAUEs */

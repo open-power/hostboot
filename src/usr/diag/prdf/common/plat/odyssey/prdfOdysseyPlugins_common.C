@@ -504,13 +504,17 @@ PLUGIN_FETCH_MPE_ERROR(1,7);
  * @param  io_sc  The step code data struct.
  * @return SUCCESS
  */
-int32_t AnalyzeFetchNceTce( ExtensibleChip * i_chip,
-                            STEP_CODE_DATA_STRUCT & io_sc )
-{
-    MemEcc::analyzeFetchNceTce<TYPE_OCMB_CHIP>( i_chip, io_sc );
-    return SUCCESS; // nothing to return to rule code
-}
-PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchNceTce );
+#define ANALYZE_FETCH_NCE_TCE_PLUGIN(POS) \
+int32_t AnalyzeFetchNceTce_##POS( ExtensibleChip * i_chip, \
+                            STEP_CODE_DATA_STRUCT & io_sc ) \
+{ \
+    MemEcc::analyzeFetchNceTce<TYPE_OCMB_CHIP>( i_chip, POS, io_sc ); \
+    return SUCCESS; \
+} \
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchNceTce_##POS );
+
+ANALYZE_FETCH_NCE_TCE_PLUGIN(0);
+ANALYZE_FETCH_NCE_TCE_PLUGIN(1);
 
 //------------------------------------------------------------------------------
 
