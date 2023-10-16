@@ -103,6 +103,7 @@ prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
+prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 
 ################################################################################
@@ -251,6 +252,7 @@ prd_obj_no_sim += ody_unmask.o
 prd_obj_no_sim += ody_ccs_des_insert_workaround.o
 prd_obj_no_sim += ody_ccs.o
 prd_obj_no_sim += ody_fir.o
+prd_obj_no_sim += ody_dqs_track_utils.o
 
 # Needed for the exp_deploy_row_repairs procedure
 prd_obj_no_sim += exp_deploy_row_repairs.o
