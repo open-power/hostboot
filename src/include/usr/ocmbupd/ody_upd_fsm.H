@@ -207,6 +207,20 @@ inline void ody_upd_reset_state(TARGETING::Target* const i_ocmb)
     }
 }
 
+/**
+ * @brief Reads the SBE MSG register (SCOM 50009) and returns the async FFDC
+ *        bit.
+ *
+ * @param[in] i_ocmb the Odyssey OCMB chip to query
+ * @param[out] o_hasAsyncFfdc whether the Odyssey chip has async FFDC. The output
+ *             is set to false at the start of the function and is returned as false
+ *             in the case of an error
+ *
+ * @return errlHndl_t valid error log on failure; nullptr otherwise
+ */
+errlHndl_t ody_has_async_ffdc(TARGETING::Target* const i_ocmb,
+                              bool& o_hasAsyncFfdc);
+
 }
 
 #endif

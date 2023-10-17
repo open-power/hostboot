@@ -103,50 +103,12 @@ bool err_is_sppe_not_ready_with_async_ffdc(Target* const i_ocmb, const errlHndl_
 
     if (i_errl->reasonCode() == fapi2::RC_POZ_SPPE_NOT_READY_ERR)
     {
-        uint64_t data = 0;
-        uint64_t datasize = sizeof(data);
-        auto errl = deviceRead(i_ocmb,
-                               &data,
-                               datasize,
-                               DEVICE_SCOM_ADDRESS(0x50009));
-
-        if (errl)
+        errlHndl_t l_errlLocal = ody_has_async_ffdc(i_ocmb, is_sppe_not_ready_with_async_ffdc);
+        if(l_errlLocal)
         {
-            TRACISTEP("call_ocmb_check_for_ready: SCOM read failed on OCMB 0x%08X "
-                      "while trying to read the async FFDC bit; deleting error and continuing",
-                      get_huid(i_ocmb));
-            delete errl;
-            errl = nullptr;
-        }
-        else
-        {
-            // See mbxscratch.H for this definition
-            typedef union
-            {
-                struct
-                {
-                    uint64_t iv_sbeBooted : 1;
-                    uint64_t iv_asyncFFDC : 1;
-                    uint64_t iv_reserved1 : 1;
-                    uint64_t iv_currImage : 1; // If 0->SROM , 1->Boot Loader/Runtime
-                    uint64_t iv_prevState : 4;
-                    uint64_t iv_currState : 4;
-                    uint64_t iv_majorStep : 4;
-                    uint64_t iv_minorStep : 6;
-                    uint64_t iv_reserved2 : 4;
-                    uint64_t iv_progressCode : 6;
-                    uint64_t iv_unused : 32;
-                };
-                uint64_t iv_messagingReg;
-            }messagingReg_t;
-
-            messagingReg_t reg;
-            reg.iv_messagingReg = data;
-
-            if (reg.iv_asyncFFDC)
-            {
-                is_sppe_not_ready_with_async_ffdc = true;
-            }
+            // Don't care about this error
+            delete l_errlLocal;
+            l_errlLocal = nullptr;
         }
     }
 
