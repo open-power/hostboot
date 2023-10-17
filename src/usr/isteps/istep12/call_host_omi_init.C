@@ -200,7 +200,7 @@ void enablePipeFifoOCMB( const TargetHandleList& i_ocmbTargetList )
     {
         // don't mess with attributes without the mutex (just to be safe)
         l_mutex = l_ocmb->getHbMutexAttr<ATTR_SBE_FIFO_MUTEX>();
-        const auto lock = scoped_mutex_lock(*l_mutex);
+        const auto lock = scoped_recursive_mutex_lock(*l_mutex);
 
         if (TARGETING::UTIL::isOdysseyChip(l_ocmb))
         {

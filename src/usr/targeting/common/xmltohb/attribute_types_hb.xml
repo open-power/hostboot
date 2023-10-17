@@ -1496,10 +1496,24 @@
   </attribute>
 
   <attribute>
+    <id>SBE_FIFO_IN_PROGRESS</id>
+    <description>Notates if a FIFO op is in progress</description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>SBE_FIFO_MUTEX</id>
     <description>Ensures atomic SBE FIFO Operations</description>
     <simpleType>
-      <hbmutex/>
+      <hbrecursivemutex/>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

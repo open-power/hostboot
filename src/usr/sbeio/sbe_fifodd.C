@@ -125,11 +125,25 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
 {
     errlHndl_t errl = nullptr;
 
-    //Serialize access to the FIFO
-    mutex_t *l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
-    const auto lock  = scoped_mutex_lock(*l_mutex);
-
     SBE_TRACD(ENTER_MRK "performFifoChipOp");
+
+    // Serialize access to the FIFO for i_target
+    mutex_t *l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
+    const auto lock  = scoped_recursive_mutex_lock(*l_mutex);
+
+    // This counter tells us if the same thread has re-entered this function for
+    // the same target
+    auto l_fifo_in_progress = i_target->getAttr<TARGETING::ATTR_SBE_FIFO_IN_PROGRESS>();
+
+    if (l_fifo_in_progress)
+    {
+        // It is possible for a thread to hit an error doing a FIFO op, and then
+        //  re-enter this function for the same target to do another FIFO op.
+        //  If this happens, we must reset the FIFO so the second FIFO op has
+        //  a chance to succeed.
+        performFifoReset(i_target);
+    }
+    i_target->setAttr<TARGETING::ATTR_SBE_FIFO_IN_PROGRESS>(++l_fifo_in_progress);
 
     std::array<uint32_t, 2> request_header = { };
     errl = writeRequest(i_target, i_requestStream, request_header);
@@ -150,7 +164,18 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
     }
 
     ERROR_EXIT:
-    if (errl) {SBE_TRACF(ERR_MRK  "performFifoChipOp");}
+    if (errl)
+    {
+        SBE_TRACF(ERR_MRK  "performFifoChipOp");
+        if (TARGETING::UTIL::isOdysseyChip(i_target))
+        {
+            i_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
+        }
+    }
+
+    i_target->setAttr<TARGETING::ATTR_SBE_FIFO_IN_PROGRESS>(--l_fifo_in_progress);
+
+    SBE_TRACD("performFifoChipOp: exit - in_progress:%d", l_fifo_in_progress);
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
 
@@ -228,12 +253,12 @@ errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
 {
     errlHndl_t errl = nullptr;
 
-    //Serialize access to the FIFO
-    mutex_t *l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
-    const auto lock  = scoped_mutex_lock(*l_mutex);
-
     SBE_TRACF(ENTER_MRK "performFifoReset: to HUID 0x%08X",
               TARGETING::get_huid(i_target));
+
+    //Serialize access to the FIFO
+    mutex_t *l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
+    const auto lock  = scoped_recursive_mutex_lock(*l_mutex);
 
     // Perform a write to the DNFIFO Reset to cleanup the fifo
     uint32_t l_dummy = 0xDEAD;
