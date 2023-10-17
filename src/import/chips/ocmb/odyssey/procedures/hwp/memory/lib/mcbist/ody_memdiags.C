@@ -265,7 +265,7 @@ template <>
 fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_init_internal()
 {
     FAPI_INF("multi-port init internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
-
+    using TT = mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
 
     // Let's assume we are going to send out all subtest unless we are in broadcast mode,
     // where we only send up to 2 subtests under an MCA ( 1 for each DIMM) which is why no const
@@ -303,7 +303,16 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_init_internal()
     std::sort(iv_program.iv_subtests.begin(), iv_program.iv_subtests.end(),
               [](const decltype(iv_subtest)& a, const decltype(iv_subtest)& b) -> bool
     {
-        return a.get_port() < b.get_port();
+        uint16_t l_a_addr_sel = 0;
+        uint16_t l_b_addr_sel = 0;
+        a.iv_mcbmr.extractToRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(l_a_addr_sel);
+        b.iv_mcbmr.extractToRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(l_b_addr_sel);
+
+        if (a.get_port() == b.get_port())
+        {
+            return(l_a_addr_sel < l_b_addr_sel);
+        }
+        return (a.get_port() < b.get_port());
     });
 
     // Initialize the common sections
