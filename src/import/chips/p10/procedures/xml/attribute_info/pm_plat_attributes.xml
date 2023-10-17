@@ -124,6 +124,19 @@
     <group>bias</group>
   </attribute>
 
+  <!-- *********************************************************************-->
+  <attribute>
+    <id>ATTR_DDR5_VDN_UPLIFT_MV</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Defines the VDN rail uplift (in mV) if DDR5 DIMMs are installed in the node
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <initToZero/>
+    <mrw/>
+    <group>bias</group>
+  </attribute>
+
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_WOF_DCCR_VALUE</id>
