@@ -213,11 +213,15 @@ fapi2::ReturnCode prepare_oscillator_mpc(
 
     if (i_op == mpc_command::OSCILLATOR_START)
     {
+        // Oscillator time delay is tMRD + the DQS interval
+        // using the maximum tMRD (34 clocks at 4800)
+        constexpr uint64_t tMRD = 34;
+
         // Grab dqs value to delay to cover timer setting programmed into mr45
         FAPI_TRY(mss::attr::get_phy_dqs_osc_runtime_sel(l_port_target, l_dqs_interval));
 
         // Start Oscillator
-        l_inst = mss::ccs::ddr5::mpc_command<mss::mc_type::ODYSSEY>(l_port_rank, uint64_t(i_op), l_dqs_interval);
+        l_inst = mss::ccs::ddr5::mpc_command<mss::mc_type::ODYSSEY>(l_port_rank, uint64_t(i_op), l_dqs_interval + tMRD);
     }
     else
     {
