@@ -96,7 +96,7 @@ fapi2::ReturnCode set_CL_attr<mss::proc_type::PROC_P10>(
 
     FAPI_INF( "Final Chosen CL: %d for %s", l_temp, mss::c_str(i_target));
 
-    FAPI_TRY( mss::attr::set_dram_cl(i_target, l_temp) );
+    FAPI_TRY( FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_CL, i_target, l_temp) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -115,7 +115,7 @@ fapi2::ReturnCode set_freq<mss::proc_type::PROC_P10>(
 {
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        FAPI_TRY( mss::attr::set_freq(l_port, i_freq) );
+        FAPI_TRY( FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_FREQ, l_port, i_freq) );
     }
 
 fapi_try_exit:

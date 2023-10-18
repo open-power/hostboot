@@ -348,7 +348,7 @@ fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TA
         }
 
         // Now read them back out
-        FAPI_TRY(mss::attr::get_bad_dq_bitmap(l_dimm, l_bad_dq_array));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimm, l_bad_dq_array));
         FAPI_TRY(populate_ffdc_dq_buffers(l_bad_dq_array, l_bad_dq_0_63, l_bad_dq_64_80));
 
         FAPI_ASSERT(false,
@@ -906,9 +906,9 @@ class phy_params
             FAPI_TRY(mss::attr::get_ddp_compatibility(i_target, iv_attrs_params.iv_ddp_compatible));
             FAPI_TRY(mss::attr::get_tsv_8h_support(i_target, iv_attrs_params.iv_tsv8h));
             FAPI_TRY(mss::attr::get_mram_support(i_target, iv_attrs_params.iv_mram_support));
-            FAPI_TRY(mss::attr::get_dram_mds(i_target, iv_attrs_params.iv_mdssupport));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MDS, i_target, iv_attrs_params.iv_mdssupport));
             FAPI_TRY(mss::attr::get_pstates(i_target, iv_attrs_params.iv_num_pstate));
-            FAPI_TRY(mss::attr::get_freq(i_target, iv_attrs_params.iv_frequency));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, iv_attrs_params.iv_frequency));
             FAPI_TRY(mss::attr::get_si_mc_rcv_imp_dq_dqs(i_target, iv_attrs_params.iv_odt_impedance));
             FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_up(i_target, iv_attrs_params.iv_drv_impedance_pu));
             FAPI_TRY(mss::attr::get_si_mc_drv_imp_dq_dqs_pull_down(i_target, iv_attrs_params.iv_drv_impedance_pd));

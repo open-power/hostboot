@@ -95,7 +95,7 @@ extern "C"
                   mss::c_str(i_target));
 
         // Enable RCD parity checking if we're planar + RDIMM
-        FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, i_target, l_is_planar));
         FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
         FAPI_TRY(mss::exp::workarounds::planar_enable_rcd_parity(i_target, l_is_planar, l_has_rcd));
 

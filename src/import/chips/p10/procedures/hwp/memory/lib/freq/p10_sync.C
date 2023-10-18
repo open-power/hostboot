@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@ fapi2::ReturnCode dimm_speed_map(const std::vector< fapi2::Target<fapi2::TARGET_
     const auto l_found_comp = std::find_if(i_targets.begin(), i_targets.end(),
                                            [&l_rc, &l_comparator] (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)->bool
     {
-        l_rc = mss::attr::get_freq(i_target, l_comparator);
+        l_rc = FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, l_comparator);
         return l_comparator != 0;
     });
 
@@ -115,7 +115,7 @@ fapi2::ReturnCode dimm_speed_map(const std::vector< fapi2::Target<fapi2::TARGET_
     for (auto l_iter = l_found_comp + 1; l_iter != i_targets.end(); ++l_iter)
     {
         uint64_t l_dimm_speed = 0;
-        FAPI_TRY( mss::attr::get_freq(*l_iter, l_dimm_speed), "Failed accessor to mss_freq" );
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, *l_iter, l_dimm_speed), "Failed accessor to mss_freq" );
 
         // In FW, parents are deconfigured if they have no children
         // So there is no way to get a MEM_PORT w/no DIMMs.

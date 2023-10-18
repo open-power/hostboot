@@ -89,11 +89,13 @@ class mr2_data : public mr_base_data<MC>
             const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
             const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
 
-            FAPI_TRY( mss::attr::get_mem_2n_mode(l_ocmb, iv_2n_mode_read_only), "Error in ddr5::mr2_data()" );
-            FAPI_TRY( mss::attr::get_mpsm(l_port_target, iv_mpsm), "Error in ddr5::mr2_data()" );
-            FAPI_TRY( mss::attr::get_cs_assert_in_mpc(l_port_target, iv_cs_during_mpc), "Error in ddr5::mr2_data()" );
-            FAPI_TRY( mss::attr::get_device15_mpsm(l_port_target, iv_device15_mpsm), "Error in ddr5::mr2_data()" );
-            FAPI_TRY( mss::attr::get_internal_wr_timing_mode(l_port_target, iv_internal_wr_timing), "Error in ddr5::mr2_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_2N_MODE, l_ocmb, iv_2n_mode_read_only), "Error in ddr5::mr2_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MPSM, l_port_target, iv_mpsm), "Error in ddr5::mr2_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_CS_ASSERT_IN_MPC, l_port_target, iv_cs_during_mpc),
+                      "Error in ddr5::mr2_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_DEVICE15_MPSM, l_port_target, iv_device15_mpsm), "Error in ddr5::mr2_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_INTERNAL_WR_TIMING_MODE, l_port_target, iv_internal_wr_timing),
+                      "Error in ddr5::mr2_data()" );
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
@@ -179,14 +181,15 @@ class mr2_data : public mr_base_data<MC>
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
             const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_rank_info.get_port_target());
-            FAPI_TRY( mss::attr::set_mem_2n_mode(l_ocmb, iv_2n_mode_read_only), "Unable to set attributes for ddr5::mr2_data()" );
-            FAPI_TRY( mss::attr::set_mpsm(i_rank_info.get_port_target(), iv_mpsm),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_2N_MODE, l_ocmb, iv_2n_mode_read_only),
                       "Unable to set attributes for ddr5::mr2_data()" );
-            FAPI_TRY( mss::attr::set_cs_assert_in_mpc(i_rank_info.get_port_target(), iv_cs_during_mpc),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_MPSM, i_rank_info.get_port_target(), iv_mpsm),
                       "Unable to set attributes for ddr5::mr2_data()" );
-            FAPI_TRY( mss::attr::set_device15_mpsm(i_rank_info.get_port_target(), iv_device15_mpsm),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_CS_ASSERT_IN_MPC, i_rank_info.get_port_target(), iv_cs_during_mpc),
                       "Unable to set attributes for ddr5::mr2_data()" );
-            FAPI_TRY( mss::attr::set_internal_wr_timing_mode(i_rank_info.get_port_target(), iv_internal_wr_timing),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_DEVICE15_MPSM, i_rank_info.get_port_target(), iv_device15_mpsm),
+                      "Unable to set attributes for ddr5::mr2_data()" );
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_INTERNAL_WR_TIMING_MODE, i_rank_info.get_port_target(), iv_internal_wr_timing),
                       "Unable to set attributes for ddr5::mr2_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;

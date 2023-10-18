@@ -132,7 +132,8 @@ fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>&
     }
 
     // Get the ignore plug attr
-    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules_dimm_size_mix(l_ignore_dimm_size_mix_plug_rule) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_IGNORE_PLUG_RULES_DIMM_SIZE_MIX, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_ignore_dimm_size_mix_plug_rule) );
 
     // Helper function so that the attribute can be UT'ed
     FAPI_TRY(dimm_size_mixing_helper<MC>(i_target, l_ocmbs, l_ignore_dimm_size_mix_plug_rule));
@@ -234,10 +235,12 @@ fapi2::ReturnCode dimm_height_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC
     }
 
     // Get the ignore plug attr
-    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules_dimm_height_mix(l_ignore_dimm_height_mix_plug_rule) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_IGNORE_PLUG_RULES_DIMM_HEIGHT_MIX, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_ignore_dimm_height_mix_plug_rule) );
 
     // Get the MRW ignore plug rule attr
-    FAPI_TRY(mss::attr::get_mrw_dimm_height_plug_rule(l_mrw_height_plug_rule));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DIMM_HEIGHT_MIXING_POLICY, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_mrw_height_plug_rule));
 
     // Helper function so that the attributes can be UT'ed
     FAPI_TRY(dimm_height_mixing_helper(i_target, i_kinds, l_ignore_dimm_height_mix_plug_rule, l_mrw_height_plug_rule));
@@ -304,7 +307,8 @@ fapi2::ReturnCode ddr5_allowed(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>& i_t
     uint8_t l_mrw_ddr5_allowed = 0;
 
     // Get the attribute that notes if DDR5 is allowed or not
-    FAPI_TRY( mss::attr::get_mrw_allow_ddr5(l_mrw_ddr5_allowed) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_ALLOW_DDR5, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_mrw_ddr5_allowed) );
 
     // Helper function so that the attributes can be UT'ed
     FAPI_TRY(ddr5_allowed_helper(i_target, i_kinds, l_mrw_ddr5_allowed));
@@ -405,7 +409,8 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARG
     // Get vector of l_kinds
     std::vector<mss::dimm::kind<MC>> l_kinds;
 
-    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules(l_ignore_plug_rules) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_IGNORE_PLUG_RULES, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_ignore_plug_rules) );
 
     // Skip all plug rule checks if set to ignore (e.g. on Apollo)
     if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
@@ -455,7 +460,8 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const std::vector<fapi2::Target
         i_targets)
 {
     uint8_t l_ignore_plug_rules = 0;
-    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules(l_ignore_plug_rules) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_IGNORE_PLUG_RULES, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_ignore_plug_rules) );
 
     // Skip all plug rule checks if set to ignore (e.g. on Apollo)
     if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)

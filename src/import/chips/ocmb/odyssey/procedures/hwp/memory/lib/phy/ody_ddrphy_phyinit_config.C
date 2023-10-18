@@ -4129,7 +4129,7 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     io_user_input_basic.NumPStates = 1;
 
     // Frequency (half of the DRAM freq, rounded up)
-    FAPI_TRY(mss::attr::get_freq(i_target, l_freq));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, l_freq));
     FAPI_TRY(mss::divide_and_round(l_freq, uint64_t(2), mss::ody::DDRPHYINIT_SETUP_BASIC_STRUCT, l_half_freq));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
@@ -4246,7 +4246,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // TxImpedance
-    FAPI_TRY(mss::attr::get_si_phy_drv_imp_dq_dqs_pull_up(i_target, l_attr_data_16));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP, i_target, l_attr_data_16));
 
     for (auto p_state = 0; p_state < mss::ody::NUM_PSTATES; p_state++)
     {
@@ -4334,7 +4334,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // TxSlewRiseDQ
-    FAPI_TRY(mss::attr::get_ddr5_tx_slew_rise_dq(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_DQ, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4342,7 +4342,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // TxSlewFallDQ
-    FAPI_TRY(mss::attr::get_ddr5_tx_slew_fall_dq(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_DQ, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4442,7 +4442,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // EnTxDqPreamblePatternU0
-    FAPI_TRY(mss::attr::get_ddr5_en_tx_dq_preamble_pattern_u0(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_EN_TX_DQ_PREAMBLE_PATTERN_U0, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4450,7 +4450,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // EnTxDqPreamblePatternU1
-    FAPI_TRY(mss::attr::get_ddr5_en_tx_dq_preamble_pattern_u1(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_EN_TX_DQ_PREAMBLE_PATTERN_U1, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4458,7 +4458,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // TxDqPreamblePatternU0
-    FAPI_TRY(mss::attr::get_ddr5_tx_dq_preamble_pattern_u0(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_TX_DQ_PREAMBLE_PATTERN_U0, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4466,7 +4466,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // TxDqPreamblePatternU1
-    FAPI_TRY(mss::attr::get_ddr5_tx_dq_preamble_pattern_u1(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_TX_DQ_PREAMBLE_PATTERN_U1, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4474,7 +4474,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // EnTxDmPreamblePattern
-    FAPI_TRY(mss::attr::get_ddr5_en_tx_dm_preamble_pattern(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_EN_TX_DM_PREAMBLE_PATTERN, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4482,7 +4482,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // TxDmPreamblePattern
-    FAPI_TRY(mss::attr::get_ddr5_tx_dm_preamble_pattern(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_TX_DM_PREAMBLE_PATTERN, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4582,7 +4582,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, io_user_input_advanced.NoX4onUpperNibbleTg));
 
     // Dfi1Active
-    FAPI_TRY(mss::attr::get_ddr5_chb_active(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_CHB_ACTIVE, i_target, l_attr_data));
     io_user_input_advanced.Dfi1Active = l_attr_data;
 
     // Num_Logical_Ranks (already done above, since needed for 3DS)
@@ -4707,7 +4707,7 @@ fapi2::ReturnCode setup_dram_input_struct(const fapi2::Target<fapi2::TARGET_TYPE
     }
 
     // PhyVref
-    FAPI_TRY(mss::attr::get_ddr5_phy_vref_rd(i_target, io_user_input_dram_config.PhyVref));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_PHY_VREF_RD, i_target, io_user_input_dram_config.PhyVref));
 
     // X16Present (hardcode to zero)
     io_user_input_dram_config.X16Present = 0;
@@ -5488,7 +5488,7 @@ fapi2::ReturnCode post_phyinit_setup_pll(const fapi2::Target<fapi2::TARGET_TYPE_
     uint64_t l_ddr_freq = 0;
     uint64_t l_data = 0;
 
-    FAPI_TRY(mss::attr::get_freq(i_target, l_ddr_freq));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, l_ddr_freq));
 
     // Fail if we don't yet support the given frequency
     FAPI_ASSERT(((l_ddr_freq == mss::DIMM_SPEED_3200) ||

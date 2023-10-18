@@ -374,8 +374,9 @@ void read_ivdd(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     // Get OCMB target
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(io_target_info.iv_pmic_dt_map[0].iv_pmic);
     // Get the RAW card attribute
-    mss::attr::get_eff_dimm_raw_card_reference_design(l_ocmb, l_raw_card_ref_design);
-    mss::attr::get_eff_dimm_raw_card_design_revision(l_ocmb, l_raw_card_design);
+    FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_RAW_CARD_REFERENCE_DESIGN, l_ocmb, l_raw_card_ref_design);
+    FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_RAW_CARD_DESIGN_REVISION,  l_ocmb, l_raw_card_design);
+
 
     if (!((l_raw_card_ref_design == RAW_CARD_REF_DESIGN_C) && (l_raw_card_design == RAW_CARD_REV)))
     {

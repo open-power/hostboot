@@ -226,7 +226,8 @@ fapi2::ReturnCode enforce_pre_freq(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules(l_ignore_plug_rules) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_IGNORE_PLUG_RULES, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_ignore_plug_rules) );
 
     // Skip plug rule checks if set to ignore (e.g. on Apollo)
     if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
@@ -284,7 +285,8 @@ fapi2::ReturnCode enforce_post_eff_config(const fapi2::Target<fapi2::TARGET_TYPE
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY( mss::attr::get_ignore_mem_plug_rules(l_ignore_plug_rules) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_IGNORE_PLUG_RULES, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_ignore_plug_rules) );
 
     // Skip plug rule checks if set to ignore (e.g. on Apollo)
     if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
@@ -294,7 +296,7 @@ fapi2::ReturnCode enforce_post_eff_config(const fapi2::Target<fapi2::TARGET_TYPE
     }
 
     // Enforce planar system plug rules
-    FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_ocmb, l_is_planar) );
     FAPI_INF("%s Enforcing planar plug rules checking", mss::c_str(i_target));
     FAPI_TRY( enforce_planar_plug_rules(i_target, l_is_planar) );
 
@@ -329,7 +331,7 @@ fapi2::ReturnCode reset_n_dead_load_helper(const uint64_t i_reset_group,
     {
         uint8_t l_reset_group = 0;
         const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_dimm);
-        FAPI_TRY(mss::attr::get_mrw_ocmb_reset_group(l_ocmb, l_reset_group));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_OCMB_RESET_GROUP, l_ocmb, l_reset_group));
 
         if (l_reset_group == i_reset_group)
         {
@@ -390,7 +392,7 @@ fapi2::ReturnCode reset_n_dead_load(const fapi2::Target<fapi2::TARGET_TYPE_PROC_
                 continue;
             }
 
-            FAPI_TRY(mss::attr::get_mrw_ocmb_reset_group(l_ocmb, l_reset_group));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_OCMB_RESET_GROUP, l_ocmb, l_reset_group));
 
             FAPI_TRY(reset_n_dead_load_helper(l_reset_group, l_functional_dimms, l_verified_reset_groups, l_callout_ocmbs));
 

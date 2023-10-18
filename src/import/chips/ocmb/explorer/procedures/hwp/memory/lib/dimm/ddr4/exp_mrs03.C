@@ -103,7 +103,8 @@ mrs03_data<mss::mc_type::EXPLORER>::mrs03_data( const fapi2::Target<fapi2::TARGE
     FAPI_TRY( mss::attr::get_exp_resp_geardown_mode(l_port_target, iv_geardown), "Error in mrs03_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_per_dram_access(l_port_target, iv_pda), "Error in mrs03_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_temp_readout(l_port_target, iv_temp_readout), "Error in mrs03_data()" );
-    FAPI_TRY( mss::attr::get_mrw_fine_refresh_mode(iv_fine_refresh), "Error in mrs03_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_FINE_REFRESH_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            iv_fine_refresh), "Error in mrs03_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_crc_wr_latency(l_port_target, iv_crc_wr_latency), "Error in mrs03_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_mpr_rd_format(l_port_target, iv_read_format), "Error in mrs03_data()" );
 

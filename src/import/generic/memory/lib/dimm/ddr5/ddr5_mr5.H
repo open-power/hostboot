@@ -82,7 +82,7 @@ class mr5_data : public mr_base_data<MC>
 
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
             FAPI_TRY( mss::attr::get_dram_pu_drv_imp(i_target, iv_pu_drv_imp), "Error in ddr5::mr5_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_dram_test_mode(l_port, iv_drv_test_mode_supported_read_only),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_TEST_MODE, l_port, iv_drv_test_mode_supported_read_only),
                       "Error in ddr5::mr5_data()" );
             FAPI_TRY( mss::attr::get_dram_pd_drv_imp(i_target, iv_pd_drv_imp), "Error in ddr5::mr5_data()" );
 
@@ -280,7 +280,8 @@ class mr5_data : public mr_base_data<MC>
         {
             FAPI_TRY( mss::attr::set_dram_pu_drv_imp(i_rank_info.get_dimm_target(), iv_pu_drv_imp),
                       "Unable to set attribute for ddr5::mr5_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_dram_test_mode(i_rank_info.get_port_target(), iv_drv_test_mode_supported_read_only),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_TEST_MODE, i_rank_info.get_port_target(),
+                                    iv_drv_test_mode_supported_read_only),
                       "Unable to set attribute for ddr5::mr5_data()" );
             FAPI_TRY( mss::attr::set_dram_pd_drv_imp(i_rank_info.get_dimm_target(), iv_pd_drv_imp),
                       "Unable to set attribute for ddr5::mr5_data()" );

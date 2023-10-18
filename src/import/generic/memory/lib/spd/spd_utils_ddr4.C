@@ -305,7 +305,7 @@ fapi2::ReturnCode calc_time_in_nck(
 {
     uint32_t l_tck_in_ps = 0;
     uint64_t l_freq = 0;
-    FAPI_TRY( attr::get_freq(mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm), l_freq) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm), l_freq) );
     FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
               "Failed to calculate clock period (tCK) for %s", spd::c_str(i_dimm) );
 

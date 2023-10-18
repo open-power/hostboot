@@ -352,7 +352,7 @@ fapi2::ReturnCode after_scominit<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
     }
 
     FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
-    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, i_target, l_is_planar));
 
     // Things get interesting if we have an RCD on a planar system
     if(l_has_rcd && l_is_planar)
@@ -397,7 +397,7 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::ODYSSEY>( const fapi2::Target<fap
     // Check MNFG THRESHOLDS Policy flag
     FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS, l_mfg_thresholds));
     FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
-    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, i_target, l_is_planar));
 
     // Unmask SRQ FIRs
     if (l_has_rcd && l_is_planar)

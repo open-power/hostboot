@@ -1558,7 +1558,7 @@ fapi2::ReturnCode pmic_power_down(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     uint8_t l_module_height = 0;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_TRY(mss::attr::get_dram_module_height(i_target, l_module_height));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, i_target, l_module_height));
 
     // For non 4U configs, let's just VR disable down the line
     if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
@@ -3140,7 +3140,7 @@ fapi2::ReturnCode pmic_enable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
     if (i_ocmb_target.isFunctional())
     {
         // Grab the module-height attribute to determine 1U/2U vs 4U
-        FAPI_TRY(mss::attr::get_dram_module_height(i_ocmb_target, l_module_height));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, i_ocmb_target, l_module_height));
 
         // Kick off the matching enable procedure
         if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)

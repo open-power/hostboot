@@ -121,7 +121,7 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_IS_APOLLO, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_apollo));
         FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN,
                                      l_mnfg_screen_test));
         FAPI_TRY(mss::attr::get_mnfg_edpl_time(l_mnfg_edpl_time));
@@ -252,7 +252,7 @@ extern "C"
             l_is_enterprise = (l_enterprise_attr == fapi2::ENUM_ATTR_MSS_OCMB_ENTERPRISE_MODE_ENTERPRISE);
 
             FAPI_TRY(mss::half_dimm_mode(i_target, l_is_enterprise, l_is_half_dimm));
-            FAPI_TRY(mss::attr::get_mss_omi_edpl_disable(l_edpl_disable));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OMI_EDPL_DISABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_edpl_disable));
 
             // Prints out the data
             FAPI_INF("%s is %s enterprise mode, and %s-DIMM mode", mss::c_str(i_target), l_is_enterprise ? "" : "non",

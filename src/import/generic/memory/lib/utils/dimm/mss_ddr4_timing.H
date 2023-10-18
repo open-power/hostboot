@@ -650,7 +650,7 @@ constexpr uint64_t tmrc()
 template< fapi2::TargetType T >
 static fapi2::ReturnCode trrd_l_half_and_1kb_page_helper(const fapi2::Target<T>& i_target,
         const uint64_t i_freq,
-        uint64_t& o_output)
+        uint8_t& o_output)
 {
     // Values derived from DDR4 Spec (79-4A)
     // 13.3 Timing Parameters by Speed Grade
@@ -713,7 +713,7 @@ fapi_try_exit:
 template< fapi2::TargetType T >
 static fapi2::ReturnCode trrd_l_2kb_page_helper(const fapi2::Target<T>& i_target,
         const uint64_t i_freq,
-        uint64_t& o_output)
+        uint8_t& o_output)
 {
 
     // Values derived from DDR4 Spec (79-4A)
@@ -772,7 +772,7 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode trrd_l( const fapi2::Target<T>& i_target,
                           const uint8_t i_dram_width,
                           const uint64_t i_freq,
-                          uint64_t& o_tRRD_L )
+                          uint8_t& o_tRRD_L )
 {
     switch(i_dram_width)
     {
@@ -815,7 +815,7 @@ fapi_try_exit:
 template< fapi2::TargetType T >
 static fapi2::ReturnCode trrd_s_half_and_1kb_page_helper(const fapi2::Target<T>& i_target,
         const uint64_t i_freq,
-        uint64_t& o_output)
+        uint8_t& o_output)
 {
     // Values derived from DDR4 Spec (79-4A)
     // 13.3 Timing Parameters by Speed Grade
@@ -888,7 +888,7 @@ fapi_try_exit:
 template< fapi2::TargetType T >
 static fapi2::ReturnCode trrd_s_2kb_page_helper(const fapi2::Target<T>& i_target,
         const uint64_t i_freq,
-        uint64_t& o_output)
+        uint8_t& o_output)
 {
     // Values derived from DDR4 Spec (79-4A)
     // 13.3 Timing Parameters by Speed Grade
@@ -948,7 +948,7 @@ template< fapi2::TargetType T >
 fapi2::ReturnCode trrd_s( const fapi2::Target<T>& i_target,
                           const uint8_t i_dram_width,
                           const uint64_t i_freq,
-                          uint64_t& o_tRRD_S )
+                          uint8_t& o_tRRD_S )
 {
     switch(i_dram_width)
     {

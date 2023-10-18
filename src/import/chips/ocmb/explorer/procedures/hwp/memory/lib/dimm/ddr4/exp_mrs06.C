@@ -67,7 +67,7 @@ mrs06_data<mss::mc_type::EXPLORER>::mrs06_data( const fapi2::Target<fapi2::TARGE
     FAPI_TRY( mss::attr::get_exp_resp_vref_dq_train_value(i_target, l_vrefdq_train_value), "Error in mrs06_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_vref_dq_train_range(i_target, l_vrefdq_train_range), "Error in mrs06_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_vref_dq_train_enable(i_target, l_vrefdq_train_enable), "Error in mrs06_data()" );
-    FAPI_TRY( mss::attr::get_dram_tccd_l(l_port_target, iv_tccd_l), "Error in mrs06_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TCCD_L, l_port_target, iv_tccd_l), "Error in mrs06_data()" );
 
     for (int i = 0; i < mss::exp::MAX_RANK_PER_DIMM; i++)
     {

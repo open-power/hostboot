@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,7 @@ extern "C"
         FAPI_INF("Start exp_mss_memdiag on: %s", mss::c_str( i_target ));
         FAPI_TRY(mss::memdiags::mss_initialize_memory<mss::mc_type::EXPLORER>(i_target));
 
-        FAPI_TRY(mss::attr::get_post_memdiags_read_subtest(i_target, l_post_memdiags_subtest));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST, i_target, l_post_memdiags_subtest));
 
         // Perform subtest if attribute is set to
         if (l_post_memdiags_subtest == fapi2::ENUM_ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST_ENABLE)

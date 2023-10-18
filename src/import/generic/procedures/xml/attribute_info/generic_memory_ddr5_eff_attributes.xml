@@ -47,7 +47,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>ddr5_tx_slew_rise_dq</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -63,7 +62,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>ddr5_tx_slew_fall_dq</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -133,7 +131,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>ddr5_tx_slew_fall_ck</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -153,7 +150,6 @@
         TCK4 = 0xF
     </enum>
     <default>TCK0</default>
-    <mssAccessorName>ddr5_en_tx_dq_preamble_pattern_u0</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -176,7 +172,6 @@
         TCK4 = 0xF
     </enum>
     <default>TCK0</default>
-    <mssAccessorName>ddr5_en_tx_dq_preamble_pattern_u1</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -199,7 +194,6 @@
         TCK4 = 0xF
     </enum>
     <default>TCK0</default>
-    <mssAccessorName>ddr5_en_tx_dm_preamble_pattern</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -215,7 +209,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <default>0</default>
-    <mssAccessorName>ddr5_tx_dq_preamble_pattern_u0</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -231,7 +224,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <default>0</default>
-    <mssAccessorName>ddr5_tx_dq_preamble_pattern_u1</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -247,7 +239,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <default>0</default>
-    <mssAccessorName>ddr5_tx_dm_preamble_pattern</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -282,7 +273,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>ddr5_rxen_adj</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -299,7 +289,6 @@
     <initToZero></initToZero>
     <valueType>uint16</valueType>
     <writeable/>
-    <mssAccessorName>ddr5_wl_adj_start</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -316,7 +305,6 @@
     <initToZero></initToZero>
     <valueType>uint16</valueType>
     <writeable/>
-    <mssAccessorName>ddr5_wl_adj_end</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -335,7 +323,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>ddr5_phy_vref_rd</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -390,7 +377,6 @@
         <initToZero></initToZero>
         <valueType>uint64</valueType>
         <writeable/>
-        <mssAccessorName>ddr5_spd_cl_supported</mssAccessorName>
     </attribute>
 
 
@@ -405,7 +391,6 @@
         <valueType>uint8</valueType>
         <default>1</default>
         <writeable/>
-        <mssAccessorName>ddr5_chb_active</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
@@ -421,7 +406,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <enum>NOT_EN = 0, PORT0_EN = 1, PORT1_EN = 2, BOTH_EN = 3</enum>
-        <mssAccessorName>ddr5_mem_port_enable</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
         </sbeAttrSync>
@@ -451,7 +435,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>ddr5_vrefcs_sweep_min</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
@@ -467,7 +450,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>ddr5_vrefcs_sweep_max</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
@@ -482,7 +464,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>ddr5_vrefca_sweep_min</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
@@ -498,7 +479,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>ddr5_vrefca_sweep_max</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>

@@ -81,13 +81,17 @@ class mr50_data : public mr_base_data<MC>
 
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-            FAPI_TRY(mss::attr::get_mrw_ddr5_dram_read_crc(iv_rd_crc_enable), "Error in ddr5::mr50_data()");
-            FAPI_TRY(mss::attr::get_mrw_dram_write_crc(iv_wr_crc_enable_lower_nibble), "Error in ddr5::mr50_data()");
-            FAPI_TRY(mss::attr::get_mrw_dram_write_crc(iv_wr_crc_enable_upper_nibble), "Error in ddr5::mr50_data()");
-            FAPI_TRY(mss::attr::get_ddr5_wr_crc_err_status(l_port, iv_wr_crc_error_status), "Error in ddr5::mr50_data()");
-            FAPI_TRY(mss::attr::get_ddr5_wr_crc_autodisable_enable(l_port, iv_wr_crc_autodisable_enable),
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DDR5_DRAM_READ_CRC, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   iv_rd_crc_enable), "Error in ddr5::mr50_data()");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DRAM_WRITE_CRC, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   iv_wr_crc_enable_lower_nibble), "Error in ddr5::mr50_data()");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DRAM_WRITE_CRC, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   iv_wr_crc_enable_upper_nibble), "Error in ddr5::mr50_data()");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_WR_CRC_ERR_STATUS, l_port, iv_wr_crc_error_status),
                      "Error in ddr5::mr50_data()");
-            FAPI_TRY(mss::attr::get_ddr5_wr_crc_autodisable_status(l_port, iv_wr_crc_autodisable_status),
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_ENABLE, l_port, iv_wr_crc_autodisable_enable),
+                     "Error in ddr5::mr50_data()");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_STATUS, l_port, iv_wr_crc_autodisable_status),
                      "Error in ddr5::mr50_data()");
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -173,11 +177,13 @@ class mr50_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY(mss::attr::set_ddr5_wr_crc_err_status(i_rank_info.get_port_target(), iv_wr_crc_error_status),
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_WR_CRC_ERR_STATUS, i_rank_info.get_port_target(), iv_wr_crc_error_status),
                      "Unable to set attributes for ddr5::mr50_data()");
-            FAPI_TRY(mss::attr::set_ddr5_wr_crc_autodisable_enable(i_rank_info.get_port_target(), iv_wr_crc_autodisable_enable),
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_ENABLE, i_rank_info.get_port_target(),
+                                   iv_wr_crc_autodisable_enable),
                      "Unable to set attributes for ddr5::mr50_data()");
-            FAPI_TRY(mss::attr::set_ddr5_wr_crc_autodisable_status(i_rank_info.get_port_target(), iv_wr_crc_autodisable_status),
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_STATUS, i_rank_info.get_port_target(),
+                                   iv_wr_crc_autodisable_status),
                      "Unable to set attributes for ddr5::mr50_data()");
 
             return fapi2::FAPI2_RC_SUCCESS;

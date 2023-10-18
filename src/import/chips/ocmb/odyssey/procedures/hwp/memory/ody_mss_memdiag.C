@@ -70,7 +70,7 @@ extern "C"
 
         FAPI_TRY(mss::memdiags::mss_initialize_memory<mss::mc_type::ODYSSEY>(i_target));
 
-        FAPI_TRY(mss::attr::get_post_memdiags_read_subtest(i_target, l_post_memdiags_subtest));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST, i_target, l_post_memdiags_subtest));
 
         // Perform subtest if attribute is set to
         if (l_post_memdiags_subtest == fapi2::ENUM_ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST_ENABLE)

@@ -67,10 +67,10 @@ mrs00_data<mss::mc_type::EXPLORER>::mrs00_data( const fapi2::Target<fapi2::TARGE
     const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
     FAPI_TRY( mss::attr::get_exp_resp_dram_rbt(l_port_target, iv_read_burst_type), "Error in mrs00_data()" );
-    FAPI_TRY( mss::attr::get_dram_cl(l_port_target, iv_cas_latency), "Error in mrs00_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_CL, l_port_target, iv_cas_latency), "Error in mrs00_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_dram_dll_reset(l_port_target, iv_dll_reset), "Error in mrs00_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_dram_tm(l_port_target, iv_test_mode), "Error in mrs00_data()" );
-    FAPI_TRY( mss::attr::get_dram_twr(l_port_target, iv_write_recovery), "Error in mrs00_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TWR, l_port_target, iv_write_recovery), "Error in mrs00_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_dram_burst_length(l_port_target, iv_burst_length), "Error in mrs00_data()" );
 
     FAPI_INF("%s MR0 Attributes: BL: 0x%x, RBT: 0x%x, CL: 0x%x, TM: 0x%x, DLL_RESET: 0x%x, WR: 0x%x",

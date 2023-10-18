@@ -33,7 +33,6 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssAccessorName>si_signature_hash</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -549,7 +548,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>si_vref_dram_wr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -563,7 +561,6 @@
         <writeable/>
         <enum>DISABLE = 0</enum>
         <mssUnits>percent of Vdd</mssUnits>
-        <mssAccessorName>si_vref_mc_rd</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -577,7 +574,6 @@
         <valueType>int16</valueType>
         <writeable/>
         <mssUnits>signed</mssUnits>
-        <mssAccessorName>si_windage_rd_ctr</mssAccessorName>
     </attribute>
 
 <attribute>
@@ -695,7 +691,6 @@
               OHM_240 = 240, OHM_480 = 480
         </enum>
         <mssUnits>ohm</mssUnits>
-        <mssAccessorName>si_phy_drv_imp_dq_dqs_pull_up</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>

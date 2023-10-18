@@ -100,7 +100,7 @@ fapi2::ReturnCode exp_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     uint8_t l_simics = 0;
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
     FAPI_TRY(mss::attr::get_is_simics(l_simics));
-    FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_IS_APOLLO, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_apollo));
 
     // Skip this in sim, check via I2C is not supported
     if (l_sim)

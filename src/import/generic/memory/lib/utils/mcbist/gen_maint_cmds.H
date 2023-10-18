@@ -734,7 +734,7 @@ fapi2::ReturnCode check_if_spare_is_free(const fapi2::Target<fapi2::TARGET_TYPE_
     // 2) Checks if the spare is clear of errors (only if we need to)
     if (!i_ignore_bad_bits)
     {
-        FAPI_TRY(mss::attr::get_bad_dq_bitmap(l_rank_info.get_dimm_target(), l_bad_bits));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, l_rank_info.get_dimm_target(), l_bad_bits));
 
         l_spare0_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][portTraits<MC>::SPARE_DQ_BYTE] & l_spare0_mask);
         l_spare1_is_clean = !(l_bad_bits[l_rank_info.get_dimm_rank()][portTraits<MC>::SPARE_DQ_BYTE] & l_spare1_mask);

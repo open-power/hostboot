@@ -823,7 +823,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 inline fapi2::ReturnCode reset_reorder_queue_settings(const fapi2::Target<T>& i_target)
 {
     uint8_t l_reorder_queue = 0;
-    FAPI_TRY(mss::attr::get_reorder_queue_setting(i_target, l_reorder_queue));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_REORDER_QUEUE_SETTING, i_target, l_reorder_queue));
 
     // Changes the reorder queue settings
     {

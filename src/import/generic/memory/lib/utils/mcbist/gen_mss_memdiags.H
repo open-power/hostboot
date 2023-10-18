@@ -1966,7 +1966,7 @@ fapi2::ReturnCode perform_read_only_subtest(const fapi2::Target<T>& i_target)
     l_rc = mss::memdiags::sf_read<MC>(i_target, l_stop_conditions);
 
     // Get fail behavior attr and process the result
-    FAPI_TRY(mss::attr::get_post_memdiags_read_subtest_fail_behavior(i_target, l_fail_behavior));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_POST_MEMDIAGS_READ_SUBTEST_FAIL_BEHAVIOR, i_target, l_fail_behavior));
     FAPI_TRY(mss::memdiags::process_subtest_result<MC>(i_target, l_fail_behavior, l_rc));
 
     return fapi2::FAPI2_RC_SUCCESS;

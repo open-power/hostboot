@@ -83,7 +83,7 @@ fapi2::ReturnCode insert_des<mss::mc_type::ODYSSEY>(
     // If first instruction pass delay of trfc, otherwise assume its last and pass delay of 1
     if(io_inst_count == 0)
     {
-        FAPI_TRY(mss::attr::get_dram_trfc(i_port, l_delay));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRFC, i_port, l_delay));
         l_des =  mss::ccs::des_command<mss::mc_type::ODYSSEY>(l_delay);
         l_des.arr1.template insertFromRight<TT::ARR1_GOTO_CMD, TT::ARR1_GOTO_CMD_LEN>(io_inst_count + 1);
     }

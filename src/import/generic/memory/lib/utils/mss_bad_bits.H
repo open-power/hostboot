@@ -63,7 +63,7 @@ fapi2::ReturnCode get_bad_dq_bitmap( const mss::rank::info<MC>& i_rank_info,
     // Use a heap based array to avoid large stack alloc
     uint8_t l_dqBitmap[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
 
-    FAPI_TRY( mss::attr::get_bad_dq_bitmap(i_rank_info.get_dimm_target(), l_dqBitmap) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, i_rank_info.get_dimm_target(), l_dqBitmap) );
 
     // Write contents of DQ bitmap for specific rank to io_data.
     std::copy(std::begin(l_dqBitmap[i_rank_info.get_dimm_rank()]), std::end(l_dqBitmap[i_rank_info.get_dimm_rank()]),
@@ -92,12 +92,12 @@ fapi2::ReturnCode set_bad_dq_bitmap( const mss::rank::info<MC>& i_rank_info,
     // Attribute is 4X10 for p10
     uint8_t l_dqBitmap[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
 
-    FAPI_TRY( mss::attr::get_bad_dq_bitmap(l_dimm, l_dqBitmap) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimm, l_dqBitmap) );
 
     // Add the rank bitmap to the DIMM bitmap and write the bitmap
     std::copy(i_data, i_data + BAD_DQ_BYTE_COUNT, std::begin(l_dqBitmap[i_rank_info.get_dimm_rank()]));
 
-    FAPI_TRY( mss::attr::set_bad_dq_bitmap(l_dimm, l_dqBitmap) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimm, l_dqBitmap) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -133,12 +133,12 @@ inline fapi2::ReturnCode update_bad_dq_bitmap(const fapi2::Target<fapi2::TARGET_
     uint8_t l_current_data[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT] = {};
 
     // Get existing bad bits data
-    FAPI_TRY(mss::attr::get_bad_dq_bitmap(i_target, l_current_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, i_target, l_current_data));
 
     // Now, or the new bits and any existing bits together
     mss::combine_bad_bits(l_current_data, i_array);
 
-    FAPI_TRY(mss::attr::set_bad_dq_bitmap(i_target, i_array));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_BAD_DQ_BITMAP, i_target, i_array));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -463,16 +463,19 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
     iv_port_power_limit(0),
     iv_calc_port_maxpower(0)
 {
-    FAPI_TRY(mss::attr::get_mrw_max_dram_databus_util(iv_databus_port_max));
-    FAPI_TRY(mss::attr::get_safemode_dram_databus_util(iv_target, iv_min_util_port));
-    FAPI_TRY(mss::attr::get_mrw_dimm_power_curve_percent_uplift(iv_power_uplift));
-    FAPI_TRY(mss::attr::get_mrw_dimm_power_curve_percent_uplift_idle(iv_power_uplift_idle));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           iv_databus_port_max));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_SAFEMODE_DRAM_DATABUS_UTIL, iv_target, iv_min_util_port));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           iv_power_uplift));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DIMM_POWER_CURVE_PERCENT_UPLIFT_IDLE,
+                           fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), iv_power_uplift_idle));
     FAPI_TRY(mss::attr::get_dimm_thermal_limit(iv_target, iv_dimm_thermal_limit));
     FAPI_TRY(mss::attr::get_total_pwr_intercept(iv_target, iv_pwr_int));
     FAPI_TRY(mss::attr::get_total_pwr_slope(iv_target, iv_pwr_slope));
-    FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_slot(iv_target, iv_runtime_n_slot));
-    FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_port(iv_target, iv_runtime_n_port));
-    FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(iv_m_clocks));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, iv_target, iv_runtime_n_slot));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, iv_target, iv_runtime_n_port));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), iv_m_clocks));
 
     //Port power limit = sum of dimm power limits
     for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target) )

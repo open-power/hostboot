@@ -79,15 +79,15 @@ class mr111_data : public mr_base_data<MC>
             }
 
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            FAPI_TRY( mss::attr::get_ddr5_global_dfe_gain(l_port, iv_global_dfe_gain_enable),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_GAIN, l_port, iv_global_dfe_gain_enable),
                       "Error in ddr5::mr111_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_global_dfe_tap1(l_port, iv_global_dfe1_enable),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP1, l_port, iv_global_dfe1_enable),
                       "Error in ddr5::mr111_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_global_dfe_tap2(l_port, iv_global_dfe2_enable),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP2, l_port, iv_global_dfe2_enable),
                       "Error in ddr5::mr111_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_global_dfe_tap3(l_port, iv_global_dfe3_enable),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP3, l_port, iv_global_dfe3_enable),
                       "Error in ddr5::mr111_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_global_dfe_tap4(l_port, iv_global_dfe4_enable),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP4, l_port, iv_global_dfe4_enable),
                       "Error in ddr5::mr111_data()" );
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -169,15 +169,15 @@ class mr111_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY( mss::attr::set_ddr5_global_dfe_gain(i_rank_info.get_port_target(), iv_global_dfe_gain_enable),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_GAIN, i_rank_info.get_port_target(), iv_global_dfe_gain_enable),
                       "Unable to set attributes for ddr5::mr111_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_global_dfe_tap1(i_rank_info.get_port_target(), iv_global_dfe1_enable),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP1, i_rank_info.get_port_target(), iv_global_dfe1_enable),
                       "Unable to set attributes for ddr5::mr111_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_global_dfe_tap2(i_rank_info.get_port_target(), iv_global_dfe2_enable),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP2, i_rank_info.get_port_target(), iv_global_dfe2_enable),
                       "Unable to set attributes for ddr5::mr111_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_global_dfe_tap3(i_rank_info.get_port_target(), iv_global_dfe3_enable),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP3, i_rank_info.get_port_target(), iv_global_dfe3_enable),
                       "Unable to set attributes for ddr5::mr111_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_global_dfe_tap4(i_rank_info.get_port_target(), iv_global_dfe4_enable),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP4, i_rank_info.get_port_target(), iv_global_dfe4_enable),
                       "Unable to set attributes for ddr5::mr111_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;

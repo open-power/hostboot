@@ -270,7 +270,7 @@ inline fapi2::ReturnCode spd_supported_freq(const fapi2::Target<TT::FREQ_DOMAIN_
             uint64_t l_tck_min_in_ps = 0;
             uint32_t l_dimm_freq = 0;
 
-            FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_ocmb, l_is_planar) );
 
             FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_spd));
             FAPI_TRY(mss::spd::get_tckmax_helper<MC>(l_dimm, l_spd, l_tckmax_in_ps),

@@ -81,11 +81,15 @@ class mr4_data : public mr_base_data<MC>
 
             const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-            FAPI_TRY( mss::attr::get_ddr5_min_ref_rate(l_port_target, iv_min_refresh_rate_read_only), "Error in ddr5::mr4_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_ref_wide_range(l_port_target, iv_wide_range_read_only), "Error in ddr5::mr4_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_ref_tuf(l_port_target, iv_tuf_read_only), "Error in ddr5::mr4_data()" );
-            FAPI_TRY( mss::attr::get_ref_rate_indic(l_port_target, iv_refresh_interval_rate), "Error in ddr5::mr4_data()" );
-            FAPI_TRY( mss::attr::get_mrw_fine_refresh_mode(iv_refresh_trfc_mode), "Error in ddr5::mr4_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_MIN_REF_RATE, l_port_target, iv_min_refresh_rate_read_only),
+                      "Error in ddr5::mr4_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_REF_WIDE_RANGE, l_port_target, iv_wide_range_read_only),
+                      "Error in ddr5::mr4_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_REF_TUF, l_port_target, iv_tuf_read_only), "Error in ddr5::mr4_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_REF_INTERVAL_RATE_INDIC, l_port_target, iv_refresh_interval_rate),
+                      "Error in ddr5::mr4_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_FINE_REFRESH_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                    iv_refresh_trfc_mode), "Error in ddr5::mr4_data()" );
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
@@ -227,13 +231,15 @@ class mr4_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY( mss::attr::set_ddr5_min_ref_rate(i_rank_info.get_port_target(), iv_min_refresh_rate_read_only),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_MIN_REF_RATE, i_rank_info.get_port_target(),
+                                    iv_min_refresh_rate_read_only),
                       "Unable to set attributes for ddr5::mr4_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_ref_wide_range(i_rank_info.get_port_target(), iv_wide_range_read_only),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_REF_WIDE_RANGE, i_rank_info.get_port_target(), iv_wide_range_read_only),
                       "Unable to set attributes for ddr5::mr4_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_ref_tuf(i_rank_info.get_port_target(), iv_tuf_read_only),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_REF_TUF, i_rank_info.get_port_target(), iv_tuf_read_only),
                       "Unable to set attributes for ddr5::mr4_data()" );
-            FAPI_TRY( mss::attr::set_ref_rate_indic(i_rank_info.get_port_target(), iv_refresh_interval_rate),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_REF_INTERVAL_RATE_INDIC, i_rank_info.get_port_target(),
+                                    iv_refresh_interval_rate),
                       "Unable to set attributes for ddr5::mr4_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;

@@ -78,7 +78,7 @@ class mr13_data : public mr_base_data<MC>
             }
 
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            FAPI_TRY( mss::attr::get_dram_tccd_l(l_port, iv_tccd_l),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TCCD_L, l_port, iv_tccd_l),
                       "Error in ddr5::mr13_data()" );
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -187,7 +187,7 @@ class mr13_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY( mss::attr::set_dram_tccd_l(i_rank_info.get_port_target(), iv_tccd_l),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TCCD_L, i_rank_info.get_port_target(), iv_tccd_l),
                       "Unable to set attributes for ddr5::mr13_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;

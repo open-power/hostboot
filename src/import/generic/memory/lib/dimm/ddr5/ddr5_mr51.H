@@ -80,7 +80,7 @@ class mr51_data : public mr_base_data<MC>
 
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-            FAPI_TRY(mss::attr::get_ddr5_wr_crc_autodisable_threshold(l_port, iv_wr_crc_autodisable_threshold),
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_THRESHOLD, l_port, iv_wr_crc_autodisable_threshold),
                      "Error in ddr5::mr50_data()");
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -181,8 +181,8 @@ class mr51_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY(mss::attr::set_ddr5_wr_crc_autodisable_threshold(i_rank_info.get_port_target(),
-                     iv_wr_crc_autodisable_threshold),
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_THRESHOLD, i_rank_info.get_port_target(),
+                                   iv_wr_crc_autodisable_threshold),
                      "Unable to set attributes for ddr5::mr50_data()");
 
             return fapi2::FAPI2_RC_SUCCESS;

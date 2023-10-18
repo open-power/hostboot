@@ -80,7 +80,7 @@ class mr52_data : public mr_base_data<MC>
 
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-            FAPI_TRY(mss::attr::get_ddr5_wr_crc_autodisable_window(l_port, iv_wr_crc_autodisable_window),
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_WINDOW, l_port, iv_wr_crc_autodisable_window),
                      "Error in ddr5::mr52_data()");
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -181,7 +181,8 @@ class mr52_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY(mss::attr::set_ddr5_wr_crc_autodisable_window(i_rank_info.get_port_target(), iv_wr_crc_autodisable_window),
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_WR_CRC_AUTODISABLE_WINDOW, i_rank_info.get_port_target(),
+                                   iv_wr_crc_autodisable_window),
                      "Unable to set attributes for ddr5::mr52_data()");
 
             return fapi2::FAPI2_RC_SUCCESS;

@@ -442,9 +442,9 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
     swizzle_repair_entry(l_repair);
 
     // Get timing from API and attributes
-    FAPI_TRY( mss::attr::get_dram_trcd(l_port_target, tRCD) );
-    FAPI_TRY( mss::attr::get_dram_twr(l_port_target, tWR) );
-    FAPI_TRY( mss::attr::get_dram_trp(l_port_target, tRP) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRCD, l_port_target, tRCD) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TWR, l_port_target, tWR) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRP, l_port_target, tRP) );
 
     // Get freq from attributes:
     FAPI_TRY( mss::freq<mss::mc_type::ODYSSEY>(l_ocmb_target, l_freq),
@@ -779,10 +779,10 @@ fapi2::ReturnCode clear_row_repairs_on_bad_dram(const fapi2::Target<fapi2::TARGE
     constexpr uint8_t ROW_REPAIR_VALID_BYTE = 3;
     constexpr uint8_t ROW_REPAIR_VALID_BIT = 7;
     uint8_t l_bad_dq_bitmap[mss::ody::MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
-    FAPI_TRY( mss::attr::get_bad_dq_bitmap(i_target, l_bad_dq_bitmap) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, i_target, l_bad_dq_bitmap) );
 
     // Load row repair data for the dimm
-    FAPI_TRY( mss::attr::get_row_repair_data(i_target, o_row_repair_data) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ROW_REPAIR_DATA, i_target, o_row_repair_data) );
 
     // Loops through all of the possible ranks on this DIMM and checks the repair data
     for(uint8_t l_rank = 0; l_rank < mss::ody::MAX_RANK_PER_DIMM; ++l_rank)
@@ -817,7 +817,7 @@ fapi2::ReturnCode clear_row_repairs_on_bad_dram(const fapi2::Target<fapi2::TARGE
 
     // Sets the row repair data
     // This way, any repairs that were freed can be cleaned up
-    FAPI_TRY( mss::attr::set_row_repair_data(i_target, o_row_repair_data) );
+    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_ROW_REPAIR_DATA, i_target, o_row_repair_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -841,7 +841,7 @@ fapi2::ReturnCode map_repairs_per_dimm( const fapi2::Target<fapi2::TARGET_TYPE_O
         REPAIR_ARR l_repairs_per_dimm;
 
         // Load row repair data for the dimm
-        FAPI_TRY( mss::attr::get_row_repair_data(l_dimm, l_row_repair_data) );
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ROW_REPAIR_DATA, l_dimm, l_row_repair_data) );
 
         // Clear out any repairs on bad DRAM
         // This way, we can use those row repairs again if needed

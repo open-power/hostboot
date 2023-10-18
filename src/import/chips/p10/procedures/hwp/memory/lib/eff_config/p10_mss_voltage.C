@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -213,7 +213,7 @@ fapi2::ReturnCode spd_common_process( const fapi2::Target<fapi2::TARGET_TYPE_DIM
     uint8_t l_is_planar = 0;
     mss::spd::common_engine l_engine(i_target);
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
-    FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_ocmb, l_is_planar) );
     FAPI_TRY(mss::spd::get_raw_data(i_target, l_is_planar, o_spd));
 
     // Setting up DRAM generation.

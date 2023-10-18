@@ -71,7 +71,7 @@ fapi2::ReturnCode p10_omi_setup_explorer( const fapi2::Target<fapi2::TARGET_TYPE
 
     FAPI_TRY(mss::unmask::before_p10_omi_setup(mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target)));
 
-    FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_IS_APOLLO, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_apollo));
 
 
     FAPI_TRY(mss::omi::setup_mc_cmn_config(i_target));

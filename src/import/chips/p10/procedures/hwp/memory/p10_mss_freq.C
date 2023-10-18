@@ -80,8 +80,8 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
             uint8_t l_spd_rev = 0;
             uint8_t l_is_planar = 0;
 
-            FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
-            FAPI_TRY( mss::attr::get_spd_revision(p, l_spd_rev) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_ocmb, l_is_planar) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_SPD_REVISION, p, l_spd_rev) );
             FAPI_TRY( mss::attr::get_dram_gen(d, l_dram_gen) );
             FAPI_TRY(mss::spd::get_raw_data(d, l_is_planar, l_raw_spd));
             {

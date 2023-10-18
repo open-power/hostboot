@@ -82,10 +82,14 @@ class mr8_data : public mr_base_data<MC>
 
             const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-            FAPI_TRY( mss::attr::get_ddr5_dram_rd_preamble(l_port_target, iv_rd_preamble), "Error in ddr5::mr8_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_dram_wr_preamble(l_port_target, iv_wr_preamble), "Error in ddr5::mr8_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_dram_rd_postamble(l_port_target, iv_rd_postamble), "Error in ddr5::mr8_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_dram_wr_postamble(l_port_target, iv_wr_postamble), "Error in ddr5::mr8_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_RD_PREAMBLE, l_port_target, iv_rd_preamble),
+                      "Error in ddr5::mr8_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_WR_PREAMBLE, l_port_target, iv_wr_preamble),
+                      "Error in ddr5::mr8_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_RD_POSTAMBLE, l_port_target, iv_rd_postamble),
+                      "Error in ddr5::mr8_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_WR_POSTAMBLE, l_port_target, iv_wr_postamble),
+                      "Error in ddr5::mr8_data()" );
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
@@ -281,13 +285,13 @@ class mr8_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY( mss::attr::set_ddr5_dram_rd_preamble(i_rank_info.get_port_target(), iv_rd_preamble),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_RD_PREAMBLE, i_rank_info.get_port_target(), iv_rd_preamble),
                       "Unable to set attributes for ddr5::mr8_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_dram_wr_preamble(i_rank_info.get_port_target(), iv_wr_preamble),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_WR_PREAMBLE, i_rank_info.get_port_target(), iv_wr_preamble),
                       "Unable to set attributes for ddr5::mr8_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_dram_rd_postamble(i_rank_info.get_port_target(), iv_rd_postamble),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_RD_POSTAMBLE, i_rank_info.get_port_target(), iv_rd_postamble),
                       "Unable to set attributes for ddr5::mr8_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_dram_wr_postamble(i_rank_info.get_port_target(), iv_wr_postamble),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_WR_POSTAMBLE, i_rank_info.get_port_target(), iv_wr_postamble),
                       "Unable to set attributes for ddr5::mr8_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;

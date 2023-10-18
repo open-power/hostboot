@@ -238,7 +238,8 @@ fapi2::ReturnCode instruction_t<mss::mc_type::EXPLORER>::compute_parity(const
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const rank_configuration i_rank_config)
 {
     uint8_t l_is_planar = 0;
-    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target), l_is_planar));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target),
+                           l_is_planar));
     FAPI_TRY(compute_parity_helper(i_target, i_rank_config, l_is_planar, *this));
 
 fapi_try_exit:

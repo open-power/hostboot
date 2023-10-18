@@ -80,13 +80,13 @@ class mr14_data : public mr_base_data<MC>
 
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-            FAPI_TRY( mss::attr::get_ddr5_dram_ecs_mode(l_port, iv_ecs_mode),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_ECS_MODE, l_port, iv_ecs_mode),
                       "Error in ddr5::mr14_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_dram_ecs_reset_counter(l_port, iv_ecs_reset),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_ECS_RESET_COUNTER, l_port, iv_ecs_reset),
                       "Error in ddr5::mr14_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_dram_ecs_count_mode(l_port, iv_row_count),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_ECS_COUNT_MODE, l_port, iv_row_count),
                       "Error in ddr5::mr14_data()" );
-            FAPI_TRY( mss::attr::get_ddr5_dram_ecs_srank_select(l_port, iv_ecs_reg_index),
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_ECS_SRANK_SELECT, l_port, iv_ecs_reg_index),
                       "Error in ddr5::mr14_data()" );
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -196,13 +196,13 @@ class mr14_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY( mss::attr::set_ddr5_dram_ecs_mode(i_rank_info.get_port_target(), iv_ecs_mode),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_ECS_MODE, i_rank_info.get_port_target(), iv_ecs_mode),
                       "Unable to set attributes for ddr5::mr14_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_dram_ecs_reset_counter(i_rank_info.get_port_target(), iv_ecs_reset),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_ECS_RESET_COUNTER, i_rank_info.get_port_target(), iv_ecs_reset),
                       "Unable to set attributes for ddr5::mr14_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_dram_ecs_count_mode(i_rank_info.get_port_target(), iv_row_count),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_ECS_COUNT_MODE, i_rank_info.get_port_target(), iv_row_count),
                       "Unable to set attributes for ddr5::mr14_data()" );
-            FAPI_TRY( mss::attr::set_ddr5_dram_ecs_srank_select(i_rank_info.get_port_target(), iv_ecs_reg_index),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_ECS_SRANK_SELECT, i_rank_info.get_port_target(), iv_ecs_reg_index),
                       "Unable to set attributes for ddr5::mr14_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;

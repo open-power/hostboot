@@ -113,7 +113,7 @@ fapi2::ReturnCode update_wr_to_wr_data_enable_timing(const fapi2::Target<fapi2::
     constexpr uint8_t CLOCK_DIVISOR = 2;
     constexpr uint8_t HW_DELAY = 18;
     uint8_t l_cl = 0;
-    FAPI_TRY(mss::attr::get_dram_cl(i_target, l_cl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_CL, i_target, l_cl));
 
     l_cl = l_cl > HW_DELAY ? (l_cl - HW_DELAY) : 0;
     l_cl = l_cl / CLOCK_DIVISOR;

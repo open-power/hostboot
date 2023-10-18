@@ -218,7 +218,7 @@ class kind
             FAPI_TRY( mss::attr::get_hybrid( i_target, iv_hybrid ));
             FAPI_TRY( mss::attr::get_hybrid_memory_type( i_target, iv_hybrid_memory_type ));
             FAPI_TRY( mss::attr::get_rcd_mfg_id(i_target, iv_rcd_mfgid) );
-            FAPI_TRY( mss::attr::get_dram_module_height(l_ocmb, iv_module_height) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, l_ocmb, iv_module_height) );
 
             iv_rounded_off_dimm_count = mss::dimm::count_num_dimms<MC>(l_ocmb);
             iv_rounded_off_dimm_count = round_up_dimm_count(iv_rounded_off_dimm_count);

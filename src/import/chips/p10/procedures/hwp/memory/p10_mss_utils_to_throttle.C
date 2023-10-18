@@ -83,8 +83,10 @@ extern "C"
             uint32_t l_safemode_util = 0;
             uint32_t l_calc_util = 0;
 
-            FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_dram_clocks));
-            FAPI_TRY(mss::attr::get_mrw_max_dram_databus_util(l_max_databus_util));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   l_dram_clocks));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   l_max_databus_util));
 
             for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb))
             {
@@ -99,7 +101,7 @@ extern "C"
                     break;
                 }
 
-                FAPI_TRY(mss::attr::get_safemode_dram_databus_util(l_port, l_safemode_util));
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_SAFEMODE_DRAM_DATABUS_UTIL, l_port, l_safemode_util));
 
                 // TODO: Zen:MST-1818 Will need to call MC-specific version of this once BL16 is supported
                 l_safemode_throttle_per_port = mss::power_thermal::calc_n_from_dram_util(l_safemode_util, l_dram_clocks);
@@ -146,11 +148,11 @@ extern "C"
                               l_throttle.iv_databus_port_max,
                               l_throttle.iv_calc_port_maxpower);
 
-                    FAPI_TRY(mss::attr::set_port_maxpower(l_port, l_throttle.iv_calc_port_maxpower));
-                    FAPI_TRY(mss::attr::set_mem_throttled_n_commands_per_slot(l_port,
-                             (l_safemode) ? l_safemode_throttle_per_port : l_throttle.iv_n_slot));
-                    FAPI_TRY(mss::attr::set_mem_throttled_n_commands_per_port(l_port,
-                             (l_safemode) ? l_safemode_throttle_per_port : l_throttle.iv_n_port));
+                    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_EXP_PORT_MAXPOWER, l_port, l_throttle.iv_calc_port_maxpower));
+                    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_port,
+                                                 (l_safemode) ? l_safemode_throttle_per_port : l_throttle.iv_n_slot));
+                    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_port,
+                                                 (l_safemode) ? l_safemode_throttle_per_port : l_throttle.iv_n_port));
                 }
                 else
                 {
@@ -168,11 +170,11 @@ extern "C"
                               l_throttle.iv_databus_port_max,
                               l_throttle.iv_calc_port_maxpower);
 
-                    FAPI_TRY(mss::attr::set_port_maxpower(l_port, l_throttle.iv_calc_port_maxpower));
-                    FAPI_TRY(mss::attr::set_mem_throttled_n_commands_per_slot(l_port,
-                             (l_safemode) ? l_safemode_throttle_per_port : l_throttle.iv_n_slot));
-                    FAPI_TRY(mss::attr::set_mem_throttled_n_commands_per_port(l_port,
-                             (l_safemode) ? l_safemode_throttle_per_port : l_throttle.iv_n_port));
+                    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_EXP_PORT_MAXPOWER, l_port, l_throttle.iv_calc_port_maxpower));
+                    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_port,
+                                                 (l_safemode) ? l_safemode_throttle_per_port : l_throttle.iv_n_slot));
+                    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_port,
+                                                 (l_safemode) ? l_safemode_throttle_per_port : l_throttle.iv_n_port));
                 }
             } // ports
 

@@ -216,7 +216,7 @@ class ddimm_0_0 : public mss::efd::base
             l_field = l_field == FIELD_2N ? fapi2::ENUM_ATTR_MEM_2N_MODE_2N : fapi2::ENUM_ATTR_MEM_2N_MODE_1N;
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_mem_2n_mode(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_2N_MODE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -251,7 +251,7 @@ class ddimm_0_0 : public mss::efd::base
             }
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_phy_vref_rd(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_PHY_VREF_RD, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -381,7 +381,7 @@ class ddimm_0_0 : public mss::efd::base
                                         l_field, l_dram_rd_preamble));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_dram_rd_preamble(iv_port, l_dram_rd_preamble));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_RD_PREAMBLE, iv_port, l_dram_rd_preamble));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -421,7 +421,7 @@ class ddimm_0_0 : public mss::efd::base
                                         l_field, l_dram_wr_preamble));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_dram_wr_preamble(iv_port, l_dram_wr_preamble));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_WR_PREAMBLE, iv_port, l_dram_wr_preamble));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -447,7 +447,7 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_RD_POSTAMBLE, i_efd, SET_RD_POSTAMBLE, l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_dram_rd_postamble(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_RD_POSTAMBLE, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -473,7 +473,7 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DRAM_WR_POSTAMBLE, i_efd, SET_WR_POSTAMBLE, l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_dram_wr_postamble(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_DDR5_DRAM_WR_POSTAMBLE, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -574,7 +574,7 @@ class ddimm_0_0 : public mss::efd::base
                                              l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_global_dfe_gain(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_GAIN, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -603,7 +603,7 @@ class ddimm_0_0 : public mss::efd::base
                                              l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_global_dfe_tap1(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP1, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -632,7 +632,7 @@ class ddimm_0_0 : public mss::efd::base
                                              l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_global_dfe_tap2(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP2, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -660,7 +660,7 @@ class ddimm_0_0 : public mss::efd::base
                                              l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_global_dfe_tap3(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP3, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -689,7 +689,7 @@ class ddimm_0_0 : public mss::efd::base
                                              l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_global_dfe_tap4(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_GLOBAL_DFE_TAP4, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -883,7 +883,7 @@ class ddimm_0_0 : public mss::efd::base
             };
 
             // Get the attr to do read modify write
-            FAPI_TRY(mss::attr::get_si_phy_drv_imp_dq_dqs_pull_up(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP, iv_port, l_field));
 
             // Get the field value from i_efd into l_phy_drv_imp_pu
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::PHY_DRIVE_IMPEDANCE_CTRL0, i_efd,
@@ -894,7 +894,7 @@ class ddimm_0_0 : public mss::efd::base
                                         l_phy_drv_imp, l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_si_phy_drv_imp_dq_dqs_pull_up(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_SI_PHY_DRV_IMP_DQ_DQS_PULL_UP, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2525,7 +2525,7 @@ class ddimm_0_0 : public mss::efd::base
             // Page 157-158
             // =========================================================
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_vrefca_sweep_max(iv_port, l_vrefca_sweep_max));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MAX, iv_port, l_vrefca_sweep_max));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2553,7 +2553,7 @@ class ddimm_0_0 : public mss::efd::base
             // Page 157-158
             // =========================================================
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_vrefca_sweep_min(iv_port, l_vrefca_sweep_min));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MIN, iv_port, l_vrefca_sweep_min));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2581,7 +2581,7 @@ class ddimm_0_0 : public mss::efd::base
             // Page 157-158
             // =========================================================
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_vrefcs_sweep_max(iv_port, l_vrefcs_sweep_max));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MAX, iv_port, l_vrefcs_sweep_max));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2609,7 +2609,7 @@ class ddimm_0_0 : public mss::efd::base
             // Page 157-158
             // =========================================================
             // Set the attr
-            FAPI_TRY(mss::attr::set_ddr5_vrefcs_sweep_min(iv_port, l_vrefcs_sweep_min));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MIN, iv_port, l_vrefcs_sweep_min));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -3924,7 +3924,7 @@ class ddimm_0_0 : public mss::efd::base
             uint16_t l_field = 0;
             uint8_t l_wr_preamble = 0;
 
-            FAPI_TRY(mss::attr::get_ddr5_dram_wr_preamble(iv_port, l_wr_preamble));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_WR_PREAMBLE, iv_port, l_wr_preamble));
 
             // =========================================================
             // Algorithm based on DDR5 spec JESD79-5B_v1-2
@@ -3959,7 +3959,7 @@ class ddimm_0_0 : public mss::efd::base
                                 spd::c_str(iv_port), l_wr_preamble);
             }
 
-            FAPI_TRY(mss::attr::set_ddr5_wl_adj_start(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_START, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -3978,7 +3978,7 @@ class ddimm_0_0 : public mss::efd::base
             uint16_t l_field = 0;
             uint8_t l_wr_preamble = 0;
 
-            FAPI_TRY(mss::attr::get_ddr5_dram_wr_preamble(iv_port, l_wr_preamble));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_DRAM_WR_PREAMBLE, iv_port, l_wr_preamble));
 
             // =========================================================
             // Algorithm based on DDR5 spec JESD79-5B_v1-2
@@ -4010,7 +4010,7 @@ class ddimm_0_0 : public mss::efd::base
                                 spd::c_str(iv_port), l_wr_preamble);
             }
 
-            FAPI_TRY(mss::attr::set_ddr5_wl_adj_end(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_END, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;

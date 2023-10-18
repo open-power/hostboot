@@ -133,7 +133,7 @@ class mrsTraits<mss::mc_type::EXPLORER>
         ///
         static fapi2::ReturnCode dram_tccd_l (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, uint8_t& o_value)
         {
-            return mss::attr::get_dram_tccd_l(i_target, o_value);
+            return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TCCD_L, i_target, o_value);
         }
 
         ///
@@ -144,7 +144,7 @@ class mrsTraits<mss::mc_type::EXPLORER>
         ///
         static fapi2::ReturnCode dram_trp (const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, uint8_t& o_value)
         {
-            return mss::attr::get_dram_trp(i_target, o_value);
+            return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRP, i_target, o_value);
         }
 
         ///
@@ -156,7 +156,7 @@ class mrsTraits<mss::mc_type::EXPLORER>
         static fapi2::ReturnCode dram_tccd_l (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value)
         {
             auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            return mss::attr::get_dram_tccd_l(l_port_target, o_value);
+            return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TCCD_L, l_port_target, o_value);
         }
 
         ///
@@ -168,7 +168,7 @@ class mrsTraits<mss::mc_type::EXPLORER>
         static fapi2::ReturnCode dram_trp (const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, uint8_t& o_value)
         {
             auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            return mss::attr::get_dram_trp(l_port_target, o_value);
+            return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRP, l_port_target, o_value);
         }
 
         ///

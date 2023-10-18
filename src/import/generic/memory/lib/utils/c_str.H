@@ -38,6 +38,12 @@
 
 #include <fapi2.H>
 
+#define FAPI_ATTR_SET_CONST(ID, TARGET, VAL) \
+    ({ \
+        ID##_Type FAPI_ATTR_SET_CONST_LOCAL = VAL; \
+        FAPI_ATTR_SET(ID, TARGET, FAPI_ATTR_SET_CONST_LOCAL); \
+    })
+
 #ifdef __PPE__
 
 #include <mss_generic_consts.H>

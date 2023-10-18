@@ -62,7 +62,7 @@ fapi2::ReturnCode freq<mss::mc_type::EXPLORER, fapi2::TARGET_TYPE_OCMB_CHIP>(
     // Each OCMB only has one MEM_PORT
     for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        return attr::get_freq(l_port, o_value);
+        return FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, l_port, o_value);
     }
 
     o_value = 0;

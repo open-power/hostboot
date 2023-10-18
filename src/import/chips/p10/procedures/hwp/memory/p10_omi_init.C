@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -196,7 +196,8 @@ fapi2::ReturnCode p10_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_ta
     FAPI_TRY(p10_omi_init_enable_lol(i_target));
 
     // Perform fir unmasking if attribute is set to enabled, default disabled
-    FAPI_TRY(mss::attr::get_enable_fir_unmasking(l_enable_fir_unmasking));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ENABLE_FIR_UNMASKING, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_enable_fir_unmasking));
 
     if (l_enable_fir_unmasking == fapi2::ENUM_ATTR_ENABLE_FIR_UNMASKING_ENABLED)
     {

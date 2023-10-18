@@ -434,7 +434,7 @@ class base_0_0 : public mss::spd::base
             // We are harcoding burst length to support Burst Chop 8 On The Fly
             constexpr uint8_t l_burst_length = fapi2::ENUM_ATTR_MEM_BURST_LENGTH_BC8_OTF;
 
-            FAPI_TRY(mss::attr::set_burst_length(iv_port, l_burst_length));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_BURST_LENGTH, iv_port, l_burst_length));
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -467,7 +467,7 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::ENABLED_PHY_CHANNELS, i_spd, SET_CHANNELS_PER_DIMM, l_field));
             FAPI_TRY(lookup_table_check(iv_dimm, PHY_PER_OCMB_EN_MAP, SET_CHANNELS_PER_DIMM, l_field,
                                         l_phy_en_per_ocmb));
-            FAPI_TRY(mss::attr::set_ddr5_mem_port_enable(iv_ocmb, l_phy_en_per_ocmb));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_MEM_PORT_ENABLE, iv_ocmb, l_phy_en_per_ocmb));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -527,7 +527,7 @@ class base_0_0 : public mss::spd::base
             // @note: The default is set to 1 in the xml file
             if(l_field_channel_b == fapi2::ENUM_ATTR_MEM_EFF_DDR5_CHANNEL_BUS_WIDTH_NOT_USED)
             {
-                FAPI_TRY(mss::attr::set_ddr5_chb_active(iv_port, 0));
+                FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DDR5_CHB_ACTIVE, iv_port, 0));
             }
 
 
@@ -623,7 +623,7 @@ class base_0_0 : public mss::spd::base
 
             FAPI_TRY(mss::gen::ddr5::get_supported_cas_latencies(iv_dimm, i_spd, get_spd_revision(), l_field))
 
-            FAPI_TRY(mss::attr::set_ddr5_spd_cl_supported(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DDR5_SPD_CL_SUPPORTED, iv_port, l_field));
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -722,8 +722,8 @@ class base_0_0 : public mss::spd::base
         {
             uint8_t l_field = fapi2::ENUM_ATTR_MEM_EFF_Z_MODE_FALSE;
             uint8_t l_dimm_mode = fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_FULL_DIMM;
-            FAPI_TRY(mss::attr::set_z_mode(iv_ocmb, l_field));
-            FAPI_TRY(mss::attr::set_ocmb_half_dimm_mode(iv_ocmb, l_dimm_mode));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_Z_MODE, iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, iv_ocmb, l_dimm_mode));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -787,13 +787,13 @@ class base_0_0 : public mss::spd::base
             // Page 389, Table 258
             // The DDR5 CWL is given as CL-2 for all speed bins
             // =========================================================
-            FAPI_TRY(mss::attr::get_dram_cl(iv_port, l_dram_cl));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_CL, iv_port, l_dram_cl));
             FAPI_DBG("%s DRAM CL %d", spd::c_str(iv_dimm), l_dram_cl);
 
             l_field = l_dram_cl - 2;
             FAPI_DBG("%s DRAM CWL %d", spd::c_str(iv_dimm), l_field);
 
-            FAPI_TRY(mss::attr::set_dram_cwl(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DRAM_CWL, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -812,7 +812,7 @@ class base_0_0 : public mss::spd::base
             using TT = mss::dimmPosTraits<mss::mc_type::ODYSSEY>;
             FAPI_TRY(gen::dimm_pos<TT>(iv_dimm, l_field));
 
-            FAPI_TRY(mss::attr::set_dimm_pos_metadata(iv_dimm, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DIMM_POS_METADATA, iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -829,7 +829,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_field = 0;
 
             FAPI_TRY(mss::attr::get_dram_gen(iv_dimm, l_field));
-            FAPI_TRY(mss::attr::set_dram_gen_metadata(iv_dimm, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DRAM_GEN_METADATA, iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -846,7 +846,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_field = 0;
 
             FAPI_TRY(mss::attr::get_dimm_type(iv_dimm, l_field));
-            FAPI_TRY(mss::attr::set_dimm_type_metadata(iv_dimm, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DIMM_TYPE_METADATA, iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -980,7 +980,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_trcd = 0;
             FAPI_TRY(mss::spd::ddr5::process_two_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TRCD_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TRCD, l_trcd));
-            FAPI_TRY(mss::attr::set_dram_trcd(iv_port, l_trcd));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRCD, iv_port, l_trcd));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -998,7 +998,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_trp = 0;
             FAPI_TRY(mss::spd::ddr5::process_two_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TRP_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TRP, l_trp));
-            FAPI_TRY(mss::attr::set_dram_trp(iv_port, l_trp));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRP, iv_port, l_trp));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1016,7 +1016,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_tras = 0;
             FAPI_TRY(mss::spd::ddr5::process_two_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TRAS_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TRAS, l_tras));
-            FAPI_TRY(mss::attr::set_dram_tras(iv_port, l_tras));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRAS, iv_port, l_tras));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1034,7 +1034,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_trc = 0;
             FAPI_TRY(mss::spd::ddr5::process_two_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TRC_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TRC, l_trc));
-            FAPI_TRY(mss::attr::set_dram_trc(iv_port, l_trc));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRC, iv_port, l_trc));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1052,7 +1052,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_twr = 0;
             FAPI_TRY(mss::spd::ddr5::process_two_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TWR_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TWR, l_twr));
-            FAPI_TRY(mss::attr::set_dram_twr(iv_port, l_twr));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TWR, iv_port, l_twr));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1069,11 +1069,12 @@ class base_0_0 : public mss::spd::base
         {
             uint16_t l_trfc = 0;
             uint8_t l_refresh_mode = 0;
-            FAPI_TRY(mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_FINE_REFRESH_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   l_refresh_mode));
             FAPI_TRY(mss::spd::ddr5::process_trfc_nck(iv_port, iv_dimm, i_spd, FIELDS::TRFC_SLR_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TRFC,
                      l_refresh_mode, l_trfc));
-            FAPI_TRY(mss::attr::set_dram_trfc(iv_port, l_trfc));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRFC, iv_port, l_trfc));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1100,11 +1101,12 @@ class base_0_0 : public mss::spd::base
                 return fapi2::FAPI2_RC_SUCCESS;
             }
 
-            FAPI_TRY(mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_FINE_REFRESH_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   l_refresh_mode));
             FAPI_TRY(mss::spd::ddr5::process_trfc_nck(iv_port, iv_dimm, i_spd, FIELDS::TRFC_DLR_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TRFC_DLR,
                      l_refresh_mode, l_trfc));
-            FAPI_TRY(mss::attr::set_dram_trfc_dlr(iv_port, l_trfc));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR, iv_port, l_trfc));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1122,7 +1124,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_trrd_l = 0;
             FAPI_TRY(mss::spd::ddr5::process_three_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TRRD_L_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TRRD_L, l_trrd_l));
-            FAPI_TRY(mss::attr::set_dram_trrd_l(iv_port, l_trrd_l));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRRD_L, iv_port, l_trrd_l));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1140,7 +1142,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_tccd_l = 0;
             FAPI_TRY(mss::spd::ddr5::process_three_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TCCD_L_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TCCD_L, l_tccd_l));
-            FAPI_TRY(mss::attr::set_dram_tccd_l(iv_port, l_tccd_l));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TCCD_L, iv_port, l_tccd_l));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1177,7 +1179,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_tfaw = 0;
             FAPI_TRY(mss::spd::ddr5::process_three_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TFAW_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TFAW, l_tfaw));
-            FAPI_TRY(mss::attr::set_dram_tfaw(iv_port, l_tfaw));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TFAW, iv_port, l_tfaw));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1195,7 +1197,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_trtp = 0;
             FAPI_TRY(mss::spd::ddr5::process_three_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TRTP_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TRTP, l_trtp));
-            FAPI_TRY(mss::attr::set_dram_trtp(iv_port, l_trtp));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRTP, iv_port, l_trtp));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1213,7 +1215,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_twtr_s = 0;
             FAPI_TRY(mss::spd::ddr5::process_three_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TWTR_S_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TWTR_S, l_twtr_s));
-            FAPI_TRY(mss::attr::set_dram_twtr_s(iv_port, l_twtr_s));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TWTR_S, iv_port, l_twtr_s));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1231,7 +1233,7 @@ class base_0_0 : public mss::spd::base
             uint8_t l_twtr_l = 0;
             FAPI_TRY(mss::spd::ddr5::process_three_byte_timing_nck(iv_port, iv_dimm, i_spd, FIELDS::TWTR_L_MIN_LSB.get_byte(i_spd),
                      generic_ffdc_codes::SET_DRAM_TWTR_L, l_twtr_l));
-            FAPI_TRY(mss::attr::set_dram_twtr_l(iv_port, l_twtr_l));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TWTR_L, iv_port, l_twtr_l));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1248,7 +1250,7 @@ class base_0_0 : public mss::spd::base
         {
             // The value is the same across all DDR5 speed bins for JEDEC spec rev 1.7.1
             constexpr uint8_t TRRD_S = 8;
-            return mss::attr::set_dram_trrd_s(iv_port, TRRD_S);
+            return FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TRRD_S, iv_port, TRRD_S);
         }
 
         ///
@@ -1262,7 +1264,7 @@ class base_0_0 : public mss::spd::base
         {
             // The value is the same across all DDR5 speed bins for JEDEC spec rev 1.7.1
             constexpr uint8_t TRRD_DLR = 4;
-            return mss::attr::set_dram_trrd_dlr(iv_port, TRRD_DLR);
+            return FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TRRD_DLR, iv_port, TRRD_DLR);
         }
 
         ///
@@ -1278,10 +1280,12 @@ class base_0_0 : public mss::spd::base
             uint8_t l_refresh_mode = 0;
             uint8_t l_refresh_rate = 0;
 
-            FAPI_TRY(mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode));
-            FAPI_TRY(mss::attr::get_mrw_refresh_rate_request(l_refresh_rate));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_FINE_REFRESH_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   l_refresh_mode));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_REFRESH_RATE_REQUEST, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                   l_refresh_rate));
             FAPI_TRY(mss::spd::ddr5::process_trefi_nck(iv_port, l_refresh_mode, l_refresh_rate, l_trefi_nck));
-            FAPI_TRY(mss::attr::set_dram_trefi(iv_port, l_trefi_nck));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TREFI, iv_port, l_trefi_nck));
 
         fapi_try_exit:
             return fapi2::current_err;

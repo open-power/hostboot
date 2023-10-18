@@ -164,8 +164,8 @@ inline fapi2::ReturnCode half_dimm_mode(
     uint8_t l_half_dimm_attr = 0;
     uint8_t l_override_attr = 0;
 
-    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode(i_target, l_half_dimm_attr) );
-    FAPI_TRY( mss::attr::get_ocmb_half_dimm_mode_override(i_target, l_override_attr) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, i_target, l_half_dimm_attr) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, i_target, l_override_attr) );
 
     // o_is_half_dimm_mode will be set by the helper function
     FAPI_TRY( mss::half_dimm_mode_helper(i_target, i_is_enterprise_mode, l_half_dimm_attr, l_override_attr,

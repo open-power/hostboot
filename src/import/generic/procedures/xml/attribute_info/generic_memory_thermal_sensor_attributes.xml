@@ -47,7 +47,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>module_thermal_sensors</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -81,7 +80,6 @@
         </enum>
         <writeable/>
         <default>NOT_AVAILABLE</default>
-        <mssAccessorName>therm_sensor_0_secondary_availability</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -101,7 +99,6 @@
         </enum>
         <writeable/>
         <default>NO_SENSOR</default>
-        <mssAccessorName>therm_sensor_0_type</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -138,7 +135,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <initToZero/>
-        <mssAccessorName>therm_sensor_0_i2c_addr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -175,7 +171,6 @@
         </enum>
         <writeable/>
         <default>NOT_AVAILABLE</default>
-        <mssAccessorName>therm_sensor_1_secondary_availability</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -195,7 +190,6 @@
         </enum>
         <writeable/>
         <default>NO_SENSOR</default>
-        <mssAccessorName>therm_sensor_1_type</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -232,7 +226,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <initToZero/>
-        <mssAccessorName>therm_sensor_1_i2c_addr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -272,7 +265,6 @@
         </enum>
         <writeable/>
         <default>NO_SENSOR</default>
-        <mssAccessorName>therm_sensor_2_type</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -309,7 +301,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <initToZero/>
-        <mssAccessorName>therm_sensor_2_i2c_addr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -349,7 +340,6 @@
         </enum>
         <writeable/>
         <default>NO_SENSOR</default>
-        <mssAccessorName>therm_sensor_3_type</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -386,7 +376,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <initToZero/>
-        <mssAccessorName>therm_sensor_3_i2c_addr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -403,7 +392,6 @@
         </enum>
         <writeable/>
         <default>NOT_AVAILABLE</default>
-        <mssAccessorName>therm_sensor_differential_availability</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -423,7 +411,6 @@
         </enum>
         <writeable/>
         <default>NO_SENSOR</default>
-        <mssAccessorName>therm_sensor_differential_type</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -443,7 +430,6 @@
         </enum>
         <writeable/>
         <default>DISABLED</default>
-        <mssAccessorName>therm_sensor_differential_usage</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -455,7 +441,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <initToZero/>
-        <mssAccessorName>therm_sensor_differential_i2c_addr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -467,7 +452,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <initToZero/>
-        <mssAccessorName>therm_sensor_0_secondary_i2c_addr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -479,7 +463,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <initToZero/>
-        <mssAccessorName>therm_sensor_1_secondary_i2c_addr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -492,7 +475,6 @@
         <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
         <writeable/>
         <initToZero/>
-        <mssAccessorName>therm_sensor_1_secondary_location</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -505,7 +487,6 @@
         <enum>LOWER_LEFT = 0, UPPER_LEFT = 1, LOWER_RIGHT = 2, UPPER_RIGHT = 3</enum>
         <writeable/>
         <initToZero/>
-        <mssAccessorName>therm_sensor_0_secondary_location</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -589,7 +570,6 @@
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
         </sbeAttrSync>
-      <mssAccessorName>therm_sensor_read_override</mssAccessorName>
     </attribute>
 
 </attributes>

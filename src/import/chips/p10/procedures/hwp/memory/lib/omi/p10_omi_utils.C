@@ -296,7 +296,7 @@ fapi2::ReturnCode setup_mc_config1(const fapi2::Target<fapi2::TARGET_TYPE_OMI>& 
     fapi2::ATTR_MSS_MNFG_EDPL_THRESHOLD_Type l_mnfg_edpl_threshold = 0;
 
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
-    FAPI_TRY(mss::attr::get_mss_omi_edpl_disable(l_edpl_disable));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OMI_EDPL_DISABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_edpl_disable));
     FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN,
                                  l_mnfg_screen_test));
     FAPI_TRY(mss::attr::get_mnfg_edpl_time(l_mnfg_edpl_time));

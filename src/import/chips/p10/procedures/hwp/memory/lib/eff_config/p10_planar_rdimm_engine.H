@@ -108,7 +108,7 @@ class planar_rdimm_ddr4_1_1 : public ddimm_0_4
             FAPI_TRY(mss::attr::set_supported_rcd(iv_dimm, l_field));
 
             // NOTE: we also set ATTR_MEM_RDIMM_BUFFER_DELAY here so scominit can set up latencies properly
-            FAPI_TRY(mss::attr::set_dimm_buffer_delay(iv_port, RDIMM_BUFFER_DELAY));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_RDIMM_BUFFER_DELAY, iv_port, RDIMM_BUFFER_DELAY));
 
         fapi_try_exit:
             return fapi2::current_err;

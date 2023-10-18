@@ -588,15 +588,15 @@ class msg_block_params
             // Pstate is always zero for Odyssey
             iv_msg_block_vars.iv_Pstate = 0;
             FAPI_TRY(mss::attr::get_phy_pll_bypass_en(i_target, iv_msg_block_vars.iv_PllBypassEn));
-            FAPI_TRY(mss::attr::get_freq(i_target, iv_msg_block_vars.iv_DRAMFreq));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, iv_msg_block_vars.iv_DRAMFreq));
 
             // TODO: Zen:MST-1668 RCW05_next and RCW06_next: need to decide how to set these
             //FAPI_TRY(mss::attr::get_rcw05_next(i_target, iv_msg_block_vars.iv_RCW05_next));
             //FAPI_TRY(mss::attr::get_rcw06_next(i_target, iv_msg_block_vars.iv_RCW06_next));
 
-            FAPI_TRY(mss::attr::get_ddr5_rxen_adj(i_target, iv_msg_block_vars.iv_RXEN_ADJ));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_RXEN_ADJ, i_target, iv_msg_block_vars.iv_RXEN_ADJ));
             FAPI_TRY(mss::attr::get_phy_rx2d_dfe_misc(i_target, iv_msg_block_vars.iv_RX2D_DFE_Misc));
-            FAPI_TRY(mss::attr::get_ddr5_phy_vref_rd(i_target, iv_msg_block_vars.iv_PhyVref));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_PHY_VREF_RD, i_target, iv_msg_block_vars.iv_PhyVref));
             FAPI_TRY(mss::attr::get_phy_d5misc(i_target, iv_msg_block_vars.iv_D5Misc));
             FAPI_TRY(mss::attr::get_phy_wl_adj(i_target, iv_msg_block_vars.iv_WL_ADJ));
             FAPI_TRY(mss::attr::get_phy_sequence_ctrl(i_target, iv_msg_block_vars.iv_SequenceCtrl));
@@ -623,10 +623,10 @@ class msg_block_params
             FAPI_TRY(mss::attr::get_phy_enabled_dq_chb(i_target, iv_msg_block_vars.iv_EnabledDQsChB));
             FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_msg_block_vars.iv_CsPresentChA));
             FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_msg_block_vars.iv_CsPresentChB));
-            FAPI_TRY(mss::attr::get_ddr5_vrefcs_sweep_min(i_target, iv_msg_block_vars.iv_VrefCS_Sweep_Min));
-            FAPI_TRY(mss::attr::get_ddr5_vrefcs_sweep_max(i_target, iv_msg_block_vars.iv_VrefCS_Sweep_Max));
-            FAPI_TRY(mss::attr::get_ddr5_vrefca_sweep_min(i_target, iv_msg_block_vars.iv_VrefCA_Sweep_Min));
-            FAPI_TRY(mss::attr::get_ddr5_vrefca_sweep_max(i_target, iv_msg_block_vars.iv_VrefCA_Sweep_Max));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MIN, i_target, iv_msg_block_vars.iv_VrefCS_Sweep_Min));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MAX, i_target, iv_msg_block_vars.iv_VrefCS_Sweep_Max));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MIN, i_target, iv_msg_block_vars.iv_VrefCA_Sweep_Min));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MAX, i_target, iv_msg_block_vars.iv_VrefCA_Sweep_Max));
 
             // Update the number of CS present based upon the number of DQ on each channel
             if(iv_msg_block_vars.iv_EnabledDQsChA == 0)
@@ -767,8 +767,8 @@ class msg_block_params
             iv_msg_block_vars.iv_Reserved1E5 = 0;
             iv_msg_block_vars.iv_Reserved1E6 = 0;
             iv_msg_block_vars.iv_Reserved1E7 = 0;
-            FAPI_TRY(mss::attr::get_ddr5_wl_adj_start(i_target, iv_msg_block_vars.iv_WL_ADJ_START));
-            FAPI_TRY(mss::attr::get_ddr5_wl_adj_end(i_target, iv_msg_block_vars.iv_WL_ADJ_END));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_START, i_target, iv_msg_block_vars.iv_WL_ADJ_START));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_END, i_target, iv_msg_block_vars.iv_WL_ADJ_END));
 
             // Initialize the RCW to zeros
             memset(iv_msg_block_vars.iv_RCW, 0, sizeof(iv_msg_block_vars.iv_RCW));

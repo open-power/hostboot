@@ -566,8 +566,9 @@ inline fapi2::ReturnCode after_p10_chiplet_scominit(const fapi2::Target<fapi2::T
     FAPI_TRY(mss::workarounds::fir::setup_attr_omi_channel_fail_action(i_target));
 
     FAPI_TRY(mss::attr::get_omi_channel_fail_action(l_omi_fail_action));
-    FAPI_TRY(mss::attr::get_omi_x4_degrade_action(l_degrade_fail_action));
-    FAPI_TRY(mss::attr::get_omi_crc_debug(l_omi_crc_debug));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_X4_DEGRADE_ACTION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_degrade_fail_action));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_CRC_DEBUG, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_omi_crc_debug));
 
     // Set up MISCFIRQ
     l_rc = l_mc_miscfir_reg.recoverable_error<scomt::mc::MBA_SCOMFIR_MISCFIRQ_SCOM_RECOVERABLE_REG_PE>()

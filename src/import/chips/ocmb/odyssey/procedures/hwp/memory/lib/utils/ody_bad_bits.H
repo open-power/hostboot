@@ -204,7 +204,7 @@ class host_bad_bit_interface
         host_bad_bit_interface(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
                                fapi2::ReturnCode& o_rc)
         {
-            o_rc = mss::attr::get_bad_dq_bitmap(i_target, iv_bad_bits);
+            o_rc = FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, i_target, iv_bad_bits);
         }
 
         ///

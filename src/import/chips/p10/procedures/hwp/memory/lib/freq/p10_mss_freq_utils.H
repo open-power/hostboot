@@ -96,7 +96,7 @@ fapi2::ReturnCode check_freq_support_vpd_p10(
     l_vpd_info.iv_omi_freq_mhz = l_omi_freq;
 
     // Add planar EFD lookup info if we need it
-    FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_vpd_target, l_is_planar) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_vpd_target, l_is_planar) );
 
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {

@@ -37,7 +37,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <mssAccessorName>ody_mem_throttled_n_commands_per_port</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -50,7 +49,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <mssAccessorName>ody_mem_throttled_n_commands_per_slot</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -64,7 +62,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <mssAccessorName>ody_runtime_mem_throttled_n_commands_per_port</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
         </sbeAttrSync>
@@ -80,7 +77,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <mssAccessorName>ody_runtime_mem_throttled_n_commands_per_slot</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
         </sbeAttrSync>
@@ -97,7 +93,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <mssAccessorName>mem_throttled_n_commands_per_port</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
@@ -113,7 +108,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <mssAccessorName>mem_throttled_n_commands_per_slot</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
@@ -130,7 +124,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <mssAccessorName>runtime_mem_throttled_n_commands_per_port</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
@@ -146,7 +139,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <mssAccessorName>runtime_mem_throttled_n_commands_per_slot</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
@@ -165,7 +157,6 @@
       <valueType>uint16</valueType>
       <default>32</default>
       <platInit/>
-      <mssAccessorName>safemode_mem_throttled_n_commands_per_port</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -249,7 +240,6 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssAccessorName>port_maxpower</mssAccessorName>
     </attribute>
 
     <attribute>

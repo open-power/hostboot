@@ -73,7 +73,7 @@ fapi2::ReturnCode p10_omi_train_explorer(const fapi2::Target<fapi2::TARGET_TYPE_
 
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
 
-    FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_IS_APOLLO, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_apollo));
 
     if (l_sim)
     {

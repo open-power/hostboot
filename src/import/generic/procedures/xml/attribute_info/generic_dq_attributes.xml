@@ -35,7 +35,6 @@
         All of these details are hidden from the user of this attribute.
       </description>
       <valueType>uint8</valueType>
-      <mssAccessorName>bad_dq_bitmap</mssAccessorName>
       <array>4 10</array>
       <platInit/>
       <initToZero/>

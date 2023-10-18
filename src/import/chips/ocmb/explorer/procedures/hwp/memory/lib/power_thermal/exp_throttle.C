@@ -59,8 +59,10 @@ fapi2::ReturnCode restore_runtime_throttles<mss::mc_type::EXPLORER>( const fapi2
     uint32_t l_max_databus = 0;
     uint32_t l_throttle_m_clocks = 0;
 
-    FAPI_TRY( mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_m_clocks) );
-    FAPI_TRY( mss::attr::get_mrw_max_dram_databus_util(l_max_databus) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_throttle_m_clocks) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MAX_DRAM_DATABUS_UTIL, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_max_databus) );
 
     //Set runtime throttles to unthrottled value, using max dram utilization and M throttle
     for (const auto& l_port : mss::find_targets<TT::PORT_TARGET_TYPE>(i_target))
@@ -72,8 +74,8 @@ fapi2::ReturnCode restore_runtime_throttles<mss::mc_type::EXPLORER>( const fapi2
             l_run_throttle = mss::power_thermal::throttled_cmds (l_max_databus, l_throttle_m_clocks);
         }
 
-        FAPI_TRY( mss::attr::set_runtime_mem_throttled_n_commands_per_port( l_port, l_run_throttle) );
-        FAPI_TRY( mss::attr::set_runtime_mem_throttled_n_commands_per_slot( l_port, l_run_throttle) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT,  l_port, l_run_throttle) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT,  l_port, l_run_throttle) );
     }
 
 fapi_try_exit:
@@ -104,10 +106,10 @@ fapi2::ReturnCode update_runtime_throttle<mss::mc_type::EXPLORER>(const fapi2::T
         uint16_t l_calc_slot = 0;
         uint16_t l_calc_port = 0;
 
-        FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_slot(l_port, l_run_slot));
-        FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_port(l_port, l_run_port));
-        FAPI_TRY(mss::attr::get_mem_throttled_n_commands_per_slot(l_port, l_calc_slot));
-        FAPI_TRY(mss::attr::get_mem_throttled_n_commands_per_port(l_port, l_calc_port));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_port, l_run_slot));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_port, l_run_port));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_port, l_calc_slot));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_port, l_calc_port));
 
         //Choose the worst case between runtime and calculated throttles
         //Have to make sure the calc_slot isn't equal to 0 though
@@ -121,8 +123,8 @@ fapi2::ReturnCode update_runtime_throttle<mss::mc_type::EXPLORER>(const fapi2::T
                  l_run_slot,
                  l_run_port);
 
-        FAPI_TRY( mss::attr::set_runtime_mem_throttled_n_commands_per_port(l_port, l_run_port) );
-        FAPI_TRY( mss::attr::set_runtime_mem_throttled_n_commands_per_slot(l_port, l_run_slot) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_port, l_run_port) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_port, l_run_slot) );
     }
 
 fapi_try_exit:
@@ -201,8 +203,8 @@ fapi2::ReturnCode write_runtime_throttles<mss::mc_type::EXPLORER>(const fapi2::T
     fapi2::buffer<uint64_t> l_data;
     FAPI_TRY(fapi2::getScom(i_target, TT::FARB3Q_REG, l_data));
 
-    FAPI_TRY( mss::attr::get_runtime_mem_throttled_n_commands_per_port(i_target, l_runtime_port));
-    FAPI_TRY( mss::attr::get_runtime_mem_throttled_n_commands_per_slot(i_target, l_runtime_slot));
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, i_target, l_runtime_port));
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, i_target, l_runtime_slot));
 
     l_data.insertFromRight<TT::RUNTIME_N_SLOT, TT::RUNTIME_N_SLOT_LEN>(l_runtime_slot);
     l_data.insertFromRight<TT::RUNTIME_N_PORT, TT::RUNTIME_N_PORT_LEN>(l_runtime_port);
@@ -230,7 +232,8 @@ fapi2::ReturnCode set_pwr_cntrl_reg<mss::mc_type::EXPLORER>(const fapi2::Target<
     fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_Type l_pwr_cntrl = 0;
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY(mss::attr::get_mrw_power_control_requested(l_pwr_cntrl));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_pwr_cntrl));
     FAPI_TRY(fapi2::getScom(i_target, TT::MBARPC0Q_REG, l_data));
 
     l_data.insertFromRight<TT::CFG_MIN_MAX_DOMAINS, TT::CFG_MIN_MAX_DOMAINS_LEN>(TT::MAXALL_MINALL);
@@ -335,9 +338,9 @@ fapi2::ReturnCode pwr_throttles<mss::mc_type::EXPLORER>( const fapi2::Target<fap
         FAPI_INF("For target " GENTARGTIDFORMAT " Calculated power is %d, throttle per slot is %d, throttle per port is %d",
                  GENTARGTID(l_port_target), l_power, l_slot, l_port);
 
-        FAPI_TRY(mss::attr::set_port_maxpower( l_port_target, l_power));
-        FAPI_TRY(mss::attr::set_mem_throttled_n_commands_per_slot( l_port_target, l_slot));
-        FAPI_TRY(mss::attr::set_mem_throttled_n_commands_per_port( l_port_target, l_port));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_EXP_PORT_MAXPOWER,  l_port_target, l_power));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT,  l_port_target, l_slot));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT,  l_port_target, l_port));
     }
 
     return fapi2::current_err;
@@ -399,10 +402,10 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::EXPLORER>(const
                 continue;
             }
 
-            FAPI_TRY(mss::attr::get_mem_throttled_n_commands_per_slot(l_port, l_calc_slot));
-            FAPI_TRY(mss::attr::get_mem_throttled_n_commands_per_port(l_port, l_calc_port));
-            FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_slot(l_port, l_run_slot));
-            FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_port(l_port, l_run_port));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_port, l_calc_slot));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_port, l_calc_port));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_port, l_run_slot));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_port, l_run_port));
 
             //Find the smaller of the three values (calculated slot, runtime slot, and min slot)
             l_min_slot = (l_calc_slot != 0) ? std::min( std::min (l_calc_slot, l_run_slot),
@@ -471,7 +474,8 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::EXPLORER>(const
                     uint64_t l_fail = mss::fapi_pos(l_port);
 
                     //Set the failing port. OCC just needs one failing port, doesn't need all of them
-                    FAPI_TRY( mss::attr::set_port_pos_of_fail_throttle(l_fail) );
+                    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_PORT_POS_OF_FAIL_THROTTLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                            l_fail) );
 
                     //Note: any failing RC from this assert will be overwritten by the FAPI_TRYs below
                     //but that's ok since we're only using this for deconfigures in FFDC. The RC will be
@@ -500,9 +504,9 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::EXPLORER>(const
                 //Even if there's an error, still calculate and set the throttles.
                 //OCC will set to safemode if there's an error
                 //Better to set the throttles than leave them 0, and potentially brick the memory
-                FAPI_TRY( mss::attr::set_mem_throttled_n_commands_per_port( l_port, l_fin_port) );
-                FAPI_TRY( mss::attr::set_mem_throttled_n_commands_per_slot( l_port, l_fin_slot) );
-                FAPI_TRY( mss::attr::set_port_maxpower( l_port, l_fin_power) );
+                FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT,  l_port, l_fin_port) );
+                FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT,  l_port, l_fin_slot) );
+                FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_PORT_MAXPOWER,  l_port, l_fin_power) );
             }
         }
     }
@@ -524,7 +528,8 @@ fapi2::ReturnCode set_str_reg<mss::mc_type::EXPLORER>(const fapi2::Target<fapi2:
     fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED_Type l_str_enable = 0;
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY(mss::attr::get_mrw_power_control_requested(l_str_enable));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_POWER_CONTROL_REQUESTED, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_str_enable));
     FAPI_TRY(fapi2::getScom(i_target, TT::STR0Q_REG, l_data));
 
     //Write bit if STR should be enabled
@@ -578,13 +583,14 @@ fapi2::ReturnCode set_nm_support<mss::mc_type::EXPLORER>(const fapi2::Target<fap
 
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_denominator));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_throttle_denominator));
 
     FAPI_TRY(fapi2::getScom(i_target, TT::FARB3Q_REG, l_data));
 
     // runtime should be calculated in eff_config_thermal, which is called before scominit in ipl
-    FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_port(i_target, l_run_port));
-    FAPI_TRY(mss::attr::get_runtime_mem_throttled_n_commands_per_slot(i_target, l_run_slot));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, i_target, l_run_port));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, i_target, l_run_slot));
     FAPI_INF("For target " GENTARGTIDFORMAT
              " throttled n commands per port are %d, per slot are %d, and dram m clocks are %d",
              GENTARGTID(i_target),
@@ -628,8 +634,9 @@ fapi2::ReturnCode set_safemode_throttles<mss::mc_type::EXPLORER>(const fapi2::Ta
     uint32_t l_throttle_per_port = 0;
     fapi2::ATTR_MSS_SAFEMODE_DRAM_DATABUS_UTIL_Type l_util_per_port = 0;
 
-    FAPI_TRY(mss::attr::get_safemode_dram_databus_util(i_target, l_util_per_port));
-    FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_throttle_denominator));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_SAFEMODE_DRAM_DATABUS_UTIL, i_target, l_util_per_port));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_throttle_denominator));
 
     FAPI_TRY(fapi2::getScom(i_target, TT::FARB4Q_REG, l_data));
 

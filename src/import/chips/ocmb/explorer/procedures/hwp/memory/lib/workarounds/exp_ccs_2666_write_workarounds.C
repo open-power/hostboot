@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,9 +71,9 @@ fapi2::ReturnCode is_ccs_2666_write_needed(const fapi2::Target<fapi2::TARGET_TYP
     o_is_needed = false;
     const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    FAPI_TRY(mss::attr::get_freq(i_target, l_freq));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, l_freq));
     FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
-    FAPI_TRY(mss::attr::get_dram_module_height(l_ocmb, l_height));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, l_ocmb, l_height));
     FAPI_DBG("%s Ran has_rcd attribute returned as %d", mss::c_str(i_target), l_has_rcd);
 
     // The workaround is needed if we're at 2666 and do not have an RCD parity delay
@@ -112,7 +112,7 @@ fapi2::ReturnCode update_cwl(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i
     }
 
     // Update the CWL to the workaround value
-    FAPI_TRY(mss::attr::set_dram_cwl(i_target, WORKAROUND_CWL));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_DRAM_CWL, i_target, WORKAROUND_CWL));
 
 fapi_try_exit:
     return fapi2::current_err;

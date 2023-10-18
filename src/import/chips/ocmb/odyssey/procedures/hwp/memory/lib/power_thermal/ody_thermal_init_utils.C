@@ -340,7 +340,8 @@ fapi2::ReturnCode get_desired_dts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
     const uint8_t l_num_ports = l_ports.size();
 
-    FAPI_TRY(mss::attr::get_mrw_dimm_slot_airflow(l_airflow_direction));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DIMM_SLOT_AIRFLOW, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_airflow_direction));
     FAPI_TRY(mss::attr::get_dimm_type(l_ports[0], l_dimm_type));
 
     l_desired_dts_loc = get_desired_dts_location(l_dimm_type[0], l_airflow_direction, l_num_ports);
@@ -416,7 +417,7 @@ fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     };
 
     // Check override attr if config on all sensors is needed
-    FAPI_TRY(mss::attr::get_therm_sensor_read_override(i_ocmb, l_override_check));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_READ_OVERRIDE, i_ocmb, l_override_check));
 
     if(l_override_check != fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_READ_OVERRIDE_TRUE)
     {
@@ -524,13 +525,14 @@ fapi2::ReturnCode setup_emergency_throttles(const fapi2::Target<fapi2::TARGET_TY
     // Get the required values from the attributes
     for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        FAPI_TRY(mss::attr::get_safemode_dram_databus_util(l_port, l_safemode_util_value),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_SAFEMODE_DRAM_DATABUS_UTIL, l_port, l_safemode_util_value),
                  "Error in setup_emergency_throttles" );
 
         break;
     }
 
-    FAPI_TRY(mss::attr::get_mrw_mem_m_dram_clocks(l_m_throttle_value), "Error in setup_emergency_throttles" );
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_m_throttle_value), "Error in setup_emergency_throttles" );
 
     // Get the register to be programmed using getScom
     FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB3Q, l_data), "Error in setup_emergency_throttles" );

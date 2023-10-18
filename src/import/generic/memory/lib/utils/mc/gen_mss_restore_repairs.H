@@ -989,7 +989,7 @@ fapi2::ReturnCode restore_repairs( const fapi2::Target<T>& i_target,
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
         uint8_t l_dram_width = 0;
-        FAPI_TRY( mss::attr::get_bad_dq_bitmap(l_dimm, l_bad_bits) );
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimm, l_bad_bits) );
         FAPI_TRY( mss::attr::get_dram_width(l_dimm, l_dram_width));
         FAPI_TRY( (restore_repairs_helper<MC>(l_dimm, l_bad_bits, l_dram_width, io_repairs_applied, io_repairs_exceeded)) );
     }

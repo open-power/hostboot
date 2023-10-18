@@ -170,7 +170,7 @@ fapi2::ReturnCode after_draminit_mc<mss::mc_type::EXPLORER>( const fapi2::Target
     FAPI_TRY(l_rc3, "unable to create fir::reg for EXPLR_RDF_FIR 0x%08X", EXPLR_RDF_FIR);
 
     FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
-    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, i_target, l_is_planar));
 
     // Set this to mask off missing dfi_rddata_valid from triggering EXPLR_RDF_FIR_RDDATA_VALID_ERROR
     FAPI_TRY(fapi2::getScom(i_target, EXPLR_RDF_MASK1, l_reg_data));
@@ -223,7 +223,7 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::EXPLORER>( const fapi2::
     // Create registers and check success for MCBISTFIR and SRQFIR
     mss::fir::reg<EXPLR_MCBIST_MCBISTFIRQ> l_exp_mcbist_reg(i_target, l_rc1);
     mss::fir::reg<EXPLR_SRQ_SRQFIRQ> l_exp_srq_reg(i_target, l_rc2);
-    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, i_target, l_is_planar));
 
     // Post-draminit: disable alert N bit on MASTER0_MEMALERTCONTROL
     // and enable async drive of alert N on MASTER0_MEMALERTCONTROL2 if we're planar
@@ -424,7 +424,7 @@ fapi2::ReturnCode after_scominit<mss::mc_type::EXPLORER>( const fapi2::Target<fa
              mss::c_str(i_target), EXPLR_TP_MB_UNIT_TOP_LOCAL_FIR);
 
     FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
-    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, i_target, l_is_planar));
 
     // Check if dimm is an ISDIMM with RCD
     mss::exp::unmask::srq_rcd_parity_helper(l_is_planar, l_has_rcd, l_exp_srqfir_reg);
@@ -503,8 +503,9 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     FAPI_TRY(l_rc2, "unable to create fir::reg for EXPLR_TLXT_TLXFIRQ 0x%08X", EXPLR_TLXT_TLXFIRQ);
     FAPI_TRY(l_rc3, "unable to create fir::reg for EXPLR_DLX_MC_OMI_FIR_REG 0x%08X", EXPLR_DLX_MC_OMI_FIR_REG);
 
-    FAPI_TRY(mss::attr::get_omi_x4_degrade_action(l_degrade_fail_action));
-    FAPI_TRY(mss::attr::get_omi_crc_debug(l_omi_crc_debug));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_X4_DEGRADE_ACTION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_degrade_fail_action));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_CRC_DEBUG, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_omi_crc_debug));
     FAPI_TRY(mss::attr::get_exp_intr_mask_disable(i_target, l_intr_mask_disable));
 
     // Before we unmask any FIRs we need to mask all Explorer interrupts due to SW515594
@@ -652,7 +653,7 @@ fapi2::ReturnCode after_memdiags<mss::mc_type::EXPLORER>( const fapi2::Target<fa
     // Determine if dimm is a DIMM with RCD
     // If so set RCD fir to recoverable
     FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
-    FAPI_TRY(mss::attr::get_mem_mrw_is_planar(i_target, l_is_planar));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, i_target, l_is_planar));
 
     // Write remainder of RDF FIR mask per Explorer unmask spec
     FAPI_TRY(l_exp_rdf_fir_reg.checkstop<EXPLR_RDF_FIR_MAINLINE_AUE>()

@@ -229,7 +229,7 @@ inline OT ps_to_cycles(const fapi2::Target<T>& i_target, const OT i_ps, fapi2::R
     // Each OCMB only has one MEM_PORT
     for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        FAPI_TRY(mss::attr::get_freq(l_port, l_freq),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, l_port, l_freq),
                  "%s Can't get valid MSS_FREQ - stopping", mss::c_str(i_target));
     }
 
@@ -284,7 +284,7 @@ inline uint64_t cycles_to_ps(const fapi2::Target<T>& i_target, const uint64_t i_
     // Each OCMB only has one MEM_PORT
     for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        FAPI_TRY(attr::get_freq(l_port, l_freq),
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, l_port, l_freq),
                  "%s Can't get a valid MSS_FREQ - stopping", mss::c_str(i_target));
     }
 

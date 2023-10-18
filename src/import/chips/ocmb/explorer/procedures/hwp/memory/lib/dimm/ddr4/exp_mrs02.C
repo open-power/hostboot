@@ -63,9 +63,10 @@ mrs02_data<mss::mc_type::EXPLORER>::mrs02_data( const fapi2::Target<fapi2::TARGE
     const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
     FAPI_TRY( mss::attr::get_exp_resp_dram_lpasr(l_port_target, iv_lpasr), "Error in mrs02_data()" );
-    FAPI_TRY( mss::attr::get_dram_cwl(l_port_target, iv_cwl), "Error in mrs02_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_DRAM_CWL, l_port_target, iv_cwl), "Error in mrs02_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_dram_rtt_wr(i_target, iv_dram_rtt_wr), "Error in mrs02_data()" );
-    FAPI_TRY( mss::attr::get_mrw_dram_write_crc(iv_write_crc), "Error in mrs02_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_DRAM_WRITE_CRC, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), iv_write_crc),
+              "Error in mrs02_data()" );
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;

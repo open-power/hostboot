@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,7 @@ fapi2::ReturnCode change_temp_sensor_usage_helper(const fapi2::Target<fapi2::TAR
     uint8_t l_sensor_0_usage = 0;
     uint8_t l_sensor_1_usage = 0;
 
-    FAPI_TRY(mss::attr::get_dram_module_height(i_target, l_module_height));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, i_target, l_module_height));
 
     if (l_module_height != fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
     {
@@ -71,35 +71,37 @@ fapi2::ReturnCode change_temp_sensor_usage_helper(const fapi2::Target<fapi2::TAR
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY(mss::attr::get_therm_sensor_0_usage(i_target, l_sensor_0_usage));
-    FAPI_TRY(mss::attr::get_therm_sensor_1_usage(i_target, l_sensor_1_usage));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE, i_target, l_sensor_0_usage));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE, i_target, l_sensor_1_usage));
 
     if (l_sensor_0_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM)
     {
         FAPI_DBG("%s Changing temperature sensor 0 usage from DRAM to DRAM_AND_MEM_BUF_EXT",
                  mss::c_str(i_target));
-        FAPI_TRY(mss::attr::set_therm_sensor_0_usage(i_target,
-                 fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM_AND_MEM_BUF_EXT));
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE, i_target,
+                                     fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM_AND_MEM_BUF_EXT));
     }
     else if (l_sensor_0_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_PMIC)
     {
         FAPI_DBG("%s Changing temperature sensor 0 usage from PMIC to MEM_BUF_EXT",
                  mss::c_str(i_target));
-        FAPI_TRY(mss::attr::set_therm_sensor_0_usage(i_target, fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_MEM_BUF_EXT));
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE, i_target,
+                                     fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_MEM_BUF_EXT));
     }
 
     if (l_sensor_1_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_DRAM)
     {
         FAPI_DBG("%s Changing temperature sensor 1 usage from DRAM to DRAM_AND_MEM_BUF_EXT",
                  mss::c_str(i_target));
-        FAPI_TRY(mss::attr::set_therm_sensor_1_usage(i_target,
-                 fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_DRAM_AND_MEM_BUF_EXT));
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE, i_target,
+                                     fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_DRAM_AND_MEM_BUF_EXT));
     }
     else if (l_sensor_1_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_PMIC)
     {
         FAPI_DBG("%s Changing temperature sensor 1 usage from PMIC to MEM_BUF_EXT",
                  mss::c_str(i_target));
-        FAPI_TRY(mss::attr::set_therm_sensor_1_usage(i_target, fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_MEM_BUF_EXT));
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE, i_target,
+                                     fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_MEM_BUF_EXT));
     }
 
 fapi_try_exit:
@@ -117,7 +119,8 @@ fapi2::ReturnCode change_temp_sensor_usage(const fapi2::Target<fapi2::TARGET_TYP
 {
     uint8_t l_therm_sensor_override = 0;
 
-    FAPI_TRY(mss::attr::get_mrw_orverride_therm_sensor_usage(l_therm_sensor_override));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_OVERRIDE_THERM_SENSOR_USAGE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_therm_sensor_override));
 
     if (l_therm_sensor_override == fapi2::ENUM_ATTR_MSS_MRW_OVERRIDE_THERM_SENSOR_USAGE_ENABLED)
     {

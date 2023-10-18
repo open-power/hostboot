@@ -82,8 +82,8 @@ class mr6_data : public mr_base_data<MC>
 
             const auto& l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-            FAPI_TRY( mss::attr::get_dram_twr(l_port_target, iv_wr_recovery), "Error in ddr5::mr6_data()" );
-            FAPI_TRY( mss::attr::get_dram_trtp(l_port_target, iv_trtp), "Error in ddr5::mr6_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TWR, l_port_target, iv_wr_recovery), "Error in ddr5::mr6_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRTP, l_port_target, iv_trtp), "Error in ddr5::mr6_data()" );
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
@@ -278,9 +278,9 @@ class mr6_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY( mss::attr::set_dram_twr(i_rank_info.get_port_target(), iv_wr_recovery),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TWR, i_rank_info.get_port_target(), iv_wr_recovery),
                       "Unable to set attributes for ddr5::mr6_data()" );
-            FAPI_TRY( mss::attr::set_dram_trtp(i_rank_info.get_port_target(), iv_trtp),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRTP, i_rank_info.get_port_target(), iv_trtp),
                       "Unable to set attributes for ddr5::mr6_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;

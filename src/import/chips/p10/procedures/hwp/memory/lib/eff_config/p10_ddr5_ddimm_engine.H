@@ -674,7 +674,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             FAPI_TRY( lookup_table_check(iv_ocmb, BASE_MODULE_HEIGHT_MAP, SET_DRAM_MODULE_HEIGHT, l_field, l_height),
                       "%s failed MODULE_HEIGHT lookup check", spd::c_str(iv_ocmb) );
 
-            FAPI_TRY(mss::attr::set_dram_module_height(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -695,7 +695,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             // Count the number of bits to get the number of configured devices
             l_value = mss::bit_count(l_field);
 
-            FAPI_TRY(mss::attr::set_module_thermal_sensors(iv_ocmb, l_value));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_MODULE_THERMAL_SENSORS, iv_ocmb, l_value));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1189,7 +1189,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   SET_SPD_CONTENT_REVISION,
                                   "SPD content revision"));
 
-            FAPI_TRY(mss::attr::set_spd_content_revision(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_SPD_CONTENT_REVISION, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4257,7 +4257,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_0_AVAIL,
                                   "Thermal Sensor 0 Availability"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_0_availability(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4292,7 +4292,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                       fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_PMIC :
                       l_field;
 
-            FAPI_TRY(mss::attr::set_therm_sensor_0_usage(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_USAGE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4317,7 +4317,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_0_TYPE,
                                   "Thermal Sensor 0 Type"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_0_type(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_TYPE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4342,7 +4342,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_0_I2C_ADDR,
                                   "Thermal Sensor 0 I2C addr"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_0_i2c_addr(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_I2C_ADDR, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4367,7 +4367,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_0_LOCATION,
                                   "Thermal Sensor 0 Location"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_0_location(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_0_LOCATION, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4392,7 +4392,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_1_AVAIL,
                                   "Thermal Sensor 1 Avail"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_1_availability(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_AVAIL, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4427,7 +4427,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                       fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_1_USAGE_PMIC :
                       l_field;
 
-            FAPI_TRY(mss::attr::set_therm_sensor_1_usage(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_USAGE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4452,7 +4452,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_1_TYPE,
                                   "Thermal Sensor 1 type"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_1_type(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_TYPE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4477,7 +4477,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_1_I2C_ADDR,
                                   "Thermal Sensor 1 I2C Address"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_1_i2c_addr(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_I2C_ADDR, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4502,7 +4502,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_1_LOCATION,
                                   "Thermal Sensor 1 I2C Address"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_1_location(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_1_LOCATION, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4527,7 +4527,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_2_AVAIL,
                                   "Thermal Sensor 2 Avail"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_2_availability(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_2_AVAIL, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4562,7 +4562,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                       fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_2_USAGE_PMIC :
                       l_field;
 
-            FAPI_TRY(mss::attr::set_therm_sensor_2_usage(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_2_USAGE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4587,7 +4587,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_2_TYPE,
                                   "Thermal Sensor 2 type"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_2_type(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_2_TYPE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4612,7 +4612,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_2_I2C_ADDR,
                                   "Thermal Sensor 2 I2C Address"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_2_i2c_addr(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_2_I2C_ADDR, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4637,7 +4637,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_2_LOCATION,
                                   "Thermal Sensor 2 I2C Address"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_2_location(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_2_LOCATION, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4662,7 +4662,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_3_AVAIL,
                                   "Thermal Sensor 3 Avail"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_3_availability(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_3_AVAIL, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4697,7 +4697,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                       fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_3_USAGE_PMIC :
                       l_field;
 
-            FAPI_TRY(mss::attr::set_therm_sensor_3_usage(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_3_USAGE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4722,7 +4722,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_3_TYPE,
                                   "Thermal Sensor 3 type"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_3_type(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_3_TYPE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4747,7 +4747,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_3_I2C_ADDR,
                                   "Thermal Sensor 3 I2C Address"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_3_i2c_addr(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_3_I2C_ADDR, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4772,7 +4772,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_3_LOCATION,
                                   "Thermal Sensor 3 I2C Address"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_3_location(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_3_LOCATION, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4797,7 +4797,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_DIFF_AVAIL,
                                   "Thermal Sensor Diff Avail"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_differential_availability(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_AVAIL, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4822,7 +4822,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_DIFF_USAGE,
                                   "Thermal Sensor Diff Usage"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_differential_usage(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_USAGE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4847,7 +4847,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_DIFF_TYPE,
                                   "Thermal Sensor Diff Type"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_differential_type(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_TYPE, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -4873,7 +4873,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                                   ody::SET_THERM_SENSOR_DIFF_I2C_ADDR,
                                   "Thermal Sensor Diff I2C Addr"));
 
-            FAPI_TRY(mss::attr::set_therm_sensor_differential_i2c_addr(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_THERM_SENSOR_DIFF_I2C_ADDR, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -5066,7 +5066,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                 FAPI_TRY(get_field_spd(iv_ocmb, F::SERIAL_NUMBER_FIELDS[l_count], i_spd, SET_EFF_DIMM_SERIAL_NUMBER, l_field[l_count]));
             }
 
-            FAPI_TRY(mss::attr::set_eff_dimm_serial_number(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DIMM_SERIAL_NUMBER, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -5084,7 +5084,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::DESIGN_REF_CARD, i_spd, SET_EFF_DIMM_RAW_CARD_REF_DESIGN_REV, l_field));
 
-            FAPI_TRY(mss::attr::set_eff_dimm_raw_card_reference_design(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DIMM_RAW_CARD_REFERENCE_DESIGN, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -5102,7 +5102,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::DESIGN_REV, i_spd, SET_EFF_DIMM_RAW_CARD_DESIGN_REVISION, l_field));
 
-            FAPI_TRY(mss::attr::set_eff_dimm_raw_card_design_revision(iv_ocmb, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DIMM_RAW_CARD_DESIGN_REVISION, iv_ocmb, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;

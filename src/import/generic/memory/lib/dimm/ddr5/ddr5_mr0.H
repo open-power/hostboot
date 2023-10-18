@@ -84,8 +84,8 @@ class mr0_data : public mr_base_data<MC>
 
             const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-            FAPI_TRY( mss::attr::get_dram_cl(l_port_target, iv_cas_latency), "Error in ddr5::mr0_data()" );
-            FAPI_TRY( mss::attr::get_burst_length(l_port_target, iv_burst_length), "Error in ddr5::mr0_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_CL, l_port_target, iv_cas_latency), "Error in ddr5::mr0_data()" );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_BURST_LENGTH, l_port_target, iv_burst_length), "Error in ddr5::mr0_data()" );
 
             io_rc = fapi2::FAPI2_RC_SUCCESS;
             return;
@@ -275,9 +275,9 @@ class mr0_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
         {
-            FAPI_TRY( mss::attr::set_dram_cl(i_rank_info.get_port_target(), iv_cas_latency),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_CL, i_rank_info.get_port_target(), iv_cas_latency),
                       "Unable to set attributes for ddr5::mr0_data()" );
-            FAPI_TRY( mss::attr::set_burst_length(i_rank_info.get_port_target(), iv_burst_length),
+            FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MEM_BURST_LENGTH, i_rank_info.get_port_target(), iv_burst_length),
                       "Unable to set attributes for ddr5::mr0_data()" );
 
             return fapi2::FAPI2_RC_SUCCESS;

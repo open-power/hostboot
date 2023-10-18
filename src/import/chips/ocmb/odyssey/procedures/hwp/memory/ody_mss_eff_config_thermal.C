@@ -87,10 +87,10 @@ extern "C"
             // init ocmb throttles to zero to make sure they will be power throttle optimized
             uint16_t l_ocmb_slot = 0;
             uint16_t l_ocmb_port = 0;
-            FAPI_TRY(mss::attr::set_ody_mem_throttled_n_commands_per_slot(l_ocmb, l_ocmb_slot));
-            FAPI_TRY(mss::attr::set_ody_mem_throttled_n_commands_per_port(l_ocmb, l_ocmb_port));
-            FAPI_TRY(mss::attr::set_ody_runtime_mem_throttled_n_commands_per_slot(l_ocmb, l_ocmb_slot));
-            FAPI_TRY(mss::attr::set_ody_runtime_mem_throttled_n_commands_per_port(l_ocmb, l_ocmb_port));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_ocmb, l_ocmb_slot));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_ocmb, l_ocmb_port));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_ocmb, l_ocmb_slot));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_ocmb, l_ocmb_port));
 
             //Restore runtime_throttles, using power optimized throttles
             //Sets throttles to max_databus_util value
@@ -121,11 +121,16 @@ extern "C"
                 uint64_t l_current_curve_with_limit[TT::SIZE_OF_CURRENT_CURVE_WITH_LIMIT_ATTR] = {0};
 
                 // Get the data from MRW
-                FAPI_TRY( mss::attr::get_mrw_ocmb_thermal_memory_power_limit (l_thermal_power_limit) );
-                FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_slope (l_thermal_power_slope) );
-                FAPI_TRY( mss::attr::get_mrw_ocmb_pwr_intercept (l_thermal_power_intecept) );
-                FAPI_TRY( mss::attr::get_mrw_ocmb_current_curve_with_limit (l_current_curve_with_limit) );
-                FAPI_TRY( mss::attr::get_mrw_ocmb_safemode_util_array (l_safemode_throttles) );
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                        l_thermal_power_limit) );
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_OCMB_PWR_SLOPE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                        l_thermal_power_slope) );
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_OCMB_PWR_INTERCEPT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                        l_thermal_power_intecept) );
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_OCMB_CURRENT_CURVE_WITH_LIMIT, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                        l_current_curve_with_limit) );
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_OCMB_SAFEMODE_UTIL_ARRAY, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                        l_safemode_throttles) );
 
                 // Convert array to vector
                 std::vector<uint64_t> l_thermal_power_limit_v     ( std::begin(l_thermal_power_limit),
@@ -180,7 +185,7 @@ extern "C"
                                  GENTARGTID(l_port),
                                  l_safemode, l_min_util );
 
-                    FAPI_TRY( mss::attr::set_safemode_dram_databus_util(l_port, l_safemode) );
+                    FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_SAFEMODE_DRAM_DATABUS_UTIL, l_port, l_safemode) );
 
                     for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port) )
                     {

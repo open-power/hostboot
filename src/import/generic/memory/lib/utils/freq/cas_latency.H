@@ -210,7 +210,7 @@ class cas_latency<mss::mc_type::EXPLORER>
                 uint8_t l_is_planar = 0;
                 std::vector<uint8_t> l_spd;
 
-                FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_ocmb, l_is_planar) );
 
                 FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_spd));
                 FAPI_TRY(cas_latency_ctr_helper(l_dimm, l_spd));
@@ -333,7 +333,7 @@ class cas_latency<mss::mc_type::EXPLORER>
 
                 // Rev is already populated from pre-init fields
                 uint8_t l_rev = 0;
-                FAPI_TRY(mss::attr::get_spd_revision(l_port, l_rev));
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_SPD_REVISION, l_port, l_rev));
 
                 // TK get real rev
                 FAPI_TRY( mss::gen::ddr4::get_supported_cas_latencies(i_dimm,
@@ -891,7 +891,7 @@ class cas_latency<mss::mc_type::ODYSSEY>
                 uint8_t l_is_planar = 0;
                 std::vector<uint8_t> l_spd;
 
-                FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_ocmb, l_is_planar) );
 
                 FAPI_TRY(mss::spd::get_raw_data(l_dimm, l_is_planar, l_spd));
                 FAPI_TRY(cas_latency_ctr_helper(l_dimm, l_spd));
@@ -1018,7 +1018,7 @@ class cas_latency<mss::mc_type::ODYSSEY>
 
                 // Rev is already populated from pre-init fields
                 uint8_t l_rev = 0;
-                FAPI_TRY(mss::attr::get_spd_revision(l_port, l_rev));
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_SPD_REVISION, l_port, l_rev));
 
                 FAPI_TRY( mss::gen::ddr5::get_supported_cas_latencies(i_dimm,
                           i_spd,

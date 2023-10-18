@@ -119,7 +119,6 @@
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       ARRAY[DIMM]
-      OMI to DDR frequency ratio
     </description>
     <valueType>uint8</valueType>
     <enum> UNITIALIZED = 0, 1_TO_1 = 1, 2_TO_1 = 2, 4_TO_1 = 4, 8_TO_1 = 8, 16_TO_1 = 16, 32_TO_1 = 32, 64_TO_1 = 64, 128_TO_1 = 128</enum>
@@ -355,7 +354,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_trcd</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -374,7 +372,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_trp</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -394,7 +391,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_tras</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -410,7 +406,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_trc</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -434,7 +429,6 @@
     <valueType>uint16</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_trfc</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -457,7 +451,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_tfaw</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -480,7 +473,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_trrd_s</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -503,7 +495,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_trrd_l</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -522,7 +513,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_trrd_dlr</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -540,7 +530,6 @@
     <enum>4NCK = 4, 5NCK = 5, 6NCK = 6, 7NCK = 7, 8NCK = 8, 12NCK = 12</enum>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_tccd_l</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -578,7 +567,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_twr</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -597,7 +585,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_twtr_s</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -616,7 +603,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_twtr_l</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -636,7 +622,6 @@
     <valueType>uint16</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_tmaw</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -769,7 +754,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>dram_module_height</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
       <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
     </sbeAttrSync>
@@ -897,7 +881,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits>nck</mssUnits>
-    <mssAccessorName>dram_cl</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -912,7 +895,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>dram_mds</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -973,7 +955,6 @@
     <valueType>uint16</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_trefi</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -991,7 +972,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits>nck</mssUnits>
-    <mssAccessorName>dram_trtp</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -1011,7 +991,6 @@
     <valueType>uint16</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <mssAccessorName>dram_trfc_dlr</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -1027,7 +1006,6 @@
     <valueType>uint64</valueType>
     <writeable/>
     <mssUnits> MT/s </mssUnits>
-    <mssAccessorName>freq</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -1081,7 +1059,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>spd_revision</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
     </sbeAttrSync>
@@ -1096,7 +1073,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>spd_content_revision</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -1172,7 +1148,6 @@
       TRUE = 1
     </enum>
     <writeable/>
-    <mssAccessorName>z_mode</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
     </sbeAttrSync>
@@ -1190,7 +1165,6 @@
     <valueType>uint8</valueType>
     <array>26</array>
     <writeable/>
-    <mssAccessorName>eff_dimm_serial_number</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -1204,7 +1178,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>eff_dimm_raw_card_reference_design</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -1218,7 +1191,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <mssAccessorName>eff_dimm_raw_card_design_revision</mssAccessorName>
   </attribute>
 
 </attributes>

@@ -57,7 +57,7 @@ extern "C"
         uint8_t l_module_height = 0;
 
         // Grab the module-height attribute to determine 1U/2U vs 4U
-        FAPI_TRY(mss::attr::get_dram_module_height(i_ocmb_target, l_module_height));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, i_ocmb_target, l_module_height));
 
         // Kick off the matching enable procedure
         if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)

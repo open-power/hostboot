@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1153,7 +1153,7 @@ class base_0_3 : public base
             uint8_t l_preambles[mss::exp::sizes::MAX_RANK_PER_DIMM] = {0};
             fapi2::buffer<uint8_t> l_preamble;
 
-            FAPI_TRY( mss::attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, iv_port, l_freq) );
             FAPI_TRY( mss::attr::get_si_dram_preamble(iv_dimm, l_preambles) );
 
             // TK Using the preamble for rank0 for now
@@ -1170,7 +1170,7 @@ class base_0_3 : public base
 
             FAPI_DBG("%s DRAM CWL %d", spd::c_str(iv_dimm), l_field);
 
-            FAPI_TRY(mss::attr::set_dram_cwl(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DRAM_CWL, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1189,7 +1189,7 @@ class base_0_3 : public base
             using TT = mss::dimmPosTraits<mss::mc_type::EXPLORER>;
             FAPI_TRY(gen::dimm_pos<TT>(iv_dimm, l_field));
 
-            FAPI_TRY(mss::attr::set_dimm_pos_metadata(iv_dimm, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DIMM_POS_METADATA, iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1206,7 +1206,7 @@ class base_0_3 : public base
             uint8_t l_field = 0;
 
             FAPI_TRY(mss::attr::get_dram_gen(iv_dimm, l_field));
-            FAPI_TRY(mss::attr::set_dram_gen_metadata(iv_dimm, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DRAM_GEN_METADATA, iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1223,7 +1223,7 @@ class base_0_3 : public base
             uint8_t l_field = 0;
 
             FAPI_TRY(mss::attr::get_dimm_type(iv_dimm, l_field));
-            FAPI_TRY(mss::attr::set_dimm_type_metadata(iv_dimm, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_DIMM_TYPE_METADATA, iv_dimm, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1523,7 +1523,7 @@ class base_0_3 : public base
             FAPI_TRY(mss::spd::ddr4::calc_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, SET_DRAM_TRCD, "TRCDmin",
                      l_field));
 
-            FAPI_TRY(mss::attr::set_dram_trcd(iv_port, static_cast<uint8_t>(l_field)));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TRCD, iv_port, static_cast<uint8_t>(l_field)));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1566,7 +1566,7 @@ class base_0_3 : public base
 
             FAPI_TRY(mss::spd::ddr4::calc_time_in_nck(iv_dimm, i_spd, l_timing_mtb, l_timing_ftb, SET_DRAM_TRP, "TRPmin", l_field));
 
-            FAPI_TRY(mss::attr::set_dram_trp(iv_port, static_cast<uint8_t>(l_field)));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TRP, iv_port, static_cast<uint8_t>(l_field)));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1622,7 +1622,7 @@ class base_0_3 : public base
 
             FAPI_TRY(mss::spd::ddr4::calc_time_in_nck(iv_dimm, i_spd, l_trasmin, l_ftb, SET_DRAM_TRAS, "TRASmin", l_field));
 
-            FAPI_TRY(mss::attr::set_dram_tras(iv_port, static_cast<uint8_t>(l_field)));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TRAS, iv_port, static_cast<uint8_t>(l_field)));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1785,11 +1785,12 @@ class base_0_3 : public base
             int64_t l_trfc_in_ps = 0;
             uint16_t l_trfc_in_nck = 0;
 
-            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, iv_port, l_freq) );
             FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
                       "%s Failed to calculate clock period (tCK)", spd::c_str(iv_dimm) );
 
-            FAPI_TRY( mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_FINE_REFRESH_MODE,       fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                    l_refresh_mode) );
 
             // Selects appropriate tRFC based on fine refresh mode
             switch(l_refresh_mode)
@@ -1852,7 +1853,7 @@ class base_0_3 : public base
                 FAPI_DBG("%s DRAM TRFC %d", spd::c_str(iv_dimm), l_trfc_in_nck);
             }
 
-            FAPI_TRY(mss::attr::set_dram_trfc(iv_port, l_trfc_in_nck));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRFC, iv_port, l_trfc_in_nck));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1908,7 +1909,7 @@ class base_0_3 : public base
 
             FAPI_TRY(mss::spd::ddr4::calc_time_in_nck(iv_dimm, i_spd, l_tfawmin, l_ftb, SET_DRAM_TFAW, "TFAW", l_field));
 
-            FAPI_TRY(mss::attr::set_dram_tfaw(iv_port, static_cast<uint8_t>(l_field)));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TFAW, iv_port, static_cast<uint8_t>(l_field)));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1926,10 +1927,10 @@ class base_0_3 : public base
             // instead of calculating proposed value from SPD -- which selects optimistic values
             // leading to errors in expected timing values
             uint8_t l_dram_width = 0;
-            uint64_t l_trrd_l_in_nck = 0;
+            uint8_t l_trrd_l_in_nck = 0;
             uint64_t l_freq = 0;
 
-            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, iv_port, l_freq) );
             FAPI_TRY( attr::get_dram_width(iv_dimm, l_dram_width) );
             FAPI_TRY( mss::ddr4::trrd_l( iv_dimm, l_dram_width, l_freq, l_trrd_l_in_nck) );
 
@@ -1938,7 +1939,7 @@ class base_0_3 : public base
 
             FAPI_DBG("%s DRAM TRRD_L %d", spd::c_str(iv_dimm), l_trrd_l_in_nck);
 
-            FAPI_TRY(mss::attr::set_dram_trrd_l(iv_port, l_trrd_l_in_nck));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRRD_L, iv_port, l_trrd_l_in_nck));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1993,7 +1994,7 @@ class base_0_3 : public base
                         "%s had a tCCD_l overflow of %u. MTB:%u FTB:%u",
                         mss::c_str(iv_dimm), l_timing_mtb, l_timing_ftb, l_field);
 
-            FAPI_TRY(mss::attr::set_dram_tccd_l(iv_port, static_cast<uint8_t>(l_field)));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TCCD_L, iv_port, static_cast<uint8_t>(l_field)));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2050,7 +2051,7 @@ class base_0_3 : public base
 
             FAPI_TRY(mss::spd::ddr4::calc_time_in_nck(iv_dimm, i_spd, l_twrmin, l_ftb, SET_DRAM_TWR, "TWRmin", l_field));
 
-            FAPI_TRY(mss::attr::set_dram_twr(iv_port, static_cast<uint8_t>(l_field)));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TWR, iv_port, static_cast<uint8_t>(l_field)));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2073,7 +2074,7 @@ class base_0_3 : public base
             constexpr int64_t l_max_trtp_in_ps = mss::ddr4::trtp();
             uint8_t l_calc_trtp_in_nck = 0;
 
-            FAPI_TRY(mss::attr::get_freq(iv_port, l_freq));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, iv_port, l_freq));
             FAPI_TRY(freq_to_ps(l_freq, l_tck_in_ps),
                      "%s Failed to calculate clock period (tCK)", spd::c_str(iv_dimm) );
 
@@ -2088,7 +2089,7 @@ class base_0_3 : public base
 
             FAPI_DBG("%s DRAM TRTP %d", spd::c_str(iv_dimm), l_calc_trtp_in_nck);
 
-            FAPI_TRY(mss::attr::set_dram_trtp(iv_port, l_calc_trtp_in_nck));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRTP, iv_port, l_calc_trtp_in_nck));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2144,7 +2145,7 @@ class base_0_3 : public base
 
             FAPI_TRY(mss::spd::ddr4::calc_time_in_nck(iv_dimm, i_spd, l_twtrmin_s, l_ftb, SET_DRAM_TWTR_S, "TWTRmin s", l_field));
 
-            FAPI_TRY(mss::attr::set_dram_twtr_s(iv_port, static_cast<uint8_t>(l_field)));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TWTR_S, iv_port, static_cast<uint8_t>(l_field)));
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -2199,7 +2200,7 @@ class base_0_3 : public base
 
             FAPI_TRY(mss::spd::ddr4::calc_time_in_nck(iv_dimm, i_spd, l_twtrmin_l, l_ftb, SET_DRAM_TWTR_L, "TWTRmin l", l_field));
 
-            FAPI_TRY(mss::attr::set_dram_twtr_l(iv_port, static_cast<uint8_t>(l_field)));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EFF_DRAM_TWTR_L, iv_port, static_cast<uint8_t>(l_field)));
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -2215,11 +2216,11 @@ class base_0_3 : public base
             // Taking the worst case required minimum JEDEC value
             // instead of calculating proposed value from SPD -- which selects optimistic values
             // leading to errors in expected timing values
-            uint64_t l_trrd_s_in_nck = 0;
+            uint8_t l_trrd_s_in_nck = 0;
             uint64_t l_freq = 0;
             uint8_t l_dram_width = 0;
             FAPI_TRY( attr::get_dram_width(iv_dimm, l_dram_width) );
-            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, iv_port, l_freq) );
             FAPI_TRY( mss::ddr4::trrd_s( iv_dimm, l_dram_width, l_freq, l_trrd_s_in_nck) );
 
             FAPI_INF("%s SDRAM width: %d, tRRD_S (nck): %d",
@@ -2227,7 +2228,7 @@ class base_0_3 : public base
 
             FAPI_DBG("%s DRAM TRRD_S %d", spd::c_str(iv_dimm), l_trrd_s_in_nck);
 
-            FAPI_TRY(mss::attr::set_dram_trrd_s(iv_port, l_trrd_s_in_nck));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRRD_S, iv_port, l_trrd_s_in_nck));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2248,11 +2249,12 @@ class base_0_3 : public base
             uint64_t l_trfc_dlr_in_ps = 0;
             uint16_t l_trfc_dlr_in_nck = 0;
 
-            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, iv_port, l_freq) );
             FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
                       "%s Failed to calculate clock period (tCK)", spd::c_str(iv_dimm) );
 
-            FAPI_TRY( mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_FINE_REFRESH_MODE,       fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                    l_refresh_mode) );
             FAPI_TRY( mss::attr::get_dram_density(iv_dimm, l_dram_density) );
 
             // Calculate refresh cycle time in ps
@@ -2270,7 +2272,7 @@ class base_0_3 : public base
 
             FAPI_DBG("%s DRAM TRFC_DLR %d", spd::c_str(iv_dimm), l_trfc_dlr_in_nck);
 
-            FAPI_TRY(mss::attr::set_dram_trfc_dlr(iv_port, l_trfc_dlr_in_nck));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TRFC_DLR, iv_port, l_trfc_dlr_in_nck));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2290,12 +2292,14 @@ class base_0_3 : public base
             int64_t l_tck_in_ps = 0;
             uint64_t l_freq = 0;
 
-            FAPI_TRY( attr::get_freq(iv_port, l_freq) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, iv_port, l_freq) );
             FAPI_TRY( freq_to_ps(l_freq, l_tck_in_ps),
                       "%s Failed to calculate clock period (tCK)", spd::c_str(iv_dimm) );
 
-            FAPI_TRY( mss::attr::get_mrw_fine_refresh_mode(l_refresh_mode) );
-            FAPI_TRY( mss::attr::get_mrw_refresh_rate_request(l_refresh_rate) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_FINE_REFRESH_MODE,    fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                    l_refresh_mode) );
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_REFRESH_RATE_REQUEST, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                    l_refresh_rate) );
 
             switch(l_refresh_mode)
             {
@@ -2343,7 +2347,7 @@ class base_0_3 : public base
                 constexpr double PERCENT_ADJUST = 0.99;
 
                 // Calculate nck
-                uint64_t l_trefi_in_nck = 0;
+                uint16_t l_trefi_in_nck = 0;
                 FAPI_TRY(  spd::ddr4::calc_nck( mss::generic_ffdc_codes::SET_TREFI,
                                                 l_trefi_in_ps,
                                                 static_cast<uint64_t>(l_tck_in_ps),
@@ -2365,7 +2369,7 @@ class base_0_3 : public base
                 FAPI_INF("%s tCK (ps): %d, tREFI (ps): %d, tREFI (nck): %d",
                          spd::c_str(iv_dimm), l_tck_in_ps, l_trefi_in_ps, l_trefi_in_nck);
 
-                FAPI_TRY(mss::attr::set_dram_trefi(iv_port, l_trefi_in_nck));
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DRAM_TREFI, iv_port, l_trefi_in_nck));
 
                 FAPI_DBG("%s DRAM TREFI %d", spd::c_str(iv_dimm), l_trefi_in_nck);
             }

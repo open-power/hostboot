@@ -131,7 +131,7 @@ fapi2::ReturnCode p10_io_omi_pre_trainadv(const fapi2::Target<fapi2::TARGET_TYPE
     FAPI_DBG("Entering ...");
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, FAPI_SYSTEM, l_attr_is_simics));
-    FAPI_TRY(mss::attr::get_is_apollo(l_is_apollo));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_IS_APOLLO, FAPI_SYSTEM, l_is_apollo));
 
     if (l_attr_is_simics)
     {

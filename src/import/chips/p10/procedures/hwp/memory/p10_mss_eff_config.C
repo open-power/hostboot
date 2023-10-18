@@ -67,8 +67,8 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
     uint8_t l_is_planar = 0;
     const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    FAPI_TRY( mss::attr::get_spd_revision(i_target, l_spd_rev) );
-    FAPI_TRY( mss::attr::get_mem_mrw_is_planar(l_ocmb, l_is_planar) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_SPD_REVISION, i_target, l_spd_rev) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_ocmb, l_is_planar) );
 
     for(const auto& dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
     {
@@ -106,7 +106,7 @@ fapi2::ReturnCode p10_mss_eff_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM
         uint8_t l_dram_gen = 0;
         std::vector<mss::spd::rank_data> l_efd_ranks;
 
-        FAPI_TRY( mss::attr::get_freq(i_target, l_freq) );
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, l_freq) );
         FAPI_TRY( mss::convert_ddr_freq_to_omi_freq(i_target, l_freq, l_omi_freq));
         FAPI_TRY( mss::attr::get_dram_gen(l_dimm, l_dram_gen) );
 

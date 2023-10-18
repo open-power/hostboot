@@ -60,10 +60,14 @@ inline fapi2::ReturnCode setup_obj_handles(const fapi2::Target<fapi2::TARGET_TYP
     fapi2::ATTR_MSS_OCMB_SPECATTN_OBJ_HANDLE_Type l_specattn_obj_handle = 0;
     fapi2::ATTR_MSS_OCMB_APPINTR_OBJ_HANDLE_Type l_appintr_obj_handle = 0;
 
-    FAPI_TRY(mss::attr::get_ocmb_checkstop_obj_handle(l_checkstop_obj_handle));
-    FAPI_TRY(mss::attr::get_ocmb_recov_obj_handle(l_recov_obj_handle));
-    FAPI_TRY(mss::attr::get_ocmb_specattn_obj_handle(l_specattn_obj_handle));
-    FAPI_TRY(mss::attr::get_ocmb_appintr_obj_handle(l_appintr_obj_handle));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_CHECKSTOP_OBJ_HANDLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_checkstop_obj_handle));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_RECOV_OBJ_HANDLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_recov_obj_handle));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_SPECATTN_OBJ_HANDLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_specattn_obj_handle));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_APPINTR_OBJ_HANDLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_appintr_obj_handle));
 
     FAPI_DBG(TARGTIDFORMAT " Setting up OMI object handles in TLXT_TLXTINTHLD", TARGTID);
 

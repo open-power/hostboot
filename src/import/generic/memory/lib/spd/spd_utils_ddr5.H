@@ -369,7 +369,7 @@ fapi2::ReturnCode process_two_byte_timing_nck( const fapi2::Target<fapi2::TARGET
     // First up, grab the value of tCK in picoseconds for this frequency
     uint64_t l_freq = 0;
     uint64_t l_tck_in_ps = 0;
-    FAPI_TRY(mss::attr::get_freq(i_port, l_freq));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_port, l_freq));
     FAPI_TRY(mss::freq_to_ps(l_freq, l_tck_in_ps));
 
     // Now grab the timing value in picoseconds
@@ -409,7 +409,7 @@ fapi2::ReturnCode process_two_byte_timing_nck( const fapi2::Target<fapi2::TARGET
     // First up, grab the value of tCK in picoseconds for this frequency
     uint64_t l_freq = 0;
     uint64_t l_tck_in_ps = 0;
-    FAPI_TRY(mss::attr::get_freq(i_port, l_freq));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_port, l_freq));
     FAPI_TRY(mss::freq_to_ps(l_freq, l_tck_in_ps));
 
     // Now grab the timing value in picoseconds
@@ -447,7 +447,7 @@ fapi2::ReturnCode process_three_byte_timing_nck( const fapi2::Target<fapi2::TARG
     // First up, grab the value of tCK in picoseconds for this frequency
     uint64_t l_freq = 0;
     uint64_t l_tck_in_ps = 0;
-    FAPI_TRY(mss::attr::get_freq(i_port, l_freq));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_port, l_freq));
     FAPI_TRY(mss::freq_to_ps(l_freq, l_tck_in_ps));
 
     // Finally, do the three byte calculation
@@ -484,7 +484,7 @@ fapi2::ReturnCode process_three_byte_timing_nck( const fapi2::Target<fapi2::TARG
     // First up, grab the value of tCK in picoseconds for this frequency
     uint64_t l_freq = 0;
     uint64_t l_tck_in_ps = 0;
-    FAPI_TRY(mss::attr::get_freq(i_port, l_freq));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_port, l_freq));
     FAPI_TRY(mss::freq_to_ps(l_freq, l_tck_in_ps));
 
     // Finally, do the three byte calculation

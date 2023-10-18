@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,7 +74,8 @@ fapi2::ReturnCode update_lpasr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
     o_update_needed = false;
 
     FAPI_TRY(mss::attr::get_exp_resp_dram_lpasr(i_target, l_lpasr_from_exp_resp));
-    FAPI_TRY(mss::attr::get_mrw_refresh_rate_request(l_refresh_rate_request));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_REFRESH_RATE_REQUEST, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_refresh_rate_request));
 
     switch(l_refresh_rate_request)
     {
