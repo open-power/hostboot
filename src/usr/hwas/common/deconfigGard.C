@@ -454,6 +454,29 @@ void DeconfigGard::_deconfigureByAssoc(
             pTempList.push_back(pPMIC);
         }
     }
+    else if (l_targetType == TYPE_MEM_PORT)
+    {
+        // Odyssey is not allowing deconfiguration of a single MEM_PORT child. Since the input target is a MEM_PORT, we
+        // must deconfigure the other MEM_PORT too.
+        // In the non-Odyssey case, a functional sibling won't be found and this logic will be a no-op.
+        Target * parent = getParent(&i_target, TYPE_OCMB_CHIP);
+        TargetHandleList siblings;
+        getChildAffinityTargetsByState(siblings,
+                                       parent,
+                                       CLASS_NA,
+                                       TYPE_MEM_PORT,
+                                       UTIL_FILTER_FUNCTIONAL);
+        for (auto sibling : siblings)
+        {
+            if (sibling != &i_target)
+            {
+                pTempList.push_back(sibling);
+                HWAS_INF("_deconfigureByAssoc MEM_PORT %.8X deconfigure its sibling MEM_PORT tgt %.8X",
+                         get_huid(&i_target),
+                         get_huid(sibling));
+            }
+        }
+    }
 
     // Append the temporary list to the child list
     if (!pTempList.empty())
@@ -461,11 +484,8 @@ void DeconfigGard::_deconfigureByAssoc(
         pChildList.insert(pChildList.end(), pTempList.begin(), pTempList.end());
     }
 
-    for (TargetHandleList::iterator pChild_it = pChildList.begin();
-            pChild_it != pChildList.end();
-            ++pChild_it)
+    for (auto pChild : pChildList)
     {
-        TargetHandle_t pChild = *pChild_it;
 
         HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget on CHILD: %.8X",
                  l_targetHuid, get_huid(pChild));
@@ -495,11 +515,8 @@ void DeconfigGard::_deconfigureByAssoc(
         targetService().getAssociated(pChildList, &i_target,
             TargetService::CHILD_BY_AFFINITY, TargetService::ALL,
             &funcOrFco);
-        for (TargetHandleList::iterator pChild_it = pChildList.begin();
-                pChild_it != pChildList.end();
-                ++pChild_it)
+        for (auto pChild : pChildList)
         {
-            TargetHandle_t pChild = *pChild_it;
 
             HWAS_INF("_deconfigureByAssoc %.8X _deconfigureTarget "
                      "CHILD_BY_AFFINITY: %.8X",
@@ -633,15 +650,14 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
 
             case TYPE_DIMM:
             {
-                HWAS_DBG("_deconfigParentAssoc DIMM deconfig parent proc");
                 // Whenever a DIMM is deconfigured, we will also deconfigure
-                // the immediate parent target (e.g. MCA, MBA, etc) to ensure
+                // the immediate parent target (e.g. MEM_PORT) to ensure
                 // there is not an unbalanced load on the ports.
 
                 // General predicate to determine if target is functional
                 PredicateIsFunctional isFunctional;
 
-                //  get immediate parent (MCA/MBA/etc)
+                //  get MEM_PORT parent
                 TargetHandleList pParentList;
                 PredicatePostfixExpr funcParent;
                 funcParent.push(&isFunctional);
@@ -658,12 +674,12 @@ void DeconfigGard::_deconfigParentAssoc(TARGETING::Target & i_target,
                 //  then deconfigure it
                 if (!pParentList.empty())
                 {
-                    const Target *l_parentMba = pParentList[0];
+                    const Target *l_parentMemport = pParentList[0];
                     HWAS_INF("_deconfigParentAssoc DIMM parent: %.8X",
-                             get_huid(l_parentMba));
-                    _deconfigureTarget(const_cast<Target &> (*l_parentMba),
+                             get_huid(l_parentMemport));
+                    _deconfigureTarget(const_cast<Target &> (*l_parentMemport),
                                        i_errlEid, nullptr, i_deconfigRule);
-                    _deconfigureByAssoc(const_cast<Target &> (*l_parentMba),
+                    _deconfigureByAssoc(const_cast<Target &> (*l_parentMemport),
                                         i_errlEid, i_deconfigRule);
                 }
 
