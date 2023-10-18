@@ -85,13 +85,6 @@ fapi2::ReturnCode half_dimm_mode_helper(
              TARGTID,
              i_half_dimm_override_attr > 0 ? "an" : "no",
              o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_is_half_dimm);
-#else
-    FAPI_INF("For " GENTARGTIDFORMAT " , %u override is present. The chip is in %u (attribute %u)",
-             TARGTID,
-             i_half_dimm_override_attr,
-             o_is_half_dimm_mode,
-             l_is_half_dimm);
-
 #endif
 
     return fapi2::FAPI2_RC_SUCCESS;
