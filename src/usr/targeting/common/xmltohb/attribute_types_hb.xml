@@ -1551,6 +1551,22 @@
   </attribute>
 
   <attribute>
+    <id>SBE_RECOVERY_IN_PROGRESS</id>
+    <description>
+        Odyssey SBE RECOVERY in progress (as a bool)
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <attribute>
     <id>SBE_SUPPORTS_HALT_STATUS</id>
     <description>
         Boolean indicating whether SBE can accurately report when Hostboot

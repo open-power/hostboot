@@ -46,9 +46,7 @@ OBJS += sbe_fifodd.o
 OBJS += sbe_scomAccess.o
 OBJS += sbe_scomAccessdd.o
 OBJS += sbe_setFFDCAddr.o
-OBJS += sbe_attributeAccess.o
 OBJS += sbe_codeUpdate.o
-OBJS += sbe_iplControl.o
 OBJS += sbe_memRegionMgr.o
 OBJS += sbe_psuTPMExtendMode.o
 OBJS += sbe_securityListBinDump.o
@@ -62,7 +60,6 @@ OBJS += p10_clock_test.o
 OBJS += p10_clock_test_cmn.o
 OBJS += ody_code_getlevels.o
 OBJS += ody_code_update.o
-OBJS += sbe_telemetry.o
 OBJS += sbe_getCodeLevels.o
 OBJS += sbe_getScratchData.o
 

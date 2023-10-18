@@ -45,3 +45,4 @@ VPATH += ${EXTRAINCDIR}
 
 TESTS += ${ROOTPATH}/src/usr/sbeio/test/sbe_ffdctest.H
 TESTS += ${ROOTPATH}/src/usr/sbeio/test/sbe_psucommandstest.H
+TESTS += ${ROOTPATH}/src/usr/sbeio/test/sbe_ody_retry_handler.H

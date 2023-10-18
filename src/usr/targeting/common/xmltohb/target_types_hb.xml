@@ -64,6 +64,9 @@
       <id>SBE_FIFO_MUTEX</id>
     </attribute>
     <attribute>
+      <id>SBE_RECOVERY_IN_PROGRESS</id>
+    </attribute>
+    <attribute>
       <id>SCOM_ACCESS_MUTEX</id>
     </attribute>
     <attribute>

@@ -69,6 +69,7 @@ enum sbeioModuleId
     SBEIO_PROCESS_ATTR_ARRAY            = 0x18,
     SBEIO_FIFO_ODY_CHECKS               = 0x19,
     SBEIO_FIFO_SBE_FFDC                 = 0x1A,
+    SBEIO_ODY_RECOVERY                  = 0x1B,
 };
 
 /**
@@ -175,6 +176,7 @@ enum sbeioReasonCode
 
     SBEIO_RECEIVE_CODE_LEVELS_BAD_MSG  = SBEIO_COMP_ID | 0x70,
     SBEIO_FIFO_SBE_FFDC_INFORMATIONAL  = SBEIO_COMP_ID | 0x71,
+    SBEIO_ODY_RECOVERY_IN_PROGRESS     = SBEIO_COMP_ID | 0x72,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

@@ -359,12 +359,6 @@ MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_ODYSSEY_SOURCE))
 
 MODULE = isteps_mss
 
-OBJS += sbe_targets.o
-OBJS += sbe_attribute_utils.o
-OBJS += ody_apply_sbe_attribute_data.o
-OBJS += ody_generate_sbe_attribute_data.o
-OBJS += ody_analyze_sbe_attr_response.o
-
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/utils/
 VPATH += ${ROOTPATH}/src/import/hwpf/sbe_utils/src/
 VPATH += ${ROOTPATH}/obj/genfiles/attr/

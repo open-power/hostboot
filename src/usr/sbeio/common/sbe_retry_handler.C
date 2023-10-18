@@ -90,6 +90,8 @@
 #include <pldm/extended/sbe_dump.H>
 #endif
 
+#include <targeting/odyutil.H>           // isOdysseyChip
+
 extern trace_desc_t* g_trac_sbeio;
 
 #define SBE_TRACF(printf_string,args...) \
@@ -165,6 +167,7 @@ ProcSbeRetryHandler::~ProcSbeRetryHandler() {}
 
 errlHndl_t ProcSbeRetryHandler::ExtractRC()
 {
+    SBE_TRACF(ENTER_MRK"ProcSberetryhandler::ExtractRC(0x%08x)", get_huid(iv_proc));
     // Default the return action to be NO_RECOVERY , if something goes
     // wrong in p10_extract_sbe_rc and l_ret doesn't get set in that function
     // then we want to fall back on NO_RECOVERY which we will handle
@@ -188,6 +191,7 @@ errlHndl_t ProcSbeRetryHandler::ExtractRC()
 
     iv_currentAction = l_ret;
 
+    SBE_TRACF(EXIT_MRK"ProcSberetryhandler::ExtractRC(0x%08x)", get_huid(iv_proc));
     return l_errl;
 }
 
