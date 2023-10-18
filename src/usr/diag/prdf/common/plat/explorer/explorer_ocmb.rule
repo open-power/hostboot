@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2022
+# Contributors Listed Below - COPYRIGHT 2018,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -1544,7 +1544,7 @@ group gOMIDLFIR
     /** OMIDLFIR[9]
      *  OMI-DL0 retrain due to internal error or software
      */
-    (rOMIDLFIR, bit(9)) ? omi_bus_th_32perDay;
+    (rOMIDLFIR, bit(9)) ? omi_bus_th_32perDay_CRC;
 
     /** OMIDLFIR[10]
      *  OMI-DL0 threshold reached

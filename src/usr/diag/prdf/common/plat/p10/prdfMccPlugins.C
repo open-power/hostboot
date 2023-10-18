@@ -257,7 +257,55 @@ PRDF_PLUGIN_DEFINE(p10_mcc, chnlTimeout_##POS);
 PLUGIN_CHNL_TIMEOUT(0);
 PLUGIN_CHNL_TIMEOUT(1);
 
+/**
+ * @brief  Checks whether OCMB_LFIR[31] is set on the corresponding Explorer
+ *         OCMB. If it is, calls out the OCMB else returns and lets the rule
+ *         code make the callout
+ * @param  i_chip An MCC chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_pos  The OMI/OCMB pos (0:1)
+ * @return SUCCESS if OCMB_LFIR[31] set, PRD_SCAN_COMM_REGISTER_ZERO otherwise.
+ */
+int32_t expCheckCalFail( ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
+                         uint8_t i_pos )
+{
+    #define PRDF_FUNC "[p10_mcc::expCheckCalFail] "
 
+    // Default to letting the rule code make the callout.
+    int32_t o_rc = PRD_SCAN_COMM_REGISTER_ZERO;
+
+    ExtensibleChip * ocmb = getConnectedChild(i_chip, TYPE_OCMB_CHIP, i_pos);
+
+    // Explorer only
+    if (isOdysseyOcmb(ocmb->getTrgt()))
+    {
+        return o_rc;
+    }
+
+    // Check if 'OCMB_LFIR[31] - SerDes continuous calibration failure' is set
+    SCAN_COMM_REGISTER_CLASS * ocmb_lfir = ocmb->getRegister( "OCMB_LFIR" );
+    if ( SUCCESS == ocmb_lfir->Read() && ocmb_lfir->IsBitSet(31) )
+    {
+        // Callout the Explorer OCMB
+        io_sc.service_data->SetCallout( i_chip->getTrgt() );
+        o_rc = SUCCESS;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+#define PLUGIN_EXP_CHECK_CAL_FAIL(POS) \
+int32_t expCheckCalFail_##POS(ExtensibleChip* i_chip, \
+                              STEP_CODE_DATA_STRUCT& io_sc) \
+{ \
+    return expCheckCalFail(i_chip, io_sc, POS); \
+} \
+PRDF_PLUGIN_DEFINE(p10_mcc, expCheckCalFail_##POS);
+
+PLUGIN_EXP_CHECK_CAL_FAIL(0);
+PLUGIN_EXP_CHECK_CAL_FAIL(1);
 
 /**
  * @brief  Calls out all dimms under an attached OCMB.

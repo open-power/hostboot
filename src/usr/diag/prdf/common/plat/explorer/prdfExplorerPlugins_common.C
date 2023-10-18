@@ -492,16 +492,16 @@ int32_t DlFatalError( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 PRDF_PLUGIN_DEFINE( explorer_ocmb, DlFatalError );
 
 /**
- * @brief  OMIDLFIR[5] - OMI-DL0 running in degraded mode
+ * @brief  Queries 'OCMB_LFIR[31] - SerDes continuous calibration failure' for
+ *         potential root cause
  * @param  i_chip An OCMB chip.
  * @param  io_sc  The step code data struct.
  * @return SUCCESS if OCMB_LFIR[31] or a CRC root cause bit are found.
  *         PRD_SCAN_COMM_REGISTER_ZERO otherwise.
  */
-int32_t OmiRunningInDegradedMode( ExtensibleChip * i_chip,
-                                  STEP_CODE_DATA_STRUCT & io_sc )
+int32_t checkCalFail( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[explorer_ocmb::OmiRunningInDegradedMode] "
+    #define PRDF_FUNC "[explorer_ocmb::checkCalFail] "
 
     // Return PRD_SCAN_COMM_REGISTER_ZERO to let the rule code handle the
     // callout if no different root cause found.
@@ -519,7 +519,7 @@ int32_t OmiRunningInDegradedMode( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-PRDF_PLUGIN_DEFINE( explorer_ocmb, OmiRunningInDegradedMode );
+PRDF_PLUGIN_DEFINE( explorer_ocmb, checkCalFail );
 
 /**
  * @brief  Check for the KVCO=2 fix for OMI degraded mode. Adjust the signature

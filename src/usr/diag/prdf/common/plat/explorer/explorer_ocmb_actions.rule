@@ -289,8 +289,7 @@ actionclass omi_degraded_mode
 {
     capture(kvco_fix);
     funccall("CheckKvcoFix");
-    try( funccall("OmiRunningInDegradedMode"),
-         try(funccall("CrcSideEffect_Ocmb"), omi_bus) );
+    try( funccall("checkCalFail"), omi_bus );
     funccall("omiDegradeRetrainWorkaround");
     threshold1;
     funccall("OmiDegradeDD1Workaround"); # Must be called after threshold
@@ -334,7 +333,7 @@ actionclass self_th_1_x4Root
 # to determine the callout if a root cause bit is found on as well.
 actionclass omi_bus_th_32perDay_CRC
 {
-    try ( funccall("CrcSideEffect_Ocmb"), omi_bus );
+    try ( funccall("checkCalFail"), omi_bus );
     threshold32pday;
 };
 

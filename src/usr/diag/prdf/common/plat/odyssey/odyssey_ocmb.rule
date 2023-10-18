@@ -2740,7 +2740,7 @@ group gDLX_FIR
     /** DLX_FIR[4]
      *  DL0 detected a CRC error
      */
-    (rDLX_FIR, bit(4)) ? omi_bus_info_only_CRC;
+    (rDLX_FIR, bit(4)) ? defaultMaskedError;
 
     /** DLX_FIR[5]
      *  DL0 received a nack
@@ -2755,7 +2755,7 @@ group gDLX_FIR
     /** DLX_FIR[7]
      *  DL0 parity error detection on a lane
      */
-    (rDLX_FIR, bit(7)) ? omi_bus_info_only_CRC;
+    (rDLX_FIR, bit(7)) ? defaultMaskedError;
 
     /** DLX_FIR[8]
      *  DL0 retrained due to no forward progress
@@ -2770,7 +2770,7 @@ group gDLX_FIR
     /** DLX_FIR[10]
      *  DL0 retrain due to internal error or software
      */
-    (rDLX_FIR, bit(10)) ? omi_bus_th_32perDay;
+    (rDLX_FIR, bit(10)) ? omi_bus_th_32perDay_CRC;
 
     /** DLX_FIR[11]
      *  DL0 threshold reached

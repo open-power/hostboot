@@ -341,8 +341,7 @@ actionclass ocmb_M_info_only_th1
 
 actionclass omi_degraded_mode
 {
-    try( funccall("odyCrcSideEffect"),
-         try(funccall("CrcSideEffect_Ocmb"), omi_bus) );
+    try( funccall("odyCrcSideEffect"), omi_bus );
     funccall("omiDegradeRetrainWorkaround");
     threshold1;
 };
@@ -1004,12 +1003,6 @@ actionclass ocmb_M_info_only_th1_CrcRootDl21
 {
     ocmb_M_info_only_th1;
     funccall("crcErrorRootCauseDlx_21"); # must be called after threshold
-};
-
-actionclass omi_bus_info_only_CRC
-{
-    try(funccall("odyCrcSideEffect"), omi_bus);
-    info_only_th32;
 };
 
 actionclass omi_bus_th_32perDay_CRC
