@@ -1238,7 +1238,7 @@
 
     Producer: Override
 
-    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PPB)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1267,7 +1267,7 @@
 
     Producer: Override
 
-    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB) for
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PPB) for
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1296,7 +1296,7 @@
 
     Producer: Override
 
-    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PPB)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1324,7 +1324,7 @@
 
     Producer: Override
 
-    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PPB)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1392,7 +1392,7 @@
 
     Producer: Override
 
-    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PPB)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1416,7 +1416,7 @@
 
     Producer: Override
 
-    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PPB)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1444,7 +1444,7 @@
 
     Producer: Override
 
-    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PPB)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1466,7 +1466,7 @@
 
     Producer: Override
 
-    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PPB)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -1484,7 +1484,7 @@
 
     Producer: Override
 
-    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PSPB)
+    Consumers: p10_build_pstate_datablock -> Pstate Parameter Block (PPB)
     </description>
     <valueType>uint8</valueType>
     <platInit/>
@@ -2124,7 +2124,7 @@
     attribute is zero.
 
     Consumer: p10_pstate_parameter_build -> p10_setup_evid Pstate Parameter
-    (PSPB) for PGPE
+    (PPB) for PGPE
     [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
 
     Provided by the Machine Readable Workbook after system characterization.
@@ -2148,7 +2148,7 @@
     The consuming code provides a default value of 10000 uV/us if this attribute
     is zero.
 
-    Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PSPB) for PGPE
+    Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PPB) for PGPE
 
     [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
 
@@ -2175,7 +2175,7 @@
     The consuming code provides a default value of 10000 uV/us if this attribute
     is zero.
 
-    Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PSPB) for PGPE
+    Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PPB) for PGPE
 
     [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
 
@@ -2204,7 +2204,7 @@
 
     Note: the smallest possible delay is limited to 1ns.
 
-    Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PSPB) for PGPE
+    Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PPB) for PGPE
 
     [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
 
@@ -2234,7 +2234,7 @@
 
     Note: the  smallest possible delay is limited to 1ns.
 
-    Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PSPB) for PGPE
+    Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PPB) for PGPE
 
     [index] ->0: VDD; 1: VCS; 2: VDN; 3: VIO;
 
@@ -2246,6 +2246,25 @@
     <default>0</default>
     <writeable/>
     <overrideOnly/>
+    <group>vrm</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SADDLEBACK_VRM_ROLLOVER_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enable the Saddleback rollover errata correction
+
+    Consumer: p10_pstate_parameter_build -> Pstate Parameter Block (PPB) for PGPE
+
+    Provided by the Machine Readable Workbook based on system use of the Saddleback
+    contoller.
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <mrw/>
     <group>vrm</group>
   </attribute>
 
