@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -90,7 +90,6 @@
     <ffdc>ICS_RDP_DC_A</ffdc>
     <ffdc>IRT_RDP_AC_10MA_A</ffdc>
     <ffdc>IRT_RDP_DC_10MA_A</ffdc>
-    <ffdc>VDD_VMIN_A</ffdc>
     <ffdc>FREQUENCY_B</ffdc>
     <ffdc>VDD_B</ffdc>
     <ffdc>IDD_TDP_AC_B</ffdc>
@@ -104,7 +103,6 @@
     <ffdc>ICS_RDP_DC_B</ffdc>
     <ffdc>IRT_RDP_AC_10MA_B</ffdc>
     <ffdc>IRT_RDP_DC_10MA_B</ffdc>
-    <ffdc>VDD_VMIN_B</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -135,7 +133,6 @@
     <ffdc>ICS_RDP_DC_A</ffdc>
     <ffdc>IRT_RDP_AC_10MA_A</ffdc>
     <ffdc>IRT_RDP_DC_10MA_A</ffdc>
-    <ffdc>VDD_VMIN_A</ffdc>
     <ffdc>FREQUENCY_B</ffdc>
     <ffdc>VDD_B</ffdc>
     <ffdc>IDD_TDP_AC_B</ffdc>
@@ -149,7 +146,6 @@
     <ffdc>ICS_RDP_DC_B</ffdc>
     <ffdc>IRT_RDP_AC_10MA_B</ffdc>
     <ffdc>IRT_RDP_DC_10MA_B</ffdc>
-    <ffdc>VDD_VMIN_B</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -178,7 +174,6 @@
     <ffdc>ICS_RDP_DC_A</ffdc>
     <ffdc>IRT_RDP_AC_10MA_A</ffdc>
     <ffdc>IRT_RDP_DC_10MA_A</ffdc>
-    <ffdc>VDD_VMIN_A</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -207,7 +202,6 @@
     <ffdc>ICS_RDP_DC_A</ffdc>
     <ffdc>IRT_RDP_AC_10MA_A</ffdc>
     <ffdc>IRT_RDP_DC_10MA_A</ffdc>
-    <ffdc>VDD_VMIN_A</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -237,7 +231,6 @@
     <ffdc>ICS_RDP_DC_A</ffdc>
     <ffdc>IRT_RDP_AC_10MA_A</ffdc>
     <ffdc>IRT_RDP_DC_10MA_A</ffdc>
-    <ffdc>VDD_VMIN_A</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>
@@ -266,7 +259,6 @@
     <ffdc>ICS_RDP_DC_A</ffdc>
     <ffdc>IRT_RDP_AC_10MA_A</ffdc>
     <ffdc>IRT_RDP_DC_10MA_A</ffdc>
-    <ffdc>VDD_VMIN_A</ffdc>
     <callout>
       <target>CHIP_TARGET</target>
       <priority>HIGH</priority>

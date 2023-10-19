@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 // *HWP HW Owner        : Greg Still <stillgs@us.ibm.com>
 // *HWP FW Owner        : Prasad Bg Ranganath <prasadbgr@in.ibm.com>
 // *HWP Team            : PM
-// *HWP Level           : 1
+// *HWP Level           : 3
 // *HWP Consumed by     : HB,PGPE,CME,OCC
 
 #ifndef __P10_PSTATE_PARAMETER_BLOCK_H__
@@ -82,6 +82,12 @@ enum PPB_ERROR
     PPB_FAIL
 };
 
+// Masks for #V Model Data (aka Flags) field
+static const uint8_t PDV_MODEL_DATA_PNEXT           = 0x80;
+static const uint8_t PDV_MODEL_DATA_ISC             = 0x40;
+static const uint8_t PDV_MODEL_DATA_VDN_CORRECT     = 0x10;
+static const uint8_t PDV_MODEL_DATA_WOF_READY       = 0x02;
+static const uint8_t PDV_MODEL_DATA_MODELED         = 0x01;
 
 typedef uint8_t Pstate;
 #define PSTATE_LT_PSTATE_MIN 0x00778a03
@@ -260,14 +266,18 @@ class PlatPmPPB
             iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
-            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_eco_count(0), iv_spare_count(0), iv_safe_mode_throt_idx(0),
+            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_eco_count(0), iv_spare_count(0),
+            iv_core_count(0), iv_safe_mode_throt_idx(0),
             iv_dccr_value(0), iv_flmr_value(0), iv_fmmr_value(0),
             iv_wts_vddPsavFreq(0), iv_wts_vddWofBaseFreq(0), iv_wts_vddUTFreq(0), iv_wts_vddFixedFreq(0)
 
         {
             attr_init();
-        }
 
+            auto l_coreList  =
+                i_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
+            iv_core_count = (uint32_t)l_coreList.size();
+        }
         ///-----------------------------------------------------------------------
         /// @brief Initialize pstate attributes
         /// @return void
@@ -287,6 +297,18 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         fapi2::ReturnCode compute_boot_safe(
             const VoltageConfigActions_t i_action);
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute the VDN setpoint from VPD, applicable uplifts and system parms
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode compute_vdn_setpoint();
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute the Vio setpoint from VPD, applicable uplifts and system parms
+        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode compute_vio_setpoint();
 
         /// -----------------------------------------------------------------------
         /// @brief Initialize resclk
@@ -835,6 +857,7 @@ class PlatPmPPB
         uint8_t                   iv_qrvrm_enable_flag;
         uint8_t                   iv_eco_count;
         uint8_t                   iv_spare_count;
+        uint32_t                  iv_core_count;
         uint32_t                  iv_safe_mode_throt_idx;
 
         PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];

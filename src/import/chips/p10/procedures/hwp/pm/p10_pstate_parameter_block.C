@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,8 +78,7 @@ using namespace ppb;
                  iv_attr_mvpd_data[i].ics_tdp_ac_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_tdp_dc_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_rdp_ac_10ma == 0 || \
-                 iv_attr_mvpd_data[i].ics_rdp_dc_10ma == 0 || \
-                 iv_attr_mvpd_data[i].vdd_vmin == 0)
+                 iv_attr_mvpd_data[i].ics_rdp_dc_10ma == 0)
 
 // TODO; need to reenable when RT values are guarenteed to be present
 //                 iv_attr_mvpd_data[i].rt_tdp_ac_10ma == 0 ||
@@ -99,8 +98,7 @@ using namespace ppb;
                  .set_ICS_RDP_AC_##suffix(iv_attr_mvpd_data[i].ics_rdp_ac_10ma) \
                  .set_ICS_RDP_DC_##suffix(iv_attr_mvpd_data[i].ics_rdp_dc_10ma) \
                  .set_IRT_RDP_AC_10MA_##suffix(iv_attr_mvpd_data[i].rt_tdp_ac_10ma) \
-                 .set_IRT_RDP_DC_10MA_##suffix(iv_attr_mvpd_data[i].rt_tdp_dc_10ma) \
-                 .set_VDD_VMIN_##suffix(iv_attr_mvpd_data[i].vdd_vmin)
+                 .set_IRT_RDP_DC_10MA_##suffix(iv_attr_mvpd_data[i].rt_tdp_dc_10ma)
 
 //w => N_L (w > 7 is invalid)
 //x => N_S (x > N_L is invalid)
@@ -202,15 +200,13 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         memset (&l_occppb , 0, sizeof (OCCPstateParmBlock_t));
 
         auto l_coreList  =
-        i_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
+            i_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
 
         if (l_coreList.size() == 0)
         {
             FAPI_INF("Skip p10_pstate_parameter_block as we don't have any cores in the proc");
             return fapi2::FAPI2_RC_SUCCESS;
         }
-
-
 
         //if PSTATES_MODE is off then we don't need to execute further to collect
         //the data.
@@ -2141,16 +2137,151 @@ fapi_try_exit:
 }
 
 ///////////////////////////////////////////////////////////
+////////    compute_vdn_setpoint
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::compute_vdn_setpoint()
+{
+    fapi2::ReturnCode l_rc;
+
+    static const uint32_t PAU_UPLIFT_FREQ_MHZ = 2050;           // PAU frequency for VDN adjustments
+    static const uint32_t DDR5_VDN_UPLIFT_OMI_FREQ_MHZ = 32000; // OMI frequency indicating DDR5
+    uint32_t l_int_vdn_mv = 0;
+    uint32_t l_idn_ma = 0;
+    uint32_t l_ext_vdn_mv = 0;
+    uint32_t l_vdn_adjust_mv = 0;
+    bool     b_vdn_allow_uplift = true;
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    FAPI_INF("Using VDN #V VPD value and correcting for applicable system parameters");
+
+    fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384,
+                           iv_procChip, l_hw543384),
+              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
+
+    if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+    {
+        FAPI_INF("ATTR_HW543384_WAR_MODE is set to TIE_NEST_TO_PAU on an applicable part.  Not performing VDN uplifts.");
+        b_vdn_allow_uplift = false;
+    }
+
+    if (((iv_pdv_model_data & PDV_MODEL_DATA_MODELED) != PDV_MODEL_DATA_MODELED) && b_vdn_allow_uplift)
+    {
+        fapi2::ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT_Type b_pau_vdn_uplift;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT,
+                               iv_procChip, b_pau_vdn_uplift),
+                "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT)");
+
+        FAPI_INF("PAU freq: %d (0x%X)",
+            iv_attr_mvpd_poundV_other_info.pau_frequency_mhz,
+            iv_attr_mvpd_poundV_other_info.pau_frequency_mhz);
+        if (b_pau_vdn_uplift && (iv_attr_mvpd_poundV_other_info.pau_frequency_mhz == PAU_UPLIFT_FREQ_MHZ))
+        {
+            fapi2::ATTR_VDN_UPLIFT_MV_Type l_pau_vdn_uplift_mv;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDN_UPLIFT_MV,
+                               FAPI_SYSTEM, l_pau_vdn_uplift_mv),
+                "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT)");
+            FAPI_INF("VDN #V adjust for parts having PAU frequency = %d.  Uplifting by %d mV",
+                PAU_UPLIFT_FREQ_MHZ, l_pau_vdn_uplift_mv);
+            l_vdn_adjust_mv = l_pau_vdn_uplift_mv;
+        }
+
+        // Allow for DDR5 VDN uplift if not PNext
+        if ((iv_pdv_model_data & PDV_MODEL_DATA_PNEXT) != PDV_MODEL_DATA_PNEXT)
+        {
+            fapi2::ATTR_FREQ_OMI_MHZ_Type l_freq_omi_mhz;
+            fapi2::ATTR_DDR5_VDN_UPLIFT_MV_Type l_ddr5_vdn_uplift_mv;
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, iv_procChip, l_freq_omi_mhz));
+            if (l_freq_omi_mhz >= DDR5_VDN_UPLIFT_OMI_FREQ_MHZ)
+            {
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_VDN_UPLIFT_MV, FAPI_SYSTEM, l_ddr5_vdn_uplift_mv));
+                l_vdn_adjust_mv += l_ddr5_vdn_uplift_mv;
+                FAPI_INF("DDR5 memory detected.  Adding to VDN adjustment by %u mV for a total adjustment of %u mV",
+                            l_ddr5_vdn_uplift_mv, l_vdn_adjust_mv);
+            }
+        }
+    }
+
+    l_int_vdn_mv = (uint32_t)(iv_attr_mvpd_poundV_static_rails.vdn_mv) + l_vdn_adjust_mv;
+    l_idn_ma =
+            (uint32_t)((iv_attr_mvpd_poundV_static_rails.idn_tdp_ac_10ma +
+                        iv_attr_mvpd_poundV_static_rails.idn_tdp_dc_10ma) * 10);
+
+    l_ext_vdn_mv = l_int_vdn_mv;
+    if (b_vdn_allow_uplift)
+    {
+        l_ext_vdn_mv = sysparm_uplift(l_int_vdn_mv,
+            l_idn_ma,
+            iv_vdn_sysparam.loadline_uohm,
+            iv_vdn_sysparam.distloss_uohm,
+            iv_vdn_sysparam.distoffset_uv);
+    }
+
+    FAPI_INF("VDN values: VPD %d (0x%X) mV; Adjusted %d mV; Set point: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+            iv_attr_mvpd_poundV_static_rails.vdn_mv,
+            revle16(iv_attr_mvpd_poundV_static_rails.vdn_mv),
+            l_int_vdn_mv,
+            l_ext_vdn_mv,
+            l_idn_ma,
+            iv_vdn_sysparam.loadline_uohm,
+            iv_vdn_sysparam.distloss_uohm,
+            iv_vdn_sysparam.distoffset_uv);
+
+    iv_attrs.attr_boot_voltage_mv[VDN] = (l_ext_vdn_mv);
+    FAPI_INF("VDN AW voltage: %d mV (0x%X)",
+            revle16(iv_array_vdn_mv),
+            revle16(iv_array_vdn_mv));
+    if (iv_array_vdn_mv && iv_attrs.attr_boot_voltage_mv[VDN] >= iv_array_vdn_mv)
+    {
+        FAPI_INF("Setting array write assist flag");
+        iv_attrs.attr_array_write_assist_set = 1;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///////////////////////////////////////////////////////////
+////////    compute_vio_setpoint
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::compute_vio_setpoint()
+{
+    fapi2::ReturnCode l_rc;
+
+    FAPI_INF("VIO boot voltage override not set, using VPD value and correcting for applicable load line setting");
+    uint32_t l_int_vio_mv = (uint32_t)(iv_attr_mvpd_poundV_static_rails.vio_mv);
+    uint32_t l_iio_ma =
+            (uint32_t)((iv_attr_mvpd_poundV_static_rails.iio_tdp_ac_10ma +
+                        iv_attr_mvpd_poundV_static_rails.iio_tdp_dc_10ma) * 10);
+
+    uint32_t l_ext_vio_mv = sysparm_uplift(l_int_vio_mv,
+            l_iio_ma,
+            iv_vio_sysparam.loadline_uohm,
+            iv_vio_sysparam.distloss_uohm,
+            iv_vio_sysparam.distoffset_uv);
+
+    FAPI_INF("VIO VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+            l_int_vio_mv,
+            l_ext_vio_mv,
+            l_iio_ma,
+            iv_vio_sysparam.loadline_uohm,
+            iv_vio_sysparam.distloss_uohm,
+            iv_vio_sysparam.distoffset_uv);
+
+    iv_attrs.attr_boot_voltage_mv[VIO]= (l_ext_vio_mv);
+
+    return fapi2::current_err;
+}
+
+///////////////////////////////////////////////////////////
 ////////    compute_boot_safe
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                   const VoltageConfigActions_t i_action)
 {
     fapi2::ReturnCode l_rc;
-
-    static const uint32_t PAU_UPLIFT_FREQ_MHZ = 2050;   // PAU frequency for VDN adjustments
-    uint32_t        l_vdn_adjust_mv = 0;
-    bool            b_vdn_allow_uplift = true;
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
@@ -2175,27 +2306,31 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                         iv_attr_mvpd_poundV_static_rails.vdn_mv,
                         iv_attr_mvpd_poundV_static_rails.vdn_mv);
 
-            // Compute the VPD operating points
-            FAPI_TRY(compute_vpd_pts());
+            // Only process VDD and VCS elements if there are cores
+            if (iv_core_count)
+            {
+                // Compute the VPD operating points
+                FAPI_TRY(compute_vpd_pts());
 
-            // ----------------
-            // WOF table analysis to determine the safe mode throttle index
-            // ----------------
-            // allocate a dummy buffer to keep wof_init happy
-            uint8_t* t_buf = new uint8_t[1024];
-            memset(t_buf, 0, 8);
-            uint32_t io_size = 0;
-            FAPI_TRY(wof_init(
-                     ppb::STORE_WOF_TABLE_OFF,
-                     t_buf,
-                     io_size),
-                     "WOF initialization failure");
-            delete[] t_buf;
+                // ----------------
+                // WOF table analysis to determine the safe mode throttle index
+                // ----------------
+                // allocate a dummy buffer to keep wof_init happy
+                uint8_t* t_buf = new uint8_t[1024];
+                memset(t_buf, 0, 8);
+                uint32_t io_size = 0;
+                FAPI_TRY(wof_init(
+                         ppb::STORE_WOF_TABLE_OFF,
+                         t_buf,
+                         io_size),
+                         "WOF initialization failure");
+                delete[] t_buf;
+            }
 
             // ----------------
             // Safe mode freq and volt init
             // ----------------
-            FAPI_TRY(safe_mode_init())
+            FAPI_TRY(safe_mode_init());
 
             if(iv_attrs.attr_avs_bus_num[VDN] == INVALID_BUS_NUM)
             {
@@ -2203,75 +2338,7 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
             }
             else
             {
-                FAPI_INF("Using VDN #V VPD value and correcting for applicable system parameters");
-
-                fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384,
-                                       iv_procChip, l_hw543384),
-                          "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
-
-                if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
-                {
-                    FAPI_INF("ATTR_HW543384_WAR_MODE is set to TIE_NEST_TO_PAU on an applicable part.  Not performing VDN uplifts.");
-                    b_vdn_allow_uplift = false;
-                }
-
-                if (((iv_pdv_model_data & 0x01) != 0x01) && b_vdn_allow_uplift)
-                {
-                    fapi2::ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT_Type b_pau_vdn_uplift;
-                    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT,
-                                           iv_procChip, b_pau_vdn_uplift),
-                            "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT)");
-
-                    FAPI_INF("PAU freq: %d (0x%X)",
-                        iv_attr_mvpd_poundV_other_info.pau_frequency_mhz,
-                        iv_attr_mvpd_poundV_other_info.pau_frequency_mhz);
-                    if (b_pau_vdn_uplift && (iv_attr_mvpd_poundV_other_info.pau_frequency_mhz == PAU_UPLIFT_FREQ_MHZ))
-                    {
-                        fapi2::ATTR_VDN_UPLIFT_MV_Type l_pau_vdn_uplift_mv;
-                        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDN_UPLIFT_MV,
-                                           FAPI_SYSTEM, l_pau_vdn_uplift_mv),
-                            "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT)");
-                        FAPI_INF("VDN #V adjust for parts having PAU frequency = %d.  Uplifting by %d mV",
-                            PAU_UPLIFT_FREQ_MHZ, l_pau_vdn_uplift_mv);
-                        l_vdn_adjust_mv = l_pau_vdn_uplift_mv;
-                    }
-                }
-
-                uint32_t l_int_vdn_mv = (uint32_t)(iv_attr_mvpd_poundV_static_rails.vdn_mv) + l_vdn_adjust_mv;
-                uint32_t l_idn_ma =
-                        (uint32_t)((iv_attr_mvpd_poundV_static_rails.idn_tdp_ac_10ma +
-                                    iv_attr_mvpd_poundV_static_rails.idn_tdp_dc_10ma) * 10);
-
-                uint32_t l_ext_vdn_mv = l_int_vdn_mv;
-                if (b_vdn_allow_uplift)
-                {
-                    l_ext_vdn_mv = sysparm_uplift(l_int_vdn_mv,
-                        l_idn_ma,
-                        iv_vdn_sysparam.loadline_uohm,
-                        iv_vdn_sysparam.distloss_uohm,
-                        iv_vdn_sysparam.distoffset_uv);
-                }
-
-                FAPI_INF("VDN values: VPD %d (0x%X) mV; Adjusted %d mV; Set point: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                        iv_attr_mvpd_poundV_static_rails.vdn_mv,
-                        revle16(iv_attr_mvpd_poundV_static_rails.vdn_mv),
-                        l_int_vdn_mv,
-                        l_ext_vdn_mv,
-                        l_idn_ma,
-                        iv_vdn_sysparam.loadline_uohm,
-                        iv_vdn_sysparam.distloss_uohm,
-                        iv_vdn_sysparam.distoffset_uv);
-
-                iv_attrs.attr_boot_voltage_mv[VDN] = (l_ext_vdn_mv);
-                FAPI_INF("VDN AW voltage: %d mV (0x%X)",
-                        revle16(iv_array_vdn_mv),
-                        revle16(iv_array_vdn_mv));
-                if (iv_array_vdn_mv && iv_attrs.attr_boot_voltage_mv[VDN] >= iv_array_vdn_mv)
-                {
-                    FAPI_INF("Setting array write assist flag");
-                    iv_attrs.attr_array_write_assist_set = 1;
-                }
+                FAPI_TRY(compute_vdn_setpoint());
             }
 
             if (iv_attrs.attr_boot_voltage_mv[VIO])
@@ -2284,27 +2351,7 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
             }
             else
             {
-                FAPI_INF("VIO boot voltage override not set, using VPD value and correcting for applicable load line setting");
-                uint32_t l_int_vio_mv = (uint32_t)(iv_attr_mvpd_poundV_static_rails.vio_mv);
-                uint32_t l_iio_ma =
-                        (uint32_t)((iv_attr_mvpd_poundV_static_rails.iio_tdp_ac_10ma +
-                                    iv_attr_mvpd_poundV_static_rails.iio_tdp_dc_10ma) * 10);
-
-                uint32_t l_ext_vio_mv = sysparm_uplift(l_int_vio_mv,
-                        l_iio_ma,
-                        iv_vio_sysparam.loadline_uohm,
-                        iv_vio_sysparam.distloss_uohm,
-                        iv_vio_sysparam.distoffset_uv);
-
-                FAPI_INF("VIO VPD voltage %d mV; Corrected voltage: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
-                        l_int_vio_mv,
-                        l_ext_vio_mv,
-                        l_iio_ma,
-                        iv_vio_sysparam.loadline_uohm,
-                        iv_vio_sysparam.distloss_uohm,
-                        iv_vio_sysparam.distoffset_uv);
-
-                iv_attrs.attr_boot_voltage_mv[VIO]= (l_ext_vio_mv);
+                FAPI_TRY(compute_vio_setpoint());
             }
 
             FAPI_INF("Setting Boot Voltage attributes: VDD = %dmV; VCS = %dmV; VDN = %dmV",
@@ -2332,7 +2379,6 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
             {
                 FAPI_INF ("Attribute override VDN boot voltage being used");
             }
-
 
         }  // COMPUTE_VOLTAGE_SETTINGS
     }
@@ -2868,7 +2914,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
 
         strcpy(outstr, "QRVRM enable flag");
         iv_qrvrm_enable_flag = *l_buffer_inc;
-        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_pdv_model_data, iv_pdv_model_data, outstr);
+        FAPI_INF("#V data = 0x%04X  %-6d (%s)", iv_qrvrm_enable_flag, iv_qrvrm_enable_flag, outstr);
         l_buffer_inc += 1;
 
         strcpy(outstr, "spare (used)");
@@ -3080,7 +3126,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE_Type");
             FAPI_INF("Running TDP current mark checking under Lab controls = %d", l_pdv_tdp_current_mode);
 #endif
-            if ((iv_pdv_model_data & 0x01) == 0x01)
+            if ((iv_pdv_model_data & PDV_MODEL_DATA_MODELED) == PDV_MODEL_DATA_MODELED)
             {
                 FAPI_INF("WOF will be disabled as model_data field indicates not a sorted part");
                 disable_wof();
@@ -3089,7 +3135,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
 
             if (l_pdv_tdp_current_mode != fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_OFF )
             {
-                if ((iv_pdv_model_data & 0x02) != 0x02)
+                if ((iv_pdv_model_data & PDV_MODEL_DATA_WOF_READY) != PDV_MODEL_DATA_WOF_READY)
                 {
                     disable_wof();
 
@@ -3120,7 +3166,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         }
         else
         {
-            if ((iv_pdv_model_data & 0x01) == 0x01)
+            if ((iv_pdv_model_data & PDV_MODEL_DATA_MODELED) == PDV_MODEL_DATA_MODELED)
             {
                 FAPI_INF("WOF will be disabled as model_data field indicates not a sorted part");
                 disable_wof();
@@ -4906,8 +4952,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_init( void )
         ps_ovrd)
     {
         //Compute safe mode values
-        FAPI_TRY(safe_mode_computation (
-                    ),
+        FAPI_TRY(safe_mode_computation(),
                 "Error from safe_mode_computation function");
     }
 
@@ -4937,17 +4982,12 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     FAPI_INF(">>>>>>>>>> safe_mode_computation");
 
     fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE_Type l_pdv_mode;
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
-            FAPI_SYSTEM, l_pdv_mode));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE, FAPI_SYSTEM, l_pdv_mode));
 
     fapi2::ATTR_WOF_TABLE_OVERRIDE_PS_Type ps_ovrd;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_OVERRIDE_PS, FAPI_SYSTEM, ps_ovrd));
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_FLOOR_MHZ,
-                           iv_procChip,
-                           l_core_floor_mhz));
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384,
-                           iv_procChip, l_hw543384),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ, FAPI_SYSTEM, l_core_floor_mhz));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384, iv_procChip, l_hw543384),
               "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW543384)");
 
     if (!is_pstates_enabled())
@@ -4956,293 +4996,336 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         goto fapi_try_exit;
     }
 
-    // Core floor frequency should be less than ultra turbo freq..
-    // if not log an error
-    if ((l_core_floor_mhz*1000) > iv_reference_frequency_khz)
+    // Only process VDD and VCS if there are cores enabled.
+    if (iv_core_count)
     {
-        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN )
-        {
+        FAPI_INF("Skipping VDD and VCS safe mode voltage compututations as there are no cores enabled");
 
-            FAPI_INF("Core floor frequency %04x (%04d) is greater than Pstate0 frequency %04x (%04d)",
-                      (l_core_floor_mhz*1000),
-                      (l_core_floor_mhz*1000),
-                      iv_reference_frequency_khz,
-                      iv_reference_frequency_khz);
-            goto fapi_try_exit;
-        }
+        l_safe_mode_freq_mhz = l_core_floor_mhz;
+        FAPI_INF("Setting safe mode frequency MHz to the system floor:  0x%04x (%4d)",
+                  l_safe_mode_freq_mhz,
+                  l_safe_mode_freq_mhz);
 
-        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO ||
-            l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
-        {
-            FAPI_ERR("Core floor frequency %04x (%04d) is greater than Pstate0 frequency %04x (%04d)",
-                      (l_core_floor_mhz*1000),
-                      (l_core_floor_mhz*1000),
-                      iv_reference_frequency_khz,
-                      iv_reference_frequency_khz);
-        }
-
-        if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
-        {
-            FAPI_ASSERT_NOEXIT(false,
-                        fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_CF6_FREQ()
-                        .set_CHIP_TARGET(iv_procChip)
-                        .set_CORE_FLOOR_FREQ(l_core_floor_mhz*1000)
-                        .set_UT_FREQ(iv_reference_frequency_khz),
-                        "Core floor freqency is greater than UltraTurbo frequency");
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            goto fapi_try_exit;
-        }
-
-        if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
-        {
-            FAPI_ASSERT(false,
-                        fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_CF6_FREQ()
-                        .set_CHIP_TARGET(iv_procChip)
-                        .set_CORE_FLOOR_FREQ(l_core_floor_mhz*1000)
-                        .set_UT_FREQ(iv_reference_frequency_khz),
-                        "Core floor freqency is greater than UltraTurbo frequency");
-        }
-    }
-
-    FAPI_INF ("core_floor_mhz 0x%04x (%4d)",
-                l_core_floor_mhz,
-                l_core_floor_mhz);
-    FAPI_INF("biased operating_point[VPD_PV_CF0].frequency_mhz 0x%04x (%4d)",
-                (iv_operating_points[VPD_PT_SET_BIASED][VPD_PV_CF0].frequency_mhz),
-                (iv_operating_points[VPD_PT_SET_BIASED][VPD_PV_CF0].frequency_mhz));
-    FAPI_INF ("reference_freq_khz 0x%08x (%d)",
-                iv_reference_frequency_khz, iv_reference_frequency_khz);
-    FAPI_INF ("step_frequency_khz 0x%08x (%d)",
-                iv_frequency_step_khz, iv_frequency_step_khz);
-    FAPI_INF ("iv_attrs.attr_pm_safe_frequency_mhz 0x%08x (%d)",
-                iv_attrs.attr_pm_safe_frequency_mhz, iv_attrs.attr_pm_safe_frequency_mhz);
-
-    if ( iv_attrs.attr_pm_safe_frequency_mhz)
-    {
-        //If WOF override is applied then we should consider
-        //updated core floor freq to compute safe mode freq
-        if (ps_ovrd)
-        {
-             l_op_pt_mhz = l_core_floor_mhz;
-        }
-        else
-        {
-             l_op_pt_mhz = iv_attrs.attr_pm_safe_frequency_mhz;
-        }
-        FAPI_INF ("Using safe operating point from the safe mode attribute 0%04x (%d)",
-                l_op_pt_mhz, l_op_pt_mhz);
-    }
-    else
-    {
-        l_op_pt_mhz = iv_vddPsavFreq;
-        FAPI_INF ("Seeding safe operating point from PowerSave 0%04x (%d)",
-                l_op_pt_mhz, l_op_pt_mhz);
-    }
-
-    // Safe operational frequency is the MAX(core floor, VPD Powersave).
-    // PowerSave is the lowest operational frequency that the part was tested at
-    if (l_core_floor_mhz > l_op_pt_mhz)
-    {
-        FAPI_INF("Moving safe operating to Core floor 0%04x (%d)",
-                l_core_floor_mhz, l_core_floor_mhz);
-        l_safe_op_freq_mhz = l_core_floor_mhz;
-    }
-    else
-    {
-        l_safe_op_freq_mhz = l_op_pt_mhz;
-    }
-
-    FAPI_INF ("Safe mode operating frequency MHz  0x%04x (%4d)",
-                 l_safe_op_freq_mhz,
-                 l_safe_op_freq_mhz);
-
-    // Calculate safe operational pstate.  This must be rounded to create
-    // a faster Pstate than the floor
-    l_rc = freq2pState(l_safe_op_freq_mhz*1000, &l_safe_op_ps, ROUND_NEAR, PPB_WARN);
-    if (l_rc)
-    {
-        disable_pstates();
-        // TODO: put in notification controls
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        goto fapi_try_exit;
-    }
-
-    // Given the Pstate might round the frequency, get that frequency
-    pState2freq(l_safe_op_ps, &l_safe_mode_op_ps2freq_khz);
-    l_safe_mode_freq_mhz = l_safe_mode_op_ps2freq_khz / 1000;
-
-    FAPI_INF("Setting safe mode frequency MHz:  0x%04x (%4d)",
-              l_safe_mode_freq_mhz,
-              l_safe_mode_freq_mhz);
-
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
-                            iv_procChip,
-                            l_safe_mode_freq_mhz));
-
-    // Read back to get any overrides
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
-                            iv_procChip,
-                            iv_attrs.attr_pm_safe_frequency_mhz));
-
-    FAPI_INF ("Read back safe mode frequency MHz:  0x%04x (%4d)",
-                iv_attrs.attr_pm_safe_frequency_mhz,
-                iv_attrs.attr_pm_safe_frequency_mhz);
-
-    if (l_safe_mode_freq_mhz != iv_attrs.attr_pm_safe_frequency_mhz)
-    {
-        FAPI_INF ("Attribute override safe mode frequency being used");
-    }
-
-    // Safe frequency must be less than Pstate 0 frequency.
-    // if not log an error
-    if ((iv_attrs.attr_pm_safe_frequency_mhz*1000) > iv_reference_frequency_khz)
-    {
-        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN )
-        {
-
-            FAPI_INF("Safe mode frequency %08x (%d) is greater than UltraTurbo frequency %08x (%d)",
-                  l_safe_mode_freq_mhz*1000, l_safe_mode_freq_mhz*1000,
-                  iv_reference_frequency_khz, iv_reference_frequency_khz);
-            goto fapi_try_exit;
-        }
-
-        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO ||
-            l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
-        {
-             FAPI_ERR("Safe mode frequency %08x (%d) is greater than UltraTurbo frequency %08x (%d)",
-                  l_safe_mode_freq_mhz*1000, l_safe_mode_freq_mhz*1000,
-                  iv_reference_frequency_khz, iv_reference_frequency_khz);
-        }
-
-        if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
-        {
-            FAPI_ASSERT_NOEXIT(false,
-                    fapi2::PSTATE_PB_SAFE_FREQ_GT_PS0_FREQ()
-                    .set_CHIP_TARGET(iv_procChip)
-                    .set_SAFE_FREQ(l_safe_mode_freq_mhz*1000)
-                    .set_UT_FREQ(iv_reference_frequency_khz),
-                    "Safe mode freqency is greater than UltraTurbo frequency");
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            goto fapi_try_exit;
-        }
-
-        if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
-        {
-            FAPI_ASSERT(false,
-                    fapi2::PSTATE_PB_SAFE_FREQ_GT_PS0_FREQ()
-                    .set_CHIP_TARGET(iv_procChip)
-                    .set_SAFE_FREQ(iv_attrs.attr_pm_safe_frequency_mhz*1000)
-                    .set_UT_FREQ(iv_reference_frequency_khz),
-                    "Safe mode freqency is greater than UltraTurbo frequency");
-        }
-    }
-
-    // Recalculate the Pstate as jump uplifts may have changed the previous result
-    l_rc = freq2pState(iv_attrs.attr_pm_safe_frequency_mhz*1000,
-                        &l_safe_mode_ps, ROUND_NEAR, PPB_WARN);
-    if (l_rc)
-    {
-        disable_pstates();
-        // TODO: put in notification controls
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        goto fapi_try_exit;
-    }
-
-    FAPI_INF ("l_safe_mode_ps 0x%x (%d)",l_safe_mode_ps, l_safe_mode_ps);
-
-    // Calculate safe mode set point voltage for use if an HWP has to perform
-    // safe mode actuation.  Note: PGPE uses the safe mode frequency in Pstate
-    // form to compute the safe mode voltage.
-
-    if (iv_attrs.attr_system_dds_disable)
-    {
-        if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
-        {
-            l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vdd_mv;
-            l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vcs_mv;
-        }
-        else
-        {
-            l_safe_mode_mv[VDD] = ps2v_mv(l_safe_mode_ps, VDD, VPD_PT_SET_BIASED_SYSP);
-            l_safe_mode_mv[VCS] = ps2v_mv(l_safe_mode_ps, VCS, VPD_PT_SET_BIASED_SYSP);
-        }
-        FAPI_INF("DDS disabled: Setting safe mode VDD voltage to %d mv (0x%x)",
-                l_safe_mode_mv[VDD],
-                l_safe_mode_mv[VDD]);
-        FAPI_INF("DDS disabled: Setting safe mode VCS voltage to %d mv (0x%x)",
-                l_safe_mode_mv[VCS],
-                l_safe_mode_mv[VCS]);
-    }
-    else
-    {
-        uint32_t l_vdd_sm_uplift = 0;
-        uint32_t l_vcs_sm_uplift = 0;
-
-        if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
-        {
-            l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vdd_mv;
-            l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vcs_mv;
-        }
-        else
-        {
-            l_safe_mode_mv[VDD]  = ps2v_mv(l_safe_mode_ps, VDD, VPD_PT_SET_BIASED_SYSP);
-            l_vdd_sm_uplift      = l_safe_mode_mv[VDD] * iv_attrs.attr_safe_mode_nodds_uplift_0p5pct[VDD] / 1000;
-            l_safe_mode_mv[VDD] += l_vdd_sm_uplift;
-
-            l_safe_mode_mv[VCS]  = ps2v_mv(l_safe_mode_ps, VCS, VPD_PT_SET_BIASED_SYSP);
-            l_vcs_sm_uplift      = l_safe_mode_mv[VCS] * iv_attrs.attr_safe_mode_nodds_uplift_0p5pct[VCS] / 1000;
-            l_safe_mode_mv[VCS] += l_vcs_sm_uplift;
-        }
-
-        FAPI_INF("DDS enabled: Setting safe mode VDD voltage to %d mv (0x%x) from a base of %d mV with an uplift of %d mv",
-                l_safe_mode_mv[VDD], l_safe_mode_mv[VDD],
-                l_safe_mode_mv[VDD]-l_vdd_sm_uplift,
-                l_vdd_sm_uplift);
-        FAPI_INF("DDS enabled: Setting safe mode VCS voltage to %d mv (0x%x) from a base of %d mV with an uplift of %d mv",
-                l_safe_mode_mv[VCS], l_safe_mode_mv[VCS],
-                l_safe_mode_mv[VCS]-l_vcs_sm_uplift,
-                l_vcs_sm_uplift);
-    }
-
-
-    FAPI_INF ("Setting safe mode voltages mV: VDD 0x%04x (%4d) VCS=N 0x%04x (%4d)",
-                l_safe_mode_mv[VDD], l_safe_mode_mv[VDD],
-                l_safe_mode_mv[VCS], l_safe_mode_mv[VCS]);
-
-    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
-                               iv_procChip,
-                               l_safe_mode_mv));
-
-    // Read back to get any overrides
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
                                 iv_procChip,
-                                iv_attrs.attr_pm_safe_voltage_mv));
+                                l_safe_mode_freq_mhz));
 
-    FAPI_INF ("Read back safe mode voltages mV: VDD 0x%04x (%4d) VDN 0x%04x (%4d)",
-                iv_attrs.attr_boot_voltage_mv[VDD], iv_attrs.attr_boot_voltage_mv[VDD],
-                iv_attrs.attr_boot_voltage_mv[VCS], iv_attrs.attr_boot_voltage_mv[VCS]);
-
-    if (l_safe_mode_mv[VDD] != iv_attrs.attr_pm_safe_voltage_mv[VDD])
-    {
-        FAPI_INF ("Attribute override safe mode VDD voltage being used");
     }
-
-    if (l_safe_mode_mv[VCS] != iv_attrs.attr_pm_safe_voltage_mv[VCS])
+    else
     {
-        FAPI_INF ("Attribute override safe mode VCS voltage being used");
-    }
+        // Core floor frequency should be less than ultra turbo freq..
+        // if not log an error
+        if ((l_core_floor_mhz*1000) > iv_reference_frequency_khz)
+        {
+            if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN )
+            {
 
-    // Calculate boot mode voltages
-    if (!iv_attrs.attr_boot_voltage_mv[VDD])
-    {
-        iv_attrs.attr_boot_voltage_mv[VDD] =
-                bias_adjust_mv(iv_attrs.attr_pm_safe_voltage_mv[VDD], iv_attrs.attr_boot_voltage_biase_0p5pct);
-    }
+                FAPI_INF("Core floor frequency %04x (%04d) is greater than Pstate0 frequency %04x (%04d)",
+                          (l_core_floor_mhz*1000),
+                          (l_core_floor_mhz*1000),
+                          iv_reference_frequency_khz,
+                          iv_reference_frequency_khz);
+                goto fapi_try_exit;
+            }
 
-    if (!iv_attrs.attr_boot_voltage_mv[VCS])
-    {
-        iv_attrs.attr_boot_voltage_mv[VCS] =
-                bias_adjust_mv(iv_attrs.attr_pm_safe_voltage_mv[VCS], iv_attrs.attr_boot_voltage_biase_0p5pct);
+            if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO ||
+                l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+            {
+                FAPI_ERR("Core floor frequency %04x (%04d) is greater than Pstate0 frequency %04x (%04d)",
+                          (l_core_floor_mhz*1000),
+                          (l_core_floor_mhz*1000),
+                          iv_reference_frequency_khz,
+                          iv_reference_frequency_khz);
+            }
+
+            if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                            fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_CF6_FREQ()
+                            .set_CHIP_TARGET(iv_procChip)
+                            .set_CORE_FLOOR_FREQ(l_core_floor_mhz*1000)
+                            .set_UT_FREQ(iv_reference_frequency_khz),
+                            "Core floor freqency is greater than UltraTurbo frequency");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                goto fapi_try_exit;
+            }
+
+            if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+            {
+                FAPI_ASSERT(false,
+                            fapi2::PSTATE_PB_CORE_FLOOR_FREQ_GT_CF6_FREQ()
+                            .set_CHIP_TARGET(iv_procChip)
+                            .set_CORE_FLOOR_FREQ(l_core_floor_mhz*1000)
+                            .set_UT_FREQ(iv_reference_frequency_khz),
+                            "Core floor freqency is greater than UltraTurbo frequency");
+            }
+        }
+
+        FAPI_INF ("core_floor_mhz 0x%04x (%4d)",
+                    l_core_floor_mhz,
+                    l_core_floor_mhz);
+        FAPI_INF("biased operating_point[VPD_PV_CF0].frequency_mhz 0x%04x (%4d)",
+                    (iv_operating_points[VPD_PT_SET_BIASED][VPD_PV_CF0].frequency_mhz),
+                    (iv_operating_points[VPD_PT_SET_BIASED][VPD_PV_CF0].frequency_mhz));
+        FAPI_INF ("reference_freq_khz 0x%08x (%d)",
+                    iv_reference_frequency_khz, iv_reference_frequency_khz);
+        FAPI_INF ("step_frequency_khz 0x%08x (%d)",
+                    iv_frequency_step_khz, iv_frequency_step_khz);
+        FAPI_INF ("iv_attrs.attr_pm_safe_frequency_mhz 0x%08x (%d)",
+                    iv_attrs.attr_pm_safe_frequency_mhz, iv_attrs.attr_pm_safe_frequency_mhz);
+
+        if ( iv_attrs.attr_pm_safe_frequency_mhz)
+        {
+            //If WOF override is applied then we should consider
+            //updated core floor freq to compute safe mode freq
+            if (ps_ovrd)
+            {
+                 l_op_pt_mhz = l_core_floor_mhz;
+            }
+            else
+            {
+                 l_op_pt_mhz = iv_attrs.attr_pm_safe_frequency_mhz;
+            }
+            FAPI_INF ("Using safe operating point from the safe mode attribute 0%04x (%d)",
+                    l_op_pt_mhz, l_op_pt_mhz);
+        }
+        else
+        {
+            l_op_pt_mhz = iv_vddPsavFreq;
+            FAPI_INF ("Seeding safe operating point from PowerSave 0%04x (%d)",
+                    l_op_pt_mhz, l_op_pt_mhz);
+        }
+
+        // Safe operational frequency is the MAX(core floor, VPD Powersave).
+        // PowerSave is the lowest operational frequency that the part was tested at
+        if (l_core_floor_mhz > l_op_pt_mhz)
+        {
+            FAPI_INF("Moving safe operating to Core floor 0%04x (%d)",
+                    l_core_floor_mhz, l_core_floor_mhz);
+            l_safe_op_freq_mhz = l_core_floor_mhz;
+        }
+        else
+        {
+            l_safe_op_freq_mhz = l_op_pt_mhz;
+        }
+
+        FAPI_INF ("Safe mode operating frequency MHz  0x%04x (%4d)",
+                     l_safe_op_freq_mhz,
+                     l_safe_op_freq_mhz);
+
+        // Calculate safe operational pstate.  This must be rounded to create
+        // a faster Pstate than the floor
+        l_rc = freq2pState(l_safe_op_freq_mhz*1000, &l_safe_op_ps, ROUND_NEAR, PPB_WARN);
+        if (l_rc)
+        {
+            disable_pstates();
+            // TODO: put in notification controls
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            goto fapi_try_exit;
+        }
+
+        // Given the Pstate might round the frequency, get that frequency
+        pState2freq(l_safe_op_ps, &l_safe_mode_op_ps2freq_khz);
+        l_safe_mode_freq_mhz = l_safe_mode_op_ps2freq_khz / 1000;
+
+        FAPI_INF("Setting safe mode frequency MHz:  0x%04x (%4d)",
+                  l_safe_mode_freq_mhz,
+                  l_safe_mode_freq_mhz);
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
+                                iv_procChip,
+                                l_safe_mode_freq_mhz));
+
+        // Read back to get any overrides
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ,
+                                iv_procChip,
+                                iv_attrs.attr_pm_safe_frequency_mhz));
+
+        FAPI_INF ("Read back safe mode frequency MHz:  0x%04x (%4d)",
+                    iv_attrs.attr_pm_safe_frequency_mhz,
+                    iv_attrs.attr_pm_safe_frequency_mhz);
+
+        if (l_safe_mode_freq_mhz != iv_attrs.attr_pm_safe_frequency_mhz)
+        {
+            FAPI_INF ("Attribute override safe mode frequency being used");
+        }
+
+        // Safe frequency must be less than Pstate 0 frequency.
+        // if not log an error
+        if ((iv_attrs.attr_pm_safe_frequency_mhz*1000) > iv_reference_frequency_khz)
+        {
+            if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_WARN )
+            {
+
+                FAPI_INF("Safe mode frequency %08x (%d) is greater than UltraTurbo frequency %08x (%d)",
+                      l_safe_mode_freq_mhz*1000, l_safe_mode_freq_mhz*1000,
+                      iv_reference_frequency_khz, iv_reference_frequency_khz);
+                goto fapi_try_exit;
+            }
+
+            if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO ||
+                l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+            {
+                 FAPI_ERR("Safe mode frequency %08x (%d) is greater than UltraTurbo frequency %08x (%d)",
+                      l_safe_mode_freq_mhz*1000, l_safe_mode_freq_mhz*1000,
+                      iv_reference_frequency_khz, iv_reference_frequency_khz);
+            }
+
+            if (l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_INFO)
+            {
+                FAPI_ASSERT_NOEXIT(false,
+                        fapi2::PSTATE_PB_SAFE_FREQ_GT_PS0_FREQ()
+                        .set_CHIP_TARGET(iv_procChip)
+                        .set_SAFE_FREQ(l_safe_mode_freq_mhz*1000)
+                        .set_UT_FREQ(iv_reference_frequency_khz),
+                        "Safe mode freqency is greater than UltraTurbo frequency");
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                goto fapi_try_exit;
+            }
+
+            if ( l_pdv_mode == fapi2::ENUM_ATTR_SYSTEM_PDV_VALIDATION_MODE_FAIL)
+            {
+                FAPI_ASSERT(false,
+                        fapi2::PSTATE_PB_SAFE_FREQ_GT_PS0_FREQ()
+                        .set_CHIP_TARGET(iv_procChip)
+                        .set_SAFE_FREQ(iv_attrs.attr_pm_safe_frequency_mhz*1000)
+                        .set_UT_FREQ(iv_reference_frequency_khz),
+                        "Safe mode freqency is greater than UltraTurbo frequency");
+            }
+        }
+
+        // Recalculate the Pstate as jump uplifts may have changed the previous result
+        l_rc = freq2pState(iv_attrs.attr_pm_safe_frequency_mhz*1000,
+                            &l_safe_mode_ps, ROUND_NEAR, PPB_WARN);
+        if (l_rc)
+        {
+            disable_pstates();
+            // TODO: put in notification controls
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            goto fapi_try_exit;
+        }
+
+        FAPI_INF ("l_safe_mode_ps 0x%x (%d)",l_safe_mode_ps, l_safe_mode_ps);
+
+        // Calculate safe mode set point voltage for use if an HWP has to perform
+        // safe mode actuation.  Note: PGPE uses the safe mode frequency in Pstate
+        // form to compute the safe mode voltage.
+
+        if (iv_attrs.attr_system_dds_disable)
+        {
+            if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+            {
+                l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vdd_mv;
+                l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vcs_mv;
+            }
+            else
+            {
+                l_safe_mode_mv[VDD] = ps2v_mv(l_safe_mode_ps, VDD, VPD_PT_SET_BIASED_SYSP);
+                l_safe_mode_mv[VCS] = ps2v_mv(l_safe_mode_ps, VCS, VPD_PT_SET_BIASED_SYSP);
+            }
+            FAPI_INF("DDS disabled: Setting safe mode VDD voltage to %d mv (0x%x)",
+                    l_safe_mode_mv[VDD],
+                    l_safe_mode_mv[VDD]);
+            FAPI_INF("DDS disabled: Setting safe mode VCS voltage to %d mv (0x%x)",
+                    l_safe_mode_mv[VCS],
+                    l_safe_mode_mv[VCS]);
+        }
+        else
+        {
+            uint32_t l_vdd_sm_uplift = 0;
+            uint32_t l_vcs_sm_uplift = 0;
+
+            if (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU)
+            {
+                l_safe_mode_mv[VDD] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vdd_mv;
+                l_safe_mode_mv[VCS] = iv_operating_points[VPD_PT_SET_RAW][VPD_PV_CF0].vcs_mv;
+            }
+            else
+            {
+                l_safe_mode_mv[VDD]  = ps2v_mv(l_safe_mode_ps, VDD, VPD_PT_SET_BIASED_SYSP);
+                l_vdd_sm_uplift      = l_safe_mode_mv[VDD] * iv_attrs.attr_safe_mode_nodds_uplift_0p5pct[VDD] / 1000;
+                l_safe_mode_mv[VDD] += l_vdd_sm_uplift;
+
+                l_safe_mode_mv[VCS]  = ps2v_mv(l_safe_mode_ps, VCS, VPD_PT_SET_BIASED_SYSP);
+                l_vcs_sm_uplift      = l_safe_mode_mv[VCS] * iv_attrs.attr_safe_mode_nodds_uplift_0p5pct[VCS] / 1000;
+                l_safe_mode_mv[VCS] += l_vcs_sm_uplift;
+            }
+
+            FAPI_INF("DDS enabled: Setting safe mode VDD voltage to %d mv (0x%x) from a base of %d mV with an uplift of %d mv",
+                    l_safe_mode_mv[VDD], l_safe_mode_mv[VDD],
+                    l_safe_mode_mv[VDD]-l_vdd_sm_uplift,
+                    l_vdd_sm_uplift);
+            FAPI_INF("DDS enabled: Setting safe mode VCS voltage to %d mv (0x%x) from a base of %d mV with an uplift of %d mv",
+                    l_safe_mode_mv[VCS], l_safe_mode_mv[VCS],
+                    l_safe_mode_mv[VCS]-l_vcs_sm_uplift,
+                    l_vcs_sm_uplift);
+        }
+
+
+        FAPI_INF ("Setting safe mode voltages mV: VDD 0x%04x (%4d) VCS=N 0x%04x (%4d)",
+                    l_safe_mode_mv[VDD], l_safe_mode_mv[VDD],
+                    l_safe_mode_mv[VCS], l_safe_mode_mv[VCS]);
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
+                                   iv_procChip,
+                                   l_safe_mode_mv));
+
+        // Read back to get any overrides
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SAFE_MODE_VOLTAGE_MV,
+                                    iv_procChip,
+                                    iv_attrs.attr_pm_safe_voltage_mv));
+
+        FAPI_INF ("Read back safe mode voltages mV: VDD 0x%04x (%4d) VDN 0x%04x (%4d)",
+                    iv_attrs.attr_boot_voltage_mv[VDD], iv_attrs.attr_boot_voltage_mv[VDD],
+                    iv_attrs.attr_boot_voltage_mv[VCS], iv_attrs.attr_boot_voltage_mv[VCS]);
+
+        if (l_safe_mode_mv[VDD] != iv_attrs.attr_pm_safe_voltage_mv[VDD])
+        {
+            FAPI_INF ("Attribute override safe mode VDD voltage being used");
+        }
+
+        if (l_safe_mode_mv[VCS] != iv_attrs.attr_pm_safe_voltage_mv[VCS])
+        {
+            FAPI_INF ("Attribute override safe mode VCS voltage being used");
+        }
+
+        // Calculate VDD and VCS boot mode voltages
+        if (!iv_attrs.attr_boot_voltage_mv[VDD])
+        {
+            iv_attrs.attr_boot_voltage_mv[VDD] =
+                    bias_adjust_mv(iv_attrs.attr_pm_safe_voltage_mv[VDD], iv_attrs.attr_boot_voltage_biase_0p5pct);
+        }
+
+        if (!iv_attrs.attr_boot_voltage_mv[VCS])
+        {
+            iv_attrs.attr_boot_voltage_mv[VCS] =
+                    bias_adjust_mv(iv_attrs.attr_pm_safe_voltage_mv[VCS], iv_attrs.attr_boot_voltage_biase_0p5pct);
+        }
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+                    FAPI_SYSTEM, l_sys_pstate0_freq_mhz));
+        if (!l_sys_pstate0_freq_mhz)
+        {
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+            FAPI_SYSTEM, iv_attrs.attr_pm_safe_frequency_mhz));
+        }
+
+        fapi2::ATTR_SAFE_MODE_THROTTLE_IDX_Type l_SMIdx;
+        l_SMIdx = iv_safe_mode_throt_idx;
+        FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_SAFE_MODE_THROTTLE_IDX,
+                                 iv_procChip,
+                                 l_SMIdx));
+
+        FAPI_INF("Setting safe mode throttle index to 0x%x (%d)",
+            l_SMIdx,l_SMIdx);
+
+        FAPI_INF("VDD boot_mode_mv 0x%x (%d)",
+            iv_attrs.attr_boot_voltage_mv[VDD],
+            iv_attrs.attr_boot_voltage_mv[VDD]);
+
+        FAPI_INF("VCS boot_mode_mv 0x%x (%d)",
+            iv_attrs.attr_boot_voltage_mv[VCS],
+            iv_attrs.attr_boot_voltage_mv[VCS]);
     }
 
     if (!iv_attrs.attr_boot_voltage_mv[VDN])
@@ -5250,32 +5333,6 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
         iv_attrs.attr_boot_voltage_mv[VDN] =
                 bias_adjust_mv(iv_attr_mvpd_poundV_static_rails.vdn_mv, iv_attrs.attr_boot_voltage_biase_0p5pct);
     }
-
-
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
-                FAPI_SYSTEM, l_sys_pstate0_freq_mhz));
-    if (!l_sys_pstate0_freq_mhz)
-    {
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
-        FAPI_SYSTEM, iv_attrs.attr_pm_safe_frequency_mhz));
-    }
-
-    fapi2::ATTR_SAFE_MODE_THROTTLE_IDX_Type l_SMIdx;
-    l_SMIdx = iv_safe_mode_throt_idx;
-    FAPI_TRY (FAPI_ATTR_SET (fapi2::ATTR_SAFE_MODE_THROTTLE_IDX,
-                             iv_procChip,
-                             l_SMIdx));
-
-    FAPI_INF("Setting safe mode throttle index to 0x%x (%d)",
-        l_SMIdx,l_SMIdx);
-
-    FAPI_INF("VDD boot_mode_mv 0x%x (%d)",
-        iv_attrs.attr_boot_voltage_mv[VDD],
-        iv_attrs.attr_boot_voltage_mv[VDD]);
-
-    FAPI_INF("VCS boot_mode_mv 0x%x (%d)",
-        iv_attrs.attr_boot_voltage_mv[VCS],
-        iv_attrs.attr_boot_voltage_mv[VCS]);
 
     FAPI_INF("VDN boot_mode_mv 0x%x (%d)",
         iv_attrs.attr_boot_voltage_mv[VDN],
