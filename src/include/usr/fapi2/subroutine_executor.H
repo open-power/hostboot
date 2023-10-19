@@ -114,7 +114,8 @@ static constexpr const char* const host_hwp_list[] =
 {
     "p10_putmemproc",
     "ody_chipop_getcodelevels",
-    "ody_chipop_codeupdate"
+    "ody_chipop_codeupdate",
+    "ody_chipop_tsns_dqs_period"
 };
 
 /** @brief strcmp that can run at compile-time given constexpr arguments.

@@ -37,6 +37,7 @@
 #include "sbe_fifodd.H"
 #include <sbeio/sbeioreasoncodes.H>
 #include <targeting/common/targetservice.H>
+#include <fapi2.H>
 
 
 extern trace_desc_t* g_trac_sbeio;
@@ -48,6 +49,27 @@ TRACDCOMP(g_trac_sbeio,"Telemetry: " printf_string,##args)
 TRACFCOMP(g_trac_sbeio,"Telemetry: " printf_string,##args)
 
 using namespace TARGETING;
+
+extern "C"
+fapi2::ReturnCode ody_chipop_tsns_dqs_period (
+            const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+            const uint32_t i_tsns_period_ms,
+            const uint8_t i_dqs_period)
+{
+    fapi2::ReturnCode rc;
+
+    errlHndl_t l_errl = SBEIO::sendExecHWPRequestForThermalSensorPolling(
+                            i_target.get(),
+                            i_tsns_period_ms,
+                            i_dqs_period);
+    if(l_errl)
+    {
+        SBE_TRACF(ERR_MRK"ody_chipop_tsns_dqs_period: Chip op to SBE 0x%x failed", get_huid(i_target.get()));
+        addErrlPtrToReturnCode(rc, l_errl);
+    }
+
+    return rc;
+}
 
 namespace SBEIO
 {
