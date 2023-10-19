@@ -965,12 +965,15 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns(uint8_t i_port)
         sprintf(maskName, "RDF_FIR_MASK_%x", i_port);
         SCAN_COMM_REGISTER_CLASS * mask = iv_chip->getRegister(maskName);
 
+        fir->clearAllBits();
+        mask->clearAllBits();
+
         // Do not unmask NCE and TCE attentions if they have been permanently
         // masked due to certain TPS conditions.
         if ( !(getOcmbDataBundle(iv_chip)->iv_maskMainlineNceTce) )
         {
-            fir->SetBit(9);  mask->ClearBit(9);  // Mainline read NCE
-            fir->SetBit(10); mask->ClearBit(10); // Mainline read TCE
+            fir->SetBit(9);  mask->SetBit(9);  // Mainline read NCE
+            fir->SetBit(10); mask->SetBit(10); // Mainline read TCE
         }
         fir->SetBit(15); mask->SetBit(15); // Mainline read UE
 
@@ -1096,6 +1099,7 @@ uint32_t __findChipMarks<TYPE_OCMB_CHIP>(
                 sprintf(regName, "RDF_FIR_%x", port);
                 SCAN_COMM_REGISTER_CLASS * reg = chip->getRegister(regName);
 
+                reg->clearAllBits();
                 reg->SetBit( 1 + rank.getMaster()); // fetch
                 reg->SetBit(21 + rank.getMaster()); // scrub
                 o_rc = reg->Write();
@@ -1245,6 +1249,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
             {
                 SCAN_COMM_REGISTER_CLASS * mcbistfir_or =
                     iv_chip->getRegister("MCBIST_FIR_OR");
+                mcbistfir_or->clearAllBits();
                 mcbistfir_or->SetBit( 11 );
 
                 mcbistfir_or->Write();
@@ -1258,6 +1263,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::handleRrFo()
             {
                 SCAN_COMM_REGISTER_CLASS * mcbistfir_or =
                     iv_chip->getRegister("MCBISTFIR_OR");
+                mcbistfir_or->clearAllBits();
                 mcbistfir_or->SetBit( 10 );
 
                 mcbistfir_or->Write();

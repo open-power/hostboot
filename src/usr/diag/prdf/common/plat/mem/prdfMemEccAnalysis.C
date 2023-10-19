@@ -595,6 +595,7 @@ uint32_t __odyTriggerChnlFail( ExtensibleChip * i_chip )
         // Unmask SRQFIR[46], write to clear
         SCAN_COMM_REGISTER_CLASS * mask = i_chip->getRegister("SRQ_FIR_MASK");
 
+        mask->clearAllBits();
         mask->SetBit(46);
         o_rc = mask->Write();
         if ( SUCCESS != o_rc )
@@ -1283,6 +1284,7 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 sprintf(maskName, "RDF_FIR_MASK_OR_%x", i_port);
 
                 SCAN_COMM_REGISTER_CLASS * mask = i_chip->getRegister(maskName);
+                mask->clearAllBits();
                 mask->SetBit(18); // mainline
                 mask->SetBit(38); // maintenance
                 o_rc = mask->Write();
@@ -1298,6 +1300,7 @@ uint32_t handleMemIue<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 SCAN_COMM_REGISTER_CLASS * mask_or =
                     i_chip->getRegister("RDFFIR_MASK_OR");
 
+                mask_or->clearAllBits();
                 mask_or->SetBit(17);
                 mask_or->SetBit(37);
 
@@ -1594,6 +1597,7 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 sprintf(maskName, "RDF_FIR_MASK_OR_%x", i_port);
 
                 SCAN_COMM_REGISTER_CLASS * mask = i_chip->getRegister(maskName);
+                mask->clearAllBits();
                 mask->SetBit(20); // mainline
                 mask->SetBit(40); // maintenance
                 o_rc = mask->Write();
@@ -1609,6 +1613,7 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             {
                 SCAN_COMM_REGISTER_CLASS * mask =
                     i_chip->getRegister( "RDFFIR_MASK_OR" );
+                mask->clearAllBits();
                 mask->SetBit(19); // mainline
                 mask->SetBit(39); // maintenance
                 o_rc = mask->Write();

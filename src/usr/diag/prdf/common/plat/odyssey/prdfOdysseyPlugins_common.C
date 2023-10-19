@@ -213,6 +213,7 @@ int32_t ClearMainlineIue( ExtensibleChip * i_chip,
 
     SCAN_COMM_REGISTER_CLASS * rdffir = i_chip->getRegister(regName);
 
+    rdffir->clearAllBits();
     rdffir->SetBit(18);
 
     if ( SUCCESS != rdffir->Write() )
@@ -259,6 +260,7 @@ int32_t __maskButDontClear(ExtensibleChip * i_chip,
     if ( io_sc.service_data->IsAtThreshold() )
     {
         SCAN_COMM_REGISTER_CLASS * mask_or = i_chip->getRegister(i_regName);
+        mask_or->clearAllBits();
         mask_or->SetBit(i_bit);
         if ( SUCCESS != mask_or->Write() )
         {
