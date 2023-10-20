@@ -595,11 +595,11 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
         //Determine if successful.
         if (!l_fifoBuffer.getStatus())
         {
-            SBE_TRACF(ERR_MRK "readResponse: invalid status distance "
-                      "cmd=0x%08x distance=%d allocated response size=%d "
+            // DO NOT USE l_fifoBuffer.offset() may be invalid, i.e. MSG_SHORT_READ
+            SBE_TRACF(ERR_MRK "readResponse: invalid data "
+                      "cmd=0x%08x allocated response size=%d "
                       "received word size=%d" ,
                       i_pFifoRequest[1],
-                      l_fifoBuffer.offset(),
                       i_responseSize,
                       l_fifoBuffer.index());
 
@@ -612,18 +612,18 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
              * @moduleid     SBEIO_FIFO
              * @reasoncode   SBEIO_FIFO_INVALID_STATUS_DISTANCE
              * @userdata1    FIFO command class and command
-             * @userdata2[0:15]   Distance to status in words
+             * @userdata2[0:15]   l_fifoBuffer.getState() indicates unexpected condition
              * @userdata2[16:31]  Bytes received
              * @userdata2[32:63]  Response buffer size
-             * @devdesc      The distance to the status header is not
-             *               within the response buffer.
+             * @devdesc      Invalid data, may be short read, etc.
+             * @custdesc     Firmware error communicating with a chip
              */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  SBEIO_FIFO,
                                  SBEIO_FIFO_INVALID_STATUS_DISTANCE,
                                  i_pFifoRequest[1],
                                  TWO_UINT32_TO_UINT64(
-                                    TWO_UINT16_TO_UINT32(l_fifoBuffer.offset(),
+                                    TWO_UINT16_TO_UINT32(l_fifoBuffer.getState(),
                                         l_fifoBuffer.index()*sizeof(uint32_t)),
                                     i_responseSize));
 
