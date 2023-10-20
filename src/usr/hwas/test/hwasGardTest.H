@@ -1667,6 +1667,92 @@ public:
 #endif
     }
 
+    void testDeconfigure5()
+    {
+        TS_INFO("testDeconfigure5: Started");
+#if DISABLE_UNIT_TESTS
+        TS_INFO("testDeconfigure5: SKIPPING -- other tests could be adversly affected");
+#else
+        // Get all OCMB targets
+        TargetHandleList l_ocmbTargetList;
+        getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP, true);
+        Target * ocmb = l_ocmbTargetList[0];
+
+        TargetHandleList memports;
+        getChildAffinityTargetsByState(memports,
+                                       ocmb,
+                                       CLASS_NA,
+                                       TYPE_MEM_PORT,
+                                       UTIL_FILTER_FUNCTIONAL);
+        TargetHandleList dimms;
+        getChildAffinityTargetsByState(dimms,
+                                       ocmb,
+                                       CLASS_NA,
+                                       TYPE_DIMM,
+                                       UTIL_FILTER_FUNCTIONAL);
+        if (memports.size() < 2)
+        {
+            TS_INFO("testDeconfigure5: Not enough memports, skip...");
+            goto EXIT;
+        }
+        if (dimms.size() < 2)
+        {
+            TS_INFO("testDeconfigure5: Not enough dimms, skip...");
+            goto EXIT;
+        }
+        saveSystemState();
+
+
+        for (const auto memport : memports)
+        {
+            // Deconfig the target
+            theDeconfigGard().deconfigureTarget(*memport, 0x1234);
+            // Check its pair was deconfigured
+            for (const auto sibling : memports)
+            {
+                if (sibling != memport)
+                {
+                    HwasState state = sibling->getAttr<ATTR_HWAS_STATE>();
+                    if (state.functional)
+                    {
+                        TS_FAIL("testDeconfigure5: Sibling still functional, fail.");
+                    }
+                    else
+                    {
+                        TS_TRACE("testDeconfigure5: Sibling not functional, pass.");
+                    }
+                }
+            }
+            restoreSystemState();
+        }
+
+        for (const auto dimm : dimms)
+        {
+            // Deconfig the target
+            theDeconfigGard().deconfigureTarget(*dimm, 0x1234);
+            // Check its pair was deconfigured
+            for (const auto sibling : dimms)
+            {
+                if (sibling != dimm)
+                {
+                    HwasState state = sibling->getAttr<ATTR_HWAS_STATE>();
+                    if (state.functional)
+                    {
+                        TS_FAIL("testDeconfigure5: Sibling still functional, fail.");
+                    }
+                    else
+                    {
+                        TS_TRACE("testDeconfigure5: Sibling not functional, pass.");
+                    }
+                }
+            }
+            restoreSystemState();
+        }
+EXIT:
+        TS_INFO("testDeconfigure5: Done");
+#endif
+    }
+
     /**
      *  @brief Test Deconfiguring a PEC Target directly
      */
