@@ -546,17 +546,14 @@ hb_startsimics()
 
         PPE_SUBREPO_TOP_COMMIT=$(git submodule status src/build/tools/extern/ppe | awk '{print $1}' | sed 's/^-//')
         PPE_CACHE_DIR=${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}
-        if [[ "$HB_FAST_PRIME" ]]; then
+        if [[ "$HB_FAST_PRIME" ]] && [[ -d ${PPE_CACHE_DIR} ]]; then
             # Pick up pre-built SBE images
             SBE_STANDALONE_IMG=${PPE_CACHE_DIR}/sbe_seeprom_p10.bin.ecc
             SBE_STANDALONE_MEASURE_IMG=${PPE_CACHE_DIR}/sbe_measurement_p10.bin.ecc
             SBE_STANDALONE_OTPROM_IMG=${PPE_CACHE_DIR}/sbe_otprom_p10.bin
             SBE_SCRIPT_TO_RUN=${PPE_CACHE_DIR}/sbeTest/sbe_startup.simics
             SBE_SCRIPT_PATH=${PPE_CACHE_DIR}/sbeTest/
-        fi
-
-        # Cache dir doesn't exist; fall back to compiled images
-        if [ ! -d ${PPE_CACHE_DIR} ]; then
+        else
             SBE_STANDALONE_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_seeprom_p10.bin.ecc
             SBE_STANDALONE_MEASURE_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_measurement_p10.bin.ecc
             SBE_STANDALONE_OTPROM_IMG=${PROJECT_ROOT}/standalone/simics/import/boot_roms/sbe_otprom_p10.bin
@@ -565,31 +562,31 @@ hb_startsimics()
         fi
 
         if [[ ! -f ${SBE_STANDALONE_IMG} ]]; then
-            echo "File does not exist: " ${SBE_STANDALONE_IMG}
+            echo "File does not exist: SBE_STANDALONE_IMG"
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
 
         if [[ ! -f ${SBE_STANDALONE_MEASURE_IMG} ]]; then
-            echo "File does not exist: " ${SBE_STANDALONE_MEASURE_IMG}
+            echo "File does not exist: SBE_STANDALONE_MEASURE_IMG"
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
 
         if [[ ! -f ${SBE_STANDALONE_OTPROM_IMG} ]]; then
-            echo "File does not exist: " ${SBE_STANDALONE_OTPROM_IMG}
+            echo "File does not exist: SBE_STANDALONE_OTPROM_IMG"
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
 
         if [[ ! -f ${SBE_SCRIPT_TO_RUN} ]]; then
-            echo "File does not exist: " ${SBE_SCRIPT_TO_RUN}
+            echo "File does not exist: SBE_SCRIPT_TO_RUN"
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
 
         if [[ ! -d ${SBE_SCRIPT_PATH} ]]; then
-            echo "Dir does not exist: " ${SBE_SCRIPT_PATH}
+            echo "Dir does not exist: SBE_SCRIPT_PATH"
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
@@ -649,7 +646,7 @@ hb_startsimics()
             ODYSSEY_SROM_IMG=${SBE_ODY_DIR}/simics/sbe/odyssey_standalone/images/odyssey_srom_DD1.bin
         fi
         if [[ ! -f $ODYSSEY_SROM_IMG ]]; then
-            echo "File does not exist: " ${ODYSSEY_SROM_IMG}
+            echo "File does not exist: ODYSSEY_SROM_IMG"
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
@@ -662,7 +659,7 @@ hb_startsimics()
             ODYSSEY_OTPROM_IMG=${SBE_ODY_DIR}/images/odyssey/onetime/otprom/odyssey_otprom_DD1.bin
         fi
         if [[ ! -f $ODYSSEY_OTPROM_IMG ]]; then
-            echo "File does not exist: " ${ODYSSEY_OTPROM_IMG}
+            echo "File does not exist: ODYSSEY_OTPROM_IMG"
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi
@@ -671,7 +668,7 @@ hb_startsimics()
             ODYSSEY_PNOR_IMG=${SBE_ODY_DIR}/simics/sbe/odyssey_standalone/images/odyssey_nor_DD1.img.ecc
         fi
         if [[ ! -f $ODYSSEY_PNOR_IMG ]]; then
-            echo "File does not exist: " ${ODYSSEY_PNOR_IMG}
+            echo "File does not exist: ODYSSEY_PNOR_IMG"
             echo "Please make sure to run \"hb prime\" to create it."
             exit 1
         fi

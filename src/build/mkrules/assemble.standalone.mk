@@ -93,20 +93,19 @@ ifdef HB_FAST_PRIME
 	endif
 endif
 
+SBE_SIGN_SCRIPT := ${PPE_DIR}/src/tools/scripts/signSbeImage
+SBE_TOOL        := ${PPE_DIR}/images/ipl_image_tool
+SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
+
 # Needed to sign SBE Image (which will add .sb_settings section to it)
 PPE_CACHE_DIR := ${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}
 PPE_CACHE_EXISTS := $(shell ls ${PPE_CACHE_DIR})
 ifdef HB_FAST_PRIME
+ifneq (${PPE_CACHE_EXISTS},)
 	SBE_SIGN_SCRIPT := ${PPE_CACHE_DIR}/signSbeImage
 	SBE_TOOL        := ${PPE_CACHE_DIR}/ipl_image_tool
 	SBE_SEEPROM_IMAGE_DD1 := ${PPE_CACHE_DIR}/sbe_seeprom_DD1.bin
 endif
-
-# Cache DNE - fall back to local-built images
-ifeq (${PPE_CACHE_EXISTS},)
-	SBE_SIGN_SCRIPT := ${PPE_DIR}/src/tools/scripts/signSbeImage
-	SBE_TOOL        := ${PPE_DIR}/images/ipl_image_tool
-	SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
 endif
 
 SBE_SCRATCH_DIR := ${STANDALONEDIR}/sbeScratchDir

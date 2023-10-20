@@ -208,8 +208,8 @@ generate_sbe_image()
     cd ${PROJECT_ROOT}
     PPE_DIR=${PROJECT_ROOT}/src/build/tools/extern/ppe
 
+    export PPE_SUBREPO_TOP_COMMIT=$(git submodule status ${PPE_DIR} | awk '{print $1}' | sed 's/^-//')
     if [[ "${HB_FAST_PRIME}" ]]; then
-        export PPE_SUBREPO_TOP_COMMIT=$(git submodule status ${PPE_DIR} | awk '{print $1}' | sed 's/^-//')
         PPE_CACHE_DIR="${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}"
         if [ -d ${PPE_CACHE_DIR} ]; then
             echo "\n***Using default pre-built SBE images from ${PPE_CACHE_DIR}\n"
