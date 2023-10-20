@@ -166,9 +166,6 @@ typedef union pib2gifErrorReg
     uint64_t word64;
 }pib2gifErrorReg_t;
 
-// Explorer MMIO addresses only have 35 bits
-constexpr uint64_t MASK_35BITS = 0x7FFFFFFFFull;
-
 
 /*******************************************************************************
  *

@@ -66,9 +66,9 @@ errlHndl_t checkOcmbError(const TARGETING::TargetHandle_t i_ocmbTarget,
     // NOTE: mmio_memcpy could be doing multiple transactions.  This means
     //       we need to test the error address register against a
     //       range of values instead of a single value.
-    // NOTE: Odyssey only uses the low 35 bits of the address for MMIO access
-    const uint64_t l_mmioAddr35Lo = i_va & MASK_35BITS;
-    const uint64_t l_mmioAddr35Hi = (i_va + i_accessLimit) & MASK_35BITS;
+    // NOTE: OCMBs only use the lower bits of the address for MMIO access
+    const uint64_t l_mmioAddrLo = i_va & MASK_ADDR_BITS;
+    const uint64_t l_mmioAddrHi = (i_va + i_accessLimit) & MASK_ADDR_BITS;
 
     do
     {
@@ -128,7 +128,7 @@ errlHndl_t checkOcmbError(const TARGETING::TargetHandle_t i_ocmbTarget,
             l_regStr = "MCFGERRA";
         }
         // Otherwise, we are accessing a non-config address and, if there
-        // is a failure, the MMIO address will show up in the lower 35 bits of
+        // is a failure, the MMIO address will show up in the lower bits of
         // the MMIOERR register
         else
         {
@@ -163,17 +163,17 @@ errlHndl_t checkOcmbError(const TARGETING::TargetHandle_t i_ocmbTarget,
             l_errorAddressIsZero = true;
         }
 
-        // Check if 35-bit error address is outside our transaction
+        // Check if error address is outside our transaction
         // access range
-        const uint64_t l_errAddr35 = l_errAddr & MASK_35BITS;
-        if((l_errAddr35 < l_mmioAddr35Lo) ||
-           (l_errAddr35 >=  l_mmioAddr35Hi))
+        const uint64_t l_errAddrActual = l_errAddr & MASK_ADDR_BITS;
+        if((l_errAddrActual < l_mmioAddrLo) ||
+           (l_errAddrActual >=  l_mmioAddrHi))
         {
             TRACDCOMP(g_trac_mmio,
                   "checkOcmbError: %s: 0x%09llx is not between 0x%09llx and"
                   " 0x%09llx on huid[0x%08x]",
-                  l_regStr, l_errAddr, l_mmioAddr35Lo,
-                  l_mmioAddr35Hi, get_huid(i_ocmbTarget));
+                  l_regStr, l_errAddrActual, l_mmioAddrLo,
+                  l_mmioAddrHi, get_huid(i_ocmbTarget));
             // Error address is outside our transaction range so this error
             // was not caused by our transaction.
             break;
@@ -182,8 +182,8 @@ errlHndl_t checkOcmbError(const TARGETING::TargetHandle_t i_ocmbTarget,
         TRACFCOMP(g_trac_mmio, ERR_MRK
                   "checkOcmbError: %s: 0x%09llx is between 0x%09llx and"
                   " 0x%09llx on huid[0x%08x]",
-                  l_regStr, l_errAddr35, l_mmioAddr35Lo,
-                  l_mmioAddr35Hi, get_huid(i_ocmbTarget));
+                  l_regStr, l_errAddrActual, l_mmioAddrLo,
+                  l_mmioAddrHi, get_huid(i_ocmbTarget));
         l_errorAddressMatches = true;
 
         // NOTE: These registers cannot be cleared without resetting the chip.

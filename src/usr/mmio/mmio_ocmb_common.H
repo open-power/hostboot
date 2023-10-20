@@ -37,8 +37,9 @@
 namespace MMIOCOMMON
 {
 
-// Odyssey MMIO addresses only have 35 bits
-constexpr uint64_t MASK_35BITS = 0x7FFFFFFFFull;
+// The OCMB itself only has 2GB of MMIO space per type,
+// so addresses only have 31 bits of relevant data.
+constexpr uint64_t MASK_ADDR_BITS = 0x000000007FFFFFFFull;
 
 // The SCOM portion of the MMIO range is at 4GB (see comments in mmio.C).
 constexpr uint64_t OCMB_IB_MMIO_OFFSET = 4*GIGABYTE;
