@@ -44,7 +44,12 @@
           fapi2::TargetState from the Host to the SPPE.
         </description>
         <valueType>uint8</valueType>
-        <default>0</default>
+        <enum>
+          TARGET_STATE_NOT_PRESENT_NOT_FUNCTIONAL = 0x00,
+          TARGET_STATE_PRESENT                    = 0x01,
+          TARGET_STATE_FUNCTIONAL                 = 0x02
+        </enum>
+        <default>TARGET_STATE_NOT_PRESENT_NOT_FUNCTIONAL</default>
         <platInit/>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>
@@ -82,13 +87,15 @@
         <description>
           The i2c engine of the temperature sensor behind the Odyssey.
           There is only a single engine on odyssey which is engine B.
-          I2C_ENGINE_B = 0x0,  //Engine 0
-          I2C_ENGINE_C = 0x1,  //Engine 1
-          I2C_ENGINE_D = 0x2,  //Engine 2
-          I2C_ENGINE_E = 0x3,  //Engine 3
         </description>
         <valueType>uint8</valueType>
-        <default>0</default>
+        <enum>
+          I2C_ENGINE_B = 0x0,
+          I2C_ENGINE_C = 0x1,
+          I2C_ENGINE_D = 0x2,
+          I2C_ENGINE_E = 0x3
+        </enum>
+        <default>I2C_ENGINE_B</default>
         <mrwHide/>
     </attribute>
 
