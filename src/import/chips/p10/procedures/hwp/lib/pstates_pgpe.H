@@ -163,7 +163,8 @@ enum PGPE_FLAGS_IDX
     PGPE_FLAG_RVRM_QVID_ENABLE_VEC          = 21,
     PGPE_FLAG_ECO_COUNT                     = 22,   // 8b: 0=valid; 1:7=eco_count
     PGPE_FLAG_SPARE_COUNT                   = 23,   // 8b: 0=valid; 1:7=spare_count
-    PGPE_FLAG_MAX_DEFINED                   = 24
+    PGPE_FLAG_SADDLEBACK_ROLLOVER           = 24,
+    PGPE_FLAG_MAX_DEFINED                   = 25
 };
 
 //WOF Vratio vdd attribute indices

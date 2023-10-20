@@ -1228,6 +1228,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         // turn off voltage movement when the WAR MODE defect exists.
         io_globalppb->pgpe_flags[PGPE_FLAG_STATIC_VOLTAGE_ENABLE] =
                            (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU) ? 1 : 0;
+        io_globalppb->pgpe_flags[PGPE_FLAG_SADDLEBACK_ROLLOVER] = iv_attrs.attr_saddleback_rollover_enable;
 
         if ( iv_eco_count )
         {
@@ -1868,6 +1869,8 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR_4(ATTR_PROC_R_LOADLINE_UOHM,               iv_procChip,  attr_proc_r_loadline_uohm);
     PPB_GET_ATTR_4(ATTR_PROC_VRM_VOFFSET_UV,                iv_procChip,  attr_proc_vrm_voffset_uv);
 
+
+
     // Feature control
     PPB_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE,                  FAPI_SYSTEM,  attr_pstate_mode);
     PPB_GET_ATTR(ATTR_SYSTEM_WOF_DISABLE,                   FAPI_SYSTEM,  attr_system_wof_disable);
@@ -1886,16 +1889,15 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR(ATTR_DDS_DPLL_SLEW_MODE,                   FAPI_SYSTEM,  attr_dds_dpll_slew_mode);
     PPB_GET_ATTR(ATTR_DDS_BIAS_ENABLE,                      iv_procChip,  attr_dds_bias_enable);
     PPB_GET_ATTR(ATTR_DDS_COARSE_THROTTLE_ENABLE,           iv_procChip,  attr_dds_coarse_thr_enable)
+    PPB_GET_ATTR(ATTR_SADDLEBACK_VRM_ROLLOVER_ENABLE,       FAPI_SYSTEM,  attr_saddleback_rollover_enable);
     PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_DISABLE,    FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_disable);
-
     PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_KI,              FAPI_SYSTEM,  attr_system_wof_throttle_control_ki);
     PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_KP,              FAPI_SYSTEM,  attr_system_wof_throttle_control_kp);
-
-    PPB_GET_ATTR(ATTR_WOF_PITCH_ENABLE,                     FAPI_SYSTEM,  attr_system_pitch_enable);
     PPB_GET_ATTR(ATTR_WOF_THROTTLE_CONTROL_LOOP_MODE,       FAPI_SYSTEM,  attr_system_wof_throttle_control_loop_mode);
     PPB_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,         FAPI_SYSTEM,  attr_system_wof_altitude_temp_adjustment);
     PPB_GET_ATTR(ATTR_WOF_TDP_ALTITUDE_REFERENCE_M,         FAPI_SYSTEM,  attr_system_wof_tdp_altitude_reference);
     PPB_GET_ATTR(ATTR_WOF_ALTITUDE_TEMP_ADJUSTMENT,         FAPI_SYSTEM,  attr_system_wof_altitude_temp_adjustment);
+    PPB_GET_ATTR(ATTR_WOF_PITCH_ENABLE,                     FAPI_SYSTEM,  attr_system_pitch_enable);
     PPB_GET_ATTR_8(ATTR_WOF_VRATIO_VDD_10THPCT,             iv_procChip,  attr_vratio_vdd_10th_pct);
     PPB_GET_ATTR_8(ATTR_WOF_VRATIO_VCS_10THPCT,             iv_procChip,  attr_vratio_vcs_10th_pct);
     PPB_GET_ATTR_U64(ATTR_WOF_DCCR_VALUE,                   iv_procChip,  attr_wof_dccr_value);
@@ -3600,7 +3602,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
         }
     }
 
-    //Total Spare count from all the quad should be even number 
+    //Total Spare count from all the quad should be even number
     if ( iv_spare_count % 2 )
     {
         FAPI_IMP("Spare core count is invalid in PG keyword %d",iv_spare_count);

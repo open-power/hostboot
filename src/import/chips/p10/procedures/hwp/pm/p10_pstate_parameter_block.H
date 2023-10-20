@@ -171,7 +171,7 @@ typedef struct
     // RTC: 269546:  remove the FMax Enable mode control
     uint8_t attr_fmax_enable;
     uint8_t attr_war_mode;
-
+    uint8_t attr_saddleback_rollover_enable;
     uint8_t attr_dd_wof_not_supported;
     uint8_t attr_dd_dds_not_supported;
     uint8_t attr_pstate_mode;
