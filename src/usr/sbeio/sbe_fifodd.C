@@ -464,6 +464,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
 
     SBE_TRACD(ENTER_MRK "readResponse");
 
+    using namespace errl_util;
+
     do
     {
         // EOT is expected before the response buffer is full. Room for
@@ -493,14 +495,17 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
              * @errortype
              * @moduleid     SBEIO_FIFO
              * @reasoncode   SBEIO_FIFO_NO_DOWNSTREAM_EOT
-             * @userdata1    FIFO command class and command
+             * @userdata1[00:31]  HUID of SBE that failed
+             * @userdata1[32:63]  FIFO command class and command
              * @userdata2    Response buffer size
              * @devdesc      EOT not received before downstream buffer full.
              */
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  SBEIO_FIFO,
                                  SBEIO_FIFO_NO_DOWNSTREAM_EOT,
-                                 i_pFifoRequest[1],
+                                 SrcUserData(
+                                   bits{0,31},TARGETING::get_huid(i_target),
+                                   bits{32,63},i_pFifoRequest[1]),
                                  i_responseSize);
 
 
@@ -580,8 +585,9 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
              * @errortype
              * @moduleid     SBEIO_FIFO
              * @reasoncode   SBEIO_FIFO_INVALID_STATUS_DISTANCE
-             * @userdata1    FIFO command class and command
-             * @userdata2[0:15]   l_fifoBuffer.getState() indicates unexpected condition
+             * @userdata1[00:31]  HUID of SBE that failed
+             * @userdata1[32:63]  FIFO command class and command
+             * @userdata2[00:15]  l_fifoBuffer.getState() indicates unexpected condition
              * @userdata2[16:31]  Bytes received
              * @userdata2[32:63]  Response buffer size
              * @devdesc      Invalid data, may be short read, etc.
@@ -590,11 +596,13 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  SBEIO_FIFO,
                                  SBEIO_FIFO_INVALID_STATUS_DISTANCE,
-                                 i_pFifoRequest[1],
-                                 TWO_UINT32_TO_UINT64(
-                                    TWO_UINT16_TO_UINT32(l_fifoBuffer.getState(),
-                                        l_fifoBuffer.index()*sizeof(uint32_t)),
-                                    i_responseSize));
+                                 SrcUserData(
+                                   bits{0,31},TARGETING::get_huid(i_target),
+                                   bits{32,63},i_pFifoRequest[1]),
+                                 SrcUserData(
+                                   bits{0,15},l_fifoBuffer.getState(),
+                                   bits{16,31},l_fifoBuffer.index()*sizeof(uint32_t),
+                                   bits{32,63},i_responseSize));
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
@@ -615,20 +623,23 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
             (SBE_SEC_OPERATION_SUCCESSFUL != l_pStatusHeader->secondaryStatus))
         {
             SBE_TRACF(ERR_MRK "readResponse: failing downstream status "
-                      " cmd=0x%08x magic=0x%08x prim=0x%08x secondary=0x%08x",
+                      " cmd=0x%08x magic=0x%08x prim=0x%08x secondary=0x%08x on %.8X",
                       i_pFifoRequest[1],
                       l_pStatusHeader->magic,
                       l_pStatusHeader->primaryStatus,
-                      l_pStatusHeader->secondaryStatus);
+                      l_pStatusHeader->secondaryStatus,
+                      TARGETING::get_huid(i_target));
 
             /*@
              * @errortype
              * @moduleid     SBEIO_FIFO
              * @reasoncode   SBEIO_FIFO_RESPONSE_ERROR
-             * @userdata1    FIFO command class and command
-             * @userdata2[0:31]   Should be magic value 0xC0DE
-             * @userdata1[32:47]  Primary Status
-             * @userdata1[48:63]  Secondary Status
+             * @userdata1[00:31]  HUID of SBE that failed
+             * @userdata1[32:63]  FIFO command class and command
+             * @userdata2[00:15]  <unused>
+             * @userdata2[16:31]  Should be magic value 0xC0DE
+             * @userdata2[32:47]  Primary Status
+             * @userdata2[48:63]  Secondary Status
              *
              * @devdesc  Status header does not start with magic number or
              *           non-zero primary or secondary status
@@ -637,12 +648,14 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
                                  SBEIO_FIFO,
                                  SBEIO_FIFO_RESPONSE_ERROR,
-                                 i_pFifoRequest[1],
-                                 FOUR_UINT16_TO_UINT64(
-                                         0,
-                                         l_pStatusHeader->magic,
-                                         l_pStatusHeader->primaryStatus,
-                                         l_pStatusHeader->secondaryStatus));
+                                 SrcUserData(
+                                   bits{0,31},TARGETING::get_huid(i_target),
+                                   bits{32,63},i_pFifoRequest[1]),
+                                 SrcUserData(
+                                   bits{0,15},0,
+                                   bits{16,31},l_pStatusHeader->magic,
+                                   bits{32,47},l_pStatusHeader->primaryStatus,
+                                   bits{48,63},l_pStatusHeader->secondaryStatus));
 
             collectRegFFDC(i_target,errl);
 
