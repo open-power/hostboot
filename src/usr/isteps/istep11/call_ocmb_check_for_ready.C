@@ -426,6 +426,28 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                     captureError(i_ocmb_errl, io_iStepError, HWPF_COMP_ID, i_ocmb);
                     goto EXIT_OCMBS;
                 }
+
+                // Check if there is any async FFDC on the Odyssey
+                // TODO JIRA: PFHB-487 Make sure that we check for async FFDC AFTER
+                // we've checked the SBE flash errors.
+                bool l_hasFfdc = false;
+                i_ocmb_errl = ody_has_async_ffdc(i_ocmb, l_hasFfdc);
+                if(i_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each ody_has_async_ffdc: could not get async FFDC bit from OCMB 0x%x", get_huid(i_ocmb));
+                    errlCommit(i_ocmb_errl, SBEIO_COMP_ID);
+                }
+                else
+                {
+                    if(l_hasFfdc)
+                    {
+                        SBEIO::processOdyAsyncFFDC(i_ocmb);
+                    }
+                    else
+                    {
+                        TRACISTEP("parallel_for_each: No async FFDC for OCMB 0x%x", get_huid(i_ocmb));
+                    }
+                }
             }
             else // EXPLORER
             {

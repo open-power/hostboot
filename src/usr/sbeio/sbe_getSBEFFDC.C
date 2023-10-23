@@ -140,12 +140,28 @@ namespace SBEIO
 
                 // Force these to be informational so there is no potential
                 // callouts logged/parts deconfigured.
-                if(l_errl)
-                {
-                    l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                }
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 errlCommit(l_errl, SBEIO_COMP_ID);
             }
+        }
+    }
+
+    void processOdyAsyncFFDC(TARGETING::Target* i_chipTarget)
+    {
+        using namespace TARGETING;
+        std::vector<errlHndl_t> l_errls = genFifoSBEFFDCErrls(i_chipTarget);
+
+        for(auto l_errl : l_errls)
+        {
+            if(i_chipTarget->getAttr<ATTR_OCMB_FW_STATE>() != OCMB_FW_STATE_UP_TO_DATE)
+            {
+                // Set the severities to informational, since code update could
+                // fix the issues SBE is complaining about, and we don't want to
+                // have valid callouts in the error logs for resolved issues.
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            }
+            SBE_TRACF(INFO_MRK"processOdyAsyncFFDC: Committing error log PLID 0x%x for OCMB 0x%x", l_errl->plid(), get_huid(i_chipTarget));
+            errlCommit(l_errl, SBEIO_COMP_ID);
         }
     }
 

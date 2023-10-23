@@ -1410,6 +1410,8 @@ void ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
     return;
 }
 
+namespace ocmbupd
+{
 errlHndl_t ody_has_async_ffdc(Target* const i_ocmb,
                               bool& o_hasAsyncFfdc)
 {
@@ -1455,3 +1457,4 @@ errlHndl_t ody_has_async_ffdc(Target* const i_ocmb,
 
     return l_errl;
 }
+} // namespace ocmbupd

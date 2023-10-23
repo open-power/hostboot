@@ -790,6 +790,19 @@ namespace SBEIO
      */
     void handleGenFifoSBEFFDCErrlRequest();
 
+    /**
+     * @brief Grab the target Odyssey chip's async FFDC, parse it, and commit the
+     *        resulting error logs. If the given OCMB's code levels are up-to-date
+     *        (the code update has been performed on this OCMB), the errors are
+     *        committed with the original severity. If the code is out-of-date,
+     *        the errors are committed as informational, since the code update
+     *        procedure may fix the errors reported.
+     *
+     * @param[in] i_chipTarget grab the async FFDC for this OCMB target
+     *
+     */
+    void processOdyAsyncFFDC(TARGETING::Target* i_chipTarget);
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */
