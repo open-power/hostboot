@@ -571,16 +571,23 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
             }
         }
 
-        if (auto l_local_errl = getFifoSbeCapabilities(i_ocmb))
+        if (SPPE_BOOT_SIDE_GOLDEN != i_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_SIDE>())
         {
-            TRACISTEP("handle_ody_upd_hwps_done: getFifoSbeCapabilities "
-                      "failed on OCMB 0x%X", get_huid(i_ocmb));
+            // getCapabilities is not supported with GOLDEN image
+            //  *This chipop did not make it into the GOLDEN image in time, and
+            //   and the golden image is now locked.
 
-            // If we can't capabilities, treat this as a boot failure with
-            // no async FFDC
-            l_event = OCMB_BOOT_ERROR_NO_FFDC;
+            if (auto l_local_errl = getFifoSbeCapabilities(i_ocmb))
+            {
+                TRACISTEP("handle_ody_upd_hwps_done: getFifoSbeCapabilities "
+                          "failed on OCMB 0x%X", get_huid(i_ocmb));
 
-            check_and_set_errl(l_return_errl, l_local_errl);
+                // If we can't get capabilities, treat this as a boot failure
+                // with no async FFDC
+                l_event = OCMB_BOOT_ERROR_NO_FFDC;
+
+                check_and_set_errl(l_return_errl, l_local_errl);
+            }
         }
     }
 
@@ -593,14 +600,14 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
             set_ody_code_levels_state(i_ocmb);
         }
 
-        if (io_hwpErrl)
+        if (l_return_errl)
         {
             // Pass any HWP error to the code update FSM and let it tell us what to do.
 
-            io_hwpErrl->addHwCallout(i_ocmb,
-                                     HWAS::SRCI_PRIORITY_HIGH,
-                                     HWAS::DECONFIG,
-                                     HWAS::GARD_NULL);
+            l_return_errl->addHwCallout(i_ocmb,
+                                        HWAS::SRCI_PRIORITY_HIGH,
+                                        HWAS::DECONFIG,
+                                        HWAS::GARD_NULL);
             l_return_errl = ody_upd_process_event(i_ocmb,
                                                   l_event,
                                                   l_return_errl,
