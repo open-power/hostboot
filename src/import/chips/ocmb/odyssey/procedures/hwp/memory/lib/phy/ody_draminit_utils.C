@@ -2807,8 +2807,8 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 
             if (l_progress_pct != l_new_progress_pct)
             {
-                FAPI_INF(TARGTIDFORMAT " Percent copied so far: %d%% (about %d minutes remaining)",
-                         TARGTID, l_new_progress_pct, l_remaining_minutes);
+                FAPI_INF_NO_SBE(TARGTIDFORMAT " Percent copied so far: %d%% (about %d minutes remaining)",
+                                TARGTID, l_new_progress_pct, l_remaining_minutes);
             }
 
             l_progress_pct = l_new_progress_pct;

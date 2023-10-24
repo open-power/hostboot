@@ -82,11 +82,9 @@ fapi2::ReturnCode bad_fir_bits_helper_with_mask(const fapi2::Target<T>& i_target
     // that are currently masked in hardware
     io_fir_error = fir_with_mask_helper(l_reg_data, (i_mask | l_mask_data));
 
-#ifndef __PPE__
-    FAPI_INF(TARGTIDFORMAT " %s on reg 0x%016lx value 0x%016lx and mask value 0x%016lx", TARGTID,
-             io_fir_error ? "has FIR's set" : "has no FIR's set",
-             i_fir_addr, l_reg_data, (i_mask | l_mask_data));
-#endif
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " %s on reg 0x%016lx value 0x%016lx and mask value 0x%016lx", TARGTID,
+                    io_fir_error ? "has FIR's set" : "has no FIR's set",
+                    i_fir_addr, l_reg_data, (i_mask | l_mask_data));
 
     // Log the error if need be
     log_fir_helper(i_target, io_fir_error, io_rc);

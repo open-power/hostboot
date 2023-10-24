@@ -80,12 +80,11 @@ fapi2::ReturnCode half_dimm_mode_helper(
 
     o_is_half_dimm_mode = l_is_half_dimm;
 
-#ifndef __PPE__
-    FAPI_INF("For " GENTARGTIDFORMAT " , %s override is present. The chip is in %s (attribute %u)",
-             TARGTID,
-             i_half_dimm_override_attr > 0 ? "an" : "no",
-             o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_is_half_dimm);
-#endif
+    FAPI_INF_NO_SBE("For " GENTARGTIDFORMAT " , %s override is present. The chip is in %s (attribute %u)",
+                    TARGTID,
+                    i_half_dimm_override_attr > 0 ? "an" : "no",
+                    o_is_half_dimm_mode ? "half-DIMM mode" : "full-DIMM mode", l_is_half_dimm);
+
 
     return fapi2::FAPI2_RC_SUCCESS;
 }

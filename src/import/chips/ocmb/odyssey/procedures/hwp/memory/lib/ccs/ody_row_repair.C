@@ -278,17 +278,15 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
                 31 > (l_original_data, l_logical_data);
             const uint64_t l_logical_srank = l_logical_data;
 
-#ifndef __PPE__
+            FAPI_INF_NO_SBE("Found valid row repair request in VPD for DIMM " TARGTIDFORMAT
+                            ", DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
+                            TARGTID, l_entry.iv_dram, l_entry.iv_dimm_rank, l_logical_srank,
+                            l_logical_bg, l_logical_bank, l_logical_row);
 
-            FAPI_INF("Found valid row repair request in VPD for DIMM " TARGTIDFORMAT
-                     ", DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
-                     TARGTID, l_entry.iv_dram, l_entry.iv_dimm_rank, l_logical_srank,
-                     l_logical_bg, l_logical_bank, l_logical_row);
+            FAPI_INF_NO_SBE("Maxes for dimm " TARGTIDFORMAT ": DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
+                            TARGTID, l_num_dram, l_kind.iv_master_ranks, l_num_subrank,
+                            MAX_BANK_GROUP, MAX_BANKS, MAX_ROW);
 
-            FAPI_INF("Maxes for dimm " TARGTIDFORMAT ": DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
-                     TARGTID, l_num_dram, l_kind.iv_master_ranks, l_num_subrank,
-                     MAX_BANK_GROUP, MAX_BANKS, MAX_ROW);
-#endif
             // Do some sanity checking here
             FAPI_ASSERT((l_entry.iv_dram < l_num_dram) &&
                         (l_logical_srank < MAX_SRANK) &&
@@ -695,8 +693,8 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                             BANK_POS,
                             l_row);
 #ifndef __PPE__
-                    FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
-                             GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
+                    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                                    GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
 #else
                     FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d",
                              GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank);
@@ -982,11 +980,10 @@ fapi2::ReturnCode deploy_mapped_repairs(
             if (l_repair.is_valid())
             {
                 // Deploy row repair and clear bad DQs
-#ifndef __PPE__
-                FAPI_INF(GENTARGTIDFORMAT" Deploying row repair on DRAM %d, dimm rank %d, subrank %d, bg %d, bank %d, row 0x%05x",
-                         GENTARGTID(l_dimm), l_repair.iv_dram, l_dimm_rank, l_repair.iv_srank, l_repair.iv_bg, l_repair.iv_bank,
-                         l_repair.iv_row);
-#endif
+                FAPI_INF_NO_SBE(
+                    GENTARGTIDFORMAT" Deploying row repair on DRAM %d, dimm rank %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                    GENTARGTID(l_dimm), l_repair.iv_dram, l_dimm_rank, l_repair.iv_srank, l_repair.iv_bg, l_repair.iv_bank,
+                    l_repair.iv_row);
 
                 // Check if at runtime for dynamic vs standalone
                 if (i_runtime)
@@ -1002,13 +999,11 @@ fapi2::ReturnCode deploy_mapped_repairs(
                               GENTARGTID(l_dimm), l_dimm_rank );
                 }
 
-#ifndef __PPE__
                 // Clear bad DQ bits for this port, DIMM, rank that will be fixed by this row repair
-                FAPI_INF("Updating bad bits on DIMM " GENTARGTIDFORMAT
-                         " , DRAM %d, port rank %d, subrank %d, bg %d, bank %d, row 0x%05x",
-                         GENTARGTID(l_dimm), l_repair.iv_dram, l_port_rank, l_repair.iv_srank, l_repair.iv_bg,
-                         l_repair.iv_bank, l_repair.iv_row);
-#endif
+                FAPI_INF_NO_SBE("Updating bad bits on DIMM " GENTARGTIDFORMAT
+                                " , DRAM %d, port rank %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                                GENTARGTID(l_dimm), l_repair.iv_dram, l_port_rank, l_repair.iv_srank, l_repair.iv_bg,
+                                l_repair.iv_bank, l_repair.iv_row);
             }
         }
     }

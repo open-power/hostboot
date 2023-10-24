@@ -140,11 +140,9 @@ inline fapi2::ReturnCode fir_with_mask( const fapi2::Target<T>& i_target,
     // Note: we want to set TRUE here as PRD will find the FIR as "new" and retrigger the procedure this way
     o_fir_error = fir_with_mask_helper(l_fir, l_fir_mask);
 
-#ifndef __PPE__
     // And print the information for debuggability
-    FAPI_INF("%s %s on reg 0x%016lx value 0x%016lx and mask 0x%016lx value 0x%016lx", mss::c_str(i_target),
-             o_fir_error ? "has FIR's set" : "has no FIR's set", i_fir_addr, l_fir, i_mask_addr, l_fir_mask);
-#endif
+    FAPI_INF_NO_SBE("%s %s on reg 0x%016lx value 0x%016lx and mask 0x%016lx value 0x%016lx", mss::c_str(i_target),
+                    o_fir_error ? "has FIR's set" : "has no FIR's set", i_fir_addr, l_fir, i_mask_addr, l_fir_mask);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -169,9 +167,7 @@ fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target,
     // We didn't have an error, so return success
     if(io_rc == fapi2::FAPI2_RC_SUCCESS)
     {
-#ifndef __PPE__
-        FAPI_INF(TARGTIDFORMAT " has a good return code, returning success", TARGTID);
-#endif
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has a good return code, returning success", TARGTID);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 

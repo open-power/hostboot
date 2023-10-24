@@ -392,9 +392,7 @@ fapi2::ReturnCode stop( const fapi2::Target<T>& i_target )
     fapi2::buffer<uint64_t> l_fir_mask_save;
     bool l_poll_result = false;
 
-#ifndef __PPE__
-    FAPI_INF("Stopping any mcbist operations which are in progress for " TARGTIDFORMAT, TARGTID);
-#endif
+    FAPI_INF_NO_SBE("Stopping any mcbist operations which are in progress for " TARGTIDFORMAT, TARGTID);
 
     // Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] when stopping to avoid erroneous attentions
     FAPI_TRY( mask_program_complete<MC>(i_target, l_fir_mask_save) );
@@ -414,10 +412,8 @@ fapi2::ReturnCode stop( const fapi2::Target<T>& i_target )
     // Pass or fail output the current address. This is useful for debugging when we can get it.
     // It's in the register FFDC for memdiags so we don't need it below
     FAPI_TRY( mss::getScom(i_target, TT::LAST_ADDR_REG, l_last_address) );
-#ifndef __PPE__
-    FAPI_INF("MCBIST last address (during stop): 0x%016lx for " TARGTIDFORMAT,
-             l_last_address, TARGTID);
-#endif
+    FAPI_INF_NO_SBE("MCBIST last address (during stop): 0x%016lx for " TARGTIDFORMAT,
+                    l_last_address, TARGTID);
 
     // Clear MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and restore the mask
     FAPI_TRY( clear_and_restore_program_complete<MC>(i_target, l_fir_mask_save) );

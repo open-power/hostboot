@@ -147,12 +147,10 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
                 }
 
                 // Omit the below trace for PPE because splitting the uint64s would result in too many formatters
-#ifndef __PPE__
-                FAPI_INF(TARGTIDFORMAT " mrank,srank %d,%d start addr 0x%016lx",
-                         GENTARGTID(iv_target), l_mrank, l_srank, uint64_t(l_start_addr));
-                FAPI_INF(TARGTIDFORMAT " mrank,srank %d,%d end addr 0x%016lx",
-                         GENTARGTID(iv_target), l_mrank, l_srank, uint64_t(l_end_addr));
-#endif
+                FAPI_INF_NO_SBE(TARGTIDFORMAT " mrank,srank %d,%d start addr 0x%016lx",
+                                GENTARGTID(iv_target), l_mrank, l_srank, uint64_t(l_start_addr));
+                FAPI_INF_NO_SBE(TARGTIDFORMAT " mrank,srank %d,%d end addr 0x%016lx",
+                                GENTARGTID(iv_target), l_mrank, l_srank, uint64_t(l_end_addr));
 
                 mss::pair<mss::mcbist::address<mss::mc_type::ODYSSEY>, mss::mcbist::address<mss::mc_type::ODYSSEY>> l_pair =
                 {l_start_addr, l_end_addr};

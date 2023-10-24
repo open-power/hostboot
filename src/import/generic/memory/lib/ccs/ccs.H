@@ -437,9 +437,8 @@ fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target,
     // Check for done and success. DONE being the only bit set.
     if (status == TT::STAT_QUERY_SUCCESS)
     {
-#ifndef __PPE__
-        FAPI_INF(TARGTIDFORMAT " CCS Executed Successfully.", GENTARGTID(i_port) );
-#endif
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " CCS Executed Successfully.", GENTARGTID(i_port) );
+
         goto fapi_try_exit;
     }
 
@@ -543,9 +542,8 @@ static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_
         fapi2::buffer<uint64_t>& o_power_cntl_reg)
 {
     // For some reason, this very innocuous print is causing SBE to fail to compile, so commenting it out in SBE
-#ifndef __PPE__
-    FAPI_INF("loading ccs instructions (%d) for " TARGTIDFORMAT, io_program.iv_instructions.size(), TARGTID);
-#endif
+    FAPI_INF_NO_SBE("loading ccs instructions (%d) for " TARGTIDFORMAT, io_program.iv_instructions.size(), TARGTID);
+
 
     // Pre CCS execution configuration
     FAPI_TRY(setup_to_execute<MC>(i_target, i_ports, io_program, o_periodics_reg, o_power_cntl_reg));
@@ -558,9 +556,7 @@ static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_
     FAPI_ASSERT( mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
                            [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
-#ifndef __PPE__
-        FAPI_INF("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
-#endif
+        FAPI_INF_NO_SBE("ccs statq (stop) 0x%llx, remaining: %d", stat_reg, poll_remaining);
         return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
     }),
     TT::setup_trying_to_stop_err(i_target), "CCS in progress bit timed out on " TARGTIDFORMAT, TARGTID );
@@ -640,22 +636,19 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
         l_repeat = io_inst_iter->iv_repeats;
 
         l_total_delay += l_delay * (l_repeat + 1);
-#ifndef __PPE__
-        FAPI_INF("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) " TARGTIDFORMAT,
-                 l_inst_count, io_inst_iter->arr0, io_inst_iter->arr1,
-                 CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count,
-                 l_delay, l_total_delay, TARGTID);
-#endif
+
+        FAPI_INF_NO_SBE("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) " TARGTIDFORMAT,
+                        l_inst_count, io_inst_iter->arr0, io_inst_iter->arr1,
+                        CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count,
+                        l_delay, l_total_delay, TARGTID);
     }
 
     // Updates the initial delays
     FAPI_TRY(update_initial_delays<MC>(i_target, l_total_delay, io_program),
              "Failed in update_initial_delays for ccs::setup_ccs_instructions on " TARGTIDFORMAT, TARGTID);
 
-#ifndef __PPE__
-    FAPI_INF("executing ccs instructions via MCBIST (%d:%d, %d) for " TARGTIDFORMAT,
-             io_program.iv_instructions.size(), l_inst_count, io_program.iv_poll.iv_initial_delay, TARGTID);
-#endif
+    FAPI_INF_NO_SBE("executing ccs instructions via MCBIST (%d:%d, %d) for " TARGTIDFORMAT,
+                    io_program.iv_instructions.size(), l_inst_count, io_program.iv_poll.iv_initial_delay, TARGTID);
 
     // Deselect
     // Ody des insert with delay 1, Exp default
@@ -683,9 +676,8 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
         ccs::program<MC>& io_program,
         const std::vector< fapi2::Target<P> >& i_ports)
 {
-#ifndef __PPE__
-    FAPI_INF("Execution standalone CCS commands (%d) for " TARGTIDFORMAT, io_program.iv_instructions.size(), TARGTID);
-#endif
+    FAPI_INF_NO_SBE("Execution standalone CCS commands (%d) for " TARGTIDFORMAT, io_program.iv_instructions.size(),
+                    TARGTID);
 
     auto l_inst_iter = io_program.iv_instructions.begin();
 
@@ -707,9 +699,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
             FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
                       "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID);
 
-#ifndef __PPE__
-            FAPI_INF("executing CCS array for port %d " TARGTIDFORMAT, l_port_index, GENTARGTID(p));
-#endif
+            FAPI_INF_NO_SBE("executing CCS array for port %d " TARGTIDFORMAT, l_port_index, GENTARGTID(p));
             FAPI_TRY( select_ports<MC>( i_target, l_port_index, io_program.iv_channel_select),
                       "Error in port select for " TARGTIDFORMAT, TARGTID);
             FAPI_TRY( execute_inst_array<MC>(i_target, io_program, p),
@@ -750,10 +740,8 @@ fapi2::ReturnCode stop_ccs_and_mcbist(const fapi2::Target<T>& i_target)
     l_poll_result = mss::poll(i_target, TT::STATQ_REG, poll_parameters(),
                               [i_target](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
-#ifndef __PPE__
-        FAPI_INF(TARGTIDFORMAT " ccs statq (stop) " UINT64FORMAT ", remaining: %d",
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ccs statq (stop) " UINT64FORMAT ", remaining: %d",
         TARGTID, UINT64_VALUE(stat_reg), poll_remaining);
-#endif
         // We're done polling when we see ccs is not in progress.
         return stat_reg.getBit<TT::CCS_IN_PROGRESS>() != 1;
     });
@@ -773,10 +761,9 @@ fapi2::ReturnCode stop_ccs_and_mcbist(const fapi2::Target<T>& i_target)
     l_poll_result = mss::poll(i_target, MT::STATQ_REG, poll_parameters(),
                               [i_target](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
-#ifndef __PPE__
-        FAPI_INF(TARGTIDFORMAT " mcbist statq (stop) " UINT64FORMAT ", remaining: %d",
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " mcbist statq (stop) " UINT64FORMAT ", remaining: %d",
         TARGTID, UINT64_VALUE(stat_reg), poll_remaining);
-#endif
+
         // We're done polling when we see mcbist is not in progress.
         return stat_reg.getBit<MT::MCBIST_IN_PROGRESS>() != 1;
     });
@@ -869,9 +856,8 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     // Subtract one for the idle we insert at the end
     constexpr size_t CCS_INSTRUCTION_DEPTH = TT::CCS_ARRAY_LEN - 1;
 
-#ifndef __PPE__
-    FAPI_INF("Execution CCS commands (%d) via MCBIST for " TARGTIDFORMAT, io_program.iv_instructions.size(), TARGTID);
-#endif
+    FAPI_INF_NO_SBE("Execution CCS commands (%d) via MCBIST for " TARGTIDFORMAT, io_program.iv_instructions.size(),
+                    TARGTID);
 
     // Get instruction count and rank info
     const uint64_t l_inst_count = io_program.iv_instructions.size();
@@ -908,9 +894,8 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
         FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
                   "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID );
 
-#ifndef __PPE__
-        FAPI_INF("executing CCS via MCBIST for port %d " TARGTIDFORMAT, l_port_index, GENTARGTID(p));
-#endif
+        FAPI_INF_NO_SBE("executing CCS via MCBIST for port %d " TARGTIDFORMAT, l_port_index, GENTARGTID(p));
+
         FAPI_TRY( select_ports<MC>( i_target, l_port_index, io_program.iv_channel_select),
                   "Error in port select for ccs::execute_via_mcbist on " TARGTIDFORMAT, TARGTID );
         FAPI_TRY( execute_inst_via_mcbist<MC>(i_target), "Error in ccs::execute_inst_via_mcbist on " TARGTIDFORMAT, TARGTID );

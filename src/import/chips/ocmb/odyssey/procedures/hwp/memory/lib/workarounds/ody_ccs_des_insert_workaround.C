@@ -110,11 +110,9 @@ fapi2::ReturnCode insert_des<mss::mc_type::ODYSSEY>(
     FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + io_inst_count, l_des.arr0) );
     FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + io_inst_count, l_des.arr1) );
 
-#ifndef __PPE__
-    FAPI_INF(TARGTIDFORMAT" css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx)", TARGTID,
-             io_inst_count, l_des.arr0, l_des.arr1,
-             CCS_ARR0_ZERO + io_inst_count, CCS_ARR1_ZERO + io_inst_count);
-#endif
+    FAPI_INF_NO_SBE(TARGTIDFORMAT" css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx)", TARGTID,
+                    io_inst_count, l_des.arr0, l_des.arr1,
+                    CCS_ARR0_ZERO + io_inst_count, CCS_ARR1_ZERO + io_inst_count);
 
     // Increment arr count by 1
     io_inst_count++;

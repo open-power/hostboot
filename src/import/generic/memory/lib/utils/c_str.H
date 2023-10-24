@@ -56,6 +56,9 @@
 #define UINT64_VALUE(_val_) \
     static_cast<uint32_t>((_val_ & 0xFFFFFFFF00000000) >> 32), static_cast<uint32_t>(_val_ & 0x00000000FFFFFFFF)
 
+// Macro for simplfing FAPI_INF calls in code used in SBE/SPPE - Does nothing if PPE defined
+#define FAPI_INF_NO_SBE(_fmt_, _args_...)
+
 #else // !defined(__PPE__)
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
@@ -72,6 +75,9 @@
 #define UINT64FORMAT "0x%016LX"
 #define UINT64_VALUE(_val_) \
     _val_
+
+// Macro for simplfing FAPI_INF calls in code used in SBE/SPPE - FAPI_INF if PPE not defined
+#define FAPI_INF_NO_SBE(_fmt_, _args_...) FAPI_INF(_fmt_, ##_args_)
 
 namespace mss
 {
