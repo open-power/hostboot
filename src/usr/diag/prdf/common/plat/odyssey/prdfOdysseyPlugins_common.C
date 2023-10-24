@@ -767,6 +767,67 @@ int32_t checkIueTh( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, checkIueTh );
 
+/**
+ * @brief  SRQ_FIR[29] - SRQ recoverable error
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t srqRecovParityError(ExtensibleChip * i_chip,
+                            STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #define PRDF_FUNC "[odyssey_ocmb::srqRecovParityError] "
+
+    // The SRQ_ERR_RPT register must be checked to determine the correct callout
+    SCAN_COMM_REGISTER_CLASS * srq_err_rpt = i_chip->getRegister("SRQ_ERR_RPT");
+    if (SUCCESS != srq_err_rpt->Read())
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to read SRQ_ERR_RPT");
+        io_sc.service_data->SetCallout(i_chip->getTrgt());
+    }
+    else
+    {
+        // SRQ_ERR_RPT[2] - SRQ0 Refresh Management Array CE
+        if (srq_err_rpt->IsBitSet(2))
+        {
+            // Callout memport 0
+            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                                                       TYPE_MEM_PORT, 0);
+            io_sc.service_data->SetCallout(memport);
+        }
+        // SRQ_ERR_RPT[3] - SRQ1 Refresh Management Array CE
+        else if (srq_err_rpt->IsBitSet(3))
+        {
+            // Callout memport 1
+            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                                                       TYPE_MEM_PORT, 1);
+            io_sc.service_data->SetCallout(memport);
+        }
+        // SRQ_ERR_RPT[4] - Parity error in ROQ config reg(s)
+        // SRQ_ERR_RPT[5] - Parity error in PC config reg(s)
+        // SRQ_ERR_RPT[9] - Reg_parity_err
+        else if (srq_err_rpt->IsBitSet(4) || srq_err_rpt->IsBitSet(5) ||
+                 srq_err_rpt->IsBitSet(9))
+        {
+            // Callout the ocmb, threshold on first occurrence, and make the
+            // log predictive
+            io_sc.service_data->SetCallout(i_chip->getTrgt());
+            io_sc.service_data->SetThresholdMaskId(0);
+        }
+        else
+        {
+            PRDF_ERR(PRDF_FUNC "Failed to find expected root cause in "
+                     "SRQ_ERR_RPT");
+            io_sc.service_data->SetCallout(i_chip->getTrgt());
+        }
+    }
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, srqRecovParityError );
+
 //##############################################################################
 //
 //                             ODP_FIR
