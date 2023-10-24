@@ -1192,8 +1192,10 @@ rule rCFIR_MEM
     CFIR_MEM_SPA & ~CFIR_MEM_SPA_MASK & `0FFFFFFFFFFFFFFF`;
 };
 
+# The SRQ_FIR should be analyzed before the RDF_FIR as RCD parity errors in the
+# SRQ_FIR can cause side effects in the RDF_FIR.
 group gCFIR_MEM
-    filter singlebit
+    filter priority(10)
 {
     /** CFIR_MEM[4]
      *  Attention from MEM_LOCAL_FIR
@@ -1987,9 +1989,12 @@ rule rRDF_FIR_0
     RDF_FIR_0 & ~RDF_FIR_MASK_0 & RDF_FIR_CFG_SPA_0;
 };
 
+# Bit 41 can cause bit 16 as a side effect, so, in the event of a system
+# checkstop, we'll analyze to bit 41 first. In normal scenarios it's fine to
+# handle them as separate attentions.
 group gRDF_FIR_0
     filter singlebit,
-           cs_root_cause(14,15,16,17,18,34,37,38,41,44,45,48,49,54)
+           cs_root_cause(14,15,41,16,17,18,34,37,38,44,45,48,49,54)
 {
     /** RDF_FIR_0[0]
      *  Internal SCOM error

@@ -1334,6 +1334,11 @@
         "description": "Reset Register Fast Mode",
         "name": "RESET_REG_B"
     },
+    "0xd747": {
+        "address": "0x0000000008011015",
+        "description": "Odyssey chip Final Arbiter Configuration Register 0",
+        "name": "FARB0"
+    },
     "0xd79c": {
         "address": "0x000000000801146c",
         "description": "Odyssey chip MBS Mainline MPE Address Trap Register",
@@ -1343,6 +1348,11 @@
         "address": "0x0000000008010c00",
         "description": "Odyssey chip OCMB_PHY_FIR",
         "name": "OCMB_PHY_FIR"
+    },
+    "0xd933": {
+        "address": "0x0000000008011403",
+        "description": "Odyssey OCMB target MCBIST_FIR_MASK OR",
+        "name": "MCBIST_FIR_MASK_OR"
     },
     "0xda75": {
         "address": "0x000000000801146a",

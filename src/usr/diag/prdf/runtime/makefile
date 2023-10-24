@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2022
+# Contributors Listed Below - COPYRIGHT 2014,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -44,6 +44,7 @@ include ../common/plat/odyssey/prdf_plat_odyssey.mk
 include ../plat/mem/prdf_plat_mem_hb_only.mk
 include ../plat/p10/prdf_plat_p10_hb_only.mk
 include ../plat/explorer/prdf_plat_explorer_hb_only.mk
+include ../plat/odyssey/prdf_plat_odyssey_hb_only.mk
 
 VPATH += ${prd_vpath}
 

@@ -244,6 +244,13 @@
         capture     group ocmb_regs;
     };
 
+    register FARB0
+    {
+        name        "Odyssey chip Final Arbiter Configuration Register 0";
+        scomaddr    0x08011015;
+        capture     group ocmb_regs;
+    };
+
     register MC_ADDR_TRANS3
     {
         name        "Odyssey chip Address Translation Register 3";
@@ -273,6 +280,14 @@
     {
         name        "Odyssey OCMB target MCBIST_FIR OR";
         scomaddr    0x08011401;
+        capture     group never;
+        access      write_only;
+    };
+
+    register MCBIST_FIR_MASK_OR
+    {
+        name        "Odyssey OCMB target MCBIST_FIR_MASK OR";
+        scomaddr    0x08011403;
         capture     group never;
         access      write_only;
     };
