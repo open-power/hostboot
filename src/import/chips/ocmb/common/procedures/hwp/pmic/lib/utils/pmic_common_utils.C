@@ -575,9 +575,11 @@ fapi2::ReturnCode update_seq_with_reg_attr(const fapi2::Target<fapi2::TARGET_TYP
     uint8_t l_pmic_seq_cfg2_r42 = 0;
     uint8_t l_pmic_seq_cfg3_r43 = 0;
 
-    FAPI_INF("Updating the PMIC sequence with register attributes " GENTARGTIDFORMAT, GENTARGTID(i_pmic_target));
-
-    // Get attributes that is for defined for SPD rev 0.7.0
+    // Get PMIC register attributes that is for defined for SPD rev 0.7.0
+    // The power-on-sequence is controlled by register 0x40 to 0x43
+    // The controller executes Power On Sequence Config0 to Power On Sequence Config3
+    // as configured in registers R40 to R43 to enable its
+    // output regulators in the sequence as specified.
     FAPI_TRY(mss::attr::get_sequence_order_reg40[i_id](i_ocmb_target, l_pmic_seq_cfg0_r40));
     FAPI_TRY(mss::attr::get_sequence_order_reg41[i_id](i_ocmb_target, l_pmic_seq_cfg1_r41));
     FAPI_TRY(mss::attr::get_sequence_order_reg42[i_id](i_ocmb_target, l_pmic_seq_cfg2_r42));
@@ -754,9 +756,10 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
     }
 
     // Get the SWA attribute value just for checking purposes
-    // We are keying off the sequence order attribute which is set to invalid/reserved value when SPD rev is 0.7.0
-    // So just getting one attribute is good enough to check for that since all of the attributes that are
-    // defined for SPD rev 0.0 are made invalid
+    // We are keying off the sequence order attribute (which is set to invalid/reserved value when SPD rev is 0.7.0)
+    // and when the dram_gen attribute is DDR5
+    // So just getting one attribute is good enough to check for that, since all of the attributes that are
+    // defined for SPD rev 0.0 are made invalid/reserved
     FAPI_TRY(((mss::attr::get_sequence_order[mss::pmic::rail::SWA][i_id]))(i_ocmb_target, l_sequence_order_swa));
 
     // Checking for the sequence order attribute for an invalid value
@@ -765,13 +768,15 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
         l_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR5)
     {
         // Call the update seq to use attributes that are defined for SPD rev 0.7.0
-        FAPI_INF("DDR5 pmic_sequencing with reg attr");
+        FAPI_INF("Call pmic_sequencing with reg attr with dram_gen: %d for " GENTARGTIDFORMAT, l_dram_gen,
+                 GENTARGTID(i_pmic_target));
         return(update_seq_with_reg_attr(i_pmic_target, i_ocmb_target, i_id));
     }
     else
     {
         // Call the update seq to use original attributes that are defined for SPD rev 0.0
-        FAPI_INF("DDR4 pmic_sequencing with original attr");
+        FAPI_INF("Call pmic_sequencing with original attributes with dram_gen: %d for " GENTARGTIDFORMAT, l_dram_gen,
+                 GENTARGTID(i_pmic_target));
         return(update_seq_with_order_and_delay_attr(i_pmic_target, i_ocmb_target, i_id));
     }
 

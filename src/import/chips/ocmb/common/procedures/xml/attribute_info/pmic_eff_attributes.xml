@@ -114,6 +114,7 @@
         <description>
           The sequence for cfg0 will be enabled for PMIC0
           and written to PMIC0 reg R40 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -199,6 +200,7 @@
         <description>
           The sequence for cfg1 will be enabled for PMIC0
           and written to PMIC0 reg R41 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -284,6 +286,7 @@
         <description>
           The sequence for cfg2 will be enabled for PMIC0
           and written to PMIC0 reg R42 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -369,6 +372,7 @@
         <description>
           The sequence for cfg3 will be enabled for PMIC0
           and written to PMIC0 reg R40 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -466,6 +470,7 @@
         <description>
           The sequence for cfg0 will be enabled for PMIC1
           and written to PMIC1 reg R40 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -551,6 +556,7 @@
         <description>
           The sequence for cfg1 will be enabled for PMIC1
           and written to PMIC1 reg R41 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -636,6 +642,7 @@
         <description>
           The sequence for cfg2 will be enabled for PMIC1
           and written to PMIC1 reg R42 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -721,6 +728,7 @@
         <description>
           The sequence for cfg3 will be enabled for PMIC1
           and written to PMIC1 reg R43 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -818,6 +826,7 @@
         <description>
           The sequence for cfg0 will be enabled for PMIC2
           and written to PMIC2 reg R40 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -903,6 +912,7 @@
         <description>
           The sequence for cfg1 will be enabled for PMIC2
           and written to PMIC2 reg R41 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -989,6 +999,7 @@
         <description>
           The sequence for cfg2 will be enabled for PMIC2
           and written to PMIC2 reg R42 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -1074,6 +1085,7 @@
         <description>
           The sequence for cfg3 will be enabled for PMIC2
           and written to PMIC2 reg R43 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -1171,6 +1183,7 @@
         <description>
           The sequence for cfg0 will be enabled for PMIC3
           and written to PMIC3 reg R40 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -1256,6 +1269,7 @@
         <description>
           The sequence for cfg1 will be enabled for PMIC3
           and written to PMIC3 reg R41 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -1342,6 +1356,7 @@
         <description>
           The sequence for cfg2 will be enabled for PMIC3
           and written to PMIC3 reg R42 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
@@ -1427,6 +1442,7 @@
         <description>
           The sequence for cfg3 will be enabled for PMIC3
           and written to PMIC3 reg R43 when using SPD REV 0.7.0
+          This turns on all desired regulators
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>

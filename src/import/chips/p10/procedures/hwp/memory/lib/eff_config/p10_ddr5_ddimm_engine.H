@@ -5528,8 +5528,9 @@ class ddimm_0_7 : public ddimm_0_0
                                   pmic::SET_PMIC0_SEQUENCE_CFG0_R40,
                                   "PMIC0 SEQUENCE CFG0 R40"));
 
-            // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
-            // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
+            // Write reserved/invalid(0x0f) value to the attributes that are used in SPD rev 0.0
+            // Combination of reserved value and DDR5 dram_gen triggers pmic_enable to use the
+            // sequence_cfg attributes
             FAPI_TRY(mss::attr::set_pmic0_swa_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
             // Write the SPD vale to the attributes that are used in SPD rev 0.7.0
             FAPI_TRY(mss::attr::set_pmic0_sequence_cfg0_r40(iv_ocmb, l_field));
