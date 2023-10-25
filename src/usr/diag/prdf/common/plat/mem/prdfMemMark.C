@@ -530,7 +530,7 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         if ( isEnabled )
         {
             // Sparing is enabled. Get the current spares in hardware.
-            MemSymbol sp0, sp1, ecc;
+            MemSymbol sp0, sp1;
             o_rc = mssGetSteerMux<TARGETING::TYPE_MEM_PORT>(memport, i_rank,
                                                             sp0, sp1);
             if ( SUCCESS != o_rc )
@@ -543,7 +543,6 @@ uint32_t __applyRasPolicies<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
             // Add the spares to the callout list if they exist.
             __addCallout( i_chip, i_rank, i_port, sp0, io_sc );
             __addCallout( i_chip, i_rank, i_port, sp1, io_sc );
-            __addCallout( i_chip, i_rank, i_port, ecc, io_sc );
 
             // Add the row repairs to the callout list if they exist
             o_rc = __addRowRepairCallout<TARGETING::TYPE_OCMB_CHIP>( memport,
