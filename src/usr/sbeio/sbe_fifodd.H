@@ -1349,7 +1349,7 @@ private:
     enum { MAX_UP_FIFO_TIMEOUT_NS = 90000*NS_PER_MSEC }; //=90s
 
     // max wait for a FIFO to present data and/or EOT to receive
-    enum { MAX_DWN_FIFO_TIMEOUT_NS = 2*90000*NS_PER_MSEC }; //=180s
+    enum { MAX_DWN_FIFO_TIMEOUT_NS = 4*90000*NS_PER_MSEC }; //=360s
 
 }; // End of classSbeFifo
 
