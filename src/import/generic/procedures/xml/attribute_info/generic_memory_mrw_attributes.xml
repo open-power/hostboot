@@ -761,6 +761,9 @@
     <valueType>uint8</valueType>
     <enum>RIGHT_TO_LEFT = 0x00, LEFT_TO_RIGHT = 0x01</enum>
     <default>RIGHT_TO_LEFT</default>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+    </sbeAttrSync>
     <platInit/>
   </attribute>
 
@@ -871,6 +874,9 @@
       ENABLED = 1
     </enum>
     <default>DISABLED</default>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+    </sbeAttrSync>
     <platInit/>
   </attribute>
 

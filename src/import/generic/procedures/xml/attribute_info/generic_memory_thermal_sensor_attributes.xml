@@ -46,6 +46,9 @@
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <writeable/>
     </attribute>
 
