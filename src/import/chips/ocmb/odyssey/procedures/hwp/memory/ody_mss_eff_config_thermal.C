@@ -40,8 +40,6 @@
 #include <lib/power_thermal/ody_throttle.H>
 #include <lib/power_thermal/ody_throttle_traits.H>
 #include <lib/shared/ody_consts.H>
-#include <mss_odyssey_attribute_getters.H>
-#include <mss_odyssey_attribute_setters.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/power_thermal/gen_decoder.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>

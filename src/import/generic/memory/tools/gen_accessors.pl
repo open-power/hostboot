@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2022
+# Contributors Listed Below - COPYRIGHT 2015,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -162,7 +162,6 @@ foreach my $infile (@ARGV)
 }    #end foreach xml
 
 # Finally, print out the header file(s)
-if ( $getters_string ne "" )
 {
     my $file_string      = generate_header_file( GETTERS, $arg_output_dir, $arg_output_file_prefix, $getters_string );
     my $header_file_name = $arg_output_file_prefix . "_attribute_getters.H";
@@ -173,7 +172,6 @@ if ( $getters_string ne "" )
     close($fh);
 }
 
-if ( $setters_string ne "" )
 {
     my $file_string      = generate_header_file( SETTERS, $arg_output_dir, $arg_output_file_prefix, $setters_string );
     my $header_file_name = $arg_output_file_prefix . "_attribute_setters.H";

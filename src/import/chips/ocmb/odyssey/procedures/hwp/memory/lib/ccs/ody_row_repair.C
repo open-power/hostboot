@@ -49,7 +49,6 @@
 #include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <mss_generic_attribute_getters.H>
-#include <mss_odyssey_attribute_getters.H>
 #include <ody_attribute_accessors_manual.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <ody_scom_ody_odc.H>

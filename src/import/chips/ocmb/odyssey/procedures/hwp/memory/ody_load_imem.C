@@ -39,7 +39,6 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/c_str.H>
-#include <mss_odyssey_attribute_getters.H>
 
 extern "C"
 {
@@ -64,7 +63,8 @@ extern "C"
 
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_ocmb_target;
         FAPI_TRY(i_target.reduceType(l_ocmb_target));
-        FAPI_TRY(mss::attr::get_ody_draminit_step_enable(l_draminit_step_enable));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_STEP_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_draminit_step_enable));
 
         if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_IMEM, l_draminit_step_enable))
         {

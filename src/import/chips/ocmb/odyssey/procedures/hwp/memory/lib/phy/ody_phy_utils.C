@@ -41,7 +41,6 @@
 #include <ody_scom_mp_drtub0.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <lib/phy/ody_draminit_utils.H>
-#include <mss_odyssey_attribute_setters.H>
 #include <generic/memory/lib/utils/fapi_try_lambda.H>
 
 namespace mss
@@ -310,7 +309,7 @@ fapi2::ReturnCode reset_dmem( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_DRTUB0_STARTDCCMCLEAR, l_data));
 
     // After the reset has completed, then toggle the DMEM attribute to note that this is a first run (should be clean now)
-    FAPI_TRY(mss::attr::set_ody_dmem_first_load(i_target, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_YES));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DMEM_FIRST_LOAD, i_target, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_YES));
 
 fapi_try_exit:
     return fapi2::current_err;

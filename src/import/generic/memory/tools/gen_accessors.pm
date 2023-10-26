@@ -997,9 +997,6 @@ sub generate_header_file
 
     my ( $getters_or_setters, $output_dir, $output_file_prefix, $method_string ) = @ARG;
 
-    # If we have no methods, just return
-    croak "ERROR: no methods found in method_string" if ( $method_string eq "" );
-
     my $header_file_name = "";
     my $header_define    = "";
     my $file_string      = "";

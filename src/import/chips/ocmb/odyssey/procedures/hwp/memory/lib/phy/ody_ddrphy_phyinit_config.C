@@ -69,7 +69,6 @@
 #include <lib/phy/ody_phy_reset.H>
 #include <lib/workarounds/ody_dfi_complete_workarounds.H>
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
-#include <mss_odyssey_attribute_getters.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr0.H>
@@ -3974,7 +3973,7 @@ fapi2::ReturnCode run_phy_init( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
     uint8_t l_data_source = 0;
     FAPI_TRY( mss::attr::get_is_simulation(l_is_sim) );
     FAPI_TRY( mss::attr::get_is_simics(l_is_simics) );
-    FAPI_TRY(mss::attr::get_ody_msg_block_data_source(i_target, l_data_source));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_MSG_BLOCK_DATA_SOURCE, i_target, l_data_source));
 
     // Configure the structure values
     // TODO: Zen:MST-1895 Make a helper function for this or remove the hardcodes
@@ -4049,7 +4048,7 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_redundant_cs = 0;
 
     // ARdPtrInitVal
-    FAPI_TRY(mss::attr::get_ardptrinitval(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_ARDPTRINITVAL, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4057,7 +4056,7 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     }
 
     // ARdPtrInitValOvr
-    FAPI_TRY(mss::attr::get_ardptrinitvalovr(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_ARDPTRINITVALOVR, i_target, l_attr_data));
     io_user_input_basic.ARdPtrInitValOvr = l_attr_data;
 
     // DramType (Hardcode to DDR5)
@@ -4065,7 +4064,7 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     io_user_input_basic.DramType = DDR5;
 
     // DisPtrInitClrTxTracking
-    FAPI_TRY(mss::attr::get_dis_ptrinitclr_txtracking(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DIS_PTRINITCLR_TXTRACKING, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4081,12 +4080,12 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     io_user_input_basic.NumDbyte = 10;
 
     // NumActiveDbyteDfi0 (enabled DQ / 8, and round up to support partial byte)
-    FAPI_TRY(mss::attr::get_phy_enabled_dq_cha(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHA, i_target, l_attr_data));
     io_user_input_basic.NumActiveDbyteDfi0 = (l_attr_data / mss::BITS_PER_BYTE) +
             ((l_attr_data % mss::BITS_PER_BYTE) ? 1 : 0);
 
     // NumActiveDbyteDfi1 (enabled DQ / 8, and round up to support partial byte)
-    FAPI_TRY(mss::attr::get_phy_enabled_dq_chb(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHB, i_target, l_attr_data));
     io_user_input_basic.NumActiveDbyteDfi1 = (l_attr_data / mss::BITS_PER_BYTE) +
             ((l_attr_data % mss::BITS_PER_BYTE) ? 1 : 0);
 
@@ -4110,11 +4109,11 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     }
 
     // NumRank_dfi0 (mranks_per_dimm only if enabled DQs > 0 on CHA)
-    FAPI_TRY(mss::attr::get_phy_enabled_dq_cha(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHA, i_target, l_attr_data));
     io_user_input_basic.NumRank_dfi0 = (l_attr_data > 0) ? l_attr_arr[0] : 0;
 
     // NumRank_dfi1 (mranks_per_dimm only if enabled DQs > 0 on CHB)
-    FAPI_TRY(mss::attr::get_phy_enabled_dq_chb(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHB, i_target, l_attr_data));
     io_user_input_basic.NumRank_dfi1 = (l_attr_data > 0) ? l_attr_arr[0] : 0;
 
     // DramDataWidth (program the same for all ranks)
@@ -4138,7 +4137,7 @@ fapi2::ReturnCode setup_phy_basic_struct(const fapi2::Target<fapi2::TARGET_TYPE_
     }
 
     // PllBypass
-    FAPI_TRY(mss::attr::get_phy_pll_bypass_en(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PLL_BYPASS_EN, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4190,7 +4189,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // ExtCalResVal
-    FAPI_TRY(mss::attr::get_extcalresval(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_EXTCALRESVAL, i_target, l_attr_data));
     io_user_input_advanced.ExtCalResVal = l_attr_data;
 
     // ODTImpedance (set to DIMM0, rank0 value)
@@ -4254,7 +4253,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // TxImpedanceCtrl1
-    FAPI_TRY(mss::attr::get_ody_phy_tx_impedance_ctrl1(i_target, l_attr_data_16));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_TX_IMPEDANCE_CTRL1, i_target, l_attr_data_16));
 
     for (auto p_state = 0; p_state < mss::ody::NUM_PSTATES; p_state++)
     {
@@ -4262,7 +4261,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // TxImpedanceCtrl2
-    FAPI_TRY(mss::attr::get_ody_phy_tx_impedance_ctrl2(i_target, l_attr_data_16));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_TX_IMPEDANCE_CTRL2, i_target, l_attr_data_16));
 
     for (auto p_state = 0; p_state < mss::ody::NUM_PSTATES; p_state++)
     {
@@ -4270,7 +4269,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // MemAlertEn
-    FAPI_TRY(mss::attr::get_memalerten(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_MEMALERTEN, i_target, l_attr_data));
     io_user_input_advanced.MemAlertEn = l_attr_data;
 
     // MtestPUImp (set to DIMM0, rank0 value)
@@ -4284,7 +4283,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // PhyMstrTrainInterval
-    FAPI_TRY(mss::attr::get_phy_mstrtrain_interval(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_MSTRTRAIN_INTERVAL, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4292,7 +4291,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // PhyMstrMaxReqToAck
-    FAPI_TRY(mss::attr::get_phy_mstrmaxreqtoack(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_MSTRMAXREQTOACK, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4300,7 +4299,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // PhyMstrCtrlMode
-    FAPI_TRY(mss::attr::get_phy_mstrctrlmode(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_MSTRCTRLMODE, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4308,11 +4307,11 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // CalInterval
-    FAPI_TRY(mss::attr::get_phy_calinterval(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CALINTERVAL, i_target, l_attr_data));
     io_user_input_advanced.CalInterval = l_attr_data;
 
     // CalOnce
-    FAPI_TRY(mss::attr::get_phy_calonce(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CALONCE, i_target, l_attr_data));
     io_user_input_advanced.CalOnce = l_attr_data;
 
     // DramByteSwap (hardcode to '0')
@@ -4356,7 +4355,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     io_user_input_advanced.TxSlewFallAC = 0x0;
 
     // IsHighVDD
-    FAPI_TRY(mss::attr::get_phy_is_highvdd(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_IS_HIGHVDD, i_target, l_attr_data));
     io_user_input_advanced.IsHighVDD = l_attr_data;
 
     // TxSlewRiseCK init to 0 pulled from attr after phyinit
@@ -4385,7 +4384,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
         io_user_input_advanced.EnTdqs2dqTrackingTg3[l_pstate] = 0;
     }
 
-    FAPI_TRY(mss::attr::get_phy_en_tdqs2dq_tracking(i_target, l_en_tracking));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_EN_TDQS2DQ_TRACKING, i_target, l_en_tracking));
     FAPI_TRY(mss::rank::ranks_on_port(i_target, l_rank_infos));
 
     for (const auto& l_rank_info : l_rank_infos)
@@ -4420,7 +4419,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data_tdqstracking(i_target, io_user_input_advanced ));
 
     // DqsOscRunTimeSel
-    FAPI_TRY(mss::attr::get_phy_dqs_osc_runtime_sel(i_target, l_attr_data_16));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_OSC_RUNTIME_SEL, i_target, l_attr_data_16));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4428,7 +4427,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     }
 
     // EnRxDqsTracking
-    FAPI_TRY(mss::attr::get_phy_en_rxdqs_tracking(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_EN_RXDQS_TRACKING, i_target, l_attr_data));
 
     for (auto l_pstate = 0; l_pstate < mss::ody::NUM_PSTATES; l_pstate++)
     {
@@ -4493,19 +4492,19 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     io_user_input_advanced.D5DisableRetraining = 1;
 
     // DisablePmuEcc
-    FAPI_TRY(mss::attr::get_phy_disable_pmu_ecc(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DISABLE_PMU_ECC, i_target, l_attr_data));
     io_user_input_advanced.DisablePmuEcc = l_attr_data;
 
     // EnableMAlertAsync
-    FAPI_TRY(mss::attr::get_phy_enable_malert_async(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_ENABLE_MALERT_ASYNC, i_target, l_attr_data));
     io_user_input_advanced.EnableMAlertAsync = l_attr_data;
 
     // AlertRecoveryEnable
-    FAPI_TRY(mss::attr::get_phy_alert_recov_enable(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_ALERT_RECOV_ENABLE, i_target, l_attr_data));
     io_user_input_advanced.AlertRecoveryEnable = l_attr_data;
 
     // RstRxTrkState
-    FAPI_TRY(mss::attr::get_phy_rst_rxtrk_state(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_RST_RXTRK_STATE, i_target, l_attr_data));
     io_user_input_advanced.RstRxTrkState = l_attr_data;
 
     // Apb32BitMode (unused in the PhyInit code, so hardcode to zero)
@@ -4532,7 +4531,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     io_user_input_advanced.special_feature_1_en = l_attr_arr[0];
 
     // rtt_term_en
-    FAPI_TRY(mss::attr::get_ody_mrr_odt_term(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_MRR_ODT_TERM, i_target, l_attr_data));
     io_user_input_advanced.rtt_term_en = l_attr_data;
 
     // VREGCtrl_LP2_PwrSavings_En (hardcode to disabled)
@@ -4558,7 +4557,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     io_user_input_advanced.DfiMode_Override_Val = 0;
 
     // NoX4onUpperNibble_Override
-    FAPI_TRY(mss::attr::get_uppernibble_override(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_UPPERNIBBLE_OVERRIDE, i_target, l_attr_data));
     io_user_input_advanced.NoX4onUpperNibble_Override = l_attr_data;
 
     // NoX4onUpperNibbleTg
@@ -4569,7 +4568,7 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
         io_user_input_advanced.NoX4onUpperNibbleTg[l_rank] = 0;
     }
 
-    FAPI_TRY(mss::attr::get_uppernibble_tg(i_target, l_uppernibbletg));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_UPPERNIBBLE_TG, i_target, l_uppernibbletg));
 
 
     for (const auto& l_rank_info : l_rank_infos)
@@ -4588,15 +4587,15 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     // Num_Logical_Ranks (already done above, since needed for 3DS)
 
     // DFIPHYUPDCNT
-    FAPI_TRY(mss::attr::get_dfiphyupdcnt(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DFIPHYUPDCNT, i_target, l_attr_data));
     io_user_input_advanced.DFIPHYUPDCNT = l_attr_data;
 
     // DFIPHYUPDRESP
-    FAPI_TRY(mss::attr::get_dfiphyupdresp(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DFIPHYUPDRESP, i_target, l_attr_data));
     io_user_input_advanced.DFIPHYUPDRESP = l_attr_data;
 
     // PowerDownANIBs
-    FAPI_TRY(mss::attr::get_powerdown_anibs(i_target, l_attr_data_16));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_POWERDOWN_ANIBS, i_target, l_attr_data_16));
     io_user_input_advanced.PowerDownANIBs = l_attr_data_16;
 
     // PowerDownDBYTEs (ATTR_MEM_EFF_BYTE_ENABLES negated and swizzled to PHY perspective)
@@ -4627,11 +4626,11 @@ fapi2::ReturnCode setup_phy_advanced_struct(const fapi2::Target<fapi2::TARGET_TY
     io_user_input_advanced.VshCurrentLoad_LP2_Override_Val = 0x2;
 
     // LP2_PwrSavings_En
-    FAPI_TRY(mss::attr::get_lp2_pwrsavings(i_target, l_attr_data));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_LP2_PWRSAVINGS, i_target, l_attr_data));
     io_user_input_advanced.LP2_PwrSavings_En = l_attr_data;
 
     // special_offset_value
-    FAPI_TRY(mss::attr::get_special_offset_value(i_target, l_attr_data_16));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SPECIAL_OFFSET_VALUE, i_target, l_attr_data_16));
     io_user_input_advanced.special_offset_value = l_attr_data_16;
 
     // DfiPositionRxPhaseVrefDACSel_Override_En (hardcode to 0 - this is not supported by our pubRev)
@@ -4717,7 +4716,7 @@ fapi2::ReturnCode setup_dram_input_struct(const fapi2::Target<fapi2::TARGET_TYPE
     io_user_input_dram_config.RCW00_ChA_D0 = 0x00;
 
     // DisabledDbyte
-    FAPI_TRY(mss::attr::get_disabled_dbyte(i_target, io_user_input_dram_config.DisabledDbyte));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DISABLED_DBYTE, i_target, io_user_input_dram_config.DisabledDbyte));
 
     // CsPresentChA, CsPresentChB
     // These are a bit-reverse of ATTR_MEM_EFF_DIMM_RANKS_CONFIGED

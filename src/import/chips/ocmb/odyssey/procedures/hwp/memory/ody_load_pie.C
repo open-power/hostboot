@@ -41,7 +41,6 @@
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/count_dimm.H>
-#include <mss_odyssey_attribute_getters.H>
 
 #include <generic/memory/mss_git_data_helper.H>
 #include <lib/phy/dwc_ddrphy_phyinit_I_loadPIEImage.H>
@@ -64,7 +63,8 @@ extern "C"
 
         uint8_t l_draminit_step_enable = 0;
 
-        FAPI_TRY(mss::attr::get_ody_draminit_step_enable(l_draminit_step_enable));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_STEP_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_draminit_step_enable));
 
         if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_PIE, l_draminit_step_enable))
         {

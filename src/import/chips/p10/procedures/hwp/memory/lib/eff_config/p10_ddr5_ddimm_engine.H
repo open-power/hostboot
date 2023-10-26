@@ -50,8 +50,6 @@
 #include <lib/eff_config/p10_base_engine.H>
 #include <mss_generic_attribute_setters.H>
 #include <mss_pmic_attribute_setters.H>
-#include <mss_odyssey_attribute_setters.H>
-#include <mss_odyssey_attribute_getters.H>
 
 
 namespace mss
@@ -723,7 +721,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             FAPI_TRY(get_field_spd(iv_ocmb, F::PHY_A1_B1_MEM_ALERT, i_spd, ody::SET_MEM_ALERT_EN, l_mem_alert_a1_b1_en));
             l_field = l_mem_alert_a0_b0_en || l_mem_alert_a1_b1_en;
 
-            FAPI_TRY(mss::attr::set_memalerten(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_MEMALERTEN, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -837,7 +835,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             FAPI_TRY(lookup_table_check(iv_dimm, EXTCALRESVAL_MAP, SET_EXTCALRESVAL, l_field, l_extcalres_val),
                      "%s failed EXTCALRESVAL_MAP lookup check", spd::c_str(iv_dimm) );
 
-            FAPI_TRY(mss::attr::set_extcalresval(iv_port, l_extcalres_val));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_EXTCALRESVAL, iv_port, l_extcalres_val));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1070,7 +1068,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                 const auto l_num_dq = l_num_nibbles * mss::conversions::BITS_PER_NIBBLE;
 
                 // Each nibble is 4 bits, hence 4 times the count is put in the attr
-                FAPI_TRY(mss::attr::set_phy_enabled_dq_cha(iv_port, l_num_dq));
+                FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHA, iv_port, l_num_dq));
             }
 
             // Set the phy dq enables for ch A
@@ -1083,7 +1081,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
                 const auto l_num_dq = l_num_nibbles * mss::conversions::BITS_PER_NIBBLE;
 
                 // Each nibble is 4 bits, hence 4 times the count is put in the attr
-                FAPI_TRY(mss::attr::set_phy_enabled_dq_chb(iv_port, l_num_dq));
+                FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHB, iv_port, l_num_dq));
             }
 
         fapi_try_exit:

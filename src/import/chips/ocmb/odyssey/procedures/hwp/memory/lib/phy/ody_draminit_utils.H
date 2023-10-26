@@ -44,7 +44,6 @@
 #include <lib/utils/ody_bad_bits.H>
 #include <hwp_data_stream.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
-#include <mss_odyssey_attribute_getters.H>
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr0.H>
@@ -583,11 +582,11 @@ class msg_block_params
             // Fetch attributes and populate the member variables
             // Note: doing this in field order to match PMU_SMB_DDR5U_1D_t definition
 
-            FAPI_TRY(mss::attr::get_phy_adv_train_opt(i_target, iv_msg_block_vars.iv_AdvTrainOpt));
-            FAPI_TRY(mss::attr::get_phy_msg_misc(i_target, iv_msg_block_vars.iv_MsgMisc));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_ADV_TRAIN_OPT, i_target, iv_msg_block_vars.iv_AdvTrainOpt));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_MSG_MISC, i_target, iv_msg_block_vars.iv_MsgMisc));
             // Pstate is always zero for Odyssey
             iv_msg_block_vars.iv_Pstate = 0;
-            FAPI_TRY(mss::attr::get_phy_pll_bypass_en(i_target, iv_msg_block_vars.iv_PllBypassEn));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PLL_BYPASS_EN, i_target, iv_msg_block_vars.iv_PllBypassEn));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, iv_msg_block_vars.iv_DRAMFreq));
 
             // TODO: Zen:MST-1668 RCW05_next and RCW06_next: need to decide how to set these
@@ -595,32 +594,32 @@ class msg_block_params
             //FAPI_TRY(mss::attr::get_rcw06_next(i_target, iv_msg_block_vars.iv_RCW06_next));
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_RXEN_ADJ, i_target, iv_msg_block_vars.iv_RXEN_ADJ));
-            FAPI_TRY(mss::attr::get_phy_rx2d_dfe_misc(i_target, iv_msg_block_vars.iv_RX2D_DFE_Misc));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_RX2D_DFE_MISC, i_target, iv_msg_block_vars.iv_RX2D_DFE_Misc));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_PHY_VREF_RD, i_target, iv_msg_block_vars.iv_PhyVref));
-            FAPI_TRY(mss::attr::get_phy_d5misc(i_target, iv_msg_block_vars.iv_D5Misc));
-            FAPI_TRY(mss::attr::get_phy_wl_adj(i_target, iv_msg_block_vars.iv_WL_ADJ));
-            FAPI_TRY(mss::attr::get_phy_sequence_ctrl(i_target, iv_msg_block_vars.iv_SequenceCtrl));
-            FAPI_TRY(mss::attr::get_ody_draminit_verbosity(i_target, iv_msg_block_vars.iv_HdtCtrl));
-            FAPI_TRY(mss::attr::get_phy_cfg(i_target, iv_msg_block_vars.iv_PhyCfg));
-            FAPI_TRY(mss::attr::get_dfimrl_margin(i_target, iv_msg_block_vars.iv_DFIMRLMargin));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_D5MISC, i_target, iv_msg_block_vars.iv_D5Misc));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_WL_ADJ, i_target, iv_msg_block_vars.iv_WL_ADJ));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SEQUENCE_CTRL, i_target, iv_msg_block_vars.iv_SequenceCtrl));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_VERBOSITY, i_target, iv_msg_block_vars.iv_HdtCtrl));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CFG, i_target, iv_msg_block_vars.iv_PhyCfg));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DFIMRL_MARGIN, i_target, iv_msg_block_vars.iv_DFIMRLMargin));
             // X16Present is always zero for Odyssey
             iv_msg_block_vars.iv_X16Present = 0;
-            FAPI_TRY(mss::attr::get_phy_use_broadcast_mr(i_target, iv_msg_block_vars.iv_UseBroadcastMR));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_USE_BROADCAST_MR, i_target, iv_msg_block_vars.iv_UseBroadcastMR));
             // D5Quickboot is always zero for Odyssey
             iv_msg_block_vars.iv_D5Quickboot = 0;
-            FAPI_TRY(mss::attr::get_disabled_dbyte(i_target, iv_msg_block_vars.iv_DisabledDbyte));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DISABLED_DBYTE, i_target, iv_msg_block_vars.iv_DisabledDbyte));
             FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_msg_block_vars.iv_nibbles_enables));
-            FAPI_TRY(mss::attr::get_ca_train_options(i_target, iv_msg_block_vars.iv_CATrainOpt));
-            FAPI_TRY(mss::attr::get_tx2d_dfe_misc(i_target, iv_msg_block_vars.iv_TX2D_DFE_Misc));
-            FAPI_TRY(mss::attr::get_rx2d_train_opt(i_target, iv_msg_block_vars.iv_RX2D_TrainOpt));
-            FAPI_TRY(mss::attr::get_tx2d_train_opt(i_target, iv_msg_block_vars.iv_TX2D_TrainOpt));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CA_TRAIN_OPTIONS, i_target, iv_msg_block_vars.iv_CATrainOpt));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_TX2D_DFE_MISC, i_target, iv_msg_block_vars.iv_TX2D_DFE_Misc));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_RX2D_TRAIN_OPT, i_target, iv_msg_block_vars.iv_RX2D_TrainOpt));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_TX2D_TRAIN_OPT, i_target, iv_msg_block_vars.iv_TX2D_TrainOpt));
             // Share2DVrefResult, MRE_MIN_PULSE, and DWL_MIN_PULSE are always zero for Odyssey
             iv_msg_block_vars.iv_Share2DVrefResult = 0;
             iv_msg_block_vars.iv_MRE_MIN_PULSE = 0;
             iv_msg_block_vars.iv_DWL_MIN_PULSE = 0;
-            FAPI_TRY(mss::attr::get_phy_config_override(i_target, iv_msg_block_vars.iv_PhyConfigOverride));
-            FAPI_TRY(mss::attr::get_phy_enabled_dq_cha(i_target, iv_msg_block_vars.iv_EnabledDQsChA));
-            FAPI_TRY(mss::attr::get_phy_enabled_dq_chb(i_target, iv_msg_block_vars.iv_EnabledDQsChB));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CONFIG_OVERRIDE, i_target, iv_msg_block_vars.iv_PhyConfigOverride));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHA, i_target, iv_msg_block_vars.iv_EnabledDQsChA));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHB, i_target, iv_msg_block_vars.iv_EnabledDQsChB));
             FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_msg_block_vars.iv_CsPresentChA));
             FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_msg_block_vars.iv_CsPresentChB));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MIN, i_target, iv_msg_block_vars.iv_VrefCS_Sweep_Min));
@@ -759,10 +758,10 @@ class msg_block_params
             FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_RD_RTT_PARK));
             FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_WR_RTT_PARK));
 
-            FAPI_TRY(mss::attr::get_ca_dfe_train_options(i_target, iv_msg_block_vars.iv_Reserved1E2));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CA_DFE_TRAIN_OPTIONS, i_target, iv_msg_block_vars.iv_Reserved1E2));
             // Reserved fields are always zero for Odyssey
             iv_msg_block_vars.iv_Reserved1E3 = 0;
-            FAPI_TRY(mss::attr::get_debug_train_options(i_target, iv_msg_block_vars.iv_Reserved1E4));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DEBUG_TRAIN_OPTIONS, i_target, iv_msg_block_vars.iv_Reserved1E4));
             // Reserved fields are always zero for Odyssey
             iv_msg_block_vars.iv_Reserved1E5 = 0;
             iv_msg_block_vars.iv_Reserved1E6 = 0;

@@ -50,7 +50,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_enable_us_tmpl_1</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -71,7 +70,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_enable_us_tmpl_5</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -92,7 +90,6 @@
   <default>ENABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_enable_us_tmpl_9</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -113,7 +110,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_enable_us_tmpl_a</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -131,7 +127,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_enable_us_tmpl_b</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -147,7 +142,6 @@
   <default>0xF</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_tmpl_0_pacing</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -163,7 +157,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_tmpl_1_pacing</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -179,7 +172,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_tmpl_5_pacing</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -195,7 +187,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_tmpl_9_pacing</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -211,7 +202,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_tmpl_b_pacing</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -227,7 +217,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_shrt_backoff_timer</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -243,7 +232,6 @@
   <default>0x1</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_metadata_enable</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -259,7 +247,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_pasid_base</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -275,7 +262,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_actag_base</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -294,7 +280,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_afu_actag_len</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
@@ -313,7 +298,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>ody_pasid_len</mssAccessorName>
   <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>

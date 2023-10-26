@@ -41,7 +41,6 @@
 
 #include <generic/memory/lib/dimm/mrs_load.H>
 #include <mss_generic_attribute_getters.H>
-#include <mss_odyssey_attribute_getters.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>

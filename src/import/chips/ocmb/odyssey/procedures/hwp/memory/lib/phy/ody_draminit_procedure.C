@@ -41,8 +41,6 @@
 
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
-#include <mss_odyssey_attribute_getters.H>
-#include <mss_odyssey_attribute_setters.H>
 #include <lib/phy/ody_draminit_procedure.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
@@ -68,8 +66,9 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     uint8_t l_draminit_step_enable = 0;
     fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
 
-    FAPI_TRY(mss::attr::get_draminit_training_timeout(i_target , l_poll_count));
-    FAPI_TRY(mss::attr::get_ody_draminit_step_enable(l_draminit_step_enable));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT, i_target , l_poll_count));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_STEP_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_draminit_step_enable));
 
     // 1. Loads the IMEM Memory (instructions) onto Synopsys PHY
     // It is being done in ody_load_imem.C
@@ -80,7 +79,7 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     // 2.1 Sets the attribute to note that the DMEM has been loaded
     // Due to memory size constraints on the SBE, the dmem load procedures can be called multiple times
     // As the speed ups for this attribute depend upon the YES enum, the NO is set here after all loads have completed
-    FAPI_TRY(mss::attr::set_ody_dmem_first_load(i_target, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_NO));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DMEM_FIRST_LOAD, i_target, fapi2::ENUM_ATTR_ODY_DMEM_FIRST_LOAD_NO));
 
     // 3. Configures and loads the message block onto Synopsys PHY
     if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_MSG_BLOCK, l_draminit_step_enable))

@@ -46,7 +46,6 @@
 #include <generic/memory/lib/utils/find.H>
 
 #include <mss_pmic_attribute_setters.H>
-#include <mss_odyssey_attribute_setters.H>
 #include <mss_generic_attribute_setters.H>
 #include <lib/eff_config/p10_ddimm_efd_engine.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
@@ -954,7 +953,7 @@ class ddimm_0_0 : public mss::efd::base
                                         l_phy_drv_imp, l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ody_phy_tx_impedance_ctrl1(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_TX_IMPEDANCE_CTRL1, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1014,7 +1013,7 @@ class ddimm_0_0 : public mss::efd::base
                                         l_phy_drv_imp, l_field));
 
             // Set the attr
-            FAPI_TRY(mss::attr::set_ody_phy_tx_impedance_ctrl2(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_TX_IMPEDANCE_CTRL2, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;

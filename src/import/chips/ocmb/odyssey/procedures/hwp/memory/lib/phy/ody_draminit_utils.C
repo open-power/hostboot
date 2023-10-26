@@ -45,8 +45,6 @@
 #include <ody_scom_mp_apbonly0.H>
 #include <ody_scom_mp_mastr_b0.H>
 #include <ody_scom_mp_drtub0.H>
-#include <mss_odyssey_attribute_getters.H>
-#include <mss_odyssey_attribute_setters.H>
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <lib/shared/ody_consts.H>
@@ -242,7 +240,7 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
     bool l_poll_return ;
 
     fapi2::ATTR_PHY_GET_MAIL_TIMEOUT_Type l_mailbox_poll_count;
-    FAPI_TRY(mss::attr::get_phy_get_mail_timeout(i_target , l_mailbox_poll_count));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PHY_GET_MAIL_TIMEOUT, i_target , l_mailbox_poll_count));
     l_poll_return = mss::poll(i_target, l_poll_params, [&i_target, &l_mailbox_poll_count, &l_mail, &o_log_data]()->bool
     {
         uint8_t l_mode = MAJOR_MSG_MODE; // 16 bit mode to read major message.
@@ -2646,7 +2644,7 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     uint8_t l_data_source = 0;
 
     FAPI_TRY(mss::attr::get_is_simulation(l_sim));
-    FAPI_TRY(mss::attr::get_ody_msg_block_data_source(i_target, l_data_source));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_MSG_BLOCK_DATA_SOURCE, i_target, l_data_source));
 
     // Configure the message block structure
     // TODO: Zen:MST-1895 Make a helper function for this or remove the hardcodes
@@ -3097,7 +3095,7 @@ fapi2::ReturnCode ody_load_dmem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OC
     // This seems like a safe assumption as attribute set/get errors are extremely rare
     if(!l_port_targets.empty())
     {
-        FAPI_TRY(mss::attr::get_ody_dmem_first_load(l_port_targets[0], l_is_first_load));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DMEM_FIRST_LOAD, l_port_targets[0], l_is_first_load));
     }
 
     return mss::ody::phy::load_mem_bin_data(i_target,
@@ -3963,10 +3961,10 @@ fapi_try_exit:
 fapi2::ReturnCode set_generic_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const _PMU_SMB_DDR5_1D_t& i_msg_block)
 {
-    FAPI_TRY(mss::attr::set_ody_draminit_fw_revision(i_target, i_msg_block.PmuRevision));
-    FAPI_TRY(mss::attr::set_ody_draminit_internal_fw_revision0(i_target, i_msg_block.PmuInternalRev0));
-    FAPI_TRY(mss::attr::set_ody_draminit_internal_fw_revision1(i_target, i_msg_block.PmuInternalRev1));
-    FAPI_TRY(mss::attr::set_ody_draminit_fw_data_addr_offset(i_target, i_msg_block.ResultAddrOffset));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DRAMINIT_FW_REVISION, i_target, i_msg_block.PmuRevision));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DRAMINIT_INTERNAL_FW_REVISION0, i_target, i_msg_block.PmuInternalRev0));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DRAMINIT_INTERNAL_FW_REVISION1, i_target, i_msg_block.PmuInternalRev1));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DRAMINIT_FW_DATA_ADDR_OFFSET, i_target, i_msg_block.ResultAddrOffset));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -6243,7 +6241,7 @@ fapi2::ReturnCode run_training_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM
 
     fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
     uint8_t l_fir_check_enable;
-    FAPI_TRY(mss::attr::get_draminit_training_timeout(i_target, l_poll_count));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT, i_target, l_poll_count));
 
     // 4. Initialize mailbox protocol and start training
     FAPI_TRY(mss::ody::phy::init_mailbox_protocol(i_target));
@@ -6789,8 +6787,8 @@ fapi2::ReturnCode check_draminit_verbosity(const fapi2::Target<fapi2::TARGET_TYP
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY(mss::attr::get_ody_draminit_verbosity(l_ports[0], l_port_0_verbosity));
-    FAPI_TRY(mss::attr::get_ody_draminit_verbosity(l_ports[1], l_port_1_verbosity));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_VERBOSITY, l_ports[0], l_port_0_verbosity));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_VERBOSITY, l_ports[1], l_port_1_verbosity));
 
     // Higher level of verbosity are encoded with a lower numerical value
     FAPI_ASSERT((l_port_0_verbosity >= fapi2::ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_COARSE_DEBUG) ||

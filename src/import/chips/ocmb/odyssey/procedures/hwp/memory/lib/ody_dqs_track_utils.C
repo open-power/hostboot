@@ -46,7 +46,6 @@
 #include <lib/mc/ody_port_traits.H>
 #include <lib/mcbist/ody_mcbist_traits.H>
 #include <lib/ccs/ody_ccs.H>
-#include <lib/mss_odyssey_attribute_getters.H>
 #include <generic/memory/lib/ccs/ccs_ddr5_commands.H>
 
 namespace mss
@@ -181,7 +180,7 @@ fapi2::ReturnCode set_dqs_timer_val(
     const auto& l_port_target = i_rank_info.get_port_target();
 
     // Grab dqs value from attr
-    FAPI_TRY(mss::attr::get_phy_dqs_osc_runtime_sel(l_port_target, l_dqs_interval));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_OSC_RUNTIME_SEL, l_port_target, l_dqs_interval));
     l_encoded = map_dqs_timer_val(l_dqs_interval);
 
     FAPI_DBG(GENTARGTIDFORMAT " DQS interval: 0x%04X (encoded to: 0x%02X)",
@@ -218,7 +217,7 @@ fapi2::ReturnCode prepare_oscillator_mpc(
         constexpr uint64_t tMRD = 34;
 
         // Grab dqs value to delay to cover timer setting programmed into mr45
-        FAPI_TRY(mss::attr::get_phy_dqs_osc_runtime_sel(l_port_target, l_dqs_interval));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_OSC_RUNTIME_SEL, l_port_target, l_dqs_interval));
 
         // Start Oscillator
         l_inst = mss::ccs::ddr5::mpc_command<mss::mc_type::ODYSSEY>(l_port_rank, uint64_t(i_op), l_dqs_interval + tMRD);

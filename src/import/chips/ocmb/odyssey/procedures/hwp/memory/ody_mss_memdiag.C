@@ -41,7 +41,6 @@
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/find.H>
-#include <mss_odyssey_attribute_getters.H>
 #include <lib/mc/ody_port_traits.H>
 #include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>

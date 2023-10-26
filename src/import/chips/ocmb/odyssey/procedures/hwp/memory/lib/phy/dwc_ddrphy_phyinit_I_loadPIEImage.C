@@ -52,7 +52,6 @@
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
 #include <lib/phy/ody_ddrphy_phyinit_config.H>
 #include <lib/phy/ody_ddrphy_csr_defines.H>
-#include <mss_odyssey_attribute_getters.H>
 
 #ifdef __PPE__
     #ifdef FAPI_INF
@@ -124,7 +123,7 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
     uint8_t l_data_source = 0;
 
     // TODO: Zen:MST-1895 Make a helper function for this or remove the hardcodes
-    FAPI_TRY(mss::attr::get_ody_msg_block_data_source(i_target, l_data_source));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_MSG_BLOCK_DATA_SOURCE, i_target, l_data_source));
 
     if (l_data_source == fapi2::ENUM_ATTR_ODY_MSG_BLOCK_DATA_SOURCE_USE_HARDCODES)
     {
