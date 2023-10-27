@@ -89,10 +89,10 @@ namespace SBEIO
     std::vector<errlHndl_t> genFifoSBEFFDCErrls(TARGETING::Target* i_chipTarget)
     {
         std::vector<errlHndl_t> l_errls;
-        do {
         uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS;
-        uint32_t *l_pFifoResponse =
-            reinterpret_cast<uint32_t *>(malloc(l_responseSize));
+        uint32_t *l_pFifoResponse = reinterpret_cast<uint32_t *>(malloc(l_responseSize));
+
+        do {
 
         errlHndl_t l_errl = getFifoSBEFFDC(i_chipTarget,
                                            l_pFifoResponse,
@@ -111,6 +111,9 @@ namespace SBEIO
                                                   get_huid(i_chipTarget), // userdata1
                                                   0);                     // userdata2
         }while(0);
+
+        free(l_pFifoResponse);
+        l_pFifoResponse = nullptr;
 
         return l_errls;
     }
