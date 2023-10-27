@@ -835,6 +835,7 @@ sub generate_getters
 
     foreach my $parameter (@parameters)
     {
+        $getterString .= "#ifndef __PPE__\n" if ( exists( $attr->{noSBEAccessor} ) );
         $getterString .= "    ///\n";
         $getterString .= "    /// \@brief $attr->{id} getter\n";
         $getterString .= $parameter->{headerString};
@@ -855,7 +856,9 @@ sub generate_getters
         $getterString .= "    fapi_try_exit:\n";
 
         $getterString .= "        return fapi2::current_err;\n";
-        $getterString .= "    }\n\n";
+        $getterString .= "    }\n";
+        $getterString .= "#endif\n" if ( exists( $attr->{noSBEAccessor} ) );
+        $getterString .= "\n";
     }
 
     return $getterString;
@@ -882,6 +885,7 @@ sub generate_setters
 
     foreach my $parameter (@parameters)
     {
+        $setterString .= "#ifndef __PPE__\n" if ( exists( $attr->{noSBEAccessor} ) );
         $setterString .= "    ///\n";
         $setterString .= "    /// \@brief $attr->{id} setter\n";
         $setterString .= $parameter->{headerString};
@@ -903,7 +907,9 @@ sub generate_setters
         $setterString .= "    fapi_try_exit:\n";
 
         $setterString .= "        return fapi2::current_err;\n";
-        $setterString .= "    }\n\n";
+        $setterString .= "    }\n";
+        $setterString .= "#endif\n" if ( exists( $attr->{noSBEAccessor} ) );
+        $setterString .= "\n";
     }
 
     return $setterString;

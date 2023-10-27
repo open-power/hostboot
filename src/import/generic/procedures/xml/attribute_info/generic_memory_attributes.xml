@@ -194,6 +194,7 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>dimm_ddr4_f0rc0f</mssAccessorName>
   </attribute>
 
@@ -212,6 +213,7 @@
     <enum>DISABLE = 0, 3CYC = 3, 4CYC = 4, 5CYC = 5, 6CYC = 6, 8CYC = 8</enum>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>cs_cmd_latency</mssAccessorName>
   </attribute>
 
@@ -228,6 +230,7 @@
     <enum>DISABLE = 0, PL4 = 4, PL5 = 5, PL6 = 6, PL8 = 8</enum>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>ca_parity_latency</mssAccessorName>
   </attribute>
 
@@ -244,7 +247,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f0rc02</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -260,7 +262,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f0rc03</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -276,7 +277,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f0rc04</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -292,7 +292,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f0rc05</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -308,7 +307,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f0rc0b</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -324,7 +322,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f0rc1x</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -340,6 +337,7 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>dimm_ddr4_f0rc7x</mssAccessorName>
   </attribute>
 
@@ -356,6 +354,7 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>dimm_ddr4_f1rc00</mssAccessorName>
   </attribute>
 
@@ -372,7 +371,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f1rc02</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -388,7 +386,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f1rc03</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -404,7 +401,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f1rc04</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -420,7 +416,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dimm_ddr4_f1rc05</mssAccessorName>
   </attribute>
 
   <attribute>

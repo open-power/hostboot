@@ -166,6 +166,7 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>dram_bank_bits</mssAccessorName>
   </attribute>
 
@@ -185,7 +186,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
-    <mssAccessorName>dram_bank_group_bits</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -323,6 +323,7 @@
     <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>dram_ppr</mssAccessorName>
   </attribute>
 
@@ -338,6 +339,7 @@
     <enum>NOT_SUPPORTED = 0, SUPPORTED = 1</enum>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>dram_soft_ppr</mssAccessorName>
   </attribute>
 
@@ -702,6 +704,7 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>register_type</mssAccessorName>
   </attribute>
 
@@ -806,6 +809,7 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2 20</array>
+    <noSBEAccessor/>
     <mssAccessorName>package_rank_map</mssAccessorName>
   </attribute>
 
@@ -821,6 +825,7 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2 20</array>
+    <noSBEAccessor/>
     <mssAccessorName>nibble_map</mssAccessorName>
   </attribute>
 
@@ -1021,6 +1026,7 @@
     <valueType>uint32</valueType>
     <writeable/>
     <mssUnits> mV </mssUnits>
+    <noSBEAccessor/>
     <mssAccessorName>volt_vddr</mssAccessorName>
   </attribute>
 
@@ -1034,6 +1040,7 @@
     <valueType>uint32</valueType>
     <writeable/>
     <mssUnits> mV </mssUnits>
+    <noSBEAccessor/>
     <mssAccessorName>volt_vddq</mssAccessorName>
   </attribute>
 
@@ -1047,6 +1054,7 @@
     <valueType>uint32</valueType>
     <writeable/>
     <mssUnits> mV </mssUnits>
+    <noSBEAccessor/>
     <mssAccessorName>volt_vpp</mssAccessorName>
   </attribute>
 

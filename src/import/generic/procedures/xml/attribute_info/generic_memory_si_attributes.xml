@@ -46,7 +46,6 @@
         <writeable/>
         <enum>IBT_OFF = 0, IBT_100 = 10, IBT_150 = 15, IBT_300 = 30</enum>
         <mssUnits>ohm</mssUnits>
-        <mssAccessorName>si_dimm_rcd_ibt_ca</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -61,7 +60,6 @@
         <writeable/>
         <enum>IBT_OFF = 0, IBT_100 = 10, IBT_150 = 15, IBT_300 = 30</enum>
         <mssUnits>ohm</mssUnits>
-        <mssAccessorName>si_dimm_rcd_ibt_cke</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -76,7 +74,6 @@
         <writeable/>
         <enum>IBT_OFF = 0, IBT_100 = 10, IBT_150 = 15, IBT_300 = 30</enum>
         <mssUnits>ohm</mssUnits>
-        <mssAccessorName>si_dimm_rcd_ibt_cs</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -91,7 +88,6 @@
         <writeable/>
         <enum>IBT_OFF = 0, IBT_100 = 10, IBT_150 = 15, IBT_300 = 30</enum>
         <mssUnits>ohm</mssUnits>
-        <mssAccessorName>si_dimm_rcd_ibt_odt</mssAccessorName>
         <array>2</array>
     </attribute>
 
@@ -205,7 +201,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>si_mc_drv_dq_dqs</mssAccessorName>
         <array>2 4</array>
     </attribute>
 
@@ -222,7 +217,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <enum>DISABLE = 0, ENABLE = 1</enum>
-        <mssAccessorName>si_mc_rcv_eq_dq_dqs</mssAccessorName>
         <array>2 4</array>
     </attribute>
 
@@ -239,7 +233,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <enum>DISABLE = 0, FFE = 1</enum>
-        <mssAccessorName>si_mc_drv_eq_dq_dqs</mssAccessorName>
         <array>2 4</array>
     </attribute>
 
@@ -328,7 +321,6 @@
         <writeable/>
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
-        <mssAccessorName>si_mc_drv_imp_cntl</mssAccessorName>
         <array>2 4</array>
     </attribute>
 
@@ -344,7 +336,6 @@
         <writeable/>
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
-        <mssAccessorName>si_mc_drv_imp_cscid</mssAccessorName>
         <array>2 4</array>
     </attribute>
 
@@ -428,7 +419,6 @@
         <writeable/>
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
-        <mssAccessorName>si_mc_drv_slew_rate_cntl</mssAccessorName>
         <array>2 4</array>
     </attribute>
 
@@ -444,7 +434,6 @@
         <writeable/>
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
-        <mssAccessorName>si_mc_drv_slew_rate_cscid</mssAccessorName>
         <array>2 4</array>
     </attribute>
 
