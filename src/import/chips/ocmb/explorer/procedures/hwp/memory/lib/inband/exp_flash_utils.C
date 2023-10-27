@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -367,8 +367,8 @@ fapi2::ReturnCode exp_flash_read_test(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     FAPI_INF("%s Entering exp_flash_read_test", mss::c_str(i_target));
 
     // Get partition authentication result info from attributes
-    FAPI_TRY( mss::attr::get_exp_fw_failed_authentication_a(i_target, l_failed_auth_a) );
-    FAPI_TRY( mss::attr::get_exp_fw_failed_authentication_b(i_target, l_failed_auth_b) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_FAILED_AUTHENTICATION_A, i_target, l_failed_auth_a) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_FAILED_AUTHENTICATION_B, i_target, l_failed_auth_b) );
 
     // Run get_partition_info to get image size(s)
     FAPI_TRY(exp_get_partition_info(i_target, l_partition_info));
@@ -505,9 +505,9 @@ fapi2::ReturnCode check_response(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHI
         uint32_t l_fw_version_a = 0;
         uint32_t l_fw_version_b = 0;
 
-        FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-        FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-        FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
         switch(i_rsp.response_argument[MCHP_ERROR_CODE_1])
         {
@@ -1029,9 +1029,9 @@ fapi2::ReturnCode callout_fw_write_no_doorbell(const fapi2::Target<fapi2::TARGET
         uint32_t l_fw_version_a = 0;
         uint32_t l_fw_version_b = 0;
 
-        FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-        FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-        FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
         fapi2::logError(io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         io_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -1069,9 +1069,9 @@ fapi2::ReturnCode callout_fw_commit_no_doorbell(const fapi2::Target<fapi2::TARGE
         uint32_t l_fw_version_a = 0;
         uint32_t l_fw_version_b = 0;
 
-        FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-        FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-        FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
         fapi2::logError(io_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
         io_rc = fapi2::FAPI2_RC_SUCCESS;

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -50,7 +50,6 @@
         <initToZero/>
         <platInit/>
         <overrideOnly/>
-        <mssAccessorName>ocmb_exp_boot_config_fw_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -67,7 +66,6 @@
         <initToZero/>
         <platInit/>
         <overrideOnly/>
-        <mssAccessorName>ocmb_exp_boot_config_opencapi_loopback_test</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -85,7 +83,6 @@
         <initToZero/>
         <platInit/>
         <overrideOnly/>
-        <mssAccessorName>ocmb_exp_boot_config_transport_layer</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -106,7 +103,6 @@
         <platInit/>
         <initToZero/>
         <overrideOnly/>
-        <mssAccessorName>ocmb_exp_boot_config_dl_layer_boot_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -123,7 +119,6 @@
         <default>ENABLE</default>
         <platInit/>
         <overrideOnly/>
-        <mssAccessorName>ocmb_exp_boot_config_dfe_disable</mssAccessorName>
     </attribute>
 
      <attribute>
@@ -139,7 +134,6 @@
         </enum>
         <default>1</default>
         <platInit/>
-        <mssAccessorName>ocmb_exp_boot_config_lane_mode</mssAccessorName>
     </attribute>
 
      <attribute>
@@ -156,7 +150,6 @@
         </enum>
         <default>3</default>
         <platInit/>
-        <mssAccessorName>ocmb_exp_boot_config_serdes_frequency</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -172,7 +165,6 @@
         </enum>
         <default>ENABLE</default>
         <platInit/>
-        <mssAccessorName>ocmb_exp_boot_config_adaptation_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -190,7 +182,6 @@
         <default>DISABLE</default>
         <platInit/>
         <overrideOnly/>
-        <mssAccessorName>omi_ffe_settings_command</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -203,7 +194,6 @@
         <valueType>uint32</valueType>
         <initToZero/>
         <writeable/>
-        <mssAccessorName>omi_ffe_pre_cursor</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -216,7 +206,6 @@
         <valueType>uint32</valueType>
         <initToZero/>
         <writeable/>
-        <mssAccessorName>omi_ffe_post_cursor</mssAccessorName>
     </attribute>
 
 </attributes>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,11 +67,11 @@ fapi2::ReturnCode process_fw_adapter_properties_image_version(const fapi2::Targe
 
     if (i_image_number == 'A')
     {
-        FAPI_TRY( mss::attr::set_exp_fw_version_a(i_target, l_image_version.build_num) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_image_version.build_num) );
     }
     else
     {
-        FAPI_TRY( mss::attr::set_exp_fw_version_b(i_target, l_image_version.build_num) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_image_version.build_num) );
     }
 
     FAPI_INF("%s image number: %c", mss::c_str(i_target), i_image_number);
@@ -103,7 +103,7 @@ fapi2::ReturnCode process_fw_adapter_properties(const fapi2::Target<fapi2::TARGE
     // boot_partition_id is stored as an ASCII 'A' or 'B'.
     const auto boot_image_number = static_cast<char>(i_fw_adapter_data.boot_partion_id);
 
-    FAPI_TRY( mss::attr::set_exp_fw_partition_id(i_target, i_fw_adapter_data.boot_partion_id) );
+    FAPI_TRY( FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, i_fw_adapter_data.boot_partion_id) );
 
     FAPI_INF("%s fw_number_of_images: %d", mss::c_str(i_target), i_fw_adapter_data.fw_number_of_images);
     FAPI_INF("%s boot_partion_id: %c", mss::c_str(i_target), boot_image_number);
@@ -137,8 +137,10 @@ fapi2::ReturnCode process_fw_adapter_properties(const fapi2::Target<fapi2::TARGE
     FAPI_INF("%s uecc_compare: 0x%02X", mss::c_str(i_target), i_flash_auth_info.uecc_compare);
     FAPI_INF("%s image_updated: 0x%02X", mss::c_str(i_target), i_flash_auth_info.image_updated);
 
-    FAPI_TRY( mss::attr::set_exp_fw_failed_authentication_a(i_target, i_flash_auth_info.failed_authentication[IMAGE_A]) );
-    FAPI_TRY( mss::attr::set_exp_fw_failed_authentication_b(i_target, i_flash_auth_info.failed_authentication[IMAGE_B]) );
+    FAPI_TRY( FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_EXP_FW_FAILED_AUTHENTICATION_A, i_target,
+                                  i_flash_auth_info.failed_authentication[IMAGE_A]) );
+    FAPI_TRY( FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_EXP_FW_FAILED_AUTHENTICATION_B, i_target,
+                                  i_flash_auth_info.failed_authentication[IMAGE_B]) );
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -315,7 +315,7 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::EXPLORER>(const fapi2::Target<
     FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN,
                                  l_mnfg_screen_test));
 
-    FAPI_TRY(mss::attr::get_exp_intr_mask_disable(i_target, l_intr_mask_disable));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_INTR_MASK_DISABLE, i_target, l_intr_mask_disable));
 
     // Now that we've set up obj handles and command tags we can unmask the Explorer interrupts
     if (l_intr_mask_disable == fapi2::ENUM_ATTR_MSS_EXP_INTR_MASK_DISABLE_ENABLE)
@@ -506,7 +506,7 @@ fapi2::ReturnCode after_mc_omi_setup<mss::mc_type::EXPLORER>( const fapi2::Targe
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_X4_DEGRADE_ACTION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                            l_degrade_fail_action));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_CRC_DEBUG, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_omi_crc_debug));
-    FAPI_TRY(mss::attr::get_exp_intr_mask_disable(i_target, l_intr_mask_disable));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_INTR_MASK_DISABLE, i_target, l_intr_mask_disable));
 
     // Before we unmask any FIRs we need to mask all Explorer interrupts due to SW515594
     if (l_intr_mask_disable == fapi2::ENUM_ATTR_MSS_EXP_INTR_MASK_DISABLE_ENABLE)

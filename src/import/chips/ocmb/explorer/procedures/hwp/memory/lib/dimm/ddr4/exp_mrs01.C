@@ -94,15 +94,16 @@ mrs01_data<mss::mc_type::EXPLORER>::mrs01_data( const fapi2::Target<fapi2::TARGE
 {
     const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-    FAPI_TRY( mss::attr::get_exp_resp_dram_dll_enable(l_port_target, iv_dll_enable),
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_DRAM_DLL_ENABLE, l_port_target, iv_dll_enable),
               "Error in mrs01_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_dram_odic(i_target, iv_odic), "Error in mrs01_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_dram_al(l_port_target, iv_additive_latency), "Error in mrs01_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_dram_wr_lvl_enable(l_port_target, iv_wl_enable),
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_DRAM_AL, l_port_target, iv_additive_latency),
+              "Error in mrs01_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_DRAM_WR_LVL_ENABLE, l_port_target, iv_wl_enable),
               "Error in mrs01_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_dram_rtt_nom(i_target, iv_rtt_nom), "Error in mrs01_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_dram_tdqs(l_port_target, iv_tdqs), "Error in mrs01_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_dram_output_buffer(l_port_target, iv_qoff), "Error in mrs01_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_DRAM_TDQS, l_port_target, iv_tdqs), "Error in mrs01_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_DRAM_OUTPUT_BUFFER, l_port_target, iv_qoff), "Error in mrs01_data()" );
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2019                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -49,7 +49,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_enable_us_tmpl_1</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -67,7 +66,6 @@
   <default>ENABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_enable_us_tmpl_5</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -85,7 +83,6 @@
   <default>ENABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_enable_us_tmpl_9</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -103,7 +100,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_enable_us_tmpl_a</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -121,7 +117,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_enable_us_tmpl_b</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -134,7 +129,6 @@
   <default>0xF</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_tmpl_0_pacing</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -147,7 +141,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_tmpl_1_pacing</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -160,7 +153,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_tmpl_5_pacing</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -173,7 +165,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_tmpl_9_pacing</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -186,7 +177,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_tmpl_b_pacing</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -199,7 +189,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_shrt_backoff_timer</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -212,7 +201,6 @@
   <default>0x1</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_metadata_enable</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -225,7 +213,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_pasid_base</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -238,7 +225,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_actag_base</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -254,7 +240,6 @@
   <default>0x1</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_afu_actag_len</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -270,7 +255,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <mssAccessorName>explr_pasid_len</mssAccessorName>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>

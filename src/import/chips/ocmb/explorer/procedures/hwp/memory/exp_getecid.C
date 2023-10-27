@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,7 +73,7 @@ extern "C"
             FAPI_TRY(mss::exp::plug_rule::enterprise_mode(i_target, l_enterprise_fuse, l_enterprise_final));
 
             // Set global enterprise mode attribute
-            FAPI_TRY(mss::attr::set_ocmb_enterprise_mode(i_target, l_enterprise_final),
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE, i_target, l_enterprise_final),
                      "exp_getecid: Could not set ATTR_MSS_OCMB_ENTERPRISE_MODE");
         }
 
@@ -100,7 +100,7 @@ extern "C"
             }
 
             // TK - Remove once ATTR_ECID is made large enough
-            FAPI_TRY(mss::attr::set_ocmb_ecid(i_target, l_ecid),
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_OCMB_ECID, i_target, l_ecid),
                      "exp_getecid: Could not set ATTR_MSS_OCMB_ECID on %s", mss::c_str(i_target));
 
             FAPI_TRY(mss::exp::ecid::set_attr(i_target, l_ecid),

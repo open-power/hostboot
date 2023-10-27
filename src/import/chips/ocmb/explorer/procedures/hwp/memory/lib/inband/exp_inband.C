@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -410,9 +410,9 @@ fapi2::ReturnCode host_fw_response_struct_from_little_endian(
     uint32_t l_fw_version_a = 0;
     uint32_t l_fw_version_b = 0;
 
-    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
     fapi2::current_err = host_fw_response_struct_from_little_endian(io_data, l_crc, o_response);
     // Re-assert here so we capture the OCMB target (lower level code uses FAPI_SYSTEM)
@@ -467,9 +467,9 @@ fapi2::ReturnCode poll_for_response_ready(const fapi2::Target<fapi2::TARGET_TYPE
     uint32_t l_fw_version_a = 0;
     uint32_t l_fw_version_b = 0;
 
-    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
     // Loop until we max our our loop count or get a doorbell response
     for (; l_loop < NUM_LOOPS && !l_doorbell_response; ++l_loop)
@@ -1080,9 +1080,9 @@ fapi2::ReturnCode app_fw_ddr_calibration_data_struct_from_little_endian(
     uint32_t l_fw_version_a = 0;
     uint32_t l_fw_version_b = 0;
 
-    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
     FAPI_TRY(correctMMIOEndianForStruct(io_data));
     FAPI_TRY(correctMMIOword_order(io_data));
@@ -1198,9 +1198,9 @@ fapi2::ReturnCode request_id(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     uint32_t l_fw_version_a = 0;
     uint32_t l_fw_version_b = 0;
 
-    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
     FAPI_ASSERT(i_rsp.request_identifier == i_cmd.request_identifier,
                 fapi2::EXP_RESPONSE_WRONG_REQID().

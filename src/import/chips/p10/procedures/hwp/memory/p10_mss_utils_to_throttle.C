@@ -107,7 +107,7 @@ extern "C"
                 l_safemode_throttle_per_port = mss::power_thermal::calc_n_from_dram_util(l_safemode_util, l_dram_clocks);
 
                 // Util attribute set by OCC
-                FAPI_TRY( mss::attr::get_databus_util(l_port, l_input_databus_util) );
+                FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_EXP_DATABUS_UTIL, l_port, l_input_databus_util) );
 
                 FAPI_INF("Input databus utilization for %s is %d",
                          mss::c_str(l_port),

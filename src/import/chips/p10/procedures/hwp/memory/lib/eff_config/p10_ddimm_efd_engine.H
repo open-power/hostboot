@@ -604,7 +604,7 @@ class ddimm_efd_0_3 : public base
                 F::CAC_DLY_A_7,
             };
 
-            FAPI_TRY(mss::attr::get_exp_atxdly_a(iv_port, l_addr_delay_a));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_ATXDLY_A, iv_port, l_addr_delay_a));
 
             for (uint8_t l_idx = 0; l_idx < DRAMINIT_NUM_ADDR_DELAYS; l_idx++)
             {
@@ -619,7 +619,7 @@ class ddimm_efd_0_3 : public base
             }
 
             // Set the attribute
-            FAPI_TRY(mss::attr::set_exp_atxdly_a(iv_port, l_addr_delay_a));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_ATXDLY_A, iv_port, l_addr_delay_a));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -649,7 +649,7 @@ class ddimm_efd_0_3 : public base
                 F::CAC_DLY_B_7,
             };
 
-            FAPI_TRY(mss::attr::get_exp_atxdly_b(iv_port, l_addr_delay_b));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_ATXDLY_B, iv_port, l_addr_delay_b));
 
             for (uint8_t l_idx = 0; l_idx < DRAMINIT_NUM_ADDR_DELAYS; l_idx++)
             {
@@ -664,7 +664,7 @@ class ddimm_efd_0_3 : public base
             }
 
             // Set the attribute
-            FAPI_TRY(mss::attr::set_exp_atxdly_b(iv_port, l_addr_delay_b));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_ATXDLY_B, iv_port, l_addr_delay_b));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1231,7 +1231,7 @@ class ddimm_efd_0_3 : public base
             // Get the data
             uint8_t l_dfimrl_ddrclk = 0;
 
-            FAPI_TRY(mss::attr::get_exp_dfimrl_clk(iv_port, l_dfimrl_ddrclk));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EXP_DFIMRL_CLK, iv_port, l_dfimrl_ddrclk));
 
             // Update the values
             FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DFIMRL_DDRCLK, i_efd, SET_DFIMRL_DDRCLK, l_dfimrl_ddrclk));
@@ -1245,7 +1245,7 @@ class ddimm_efd_0_3 : public base
                                   "DFI Max RD Latency"));
 
             // Set the attribute
-            FAPI_TRY(mss::attr::set_exp_dfimrl_clk(iv_port, l_dfimrl_ddrclk));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EXP_DFIMRL_CLK, iv_port, l_dfimrl_ddrclk));
 
         fapi_try_exit:
             return fapi2::current_err;

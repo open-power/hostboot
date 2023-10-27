@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,12 +64,13 @@ extern "C"
 
         {
             fapi2::ATTR_MSS_CHECK_FOR_READY_TIMEOUT_Type l_poll_count = 0;
-            FAPI_TRY(mss::attr::get_check_for_ready_timeout(i_target, l_poll_count));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_CHECK_FOR_READY_TIMEOUT, i_target, l_poll_count));
             FAPI_TRY(mss::exp::i2c::exp_check_for_ready_helper(i_target, l_poll_count, mss::DELAY_1MS));
         }
 
         // Save our new communication state
-        FAPI_TRY(mss::attr::set_exp_comm_state(i_target, fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_I2C_NO_SCOM));
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_EXP_COMM_STATE, i_target,
+                                     fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_I2C_NO_SCOM));
 
     fapi_try_exit:
         return fapi2::current_err;

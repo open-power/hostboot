@@ -261,16 +261,16 @@ inline fapi2::ReturnCode get_booted_fw_version(const fapi2::Target<fapi2::TARGET
     o_fw_version = 0;
     uint32_t l_partition = 0;
 
-    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition));
 
     // If we're the A-side partion, grab the A-side value
     if(l_partition == fapi2::ENUM_ATTR_MSS_EXP_FW_PARTITION_ID_A)
     {
-        return mss::attr::get_exp_fw_version_a(i_target, o_fw_version);
+        return FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, o_fw_version);
     }
 
     // Otherwise, return the B-side value
-    return mss::attr::get_exp_fw_version_b(i_target, o_fw_version);
+    return FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, o_fw_version);
 
 fapi_try_exit:
     return fapi2::current_err;

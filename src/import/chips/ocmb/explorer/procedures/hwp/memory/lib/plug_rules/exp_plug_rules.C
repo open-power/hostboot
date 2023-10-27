@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -142,8 +142,9 @@ fapi2::ReturnCode enterprise_mode(
     uint8_t l_enterprise_policy = 0;
     uint8_t l_override_attr = 0;
 
-    FAPI_TRY( mss::attr::get_ocmb_enterprise_policy(l_enterprise_policy) );
-    FAPI_TRY( mss::attr::get_ocmb_nonenterprise_mode_override(i_target, l_override_attr) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ENTERPRISE_POLICY, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_enterprise_policy) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_NONENTERPRISE_MODE_OVERRIDE, i_target, l_override_attr) );
 
     // This function will populate o_is_enterprise_mode accordingly
     FAPI_TRY(enterprise_mode_helper(i_target, i_enterprise_fuse, l_enterprise_policy, l_override_attr,

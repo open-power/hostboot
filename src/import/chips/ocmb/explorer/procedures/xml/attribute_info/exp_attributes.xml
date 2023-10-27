@@ -61,7 +61,6 @@
             ENTERPRISE = 1
         </enum>
         <writeable/>
-        <mssAccessorName>ocmb_enterprise_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -86,7 +85,6 @@
         </enum>
         <platInit/>
         <default>ALLOW_ENTERPRISE</default>
-        <mssAccessorName>ocmb_enterprise_policy</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -103,7 +101,6 @@
             OVERRIDE_NON_ENTERPRISE = 1
         </enum>
         <writeable/>
-        <mssAccessorName>ocmb_nonenterprise_mode_override</mssAccessorName>
     </attribute>
 
     <!-- user_input_msdg attribute overrides start -->
@@ -196,7 +193,6 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssAccessorName>exp_spd_cl_supported</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -209,7 +205,6 @@
         <valueType>uint16</valueType>
         <writeable/>
         <mssUnits>ps</mssUnits>
-        <mssAccessorName>exp_spd_taa_min</mssAccessorName>
     </attribute>
 
   <attribute>
@@ -223,7 +218,6 @@
       <initToZero></initToZero>
       <valueType>uint8</valueType>
       <writeable/>
-      <mssAccessorName>exp_reorder_queue_setting</mssAccessorName>
   </attribute>
 
     <attribute>
@@ -237,7 +231,6 @@
         <mssUnits>bool</mssUnits>
         <enum>NORMAL = 0, EMULATION = 1</enum>
         <writeable/>
-        <mssAccessorName>exp_firmware_emulation_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -301,7 +294,6 @@
         <valueType>uint16</valueType>
         <array>14</array>
         <writeable/>
-        <mssAccessorName>ocmb_ecid</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -313,7 +305,6 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
-        <mssAccessorName>exp_dfimrl_clk</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -334,7 +325,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>8</array>
-        <mssAccessorName>exp_atxdly_a</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -355,7 +345,6 @@
         <valueType>uint8</valueType>
         <writeable/>
         <array>8</array>
-        <mssAccessorName>exp_atxdly_b</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -371,7 +360,6 @@
             WITH_EYE_CAPTURE = 1
         </enum>
         <writeable/>
-        <mssAccessorName>exp_phy_init_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -385,7 +373,6 @@
         <default>20000</default>
         <platInit/>
         <mrwHide/>
-        <mssAccessorName>check_for_ready_timeout</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -402,7 +389,6 @@
         <platInit/>
         <overrideOnly/>
         <initToZero/>
-        <mssAccessorName>disable_therm_init_read</mssAccessorName>
     </attribute>
 
   <attribute>
@@ -416,7 +402,6 @@
     <valueType>uint8</valueType>
     <default>0</default>
     <writeable/>
-    <mssAccessorName>exp_fw_api_version</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -429,7 +414,6 @@
     <valueType>uint32</valueType>
     <default>0</default>
     <writeable/>
-    <mssAccessorName>exp_fw_version_a</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -442,7 +426,6 @@
     <valueType>uint32</valueType>
     <default>0</default>
     <writeable/>
-    <mssAccessorName>exp_fw_version_b</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -456,7 +439,6 @@
     <default>0</default>
     <enum>A = 65, B = 66</enum>
     <writeable/>
-    <mssAccessorName>exp_fw_partition_id</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -470,7 +452,6 @@
     <valueType>uint8</valueType>
     <default>0</default>
     <writeable/>
-    <mssAccessorName>exp_fw_failed_authentication_a</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -484,7 +465,6 @@
     <valueType>uint8</valueType>
     <default>0</default>
     <writeable/>
-    <mssAccessorName>exp_fw_failed_authentication_b</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -504,7 +484,6 @@
       INBAND = 3
     </enum>
     <writeable/>
-    <mssAccessorName>exp_comm_state</mssAccessorName>
   </attribute>
 
   <attribute>
@@ -728,7 +707,6 @@
       <valueType>uint8</valueType>
       <enum>SEQUENTIAL = 0, INTERLEAVE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_rbt</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -743,7 +721,6 @@
       <valueType>uint8</valueType>
       <enum>NORMAL= 0, TEST = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_tm</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -758,7 +735,6 @@
       <valueType>uint8</valueType>
       <enum>NO = 0, YES = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_dll_reset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -773,7 +749,6 @@
       <valueType>uint8</valueType>
       <enum>FIXED8 = 0, ON_THE_FLY = 1, BC4 = 2, RESERVED = 3</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_burst_length</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -788,7 +763,6 @@
       <valueType>uint8</valueType>
       <enum>ENABLE = 1, DISABLE = 0</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_dll_enable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -819,7 +793,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, CL_MINUS_1 = 1, CL_MINUS_2 = 2</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_al</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -834,7 +807,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_wr_lvl_enable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -879,7 +851,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_tdqs</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -895,7 +866,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 1, ENABLE = 0</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_output_buffer</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -910,7 +880,6 @@
       <valueType>uint8</valueType>
       <enum>MANUAL_NORMAL =0, MANUAL_REDUCED = 1, MANUAL_EXTENDED = 2, ASR = 3</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_dram_lpasr</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -941,7 +910,6 @@
       <valueType>uint8</valueType>
       <enum>PG0 = 0, PG1 = 1, PG2 = 2, PG3 = 3</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_mpr_page</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -956,7 +924,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_mpr_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -971,7 +938,6 @@
       <valueType>uint8</valueType>
       <enum>HALF =0, QUARTER=1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_geardown_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -986,7 +952,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_per_dram_access</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1001,7 +966,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_temp_readout</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1016,7 +980,6 @@
       <valueType>uint8</valueType>
       <enum>4NCK = 4, 5NCK = 5, 6NCK = 6</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_crc_wr_latency</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1031,7 +994,6 @@
       <valueType>uint8</valueType>
       <enum>SERIAL = 0, PARALLEL = 1, STAGGERED = 2</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_mpr_rd_format</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1046,7 +1008,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_max_powerdown_mode</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1061,7 +1022,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_internal_vref_monitor</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1076,7 +1036,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_self_ref_abort</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1091,7 +1050,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_rd_preamble_train</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1106,7 +1064,6 @@
       <valueType>uint8</valueType>
       <enum>1NCLK = 0, 2NCLK = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_rd_preamble</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1121,7 +1078,6 @@
       <valueType>uint8</valueType>
       <enum>1NCLK = 0, 2NCLK = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_wr_preamble</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1136,7 +1092,6 @@
       <valueType>uint8</valueType>
       <enum>CLEAR = 0, ERROR = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_crc_error_clear</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1151,7 +1106,6 @@
       <valueType>uint8</valueType>
       <enum>CLEAR = 0, ERROR = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_ca_parity_error_status</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1166,7 +1120,6 @@
       <valueType>uint8</valueType>
       <enum>ACTIVATED = 0, DEACTIVATED = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_odt_input_buff</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1181,7 +1134,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_ca_parity</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1196,7 +1148,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_data_mask</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1211,7 +1162,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_write_dbi</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1226,7 +1176,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_resp_read_dbi</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1288,7 +1237,6 @@
       <valueType>uint8</valueType>
       <enum>DISABLE = 0, ENABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_cdr_bw_override_enable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1302,7 +1250,6 @@
       <valueType>uint8</valueType>
       <default>47</default>
       <writeable/>
-      <mssAccessorName>exp_cdr_bw_override_value</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1317,7 +1264,6 @@
       <default>0x00</default>
       <platInit/>
       <overrideOnly/>
-      <mssAccessorName>exp_omi_cdr_bw_override</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1343,7 +1289,6 @@
       <default>0x00</default>
       <platInit/>
       <overrideOnly/>
-      <mssAccessorName>exp_omi_cdr_offset</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1359,7 +1304,6 @@
       <default>0xFF</default>
       <platInit/>
       <overrideOnly/>
-      <mssAccessorName>exp_omi_cdr_offset_lane_mask</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1375,7 +1319,6 @@
       <valueType>uint8</valueType>
       <enum>ENABLE = 0, DISABLE = 1</enum>
       <writeable/>
-      <mssAccessorName>exp_intr_mask_disable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1394,7 +1337,6 @@
       <enum>ENABLE = 0, DISABLE = 1</enum>
       <writeable/>
       <overrideOnly/>
-      <mssAccessorName>exp_i2c_fw_log_dump_disable</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1407,7 +1349,6 @@
       <valueType>uint8</valueType>
       <writeable/>
       <array> 26 </array>
-      <mssAccessorName>exp_serial_number</mssAccessorName>
     </attribute>
 
     <attribute>
@@ -1523,7 +1464,6 @@
     <default>0x400</default>
     <platInit/>
     <mrwHide/>
-    <mssAccessorName>omi_dl_preipl_prbs_time</mssAccessorName>
   </attribute>
 
 </attributes>

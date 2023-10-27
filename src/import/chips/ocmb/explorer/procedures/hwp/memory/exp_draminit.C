@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,7 +66,7 @@ extern "C"
         uint8_t l_sim = 0;
 
         // Get phy init mode attribute
-        FAPI_TRY(mss::attr::get_exp_phy_init_mode(i_target, l_phy_init_mode));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_PHY_INIT_MODE, i_target, l_phy_init_mode));
 
         // Make sure we're in range
         FAPI_ASSERT((l_phy_init_mode <= fapi2::ENUM_ATTR_MSS_OCMB_PHY_INIT_MODE_WITH_EYE_CAPTURE),

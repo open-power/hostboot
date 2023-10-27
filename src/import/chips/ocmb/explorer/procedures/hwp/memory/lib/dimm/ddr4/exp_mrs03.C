@@ -98,15 +98,18 @@ mrs03_data<mss::mc_type::EXPLORER>::mrs03_data( const fapi2::Target<fapi2::TARGE
 {
     const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-    FAPI_TRY( mss::attr::get_exp_resp_mpr_mode(l_port_target, iv_mpr_mode), "Error in mrs03_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_mpr_page(l_port_target, iv_mpr_page), "Error in mrs03_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_geardown_mode(l_port_target, iv_geardown), "Error in mrs03_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_per_dram_access(l_port_target, iv_pda), "Error in mrs03_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_temp_readout(l_port_target, iv_temp_readout), "Error in mrs03_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_MPR_MODE, l_port_target, iv_mpr_mode), "Error in mrs03_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_MPR_PAGE, l_port_target, iv_mpr_page), "Error in mrs03_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_GEARDOWN_MODE, l_port_target, iv_geardown), "Error in mrs03_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_PER_DRAM_ACCESS, l_port_target, iv_pda), "Error in mrs03_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_TEMP_READOUT, l_port_target, iv_temp_readout),
+              "Error in mrs03_data()" );
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_FINE_REFRESH_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                             iv_fine_refresh), "Error in mrs03_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_crc_wr_latency(l_port_target, iv_crc_wr_latency), "Error in mrs03_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_mpr_rd_format(l_port_target, iv_read_format), "Error in mrs03_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_CRC_WR_LATENCY, l_port_target, iv_crc_wr_latency),
+              "Error in mrs03_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_MPR_RD_FORMAT, l_port_target, iv_read_format),
+              "Error in mrs03_data()" );
 
     FAPI_INF("%s MR3 attributes: MPR_MODE: 0x%x, MPR_PAGE: 0x%x, GD: 0x%x, PDA: 0x%x, "
              "TEMP: 0x%x FR: 0x%x, CRC_WL: 0x%x, RF: 0x%x",

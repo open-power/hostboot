@@ -130,10 +130,10 @@ extern "C"
         FAPI_TRY(mss::attr::get_mnfg_edpl_threshold(l_mnfg_edpl_threshold));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT, i_target, l_poll_count) );
-        FAPI_TRY(mss::attr::get_exp_omi_cdr_bw_override(i_target, l_cdr_bw_override));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_OMI_CDR_BW_OVERRIDE, i_target, l_cdr_bw_override));
 
         // FFE Setup
-        FAPI_TRY(mss::attr::get_omi_ffe_settings_command(i_target, l_enable_ffe_settings));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_FFE_SETTINGS_COMMAND, i_target, l_enable_ffe_settings));
 
         if(!i_poll_repeat)
         {
@@ -233,7 +233,8 @@ extern "C"
         }
 
         // Save our new communication state
-        FAPI_TRY(mss::attr::set_exp_comm_state(i_target, fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_I2C_WITH_SCOM));
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_EXP_COMM_STATE, i_target,
+                                     fapi2::ENUM_ATTR_MSS_EXP_COMM_STATE_I2C_WITH_SCOM));
 
         FAPI_TRY(mss::exp::workarounds::omi::gem_menterp(i_target, l_gem_menterp_workaround));
 
@@ -255,7 +256,7 @@ extern "C"
             bool l_is_enterprise = false;
 
             // Gets the configuration information from attributes
-            FAPI_TRY(mss::attr::get_ocmb_enterprise_mode(i_target, l_enterprise_attr));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_ENTERPRISE_MODE, i_target, l_enterprise_attr));
             l_is_enterprise = (l_enterprise_attr == fapi2::ENUM_ATTR_MSS_OCMB_ENTERPRISE_MODE_ENTERPRISE);
 
             FAPI_TRY(mss::half_dimm_mode(i_target, l_is_enterprise, l_is_half_dimm));
@@ -298,8 +299,8 @@ extern "C"
         if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
         {
             // Apply override for CDR offset
-            FAPI_TRY(mss::attr::get_exp_omi_cdr_offset(i_target, l_cdr_offset));
-            FAPI_TRY(mss::attr::get_exp_omi_cdr_offset_lane_mask(i_target, l_cdr_offset_lane_mask));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET, i_target, l_cdr_offset));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK, i_target, l_cdr_offset_lane_mask));
             FAPI_TRY(mss::exp::workarounds::omi::override_cdr_offset(i_target, l_cdr_offset, l_cdr_offset_lane_mask));
         }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,7 +88,8 @@ fapi2::ReturnCode prbs_delay(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
 
     FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
 
-    FAPI_TRY(mss::attr::get_omi_dl_preipl_prbs_time(mss::find_target<fapi2::TARGET_TYPE_OMI>(i_ocmb_chip), l_prbs_time),
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_DL_PREIPL_PRBS_TIME, mss::find_target<fapi2::TARGET_TYPE_OMI>(i_ocmb_chip),
+                           l_prbs_time),
              "Error from FAPI_ATTR_GET (ATTR_OMI_DL_PREIPL_PRBS_TIME)");
     l_prbs_time_scaled = l_prbs_time * mss::common_timings::DELAY_1MS;
 
@@ -284,7 +285,7 @@ fapi2::ReturnCode override_cdr_bw_i2c(
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY(mss::attr::get_exp_fw_api_version(i_target, l_version));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_API_VERSION, i_target, l_version));
 
     if (l_version < FW_CDR_BANDWIDTH_SET_SUPPORTED)
     {
@@ -355,7 +356,7 @@ fapi2::ReturnCode override_cdr_offset(
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY(mss::attr::get_exp_fw_api_version(i_target, l_version));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_API_VERSION, i_target, l_version));
 
     if (l_version < FW_CDR_OFFSET_FROM_CAL_SET_SUPPORTED)
     {
@@ -410,7 +411,7 @@ fapi2::ReturnCode select_dl_layer_boot_mode(
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_TRY(mss::attr::get_exp_fw_api_version(i_target, l_version));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_API_VERSION, i_target, l_version));
 
     if (l_version >= DL_TRAINING_VERSION2_SUPPORTED)
     {

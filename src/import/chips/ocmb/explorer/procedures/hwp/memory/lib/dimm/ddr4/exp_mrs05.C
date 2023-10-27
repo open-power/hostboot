@@ -74,15 +74,17 @@ mrs05_data<mss::mc_type::EXPLORER>::mrs05_data( const fapi2::Target<fapi2::TARGE
     const auto l_port_target = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
     FAPI_TRY( mss::attr::get_ca_parity_latency(i_target, iv_ca_parity_latency), "Error in mrs05_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_crc_error_clear(l_port_target, iv_crc_error_clear), "Error in mrs05_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_ca_parity_error_status(l_port_target, iv_ca_parity_error_status),
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_CRC_ERROR_CLEAR, l_port_target, iv_crc_error_clear),
               "Error in mrs05_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_odt_input_buff(l_port_target, iv_odt_input_buffer), "Error in mrs05_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_CA_PARITY_ERROR_STATUS, l_port_target, iv_ca_parity_error_status),
+              "Error in mrs05_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_ODT_INPUT_BUFF, l_port_target, iv_odt_input_buffer),
+              "Error in mrs05_data()" );
     FAPI_TRY( mss::attr::get_exp_resp_dram_rtt_park(i_target, iv_rtt_park), "Error in mrs05_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_ca_parity(l_port_target, iv_ca_parity), "Error in mrs05_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_data_mask(l_port_target, iv_data_mask), "Error in mrs05_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_write_dbi(l_port_target, iv_write_dbi), "Error in mrs05_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_read_dbi(l_port_target, iv_read_dbi), "Error in mrs05_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_CA_PARITY, l_port_target, iv_ca_parity), "Error in mrs05_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_DATA_MASK, l_port_target, iv_data_mask), "Error in mrs05_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_WRITE_DBI, l_port_target, iv_write_dbi), "Error in mrs05_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_READ_DBI, l_port_target, iv_read_dbi), "Error in mrs05_data()" );
 
     o_rc = fapi2::FAPI2_RC_SUCCESS;
     return;

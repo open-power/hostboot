@@ -73,17 +73,21 @@ mrs04_data<mss::mc_type::EXPLORER>::mrs04_data( const fapi2::Target<fapi2::TARGE
     // From DDR4 Spec: 3.3 RESET and Initialization Procedure
     // PPR and soft PPR must be disabled during initialization
     // so we don't call the attribute accessor for them
-    FAPI_TRY( mss::attr::get_exp_resp_max_powerdown_mode(l_port_target, iv_max_pd_mode), "Error in mrs04_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_MAX_POWERDOWN_MODE, l_port_target, iv_max_pd_mode),
+              "Error in mrs04_data()" );
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_TEMP_REFRESH_RANGE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                             iv_temp_refresh_range), "Error in mrs04_data()" );
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_TEMP_REFRESH_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                             iv_temp_ref_mode), "Error in mrs04_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_internal_vref_monitor(l_port_target, iv_vref_mon), "Error in mrs04_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_INTERNAL_VREF_MONITOR, l_port_target, iv_vref_mon),
+              "Error in mrs04_data()" );
     FAPI_TRY( mss::attr::get_cs_cmd_latency(i_target, iv_cs_cmd_latency), "Error in mrs04_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_self_ref_abort(l_port_target, iv_ref_abort), "Error in mrs04_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_rd_preamble_train(l_port_target, iv_rd_pre_train_mode), "Error in mrs04_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_rd_preamble(l_port_target, iv_rd_preamble), "Error in mrs04_data()" );
-    FAPI_TRY( mss::attr::get_exp_resp_wr_preamble(l_port_target, iv_wr_preamble), "Error in mrs04_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_SELF_REF_ABORT, l_port_target, iv_ref_abort),
+              "Error in mrs04_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_RD_PREAMBLE_TRAIN, l_port_target, iv_rd_pre_train_mode),
+              "Error in mrs04_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_RD_PREAMBLE, l_port_target, iv_rd_preamble), "Error in mrs04_data()" );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_WR_PREAMBLE, l_port_target, iv_wr_preamble), "Error in mrs04_data()" );
 
     FAPI_INF("%s MR4 attributes: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
              "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "

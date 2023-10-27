@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -288,7 +288,7 @@ extern "C"
         constexpr uint32_t MAX_SEQUENCES = BUFFER_SIZE / DATA_PER_I2C_SEQUENCE + 1;
         uint32_t l_sequence_count = 0;
 
-        FAPI_TRY(mss::attr::get_exp_i2c_fw_log_dump_disable(i_ocmbTarget, l_disable_dump));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_I2C_FW_LOG_DUMP_DISABLE, i_ocmbTarget, l_disable_dump));
 
         if (l_disable_dump == fapi2::ENUM_ATTR_MSS_EXP_I2C_FW_LOG_DUMP_DISABLE_DISABLE)
         {

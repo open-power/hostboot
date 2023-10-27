@@ -275,9 +275,9 @@ fapi2::ReturnCode explorer_detailed_training_codes(const fapi2::Target<fapi2::TA
     uint32_t l_fw_version_a = 0;
     uint32_t l_fw_version_b = 0;
 
-    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
     if (i_error_code != fw_ddr_phy_init_status::FW_DDR_PHY_INIT_TRAINING_FAIL)
     {
@@ -400,9 +400,9 @@ fapi2::ReturnCode fw_ddr_phy_init_response_code(const fapi2::Target<fapi2::TARGE
     uint32_t l_fw_version_a = 0;
     uint32_t l_fw_version_b = 0;
 
-    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
     // If the response isn't a success check the return code
     if (l_rsp_status != omi::response_arg::RESPONSE_SUCCESS)
@@ -900,8 +900,8 @@ class phy_params
             FAPI_TRY(mss::attr::get_exp_dram_address_mirroring(i_target, iv_attrs_params.iv_addr_mirror));
             FAPI_TRY(mss::attr::get_dram_column_bits(i_target, iv_attrs_params.iv_column_width));
             FAPI_TRY(mss::attr::get_dram_row_bits(i_target, iv_attrs_params.iv_row_width));
-            FAPI_TRY(mss::attr::get_exp_spd_cl_supported(i_target, iv_attrs_params.iv_spdcl_support));
-            FAPI_TRY(mss::attr::get_exp_spd_taa_min(i_target, iv_attrs_params.iv_taa_min));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EXP_SPD_CL_SUPPORTED, i_target, iv_attrs_params.iv_spdcl_support));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EXP_SPD_TAA_MIN, i_target, iv_attrs_params.iv_taa_min));
             FAPI_TRY(mss::attr::get_four_rank_mode(i_target, iv_attrs_params.iv_rank4_mode));
             FAPI_TRY(mss::attr::get_ddp_compatibility(i_target, iv_attrs_params.iv_ddp_compatible));
             FAPI_TRY(mss::attr::get_tsv_8h_support(i_target, iv_attrs_params.iv_tsv8h));
@@ -937,9 +937,9 @@ class phy_params
             FAPI_TRY(mss::attr::get_dimm_ddr4_f0rc7x(i_target, iv_attrs_params.iv_f0rc7x));
             FAPI_TRY(mss::attr::get_dimm_ddr4_f1rc00(i_target, iv_attrs_params.iv_f1rc00));
             FAPI_TRY(mss::attr::get_exp_rcd_slew_rate(i_target, iv_attrs_params.iv_rcd_slew_rate));
-            FAPI_TRY(mss::attr::get_exp_dfimrl_clk(i_target, iv_attrs_params.iv_dfimrl_ddrclk));
-            FAPI_TRY(mss::attr::get_exp_atxdly_a(i_target, iv_attrs_params.iv_atxdly_a));
-            FAPI_TRY(mss::attr::get_exp_atxdly_b(i_target, iv_attrs_params.iv_atxdly_b));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EXP_DFIMRL_CLK, i_target, iv_attrs_params.iv_dfimrl_ddrclk));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_ATXDLY_A, i_target, iv_attrs_params.iv_atxdly_a));
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_ATXDLY_B, i_target, iv_attrs_params.iv_atxdly_b));
             FAPI_TRY(mss::attr::get_ddr4_f1rc1x(i_target, iv_attrs_params.iv_f1rc1x));
             FAPI_TRY(mss::attr::get_ddr4_f1rc2x(i_target, iv_attrs_params.iv_f1rc2x));
             FAPI_TRY(mss::attr::get_ddr4_f1rc3x(i_target, iv_attrs_params.iv_f1rc3x));

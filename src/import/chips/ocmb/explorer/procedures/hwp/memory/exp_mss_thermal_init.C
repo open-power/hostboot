@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,7 +56,7 @@ extern "C"
         uint8_t l_interval_read_dis = 0;
 
         FAPI_TRY(mss::attr::get_is_simulation(l_sim));
-        FAPI_TRY(mss::attr::get_disable_therm_init_read(i_target, l_interval_read_dis));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_DISABLE_THERM_INIT_READ, i_target, l_interval_read_dis));
 
         if (l_sim)
         {

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -130,105 +130,105 @@ fapi2::ReturnCode parse_mrs_data_attributes(const fapi2::Target<fapi2::TARGET_TY
 
         // Parse MR0 Attributes
         l_temp_attr = l_MR0.getBit<MR0_EFF_DRAM_RBT>();
-        FAPI_TRY( mss::attr::set_exp_resp_dram_rbt(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_RBT, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR0.getBit<MR0_EFF_DRAM_TM>();
-        FAPI_TRY( mss::attr::set_exp_resp_dram_tm(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_TM, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR0.getBit<MR0_EFF_DRAM_DLL_RESET>();
-        FAPI_TRY( mss::attr::set_exp_resp_dram_dll_reset(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_DLL_RESET, l_port_target, l_temp_attr) );
 
         l_temp_attr = 0;
         l_MR0.extractToRight<MR0_EFF_BURST_LENGTH, MR0_EFF_BURST_LENGTH_LEN>(l_temp_attr);
-        FAPI_TRY( mss::attr::set_exp_resp_dram_burst_length(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_BURST_LENGTH, l_port_target, l_temp_attr) );
 
         // Parse MR1 Attributes
         l_temp_attr = l_MR1.getBit<MR1_EFF_DRAM_DLL_ENABLE>();
-        FAPI_TRY( mss::attr::set_exp_resp_dram_dll_enable(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_DLL_ENABLE, l_port_target, l_temp_attr) );
 
         l_temp_attr = 0;
         l_MR1.extractToRight<MR1_EFF_DRAM_AL, MR1_EFF_DRAM_AL_LEN>(l_temp_attr);
-        FAPI_TRY( mss::attr::set_exp_resp_dram_al(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_AL, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR1.getBit<MR1_EFF_DRAM_WR_LVL_ENABLE>();
-        FAPI_TRY( mss::attr::set_exp_resp_dram_wr_lvl_enable(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_WR_LVL_ENABLE, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR1.getBit<MR1_EFF_DRAM_TDQS>();
-        FAPI_TRY( mss::attr::set_exp_resp_dram_tdqs(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_TDQS, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR1.getBit<MR1_EFF_DRAM_OUTPUT_BUFFER>();
-        FAPI_TRY( mss::attr::set_exp_resp_dram_output_buffer(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_OUTPUT_BUFFER, l_port_target, l_temp_attr) );
 
         // Parse MR2 Attributes
         l_temp_attr = 0;
         l_MR2.extractToRight<MR2_EFF_DRAM_LPASR, MR2_EFF_DRAM_LPASR_LEN>(l_temp_attr);
-        FAPI_TRY( mss::attr::set_exp_resp_dram_lpasr(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_LPASR, l_port_target, l_temp_attr) );
 
         // Parse MR3 Attributes
         l_temp_attr = 0;
         l_MR3.extractToRight<MR3_EFF_MPR_PAGE, MR3_EFF_MPR_PAGE_LEN>(l_temp_attr);
-        FAPI_TRY( mss::attr::set_exp_resp_mpr_page(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_MPR_PAGE, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR3.getBit<MR3_EFF_MPR_MODE>();
-        FAPI_TRY( mss::attr::set_exp_resp_mpr_mode(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_MPR_MODE, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR3.getBit<MR3_EFF_GEARDOWN_MODE>();
-        FAPI_TRY( mss::attr::set_exp_resp_geardown_mode(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_GEARDOWN_MODE, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR3.getBit<MR3_EFF_PER_DRAM_ACCESS>();
-        FAPI_TRY( mss::attr::set_exp_resp_per_dram_access(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_PER_DRAM_ACCESS, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR3.getBit<MR3_EFF_TEMP_READOUT>();
-        FAPI_TRY( mss::attr::set_exp_resp_temp_readout(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_TEMP_READOUT, l_port_target, l_temp_attr) );
 
         l_temp_attr = 0;
         l_MR3.extractToRight<MR3_EFF_CRC_WR_LATENCY, MR3_EFF_CRC_WR_LATENCY_LEN>(l_temp_attr);
-        FAPI_TRY( mss::attr::set_exp_resp_crc_wr_latency(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_CRC_WR_LATENCY, l_port_target, l_temp_attr) );
 
         l_temp_attr = 0;
         l_MR3.extractToRight<MR3_EFF_MPR_RD_FORMAT, MR3_EFF_MPR_RD_FORMAT_LEN>(l_temp_attr);
-        FAPI_TRY( mss::attr::set_exp_resp_mpr_rd_format(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_MPR_RD_FORMAT, l_port_target, l_temp_attr) );
 
         // Parse MR4 Attributes
         l_temp_attr = l_MR4.getBit<MR4_EFF_MAX_POWERDOWN_MODE>();
-        FAPI_TRY( mss::attr::set_exp_resp_max_powerdown_mode(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_MAX_POWERDOWN_MODE, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR4.getBit<MR4_EFF_INTERNAL_VREF_MONITOR>();
-        FAPI_TRY( mss::attr::set_exp_resp_internal_vref_monitor(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_INTERNAL_VREF_MONITOR, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR4.getBit<MR4_EFF_SELF_REF_ABORT>();
-        FAPI_TRY( mss::attr::set_exp_resp_self_ref_abort(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_SELF_REF_ABORT, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR4.getBit<MR4_EFF_RD_PREAMBLE_TRAIN>();
-        FAPI_TRY( mss::attr::set_exp_resp_rd_preamble_train(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_RD_PREAMBLE_TRAIN, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR4.getBit<MR4_EFF_RD_PREAMBLE>();
-        FAPI_TRY( mss::attr::set_exp_resp_rd_preamble(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_RD_PREAMBLE, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR4.getBit<MR4_EFF_WR_PREAMBLE>();
-        FAPI_TRY( mss::attr::set_exp_resp_wr_preamble(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_WR_PREAMBLE, l_port_target, l_temp_attr) );
 
         // Parse MR5 Attributes
         l_temp_attr = l_MR5.getBit<MR5_EFF_CRC_ERROR_CLEAR>();
-        FAPI_TRY( mss::attr::set_exp_resp_crc_error_clear(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_CRC_ERROR_CLEAR, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR5.getBit<MR5_EFF_CA_PARITY_ERROR_STATUS>();
-        FAPI_TRY( mss::attr::set_exp_resp_ca_parity_error_status(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_CA_PARITY_ERROR_STATUS, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR5.getBit<MR5_EFF_ODT_INPUT_BUFF>();
-        FAPI_TRY( mss::attr::set_exp_resp_odt_input_buff(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_ODT_INPUT_BUFF, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR5.getBit<MR5_EFF_CA_PARITY>();
-        FAPI_TRY( mss::attr::set_exp_resp_ca_parity(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_CA_PARITY, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR5.getBit<MR5_EFF_DATA_MASK>();
-        FAPI_TRY( mss::attr::set_exp_resp_data_mask(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DATA_MASK, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR5.getBit<MR5_EFF_WRITE_DBI>();
-        FAPI_TRY( mss::attr::set_exp_resp_write_dbi(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_WRITE_DBI, l_port_target, l_temp_attr) );
 
         l_temp_attr = l_MR5.getBit<MR5_EFF_READ_DBI>();
-        FAPI_TRY( mss::attr::set_exp_resp_read_dbi(l_port_target, l_temp_attr) );
+        FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_READ_DBI, l_port_target, l_temp_attr) );
 
         // Parse rank based MRs
         // Note: we're only parsing for existing ranks

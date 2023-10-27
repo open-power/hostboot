@@ -118,8 +118,8 @@ fapi2::ReturnCode ffe_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
     uint32_t l_pre_cursor = 0;
     uint32_t l_post_cursor = 0;
 
-    FAPI_TRY(mss::attr::get_omi_ffe_pre_cursor(i_target, l_pre_cursor));
-    FAPI_TRY(mss::attr::get_omi_ffe_post_cursor(i_target, l_post_cursor));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_FFE_PRE_CURSOR, i_target, l_pre_cursor));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_FFE_POST_CURSOR, i_target, l_post_cursor));
 
     FAPI_ASSERT((l_pre_cursor + l_post_cursor) < MAX_CURSOR_SUM,
                 fapi2::MSS_FFE_CURSOR_OVERFLOW().
@@ -237,19 +237,19 @@ fapi2::ReturnCode setup_fw_boot_config( const fapi2::Target<fapi2::TARGET_TYPE_O
     const auto& l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
 
     // Read the EXP_FW_BOOT_CONFIG from the attributes
-    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_adaptation_mode(i_target, l_adaptation_mode));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_ADAPTATION_MODE, i_target, l_adaptation_mode));
 
-    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_fw_mode(i_target, l_fw_mode));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_FW_MODE, i_target, l_fw_mode));
 
-    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_opencapi_loopback_test(i_target, l_loopback_test));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_OPENCAPI_LOOPBACK_TEST, i_target, l_loopback_test));
 
-    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_transport_layer(i_target, l_transport_layer));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_TRANSPORT_LAYER, i_target, l_transport_layer));
 
-    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_dl_layer_boot_mode(i_target, l_dl_layer_boot_mode));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DL_LAYER_BOOT_MODE, i_target, l_dl_layer_boot_mode));
 
-    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_dfe_disable(i_target, l_dfe_disable));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_DFE_DISABLE, i_target, l_dfe_disable));
 
-    FAPI_TRY(mss::attr::get_ocmb_exp_boot_config_lane_mode(i_target, l_lane_mode));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_EXP_BOOT_CONFIG_LANE_MODE, i_target, l_lane_mode));
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
 

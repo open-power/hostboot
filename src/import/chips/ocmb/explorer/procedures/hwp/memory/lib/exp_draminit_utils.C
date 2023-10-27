@@ -64,9 +64,9 @@ fapi2::ReturnCode check_rsp_data_size(
     uint32_t l_fw_version_a = 0;
     uint32_t l_fw_version_b = 0;
 
-    FAPI_TRY(mss::attr::get_exp_fw_partition_id(i_target, l_partition_id));
-    FAPI_TRY(mss::attr::get_exp_fw_version_a(i_target, l_fw_version_a));
-    FAPI_TRY(mss::attr::get_exp_fw_version_b(i_target, l_fw_version_b));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_PARTITION_ID, i_target, l_partition_id));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_A, i_target, l_fw_version_a));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_FW_VERSION_B, i_target, l_fw_version_b));
 
     switch (i_mode)
     {

@@ -943,7 +943,7 @@ class base_0_3 : public base
 
             FAPI_TRY(mss::gen::ddr4::get_supported_cas_latencies(iv_dimm, i_spd, get_spd_revision(), l_field))
 
-            FAPI_TRY(mss::attr::set_exp_spd_cl_supported(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EXP_SPD_CL_SUPPORTED, iv_port, l_field));
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -1479,7 +1479,7 @@ class base_0_3 : public base
 
             l_field = spd::ddr4::calc_timing_from_timebase(l_timing_mtb, l_mtb, l_timing_ftb, l_ftb);
 
-            FAPI_TRY(mss::attr::set_exp_spd_taa_min(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_EXP_SPD_TAA_MIN, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -2447,7 +2447,7 @@ class base_0_3 : public base
             std::copy( i_spd.begin() + DF::SERIAL_NUMBER_BYTE0, i_spd.begin() + DF::SERIAL_NUMBER_BYTE0 + DF::SERIAL_NUMBER_LEN,
                        std::begin(l_attr) );
 
-            FAPI_TRY(mss::attr::set_exp_serial_number(iv_ocmb, l_attr));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_SERIAL_NUMBER, iv_ocmb, l_attr));
 
         fapi_try_exit:
             return fapi2::current_err;

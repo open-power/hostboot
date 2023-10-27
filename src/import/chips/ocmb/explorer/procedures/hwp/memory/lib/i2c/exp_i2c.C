@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,7 +181,7 @@ fapi2::ReturnCode save_fw_api_version(const fapi2::Target<fapi2::TARGET_TYPE_OCM
               MSSTARGID, l_version);
 
 #ifndef __PPE__
-    FAPI_TRY(mss::attr::set_exp_fw_api_version(i_target, l_version));
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_FW_API_VERSION, i_target, l_version));
 #endif
 
 fapi_try_exit:

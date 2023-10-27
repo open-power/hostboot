@@ -73,7 +73,7 @@ fapi2::ReturnCode update_lpasr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
 
     o_update_needed = false;
 
-    FAPI_TRY(mss::attr::get_exp_resp_dram_lpasr(i_target, l_lpasr_from_exp_resp));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_RESP_DRAM_LPASR, i_target, l_lpasr_from_exp_resp));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_REFRESH_RATE_REQUEST, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                            l_refresh_rate_request));
 
@@ -103,7 +103,7 @@ fapi2::ReturnCode update_lpasr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
     if (l_lpasr != l_lpasr_from_exp_resp)
     {
         o_update_needed = true;
-        FAPI_TRY(mss::attr::set_exp_resp_dram_lpasr(i_target, l_lpasr));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MSS_EXP_RESP_DRAM_LPASR, i_target, l_lpasr));
     }
 
 fapi_try_exit:
