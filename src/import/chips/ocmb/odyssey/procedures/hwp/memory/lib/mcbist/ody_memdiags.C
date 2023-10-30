@@ -66,7 +66,7 @@ fapi2::ReturnCode update_bad_bits<mss::mc_type::ODYSSEY>( const fapi2::Target<fa
         FAPI_TRY(l_rc);
 
         // Record the bad bits data into our attribute and SPD
-        FAPI_TRY(mss::record_bad_bits(i_target, l_interface));
+        FAPI_TRY(mss::record_bad_bits(l_dimm, l_interface));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

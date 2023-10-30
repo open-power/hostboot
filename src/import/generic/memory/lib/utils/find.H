@@ -80,7 +80,13 @@ static inline std::vector< fapi2::Target<M> > find_targets_impl( const fapi2::Ta
         std::true_type,
         fapi2::TargetState i_state )
 {
+#ifndef __PPE__
     return std::vector< fapi2::Target<M> > {i_target};
+#else
+    std::vector< fapi2::Target<M> > l_vec;
+    l_vec.push_back(i_target);
+    return l_vec;
+#endif
 }
 
 ///
