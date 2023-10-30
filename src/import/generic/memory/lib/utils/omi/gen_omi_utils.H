@@ -41,6 +41,9 @@
 #include <generic/memory/lib/utils/omi/gen_omi_traits.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
+#ifdef __PPE__
+    #include <ody_fifo.H>
+#endif
 
 
 namespace mss
@@ -71,6 +74,7 @@ inline fapi2::ReturnCode setup_obj_handles(const fapi2::Target<fapi2::TARGET_TYP
 
     FAPI_DBG(TARGTIDFORMAT " Setting up OMI object handles in TLXT_TLXTINTHLD", TARGTID);
 
+#ifndef __PPE__
     FAPI_TRY( fapi2::putScom(i_target, TT::TLXT_TLXTINTHLD0, l_checkstop_obj_handle),
               "Error writing TLXT_TLXTINTHLD0 on " TARGTIDFORMAT, TARGTID );
     FAPI_TRY( fapi2::putScom(i_target, TT::TLXT_TLXTINTHLD1, l_recov_obj_handle),
@@ -79,6 +83,16 @@ inline fapi2::ReturnCode setup_obj_handles(const fapi2::Target<fapi2::TARGET_TYP
               "Error writing TLXT_TLXTINTHLD2 on " TARGTIDFORMAT, TARGTID );
     FAPI_TRY( fapi2::putScom(i_target, TT::TLXT_TLXTINTHLD3, l_appintr_obj_handle),
               "Error writing TLXT_TLXTINTHLD3 on " TARGTIDFORMAT, TARGTID );
+#else
+    FAPI_TRY( ody_put_scom(i_target, TT::TLXT_TLXTINTHLD0, l_checkstop_obj_handle),
+              "Error writing TLXT_TLXTINTHLD0 on " TARGTIDFORMAT, TARGTID );
+    FAPI_TRY( ody_put_scom(i_target, TT::TLXT_TLXTINTHLD1, l_recov_obj_handle),
+              "Error writing TLXT_TLXTINTHLD1 on " TARGTIDFORMAT, TARGTID );
+    FAPI_TRY( ody_put_scom(i_target, TT::TLXT_TLXTINTHLD2, l_specattn_obj_handle),
+              "Error writing TLXT_TLXTINTHLD2 on " TARGTIDFORMAT, TARGTID );
+    FAPI_TRY( ody_put_scom(i_target, TT::TLXT_TLXTINTHLD3, l_appintr_obj_handle),
+              "Error writing TLXT_TLXTINTHLD3 on " TARGTIDFORMAT, TARGTID );
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -99,10 +113,15 @@ inline fapi2::ReturnCode setup_int_cmd_flags(const fapi2::Target<fapi2::TARGET_T
 
     fapi2::buffer<uint64_t> l_data;
 
-    FAPI_DBG("%s Setting up OMI interrupt command flags in TLXT_REGS_TLXCFG1", mss::c_str(i_target));
+    FAPI_DBG(TARGTIDFORMAT" Setting up OMI interrupt command flags in TLXT_REGS_TLXCFG1", TARGTID);
 
+#ifndef __PPE__
     FAPI_TRY( fapi2::getScom(i_target, TT::TLXT_REGS_TLXCFG1, l_data),
               "Error reading TLXT_TLXCFG1 on %s", mss::c_str(i_target));
+#else
+    FAPI_TRY( ody_get_scom(i_target, TT::TLXT_REGS_TLXCFG1, l_data),
+              "Error reading TLXT_TLXCFG1 on " TARGTIDFORMAT, TARGTID);
+#endif
     l_data.insertFromRight<TT::TLXT_REGS_TLXCFG1_TLXT_INTRP_CMDFLAG_0,
                            TT::TLXT_REGS_TLXCFG1_TLXT_INTRP_CMDFLAG_0_LEN>(CHECKSTOP_COMMAND_FLAG);
     l_data.insertFromRight<TT::TLXT_REGS_TLXCFG1_TLXT_INTRP_CMDFLAG_1,
@@ -111,8 +130,13 @@ inline fapi2::ReturnCode setup_int_cmd_flags(const fapi2::Target<fapi2::TARGET_T
                            TT::TLXT_REGS_TLXCFG1_TLXT_INTRP_CMDFLAG_2_LEN>(SPECATTN_COMMAND_FLAG);
     l_data.insertFromRight<TT::TLXT_REGS_TLXCFG1_TLXT_INTRP_CMDFLAG_3,
                            TT::TLXT_REGS_TLXCFG1_TLXT_INTRP_CMDFLAG_3_LEN>(APPINTR_COMMAND_FLAG);
+#ifndef __PPE__
     FAPI_TRY( fapi2::putScom(i_target, TT::TLXT_REGS_TLXCFG1, l_data),
               "Error writing TLXT_TLXCFG1 on %s", mss::c_str(i_target));
+#else
+    FAPI_TRY( ody_put_scom(i_target, TT::TLXT_REGS_TLXCFG1, l_data),
+              "Error writing TLXT_TLXCFG1 on " TARGTIDFORMAT, TARGTID);
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -134,7 +158,11 @@ inline fapi2::ReturnCode check_mfir_actag_pasid_cfg(const fapi2::Target<fapi2::T
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     // Reading from the register into l_reg_data
+#ifndef __PPE__
     FAPI_TRY(fapi2::getScom(i_target, TT::MMIO_MFIR_RW_WCLEAR, l_reg_data));
+#else
+    FAPI_TRY(ody_get_scom(i_target, TT::MMIO_MFIR_RW_WCLEAR, l_reg_data));
+#endif
 
 
     FAPI_ASSERT(!l_reg_data.getBit<TT::ACTAG_PASID_CFG_ERR>(),

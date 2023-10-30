@@ -31,14 +31,12 @@
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team:
 // *HWP Level: 2
-// *HWP Consumed by: HB
+// *HWP Consumed by: HB/SPPE
 
 #include <fapi2.H>
 #include <ody_omi_init.H>
 #include <ody_oc_regs.H>
 #include <chipids.H>
-#include <mss_odyssey_attribute_getters.H>
-#include <mss_odyssey_attribute_setters.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
@@ -46,9 +44,13 @@
 #include <generic/memory/lib/utils/omi/gen_omi_utils.H>
 #include <lib/omi/ody_system_specific_omi.H>
 #include <lib/omi/ody_omi_traits.H>
-#include <lib/inband/ody_inband.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
-
+#include <generic/memory/lib/utils/c_str.H>
+#ifndef __PPE__
+    #include <lib/inband/ody_inband.H>
+#else
+    #include <ody_fifo.H>
+#endif
 namespace ody
 {
 
@@ -65,8 +67,13 @@ fapi2::ReturnCode omiDeviceVerify(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     fapi2::buffer<uint32_t> l_data;
 
     constexpr uint32_t EXPECTED = (POWER_OCID::ODYSSEY << 16) | (POWER_OCID::VENDOR_IBM);
-
+#ifdef __PPE__
+    fapi2::buffer<uint64_t> l_scom;
+    FAPI_TRY(ody_get_scom(i_target, scomt::ody::ODC_MMIO_O0MBIT_O0DID, l_scom));
+    l_scom.extractToRight<32, 32>(l_data);
+#else
     FAPI_TRY(mss::ody::ib::getOCCfg(i_target, ODY_OC_O0MBIT_O0DID_LSB, l_data));
+#endif
 
     FAPI_ASSERT(l_data == EXPECTED,
                 fapi2::OCMB_IS_NOT_ODYSSEY()
@@ -97,6 +104,9 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
     //Expected dnstream 0,1,4 to OCMB
     //Expected upstream 0,5,9 to P10/P11, or host
     fapi2::buffer<uint32_t> l_data;
+#ifdef __PPE__
+    fapi2::buffer<uint64_t> l_scom;
+#endif
     fapi2::ATTR_ODY_ENABLE_US_TMPL_1_Type l_enable_tmpl_1;
     fapi2::ATTR_ODY_ENABLE_US_TMPL_5_Type l_enable_tmpl_5;
     fapi2::ATTR_ODY_ENABLE_US_TMPL_9_Type l_enable_tmpl_9;
@@ -105,18 +115,17 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
     fapi2::ATTR_ODY_TMPL_1_PACING_Type l_tmpl_1_pacing;
     fapi2::ATTR_ODY_TMPL_5_PACING_Type l_tmpl_5_pacing;
     fapi2::ATTR_ODY_TMPL_9_PACING_Type l_tmpl_9_pacing;
-    uint8_t l_us_only_0159;
+    uint8_t l_us_only_0159 = 0;
     fapi2::ATTR_ODY_TMPL_B_PACING_Type l_tmpl_b_pacing;
-
 
     auto const& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
                          .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
     FAPI_TRY(mss::omi::get_us_template_support(l_proc, l_us_only_0159));
-    FAPI_TRY(mss::attr::get_ody_enable_us_tmpl_1(i_target, l_enable_tmpl_1));
-    FAPI_TRY(mss::attr::get_ody_enable_us_tmpl_5(i_target, l_enable_tmpl_5));
-    FAPI_TRY(mss::attr::get_ody_enable_us_tmpl_9(i_target, l_enable_tmpl_9));
-    FAPI_TRY(mss::attr::get_ody_enable_us_tmpl_b(i_target, l_enable_tmpl_b));
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_ENABLE_US_TMPL_1, i_target, l_enable_tmpl_1) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_ENABLE_US_TMPL_5, i_target, l_enable_tmpl_5) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_ENABLE_US_TMPL_9, i_target, l_enable_tmpl_9) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_ENABLE_US_TMPL_B, i_target, l_enable_tmpl_b) );
 
     FAPI_ASSERT(!l_us_only_0159 || !l_enable_tmpl_b,
                 fapi2::PROC_DOES_NOT_SUPPORT_US_B()
@@ -127,11 +136,11 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
                 GENTARGTIDFORMAT " Upstream template B requested, but not supported by proc. EN_TMPL_B: %u, CHIP_EC_TMPL_0159: %u",
                 GENTARGTID(l_proc), l_enable_tmpl_b, l_us_only_0159);
 
-    FAPI_TRY(mss::attr::get_ody_tmpl_0_pacing(i_target, l_tmpl_0_pacing));
-    FAPI_TRY(mss::attr::get_ody_tmpl_1_pacing(i_target, l_tmpl_1_pacing));
-    FAPI_TRY(mss::attr::get_ody_tmpl_5_pacing(i_target, l_tmpl_5_pacing));
-    FAPI_TRY(mss::attr::get_ody_tmpl_9_pacing(i_target, l_tmpl_9_pacing));
-    FAPI_TRY(mss::attr::get_ody_tmpl_b_pacing(i_target, l_tmpl_b_pacing));
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_TMPL_0_PACING, i_target, l_tmpl_0_pacing) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_TMPL_1_PACING, i_target, l_tmpl_1_pacing) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_TMPL_5_PACING, i_target, l_tmpl_5_pacing) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_TMPL_9_PACING, i_target, l_tmpl_9_pacing) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_TMPL_B_PACING, i_target, l_tmpl_b_pacing) );
 
     l_data.setBit<ODY_OC_OTTCFG_MSB_TEMPLATE_0>(); //Template 0
 
@@ -144,8 +153,14 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
     l_data.writeBit<ODY_OC_OTTCFG_MSB_TEMPLATE_11>
     (l_enable_tmpl_b == fapi2::ENUM_ATTR_ODY_ENABLE_US_TMPL_B_ENABLED); //Template B
 
-
+#ifdef __PPE__
+    FAPI_TRY(ody_get_scom(i_target, scomt::ody::ODC_MMIO_OTTCFG, l_scom));
+    l_scom.insertFromRight<0, 32>(l_data);
+    FAPI_TRY(ody_put_scom(i_target, scomt::ody::ODC_MMIO_OTTCFG, l_scom));
+    l_scom.flush<0>();
+#else
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_OTTCFG_MSB, l_data));
+#endif
 
     //Update template pacing
     l_data.flush<0>();
@@ -167,7 +182,11 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
         FAPI_DBG("Upstream template 5 enabled with pacing %X", l_tmpl_5_pacing);
     }
 
+#ifdef __PPE__
+    l_scom.insertFromRight<0, 32>(l_data);
+#else
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_OTRCFG76_MSB, l_data));
+#endif
 
     l_data.flush<0>();
 
@@ -185,7 +204,12 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
         FAPI_DBG("Upstream template B enabled with pacing %X", l_tmpl_b_pacing);
     }
 
+#ifdef __PPE__
+    l_scom.insertFromRight<32, 32>(l_data);
+    FAPI_TRY(ody_put_scom(i_target, scomt::ody::ODC_MMIO_OTRCFG76, l_scom));
+#else
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_OTRCFG76_LSB, l_data));
+#endif
 
 fapi_try_exit:
 
@@ -204,6 +228,9 @@ fapi_try_exit:
 fapi2::ReturnCode omiTLVersionShortBackOff(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     fapi2::buffer<uint32_t> l_data;
+#ifdef __PPE__
+    fapi2::buffer<uint64_t> l_scom;
+#endif
     fapi2::buffer<uint8_t> l_short_backoff;
     fapi2::ATTR_PROC_OMI_OC_MAJOR_VER_Type l_proc_oc_major;
     fapi2::ATTR_PROC_OMI_OC_MINOR_VER_Type l_proc_oc_minor;
@@ -211,7 +238,7 @@ fapi2::ReturnCode omiTLVersionShortBackOff(const fapi2::Target<fapi2::TARGET_TYP
     auto const& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
                          .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
 
-    FAPI_TRY(mss::attr::get_ody_shrt_backoff_timer(i_target, l_short_backoff));
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_SHRT_BACKOFF_TIMER, i_target, l_short_backoff) );
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_OMI_OC_MAJOR_VER,
                            l_proc,
                            l_proc_oc_major));
@@ -229,7 +256,13 @@ fapi2::ReturnCode omiTLVersionShortBackOff(const fapi2::Target<fapi2::TARGET_TYP
     l_data.insertFromRight<ODY_OC_OVERCFG_LSB_SHORT_BACK_OFF_TIMER,
                            ODY_OC_OVERCFG_LSB_SHORT_BACK_OFF_TIMER_LEN>(l_short_backoff);
 
+#ifdef __PPE__
+    FAPI_TRY(ody_get_scom(i_target, scomt::ody::ODC_MMIO_OVERCFG, l_scom));
+    l_scom.insertFromRight<32, 32>(l_data);
+    FAPI_TRY(ody_put_scom(i_target, scomt::ody::ODC_MMIO_OVERCFG, l_scom));
+#else
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_OVERCFG_LSB, l_data));
+#endif
 
 fapi_try_exit:
 
@@ -316,6 +349,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
+#ifndef __PPE__
     //Expected dnstream 0,1,4 to OCMB
     //Expected upstream 0,5,9 to P10
     fapi2::buffer<uint32_t> l_data;
@@ -329,14 +363,12 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
     fapi2::ATTR_PROC_TMPL_7_PACING_Type l_tmpl_7_pace;
     fapi2::ATTR_PROC_TMPL_A_PACING_Type l_tmpl_A_pace;
     uint8_t l_tmp = 0x0;
-    uint8_t l_ds_only_0147;
-
-    const auto& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
-                         .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
-
+    uint8_t l_ds_only_0147 = 0;
     const auto& l_mcc_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
                                .getParent<fapi2::TARGET_TYPE_MCC>();
 
+    const auto& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
+                         .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
     FAPI_TRY(mss::omi::get_ds_template_support(l_proc, l_ds_only_0147));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_1,
                            l_mcc_target,
@@ -366,7 +398,6 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
                 .set_OCMB_TARGET(i_target),
                 GENTARGTIDFORMAT " Downstream template A requested, but not supported by proc. EN_TMPL_A: %u CHIP_EC_TMPL_0147: %u",
                 GENTARGTID(l_proc), l_enable_tmpl_A, l_ds_only_0147);
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_TMPL_0_PACING,
                            l_mcc_target,
                            l_tmpl_0_pace),
@@ -419,8 +450,6 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
                              l_mcc_target,
                              l_tmp       ) );
 
-
-
     FAPI_TRY(mss::ody::ib::getOCCfg(i_target, ODY_OC_ORRCAP76_MSB, l_data));
 
     FAPI_TRY(omiCheckSupportedPacing(l_data, ODY_OC_ORRCAP76_MSB_TEMPLATE_0,
@@ -459,7 +488,8 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_PROC_TMPL_A_PACING,
                            l_mcc_target,
                            l_tmp ));
-
+#endif
+    return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
 
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
@@ -475,11 +505,10 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode omiSetMMIOEnableBAR(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    uint8_t l_addrbit;
     fapi2::buffer<uint32_t> l_value;
-
-    const auto& l_mcc_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
-                               .getParent<fapi2::TARGET_TYPE_MCC>();
+#ifndef __PPE__
+    uint8_t l_addrbit;
+    const auto& l_mcc_target = mss::find_target<fapi2::TARGET_TYPE_MCC>(i_target);
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_DSTLCFG_MMIO_ADDRBIT_POS,
                            l_mcc_target,
@@ -491,11 +520,21 @@ fapi2::ReturnCode omiSetMMIOEnableBAR(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     l_value.flush<0>();
     FAPI_TRY(l_value.setBit(63 - (43 + l_addrbit)));
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_O1BAR0_MSB, l_value));
-
-    //Enable the bar
     FAPI_TRY(mss::ody::ib::getOCCfg(i_target, ODY_OC_O1MBIT_O1DID_MSB, l_value));
     l_value.setBit<ODY_OC_O1MBIT_O1DID_MSB_MEMORY_SPACE>();
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_O1MBIT_O1DID_MSB, l_value));
+#else
+    fapi2::buffer<uint64_t> l_scom;
+    l_value = 0x03;
+    FAPI_TRY(ody_get_scom(i_target, scomt::ody::ODC_MMIO_O1BAR0, l_scom));
+    l_scom.insertFromRight<0, 32>(l_value);
+    FAPI_TRY(ody_put_scom(i_target, scomt::ody::ODC_MMIO_O1BAR0, l_scom));
+
+    //Enable the bar
+    FAPI_TRY(ody_get_scom(i_target, scomt::ody::ODC_MMIO_O1MBIT_O1DID, l_scom));
+    l_scom.setBit<scomt::ody::ODC_MMIO_O1MBIT_O1DID_MEMORY_SPACE>();
+    FAPI_TRY(ody_put_scom(i_target, scomt::ody::ODC_MMIO_O1MBIT_O1DID, l_scom));
+#endif
 
 fapi_try_exit:
 
@@ -520,15 +559,22 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
     fapi2::buffer<uint32_t> l_value;
     fapi2::buffer<uint32_t> l_afu_actag_len_supported;
     fapi2::buffer<uint32_t> l_pasid_len_supported;
-
-    FAPI_TRY(mss::attr::get_ody_metadata_enable(i_target, l_meta_data_ena));
-    FAPI_TRY(mss::attr::get_ody_pasid_base(i_target, l_pasid_base));
-    FAPI_TRY(mss::attr::get_ody_actag_base(i_target, l_actag_base));
-    FAPI_TRY(mss::attr::get_ody_afu_actag_len(i_target, l_afu_actag_len));
-    FAPI_TRY(mss::attr::get_ody_pasid_len(i_target, l_pasid_len));
+#ifdef __PPE__
+    fapi2::buffer<uint64_t> l_scom;
+#endif
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_METADATA_ENABLE, i_target, l_meta_data_ena) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_PASID_BASE, i_target, l_pasid_base) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_ACTAG_BASE, i_target, l_actag_base) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_AFU_ACTAG_LEN, i_target, l_afu_actag_len) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_PASID_LEN, i_target, l_pasid_len) );
 
     //Set PASID Base and enable metadata
+#ifdef __PPE__
+    FAPI_TRY(ody_get_scom(i_target, scomt::ody::ODC_MMIO_OCTRLPID, l_scom));
+    l_scom.extractToRight<0, 32>(l_value);
+#else
     FAPI_TRY(mss::ody::ib::getOCCfg(i_target, ODY_OC_OCTRLPID_MSB, l_value));
+#endif
     FAPI_TRY(omiCheckSupportedBit(l_value,
                                   ODY_OC_OCTRLPID_MSB_METADATA_SUPPORTED,
                                   l_meta_data_ena,
@@ -539,12 +585,12 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
     {
         uint8_t l_enable_template_5 = 0;
         uint8_t l_enable_template_9 = 0;
+#ifndef __PPE__
         uint8_t l_enable_template_4 = 0;
-
         const auto& l_mcc = mss::find_target<fapi2::TARGET_TYPE_MCC>(i_target);
-
-        FAPI_TRY(mss::attr::get_ody_enable_us_tmpl_5(i_target, l_enable_template_5));
-        FAPI_TRY(mss::attr::get_ody_enable_us_tmpl_9(i_target, l_enable_template_9));
+#endif
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_ENABLE_US_TMPL_5, i_target, l_enable_template_5) );
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_ENABLE_US_TMPL_9, i_target, l_enable_template_9) );
 
         FAPI_ASSERT((l_enable_template_5 == fapi2::ENUM_ATTR_ODY_ENABLE_US_TMPL_5_ENABLED) ||
                     (l_enable_template_9 == fapi2::ENUM_ATTR_ODY_ENABLE_US_TMPL_9_ENABLED),
@@ -557,7 +603,7 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
                     GENTARGTID(i_target),
                     l_enable_template_5,
                     l_enable_template_9)
-
+#ifndef __PPE__
         // Check for downstream template 4 as well. We won't bomb out here, just have an error printout if not enabled
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_4, l_mcc, l_enable_template_4),
                  "Error from FAPI_ATTR_GET (ATTR_PROC_ENABLE_DL_TMPL_4)");
@@ -568,6 +614,8 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
                      " Expected MCC TMPL_4 to be enabled for metadata enabling. Was not enabled: may be incorrectly configured",
                      GENTARGTID(i_target));
         }
+
+#endif
     }
 
     l_value.insertFromRight<ODY_OC_OCTRLPID_MSB_METADATA_ENABLED,
@@ -576,11 +624,19 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
     l_value.insertFromRight<ODY_OC_OCTRLPID_MSB_PASID_BASE,
                             ODY_OC_OCTRLPID_MSB_PASID_BASE_LEN>
                             (l_pasid_base);
-    FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_OCTRLPID_MSB, l_value));
 
+#ifdef __PPE__
+    l_scom.insertFromRight<0, 32>(l_value);
+#else
+    FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_OCTRLPID_MSB, l_value));
+#endif
 
     //Establish PASID supported, check expected, set enabled.
+#ifdef __PPE__
+    l_scom.extractToRight<32, 32>(l_value);
+#else
     FAPI_TRY(mss::ody::ib::getOCCfg(i_target, ODY_OC_OCTRLPID_LSB, l_value));
+#endif
 
     FAPI_TRY(l_value.extractToRight<uint32_t>(l_pasid_len_supported, ODY_OC_OCTRLPID_LSB_PASID_LENGTH_SUPPORTED,
              ODY_OC_OCTRLPID_LSB_PASID_LENGTH_SUPPORTED_LEN));
@@ -596,10 +652,20 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
     l_value.insertFromRight<ODY_OC_OCTRLPID_LSB_PASID_LENGTH_ENABLED,
                             ODY_OC_OCTRLPID_LSB_PASID_LENGTH_ENABLED_LEN>
                             (l_pasid_len);
+#ifdef __PPE__
+    l_scom.insertFromRight<32, 32>(l_value);
+    FAPI_TRY(ody_put_scom(i_target, scomt::ody::ODC_MMIO_OCTRLPID, l_scom));
+#else
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_OCTRLPID_LSB, l_value));
+#endif
 
     //Establish supported AFU ACTAG length, check expected, set
+#ifdef __PPE__
+    FAPI_TRY(ody_get_scom(i_target, scomt::ody::ODC_MMIO_OCTRLTAG, l_scom));
+    l_scom.extractToRight<32, 32>(l_value);
+#else
     FAPI_TRY(mss::ody::ib::getOCCfg(i_target, ODY_OC_OCTRLTAG_LSB, l_value));
+#endif
 
     FAPI_TRY(l_value.extractToRight<uint32_t>(l_afu_actag_len_supported,
              ODY_OC_OCTRLTAG_LSB_AFU_ACTAG_LENGTH_SUPPORTED,
@@ -616,19 +682,35 @@ fapi2::ReturnCode omiSetACTagPASIDMetaData(const fapi2::Target<fapi2::TARGET_TYP
     l_value.insertFromRight<ODY_OC_OCTRLTAG_LSB_AFU_ACTAG_LENGTH_ENABLED,
                             ODY_OC_OCTRLTAG_LSB_AFU_ACTAG_LENGTH_ENABLED_LEN>
                             (l_afu_actag_len);
+
+#ifdef __PPE__
+    l_scom.insertFromRight<32, 32>(l_value);
+    FAPI_TRY(ody_put_scom(i_target, scomt::ody::ODC_MMIO_OCTRLTAG, l_scom));
+#else
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_OCTRLTAG_LSB, l_value));
+#endif
 
     //Write the Functions actag length.  There's only 1 AFU so set
     //the function the same as the AFU.
     //(Note: on explorer this causes it to send a assign_acTag to the host)
+#ifdef __PPE__
+    FAPI_TRY(ody_get_scom(i_target, scomt::ody::ODC_MMIO_O1ACTAG_O1FNID, l_scom));
+    l_scom.extractToRight<0, 32>(l_value);
+#else
     FAPI_TRY(mss::ody::ib::getOCCfg(i_target, ODY_OC_O1ACTAG_O1FNID_MSB, l_value));
+#endif
     l_value.insertFromRight<ODY_OC_O1ACTAG_O1FNID_MSB_ACTAG_LENGTH,
                             ODY_OC_O1ACTAG_O1FNID_MSB_ACTAG_LENGTH_LEN>
                             (l_afu_actag_len);
     l_value.insertFromRight<ODY_OC_O1ACTAG_O1FNID_MSB_ACTAG_BASE,
                             ODY_OC_O1ACTAG_O1FNID_MSB_ACTAG_BASE_LEN>
                             (l_actag_base);
+#ifdef __PPE__
+    l_scom.insertFromRight<0, 32>(l_value);
+    FAPI_TRY(ody_put_scom(i_target, scomt::ody::ODC_MMIO_O1ACTAG_O1FNID, l_scom));
+#else
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_O1ACTAG_O1FNID_MSB, l_value));
+#endif
 
     // Check that acTAG and PASID config is valid
     FAPI_TRY(mss::check::check_mfir_actag_pasid_cfg<mss::mc_type::ODYSSEY>(i_target));
@@ -648,11 +730,17 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode omiEnableAFU(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
+#ifdef __PPE__
+    fapi2::buffer<uint64_t> l_scom;
+    FAPI_TRY(ody_get_scom(i_target, scomt::ody::ODC_MMIO_OCTRLENB_OCTRLID, l_scom));
+    l_scom.setBit<scomt::ody::ODC_MMIO_OCTRLENB_OCTRLID_ENABLE_AFU>();
+    FAPI_TRY(ody_put_scom(i_target, scomt::ody::ODC_MMIO_OCTRLENB_OCTRLID, l_scom));
+#else
     fapi2::buffer<uint32_t> l_value;
     FAPI_TRY(mss::ody::ib::getOCCfg(i_target, ODY_OC_OCTRLENB_OCTRLID_MSB, l_value));
     l_value.setBit<ODY_OC_OCTRLENB_OCTRLID_MSB_ENABLE_AFU>();
     FAPI_TRY(mss::ody::ib::putOCCfg(i_target, ODY_OC_OCTRLENB_OCTRLID_MSB, l_value));
-
+#endif
 fapi_try_exit:
 
     FAPI_DBG("Exiting with return code : 0x%08X...", (uint64_t) fapi2::current_err);
@@ -683,7 +771,9 @@ fapi2::ReturnCode ody_omi_init(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     FAPI_TRY(ody::omiSetACTagPASIDMetaData(i_target));
     FAPI_TRY(ody::omiEnableAFU(i_target));
 
+#ifndef __PPE__
     FAPI_TRY(mss::unmask::after_mc_omi_init<mss::mc_type::ODYSSEY>(i_target));
+#endif
 
 fapi_try_exit:
 
