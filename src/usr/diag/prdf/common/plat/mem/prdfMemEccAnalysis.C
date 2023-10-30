@@ -699,7 +699,12 @@ uint32_t handleMpe( ExtensibleChip * i_chip, const MemAddr & i_addr,
         // If the chip mark is not valid, then somehow the chip mark was
         // placed on a rank other than the rank in which the command
         // stopped. This would most likely be a code bug.
-        PRDF_ASSERT( chipMark.isValid() );
+        if (!chipMark.isValid())
+        {
+            PRDF_ERR(PRDF_FUNC "Invalid chip mark");
+            o_rc = FAIL;
+            break;
+        }
 
         // Add the mark to the callout list.
         MemoryMru mm { i_chip->getTrgt(), rank, port, chipMark.getSymbol() };

@@ -476,6 +476,7 @@
         name        "Odyssey chip Hardware Mark Store Rank0 Register 0";
         scomaddr    0x08011810;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS1_0
@@ -483,6 +484,7 @@
         name        "Odyssey chip Hardware Mark Store Rank1 Register 0";
         scomaddr    0x08011811;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS2_0
@@ -490,6 +492,7 @@
         name        "Odyssey chip Hardware Mark Store Rank2 Register 0";
         scomaddr    0x08011812;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS3_0
@@ -497,6 +500,7 @@
         name        "Odyssey chip Hardware Mark Store Rank3 Register 0";
         scomaddr    0x08011813;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS4_0
@@ -504,6 +508,7 @@
         name        "Odyssey chip Hardware Mark Store Rank4 Register 0";
         scomaddr    0x08011814;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS5_0
@@ -511,6 +516,7 @@
         name        "Odyssey chip Hardware Mark Store Rank5 Register 0";
         scomaddr    0x08011815;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS6_0
@@ -518,6 +524,7 @@
         name        "Odyssey chip Hardware Mark Store Rank6 Register 0";
         scomaddr    0x08011816;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS7_0
@@ -525,6 +532,7 @@
         name        "Odyssey chip Hardware Mark Store Rank7 Register 0";
         scomaddr    0x08011817;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS0_0
@@ -532,6 +540,7 @@
         name        "Odyssey chip Firmware Mark Store Rank0 Register 0";
         scomaddr    0x08011818;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS1_0
@@ -539,6 +548,7 @@
         name        "Odyssey chip Firmware Mark Store Rank1 Register 0";
         scomaddr    0x08011819;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS2_0
@@ -546,6 +556,7 @@
         name        "Odyssey chip Firmware Mark Store Rank2 Register 0";
         scomaddr    0x0801181A;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS3_0
@@ -553,6 +564,7 @@
         name        "Odyssey chip Firmware Mark Store Rank3 Register 0";
         scomaddr    0x0801181B;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS4_0
@@ -560,6 +572,7 @@
         name        "Odyssey chip Firmware Mark Store Rank4 Register 0";
         scomaddr    0x0801181C;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS5_0
@@ -567,6 +580,7 @@
         name        "Odyssey chip Firmware Mark Store Rank5 Register 0";
         scomaddr    0x0801181D;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS6_0
@@ -574,6 +588,7 @@
         name        "Odyssey chip Firmware Mark Store Rank6 Register 0";
         scomaddr    0x0801181E;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS7_0
@@ -581,6 +596,7 @@
         name        "Odyssey chip Firmware Mark Store Rank7 Register 0";
         scomaddr    0x0801181F;
         capture     group rdf_fir_0_regs;
+        capture     group mcbist_fir_regs;
     };
 
     ############################################################################
@@ -628,6 +644,7 @@
         name        "Odyssey chip Hardware Mark Store Rank0 Register 1";
         scomaddr    0x08012810;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS1_1
@@ -635,6 +652,7 @@
         name        "Odyssey chip Hardware Mark Store Rank1 Register 1";
         scomaddr    0x08012811;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS2_1
@@ -642,6 +660,7 @@
         name        "Odyssey chip Hardware Mark Store Rank2 Register 1";
         scomaddr    0x08012812;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS3_1
@@ -649,6 +668,7 @@
         name        "Odyssey chip Hardware Mark Store Rank3 Register 1";
         scomaddr    0x08012813;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS4_1
@@ -656,6 +676,7 @@
         name        "Odyssey chip Hardware Mark Store Rank4 Register 1";
         scomaddr    0x08012814;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS5_1
@@ -663,6 +684,7 @@
         name        "Odyssey chip Hardware Mark Store Rank5 Register 1";
         scomaddr    0x08012815;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS6_1
@@ -670,6 +692,7 @@
         name        "Odyssey chip Hardware Mark Store Rank6 Register 1";
         scomaddr    0x08012816;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register HW_MS7_1
@@ -677,6 +700,7 @@
         name        "Odyssey chip Hardware Mark Store Rank7 Register 1";
         scomaddr    0x08012817;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS0_1
@@ -684,6 +708,7 @@
         name        "Odyssey chip Firmware Mark Store Rank0 Register 1";
         scomaddr    0x08012818;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS1_1
@@ -691,6 +716,7 @@
         name        "Odyssey chip Firmware Mark Store Rank1 Register 1";
         scomaddr    0x08012819;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS2_1
@@ -698,6 +724,7 @@
         name        "Odyssey chip Firmware Mark Store Rank2 Register 1";
         scomaddr    0x0801281A;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS3_1
@@ -705,6 +732,7 @@
         name        "Odyssey chip Firmware Mark Store Rank3 Register 1";
         scomaddr    0x0801281B;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS4_1
@@ -712,6 +740,7 @@
         name        "Odyssey chip Firmware Mark Store Rank4 Register 1";
         scomaddr    0x0801281C;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS5_1
@@ -719,6 +748,7 @@
         name        "Odyssey chip Firmware Mark Store Rank5 Register 1";
         scomaddr    0x0801281D;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS6_1
@@ -726,6 +756,7 @@
         name        "Odyssey chip Firmware Mark Store Rank6 Register 1";
         scomaddr    0x0801281E;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     register FW_MS7_1
@@ -733,6 +764,7 @@
         name        "Odyssey chip Firmware Mark Store Rank7 Register 1";
         scomaddr    0x0801281F;
         capture     group rdf_fir_1_regs;
+        capture     group mcbist_fir_regs;
     };
 
     ############################################################################
