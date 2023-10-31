@@ -248,12 +248,12 @@ struct pmicFields<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t R31_ADC_READ_SETTING_START         = 0;
     static constexpr uint8_t R31_ADC_READ_SETTING_LENGTH        = 8;
 
-    // R33 - bit positions flipped (0 is for bit7, 1 is for bit6, etc)
-    static constexpr uint8_t R33_TEMPERATURE_SETTING_START             = 0;
+    // R33
+    static constexpr uint8_t R33_TEMPERATURE_SETTING_START             = 5;
     static constexpr uint8_t R33_TEMPERATURE_SETTING_LENGTH            = 3;
-    static constexpr uint8_t R33_VIN_MGMT_PGOOD_SWITCHOVER_MODE_STATUS = 3;
-    static constexpr uint8_t R33_VIN_BULK_UNDER_VOLTAGE_LOCKOUT_STATUS = 4;
-    static constexpr uint8_t R33_VOUT_1P0V_OUTPUT_POWER_GOOD_STATUS    = 5;
+    static constexpr uint8_t R33_VIN_MGMT_PGOOD_SWITCHOVER_MODE_STATUS = 4;
+    static constexpr uint8_t R33_VIN_BULK_UNDER_VOLTAGE_LOCKOUT_STATUS = 3;
+    static constexpr uint8_t R33_VOUT_1P0V_OUTPUT_POWER_GOOD_STATUS    = 2;
 
     static constexpr uint8_t DELAY_FLD_LENGTH               = 3;
     static constexpr uint8_t VOLTAGE_SETTING_START          = 0;
