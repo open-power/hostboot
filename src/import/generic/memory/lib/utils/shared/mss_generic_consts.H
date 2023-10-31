@@ -1145,7 +1145,7 @@ enum preipl_prbs_time
     PREIPL_PRBS_4S         = 0b111,
 };
 
-}
+} // omi
 ///
 /// @brief Supported DIMM speed equality deliberations
 ///

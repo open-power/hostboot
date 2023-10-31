@@ -50,6 +50,7 @@ OBJS += p10_sbe_scratch_regs.o
 OBJS += mss_check_ddimm_config.o
 OBJS += pmic_enable_utils_ddr5.o
 OBJS += pmic_common_utils.o
+OBJS += pmic_common_utils_ddr4.o
 OBJS += pmic_common_utils_ddr5.o
 OBJS += pmic_enable_utils.o
 OBJS += mss_pmic_attribute_accessors_manual.o

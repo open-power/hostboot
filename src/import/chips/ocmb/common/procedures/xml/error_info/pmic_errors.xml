@@ -79,6 +79,7 @@
     <ffdc>BASE_VOLTAGE</ffdc>
     <ffdc>SPD_OFFSET</ffdc>
     <ffdc>EFD_OFFSET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>MEDIUM</priority>
@@ -115,6 +116,7 @@
     <ffdc>PMIC_TARGET</ffdc>
     <ffdc>RAIL</ffdc>
     <ffdc>ORDER</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>MEDIUM</priority>
@@ -136,6 +138,7 @@
     <ffdc>PMIC_TARGET</ffdc>
     <ffdc>RAIL</ffdc>
     <ffdc>DELAY</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>MEDIUM</priority>
@@ -228,6 +231,7 @@
     <ffdc>VENDOR_ATTR</ffdc>
     <ffdc>VENDOR_REG</ffdc>
     <ffdc>PMIC_TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>MEDIUM</priority>
@@ -250,6 +254,7 @@
     <ffdc>REVISION_ATTR</ffdc>
     <ffdc>REVISION_REG</ffdc>
     <ffdc>PMIC_TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>MEDIUM</priority>
@@ -286,6 +291,7 @@
     <ffdc>REVISION_ATTR</ffdc>
     <ffdc>REVISION_REG</ffdc>
     <ffdc>PMIC_TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
       <target>PMIC_TARGET</target>
       <priority>MEDIUM</priority>

@@ -42,23 +42,21 @@
 #include <pmic_regs_fld.H>
 #include <lib/utils/pmic_consts.H>
 #include <mss_pmic_attribute_getters.H>
-#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/fapi_try_lambda.H>
 
 namespace mss
 {
 namespace pmic
 {
-
-// For output traces
-const std::vector<const char*> PMIC_RAIL_NAMES = {"SWA", "SWB", "SWC", "SWD"};
-
 using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
 using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;;
 using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
 using TPS_CONSTS = mss::pmic::consts<mss::pmic::product::TPS5383X>;;
 using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
+
+// For output traces
+static constexpr const char* PMIC_RAIL_NAMES[] = {"SWA", "SWB", "SWC", "SWD"};
 
 // Arrays to easily index common parameters by rail
 static constexpr uint8_t const VOLT_SETTING_ACTIVE_REGS[] =
@@ -130,135 +128,6 @@ static constexpr uint32_t const VOLT_RANGE_VID_OFFSET_COARSE_MINS[][TPS_CONSTS::
     },
 };
 
-
-///
-/// @brief Get the valid pmics for id object
-///
-/// @param[in] i_ocmb_target OCMB target to get PMIC(s) for
-/// @param[in] i_id index of PMIC requested
-/// @return vector of PMICs that match the id
-///
-inline std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> get_valid_pmics_for_id(
-            const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-            const mss::pmic::id i_id)
-{
-    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>> l_output_pmics;
-
-    const auto l_pmics = mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
-
-    for (const auto& l_pmic : l_pmics)
-    {
-        if (mss::index(l_pmic) % CONSTS::NUM_PRIMARY_PMICS == i_id)
-        {
-            l_output_pmics.push_back(l_pmic);
-        }
-    }
-
-    return l_output_pmics;
-}
-
-///
-/// @brief Determine if PMIC is disabled based on ATTR_MEM_PMIC_FORCE_N_MODE attribute setting
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[out] o_disabled true/false
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else, error code
-///
-fapi2::ReturnCode disabled(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_disabled);
-
-///
-/// @brief Run the provided function if the PMIC is present and not overridden to N-Mode
-///
-/// @tparam F function type (expected to be lambda)
-/// @param[in] i_pmic_map Map of pmic ID to pmic target
-/// @param[in] i_pmic_id desired pmic ID to key on
-/// @param[in] i_func lambda function to run if given PMIC is not disabled
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-template<typename F>
-fapi2::ReturnCode run_if_present(
-    const std::map<size_t, fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmic_map,
-    const uint8_t i_pmic_id,
-    const F i_func)
-{
-    // No const here due to the HB implementation of map/iterator: Does not allow for
-    // const iterators to perform the -> operator (has trouble de-const'ing)
-    auto l_pmic_it = i_pmic_map.find(i_pmic_id);
-    bool l_disabled = false;
-
-    // If we don't have the PMIC in the map, then platform never provided it as present,
-    // so we should just exit, do not run i_func()
-    if ( l_pmic_it == i_pmic_map.end() )
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    const auto& l_pmic = l_pmic_it->second;
-
-    // PMIC does exist, now see if it was overridden to disabled via ATTR_PMIC_FORCE_N_MODE
-    FAPI_TRY(mss::pmic::disabled(l_pmic, l_disabled));
-
-    // PMIC target provided here. Other arguments to be provided via capture list
-    if (!l_disabled)
-    {
-        FAPI_TRY(i_func(l_pmic));
-    }
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Checks PMIC for VIN_BULK above minimum tolerance
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode success if good, else, error code
-///
-fapi2::ReturnCode check_vin_bulk_good(
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
-
-///
-/// @brief Get the minimum vin bulk threshold
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[out] o_vin_bulk_min VIN bulk minimum value
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode get_minimum_vin_bulk_threshold(
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-    uint16_t& o_vin_bulk_min);
-
-///
-/// @brief Helper function to get the minimum vin bulk threshold
-///
-/// @param[in] i_vin_bulk_min_threshold
-/// @param[in] i_is_ti PMIC is TI
-/// @param[in] i_rev PMIC revision
-/// return VIN bulk minimum value
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-uint16_t get_minimum_vin_bulk_threshold_helper(
-    const uint8_t i_vin_bulk_min_threshold,
-    const bool i_is_ti,
-    const uint8_t i_rev);
-
-///
-/// @brief Disable the ADC for the pmic
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode disable_pmic_adc(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
-
-///
-/// @brief Enable the ADC for the pmic
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode enable_pmic_adc(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);;
-
 ///
 /// @brief Unlocks PMIC vendor region
 ///
@@ -295,6 +164,40 @@ fapi2::ReturnCode pmic_is_idt(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pm
 ///
 fapi2::ReturnCode pmic_is_ti(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_is_ti);
 
+///
+/// @brief Check number of pmics received for 2U. If < 2, then throw an error
+///
+/// @param[in] i_ocmb_target OCMB target parent of PMICs
+/// @param[in] i_pmics_size number of PMIC received
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode check_number_pmics_received_2u(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const uint8_t i_pmics_size);
+
+///
+/// @brief Determine if PMIC is disabled based on ATTR_MEM_PMIC_FORCE_N_MODE attribute setting
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[out] o_disabled true/false
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else, error code
+///
+fapi2::ReturnCode disabled(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target, bool& o_disabled);
+
+///
+/// @brief Set the startup seq register with the given parameters
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_rail rail to
+/// @param[in] i_round sequence round 1-4
+/// @param[in] i_delay delay after round
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode set_startup_seq_register(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint8_t i_rail,
+    const uint8_t i_round,
+    const uint8_t i_delay);
 
 ///
 /// @brief Calculate target voltage for PMIC from attribute settings
@@ -312,19 +215,139 @@ fapi2::ReturnCode calculate_voltage_bitmap_from_attr(
     uint8_t& o_volt_bitmap);
 
 ///
-/// @brief Calculate nominal rail voltages
+/// @brief Set the current limiter warning registers via attributes
 ///
 /// @param[in] i_pmic_target PMIC target
-/// @param[in] i_id ID of pmic (0,1)
-/// @param[in] i_rail SWA through SWD mapped as 0 to 3
-/// @param[out] o_nominal_voltage calculated nominal voltage, shifted in place for register
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_relative_pmic_id relative PMIC position (0/1 if DDR4, 0/1/2/3 if DDR5)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode calculate_4u_nominal_voltage(
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-    const uint8_t i_id,
-    const uint8_t i_rail,
-    uint8_t& o_nominal_voltage);
+fapi2::ReturnCode set_current_limiter_warnings(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_relative_pmic_id);
+
+///
+/// @brief Order PMICs by sequence defined in the SPD
+///
+/// @param[in] i_ocmb_target OCMB target to pull SPD fields from
+/// @param[in,out] io_pmics vector of PMICs that will be re-ordered in place
+/// @return fapi2::ReturnCode
+///
+fapi2::ReturnCode order_pmics_by_sequence(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target,
+    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics);
+
+///
+/// @brief Update PMIC sequence based on SPD rev 0.0
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id PMIC0 or PMIC1
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode update_seq_with_order_and_delay_attr(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id);
+
+///
+/// @brief Update PMIC sequence based on the SPD version 0.7.0
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_id PMIC2 or PMIC3
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode update_seq_with_reg_attr(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        const mss::pmic::id i_id);;
+
+///
+/// @brief bias PMIC with spd settings for phase combination (SWA, SWB or SWA+SWB)
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target - OCMB parent target of pmic
+/// @param[in] i_id - PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode bias_with_spd_phase_comb(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id);
+
+///
+/// @brief bias PMIC with SPD settings for voltage ranges
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode bias_with_spd_volt_ranges(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id);
+
+///
+/// @brief bias PMIC with SPD settings for startup sequence
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode bias_with_spd_startup_seq(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id);
+
+//-----------------------------------
+// Templated SPD Biasing functions
+//-----------------------------------
+///
+/// @brief Bias with spd voltages for TI pmic with revision less than 0x23
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
+/// @param[in] i_rail_index SWA/SWB/SWC/SWD rails of pmic
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode bias_with_spd_voltages_TI_rev_less_then_23(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id,
+    const uint8_t i_rail_index);
+
+///
+/// @brief Bias with spd voltages for IDT pmic
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+template <mss::pmic::vendor V>
+fapi2::ReturnCode bias_with_spd_voltages(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_id);
+
+///
+/// @brief Bias PMIC from SPD settings per vendor
+///
+/// @tparam V mss::pmic::vendor (IDT/TI)
+/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target OCMB parent target of pmic
+/// @param[in] i_relative_pmic_id relative PMIC position (0/1 if DDR4, 0/1/2/3 if DDR5)
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+template <mss::pmic::vendor V>
+fapi2::ReturnCode bias_with_spd_settings(
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
+    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const mss::pmic::id i_relative_pmic_id);
 
 ///
 /// @brief Get PMIC position/ID under OCMB target. There could be 4 pmics, but we care about whether its PMIC0(2) or PMIC1(3)
@@ -337,17 +360,6 @@ inline mss::pmic::id get_relative_pmic_id(const fapi2::Target<fapi2::TARGET_TYPE
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     return static_cast<mss::pmic::id>(mss::index(i_pmic_target) % CONSTS::NUM_PRIMARY_PMICS);
 }
-
-///
-/// @brief Check number of pmics received for 2U. If < 2, then throw an error
-///
-/// @param[in] i_ocmb_target OCMB target parent of PMICs
-/// @param[in] i_pmics_size number of PMIC received
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode check_number_pmics_received_2u(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const uint8_t i_pmics_size);
 
 namespace status
 {
@@ -378,6 +390,31 @@ struct status_field
     bool iv_assert_out;
 };
 
+///
+/// @brief Unlock PMIC registers R70 to RA3
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode unlock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Lock PMIC registers R70 to RA3
+///
+/// @param[in] i_pmic_target PMIC target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
+///
+fapi2::ReturnCode lock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Clear PMIC status registers
+///
+/// @param[in] i_pmic_target PMIC to clear
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode clear(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+#ifndef __PPE__
 ///
 /// @brief const vector of statuses to check
 ///
@@ -563,22 +600,6 @@ fapi2::ReturnCode check_all_pmics_helper(
 fapi2::ReturnCode check_all_pmics(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target);
 
 ///
-/// @brief Unlock PMIC registers R70 to RA3
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
-///
-fapi2::ReturnCode unlock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
-
-///
-/// @brief Lock PMIC registers R70 to RA3
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
-///
-fapi2::ReturnCode lock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
-
-///
 /// @brief Check the PMIC's status codes and report back if an error occurred
 ///
 /// @param[in] i_pmic_target PMIC target
@@ -590,14 +611,6 @@ fapi2::ReturnCode check_pmic(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     status_regs& io_values,
     bool& o_error);
-
-///
-/// @brief Clear PMIC status registers
-///
-/// @param[in] i_pmic_target PMIC to clear
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode clear(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
 /// @brief Helper to fill in pmic::status::status_regs struct
@@ -628,7 +641,69 @@ fapi2::ReturnCode check_fields(
     status_regs& io_values,
     bool& o_error);
 
+#endif
+
 } // status
+
+namespace check
+{
+
+///
+/// @brief Unit testable helper function: Check that the IDT revision # register and attribute match
+///
+/// @param[in] i_pmic_target PMIC target (for FFDC)
+/// @param[in] i_rev_attr revision value from attribute
+/// @param[in] i_rev_reg revision value from register
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode validate_and_return_idt_revisions_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint8_t i_rev_attr,
+    const uint8_t i_rev_reg);
+
+///
+/// @brief Check that the IDT revision # register and attribute match and return revision number.
+///        In case of TI, just return the revision number
+///
+/// @param[in]  i_ocmb_target OCMB target
+/// @param[in]  i_pmic_target PMIC target to check
+/// @param[in]  i_vendor_id to run IDT revision check
+/// @param[out] o_rev_reg revision number of PMIC
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode validate_and_return_pmic_revisions(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint16_t i_vendor_id,
+    fapi2::buffer<uint8_t>& o_rev_reg);
+
+///
+/// @brief Check that the vendor ID register and attribute match
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in] i_pmic_target PMIC target to check
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode matching_vendors(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
+
+///
+/// @brief Unit testable helper function: Check matching vendor ID between attr and reg values
+///
+/// @param[in] i_pmic_target PMIC target for FFDC
+/// @param[in] i_vendor_attr vendor attribute value
+/// @param[in] i_vendor_reg_lo vendor register low byte
+/// @param[in] i_vendor_reg_hi vendor register high byte
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
+///
+fapi2::ReturnCode matching_vendors_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+    const uint16_t i_vendor_attr,
+    const uint8_t i_vendor_reg_lo,
+    const uint8_t i_vendor_reg_hi);
+
+} // check
 } // pmic
 } // mss
 

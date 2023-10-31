@@ -42,6 +42,7 @@
 #include <lib/i2c/i2c_pmic.H>
 #include <lib/utils/pmic_common_utils.H>
 #include <lib/utils/pmic_consts.H>
+#include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/index.H>
 #include <mss_pmic_attribute_accessors_manual.H>
@@ -73,7 +74,7 @@ namespace pmic
 using ADC_REGS = mss::adc::regs;
 using ADC_FIELDS = mss::adc::fields;
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
-
+#ifndef __PPE__ // commenting the code that contains vectors for the sppe compilation.
 // The sequences below and accompanying comments are
 // defined in section 6.1.1 of the Redundant Power on DIMM –
 // Functional Specification document
@@ -555,156 +556,6 @@ fapi2::ReturnCode set_soft_stop_time(const fapi2::Target<fapi2::TargetType::TARG
 ///
 fapi2::ReturnCode pre_enable_steps(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
-///
-/// @brief bias PMIC with spd settings for phase combination (SWA, SWB or SWA+SWB)
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target - OCMB parent target of pmic
-/// @param[in] i_id - PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
-///
-fapi2::ReturnCode bias_with_spd_phase_comb(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_id);
-
-///
-/// @brief bias PMIC with SPD settings for voltage ranges
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
-///
-fapi2::ReturnCode bias_with_spd_volt_ranges(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_id);
-
-///
-/// @brief Update PMIC sequence based on SPD rev 0.0
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id PMIC0 or PMIC1
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
-///
-fapi2::ReturnCode update_seq_with_order_and_delay_attr(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_id);
-
-///
-/// @brief Update PMIC sequence based on the SPD version 0.7.0
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB target
-/// @param[in] i_id PMIC2 or PMIC3 for DDR5
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode update_seq_with_reg_attr(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-        const mss::pmic::id i_id);
-
-///
-/// @brief bias PMIC with SPD settings for startup sequence based
-///        on SPD revision
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id PMIC0 or PMIC1 (or PMIC2 or PMIC3 for DDR5)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
-///
-fapi2::ReturnCode bias_with_spd_startup_seq(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_id);
-
-///
-/// @brief Set the current limiter warning registers via attributes
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_relative_pmic_id relative PMIC position (0/1 if DDR4, 0/1/2/3 if DDR5)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-fapi2::ReturnCode set_current_limiter_warnings(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_relative_pmic_id);
-
-///
-/// @brief Set the startup seq register with the given parameters
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_rail rail to
-/// @param[in] i_round sequence round 1-4
-/// @param[in] i_delay delay after round
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
-///
-fapi2::ReturnCode set_startup_seq_register(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const uint8_t i_rail,
-    const uint8_t i_round,
-    const uint8_t i_delay);
-
-//-----------------------------------
-// Templated SPD Biasing functions
-//-----------------------------------
-///
-/// @brief Bias with spd voltages for TI pmic with revision less than 0x23
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
-/// @param[in] i_rail_index SWA/SWB/SWC/SWD rails of pmic
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-///
-fapi2::ReturnCode bias_with_spd_voltages_TI_rev_less_then_23(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_id,
-    const uint8_t i_rail_index);
-
-///
-/// @brief Bias with spd voltages for IDT pmic
-///
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_id relative ID of PMIC (0/1) (or PMIC2 or PMIC3 for DDR5)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-///
-template <mss::pmic::vendor V>
-fapi2::ReturnCode bias_with_spd_voltages(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_id);
-
-///
-/// @brief Order PMICs by sequence defined in the SPD
-///
-/// @param[in] i_ocmb_target OCMB target to pull SPD fields from
-/// @param[in,out] io_pmics vector of PMICs that will be re-ordered in place
-/// @return fapi2::ReturnCode
-///
-fapi2::ReturnCode order_pmics_by_sequence(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmb_target,
-    std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& io_pmics);
-
-///
-/// @brief Bias PMIC from SPD settings per vendor
-///
-/// @tparam V mss::pmic::vendor (IDT/TI)
-/// @param[in] i_pmic_target PMIC target
-/// @param[in] i_ocmb_target OCMB parent target of pmic
-/// @param[in] i_relative_pmic_id relative PMIC position (0/1 if DDR4, 0/1/2/3 if DDR5)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-///
-template <mss::pmic::vendor V>
-fapi2::ReturnCode bias_with_spd_settings(
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_PMIC>& i_pmic_target,
-    const fapi2::Target<fapi2::TargetType::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const mss::pmic::id i_relative_pmic_id);
 
 //------------------- ENABLE FUNCTIONS-----------------//
 
@@ -1032,32 +883,6 @@ inline bool efuses_already_enabled_helper(const uint8_t i_polarity, const uint8_
 }
 
 ///
-/// @brief Check that the vendor ID register and attribute match
-///
-/// @param[in] i_ocmb_target OCMB target
-/// @param[in] i_pmic_target PMIC target to check
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
-///
-fapi2::ReturnCode matching_vendors(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
-
-///
-/// @brief Unit testable helper function: Check matching vendor ID between attr and reg values
-///
-/// @param[in] i_pmic_target PMIC target for FFDC
-/// @param[in] i_vendor_attr vendor attribute value
-/// @param[in] i_vendor_reg_lo vendor register low byte
-/// @param[in] i_vendor_reg_hi vendor register high byte
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
-///
-fapi2::ReturnCode matching_vendors_helper(
-    const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-    const uint16_t i_vendor_attr,
-    const uint8_t i_vendor_reg_lo,
-    const uint8_t i_vendor_reg_hi);
-
-///
 /// @brief Check that the IDT revision # register and attribute match and return revision number.
 ///        In case of TI, just return the revision number
 ///
@@ -1087,7 +912,7 @@ fapi2::ReturnCode validate_and_return_idt_revisions_helper(
     const uint8_t i_rev_reg);
 
 } // check
-
+#endif // __PPE__
 namespace ddr4
 {
 ///
