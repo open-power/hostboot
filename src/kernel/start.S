@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2022
+# Contributors Listed Below - COPYRIGHT 2010,2023
 # [+] International Business Machines Corp.
 # [+] Joel Stanley
 #
@@ -142,14 +142,18 @@ finished_relocate:
 
 #define STD_INTERRUPT(name, address) \
         .org _start + address; \
-        STD_INTERRUPT_NOADDR(name)
+        STD_INTERRUPT_NOADDR(name, 0)
+
+#define STD_INTERRUPT_ENABLE_MACHINE_CHECK_EXCEPTIONS(name, address) \
+        .org _start + address; \
+        STD_INTERRUPT_NOADDR(name, 1)
 
 #define STD_INTERRUPT_STUB(name, address) \
         .org _start + address; \
     intvect_stub_##name: \
         b intvect_##name;
 
-#define STD_INTERRUPT_NOADDR(name) \
+#define STD_INTERRUPT_NOADDR(name, force_enable_machine_check_exceptions) \
     intvect_##name: \
         or 2,2,2; /* Ensure thread priority is high. */ \
         mtsprg1 r1; /* Save GPR1 */ \
@@ -169,6 +173,7 @@ finished_relocate:
         ld r2, 8(r2); /* Load TOC base. */ \
         blrl; /* Call kernel function */ \
         nop; \
+	li r3, force_enable_machine_check_exceptions; \
         b kernel_dispatch_task; /* Return to task */
 
 #define HYP_INTERRUPT(name, address) \
@@ -208,7 +213,7 @@ STD_INTERRUPT_STUB(system_reset, 0x100)
 intvect_inst_start:
     b _start
 
-STD_INTERRUPT(machine_check, 0x200)
+STD_INTERRUPT_ENABLE_MACHINE_CHECK_EXCEPTIONS(machine_check, 0x200)
 STD_INTERRUPT(data_storage, 0x300)
 STD_INTERRUPT(data_segment, 0x380)
 STD_INTERRUPT(inst_storage, 0x400)
@@ -311,7 +316,7 @@ softpatch_stub:
     subi r1, r1, 4      ;// Roll back SRR0 1 instruction to one taking except.
     mtsrr0 r1
     mfspr r1, HSPRG1     ;// Restore temporary (R1)
-STD_INTERRUPT_NOADDR(softpatch)
+STD_INTERRUPT_NOADDR(softpatch, 0)
 
 .section .text.kernelasm
 
@@ -512,7 +517,7 @@ kernel_save_task:
     ;//
     ;// Requires:
     ;//     * SPRG3 -> Task Structure.
-    ;//     * Current contents of registers are not needed.
+    ;//     * r3 -> Boolean: 0 means leave MSR[ME] alone, otherwise enable MSR[ME]
 kernel_dispatch_task:
 .global kernel_dispatch_task
     mfsprg3 r1          ;// Load task structure to r1.
@@ -522,6 +527,12 @@ kernel_dispatch_task:
 
     mfmsr r2            ;// Get current MSR
     ori r2,r2, 0xC030   ;// Enable MSR[EE,PR,IR,DR].
+
+    cmpdi r3, 0         ;// Check whether arg 1 (enable_machine_check_interrupts) is false.
+    beq 3f
+    ori r2,r2, 0x1000   ;// Enable MSR[ME] if the caller asks for it.
+
+3:
     rldicl r2,r2,50,1   ;// Clear ...
     rotldi r2,r2,14     ;//     MSR[FP]
     rldicl r2,r2,3,1    ;// Clear HV bit...
@@ -833,6 +844,7 @@ intvect_system_reset_inactive:
     ld r1, CPU_KERNEL_STACK_BOTTOM(r2)
     ld r1, 0(r1)
     mtsprg3 r1
+    li r3, 0 ;// r3=0 -> Ask kernel_dispatch_task to leave MSR[ME] as-is.
     b kernel_dispatch_task
 
     ;// @fn intvect_system_reset_decrementer
@@ -1041,9 +1053,10 @@ intvect_unhandled_finish_save: \
     ld r2, 8(r2); /* Load TOC base. */
     blrl; /* Call kernel function */
     nop;
+    li r3, 0 ;// r3=0 -> Ask kernel_dispatch_task to leave MSR[ME] as-is.
     b kernel_dispatch_task; /* Return to task */
 
-STD_INTERRUPT_NOADDR(hype_emu_assist)
+STD_INTERRUPT_NOADDR(hype_emu_assist, 0)
 UNIMPL_INTERRUPT_NOADDR(trace, 0xD00)
 UNIMPL_INTERRUPT_NOADDR(hype_data_storage, 0xE00)
 UNIMPL_INTERRUPT_NOADDR(hype_inst_storage, 0xE20)

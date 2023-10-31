@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,11 @@
 
 #include <stdlib.h>
 
-extern "C" void kernel_dispatch_task();
+uint64_t NO_FORCE_ENABLE_MACHINE_CHECK_EXCEPTIONS = 0;
+
+extern "C" void kernel_dispatch_task(uint64_t force_enable_machine_check_exceptions
+                                         = NO_FORCE_ENABLE_MACHINE_CHECK_EXCEPTIONS);
+
 extern void* init_main(void* unused);
 extern uint64_t kernel_other_thread_spinlock;
 extern char hbi_ImageId[];
