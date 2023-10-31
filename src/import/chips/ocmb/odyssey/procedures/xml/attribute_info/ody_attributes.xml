@@ -1172,7 +1172,7 @@
             TX2D_DFE_Misc in the message block structure.
         </description>
         <valueType>uint8</valueType>
-        <default>0x01</default>
+        <default>0x55</default>
         <writeable/>
         <mssAccessorName>tx2d_dfe_misc</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
@@ -1216,7 +1216,7 @@
             TX2D_TrainOpt in the message block structure.
         </description>
         <valueType>uint8</valueType>
-        <default>0x01</default>
+        <default>0x0B</default>
         <writeable/>
         <mssAccessorName>tx2d_train_opt</mssAccessorName>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
