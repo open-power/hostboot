@@ -36,6 +36,7 @@
 #include <errl/errlmanager.H>
 #include <sbeio/sbe_ffdc_parser.H>
 #include <sbeio/sbe_utils.H>
+#include <return_code_defs.H>
 
 #define SBE_TRACF(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"ffdcParserTest: " printf_string,##args)
@@ -326,7 +327,9 @@ public:
     }
 
     /**
-     * @brief Test an FFDC package overflow scenario
+     * @brief Test an FFDC package overflow scenario. This test will also implicitly verify that strict weak ordering is
+     *        adhered to in the sorting of the packages. If strict weak ordering is not followed, this test will crash
+     *        and the printk backtrace for the task running this test will be full of infinite recursion traces.
      */
     void testSBEFFDC7()
     {
@@ -352,8 +355,8 @@ public:
             l_totalNumPackages++;
         }
 
-        TS_TRACE("ffdcParserTest test 7 - "
-                "%d ODYSSEY packages which overflows the package buffer by 1", l_totalNumPackages);
+        TS_TRACE("ffdcParserTest test 7 - %d ODYSSEY packages which overflows the package buffer by 1",
+                 l_totalNumPackages);
 
         SBEIO::SbeFFDCParser l_ffdc_parser;
         l_ffdc_parser.parseFFDCData(&data[0]);
@@ -387,51 +390,154 @@ public:
     }
 
     /*
-     * Test that multiple Odyssey packages with 2 different SLIDs are sorted by SLID during parsing.
-     * This test also verifies that the parsing logic is smart enough to tell that SLIDs and Severities are
-     * present and can handle them.
+     * Test that multiple Odyssey packages with different SLIDs are sorted by during parsing. The ordering is by SLID
+     * then among packages with the same SLID, HWP RC < PLID < 0. This test also verifies that the parsing logic is
+     * smart enough to tell that SLIDs and Severities are present.
      */
     void testSBEFFDC8()
     {
         struct expectedResults
         {
             uint16_t slid;
+            uint32_t rc;
             ERRORLOG::errlSeverity_t sev;
 
-            expectedResults(uint16_t i_slid, ERRORLOG::errlSeverity_t i_sev) : slid(i_slid), sev(i_sev) {};
+            expectedResults(uint16_t i_slid,
+                            uint32_t i_rc,
+                            ERRORLOG::errlSeverity_t i_sev)
+                            : slid(i_slid),
+                              rc(i_rc),
+                              sev(i_sev) {};
         };
 
-        // The slids are sorted so make the expected list in sorted order.
-        // Severity has to be the same for all packages that have a matching SLID.
+        uint32_t PLAT_RC = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA, HWP_RC = 0x04050607, BAD_RC = 0;
+
+        // The packages will be sorted so make the expected list in sorted order.
+        // It is required that severity is the same for all packages that have a matching SLID.
         std::vector<expectedResults> expected;
-        expected.push_back({0x1, ERRORLOG::ERRL_SEV_RECOVERED});
-        expected.push_back({0x1, ERRORLOG::ERRL_SEV_RECOVERED});
-        expected.push_back({0x2, ERRORLOG::ERRL_SEV_PREDICTIVE});
+        expected.push_back({0x1, HWP_RC,  ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x1, PLAT_RC, ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x2, HWP_RC,  ERRORLOG::ERRL_SEV_PREDICTIVE});
+        expected.push_back({0x3, HWP_RC,  ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x3, PLAT_RC, ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x3, BAD_RC,  ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x4, HWP_RC,  ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x4, PLAT_RC, ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x4, PLAT_RC, ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x5, HWP_RC,  ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x5, PLAT_RC, ERRORLOG::ERRL_SEV_RECOVERED});
+        expected.push_back({0x5, BAD_RC,  ERRORLOG::ERRL_SEV_RECOVERED});
 
         bool testPassed = true;
+        // A vector of thoughtfully scrambled data.
+        // Test number = SLID
+        // P = PLAT RC, H = HWP RC, 0 = BAD RC
+        // Initial RC orders for each test, see above expected vector for correct order.
+        // 1: HP
+        // 2: H
+        // 3: PH0
+        // 4: HPP
+        // 5: 0HP
+        // The SLIDs have been mixed so that the relative RC order within the same SLID stays the same but the packages
+        // aren't already in SLID order.
         std::vector<uint32_t> odyPackage = {
+
+            0xFBAD0008,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00031001,        // SLID, errlSeverity_t, and arbitrary chipid
+            PLAT_RC,           // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+
             0xFBAD0006,        // magic byte + package length
             0x00020101,        // arbitrary sequence ID, command class, and command
             0x00011001,        // SLID, errlSeverity_t, and arbitrary chipid
-            0x04050607,        // return code
+            HWP_RC,            // return code
             0xDEADC0DE,        // arbitrary FFDC data
             0xDEADC0DE,        // arbitrary FFDC data
+
             0xFBAD0008,        // magic byte + package length
             0x00020101,        // arbitrary sequence ID, command class, and command
             0x00022001,        // SLID, errlSeverity_t, and arbitrary chipid
-            0x04050607,        // return code
+            HWP_RC,            // return code
             0xDEADC0DE,        // arbitrary FFDC data
             0xDEADC0DE,        // arbitrary FFDC data
             0xDEADC0DE,        // arbitrary FFDC data
             0xDEADC0DE,        // arbitrary FFDC data
+
+            0xFBAD0006,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00041001,        // SLID, errlSeverity_t, and arbitrary chipid
+            HWP_RC,            // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+
             0xFBAD0008,        // magic byte + package length
             0x00020101,        // arbitrary sequence ID, command class, and command
             0x00011001,        // SLID, errlSeverity_t, and arbitrary chipid
-            0x04050607,        // return code
+            PLAT_RC,           // return code
             0xDEADC0DE,        // arbitrary FFDC data
             0xDEADC0DE,        // arbitrary FFDC data
             0xDEADC0DE,        // arbitrary FFDC data
             0xDEADC0DE,        // arbitrary FFDC data
+
+            0xFBAD0006,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00031001,        // SLID, errlSeverity_t, and arbitrary chipid
+            HWP_RC,            // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+
+            0xFBAD0006,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00031001,        // SLID, errlSeverity_t, and arbitrary chipid
+            BAD_RC,            // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+
+            0xFBAD0006,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00051001,        // SLID, errlSeverity_t, and arbitrary chipid
+            BAD_RC,            // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+
+            0xFBAD0008,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00041001,        // SLID, errlSeverity_t, and arbitrary chipid
+            PLAT_RC,           // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+
+            0xFBAD0006,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00051001,        // SLID, errlSeverity_t, and arbitrary chipid
+            HWP_RC,            // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+
+            0xFBAD0008,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00041001,        // SLID, errlSeverity_t, and arbitrary chipid
+            PLAT_RC,           // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+
+            0xFBAD0008,        // magic byte + package length
+            0x00020101,        // arbitrary sequence ID, command class, and command
+            0x00051001,        // SLID, errlSeverity_t, and arbitrary chipid
+            PLAT_RC,           // return code
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+            0xDEADC0DE,        // arbitrary FFDC data
+
         };
 
         SBEIO::SbeFFDCParser ffdcParser;
@@ -455,17 +561,23 @@ public:
                         expected[i].slid);
                 testPassed = false;
             }
-            else
+            else if (ffdcParser.getPackageSeverity(i) != expected[i].sev)
             {
-                if (ffdcParser.getPackageSeverity(i) != expected[i].sev)
-                {
-                    TS_FAIL("ffdcParserTest test 8: FAIL Package %d/%d Severity 0x%X didn't match expected 0x%X",
-                            i+1,
-                            numPackages,
-                            ffdcParser.getPackageSeverity(i),
-                            expected[i].sev);
-                    testPassed = false;
-                }
+                TS_FAIL("ffdcParserTest test 8: FAIL Package %d/%d Severity 0x%X didn't match expected 0x%X",
+                        i+1,
+                        numPackages,
+                        ffdcParser.getPackageSeverity(i),
+                        expected[i].sev);
+                testPassed = false;
+            }
+            else if (ffdcParser.getPackageRC(i) != expected[i].rc)
+            {
+                TS_FAIL("ffdcParserTest test 8: FAIL Package %d/%d RC 0x%X didn't match expected 0x%X",
+                        i+1,
+                        numPackages,
+                        ffdcParser.getPackageRC(i),
+                        expected[i].rc);
+                testPassed = false;
             }
         }
         if (testPassed)
