@@ -35,8 +35,10 @@
 #include <fapi2.H>
 #include <ody_getecid.H>
 #include <ody_scom_perv.H>
-#include <generic/memory/lib/utils/mss_generic_check.H>
-
+#include <generic/memory/lib/utils/c_str.H>
+#ifdef __PPE__
+    #include <ody_fifo.H>
+#endif
 
 
 extern "C"
@@ -61,10 +63,15 @@ extern "C"
         FAPI_INF(TARGTIDFORMAT " ody_getecid : Entering ...", TARGTID);
 
         FAPI_INF(TARGTIDFORMAT " ody_getecid : extract and manipulate ECID data", TARGTID);
+#ifdef __PPE__
+        FAPI_TRY(ody_get_scom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG0, l_ecid_part0_data64));
+        FAPI_TRY(ody_get_scom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG1, l_ecid_part1_data64));
+        FAPI_TRY(ody_get_scom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG2, l_ecid_part2_data64));
+#else
         FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG0, l_ecid_part0_data64));
         FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG1, l_ecid_part1_data64));
         FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG2, l_ecid_part2_data64));
-
+#endif
         l_ecid_part0_data64.reverse();
         l_ecid_part1_data64.reverse();
         l_ecid_part2_data64.reverse();
