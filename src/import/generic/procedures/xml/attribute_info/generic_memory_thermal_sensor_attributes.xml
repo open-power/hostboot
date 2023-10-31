@@ -63,6 +63,9 @@
         </enum>
         <writeable/>
         <default>NOT_AVAILABLE</default>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
         <mssAccessorName>therm_sensor_0_availability</mssAccessorName>
     </attribute>
 
