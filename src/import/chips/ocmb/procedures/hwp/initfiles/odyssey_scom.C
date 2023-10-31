@@ -77,6 +77,7 @@ constexpr uint64_t literal_36 = 36;
 constexpr uint64_t literal_0b11111 = 0b11111;
 constexpr uint64_t literal_0b10001 = 0b10001;
 constexpr uint64_t literal_0b01111 = 0b01111;
+constexpr uint64_t literal_0b111000 = 0b111000;
 constexpr uint64_t literal_0x2 = 0x2;
 constexpr uint64_t literal_0x3 = 0x3;
 constexpr uint64_t literal_0x4 = 0x4;
@@ -214,7 +215,7 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             l_scom_buffer.insert<16, 4, 60, uint64_t>(literal_7 );
             l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<24, 4, 60, uint64_t>(literal_4 );
-            l_scom_buffer.insert<28, 5, 59, uint64_t>((l_TGT1_ATTR_MEM_EFF_DRAM_TCCD_L_WR / literal_2) );
+            l_scom_buffer.insert<28, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TCCD_L_WR + literal_1) / literal_2) );
             l_scom_buffer.insert<33, 4, 60, uint64_t>(literal_8 );
             l_scom_buffer.insert<37, 5, 59, uint64_t>(literal_8 );
             l_scom_buffer.insert<42, 5, 59, uint64_t>(literal_8 );
@@ -232,7 +233,7 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             l_scom_buffer.insert<4, 6, 58, uint64_t>(((((l_TGT1_ATTR_MEM_DRAM_CWL + literal_8) + l_TGT1_ATTR_MEM_EFF_DRAM_TWTR_L) +
                     literal_1) / literal_2) );
             l_scom_buffer.insert<16, 6, 58, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TRCD + literal_1) / literal_2) );
-            l_scom_buffer.insert<22, 6, 58, uint64_t>((l_TGT1_ATTR_MEM_EFF_DRAM_TRP / literal_2) );
+            l_scom_buffer.insert<22, 6, 58, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TRP + literal_1) / literal_2) );
 
             if ((l_def_MEM_EFF_FREQ_EQ_3200 == literal_1))
             {
@@ -265,7 +266,7 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 
             l_scom_buffer.insert<52, 4, 60, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_S + literal_1) / literal_2) );
             l_scom_buffer.insert<56, 4, 60, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TRRD_L + literal_1) / literal_2) );
-            l_scom_buffer.insert<10, 6, 58, uint64_t>((l_TGT1_ATTR_MEM_EFF_DRAM_TFAW / literal_2) );
+            l_scom_buffer.insert<10, 6, 58, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TFAW + literal_1) / literal_2) );
             FAPI_TRY(fapi2::putScom(TGT0, 0x801100eull, l_scom_buffer));
         }
         {
@@ -1195,6 +1196,7 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
 
             l_scom_buffer.insert<16, 1, 63, uint64_t>(literal_1 );
             l_scom_buffer.insert<36, 1, 63, uint64_t>(literal_1 );
+            l_scom_buffer.insert<41, 6, 58, uint64_t>(literal_0b111000 );
             l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011c0bull, l_scom_buffer));
         }
