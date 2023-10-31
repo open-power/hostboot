@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2021
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -32,10 +32,12 @@ OBJS += $(if $(CONFIG_SECUREBOOT), service_ext.o)
 OBJS += $(if $(CONFIG_PHYS_PRES_PWR_BUTTON), phys_presence.o)
 OBJS += $(if $(CONFIG_KEY_CLEAR), key_clear.o)
 OBJS += $(if $(CONFIG_SECUREBOOT), p10_update_security_ctrl.o)
+OBJS += $(if $(CONFIG_SECUREBOOT), ody_secureboot.o)
 
 VPATH += $(PERV_HWP_PATH)
 
 EXTRAINCDIR += $(ROOTPATH)/src/usr/
+EXTRAINCDIR += $(ROOTPATH)/src/usr/isteps/
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr/
 EXTRAINCDIR += $(ROOTPATH)/src/include/usr/fapi2/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/p10/procedures/hwp/ffdc/
@@ -45,6 +47,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
 EXTRAINCDIR += $(PERV_HWP_PATH)
 

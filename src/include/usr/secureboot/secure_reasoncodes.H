@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@ namespace SECUREBOOT
         MOD_VERIFY_MEASUREMENT_SEEPROM_SECURITY = 0x16,
         MOD_CAN_XSCOM_PROC                      = 0x17,
         MOD_READ_SBE_MEASUREMENT_REGISTER       = 0x18,
+        MOD_VERIFY_ODY_SECURITY_SETTINGS        = 0x19,
 
         // Use 0x20-0x3F range for Node Communications
         MOD_NCDD_CHECK_FOR_ERRORS           = 0x20,
@@ -112,6 +113,7 @@ namespace SECUREBOOT
         RC_ALLOCATED_NE_REQUESTED          = SECURE_COMP_ID | 0x18,
         RC_UNSECURE_MEASUREMENT_VERSION    = SECURE_COMP_ID | 0x19,
         RC_UNBLOWN_MEASUREMENT_FUSE        = SECURE_COMP_ID | 0x1A,
+        RC_ODY_SECURE_SETTINGS_MISMATCH    = SECURE_COMP_ID | 0x1B,
 
         // Use 0x20-0x3F range for Node Communications
         RC_NCDD_HW_ERROR_FOUND             = SECURE_COMP_ID | 0x20,
