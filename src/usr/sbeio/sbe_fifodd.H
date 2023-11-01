@@ -1087,17 +1087,6 @@ public:
      */
     errlHndl_t performFifoReset(TARGETING::Target * i_target);
 
-    /**
-     * @Brief Setup the Access Control for the FIFO PIPE
-     *
-     *        NOT to be used on running SBE -- only for IPL
-     *
-     * @param[in]  i_target        Target to access
-     *
-     * @return errlHndl_t Error log handle on failure.
-     */
-    errlHndl_t setupPipeAccess(TARGETING::Target *i_target);
-
 protected:
 
     /**

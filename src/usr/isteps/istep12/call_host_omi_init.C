@@ -193,7 +193,6 @@ void enableInbandScomsOCMB(const TargetHandleList& i_ocmbTargetList )
 
 void enablePipeFifoOCMB( const TargetHandleList& i_ocmbTargetList )
 {
-    errlHndl_t l_errl  = nullptr;
     mutex_t   *l_mutex = nullptr;
 
     for (const auto l_ocmb : i_ocmbTargetList)
@@ -204,15 +203,7 @@ void enablePipeFifoOCMB( const TargetHandleList& i_ocmbTargetList )
 
         if (TARGETING::UTIL::isOdysseyChip(l_ocmb))
         {
-            l_errl = SBEIO::doSetupPipeAccess(l_ocmb);
-            if (l_errl)
-            {
-                ERRORLOG::errlCommit(l_errl, ISTEP_COMP_ID);
-            }
-            else
-            {
-                l_ocmb->setAttr<ATTR_USE_PIPE_FIFO>(1);
-            }
+            l_ocmb->setAttr<ATTR_USE_PIPE_FIFO>(1);
         }
     }
 }
