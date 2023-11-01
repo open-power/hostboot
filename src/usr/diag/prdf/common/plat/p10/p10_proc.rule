@@ -4051,42 +4051,42 @@ group gINT_CQ_FIR
     /** INT_CQ_FIR[43]
      *  PC fatal error summary, as indicated on pc_cq_fata
      */
-    (rINT_CQ_FIR, bit(43)) ? self_th_1;
+    (rINT_CQ_FIR, bit(43)) ? level2_th_1;
 
     /** INT_CQ_FIR[44]
      *  PC fatal error summary, as indicated on pc_cq_fata
      */
-    (rINT_CQ_FIR, bit(44)) ? self_th_1;
+    (rINT_CQ_FIR, bit(44)) ? level2_th_1;
 
     /** INT_CQ_FIR[45]
      *  PC fatal error summary, as indicated on pc_cq_fata
      */
-    (rINT_CQ_FIR, bit(45)) ? self_th_1;
+    (rINT_CQ_FIR, bit(45)) ? level2_th_1;
 
     /** INT_CQ_FIR[46]
      *  PC fatal error summary, as indicated on pc_cq_fata
      */
-    (rINT_CQ_FIR, bit(46)) ? self_th_1;
+    (rINT_CQ_FIR, bit(46)) ? level2_th_1;
 
     /** INT_CQ_FIR[47]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(47)) ? self_th_32perDay;
+    (rINT_CQ_FIR, bit(47)) ? level2_th_32perDay;
 
     /** INT_CQ_FIR[48]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(48)) ? self_th_32perDay;
+    (rINT_CQ_FIR, bit(48)) ? level2_th_32perDay;
 
     /** INT_CQ_FIR[49]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(49)) ? self_th_32perDay;
+    (rINT_CQ_FIR, bit(49)) ? level2_th_32perDay;
 
     /** INT_CQ_FIR[50]
      *  PC recoverable error summary, as indicated on pc_c
      */
-    (rINT_CQ_FIR, bit(50)) ? self_th_32perDay;
+    (rINT_CQ_FIR, bit(50)) ? level2_th_32perDay;
 
     /** INT_CQ_FIR[51]
      *  PC informational error summary, as indicated on pc
