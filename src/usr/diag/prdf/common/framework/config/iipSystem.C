@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -461,13 +461,13 @@ RuleMetaData* System::getChipMetaData( TARGETING::TYPE i_type,
                                         ResolutionFactory & i_reslFactory,
                                         errlHndl_t & o_errl )
 {
-    if( nullptr == iv_listRuleData[i_type] )
+    if( nullptr == iv_listRuleData[i_fileName] )
     {
-        iv_listRuleData[i_type] = new RuleMetaData( i_fileName,i_scanFactory,
+        iv_listRuleData[i_fileName] = new RuleMetaData( i_fileName,i_scanFactory,
                                                     i_reslFactory,i_type,
                                                     o_errl );
     }
-    return iv_listRuleData[i_type];
+    return iv_listRuleData[i_fileName];
 
 }
 

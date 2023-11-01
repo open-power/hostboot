@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 1996,2020                        */
+/* Contributors Listed Below - COPYRIGHT 1996,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,7 +103,7 @@ class ScanFacility;
 class ResolutionFactory;
 
 struct STEP_CODE_DATA_STRUCT;
-typedef std::map< TARGETING::TYPE ,RuleMetaData *> RuleMetaDataList ;
+typedef std::map< const char * ,RuleMetaData *> RuleMetaDataList ;
 
 class System
   {
