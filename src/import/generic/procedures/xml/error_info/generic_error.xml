@@ -2207,6 +2207,24 @@
 
   <hwpError>
     <sbeError/>
+    <rc>RC_MSS_INVALID_CCS_INSTR_OFFSET</rc>
+    <description>
+        Requested CCS Program has invalid instruction offset.
+    </description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>INVALID_OFFSET</ffdc>
+    <ffdc>INST_COUNT</ffdc>
+    <ffdc>OFFSET</ffdc>
+    <ffdc>MAX_INSTRUCTIONS</ffdc>
+    <!-- No hardware callout due to being a runtime only error -->
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_CCS_STUCK_IN_PROGRESS</rc>
     <description>
         CCS engine is in use and is not available
@@ -2234,6 +2252,45 @@
     </callout>
     <deconfigure>
       <target>MC_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
+    <rc>RC_ODY_ECS_CCS_STUCK_IN_PROGRESS</rc>
+    <description>
+        Trying to run ECS when CCS engine is in use and is not available
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_ODY_ECS_ERR_THRESHOLD_EXCEEDED</rc>
+    <description>
+        More errors are found in the memory than the
+        threshold value
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>SRANK</ffdc>
+    <ffdc>DRAM_NUM</ffdc>
+    <ffdc>OPCODE</ffdc>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
     </deconfigure>
   </hwpError>
 

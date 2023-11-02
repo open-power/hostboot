@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2024                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2023,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,6 +22,7 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot                                                -->
 <hwpErrors>
   <format>poz</format>
 
@@ -56,6 +57,7 @@
         </description>
         <ffdc>PORT_TARGET</ffdc>
         <ffdc>THRESHOLD</ffdc>
+        <ffdc>MRANK</ffdc>
         <ffdc>MR16_TO_19_PAT0</ffdc>
         <ffdc>MR16_TO_19_PAT0_SIZE</ffdc>
         <ffdc>MR20_PAT0</ffdc>

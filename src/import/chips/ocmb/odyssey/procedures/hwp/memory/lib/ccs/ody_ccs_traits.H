@@ -52,7 +52,7 @@
 
 ///
 /// @class ccsTraits
-/// @brief Explorer CCS Engine traits
+/// @brief Odyssey CCS Engine traits
 ///
 template<>
 class ccsTraits<mss::mc_type::ODYSSEY>
@@ -88,6 +88,7 @@ class ccsTraits<mss::mc_type::ODYSSEY>
             DATA_COMPARE_BURST_SEL = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_CCS_DATA_COMPARE_BURST_SEL,
             DATA_COMPARE_BURST_SEL_LEN = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_CCS_DATA_COMPARE_BURST_SEL_LEN,
             AUTO_BURST = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_CCS_AUTO_BURST,
+            MODEQ_NESTED_LOOP_EN =  scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_NESTED_LOOP_ENABLE,
             // TODO:MST-1437 Fix the next two bits for Odyssey CCS
             CFG_PARITY_AFTER_CMD = 24,
             DISABLE_ECC_ARRAY_CHK = scomt::ody::ODC_MCBIST_SCOM_CCS_MODEQ_DISABLE_ECC_ARRAY_CHK,
@@ -115,9 +116,9 @@ class ccsTraits<mss::mc_type::ODYSSEY>
             ARR0_CMD0_ADDRESS_0_13_LEN = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_ADDRESS_LEN,
             ARR0_CMD0_CSN_0_1 = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_CSN,
             ARR0_CMD0_CSN_0_1_LEN = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_CSN_LEN,
-            ARR0_CMD0_WRDATA_EN = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_WRDATA_EN,
             ARR0_CMD0_WRDATA_CSN = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_WRDATA_CSN,
             ARR0_CMD0_WRDATA_CSN_LEN = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_WRDATA_CSN_LEN,
+            ARR0_CMD0_WRDATA_EN = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_WRDATA_EN,
             ARR0_CMD0_PARITY = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_PTY,
             ARR0_CMD0_RESETN = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_RESETN,
             ARR0_CMD0_ADDRESS_OP = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_ADDRESS_OP,

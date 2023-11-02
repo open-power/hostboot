@@ -72,6 +72,9 @@ enum sizes
     // This is the maximum number of main ranks per DIMM supported by the hardware
     HW_MAX_RANK_PER_DIMM = 2,
 
+    // Maximum number of sranks
+    MAX_SRANKS = 4,
+
     // This is used in the row repair code to determine how many sPPRs we can do. We used an artificial limit of one
     // per bank group on DDR4, but it's technically one per bank, per DRAM, so 40*16 per DIMM
     MAX_BG_PER_DIMM = 8,
