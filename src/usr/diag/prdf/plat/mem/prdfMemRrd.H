@@ -39,42 +39,46 @@
 namespace PRDF
 {
 
-  // Row repair format, per primary rank:
-  // 32 bits per repair (Explorer):
-  //     5 bits : DRAM position (x8: 0-9, x4: 0-19)
-  //     3 bits : secondary rank (srank0-srank2)
-  //     2 bits : bank group (bg1-bg0)
-  //     3 bits : bank (b2-b0)
-  //     18 bits: row (r17-r0)
-  //     1 bit  : repair validity (0: invalid, 1: valid)
-  //
-  // 32 bits per repair (Odyssey):
-  //     5 bits : DRAM position (x8: 0-9, x4: 0-19)
-  //     3 bits : secondary rank (srank0-srank2)
-  //     3 bits : bank group (bg2-bg0)
-  //     2 bits : bank (b1-b0)
-  //     18 bits: row (r17-r0)
-  //     1 bit  : repair validity (0: invalid, 1: valid)
+// Row repair format, per primary rank:
+// 32 bits per repair (Explorer):
+//     5 bits : DRAM position (x8: 0-9, x4: 0-19)
+//     3 bits : secondary rank (srank0-srank2)
+//     2 bits : bank group (bg1-bg0)
+//     3 bits : bank (b2-b0)
+//     18 bits: row (r17-r0)
+//     1 bit  : repair validity (0: invalid, 1: valid)
+//
+// 32 bits per repair (Odyssey):
+//     5 bits : DRAM position (x8: 0-9, x4: 0-19)
+//     3 bits : secondary rank (srank0-srank2)
+//     3 bits : bank group (bg2-bg0)
+//     2 bits : bank (b1-b0)
+//     18 bits: row (r17-r0)
+//     1 bit  : repair validity (0: invalid, 1: valid)
 
+/** @brief Structure for FFDC to track address data of rows */
+struct FfdcRrData
+{
+    uint8_t prank;
+    uint8_t srank;
+    uint8_t bnkGrp;
+    uint8_t bnk;
+    uint32_t row;
 
-  /** @brief Structure for FFDC to track address data of rows */
-  struct FfdcRrData
-  {
-      uint8_t prank;
-      uint8_t srank;
-      uint8_t bnkGrp;
-      uint8_t bnk;
-      uint32_t row;
-
-      bool operator==( const FfdcRrData & i_data ) const
-      {
-          return ( this->prank == i_data.prank &&
-                   this->srank == i_data.srank &&
-                   this->bnkGrp == i_data.bnkGrp &&
-                   this->bnk == i_data.bnk &&
-                   this->row == i_data.row );
-      }
-  };
+    // Note: The bank and bank group of the address are collected for FFDC in
+    // this struct, however when resuming scrub for an RRD event the scrub will
+    // be resumed on the next row after stopping before the end of the rank. As
+    // such there is no guarantee that we stop on the exact bank/bank group
+    // that matches where the row repair was deployed. Therefore, when comparing
+    // elements of this struct, the rank and row will be taken into account,
+    // but the bank elements are deliberately not compared.
+    bool operator==( const FfdcRrData & i_data ) const
+    {
+        return ( this->prank == i_data.prank &&
+                 this->srank == i_data.srank &&
+                 this->row == i_data.row );
+    }
+};
 
 /** @brief Row Repair Deploy procedure. */
 template<TARGETING::TYPE T>

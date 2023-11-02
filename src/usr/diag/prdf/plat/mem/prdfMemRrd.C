@@ -388,12 +388,15 @@ uint32_t RrdEvent<T>::analyzePhase(STEP_CODE_DATA_STRUCT & io_sc, bool & o_done)
         if ( o_done ) break; // abort the procedure.
 
         // Determine if the row repair was deployed successfully.
-        o_rc = verifyRowRepair( io_sc, o_done );
-        if ( SUCCESS != o_rc )
+        if (lastAddr)
         {
-            PRDF_ERR( PRDF_FUNC "verifyRowRepair() failed on 0x%08x",
-                      iv_chip->getHuid() );
-            break;
+            o_rc = verifyRowRepair( io_sc, o_done );
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "verifyRowRepair() failed on 0x%08x",
+                          iv_chip->getHuid() );
+                break;
+            }
         }
 
     } while (0);
@@ -562,7 +565,7 @@ void RrdEvent<T>::addFfdc(STEP_CODE_DATA_STRUCT & io_sc)
 
     if (!buf->good())
     {
-        PRDF_ERR("RrdEvent::addCaptureData: Buffer state bad. Data may be "
+        PRDF_ERR("RrdEvent::addFfdc: Buffer state bad. Data may be "
                  "incomplete.");
     }
 

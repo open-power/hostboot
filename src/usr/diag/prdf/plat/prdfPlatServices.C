@@ -862,7 +862,7 @@ uint32_t deployRowRepair<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     uint32_t o_rc = SUCCESS;
     errlHndl_t errl = nullptr;
 
-    PRDF_TRAC( PRDF_FUNC "Calling exp_deploy_dynamic_row_repairs(0x%08x)",
+    PRDF_TRAC( PRDF_FUNC "Calling deploy_dynamic_row_repairs(0x%08x)",
                i_chip->getHuid() );
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb( i_chip->getTrgt() );
 
