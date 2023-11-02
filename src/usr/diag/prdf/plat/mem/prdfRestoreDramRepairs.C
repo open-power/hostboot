@@ -539,24 +539,23 @@ uint32_t restoreDramRepairs<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt )
 
                 break; // Assume user meant to disable DRAM repairs.
             }
-
-            uint8_t rankMask = 0, dimmMask = 0;
-            if ( SUCCESS != mssRestoreDramRepairs<TYPE_OCMB_CHIP>(i_trgt,
-                 rankMask, dimmMask) )
-            {
-                // Can't check anything if this doesn't work.
-                PRDF_ERR( "[" PRDF_FUNC "] mssRestoreDramRepairs() failed" );
-                break;
-            }
-
-            // Callout DIMMs with too many bad bits and not enough repairs available
-            if ( RDR::processBadDimms<TYPE_OCMB_CHIP>(i_trgt, dimmMask) )
-                 calloutMade = true;
-
-            // Check repaired ranks for RAS policy violations.
-            if ( RDR::processRepairedRanks<TYPE_OCMB_CHIP>(i_trgt, rankMask) )
-                 calloutMade = true;
         }
+        uint8_t rankMask = 0, dimmMask = 0;
+        if ( SUCCESS != mssRestoreDramRepairs<TYPE_OCMB_CHIP>(i_trgt, rankMask,
+             dimmMask) )
+        {
+            // Can't check anything if this doesn't work.
+            PRDF_ERR( "[" PRDF_FUNC "] mssRestoreDramRepairs() failed" );
+            break;
+        }
+
+        // Callout DIMMs with too many bad bits and not enough repairs available
+        if ( RDR::processBadDimms<TYPE_OCMB_CHIP>(i_trgt, dimmMask) )
+            calloutMade = true;
+
+        // Check repaired ranks for RAS policy violations.
+        if ( RDR::processRepairedRanks<TYPE_OCMB_CHIP>(i_trgt, rankMask) )
+            calloutMade = true;
 
     } while(0);
 
