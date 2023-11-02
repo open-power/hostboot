@@ -58,6 +58,17 @@ ReturnCode poz_sbe_hreset(
 
     if (!i_use_scom_path)
     {
+        // Get and set the side to boot the SPPE from
+        // Callers of this HWP need to set the SPPE_BOOT_SIDE
+        // as appropriate to indicate which side to boot from.
+        fapi2::buffer<uint8_t> l_bootSide;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SPPE_BOOT_SIDE, i_target, l_bootSide));
+        FAPI_TRY(SB_CS.getCfam(i_target));
+        FAPI_INF("CFAM Current boot side set to %d. l_bootSide=%d", SB_CS.getBits<17, 2>(), l_bootSide);
+        SB_CS.insertFromRight<17, 2, uint8_t>(l_bootSide);
+        FAPI_INF("CFAM New boot side set to %d.", SB_CS.getBits<17, 2>());
+        FAPI_TRY(SB_CS.putCfam(i_target));
+
         //Applying hreset only when SBE is in Runtime State
         FAPI_INF("Checking if SBE is in Runtime State");
         FAPI_TRY(SB_MSG.getCfam(i_target));
@@ -111,6 +122,17 @@ ReturnCode poz_sbe_hreset(
 
     else
     {
+        // Get and set the side to boot the SPPE from
+        // Callers of this HWP need to set the SPPE_BOOT_SIDE
+        // as appropriate to indicate which side to boot from.
+        fapi2::buffer<uint8_t> l_bootSide;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SPPE_BOOT_SIDE, i_target, l_bootSide));
+        FAPI_TRY(SB_CS.getScom(i_target));
+        FAPI_INF("SCOM Current boot side set to %d. l_bootSide=%d", SB_CS.getBits<17, 2>(), l_bootSide);
+        SB_CS.insertFromRight<17, 2, uint8_t>(l_bootSide);
+        FAPI_INF("SCOM New boot side set to %d.", SB_CS.getBits<17, 2>());
+        FAPI_TRY(SB_CS.putScom(i_target));
+
         //Applying hreset only when SBE is in Runtime State
         FAPI_INF("Checking if SBE is in Runtime State");
         FAPI_TRY(SB_MSG.getScom(i_target));
