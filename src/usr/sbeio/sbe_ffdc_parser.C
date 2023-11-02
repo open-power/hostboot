@@ -30,7 +30,10 @@
 #include <errl/errlmanager.H>
 #include <util/utilbyte.H>
 #include <sbeio/sbe_ffdc_parser.H>
+#include <sbeio/sbe_ffdc_package_parser.H>
+
 #include <fapi2.H>
+#include <set_sbe_error.H>
 
 #include "sbe_fifodd.H"
 
@@ -284,9 +287,173 @@ std::vector<errlHndl_t> SbeFFDCParser::generateSbeErrors(const uint8_t i_modId,
                                                          const uint64_t i_userdata1,
                                                          const uint64_t i_userdata2)
 {
-    // @TODO JIRA PFHB-551 Fill in this function.
+    // @TODO JIRA PFHB-551 Remove this function and replace with the filled in version.
     // The SBE could have multiple errors it wants to create for context.
     std::vector<errlHndl_t> sbeErrors;
+    return sbeErrors;
+}
+
+std::vector<errlHndl_t> SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
+                                                         const uint8_t i_modId,
+                                                         const uint16_t i_reasonCode,
+                                                         const uint64_t i_userdata1,
+                                                         const uint64_t i_userdata2)
+{
+    // The SBE could have multiple errors it wants to create for context.
+    std::vector<errlHndl_t> sbeErrors;
+    errlHndl_t slidErrl = nullptr;
+
+    // Track when SLID groups change.
+    size_t currentSlid = 0;
+
+    // Iterate over all the packages and handle them in batches of matching SLID. The SLID indicates which
+    // errors/packages belong together.
+    for (const auto & package : iv_ffdcPackages)
+    {
+        if (currentSlid != package->slid)
+        {
+            // New SLID detected.
+            currentSlid = package->slid;
+            if (slidErrl != nullptr)
+            {
+                // Add existing error to the list of return logs
+                slidErrl->collectTrace(SBEIO_COMP_NAME);
+                sbeErrors.push_back(slidErrl);
+
+                slidErrl = nullptr;
+            }
+        }
+
+        // There are three forms the package RC can take: Hardware Procedure RC, Platform RC, and RC=0. Each will be
+        // handled differently below. The list of packages have been sorted in parseFFDCData() so that HWP RCs appear
+        // first in the SLID grouping, followed by Plat RCs, and finally RC=0 packages.
+        //
+        // This is done to reduce the number of logs generated from the same SLID group. HWP RCs go first because
+        // Hostboot has to call FAPI_SET_SBE_ERROR to create the HWP error log. After that, it's easy to append PLAT RC
+        // data to that existing log. RC=0 is always last because Hostboot doesn't have a way to parse the data that
+        // comes back with RC=0 so it's added as unformated data for SBE to look over.
+        if ((package->rc != fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA) && (package->rc != 0))
+        {
+            // RC is not PLAT or 0, so it must be a hardware procedure RC.
+
+            if (slidErrl != nullptr)
+            {
+                SBE_TRACF(ERR_MRK"ERROR: SBE sent two HWP RCs with the same SLID, this is a code bug.");
+                // There should never be two HWP RCs with the same SLID. This is an SBE code bug.
+                slidErrl->addProcedureCallout(HWAS::EPUB_PRC_SBE_CODE,
+                                              HWAS::SRCI_PRIORITY_HIGH);
+
+                slidErrl->collectTrace(SBEIO_COMP_NAME);
+                // Add the existing log to the list and allow the second log to be created.
+                sbeErrors.push_back(slidErrl);
+                slidErrl = nullptr;
+
+            }
+            using namespace fapi2;
+            ReturnCode fapiRC;
+
+            /*
+             * Put FFDC data into sbeFfdc_t struct and
+             * call FAPI_SET_SBE_ERROR
+             */
+            sbeFfdc_t * ffdcBuf = reinterpret_cast<sbeFfdc_t * >(package->ffdcPtr);
+
+            FAPI_SET_SBE_ERROR(fapiRC,
+                               package->rc,
+                               ffdcBuf,
+                               i_target->getAttr<TARGETING::ATTR_FAPI_POS>());
+
+            slidErrl = rcToErrl(fapiRC,
+                                package->severity,
+                                RC_HWP_GENERATED_SBE_ERROR);
+
+            if (slidErrl != nullptr)
+            {
+                slidErrl->collectTrace(FAPI_TRACE_NAME);
+            }
+        }
+        else if (package->rc == fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
+        {
+            if (slidErrl == nullptr)
+            {
+                // Create new error for this SLID
+                //     severity comes from ffdc package
+                slidErrl = new ERRORLOG::ErrlEntry(package->severity,
+                                                   i_modId,
+                                                   i_reasonCode,
+                                                   i_userdata1,
+                                                   i_userdata2);
+
+            }
+            else
+            {
+                // An error was already created earlier.
+                // If severity of this package exceeds severity of slid-pel then upgrade severity
+                if (((package->severity == ERRORLOG::ERRL_SEV_UNRECOVERABLE)
+                        && (slidErrl->sev() != package->severity))
+                    || ((package->severity == ERRORLOG::ERRL_SEV_PREDICTIVE)
+                        && (slidErrl->sev() == ERRORLOG::ERRL_SEV_RECOVERED)))
+                {
+                    slidErrl->setSev(package->severity);
+                }
+            }
+
+            // Add (platform) data to error
+            slidErrl->addFFDC(SBEIO_COMP_ID,
+                              package->ffdcPtr,
+                              package->size,
+                              0, /* version */
+                              SBEIO_UDT_PARAMETERS,
+                              false /* Do not merge*/);
+        }
+        else // RC==0
+        {
+            if (slidErrl == nullptr)
+            {
+                // Create new error for this SLID
+                slidErrl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                                   i_modId,
+                                                   i_reasonCode,
+                                                   i_userdata1,
+                                                   i_userdata2);
+
+            }
+            // For now, rc == 0 will have its data stuffed into a log as unformatted data. SBE team has said that RC=0
+            // means no failure on the part of the SBE but they will sometimes send data back anyway.
+            // At present there is no way to distingiush between PLAT error or HWP error RC=0 cases. So this
+            // data may only be understood by SBE team.
+            slidErrl->addFFDC(SBEIO_COMP_ID,
+                              package->ffdcPtr,
+                              package->size,
+                              0,
+                              SBEIO_UDT_NO_FORMAT,
+                              false );
+
+            slidErrl->addProcedureCallout(HWAS::EPUB_PRC_SBE_CODE,
+                                          HWAS::SRCI_PRIORITY_HIGH);
+        }
+
+        // If FFDC schema is known and a processing routine is defined then perform the processing.
+        // For scom PIB errors, addFruCallouts is invoked. Only processing known FFDC schemas protects us
+        // from trying to process FFDC formats we do not anticipate. For example, the SBE can send user and
+        // attribute FFDC information after the Scom Error FFDC. We do not want to process that type of data here.
+        // Ignore the return value, in this context it doesn't do anything for the logic of this function.
+        FfdcParsedPackage::doDefaultProcessing(*package,
+                                                     i_target,
+                                                     slidErrl);
+
+
+    }
+
+    // Make sure the last error makes it into the list
+    if (slidErrl != nullptr)
+    {
+        // Add existing error to the list of return logs
+        slidErrl->collectTrace(SBEIO_COMP_NAME);
+        sbeErrors.push_back(slidErrl);
+    }
+
+    // Return list of all logs made to caller to deal with (add callouts or whatever)
     return sbeErrors;
 }
 

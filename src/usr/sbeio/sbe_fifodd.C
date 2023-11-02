@@ -79,8 +79,6 @@ extern trace_desc_t* g_trac_sbeio;
 #define SBE_TRACDBIN(args...)
 #endif
 
-#define TOLERATE_BLACKLIST_ERRS 0
-
 using namespace ERRORLOG;
 using namespace TARGETING;
 
@@ -462,10 +460,6 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
 
     SBE_TRACD(ENTER_MRK "readResponse");
 
-#ifdef TOLERATE_BLACKLIST_ERRS
-    auto blacklisted = false;
-#endif
-
     do
     {
         // EOT is expected before the response buffer is full. Room for
@@ -646,150 +640,38 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                          l_pStatusHeader->primaryStatus,
                                          l_pStatusHeader->secondaryStatus));
 
-            #ifdef TOLERATE_BLACKLIST_ERRS
-            if(   (FIFO_STATUS_MAGIC == l_pStatusHeader->magic)
-               && (SBE_PRI_UNSECURE_ACCESS_DENIED == l_pStatusHeader->primaryStatus)
-               && (SBE_SEC_BLACKLISTED_REG_ACCESS == l_pStatusHeader->secondaryStatus))
-            {
-                blacklisted = true;
-
-                const SbeFifo::fifoPutScomRequest* pScomRequest =
-                    reinterpret_cast<const SbeFifo::fifoPutScomRequest*>(
-                        i_pFifoRequest);
-
-                SBE_TRACF(ERR_MRK "SbeFifo::readResponse: Secure Boot "
-                    "violation; request blacklisted by SBE.  Reference EID "
-                    "0x%08X, PLID 0x%08X, reason code 0x%04X, "
-                    "class 0x%02X, command 0x%02X, address 0x%016llX, "
-                    "data 0x%016llX",
-                    errl->eid(),errl->plid(),errl->reasonCode(),
-                    pScomRequest->commandClass, pScomRequest->command,
-                    pScomRequest->address, pScomRequest->data);
-
-                errl->collectTrace(SBEIO_COMP_NAME);
-            }
-            #endif
-
             collectRegFFDC(i_target,errl);
 
-            if(!l_fifoBuffer.msgContainsFFDC())
-            {
-                break;
-            }
+            errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                      HWAS::SRCI_PRIORITY_HIGH);
 
-            SbeFFDCParser * l_ffdc_parser = new SbeFFDCParser();
-            l_ffdc_parser->parseFFDCData(const_cast<void*>(l_fifoBuffer.getFFDCPtr()));
-
-            // Go through the buffer, get the RC
-            uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
-            // bool to track if addFruCallouts() was called on any of the FFDC packages
-            bool l_didDefaultProcessing{false};
-            for(uint8_t i = 0; i < l_pkgs; i++)
-            {
-                 ffdc_package l_package{};
-                 if(!l_ffdc_parser->getFFDCPackage(i, l_package))
-                 {
-                     continue;
-                 }
-
-                 uint32_t l_rc = l_package.rc;
-                 // If fapiRC, add data to errorlog
-                 if(l_rc ==  fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
-                 {
-                     errl->addFFDC( SBEIO_COMP_ID,
-                                    l_package.ffdcPtr,
-                                    l_package.size,
-                                    0,
-                                    SBEIO_UDT_PARAMETERS,
-                                    false );
-                 }
-                 else if (l_rc == 0)
-                 {
-                     // For now, rc == 0 will have its data stuffed into the existing log. SBE team has said that RC=0
-                     // means no failure on the part of the SBE but they will sometimes send data back anyway.
-                     // At present there is no way to distingiush between PLAT error or HWP error RC=0 cases. So this
-                     // data may only be understood by SBE team.
-                     errl->addFFDC( SBEIO_COMP_ID,
-                                    l_package.ffdcPtr,
-                                    l_package.size,
-                                    0,
-                                    SBEIO_UDT_NO_FORMAT,
-                                    false );
-                 }
-                 else
-                 {
-                     using namespace fapi2;
-                     ReturnCode l_fapiRC;
-
-                     /*
-                      * Put FFDC data into sbeFfdc_t struct and
-                      * call FAPI_SET_SBE_ERROR
-                      */
-                     sbeFfdc_t * l_ffdcBuf = reinterpret_cast<sbeFfdc_t * >(l_package.ffdcPtr);
-                     auto fapiTargetType = convertTargetingTypeToFapi2(i_target->getAttr<TARGETING::ATTR_TYPE>());
-
-                     FAPI_SET_SBE_ERROR(l_fapiRC,
-                                l_rc,
-                                l_ffdcBuf,
-                                i_target->getAttr<TARGETING::ATTR_FAPI_POS>(),
-                                fapiTargetType);
-
-                     errlHndl_t sbe_errl = fapi2::rcToErrl(l_fapiRC,
-                                                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                                           fapi2::RC_HWP_GENERATED_SBE_ERROR);
-                     if( sbe_errl )
-                     {
-                         sbe_errl->plid(errl->plid());
-                         sbe_errl->collectTrace(FAPI_TRACE_NAME);
-                         ERRORLOG::errlCommit( sbe_errl, SBEIO_COMP_ID );
-                     }
-                 }
-
-                 //If FFDC schema is known and a processing routine
-                 //is defined then perform the processing.
-                 //For scom PIB errors, addFruCallouts is invoked.
-                 //Only processing known FFDC schemas protects us
-                 //from trying to process FFDC formats we do not
-                 //anticipate. For example, the SBE can send
-                 //user and attribute FFDC information after the
-                 //Scom Error FFDC. We do not want to process that
-                 //type of data here.
-                 l_didDefaultProcessing |= FfdcParsedPackage::doDefaultProcessing(l_package,
-                                                                                  i_target,
-                                                                                  errl);
-            }
-
-            // only add automatic callouts if doDefaultProcessing() did not
-            // call addFruCallouts() on the current errl
-            if (!l_didDefaultProcessing)
-            {
-                errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
-                                          HWAS::SRCI_PRIORITY_HIGH);
-                errl->addHwCallout(i_target,
-                                   HWAS::SRCI_PRIORITY_LOW,
-                                   HWAS::NO_DECONFIG,
-                                   HWAS::GARD_NULL);
-            }
-
+            errl->addHwCallout(i_target,
+                               HWAS::SRCI_PRIORITY_LOW,
+                               HWAS::NO_DECONFIG,
+                               HWAS::GARD_NULL);
             errl->collectTrace(SBEIO_COMP_NAME);
 
-            delete l_ffdc_parser;
-            break;
+        }
+
+        if(l_fifoBuffer.msgContainsFFDC())
+        {
+            SbeFFDCParser l_ffdc_parser;
+            l_ffdc_parser.parseFFDCData(const_cast<void*>(l_fifoBuffer.getFFDCPtr()));
+
+            std::vector<errlHndl_t> sbeErrors = l_ffdc_parser.generateSbeErrors(i_target,
+                                                                                SBEIO_FIFO,
+                                                                                SBEIO_FIFO_RESPONSE_ERROR,
+                                                                                0,
+                                                                                0);
+            // Commit any returned logs and return the chip-op failure log
+            // @TODO PFHB-551 Do not commit these here. Instead aggregate/return these logs along with the chip-op.
+            for (auto error : sbeErrors)
+            {
+                ERRORLOG::errlCommit(error, SBEIO_COMP_ID);
+            }
         }
     }
     while (0);
-
-#ifdef TOLERATE_BLACKLIST_ERRS
-    if(blacklisted)
-    {
-        // Do not terminate the boot when tolerating blacklist errors, just log
-        // the error and move on.  Note that until all blacklist violations are
-        // fixed, SBE will still execute the request, but will return primary
-        // status as access denied and secondary status as blacklist violation,
-        // which is how we know there is a theoretical problem to address.
-        ERRORLOG::errlCommit(errl, SBEIO_COMP_ID);
-    }
-#endif
 
     if (errl) {SBE_TRACF(ERR_MRK  "readResponse");}
 

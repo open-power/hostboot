@@ -160,6 +160,11 @@ class SbeFFDCParser
                 const uint64_t i_userdata1,
                 const uint64_t i_userdata2);
 
+        std::vector<errlHndl_t> generateSbeErrors(TARGETING::TargetHandle_t i_target,
+                const uint8_t i_modId,
+                const uint16_t i_reasonCode,
+                const uint64_t i_userdata1,
+                const uint64_t i_userdata2);
 
     private:
         /**
