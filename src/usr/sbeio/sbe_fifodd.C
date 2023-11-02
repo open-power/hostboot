@@ -470,7 +470,7 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
         l_SBEobj->main_sbe_handler();
     }
 
-    SBE_TRACF(EXIT_MRK "waitUpFifoReady(0x%08X) = 0x%08X",
+    SBE_TRACU(EXIT_MRK "waitUpFifoReady(0x%08X) = 0x%08X",
               get_huid(i_target),
               ERRL_GETEID_SAFE(errl));
 
