@@ -68,7 +68,8 @@ template <>
 fapi2::ReturnCode config_ccs_regs_for_concurrent<mss::mc_type::EXPLORER>(const
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         fapi2::buffer<uint64_t>& o_modeq_reg,
-        const mss::states i_nttm_mode)
+        const mss::states i_nttm_mode,
+        const mss::states i_nested_loop_en)
 {
     using TT = ccsTraits<mss::mc_type::EXPLORER>;
 
@@ -78,6 +79,7 @@ fapi2::ReturnCode config_ccs_regs_for_concurrent<mss::mc_type::EXPLORER>(const
     // Configure modeq register
     FAPI_TRY(mss::getScom(i_target, TT::MODEQ_REG, o_modeq_reg));
     l_temp = o_modeq_reg;
+    l_temp.template writeBit<TT::MODEQ_NESTED_LOOP_EN>(i_nested_loop_en); // enables the nested loop in ccs instr
     l_temp.template writeBit<TT::NTTM_MODE>(i_nttm_mode); // 1 = nontraditional transparent mode
     l_temp.template clearBit<TT::STOP_ON_ERR>();          // 1 = stop on ccs error
     l_temp.template setBit<TT::UE_DISABLE>();             // 1 = hardware ignores UEs

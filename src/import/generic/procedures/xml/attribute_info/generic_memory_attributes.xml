@@ -726,4 +726,17 @@
         <noSBEAccessor/>
         <mssAccessorName>dram_address_mirroring</mssAccessorName>
     </attribute>
+
+    <attribute>
+        <id>ATTR_ECS_ERROR_COUNT_THRESHOLD</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            This value produces an error log if the total errors
+            when running ECS are greater than the threshold value
+        </description>
+        <initToZero></initToZero>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <noSBEAccessor/>
+    </attribute>
 </attributes>

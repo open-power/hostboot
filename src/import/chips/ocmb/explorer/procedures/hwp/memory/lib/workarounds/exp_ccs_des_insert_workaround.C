@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,7 +107,7 @@ fapi2::ReturnCode insert_des<mss::mc_type::EXPLORER>(
     FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + io_inst_count, l_des.arr1) );
 
 #ifndef __PPE__
-    FAPI_INF("css inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
+    FAPI_INF("ccs inst %d fixup: 0x%016lX 0x%016lX (0x%lx, 0x%lx) %s",
              io_inst_count, l_des.arr0, l_des.arr1,
              CCS_ARR0_ZERO + io_inst_count, CCS_ARR1_ZERO + io_inst_count, mss::c_str(i_target));
 #endif

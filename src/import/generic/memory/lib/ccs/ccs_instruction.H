@@ -78,7 +78,11 @@ class instruction_t
         fapi2::buffer<uint64_t> arr0;
         fapi2::buffer<uint64_t> arr1;
         // The port indexed rank on which to operate. If this is invalid, all ranks will be disabled
-        uint64_t iv_port_rank;
+        uint8_t iv_port_rank;
+        // Signed integer value for the goto that is an offset from current instruction
+        // This defaults to '1' for "standard" CCS programs that run sequentially
+        // from instruction 0 to N
+        int8_t iv_goto_instr_offset;
         // Different memory controllers handle the 16-bit idle and repeats separately
         // As such, we store the idle and repeat command values here
         // They will then be updated immediately prior to the arrays buffers being loaded into the registers
@@ -134,16 +138,19 @@ class instruction_t
         /// @param[in] i_arr0 the initial value for arr0, defaults to 0
         /// @param[in] i_arr1 the initial value for arr1, defaults to 0
         /// @param[in] i_update_rank true if the rank should be updated before being sent, defaults to true
+        /// @param[in] i_goto_instr_offset offset that takes you to the next intruction
         ///
         instruction_t( const uint64_t i_port_rank = NO_CHIP_SELECT_ACTIVE,
                        const fapi2::buffer<uint64_t> i_arr0 = 0,
                        const fapi2::buffer<uint64_t> i_arr1 = 0,
                        const uint16_t i_idles = 0,
                        const uint16_t i_repeats = 0,
-                       const bool i_update_rank = true):
+                       const bool i_update_rank = true,
+                       const int8_t i_goto_instr_offset = 1):
             arr0(i_arr0),
             arr1(i_arr1),
             iv_port_rank(i_port_rank),
+            iv_goto_instr_offset(i_goto_instr_offset),
             iv_idles(i_idles),
             iv_repeats(i_repeats),
             iv_update_rank(i_update_rank)
@@ -287,9 +294,10 @@ class instruction_t
                    iv_port_rank == i_rhs.iv_port_rank &&
                    iv_update_rank == i_rhs.iv_update_rank &&
                    iv_idles == i_rhs.iv_idles &&
-                   iv_repeats == i_rhs.iv_repeats;
+                   iv_repeats == i_rhs.iv_repeats &&
+                   iv_goto_instr_offset == i_rhs.iv_goto_instr_offset;
         }
-};
+} __attribute__ ((aligned (8)));
 
 } // ends namespace ccs
 } // ends namespace mss

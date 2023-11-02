@@ -641,13 +641,15 @@ fapi_try_exit:
 /// @param[in] i_target The MC target
 /// @param[out] o_modeq_reg A buffer to return the original value of modeq
 /// @param[in] i_nttm_mode state to write to the NTTM mode bit (default false)
+/// @param[in] i_nested_loop_en state to write to the NESTED_LOOP_EN bit (default false)
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template <>
 fapi2::ReturnCode config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(const
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         fapi2::buffer<uint64_t>& o_modeq_reg,
-        const mss::states i_nttm_mode)
+        const mss::states i_nttm_mode,
+        const mss::states i_nested_loop_en)
 {
     using TT = ccsTraits<mss::mc_type::ODYSSEY>;
 
@@ -657,6 +659,7 @@ fapi2::ReturnCode config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(const
     // Configure modeq register
     FAPI_TRY(mss::getScom(i_target, TT::MODEQ_REG, o_modeq_reg));
     l_temp = o_modeq_reg;
+    l_temp.template writeBit<TT::MODEQ_NESTED_LOOP_EN>(i_nested_loop_en); // enables the nested loop in ccs instr
     l_temp.template writeBit<TT::NTTM_MODE>(i_nttm_mode); // 1 = nontraditional transparent mode
     l_temp.template clearBit<TT::STOP_ON_ERR>();          // 1 = stop on ccs error
     l_temp.template setBit<TT::UE_DISABLE>();             // 1 = hardware ignores UEs

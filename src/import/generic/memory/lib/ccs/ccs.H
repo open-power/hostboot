@@ -607,7 +607,7 @@ template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT
 static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& i_target,
         IT io_inst_iter,
         ccs::program<MC>& io_program,
-        const fapi2::Target<P>& i_port )
+        const fapi2::Target<P>& i_port)
 {
     // Subtract one for the idle we insert at the end
     constexpr size_t CCS_INSTRUCTION_DEPTH = TT::MAX_INST_DEPTH;
@@ -619,6 +619,7 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
     uint64_t l_delay = 0;
     uint64_t l_repeat = 0;
     uint8_t l_current_cke = 0;
+    int8_t l_inst_offset_count = 0;
 
     // Grab port index and first inst
     const auto l_port_index = mss::relative_pos<MC, T>(i_port);
@@ -648,12 +649,28 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
 
         io_inst_iter->get_cke_helper(l_current_cke);
 
-        // Make sure this instruction leads to the next. Notice this limits this mechanism to pretty
-        // simple (straight line) CCS programs. Anything with a loop or such will need another mechanism.
+        // iv_goto_instr_offset makes sure to go to the next instruction for simple straight line CCS
+        // programs or anything with loop. The offset needs to be set correctly in the calling function
+        // when the instructions need to be looped.
+        // Check that we have less than the maximum CCS instructions
+        l_inst_offset_count = l_inst_count + io_inst_iter->iv_goto_instr_offset;
+        FAPI_ASSERT(l_inst_offset_count >= 0 &&
+                    size_t(l_inst_offset_count) < CCS_INSTRUCTION_DEPTH,
+                    fapi2::MSS_INVALID_CCS_INSTR_OFFSET()
+                    .set_MC_TARGET(i_target)
+                    .set_INVALID_OFFSET(l_inst_offset_count)
+                    .set_INST_COUNT(l_inst_count)
+                    .set_OFFSET(io_inst_iter->iv_goto_instr_offset)
+                    .set_MAX_INSTRUCTIONS(CCS_INSTRUCTION_DEPTH),
+                    TARGTIDFORMAT " CCS instruction offset points at invalid instruction index, current instruction: %d, offset: %d",
+                    TARGTID, l_inst_count, l_inst_count + io_inst_iter->iv_goto_instr_offset);
 
-        io_inst_iter->arr1.template insertFromRight<TT::ARR1_GOTO_CMD, TT::ARR1_GOTO_CMD_LEN>(l_inst_count + 1);
+        io_inst_iter->arr1.template insertFromRight<TT::ARR1_GOTO_CMD, TT::ARR1_GOTO_CMD_LEN>
+        (l_inst_offset_count);
         FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, io_inst_iter->arr0) );
         FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, io_inst_iter->arr1) );
+
+
 
         // arr1 contains a specification of the delay and repeat after this instruction, as well
         // as a repeat. Total up the delays as we go so we know how long to wait before polling
@@ -673,7 +690,7 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
     FAPI_TRY(update_initial_delays<MC>(i_target, l_total_delay, io_program),
              "Failed in update_initial_delays for ccs::setup_ccs_instructions on " TARGTIDFORMAT, TARGTID);
 
-    FAPI_INF_NO_SBE("executing ccs instructions via MCBIST (%d:%d, %d) for " TARGTIDFORMAT,
+    FAPI_INF_NO_SBE("executing ccs instructions via MCBIST (%d:%d, %ull) for " TARGTIDFORMAT,
                     io_program.iv_instructions.size(), l_inst_count, io_program.iv_poll.iv_initial_delay, TARGTID);
 
     // Deselect
@@ -853,12 +870,14 @@ fapi2::ReturnCode post_execute_via_mcbist(const fapi2::Target<T>& i_target, cons
 /// @param[in] i_target The MC target
 /// @param[out] o_modeq_reg A buffer to return the original value of modeq
 /// @param[in] i_nttm_mode state to write to the NTTM mode bit (default false)
+/// @param[in] i_nested_loop_en state to write to the NESTED_LOOP_EN bit (default false)
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template <mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC>>
 fapi2::ReturnCode config_ccs_regs_for_concurrent(const fapi2::Target<T>& i_target,
         fapi2::buffer<uint64_t>& o_modeq_reg,
-        const mss::states i_nttm_mode = mss::states::OFF);
+        const mss::states i_nttm_mode = mss::states::OFF,
+        const mss::states i_nested_loop_en = mss::states::OFF);
 
 ///
 /// @brief Sets config registers to passed values
