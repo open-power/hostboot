@@ -1321,6 +1321,18 @@
     </attribute>
 
     <attribute>
+      <id>ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT</id>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <description>
+          The time in milliseconds to poll for the OMI setup command completing before exiting out of exp_omi_setup
+      </description>
+      <valueType>uint32</valueType>
+      <default>20000</default>
+      <platInit/>
+      <overrideOnly/>
+    </attribute>
+
+    <attribute>
       <id>ATTR_MSS_EXP_OMI_CDR_OFFSET</id>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
       <description>

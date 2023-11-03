@@ -83,9 +83,10 @@ extern "C"
     ///
     /// @brief Setup the OCMB for enterprise and half-DIMM modes as desired
     /// @param[in] i_target the OCMB target to operate on
+    /// @param[in] i_poll_repeat true if the caller wants to repeat a polling attempt - defaults to false
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+    fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target, const bool i_poll_repeat)
     {
         mss::display_git_commit_info("exp_omi_setup");
 
@@ -103,6 +104,7 @@ extern "C"
         fapi2::ATTR_MSS_EXP_OMI_CDR_OFFSET_LANE_MASK_Type l_cdr_offset_lane_mask = 0;
         fapi2::ATTR_MSS_MNFG_EDPL_TIME_Type l_mnfg_edpl_time = 0;
         fapi2::ATTR_MSS_MNFG_EDPL_THRESHOLD_Type l_mnfg_edpl_threshold = 0;
+        uint32_t l_poll_count = 0;
 
         // Declares variables
         std::vector<uint8_t> l_boot_config_data;
@@ -127,50 +129,55 @@ extern "C"
         FAPI_TRY(mss::attr::get_mnfg_edpl_time(l_mnfg_edpl_time));
         FAPI_TRY(mss::attr::get_mnfg_edpl_threshold(l_mnfg_edpl_threshold));
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, l_proc, l_omi_freq) );
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT, i_target, l_poll_count) );
+        FAPI_TRY(mss::attr::get_exp_omi_cdr_bw_override(i_target, l_cdr_bw_override));
 
         // FFE Setup
         FAPI_TRY(mss::attr::get_omi_ffe_settings_command(i_target, l_enable_ffe_settings));
 
-        if (l_enable_ffe_settings == fapi2::ENUM_ATTR_OMI_FFE_SETTINGS_COMMAND_ENABLE)
+        if(!i_poll_repeat)
         {
-            FAPI_TRY(mss::exp::omi::ffe_setup(i_target, l_ffe_setup_data));
-            FAPI_TRY(mss::exp::i2c::send_ffe_settings(i_target, l_ffe_setup_data));
-            FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 20, l_fw_status_data));
-            FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_TWI_FFE_SETTINGS, l_ffe_setup_data,
-                     l_fw_status_data));
+            if (l_enable_ffe_settings == fapi2::ENUM_ATTR_OMI_FFE_SETTINGS_COMMAND_ENABLE)
+            {
+                FAPI_TRY(mss::exp::omi::ffe_setup(i_target, l_ffe_setup_data));
+                FAPI_TRY(mss::exp::i2c::send_ffe_settings(i_target, l_ffe_setup_data));
+                FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, mss::DELAY_1MS, 20, l_fw_status_data));
+                FAPI_TRY(mss::exp::i2c::check::command_result(i_target, mss::exp::i2c::FW_TWI_FFE_SETTINGS, l_ffe_setup_data,
+                         l_fw_status_data));
+            }
+
+            // Apply override for CDR bandwidth
+            // Use the default for the given freq if override is zero, unless we're on Apollo
+            if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
+            {
+                FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target,
+                         l_omi_freq,
+                         l_cdr_bw_override));
+            }
+
+            FAPI_TRY(mss::exp::workarounds::omi::override_cdr_bw_i2c(i_target, l_cdr_bw_override));
+
+            // Gets the data setup
+            FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
+
+            // Set up dl_layer_boot_mode according to FW and HW support
+            // Need to run original sequence (0b00) on Apollo and on legacy FW
+            FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_boot_config_data));
+
+            // Issues the command and checks for completion
+            // Note: This does not kick off OMI training
+            FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
+
+            //// Wait a bit for the command (DLL lock and OMI training) to complete
+            //// Value based on initial Explorer hardware.
+            //// The command takes ~300ms and we poll for around 100ms, so wait 250ms here
+            FAPI_TRY( fapi2::delay( (mss::DELAY_1MS * 250), 200) );
         }
-
-        // Apply override for CDR bandwidth
-        FAPI_TRY(mss::attr::get_exp_omi_cdr_bw_override(i_target, l_cdr_bw_override));
-
-        // Use the default for the given freq if override is zero, unless we're on Apollo
-        if (l_is_apollo == fapi2::ENUM_ATTR_MSS_IS_APOLLO_FALSE)
-        {
-            FAPI_TRY(mss::exp::workarounds::omi::cdr_bw_override(i_target,
-                     l_omi_freq,
-                     l_cdr_bw_override));
-        }
-
-        FAPI_TRY(mss::exp::workarounds::omi::override_cdr_bw_i2c(i_target, l_cdr_bw_override));
-
-        // Gets the data setup
-        FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
-
-        // Set up dl_layer_boot_mode according to FW and HW support
-        // Need to run original sequence (0b00) on Apollo and on legacy FW
-        FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_boot_config_data));
-
-        // Issues the command and checks for completion
-        // Note: This does not kick off OMI training
-        FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
-
-        //// Wait a bit for the command (DLL lock and OMI training) to complete
-        //// Value based on initial Explorer hardware.
-        //// The command takes ~300ms and we poll for around 100ms, so wait 250ms here
-        FAPI_TRY( fapi2::delay( (mss::DELAY_1MS * 250), 200) );
 
         // Check FW status for success
-        FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, 2 * mss::DELAY_1MS, 100000, l_fw_status_data));
+        // Convert the poll count over from milliseconds to units of 2 milliseconds rounding up
+        l_poll_count = (l_poll_count / 2) + (l_poll_count % 2);
+        FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, 2 * mss::DELAY_1MS, l_poll_count, l_fw_status_data));
         l_rc_bootconfig0 = mss::exp::i2c::check::boot_config(i_target, l_boot_config_data, l_fw_status_data);
         l_rc_bootconfig0_copy = l_rc_bootconfig0;
 

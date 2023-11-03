@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,7 @@
 
 #include <fapi2.H>
 
-typedef fapi2::ReturnCode (*exp_omi_setup_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&);
+typedef fapi2::ReturnCode (*exp_omi_setup_FP_t) (const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&, const bool);
 
 extern "C"
 {
@@ -45,9 +45,11 @@ extern "C"
     ///
     /// @brief Setup the OCMB for enterprise and half-DIMM modes as desired
     /// @param[in] i_target the OCMB target to operate on
+    /// @param[in] i_poll_repeat true if the caller wants to repeat a polling attempt - defaults to false
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+    fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                     const bool i_poll_repeat = false);
 }
 
 #endif
