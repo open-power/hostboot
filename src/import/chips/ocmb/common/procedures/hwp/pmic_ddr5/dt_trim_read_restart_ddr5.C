@@ -93,8 +93,7 @@ fapi2::ReturnCode dt_trim_read_restart_ddr5(const fapi2::Target<fapi2::TARGET_TY
     FAPI_TRY(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_COMMAND, l_data_trim));
 
     // Delay before locking trims
-    // TODO ZEN:MST-2386 Apply correct delay for DT restart HWP
-    fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+    fapi2::delay(5 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
     // Lock Trim section for each DT
     for(const auto& l_dt : mss::find_targets<fapi2::TARGET_TYPE_POWER_IC>(i_ocmb_target))
