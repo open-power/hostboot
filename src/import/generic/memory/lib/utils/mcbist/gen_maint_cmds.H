@@ -1009,7 +1009,9 @@ fapi2::ReturnCode unspare(const size_t i_spare,
     fapi2::buffer<uint64_t> l_steer_mux_rd;
 
     const auto& l_port = i_rank.get_port_target();
-    const auto l_port_rank = i_rank.get_port_rank();
+    uint8_t l_steer_mux_index = i_rank.get_port_rank();
+
+    update_steer_mux_instance<MC>(l_port, l_steer_mux_index);
 
     // Check for i_port_rank or i_spare or i_symbol out of range
     FAPI_TRY(mss::steer::check::rank<MC>(l_port, i_rank.get_port_rank()));
@@ -1028,22 +1030,22 @@ fapi2::ReturnCode unspare(const size_t i_spare,
     {
         // Get correct ranks spare data for spare0
         FAPI_TRY(l_steer_mux_wr.insertFromRight(mss::steer::genSteerTraits<MC>::SPARE_UNUSED,
-                                                mss::steer::get_muxregs_left<MC, mss::steer::mux_type::WRITE_MUX>(l_port_rank),
+                                                mss::steer::get_muxregs_left<MC, mss::steer::mux_type::WRITE_MUX>(l_steer_mux_index),
                                                 WM::SPARE_MUX_LEN));
 
         FAPI_TRY(l_steer_mux_rd.insertFromRight(mss::steer::genSteerTraits<MC>::SPARE_UNUSED,
-                                                mss::steer::get_muxregs_left<MC, mss::steer::mux_type::READ_MUX>(l_port_rank),
+                                                mss::steer::get_muxregs_left<MC, mss::steer::mux_type::READ_MUX>(l_steer_mux_index),
                                                 RM::SPARE_MUX_LEN));
     }
     else
     {
         // Get correct ranks spare data for spare1
         FAPI_TRY(l_steer_mux_wr.insertFromRight(mss::steer::genSteerTraits<MC>::SPARE_UNUSED,
-                                                mss::steer::get_muxregs_right<MC, mss::steer::mux_type::WRITE_MUX>(l_port_rank),
+                                                mss::steer::get_muxregs_right<MC, mss::steer::mux_type::WRITE_MUX>(l_steer_mux_index),
                                                 WM::SPARE_MUX_LEN));
 
         FAPI_TRY(l_steer_mux_rd.insertFromRight(mss::steer::genSteerTraits<MC>::SPARE_UNUSED,
-                                                mss::steer::get_muxregs_right<MC, mss::steer::mux_type::READ_MUX>(l_port_rank),
+                                                mss::steer::get_muxregs_right<MC, mss::steer::mux_type::READ_MUX>(l_steer_mux_index),
                                                 RM::SPARE_MUX_LEN));
     }
 
