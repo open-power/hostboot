@@ -27,9 +27,15 @@
 ################################################################################
 # simple usage:
 #   xlate_stack -l hbicore.list -s "<-0x347F8<-0x4001574C<-0x4001CDC8"
+#
 # usage for DCE built for standalone simics:
 #   xlate_stack -l hbicore_test.list -d ody.dce.test.lid.debug.list -e 0xb92000
 #       -s "<-0x3B818<-0x4001E614<-0xB960A0<-0xB9628C<-0x40C5EDEC<-0x26E4"
+#
+# usage for hbrt stack addrs
+#   xlate_stack -f hbrt_addrs -l hbirt.list
+#     (put the hbrt stack addrs into a file, and pass with -f <fn>)
+#         "ISF=FFFFFF0001190000 NIA=FFFFFF00000270A4 ...."
 ################################################################################
 
 use strict;
@@ -52,12 +58,49 @@ GetOptions(
             "rt_addr=s"     => \my $runtime_base_addr,
             "elf_dce=s"     => \my $dce_elf,
             "dce_listing=s" => \my $dce_list,
+            "file_hbrt=s"   => \my $hbrt_file,
             "Verbosity=i"   => \my $verbosity)
    or die("Error in command line arguments\n");
 
 ################################################################################
 # input parm checks
 ################################################################################
+if ($hbrt_file && $stack_addrs) {die "Cannot provide -s and -f";}
+
+if ($hbrt_file)
+{
+   # Convert the hbrt_file stack addrs and place into the var $stack_addrs.
+   # This program can then lookup the addrs normally in the listing
+
+    my $fh;
+    my $addr;
+    my $num;
+
+    $stack_addrs = "";
+
+    open($fh, $hbrt_file) or die "File '$hbrt_file' cannot be opened";
+
+    foreach my $line (<$fh>)
+    {
+        $line =~ /NIA/ or next;
+        chomp $line;
+
+        # extract the NIA addr
+        my ($junk, $nia) = split /NIA=/, $line;
+        ($addr, $junk)   = split / /, $nia;
+
+        # remove the leading 10 chars from NIA addr
+        $addr = substr($addr, 10, 6);
+
+        # subtract 0x1000 (dont ask why, just do it)
+        $num = hex($addr) - 0x1000;
+
+        # append to create the -s <stack_addrs>
+        $stack_addrs .= sprintf("<-0x%x", $num);
+    }
+    close $fh;
+}
+
 $hbicore_list      or die "Provide hbicore listing file.";
 $stack_addrs       or die "Provide stack addrs.";
 $verbosity         or $verbosity=0;
