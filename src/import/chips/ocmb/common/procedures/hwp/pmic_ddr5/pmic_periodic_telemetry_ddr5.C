@@ -51,8 +51,11 @@
 void read_serial_ccin_number(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                              mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
 {
-    // TODO: ZEN-MST1906 Periodic telemetry data collection
-    // TODO: ZEN-MST2154 Make a generic attr for serial number
+    uint8_t l_serial_number[26] = {0};
+
+    FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SERIAL_NUMBER, io_target_info.iv_ocmb, l_serial_number);
+
+    memcpy(io_periodic_tele_info.iv_serial_number, l_serial_number, sizeof(l_serial_number));
 }
 
 ///

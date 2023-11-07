@@ -593,11 +593,9 @@ struct __attribute__ ((__packed__)) periodic_telemetry_data
     uint8_t reserved = 0;
     uint16_t reserved1 = 0;
 
-    uint8_t iv_serial_number[22] = {0};
+    uint8_t iv_serial_number[26] = {0};
     uint8_t reserved2 = 0;
     uint8_t reserved3 = 0;
-
-    uint8_t iv_ccin_number[4] = {0};
 
     adc_periodic_telemetry_data iv_adc;
 
