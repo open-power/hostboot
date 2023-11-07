@@ -232,7 +232,7 @@ void* call_omi_setup (void *io_pArgs)
 
     // Set ATTR_ATTN_CHK_OCMBS to let ATTN know that we may now get attentions
     // from Explorer, but interrupts from the OCMB are not enabled yet.
-    if (UTIL::hasOdysseyOcmbChildren(UTIL::getCurrentNodeTarget()))
+    if (!UTIL::hasOdysseyOcmbChildren(UTIL::getCurrentNodeTarget()))
     {
         TRACISTEP("Enable attention processing for Explorer OCMBs");
         sys->setAttr<ATTR_ATTN_CHK_OCMBS>(1);
