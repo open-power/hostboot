@@ -205,7 +205,7 @@ inline OT ps_to_cycles(const T i_clock_period, const OT i_ps)
     const OT l_remainder = i_ps % ((i_clock_period == 0) ? 1 : l_divisor);
 
     // Make sure we add a cycle if there wasn't an even number of cycles in the input
-    FAPI_INF("converting %llups to %llu cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : l_rounder));
+    FAPI_INF_NO_SBE("converting %llups to %llu cycles", i_ps, l_quotient + (l_remainder == 0 ? 0 : l_rounder));
 
     return l_quotient + (l_remainder == 0 ? 0 : l_rounder);
 }
@@ -262,7 +262,7 @@ fapi_try_exit:
 inline uint64_t cycles_to_ps(const uint64_t i_clock_period, const uint64_t i_cycles)
 {
     const auto l_ps = i_cycles * i_clock_period;
-    FAPI_INF("converting %llu cycles to %llups", i_cycles, l_ps );
+    FAPI_INF_NO_SBE("converting %llu cycles to %llups", i_cycles, l_ps );
     return l_ps;
 }
 
@@ -418,7 +418,7 @@ inline uint64_t cycles_to_ns(const fapi2::Target<T>& i_target, const uint64_t i_
 inline uint64_t cycles_to_ns(const uint64_t i_clock_period, const uint64_t i_cycles)
 {
     const uint64_t l_ns = cycles_to_time<CONVERT_PS_IN_A_NS>(i_clock_period, i_cycles);
-    FAPI_INF("converting %llu cycles to %lluns", i_cycles, l_ns);
+    FAPI_INF_NO_SBE("converting %llu cycles to %lluns", i_cycles, l_ns);
 
     return l_ns;
 }
@@ -432,7 +432,7 @@ inline uint64_t cycles_to_ns(const uint64_t i_clock_period, const uint64_t i_cyc
 inline uint64_t cycles_to_us(const uint64_t i_clock_period, const uint64_t i_cycles)
 {
     const uint64_t l_us = cycles_to_time<CONVERT_PS_IN_A_US>(i_clock_period, i_cycles);
-    FAPI_INF("converting %llu cycles to %lluus", i_cycles, l_us);
+    FAPI_INF_NO_SBE("converting %llu cycles to %lluus", i_cycles, l_us);
 
     return l_us;
 }
