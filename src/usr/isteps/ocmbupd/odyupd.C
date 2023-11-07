@@ -245,6 +245,17 @@ void check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
 
         static_assert(sizeof(img->image_hash) == sizeof(codelevel.hash));
 
+        // Set the measured hashes for secureboot comparison between measurements
+        // from the Odyssey later.
+        if(codelevel.type == codelevel_info_t::bootloader)
+        {
+            i_ocmb->setAttr<ATTR_SPPE_BOOTLOADER_MEASUREMENT_HASH>(img->measured_hash);
+        }
+        else if(codelevel.type == codelevel_info_t::runtime)
+        {
+            i_ocmb->setAttr<ATTR_SPPE_RUNTIME_MEASUREMENT_HASH>(img->measured_hash);
+        }
+
         /* If the hashes don't match; or if the bootloader needs
            updating and this image is the runtime image (see comments
            for bootloader_needs_update); or if this is the golden side

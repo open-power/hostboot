@@ -126,6 +126,7 @@ def create_ocmbfw_image(layout, outfile):
                                                 image['dd_level'],
                                                 image['compression'],
                                                 image.get('pakfile_hash_path'),
+                                                image.get('measured_hash_path'),
                                                 image.get('image_hash'),
                                                 image.get('unhashed_header_size')))
 
@@ -210,7 +211,7 @@ def gen_label():
 #    is a label object that marks the offset to replace that 64-bit number with.
 def pack_fw_image_info_struct(image_type, image_path, ocmb_type,
                               dd_level, compression, pakfile_hash_path,
-                              image_hash_algo, unhashed_header_size):
+                              measured_hash_path, image_hash_algo, unhashed_header_size):
     try:
         dd_major, dd_minor = map(int, dd_level.split('.'))
     except Exception as e:
@@ -238,17 +239,27 @@ def pack_fw_image_info_struct(image_type, image_path, ocmb_type,
         hasher.update(open(image_path, 'rb').read()[unhashed_header_size or 0:])
         image_hash = hasher.digest()
 
+    if measured_hash_path:
+        ec = subprocess.run(['paktool', 'extract', image_path, measured_hash_path])
+        if ec.returncode != 0:
+            print(format(ec.args))
+            error('paktool could not extract measured hash :: '.format(ec.args))
+        measured_hash = open(measured_hash_path, 'rb').read()
+    else:
+        measured_hash = bytes()
+
     payload_reloc = gen_reloc64()
     payload_label = gen_label()
 
     return ([
-               struct.pack('>QQIIQ64s',
+               struct.pack('>QQIIQ64s64s',
                            ocmb_type_to_enum(ocmb_type),
                            image_type_to_enum(image_type),
                            dd_major,
                            dd_minor,
                            compression_type,
-                           image_hash),
+                           image_hash,
+                           measured_hash),
                payload_reloc,
                struct.pack('>Q', 0), # This 64-bit 0 will be replaced
                                      # by the relative position of the

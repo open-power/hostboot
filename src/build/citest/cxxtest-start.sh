@@ -48,17 +48,14 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
 
     PPE_SUBREPO_TOP_COMMIT=$(git submodule status src/build/tools/extern/ppe | awk '{print $1}' | sed 's/^-//')
     PPE_CACHE_DIR=${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}
-    if [[ "$HB_FAST_PRIME" ]]; then
+    if [[ "$HB_FAST_PRIME" ]] && [[ -d ${PPE_CACHE_DIR} ]]; then
         # Pick up pre-built SBE images
         SBE_STANDALONE_IMG=${PPE_CACHE_DIR}/sbe_seeprom_p10.bin.ecc
         SBE_STANDALONE_MEASURE_IMG=${PPE_CACHE_DIR}/sbe_measurement_p10.bin.ecc
         SBE_STANDALONE_OTPROM_IMG=${PPE_CACHE_DIR}/sbe_otprom_p10.bin
         SBE_SCRIPT_TO_RUN=${PPE_CACHE_DIR}/sbeTest/sbe_startup.simics
         SBE_SCRIPTS_PATH=${PPE_CACHE_DIR}/sbeTest/
-    fi
-
-    # Cache dir doesn't exist; fall back to compiled images
-    if [ ! -d ${PPE_CACHE_DIR} ]; then
+    else
         SBE_STANDALONE_IMG=${STANDALONE_SIMICS}/import/boot_roms/sbe_seeprom_p10.bin.ecc
         SBE_STANDALONE_MEASURE_IMG=${STANDALONE_SIMICS}/import/boot_roms/sbe_measurement_p10.bin.ecc
         SBE_STANDALONE_OTPROM_IMG=${STANDALONE_SIMICS}/import/boot_roms/sbe_otprom_p10.bin

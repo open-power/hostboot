@@ -9354,6 +9354,42 @@
   </attribute>
 
   <attribute>
+    <id>SPPE_BOOTLOADER_MEASUREMENT_HASH</id>
+    <description>
+      The measured.hash for the SPPE's bootloader image. Comes from boot.pak
+      that is built as part of Odyssey image builds. The measured.hash is included
+      in OCMBFW PNOR partition and is used to perform secureboot verification of
+      Odysseys during IPL.
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>64</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <id>SPPE_RUNTIME_MEASUREMENT_HASH</id>
+    <description>
+       The measured.hash for the SPPE's runtime image. Comes from rt.pak
+       that is built as part of Odyssey image builds. The measured.hash is included
+       in OCMBFW PNOR partition and is used to perform secureboot verification of
+       Odysseys during IPL.
+     </description>
+    <simpleType>
+      <uint8_t/>
+      <array>64</array>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <complexType>
       <description>
          Structure which defines a system's SP functions.

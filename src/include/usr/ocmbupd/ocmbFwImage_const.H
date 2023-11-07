@@ -155,6 +155,9 @@ struct ocmbfw_ext_image_info
     ocmbfw_hash_t image_hash; // Hash of image contents. How this is
                               // calculated is dependent on the OCMB
                               // and image types.
+    ocmbfw_hash_t measured_hash; // Hash of the expected measurements that OCMB
+                                 // will write into measurement registers for
+                                 // secureboot validation.
     uint64_t image_offset; // byte offset from the V2 PNOR section header to image contents.
     uint64_t image_size; // Size of image contents in bytes
 } PACKED;

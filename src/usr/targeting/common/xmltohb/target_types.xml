@@ -487,6 +487,12 @@
     <attribute>
       <id>SBE_VERSION_INFO</id>
     </attribute>
+    <attribute>
+      <id>SPPE_BOOTLOADER_MEASUREMENT_HASH</id>
+    </attribute>
+    <attribute>
+      <id>SPPE_RUNTIME_MEASUREMENT_HASH</id>
+    </attribute>
   </targetType>
 
   <targetType>

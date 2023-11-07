@@ -19,6 +19,7 @@
             "image_version": "1",
             "image_path": UNPKGD_ODY_BLDR_IMG,
             "pakfile_hash_path": "boot/image.hash",
+            "measured_hash_path": "boot/measured.hash",
             "compression": "none"
         },
         {
@@ -28,6 +29,7 @@
             "image_version": "1",
             "image_path": UNPKGD_ODY_RT_IMG,
             "pakfile_hash_path": "rt/image.hash",
+            "measured_hash_path": "rt/measured.hash",
             "compression": "none"
         },
         {
