@@ -140,35 +140,6 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::checkEcc( const uint32_t & i_eccAttns,
                                               STEP_CODE_DATA_STRUCT & io_sc,
                                               bool & o_done );
 
-//------------------------------------------------------------------------------
-
-template<>
-uint32_t VcmEvent<TYPE_OCMB_CHIP>::cleanup( STEP_CODE_DATA_STRUCT & io_sc )
-{
-    #define PRDF_FUNC "[VcmEvent::cleanup] "
-
-    uint32_t o_rc = SUCCESS;
-
-    do
-    {
-        bool junk = false;
-        o_rc = MarkStore::chipMarkCleanup<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
-                                                           iv_port, io_sc,
-                                                           junk );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
-                      iv_chip->getHuid(), iv_rank.getKey() );
-            break;
-        }
-
-    } while (0);
-
-    return o_rc;
-
-    #undef PRDF_FUNC
-}
-
 //##############################################################################
 //
 //                          Generic template functions
@@ -211,10 +182,13 @@ uint32_t VcmEvent<T>::falseAlarm( STEP_CODE_DATA_STRUCT & io_sc )
                        iv_chip->getHuid(), getKey() );
 
             // Leave the chip mark in place and do any necessary cleanup.
-            o_rc = cleanup( io_sc );
-            if ( SUCCESS != o_rc )
+            bool junk = false;
+            o_rc = MarkStore::chipMarkCleanup<T>(iv_chip, iv_rank, iv_port,
+                                                 io_sc, junk);
+            if (SUCCESS != o_rc)
             {
-                PRDF_ERR( PRDF_FUNC "cleanup() failed" );
+                PRDF_ERR(PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
+                         iv_chip->getHuid(), iv_rank.getKey());
                 break;
             }
         }

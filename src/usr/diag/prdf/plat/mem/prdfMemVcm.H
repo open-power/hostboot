@@ -57,9 +57,13 @@ class VcmEvent : public TdEntry
      * @param i_port Target port.
      */
     VcmEvent<T>( ExtensibleChip * i_chip, const MemRank & i_rank,
-                 const MemMark & i_mark, const uint8_t& i_port ) :
+                 const MemMark & i_mark, const uint8_t& i_port,
+                 bool i_tpsSymbolMarkBackup = false,
+                 bool i_tpsUnrepairedDqBackup = false) :
         TdEntry(VCM_EVENT, i_chip, i_port, i_rank), iv_mark(i_mark),
-        iv_rowRepairEnabled(PlatServices::isRowRepairEnabled<T>(i_chip,i_rank))
+        iv_rowRepairEnabled(PlatServices::isRowRepairEnabled<T>(i_chip,i_rank)),
+        iv_tpsSymbolMarkBackup(i_tpsSymbolMarkBackup),
+        iv_tpsUnrepairedDqBackup(i_tpsUnrepairedDqBackup)
     {
         PRDF_ASSERT( nullptr != i_chip );
         PRDF_ASSERT( T == i_chip->getType() );
@@ -262,57 +266,7 @@ class VcmEvent : public TdEntry
      * @param  io_sc  The step code data struct.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t verified( STEP_CODE_DATA_STRUCT & io_sc )
-    {
-        #define PRDF_FUNC "[VcmEvent::verified] "
-
-        uint32_t o_rc = SUCCESS;
-
-        PRDF_TRAC( PRDF_FUNC "Chip mark verified: 0x%08x,0x%02x",
-                   iv_chip->getHuid(), getKey() );
-
-        io_sc.service_data->setSignature( iv_chip->getHuid(),
-                                          PRDFSIG_VcmVerified );
-
-        // Leave the chip mark in place and do any necessary cleanup.
-        o_rc = cleanup( io_sc );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "cleanup() failed" );
-        }
-
-        return o_rc;
-
-        #undef PRDF_FUNC
-    }
-
-    /**
-     * @brief  Cleanup required when a chip mark is left in place (i.e. chip
-     *         mark verified or false alarm threshold). Will balance the chip
-     *         and symbol marks, set VPD, and initiate DRAM sparing if
-     *         supported.
-     * @param  io_sc  The step code data struct.
-     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
-     */
-    uint32_t cleanup( STEP_CODE_DATA_STRUCT & io_sc )
-    {
-        #define PRDF_FUNC "[VcmEvent::cleanup] "
-
-        uint32_t o_rc = SUCCESS;
-
-        bool junk = false;
-        o_rc = MarkStore::chipMarkCleanup<T>( iv_chip, iv_rank, iv_port, io_sc,
-                                              junk );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
-                    iv_chip->getHuid(), iv_rank.getKey() );
-        }
-
-        return o_rc;
-
-        #undef PRDF_FUNC
-    }
+    uint32_t verified( STEP_CODE_DATA_STRUCT & io_sc );
 
     /**
      * @brief  Verification failed. Do additional processing such as removing
@@ -345,18 +299,16 @@ class VcmEvent : public TdEntry
     uint8_t iv_mceCount = 0; ///< MCEs hit count, currently for Row Repair only.
     MemAddr iv_rowRepairFailAddr; ///< Address stored to apply Row Repair on.
     bool iv_disableStopOnMce = false; ///< Used to disable stop on MCE
+
+    // There exist scenarios where VCM will be triggered by TPS to determine if
+    // a bad dq is contained to a row and can be repaired with a row repair. In
+    // those cases flags indicating what action to take if a row repair cannot
+    // be performed as opposed to the usual handling.
+    bool iv_tpsSymbolMarkBackup;
+    bool iv_tpsUnrepairedDqBackup;
 };
 
 //------------------------------------------------------------------------------
-
-// Forward declarations for template specializations. Required for functions
-// that are also defined in the primary template.
-
-#ifdef __HOSTBOOT_RUNTIME
-template<>
-uint32_t VcmEvent<TARGETING::TYPE_OCMB_CHIP>::cleanup(
-    STEP_CODE_DATA_STRUCT & io_sc);
-#endif
 
 } // end namespace PRDF
 

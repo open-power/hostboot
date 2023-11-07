@@ -542,6 +542,12 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                               "failed", iv_chip->getHuid(), getKey() );
                     break;
                 }
+
+                // Trigger VCM to see if it's contained to a single row
+                TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
+                    iv_rank, newCM, iv_port };
+                MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
+                vcmQueued = true;
             }
             // Else we can't place a spare
             else
@@ -549,9 +555,33 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 // If the symbol mark is available.
                 if ( !symMark.isValid() )
                 {
+                    // If placing a chip mark does not risk a UE
+                    if (noSpareUeRisk)
+                    {
+                        // Place a chip mark
+                        MemMark newCM(i_badDqCount.symList.at(0).symbol);
+                        o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>(iv_chip,
+                            iv_rank, newCM);
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                                      "failed", iv_chip->getHuid(), getKey() );
+                            break;
+                        }
+
+                        // Trigger VCM to see if it's contained to a single row
+                        // Set the flag for VCM indicating that a symbol mark
+                        // should be used if a row repair cannot be.
+                        TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
+                            iv_rank, newCM, iv_port, true, false };
+
+                        MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
+                        vcmQueued = true;
+
+                    }
                     // If the sum above one nibble count is <= 1 or sum above
                     // one nibble count == 2 and single sym nibble count == 2
-                    if ( (i_sumAboveOneCount.count <= 1) ||
+                    else if ( (i_sumAboveOneCount.count <= 1) ||
                             (i_sumAboveOneCount.count == 2 &&
                              i_singleSymCount.count == 2) )
                     {
@@ -622,34 +652,83 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
             bool noSpareUeRisk = (i_sumAboveOneCount.count == 0);
 
             // If we can place a spare
-            if ( spAvail && noSpareUeRisk  )
+            if ( spAvail && noSpareUeRisk )
             {
-                // Placing a chip mark to deploy a spare does not risk a UE
-                MemMark newCM(i_badDqCount.symList.at(0).symbol);
-                o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>( iv_chip,
-                    iv_rank, newCM );
-                if ( SUCCESS != o_rc )
+                // Place a chip mark and trigger VCM on one of the bad DQs. If
+                // one of the bad DQs is already being fixed by a symbol mark,
+                // place the chip mark on the other one.
+                for (const auto & sym : i_badDqCount.symList)
                 {
-                    PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
-                              "failed", iv_chip->getHuid(), getKey() );
-                    break;
+                    if (symMark.isValid() && sym.symbol == symMark.getSymbol())
+                    {
+                        PRDF_TRAC(PRDF_FUNC "Symbol mark already used to "
+                            "repair symbol %d on huid 0x%08x, port %d, rank "
+                            "0x%02x", sym.symbol.getSymbol(),
+                            iv_chip->getHuid(), iv_port, getKey());
+                        continue;
+                    }
+                    else
+                    {
+                        MemMark newCM(sym.symbol);
+                        o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>(
+                            iv_chip, iv_rank, newCM);
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                                      "failed", iv_chip->getHuid(), getKey() );
+                            break;
+                        }
+
+                        // Trigger VCM to see if it's contained to a single row
+                        TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
+                            iv_rank, newCM, iv_port };
+                        MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
+                        vcmQueued = true;
+
+                        // Only have the one chip mark to apply, break out.
+                        break;
+                    }
                 }
             }
             // Else we can't place a spare
             else
             {
-                // Permanently mask mainline NCEs and TCEs and ban TPS.
-                MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank, iv_port );
-
                 // If the symbol mark is available.
                 if ( !symMark.isValid() )
                 {
+                    // If placing a chip mark is safe i.e. does not risk a UE
+                    if (noSpareUeRisk)
+                    {
+                        // Place a chip mark on either of the two DQs and
+                        // trigger VCM to see if the DQ is contained to a row
+                        MemMark newCM(i_badDqCount.symList.at(0).symbol);
+                        o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>(iv_chip,
+                            iv_rank, newCM);
+                        if ( SUCCESS != o_rc )
+                        {
+                            PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                                      "failed", iv_chip->getHuid(), getKey() );
+                            break;
+                        }
+
+                        // Set the flag for VCM indicating that a symbol mark
+                        // should be used if a row repair cannot be.
+                        TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
+                            iv_rank, newCM, iv_port, true, false };
+
+                        MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
+                        vcmQueued = true;
+                    }
                     // If the sum above one nibble count is = 0 or sum above one
                     // nibble count = 1 and single sym nibble count = 1
-                    if ( (i_sumAboveOneCount.count == 0) ||
-                            (i_sumAboveOneCount.count == 1 &&
-                             i_singleSymCount.count == 1) )
+                    else if ( (i_sumAboveOneCount.count == 0) ||
+                                (i_sumAboveOneCount.count == 1 &&
+                                 i_singleSymCount.count == 1) )
                     {
+                        // Permanently mask mainline NCEs and TCEs and ban TPS.
+                        MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                            iv_port );
+
                         // This means we have only one more potential bad DQ,
                         // which is correctable after a symbol mark is placed.
                         // Place a symbol mark on the bad DQ with the highest
@@ -689,6 +768,10 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     }
                     else
                     {
+                        // Permanently mask mainline NCEs and TCEs and ban TPS.
+                        MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                            iv_port );
+
                         // Placing a symbol mark risks a UE.
                         // For nibbles under threshold with a sum greater than
                         // 1, update VPD with it's non-zero symbols.
@@ -711,22 +794,51 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                 else
                 {
                     // Otherwise assume the symbol mark is fixing a bad DQ.
-                    // Update VPD with the unrepaired symbol.
-                    for ( auto sym : i_badDqCount.symList )
-                    {
-                        if ( sym.symbol == symMark.getSymbol() ) continue;
 
-                        o_rc = dqBitmap.setSymbol( sym.symbol );
+                    // If placing a chip mark is safe i.e. does not risk a UE
+                    if (noSpareUeRisk)
+                    {
+                        // Place a chip mark
+                        MemMark newCM(i_badDqCount.symList.at(0).symbol);
+                        o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>(iv_chip,
+                            iv_rank, newCM);
                         if ( SUCCESS != o_rc )
                         {
-                            PRDF_ERR( PRDF_FUNC "dqBitmap.setSymbol failed." );
+                            PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
+                                      "failed", iv_chip->getHuid(), getKey() );
                             break;
                         }
-                    }
-                    if ( SUCCESS != o_rc ) break;
 
-                    // Set the false alarm flag to true.
-                    tpsFalseAlarm = true;
+                        // Trigger VCM to see if it's contained to a single row
+                        // Set the flag for VCM indicating that an unrepaired DQ
+                        // should be used if a row repair cannot be.
+                        TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
+                            iv_rank, newCM, iv_port, false, true };
+
+                        MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
+                        vcmQueued = true;
+                    }
+                    else
+                    {
+                        // Permanently mask mainline NCEs and TCEs and ban TPS.
+                        MemDbUtils::banTps<TYPE_OCMB_CHIP>( iv_chip, iv_rank,
+                                                            iv_port );
+
+                        // Update VPD with the unrepaired symbol.
+                        for ( auto sym : i_badDqCount.symList )
+                        {
+                            if ( sym.symbol == symMark.getSymbol() ) continue;
+
+                            o_rc = dqBitmap.setSymbol( sym.symbol );
+                            if ( SUCCESS != o_rc )
+                            {
+                                PRDF_ERR( PRDF_FUNC "dqBitmap.setSymbol "
+                                          "failed." );
+                                break;
+                            }
+                        }
+                        if ( SUCCESS != o_rc ) break;
+                    }
                 }
             }
         }

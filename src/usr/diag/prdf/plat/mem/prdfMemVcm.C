@@ -315,6 +315,98 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
 //------------------------------------------------------------------------------
 
 template<>
+uint32_t VcmEvent<TYPE_OCMB_CHIP>::verified(STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #define PRDF_FUNC "[VcmEvent::verified] "
+
+    uint32_t o_rc = SUCCESS;
+
+    PRDF_TRAC(PRDF_FUNC "Chip mark verified: 0x%08x,0x%02x",
+              iv_chip->getHuid(), getKey());
+
+    io_sc.service_data->setSignature(iv_chip->getHuid(),
+                                     PRDFSIG_VcmVerified);
+
+    if (iv_tpsSymbolMarkBackup || iv_tpsUnrepairedDqBackup)
+    {
+        // If the backup was a symbol mark, place a symbol mark on the symbol.
+        if (iv_tpsSymbolMarkBackup)
+        {
+            MemMark newSymMark(iv_mark.getSymbol());
+            o_rc = MarkStore::writeSymbolMark<TYPE_OCMB_CHIP>(iv_chip, iv_rank,
+                newSymMark);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "writeSymbolMark(0x%08x,0x%02x) failed",
+                          iv_chip->getHuid(), getKey() );
+                return o_rc;
+            }
+        }
+        // If the backup was an unrepaired DQ, ban TPS on the rank and
+        // permanently mask mainline NCEs and TCEs.
+        else if (iv_tpsUnrepairedDqBackup)
+        {
+            #ifdef __HOSTBOOT_RUNTIME
+            MemDbUtils::banTps<TYPE_OCMB_CHIP>(iv_chip, iv_rank, iv_port);
+            #endif
+        }
+
+        // Remove the chip mark
+        o_rc = MarkStore::clearChipMark<TYPE_OCMB_CHIP>(iv_chip, iv_rank,
+                                                        iv_port);
+        if (SUCCESS != o_rc)
+        {
+            PRDF_ERR(PRDF_FUNC "clearChipMark(0x%08x,0x%02x,%x) failed",
+                     iv_chip->getHuid(), getKey(), iv_port);
+            return o_rc;
+        }
+
+        // Update VPD with the symbol
+        TargetHandle_t memport = getConnectedChild(iv_chip->getTrgt(),
+                                                   TYPE_MEM_PORT, iv_port);
+        MemDqBitmap dqBitmap;
+        o_rc = getBadDqBitmap<TYPE_MEM_PORT>(memport, iv_rank, dqBitmap);
+        if (SUCCESS != o_rc)
+        {
+            PRDF_ERR(PRDF_FUNC "getBadDqBitmap(0x%08x, 0x%02x) failed",
+                     getHuid(memport), iv_rank.getKey());
+            return o_rc;
+        }
+        o_rc = dqBitmap.setSymbol(iv_mark.getSymbol());
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "dqBitmap.setSymbol failed." );
+            return o_rc;
+        }
+        o_rc = setBadDqBitmap<TYPE_MEM_PORT>(memport, iv_rank, dqBitmap);
+        if ( SUCCESS != o_rc )
+        {
+            PRDF_ERR( PRDF_FUNC "setBadDqBitmap(0x%08x, 0x%02x) failed",
+                    getHuid(memport), iv_rank.getKey() );
+            return o_rc;
+        }
+    }
+    else
+    {
+        // Leave the chip mark in place and do any necessary cleanup.
+        bool junk = false;
+        o_rc = MarkStore::chipMarkCleanup<TYPE_OCMB_CHIP>(iv_chip, iv_rank,
+                                                          iv_port, io_sc, junk);
+        if (SUCCESS != o_rc)
+        {
+            PRDF_ERR(PRDF_FUNC "chipMarkCleanup(0x%08x,0x%02x) failed",
+                     iv_chip->getHuid(), iv_rank.getKey());
+        }
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
 uint32_t VcmEvent<TYPE_OCMB_CHIP>::rowRepair( STEP_CODE_DATA_STRUCT & io_sc,
                                               bool & o_done )
 {
