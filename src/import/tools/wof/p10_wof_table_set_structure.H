@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ typedef struct __attribute__((__packed__))  wofImageHeader
     uint8_t     entryCount;
     // Varies, Absolute offset to the Section Table.
     uint32_t    offset;
-    // Varies, Provided from the –tsi input parameter. Otherwise, all NULLs.
+    // Varies, Provided from the tsi input parameter. Otherwise, all NULLs.
     char        setId[16];
     // 0s, Reserved.
     char        pad[6];
