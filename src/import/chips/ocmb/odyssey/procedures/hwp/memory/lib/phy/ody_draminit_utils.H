@@ -3312,19 +3312,6 @@ fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TAR
         fapi2::hwp_data_ostream& o_log_data,
         bool& o_loop_end);
 
-// Not needed for PPE as this is only being used for initial bringup/simulation which will not be running PPE
-#ifndef __PPE__
-///
-/// @brief Configures the DRAM training message block using sim environment hardcoded values
-/// @param[in] i_target the memory port on which to operate
-/// @param[out] o_struct the message block
-/// @return fapi2::FAPI2_RC_SUCCESS iff successful
-///
-fapi2::ReturnCode configure_dram_train_message_block_hardcodes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
-        i_target,
-        PMU_SMB_DDR5U_1D_t& o_struct);
-#endif
-
 ///
 /// @brief Configures the msg block on to snps phy
 /// @param[in] i_target the target on which to operate
