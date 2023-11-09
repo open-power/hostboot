@@ -115,7 +115,7 @@ bool OdyPllDomain::Query(ATTENTION_TYPE i_attnType)
     {
         ExtensibleChip* chip = LookUp(index);
 
-#ifdef __HOSTBOOT_MODULE
+#if defined __HOSTBOOT_MODULE && !defined __HOSTBOOT_RUNTIME // IPL only
 
         // When the ATTR_ATTN_CHK_OCMBS attribute is set to a non-zero value,
         // check if this chip is in the list of chips with active attentions.
@@ -127,8 +127,33 @@ bool OdyPllDomain::Query(ATTENTION_TYPE i_attnType)
                 continue; // Try the next chip.
             }
         }
+        // There is a window early in the IPL where SCOMs to the OCMB will fail
+        // because the OCMBs have not been configured yet. We can assume that if
+        // the processor thinks there are active recoverable attentions coming
+        // from the connected OCMBs that it is safe to SCOM the OCMBs. Note that
+        // this check must be here instead of in the 'queryPllUnlock' plugin
+        // because of the istep covered by ATTR_ATTN_CHK_OCMBS, where the OCMBs
+        // are SCOMable, but we won't see anything on the processor side of the
+        // bus.
+        else
+        {
+            auto mccChip = getConnectedParent(chip, TYPE_MCC);
+            auto relPos = chip->getPos() % 2;
+            auto bit = 1 + relPos * 4;
 
-#endif // __HOSTBOOT_MODULE
+            auto fir = mccChip->getRegister("MC_DSTL_FIR");
+            auto msk = mccChip->getRegister("MC_DSTL_FIR_MASK");
+
+            // No need to check power faults on processor registers becase that
+            // would have been done in the processor PLL domain.
+            if (SUCCESS == fir->Read() && SUCCESS == msk->Read() &&
+                (!fir->IsBitSet(bit) || msk->IsBitSet(bit)))
+            {
+                continue; // Try the next chip.
+            }
+        }
+
+#endif // IPL only
 
         // Query this chip for an active attention.
         bool attn  = false;
