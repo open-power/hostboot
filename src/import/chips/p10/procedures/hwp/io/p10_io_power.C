@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,11 +34,100 @@
 
 #include <p10_io_power.H>
 #include <p10_io_ppe_lib.H>
-#include <p10_io_ppe_regs.H>
 #include <p10_scom_pauc.H>
 #include <p10_io_lib.H>
 
-class p10_io_power : public p10_io_ppe_cache_proc
+p10_io_ppe_cache_proc_power_on::p10_io_ppe_cache_proc_power_on() :
+    p10_io_ppe_fw_regs
+{
+    p10_io_ppe_cache(&p10_io_phy_ppe_scom_regs, p10_io_ppe_fw_regs0_start),
+    p10_io_ppe_cache(&p10_io_phy_ppe_scom_regs, p10_io_ppe_fw_regs1_start),
+    p10_io_ppe_cache(&p10_io_phy_ppe_scom_regs, p10_io_ppe_fw_regs2_start),
+    p10_io_ppe_cache(&p10_io_phy_ppe_scom_regs, p10_io_ppe_fw_regs3_start),
+    p10_io_ppe_cache(&p10_io_phy_ppe_scom_regs, p10_io_ppe_fw_regs4_start)
+},
+p10_io_ppe_ext_cmd_done
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000101, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000101, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000101, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000101, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000101, 0xffff, 0)
+},
+p10_io_ppe_ext_cmd_done_power_off_pl
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000101, 0x200, 9),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000101, 0x200, 9),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000101, 0x200, 9),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000101, 0x200, 9),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000101, 0x200, 9)
+},
+p10_io_ppe_ext_cmd_done_power_on_pl
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000101, 0x100, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000101, 0x100, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000101, 0x100, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000101, 0x100, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000101, 0x100, 8)
+},
+p10_io_ppe_ext_cmd_done_tx_fifo_init_pl
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000101, 0x80, 7),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000101, 0x80, 7),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000101, 0x80, 7),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000101, 0x80, 7),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000101, 0x80, 7)
+},
+p10_io_ppe_ext_cmd_lanes_00_15
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000000, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000000, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000000, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000000, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000000, 0xffff, 0)
+},
+p10_io_ppe_ext_cmd_lanes_16_31
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000001, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000001, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000001, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000001, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000001, 0xffff, 0)
+},
+p10_io_ppe_ext_cmd_req
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000010, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000010, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000010, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000010, 0xffff, 0),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000010, 0xffff, 0)
+},
+p10_io_ppe_ext_cmd_req_power_off_pl
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000010, 0x200, 9),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000010, 0x200, 9),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000010, 0x200, 9),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000010, 0x200, 9),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000010, 0x200, 9)
+},
+p10_io_ppe_ext_cmd_req_power_on_pl
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000010, 0x100, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000010, 0x100, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000010, 0x100, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000010, 0x100, 8),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000010, 0x100, 8)
+},
+p10_io_ppe_ext_cmd_req_tx_fifo_init_pl
+{
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[0], 0b000000010, 0x80, 7),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[1], 0b000000010, 0x80, 7),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[2], 0b000000010, 0x80, 7),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[3], 0b000000010, 0x80, 7),
+    p10_io_ppe_sram_reg(&p10_io_ppe_fw_regs[4], 0b000000010, 0x80, 7)
+} {}
+
+class p10_io_power : public p10_io_ppe_cache_proc_power_on
 {
     private:
         fapi2::ReturnCode p10_io_power_check_thread_done(
