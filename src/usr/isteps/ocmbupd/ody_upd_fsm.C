@@ -39,6 +39,7 @@
 
 #include <console/consoleif.H>
 #include <sbeio/sbeioif.H>
+#include <sbeio/errlud_sbeio.H>
 
 #include <ocmbupd/ocmbupd.H>
 #include <ocmbupd/ocmbupd_trace.H>
@@ -1179,6 +1180,7 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
 
     if (i_errlog)
     {
+        SBEIO::UdSPPECodeLevels(i_ocmb).addToLog(i_errlog);
         errlCommit(i_errlog, OCMBUPD_COMP_ID);
         ErrlManager::callFlushErrorLogs(); // this may deconfigure an ocmb, and we want to
                                            // communicate that to the caller.
@@ -1337,6 +1339,7 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
                   get_huid(ocmb),
                   event_to_str(i_event).data(),
                   TRACE_ERR_ARGS(fsm_error));
+            SBEIO::UdSPPECodeLevels(ocmb).addToLog(fsm_error);
         }
 
         return fsm_error;

@@ -39,6 +39,7 @@
 #include <errl/errlreasoncodes.H>
 #include "sbe_fifo_buffer.H"
 #include "sbe_fifodd.H"
+#include <sbeio/errlud_sbeio.H>
 #include <sbeio/sbe_ffdc_package_parser.H>
 #include <sbeio/sbe_ffdc_parser.H>
 #include <fapi2.H>
@@ -188,6 +189,10 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
     if (errl)
     {
         SBE_TRACF(ERR_MRK  "performFifoChipOp: PIPE Fifo");
+        if (TARGETING::UTIL::isOdysseyChip(i_target))
+        {
+            UdSPPECodeLevels(i_target).addToLog(errl);
+        }
     }
 
     i_target->setAttr<TARGETING::ATTR_SBE_FIFO_IN_PROGRESS>(--l_fifo_in_progress);

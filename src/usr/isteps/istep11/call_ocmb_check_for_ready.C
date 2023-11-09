@@ -55,6 +55,7 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/odyutil.H>
 #include <sbeio/sbeioif.H>
+#include <sbeio/errlud_sbeio.H>
 #include <util/misc.H>
 #include <sys/time.h>
 #include <time.h>
@@ -486,6 +487,7 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                 if (i_ocmb_errl)
                 {
                     TRACISTEP("parallel_for_each ody_upd_process_event: OCMB HUID=0x%X proc_reboot_odysseys=%d", get_huid(i_ocmb), proc_reboot_odysseys);
+                    UdSPPECodeLevels(i_ocmb).addToLog(i_ocmb_errl);
                     captureError(i_ocmb_errl, io_iStepError, HWPF_COMP_ID, i_ocmb);
                     goto EXIT_OCMBS;
                 }
@@ -498,6 +500,7 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                 if(i_ocmb_errl)
                 {
                     TRACISTEP("parallel_for_each ody_has_async_ffdc: could not get async FFDC bit from OCMB 0x%x", get_huid(i_ocmb));
+                    UdSPPECodeLevels(i_ocmb).addToLog(i_ocmb_errl);
                     errlCommit(i_ocmb_errl, SBEIO_COMP_ID);
                 }
                 else
@@ -671,6 +674,7 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
                                         HWAS::SRCI_PRIORITY_HIGH,
                                         HWAS::DECONFIG,
                                         HWAS::GARD_NULL);
+            UdSPPECodeLevels(i_ocmb).addToLog(l_return_errl);
             l_return_errl = ody_upd_process_event(i_ocmb,
                                                   l_event,
                                                   l_return_errl,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,11 @@
 std::cout << \
 "                             " x << std::endl;\
 SBE_PARSER_PRINT_DELIMITER }
+
+#define SPPE_LEVEL_ATTR_MAX_STRING_SIZE 20
+#define SPPE_CODE_LEVEL_ATTR_ARRAY_SIZE 64
+#define TO_UINT32(ptr)  (ntohl(*(reinterpret_cast<uint32_t*>(ptr))))
+#define TO_UINT64(ptr)  (ntohll(*(reinterpret_cast<uint64_t*>(ptr))))
 
 namespace SBEIO
 {
@@ -345,6 +350,93 @@ private:
         }
     }
 };
+
+/**
+ * @class UdParserSPPECodeLevels
+ *
+ * Parses UdSPPECodeLevels
+ */
+class UdParserSPPECodeLevels : public ERRORLOG::ErrlUserDetailsParser
+{
+public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserSPPECodeLevels() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserSPPECodeLevels() {}
+
+    /**
+     *  @brief Parses string user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        char* l_databuf = static_cast<char*>(i_pBuffer);
+        i_parser.PrintHeading("SPPE Code Levels");
+
+        //***** Memory Layout *****
+        // 4 bytes  : OCMB HUID
+        // 4 bytes  : ATTR_SBE_VERSION_INFO
+        // 4 bytes  : ATTR_SBE_COMMIT_ID
+        // 64 bytes : ATTR_SBE_BOOTLOADER_CODELEVEL
+        // 64 bytes : ATTR_SBE_RUNTIME_CODELEVEL
+        // 21 bytes : ATTR_SBE_RELEASE_TAG
+        // 21 bytes : ATTR_SBE_BUILD_TAG
+        // 21 bytes : ATTR_SBE_EKB_BUILD_TAG
+
+        i_parser.PrintNumber("OCMB HUID",
+                             "%.8lX", TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+
+        i_parser.PrintNumber("ATTR_SBE_VERSION_INFO",
+                             "%.8lX", TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+
+        i_parser.PrintNumber("ATTR_SBE_COMMIT_ID",
+                             "%.8lX", TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+
+        for (uint32_t l_byte = 0; l_byte < 16; l_byte++)
+        {
+            i_parser.PrintNumber("ATTR_SBE_BOOTLOADER_CODELEVEL",
+                                 "%.8X", TO_UINT32(l_databuf));
+            l_databuf += sizeof(uint32_t);
+        }
+
+        for (uint32_t l_byte = 0; l_byte < 16; l_byte++)
+        {
+            i_parser.PrintNumber("ATTR_SBE_RUNTIME_CODELEVEL",
+                                 "%.8X", TO_UINT32(l_databuf));
+            l_databuf += sizeof(uint32_t);
+        }
+
+        i_parser.PrintString("ATTR_SBE_RELEASE_TAG", l_databuf);
+        l_databuf += SPPE_LEVEL_ATTR_MAX_STRING_SIZE + 1; // null terminator
+
+        i_parser.PrintString("ATTR_SBE_BUILD_TAG", l_databuf);
+        l_databuf += SPPE_LEVEL_ATTR_MAX_STRING_SIZE + 1; // null terminator
+
+        i_parser.PrintString("ATTR_SBE_EKB_BUILD_TAG", l_databuf);
+        l_databuf += SPPE_LEVEL_ATTR_MAX_STRING_SIZE + 1; // null terminator
+    }
+
+private:
+    // Disabled
+    UdParserSPPECodeLevels(const UdParserSPPECodeLevels&);
+    UdParserSPPECodeLevels & operator=(const UdParserSPPECodeLevels&);
+};
+
 
 } // end namespace
 

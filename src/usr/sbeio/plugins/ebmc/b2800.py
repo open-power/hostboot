@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -57,11 +57,45 @@ class errludP_sbeio:
                 jsonStr = json.dumps(d)
                 return jsonStr
 
+    def SbeIoUserDetailsSPPECodeLevels(ver, data, subType):
+        # 4 bytes  : OCMB HUID
+        # 4 bytes  : ATTR_SBE_VERSION_INFO
+        # 4 bytes  : ATTR_SBE_COMMIT_ID
+        # 64 bytes : ATTR_SBE_BOOTLOADER_CODELEVEL
+        # 64 bytes : ATTR_SBE_RUNTIME_CODELEVEL
+        # 21 bytes : ATTR_SBE_RELEASE_TAG
+        # 21 bytes : ATTR_SBE_BUILD_TAG
+        # 21 bytes : ATTR_SBE_EKB_BUILD_TAG
+        d = dict()
+        subd = dict()
+        i = 0
+
+        subd['OCMB HUID'], i=memConcat(data, i, i+4)
+        subd['ATTR_SBE_VERSION_INFO'], i=memConcat(data, i, i+4)
+        subd['ATTR_SBE_COMMIT_ID'], i=memConcat(data, i, i+4)
+        subd['ATTR_SBE_BOOTLOADER_CODELEVEL[0-63]'], i=memConcat(data, i, i+64)
+        subd['ATTR_SBE_RUNTIME_CODELEVEL[0-63]'], i=memConcat(data, i, i+64)
+        indx = findNull(data, i, i+20)
+        subd['ATTR_SBE_RELEASE_TAG'], label=strConcat(data, i, indx)
+        i += 21
+        indx = findNull(data, i, i+20)
+        subd['ATTR_SBE_BUILD_TAG'], label=strConcat(data, i, indx)
+        i += 21
+        indx = findNull(data, i, i+20)
+        subd['ATTR_SBE_EKB_BUILD_TAG'], label=strConcat(data, i, indx)
+        i += 21
+
+        d['SPPE Code Levels']=subd
+
+        jsonStr = json.dumps(d)
+        return jsonStr
+
 #Dictionary with parser functions for each subtype
 #Values are from UserDetailsTypes enum
 #in src/include/usr/sbeio/sbeioreasoncodes.H
 SbeIoUserDetailDataSubSection = { 0: "SbeIoUserDetailsParserNoFormat",
-                                  1: "SbeIoUserDetailsParserFFDC" }
+                                  1: "SbeIoUserDetailsParserFFDC",
+                                  2: "SbeIoUserDetailsSPPECodeLevels" }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data, subType)

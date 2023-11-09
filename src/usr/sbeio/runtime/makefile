@@ -49,6 +49,7 @@ OBJS += rt_sbe_psudd.o
 OBJS += sbe_scomAccess.o
 OBJS += i2cr.o
 OBJS += sbe_fifodd.o
+OBJS += errlud_sbeio.o
 
 # for PRDF channel failure cache registers
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/prdf

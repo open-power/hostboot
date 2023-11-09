@@ -70,6 +70,7 @@ enum sbeioModuleId
     SBEIO_FIFO_ODY_CHECKS               = 0x19,
     SBEIO_FIFO_SBE_FFDC                 = 0x1A,
     SBEIO_ODY_RECOVERY                  = 0x1B,
+    SBEIO_ERRLUD_SPPE_CODE_LEVELS       = 0x1C,
 };
 
 /**
@@ -177,6 +178,7 @@ enum sbeioReasonCode
     SBEIO_RECEIVE_CODE_LEVELS_BAD_MSG  = SBEIO_COMP_ID | 0x70,
     SBEIO_FIFO_SBE_FFDC_INFORMATIONAL  = SBEIO_COMP_ID | 0x71,
     SBEIO_ODY_RECOVERY_IN_PROGRESS     = SBEIO_COMP_ID | 0x72,
+    SBEIO_OCMB_NULL_TARGET             = SBEIO_COMP_ID | 0x73,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
@@ -185,8 +187,9 @@ enum sbeioReasonCode
 
 enum UserDetailsTypes
 {
-        SBEIO_UDT_NO_FORMAT       = 0x0,
-        SBEIO_UDT_PARAMETERS      = 0x1,
+        SBEIO_UDT_NO_FORMAT        = 0x0,
+        SBEIO_UDT_PARAMETERS       = 0x1,
+        SBEIO_UDT_SPPE_CODE_LEVELS = 0x2,
 };
 
 

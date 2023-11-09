@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/sbeio/plugins/sbeIoUdParserFactory.H $                */
+/* $Source: src/include/usr/sbeio/errlud_sbeio.H $                        */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,33 +22,44 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#if !defined(_SBEIOUDPARSERFACTORY_H)
-#define _SBEIOUDPARSERFACTORY_H
+#ifndef ERRL_UD_SBEIO_H
+#define ERRL_UD_SBEIO_H
 
-#include "errludparserfactory.H"
-#include "sbeIoErrlUd.H"
+/**
+ *  @file errlud_sbeio.H
+ *
+ *  Defines the classes that logs and parses various SBEIO data
+ */
+
+#include <errl/errluserdetails.H>
+//#include <devicefw/driverif.H>
 
 namespace SBEIO
 {
-    class UserDetailsParserFactory
-        : public ERRORLOG::ErrlUserDetailsParserFactory
-    {
-        public:
-            UserDetailsParserFactory()
-            {
-                registerParser<SBEIO::SbeIoFfdcErrlParser>
-                  (SBEIO_UDT_PARAMETERS);
-                registerParser<SBEIO::UdParserSPPECodeLevels>
-                  (SBEIO_UDT_SPPE_CODE_LEVELS);
-            }
 
-        private:
+/**
+ * @class UdSPPECodeLevels
+ *
+ * Adds SPPE code levels to an error log as user detail data
+ */
+class UdSPPECodeLevels : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     *
+     *  @param i_ocmb  OCMB target
+     */
+    UdSPPECodeLevels( TARGETING::Target * i_ocmb );
 
-            UserDetailsParserFactory(const UserDetailsParserFactory &);
-            UserDetailsParserFactory & operator=
-                (const UserDetailsParserFactory &);
-    };
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdSPPECodeLevels();
+
+  private:
 };
 
-#endif
+} // end SBEIO namespace
 
+#endif

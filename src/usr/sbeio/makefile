@@ -62,6 +62,7 @@ OBJS += ody_code_getlevels.o
 OBJS += ody_code_update.o
 OBJS += sbe_getCodeLevels.o
 OBJS += sbe_getScratchData.o
+OBJS += errlud_sbeio.o
 
 # sbeio's sub directories
 SUBDIRS += test.d
