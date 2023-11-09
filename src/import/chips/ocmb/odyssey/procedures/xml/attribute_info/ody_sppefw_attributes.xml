@@ -96,6 +96,7 @@
           I2C_ENGINE_E = 0x3
         </enum>
         <default>I2C_ENGINE_B</default>
+        <platInit/>
         <mrwHide/>
     </attribute>
 
@@ -110,7 +111,28 @@
         </description>
         <valueType>uint8</valueType>
         <default>0</default>
+        <platInit/>
         <mrwHide/>
     </attribute>
+
+    <attribute>
+      <id>ATTR_SPPE_I2C_MAX_RETRY_COUNT</id>
+      <targetType>
+         TARGET_TYPE_TEMP_SENSOR
+      </targetType>
+      <description>
+         Maximum number of times to reset i2c and retry before bailing out.
+      </description>
+      <valueType>uint8</valueType>
+      <default>1</default>
+      <platInit/>
+      <mrwHide/>
+      <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+        <targetTypes>
+          TARGET_TYPE_TEMP_SENSOR
+        </targetTypes>
+      </sbeAttrSync>
+      <mrwHide/>
+  </attribute>
 
 </attributes>
