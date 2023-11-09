@@ -80,6 +80,29 @@ namespace HTMGT
     trace_desc_t* g_trac_htmgt_mem = nullptr;
     uint8_t g_max_ports_per_ocmb = 0;
 
+// Function: isOdysseyChip
+//
+// function to determine and return true if OCMB is an Odyssey Chip.
+//
+bool isOdysseyChip( TARGETING::Target * i_ocmb_target )
+{
+    static bool l_odyssey_config = false;
+    static bool l_known_config = false;
+
+    // if never determined if this system is an Explorer or Odyssey system
+    if(l_known_config == false)
+    {
+        const uint32_t chipId = i_ocmb_target->getAttr<ATTR_CHIP_ID>();
+        if (chipId == POWER_CHIPID::ODYSSEY_16)
+        {
+            l_odyssey_config = true;
+        }
+        l_known_config = true;
+    }
+
+    return l_odyssey_config;
+}
+
 /**
  * Function: call_utils_to_throttle()
  *
@@ -216,13 +239,28 @@ errlHndl_t memPowerThrottleOT(
                     l_port_unit = 0;
                 }
 
-                // Read HWP outputs:
-                if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
-                    (l_slot[l_port_unit]))
+                if(isOdysseyChip(ocmb_target))
                 {
-                    TMGT_ERR("memPowerThrottleOT: failed to read "
-                             "EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
-                    attr_failure = true;
+                    // Odyssey uses the TARGET_TYPE_OCMB_CHIP
+                    // Read HWP outputs:
+                    if (!ocmb_target->tryGetAttr<ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
+                        (l_slot[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleOT: failed to read "
+                                "ODY_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
+                        attr_failure = true;
+                    }
+                }
+                else
+                {
+                    // Read HWP outputs:
+                    if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
+                        (l_slot[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleOT: failed to read "
+                                "EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
+                        attr_failure = true;
+                    }
                 }
 
                 if (!l_portTarget->tryGetAttr<ATTR_EXP_PORT_MAXPOWER>
@@ -955,20 +993,42 @@ errlHndl_t memPowerThrottleRedPower(
                     l_port_unit = 0;
                 }
 
-                // Read HWP outputs:
-                if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
-                    (l_slot[l_port_unit]))
+                if(isOdysseyChip(ocmb_target))
                 {
-                    TMGT_ERR("memPowerThrottleRedPower: failed to read "
-                             "EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
-                    attr_failure = true;
+                    // Read HWP outputs:
+                    // Odyssey uses the TARGET_TYPE_OCMB_CHIP
+                    if (!ocmb_target->tryGetAttr<ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
+                        (l_slot[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleRedPower: failed to read "
+                                "ODY_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
+                        attr_failure = true;
+                    }
+                    if (!ocmb_target->tryGetAttr<ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_PORT>
+                        (l_port[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleRedPower: failed to read "
+                                "ODY_MEM_THROTTLED_N_COMMANDS_PER_PORT");
+                        attr_failure = true;
+                    }
                 }
-                if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT>
-                    (l_port[l_port_unit]))
+                else
                 {
-                    TMGT_ERR("memPowerThrottleRedPower: failed to read "
-                             "EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT");
-                    attr_failure = true;
+                    // Read HWP outputs:
+                    if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
+                        (l_slot[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleRedPower: failed to read "
+                                "EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
+                        attr_failure = true;
+                    }
+                    if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT>
+                        (l_port[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleRedPower: failed to read "
+                                "EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT");
+                        attr_failure = true;
+                    }
                 }
                 if (!l_portTarget->tryGetAttr<ATTR_EXP_PORT_MAXPOWER>
                     (l_power[l_port_unit]))
@@ -1197,19 +1257,42 @@ errlHndl_t memPowerThrottleOversub(
                     attr_failure = true;
                     l_port_unit = 0;
                 }
-                if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
-                    (l_slot[l_port_unit]))
+
+                if(isOdysseyChip(ocmb_target))
                 {
-                    TMGT_ERR("memPowerThrottleOversub: failed to read "
-                             "EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
-                    attr_failure = true;
+                    // Odyssey uses the TARGET_TYPE_OCMB_CHIP
+                    if (!ocmb_target->tryGetAttr<ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
+                        (l_slot[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleOversub: failed to read "
+                                "ODY_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
+                        attr_failure = true;
+                    }
+                    if (!ocmb_target->tryGetAttr<ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_PORT>
+                        (l_port[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleOversub: failed to read "
+                                "ODY_MEM_THROTTLED_N_COMMANDS_PER_PORT");
+                        attr_failure = true;
+                    }
                 }
-                if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT>
-                    (l_port[l_port_unit]))
+                else
                 {
-                    TMGT_ERR("memPowerThrottleOversub: failed to read "
-                             "EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT");
-                    attr_failure = true;
+                    if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT>
+                        (l_slot[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleOversub: failed to read "
+                                "EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT");
+                        attr_failure = true;
+                    }
+                    if (!l_portTarget->tryGetAttr<ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT>
+                        (l_port[l_port_unit]))
+                    {
+                        TMGT_ERR("memPowerThrottleOversub: failed to read "
+                                "EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT");
+                        attr_failure = true;
+                    }
+
                 }
                 if (!l_portTarget->tryGetAttr<ATTR_EXP_PORT_MAXPOWER>
                     (l_power[l_port_unit]))
