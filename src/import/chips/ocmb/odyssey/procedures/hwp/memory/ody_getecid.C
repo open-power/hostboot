@@ -56,21 +56,25 @@ extern "C"
         using namespace scomt::perv;
 
         uint64_t l_attr_data[2] = {};
+        uint64_t l_attr_ody_psro = 0;
         fapi2::buffer<uint64_t> l_ecid_part0_data64;
         fapi2::buffer<uint64_t> l_ecid_part1_data64;
         fapi2::buffer<uint64_t> l_ecid_part2_data64;
+        fapi2::buffer<uint64_t> l_ody_psro_data64;
 
         FAPI_INF(TARGTIDFORMAT " ody_getecid : Entering ...", TARGTID);
 
-        FAPI_INF(TARGTIDFORMAT " ody_getecid : extract and manipulate ECID data", TARGTID);
+        FAPI_INF(TARGTIDFORMAT " ody_getecid : extract and manipulate ECID and PSRO data", TARGTID);
 #ifdef __PPE__
         FAPI_TRY(ody_get_scom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG0, l_ecid_part0_data64));
         FAPI_TRY(ody_get_scom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG1, l_ecid_part1_data64));
         FAPI_TRY(ody_get_scom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG2, l_ecid_part2_data64));
+        FAPI_TRY(ody_get_scom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG33, l_ody_psro_data64));
 #else
         FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG0, l_ecid_part0_data64));
         FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG1, l_ecid_part1_data64));
         FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG2, l_ecid_part2_data64));
+        FAPI_TRY(fapi2::getScom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG33, l_ody_psro_data64));
 #endif
         l_ecid_part0_data64.reverse();
         l_ecid_part1_data64.reverse();
@@ -78,13 +82,15 @@ extern "C"
 
         l_attr_data[0] = l_ecid_part0_data64();
         l_attr_data[1] = l_ecid_part1_data64();
+        l_attr_ody_psro = l_ody_psro_data64();
 
         FAPI_INF(TARGTIDFORMAT " ody_getecid : extracted ecid: 0x%016llX 0x%016llX", TARGTID, l_attr_data[0], l_attr_data[1]);
         FAPI_INF(TARGTIDFORMAT " ody_getecid : push fuse string into attribute ...", TARGTID);
-
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ECID, i_target, l_attr_data));
 
-
+        FAPI_INF(TARGTIDFORMAT " ody_getecid : extract the psro : 0x%016llX", TARGTID, l_attr_ody_psro);
+        FAPI_INF(TARGTIDFORMAT " ody_getecid : push psro into attribute ...", TARGTID);
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_PSRO, i_target, l_attr_ody_psro));
 
         FAPI_INF(TARGTIDFORMAT " ody_getecid : Exiting ...", TARGTID);
 

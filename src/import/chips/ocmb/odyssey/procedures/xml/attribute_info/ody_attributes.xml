@@ -1386,5 +1386,24 @@
         </sbeAttrSync>
     </attribute>
 
+    <attribute>
+        <id>ATTR_ODY_PSRO</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+        Value read from CFAM_OTPROM_SINGLE_OTP_ROM_REG33 is put in the attribute
+        We can use a 6-bit bit(2:7) code to capture the range of psro we have for chips
+        code      meaning
+        0         no data
+        1         LTE 5.5ps
+        2         GT 5.5, LTE 5.6
+        3         GT 5.6, LTE 5.7
+        ...
+        62        GT 11.5, LTE 11.6
+        63        GT 11.6
+        </description>
+        <valueType>uint64</valueType>
+        <writeable/>
+    </attribute>
+
 
 </attributes>
