@@ -182,8 +182,11 @@ fapi2::ReturnCode exp_check_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
 {
     uint8_t l_width[mss::exp::MAX_DIMM_PER_PORT] = {0};
     FAPI_TRY( mss::attr::get_dram_width(i_target, l_width));
-    return mss::steer::check_steering<mss::mc_type::EXPLORER>(i_target, i_port_rank, l_width[0], o_dram_spare0_symbol,
-            o_dram_spare1_symbol);
+    FAPI_TRY( mss::steer::check_steering<mss::mc_type::EXPLORER>(i_target,
+              i_port_rank,
+              l_width[0],
+              o_dram_spare0_symbol,
+              o_dram_spare1_symbol) );
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -201,7 +204,16 @@ fapi2::ReturnCode exp_do_steering( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                                    const uint8_t i_symbol,
                                    const bool i_ignore_bad_bits = false )
 {
-    return mss::steer::do_steering<mss::mc_type::EXPLORER>(i_target, i_port_rank, i_symbol, i_ignore_bad_bits);
+    uint8_t l_width[mss::exp::MAX_DIMM_PER_PORT] = {0};
+    FAPI_TRY( mss::attr::get_dram_width(i_target, l_width));
+    FAPI_TRY( mss::steer::do_steering<mss::mc_type::EXPLORER>(i_target,
+              i_port_rank,
+              i_symbol,
+              l_width[0],
+              i_ignore_bad_bits) );
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
