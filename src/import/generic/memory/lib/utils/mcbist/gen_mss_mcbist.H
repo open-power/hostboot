@@ -2334,6 +2334,8 @@ class program
 
                 case speed::BG_SCRUB:
                     {
+// Note: PPE code doesn't need this code as it saves/restores the test speed
+#ifndef __PPE__
                         uint64_t l_freq = 0;
                         uint64_t l_size = 0;
                         uint64_t l_min_cmd_gap = 0;
@@ -2353,7 +2355,7 @@ class program
 
                         change_min_cmd_gap(l_min_cmd_gap);
                         change_min_gap_timebase(l_timebase);
-
+#endif
                         return fapi2::FAPI2_RC_SUCCESS;
                     }
                     break;

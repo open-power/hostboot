@@ -89,7 +89,25 @@ struct sensor_info_vars
     uint8_t iv_pmic_index = 0;
     uint8_t iv_mem_buf_ext_index = 0;
     uint16_t iv_pad = 0;
-};
+} __attribute__ ((__aligned__(8)));
+
+///
+/// @brief Structure to hold the saved MCBIST state during DQS drift tracking
+/// @note The purpose of this struct is to save/restore BG memory diagnostics
+///       while DQS drift tracking runs.
+///
+struct mcbist_state
+{
+    // iv_mcbparmq saves the min_cmd_gap and timebase
+    fapi2::buffer<uint64_t> iv_mcbparmq;
+
+    // iv_thresholds saves the stop conditions
+    fapi2::buffer<uint64_t> iv_thresholds;
+
+    // iv_current_addr saves the last address completed by the test, and thus the
+    // starting address for when we resume the test
+    fapi2::buffer<uint64_t> iv_current_addr;
+} __attribute__ ((__aligned__(8)));
 
 ///
 /// @brief Maps DQS interval timer value to MR value encoding
@@ -180,8 +198,7 @@ fapi2::ReturnCode calc_ocmb_sensor_temp_delta_helper(const fapi2::Target<fapi2::
         const int16_t i_thermal_sensor_prev_attr,
         const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
         int16_t& o_temp_delta_value,
-        int16_t& o_current_temp_value
-                                                    );
+        int16_t& o_current_temp_value);
 
 
 ///
@@ -193,8 +210,7 @@ fapi2::ReturnCode calc_ocmb_sensor_temp_delta_helper(const fapi2::Target<fapi2::
 ///
 int16_t calc_thermal_sensor_temp_delta_helper(const int16_t i_thermal_sensor_prev_attr,
         const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
-        int16_t& o_temp_delta_value
-                                             );
+        int16_t& o_temp_delta_value);
 
 ///
 /// @brief Check if sensor exists and get the index number of that sensor
@@ -207,8 +223,7 @@ int16_t calc_thermal_sensor_temp_delta_helper(const int16_t i_thermal_sensor_pre
 void check_sensor_exists_and_get_index(const uint8_t i_thermal_sensor_usage,
                                        const uint8_t i_thermal_sensor_avail,
                                        const uint8_t i_sensor_index,
-                                       mss::ody::sensor_info_vars& o_sensor_info
-                                      );
+                                       mss::ody::sensor_info_vars& o_sensor_info);
 
 ///
 /// @brief Calculate the temperature delta of the sensor
@@ -219,8 +234,63 @@ void check_sensor_exists_and_get_index(const uint8_t i_thermal_sensor_usage,
 ///
 fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         int16_t& o_temp_delta,
-        int16_t (&o_current_temp_values)[mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::temp_sensor::NUM_SENSORS]
-                                             );
+        int16_t (&o_current_temp_values)[mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::temp_sensor::NUM_SENSORS]);
+
+///
+/// @brief Check if a steer test is in the MCBIST
+/// @param [in] i_target OCMB target
+/// @param [out] o_is_steer will be set to true if steer test present, false otherwise
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode check_steer_subtest(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      bool& o_is_steer);
+
+///
+/// @brief Check if MCBIST_PROGRAM_COMPLETE FIR is set
+/// @param [in] i_target OCMB target
+/// @param [out] o_prog_complete will be set to true if PROGRAM_COMPLETE is set, false otherwise
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode check_mcbist_program_complete(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        bool& o_prog_complete);
+
+///
+/// @brief Save state of MCBIST test
+/// @param [in] i_target OCMB target
+/// @param [in,out] io_saved_mcbist_state saved state of MCBIST
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode save_mcbist_state(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    mcbist_state& io_saved_mcbist_state);
+
+///
+/// @brief Restore state of MCBIST test
+/// @param [in] i_target OCMB target
+/// @param [in] i_saved_mcbist_state saved state of MCBIST
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode restore_mcbist_state(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       const mcbist_state& i_saved_mcbist_state);
+
+///
+/// @brief Suspend and save the state of a background steer operation
+/// @param [in] i_target OCMB target
+/// @param [in,out] io_saved_mcbist_state saved state of MCBIST, to be used in later resume_bg_scrub call
+/// @param [out] o_cannot_suspend will be set to true if steer test cannot be suspended, false otherwise
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode suspend_bg_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   mcbist_state& io_saved_mcbist_state,
+                                   bool& o_cannot_suspend);
+
+///
+/// @brief Restore the state of a background steer operation and restart it
+/// @param [in] i_target OCMB target
+/// @param [in] i_saved_mcbist_state saved state of MCBIST, from suspend_bg_scrub
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode resume_bg_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  const mcbist_state& i_saved_mcbist_state);
 
 ///
 /// @brief Ody DQS track procedure

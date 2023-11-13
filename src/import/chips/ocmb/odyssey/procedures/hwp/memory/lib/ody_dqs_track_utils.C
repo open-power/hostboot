@@ -48,6 +48,8 @@
 #include <lib/ccs/ody_ccs.H>
 #include <generic/memory/lib/ccs/ccs_ddr5_commands.H>
 #include <lib/power_thermal/ody_thermal_init_utils.H>
+#include <generic/memory/lib/utils/poll.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
 
 namespace mss
 {
@@ -585,6 +587,210 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Check if a steer test is in the MCBIST
+/// @param [in] i_target OCMB target
+/// @param [out] o_is_steer will be set to true if steer test present, false otherwise
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode check_steer_subtest(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      bool& o_is_steer)
+{
+    using TT = mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    fapi2::buffer<uint64_t> l_mcbmr;
+    uint8_t l_operation = 0;
+
+    // Return false by default
+    o_is_steer = false;
+
+    // Check in first MCBIST subtest register
+    FAPI_TRY(fapi2::getScom(i_target, TT::MCBMR0_REG, l_mcbmr));
+    l_mcbmr.extractToRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(l_operation);
+
+    o_is_steer = (l_operation == mss::mcbist::op_type::STEER_RW);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if MCBIST_PROGRAM_COMPLETE FIR is set
+/// @param [in] i_target OCMB target
+/// @param [out] o_prog_complete will be set to true if PROGRAM_COMPLETE is set, false otherwise
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode check_mcbist_program_complete(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        bool& o_prog_complete)
+{
+    using TT = mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    fapi2::buffer<uint64_t> l_mcbistfir;
+
+    // Return false by default
+    o_prog_complete = false;
+
+    FAPI_TRY(fapi2::getScom(i_target, TT::FIRQ_REG, l_mcbistfir));
+
+    o_prog_complete = l_mcbistfir.getBit<TT::MCB_PROGRAM_COMPLETE>();
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Save state of MCBIST test
+/// @param [in] i_target OCMB target
+/// @param [in,out] io_saved_mcbist_state saved state of MCBIST
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode save_mcbist_state(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                    mcbist_state& io_saved_mcbist_state)
+{
+    using TT = mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    fapi2::buffer<uint64_t> l_mcbmr;
+
+    // Note MCBPARMQ should be saved before the point where this function gets called because of the
+    // adjustment to the command gap
+
+    FAPI_TRY(fapi2::getScom(i_target, TT::THRESHOLD_REG, io_saved_mcbist_state.iv_thresholds));
+    FAPI_TRY(fapi2::getScom(i_target, TT::LAST_ADDR_REG, io_saved_mcbist_state.iv_current_addr));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Restore state of MCBIST test
+/// @param [in] i_target OCMB target
+/// @param [in] i_saved_mcbist_state saved state of MCBIST
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode restore_mcbist_state(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       const mcbist_state& i_saved_mcbist_state)
+{
+    using TT = mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    // Note: current address and subtest programming get set up when the test is restarted
+    FAPI_TRY(fapi2::putScom(i_target, TT::MCBPARMQ_REG, i_saved_mcbist_state.iv_mcbparmq));
+    FAPI_TRY(fapi2::putScom(i_target, TT::THRESHOLD_REG, i_saved_mcbist_state.iv_thresholds));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Suspend and save the state of a background steer operation
+/// @param [in] i_target OCMB target
+/// @param [in,out] io_saved_mcbist_state saved state of MCBIST, to be used in later resume_bg_scrub call
+/// @param [out] o_cannot_suspend will be set to true if scrub test cannot be suspended, false otherwise
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode suspend_bg_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                   mcbist_state& io_saved_mcbist_state,
+                                   bool& o_cannot_suspend)
+{
+    using TT = mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    constexpr uint16_t MAX_CMD_GAP = 0xFFF;
+
+    fapi2::buffer<uint64_t> l_mcbparmq;
+    fapi2::buffer<uint64_t> l_last_addr;
+    const mss::poll_parameters l_poll_parameters(0, 200, mss::DELAY_1MS, 200, 50);
+    bool l_curr_addr_changed = false;
+    bool l_prog_complete = false;
+
+    // Default o_cannot_suspend to true in case an error occurs
+    o_cannot_suspend = true;
+
+    // Slow down command by putting max value into the command gap
+    FAPI_TRY(fapi2::getScom(i_target, TT::MCBPARMQ_REG, l_mcbparmq));
+    io_saved_mcbist_state.iv_mcbparmq = l_mcbparmq;
+    l_mcbparmq.insertFromRight<TT::MIN_CMD_GAP, TT::MIN_CMD_GAP_LEN>(MAX_CMD_GAP)
+    .setBit<TT::MIN_GAP_TIMEBASE>();
+    FAPI_TRY(fapi2::putScom(i_target, TT::MCBPARMQ_REG, l_mcbparmq));
+
+    // Poll for current address pointer to change
+    // Note: we slowed down the MCBIST test to the maximum min_cmd_gap, which is 10ms.
+    // The designers say the max command gap is still around 28ms in this case, so we poll
+    // 50 times with a 1ms delay in between to be safe.
+    FAPI_TRY(fapi2::getScom(i_target, TT::LAST_ADDR_REG, l_last_addr));
+    l_curr_addr_changed = mss::poll(i_target, TT::LAST_ADDR_REG, l_poll_parameters,
+                                    [l_last_addr](const size_t poll_remaining,
+                                            const fapi2::buffer<uint64_t>& addr_reg) -> bool
+    {
+        if (addr_reg != l_last_addr)
+        {
+            return true;
+        }
+        return false;
+    });
+
+    // If the curent address didn't change, assume PRD is doing an analysis, so restore state and exit
+    if (!l_curr_addr_changed)
+    {
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " current MCBIST test is paused, so cannot suspend", GENTARGTID(i_target));
+        o_cannot_suspend = true;
+        FAPI_TRY(fapi2::putScom(i_target, TT::MCBPARMQ_REG, io_saved_mcbist_state.iv_mcbparmq));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // If MCBIST_PROGRAM_COMPLETE FIR is set, test is either at end of address range or stopped on error
+    // so restore state and exit
+    FAPI_TRY(check_mcbist_program_complete(i_target, l_prog_complete));
+
+    if (l_prog_complete)
+    {
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " current MCBIST test is stopped on error, so cannot suspend", GENTARGTID(i_target));
+        o_cannot_suspend = true;
+        FAPI_TRY(fapi2::putScom(i_target, TT::MCBPARMQ_REG, io_saved_mcbist_state.iv_mcbparmq));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // If we haven't exited by now, it means we're safe to suspend the MCBIST test
+
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " suspending current MCBIST test", GENTARGTID(i_target));
+
+    // Mask MCBIST_PROGRAM_COMPLETE and force MCBIST stop
+    FAPI_TRY( mss::memdiags::stop<mss::mc_type::ODYSSEY>(i_target),
+              "MCBIST engine failed to stop on "
+              GENTARGTIDFORMAT, GENTARGTID(i_target) );
+
+    // Record subtest, stop conditions, and current address, then return
+    FAPI_TRY(save_mcbist_state(i_target, io_saved_mcbist_state));
+    o_cannot_suspend = false;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Restore the state of a background steer operation and restart it
+/// @param [in] i_target OCMB target
+/// @param [in] i_saved_mcbist_state saved state of MCBIST, from suspend_bg_scrub
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode resume_bg_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                  const mcbist_state& i_saved_mcbist_state)
+{
+    const mss::mcbist::address<mss::mc_type::ODYSSEY> l_address(i_saved_mcbist_state.iv_current_addr);
+
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " resuming suspended MCBIST test", GENTARGTID(i_target));
+
+    // Restore speed and stop conditions
+    FAPI_TRY(restore_mcbist_state(i_target, i_saved_mcbist_state));
+
+    // Start new steer test from saved address
+    FAPI_TRY(mss::memdiags::mss_firmware_background_steer_helper<mss::mc_type::ODYSSEY>(i_target,
+             mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>::DONT_CHANGE,
+             mss::mcbist::speed::SAME_SPEED,
+             l_address));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Ody DQS track procedure
 /// @param [in] i_target OCMB target
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -593,12 +799,13 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 {
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
-
     uint8_t l_threshold = 0;
     int16_t l_temp_delta = 0;
     int16_t l_curr_temp_values[TT::temp_sensor::NUM_SENSORS] __attribute__ ((__aligned__(8))) = {0};
     uint16_t l_count = 0;
     uint16_t l_count_threshold = 0;
+    bool l_steer = false;
+    mcbist_state l_saved_mcbist_state;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_TEMP_THRESHOLD, i_target, l_threshold));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL, i_target, l_count));
@@ -613,8 +820,47 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     // Run DQS tracking only if the temp delta or count is more than the associated threshold
     // Threshold is in degrees-C so needs to be multiplied by 100
     if ((l_temp_delta > static_cast<int16_t>(l_threshold) * 100) ||
-        (l_count > l_count_threshold))
+        ((l_count >= l_count_threshold) &&
+         (l_count_threshold != fapi2::ENUM_ATTR_ODY_DQS_TRACKING_COUNT_THRESHOLD_DISABLE)))
     {
+        // Check if steer is running
+        FAPI_TRY(check_steer_subtest(i_target, l_steer));
+
+        if (l_steer)
+        {
+            bool l_prog_complete = false;
+            bool l_cannot_suspend = false;
+
+            // Check if MCBIST_PROGRAM_COMPLETE is 1, implying PRD is handling an error at this moment
+            FAPI_TRY(check_mcbist_program_complete(i_target, l_prog_complete));
+
+            if (l_prog_complete)
+            {
+                // PRD is handling an error, so we're blocked. Set the counter to the threshold to force
+                // a recal at the next opportunity
+                FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL, i_target,
+                                             static_cast<uint16_t>(l_count_threshold + 1)));
+
+                FAPI_INF_NO_SBE(GENTARGTIDFORMAT " MCBIST_PROGRAM_COMPLETE FIR is on for steer test,"
+                                " so cannot use MCBIST engine", GENTARGTID(i_target));
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+
+            // Check and save the state of the MCBIST engine, and exit if we cannot break in
+            FAPI_TRY(suspend_bg_scrub(i_target, l_saved_mcbist_state, l_cannot_suspend));
+
+            if (l_cannot_suspend)
+            {
+                // Set the counter to the threshold to force a recal at the next opportunity
+                FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL, i_target,
+                                             static_cast<uint16_t>(l_count_threshold + 1)));
+
+                FAPI_INF_NO_SBE(GENTARGTIDFORMAT " could not suspend current MCBIST test", GENTARGTID(i_target));
+                return fapi2::FAPI2_RC_SUCCESS;
+            }
+        }
+
+        // If we made it here, it means the MCBIST engine should be unused at this point
         for(auto& l_port_target : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target) )
         {
             FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(l_port_target, l_rank_infos));
@@ -642,6 +888,12 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     // Update the "count since last recal" value
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL, i_target, l_count));
+
+    if (l_steer)
+    {
+        // Restore the state of the MCBIST engine and restart the bg steer test from the last address
+        FAPI_TRY(resume_bg_scrub(i_target, l_saved_mcbist_state));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -846,7 +846,6 @@
     <writeable/>
     <array>2</array>
     <mssUnits>GB</mssUnits>
-    <noSBEAccessor/>
     <mssAccessorName>dimm_size</mssAccessorName>
   </attribute>
 

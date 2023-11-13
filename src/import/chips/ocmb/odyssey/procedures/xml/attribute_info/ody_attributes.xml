@@ -231,11 +231,15 @@
             Threshold value (in number of attempts) for a DQS drift recalibration
             to be run. Even if a significant temperature change has not occurred
             since the previous recalibration, another one will be triggered
-            after this many attempts have passed. Set to zero to disable upper
-            threshold (recalibration will not be forced unless temperature changes
-            more than temperature threshold)
+            after this many attempts have passed. Set to zero to force recalibration
+            to run every time the drift tracking procedure is run. Set to DISABLE to
+            disable upper threshold (recalibration will not be forced unless
+            temperature changes more than temperature threshold)
         </description>
         <valueType>uint16</valueType>
+        <enum>
+            DISABLE = 0xFFFF
+        </enum>
         <default>3600</default>
         <writeable/>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
