@@ -51,7 +51,7 @@ extern "C"
     /// @param[in] i_dmem_offset address offset of this chunk within the dmem image(in bytes)
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode ody_load_dmem(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::ReturnCode ody_load_dmem(const fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>& i_target,
                                     const uint8_t* i_dmem_data,
                                     const uint32_t i_dmem_size,
                                     const uint32_t i_dmem_offset,
@@ -61,6 +61,8 @@ extern "C"
 
         uint8_t l_draminit_step_enable = 0;
 
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_ocmb_target;
+        FAPI_TRY(i_target.reduceType(l_ocmb_target));
         FAPI_TRY(mss::attr::get_ody_draminit_step_enable(l_draminit_step_enable));
 
         if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_DMEM, l_draminit_step_enable))
@@ -69,7 +71,7 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
-        FAPI_TRY(mss::ody::phy::ody_load_dmem_helper(i_target, i_dmem_data, i_dmem_size, i_dmem_offset));
+        FAPI_TRY(mss::ody::phy::ody_load_dmem_helper(l_ocmb_target, i_dmem_data, i_dmem_size, i_dmem_offset));
 
     fapi_try_exit:
         return fapi2::current_err;

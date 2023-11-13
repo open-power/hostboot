@@ -59,7 +59,7 @@ extern "C"
 /// @param[in] i_image_type type of image being loaded
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-    fapi2::ReturnCode ody_load_imem(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    fapi2::ReturnCode ody_load_imem(const fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>& i_target,
                                     const uint8_t* i_imem_data,
                                     const uint32_t i_imem_size,
                                     const uint32_t i_imem_offset,

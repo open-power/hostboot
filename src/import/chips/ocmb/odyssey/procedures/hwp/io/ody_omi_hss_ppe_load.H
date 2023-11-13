@@ -83,7 +83,7 @@ extern "C" {
 /// @return FAPI_RC_SUCCESS if success, else error code
 ///
     fapi2::ReturnCode ody_omi_hss_ppe_load(
-        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>& i_target,
         const uint8_t* i_img_data,
         const uint32_t i_img_size,
         const uint32_t i_offset,
