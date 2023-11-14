@@ -94,10 +94,10 @@ extern "C"
         FAPI_TRY( mss::change_dfi_init_start<mss::mc_type::EXPLORER>(i_target, mss::ON ), "%s Failed to change_dfi_init_start",
                   mss::c_str(i_target));
 
-        // Enable RCD parity checking if we're planar + RDIMM
+        // Enable RCD parity checking post-training if we're planar + RDIMM and our DIMM supports it
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, i_target, l_is_planar));
         FAPI_TRY(mss::dimm::has_rcd<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
-        FAPI_TRY(mss::exp::workarounds::planar_enable_rcd_parity(i_target, l_is_planar, l_has_rcd));
+        FAPI_TRY(mss::exp::workarounds::planar_enable_rcd_parity_post_training(i_target, l_is_planar, l_has_rcd));
 
         // Start the refresh engines by setting MBAREF0Q(0) = 1. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.

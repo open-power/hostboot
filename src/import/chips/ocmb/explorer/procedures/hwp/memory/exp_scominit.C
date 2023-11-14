@@ -52,6 +52,7 @@
 #include <mss_explorer_attribute_getters.H>
 #include <lib/mc/exp_port_traits.H>
 #include <lib/dimm/exp_rank.H>
+#include <lib/workarounds/exp_rcw_workarounds.H>
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
@@ -69,6 +70,7 @@ extern "C"
         uint8_t l_sim = 0;
         bool l_has_rcd = false;
         bool l_is_mds = false;
+        uint8_t l_is_planar = 0;
 
         if (mss::count_dimm(i_target) == 0)
         {
@@ -92,6 +94,10 @@ extern "C"
 
         // Configure clock stabilization time
         FAPI_TRY(mss::configure_tstab<mss::mc_type::EXPLORER>(i_target, l_has_rcd));
+
+        // Enable RCD parity checking pre-training if we're planar + RDIMM and our DIMM supports it
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, i_target, l_is_planar));
+        FAPI_TRY(mss::exp::workarounds::planar_enable_rcd_parity_pre_training(i_target, l_is_planar, l_has_rcd));
 
         for(const auto& l_port : l_port_targets)
         {

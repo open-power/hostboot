@@ -52,8 +52,49 @@ namespace workarounds
 {
 
 ///
+/// @brief Check whether RCD parity enable can be done pre-training or post-training
+/// @param[in] i_target the OCMB_CHIP on which to operate
+/// @param[out] o_needs_rcd_parity_post_training will be set to true if post-training RCD parity enable is necessary
+/// @return FAPI2_RC_SUCCESS
+///
+fapi2::ReturnCode check_if_post_training_rcd_parity(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        bool& o_needs_rcd_parity_post_training)
+{
+    uint16_t l_dimm_vendor = 0;
+    uint32_t l_dimm_size = 0;
+    uint8_t l_mranks = 0;
+    uint8_t l_width = 0;
+
+    o_needs_rcd_parity_post_training = false;
+
+    // Samsung 16GB (1Rx4) PCB does not have Cid[2:0] wired to the RCD, so it will fail
+    // the parity calculation when we train the DRAM, so we need to enable it using RCWs
+    // post-training for this config
+
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
+    {
+        FAPI_TRY(mss::attr::get_module_mfg_id(l_dimm, l_dimm_vendor));
+        FAPI_TRY(mss::attr::get_dimm_size(l_dimm, l_dimm_size));
+        FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(l_dimm, l_mranks));
+        FAPI_TRY(mss::attr::get_dram_width(l_dimm, l_width));
+        break;
+    }
+
+    if ((l_dimm_vendor == fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_SAMSUNG) &&
+        (l_dimm_size == fapi2::ENUM_ATTR_MEM_EFF_DIMM_SIZE_16GB) &&
+        (l_mranks == fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_1R) &&
+        (l_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4))
+    {
+        o_needs_rcd_parity_post_training = true;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Helper function to get F0RC08 value for RCD parity enable on planar RDIMM
-/// @param[in] i_target the DIMM on which to operate
+/// @param[in] i_target the port on which to operate
 /// @param[out] o_value value to be used for RCW data
 /// @return FAPI2_RC_SUCCESS
 ///
@@ -145,13 +186,24 @@ fapi_try_exit:
 /// @param[in] i_has_rcd true if this target has an RCD
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode planar_enable_rcd_parity(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+fapi2::ReturnCode planar_enable_rcd_parity_post_training(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const uint8_t i_is_planar,
         const bool i_has_rcd)
 {
+    bool l_needs_rcd_parity_post_training = false;
+
     // Exit if we're not planar and RDIMM
     if (!i_has_rcd || i_is_planar != fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_TRUE)
     {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Exit if we need to enable RCD parity post-training
+    FAPI_TRY(check_if_post_training_rcd_parity(i_target, l_needs_rcd_parity_post_training));
+
+    if (!l_needs_rcd_parity_post_training)
+    {
+        FAPI_INF("%s DIMM does not require RCD parity after training. Returning...", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -168,6 +220,50 @@ fapi2::ReturnCode planar_enable_rcd_parity(const fapi2::Target<fapi2::TARGET_TYP
 
         // Issues the CCS instructions
         FAPI_TRY(mss::ccs::execute(i_target, l_program, l_port));
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Enable RCD parity checking using attributes, pre-training
+/// @param[in] i_target ocmb_chip target on which to operate
+/// @param[in] i_is_planar value of ATTR_MEM_MRW_IS_PLANAR
+/// @param[in] i_has_rcd true if this target has an RCD
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode planar_enable_rcd_parity_pre_training(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_is_planar,
+        const bool i_has_rcd)
+{
+    constexpr uint8_t RDIMM_F0RC0F = 2;
+    constexpr uint8_t RDIMM_BUFFER_DELAY = 2;
+    bool l_needs_rcd_parity_post_training = false;
+
+    // Exit if we're not planar and RDIMM
+    if (!i_has_rcd || i_is_planar != fapi2::ENUM_ATTR_MEM_MRW_IS_PLANAR_TRUE)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Exit if we need to enable RCD parity post-training
+    FAPI_TRY(check_if_post_training_rcd_parity(i_target, l_needs_rcd_parity_post_training));
+
+    if (l_needs_rcd_parity_post_training)
+    {
+        FAPI_INF("%s DIMM requires RCD parity after training. Returning...", mss::c_str(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+    {
+        for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
+        {
+            FAPI_TRY( mss::attr::set_dimm_ddr4_f0rc0f(l_dimm, RDIMM_F0RC0F));
+        }
+
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_RDIMM_BUFFER_DELAY, l_port, RDIMM_BUFFER_DELAY));
     }
 
 fapi_try_exit:

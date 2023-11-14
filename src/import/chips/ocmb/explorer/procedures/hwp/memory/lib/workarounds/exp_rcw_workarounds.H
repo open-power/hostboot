@@ -50,6 +50,15 @@ namespace workarounds
 {
 
 ///
+/// @brief Check whether RCD parity enable can be done pre-training or post-training
+/// @param[in] i_target the OCMB_CHIP on which to operate
+/// @param[out] o_needs_rcd_parity_post_training will be set to true if post-training RCD parity enable is necessary
+/// @return FAPI2_RC_SUCCESS
+///
+fapi2::ReturnCode check_if_post_training_rcd_parity(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        bool& o_needs_rcd_parity_post_training);
+
+///
 /// @brief Helper function to get F0RC08 value for RCD parity enable on planar RDIMM
 /// @param[in] i_target the DIMM on which to operate
 /// @param[out] o_value value to be used for RCW data
@@ -74,7 +83,18 @@ fapi2::ReturnCode setup_rcd_parity_rcws(const fapi2::Target<fapi2::TARGET_TYPE_M
 /// @param[in] i_has_rcd true if this target has an RCD
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode planar_enable_rcd_parity(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+fapi2::ReturnCode planar_enable_rcd_parity_post_training(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint8_t i_is_planar,
+        const bool i_has_rcd);
+
+///
+/// @brief Enable RCD parity checking using attributes, pre-training
+/// @param[in] i_target ocmb_chip target on which to operate
+/// @param[in] i_is_planar value of ATTR_MEM_MRW_IS_PLANAR
+/// @param[in] i_has_rcd true if this target has an RCD
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode planar_enable_rcd_parity_pre_training(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const uint8_t i_is_planar,
         const bool i_has_rcd);
 
