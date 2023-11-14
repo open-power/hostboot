@@ -103,21 +103,39 @@ OdySbeRetryHandler::OdySbeRetryHandler(Target* const i_ocmb)
 {
 }
 
-/*******************************************************************************
- * @brief Execute the steps for Odyssey SBE recovery
- *
- * if ODY_RECOVERY_STATUS_VIABLE
- *   set ODY_RECOVERY_STATUS_IN_PROGRESS
- * else
- *   commit log - SBEIO_ODY_RECOVERY_NOT_AVAILABLE
- *   exit
- *
- * extractRC()
- * if isRuntimeOrMpIpl
- *   hreset()
- * else
- *   dump()
- ******************************************************************************/
+bool OdySbeRetryHandler::odyssey_recovery_handler()
+{
+    SBE_TRACF(ENTER_MRK"OdySbeRetryhandler::odyssey_recovery_handler HUID=0x%X", get_huid(iv_ocmb));
+    bool l_recovered = false;
+    bool isRuntimeOrMpIpl = TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
+#if defined (__HOSTBOOT_RUNTIME)
+    isRuntimeOrMpIpl = true;
+#endif
+    if (!isRuntimeOrMpIpl)
+    {
+        SBE_TRACF("OdySbeRetryhandler::odyssey_recovery_handler unsupported at IPL time HUID=0x%X", get_huid(iv_ocmb));
+        return l_recovered; // We only support Odyssey odyssey_recovery_handler at runtime or MPIPL
+    }
+
+    auto l_ody_recovery_state = iv_ocmb->getAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>();
+    if (l_ody_recovery_state != ODY_RECOVERY_STATUS_DEAD)
+    {
+        // If timeouts occur during checkOdyFFDC, the main_sbe_handler will
+        // be invoked within the checkOdyFFDC scope to perform an hreset
+        SBEIO::checkOdyFFDC(iv_ocmb);
+    }
+    // Let main_sbe_handler own the ODY_RECOVERY_STATUS_IN_PROGRESS
+    main_sbe_handler();
+    l_ody_recovery_state = iv_ocmb->getAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>();
+
+    if (l_ody_recovery_state == ODY_RECOVERY_STATUS_VIABLE)
+    {
+        SBE_TRACF("OdySbeRetryhandler::odyssey_recovery_handler VIABLE set l_recovered=true HUID=0x%X", get_huid(iv_ocmb));
+        l_recovered = true;
+    }
+    return l_recovered;
+}
+
 void OdySbeRetryHandler::main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeHalted)
 {
     errlHndl_t l_errl           = nullptr;

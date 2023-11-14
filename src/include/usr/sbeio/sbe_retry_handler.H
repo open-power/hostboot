@@ -104,12 +104,24 @@ public:
     OdySbeRetryHandler(TARGETING::Target* i_ocmb);
 
     /**
+     * @brief  This function is a wrapper for the Odyssey Recovery functions.
+     *         Providing a simple and custom interface which will first
+     *         gather the FFDC prior to performing the needed hreset flows.
+     *
+     *         Any FFDC that is gathered prior to the hreset can then be
+     *         used to aid in problem determination.
+     * @return - bool, true if recovery successful
+     */
+    bool odyssey_recovery_handler();
+
+    /**
      * @brief  This function is the main entry point for all of the
      *         Odyssey SBE handler functions, including calling *extract_sbe_rc.
      *
      *         During IPL the dump processing will occur, during HBRT and
      *         MPIPL the hreset processing will occur.
      */
+
     void main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeHalted = false) override;
 
     /** @brief Forward to the other overload of main_sbe_handler.
@@ -150,16 +162,6 @@ public:
      *        *_extract_sbe_rc HWP.
      */
     errlHndl_t ExtractRC() override;
-
-    inline auto getOdyRecoveryState()
-    {
-        return iv_ocmb->getAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>();
-    }
-
-    inline void setOdyRecoveryState(TARGETING::ATTR_ODY_RECOVERY_STATE_type i_recovery_state)
-    {
-        iv_ocmb->setAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>(i_recovery_state);
-    }
 
     virtual ~OdySbeRetryHandler() override;
 

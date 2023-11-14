@@ -38,6 +38,7 @@
 #include <sbe_getCodeLevels.H>
 #include <ody_code_getlevels.H>
 #include <targeting/odyutil.H>
+#include <sbeio/sbe_retry_handler.H>
 
 #define SBE_TRACD_ODY(printf_string,args...) \
     TRACDCOMP(g_trac_sbeio,"odyRetryHandlerTest: " printf_string,##args)
@@ -58,7 +59,6 @@ class OdySbeRetryHandlerTest : public TestSuite
 {
   public:
 
-#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
         // Compile out this code because it uses data types from TestInject_defs.H
         //  and TestInject.C
         // Those data types are compiled out using this flag in those files, so this
@@ -227,6 +227,7 @@ class OdySbeRetryHandlerTest : public TestSuite
      * @param[in] i_expectSide     which side should be booted after the test?
      * @param[in] i_expectState    which ODY_RECOVERY_STATE exists after the test?
      **************************************************************************/
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
     void runOdyRetryHandlerTest(TargetHandle_t               i_target,
                                 testcase_t                   i_testcase,
                                 CxxTestInjects               i_inject1,
@@ -236,10 +237,9 @@ class OdySbeRetryHandlerTest : public TestSuite
                                 expected_side_switch_t       i_expectSide,
                                 ATTR_ODY_RECOVERY_STATE_type i_expectState)
     {
+        TS_INFO("testOdySbeRetryHandler: TC_%d 0x%x", i_testcase, get_huid(i_target));
         getCodeLevelsResponse_t l_response{};
         errlHndl_t              l_errl = nullptr;
-
-        TS_INFO("testOdySbeRetryHandler: TC_%d 0x%x", i_testcase, get_huid(i_target));
 
         //----------------------------------------------------------------------
         // SET THE INJECT BITS
@@ -298,12 +298,14 @@ class OdySbeRetryHandlerTest : public TestSuite
             g_cxxTestInject.clear(i_inject3);
         }
     }
+#endif // cxxhooks
 
     /**
      * @brief Test the Odyssey RetryHandler in IPL and HBRT
      */
     void testOdySbeRetryHandler(void)
     {
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
         /*----------------------------------------------------------------------
           These testcases validate the Odyssey hreset paths.
             There are error injects during the hreset path on the current SIDE.
@@ -488,7 +490,7 @@ class OdySbeRetryHandlerTest : public TestSuite
                                SIDE_SWITCH_NOT_EXPECTED,
                                ODY_RECOVERY_STATUS_VIABLE);
 
-#endif
+#endif // runtime
 
     EXIT:
         // cleanup
@@ -501,28 +503,236 @@ class OdySbeRetryHandlerTest : public TestSuite
         g_cxxTestInject.clear(SBEIO_INJECT_HRESET_TWO_FAILS);
         g_cxxTestInject.clear(SBEIO_INJECT_HRESET_SKIP_DUMP);
 
-#endif
+#endif // temporary
         TS_INFO("testOdySbeRetryHandler: Exit");
-
+#endif // cxxhooks
         return;
     }
-#else
-    void testOdySbeRetryHandler(void)
-    {
-        return;
-    }
-#endif
 
     /**
-     * @brief  Execute CI for OdySbeRetryHandler
+     * @brief Run the Odyssey Recovery in IPL and HBRT
      */
-    void runOdySbeRetryHandlerCI()
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+    void runOdyRecoveryTest(TargetHandle_t                   i_target,
+                                testcase_t                   i_testcase,
+                                CxxTestInjects               i_inject1,
+                                CxxTestInjects               i_inject2,
+                                CxxTestInjects               i_inject3,
+                                expected_error_log_t         i_expectErrl,
+                                expected_side_switch_t       i_expectSide,
+                                ATTR_ODY_RECOVERY_STATE_type i_expectState)
     {
-        TS_INFO("runOdySbeRetryHandlerCI");
-        testOdySbeRetryHandler();
+        TS_INFO("runOdyRecoveryTest: TC_%d HUID=0x%X", i_testcase, get_huid(i_target));
+        errlHndl_t              l_errl = nullptr;
+
+        if (i_inject1 != INJECT_NONE)
+        {
+            g_cxxTestInject.set(i_inject1); // activate inject1
+        }
+        if (i_inject2 != INJECT_NONE)
+        {
+            g_cxxTestInject.set(i_inject2); // activate inject2
+        }
+        if (i_inject3 != INJECT_NONE)
+        {
+            g_cxxTestInject.set(i_inject3); // activate inject3
+        }
+
+        auto l_boot_side = getBootSide(i_target, i_testcase);
+        if (i_expectSide == SIDE_SWITCH_EXPECTED)
+        {
+            // flip to expect the other side
+            l_boot_side = !l_boot_side;
+        }
+
+        bool l_recovered = false;
+        OdySbeRetryHandler l_SBEobj = OdySbeRetryHandler(i_target);
+        l_recovered = l_SBEobj.odyssey_recovery_handler();
+
+        verifyResult(i_expectErrl,        // do a TS_FAIL in here if appropriate
+                     l_boot_side,
+                     i_expectState,
+                     i_testcase,
+                     i_target,
+                     l_errl);
+        switch(i_testcase)
+        {
+            case TC_2_HRESET:
+            case TC_4_HRESET_ody_sppe_check_for_ready:
+            case TC_8_HRESET:
+                if (l_recovered == true)
+                {
+                    TS_INFO("runOdyRecoveryTest TC=%d success", i_testcase);
+                }
+                else
+                {
+                    TS_FAIL("runOdyRecoveryTest TC=%d failed", i_testcase);
+                }
+                break;
+
+            case TC_1_HRESET_DUMP:
+            case TC_7_HRESET_FAIL:
+                if (l_recovered == true)
+                {
+                    TS_FAIL("runOdyRecoveryTest TC=%d failed", i_testcase);
+                }
+                else
+                {
+                    TS_INFO("runOdyRecoveryTest TC=%d success", i_testcase);
+                }
+                break;
+            default:
+                TS_FAIL("runOdyRecoveryTest TC=%d UNEXPECTED", i_testcase);
+        }
+
+        if (i_inject1 != INJECT_NONE)
+        {
+            g_cxxTestInject.clear(i_inject1);
+        }
+        if (i_inject2 != INJECT_NONE)
+        {
+            g_cxxTestInject.clear(i_inject2);
+        }
+        if (i_inject3 != INJECT_NONE)
+        {
+            g_cxxTestInject.clear(i_inject3);
+        }
+    }
+#endif // cxxhooks
+
+    /**
+     * @brief Test the Odyssey Recovery in IPL and HBRT
+     */
+    void testOdyRecovery(void)
+    {
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+        TS_INFO("testOdyRecovery: Enter");
+
+#if HB_TEMPORARY_REMOVE_THESE_TESTCASES
+
+        TargetHandle_t   l_target = nullptr;
+        TargetHandleList l_ocmbTargetList{};
+
+        // get OCMBs, and use the first Odyssey in the list
+        getAllChips(l_ocmbTargetList, TYPE_OCMB_CHIP);
+        for (auto l_ocmb : l_ocmbTargetList)
+        {
+            if (UTIL::isOdysseyChip(l_ocmb))
+            {
+                l_target = l_ocmb;
+                break;
+            }
+        }
+        if (!l_target)
+        {
+            TS_INFO("testOdyRecovery: NO Odyssey targets found");
+            goto EXIT;
+        }
+
+        // ensure these are clear
+        g_cxxTestInject.clear(SBEIO_INJECT_FIFO_HANG);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_ody_sbe_hreset);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_ody_sppe_check_for_ready);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_sendAttrUpdateRequest);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_ThermalSensorPolling);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_TWO_FAILS);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_SKIP_DUMP);
+
+        // This flag only indicates that the SBEIO Testcases are running
+        // It may be used to conditionally trace, or something similiar
+        g_cxxTestInject.set(SBEIO_INJECT_IN_PROGRESS);
+
+        // pre-check ATTR_ODY_RECOVERY_STATE
+        if (l_target->getAttr<ATTR_ODY_RECOVERY_STATE>() != ODY_RECOVERY_STATUS_VIABLE)
+        {
+            TS_FAIL("testOdyRecovery: pre-check: bad ODY_RECOVERY_STATE:%d for 0x%x",
+                    l_target->getAttr<ATTR_ODY_RECOVERY_STATE>(),
+                    get_huid(l_target));
+            goto EXIT;
+        }
+
+#ifndef __HOSTBOOT_RUNTIME
+        TS_INFO("testOdyRecovery: IPL Time");
+        // IPL testcase is unsupported for the odyssey_recovery_handler, so this
+        // tests the entry to odyssey_recovery_handler and NO operational changes,
+        // i.e. still VIABLE since the inject was actually NOT performed
+        // which would have modified the state to DEAD
+        runOdyRecoveryTest(l_target,                          // ocmb target
+                               TC_1_HRESET_DUMP,              // testcase name
+                               SBEIO_INJECT_FIFO_HANG,        // first inject bit to set
+                               SBEIO_INJECT_HRESET_SKIP_DUMP, // second inject bit to set
+                               INJECT_NONE,                   // third inject bit to set
+                               ERROR_LOG_NOT_EXPECTED,        // no log means chipop success
+                               SIDE_SWITCH_NOT_EXPECTED,      // should hreset do a side switch
+                               ODY_RECOVERY_STATUS_VIABLE);   // state of SBE after hreset
+        // force back to a good state
+        l_target->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_VIABLE);
+#else
+        TS_INFO("testOdyRecovery: RUNTIME");
+        // inject FIFO TIMEOUT
+        runOdyRecoveryTest(l_target,
+                               TC_2_HRESET,
+                               SBEIO_INJECT_FIFO_HANG,
+                               INJECT_NONE,
+                               INJECT_NONE,
+                               ERROR_LOG_NOT_EXPECTED,
+                               SIDE_SWITCH_NOT_EXPECTED,
+                               ODY_RECOVERY_STATUS_VIABLE);
+        // force back to a good state
+        l_target->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_VIABLE);
+
+        runOdyRecoveryTest(l_target,
+                               TC_4_HRESET_ody_sppe_check_for_ready,
+                               SBEIO_INJECT_FIFO_HANG,
+                               SBEIO_INJECT_HRESET_ody_sppe_check_for_ready,
+                               INJECT_NONE,
+                               ERROR_LOG_NOT_EXPECTED,
+                               SIDE_SWITCH_EXPECTED,
+                               ODY_RECOVERY_STATUS_VIABLE);
+        // force back to a good state
+        l_target->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_VIABLE);
+
+        runOdyRecoveryTest(l_target,
+                               TC_7_HRESET_FAIL,
+                               SBEIO_INJECT_FIFO_HANG,
+                               SBEIO_INJECT_HRESET_TWO_FAILS,
+                               SBEIO_INJECT_HRESET_SKIP_DUMP,
+                               ERROR_LOG_NOT_EXPECTED,
+                               SIDE_SWITCH_EXPECTED,
+                               ODY_RECOVERY_STATUS_DEAD);
+        // force back to a good state
+        l_target->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_VIABLE);
+
+        //  (this testcase ensures the SBE is in a good state)
+        runOdyRecoveryTest(l_target,
+                               TC_8_HRESET,
+                               SBEIO_INJECT_FIFO_HANG,
+                               INJECT_NONE,
+                               INJECT_NONE,
+                               ERROR_LOG_NOT_EXPECTED,
+                               SIDE_SWITCH_NOT_EXPECTED,
+                               ODY_RECOVERY_STATUS_VIABLE);
+#endif // runtime
+
+    TS_INFO("testOdyRecovery: Executed TESTS");
+    EXIT:
+        // cleanup
+        g_cxxTestInject.clear(SBEIO_INJECT_IN_PROGRESS);
+        g_cxxTestInject.clear(SBEIO_INJECT_FIFO_HANG);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_ody_sbe_hreset);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_ody_sppe_check_for_ready);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_sendAttrUpdateRequest);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_ThermalSensorPolling);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_TWO_FAILS);
+        g_cxxTestInject.clear(SBEIO_INJECT_HRESET_SKIP_DUMP);
+
+#endif // HB_TEMPORARY_REMOVE_THESE_TESTCASES
+
+        TS_INFO("testOdyRecovery: Exit TESTS");
+#endif // cxxhooks
         return;
     }
 
-};
+}; // class
 
-#endif
+#endif // ifndef
