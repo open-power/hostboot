@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,6 +26,7 @@
 #ifndef prdfMemDbUtils_H
 #define prdfMemDbUtils_H
 
+#include <prdfMemUtils.H>
 #include <prdfOcmbDataBundle.H>
 #include <prdfTargetServices.H>
 

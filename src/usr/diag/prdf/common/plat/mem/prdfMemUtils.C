@@ -999,6 +999,125 @@ bool queryChnlFail<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip)
 
 //------------------------------------------------------------------------------
 
+uint32_t clearHwfm(ExtensibleChip * i_mcc)
+{
+    #define PRDF_FUNC "[MemUtils::clearHwfm] "
+
+    uint32_t o_rc = SUCCESS;
+
+    #ifdef __HOSTBOOT_RUNTIME
+
+    if (nullptr == i_mcc)
+    {
+        PRDF_ERR(PRDF_FUNC "i_mcc == nullptr");
+        return FAIL;
+    }
+
+    // Check for mainline UEs on either connected OCMB. If either had
+    // encountered a mainline UE previously, skip clearing HWFM.
+    for (const auto & ocmb : getConnectedChildren(i_mcc, TYPE_OCMB_CHIP))
+    {
+        OcmbDataBundle * db = getOcmbDataBundle(ocmb);
+        if (db->iv_hwfmMainlineUe)
+        {
+            return o_rc;
+        }
+    }
+
+    SCAN_COMM_REGISTER_CLASS * ustlmchwfm = i_mcc->getRegister("USTLMCHWFM");
+
+    o_rc = ustlmchwfm->Read();
+    if (SUCCESS != o_rc)
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to read USTLMCHWFM on 0x%08x",
+                 i_mcc->getHuid());
+        return o_rc;
+    }
+
+    // Write USTLMCHWFM[16] = 0b0. The bit is not self-resetting so needs to be
+    // cleared before being set as it will only trigger on a rising edge.
+    ustlmchwfm->ClearBit(16);
+
+    o_rc = ustlmchwfm->Write();
+    if (SUCCESS != o_rc)
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to clear USTLMCHWFM[16] on 0x%08x",
+                 i_mcc->getHuid());
+        return o_rc;
+    }
+
+    // Write USTLMCHWFM[16:17] = 0b10. This sets the cmd valid and selects the
+    // clear HWFM cmd.
+    ustlmchwfm->SetBit(16);
+    ustlmchwfm->ClearBit(17);
+
+    o_rc = ustlmchwfm->Write();
+    if (SUCCESS != o_rc)
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to write USTLMCHWFM on 0x%08x",
+                 i_mcc->getHuid());
+        return o_rc;
+    }
+
+    #endif
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+uint32_t clearFirAndHwfm(ExtensibleChip * i_ocmb, const char * i_fir,
+                         uint8_t i_firBit)
+{
+    #define PRDF_FUNC "[MemUtils::clearFirAndHwfm] "
+
+    uint32_t o_rc = SUCCESS;
+
+    // Get FIR register
+    SCAN_COMM_REGISTER_CLASS * reg = i_ocmb->getRegister(i_fir);
+
+    // Odyssey FIRs are write to clear
+    if (isOdysseyOcmb(i_ocmb->getTrgt()))
+    {
+        reg->clearAllBits();
+        reg->SetBit(i_firBit);
+    }
+    // Explorer FIRs will use a FIR_AND to clear
+    else
+    {
+        reg->setAllBits();
+        reg->ClearBit(i_firBit);
+    }
+
+    // Write register
+    o_rc = reg->Write();
+    if (SUCCESS != o_rc)
+    {
+        PRDF_ERR(PRDF_FUNC "Failed to write %s to clear bit %d on huid 0x%08x",
+                 i_fir, i_firBit, i_ocmb->getHuid());
+        return o_rc;
+    }
+
+    // Get the parent MCC target
+    ExtensibleChip * mcc = getConnectedParent(i_ocmb, TYPE_MCC);
+
+    // Clear HWFM
+    o_rc = clearHwfm(mcc);
+    if (SUCCESS != o_rc)
+    {
+        PRDF_ERR(PRDF_FUNC "Failure from clearHwfm(0x%08x)", mcc->getHuid());
+        return o_rc;
+    }
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
 } // end namespace MemUtils
 
 } // end namespace PRDF

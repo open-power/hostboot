@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2021
+# Contributors Listed Below - COPYRIGHT 2019,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -119,4 +119,15 @@
         name        "MC USTL Error Report 1";
         scomaddr    0x0C010E16;
         capture     group mc_ustl_fir_ffdc;
+    };
+
+    ###########################################################################
+    # P10 target Hardware Force Mirror (HWFM)
+    ###########################################################################
+
+    register USTLMCHWFM
+    {
+        name        "P10 USTL Memory Controller Hardware Force Mirror Register";
+        scomaddr    0x0C010E0F;
+        capture     group default;
     };
