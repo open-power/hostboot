@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -94,6 +94,7 @@ errlHndl_t micronCheckForWorkarounds( SfcDD* i_sfc,
 errlHndl_t micronFlagStatus( SfcDD* i_sfc )
 {
     errlHndl_t l_err = NULL;
+    errlHndl_t tmp_err = nullptr;
     TRACDCOMP( g_trac_pnor, "micronFlagStatus>" );
 
     do {
@@ -117,11 +118,11 @@ errlHndl_t micronFlagStatus( SfcDD* i_sfc )
 
             //Read back full 6 bytes of chipid
             uint32_t outdata[2];
-            l_err = i_sfc->sendSpiCmd( PNOR::SPI_JEDEC_CHIPID,
-                                       SfcDD::NO_ADDRESS,
-                                       0, NULL,
-                                       6, reinterpret_cast<uint8_t*>(outdata) );
-            if( l_err ) { delete l_err; l_err = nullptr; }
+            tmp_err = i_sfc->sendSpiCmd( PNOR::SPI_JEDEC_CHIPID,
+                                         SfcDD::NO_ADDRESS,
+                                         0, NULL,
+                                         6, reinterpret_cast<uint8_t*>(outdata) );
+            if( tmp_err ) { delete tmp_err; tmp_err = nullptr; }
 
             /*@
              * @errortype
@@ -150,14 +151,14 @@ errlHndl_t micronFlagStatus( SfcDD* i_sfc )
 
             //Read out SFDP
             uint8_t sfdp[16];
-            l_err = i_sfc->sendSpiCmd( PNOR::SPI_JEDEC_READ_SFDP,
-                                       0,
-                                       0, NULL,
-                                       16, sfdp );
-            if( l_err )
+            tmp_err = i_sfc->sendSpiCmd( PNOR::SPI_JEDEC_READ_SFDP,
+                                         0,
+                                         0, NULL,
+                                         16, sfdp );
+            if( tmp_err )
             {
-                delete l_err;
-                l_err = nullptr;
+                delete tmp_err;
+                tmp_err = nullptr;
             }
             else
             {
@@ -170,6 +171,7 @@ errlHndl_t micronFlagStatus( SfcDD* i_sfc )
                                 false );             // merge
             }
 
+#if 0 // This would be best but we don't actually support custom writes
             //Erase & Program error bits are sticky,
             // so they need to be cleared.
             uint8_t flagstat = 0;
@@ -186,6 +188,7 @@ errlHndl_t micronFlagStatus( SfcDD* i_sfc )
                 tmp_err->plid(l_err->plid());
                 ERRORLOG::errlCommit(tmp_err,PNOR_COMP_ID);
             }
+#endif
 
             l_err->collectTrace(PNOR_COMP_NAME);
 
