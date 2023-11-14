@@ -93,9 +93,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -108,9 +105,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -124,9 +118,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -139,9 +130,6 @@
         <initToZero></initToZero>
         <valueType>uint16</valueType>
         <writeable/>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -194,9 +182,7 @@
         <writeable/>
         <array>2</array>
         <mssAccessorName>mem_watt_target</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
+        <noSBEAccessor/>
     </attribute>
 
     <attribute>
@@ -212,9 +198,7 @@
         <writeable/>
         <array>2</array>
         <mssAccessorName>total_pwr_slope</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
+        <noSBEAccessor/>
     </attribute>
 
     <attribute>
@@ -228,9 +212,7 @@
         <writeable/>
         <array>2</array>
         <mssAccessorName>total_pwr_intercept</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
+        <noSBEAccessor/>
     </attribute>
 
     <attribute>
@@ -255,9 +237,7 @@
         <mssUnit>cW</mssUnit>
         <array>2</array>
         <mssAccessorName>dimm_thermal_limit</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
+        <noSBEAccessor/>
     </attribute>
 
 </attributes>

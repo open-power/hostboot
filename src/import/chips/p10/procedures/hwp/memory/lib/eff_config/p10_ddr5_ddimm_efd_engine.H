@@ -1115,7 +1115,7 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_RISE,
                       l_field[mss::ddr5::mr::ATTR_CHANNEL_B]) );
 
-            FAPI_TRY(mss::attr::set_ddr5_tx_slew_rise_ac(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_AC, iv_port, l_field));
 
 
         fapi_try_exit:
@@ -1168,7 +1168,7 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_SLEW_RATE_FALL,
                       l_field[mss::ddr5::mr::ATTR_CHANNEL_B]) );
 
-            FAPI_TRY(mss::attr::set_ddr5_tx_slew_fall_ac(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_AC, iv_port, l_field));
 
         fapi_try_exit:
             return fapi2::current_err;
@@ -1218,7 +1218,7 @@ class ddimm_0_0 : public mss::efd::base
             FAPI_TRY( mss::spd::check::reserved_values(iv_ocmb, l_reserved_bits, mss::SET_CK_SLEW_RATE_RISE,
                       l_field[mss::ddr5::mr::ATTR_CHANNEL_B]) );
 
-            FAPI_TRY(mss::attr::set_ddr5_tx_slew_rise_ck(iv_port, l_field));
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_CK, iv_port, l_field));
 
 
         fapi_try_exit:

@@ -34,7 +34,6 @@
         <initToZero></initToZero>
         <valueType>uint32</valueType>
         <writeable/>
-        <mssAccessorName>databus_util</mssAccessorName>
     </attribute>
 
 </attributes>

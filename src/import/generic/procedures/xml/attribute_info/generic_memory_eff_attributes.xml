@@ -89,10 +89,8 @@
     <enum> NONE = 0, NVDIMM = 1, MDS = 3, NVDIMM_N = 4, NVDIMM_P = 2</enum>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>hybrid_memory_type</mssAccessorName>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -108,10 +106,8 @@
     <enum> NOT_HYBRID = 0, IS_HYBRID= 1</enum>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>hybrid</mssAccessorName>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -126,6 +122,7 @@
     <writeable/>
     <array>2</array>
     <mssUnit>ratio</mssUnit>
+    <noSBEAccessor/>
     <mssAccessorName>host_to_ddr_speed_ratio</mssAccessorName>
   </attribute>
 
@@ -203,6 +200,7 @@
     <enum> NUM10 = 10, NUM11 = 11</enum>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>dram_column_bits</mssAccessorName>
   </attribute>
 
@@ -290,6 +288,7 @@
     <writeable/>
     <default>32,32</default>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>prim_bus_width</mssAccessorName>
   </attribute>
 
@@ -308,6 +307,7 @@
     </enum>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>channels_per_dimm</mssAccessorName>
   </attribute>
 
@@ -722,6 +722,7 @@
     <valueType>uint16</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>module_mfg_id</mssAccessorName>
   </attribute>
 
@@ -739,10 +740,8 @@
     <valueType>uint16</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>dram_mfg_id</mssAccessorName>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -776,10 +775,8 @@
     <valueType>uint16</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>rcd_mfg_id</mssAccessorName>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -794,6 +791,7 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
     <mssAccessorName>register_rev</mssAccessorName>
   </attribute>
 
@@ -851,10 +849,8 @@
     <writeable/>
     <array>2</array>
     <mssUnits>GB</mssUnits>
+    <noSBEAccessor/>
     <mssAccessorName>dimm_size</mssAccessorName>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>

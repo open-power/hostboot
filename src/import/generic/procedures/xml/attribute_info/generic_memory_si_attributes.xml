@@ -103,6 +103,7 @@
         <writeable/>
         <enum>DISABLE = 0, OHM34 = 34, OHM48 = 48</enum>
         <mssUnits>ohm</mssUnits>
+        <noSBEAccessor/>
         <mssAccessorName>si_dram_drv_imp_dq_dqs</mssAccessorName>
         <array>2 4</array>
     </attribute>
@@ -121,6 +122,7 @@
         <writeable/>
         <enum>READ_PREAMBLE_BIT = 3, WRITE_PREAMBLE_BIT = 7</enum>
         <mssUnits>nCK</mssUnits>
+        <noSBEAccessor/>
         <mssAccessorName>si_dram_preamble</mssAccessorName>
         <array>2 4</array>
     </attribute>
@@ -188,6 +190,7 @@
       <enum>HALF=0, QUARTER=1</enum>
       <writeable/>
       <array>2 4</array>
+      <noSBEAccessor/>
       <mssAccessorName>si_geardown_mode</mssAccessorName>
     </attribute>
 
@@ -249,6 +252,7 @@
         <initToZero></initToZero>
         <valueType>uint8</valueType>
         <writeable/>
+        <noSBEAccessor/>
         <mssAccessorName>si_phy_equalization</mssAccessorName>
         <array>2 4</array>
     </attribute>
@@ -266,6 +270,7 @@
         <enum>DISABLE = 0, OHM_20 = 20, OHM_24 = 24, OHM_30 = 30, OHM_40 = 40, OHM_60 = 60, OHM_120 = 120</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_clk</mssAccessorName>
+        <noSBEAccessor/>
         <array>2 4</array>
     </attribute>
 
@@ -353,6 +358,7 @@
               OHM_48 = 48, OHM_53 = 53, OHM_60 = 60, OHM_68 = 68, OHM_80 = 80, OHM_96 = 96, OHM_120 = 120, OHM_160 = 160,
               OHM_240 = 240, OHM_480 = 480</enum>
         <mssUnits>ohm</mssUnits>
+        <noSBEAccessor/>
         <mssAccessorName>si_mc_drv_imp_dq_dqs_pull_down</mssAccessorName>
         <array>2 4</array>
     </attribute>
@@ -387,6 +393,7 @@
         <writeable/>
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
+        <noSBEAccessor/>
         <mssAccessorName>si_mc_drv_slew_rate_clk</mssAccessorName>
         <array>2 4</array>
     </attribute>
@@ -403,6 +410,7 @@
         <writeable/>
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
+        <noSBEAccessor/>
         <mssAccessorName>si_mc_drv_slew_rate_cmd_addr</mssAccessorName>
         <array>2 4</array>
     </attribute>
@@ -449,6 +457,7 @@
         <writeable/>
         <enum>DISABLE = 0</enum>
         <mssUnits>ohm</mssUnits>
+        <noSBEAccessor/>
         <mssAccessorName>si_mc_drv_slew_rate_dq_dqs</mssAccessorName>
         <array>2 4</array>
     </attribute>
@@ -576,6 +585,7 @@
     <valueType>uint8</valueType>
     <array>2</array>
     <writeable/>
+    <noSBEAccessor/>
     <mssAccessorName>ddr4_f1rc1x</mssAccessorName>
   </attribute>
 
@@ -590,6 +600,7 @@
     <valueType>uint8</valueType>
     <array>2</array>
     <writeable/>
+    <noSBEAccessor/>
     <mssAccessorName>ddr4_f1rc2x</mssAccessorName>
   </attribute>
 
@@ -604,6 +615,7 @@
     <valueType>uint8</valueType>
     <array>2</array>
     <writeable/>
+    <noSBEAccessor/>
     <mssAccessorName>ddr4_f1rc3x</mssAccessorName>
   </attribute>
 
@@ -618,6 +630,7 @@
     <valueType>uint8</valueType>
     <array>2</array>
     <writeable/>
+    <noSBEAccessor/>
     <mssAccessorName>ddr4_f1rc4x</mssAccessorName>
   </attribute>
 
@@ -632,6 +645,7 @@
     <valueType>uint8</valueType>
     <array>2</array>
     <writeable/>
+    <noSBEAccessor/>
     <mssAccessorName>ddr4_f1rc5x</mssAccessorName>
   </attribute>
 
@@ -644,8 +658,9 @@
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <array>2</array>~
+    <array>2</array>
     <writeable/>
+    <noSBEAccessor/>
     <mssAccessorName>ddr4_f1rc6x</mssAccessorName>
   </attribute>
 
@@ -660,6 +675,7 @@
     <valueType>uint8</valueType>
     <array>2</array>
     <writeable/>
+    <noSBEAccessor/>
     <mssAccessorName>ddr4_f1rc7x</mssAccessorName>
   </attribute>
 

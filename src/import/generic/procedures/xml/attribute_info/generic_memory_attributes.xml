@@ -745,9 +745,7 @@
         <valueType>uint8</valueType>
         <array>2</array>
         <writeable/>
+        <noSBEAccessor/>
         <mssAccessorName>dram_address_mirroring</mssAccessorName>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-        </sbeAttrSync>
     </attribute>
 </attributes>

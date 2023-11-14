@@ -5154,7 +5154,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ac(const fapi2::Target<fapi
     };
 
 
-    FAPI_TRY(mss::attr::get_ddr5_tx_slew_rise_ac(i_target, l_attr_arr));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_AC, i_target, l_attr_arr));
 
     // Asserts to avoid bad/reserved values being passed in
     for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
@@ -5269,7 +5269,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_fall_ac(const fapi2::Target<fapi
     };
 
     // TxSlewFallAC
-    FAPI_TRY(mss::attr::get_ddr5_tx_slew_fall_ac(i_target, l_attr_arr));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_TX_SLEW_FALL_AC, i_target, l_attr_arr));
 
     // Asserts to avoid bad/reserved values being passed in
     for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
@@ -5391,7 +5391,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ck(const fapi2::Target<fapi
     };
 
     // TxSlewRiseCK
-    FAPI_TRY(mss::attr::get_ddr5_tx_slew_rise_ck(i_target, l_attr_arr));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_TX_SLEW_RISE_CK, i_target, l_attr_arr));
 
     // Asserts to avoid bad/reserved values being passed in
     for(uint8_t l_channel = 0; l_channel < mss::ody::sizes::NUM_CHANNELS; l_channel++)
