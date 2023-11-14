@@ -26,6 +26,7 @@
 #ifndef prdfMemDbUtils_H
 #define prdfMemDbUtils_H
 
+#include <prdfMemUtils.H>
 #include <prdfOcmbDataBundle.H>
 #include <prdfTargetServices.H>
 
@@ -217,6 +218,13 @@ void banTps<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
     // Permanently mask mainline NCEs and TCEs because of the TPS ban.
     getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
     getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns(i_port);
+
+    // HWFM workaround: set exit 1 for Odyssey to prevent HWFM on masked NCEs
+    if (SUCCESS != MemUtils::hwfmSetExit1(i_chip))
+    {
+        PRDF_ERR("MemDbUtils::banTps: Failed from hwfmSetExit1(0x%08x)",
+                 i_chip->getHuid());
+    }
 }
 
 #endif // Hostboot Runtime only

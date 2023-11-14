@@ -81,6 +81,13 @@ void __maskMainlineNceTces<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 {
     getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
     getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns(i_port);
+
+    // HWFM workaround: set exit 1 for Odyssey to prevent HWFM on masked NCEs
+    if (SUCCESS != MemUtils::hwfmSetExit1(i_chip))
+    {
+        PRDF_ERR("MemDbUtils::banTps: Failed from hwfmSetExit1(0x%08x)",
+                 i_chip->getHuid());
+    }
 }
 
 //------------------------------------------------------------------------------

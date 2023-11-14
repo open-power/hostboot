@@ -231,6 +231,37 @@ bool queryChnlFail(ExtensibleChip * i_chip);
 template<TARGETING::TYPE T>
 bool checkOdpRootCause(ExtensibleChip * i_chip, uint8_t i_port);
 
+/**
+ * @brief  Clears Hardware Force Mirror (HWFM) as long as no mainline UEs have
+ *         previously been hit on the attached OCMBs. Note: the FIR bit must
+ *         be cleared before HWFM is cleared.
+ * @param  i_mcc MCC chip
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+uint32_t clearHwfm(ExtensibleChip * i_mcc);
+
+/**
+ * @brief  Clears the given bit for the input FIR and then calls clearHwfm to
+ *         clear Hardware Force Mirror. This is needed as the FIR bit needs to
+ *         be cleared before HWFM is cleared, as such it must be done manually
+ *         here instead of leaving it to the PRD framework.
+ * @param  i_ocmb OCMB chip
+ * @param  i_fir  Input FIR_AND or write-to-clear FIR to write to clear the FIR.
+ * @param  i_bit  Input FIR bit to clear.
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+uint32_t clearFirAndHwfm(ExtensibleChip * i_ocmb, const char * i_fir,
+                         uint8_t i_firBit);
+
+/**
+ * @brief  Sets Odyssey min exit 1 which prevents Hardware Force Mirror (HWFM)
+ *         for subsequent NCEs. Not needed for Explorer as HWFM is not triggered
+ *         on NCEs for Explorer.
+ * @param  i_ocmb OCMB chip
+ * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+ */
+uint32_t hwfmSetExit1(ExtensibleChip * i_ocmb);
+
 } // end namespace MemUtils
 
 } // end namespace PRDF

@@ -44,6 +44,11 @@
         "description": "Odyssey chip DLX Skitter Control Register",
         "name": "DLX_SKIT_CTL"
     },
+    "0x0d73": {
+        "address": "0x0000000008011c0b",
+        "description": "Read ECC Control Register",
+        "name": "RECR"
+    },
     "0x0f7a": {
         "address": "0x000000000803000f",
         "description": "MEM Error Status",

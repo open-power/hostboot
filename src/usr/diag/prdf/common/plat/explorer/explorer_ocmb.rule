@@ -1120,12 +1120,12 @@ group gRDFFIR
     /** RDFFIR[8]
      *  Mainline read NCE
      */
-    (rRDFFIR, bit(8)) ? mainline_nce_tce_handling;
+    (rRDFFIR, bit(8)) ? mainline_nce_handling;
 
     /** RDFFIR[9]
      *  Mainline read TCE
      */
-    (rRDFFIR, bit(9)) ? mainline_nce_tce_handling;
+    (rRDFFIR, bit(9)) ? mainline_tce_handling;
 
     /** RDFFIR[10]
      *  Mainline read SCE
@@ -1170,7 +1170,7 @@ group gRDFFIR
     /** RDFFIR[18]
      *  Mainline read IRCD
      */
-    (rRDFFIR, bit(18)) ? all_dimm_H_memport_L_th_32perDay;
+    (rRDFFIR, bit(18)) ? mainline_ircd_handling;
 
     /** RDFFIR[19]
      *  Mainline read IMPE

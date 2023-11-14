@@ -523,15 +523,32 @@ ANALYZE_FETCH_NCE_TCE_PLUGIN(1);
 /**
  * @brief  RDF_FIR[15] - Mainline UE.
  * @param  i_chip OCMB chip.
+ * @param  i_port Target port select.
  * @param  io_sc  The step code data struct.
  * @return SUCCESS
  */
+int32_t __analyzeFetchUe(ExtensibleChip * i_chip, uint8_t i_port,
+                         STEP_CODE_DATA_STRUCT & io_sc)
+{
+    MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, i_port, io_sc );
+
+    // Each OCMB needs to keep track of whether it has hit a mainline UE. This
+    // is needed for a workaround for clearing Hardware Force Mirror (HWFM) when
+    // certain errors are hit, however if an OCMB has hit a mainline UE, then
+    // HWFM will not be cleared.
+    #ifdef __HOSTBOOT_RUNTIME
+    OcmbDataBundle * db = getOcmbDataBundle(i_chip);
+    db->iv_hwfmMainlineUe = true;
+    #endif
+
+    return SUCCESS;
+}
+
 #define ANALYZE_FETCH_UE_PLUGIN(POS) \
 int32_t AnalyzeFetchUe_##POS( ExtensibleChip * i_chip, \
                               STEP_CODE_DATA_STRUCT & io_sc ) \
 { \
-    MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, POS, io_sc ); \
-    return SUCCESS; \
+    return __analyzeFetchUe( i_chip, POS, io_sc ); \
 } \
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeFetchUe_##POS );
 
@@ -550,13 +567,33 @@ ANALYZE_FETCH_UE_PLUGIN(1);
 int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip, uint8_t i_port,
                             STEP_CODE_DATA_STRUCT & io_sc )
 {
+    #define PRDF_FUNC "[odyssey_ocmb::AnalyzeMainlineIue] "
+
     int32_t rc = SUCCESS;
     MemEcc::analyzeMainlineIue<TYPE_OCMB_CHIP>( i_chip, i_port, io_sc );
     #ifdef __HOSTBOOT_MODULE
     if ( MemEcc::queryIueTh<TYPE_OCMB_CHIP>(i_chip, io_sc) )
         rc = PRD_NO_CLEAR_FIR_BITS;
     #endif
+
+    // Hardware Force Mirror workaround: manually clear the FIR bit and HWFM.
+    // If IUE threshold was reached, a channel fail will be triggered anyway so
+    // don't bother clearing HWFM.
+    // Note: Odyssey FIRs are write to clear.
+    if (PRD_NO_CLEAR_FIR_BITS != rc)
+    {
+        char reg[64];
+        sprintf(reg, "RDF_FIR_%x", i_port);
+        if (SUCCESS != MemUtils::clearFirAndHwfm(i_chip, reg, 18))
+        {
+            PRDF_ERR(PRDF_FUNC "Error from clearFirAndHwfm(0x%08x,%s,18)",
+                     i_chip->getHuid(), reg);
+        }
+    }
+
     return rc;
+
+    #undef PRDF_FUNC
 }
 
 #define ANALYZE_MAINLINE_IUE_PLUGIN(POS) \
@@ -717,6 +754,68 @@ PRDF_PLUGIN_DEFINE(odyssey_ocmb, odpDataCorruptSideEffect_##PORT);
 
 PLUGIN_ODP_DATA_CORRUPT_SIDE_EFFECT(0);
 PLUGIN_ODP_DATA_CORRUPT_SIDE_EFFECT(1);
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  Workaround to manually clear the indicated FIR bit and Hardware
+ *         Force Mirror (HWFM) after handling an error.
+ * @param  i_chip OCMB chip.
+ * @param  i_port Target port select.
+ * @param  i_bit Target bit to clear.
+ * @return SUCCESS
+ */
+int32_t __hwfmWorkaround(ExtensibleChip * i_chip, uint8_t i_port, uint8_t i_bit)
+{
+    #define PRDF_FUNC "[odyssey_ocmb::__hwfmWorkaround] "
+
+    // Hardware Force Mirror workaround: manually clear the FIR bit and HWFM.
+    // Note: Odyssey FIRs are write to clear.
+    char reg[64];
+    sprintf(reg, "RDF_FIR_%x", i_port);
+    if (SUCCESS != MemUtils::clearFirAndHwfm(i_chip, reg, i_bit))
+    {
+        PRDF_ERR(PRDF_FUNC "Error from clearFirAndHwfm(0x%08x,%s,%d)",
+                 i_chip->getHuid(), reg, i_bit);
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+
+#define HWFM_WORKAROUND_IMPE_PLUGIN(PORT, BIT) \
+int32_t hwfmWorkaround_port##PORT##_bit##BIT(ExtensibleChip * i_chip, \
+                                             STEP_CODE_DATA_STRUCT & io_sc) \
+{ \
+    return __hwfmWorkaround(i_chip, PORT, BIT); \
+} \
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, hwfmWorkaround_port##PORT##_bit##BIT );
+
+HWFM_WORKAROUND_IMPE_PLUGIN(0,1);  // mainline MPE rank 0
+HWFM_WORKAROUND_IMPE_PLUGIN(1,1);  // mainline MPE rank 0
+HWFM_WORKAROUND_IMPE_PLUGIN(0,2);  // mainline MPE rank 1
+HWFM_WORKAROUND_IMPE_PLUGIN(1,2);  // mainline MPE rank 1
+HWFM_WORKAROUND_IMPE_PLUGIN(0,3);  // mainline MPE rank 2
+HWFM_WORKAROUND_IMPE_PLUGIN(1,3);  // mainline MPE rank 2
+HWFM_WORKAROUND_IMPE_PLUGIN(0,4);  // mainline MPE rank 3
+HWFM_WORKAROUND_IMPE_PLUGIN(1,4);  // mainline MPE rank 3
+HWFM_WORKAROUND_IMPE_PLUGIN(0,5);  // mainline MPE rank 4
+HWFM_WORKAROUND_IMPE_PLUGIN(1,5);  // mainline MPE rank 4
+HWFM_WORKAROUND_IMPE_PLUGIN(0,6);  // mainline MPE rank 5
+HWFM_WORKAROUND_IMPE_PLUGIN(1,6);  // mainline MPE rank 5
+HWFM_WORKAROUND_IMPE_PLUGIN(0,7);  // mainline MPE rank 6
+HWFM_WORKAROUND_IMPE_PLUGIN(1,7);  // mainline MPE rank 6
+HWFM_WORKAROUND_IMPE_PLUGIN(0,8);  // mainline MPE rank 7
+HWFM_WORKAROUND_IMPE_PLUGIN(1,8);  // mainline MPE rank 7
+HWFM_WORKAROUND_IMPE_PLUGIN(0,9);  // mainline NCE
+HWFM_WORKAROUND_IMPE_PLUGIN(1,9);  // mainline NCE
+HWFM_WORKAROUND_IMPE_PLUGIN(0,10); // mainline TCE
+HWFM_WORKAROUND_IMPE_PLUGIN(1,10); // mainline TCE
+HWFM_WORKAROUND_IMPE_PLUGIN(0,19); // mainline IRCD
+HWFM_WORKAROUND_IMPE_PLUGIN(1,19); // mainline IRCD
+HWFM_WORKAROUND_IMPE_PLUGIN(0,20); // mainline IMPE
+HWFM_WORKAROUND_IMPE_PLUGIN(1,20); // mainline IMPE
 
 //##############################################################################
 //

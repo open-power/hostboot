@@ -1760,3 +1760,14 @@
         scomaddr    0x080F001F;
         capture     group pll_ffdc;
     };
+
+    ###########################################################################
+    # Odyssey target Hardware Force Mirror (HWFM)
+    ###########################################################################
+
+    register RECR
+    {
+        name        "Read ECC Control Register";
+        scomaddr    0x08011C0B;
+        capture     group ocmb_regs;
+    };
