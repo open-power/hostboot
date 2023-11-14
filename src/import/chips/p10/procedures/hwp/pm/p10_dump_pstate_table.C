@@ -1007,9 +1007,13 @@ void pgpe_flags_print(FILE* stream,
     fprintf(stream, "\tPhantom Halt               = %s\n",
             (gppb->pgpe_flags[PGPE_FLAG_PHANTOM_HALT_ENABLE]) ? "ENABLED" : "DISABLED");
 
+    fprintf(stream, "\tECO Cores (Valid, Count)   = %3s, %d\n",
+            gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] & 0x80 ? "Yes" : "No",
+            gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] & 0x7F);
 
-    fprintf(stream, "\tSPARE COUNT NUM            = %d\n",
-            gppb->pgpe_flags[PGPE_FLAG_SPARE_COUNT]);
+    fprintf(stream, "\tSPARE Cores (Valid, Count) = %3s, %d\n",
+            gppb->pgpe_flags[PGPE_FLAG_SPARE_COUNT] & 0x80 ? "Yes" : "No",
+            gppb->pgpe_flags[PGPE_FLAG_SPARE_COUNT] & 0x7F);
 
     fprintf(stream,
             "---------------------------------------------------------------------------------------------------------\n");

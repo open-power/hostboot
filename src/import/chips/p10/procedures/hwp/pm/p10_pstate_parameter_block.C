@@ -3573,12 +3573,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
     FAPI_INF(">>>>>>>>> get_mvpd_poundPG");
 
     iv_eco_count = 0;
-
-    uint8_t l_present_core_unit_pos;
-
-    auto l_core_present_vector =
-        iv_procChip.getChildren<fapi2::TARGET_TYPE_CORE>
-        (fapi2::TARGET_STATE_PRESENT);
+    iv_spare_count = 0;
 
     auto l_quad_vector =
         iv_procChip.getChildren<fapi2::TARGET_TYPE_EQ>
@@ -3586,17 +3581,44 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
 
     for (auto quad_it : l_quad_vector)
     {
-        fapi2::ATTR_PG_Type l_vpd_pg;
-        fapi2::buffer<uint32_t> l_vpd_pg_buf;
+        fapi2::ATTR_CHIP_UNIT_POS_Type l_present_quad_unit_pos;
+        fapi2::ATTR_PG_MVPD_Type l_mvpd_pg;
+        fapi2::buffer<uint32_t> l_mvpd_pg_buf;
+
         const auto l_perv = quad_it.getParent<fapi2::TARGET_TYPE_PERV>();
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv, l_vpd_pg),
-                                "Error from FAPI_ATTR_GET (ATTR_PG)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG_MVPD, l_perv, l_mvpd_pg),
+                                "Error from FAPI_ATTR_GET (ATTR_PG_MVPD)");
 
-        l_vpd_pg_buf = l_vpd_pg;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_UNIT_POS,
+                               quad_it,
+                               l_present_quad_unit_pos));
+
+        l_mvpd_pg_buf = l_mvpd_pg;
+
+        // PG bit definition reference:
+        //   https://ibm.box.com/s/tmt5lvsswmvp9di8zxcge8i0eljxj0jb
+        // constants reflect bit associated with c0 slice in EQ (start of contiguous
+        // 4-bit field of L3 ECO data), with data packed
+        const auto SPARE_CORE_PG_START_BIT = 27;
+        const auto L3_ECO_PG_START_BIT = 28;
+        const auto MAX_CORES_PER_QUAD = 4;
+
+        FAPI_INF("  MVPD PG EQ %d : 0x%08X", l_present_quad_unit_pos, l_mvpd_pg);
+
+        // ECO mode is enabled if L3 ECO PG bit is 0
+        for (int c=0; c < MAX_CORES_PER_QUAD; ++c)
+        {
+            uint32_t l_core_pos = (l_present_quad_unit_pos * MAX_CORES_PER_QUAD) + c;
+            if (!l_mvpd_pg_buf.getBit(L3_ECO_PG_START_BIT + c))
+            {
+                ++iv_eco_count;
+                FAPI_INF("     EC %d is an ECO core", l_core_pos);
+            }
+        }
 
         // SPARE core count
-        if (!l_vpd_pg_buf.getBit(27))
+        if (!l_mvpd_pg_buf.getBit(SPARE_CORE_PG_START_BIT))
         {
             ++iv_spare_count;
         }
@@ -3609,57 +3631,9 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_PG()
         iv_spare_count = 0;
     }
 
-    FAPI_INF("  Total spare core count", iv_spare_count);
-
-    // For each present core,set region partial good and OCC CCSR bits
-    for (auto core_present_it : l_core_present_vector)
-    {
-
-        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_CHIP_UNIT_POS,
-                                core_present_it,
-                                l_present_core_unit_pos));
-
-        // ECO cores identifed in VPD
-
-        // PG bit definition reference:
-        //   https://ibm.box.com/s/tmt5lvsswmvp9di8zxcge8i0eljxj0jb
-        // constants reflect bit associated with c0 slice in EQ (start of contiguous
-        // 4-bit field of L3 ECO data), with data packed
-        const auto l_l3_eco_pg_start_bit = 28;
-
-        // grab perv target associated with parent EQ
-        const auto l_eq = core_present_it.getParent<fapi2::TARGET_TYPE_EQ>();
-        const auto l_perv = l_eq.getParent<fapi2::TARGET_TYPE_PERV>();
-
-        fapi2::ATTR_PG_MVPD_Type l_eq_mvpd_pg;
-        fapi2::ATTR_PG_Type l_vpd_pg;
-        fapi2::buffer<uint32_t> l_eq_mvpd_pg_buf;
-        fapi2::buffer<uint32_t> l_vpd_pg_buf;
-
-        // retreive partial good information for EQ containing this core, via
-        // the associated pervasive target
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG_MVPD, l_perv, l_eq_mvpd_pg),
-                 "Error from FAPI_ATTR_GET (ATTR_PG_MVPD)");
-
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PG, l_perv, l_vpd_pg),
-                                "Error from FAPI_ATTR_GET (ATTR_PG)");
-
-        l_eq_mvpd_pg_buf = l_eq_mvpd_pg;
-
-        l_vpd_pg_buf = l_vpd_pg;
-
-        FAPI_INF("  MVPD PG : 0x%08X   VPD PG : 0x%08X", l_eq_mvpd_pg_buf, l_vpd_pg_buf);
-
-        // ECO mode is enabled if L3 ECO PG bit is 0
-        if (!l_eq_mvpd_pg_buf.getBit(l_l3_eco_pg_start_bit + (l_present_core_unit_pos % 4)))
-        {
-            iv_eco_count++;
-            FAPI_INF("  EC %d is an ECO core", l_present_core_unit_pos);
-        }
-    }  // Present core loop
-
+    FAPI_INF("  Spare core count = %d", iv_spare_count);
+    FAPI_INF("  ECO count        = %d", iv_eco_count);
 fapi_try_exit:
-    FAPI_INF("ECO count = %d", iv_eco_count);
     FAPI_INF("<<<<<<<<< get_mvpd_poundPG");
 
     return fapi2::current_err;
