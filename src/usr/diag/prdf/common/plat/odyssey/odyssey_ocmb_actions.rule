@@ -208,6 +208,12 @@ actionclass omi_bus_th_32perDay
     threshold32pday;
 };
 
+actionclass omi_bus_th_32perDay_mnfg_info_only
+{
+    omi_bus;
+    info_only_mnfgInfo_th32;
+};
+
 actionclass mem_port0_M_th1
 {
     mem_port0_M;
@@ -413,6 +419,20 @@ actionclass omi_bus_th1_chnlFail
     SueSource;
     omi_bus;
     threshold1;
+    funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass dimm0_H_mem_port0_L_th1_chnlFail
+{
+    SueSource;
+    dimm0_H_mem_port0_L_th1;
+    funccall("returnNoClearFirBits"); # must be called last
+};
+
+actionclass dimm1_H_mem_port1_L_th1_chnlFail
+{
+    SueSource;
+    dimm1_H_mem_port1_L_th1;
     funccall("returnNoClearFirBits"); # must be called last
 };
 
@@ -1087,6 +1107,7 @@ actionclass analyzeODP_FIR_1
 actionclass analyzeOCMB_PHY_FIR
 {
     capture(ocmb_regs);
+    capture(omi_ocmb_ffdc);
     analyze(gOCMB_PHY_FIR);
 };
 

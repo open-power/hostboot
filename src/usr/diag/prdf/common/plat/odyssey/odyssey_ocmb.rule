@@ -1618,7 +1618,7 @@ rule rSRQ_FIR
 
 group gSRQ_FIR
     filter singlebit,
-           cs_root_cause(1,5,7,10,11,12,16,17,18,19,20,22,26,27,31,37,38,39,43,44,45)
+           cs_root_cause(1,5,7,10,11,12,13,16,17,18,19,20,22,26,27,31,37,38,39,40,43,44,45)
 {
     /** SRQ_FIR[0]
      *  Internal parity error
@@ -1688,7 +1688,7 @@ group gSRQ_FIR
     /** SRQ_FIR[13]
      *  port0 has failed due to a persistent retry
      */
-    (rSRQ_FIR, bit(13)) ? dimm0_H_mem_port0_L_th1;
+    (rSRQ_FIR, bit(13)) ? dimm0_H_mem_port0_L_th1_chnlFail;
 
     /** SRQ_FIR[14]
      *  informational register parity error
@@ -1823,7 +1823,7 @@ group gSRQ_FIR
     /** SRQ_FIR[40]
      *  port1 has failed due to a persistent retry
      */
-    (rSRQ_FIR, bit(40)) ? dimm1_H_mem_port1_L_th1;
+    (rSRQ_FIR, bit(40)) ? dimm1_H_mem_port1_L_th1_chnlFail;
 
     /** SRQ_FIR[41]
      *  refresh management CE port1
@@ -2835,7 +2835,7 @@ group gDLX_FIR
     /** DLX_FIR[22]
      *  DL0 skitter drift detected
      */
-    (rDLX_FIR, bit(22)) ? omi_bus_th_32perDay;
+    (rDLX_FIR, bit(22)) ? omi_bus_th_32perDay_mnfg_info_only;
 
     /** DLX_FIR[23:63]
      *  reserved
