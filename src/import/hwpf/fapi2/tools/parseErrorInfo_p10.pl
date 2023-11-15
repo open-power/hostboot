@@ -1967,8 +1967,12 @@ print ECFILE "\n\n#endif\n";
 # Print end of file information to set_sbe_error.H
 #------------------------------------------------------------------------------
 print SBFILE "    default:\\\n";
-
-print SBFILE "       invalid_data = true;\\\n";
+print SBFILE "  /* Create a new rc and capture unknown ffdc buffer */\\\n";
+print SBFILE "  /* When this occurs it's very likely a code bug in the xml (e.g. omitting <sbeError/> tag) */\\\n";
+print SBFILE "        const uint32_t size_bytes = (sizeof(fapi2::sbeFfdc_t)*20);\\\n";
+print SBFILE "        fapi2::variable_buffer l_buffer((uint32_t*)FFDC_BUFFER, size_bytes/4, size_bytes*8);\\\n";
+print SBFILE "        fapi2::ERROR_UNSUPPORTED_BY_SBE(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,RC).";
+print SBFILE "set_FFDC_BUFFER(l_buffer).set_INVALID_ERRVAL(ERRVAL).execute();\\\n";
 print SBFILE "        break;\\\n";
 print SBFILE "}\\\n";
 print SBFILE "if(invalid_data)\\\n";

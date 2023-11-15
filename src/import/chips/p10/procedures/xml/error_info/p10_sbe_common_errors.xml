@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -238,6 +238,14 @@
       <sbeError/>
       <rc>RC_INVALID_SBE_FFDC_PACKET</rc>
       <description>Invalid data detected in the SBE FFDC buffer</description>
+      <buffer>FFDC_BUFFER</buffer>
+      <ffdc>INVALID_ERRVAL</ffdc>
+    </hwpError>
+   <!-- ******************************************************************** -->
+    <hwpError>
+      <sbeError/>
+      <rc>RC_ERROR_UNSUPPORTED_BY_SBE</rc>
+      <description>An error was encountered that the SBE didn't expect.</description>
       <buffer>FFDC_BUFFER</buffer>
       <ffdc>INVALID_ERRVAL</ffdc>
     </hwpError>
