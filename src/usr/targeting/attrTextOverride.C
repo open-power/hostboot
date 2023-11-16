@@ -628,10 +628,21 @@ errlHndl_t attrLineToFields( char * i_line,
     // Get the attr dimensions
     while (l_openOffset != CONST_INVALID)
     {
+        // Get the number of chars between '[' and ']'
+        // This will include one extra char for the null terminator
         l_dimchars = l_closeOffset - l_openOffset;
+
+        // Put the value into it's own string
         char l_dimstring[l_dimchars] = {0};
-        strncpy(l_dimstring, l_namePtr+l_openOffset+1, l_dimchars);
+        strncpy(l_dimstring, l_namePtr+l_openOffset+1, l_dimchars-1);
+
+        // Add the null terminator
+        l_dimstring[l_dimchars-1] = '\0';
+
+        // Convert to an unsigned long for the output array
         o_attrDims[l_dim] = strtoul(l_dimstring, nullptr, 10);
+
+        // Increment dimension counter and check for too many dimensions
         l_dim++;
 
         if(l_dim > ATTR_MAX_DIMS)
@@ -656,9 +667,18 @@ errlHndl_t attrLineToFields( char * i_line,
             goto ERROR_EXIT;
         }
 
-        l_openOffset = strStrPos(l_namePtr+l_closeOffset+1, "[");
-        l_closeOffset = strStrPos(l_namePtr+l_closeOffset+1, "]");
-    }
+        // Check for another dimension
+        l_openOffset = strStrPos(l_namePtr+l_closeOffset, "[");
+
+        if (l_openOffset != CONST_INVALID)
+        {
+            // Set offsets from the start of the attr name
+            l_openOffset =
+                l_closeOffset + strStrPos(l_namePtr+l_closeOffset, "[");
+            l_closeOffset =
+                l_openOffset + strStrPos(l_namePtr+l_openOffset, "]");
+        }
+    } // end while
 
     // Check the value length, don't want to over-run the value string
     l_err = checkAttrValueLength(l_valueLen);
