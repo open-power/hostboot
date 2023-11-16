@@ -90,7 +90,8 @@ class MemTdCtlr
     {
         #ifdef __HOSTBOOT_RUNTIME
         if ( TdEntry::TPS_EVENT == i_entry->getType() &&
-             isTpsBanned(i_entry->getChip(), i_entry->getRank()) )
+             isTpsBanned(i_entry->getChip(), i_entry->getRank(),
+                         i_entry->getPort()) )
         {
             PRDF_ERR( "[MemTdCtlr::pushToQueue] TPS banned on 0x%08x 0x%02x",
                       i_entry->getChip()->getHuid(), i_entry->getRank() );
@@ -145,12 +146,14 @@ class MemTdCtlr
      *         to the queue for this rank will be ignored.
      * @param  i_chip OCMB chip.
      * @param  i_rank The target slave rank.
+     * @param  i_port The target port select.
      */
-    void banTps( ExtensibleChip * i_chip, const MemRank & i_rank )
+    void banTps( ExtensibleChip * i_chip, const MemRank & i_rank,
+                 uint8_t i_port )
     {
         // It doesn't matter what we set the value to, we just need to make sure
         // the rank exists in the map.
-        iv_tpsBans[std::make_pair(i_chip, i_rank)] = true;
+        iv_tpsBans[std::make_tuple(i_chip, i_rank, i_port)] = true;
     }
 
     /**
@@ -299,13 +302,18 @@ class MemTdCtlr
     #ifdef __HOSTBOOT_RUNTIME
 
     /**
+     * @brief  Returns whether TPS has been banned on the input rank/port.
+     * @param  i_chip OCMB chip.
      * @param  i_rank The target slave rank.
+     * @param  i_port The target port select.
      * @return True, if this slave rank has been banned. False, otherwise.
      */
-    bool isTpsBanned( ExtensibleChip * i_chip, const MemRank & i_rank )
+    bool isTpsBanned( ExtensibleChip * i_chip, const MemRank & i_rank,
+                      uint8_t i_port )
     {
         // Check if this rank exists in the map.
-        std::pair<ExtensibleChip *, MemRank> e = std::make_pair(i_chip, i_rank);
+        std::tuple<ExtensibleChip *, MemRank, uint8_t> e =
+            std::make_tuple(i_chip, i_rank, i_port);
         return ( iv_tpsBans.end() != iv_tpsBans.find(e) );
     }
 
@@ -363,8 +371,7 @@ class MemTdCtlr
     bool iv_resumeBgScrub = false;
 
     /** Map to keep track of ranks that have banned TPS. */
-    // TODO Odyssey - need the port
-    std::map< std::pair<ExtensibleChip *, MemRank>, bool > iv_tpsBans;
+    std::map< std::tuple<ExtensibleChip *, MemRank, uint8_t>, bool > iv_tpsBans;
 
     #else // IPL only
 

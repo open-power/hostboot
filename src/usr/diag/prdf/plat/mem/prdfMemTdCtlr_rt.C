@@ -980,7 +980,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns(uint8_t i_port)
 
         // Do not unmask NCE and TCE attentions if they have been permanently
         // masked due to certain TPS conditions.
-        if ( !(getOcmbDataBundle(iv_chip)->iv_maskMainlineNceTce) )
+        if (!(getOcmbDataBundle(iv_chip)->iv_maskMainlineNceTce.count(i_port)))
         {
             fir->SetBit(9);  mask->SetBit(9);  // Mainline read NCE
             fir->SetBit(10); mask->SetBit(10); // Mainline read TCE
@@ -1010,7 +1010,7 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns(uint8_t i_port)
 
         // Do not unmask NCE and TCE attentions if they have been permanently
         // masked due to certain TPS conditions.
-        if ( !(getOcmbDataBundle(iv_chip)->iv_maskMainlineNceTce) )
+        if (!(getOcmbDataBundle(iv_chip)->iv_maskMainlineNceTce.count(i_port)))
         {
             fir->ClearBit(8);  mask->ClearBit(8);  // Mainline read NCE
             fir->ClearBit(9);  mask->ClearBit(9);  // Mainline read TCE

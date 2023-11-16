@@ -212,11 +212,10 @@ template<> inline
 void banTps<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                                         const MemRank & i_rank, uint8_t i_port )
 {
-    // TODO Odyssey - need the port
     // Ban TPS on this rank.
-    getOcmbDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank );
+    getOcmbDataBundle(i_chip)->getTdCtlr()->banTps( i_chip, i_rank, i_port );
     // Permanently mask mainline NCEs and TCEs because of the TPS ban.
-    getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
+    getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce[i_port] = true;
     getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns(i_port);
 
     // HWFM workaround: set exit 1 for Odyssey to prevent HWFM on masked NCEs

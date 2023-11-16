@@ -79,7 +79,7 @@ template<>
 void __maskMainlineNceTces<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
                                            uint8_t i_port)
 {
-    getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce = true;
+    getOcmbDataBundle(i_chip)->iv_maskMainlineNceTce[i_port] = true;
     getOcmbDataBundle(i_chip)->getTdCtlr()->maskEccAttns(i_port);
 
     // HWFM workaround: set exit 1 for Odyssey to prevent HWFM on masked NCEs

@@ -233,9 +233,9 @@ class OcmbDataBundle : public DataBundle
 
     /** Set to true if mainline NCEs and TCEs should be permanently masked. This
      *  is checked at the end of targeted diagnostics before background
-     *  scrubbing is resumed. */
-    // TODO Odyssey - need to mask per port
-    bool iv_maskMainlineNceTce = false;
+     *  scrubbing is resumed. Mask per port. Value doesn't matter, the key just
+     *  needs to exist in the map. */
+    std::map<uint8_t, bool> iv_maskMainlineNceTce;
 
     // These are used to limit the number of times a scrub command will stop
     // on a UE or CE on a rank. This is to prevent potential flooding of
@@ -243,7 +243,7 @@ class OcmbDataBundle : public DataBundle
     TimeBasedThreshold iv_ueStopCounter =
         TimeBasedThreshold( 16, ThresholdResolution::SEVEN_HOURS );
     TimeBasedThreshold iv_ceStopCounter =
-        TimeBasedThreshold( 16, ThresholdResolution::SEVEN_HOURS );;
+        TimeBasedThreshold( 16, ThresholdResolution::SEVEN_HOURS );
 
     // If we stop on a UE or a CE, we will need to store the port and rank that
     // the error is on so that we can clear our respective thresholds if the
