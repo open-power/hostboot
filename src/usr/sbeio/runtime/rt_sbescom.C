@@ -64,6 +64,9 @@ static void markUseSbeScom(TARGETING::TargetHandle_t i_ocmb)
 
         // Mark target
         i_ocmb->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+
+        // also turn off the inband PIPE FIFO
+        i_ocmb->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
     }
 }
 
