@@ -235,9 +235,9 @@ $(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
 $(GENERATED)_PATH = ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/lib/
 $(GENERATED)_FILE_PREFIX = mss_p10
 
-SOURCES += $(ROOTPATH)/chips/p10/procedures/xml/attribute_info/p10_io_attributes.xml
-SOURCES += $(ROOTPATH)/chips/p10/procedures/xml/attribute_info/p10_omi_setup_bars.xml
-SOURCES += $(ROOTPATH)/chips/p10/procedures/xml/attribute_info/p10_omi_init.xml
+SOURCES += $(IMPORT_PATH)/chips/p10/procedures/xml/attribute_info/p10_io_attributes.xml
+SOURCES += $(IMPORT_PATH)/chips/p10/procedures/xml/attribute_info/p10_omi_setup_bars.xml
+SOURCES += $(IMPORT_PATH)/chips/p10/procedures/xml/attribute_info/p10_omi_init.xml
 
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_p10_attribute_getters.H
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_p10_attribute_setters.H
@@ -259,8 +259,8 @@ $(GENERATED)_COMMAND_PATH = $(IMPORT_PATH)/generic/memory/tools/
 $(GENERATED)_PATH = ${ROOTPATH}/obj/genfiles/chips/ocmb/common/procedures/hwp/pmic/lib/
 $(GENERATED)_FILE_PREFIX = mss_pmic
 
-SOURCES += $(ROOTPATH)/chips/ocmb/common/procedures/xml/attribute_info/pmic_eff_attributes.xml
-SOURCES += $(ROOTPATH)/chips/ocmb/common/procedures/xml/attribute_info/pmic_attributes.xml
+SOURCES += $(IMPORT_PATH)/chips/ocmb/common/procedures/xml/attribute_info/pmic_eff_attributes.xml
+SOURCES += $(IMPORT_PATH)/chips/ocmb/common/procedures/xml/attribute_info/pmic_attributes.xml
 
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_pmic_attribute_getters.H
 CLEAN_TARGETS += ${$(GENERATED)_PATH}/mss_pmic_attribute_setters.H
