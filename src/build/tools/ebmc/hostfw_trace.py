@@ -1106,9 +1106,7 @@ def get_ascii_traces_from_trace_entry_list(binaryData, traceEntriesV2):
                 hexTrace = traceStr + hexString
                 traces.append(hexTrace)
         else:
-            capture_error("Error: entry type " + str(traceEntryV1.entryType) +
-                          " not recognized")
-            return -1, traces
+            traces.append("   *** WARNING: entry type ===> " + str(traceEntryV1.entryType) + " <=== NOT RECOGNIZED, SKIPPING ***   ")
 
     return 0, traces
 
