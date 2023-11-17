@@ -28,7 +28,7 @@
 <hwpErrors>
    <!-- ******************************************************************** -->
     <registerFfdc>
-       <id>CBS_STATUS_REGS_FSI</id>
+       <id>CBS_STATUS_REGS_CFAM</id>
        <cfamRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_FSI</cfamRegister>
        <cfamRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS_FSI</cfamRegister>
        <cfamRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI</cfamRegister>
@@ -39,13 +39,12 @@
     <registerFfdc>
        <id>CBS_STATUS_REGS_SCOM</id>
        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS</scomRegister>
+       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS</scomRegister>
+       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG</scomRegister>
        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_RO</scomRegister>
+       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_HIST</scomRegister>
        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_RO</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_HIST_FSI</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST_FSI</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS_FSI</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI</scomRegister>
+       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST</scomRegister>
        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_RO</scomRegister>
        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_STAT_RO</scomRegister>
     </registerFfdc>

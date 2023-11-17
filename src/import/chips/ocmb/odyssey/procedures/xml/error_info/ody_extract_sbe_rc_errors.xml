@@ -53,8 +53,7 @@
     Program interrupt promoted
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -63,8 +62,7 @@
     Instruction storage interrupt
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -73,8 +71,7 @@
     Alignment interrupt
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -83,8 +80,7 @@
     Data storage interrupt
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -93,9 +89,7 @@
     Uncorrectable error detected in OTPROM memory read
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -105,9 +99,7 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -117,9 +109,7 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -129,9 +119,7 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -140,8 +128,7 @@
     Address scope out of range
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -151,9 +138,7 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -163,9 +148,7 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -175,9 +158,7 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -187,9 +168,7 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -199,9 +178,7 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -221,9 +198,7 @@
     Error detected during pibmem access
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>SBE_IPL_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
