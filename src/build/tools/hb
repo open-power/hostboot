@@ -711,12 +711,6 @@ hb_startsimics()
             VEXEC_STR=""
         else
             VEXEC_STR=" vexec"
-
-            # Spawn the vexec to the same type of server we started on
-            RED_HAT_DIST=`sed "s/^.*release \([0-9]*\)\..*$/rh\1/" /etc/redhat-release`
-            if [[ $RED_HAT_DIST == "rh7" ]]; then
-                VEXEC_STR+=" -pool csexec8t-rhel7 "
-            fi
         fi
 
         # For GCOV, tell simics to enable the larger backing cache.
