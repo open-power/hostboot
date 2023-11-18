@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -204,6 +204,7 @@ enum vpdReasonCode
     VPD_ISDIMM_UNSUPPORTED_PN_FOR_CCIN  = VPD_COMP_ID | 0x54,
     VPD_ISDIMM_PROBLEM_READING_SPD_SIZE = VPD_COMP_ID | 0x55,
     VPD_ISDIMM_PROBLEM_READING_SPD      = VPD_COMP_ID | 0x56,
+    VPD_ISDIMM_UNSUPPORTED_FN_FOR_CCIN  = VPD_COMP_ID | 0x57,
 };
 
 
@@ -267,6 +268,15 @@ enum UserDetailsTypes
  * @devdesc      getVpdLocation> VPD_REC_NUM is invalid, bad MRW
  * @custdesc     Firmware configuration error
  */
+
+/*@
+ * @reasoncode       VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_CCIN
+ * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
+ * @userdata1        target huid
+ * @userdata2        partNumber
+ * @devdesc          Unsupported FRU part number
+ * @custdesc         Unexpected FRU part number detected
+*/
 
 
 #endif

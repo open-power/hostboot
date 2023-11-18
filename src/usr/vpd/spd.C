@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
@@ -89,6 +89,7 @@ typedef std::array<uint8_t, SPD::IBM_11S_SN_SIZE + 1>   COMPOSED_SN_typeStdArr;
 typedef std::array<uint8_t, SPD::IBM_11S_PN_SIZE + 1>   COMPOSED_PN_typeStdArr;
 typedef std::array<uint8_t, SPD::IBM_11S_FN_SIZE + 1>   COMPOSED_FN_typeStdArr;
 typedef std::array<uint8_t, SPD::IBM_11S_CCIN_SIZE + 1> COMPOSED_CCIN_typeStdArr;
+typedef std::array<uint8_t, sizeof(uint8_t)        + 1> COMPOSED_FREQ_typeStdArr;
 
 // This mutex is used to lock for writing/updating the global variables.
 mutex_t g_spdMutex = MUTEX_INITIALIZER;
@@ -349,7 +350,7 @@ void setDDR4FN ( Target * i_target, const COMPOSED_FN_typeStdArr &i_fruNumber)
  *
  * @param[in] i_target - DIMM target
  *
- * @param[in] i_partNumber - Part Number to map to pull the CCIN
+ * @param[in] i_fruNumber - FRU Number to map to pull the CCIN
  *
  * @param[in/out] io_CCIN - CCIN
  *
@@ -358,26 +359,28 @@ void setDDR4FN ( Target * i_target, const COMPOSED_FN_typeStdArr &i_fruNumber)
  *
  * @return void
  */
-void buildDDR4CCIN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber, COMPOSED_CCIN_typeStdArr &io_CCIN)
+void buildDDR4CCIN ( Target * i_target, const COMPOSED_FN_typeStdArr &i_fruNumber, COMPOSED_CCIN_typeStdArr &io_CCIN)
 {
-    std::pair<const char*, const char*> pn_ccin[] =
+    std::pair<const char*, const char*> fn_ccin[] =
     {
-        { "8421000", "324D" },
-        { "8421008", "324E" },
-        { "8529000", "324E" },
-        { "8529008", "324F" },
-        { "8529928", "325A" },
-        { "8529B28", "324C" },
-        { "8631008", "32BB" },
-        { "8631928", "32BC" },
+        { "78P4191", "324D" },
+        { "78P4192", "324E" },
+        { "78P4197", "324E" },
+        { "78P4198", "324F" },
+        { "78P4199", "325A" },
+        { "78P4200", "324C" },
+        { "78P6925", "32BC" },
+        { "78P7317", "331A" },
+        { "78P7318", "331F" },
+        { "78P6815", "32BB" },
     };
-    static_assert (SPD::IBM_11S_PN_SIZE == 7);   // Future check to catch if things change since this table is using 7 char PN
+    static_assert (SPD::IBM_11S_FN_SIZE == 7);   // Future check to catch if things change since this table is using 7 char FN
     static_assert (SPD::IBM_11S_CCIN_SIZE == 4); // Future check to catch if things change since this table is using 4 char CCIN
     bool missing = true;
     errlHndl_t l_err = nullptr;
-    for (const auto [ pn, ccin ] : pn_ccin)
+    for (const auto [ fn, ccin ] : fn_ccin)
     {
-        if (!strcmp(pn, reinterpret_cast<const char *>(&i_partNumber)))
+        if (!strcmp(fn, reinterpret_cast<const char *>(&i_fruNumber)))
         {
             // ONLY copy IBM_11S_FN_SIZE, preserve the NULL byte
             memcpy(&io_CCIN, ccin, SPD::IBM_11S_CCIN_SIZE);
@@ -394,18 +397,18 @@ void buildDDR4CCIN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumb
         // having a null CCIN value.
 
         /*@
-         * @reasoncode       VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_CCIN
+         * @reasoncode       VPD::VPD_ISDIMM_UNSUPPORTED_FN_FOR_CCIN
          * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
          * @userdata1        target huid
-         * @userdata2        partNumber
-         * @devdesc          Unsupported FRU part number
-         * @custdesc         Unexpected FRU part number detected
+         * @userdata2        fruNumber
+         * @devdesc          Unsupported FRU number
+         * @custdesc         Unexpected FRU number detected
          */
          l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
                                           VPD::VPD_SPD_PRESENCE_DETECT,
-                                          VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_CCIN,
+                                          VPD::VPD_ISDIMM_UNSUPPORTED_FN_FOR_CCIN,
                                           get_huid(i_target),
-                                          strtoul(reinterpret_cast<const char *>(&i_partNumber), nullptr, 16),
+                                          strtoul(reinterpret_cast<const char *>(&i_fruNumber), nullptr, 16),
                                           ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
          l_err->addPartCallout( i_target,
                               HWAS::VPD_PART_TYPE,
@@ -436,18 +439,40 @@ void buildDDR4CCIN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumb
  *
  * @return void
  */
-void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber, COMPOSED_FN_typeStdArr &io_fruNumber)
+void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber, COMPOSED_FN_typeStdArr &io_fruNumber, const uint8_t * i_SPD)
 {
     std::pair<const char*, const char*> pn_fn[] =
     {
+        // First column is PN, second column is FN
         { "8421000", "78P4191" },
         { "8421008", "78P4192" },
         { "8529000", "78P4197" },
+        { "8529000", "78P7317" },
         { "8529008", "78P4198" },
+        { "8529008", "78P7318" },
         { "8529928", "78P4199" },
         { "8529B28", "78P4200" },
         { "8631008", "78P6815" },
         { "8631928", "78P6925" },
+    };
+
+    // The second column in the freq_table is the MTB units (byte 18)
+    // which is the value used to determine the frequency of the dimm.
+    // Above PN's may have duplicate values, we need to match the
+    // MTB units to know which FN this is going to map.
+    std::pair<const char*, uint8_t> freq_table[] =
+    {
+        // First column is FN, second column is MTB units (TCK_MIN)
+        { "78P4191", 6 },
+        { "78P4192", 6 },
+        { "78P4197", 6 },
+        { "78P7317", 5 },
+        { "78P4198", 6 },
+        { "78P7318", 5 },
+        { "78P4199", 6 },
+        { "78P4200", 6 },
+        { "78P6815", 5 },
+        { "78P6925", 6 },
     };
     // PN and FN have same sizes
     static_assert (SPD::IBM_11S_PN_SIZE == 7); // Future check to catch if things change since this table is using 7 char PN and FN
@@ -459,9 +484,22 @@ void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber
     {
         if (!strcmp(pn, reinterpret_cast<const char *> (&i_partNumber)))
         {
-            // ONLY copy IBM_11S_FN_SIZE, preserve the NULL byte
-            memcpy(&io_fruNumber, fn, SPD::IBM_11S_FN_SIZE);
-            missing = false;
+            for (const auto [ fru, freq ] : freq_table)
+            {
+                if (!strcmp(fn, fru))
+                {
+                    if (freq == i_SPD[SPD::ddr4Data[SPD::TCK_MIN].offset]) // byte 18 SPD enum=0x10 MTB units determines frequency
+                    {
+                        // ONLY copy IBM_11S_FN_SIZE, preserve the NULL byte
+                        memcpy(&io_fruNumber, fn, SPD::IBM_11S_FN_SIZE);
+                        missing = false;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!missing)
+        {
             break;
         }
     }
@@ -612,16 +650,17 @@ errlHndl_t composeIsDimmVPD ( Target * i_target)
     // If we have any errors we log the issue and we keep on
     // trying to collect as much data as possible
 
+
     // Build the composed SN PN FN and CCIN's
     buildDDR4SN(l_SPD_Data, tmpSN);
-
     //  We need the PN which is used in FN and CCIN calculation
     //  If PN has a problem a PREDICTIVE log will be created,
     //  but keep on collecting as much data as possible
     buildDDR4PN(l_SPD_Data, tmpPN);
     // Now calculate FN and CCIN since we now have the PN
-    buildDDR4FN(i_target, tmpPN, tmpFN);
-    buildDDR4CCIN(i_target, tmpPN, tmpCCIN);
+    buildDDR4FN(i_target, tmpPN, tmpFN, l_SPD_Data);
+    buildDDR4CCIN(i_target, tmpFN, tmpCCIN);
+
     // Set the attributes with composed values for SN PN FN and CCIN
     setDDR4SN(i_target, tmpSN);
     setDDR4PN(i_target, tmpPN);
