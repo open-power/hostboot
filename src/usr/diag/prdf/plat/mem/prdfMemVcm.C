@@ -253,7 +253,7 @@ uint32_t VcmEvent<TYPE_OCMB_CHIP>::startCmd()
         mss::mcbist::stop_conditions<mss::mc_type::EXPLORER> stopCond;
 
         // If at phase 2, set to stop on MCEs
-        if ( TD_PHASE_2 == iv_phase )
+        if ( TD_PHASE_2 == iv_phase && !iv_disableStopOnMce)
         {
             stopCond.set_pause_on_mce_hard(mss::ON)
                     .set_pause_on_mce_soft(mss::ON)
