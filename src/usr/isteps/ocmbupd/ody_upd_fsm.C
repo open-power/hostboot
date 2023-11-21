@@ -1433,17 +1433,16 @@ errlHndl_t ody_has_async_ffdc(Target* const i_ocmb,
             uint64_t iv_minorStep : 6;
             uint64_t iv_reserved2 : 4;
             uint64_t iv_progressCode : 6;
-            uint64_t iv_unused : 32;
         };
         uint64_t iv_messagingReg;
     } messagingReg_t;
 
-    uint64_t l_data = 0;
+    uint32_t l_data = 0;
     uint64_t l_dataSize = sizeof(l_data);
     l_errl = deviceRead(i_ocmb,
                         &l_data,
                         l_dataSize,
-                        DEVICE_SCOM_ADDRESS(0x50009));
+                        DEVICE_CFAM_ADDRESS(0x2809));
     if(l_errl)
     {
         TRACF(ERR_MRK"ody_has_async_ffdc: Could not read SBE MSG register for OCMB 0x%x", get_huid(i_ocmb));
