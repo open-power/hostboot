@@ -4709,7 +4709,14 @@ fapi2::ReturnCode handle_draminit_recovery(const fapi2::Target<fapi2::TARGET_TYP
 /// @param[in] i_target the memory port on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff verbosity is no higher than COURSE_DEBUG on both
 ///
-fapi2::ReturnCode check_draminit_verbosity(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_targets);
+fapi2::ReturnCode check_draminit_verbosity(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Returns max size of Synopsys training log
+/// @param[in] i_port_verbosity Memory port verbosity
+/// @return uint32_t of buffer size in B
+///
+uint32_t getBufferSizeFromVerboseAttr(const uint8_t i_port_verbosity);
 
 } // namespace phy
 } // namespace ody

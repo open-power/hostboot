@@ -6806,6 +6806,32 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Returns max size of Synopsys training log
+/// @param[in] i_port_verbosity Memory port verbosity
+/// @return uint32_t of buffer size in B
+///
+uint32_t getBufferSizeFromVerboseAttr(const uint8_t i_port_verbosity)
+{
+    // ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_MAX_DEBUG (0x04) = 32KB
+    // ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_DETAILED_DEBUG (0x05) = 32KB
+    // ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_COARSE_DEBUG (0x0A) = 512B
+    // ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_STAGE_COMPLETE (0xC8) = 512B
+    // ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_ASSERTION (0xC9) = 512B
+    // ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_FW_COMPLETE (0xFF) = 512B
+    constexpr uint32_t MAX_LOG_SIZE_512B = 512;
+    constexpr uint32_t MAX_LOG_SIZE_32KB = 32000;
+
+    if(i_port_verbosity >= fapi2::ENUM_ATTR_ODY_DRAMINIT_VERBOSITY_COARSE_DEBUG)
+    {
+        return MAX_LOG_SIZE_512B;
+    }
+    else
+    {
+        return MAX_LOG_SIZE_32KB;
+    }
+}
+
 } // namespace phy
 } // namespace ody
 } // namespace mss
