@@ -34,6 +34,7 @@
 #include <prdfMemScrubUtils.H>
 #include <prdfMemExtraSig.H>
 #include <prdfMemUtils.H>
+#include <prdfOdyExtraSig.H>
 #include <prdfParserEnums.H>
 #include <UtilHash.H> // for Util::hashString
 
@@ -119,6 +120,25 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         PRDF_ERR( PRDF_FUNC "getMemMaintAddr<T>(0x%08x) failed",
                   iv_chip->getHuid() );
         return o_rc;
+    }
+
+    // For Odyssey OCMBs, adjust the signature to specify the port.
+    if (isOdysseyOcmb(iv_chip->getTrgt()))
+    {
+        switch(addr.getPort())
+        {
+            case 0:
+                io_sc.service_data->setSignature(iv_chip->getHuid(),
+                                                 PRDFSIG_McbistCmdComp0);
+                break;
+            case 1:
+                io_sc.service_data->setSignature(iv_chip->getHuid(),
+                                                 PRDFSIG_McbistCmdComp1);
+                break;
+            default:
+                PRDF_ERR(PRDF_FUNC "Invalid port %d in addr", addr.getPort());
+                return o_rc;
+        }
     }
 
     do
