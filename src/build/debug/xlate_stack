@@ -36,6 +36,7 @@
 #   xlate_stack -f hbrt_addrs -l hbirt.list
 #     (put the hbrt stack addrs into a file, and pass with -f <fn>)
 #         "ISF=FFFFFF0001190000 NIA=FFFFFF00000270A4 ...."
+#     (use -p for fsp systems, to subtract a page from addrs)
 ################################################################################
 
 use strict;
@@ -59,6 +60,7 @@ GetOptions(
             "elf_dce=s"     => \my $dce_elf,
             "dce_listing=s" => \my $dce_list,
             "file_hbrt=s"   => \my $hbrt_file,
+            "page_subtract" => \my $subtract_page,
             "Verbosity=i"   => \my $verbosity)
    or die("Error in command line arguments\n");
 
@@ -92,8 +94,15 @@ if ($hbrt_file)
         # remove the leading 10 chars from NIA addr
         $addr = substr($addr, 10, 6);
 
-        # subtract 0x1000 (dont ask why, just do it)
-        $num = hex($addr) - 0x1000;
+        $num = hex($addr);
+
+        # subtract 0x1000 to offset the header page in some configurations
+        # BMC systems = not used
+        # FSP systems = required
+        if( $subtract_page )
+        {
+           $num -= 0x1000;
+        }
 
         # append to create the -s <stack_addrs>
         $stack_addrs .= sprintf("<-0x%x", $num);
@@ -121,9 +130,11 @@ sub usage
           qq(-s [stack addrs]\n) .
           qq(-e [dce elf]\n) .
           qq(-d [dce listing file]\n) .
+          qq(-f [hbrt stack file]\n) .
           qq(-r [runtime image addr]\n) .
           qq(    IF needed, from this trace:\n) .
-          qq(     HBRT_TEST       | 135|Runtime image loaded @ <addr>\n);
+          qq(     HBRT_TEST       | 135|Runtime image loaded @ <addr>\n) .
+          qq(-p (subtract 1 page from hbrt addresses - needed for fsp)\n) ;
     exit 0;
 }
 
