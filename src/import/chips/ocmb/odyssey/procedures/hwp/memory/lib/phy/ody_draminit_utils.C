@@ -415,7 +415,9 @@ fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TAR
     if(l_log_msg)
     {
         l_full_msg = ADD_MAJOR_MESSAGES | i_mail;
-        FAPI_TRY(o_log_data.put(static_cast<fapi2::hwp_data_unit>(l_full_msg)));
+        // Ignoring return code to avoiding the HWP failing because of an overshoot of ostream log space
+        // Data that overshoots log space will not be logged/saved by SBE
+        o_log_data.put(static_cast<fapi2::hwp_data_unit>(l_full_msg));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -2599,7 +2601,9 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
     .extractToRight<NUM_DATA, NUM_DATA_LEN>(l_num_data);
 
     // Put the string index into the output stream
-    FAPI_TRY(o_log_data.put(static_cast<fapi2::hwp_data_unit>(l_string_index)));
+    // Ignoring return code to avoiding the HWP failing because of an overshoot of ostream log space
+    // Data that overshoots log space will not be logged/saved by SBE
+    o_log_data.put(static_cast<fapi2::hwp_data_unit>(l_string_index));
 
     // Print out the message's "string index" to use to decode the string
     FAPI_INF(TARGTIDFORMAT " Message string index: 0x%08x has %u more data pieces for decode", TARGTID, l_string_index,
@@ -2616,7 +2620,9 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
         l_mail.extractToRight<DATA, DATA_LEN>(l_data);
 
         // Put the data piece into the output stream
-        FAPI_TRY(o_log_data.put(static_cast<fapi2::hwp_data_unit>(l_data)));
+        // Ignoring return code to avoiding the HWP failing because of an overshoot of ostream log space
+        // Data that overshoots log space will not be logged/saved by SBE
+        o_log_data.put(static_cast<fapi2::hwp_data_unit>(l_data));
 
         // Print the data
         // The data can be post processed using the Synopsys .strings file (not including here as it could be size prohibitive)
