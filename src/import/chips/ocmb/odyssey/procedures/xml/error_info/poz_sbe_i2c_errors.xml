@@ -34,6 +34,7 @@
         <ffdc>PORT</ffdc>
         <ffdc>ENGINE</ffdc>
         <ffdc>DEVICEADDR</ffdc>
+        <ffdc>RETRYCOUNT</ffdc>
     </hwpError>
     <hwpError>
         <sbeError/>
@@ -44,6 +45,7 @@
         <ffdc>PORT</ffdc>
         <ffdc>ENGINE</ffdc>
         <ffdc>DEVICEADDR</ffdc>
+        <ffdc>RETRYCOUNT</ffdc>
     </hwpError>
     <hwpError>
         <sbeError/>
@@ -55,6 +57,7 @@
         <ffdc>DEVICEADDR</ffdc>
         <ffdc>POLLINGINT</ffdc>
         <ffdc>TIMEOUTCOUNT</ffdc>
+        <ffdc>RETRYCOUNT</ffdc>
     </hwpError>
     <hwpError>
         <sbeError/>
@@ -66,6 +69,7 @@
         <ffdc>DEVICEADDR</ffdc>
         <ffdc>POLLINGINT</ffdc>
         <ffdc>TIMEOUTCOUNT</ffdc>
+        <ffdc>RETRYCOUNT</ffdc>
     </hwpError>
     <hwpError>
         <sbeError/>
@@ -77,6 +81,17 @@
         <ffdc>DEVICEADDR</ffdc>
         <ffdc>POLLINGINT</ffdc>
         <ffdc>TIMEOUTCOUNT</ffdc>
+        <ffdc>RETRYCOUNT</ffdc>
+    </hwpError>
+    <hwpError>
+        <sbeError/>
+        <rc>RC_POZ_I2CC_RESET_ERROR</rc>
+        <description>Error resetting Odyssey I2C controller</description>
+        <ffdc>STATUS</ffdc>
+        <ffdc>PORT</ffdc>
+        <ffdc>ENGINE</ffdc>
+        <ffdc>DEVICEADDR</ffdc>
+        <ffdc>RETRYCOUNT</ffdc>
     </hwpError>
 
 </hwpErrors>
