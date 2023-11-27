@@ -368,6 +368,9 @@ if [[ $COPY_ONLY = 1 ]] ; then
     echo "   PATCHES_DIR=$COPYDIR $COPYDIR/patch-bmc [USERNAME@]HOSTNAME PASSWORD $SECTIONS" >> $COPYDIR/HOW_TO_APPLY.txt
     cat $COPYDIR/HOW_TO_APPLY.txt
 
+    # Copy this script out there
+    cp $0 "$COPYDIR"
+
 else   # Apply the data to the BMC
 
    FETCH_LID_IDS_FROM_BMC
