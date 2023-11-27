@@ -6112,6 +6112,21 @@
   </attribute>
 
   <attribute>
+    <description>
+       If set, then the temporary code that universally disables scom
+        checking on the Odyssey SBE is not executed.
+       This makes the firmware act like the real shipped code,
+    </description>
+    <id>OCMB_IGNORE_SCOM_CHECK_DISABLE</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>OCMB_ISTEP_MODE</id>
     <description>
         A mode flag to enable the Odyssey SPPE to be single stepped.

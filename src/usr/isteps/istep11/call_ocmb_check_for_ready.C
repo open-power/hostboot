@@ -47,6 +47,7 @@
 
 //  Tracing support
 #include <initservice/isteps_trace.H>           // g_trac_isteps_trace
+#include <initservice/mboxRegs.H>
 
 //  Targeting support
 #include <attributeenums.H>                     // TYPE_PROC
@@ -83,6 +84,9 @@
 #include <ocmbupd/ocmbupd.H>
 #include <ocmbupd/ocmbFwImage.H>
 #include <ocmbupd/ody_upd_fsm.H>
+
+#include <secureboot/service.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
@@ -125,9 +129,10 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const, errlHndl_t&, bool&); // forwa
  */
 errlHndl_t ody_attribute_setup(Target* const i_ocmb)
 {
-    errlHndl_t l_errl = nullptr;
-    const auto boot_flags = i_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>();
-    const auto boot_side = i_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_SIDE>();
+    errlHndl_t l_errl               = nullptr;
+    const auto ocmb_boot_flags_orig = i_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>();
+    const auto boot_side            = i_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_SIDE>();
+
     i_ocmb->setAttr<TARGETING::ATTR_SPPE_BOOT_SIDE>(boot_side);
 
     // See ody_perv_attributes.xml for these definitions
@@ -136,6 +141,9 @@ errlHndl_t ody_attribute_setup(Target* const i_ocmb)
     const uint32_t OCMB_BOOT_FLAGS_ISTEP_MODE = 0xC0000000;
 
     const auto sys = UTIL::assertGetToplevelTarget();
+
+    uint32_t ocmb_boot_flags_new = (ocmb_boot_flags_orig & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK);
+
     if (boot_side == SPPE_BOOT_SIDE_GOLDEN || sys->getAttr<TARGETING::ATTR_OCMB_ISTEP_MODE>())
     {
         TRACISTEP("ody_attribute_setup: Disable autoboot for Odyssey golden side HUID=0x%X",
@@ -144,19 +152,73 @@ errlHndl_t ody_attribute_setup(Target* const i_ocmb)
         // Disable autoboot on the golden side, so that we execute as
         // little code as possible (and therefore have the smallest chance
         // of failing) before we update the chip.
-        i_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
-                                                      | OCMB_BOOT_FLAGS_ISTEP_MODE);
+        ocmb_boot_flags_new |= OCMB_BOOT_FLAGS_ISTEP_MODE;
+        i_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>(ocmb_boot_flags_new);
     }
     else
     {
         TRACISTEP("ody_attribute_setup: Enable autoboot for Odyssey side %d HUID=0x%X",
                   boot_side, get_huid(i_ocmb));
 
-        i_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>((boot_flags & ~OCMB_BOOT_FLAGS_BOOT_INDICATION_MASK)
-                                                      | OCMB_BOOT_FLAGS_AUTOBOOT_MODE);
+        ocmb_boot_flags_new |= OCMB_BOOT_FLAGS_AUTOBOOT_MODE;
+        i_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>(ocmb_boot_flags_new);
     }
 
-    TRACISTEP("ody_attribute_setup: Setting boot side to boot_side=%d HUID=x%X", boot_side, get_huid(i_ocmb));
+    /*--------------------------------------------------------------------------
+     * Setup the security settings in ATTR_OCMB_BOOT_FLAGS
+     -------------------------------------------------------------------------*/
+    bool security_enabled = SECUREBOOT::enabled();
+    bool prod_driver      = (SECUREBOOT::getSbeSecurityBackdoor() == false);
+    bool mfg_mode         = TARGETING::areMfgThresholdsActive();
+
+    if (!mfg_mode && !prod_driver)
+    {
+        // get boot_flags from Scratch3 register on the boot proc
+        const auto l_scratchRegs = UTIL::assertGetToplevelTarget()->
+                                    getAttrAsStdArr<ATTR_MASTER_MBOX_SCRATCH>();
+        const auto boot_flags = l_scratchRegs[INITSERVICE::SPLESS::MboxScratch3_t::REG_IDX];
+
+        uint32_t BOOT_FLAGS_BIT7  = 0x01000000; // Allow ATTR overrides in a secure system
+        uint32_t BOOT_FLAGS_BIT11 = 0x00100000; // Disable SCOM Security
+        uint32_t BOOT_FLAGS_BIT12 = 0x00080000; // Disable invalid scom address check
+
+        // set bits 7,11,12 in ATTR_OCMB_BOOT_FLAGS to match ATTR_BOOT_FLAGS
+        if (boot_flags & BOOT_FLAGS_BIT7)  {ocmb_boot_flags_new |= BOOT_FLAGS_BIT7;}
+        if (boot_flags & BOOT_FLAGS_BIT11) {ocmb_boot_flags_new |= BOOT_FLAGS_BIT11;}
+        if (boot_flags & BOOT_FLAGS_BIT12) {ocmb_boot_flags_new |= BOOT_FLAGS_BIT12;}
+
+        // check FFT ATTR override to allow scom security
+        if (!UTIL::assertGetToplevelTarget()->getAttr<ATTR_OCMB_IGNORE_SCOM_CHECK_DISABLE>())
+        {
+            // always turn on bit11, *temporary*
+            //   @TODO: JIRA: PFHB-664 Remove hardcode setting bit11
+            ocmb_boot_flags_new |= BOOT_FLAGS_BIT11;  // Disable SCOM Security
+        }
+
+        if (security_enabled)
+        {
+            uint32_t BOOT_FLAGS_BIT4  = 0x08000000; // Emulate Security Enable
+            uint32_t BOOT_FLAGS_BIT16 = 0x00008000; // Enable ECDSA Signature enable
+            uint32_t BOOT_FLAGS_BIT17 = 0x00004000; // Enable Dilithium Signature enable
+            uint32_t BOOT_FLAGS_BIT19 = 0x00001000; // Enable HW key hash verification
+
+            ocmb_boot_flags_new |= BOOT_FLAGS_BIT4  |
+                                   BOOT_FLAGS_BIT16 |
+                                   BOOT_FLAGS_BIT17 |
+                                   BOOT_FLAGS_BIT19;
+        }
+
+        i_ocmb->setAttr<TARGETING::ATTR_OCMB_BOOT_FLAGS>(ocmb_boot_flags_new);
+
+        TRACISTEP("ody_attribute_setup: update security boot flags "
+                  "orig:%0.8X new:%0.8X HUID=x%X",
+                  ocmb_boot_flags_orig,
+                  ocmb_boot_flags_new,
+                  get_huid(i_ocmb));
+    }
+
+    TRACISTEP("ody_attribute_setup: Setting boot side to boot_side=%d HUID=x%X",
+              boot_side, get_huid(i_ocmb));
     return l_errl;
 }
 

@@ -2687,6 +2687,9 @@
       <id>OCMB_FW_UPDATE_OVERRIDE</id>
     </attribute>
     <attribute>
+      <id>OCMB_IGNORE_SCOM_CHECK_DISABLE</id>
+    </attribute>
+    <attribute>
       <id>OCMB_ISTEP_MODE</id>
     </attribute>
     <attribute>
