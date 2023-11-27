@@ -688,6 +688,10 @@ fapi2::ReturnCode enable_2u(
 #ifndef __PPE__
     // Host SBE does not support 2U so we can safely ifndef this function call
 
+    // delay after final VR enable and before checking status
+    // soft start time and idle delays add up to 12 ms for 2U DDIMMs, so have this delay be > 12 ms)
+    fapi2::delay(20 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
     // Check that all the PMIC statuses are good post-enable
     FAPI_TRY(mss::pmic::status::check_all_pmics(i_ocmb_target),
              "Bad statuses returned, or error checking statuses of PMICs on " GENTARGTIDFORMAT, GENTARGTID(i_ocmb_target));
