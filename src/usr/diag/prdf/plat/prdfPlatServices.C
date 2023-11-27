@@ -1108,8 +1108,17 @@ uint32_t startBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_ocmb,
             #endif
 
             // Note: For Odyssey a steer command is used instead of a scrub
-            FAPI_INVOKE_HWP( errl, ody_background_steer, fapiTrgt,
-                             stopCond, scrubSpeed, saddr );
+            // unless MNFG fast scrub is enabled
+            if (mss::mcbist::LUDICROUS == scrubSpeed)
+            {
+                FAPI_INVOKE_HWP( errl, ody_mnfg_fast_scrub, fapiTrgt,
+                                 stopCond );
+            }
+            else
+            {
+                FAPI_INVOKE_HWP( errl, ody_background_steer, fapiTrgt,
+                                 stopCond, scrubSpeed, saddr );
+            }
         }
         else
         {
