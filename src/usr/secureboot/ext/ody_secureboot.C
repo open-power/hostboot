@@ -28,6 +28,7 @@
 #include <secureboot/secure_reasoncodes.H>
 #include <secureboot/trustedbootif.H>
 #include <errl/hberrltypes.H>
+#include <errl/errlmanager.H>
 #include <secureboot/common/securetrace.H>
 #include <devicefw/userif.H>
 #include <devicefw/driverif.H>
@@ -102,6 +103,177 @@ errlHndl_t verifyOdySecuritySettings(Target* i_ocmb,
     return l_errl;
 }
 
+/**
+ * @brief This function compares the contents of the measurement registers on
+ *        the given OCMB to the measured.hash in the OCMBFW partition. Both bootloader
+ *        and runtime OCMB images are verified. On successful verification, the
+ *        measured hash gets extended into TPM's PCR2 reg.
+ *
+ * @param[in] i_ocmb The Odyssey to run the verification on
+ * @return nullptr on success; valid error log on error
+ */
+errlHndl_t verifyOdyMeasurementRegs(Target* i_ocmb)
+{
+    errlHndl_t l_errl = nullptr;
+
+    const uint32_t BL_MEASUREMENT_REG_START = 0x000501A0;
+    const uint32_t BL_MEASUREMENT_REG_END   = 0x000501AB;
+    const uint32_t RT_MEASUREMENT_REG_START = 0x000501AC;
+    const uint32_t RT_MEASUREMENT_REG_END   = 0x000501B7;
+
+    const size_t SPPE_MEASUREMENT_HASH_SIZE_BYTES = 48;
+    uint32_t l_sppeBlMeasurementData[SPPE_MEASUREMENT_HASH_SIZE_BYTES/sizeof(uint32_t)]{};
+    uint32_t l_sppeRtMeasurementData[SPPE_MEASUREMENT_HASH_SIZE_BYTES/sizeof(uint32_t)]{};
+
+    static bool l_extendBlMeasurementOnce = false;
+    static bool l_extendRtMeasurementOnce = false;
+
+    uint64_t l_tempReadData = 0;
+    size_t l_readSize = sizeof(l_tempReadData);
+
+    auto l_pnorMeasurementData = i_ocmb->getAttrAsStdArr<ATTR_SPPE_BOOTLOADER_MEASUREMENT_HASH>();
+
+    // Read out the bootloader measurement registers and compare the
+    // result to boot/measured.hash (truncated to 48 bytes)
+    for(uint32_t l_addr = BL_MEASUREMENT_REG_START, i = 0; l_addr <= BL_MEASUREMENT_REG_END; ++l_addr, ++i)
+    {
+        l_errl = deviceRead(i_ocmb,
+                            &l_tempReadData,
+                            l_readSize,
+                            DEVICE_SCOM_ADDRESS(l_addr));
+        if(l_errl)
+        {
+            SB_ERR("verifyOdyMeasurementRegs: Could not read BL measurement reg 0x%x for Odyssey 0x%x",
+                    l_addr, get_huid(i_ocmb));
+            goto ERROR_EXIT;
+        }
+
+        l_tempReadData = l_tempReadData >> 32; // The actual data from the SCOM read is in the top 32 bits
+        l_sppeBlMeasurementData[i] = l_tempReadData;
+    }
+
+    if(memcmp(l_sppeBlMeasurementData, l_pnorMeasurementData.data(), SPPE_MEASUREMENT_HASH_SIZE_BYTES))
+    {
+        SB_ERR("verifyOdyMeasurementRegs: Failed bootloader measurement verification for Odyssey 0x%x",
+               get_huid(i_ocmb));
+        SB_INF_BIN("verifyOdyMeasurementRegs: bootloader measurement hash from PNOR", l_pnorMeasurementData.data(), SPPE_MEASUREMENT_HASH_SIZE_BYTES);
+        SB_INF_BIN("verifyOdyMeasurementRegs: bootloader measurement hash from SPPE", l_sppeBlMeasurementData, SPPE_MEASUREMENT_HASH_SIZE_BYTES);
+
+        /*@
+         * @errortype
+         * @moduleid MOD_VERIFY_ODY_MEASUREMENT_REGS
+         * @reasoncode RC_ODY_BOOT_MEASUREMENT_FAIL
+         * @userdata1 Odyssey Chip HUID
+         * @userdata2 Unused
+         * @devdesc Odyssey failed bootloader measurement hash verification
+         * @custdesc Secureboot failure
+         */
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                               MOD_VERIFY_ODY_MEASUREMENT_REGS,
+                               RC_ODY_BOOT_MEASUREMENT_FAIL,
+                               get_huid(i_ocmb),
+                               0, // userdata2,
+                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        goto ERROR_EXIT;
+    }
+    else
+    {
+        // All Odyssey measurement hashes should match, so only extend them once
+        if(!l_extendBlMeasurementOnce)
+        {
+            char l_pcrExtendMessage[100];
+            snprintf(l_pcrExtendMessage, 100, "Odyssey BOOT FW\n");
+            l_errl = pcrExtend(PCR_2,
+                               EV_PLATFORM_CONFIG_FLAGS,
+                               reinterpret_cast<const uint8_t*>(l_sppeBlMeasurementData),
+                               SPPE_MEASUREMENT_HASH_SIZE_BYTES,
+                               reinterpret_cast<const uint8_t*>(l_pcrExtendMessage),
+                            strlen(l_pcrExtendMessage));
+            if(l_errl)
+            {
+                SB_ERR("verifyOdyMeasurementRegs: Could not extend SPPE bootloader measurement");
+                goto ERROR_EXIT;
+            }
+            else
+            {
+                l_extendBlMeasurementOnce = true;
+            }
+        }
+    }
+
+    // Read out the runtime measurement registers and compare the
+    // result to  rt/measured.hash (truncated to 48 bytes)
+    for(uint32_t l_addr = RT_MEASUREMENT_REG_START, i = 0; l_addr <= RT_MEASUREMENT_REG_END; ++l_addr, ++i)
+    {
+        l_errl = deviceRead(i_ocmb,
+                            &l_tempReadData,
+                            l_readSize,
+                            DEVICE_SCOM_ADDRESS(l_addr));
+        if(l_errl)
+        {
+            SB_ERR("verifyOdyMeasurementRegs: Could not read RT measurement reg 0x%x for Odyssey 0x%x",
+                    l_addr, get_huid(i_ocmb));
+            goto ERROR_EXIT;
+        }
+
+        l_tempReadData = l_tempReadData >> 32; // The actual data from the SCOM read is in the top 32 bits
+        l_sppeRtMeasurementData[i] = l_tempReadData;
+    }
+
+    l_pnorMeasurementData = i_ocmb->getAttrAsStdArr<ATTR_SPPE_RUNTIME_MEASUREMENT_HASH>();
+    if(memcmp(l_sppeRtMeasurementData, l_pnorMeasurementData.data(), SPPE_MEASUREMENT_HASH_SIZE_BYTES))
+    {
+        SB_ERR("verifyOdyMeasurementRegs: Failed runtime measurement verification for Odyssey 0x%x",
+               get_huid(i_ocmb));
+        SB_INF_BIN("verifyOdyMeasurementRegs: runtime measurement hash from PNOR", l_pnorMeasurementData.data(), SPPE_MEASUREMENT_HASH_SIZE_BYTES);
+        SB_INF_BIN("verifyOdyMeasurementRegs: runtime measurement hash from SPPE", l_sppeRtMeasurementData, SPPE_MEASUREMENT_HASH_SIZE_BYTES);
+
+        /*@
+         * @errortype
+         * @moduleid MOD_VERIFY_ODY_MEASUREMENT_REGS
+         * @reasoncode RC_ODY_RT_MEASUREMENT_FAIL
+         * @userdata1 Odyssey Chip HUID
+         * @userdata2 Unused
+         * @devdesc Odyssey failed runtime measurement hash verification
+         * @custdesc Secureboot failure
+         */
+        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                               MOD_VERIFY_ODY_MEASUREMENT_REGS,
+                               RC_ODY_RT_MEASUREMENT_FAIL,
+                               get_huid(i_ocmb),
+                               0, // userdata2,
+                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        goto ERROR_EXIT;
+    }
+    else
+    {
+        // All Odyssey measurement hashes should match, so only extend them once
+        if(!l_extendRtMeasurementOnce)
+        {
+            char l_pcrExtendMessage[100];
+            snprintf(l_pcrExtendMessage, 100, "Odyssey RUNTIME FW\n");
+            l_errl = pcrExtend(PCR_2,
+                               EV_PLATFORM_CONFIG_FLAGS,
+                               reinterpret_cast<const uint8_t*>(l_sppeRtMeasurementData),
+                               SPPE_MEASUREMENT_HASH_SIZE_BYTES,
+                               reinterpret_cast<const uint8_t*>(l_pcrExtendMessage),
+                            strlen(l_pcrExtendMessage));
+            if(l_errl)
+            {
+                SB_ERR("verifyOdyMeasurementRegs: Could not extend SPPE bootloader measurement");
+                goto ERROR_EXIT;
+            }
+            else
+            {
+                l_extendRtMeasurementOnce = true;
+            }
+        }
+    }
+
+ERROR_EXIT:
+    return l_errl;
+}
+
 errlHndl_t odySecurebootVerification(Target* i_ocmb)
 {
     SB_INF("odySecurebootVerification begin");
@@ -142,6 +314,15 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
                    l_controlReg, get_huid(i_ocmb));
             goto EXIT;
         }
+    }
+
+    // Step 3/4: Verify that the SPPE image measurements from PNOR match those running on SPPE
+    l_errl = verifyOdyMeasurementRegs(i_ocmb);
+    if(l_errl)
+    {
+        SB_ERR("odySecurebootVerification: failed Odyssey measurement hash verification for Odyssey 0x%x",
+               get_huid(i_ocmb));
+        goto EXIT;
     }
 
 EXIT:

@@ -302,6 +302,7 @@ const DepModInfo g_istep12Dependancies = {
         DEP_LIB(libisteps_mss.so),
         DEP_LIB(libocmbupd.so),
         DEP_LIB(libistep12.so),
+        DEP_LIB(libsecureboot_ext.so),
         NULL
     }
 };

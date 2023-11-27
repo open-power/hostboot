@@ -56,6 +56,8 @@
 #include <targeting/odyutil.H>
 #include <ocmbupd/ody_upd_fsm.H>
 
+#include <secureboot/ody_secureboot.H>
+
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   TARGETING;
@@ -149,6 +151,23 @@ void* call_update_omi_firmware (void *io_pArgs)
             captureError(errl, l_StepError, HWPF_COMP_ID);
         }
     }
+
+#if 0 // TODO JIRA: PFHB-455 Currently the secureboot settings check doesn't pass
+      // because we don't program any security settings into SPPE.
+#ifdef CONFIG_SECUREBOOT
+    errlHndl_t l_securebootErrl = nullptr;
+    for(auto l_ocmb : l_ocmbTargetList)
+    {
+        l_securebootErrl = odySecurebootVerification(l_ocmb);
+        if(l_securebootErrl)
+        {
+            TRACISTEP(ERR_MRK"call_update_omi_firmware: Secureboot verification for OCMB 0x%x failed",
+                      get_huid(l_ocmb));
+            captureError(l_securebootErrl, l_StepError, SECURE_COMP_ID);
+        }
+    }
+#endif
+#endif
 
     TRACISTEP("call_update_omi_firmware exit");
 

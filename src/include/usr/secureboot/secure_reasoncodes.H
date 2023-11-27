@@ -57,6 +57,7 @@ namespace SECUREBOOT
         MOD_CAN_XSCOM_PROC                      = 0x17,
         MOD_READ_SBE_MEASUREMENT_REGISTER       = 0x18,
         MOD_VERIFY_ODY_SECURITY_SETTINGS        = 0x19,
+        MOD_VERIFY_ODY_MEASUREMENT_REGS         = 0x1A,
 
         // Use 0x20-0x3F range for Node Communications
         MOD_NCDD_CHECK_FOR_ERRORS           = 0x20,
@@ -114,6 +115,8 @@ namespace SECUREBOOT
         RC_UNSECURE_MEASUREMENT_VERSION    = SECURE_COMP_ID | 0x19,
         RC_UNBLOWN_MEASUREMENT_FUSE        = SECURE_COMP_ID | 0x1A,
         RC_ODY_SECURE_SETTINGS_MISMATCH    = SECURE_COMP_ID | 0x1B,
+        RC_ODY_BOOT_MEASUREMENT_FAIL       = SECURE_COMP_ID | 0x1C,
+        RC_ODY_RT_MEASUREMENT_FAIL         = SECURE_COMP_ID | 0x1D,
 
         // Use 0x20-0x3F range for Node Communications
         RC_NCDD_HW_ERROR_FOUND             = SECURE_COMP_ID | 0x20,

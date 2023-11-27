@@ -405,6 +405,7 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                     captureError(i_ocmb_errl, io_iStepError, HWPF_COMP_ID, i_ocmb);
                     goto EXIT_OCMBS;
                 }
+
                 if (proc_reboot_odysseys)
                 {
                     TRACISTEP("parallel_for_each boot_all_proc_ocmbs: OCMB HUID=0x%X proc_reboot_odysseys=%d EXIT_OCMBS", get_huid(i_ocmb), proc_reboot_odysseys);
