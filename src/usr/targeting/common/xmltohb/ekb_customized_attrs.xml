@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2017,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2017,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -82,6 +82,15 @@
           time to avoid memory leaks. -->
      <attribute>
           <id>ATTR_MSS_CHECK_FOR_READY_TIMEOUT</id>
+          <writeable/>
+          <persistency>volatile</persistency>
+     </attribute>
+
+     <!-- Override this to be writeable and volatile, so that we can
+          break the timeout into smaller chunks and do them one at a
+          time to avoid memory leaks. -->
+     <attribute>
+          <id>ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT</id>
           <writeable/>
           <persistency>volatile</persistency>
      </attribute>

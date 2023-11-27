@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
  */
 
 #include    <stdint.h>
+#include    <sys/time.h>
 
 #include    <trace/interface.H>
 #include    <initservice/taskargs.H>
@@ -129,25 +130,106 @@ errlHndl_t run_omi_setup(IStepError& io_stepError, Target* const i_omic, const b
             }
             else
             {
-                TRACFCOMP(g_trac_isteps_trace,
-                          INFO_MRK"exp_omi_setup HWP target HUID 0x%.08x",
+                TRACISTEP(INFO_MRK"exp_omi_setup HWP target HUID 0x%.08x",
                           get_huid(l_ocmbTarget));
 
-                FAPI_INVOKE_HWP(l_err, exp_omi_setup, ocmb);
+                size_t l_maxTime_secs = 0;
+                timespec_t l_preLoopTime = {};
+                timespec_t l_ocmbCurrentTime = {};
+                clock_gettime(CLOCK_MONOTONIC, &l_preLoopTime);
+
+                bool l_one_more_try = false;
+                // Save the original timeout (to be restored after exp_omi_setup)
+                // Units for the attribute are milliseconds; the value returned is > 1 second
+                const auto original_timeout_ms
+                  = l_ocmbTarget->getAttr<ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT>();
+                
+                // Calculate MAX Wait Time - Round up on seconds
+                // - ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT in msec (see exp_attributes.xml)
+                // - The calculation is as follows:
+                // 1) Start with the 'seconds' value of the pre-loop time
+                // 2) Add *double* the 'seconds' amount of the original timeout value
+                //    -- the *double* is just to be on the safe side, as we're only dealing with
+                //       seconds and not minutes here
+                // 3) Add 3 to round up for the nanoseconds of (1) and double the milliseconds of (2)
+                l_maxTime_secs = l_preLoopTime.tv_sec
+                  + (2 * (original_timeout_ms / MS_PER_SEC))
+                  + 3;
+
+                // exp_omi_setup will read this attribute to know how long to
+                // poll. If this number is too large and we get too many I2C error
+                // logs between calls to FAPI_INVOKE_HWP, we will run out of memory.
+                // So break the original timeout into smaller timeouts.
+                // This will not affect how the loop below will use l_maxTime_secs to look for a timeouts
+                const ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT_type smaller_timeout_ms = 100;
+                l_ocmbTarget->setAttr<ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT>(smaller_timeout_ms);
+
+                TRACISTEP("run_omi_setup: OCMB 0x%.8X: "
+                          "original_timeout_ms = %d, smaller_timeout_ms = %d, "
+                          "l_preLoopTime.tv_sec = %lu l_maxTime_secs = %lu",
+                          get_huid(l_ocmbTarget), original_timeout_ms, smaller_timeout_ms,
+                          l_preLoopTime.tv_sec, l_maxTime_secs);
+
+                bool l_only_poll = false;
+                while (true)
+                {
+                    // Delete the log from the previous iteration
+                    if( l_err )
+                    {
+                        delete l_err;
+                        l_err = nullptr;
+                    }
+
+                    FAPI_INVOKE_HWP(l_err, exp_omi_setup, ocmb, l_only_poll, l_one_more_try);
+                    // On success, quit retrying.
+                    if (!l_err)
+                    {
+                        TRACISTEP("run_omi_setup:exp_omi_setup DONE ! HUID=0x%.8X", get_huid(l_ocmbTarget));
+                        break;
+                    }
+                    // from now just poll, skip the other work
+                    l_only_poll = true;
+
+                    clock_gettime(CLOCK_MONOTONIC, &l_ocmbCurrentTime);
+                    if (l_ocmbCurrentTime.tv_sec > l_maxTime_secs)
+                    {
+                        if (l_one_more_try == false)
+                        {
+                            // Do one more attempt just to be safe
+                            l_one_more_try = true;
+                            TRACISTEP("run_omi_setup: Setting 'one more try' based on times HUID=0x%.8X "
+                                      "l_ocmbCurrentTime.tv_sec = %lu, l_maxTime_secs = %lu",
+                                      get_huid(l_ocmbTarget), l_ocmbCurrentTime.tv_sec, l_maxTime_secs);
+                        }
+                        else
+                        {
+                            // Already done "one more try" so just break
+                            TRACISTEP("run_omi_setup: Breaking as 'one more try' exhausted HUID=0x%.8X "
+                                      "l_ocmbCurrentTime.tv_sec = %lu, l_maxTime_secs = %lu",
+                                      get_huid(l_ocmbTarget), l_ocmbCurrentTime.tv_sec, l_maxTime_secs);
+                            break;
+                        }
+                    }
+
+                    // we don't want to just hammer the i2c because we've got other threads
+                    // trying to get in too so add a small delay between calls
+                    nanosleep(0,100*NS_PER_MSEC);
+                }
+
+                // Restore original timeout value
+                l_ocmbTarget->setAttr<ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT>(original_timeout_ms);
 
                 if (l_err)
                 {
-                    TRACFCOMP(g_trac_isteps_trace,
-                              ERR_MRK"exp_omi_setup HWP: failed on target 0x%08X. "
+                    TRACISTEP(ERR_MRK"exp_omi_setup HWP: failed on target 0x%08X. "
                               TRACE_ERR_FMT,
                               get_huid(l_ocmbTarget),
                               TRACE_ERR_ARGS(l_err));
 
                     break; // have to quit here, we can only return one error
                 }
-
-                TRACFCOMP(g_trac_isteps_trace,
-                          INFO_MRK"SUCCESS running exp_omi_setup HWP on target HUID %.8X.",
+                
+                TRACISTEP(INFO_MRK"SUCCESS running exp_omi_setup HWP on target HUID %.8X.",
                           get_huid(l_ocmbTarget));
             }
 
