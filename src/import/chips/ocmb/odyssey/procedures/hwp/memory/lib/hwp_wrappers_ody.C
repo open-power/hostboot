@@ -135,8 +135,10 @@ fapi2::ReturnCode ody_mnfg_fast_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OC
 fapi2::ReturnCode ody_single_address_steer( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_address )
 {
-    mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> l_stop;
-    return mss::memdiags::targeted_steer<mss::mc_type::ODYSSEY>(i_target, l_stop, i_address, i_address,
+    return mss::memdiags::targeted_steer<mss::mc_type::ODYSSEY>(i_target,
+            mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::DONT_CHANGE,
+            i_address,
+            i_address,
             mss::mcbist::end_boundary::DONT_CHANGE);
 }
 

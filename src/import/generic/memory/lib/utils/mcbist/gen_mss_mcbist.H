@@ -3987,6 +3987,12 @@ fapi_try_exit:
 template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 inline fapi2::ReturnCode load_thresholds( const fapi2::Target<T>& i_target, const uint64_t i_thresholds )
 {
+    if (i_thresholds == stop_conditions<MC, T, TT>::DONT_CHANGE)
+    {
+        FAPI_INF_NO_SBE("Retain current MCBIST threshold settings for " TARGTIDFORMAT, TARGTID );
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     FAPI_INF_NO_SBE("load MCBIST threshold register: 0x%016lx for " TARGTIDFORMAT, i_thresholds, TARGTID );
     return fapi2::putScom(i_target, TT::THRESHOLD_REG, i_thresholds);
 }
