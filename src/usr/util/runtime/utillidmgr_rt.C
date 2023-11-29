@@ -302,6 +302,7 @@ errlHndl_t UtilLidMgr::loadLid()
                     rc,
                     iv_lidId,
                     ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                l_errl->collectTrace(UTIL_COMP_NAME);
                 break;
             }
             UTIL_FT("UtilLidMgr::loadLid> size=%d, ptr=%p",
@@ -336,6 +337,7 @@ errlHndl_t UtilLidMgr::loadLid()
                              l_payload ),
                            0 ),
                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(UTIL_COMP_NAME);
     }
 
     if( l_rsvd_mem_label )
@@ -367,6 +369,7 @@ errlHndl_t UtilLidMgr::cleanup()
                         Util::UTIL_LIDMGR_RT,
                         Util::UTIL_LIDMGR_UNLOAD_RC_FAIL,
                         l_rc);
+            l_err->collectTrace(UTIL_COMP_NAME);
         }
     }
 
