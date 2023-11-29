@@ -231,11 +231,15 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
 
             #endif
 
-            // If the command completed successfully with no error, the error
+            // If the command completed successfully with no error and there
+            // are no targeted diagnostic events in the queue, the error
             // log will not have any useful information. Therefore, do not
             // commit the error log. This is done to avoid useless
             // informational error logs.
-            if ( !errorsFound ) io_sc.service_data->setDontCommitErrl();
+            if ( !errorsFound && iv_queue.empty() )
+            {
+                io_sc.service_data->setDontCommitErrl();
+            }
         }
 
         // Move onto the next step in the state machine.
