@@ -31,6 +31,8 @@ MODULE = mmio_rt
 OBJS += rt_mmio.o
 OBJS += mmio_odyssey.o
 
+SUBDIRS += test.d
+
 VPATH += ..
 
 include $(ROOTPATH)/config.mk

@@ -1174,6 +1174,22 @@ private:
             uint32_t   i_responseSize);
 
     /**
+     * @brief handle an up Fifo timeout
+     *
+     * @param[in]  i_target         Target to access
+     * @return     errlHndl_t       Error log handle on failure.
+     */
+    errlHndl_t upFifoTimeout(TARGETING::Target * i_target, uint32_t l_data);
+
+    /**
+     * @brief handle a down Fifo timeout
+     *
+     * @param[in]  i_target         Target to access
+     * @return     errlHndl_t       Error log handle on failure.
+     */
+    errlHndl_t dnFifoTimeout(TARGETING::Target * i_target, uint32_t l_status);
+
+    /**
      * @brief poll until uplift Fifo has room to write into
      *
      * @param[in]  i_target         Target to access

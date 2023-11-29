@@ -50,6 +50,7 @@
 #include <targeting/odyutil.H>
 #include <util/misc.H>
 #include <errl/errludlogregister.H>
+#include <cxxtest/TestInject.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -85,6 +86,28 @@ using namespace TARGETING;
 
 namespace SBEIO
 {
+#if defined(CONFIG_COMPILE_CXXTEST_HOOKS)
+#define CI_INJECT_FIFO_HANG(_g_inject, _i_target, _enum, _msg, _l_errl)         \
+            if (_g_inject.isSet(_enum))                                         \
+            {                                                                   \
+                _g_inject.clear(_enum);                                         \
+                SBE_TRACF(_msg                                                  \
+                          " OCMB 0x%08x", TARGETING::get_huid(_i_target));      \
+                _l_errl = dnFifoTimeout(_i_target, 0xFFFF);                     \
+            }
+
+#define CI_INJECT_FIFO_BREAKAGE(_g_inject, _i_target, _enum, _timeout, _msg)    \
+            if (_g_inject.isSet(_enum))                                         \
+            {                                                                   \
+                _g_inject.clear(_enum);                                         \
+                SBE_TRACF(_msg " OCMB 0x%08x", TARGETING::get_huid(_i_target)); \
+                _timeout = true;                                                \
+            }
+#else
+#define CI_INJECT_FIFO_HANG(_g_inject, _i_target, _enum, _msg, _l_errl)
+#define CI_INJECT_FIFO_BREAKAGE(_g_inject, _i_target, _enum, _timeout, _msg)
+#endif
+
 
 SbeFifo & SbeFifo::getTheInstance()
 {
@@ -166,16 +189,10 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
     ERROR_EXIT:
     if (errl)
     {
-        SBE_TRACF(ERR_MRK  "performFifoChipOp");
-        if (TARGETING::UTIL::isOdysseyChip(i_target))
-        {
-            i_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
-        }
+        SBE_TRACF(ERR_MRK  "performFifoChipOp: PIPE Fifo");
     }
 
     i_target->setAttr<TARGETING::ATTR_SBE_FIFO_IN_PROGRESS>(--l_fifo_in_progress);
-
-    SBE_TRACD("performFifoChipOp: exit - in_progress:%d", l_fifo_in_progress);
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
 
@@ -298,32 +315,11 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target *i_target,
 }
 
 /**
- * @brief wait for room in upstream fifo to send data
+ * @brief handle the timeout, waiting for room in upstream fifo
  */
-errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
+errlHndl_t SbeFifo::upFifoTimeout(TARGETING::Target * i_target, uint32_t l_data)
 {
     errlHndl_t errl = NULL;
-
-    SBE_TRACU(ENTER_MRK "waitUpFifoReady");
-
-    uint32_t l_data = 0;
-
-    const bool timeout = hbstd::with_timeout(0, MAX_UP_FIFO_TIMEOUT_NS, 0, 10000, [&]()
-    {
-        // read upstream status to see if room for more data
-        errl = readFifoReg(i_target, FIFO_UPFIFO_STATUS, &l_data);
-        if (errl) {return hbstd::timeout_t::STOP;}
-
-        if (! (l_data & UPFIFO_STATUS_FIFO_FULL)) {return hbstd::timeout_t::STOP;}
-
-        return hbstd::timeout_t::CONTINUE;
-    });
-
-    if (timeout && !errl) // timeout already implies !l_errl, but we check anyway
-    {
-        SBE_TRACF(ERR_MRK "waitUpFifoReady: "
-                  "timeout waiting for upstream FIFO to be not full on %.8X",
-                  TARGETING::get_huid(i_target));
 
         /*@
          * @errortype
@@ -404,9 +400,41 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
         // then, for proc chips, TI the system on fsp-systems. It may
         // collect a dump and/or do an HRESET where applicable.
         l_SBEobj->main_sbe_handler();
+
+    return errl;
     }
 
-    SBE_TRACU(EXIT_MRK "waitUpFifoReady(0x%08X) = 0x%08X",
+/**
+ * @brief wait for room in upstream fifo to send data
+ */
+errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
+{
+    errlHndl_t errl = NULL;
+
+    SBE_TRACU(ENTER_MRK "waitUpFifoReady");
+
+    uint32_t l_data = 0;
+
+    const bool timeout = hbstd::with_timeout(0, MAX_UP_FIFO_TIMEOUT_NS, 0, 10000, [&]()
+    {
+        // read upstream status to see if room for more data
+        errl = readFifoReg(i_target, FIFO_UPFIFO_STATUS, &l_data);
+        if (errl) {return hbstd::timeout_t::STOP;}
+
+        if (! (l_data & UPFIFO_STATUS_FIFO_FULL)) {return hbstd::timeout_t::STOP;}
+
+        return hbstd::timeout_t::CONTINUE;
+    });
+
+    if (timeout && !errl) // timeout already implies !l_errl, but we check anyway
+    {
+        SBE_TRACF(ERR_MRK "waitUpFifoReady: "
+                  "timeout waiting for upstream FIFO to be not full on %.8X",
+                  TARGETING::get_huid(i_target));
+        errl = upFifoTimeout(i_target, l_data);
+    }
+
+    SBE_TRACD(EXIT_MRK "waitUpFifoReady(0x%08X) = 0x%08X",
               get_huid(i_target),
               ERRL_GETEID_SAFE(errl));
 
@@ -526,6 +554,13 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
         //notify that EOT has been received
         uint32_t l_eotSig = FSB_UPFIFO_SIG_EOT;
         errl = writeFifoReg(i_target, FIFO_DNFIFO_ACK_EOT, &l_eotSig);
+
+        // if the hang inject is on, create the timeout errl
+        CI_INJECT_FIFO_HANG(CxxTest::g_cxxTestInject,
+                            i_target,
+                            CxxTest::MMIO_INJECT_FIFO_HANG,
+                            "readResponse: INJECT_FIFO_HANG",
+                            errl);
         if (errl) {break;}
 
         //Determine if successful.
@@ -836,42 +871,11 @@ errlHndl_t SbeFifo::parseDataOutReg(TARGETING::Target   *i_target,
 }
 
 /**
- * @brief  Wait for data in downstream fifo to receive, hit EOT, or timeout.
- *         Add each entry to the RespBuffer and do the RespBuffer
- *         completeMessage upon receiving EOT.
- *
+ * @brief handle the timeout, waiting for data in downstream fifo
  */
-errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
-                               SBEIO::SbeFifoRespBuffer &o_fifoBuffer,
-                                               bool     &o_EOT)
+errlHndl_t SbeFifo::dnFifoTimeout(TARGETING::Target * i_target, uint32_t l_status)
 {
     errlHndl_t l_errl            = NULL;
-    bool       l_EMPTY{};
-    uint32_t   l_data{};
-    uint32_t   l_status{};
-
-    SBE_TRACU(ENTER_MRK "waitDnFifoReady");
-
-    const bool timeout = hbstd::with_timeout(0, MAX_DWN_FIFO_TIMEOUT_NS, 0, 10000, [&]()
-    {
-        // read and parse the FIFO data
-        l_errl = parseDataOutReg(i_target, l_data, l_status, l_EMPTY, o_EOT);
-        if (l_errl) {return hbstd::timeout_t::STOP;}
-
-        if (!l_EMPTY) {o_fifoBuffer.append(l_data);}
-        if (o_EOT)    {o_fifoBuffer.completeMessage();}
-
-        // if we received a new entry or an EOT, stop the FIFO receive loop
-        if ((!l_EMPTY || o_EOT)) {return hbstd::timeout_t::STOP;}
-
-        // else, continue waiting to receive data
-        return hbstd::timeout_t::CONTINUE;
-    });
-
-    if (timeout && !l_errl) // timeout already implies !l_errl, but we check anyway
-    {
-        SBE_TRACF(ERR_MRK "waitDnFifoReady: "
-                  "timeout waiting for downstream FIFO ENTRY or EOT");
 
         /*@
          * @errortype
@@ -956,6 +960,55 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
         // then, for proc chips, TI the system on fsp-systems. It may
         // collect a dump and/or do an HRESET where applicable.
         l_SBEobj->main_sbe_handler();
+
+    return l_errl;
+}
+
+/**
+ * @brief  Wait for data in downstream fifo to receive, hit EOT, or timeout.
+ *         Add each entry to the RespBuffer and do the RespBuffer
+ *         completeMessage upon receiving EOT.
+ *
+ */
+errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
+                               SBEIO::SbeFifoRespBuffer &o_fifoBuffer,
+                                               bool     &o_EOT)
+{
+    errlHndl_t l_errl = NULL;
+    bool       l_EMPTY{};
+    uint32_t   l_data{};
+    uint32_t   l_status{};
+
+    SBE_TRACU(ENTER_MRK "waitDnFifoReady");
+
+    bool timeout = hbstd::with_timeout(0, MAX_DWN_FIFO_TIMEOUT_NS, 0, 10000, [&]()
+    {
+        // read and parse the FIFO data
+        l_errl = parseDataOutReg(i_target, l_data, l_status, l_EMPTY, o_EOT);
+        if (l_errl) {return hbstd::timeout_t::STOP;}
+
+        if (!l_EMPTY) {o_fifoBuffer.append(l_data);}
+        if (o_EOT)    {o_fifoBuffer.completeMessage();}
+
+        // if we received a new entry or an EOT, stop the FIFO receive loop
+        if ((!l_EMPTY || o_EOT)) {return hbstd::timeout_t::STOP;}
+
+        // else, continue waiting to receive data
+        return hbstd::timeout_t::CONTINUE;
+    });
+
+    CI_INJECT_FIFO_BREAKAGE(CxxTest::g_cxxTestInject,
+                            i_target,
+                            CxxTest::MMIO_INJECT_FIFO_BREAKAGE,
+                            timeout,
+                            "waitDnFifoReady: INJECT_FIFO_BREAKAGE");
+
+    if (timeout && !l_errl) // timeout already implies !l_errl, but we check anyway
+    {
+        SBE_TRACF(ERR_MRK "waitDnFifoReady: "
+                  "timeout waiting for downstream FIFO ENTRY or EOT");
+
+        l_errl = dnFifoTimeout(i_target, l_status);
     }
 
     SBE_TRACU(EXIT_MRK "waitDnFifoReady(0x%08X) = 0x%08X",
@@ -1064,15 +1117,6 @@ errlHndl_t SbeFifo::readFifoReg64(TARGETING::Target   *i_target,
                       o_pData,
                       l_64bitSize,
                       DEVICE_SCOM_ADDRESS(l_addr));
-    if (l_errl)
-    {
-        if (TARGETING::UTIL::isOdysseyChip(i_target) &&
-            i_target->getAttr<TARGETING::ATTR_USE_PIPE_FIFO>())
-        {
-            // ERROR with PIPE FIFO, disable the PIPE FIFO
-            i_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
-        }
-    }
 
     SBE_TRACU("  readFifoReg64 PIPE addr=0x%08lx data=0x%016llx", l_addr, *o_pData);
     if (l_errl) {SBE_TRACD(ERR_MRK "readFifoReg64");}
@@ -1172,11 +1216,6 @@ errlHndl_t SbeFifo::writeFifoReg(TARGETING::Target     *i_target,
                               &l_data,
                               l_64bitSize,
                               DEVICE_SCOM_ADDRESS(l_addr));
-            if (l_errl)
-            {
-                // ERROR with PIPE FIFO, disable the PIPE FIFO
-                i_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
-            }
         }
         else
         {

@@ -1,11 +1,11 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/mmio/test/makefile $
+# $Source: src/usr/mmio/runtime/test/makefile $
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2023
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -22,9 +22,10 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../../..
 
-MODULE = testmmio
+HOSTBOOT_RUNTIME = 1
+ROOTPATH = ../../../../..
+MODULE = testmmio_rt
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
@@ -47,7 +48,10 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/expaccess/
 
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr/
 
-TESTS = *.H
+VPATH += ${ROOTPATH}/src/usr/sbeio
 
+OBJS += sbe_getCodeLevels.o
+
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk

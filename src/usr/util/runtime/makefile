@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2022
+# Contributors Listed Below - COPYRIGHT 2013,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -59,10 +59,12 @@ OBJS += rt_fwnotify.o
 OBJS += rt_fwreq_helper.o
 OBJS += rt_utiltime.o
 OBJS += utiltime_common.o
+OBJS += TestInject.o
 
 SUBDIRS += test.d
 
 VPATH += ..
+VPATH += ${ROOTPATH}/src/usr/cxxtest/
 
 # pull in pnor_utils explicitly without the rest of the module
 VPATH += ${ROOTPATH}/src/usr/pnor/

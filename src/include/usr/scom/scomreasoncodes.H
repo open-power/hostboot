@@ -49,6 +49,7 @@ namespace SCOM
         // 0x12 reserved
         MOD_ROUTE_IBSCOM                = 0x13,
         SCOM_TRANSLATE_ODY              = 0x14,
+        SCOM_TEST_INJECT                = 0x15,
     };
 
     enum scomReasonCode
@@ -90,6 +91,7 @@ namespace SCOM
         SCOM_UNSUPPORTED_CHIPID        = SCOM_COMP_ID | 0x24,
         SCOM_MULTICAST_WRITE_INVALID   = SCOM_COMP_ID | 0x25,
         SCOM_ODY_TRANS_INVALID_TYPE    = SCOM_COMP_ID | 0x26,
+        SCOM_TEST_INJECT_OP_FAIL       = SCOM_COMP_ID | 0x27,
     };
 
     enum UserDetailsTypes

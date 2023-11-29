@@ -44,6 +44,7 @@
 #include "mmio.H"
 #include <mmio/mmio.H>
 #include <mmio/mmio_reasoncodes.H>
+#include <scom/scomreasoncodes.H>
 
 #include <p10_scom_mcc_b.H>
 #include <error_info_defs.H>
@@ -52,6 +53,8 @@
 #include "mmio_odyssey.H"
 #include "mmio_explorer.H"
 #include <utils/chipids.H>
+
+#include <cxxtest/TestInject.H>
 
 // Trace definition
 trace_desc_t* g_trac_mmio = nullptr;
@@ -65,6 +68,41 @@ using namespace scomt::mcc;
 
 namespace MMIO
 {
+#if defined(CONFIG_COMPILE_CXXTEST_HOOKS)
+#define CI_INJECT_UE(_g_inject, _i_target, _enum, _msg, _l_addr)                \
+            if (_g_inject.isSet(_enum))                                         \
+            {                                                                   \
+                _g_inject.clear(_enum);                                         \
+                TRACFCOMP(g_trac_mmio, _msg                                     \
+                          " OCMB 0x%08x", get_huid(_i_target));                 \
+                memcpy(_l_addr,                                                 \
+                       &MMIO_OCMB_UE_DETECTED,                                  \
+                       sizeof(MMIO_OCMB_UE_DETECTED));                          \
+            }
+#define CI_INJECT_WRITE_ERROR(_g_inject, _i_target, _enum, _msg, _l_err)        \
+            if (_g_inject.isSet(_enum))                                         \
+            {                                                                   \
+                _g_inject.clear(_enum);                                         \
+                TRACFCOMP(g_trac_mmio, _msg                                     \
+                          " OCMB 0x%08x", get_huid(_i_target));                 \
+                _l_err = new ERRORLOG::ErrlEntry(                               \
+                                 ERRORLOG::ERRL_SEV_UNRECOVERABLE,              \
+                                 SCOM::SCOM_TEST_INJECT,                        \
+                                 SCOM::SCOM_TEST_INJECT_OP_FAIL);               \
+}
+#define CI_INJECT_CHECKSTOP(_g_inject, _i_target, _enum, _msg, _l_set_error)    \
+            if (_g_inject.isSet(_enum))                                         \
+            {                                                                   \
+                _g_inject.clear(_enum);                                         \
+                TRACFCOMP(g_trac_mmio, _msg                                     \
+                          " OCMB 0x%08x", get_huid(_i_target));                 \
+                _l_set_error = true;                                            \
+            }
+#else
+#define CI_INJECT_UE(_g_inject, _i_target, _enum, _msg, _l_addr)
+#define CI_INJECT_WRITE_ERROR(_g_inject, _i_target, _enum, _msg, _l_err)
+#define CI_INJECT_CHECKSTOP(_g_inject, _i_target, _enum, _msg, _l_exists)
+#endif
 
 // Helper function declarations (definitions at the bottom of this file)
 static
@@ -956,6 +994,12 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                             l_accessLimit);
                 eieio();
 
+                CI_INJECT_UE(CxxTest::g_cxxTestInject,
+                             i_ocmbTarget,
+                             CxxTest::MMIO_INJECT_OP_ERROR,
+                             "ocmbMmioPerformOp: ERROR_INJECT_UE",
+                             (l_ioPtr + l_bytesCopied));
+
                 // If there was a UE detected by the processor, a Load UE
                 // exception will be raised.  Kernel code will detect
                 // that the exception occurred during an OCMB read and
@@ -976,10 +1020,6 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                  " MMIO read of offset 0x%08x from OCMB 0x%08x",
                                  l_offset, get_huid(i_ocmbTarget));
 
-                // Switch over to requesting the SBE to perform i2c scoms to prevent
-                // further MMIO access to this OCMB
-                disableInbandScomsOcmb(i_ocmbTarget);
-
                 // Check for channel checkstops (this reads a processor reg)
                 bool l_checkstopExists = false;
                 l_err = checkChannelCheckstop(i_ocmbTarget, l_checkstopExists);
@@ -989,8 +1029,18 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                     break;
                 }
 
+                CI_INJECT_CHECKSTOP(CxxTest::g_cxxTestInject,
+                                    i_ocmbTarget,
+                                    CxxTest::MMIO_INJECT_CHECKSTOP,
+                                    "ocmbMmioPerformOp: ERROR_INJECT_CHECKSTOP",
+                                    l_checkstopExists);
+
                 if(l_checkstopExists)
                 {
+                    // Switch over to requesting the SBE to perform i2c scoms to
+                    //  prevent further MMIO access to this OCMB
+                    disableInbandScomsOcmb(i_ocmbTarget);
+
                     /*@
                      * @errortype
                      * @moduleid         MMIO::MOD_MMIO_PERFORM_OP
@@ -1018,6 +1068,9 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                       (i_opType << 31) | l_accessLimit,
                                       io_buflen),
                                     ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+
+                    // set a generic reason code
+                    l_err->setErrorType(MMIO::RC_MMIO_CHAN_CHECKSTOP);
 
                     addDefaultCallouts(l_err, i_ocmbTarget);
 
@@ -1144,6 +1197,12 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                              l_errorAddressMatches,
                              l_errorAddressIsZero);
 
+                CI_INJECT_WRITE_ERROR(CxxTest::g_cxxTestInject,
+                                      i_ocmbTarget,
+                                      CxxTest::MMIO_INJECT_OP_ERROR,
+                                      "ocmbMmioPerformOp: ERROR_INJECT_WRITE",
+                                      l_err);
+
                 // Check that we were able to read the error register
                 // and that it doesn't contain our address.
                 if(!l_err && !l_errorAddressMatches)
@@ -1158,10 +1217,6 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                  "ocmbMmioPerformOp: unable to complete"
                                  " MMIO write to offset 0x%08x on OCMB 0x%08x",
                                  l_offset, get_huid(i_ocmbTarget));
-
-                // Switch over to requesting the SBE to perform i2c scoms to prevent
-                // further MMIO access to this OCMB
-                disableInbandScomsOcmb(i_ocmbTarget);
 
                 /*@
                  * @errortype
@@ -1213,6 +1268,12 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                     errlHndl_t l_xstopErr = nullptr;
                     l_xstopErr = checkChannelCheckstop(i_ocmbTarget,
                                                        l_checkstopExists);
+
+                    CI_INJECT_CHECKSTOP(CxxTest::g_cxxTestInject,
+                                        i_ocmbTarget,
+                                        CxxTest::MMIO_INJECT_CHECKSTOP,
+                                        "ocmbMmioPerformOp: ERROR_INJECT_CHECKSTOP",
+                                        l_checkstopExists);
                     if(l_xstopErr)
                     {
                         // Couldn't deterimine if checkstop exists.
@@ -1222,6 +1283,13 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                     }
                     if(l_checkstopExists)
                     {
+                        // Switch over to requesting the SBE to perform i2c scoms
+                        //   to prevent further MMIO access to this OCMB
+                        disableInbandScomsOcmb(i_ocmbTarget);
+
+                        // set a generic reason code
+                        l_err->setErrorType(MMIO::RC_MMIO_CHAN_CHECKSTOP);
+
                         l_writeErr->setSev(l_err->sev());
                     }
                     ERRORLOG::errlCommit(l_err, MMIO_COMP_ID);

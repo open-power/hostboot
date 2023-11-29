@@ -41,6 +41,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/mmio
 
 #include unique object modules
 OBJS += mmio.o

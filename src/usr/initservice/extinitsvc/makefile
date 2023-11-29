@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2019
+# Contributors Listed Below - COPYRIGHT 2011,2023
 # [+] International Business Machines Corp.
 #
 #
@@ -26,5 +26,8 @@ ROOTPATH = ../../../..
 MODULE = extinitsvc
 
 OBJS += extinitsvc.o
+OBJS += TestInject.o
+
+VPATH += ${ROOTPATH}/src/usr/cxxtest/
 
 include ${ROOTPATH}/config.mk

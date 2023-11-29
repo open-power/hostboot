@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,12 +34,35 @@
 #include <targeting/common/mfgFlagAccessors.H>
 #include <xscom/piberror.H>
 #include <runtime/hbrt_utilities.H>
+#include <mmio/mmio_reasoncodes.H>
+#include <cxxtest/TestInject.H>
 
 // Trace definition
 extern trace_desc_t* g_trac_scom;
 
 namespace SCOM
 {
+#if defined(CONFIG_COMPILE_CXXTEST_HOOKS)
+#define CI_INJECT_OP_ERROR(_g_inject, _i_target, _enum, _msg, _l_rc)            \
+            if (_g_inject.isSet(_enum))                                         \
+            {                                                                   \
+                _g_inject.clear(_enum);                                         \
+                TRACFCOMP(g_trac_scom, _msg                                     \
+                          " OCMB 0x%08x", TARGETING::get_huid(_i_target));      \
+                _l_rc = HBRT_RC_PIBERR_001_BUSY;                                \
+            }
+#define CI_INJECT_CHECKSTOP(_g_inject, _i_target, _enum, _msg, _l_rc)           \
+            if (_g_inject.isSet(_enum))                                         \
+            {                                                                   \
+                _g_inject.clear(_enum);                                         \
+                TRACFCOMP(g_trac_scom, _msg                                     \
+                          " OCMB 0x%08x", TARGETING::get_huid(_i_target));      \
+                _l_rc = HBRT_RC_CHANNEL_FAILURE;                                \
+            }
+#else
+#define CI_INJECT_OP_ERROR(_g_inject, _i_target, _enum, _msg, _l_rc)
+#define CI_INJECT_CHECKSTOP(_g_inject, _i_target, _enum, _msg, _l_rc)
+#endif
 
 struct RcPibErrMap
 {
@@ -200,6 +223,18 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                                                 );
             }
 
+            CI_INJECT_OP_ERROR(CxxTest::g_cxxTestInject,
+                               i_target,
+                               CxxTest::MMIO_INJECT_OP_ERROR,
+                               "sendScomToHyp: ERROR_INJECT_OP_ERROR",
+                               l_hostRC);
+
+            CI_INJECT_CHECKSTOP(CxxTest::g_cxxTestInject,
+                                i_target,
+                                CxxTest::MMIO_INJECT_CHECKSTOP,
+                                "sendScomToHyp: ERROR_INJECT_CHECKSTOP",
+                                l_hostRC);
+
             if(l_hostRC)
             {
                 TRACFCOMP(g_trac_scom,ERR_MRK
@@ -246,6 +281,9 @@ errlHndl_t sendScomToHyp(DeviceFW::OperationType i_opType,
                         //  access will use fsp mailbox
                         SBESCOM::switchToSbeScomAccess(i_target);
                     }
+
+                    // set a generic reason code
+                    l_err->setErrorType(MMIO::RC_MMIO_CHAN_CHECKSTOP);
 
                     // Callout the failing buffer chip
                     l_err->addHwCallout(i_target,

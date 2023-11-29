@@ -27,23 +27,38 @@
  *
  *  @brief Test cases for MMIO code
  */
+#ifndef __MMIOTEST_H
+#define __MMIOTEST_H
 
 #include <cxxtest/TestSuite.H>
+#include <cxxtest/TestInject.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <limits.h>
 #include <devicefw/driverif.H>
-#include "../mmio.H"
+#include <mmio/mmio.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/attributes.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/odyutil.H>
 #include <explorer_scom_addresses.H>
 #include <exp_oc_regs.H>
+#include <ody_oc_regs.H>
 #include <sys/mmio.h>
 #include <utils/chipids.H>
 #include <test/exptest_utils.H>
 #include <arch/magic.H>
 #include <console/consoleif.H>
+
+#include <initservice/isteps_trace.H>
+#include <sbeio/sbe_getCodeLevels.H>
+#include <ody_code_getlevels.H>
+
+#include <mmio/test/mmiotest_common.H>
+
+#ifndef __HOSTBOOT_RUNTIME
+#include <sbeio/sbe_fifodd.H>
+#endif
 
 #define SCOM2MMIO_ADDR(_ADDR) (EXPLR_IB_MMIO_OFFSET | (_ADDR << 3))
 #define CNFG2MMIO_ADDR(_ADDR) (EXPLR_IB_CONFIG_OFFSET | _ADDR)
@@ -57,11 +72,24 @@ static const uint64_t EXPLR_IB_MMIO_OFFSET   = 0x0000000100000000ull; // 4GB
 // @TODO PFHB-530 Fix Explorer MMIO Error Path Testcases
 static const uint64_t EXPLR_INVALID_SCOM_ADDR = 0x80109999;
 
-using namespace TARGETING;
 
-class MmioTest : public CxxTest::TestSuite
+using namespace ISTEPS_TRACE;
+using namespace TARGETING;
+using namespace ERRORLOG;
+using namespace CxxTest;
+
+
+class MmioTest : public TestSuite
 {
   public:
+    /**
+     * @brief  Execute CI for mmio
+     */
+    void testOdyMMIO(void)
+    {
+        runOdyMmioCI();
+        return;
+    }
 
     /**
      * @brief Test MMIO calls
@@ -484,3 +512,5 @@ class MmioTest : public CxxTest::TestSuite
         TS_INFO("testOdyMulticastScom: End: test total:%d failed:%d", l_total, l_fails);
     }
 };
+
+#endif

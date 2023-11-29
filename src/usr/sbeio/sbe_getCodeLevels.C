@@ -49,8 +49,6 @@ using namespace TARGETING;
 using namespace ERRORLOG;
 
 
-#ifndef __HOSTBOOT_RUNTIME  //no FIFO at runtime
-
 struct getCodeLevelsResponseBuf_t
 {
     struct getCodeLevelsResponse_t data;
@@ -167,7 +165,5 @@ errlHndl_t getFifoSbeCodeLevels(TargetHandle_t  i_target,
 
     return l_errl;
 }
-
-#endif //#ifdef __HOSTBOOT_RUNTIME
 
 } //end namespace SBEIO

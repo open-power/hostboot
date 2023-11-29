@@ -384,6 +384,7 @@ RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testprdf_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_HBRT_PRD),testattn_rt)
 RUNTIME_TESTCASE_MODULES += $(if $(CONFIG_MCTP)$(CONFIG_MCTP_TESTCASES),testmctp_rt) # ~/src/usr/mctp/runtime/
 RUNTIME_TESTCASE_MODULES += testi2c_rt
+RUNTIME_TESTCASE_MODULES += testmmio_rt
 endif
 
 RELOCATABLE_IMAGE_LDFLAGS = -pie --export-dynamic

@@ -408,6 +408,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             int rc = 0;
             bool l_odyssey = false;
             uint64_t custom_addr = 0x0;
+            uint64_t *data64 = static_cast<uint64_t*>(data);
 
             TRACFCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_read chipid=0x%llX addr=0x%llX",
                           chipid, addr);
@@ -461,7 +462,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 l_errl = nullptr;
 
                 // Use cache in the case of an error
-                uint64_t * data64 = static_cast<uint64_t *>(data);
 
                 SCOM_KEY scomKey(chipid,addr);
                 SCOM_MAP::iterator it = cv_scomMap.find(scomKey);
@@ -483,6 +483,11 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 {
                     rc = HBRT_RC_PIBERR_100_INVALIDADDR;
                 }
+            }
+            else if (l_odyssey) // dont byteswap if data comes from the cache
+            {
+                // OMI is little-endian, need to byteswap the data
+                *data64 = __builtin_bswap64(*data64);
             }
 
             if (!l_odyssey) // Explorer only handling
@@ -531,6 +536,9 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 //
                 if (l_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
                 {
+                    // OMI is little-endian, need to byteswap the data
+                    *data64 = __builtin_bswap64(*data64);
+
                     custom_addr = (addr & MMIO_MASK) >> 3;
                 }
                 else // EXPLORER_16 not yet supported
