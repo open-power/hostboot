@@ -756,9 +756,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <sbeAttrSync toSBE="1" fromSBE="1" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>

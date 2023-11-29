@@ -777,9 +777,6 @@
     <initToZero></initToZero>
     <valueType>uint64</valueType>
     <writeable/>
-    <sbeAttrSync toSBE="0" fromSBE="1" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -874,9 +871,6 @@
       ENABLED = 1
     </enum>
     <default>DISABLED</default>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-    </sbeAttrSync>
     <platInit/>
   </attribute>
 
