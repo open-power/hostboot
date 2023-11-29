@@ -187,6 +187,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+#ifndef __PPE__
 ///
 /// @brief Align the READ_PREAMBLE and WRITE_PREAMBLE to the si attribute bitmap
 ///
@@ -204,6 +205,7 @@ static inline uint8_t align_preamble_to_attr(const uint8_t i_read_pramble, const
 
     return l_si_preamble;
 }
+#endif
 
 ///
 /// @brief Shift the bits of the SPD field to match the attribute format
