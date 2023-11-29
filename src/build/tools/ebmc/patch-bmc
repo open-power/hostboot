@@ -104,7 +104,7 @@ function USAGE () {
     errlog "Usage(2): $0 [EXTERNALDIR] --cponly [OPTIONS...]"
     errlog "    EXTERNALDIR      Path to a directory to copy data files and scripts into"
     errlog ""
-    errlog "Usage(3): PATCHES_DIR=[COPYDIR] [COPYDIR]/$0 [USERNAME@]HOSTNAME PASSWORD [OPTIONS...]"
+    errlog "Usage(3): PATCHES_DIR=[COPYDIR] [COPYDIR]/patch-bmc [USERNAME@]HOSTNAME PASSWORD [OPTIONS...]"
     errlog "    COPYDIR          Path to a directory where data files and scripts were previously copied into"
     errlog "    HOSTNAME         The hostname of the machine to patch, including a user name if needed"
     errlog "    PASSWORD         SSH password for the machine to patch"
