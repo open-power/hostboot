@@ -320,13 +320,13 @@ void addDefaultCallouts(errlHndl_t i_err,
     // Add OCMB as high priority
     i_err->addHwCallout(i_ocmbTarget,
                         HWAS::SRCI_PRIORITY_HIGH,
-                        HWAS::DECONFIG,
+                        HWAS::DELAYED_DECONFIG,
                         HWAS::GARD_NULL);
 
     // Add OMI bus
     i_err->addHwCallout(getImmediateParentByAffinity(i_ocmbTarget),
                         HWAS::SRCI_PRIORITY_MED,
-                        HWAS::DECONFIG,
+                        HWAS::DELAYED_DECONFIG,
                         HWAS::GARD_NULL);
 
     // Add code as low priority callout
@@ -502,7 +502,7 @@ void determineCallouts(const TargetHandle_t i_ocmbTarget,
             // Add OCMB as high priority callout
             i_err->addHwCallout(i_ocmbTarget,
                                 HWAS::SRCI_PRIORITY_HIGH,
-                                HWAS::DECONFIG,
+                                HWAS::DELAYED_DECONFIG,
                                 HWAS::GARD_NULL);
         }
     }
