@@ -156,6 +156,20 @@ extern uint64_t g_ModulesCompleted;
 #define TS_FAIL(...)   { TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__);   \
     CxxTest::doFailTest( __FILE__, __LINE__ ); }
 
+#define TS_FAIL_FN(...)                         \
+    TS_FAIL(TEST_FUNC ": " __VA_ARGS__)
+
+#define TS_ASSERT(COND, ...)                    \
+    if (!(COND)) {                              \
+        TS_FAIL_FN(__VA_ARGS__);                \
+    }                                           \
+
+#define TS_ASSERT_RETURN(COND, ...)             \
+    if (!(COND)) {                              \
+        TS_FAIL_FN(__VA_ARGS__);                \
+        return;                                 \
+    }                                           \
+
 // Statistics structure for passing original pointers to the runtime test suite.
 struct CxxTestStats
 {

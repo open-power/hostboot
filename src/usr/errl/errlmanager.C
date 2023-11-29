@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -838,6 +838,47 @@ void ErrlManager::sendErrLogToFSP ( errlHndl_t& io_err )
     TRACFCOMP( g_trac_errl, EXIT_MRK"ErrlManager::sendErrLogToFSP" );
 } // sendErrLogToFSP
 
+void ErrlManager::commitErrLogAggregate(errlHndl_t& io_err, const compId_t i_committerComp)
+{
+    const char* l_sevString = errl_sev_str_map.at(io_err->sev());
+
+    TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s",
+              i_committerComp, io_err->eid(), io_err->reasonCode(), l_sevString );
+
+    if ( (io_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL) &&
+         (io_err->sev() != ERRORLOG::ERRL_SEV_RECOVERED) )
+    {
+        iv_nonInfoCommitted = true;
+        lwsync();
+    }
+
+    // Ask ErrlEntry to check for any special deferred deconfigure callouts
+    io_err->deferredDeconfigure();
+
+    // Is error flagged for doing HB Dump during a shutdown / TI?
+    if (io_err->getDoHbDump() == true)
+    {
+        // Then set flag in TI data
+        termSetHbDump();
+    }
+
+    // Take ownership of the log's sub-logs, which means that we are
+    // responsible for freeing them (which is done by the message
+    // queue handler)
+    auto aggregate_errors = move(io_err->iv_aggregate_errors);
+
+    // Offload the error log to the errlog message queue
+    sendErrlogToMessageQueue ( io_err, i_committerComp );
+
+    // Commit the rest of the error logs in the aggregate
+    for (auto log : aggregate_errors)
+    {
+        commitErrLogAggregate(log, i_committerComp);
+    }
+
+    io_err = nullptr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Handling commit error log.
 ///////////////////////////////////////////////////////////////////////////////
@@ -845,6 +886,7 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
 {
 
     TRACDCOMP( g_trac_errl, ENTER_MRK"ErrlManager::commitErrLog" );
+
     do
     {
         if (io_err == nullptr)
@@ -854,35 +896,12 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
             break;
         }
 
-        // Lock the severity map mutex to prevent multiple threads from
-        // attempting to access the map simultaneously
-        mutex_lock(&g_sevMapMutex);
-        const char* l_sevString = errl_sev_str_map.at(io_err->sev());
-        mutex_unlock(&g_sevMapMutex);
-        TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s",
-                  i_committerComp, io_err->eid(), io_err->reasonCode(), l_sevString );
+        assert(io_err->iv_aggregate_parent == nullptr,
+               "commitErrLog(0x%08X, %d) called on a log which is a member of an aggregate",
+               io_err->eid(),
+               i_committerComp);
 
-        if ( (io_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL) &&
-             (io_err->sev() != ERRORLOG::ERRL_SEV_RECOVERED) )
-        {
-            iv_nonInfoCommitted = true;
-            lwsync();
-        }
-
-        //Ask ErrlEntry to check for any special deferred deconfigure callouts
-        io_err->deferredDeconfigure();
-
-        // Is error flagged for doing HB Dump during a shutdown / TI?
-        if (io_err->getDoHbDump() == true)
-        {
-            // Then set flag in TI data
-            termSetHbDump();
-        }
-
-        //Offload the error log to the errlog message queue
-        sendErrlogToMessageQueue ( io_err, i_committerComp );
-        io_err = nullptr;
-
+        commitErrLogAggregate(io_err, i_committerComp);
    } while( 0 );
 
    TRACDCOMP( g_trac_errl, EXIT_MRK"ErrlManager::commitErrLog" );

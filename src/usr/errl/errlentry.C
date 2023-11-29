@@ -216,7 +216,8 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     iv_sevFinal(false),
     iv_skipProcessingLog(true),
     iv_skipShowingLog(true),
-    iv_doHbDump(i_hbDump)
+    iv_doHbDump(i_hbDump),
+    iv_aggregate_parent()
 {
     // Lock the severity map mutex to prevent multiple threads from
     // attempting to access the map simultaneously
@@ -250,6 +251,23 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
 ///////////////////////////////////////////////////////////////////////////////
 ErrlEntry::~ErrlEntry()
 {
+    // Clean up aggregate errors.
+    // This class isn't copyable/movable so we don't have to worry
+    // about that anywhere.
+    for (auto& log : iv_aggregate_errors)
+    {
+        if (log)
+        {
+            assert(log->iv_aggregate_parent == this,
+                   "~ErrlEntry: 0x%08X->iv_aggregate_parent != 0x%08X",
+                   log->eid(),
+                   eid());
+
+            delete log;
+            log = nullptr;
+        }
+    }
+
     // Trace a delete/destruction on an uncommitted log
     if (iv_Private.iv_committed.date_time.value == 0)
     {
@@ -261,10 +279,10 @@ ErrlEntry::~ErrlEntry()
     }
 
     // Free memory of all sections
-    for (std::vector<ErrlUD*>::const_iterator l_itr = iv_SectionVector.begin();
-         l_itr != iv_SectionVector.end(); ++l_itr)
+    for (auto& section : iv_SectionVector)
     {
-        delete (*l_itr);
+        delete section;
+        section = nullptr;
     }
 
     delete iv_pBackTrace;
@@ -279,7 +297,8 @@ ErrlUD * ErrlEntry::addFFDC(const compId_t i_compId,
              const uint32_t i_ffdcLen,
              const uint8_t i_ffdcVer,
              const uint8_t i_ffdcSubSect,
-             bool i_merge)
+             const bool i_merge,
+             const propagation_t i_propagate)
 {
     ErrlUD * l_ffdcSection = NULL;
 
@@ -343,6 +362,16 @@ ErrlUD * ErrlEntry::addFFDC(const compId_t i_compId,
             // Add to the vector of sections for this error log.
             iv_SectionVector.push_back( l_ffdcSection );
         }
+
+        // Add FFDC to all logs in the aggregate, so that we have
+        // the most pertinent context no matter what log we look at.
+        if (i_propagate == propagation_t::PROPAGATE)
+        {
+            for (const auto err : iv_aggregate_errors)
+            {
+                err->addFFDC(i_compId, i_dataPtr, i_ffdcLen, i_ffdcVer, i_ffdcSubSect, i_merge, propagation_t::PROPAGATE);
+            }
+        }
     }
     else
     {
@@ -380,12 +409,18 @@ void ErrlEntry::appendToFFDC(ErrlUD * i_pErrlUD,
 ///////////////////////////////////////////////////////////////////////////////
 // Return a Boolean indication of success.
 
-bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
+bool ErrlEntry::collectTrace(const char i_name[],
+                             const uint64_t i_max,
+                             const propagation_t i_propagate)
 {
     bool l_rc = false;  // assume a problem.
     char * l_pBuffer = NULL;
     uint64_t l_cbOutput = 0;
     uint64_t l_cbBuffer = 0;
+
+    TRACFCOMP( g_trac_errl,
+               "Calling collectTrace on 0x%08x",
+               eid());
 
     do
     {
@@ -439,6 +474,14 @@ bool ErrlEntry::collectTrace(const char i_name[], const uint64_t i_max)
         iv_SectionVector.push_back( l_udSection );
 
         l_rc = true;
+
+        if (i_propagate == propagation_t::PROPAGATE)
+        {
+            for (const auto err : iv_aggregate_errors)
+            {
+                err->collectTrace(i_name, i_max, propagation_t::PROPAGATE);
+            }
+        }
     }
     while(0);
 
@@ -2106,7 +2149,7 @@ bool ErrlEntry::isTerminateLog() const
 
 ///////////////////////////////////////////////////////////////////////////////
 // Map the target type to correct subsystem ID using a binary search
-epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_targetType, 
+epubSubSystem_t ErrlEntry::getSubSystem( TARGETING::TYPE i_targetType,
                                          TARGETING::TYPE i_parentType ) const
 {
 
@@ -2763,6 +2806,19 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
 
 uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
 {
+    if (!iv_aggregate_errors.empty()
+        || iv_aggregate_parent)
+    { // It makes no sense to unflatten a log with aggregate logs
+      // attached, so we error out.
+        TRACFCOMP(g_trac_errl,
+                  ERR_MRK"Can't unflatten error log 0x%08X with aggregate! "
+                  "parent=0x%08X, child count=%d",
+                  eid(),
+                  ERRL_GETEID_SAFE(iv_aggregate_parent),
+                  iv_aggregate_errors.size());
+        return -1;
+    }
+
     const uint8_t * l_buf = static_cast<const uint8_t *>(i_buffer);
     uint64_t consumed = 0;
     uint64_t bytes_used = 0;
@@ -2860,8 +2916,9 @@ uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
 
 //@brief Return the list of User Detail sections
 //NOTE: You can pass COMP_ID or subsect 0 into this function for wildcard
-std::vector<void*> ErrlEntry::getUDSections(compId_t i_compId,
-                                            uint8_t i_subSect)
+std::vector<void*> ErrlEntry::getUDSections(const compId_t i_compId,
+                                            const uint8_t i_subSect,
+                                            const propagation_t i_behavior)
 {
     std::vector<void *> copy_vector;
 
@@ -2876,16 +2933,27 @@ std::vector<void*> ErrlEntry::getUDSections(compId_t i_compId,
         }
     }
 
+    if (i_behavior == propagation_t::PROPAGATE)
+    {
+        for (const auto log : iv_aggregate_errors)
+        {
+            auto sections = log->getUDSections(i_compId, i_subSect, propagation_t::PROPAGATE);
+
+            copy_vector.insert(end(copy_vector), begin(sections), end(sections));
+        }
+    }
+
     return copy_vector;
 }
 
 uint8_t ErrlEntry::queryCallouts(TARGETING::Target         * const i_target,
-                                 deconfig_and_gard_records * const o_accumulatedRecords)
+                                 deconfig_and_gard_records * const o_accumulatedRecords,
+                                 const propagation_t i_behavior,
+                                 const bool i_toplevel)
 {
     uint8_t criteria_matched = NO_MATCH;
-    bool accumulateRecords = (o_accumulatedRecords != nullptr);
 
-    if (accumulateRecords)
+    if (o_accumulatedRecords && i_toplevel)
     {
         // Make sure the lists are empty
         o_accumulatedRecords->deconfigs.clear();
@@ -2954,7 +3022,7 @@ uint8_t ErrlEntry::queryCallouts(TARGETING::Target         * const i_target,
                         criteria_matched |= GARD_FOUND;
                     }
 
-                    if (accumulateRecords)
+                    if (o_accumulatedRecords)
                     {
                         // Caller wishes to have a list of the deconfigs and gards. Add these to their respective lists.
                         o_accumulatedRecords->deconfigs.push_back(deconfigState);
@@ -2984,6 +3052,18 @@ uint8_t ErrlEntry::queryCallouts(TARGETING::Target         * const i_target,
                     }
                 }
             }
+        }
+    }
+
+    if (i_behavior == propagation_t::PROPAGATE)
+    {
+        for (const auto err : iv_aggregate_errors)
+        {
+            criteria_matched
+                |= err->queryCallouts(i_target,
+                                      o_accumulatedRecords,
+                                      propagation_t::PROPAGATE,
+                                      false /* not the toplevel call */);
         }
     }
 
@@ -3017,12 +3097,13 @@ bool ErrlEntry::hasMaintenanceCallout(bool i_includeInfo)
 
 
 void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
-                                 DeconfigEnum i_deconfigState,
-                                 HWAS::CalloutStyle_t i_callout_style,
-                                 HWAS::CalloutType_t i_callout_type)
+                                 const DeconfigEnum i_deconfigState,
+                                 const HWAS::CalloutStyle_t i_callout_style,
+                                 const HWAS::CalloutType_t i_callout_type,
+                                 const propagation_t i_behavior)
 {
-    TRACFCOMP(g_trac_errl, ENTER_MRK"setDeconfigState i_callout_style=0x%X i_callout_type=0x%X HWAS::ALL_STYLE=0x%X HWAS::SINGLE_STYLE=0x%X",
-                  i_callout_style, i_callout_type, HWAS::ALL_STYLE, HWAS::SINGLE_STYLE);
+    TRACFCOMP(g_trac_errl, ENTER_MRK"setDeconfigState(0x%08X) i_callout_style=0x%X i_callout_type=0x%X HWAS::ALL_STYLE=0x%X HWAS::SINGLE_STYLE=0x%X",
+              eid(), i_callout_style, i_callout_type, HWAS::ALL_STYLE, HWAS::SINGLE_STYLE);
     //Loop through each section of the errorlog
     for(auto & section : iv_SectionVector)
     {
@@ -3033,6 +3114,7 @@ void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
             // entry that follows the UDT callout entry
             //
             // Rule for letting it pass
+
             if ( ((i_callout_style == HWAS::SINGLE_STYLE) && (callout_ud->type == i_callout_type)) ||
                  ( (i_callout_style == HWAS::ALL_STYLE) &&
                    ((callout_ud->type == HWAS::HW_CALLOUT) ||
@@ -3045,9 +3127,6 @@ void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
                 if(!retrieveTarget(target_ptr, target_found, this) &&
                    target_found  == i_target)
                 {
-                    TRACFCOMP(g_trac_errl,
-                              "setDeconfigState: Found target 0x%08X callout match, setting deconfig state 0x%X for errl 0x%08X",
-                              get_huid(i_target), i_deconfigState, eid());
                     // Depending on the user details' type set the appropriate
                     // deconfig field.
                     if (callout_ud->type == HWAS::HW_CALLOUT)
@@ -3066,12 +3145,25 @@ void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
             }
         }
     }
+
+    if (i_behavior == propagation_t::PROPAGATE)
+    {
+        for (const auto log : iv_aggregate_errors)
+        {
+            log->setDeconfigState(i_target,
+                                  i_deconfigState,
+                                  i_callout_style,
+                                  i_callout_type,
+                                  propagation_t::PROPAGATE);
+        }
+    }
 }
 
 void ErrlEntry::setGardType(TARGETING::Target* const i_target,
-                            GARD_ErrorType i_gardType,
-                            HWAS::CalloutStyle_t i_callout_style,
-                            HWAS::CalloutType_t i_callout_type)
+                            const GARD_ErrorType i_gardType,
+                            const HWAS::CalloutStyle_t i_callout_style,
+                            const HWAS::CalloutType_t i_callout_type,
+                            const propagation_t i_behavior)
 {
     //Loop through each section of the errorlog
     TRACFCOMP(g_trac_errl, ENTER_MRK"setGardType i_callout_style=0x%X i_callout_type=0x%X HWAS::ALL_STYLE=0x%X HWAS::SINGLE_STYLE=0x%X",
@@ -3118,10 +3210,22 @@ void ErrlEntry::setGardType(TARGETING::Target* const i_target,
             }
         }
     }
+
+    if (i_behavior == propagation_t::PROPAGATE)
+    {
+        for (const auto log : iv_aggregate_errors)
+        {
+            log->setGardType(i_target,
+                             i_gardType,
+                             i_callout_style,
+                             i_callout_type,
+                             propagation_t::PROPAGATE);
+        }
+    }
 }
 
 
-void ErrlEntry::removeGardAndDeconfigure()
+void ErrlEntry::removeGardAndDeconfigure(const propagation_t i_behavior)
 {
     //Loop through each section of the errorlog
     for(auto & section : iv_SectionVector)
@@ -3149,6 +3253,14 @@ void ErrlEntry::removeGardAndDeconfigure()
                 reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->partGardErrorType = HWAS::GARD_NULL;
                 reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData)->partDeconfigState = HWAS::NO_DECONFIG;
             }
+        }
+    }
+
+    if (i_behavior == propagation_t::PROPAGATE)
+    {
+        for (const auto log : iv_aggregate_errors)
+        {
+            log->removeGardAndDeconfigure(propagation_t::PROPAGATE);
         }
     }
 }

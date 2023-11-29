@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -74,6 +76,12 @@ public:
      */
     virtual void addToLog(errlHndl_t i_errl);
 
+    template<typename Del>
+    void addToLog(const errlOwner_d<Del>& i_errl)
+    {
+        return addToLog(i_errl.get());
+    }
+
 protected:
 
     /**
@@ -132,4 +140,3 @@ private:
 }
 
 #endif
-

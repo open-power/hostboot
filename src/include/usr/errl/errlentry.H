@@ -64,6 +64,7 @@
 #include <targeting/common/target.H>
 #include <attributeenums.H>
 #include <sys/sync.h>
+#include <assert.h>
 
 namespace ERRORLOGDISPLAY
 {
@@ -77,6 +78,13 @@ typedef ERRORLOG::ErrlEntry* errlHndl_t;
 
 #include <hwas/common/hwasCallout.H>
 
+class UtilErrlUsrDataTest;
+
+namespace err_test
+{
+class ErrlAggregateTest;
+}
+
 namespace ERRORLOG
 {
 
@@ -89,6 +97,15 @@ static mutex_t g_sevMapMutex = MUTEX_INITIALIZER;
 class ErrlManager;
 class ErrlUserDetailsBackTrace;
 class ErrlUserDetailsCallout;
+
+/** @brief Parameter type for ErrlEntry member functions. See
+ *  functions below for description.
+ */
+enum class propagation_t
+{
+    PROPAGATE,
+    NO_PROPAGATE
+};
 
 /**
  *  @brief      Host Boot Error log entry class.
@@ -104,6 +121,8 @@ class ErrlEntry
     friend class ErrlManager;
     friend class ERRORLOGDISPLAY::ErrLogDisplay;
     friend class ErrlTest;
+    friend class ::UtilErrlUsrDataTest;
+    friend class err_test::ErrlAggregateTest;
 
 public:
     /** Constants to use in constructor */
@@ -181,49 +200,181 @@ public:
      */
     errlSeverity_t sev() const { return iv_User.iv_severity; }
 
-
     /**
-     *  @brief Set the log's severity
-     *  The severity of a log determines how severe the
-     *  problem is perceived to be.  The severity is
-     *  initially set by the parameter in the constructor
-     *  and can be changed at any point thereafter, unless the
-     *  the severity has been set as "final".
+     * @brief Iterator class for error log aggregate.
      *
-     *  @param[in]  i_sev Severity. See errl/errltypes.H
-     *
-     *  @return     void
+     * @tparam T  The type of the iterated error log
+     *            (ErrlEntry* or const ErrlEntry*)
      */
-    void setSev(const errlSeverity_t i_sev)
+    template<typename T>
+    struct aggregate_iterator_
     {
-        if (false == iv_sevFinal) // update severity as long as not set "final"
+        aggregate_iterator_(T err)
+            : current(err) { }
+
+        /**
+         * @brief Advances the iterator to the next error in the
+         * aggregate tree.
+         *
+         * The algorithm will work down one path in the tree as far as
+         * possible, pausing at each layer to "yield" a value. When a
+         * leaf is reached, the tree is traversed upwards until an
+         * unvisited sibling is found, and then that path is explored
+         * depth-first, and so on until every node is visited.
+         */
+        aggregate_iterator_& operator++()
         {
-            iv_User.iv_severity = i_sev;
+            if (current)
+            {
+                if (!current->iv_aggregate_errors.empty())
+                { // If the current error has children, go down one
+                  // level and make the first child the current error.
+                    current = current->iv_aggregate_errors[0];
+                }
+                else
+                { // If the current error has no children, find the
+                  // current error in its parent's list, and go to the
+                  // next one.
+                    while (current)
+                    {
+                        const auto parent = current->iv_aggregate_parent;
+
+                        if (parent)
+                        {
+                            const size_t index_in_parent_list
+                                = (std::find(begin(parent->iv_aggregate_errors),
+                                             end(parent->iv_aggregate_errors),
+                                             current)
+                                   - begin(parent->iv_aggregate_errors));
+
+                            if (index_in_parent_list + 1 < parent->iv_aggregate_errors.size())
+                            {
+                                current = parent->iv_aggregate_errors[index_in_parent_list + 1];
+                                break;
+                            }
+                            else
+                            {
+                                current = parent;
+                            }
+                        }
+                        else
+                        {
+                            current = nullptr;
+                        }
+                    }
+                }
+            }
+
+            return *this;
         }
+
+        aggregate_iterator_ operator++(int)
+        {
+            auto copy = *this;
+            ++(*this);
+            return copy;
+        }
+
+        T operator*()
+        {
+            return current;
+        }
+
+        bool operator==(const aggregate_iterator_& rhs) const
+        {
+            return current == rhs.current;
+        }
+
+        bool operator!=(const aggregate_iterator_& rhs) const
+        {
+            return !(*this == rhs);
+        }
+
+        T current = nullptr;
+    };
+
+    using aggregate_iterator = aggregate_iterator_<ErrlEntry*>;
+    using const_aggregate_iterator = aggregate_iterator_<const ErrlEntry*>;
+
+    /** @brief A class to contain the .begin() and .end() members for
+     * iterating an aggregate error. Returned from ErrlEntry::aggregated().
+     */
+    template<typename T>
+    struct aggregate_container
+    {
+        T error;
+
+        aggregate_iterator_<T> begin()
+        { return { error }; }
+
+        aggregate_iterator_<T> end()
+        { return { nullptr }; }
+
+        const_aggregate_iterator begin() const
+        { return { error }; }
+
+        const_aggregate_iterator end() const
+        { return { nullptr }; }
+
+        const_aggregate_iterator cbegin() const
+        { return { error }; }
+
+        const_aggregate_iterator cend() const
+        { return { nullptr }; }
+    };
+
+    /** @brief Get an object that can be used to iterate the logs in
+     *  the aggregate (including this log).
+     */
+    aggregate_container<ErrlEntry*> aggregated()
+    {
+        return { this };
+    }
+
+    /** @brief Get an object that can be used to iterate the logs in
+     *  the aggregate (including this log).
+     */
+    aggregate_container<const ErrlEntry*> caggregated() const
+    {
+        return { this };
     }
 
     /**
-     *  @brief Set the log's severity "final".
-     *  The severity being set will be set as "final" such that it can
-     *  not be changed again. Setting a severity as "final" can be used
-     *  in the less frequent case that a severity should not be
-     *  changed by code at a higher level.
+     *  @brief Set the log's severity, and optionally mark it "final".
+     *  The severity being finalized will make it such that the
+     *  severity cannot be changed again. Setting a severity as
+     *  "final" can be used in the rare case that a severity should
+     *  not be changed by code at a higher level.
      *
-     *  @param[in]  i_sev    Severity. See errl/errltypes.H
-     *  @param[in]  i_final  true: If not already "final", sets severity and
-     *                             marks the severity as "final"
-     *                       false: If not "final", sets severity
+     *  @param[in]  i_sev       Severity. See errl/errltypes.H
+     *  @param[in]  i_finalize  true: If not already "final", sets severity and
+     *                                marks the severity as "final"
+     *                          false: If not "final", sets severity
+     *  @param[in] i_behavior   Whether to propagate this call to the rest of
+     *                          the logs in the aggregate.
+     *
+     *  @note       This function is an aggregate function
+     *              (i.e. will be called recursively on all
+     *              sub-logs).
      *
      *  @return     void
      */
     void setSev(const errlSeverity_t i_sev,
-                bool  i_final)
+                const bool i_finalize = false,
+                const propagation_t i_behavior = propagation_t::PROPAGATE)
     {
-
         if (false == iv_sevFinal) // as long as not already set as "final"
         {
             iv_User.iv_severity = i_sev;  // set severity
-            iv_sevFinal = i_final;        // set whether severity is "final"
+            iv_sevFinal = i_finalize;     // set whether severity is "final"
+        }
+
+        if (i_behavior == propagation_t::PROPAGATE)
+        {
+            for (const auto err : iv_aggregate_errors)
+            {
+                err->setSev(i_sev, i_finalize, propagation_t::PROPAGATE);
+            }
         }
     }
 
@@ -296,11 +447,22 @@ public:
     /**
      *  @brief Set the platform log id for this error log.
      *
-     *  @param[in]  i_plid  PLID for error log
+     *  @param[in]  i_plid      PLID for error log
+     *  @param[in]  i_behavior  Whether to propagate this PLID to the
+     *                          other logs in the aggregate below.
+     *  @param[in]  i_toplevel  Whether this is the toplevel call to plid()
+     *                          (i.e. not part of aggregate propagation).
+     *                          Internal use only.
+     *
+     *  @note For propagated PLIDs in an aggregate, if a log already
+     *        has had its PLID set, the propagated PLID will not
+     *        override it.
      *
      *  @return void
      */
-    void plid( uint32_t i_plid);
+    void plid( uint32_t i_plid,
+               propagation_t i_behavior = propagation_t::PROPAGATE,
+               bool i_toplevel = true);
 
     /**
      *  @brief Get the event type of the error log.
@@ -419,8 +581,11 @@ public:
     /**
      * @brief Helper function to determine if log is a terminating error
      *
-     *
      * @return  returns true if error will result in system termination.
+     *
+     * @note    Does not consider other logs in the aggregate (because by
+     *          the time this is used, the aggregates have already been
+     *          broken up by the error log manager).
      */
     bool isTerminateLog() const;
 
@@ -461,6 +626,18 @@ public:
     uint64_t getUserData1() const;
 
     /**
+     * @brief Whether any log in the aggregate has userdata1 matching
+     * the given value.
+     */
+    bool hasUserData1(uint64_t i_userdata1) const;
+
+    /**
+     * @brief Whether any log in the aggregate has userdata2 matching
+     * the given value.
+     */
+    bool hasUserData2(uint64_t i_userdata2) const;
+
+    /**
      *  @brief Return iv_Src user data words.
      *
      *  @return data2 word from SRC
@@ -485,16 +662,23 @@ public:
      *                               parameter is not specified) to indicate
      *                               whether this buffer is merged with the
      *                               previous section iff it matches.
+     * @param[in]  i_behavior        Whether to propagate this FFDC to the
+     *                               other logs in the aggregate below.
+     *
+     * @note                         This function is an aggregate function
+     *                               (i.e. may be called recursively on all
+     *                               sub-logs).
      *
      * @return Pointer to FFDC section if successfully added.
      *         NULL if fails
      */
-    ErrlUD * addFFDC(const compId_t i_compId,
+    ErrlUD * addFFDC(compId_t i_compId,
                      const void * i_dataPtr,
-                     const uint32_t i_ffdcLen,
-                     const uint8_t i_ffdcVer,
-                     const uint8_t i_ffdcSubSect,
-                     bool i_merge = false);
+                     uint32_t i_ffdcLen,
+                     uint8_t i_ffdcVer,
+                     uint8_t i_ffdcSubSect,
+                     bool i_merge = false,
+                     propagation_t i_behavior = propagation_t::NO_PROPAGATE);
 
     /**
      * @brief Append more data to an FFDC section.
@@ -528,18 +712,24 @@ public:
      *
      *  @param[in]  i_name          Trace buffer name
      *  @param[in]  i_max           Size of trace to capture.
+     *  @param[in]  i_behavior      Whether to propagate this call to the
+     *                              other logs in the aggregate below.
      *
      *  @note: 'i_max = 0' implies to collect all of the trace available for
      *         that component.  This is actually dangerous in Hostboot because
      *         our trace buffer are not hard-limited.  The default of this
      *         function will be 1K to keep us at a reasonable limit.
      *
+     *  @note: This function is an aggregate function (i.e. may be called
+     *         recursively on all sub-logs).
+     *
      *  @return A Boolean indication of success.  False likely means
      *  the trace buffer name given is not found. However, check the ERRL
      *  trace buffer for the cause of the failure.
      */
     bool collectTrace(const char i_name[],
-                      const uint64_t i_max = KILOBYTE);
+                      uint64_t i_max = KILOBYTE,
+                      propagation_t i_behavior = propagation_t::PROPAGATE);
 
     /**
      *  @brief Get the flattened size of the errl entry and the max possible
@@ -551,27 +741,6 @@ public:
      */
     void getErrlSize(uint32_t& o_flatSize,
                      uint32_t& o_maxSize);
-
-    /**
-     *  @brief Remove the duplicate trace entries from user detail data
-     *  When multiple calls to collectTrace() on the same component id occur a
-     *  new user detail section is created each time. This function removes the
-     *  duplicates created from that process.
-     *
-     *  @algorithm A high level overview of what the code does is as follows:
-     *      * Iterate through the iv_SectionVector which contains all UD
-     *        sections and add each trace_bin_entry_t to a vector corresponding
-     *        to each component id found in iv_SectionVector.
-     *      * For each vector in the map of component id vectors
-     *          * sort the collection of traces by timestamp and hash
-     *          * call unique where the same timestamp and hash are considered
-     *            to be equivalent trace entries to be removed.
-     *          * Put all remaining trace entries into a new, consolidated trace
-     *            UD section.
-     *      * Remove the old trace UD sections from iv_SectionVector
-     *      * Add the new consolidated trace UD sections to the iv_SectionVector
-     */
-    void removeDuplicateTraces(void);
 
      /**
       *  @brief Remove the back trace user detail data
@@ -614,28 +783,22 @@ public:
      *  @param[out] o_accumulatedRecords A pointer to a struct which holds lists of the different deconfigs and gards of
      *                                   the given target that the caller would like filled.
      *                                   Default nullptr to not accumulate.
+     *  @param[in]  i_behavior      Whether to propagate this call to the
+     *                              other logs in the aggregate below.
+     *  @param[in]  i_toplevel      Whether this is the toplevel call to
+     *                              queryCallouts (internal use only).
+     *
+     *  @note: This function is an aggregate function (i.e. may be called
+     *         recursively on all sub-logs).
      *
      *  @return bit-wise mask of matched callout_search_criteria
      *          Note: DECONFIG_FOUND and GARD_FOUND will only be true
      *                if TARGET_MATCH is true.
      */
     uint8_t queryCallouts(TARGETING::Target* i_target,
-                          deconfig_and_gard_records * o_accumulatedRecords = nullptr);
-
-    /**
-     *  @brief Check if this error log has any callouts which suggest
-     *         maintenance, such as part replacement, would help resolve
-     *         the issue being reported.
-     *
-     *  @param[in]  i_includeInfo  false = Return false if log is informational
-     *                                     even if there is a callout present;
-     *                             true = Ignore log severity
-     *
-     *  @return bool True if a ERRL_UDT_CALLOUT subsection that is not of type
-     *               HWAS::PROCEDURE_CALLOUT is found. False if no ERRL_UDT_CALLOUT
-     *               or only PROCEDURE_CALLOUT is found.
-     */
-    bool hasMaintenanceCallout(bool i_includeInfo = false);
+                          deconfig_and_gard_records * o_accumulatedRecords = nullptr,
+                          propagation_t i_behavior = propagation_t::PROPAGATE,
+                          bool i_toplevel = true);
 
     /**
     *  @brief Search through UD details sections for HW, clock, and part
@@ -648,13 +811,20 @@ public:
     *  @param[in]  i_callout_type  The callout type to work on
     *  @param[in]  i_callout_style The type of SET to perform, legacy ALL,
     *              HW_CALLOUT, CLOCK_CALLOUT and PART_CALLOUT
+    *  @param[in]  i_behavior      Whether to propagate this call to the
+    *                              other logs in the aggregate below.
+    *
+    *  @note: This function is an aggregate function (i.e. may be called
+    *         recursively on all sub-logs).
     *
     *  @return void
     */
     void setGardType(TARGETING::Target* i_target,
                      HWAS::GARD_ErrorType i_gardType,
                      HWAS::CalloutStyle_t i_callout_style = HWAS::ALL_STYLE,
-                     HWAS::CalloutType_t i_callout_type = HWAS::HW_CALLOUT);
+                     HWAS::CalloutType_t i_callout_type = HWAS::HW_CALLOUT,
+                     propagation_t i_behavior = propagation_t::PROPAGATE);
+
     /**
     *  @brief Search through UD details sections for HW, clock, and part
     *  callouts associated with a given target and set the deconfig setting
@@ -665,19 +835,31 @@ public:
     *                              callouts to.
     *  @param[in]  i_callout_type  The callout type to work on
     *  @param[in]  i_callout_style The type of SET to perform, legacy ALL,
-    *              HW_CALLOUT, CLOCK_CALLOUT and PART_CALLOUT
+    *                              HW_CALLOUT, CLOCK_CALLOUT and PART_CALLOUT
+    *  @param[in]  i_behavior      Whether to propagate this call to the
+    *                              other logs in the aggregate below.
+    *
+    *  @note: This function is an aggregate function (i.e. may be called
+    *         recursively on all sub-logs).
     *
     *  @return void
     */
     void setDeconfigState(TARGETING::Target* i_target,
                           HWAS::DeconfigEnum i_deconfigState,
                           HWAS::CalloutStyle_t i_callout_style = HWAS::ALL_STYLE,
-                          HWAS::CalloutType_t i_callout_type = HWAS::HW_CALLOUT);
+                          HWAS::CalloutType_t i_callout_type = HWAS::HW_CALLOUT,
+                          propagation_t i_behavior = propagation_t::PROPAGATE);
 
     /**
      *  @brief remove all gard and deconfigure elements from an errorlog
+     *
+     *  @param[in]  i_behavior      Whether to propagate this call to the
+     *                              other logs in the aggregate below.
+     *
+     *  @note: This function is an aggregate function (i.e. may be called
+     *         recursively on all sub-logs).
      */
-    void removeGardAndDeconfigure(void);
+    void removeGardAndDeconfigure(propagation_t i_behavior = propagation_t::PROPAGATE);
 
     /**
      *  @brief Add a clock callout.
@@ -856,33 +1038,24 @@ public:
     *
     *            //NOTE: You can pass COMP_ID or subsect 0 into this
     *                    function for wildcard
+    * @param[in]  i_behavior      Whether to propagate this call to the
+    *                             other logs in the aggregate below.
+    *
+    * @note: This function is an aggregate function (i.e. may be called
+    *        recursively on all sub-logs).
     *
     * @return vector of void pointers that point to the data buffer inside
     *         of a user details section
     */
-    std::vector<void*> getUDSections(compId_t i_compId, uint8_t i_subSect);
-
-    /**
-     * @brief Removes ErrlUD sections for this entry
-     * @param[in] i_maxSize Maximum flattenedSize() allowed
-     * @param[in] i_keep_trace_sections Do not delete trace sections
-     * @return Array of removed sections (caller responsible to delete memory)
-     */
-    std::vector<ErrlUD*> removeExcessiveUDsections(uint64_t i_maxSize, bool i_keep_trace_sections);
+    std::vector<void*> getUDSections(compId_t i_compId,
+                                     uint8_t i_subSect,
+                                     propagation_t i_behavior = propagation_t::PROPAGATE);
 
     /**
      * @brief Add this ErrlUD section to this errl entry
      * @param[in] i_section ErrlUD section
      */
     void addUDSection( ErrlUD* i_section);
-
-    /**
-     * @brief get iv_doHbDump
-     *
-     * @return true if this log should result in a HB dump during a shutdown,
-     *         false otherwise
-     */
-    bool getDoHbDump();
 
     /**
      * @brief set the internal error type member. Note that the error type
@@ -894,13 +1067,22 @@ public:
     void setErrorType(uint32_t i_errType);
 
     /**
-     * @brief return the type of error this error log is. The error type is
-     *        not a return code - it is the generic type of the error that
-     *        occurred.
+     * @brief return whether the type of error this error log (or any
+     *        log in the aggregate if i_behavior = PROPAGATE) is equal
+     *        to the given type. The error type is not a return code -
+     *        it is the generic type of the error that occurred.
+     *
+     * @param[in]  i_type          The type to check.
+     * @param[in]  i_behavior      Whether to propagate this call to the
+     *                             other logs in the aggregate below.
+     *
+     * @note: This function is an aggregate function (i.e. may be called
+     *        recursively on all sub-logs).
      *
      * @return uint32_t the tyoe of error this error log is
      */
-    uint32_t getErrorType() const;
+    bool hasErrorType(uint32_t i_type,
+                      propagation_t i_behavior = propagation_t::PROPAGATE) const;
 
     /* @brief Structure to hold a callout and priority pair.
      */
@@ -951,7 +1133,105 @@ public:
      */
     bool isUDHashDuplicate(uint32_t i_hash);
 
+    /**
+     * @brief Take ownership of the given error handle and add it to
+     * this error log aggregate. Logs part of the same aggregate will be
+     * committed and deleted all together.
+     *
+     * @note When a log is committed, the aggregate is broken up and each
+     * log is committed separately.
+     *
+     * @note This function is NOT thread-safe.
+     */
+    void aggregate(errlHndl_t& io_log)
+    {
+        if (io_log && io_log != this)
+        {
+#if !defined(BOOTLOADER) && defined(assert)
+            assert(iv_aggregate_parent == nullptr,
+                   "ErrlEntry(0x%08X)::aggregate(): Cannot add to an "
+                   "aggregate that is already part of another aggregate "
+                   "0x%08X (this prevents cycles from forming)",
+                   eid(),
+                   iv_aggregate_parent->eid());
+
+            assert(io_log->iv_aggregate_parent == nullptr,
+                   "ErrlEntry(0x%08X)::aggregate(): Log 0x%08X is already "
+                   "part of another aggregate 0x%08X",
+                   eid(),
+                   io_log->eid(),
+                   io_log->iv_aggregate_parent->eid());
+#endif
+
+            io_log->iv_aggregate_parent = this;
+            iv_aggregate_errors.push_back(io_log);
+
+            io_log = nullptr;
+        }
+    }
+
+    /** @brief Same as aggregate(errlHndl_t&) for unique_ptrs.
+     */
+    template<typename Del>
+    void aggregate(std::unique_ptr<ErrlEntry, Del> i_log)
+    {
+        errlHndl_t log = i_log.release();
+        return aggregate(log);
+    }
+
 private:
+
+    /**
+     * @brief get iv_doHbDump
+     *
+     * @return true if this log should result in a HB dump during a shutdown,
+     *         false otherwise
+     */
+    bool getDoHbDump();
+
+    /**
+     * @brief Removes ErrlUD sections for this entry
+     * @param[in] i_maxSize Maximum flattenedSize() allowed
+     * @param[in] i_keep_trace_sections Do not delete trace sections
+     * @return Array of removed sections (caller responsible to delete memory)
+     */
+    std::vector<ErrlUD*> removeExcessiveUDsections(uint64_t i_maxSize, bool i_keep_trace_sections);
+
+    /**
+     *  @brief Check if this error log has any callouts which suggest
+     *         maintenance, such as part replacement, would help resolve
+     *         the issue being reported.
+     *
+     *  @param[in]  i_includeInfo  false = Return false if log is informational
+     *                                     even if there is a callout present;
+     *                             true = Ignore log severity
+     *
+     *  @return bool True if a ERRL_UDT_CALLOUT subsection that is not of type
+     *               HWAS::PROCEDURE_CALLOUT is found. False if no ERRL_UDT_CALLOUT
+     *               or only PROCEDURE_CALLOUT is found.
+     */
+    bool hasMaintenanceCallout(bool i_includeInfo = false);
+
+    /**
+     *  @brief Remove the duplicate trace entries from user detail data
+     *  When multiple calls to collectTrace() on the same component id occur a
+     *  new user detail section is created each time. This function removes the
+     *  duplicates created from that process.
+     *
+     *  @algorithm A high level overview of what the code does is as follows:
+     *      * Iterate through the iv_SectionVector which contains all UD
+     *        sections and add each trace_bin_entry_t to a vector corresponding
+     *        to each component id found in iv_SectionVector.
+     *      * For each vector in the map of component id vectors
+     *          * sort the collection of traces by timestamp and hash
+     *          * call unique where the same timestamp and hash are considered
+     *            to be equivalent trace entries to be removed.
+     *          * Put all remaining trace entries into a new, consolidated trace
+     *            UD section.
+     *      * Remove the old trace UD sections from iv_SectionVector
+     *      * Add the new consolidated trace UD sections to the iv_SectionVector
+     */
+    void removeDuplicateTraces(void);
 
     /* @brief Checks whether the provided callout already exists in the list
      *        of callouts and adds the callout to the error log if it's unique
@@ -975,7 +1255,7 @@ private:
      *
      *  @return     subsystem ID
      */
-    epubSubSystem_t getSubSystem( TARGETING::TYPE i_targetType, 
+    epubSubSystem_t getSubSystem( TARGETING::TYPE i_targetType,
                                   TARGETING::TYPE i_parentType ) const;
 
     /**
@@ -1252,10 +1532,10 @@ private:
 
 
     /**
-      * @brief   Disabled copy constructor and assignment operator
+      * @brief   Disabled copy/move constructor and assignment operator
       */
-    ErrlEntry(const ErrlEntry& i_right);
-    ErrlEntry& operator=(const ErrlEntry& i_right);
+    ErrlEntry(const ErrlEntry& i_right) = delete;
+    ErrlEntry& operator=(const ErrlEntry& i_right) = delete;
 
     /**
       * @brief Check if any callouts in this error log have
@@ -1280,7 +1560,6 @@ private:
                     a predictive type and predictive gard has been disabled).
      */
     bool skipPredictiveGard(HWAS::GARD_ErrorType i_gardType);
-
 
 private:
     // Data Members
@@ -1323,6 +1602,19 @@ private:
 
     // vector used to remove duplicate User Detail callout sections
     std::vector<uint32_t>iv_UDDataHashes;
+
+    // If this error log is part of an aggregate, this pointer will
+    // point to the "owner" of the aggregate.  Note that this only
+    // goes "one level" up; e.g. if C is added to B and B is added to
+    // A, C->iv_aggregate_parent will point to B, and
+    // B->iv_aggregate_parent will point to A.
+    ErrlEntry* iv_aggregate_parent;
+
+    // A list of errors owned by this one and treated in aggregate
+    // with this log. All logs in the aggregate are committed or
+    // deleted together, and some accessor functions operate on all of
+    // the logs in the aggregate.
+    std::vector<ErrlEntry*> iv_aggregate_errors;
 };
 
 
@@ -1357,9 +1649,25 @@ inline uint32_t ErrlEntry::plid() const
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-inline void ErrlEntry::plid( uint32_t i_plid)
+inline void ErrlEntry::plid( const uint32_t i_plid,
+                             const propagation_t i_behavior,
+                             const bool i_toplevel)
 {
-    iv_Private.iv_plid = i_plid;
+    if (i_toplevel || plid() == eid())
+    { // When we're propagating a PLID down through an aggregate, we
+      // only want to set the PLID if it hasn't already been set (if
+      // it's already set we assume that the person who did that knew
+      // what they were doing, so we don't override them).
+        iv_Private.iv_plid = i_plid;
+    }
+
+    if (i_behavior == propagation_t::PROPAGATE)
+    {
+        for (const auto log : iv_aggregate_errors)
+        {
+            log->plid(i_plid, propagation_t::PROPAGATE, false);
+        }
+    }
 }
 
 
@@ -1437,6 +1745,30 @@ inline uint64_t ErrlEntry::getUserData1() const
 }
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
+inline bool ErrlEntry::hasUserData1(const uint64_t i_userdata1) const
+{
+    return
+        (iv_Src.iv_user1 == i_userdata1
+         || std::any_of(cbegin(iv_aggregate_errors),
+                        cend(iv_aggregate_errors),
+                        [=](const errlHndl_t log) {
+                            return log->hasUserData1(i_userdata1);
+                        }));
+}
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline bool ErrlEntry::hasUserData2(const uint64_t i_userdata2) const
+{
+    return
+        (iv_Src.iv_user2 == i_userdata2
+         || std::any_of(cbegin(iv_aggregate_errors),
+                        cend(iv_aggregate_errors),
+                        [=](const errlHndl_t log) {
+                            return log->hasUserData2(i_userdata2);
+                        }));
+}
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 inline uint64_t ErrlEntry::getUserData2() const
 {
     return iv_Src.iv_user2;
@@ -1510,28 +1842,216 @@ inline void ErrlEntry::setErrorType(const uint32_t i_errType)
 
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////
-inline uint32_t ErrlEntry::getErrorType() const
+inline bool ErrlEntry::hasErrorType(const uint32_t i_type,
+                                    const propagation_t i_behavior) const
 {
-    return iv_errorType;
+    return
+        (iv_errorType == i_type
+         || (i_behavior == propagation_t::PROPAGATE
+             && std::any_of(cbegin(iv_aggregate_errors),
+                            cend(iv_aggregate_errors),
+                            [=](const errlHndl_t log) {
+                                return log->hasErrorType(i_type,
+                                                         propagation_t::PROPAGATE);
+                            })));
 }
 
-} // End namespace
+template<typename T>
+auto begin(ErrlEntry::aggregate_container<T>& err)
+{ return err.begin(); }
 
+template<typename T>
+auto begin(const ErrlEntry::aggregate_container<T>& err)
+{ return err.begin(); }
+
+template<typename T>
+auto begin(ErrlEntry::aggregate_container<T>&& err)
+{ return err.begin(); }
+
+template<typename T>
+auto cbegin(ErrlEntry::aggregate_container<T>& err)
+{ return err.cbegin(); }
+
+template<typename T>
+auto cbegin(const ErrlEntry::aggregate_container<T>& err)
+{ return err.cbegin(); }
+
+template<typename T>
+auto cbegin(ErrlEntry::aggregate_container<T>&& err)
+{ return err.cbegin(); }
+
+template<typename T>
+auto end(ErrlEntry::aggregate_container<T>& err)
+{ return err.end(); }
+
+template<typename T>
+auto end(const ErrlEntry::aggregate_container<T>& err)
+{ return err.end(); }
+
+template<typename T>
+auto end(ErrlEntry::aggregate_container<T>&& err)
+{ return err.end(); }
+
+template<typename T>
+auto cend(ErrlEntry::aggregate_container<T>& err)
+{ return err.cend(); }
+
+template<typename T>
+auto cend(const ErrlEntry::aggregate_container<T>& err)
+{ return err.cend(); }
+
+template<typename T>
+auto cend(ErrlEntry::aggregate_container<T>&& err)
+{ return err.cend(); }
+
+} // end namespace ERRORLOG
+
+using errlOwner = std::unique_ptr<ERRORLOG::ErrlEntry>;
+
+template<typename D>
+using errlOwner_d = std::unique_ptr<ERRORLOG::ErrlEntry, D>;
+
+namespace ERRORLOG
+{
+
+/**
+ * @brief Aggregate one or two errors into one.
+ *
+ * @tparam D  Deleter type for error owner.
+ *
+ * @param[in/out] io_main_error  The main error. If this is null,
+ *                               i_secondary_error becomes it. If it
+ *                               points to an error, i_secondary_error
+ *                               is added to its aggregate.
+ * @param[in] i_secondary_error  An error to be folded into io_main_error.
+ * @param[in] i_update_plid      Whether to update the PLID of i_secondary_error
+ *                               to point to io_main_error.
+ */
+template<typename D>
+inline void aggregate(errlOwner_d<D>& io_main_error, errlOwner_d<D> i_secondary_error, const bool i_update_plid = false)
+{
+    if (i_secondary_error)
+    {
+        if (!io_main_error)
+        {
+            io_main_error = move(i_secondary_error);
+        }
+        else
+        {
+            if (i_update_plid)
+            {
+                i_secondary_error->plid(io_main_error->plid());
+            }
+
+            io_main_error->aggregate(move(i_secondary_error));
+        }
+    }
+}
+
+/**
+ * @brief Aggregate one or two errors into one.
+ */
+template<typename D>
+inline void aggregate(errlOwner_d<D>& io_main_error, errlHndl_t& io_secondary_error, const bool i_update_plid = false)
+{
+    auto secondary_owner = hbstd::own(io_secondary_error);
+    io_secondary_error = nullptr;
+    return aggregate(io_main_error, move(secondary_owner), i_update_plid);
+}
+
+/**
+ * @brief Aggregate one or two errors into one.
+ */
+inline void aggregate(errlHndl_t& io_main_error, errlHndl_t& io_secondary_error, const bool i_update_plid = false)
+{
+    if (io_secondary_error)
+    {
+        if (!io_main_error)
+        {
+            io_main_error = io_secondary_error;
+        }
+        else
+        {
+            if (i_update_plid)
+            {
+                io_secondary_error->plid(io_main_error->plid());
+            }
+
+            io_main_error->aggregate(io_secondary_error);
+        }
+
+        io_secondary_error = nullptr;
+    }
+}
+
+/**
+ * @brief Aggregate one or two errors into one.
+ */
+template<typename D>
+inline void aggregate(errlHndl_t& io_main_error, errlOwner_d<D> io_secondary_error, const bool i_update_plid = false)
+{
+    auto secondary = io_secondary_error.release();
+    return aggregate(io_main_error, secondary, i_update_plid);
+}
+
+/**
+ * @brief Aggregate a list of errors into one.
+ */
+template<typename Errorlog, typename Container>
+inline auto aggregate(Errorlog& io_main_error, Container&& cont, const bool i_update_plid = false)
+    -> decltype(begin(cont), void())
+{
+    for (auto x : cont)
+    {
+        aggregate(io_main_error, x, i_update_plid);
+    }
+
+    cont.clear();
+}
+
+} // End namespace ERRORLOG
 
 /**
  * Retrieve the RC inside an error log, or return zero if the log is NULL
  */
-#define ERRL_GETRC_SAFE(errhdl) (errhdl == NULL ? 0 : errhdl->reasonCode())
+inline uint16_t ERRL_GETRC_SAFE(const errlHndl_t errhdl)
+{
+    return errhdl ? errhdl->reasonCode() : 0;
+}
+
+template<typename Del>
+inline uint16_t ERRL_GETRC_SAFE(const errlOwner_d<Del>& errhdl)
+{
+    return errhdl ? errhdl->reasonCode() : 0;
+}
 
 /**
  * Retrieve the PLID inside an error log, or return zero if the log is NULL
  */
-#define ERRL_GETPLID_SAFE(errhdl) (errhdl == NULL ? 0 : errhdl->plid())
+inline uint32_t ERRL_GETPLID_SAFE(const errlHndl_t errhdl)
+{
+    return errhdl ? errhdl->plid() : 0;
+}
+
+template<typename Del>
+inline uint32_t ERRL_GETPLID_SAFE(const errlOwner_d<Del>& errhdl)
+{
+    return errhdl ? errhdl->plid() : 0;
+}
 
 /**
  * Retrieve the EID inside an error log, or return zero if the log is NULL
  */
-#define ERRL_GETEID_SAFE(errhdl) (errhdl == NULL ? 0 : errhdl->eid())
+inline uint32_t ERRL_GETEID_SAFE(const errlHndl_t errhdl)
+{
+    return errhdl ? errhdl->eid() : 0;
+}
+
+template<typename Del>
+inline uint32_t ERRL_GETEID_SAFE(const errlOwner_d<Del>& errhdl)
+{
+    return errhdl ? errhdl->eid() : 0;
+}
 
 // These defines allow standard logging of error information in traces
 #define TRACE_ERR_FMT " Error info: PLID=0x%08X, EID=0x%08X, Reason=0x%04X. "

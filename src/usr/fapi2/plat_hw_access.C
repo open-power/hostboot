@@ -190,7 +190,7 @@ ReturnCode platGetScom(const Target<TARGET_TYPE_ALL | TARGET_TYPE_MULTICAST>& i_
                      l_targName, l_scomAddr);
             // Add the error log pointer as data to the ReturnCode
             addErrlPtrToReturnCode(l_rc, l_err);
-            if(l_err->getErrorType() == SCOM::SCOM_MULTICAST_MISCOMPARE)
+            if(l_err->hasErrorType(SCOM::SCOM_MULTICAST_MISCOMPARE))
             {
                 l_rc.setRC(fapi2::FAPI2_RC_PLAT_MISCOMPARE);
             }

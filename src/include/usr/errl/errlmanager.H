@@ -45,6 +45,7 @@
 #include <mbox/mboxif.H>
 #include <utility>
 #include <list>
+#include <memory>
 #include <time.h>
 
 namespace ERRORLOG
@@ -99,6 +100,25 @@ typedef struct {
  */
 void errlCommit(errlHndl_t& io_err, compId_t i_committerComp );
 
+/** @brief Wrapper around errlCommit(errlHndl_t, compId_t).
+ *         Takes ownership of the given error.
+ */
+template<typename Del>
+inline void errlCommit(errlOwner_d<Del>& io_err, const compId_t i_committerComp)
+{
+    errlHndl_t err = io_err.release();
+    errlCommit(err, i_committerComp);
+}
+
+/** @brief Wrapper around errlCommit(errlHndl_t, compId_t).
+ *         Takes ownership of the given error.
+ */
+template<typename Del>
+inline void errlCommit(errlOwner_d<Del>&& io_err, const compId_t i_committerComp)
+{
+    errlHndl_t err = io_err.release();
+    errlCommit(err, i_committerComp);
+}
 
 /**
  *  @brief  Global function to log a large error log into multiple logs
@@ -159,7 +179,7 @@ class ErrlManager
 public:
 
     /**
-     *  @brief Commit an error log by sending it to the repository
+     *  @brief Commit an aggregate error log by sending it to the repository
      *  Writes the log to PNOR where committed logs are kept.
      *  If there's not enough room, remove the latest log(s) to make
      *  enough room to commit this log.
@@ -175,7 +195,6 @@ public:
      *  @return None
      */
     void commitErrLog(errlHndl_t& io_err, compId_t i_committerComp );
-
 
     /**
      *  @brief  Acts like commitErrLog but instead of removing latest log(s) to
@@ -383,6 +402,13 @@ protected:
     ErrlManager();
 
 private:
+
+    /** @brief Implementation of commitErrLog; commits the given error
+     *  and all errors owned by it as part of the aggregate.
+     *
+     *  @note This function takes ownership of the given error log.
+     */
+    void commitErrLogAggregate(errlHndl_t& io_err, compId_t i_committerComp);
 
     /**
      * @enum ERRLOG_MSG_TYPE
@@ -845,53 +871,6 @@ private:
     bool isFirstHbrtEid(uint32_t i_position);
 
 };
-
-/** @brief Take up to two possible-related errors and produce one by
- *  either committing the extra one or assigning it to the primary.
- *  This function is intended to be used like this:
- *
- *    errlHndl_t error = nullptr;
- *    for (...) {
- *        errlHndl_t tmp_err = ...;
- *        foldErrors(error, tmp_err);
- *    }
- *
- *  At the end of the above loop, "error" will contain an error if at
- *  least one error was produced (and "error" will point to the first
- *  one); and if more than one was produced, all but "error" will have
- *  been committed. Additionally, all of the other errors will have
- *  their PLID linked to "error" if i_linkPlids = true.
- *
- *  @param[in/out]  io_main_error      The main error. This will be set to
- *                                     io_old_error if it's null.
- *  @param[in/out] io_secondary_error  The secondary error. This is
- *                                     either committed, or becomes
- *                                     the primary error if there isn't one
- *                                     already. This always becomes null
- *                                     after this function. If null, this
- *                                     function does nothing.
- *  @param[in] i_comp_id               The component ID to commit io_secondary_error
- *                                     with if io_main_error already exists.
- *  @param[in] i_linkPlids             Links all secondary errors to the main error
- *                                     if true. Otherwise, does not change any PLID.
- */
-inline void foldErrors(errlHndl_t& io_main_error, errlHndl_t& io_secondary_error, const compId_t i_comp_id, const bool i_linkPlids = false)
-{
-    if (!io_main_error)
-    {
-        io_main_error = io_secondary_error;
-        io_secondary_error = nullptr;
-    }
-    else if (io_secondary_error)
-    {
-        if (i_linkPlids)
-        {
-            io_secondary_error->plid(io_main_error->plid());
-        }
-
-        errlCommit(io_secondary_error, i_comp_id);
-    }
-}
 
 } // End namespace
 

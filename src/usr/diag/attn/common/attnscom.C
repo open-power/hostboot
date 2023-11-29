@@ -131,7 +131,7 @@ errlHndl_t ScomImpl::getScom(
     errlHndl_t errlH =
         deviceRead(i_target, &o_data, size, DEVICE_SCOM_ADDRESS(i_address));
 
-    if (errlH && errlH->getErrorType() == MMIO::RC_MMIO_CHAN_CHECKSTOP)
+    if (errlH && errlH->hasErrorType(MMIO::RC_MMIO_CHAN_CHECKSTOP))
     {
         errlCommit( errlH, ATTN_COMP_ID );
         ATTN_DBG( "deviceRead() failed with reason code %X."

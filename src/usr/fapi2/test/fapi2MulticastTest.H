@@ -973,7 +973,7 @@ void testMulticastCompare()
     }
     else
     {
-        if(l_errl->getErrorType() != SCOM::SCOM_MULTICAST_MISCOMPARE)
+        if(!l_errl->hasErrorType(SCOM::SCOM_MULTICAST_MISCOMPARE))
         {
             TS_FAIL("testMulticastCompare: incorrect RC returned for multicast"
                     " miscompare. Expected 0x%x; actual 0x%x",
@@ -1021,13 +1021,10 @@ void testMulticastCompare()
             }
             else
             {
-                if(l_errl->getErrorType() != SCOM::SCOM_MULTICAST_MISCOMPARE)
+                if(!l_errl->hasErrorType(SCOM::SCOM_MULTICAST_MISCOMPARE))
                 {
                     TS_FAIL("testMulticastCompare: incorrect HB errl rc for "
-                            "FAPI multicast miscompare. Expected 0x%x; actual "
-                            "0x%x",
-                            SCOM::SCOM_MULTICAST_MISCOMPARE,
-                            l_errl->getErrorType());
+                            "FAPI multicast miscompare.");
                     break;
                 }
                 delete l_errl;
