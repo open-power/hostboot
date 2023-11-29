@@ -117,7 +117,7 @@ if [ "$CHIP" == "ODYSSEY" ]; then
 fi
 
 # Use the cached HB prime images wherever possible
-#export HB_FAST_PRIME=1 # Re-enable this once we have a hashed OCMBFW image with the changes in this commit
+export HB_FAST_PRIME=1
 
 #export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 
