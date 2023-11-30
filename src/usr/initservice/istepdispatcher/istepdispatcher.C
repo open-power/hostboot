@@ -983,6 +983,51 @@ void doMagicAttributeWrites()
     }
 }
 
+/**
+ * @brief Process deferred deconfigures, and check whether a reconfig
+ * loop has been requested.
+ *
+ * @return Whether a reconfig loop was requested or not.
+ */
+bool process_deferred_deconfig_and_check_reconfig()
+{
+    bool do_reconfig = false;
+
+    const auto l_pTopLevel = TARGETING::UTIL::assertGetToplevelTarget();
+
+    // Check for Power Line Disturbance (PLD)
+    if (HWAS::hwasPLDDetection())
+    {
+        // There was a PLD, clear any deferred deconfig records
+        TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: PLD, clearing deferred "
+                  "deconfig records");
+        HWAS::theDeconfigGard().clearDeconfigureRecords(NULL);
+    }
+    else
+    {
+        // There was no PLD, process any deferred deconfig records (i.e.
+        // actually do the deconfigures)
+        // We need to flush the errl buffer first
+        ERRORLOG::ErrlManager::callFlushErrorLogs();
+
+        // Regardless of the way the flush came back, we need to try to
+        // process the deferred deconfigs
+        HWAS::theDeconfigGard().processDeferredDeconfig();
+    }
+
+    // Check if ATTR_RECONFIGURE_LOOP is non-zero
+    TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
+        l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
+
+    if (l_reconfigAttr)
+    {
+        TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Reconfigure needed, "
+                  "ATTR_RECONFIGURE_LOOP = %d", l_reconfigAttr);
+        do_reconfig = true;
+    }
+
+    return do_reconfig;
+}
 
 // ----------------------------------------------------------------------------
 // IStepDispatcher::doIstep()
@@ -1161,6 +1206,15 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             }
         }
 
+        // Check for deconfig/reconfig loops before we invoke PRD. We
+        // do this because if an istep deconfigures a target and an
+        // attention comes in for the same target, PRD will create
+        // error logs, which we don't want because we're going to do a
+        // reconfig loop anyway.
+        // This is not a logical-OR because we don't want to
+        // short-circuit it.
+        o_doReconfig = process_deferred_deconfig_and_check_reconfig() || o_doReconfig;
+
         // Run check attention if system attribute is set
         bool runCheckAttn = l_pTopLevel->getAttr<TARGETING::ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>();
 
@@ -1175,8 +1229,9 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             runCheckAttn = true;
         }
 
-        // Run check attention if flag is set
-        if (runCheckAttn)
+        // Run check attention if flag is set, and if we're not going
+        // to just do a reconfig loop anyway.
+        if (runCheckAttn && !o_doReconfig)
         {
             TRACDCOMP(g_trac_initsvc,
                       INFO_MRK"Check for attentions and invoke PRD" );
@@ -1225,39 +1280,12 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             istepCalloutInject(i_istep, i_substep);
         }
 
-        // now that HWP and PRD have run, check for deferred deconfig work.
-
-        // Check for Power Line Disturbance (PLD)
-        if (HWAS::hwasPLDDetection())
-        {
-            // There was a PLD, clear any deferred deconfig records
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: PLD, clearing deferred "
-                      "deconfig records");
-            HWAS::theDeconfigGard().clearDeconfigureRecords(NULL);
-        }
-        else
-        {
-            // There was no PLD, process any deferred deconfig records (i.e.
-            // actually do the deconfigures)
-            // We need to flush the errl buffer first
-            ERRORLOG::ErrlManager::callFlushErrorLogs();
-
-            // Regardless of the way the flush came back, we need to try to
-            // process the deferred deconfigs
-            HWAS::theDeconfigGard().processDeferredDeconfig();
-        }
-
-        // Check if ATTR_RECONFIGURE_LOOP is non-zero
-        TARGETING::ATTR_RECONFIGURE_LOOP_type l_reconfigAttr =
-                       l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
-
-        if (l_reconfigAttr)
-        {
-            TRACFCOMP(g_trac_initsvc, ERR_MRK"doIstep: Reconfigure needed, "
-                      "ATTR_RECONFIGURE_LOOP = %d", l_reconfigAttr);
-            o_doReconfig = true;
-        }
-
+        // Now that HWP and PRD have run, check for deferred deconfig
+        // work. We already did this, but PRD could have deconfigured
+        // things since the last time we did it.
+        // This is not a logical-OR because we don't want to
+        // short-circuit it.
+        o_doReconfig = process_deferred_deconfig_and_check_reconfig() || o_doReconfig;
 
         //--- Mark we have finished the istep in the scratch reg
         SPLESS::MboxScratch5_t l_scratch5;
