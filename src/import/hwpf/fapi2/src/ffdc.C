@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,7 +51,14 @@ void FirstFailureData<ReturnCode>::addErrorInfo(
 
     for (uint32_t i = 0; i < i_count; i++)
     {
-        i_pEntries[i].addErrorInfo(iv_info, i_pObjects);
+        if (iv_info != nullptr)
+        {
+            i_pEntries[i].addErrorInfo(iv_info, i_pObjects);
+        }
+        else
+        {
+            FAPI_DBG("Unable to addErrorInfo entries because the ErrorInfo iv_info was never initialized");
+        }
     }
 }
 
