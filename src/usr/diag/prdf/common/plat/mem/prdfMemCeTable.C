@@ -101,8 +101,9 @@ uint32_t MemCeTable<T>::addEntry( const MemAddr & i_addr,
     // removing any entries, if the table is full. This is to catch the corner
     // case where the oldest entry is on the same rank as the new entry.
 
-    // Check MNFG thresholds, if needed.
-    if ( mfgMode() )
+    // Check MNFG thresholds, if needed. Don't count entries with an invalid
+    // address.
+    if ( mfgMode() && !i_invalidAddr )
     {
         // Get the MNFG CE thresholds.
         uint32_t dramTh, rankTh, dimmTh;

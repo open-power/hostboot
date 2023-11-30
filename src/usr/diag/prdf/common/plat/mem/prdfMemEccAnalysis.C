@@ -976,6 +976,17 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip, uint8_t i_port,
         return o_rc;
     }
 
+    MemRank rank = addr.getRank();
+    // Get the symbols for the NCE/TCE attention.
+    MemSymbol sym1, sym2;
+    o_rc = getMemReadSymbol<T>( i_chip, rank, i_port, sym1, sym2 );
+    if ( SUCCESS != o_rc )
+    {
+        PRDF_ERR( PRDF_FUNC "getMemReadSymbol(0x%08x) failed",
+                  i_chip->getHuid() );
+        return o_rc;
+    }
+
     // Odyssey only: Check if the address is potentially invalid. On Odyssey
     // OCMBs, if there is a CE reporting on both RDF/ports at the same time,
     // the address within the mainline address trap register may be invalid.
@@ -989,8 +1000,8 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip, uint8_t i_port,
         SCAN_COMM_REGISTER_CLASS * rdf1 = i_chip->getRegister("RDF_FIR_1");
         SCAN_COMM_REGISTER_CLASS * msk0 = i_chip->getRegister("RDF_FIR_MASK_0");
         SCAN_COMM_REGISTER_CLASS * msk1 = i_chip->getRegister("RDF_FIR_MASK_1");
-        if ( SUCCESS != (rdf0->Read() | rdf0->Read() |
-                         msk0->Read() | msk1->Read()) )
+        if ( SUCCESS != (rdf0->ForceRead() | rdf0->ForceRead() |
+                         msk0->ForceRead() | msk1->ForceRead()) )
         {
             PRDF_ERR( PRDF_FUNC "Read() failed on RDF_FIRs: i_chip=0x%08x",
                       i_chip->getHuid() );
@@ -1002,6 +1013,19 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip, uint8_t i_port,
         {
             // Set a flag indicating the address is invalid
             invAddr = true;
+
+            // sym1 returned from getMemReadSymbol may be invalid due to
+            // this as well. If sym1 is invalid at this point, just replace it
+            // with a dummy symbol so there is something to add to the CE table
+            // at least.
+            if (!sym1.isValid())
+            {
+                TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
+                    TYPE_MEM_PORT, i_port);
+
+                // Use a value of 0 for a dummy symbol value
+                sym1 = MemSymbol::fromSymbol(memport, rank, 0);
+            }
 
             // Clear NCE/TCE FIR bits on both RDFs. Write to clear.
             rdf0->clearAllBits();
@@ -1022,18 +1046,6 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip, uint8_t i_port,
 
     do
     {
-        MemRank rank = addr.getRank();
-
-        // Get the symbols for the NCE/TCE attention.
-        MemSymbol sym1, sym2;
-        o_rc = getMemReadSymbol<T>( i_chip, rank, i_port, sym1, sym2 );
-        if ( SUCCESS != o_rc )
-        {
-            PRDF_ERR( PRDF_FUNC "getMemReadSymbol(0x%08x) failed",
-                      i_chip->getHuid() );
-            break;
-        }
-
         // Add the first symbol to the callout list and CE table.
         bool doTps = false;
         if ( sym1.isValid() )
