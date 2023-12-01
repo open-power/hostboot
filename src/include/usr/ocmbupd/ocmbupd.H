@@ -206,7 +206,7 @@ inline void captureErrorOcmbUpdateCheck(errlHndl_t& io_err,
       // *related* to an odyssey chip, then
         const auto parent_proc = (i_target->getAttr<ATTR_TYPE>() == TYPE_PROC
                                   ? i_target
-                                  : getParent(i_target, TYPE_PROC));
+                                  : getAffinityParent(i_target, TYPE_PROC));
 
         if (UTIL::hasOdysseyOcmbChildren(parent_proc))
         {
