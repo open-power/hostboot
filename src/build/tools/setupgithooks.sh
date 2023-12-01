@@ -33,17 +33,29 @@ then
     # Get hooks from Gerrit, if needed.
     if [ ! -f $HOOKSDIR/commit-msg ]
     then
-        echo "Copying Gerrit hooks..."
-        # gerrit needs -O flag as sftp is not enabled
-        # get version major number
-        # OpenSSH_9.0p1, OpenSSL 1.1.1f  31 Mar 2020
-        version=($(ssh -V |& awk -F'[_.]' '{ print $2 }'))
-        use_legacy=$(echo "$version >= 9" | bc -l)
-        if (( $use_legacy ))
+        # The 'commit-msg' file on the updated gerrit server uses features that are
+        # not available on older versions of git. To circumvent this, an older
+        # version of that file has been stored in this repository, which will be
+        # used instead of pulling the latest from the gerrit server.
+        if (echo min version 2.2.0; git --version) | sort -Vk3 | tail -1 | grep -q min
         then
-            scp -O -p -q $GERRIT_SRV:hooks/commit-msg $HOOKSDIR
+            echo "Copying legacy Gerrit hooks.."
+
+            cp "$TOOLSDIR/commit-msg-for-old-git" "$HOOKSDIR/commit-msg"
         else
-            scp -p -q $GERRIT_SRV:hooks/commit-msg $HOOKSDIR
+            echo "Copying Gerrit hooks from server..."
+
+            # gerrit needs -O flag as sftp is not enabled
+            # get version major number
+            # OpenSSH_9.0p1, OpenSSL 1.1.1f  31 Mar 2020
+            version=($(ssh -V 2>&1 | awk -F'[_.]' '{ print $2 }'))
+            use_legacy=$(echo "$version >= 9" | bc -l)
+            if (( $use_legacy ))
+            then
+                scp -O -p -q $GERRIT_SRV:hooks/commit-msg $HOOKSDIR
+            else
+                scp -p -q $GERRIT_SRV:hooks/commit-msg $HOOKSDIR
+            fi
         fi
     fi
 
