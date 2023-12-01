@@ -463,6 +463,11 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
 
     uint32_t o_rc = SUCCESS;
 
+    PRDF_TRAC(PRDF_FUNC "i_badDqCount=%d, i_badChipCount=%d, "
+              "i_sumAboveOneCount=%d, i_singleSymCount=%d", i_badDqCount.count,
+              i_badChipCount.count, i_sumAboveOneCount.count,
+              i_singleSymCount.count);
+
     do
     {
         // Keep track of if there was a false alarm and if we added a VCM
