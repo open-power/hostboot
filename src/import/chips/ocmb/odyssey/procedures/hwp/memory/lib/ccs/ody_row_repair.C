@@ -46,7 +46,6 @@
 #include <lib/dimm/ody_rank.H>
 
 #include <generic/memory/lib/utils/buffer_ops.H>
-#include <generic/memory/lib/utils/dimm/kind.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <mss_generic_attribute_getters.H>
 #include <ody_attribute_accessors_manual.H>
@@ -209,20 +208,26 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_num_subrank = 0;
 
     // Determine repair data bounds
-    mss::dimm::kind<mss::mc_type::ODYSSEY> l_kind(i_target, l_rc);
-    FAPI_TRY(l_rc, TARGTIDFORMAT" Failed to create dimm::kind instance", TARGTID);
+    uint8_t l_mranks = 0;
+    uint8_t l_total_ranks = 0;
+    uint8_t l_rows = 0;
+    uint8_t l_dram_width = 0;
+    FAPI_TRY( mss::attr::get_num_master_ranks_per_dimm(i_target, l_mranks) );
+    FAPI_TRY( mss::attr::get_logical_ranks_per_dimm(i_target, l_total_ranks) );
+    FAPI_TRY( mss::attr::get_dram_row_bits(i_target, l_rows) );
+    FAPI_TRY( mss::attr::get_dram_width(i_target, l_dram_width) );
 
     // Clear repair entry array
     init_repair_entry_arr(o_repairs_per_dimm);
 
-    get_dram_count(l_kind.iv_dram_width, l_num_dram);
+    get_dram_count(l_dram_width, l_num_dram);
 
-    if (l_kind.iv_master_ranks != 0)
+    if (l_mranks != 0)
     {
-        l_num_subrank = l_kind.iv_total_ranks / l_kind.iv_master_ranks;
+        l_num_subrank = l_total_ranks / l_mranks;
     }
 
-    for (uint8_t l_dimm_rank = 0; l_dimm_rank < l_kind.iv_master_ranks; ++l_dimm_rank)
+    for (uint8_t l_dimm_rank = 0; l_dimm_rank < l_mranks; ++l_dimm_rank)
     {
         fapi2::buffer<uint32_t> l_row_repair_data;
 
@@ -241,7 +246,7 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
 
         if (l_entry.is_valid())
         {
-            const uint64_t MAX_ROW = 1 << l_kind.iv_rows;
+            const uint64_t MAX_ROW = 1 << l_rows;
             const uint64_t MAX_SRANK = 1 << l_num_subrank;
 
             // srank, BG, BA, and row address are used bit-reversed in the row repair commands,
@@ -283,7 +288,7 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
                             l_logical_bg, l_logical_bank, l_logical_row);
 
             FAPI_INF_NO_SBE("Maxes for dimm " TARGTIDFORMAT ": DRAM %d, mrank %d, srank %d, bg %d, bank %d, row 0x%05x",
-                            TARGTID, l_num_dram, l_kind.iv_master_ranks, l_num_subrank,
+                            TARGTID, l_num_dram, l_mranks, l_num_subrank,
                             MAX_BANK_GROUP, MAX_BANKS, MAX_ROW);
 
             // Do some sanity checking here
