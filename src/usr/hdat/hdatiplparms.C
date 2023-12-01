@@ -121,6 +121,62 @@ static void hdatGetNumberOfCores(uint32_t &o_numCores)
 #endif
 
 /**
+ * @brief This routine gets the information for TCE Table Pre-Allocation for Dynamic IO Drawer
+ *        Attachment
+ *
+ * @pre None
+ *
+ * @post None
+ *
+ * @param o_DynIoDrawerAttach - output parameter - TCE Table Pre-Allocation for Dynamic IO Drawer
+ *                                                 Attachment value for all nodes
+ *
+ * @return None
+ *
+ * @retval HDAT_OTHER_COMP_ERROR
+ */
+static void hdatGetDynIoDrawerAttachment(uint32_t &o_DynIoDrawerAttach)
+{
+    HDAT_ENTER();
+    TARGETING::PredicateCTM l_nodePredicate(TARGETING::CLASS_ENC,
+                                            TARGETING::TYPE_NODE);
+    TARGETING::PredicateHwas l_predHwas;
+    l_predHwas.present(true);
+
+    TARGETING::PredicatePostfixExpr l_presentNode;
+    l_presentNode.push(&l_nodePredicate).push(&l_predHwas).And();
+
+    TARGETING::TargetRangeFilter l_nodeFilter(
+                                        TARGETING::targetService().begin(),
+                                        TARGETING::targetService().end(),
+                                        &l_presentNode);
+
+    o_DynIoDrawerAttach = 0;
+    uint8_t l_nodeindex = 3;
+
+    for (;l_nodeFilter;++l_nodeFilter)
+    {
+        TARGETING::Target *l_nodeTarget = (*l_nodeFilter);
+
+        TARGETING::ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT_type l_node_dynIoDrawerAttach;
+        if(l_nodeTarget->tryGetAttr<TARGETING::ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT>
+                                               (l_node_dynIoDrawerAttach))
+        {
+            HDAT_DBG("l_node_dynIoDrawerAttach = 0x%X", l_node_dynIoDrawerAttach);
+            o_DynIoDrawerAttach |= (uint32_t)l_node_dynIoDrawerAttach << (8 * l_nodeindex);
+        }
+        else
+        {
+            HDAT_ERR("Error in getting TCE_TABLE_PREALLOCATION attribute");
+        }
+        l_nodeindex--;
+    }
+
+    HDAT_DBG("o_DynIoDrawerAttach = 0x%08X", o_DynIoDrawerAttach);
+    HDAT_EXIT();
+}
+
+/**
  * @brief This routine gets the information for Enlarged IO Slot Count
  *
  * @pre None
@@ -171,8 +227,9 @@ static void hdatGetEnlargedIOCapacity(uint32_t &o_EnlargedSlotCount)
         }
         l_nodeindex--;
     }
-HDAT_DBG("o_EnlargedSlotCount=0x%x",o_EnlargedSlotCount);
-HDAT_EXIT();
+
+    HDAT_DBG("o_EnlargedSlotCount=0x%x",o_EnlargedSlotCount);
+    HDAT_EXIT();
 }
 
 /**
@@ -404,11 +461,15 @@ void  HdatIplParms::hdatGetIplParmsData()
         HDAT_ERR("Error in getting VLAN_SWITCHES attribute");
     }
 
+
+    uint32_t hdatDynIoDrawerAttachment = 0;
+    hdatGetDynIoDrawerAttachment(hdatDynIoDrawerAttachment);
+    this->iv_hdatIPLParams->iv_iplParms.hdatDynIoDrawerAttach = hdatDynIoDrawerAttachment;
+
     uint32_t hdatEnlargedIOCapacity = 0;
     hdatGetEnlargedIOCapacity(hdatEnlargedIOCapacity);
     this->iv_hdatIPLParams->iv_iplParms.hdatEnlargedIOCap =
                                                      hdatEnlargedIOCapacity;
-
 }
 
 /**

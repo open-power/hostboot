@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,7 +55,7 @@ namespace HDAT
 /* Typedefs                                                                   */
 /*----------------------------------------------------------------------------*/
 
-const uint16_t HDAT_IPL_PARAMS_VERSION    = 0x80; // P10 version
+const uint16_t HDAT_IPL_PARAMS_VERSION    = 0x82; // P10 version
 const char HDAT_IPLP_STRUCT_NAME[7] = "IPLPMS";
 
 
@@ -156,7 +156,7 @@ struct hdatIPLParams_t
     uint16_t hdatHugePageMemCount;     // Huge Page Memory Count
     uint8_t  hdatHugePageMemSize;      // Huge Page Memory Size
     uint8_t  hdatNumVlanSwitches;      // Number of VLAN Switches
-    uint32_t hdatReserved3;            // Reserved
+    uint32_t hdatDynIoDrawerAttach;    // Dynamic IO Drawer Attachment
     uint32_t hdatEnlargedIOCap;        // Enlarged IO Capacity
 }__attribute__ ((packed));
 
