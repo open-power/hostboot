@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -101,6 +101,9 @@
 
   <targetTypeExtension>
     <id>enc-node-power10</id>
+    <attribute>
+      <id>DYNAMIC_IO_DRAWER_ATTACHMENT</id>
+    </attribute>
     <attribute>
       <id>ENLARGED_IO_SLOT_COUNT</id>
     </attribute>

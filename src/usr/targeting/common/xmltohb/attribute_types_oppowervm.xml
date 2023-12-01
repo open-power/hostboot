@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2023                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -81,6 +81,19 @@
     <id>CREATE_DEF_PARTITION</id>
     <description>
         User configuration for creating default partition
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>DYNAMIC_IO_DRAWER_ATTACHMENT</id>
+    <description>
+        User configuration for TCE Table Pre-Allocation for Dynamic I/O Drawer Attachment
     </description>
     <simpleType>
       <uint8_t/>
