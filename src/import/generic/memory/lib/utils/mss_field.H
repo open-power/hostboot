@@ -68,9 +68,12 @@ class field_t
 {
     private:
 
-        const size_t iv_byte;
-        const size_t iv_start;
-        const size_t iv_length;
+        // This gets us out to ~65k, which is much longer than we need for a byte position at this time
+        const uint16_t iv_byte;
+        // Bit positions of uint8_t get 255 of bits vs lengths which is longer than the longest unit we could have (64-bits)
+        // Most fields are being accessed over uint8_t's so a uint8_t should be sufficient regardless
+        const uint8_t iv_start;
+        const uint8_t iv_length;
 
     public:
 
