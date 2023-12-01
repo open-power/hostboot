@@ -143,10 +143,10 @@ fapi2::ReturnCode get_field_spd(
 
     // clear out stale state
     o_field = 0;
-
+#ifndef __PPE__
     // Passes target for better FFDC
     FAPI_TRY(mss::spd::index_within_bounds_spd(i_target, BYTE, N, i_ffdc_code));
-
+#endif
     {
         // Extracting desired bits
         // API enforces uint8_t vector data, so no conversion check needed to uint8_t buffer
