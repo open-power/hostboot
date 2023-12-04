@@ -314,6 +314,38 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
                    l_controlReg, get_huid(i_ocmb));
             goto EXIT;
         }
+
+        // Also verify that Odyssey MSV (comes from the BL SB control reg) is not less than the MSV set by P10 SBE
+        if(l_controlReg == BL_SB_CONTROL_REG)
+        {
+            if(l_ocmbSBConfigReg.fields.minimumSecureVersion < SECUREBOOT::getMinimumSecureVersion())
+            {
+                SB_ERR("odySecurebootVerification: Odyssey 0x%x MSV value (0x%x) is less than system MSV (0x%x)",
+                       get_huid(i_ocmb),
+                       l_ocmbSBConfigReg.fields.minimumSecureVersion,
+                       SECUREBOOT::getMinimumSecureVersion());
+                uint32_t l_ocmbMSV = l_ocmbSBConfigReg.fields.minimumSecureVersion;
+                /*@
+                 * @errortype
+                 * @moduleid MOD_ODY_SECUREBOOT_VERIF
+                 * @reasoncode RC_ODY_BAD_MSV
+                 * @userdata1 Odyssey Chip HUID
+                 * @userdata2[0:31] Odyssey MSV
+                 * @userdata2[32:63] System MSV (set by P10 SBE)
+                 * @devdesc Odyssey Minimum Secure Version is less than the
+                 *          Minimum Secure Version set by P10 SBE.
+                 * @custdesc Secureboot failure
+                 */
+                l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                       MOD_ODY_SECUREBOOT_VERIF,
+                                       RC_ODY_BAD_MSV,
+                                       get_huid(i_ocmb),
+                                       SrcUserData(bits{0,31}, l_ocmbMSV,
+                                                   bits{32,63}, SECUREBOOT::getMinimumSecureVersion()),
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                goto EXIT;
+            }
+        }
     }
 
     // Step 3/4: Verify that the SPPE image measurements from PNOR match those running on SPPE
