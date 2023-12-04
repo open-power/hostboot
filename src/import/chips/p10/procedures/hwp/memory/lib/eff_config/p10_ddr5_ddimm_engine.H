@@ -348,6 +348,7 @@ class ddimm_0_0 : public mss::spd::module_specific_base
         virtual bool check_pmic_rail_delay(const uint8_t i_field) const
         {
             return (i_field <= 0x07);
+
         }
 
         ///
@@ -5507,6 +5508,29 @@ class ddimm_0_7 : public ddimm_0_0
         }
 
         ///
+        /// @brief Traits for pmic rail delay
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
+        virtual bool check_pmic_rail_delay(const uint8_t i_field) const
+        {
+            return true;
+        }
+
+        ///
+        /// @brief Traits for pmic rail order
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
+        virtual bool check_pmic_rail_order(const uint8_t i_field) const
+        {
+            return true;
+        }
+
+
+        ///
         /// @brief Set the pmic0 swa order field to write to PMIC0 reg R40
         ///
         /// @param[in] i_spd SPD binary
@@ -5550,12 +5574,14 @@ class ddimm_0_7 : public ddimm_0_0
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_SWB_SEQUENCE, i_spd, pmic::SET_PMIC0_SEQUENCE_CFG1_R41, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+
                                   iv_ocmb,
                                   check_pmic_rail_order(l_field),
                                   F::PMIC0_SWB_SEQUENCE.get_byte(i_spd),
                                   l_field,
                                   pmic::SET_PMIC0_SEQUENCE_CFG1_R41,
                                   "PMIC0 SEQUENCE CFG1 R41"));
+
             // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
             // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
             FAPI_TRY(mss::attr::set_pmic0_swb_sequence_order(iv_ocmb, mss::ddr5::pmic_consts::SEQ_ORDER_RESERVED_VALUE));
@@ -5615,6 +5641,7 @@ class ddimm_0_7 : public ddimm_0_0
                                   l_field,
                                   pmic::SET_PMIC0_SEQUENCE_CFG3_R43,
                                   "PMIC0 SEQUENCE CFG3 R43"));
+
 
             // Write reserved/invalid value to the attributes that are used in SPD rev 0.0
             // Reserved value triggeres pmic_enable to use the sequence_cfg attributes
@@ -6030,7 +6057,7 @@ class ddimm_0_7 : public ddimm_0_0
 //
 // Can be updated with the earliest supported ddimm module revision
 //
-using ddimm_base_latest = ddimm_0_0;
+using ddimm_base_latest = ddimm_0_7;
 
 } // ddr5
 
