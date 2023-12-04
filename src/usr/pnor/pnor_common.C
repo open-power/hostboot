@@ -53,6 +53,9 @@
 #include <pldm/pldm_errl.H>
 #endif
 
+// For SrcUserData
+using namespace errl_util;
+
 // Trace definition
 trace_desc_t* g_trac_pnor = NULL;
 
@@ -522,12 +525,17 @@ errlHndl_t PNOR::populateTOC( SectionData_t * o_TOC ,
 
             if(file_table_entry == nullptr)
             {
+                // save off the section name
+                auto l_nameStr = PNOR::SectionIdToString(section_id);
+                uint64_t l_name = 0;
+                memcpy( &l_name, l_nameStr, 8 );
                 /*@
                 * @errortype
                 * @moduleid     PNOR::MOD_POPULATE_TOC
                 * @reasoncode   PNOR::RC_INVALID_SECTION
-                * @userdata1    Section ID we are looking up
-                * @userdata2    unused
+                * @userdata1[00:31]    Section ID we are looking up
+                * @userdata1[32:63]    Lid number we are looking up
+                * @userdata2    Section name (ASCII)
                 * @devdesc      PnorRP::populateTOC> Could not find section id in PLDM file table
                 * @custdesc     A problem occurred while accessing the boot firmware.
                 */
@@ -535,13 +543,16 @@ errlHndl_t PNOR::populateTOC( SectionData_t * o_TOC ,
                               ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                               PNOR::MOD_POPULATE_TOC,
                               PNOR::RC_INVALID_SECTION,
-                              section_id,
-                              0,
+                              SrcUserData(bits{0,31}, section_id,
+                                          bits{32,63}, i_lid_ids[section_id]),
+                              l_name,
                               ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
                 TRACFCOMP(g_trac_pnor,
-                          "populateTOC> Could not find section id in PLDM file table %d"
+                          "populateTOC> Could not find section id %d (%s) in PLDM file table : lid=0x%.8X"
                           TRACE_ERR_FMT,
                           section_id,
+                          l_nameStr,
+                          i_lid_ids[section_id],
                           TRACE_ERR_ARGS(l_errhdl));
                 l_errhdl->collectTrace(PNOR_COMP_NAME);
                 PLDM::addBmcErrorCallouts(l_errhdl);
@@ -573,11 +584,12 @@ errlHndl_t PNOR::populateTOC( SectionData_t * o_TOC ,
                               o_TOC[i].size,
                               ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
                 TRACFCOMP(g_trac_pnor,
-                          "populateTOC> Size reported by bmc is larger (0x%x) than we can handle (0x%x) for section %d"
+                          "populateTOC> Size reported by bmc is larger (0x%x) than we can handle (0x%x) for section %d : lid=0x%.8X"
                           TRACE_ERR_FMT,
                           o_TOC[i].size,
                           VMM_SIZE_RESERVED_PER_SECTION,
                           section_id,
+                          i_lid_ids[section_id],
                           TRACE_ERR_ARGS(l_errhdl));
                 l_errhdl->collectTrace(PNOR_COMP_NAME);
                 PLDM::addBmcErrorCallouts(l_errhdl);
