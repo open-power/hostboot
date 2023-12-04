@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -622,7 +622,7 @@ extern "C"
         l_fapirc = fapi2::current_err;
 
         FAPI_IMP("mvpdRingFuncFind: Exit w/rc=0x%08x for chipletSel=0x%08x, ringId=0x%x and"
-                 " ring size=%u (if size==0, then something failed)",
+                 " ring size=%u (if size==0, then something is wrong)",
                  static_cast<uint32_t>(l_fapirc),
                  i_chipletSel,
                  i_ringId,
