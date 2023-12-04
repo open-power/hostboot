@@ -126,7 +126,7 @@ generate_sbe_odyssey_images()
 {
     SBE_DIR=${PROJECT_ROOT}/src/build/tools/extern/sbe
 
-    if [[ "${HB_FAST_PRIME}" ]]
+    if [[ "${HB_FAST_PRIME}" ]] && [[ -z $HB_FORCE_REBUILD_ODY ]]
     then
         export SBE_SUBREPO_TOP_COMMIT=$(git submodule status $SBE_DIR | awk '{print $1}' | sed 's/^-//')
         export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/$SBE_SUBREPO_TOP_COMMIT/
@@ -139,7 +139,7 @@ generate_sbe_odyssey_images()
             unset ODYSSEY_SBE_IMAGES
         fi
     fi
-
+        
     # Use default paths for Odyssey images if no custom ones are specified
     if [ -n "${ODYSSEY_SBE_IMAGES}" ]; then
         ODYSSEY_SROM_IMG=${ODYSSEY_SBE_IMAGES}/odyssey_srom_DD1.bin
@@ -209,7 +209,8 @@ generate_sbe_image()
     PPE_DIR=${PROJECT_ROOT}/src/build/tools/extern/ppe
 
     export PPE_SUBREPO_TOP_COMMIT=$(git submodule status ${PPE_DIR} | awk '{print $1}' | sed 's/^-//')
-    if [[ "${HB_FAST_PRIME}" ]]; then
+    if [[ "${HB_FAST_PRIME}" ]] && [[ -z $HB_FORCE_REBUILD_SBE ]]
+    then
         PPE_CACHE_DIR="${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}"
         if [ -d ${PPE_CACHE_DIR} ]; then
             echo "\n***Using default pre-built SBE images from ${PPE_CACHE_DIR}\n"
@@ -272,7 +273,8 @@ generate_hcode_image()
     EKB_DIR=${PROJECT_ROOT}/src/build/tools/extern/ekb
     HCODE_IMAGE=${EKB_DIR}/output/images/hw_image/p10.hw_image.bin
 
-    if [[ "$HB_FAST_PRIME" ]] ; then
+    if [[ "${HB_FAST_PRIME}" ]] && [[ -z $HB_FORCE_REBUILD_EKB ]]
+    then
         export EKB_SUBREPO_TOP_COMMIT=$(git submodule status $EKB_DIR | awk '{print $1}' | sed 's/^-//')
         EKB_CACHE_DIR="${HOSTBOOT_ENVIRONMENT}/prime/ekb/master-p10/${EKB_SUBREPO_TOP_COMMIT}"
         if [ -d ${EKB_CACHE_DIR} ]; then
@@ -296,7 +298,8 @@ generate_hcode_image()
 
     # Only [re]generate the HCODE image if the user hasn't asked us not to or
     # the HCODE image hasn't been built already.
-    if [[ ! "$HB_SKIP_GEN_HCODE" || ! -f $HCODE_IMAGE ]] ; then
+    if [[ ! "$HB_SKIP_GEN_HCODE" || ! -f $HCODE_IMAGE || $HB_FORCE_REBUILD_EKB ]] ;
+    then
         echo -e "\n\nGenerating HCODE image..."
 
         if [[ ! -f ${EKB_DIR}/ekb ]];then
