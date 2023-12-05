@@ -36,7 +36,6 @@
 #ifndef _EFD_FIELDS_DDR5_H_
 #define _EFD_FIELDS_DDR5_H_
 
-
 #ifndef __PPE__
     #include <cstdint>
 #endif
@@ -70,25 +69,31 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         {
 
             // Byte 0: Host Speed Supported
+#ifndef __PPE__
             HOST_SPEED_SUPPORTED_BYTE = 0,
             HOST_SPEED_SUPPORTED_START = 5,
             HOST_SPEED_SUPPORTED_LEN = 3,
+#endif
 
             // Byte 1: 2N Requirements
             MODE_2N_REQUIREMENTS_BYTE = 1,
             MODE_2N_REQUIREMENTS_25600_START = 7,
             MODE_2N_REQUIREMENTS_25600_LEN = 1,
+#ifndef __PPE__
             MODE_2N_REQUIREMENTS_32000_START = 6,
             MODE_2N_REQUIREMENTS_32000_LEN = 1,
             MODE_2N_REQUIREMENTS_38400_START = 5,
             MODE_2N_REQUIREMENTS_38400_LEN = 1,
+#endif
 
             // Byte 2: Master Ranks and PHY Channels Supported
             MASTER_RANKS_PHY_CHA_SUPPORTED_BYTE = 2,
+#ifndef __PPE__
             MASTER_RANKS_SUPPORTED_START = 4,
             MASTER_RANKS_SUPPORTED_LEN = 4,
             PHY_CHANNEL_SUPPORTED_START = 0,
             PHY_CHANNEL_SUPPORTED_LEN = 4,
+#endif
 
             // Byte 3: PHY0 Channels A0/B0 VRef
             PHY0_CHANNELS_VREF_BYTE = 3,
@@ -171,47 +176,61 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             DRAM_DFE_GAIN_BIAS_BYTE0_SIGN_BIT_START = 4,
             DRAM_DFE_GAIN_BIAS_BYTE0_SIGN_BIT_LEN = 1,
 
+#ifndef __PPE__
             DRAM_DFE_GAIN_BIAS_BYTE1_BYTE = 20,
             DRAM_DFE_GAIN_BIAS_BYTE1_START = 5,
             DRAM_DFE_GAIN_BIAS_BYTE1_LEN = 3,
             DRAM_DFE_GAIN_BIAS_BYTE1_SIGN_BIT_START = 4,
             DRAM_DFE_GAIN_BIAS_BYTE1_SIGN_BIT_LEN = 1,
+#endif
 
+#ifndef __PPE__
             DRAM_DFE_GAIN_BIAS_BYTE2_BYTE = 21,
             DRAM_DFE_GAIN_BIAS_BYTE2_START = 0,
             DRAM_DFE_GAIN_BIAS_BYTE2_LEN = 8,
             DRAM_DFE_GAIN_BIAS_BYTE2_SIGN_BIT_START = 4,
             DRAM_DFE_GAIN_BIAS_BYTE2_SIGN_BIT_LEN = 1,
+#endif
 
+#ifndef __PPE__
             DRAM_DFE_GAIN_BIAS_BYTE3_BYTE = 22,
             DRAM_DFE_GAIN_BIAS_BYTE3_START = 0,
             DRAM_DFE_GAIN_BIAS_BYTE3_LEN = 8,
             DRAM_DFE_GAIN_BIAS_BYTE3_SIGN_BIT_START = 4,
             DRAM_DFE_GAIN_BIAS_BYTE3_SIGN_BIT_LEN = 1,
+#endif
 
+#ifndef __PPE__
             DRAM_DFE_GAIN_BIAS_BYTE4_BYTE = 23,
             DRAM_DFE_GAIN_BIAS_BYTE4_START = 0,
             DRAM_DFE_GAIN_BIAS_BYTE4_LEN = 8,
             DRAM_DFE_GAIN_BIAS_BYTE4_SIGN_BIT_START = 4,
             DRAM_DFE_GAIN_BIAS_BYTE4_SIGN_BIT_LEN = 1,
+#endif
 
+#ifndef __PPE__
             DRAM_DFE_GAIN_BIAS_BYTE5_BYTE = 24,
             DRAM_DFE_GAIN_BIAS_BYTE5_START = 0,
             DRAM_DFE_GAIN_BIAS_BYTE5_LEN = 8,
             DRAM_DFE_GAIN_BIAS_BYTE5_SIGN_BIT_START = 4,
             DRAM_DFE_GAIN_BIAS_BYTE5_SIGN_BIT_LEN = 1,
+#endif
 
+#ifndef __PPE__
             DRAM_DFE_GAIN_BIAS_BYTE6_BYTE = 25,
             DRAM_DFE_GAIN_BIAS_BYTE6_START = 5,
             DRAM_DFE_GAIN_BIAS_BYTE6_LEN = 3,
             DRAM_DFE_GAIN_BIAS_BYTE6_SIGN_BIT_START = 4,
             DRAM_DFE_GAIN_BIAS_BYTE6_SIGN_BIT_LEN = 1,
+#endif
 
+#ifndef __PPE__
             DRAM_DFE_GAIN_BIAS_BYTE7_BYTE = 26,
             DRAM_DFE_GAIN_BIAS_BYTE7_START = 5,
             DRAM_DFE_GAIN_BIAS_BYTE7_LEN = 3,
             DRAM_DFE_GAIN_BIAS_BYTE7_SIGN_BIT_START = 4,
             DRAM_DFE_GAIN_BIAS_BYTE7_SIGN_BIT_LEN = 1,
+#endif
 
             // Byte 27: PHY ODT impedance
             PHY_ODT_IMPEDANCE_BYTE = 27,
@@ -234,9 +253,11 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             PHY_DRIVE_IMPEDANCE_CTRL2_LEN = 5,
 
             // Byte 31: PHY Slew Rate DQ_DQS
+#ifndef __PPE__
             PHY_SLEW_RATE_DQ_DQS_BYTE = 31,
             PHY_SLEW_RATE_DQ_DQS_START = 4,
             PHY_SLEW_RATE_DQ_DQS_LEN = 4,
+#endif
 
             // Byte 32: ATX impedance
             ATX_IMPEDANCE_BYTE = 32,
@@ -271,13 +292,17 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             CK_SLEW_RATE_RISE_BYTE1_LEN = 8,
 
             // Byte 49-52: DQ Slew rate rise
+#ifndef __PPE__
             DQ_SLEW_RATE_RISE_BYTE0_BYTE = 49,
             DQ_SLEW_RATE_RISE_BYTE0_START = 0,
             DQ_SLEW_RATE_RISE_BYTE0_LEN = 8,
+#endif
 
+#ifndef __PPE__
             DQ_SLEW_RATE_RISE_BYTE1_BYTE = 50,
             DQ_SLEW_RATE_RISE_BYTE1_START = 0,
             DQ_SLEW_RATE_RISE_BYTE1_LEN = 8,
+#endif
 
             DQ_SLEW_RATE_RISE_BYTE2_BYTE = 51,
             DQ_SLEW_RATE_RISE_BYTE2_START = 0,
@@ -431,10 +456,12 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
 
             // Byte 76: PHY Equalization
             PHY_EQUALIZATION_BYTE = 76,
+#ifndef __PPE__
             PHY_EQUALIZATION_DFFE_START = 6,
             PHY_EQUALIZATION_DFFE_LEN = 1,
             PHY_EQUALIZATION_RDFE_START = 7,
             PHY_EQUALIZATION_RDFE_LEN = 1,
+#endif
 
             // Byte 77: Non-Target ODT RD/WR
             NT_ODT_BYTE = 77,
@@ -457,8 +484,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
 
             // Byte 78: DFI Max Read Latency
             DFI_MAX_RD_LATENCY_BYTE = 78,
+#ifndef __PPE__
             DFIMRL_DDRCLK_START = 3,
             DFIMRL_DDRCLK_LEN = 5,
+#endif
 
             // Byte 82-89: Group A CK/CS ODT and CA
             // BYTE0: A0 RANK0
@@ -482,16 +511,20 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             ODT_CA_GRPA_CS_BYTE1_LEN = 3,
 
             ODT_CA_GRPA_BYTE2_BYTE = 84,
+#ifndef __PPE__
             ODT_CA_GRPA_CK_BYTE2_START = 5,
             ODT_CA_GRPA_CK_BYTE2_LEN = 3,
             ODT_CA_GRPA_CS_BYTE2_START = 2,
             ODT_CA_GRPA_CS_BYTE2_LEN = 3,
+#endif
 
             ODT_CA_GRPA_BYTE3_BYTE = 85,
+#ifndef __PPE__
             ODT_CA_GRPA_CK_BYTE3_START = 5,
             ODT_CA_GRPA_CK_BYTE3_LEN = 3,
             ODT_CA_GRPA_CS_BYTE3_START = 2,
             ODT_CA_GRPA_CS_BYTE3_LEN = 3,
+#endif
 
             ODT_CA_GRPA_BYTE4_BYTE = 86,
             ODT_CA_GRPA_CK_BYTE4_START = 5,
@@ -506,16 +539,20 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             ODT_CA_GRPA_CS_BYTE5_LEN = 3,
 
             ODT_CA_GRPA_BYTE6_BYTE = 88,
+#ifndef __PPE__
             ODT_CA_GRPA_CK_BYTE6_START = 5,
             ODT_CA_GRPA_CK_BYTE6_LEN = 3,
             ODT_CA_GRPA_CS_BYTE6_START = 2,
             ODT_CA_GRPA_CS_BYTE6_LEN = 3,
+#endif
 
             ODT_CA_GRPA_BYTE7_BYTE = 89,
+#ifndef __PPE__
             ODT_CA_GRPA_CK_BYTE7_START = 5,
             ODT_CA_GRPA_CK_BYTE7_LEN = 3,
             ODT_CA_GRPA_CS_BYTE7_START = 2,
             ODT_CA_GRPA_CS_BYTE7_LEN = 3,
+#endif
 
             // Byte 90-97: Group B CK/CS ODT and CA
             // BYTE0: A0 RANK0
@@ -539,16 +576,20 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             ODT_CA_GRPB_CS_BYTE1_LEN = 3,
 
             ODT_CA_GRPB_BYTE2_BYTE = 92,
+#ifndef __PPE__
             ODT_CA_GRPB_CK_BYTE2_START = 5,
             ODT_CA_GRPB_CK_BYTE2_LEN = 3,
             ODT_CA_GRPB_CS_BYTE2_START = 2,
             ODT_CA_GRPB_CS_BYTE2_LEN = 3,
+#endif
 
             ODT_CA_GRPB_BYTE3_BYTE = 93,
+#ifndef __PPE__
             ODT_CA_GRPB_CK_BYTE3_START = 5,
             ODT_CA_GRPB_CK_BYTE3_LEN = 3,
             ODT_CA_GRPB_CS_BYTE3_START = 2,
             ODT_CA_GRPB_CS_BYTE3_LEN = 3,
+#endif
 
             ODT_CA_GRPB_BYTE4_BYTE = 94,
             ODT_CA_GRPB_CK_BYTE4_START = 5,
@@ -563,16 +604,20 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             ODT_CA_GRPB_CS_BYTE5_LEN = 3,
 
             ODT_CA_GRPB_BYTE6_BYTE = 96,
+#ifndef __PPE__
             ODT_CA_GRPB_CK_BYTE6_START = 5,
             ODT_CA_GRPB_CK_BYTE6_LEN = 3,
             ODT_CA_GRPB_CS_BYTE6_START = 2,
             ODT_CA_GRPB_CS_BYTE6_LEN = 3,
+#endif
 
             ODT_CA_GRPB_BYTE7_BYTE = 97,
+#ifndef __PPE__
             ODT_CA_GRPB_CK_BYTE7_START = 5,
             ODT_CA_GRPB_CK_BYTE7_LEN = 3,
             ODT_CA_GRPB_CS_BYTE7_START = 2,
             ODT_CA_GRPB_CS_BYTE7_LEN = 3,
+#endif
 
             // Byte 98-177: CK/CS ODT and CA per DRAM
             // Channel incr 20
@@ -591,8 +636,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             ODT_CA_CK_BYTE0_LEN = 3,
             ODT_CA_CS_BYTE0_START = 2,
             ODT_CA_CS_BYTE0_LEN = 3,
+#ifndef __PPE__
             ODT_CA_BYTE0_EXP_GRP_START = 1,
             ODT_CA_BYTE0_EXP_GRP_LEN = 1,
+#endif
 
             // Byte 178-185: CA ODT and DQS for GROUPA
             // BYTE0: A0 RANK0
@@ -615,17 +662,25 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             DQS_RTT_PARK_GRPA_BYTE1_START = 2,
             DQS_RTT_PARK_GRPA_BYTE1_LEN = 3,
 
+#ifndef __PPE__
             CA_ODT_DQS_GRPA_BYTE2_BYTE = 180,
+#endif
             CA_ODT_GRPA_BYTE2_START = 5,
             CA_ODT_GRPA_BYTE2_LEN = 3,
+#ifndef __PPE__
             DQS_RTT_PARK_GRPA_BYTE2_START = 2,
             DQS_RTT_PARK_GRPA_BYTE2_LEN = 3,
+#endif
 
+#ifndef __PPE__
             CA_ODT_DQS_GRPA_BYTE3_BYTE = 181,
+#endif
             CA_ODT_GRPA_BYTE3_START = 5,
             CA_ODT_GRPA_BYTE3_LEN = 3,
+#ifndef __PPE__
             DQS_RTT_PARK_GRPA_BYTE3_START = 2,
             DQS_RTT_PARK_GRPA_BYTE3_LEN = 3,
+#endif
 
             CA_ODT_DQS_GRPA_BYTE4_BYTE = 182,
             CA_ODT_GRPA_BYTE4_START = 5,
@@ -639,17 +694,25 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             DQS_RTT_PARK_GRPA_BYTE5_START = 2,
             DQS_RTT_PARK_GRPA_BYTE5_LEN = 3,
 
+#ifndef __PPE__
             CA_ODT_DQS_GRPA_BYTE6_BYTE = 184,
+#endif
             CA_ODT_GRPA_BYTE6_START = 5,
             CA_ODT_GRPA_BYTE6_LEN = 3,
+#ifndef __PPE__
             DQS_RTT_PARK_GRPA_BYTE6_START = 2,
             DQS_RTT_PARK_GRPA_BYTE6_LEN = 3,
+#endif
 
+#ifndef __PPE__
             CA_ODT_DQS_GRPA_BYTE7_BYTE = 185,
+#endif
             CA_ODT_GRPA_BYTE7_START = 5,
             CA_ODT_GRPA_BYTE7_LEN = 3,
+#ifndef __PPE__
             DQS_RTT_PARK_GRPA_BYTE7_START = 2,
             DQS_RTT_PARK_GRPA_BYTE7_LEN = 3,
+#endif
 
             // Byte 186-193: CA ODT and DQS for GROUPB
             // BYTE0: A0 RANK0
@@ -672,17 +735,25 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             DQS_RTT_PARK_GRPB_BYTE1_START = 2,
             DQS_RTT_PARK_GRPB_BYTE1_LEN = 3,
 
+#ifndef __PPE__
             CA_ODT_DQS_GRPB_BYTE2_BYTE = 188,
+#endif
             CA_ODT_GRPB_BYTE2_START = 5,
             CA_ODT_GRPB_BYTE2_LEN = 3,
+#ifndef __PPE__
             DQS_RTT_PARK_GRPB_BYTE2_START = 2,
             DQS_RTT_PARK_GRPB_BYTE2_LEN = 3,
+#endif
 
+#ifndef __PPE__
             CA_ODT_DQS_GRPB_BYTE3_BYTE = 189,
+#endif
             CA_ODT_GRPB_BYTE3_START = 5,
             CA_ODT_GRPB_BYTE3_LEN = 3,
+#ifndef __PPE__
             DQS_RTT_PARK_GRPB_BYTE3_START = 2,
             DQS_RTT_PARK_GRPB_BYTE3_LEN = 3,
+#endif
 
             CA_ODT_DQS_GRPB_BYTE4_BYTE = 190,
             CA_ODT_GRPB_BYTE4_START = 5,
@@ -696,17 +767,25 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             DQS_RTT_PARK_GRPB_BYTE5_START = 2,
             DQS_RTT_PARK_GRPB_BYTE5_LEN = 3,
 
+#ifndef __PPE__
             CA_ODT_DQS_GRPB_BYTE6_BYTE = 192,
+#endif
             CA_ODT_GRPB_BYTE6_START = 5,
             CA_ODT_GRPB_BYTE6_LEN = 3,
+#ifndef __PPE__
             DQS_RTT_PARK_GRPB_BYTE6_START = 2,
             DQS_RTT_PARK_GRPB_BYTE6_LEN = 3,
+#endif
 
+#ifndef __PPE__
             CA_ODT_DQS_GRPB_BYTE7_BYTE = 193,
+#endif
             CA_ODT_GRPB_BYTE7_START = 5,
             CA_ODT_GRPB_BYTE7_LEN = 3,
+#ifndef __PPE__
             DQS_RTT_PARK_GRPB_BYTE7_START = 2,
             DQS_RTT_PARK_GRPB_BYTE7_LEN = 3,
+#endif
 
             // Byte 194-273: CA ODT and DQS per DRAM
             // BYTE0-BYTE9  : A0 RANK0
@@ -1005,6 +1084,7 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
 
 
             VREF_OFFSET_STEP_BYTE10_BYTE = 334,
+#ifndef __PPE__
             VREF_CA_OFFSET_STEP_BYTE10_START = 5,
             VREF_CA_OFFSET_STEP_BYTE10_LEN = 3,
             VREF_CA_OFFSET_BYTE10_ADD_SUB_START = 4,
@@ -1013,8 +1093,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             VREF_CS_OFFSET_STEP_BYTE10_LEN = 3,
             VREF_CS_OFFSET_BYTE10_ADD_SUB_START = 0,
             VREF_CS_OFFSET_BYTE10_ADD_SUB_LEN = 1,
+#endif
 
             VREF_OFFSET_STEP_BYTE20_BYTE = 344,
+#ifndef __PPE__
             VREF_CA_OFFSET_STEP_BYTE20_START = 5,
             VREF_CA_OFFSET_STEP_BYTE20_LEN = 3,
             VREF_CA_OFFSET_BYTE20_ADD_SUB_START = 4,
@@ -1023,8 +1105,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             VREF_CS_OFFSET_STEP_BYTE20_LEN = 3,
             VREF_CS_OFFSET_BYTE20_ADD_SUB_START = 0,
             VREF_CS_OFFSET_BYTE20_ADD_SUB_LEN = 1,
+#endif
 
             VREF_OFFSET_STEP_BYTE30_BYTE = 354,
+#ifndef __PPE__
             VREF_CA_OFFSET_STEP_BYTE30_START = 5,
             VREF_CA_OFFSET_STEP_BYTE30_LEN = 3,
             VREF_CA_OFFSET_BYTE30_ADD_SUB_START = 4,
@@ -1033,8 +1117,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             VREF_CS_OFFSET_STEP_BYTE30_LEN = 3,
             VREF_CS_OFFSET_BYTE30_ADD_SUB_START = 0,
             VREF_CS_OFFSET_BYTE30_ADD_SUB_LEN = 1,
+#endif
 
             VREF_OFFSET_STEP_BYTE40_BYTE = 364,
+#ifndef __PPE__
             VREF_CA_OFFSET_STEP_BYTE40_START = 5,
             VREF_CA_OFFSET_STEP_BYTE40_LEN = 3,
             VREF_CA_OFFSET_BYTE40_ADD_SUB_START = 4,
@@ -1043,8 +1129,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             VREF_CS_OFFSET_STEP_BYTE40_LEN = 3,
             VREF_CS_OFFSET_BYTE40_ADD_SUB_START = 0,
             VREF_CS_OFFSET_BYTE40_ADD_SUB_LEN = 1,
+#endif
 
             VREF_OFFSET_STEP_BYTE50_BYTE = 374,
+#ifndef __PPE__
             VREF_CA_OFFSET_STEP_BYTE50_START = 5,
             VREF_CA_OFFSET_STEP_BYTE50_LEN = 3,
             VREF_CA_OFFSET_BYTE50_ADD_SUB_START = 4,
@@ -1053,8 +1141,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             VREF_CS_OFFSET_STEP_BYTE50_LEN = 3,
             VREF_CS_OFFSET_BYTE50_ADD_SUB_START = 0,
             VREF_CS_OFFSET_BYTE50_ADD_SUB_LEN = 1,
+#endif
 
             VREF_OFFSET_STEP_BYTE60_BYTE = 384,
+#ifndef __PPE__
             VREF_CA_OFFSET_STEP_BYTE60_START = 5,
             VREF_CA_OFFSET_STEP_BYTE60_LEN = 3,
             VREF_CA_OFFSET_BYTE60_ADD_SUB_START = 4,
@@ -1063,8 +1153,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             VREF_CS_OFFSET_STEP_BYTE60_LEN = 3,
             VREF_CS_OFFSET_BYTE60_ADD_SUB_START = 0,
             VREF_CS_OFFSET_BYTE60_ADD_SUB_LEN = 1,
+#endif
 
             VREF_OFFSET_STEP_BYTE70_BYTE = 394,
+#ifndef __PPE__
             VREF_CA_OFFSET_STEP_BYTE70_START = 5,
             VREF_CA_OFFSET_STEP_BYTE70_LEN = 3,
             VREF_CA_OFFSET_BYTE70_ADD_SUB_START = 4,
@@ -1073,278 +1165,367 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
             VREF_CS_OFFSET_STEP_BYTE70_LEN = 3,
             VREF_CS_OFFSET_BYTE70_ADD_SUB_START = 0,
             VREF_CS_OFFSET_BYTE70_ADD_SUB_LEN = 1,
+#endif
 
             // Byte 404-414: Command Address Delay for Port A0
             // Byte 415: Reserved
             CS_DELAYS_A0_0_A0_2_BYTE = 404,
+#ifndef __PPE__
             CS_DELAYS_A0_0_A0_2_FINE_START = 3,
             CS_DELAYS_A0_0_A0_2_FINE_LEN = 5,
             CS_DELAYS_A0_0_A0_2_COARSE_START = 1,
             CS_DELAYS_A0_0_A0_2_COARSE_LEN = 1,
+#endif
 
             CS_DELAYS_A0_1_A0_3_BYTE = 405,
+#ifndef __PPE__
             CS_DELAYS_A0_1_A0_3_FINE_START = 3,
             CS_DELAYS_A0_1_A0_3_FINE_LEN = 5,
             CS_DELAYS_A0_1_A0_3_COARSE_START = 1,
             CS_DELAYS_A0_1_A0_3_COARSE_LEN = 1,
+#endif
 
             CK_DELAYS_A0_0_A0_2_BYTE = 406,
+#ifndef __PPE__
             CK_DELAYS_A0_0_A0_2_FINE_START = 3,
             CK_DELAYS_A0_0_A0_2_FINE_LEN = 5,
             CK_DELAYS_A0_0_A0_2_COARSE_START = 1,
             CK_DELAYS_A0_0_A0_2_COARSE_LEN = 1,
+#endif
 
             CK_DELAYS_A0_1_A0_3_BYTE = 407,
+#ifndef __PPE__
             CK_DELAYS_A0_1_A0_3_FINE_START = 3,
             CK_DELAYS_A0_1_A0_3_FINE_LEN = 5,
             CK_DELAYS_A0_1_A0_3_COARSE_START = 1,
             CK_DELAYS_A0_1_A0_3_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A0_0_A0_1_BYTE = 408,
+#ifndef __PPE__
             CA_DELAYS_A0_0_A0_1_FINE_START = 3,
             CA_DELAYS_A0_0_A0_1_FINE_LEN = 5,
             CA_DELAYS_A0_0_A0_1_COARSE_START = 1,
             CA_DELAYS_A0_0_A0_1_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A0_2_A0_3_BYTE = 409,
+#ifndef __PPE__
             CA_DELAYS_A0_2_A0_3_FINE_START = 3,
             CA_DELAYS_A0_2_A0_3_FINE_LEN = 5,
             CA_DELAYS_A0_2_A0_3_COARSE_START = 1,
             CA_DELAYS_A0_2_A0_3_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A0_4_A0_5_BYTE = 410,
+#ifndef __PPE__
             CA_DELAYS_A0_4_A0_5_FINE_START = 3,
             CA_DELAYS_A0_4_A0_5_FINE_LEN = 5,
             CA_DELAYS_A0_4_A0_5_COARSE_START = 1,
             CA_DELAYS_A0_4_A0_5_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A0_6_A0_7_BYTE = 411,
+#ifndef __PPE__
             CA_DELAYS_A0_6_A0_7_FINE_START = 3,
             CA_DELAYS_A0_6_A0_7_FINE_LEN = 5,
             CA_DELAYS_A0_6_A0_7_COARSE_START = 1,
             CA_DELAYS_A0_6_A0_7_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A0_8_A0_9_BYTE = 412,
+#ifndef __PPE__
             CA_DELAYS_A0_8_A0_9_FINE_START = 3,
             CA_DELAYS_A0_8_A0_9_FINE_LEN = 5,
             CA_DELAYS_A0_8_A0_9_COARSE_START = 1,
             CA_DELAYS_A0_8_A0_9_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A0_10_A0_11_BYTE = 413,
+#ifndef __PPE__
             CA_DELAYS_A0_10_A0_11_FINE_START = 3,
             CA_DELAYS_A0_10_A0_11_FINE_LEN = 5,
             CA_DELAYS_A0_10_A0_11_COARSE_START = 1,
             CA_DELAYS_A0_10_A0_11_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A0_12_A0_13_BYTE = 414,
+#ifndef __PPE__
             CA_DELAYS_A0_12_A0_13_FINE_START = 3,
             CA_DELAYS_A0_12_A0_13_FINE_LEN = 5,
             CA_DELAYS_A0_12_A0_13_COARSE_START = 1,
             CA_DELAYS_A0_12_A0_13_COARSE_LEN = 1,
+#endif
 
             // Byte 416-426: Command Address Delay for Port B0
             // Byte 427: Reserved
             CS_DELAYS_B0_0_B0_2_BYTE = 416,
+#ifndef __PPE__
             CS_DELAYS_B0_0_B0_2_FINE_START = 3,
             CS_DELAYS_B0_0_B0_2_FINE_LEN = 5,
             CS_DELAYS_B0_0_B0_2_COARSE_START = 1,
             CS_DELAYS_B0_0_B0_2_COARSE_LEN = 1,
+#endif
 
             CS_DELAYS_B0_1_B0_3_BYTE = 417,
+#ifndef __PPE__
             CS_DELAYS_B0_1_B0_3_FINE_START = 3,
             CS_DELAYS_B0_1_B0_3_FINE_LEN = 5,
             CS_DELAYS_B0_1_B0_3_COARSE_START = 1,
             CS_DELAYS_B0_1_B0_3_COARSE_LEN = 1,
+#endif
 
             CK_DELAYS_B0_0_B0_2_BYTE = 418,
+#ifndef __PPE__
             CK_DELAYS_B0_0_B0_2_FINE_START = 3,
             CK_DELAYS_B0_0_B0_2_FINE_LEN = 5,
             CK_DELAYS_B0_0_B0_2_COARSE_START = 1,
             CK_DELAYS_B0_0_B0_2_COARSE_LEN = 1,
+#endif
 
             CK_DELAYS_B0_1_B0_3_BYTE = 419,
+#ifndef __PPE__
             CK_DELAYS_B0_1_B0_3_FINE_START = 3,
             CK_DELAYS_B0_1_B0_3_FINE_LEN = 5,
             CK_DELAYS_B0_1_B0_3_COARSE_START = 1,
             CK_DELAYS_B0_1_B0_3_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B0_0_B0_1_BYTE = 420,
+#ifndef __PPE__
             CA_DELAYS_B0_0_B0_1_FINE_START = 3,
             CA_DELAYS_B0_0_B0_1_FINE_LEN = 5,
             CA_DELAYS_B0_0_B0_1_COARSE_START = 1,
             CA_DELAYS_B0_0_B0_1_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B0_2_B0_3_BYTE = 421,
+#ifndef __PPE__
             CA_DELAYS_B0_2_B0_3_FINE_START = 3,
             CA_DELAYS_B0_2_B0_3_FINE_LEN = 5,
             CA_DELAYS_B0_2_B0_3_COARSE_START = 1,
             CA_DELAYS_B0_2_B0_3_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B0_4_B0_5_BYTE = 422,
+#ifndef __PPE__
             CA_DELAYS_B0_4_B0_5_FINE_START = 3,
             CA_DELAYS_B0_4_B0_5_FINE_LEN = 5,
             CA_DELAYS_B0_4_B0_5_COARSE_START = 1,
             CA_DELAYS_B0_4_B0_5_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B0_6_B0_7_BYTE = 423,
+#ifndef __PPE__
             CA_DELAYS_B0_6_B0_7_FINE_START = 3,
             CA_DELAYS_B0_6_B0_7_FINE_LEN = 5,
             CA_DELAYS_B0_6_B0_7_COARSE_START = 1,
             CA_DELAYS_B0_6_B0_7_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B0_8_B0_9_BYTE = 424,
+#ifndef __PPE__
             CA_DELAYS_B0_8_B0_9_FINE_START = 3,
             CA_DELAYS_B0_8_B0_9_FINE_LEN = 5,
             CA_DELAYS_B0_8_B0_9_COARSE_START = 1,
             CA_DELAYS_B0_8_B0_9_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B0_10_B0_11_BYTE = 425,
+#ifndef __PPE__
             CA_DELAYS_B0_10_B0_11_FINE_START = 3,
             CA_DELAYS_B0_10_B0_11_FINE_LEN = 5,
             CA_DELAYS_B0_10_B0_11_COARSE_START = 1,
             CA_DELAYS_B0_10_B0_11_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B0_12_B0_13_BYTE = 426,
+#ifndef __PPE__
             CA_DELAYS_B0_12_B0_13_FINE_START = 3,
             CA_DELAYS_B0_12_B0_13_FINE_LEN = 5,
             CA_DELAYS_B0_12_B0_13_COARSE_START = 1,
             CA_DELAYS_B0_12_B0_13_COARSE_LEN = 1,
+#endif
 
             // Byte 428-438: Command Address Delay for Port A1
             // Byte 439: Reserved
             CS_DELAYS_A1_0_A1_2_BYTE = 428,
+#ifndef __PPE__
             CS_DELAYS_A1_0_A1_2_FINE_START = 3,
             CS_DELAYS_A1_0_A1_2_FINE_LEN = 5,
             CS_DELAYS_A1_0_A1_2_COARSE_START = 1,
             CS_DELAYS_A1_0_A1_2_COARSE_LEN = 1,
+#endif
 
             CS_DELAYS_A1_1_A1_3_BYTE = 429,
+#ifndef __PPE__
             CS_DELAYS_A1_1_A1_3_FINE_START = 3,
             CS_DELAYS_A1_1_A1_3_FINE_LEN = 5,
             CS_DELAYS_A1_1_A1_3_COARSE_START = 1,
             CS_DELAYS_A1_1_A1_3_COARSE_LEN = 1,
+#endif
 
             CK_DELAYS_A1_0_A1_2_BYTE = 430,
+#ifndef __PPE__
             CK_DELAYS_A1_0_A1_2_FINE_START = 3,
             CK_DELAYS_A1_0_A1_2_FINE_LEN = 5,
             CK_DELAYS_A1_0_A1_2_COARSE_START = 1,
             CK_DELAYS_A1_0_A1_2_COARSE_LEN = 1,
+#endif
 
             CK_DELAYS_A1_1_A1_3_BYTE = 431,
+#ifndef __PPE__
             CK_DELAYS_A1_1_A1_3_FINE_START = 3,
             CK_DELAYS_A1_1_A1_3_FINE_LEN = 5,
             CK_DELAYS_A1_1_A1_3_COARSE_START = 1,
             CK_DELAYS_A1_1_A1_3_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A1_0_A1_1_BYTE = 432,
+#ifndef __PPE__
             CA_DELAYS_A1_0_A1_1_FINE_START = 3,
             CA_DELAYS_A1_0_A1_1_FINE_LEN = 5,
             CA_DELAYS_A1_0_A1_1_COARSE_START = 1,
             CA_DELAYS_A1_0_A1_1_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A1_2_A1_3_BYTE = 433,
+#ifndef __PPE__
             CA_DELAYS_A1_2_A1_3_FINE_START = 3,
             CA_DELAYS_A1_2_A1_3_FINE_LEN = 5,
             CA_DELAYS_A1_2_A1_3_COARSE_START = 1,
             CA_DELAYS_A1_2_A1_3_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A1_4_A1_5_BYTE = 434,
+#ifndef __PPE__
             CA_DELAYS_A1_4_A1_5_FINE_START = 3,
             CA_DELAYS_A1_4_A1_5_FINE_LEN = 5,
             CA_DELAYS_A1_4_A1_5_COARSE_START = 1,
             CA_DELAYS_A1_4_A1_5_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A1_6_A1_7_BYTE = 435,
+#ifndef __PPE__
             CA_DELAYS_A1_6_A1_7_FINE_START = 3,
             CA_DELAYS_A1_6_A1_7_FINE_LEN = 5,
             CA_DELAYS_A1_6_A1_7_COARSE_START = 1,
             CA_DELAYS_A1_6_A1_7_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A1_8_A1_9_BYTE = 436,
+#ifndef __PPE__
             CA_DELAYS_A1_8_A1_9_FINE_START = 3,
             CA_DELAYS_A1_8_A1_9_FINE_LEN = 5,
             CA_DELAYS_A1_8_A1_9_COARSE_START = 1,
             CA_DELAYS_A1_8_A1_9_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A1_10_A1_11_BYTE = 437,
+#ifndef __PPE__
             CA_DELAYS_A1_10_A1_11_FINE_START = 3,
             CA_DELAYS_A1_10_A1_11_FINE_LEN = 5,
             CA_DELAYS_A1_10_A1_11_COARSE_START = 1,
             CA_DELAYS_A1_10_A1_11_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_A1_12_A1_13_BYTE = 438,
+#ifndef __PPE__
             CA_DELAYS_A1_12_A1_13_FINE_START = 3,
             CA_DELAYS_A1_12_A1_13_FINE_LEN = 5,
             CA_DELAYS_A1_12_A1_13_COARSE_START = 1,
             CA_DELAYS_A1_12_A1_13_COARSE_LEN = 1,
+#endif
 
             // Byte 440-450: Command Address Delay for Port B1
             // Byte 451: Reserved
             CS_DELAYS_B1_0_B1_2_BYTE = 440,
+#ifndef __PPE__
             CS_DELAYS_B1_0_B1_2_FINE_START = 3,
             CS_DELAYS_B1_0_B1_2_FINE_LEN = 5,
             CS_DELAYS_B1_0_B1_2_COARSE_START = 1,
             CS_DELAYS_B1_0_B1_2_COARSE_LEN = 1,
+#endif
 
             CS_DELAYS_B1_1_B1_3_BYTE = 441,
+#ifndef __PPE__
             CS_DELAYS_B1_1_B1_3_FINE_START = 3,
             CS_DELAYS_B1_1_B1_3_FINE_LEN = 5,
             CS_DELAYS_B1_1_B1_3_COARSE_START = 1,
             CS_DELAYS_B1_1_B1_3_COARSE_LEN = 1,
+#endif
 
             CK_DELAYS_B1_0_B1_2_BYTE = 442,
+#ifndef __PPE__
             CK_DELAYS_B1_0_B1_2_FINE_START = 3,
             CK_DELAYS_B1_0_B1_2_FINE_LEN = 5,
             CK_DELAYS_B1_0_B1_2_COARSE_START = 1,
             CK_DELAYS_B1_0_B1_2_COARSE_LEN = 1,
+#endif
 
             CK_DELAYS_B1_1_B1_3_BYTE = 443,
+#ifndef __PPE__
             CK_DELAYS_B1_1_B1_3_FINE_START = 3,
             CK_DELAYS_B1_1_B1_3_FINE_LEN = 5,
             CK_DELAYS_B1_1_B1_3_COARSE_START = 1,
             CK_DELAYS_B1_1_B1_3_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B1_0_B1_1_BYTE = 444,
+#ifndef __PPE__
             CA_DELAYS_B1_0_B1_1_FINE_START = 3,
             CA_DELAYS_B1_0_B1_1_FINE_LEN = 5,
             CA_DELAYS_B1_0_B1_1_COARSE_START = 1,
             CA_DELAYS_B1_0_B1_1_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B1_2_B1_3_BYTE = 445,
+#ifndef __PPE__
             CA_DELAYS_B1_2_B1_3_FINE_START = 3,
             CA_DELAYS_B1_2_B1_3_FINE_LEN = 5,
             CA_DELAYS_B1_2_B1_3_COARSE_START = 1,
             CA_DELAYS_B1_2_B1_3_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B1_4_B1_5_BYTE = 446,
+#ifndef __PPE__
             CA_DELAYS_B1_4_B1_5_FINE_START = 3,
             CA_DELAYS_B1_4_B1_5_FINE_LEN = 5,
             CA_DELAYS_B1_4_B1_5_COARSE_START = 1,
             CA_DELAYS_B1_4_B1_5_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B1_6_B1_7_BYTE = 447,
+#ifndef __PPE__
             CA_DELAYS_B1_6_B1_7_FINE_START = 3,
             CA_DELAYS_B1_6_B1_7_FINE_LEN = 5,
             CA_DELAYS_B1_6_B1_7_COARSE_START = 1,
             CA_DELAYS_B1_6_B1_7_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B1_8_B1_9_BYTE = 448,
+#ifndef __PPE__
             CA_DELAYS_B1_8_B1_9_FINE_START = 3,
             CA_DELAYS_B1_8_B1_9_FINE_LEN = 5,
             CA_DELAYS_B1_8_B1_9_COARSE_START = 1,
             CA_DELAYS_B1_8_B1_9_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B1_10_B1_11_BYTE = 449,
+#ifndef __PPE__
             CA_DELAYS_B1_10_B1_11_FINE_START = 3,
             CA_DELAYS_B1_10_B1_11_FINE_LEN = 5,
             CA_DELAYS_B1_10_B1_11_COARSE_START = 1,
             CA_DELAYS_B1_10_B1_11_COARSE_LEN = 1,
+#endif
 
             CA_DELAYS_B1_12_B1_13_BYTE = 450,
+#ifndef __PPE__
             CA_DELAYS_B1_12_B1_13_FINE_START = 3,
             CA_DELAYS_B1_12_B1_13_FINE_LEN = 5,
             CA_DELAYS_B1_12_B1_13_COARSE_START = 1,
             CA_DELAYS_B1_12_B1_13_COARSE_LEN = 1,
+#endif
 
             // Byte 478: PMIC0 SWA Voltage Offset
             PMIC0_SWA_VOLT_OFF_BYTE = 478,
@@ -1585,16 +1766,22 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         // Third field - bit length
 
         // Byte 0: Host Speed Supported
-        static constexpr field_t HOST_SPEED_SUPPORTED{HOST_SPEED_SUPPORTED_BYTE, HOST_SPEED_SUPPORTED_START, HOST_SPEED_SUPPORTED_LEN};
+#ifndef __PPE__
+        static constexpr field_t HOST_SPEED_SUPPORTED {HOST_SPEED_SUPPORTED_BYTE, HOST_SPEED_SUPPORTED_START, HOST_SPEED_SUPPORTED_LEN};
+#endif
 
         // Byte 1: 2N Requirements
         static constexpr field_t MODE_2N_REQUIREMENTS_25600{MODE_2N_REQUIREMENTS_BYTE, MODE_2N_REQUIREMENTS_25600_START, MODE_2N_REQUIREMENTS_25600_LEN};
-        static constexpr field_t MODE_2N_REQUIREMENTS_32000{MODE_2N_REQUIREMENTS_BYTE, MODE_2N_REQUIREMENTS_32000_START, MODE_2N_REQUIREMENTS_32000_LEN};
+#ifndef __PPE__
+        static constexpr field_t MODE_2N_REQUIREMENTS_32000 {MODE_2N_REQUIREMENTS_BYTE, MODE_2N_REQUIREMENTS_32000_START, MODE_2N_REQUIREMENTS_32000_LEN};
         static constexpr field_t MODE_2N_REQUIREMENTS_38400{MODE_2N_REQUIREMENTS_BYTE, MODE_2N_REQUIREMENTS_38400_START, MODE_2N_REQUIREMENTS_38400_LEN};
+#endif
 
         // Byte 2: Master Ranks and PHY Channels Supported
-        static constexpr field_t MASTER_RANKS_SUPPORTED{MASTER_RANKS_PHY_CHA_SUPPORTED_BYTE, MASTER_RANKS_SUPPORTED_START, MASTER_RANKS_SUPPORTED_LEN};
+#ifndef __PPE__
+        static constexpr field_t MASTER_RANKS_SUPPORTED {MASTER_RANKS_PHY_CHA_SUPPORTED_BYTE, MASTER_RANKS_SUPPORTED_START, MASTER_RANKS_SUPPORTED_LEN};
         static constexpr field_t PHY_CHANNEL_SUPPORTED{MASTER_RANKS_PHY_CHA_SUPPORTED_BYTE, PHY_CHANNEL_SUPPORTED_START, PHY_CHANNEL_SUPPORTED_LEN};
+#endif
 
         // Byte 3: PHY0 Channels A0/B0 Vref
         static constexpr field_t PHY0_CHANNELS_VREF{PHY0_CHANNELS_VREF_BYTE, PHY0_CHANNELS_VREF_START, PHY0_CHANNELS_VREF_LEN};
@@ -1633,26 +1820,40 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE0{DRAM_DFE_GAIN_BIAS_BYTE0_BYTE, DRAM_DFE_GAIN_BIAS_BYTE0_START, DRAM_DFE_GAIN_BIAS_BYTE0_LEN};
         static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE0_SIGN_BIT{DRAM_DFE_GAIN_BIAS_BYTE0_BYTE, DRAM_DFE_GAIN_BIAS_BYTE0_SIGN_BIT_START, DRAM_DFE_GAIN_BIAS_BYTE0_SIGN_BIT_LEN};
 
-        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE1{DRAM_DFE_GAIN_BIAS_BYTE1_BYTE, DRAM_DFE_GAIN_BIAS_BYTE1_START, DRAM_DFE_GAIN_BIAS_BYTE1_LEN};
+#ifndef __PPE__
+        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE1 {DRAM_DFE_GAIN_BIAS_BYTE1_BYTE, DRAM_DFE_GAIN_BIAS_BYTE1_START, DRAM_DFE_GAIN_BIAS_BYTE1_LEN};
         static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE1_SIGN_BIT{DRAM_DFE_GAIN_BIAS_BYTE1_BYTE, DRAM_DFE_GAIN_BIAS_BYTE1_SIGN_BIT_START, DRAM_DFE_GAIN_BIAS_BYTE1_SIGN_BIT_LEN};
+#endif
 
-        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE2{DRAM_DFE_GAIN_BIAS_BYTE2_BYTE, DRAM_DFE_GAIN_BIAS_BYTE2_START, DRAM_DFE_GAIN_BIAS_BYTE2_LEN};
+#ifndef __PPE__
+        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE2 {DRAM_DFE_GAIN_BIAS_BYTE2_BYTE, DRAM_DFE_GAIN_BIAS_BYTE2_START, DRAM_DFE_GAIN_BIAS_BYTE2_LEN};
         static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE2_SIGN_BIT{DRAM_DFE_GAIN_BIAS_BYTE2_BYTE, DRAM_DFE_GAIN_BIAS_BYTE2_SIGN_BIT_START, DRAM_DFE_GAIN_BIAS_BYTE2_SIGN_BIT_LEN};
+#endif
 
-        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE3{DRAM_DFE_GAIN_BIAS_BYTE3_BYTE, DRAM_DFE_GAIN_BIAS_BYTE3_START, DRAM_DFE_GAIN_BIAS_BYTE3_LEN};
+#ifndef __PPE__
+        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE3 {DRAM_DFE_GAIN_BIAS_BYTE3_BYTE, DRAM_DFE_GAIN_BIAS_BYTE3_START, DRAM_DFE_GAIN_BIAS_BYTE3_LEN};
         static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE3_SIGN_BIT{DRAM_DFE_GAIN_BIAS_BYTE3_BYTE, DRAM_DFE_GAIN_BIAS_BYTE3_SIGN_BIT_START, DRAM_DFE_GAIN_BIAS_BYTE3_SIGN_BIT_LEN};
+#endif
 
-        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE4{DRAM_DFE_GAIN_BIAS_BYTE4_BYTE, DRAM_DFE_GAIN_BIAS_BYTE4_START, DRAM_DFE_GAIN_BIAS_BYTE4_LEN};
+#ifndef __PPE__
+        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE4 {DRAM_DFE_GAIN_BIAS_BYTE4_BYTE, DRAM_DFE_GAIN_BIAS_BYTE4_START, DRAM_DFE_GAIN_BIAS_BYTE4_LEN};
         static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE4_SIGN_BIT{DRAM_DFE_GAIN_BIAS_BYTE4_BYTE, DRAM_DFE_GAIN_BIAS_BYTE4_SIGN_BIT_START, DRAM_DFE_GAIN_BIAS_BYTE4_SIGN_BIT_LEN};
+#endif
 
-        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE5{DRAM_DFE_GAIN_BIAS_BYTE5_BYTE, DRAM_DFE_GAIN_BIAS_BYTE5_START, DRAM_DFE_GAIN_BIAS_BYTE5_LEN};
+#ifndef __PPE__
+        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE5 {DRAM_DFE_GAIN_BIAS_BYTE5_BYTE, DRAM_DFE_GAIN_BIAS_BYTE5_START, DRAM_DFE_GAIN_BIAS_BYTE5_LEN};
         static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE5_SIGN_BIT{DRAM_DFE_GAIN_BIAS_BYTE5_BYTE, DRAM_DFE_GAIN_BIAS_BYTE5_SIGN_BIT_START, DRAM_DFE_GAIN_BIAS_BYTE5_SIGN_BIT_LEN};
+#endif
 
-        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE6{DRAM_DFE_GAIN_BIAS_BYTE6_BYTE, DRAM_DFE_GAIN_BIAS_BYTE6_START, DRAM_DFE_GAIN_BIAS_BYTE6_LEN};
+#ifndef __PPE__
+        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE6 {DRAM_DFE_GAIN_BIAS_BYTE6_BYTE, DRAM_DFE_GAIN_BIAS_BYTE6_START, DRAM_DFE_GAIN_BIAS_BYTE6_LEN};
         static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE6_SIGN_BIT{DRAM_DFE_GAIN_BIAS_BYTE6_BYTE, DRAM_DFE_GAIN_BIAS_BYTE6_SIGN_BIT_START, DRAM_DFE_GAIN_BIAS_BYTE6_SIGN_BIT_LEN};
+#endif
 
-        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE7{DRAM_DFE_GAIN_BIAS_BYTE7_BYTE, DRAM_DFE_GAIN_BIAS_BYTE7_START, DRAM_DFE_GAIN_BIAS_BYTE7_LEN};
+#ifndef __PPE__
+        static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE7 {DRAM_DFE_GAIN_BIAS_BYTE7_BYTE, DRAM_DFE_GAIN_BIAS_BYTE7_START, DRAM_DFE_GAIN_BIAS_BYTE7_LEN};
         static constexpr field_t DRAM_DFE_GAIN_BIAS_BYTE7_SIGN_BIT{DRAM_DFE_GAIN_BIAS_BYTE7_BYTE, DRAM_DFE_GAIN_BIAS_BYTE7_SIGN_BIT_START, DRAM_DFE_GAIN_BIAS_BYTE7_SIGN_BIT_LEN};
+#endif
 
         // Byte 27: PHY ODT Impedence
         static constexpr field_t PHY_ODT_IMPEDANCE{PHY_ODT_IMPEDANCE_BYTE, PHY_ODT_IMPEDANCE_START, PHY_ODT_IMPEDANCE_LEN};
@@ -1667,7 +1868,9 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t PHY_DRIVE_IMPEDANCE_CTRL2{PHY_DRIVE_IMPEDANCE_CTRL2_BYTE, PHY_DRIVE_IMPEDANCE_CTRL2_START, PHY_DRIVE_IMPEDANCE_CTRL2_LEN};
 
         // Byte 31: PHY Slew Rate DQ_DQS
-        static constexpr field_t PHY_SLEW_RATE_DQ_DQS{PHY_SLEW_RATE_DQ_DQS_BYTE, PHY_SLEW_RATE_DQ_DQS_START, PHY_SLEW_RATE_DQ_DQS_LEN};
+#ifndef __PPE__
+        static constexpr field_t PHY_SLEW_RATE_DQ_DQS {PHY_SLEW_RATE_DQ_DQS_BYTE, PHY_SLEW_RATE_DQ_DQS_START, PHY_SLEW_RATE_DQ_DQS_LEN};
+#endif
 
         // Byte 32: ATX impedance
         static constexpr field_t ATX_IMPEDANCE{ATX_IMPEDANCE_BYTE, ATX_IMPEDANCE_START, ATX_IMPEDANCE_LEN};
@@ -1685,8 +1888,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t CK_SLEW_RATE_RISE_BYTE1{CK_SLEW_RATE_RISE_BYTE1_BYTE, CK_SLEW_RATE_RISE_BYTE1_START, CK_SLEW_RATE_RISE_BYTE1_LEN};
 
         // Byte 49-50: DQ Slew rate rise
-        static constexpr field_t DQ_SLEW_RATE_RISE_BYTE0{DQ_SLEW_RATE_RISE_BYTE0_BYTE, DQ_SLEW_RATE_RISE_BYTE0_START, DQ_SLEW_RATE_RISE_BYTE0_LEN};
+#ifndef __PPE__
+        static constexpr field_t DQ_SLEW_RATE_RISE_BYTE0 {DQ_SLEW_RATE_RISE_BYTE0_BYTE, DQ_SLEW_RATE_RISE_BYTE0_START, DQ_SLEW_RATE_RISE_BYTE0_LEN};
         static constexpr field_t DQ_SLEW_RATE_RISE_BYTE1{DQ_SLEW_RATE_RISE_BYTE1_BYTE, DQ_SLEW_RATE_RISE_BYTE1_START, DQ_SLEW_RATE_RISE_BYTE1_LEN};
+#endif
 
         // Byte 60-67: RTT PARK and WR
         // BYTE0: A0 RANK0
@@ -1741,8 +1946,10 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t DRAM_RTT_NOM_BYTE7_WR{DRAM_RTT_NOM_BYTE7_BYTE, DRAM_RTT_NOM_BYTE7_WR_START, DRAM_RTT_NOM_BYTE7_WR_LEN};
 
         // Byte 76: PHY Equalization
-        static constexpr field_t PHY_EQUALIZATION_DFFE{PHY_EQUALIZATION_BYTE, PHY_EQUALIZATION_DFFE_START, PHY_EQUALIZATION_DFFE_LEN};
+#ifndef __PPE__
+        static constexpr field_t PHY_EQUALIZATION_DFFE {PHY_EQUALIZATION_BYTE, PHY_EQUALIZATION_DFFE_START, PHY_EQUALIZATION_DFFE_LEN};
         static constexpr field_t PHY_EQUALIZATION_RDFE{PHY_EQUALIZATION_BYTE, PHY_EQUALIZATION_RDFE_START, PHY_EQUALIZATION_RDFE_LEN};
+#endif
 
         // Byte 77: Non-Target ODT RD/WR
         static constexpr field_t NT_ODT_RD_A0_B0_RANK0{NT_ODT_BYTE, NT_ODT_RD_A0_B0_RANK0_START, NT_ODT_RD_A0_B0_RANK0_LEN};
@@ -1755,7 +1962,9 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t NT_ODT_WR_A1_B1_RANK1{NT_ODT_BYTE, NT_ODT_WR_A1_B1_RANK1_START, NT_ODT_WR_A1_B1_RANK1_LEN};
 
         // Byte 78: DFI Max Read Latency
-        static constexpr field_t DFIMRL_DDRCLK{DFI_MAX_RD_LATENCY_BYTE, DFIMRL_DDRCLK_START, DFIMRL_DDRCLK_LEN};
+#ifndef __PPE__
+        static constexpr field_t DFIMRL_DDRCLK {DFI_MAX_RD_LATENCY_BYTE, DFIMRL_DDRCLK_START, DFIMRL_DDRCLK_LEN};
+#endif
 
         // Byte 82-89: Group A CK/CS ODT and CA
         // BYTE0: A0 RANK0
@@ -1765,11 +1974,15 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t ODT_CA_GRPA_CK_BYTE1{ODT_CA_GRPA_BYTE1_BYTE, ODT_CA_GRPA_CK_BYTE1_START, ODT_CA_GRPA_CK_BYTE1_LEN};
         static constexpr field_t ODT_CA_GRPA_CS_BYTE1{ODT_CA_GRPA_BYTE1_BYTE, ODT_CA_GRPA_CS_BYTE1_START, ODT_CA_GRPA_CS_BYTE1_LEN};
         // BYTE2: B0 RANK0
-        static constexpr field_t ODT_CA_GRPA_CK_BYTE2{ODT_CA_GRPA_BYTE2_BYTE, ODT_CA_GRPA_CK_BYTE2_START, ODT_CA_GRPA_CK_BYTE2_LEN};
+#ifndef __PPE__
+        static constexpr field_t ODT_CA_GRPA_CK_BYTE2 {ODT_CA_GRPA_BYTE2_BYTE, ODT_CA_GRPA_CK_BYTE2_START, ODT_CA_GRPA_CK_BYTE2_LEN};
         static constexpr field_t ODT_CA_GRPA_CS_BYTE2{ODT_CA_GRPA_BYTE2_BYTE, ODT_CA_GRPA_CS_BYTE2_START, ODT_CA_GRPA_CS_BYTE2_LEN};
+#endif
         // BYTE3: B0 RANK1
-        static constexpr field_t ODT_CA_GRPA_CK_BYTE3{ODT_CA_GRPA_BYTE3_BYTE, ODT_CA_GRPA_CK_BYTE3_START, ODT_CA_GRPA_CK_BYTE3_LEN};
+#ifndef __PPE__
+        static constexpr field_t ODT_CA_GRPA_CK_BYTE3 {ODT_CA_GRPA_BYTE3_BYTE, ODT_CA_GRPA_CK_BYTE3_START, ODT_CA_GRPA_CK_BYTE3_LEN};
         static constexpr field_t ODT_CA_GRPA_CS_BYTE3{ODT_CA_GRPA_BYTE3_BYTE, ODT_CA_GRPA_CS_BYTE3_START, ODT_CA_GRPA_CS_BYTE3_LEN};
+#endif
         // BYTE4: A1 RANK0
         static constexpr field_t ODT_CA_GRPA_CK_BYTE4{ODT_CA_GRPA_BYTE4_BYTE, ODT_CA_GRPA_CK_BYTE4_START, ODT_CA_GRPA_CK_BYTE4_LEN};
         static constexpr field_t ODT_CA_GRPA_CS_BYTE4{ODT_CA_GRPA_BYTE4_BYTE, ODT_CA_GRPA_CS_BYTE4_START, ODT_CA_GRPA_CS_BYTE4_LEN};
@@ -1777,11 +1990,15 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t ODT_CA_GRPA_CK_BYTE5{ODT_CA_GRPA_BYTE5_BYTE, ODT_CA_GRPA_CK_BYTE5_START, ODT_CA_GRPA_CK_BYTE5_LEN};
         static constexpr field_t ODT_CA_GRPA_CS_BYTE5{ODT_CA_GRPA_BYTE5_BYTE, ODT_CA_GRPA_CS_BYTE5_START, ODT_CA_GRPA_CS_BYTE5_LEN};
         // BYTE6: B2 RANK0
-        static constexpr field_t ODT_CA_GRPA_CK_BYTE6{ODT_CA_GRPA_BYTE6_BYTE, ODT_CA_GRPA_CK_BYTE6_START, ODT_CA_GRPA_CK_BYTE6_LEN};
+#ifndef __PPE__
+        static constexpr field_t ODT_CA_GRPA_CK_BYTE6 {ODT_CA_GRPA_BYTE6_BYTE, ODT_CA_GRPA_CK_BYTE6_START, ODT_CA_GRPA_CK_BYTE6_LEN};
         static constexpr field_t ODT_CA_GRPA_CS_BYTE6{ODT_CA_GRPA_BYTE6_BYTE, ODT_CA_GRPA_CS_BYTE6_START, ODT_CA_GRPA_CS_BYTE6_LEN};
+#endif
         // BYTE7: B2 RANK1
-        static constexpr field_t ODT_CA_GRPA_CK_BYTE7{ODT_CA_GRPA_BYTE7_BYTE, ODT_CA_GRPA_CK_BYTE7_START, ODT_CA_GRPA_CK_BYTE7_LEN};
+#ifndef __PPE__
+        static constexpr field_t ODT_CA_GRPA_CK_BYTE7 {ODT_CA_GRPA_BYTE7_BYTE, ODT_CA_GRPA_CK_BYTE7_START, ODT_CA_GRPA_CK_BYTE7_LEN};
         static constexpr field_t ODT_CA_GRPA_CS_BYTE7{ODT_CA_GRPA_BYTE7_BYTE, ODT_CA_GRPA_CS_BYTE7_START, ODT_CA_GRPA_CS_BYTE7_LEN};
+#endif
 
         // Byte 90-97: Group B CK/CS ODT and CA
         // BYTE0: A0 RANK0
@@ -1791,11 +2008,15 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t ODT_CA_GRPB_CK_BYTE1{ODT_CA_GRPB_BYTE1_BYTE, ODT_CA_GRPB_CK_BYTE1_START, ODT_CA_GRPB_CK_BYTE1_LEN};
         static constexpr field_t ODT_CA_GRPB_CS_BYTE1{ODT_CA_GRPB_BYTE1_BYTE, ODT_CA_GRPB_CS_BYTE1_START, ODT_CA_GRPB_CS_BYTE1_LEN};
         // BYTE2: B0 RANK0
-        static constexpr field_t ODT_CA_GRPB_CK_BYTE2{ODT_CA_GRPB_BYTE2_BYTE, ODT_CA_GRPB_CK_BYTE2_START, ODT_CA_GRPB_CK_BYTE2_LEN};
+#ifndef __PPE__
+        static constexpr field_t ODT_CA_GRPB_CK_BYTE2 {ODT_CA_GRPB_BYTE2_BYTE, ODT_CA_GRPB_CK_BYTE2_START, ODT_CA_GRPB_CK_BYTE2_LEN};
         static constexpr field_t ODT_CA_GRPB_CS_BYTE2{ODT_CA_GRPB_BYTE2_BYTE, ODT_CA_GRPB_CS_BYTE2_START, ODT_CA_GRPB_CS_BYTE2_LEN};
+#endif
         // BYTE3: B0 RANK1
-        static constexpr field_t ODT_CA_GRPB_CK_BYTE3{ODT_CA_GRPB_BYTE3_BYTE, ODT_CA_GRPB_CK_BYTE3_START, ODT_CA_GRPB_CK_BYTE3_LEN};
+#ifndef __PPE__
+        static constexpr field_t ODT_CA_GRPB_CK_BYTE3 {ODT_CA_GRPB_BYTE3_BYTE, ODT_CA_GRPB_CK_BYTE3_START, ODT_CA_GRPB_CK_BYTE3_LEN};
         static constexpr field_t ODT_CA_GRPB_CS_BYTE3{ODT_CA_GRPB_BYTE3_BYTE, ODT_CA_GRPB_CS_BYTE3_START, ODT_CA_GRPB_CS_BYTE3_LEN};
+#endif
         // BYTE4: A1 RANK0
         static constexpr field_t ODT_CA_GRPB_CK_BYTE4{ODT_CA_GRPB_BYTE4_BYTE, ODT_CA_GRPB_CK_BYTE4_START, ODT_CA_GRPB_CK_BYTE4_LEN};
         static constexpr field_t ODT_CA_GRPB_CS_BYTE4{ODT_CA_GRPB_BYTE4_BYTE, ODT_CA_GRPB_CS_BYTE4_START, ODT_CA_GRPB_CS_BYTE4_LEN};
@@ -1803,17 +2024,23 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t ODT_CA_GRPB_CK_BYTE5{ODT_CA_GRPB_BYTE5_BYTE, ODT_CA_GRPB_CK_BYTE5_START, ODT_CA_GRPB_CK_BYTE5_LEN};
         static constexpr field_t ODT_CA_GRPB_CS_BYTE5{ODT_CA_GRPB_BYTE5_BYTE, ODT_CA_GRPB_CS_BYTE5_START, ODT_CA_GRPB_CS_BYTE5_LEN};
         // BYTE6: B2 RANK0
-        static constexpr field_t ODT_CA_GRPB_CK_BYTE6{ODT_CA_GRPB_BYTE6_BYTE, ODT_CA_GRPB_CK_BYTE6_START, ODT_CA_GRPB_CK_BYTE6_LEN};
+#ifndef __PPE__
+        static constexpr field_t ODT_CA_GRPB_CK_BYTE6 {ODT_CA_GRPB_BYTE6_BYTE, ODT_CA_GRPB_CK_BYTE6_START, ODT_CA_GRPB_CK_BYTE6_LEN};
         static constexpr field_t ODT_CA_GRPB_CS_BYTE6{ODT_CA_GRPB_BYTE6_BYTE, ODT_CA_GRPB_CS_BYTE6_START, ODT_CA_GRPB_CS_BYTE6_LEN};
+#endif
         // BYTE7: B2 RANK1
-        static constexpr field_t ODT_CA_GRPB_CK_BYTE7{ODT_CA_GRPB_BYTE7_BYTE, ODT_CA_GRPB_CK_BYTE7_START, ODT_CA_GRPB_CK_BYTE7_LEN};
+#ifndef __PPE__
+        static constexpr field_t ODT_CA_GRPB_CK_BYTE7 {ODT_CA_GRPB_BYTE7_BYTE, ODT_CA_GRPB_CK_BYTE7_START, ODT_CA_GRPB_CK_BYTE7_LEN};
         static constexpr field_t ODT_CA_GRPB_CS_BYTE7{ODT_CA_GRPB_BYTE7_BYTE, ODT_CA_GRPB_CS_BYTE7_START, ODT_CA_GRPB_CS_BYTE7_LEN};
+#endif
 
         // Byte 98-177: CK/CS ODT and CA per DRAM
         // BYTE0-BYTE9  : A0 RANK0
         static constexpr field_t ODT_CA_CK_BYTE0{ODT_CA_BYTE0_BYTE, ODT_CA_CK_BYTE0_START, ODT_CA_CK_BYTE0_LEN};
         static constexpr field_t ODT_CA_CS_BYTE0{ODT_CA_BYTE0_BYTE, ODT_CA_CS_BYTE0_START, ODT_CA_CS_BYTE0_LEN};
-        static constexpr field_t ODT_CA_BYTE0_EXP_GRP{ODT_CA_BYTE0_BYTE, ODT_CA_BYTE0_EXP_GRP_START, ODT_CA_BYTE0_EXP_GRP_LEN};
+#ifndef __PPE__
+        static constexpr field_t ODT_CA_BYTE0_EXP_GRP {ODT_CA_BYTE0_BYTE, ODT_CA_BYTE0_EXP_GRP_START, ODT_CA_BYTE0_EXP_GRP_LEN};
+#endif
 
         // Byte 178-185: CA ODT and DQS for GROUPA
         // BYTE0: A0 RANK0
@@ -1823,11 +2050,15 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t CA_ODT_DQS_GRPA_BYTE1{CA_ODT_DQS_GRPA_BYTE1_BYTE, CA_ODT_GRPA_BYTE1_START, CA_ODT_GRPA_BYTE1_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPA_BYTE1{CA_ODT_DQS_GRPA_BYTE1_BYTE, DQS_RTT_PARK_GRPA_BYTE1_START, DQS_RTT_PARK_GRPA_BYTE1_LEN};
         // BYTE2: B0 RANK0
-        static constexpr field_t CA_ODT_DQS_GRPA_BYTE2{CA_ODT_DQS_GRPA_BYTE2_BYTE, CA_ODT_GRPA_BYTE2_START, CA_ODT_GRPA_BYTE2_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_ODT_DQS_GRPA_BYTE2 {CA_ODT_DQS_GRPA_BYTE2_BYTE, CA_ODT_GRPA_BYTE2_START, CA_ODT_GRPA_BYTE2_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPA_BYTE2{CA_ODT_DQS_GRPA_BYTE2_BYTE, DQS_RTT_PARK_GRPA_BYTE2_START, DQS_RTT_PARK_GRPA_BYTE2_LEN};
+#endif
         // BYTE3: B0 RANK1
-        static constexpr field_t CA_ODT_DQS_GRPA_BYTE3{CA_ODT_DQS_GRPA_BYTE3_BYTE, CA_ODT_GRPA_BYTE3_START, CA_ODT_GRPA_BYTE3_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_ODT_DQS_GRPA_BYTE3 {CA_ODT_DQS_GRPA_BYTE3_BYTE, CA_ODT_GRPA_BYTE3_START, CA_ODT_GRPA_BYTE3_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPA_BYTE3{CA_ODT_DQS_GRPA_BYTE3_BYTE, DQS_RTT_PARK_GRPA_BYTE3_START, DQS_RTT_PARK_GRPA_BYTE3_LEN};
+#endif
         // BYTE4: A1 RANK0
         static constexpr field_t CA_ODT_DQS_GRPA_BYTE4{CA_ODT_DQS_GRPA_BYTE4_BYTE, CA_ODT_GRPA_BYTE4_START, CA_ODT_GRPA_BYTE4_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPA_BYTE4{CA_ODT_DQS_GRPA_BYTE4_BYTE, DQS_RTT_PARK_GRPA_BYTE4_START, DQS_RTT_PARK_GRPA_BYTE4_LEN};
@@ -1835,11 +2066,15 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t CA_ODT_DQS_GRPA_BYTE5{CA_ODT_DQS_GRPA_BYTE5_BYTE, CA_ODT_GRPA_BYTE5_START, CA_ODT_GRPA_BYTE5_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPA_BYTE5{CA_ODT_DQS_GRPA_BYTE5_BYTE, DQS_RTT_PARK_GRPA_BYTE5_START, DQS_RTT_PARK_GRPA_BYTE5_LEN};
         // BYTE6: B1 RANK0
-        static constexpr field_t CA_ODT_DQS_GRPA_BYTE6{CA_ODT_DQS_GRPA_BYTE6_BYTE, CA_ODT_GRPA_BYTE6_START, CA_ODT_GRPA_BYTE6_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_ODT_DQS_GRPA_BYTE6 {CA_ODT_DQS_GRPA_BYTE6_BYTE, CA_ODT_GRPA_BYTE6_START, CA_ODT_GRPA_BYTE6_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPA_BYTE6{CA_ODT_DQS_GRPA_BYTE6_BYTE, DQS_RTT_PARK_GRPA_BYTE6_START, DQS_RTT_PARK_GRPA_BYTE6_LEN};
+#endif
         // BYTE7: B1 RANK1
-        static constexpr field_t CA_ODT_DQS_GRPA_BYTE7{CA_ODT_DQS_GRPA_BYTE7_BYTE, CA_ODT_GRPA_BYTE7_START, CA_ODT_GRPA_BYTE7_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_ODT_DQS_GRPA_BYTE7 {CA_ODT_DQS_GRPA_BYTE7_BYTE, CA_ODT_GRPA_BYTE7_START, CA_ODT_GRPA_BYTE7_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPA_BYTE7{CA_ODT_DQS_GRPA_BYTE7_BYTE, DQS_RTT_PARK_GRPA_BYTE7_START, DQS_RTT_PARK_GRPA_BYTE7_LEN};
+#endif
 
         // Byte 186-193: CA ODT and DQS for GROUPB
         // BYTE0: A0 RANK0
@@ -1849,11 +2084,15 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t CA_ODT_DQS_GRPB_BYTE1{CA_ODT_DQS_GRPB_BYTE1_BYTE, CA_ODT_GRPB_BYTE1_START, CA_ODT_GRPB_BYTE1_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPB_BYTE1{CA_ODT_DQS_GRPB_BYTE1_BYTE, DQS_RTT_PARK_GRPB_BYTE1_START, DQS_RTT_PARK_GRPB_BYTE1_LEN};
         // BYTE2: B0 RANK0
-        static constexpr field_t CA_ODT_DQS_GRPB_BYTE2{CA_ODT_DQS_GRPB_BYTE2_BYTE, CA_ODT_GRPB_BYTE2_START, CA_ODT_GRPB_BYTE2_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_ODT_DQS_GRPB_BYTE2 {CA_ODT_DQS_GRPB_BYTE2_BYTE, CA_ODT_GRPB_BYTE2_START, CA_ODT_GRPB_BYTE2_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPB_BYTE2{CA_ODT_DQS_GRPB_BYTE2_BYTE, DQS_RTT_PARK_GRPB_BYTE2_START, DQS_RTT_PARK_GRPB_BYTE2_LEN};
+#endif
         // BYTE3: B0 RANK1
-        static constexpr field_t CA_ODT_DQS_GRPB_BYTE3{CA_ODT_DQS_GRPB_BYTE3_BYTE, CA_ODT_GRPB_BYTE3_START, CA_ODT_GRPB_BYTE3_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_ODT_DQS_GRPB_BYTE3 {CA_ODT_DQS_GRPB_BYTE3_BYTE, CA_ODT_GRPB_BYTE3_START, CA_ODT_GRPB_BYTE3_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPB_BYTE3{CA_ODT_DQS_GRPB_BYTE3_BYTE, DQS_RTT_PARK_GRPB_BYTE3_START, DQS_RTT_PARK_GRPB_BYTE3_LEN};
+#endif
         // BYTE4: A1 RANK0
         static constexpr field_t CA_ODT_DQS_GRPB_BYTE4{CA_ODT_DQS_GRPB_BYTE4_BYTE, CA_ODT_GRPB_BYTE4_START, CA_ODT_GRPB_BYTE4_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPB_BYTE4{CA_ODT_DQS_GRPB_BYTE4_BYTE, DQS_RTT_PARK_GRPB_BYTE4_START, DQS_RTT_PARK_GRPB_BYTE4_LEN};
@@ -1861,11 +2100,15 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t CA_ODT_DQS_GRPB_BYTE5{CA_ODT_DQS_GRPB_BYTE5_BYTE, CA_ODT_GRPB_BYTE5_START, CA_ODT_GRPB_BYTE5_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPB_BYTE5{CA_ODT_DQS_GRPB_BYTE5_BYTE, DQS_RTT_PARK_GRPB_BYTE5_START, DQS_RTT_PARK_GRPB_BYTE5_LEN};
         // BYTE6: B1 RANK0
-        static constexpr field_t CA_ODT_DQS_GRPB_BYTE6{CA_ODT_DQS_GRPB_BYTE6_BYTE, CA_ODT_GRPB_BYTE6_START, CA_ODT_GRPB_BYTE6_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_ODT_DQS_GRPB_BYTE6 {CA_ODT_DQS_GRPB_BYTE6_BYTE, CA_ODT_GRPB_BYTE6_START, CA_ODT_GRPB_BYTE6_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPB_BYTE6{CA_ODT_DQS_GRPB_BYTE6_BYTE, DQS_RTT_PARK_GRPB_BYTE6_START, DQS_RTT_PARK_GRPB_BYTE6_LEN};
+#endif
         // BYTE7: B1 RANK1
-        static constexpr field_t CA_ODT_DQS_GRPB_BYTE7{CA_ODT_DQS_GRPB_BYTE7_BYTE, CA_ODT_GRPB_BYTE7_START, CA_ODT_GRPB_BYTE7_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_ODT_DQS_GRPB_BYTE7 {CA_ODT_DQS_GRPB_BYTE7_BYTE, CA_ODT_GRPB_BYTE7_START, CA_ODT_GRPB_BYTE7_LEN};
         static constexpr field_t DQS_RTT_PARK_GRPB_BYTE7{CA_ODT_DQS_GRPB_BYTE7_BYTE, DQS_RTT_PARK_GRPB_BYTE7_START, DQS_RTT_PARK_GRPB_BYTE7_LEN};
+#endif
 
         // Byte 194-273: CA ODT and DQS per DRAM
         // BYTE0-BYTE9  : A0 RANK0
@@ -2175,188 +2418,290 @@ class fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>
         static constexpr field_t VREF_CS_OFFSET_BYTE0_ADD_SUB{VREF_OFFSET_STEP_BYTE0_BYTE, VREF_CS_OFFSET_BYTE0_ADD_SUB_START, VREF_CS_OFFSET_BYTE0_ADD_SUB_LEN};
 
         // BYTE9-BYTE19 : A0 RANK1
-        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE10{VREF_OFFSET_STEP_BYTE10_BYTE, VREF_CA_OFFSET_STEP_BYTE10_START, VREF_CA_OFFSET_STEP_BYTE10_LEN };
+#ifndef __PPE__
+        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE10 {VREF_OFFSET_STEP_BYTE10_BYTE, VREF_CA_OFFSET_STEP_BYTE10_START, VREF_CA_OFFSET_STEP_BYTE10_LEN };
         static constexpr field_t VREF_CS_OFFSET_STEP_BYTE10{VREF_OFFSET_STEP_BYTE10_BYTE, VREF_CS_OFFSET_STEP_BYTE10_START, VREF_CS_OFFSET_STEP_BYTE10_LEN};
         static constexpr field_t VREF_CA_OFFSET_BYTE10_ADD_SUB{VREF_OFFSET_STEP_BYTE10_BYTE, VREF_CA_OFFSET_BYTE10_ADD_SUB_START, VREF_CA_OFFSET_BYTE10_ADD_SUB_LEN};
         static constexpr field_t VREF_CS_OFFSET_BYTE10_ADD_SUB{VREF_OFFSET_STEP_BYTE10_BYTE, VREF_CS_OFFSET_BYTE10_ADD_SUB_START, VREF_CS_OFFSET_BYTE10_ADD_SUB_LEN};
+#endif
 
         // BYTE20-BYTE29: B0 RANK0
-        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE20{VREF_OFFSET_STEP_BYTE20_BYTE, VREF_CA_OFFSET_STEP_BYTE20_START, VREF_CA_OFFSET_STEP_BYTE20_LEN };
+#ifndef __PPE__
+        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE20 {VREF_OFFSET_STEP_BYTE20_BYTE, VREF_CA_OFFSET_STEP_BYTE20_START, VREF_CA_OFFSET_STEP_BYTE20_LEN };
         static constexpr field_t VREF_CS_OFFSET_STEP_BYTE20{VREF_OFFSET_STEP_BYTE20_BYTE, VREF_CS_OFFSET_STEP_BYTE20_START, VREF_CS_OFFSET_STEP_BYTE20_LEN};
         static constexpr field_t VREF_CA_OFFSET_BYTE20_ADD_SUB{VREF_OFFSET_STEP_BYTE20_BYTE, VREF_CA_OFFSET_BYTE20_ADD_SUB_START, VREF_CA_OFFSET_BYTE20_ADD_SUB_LEN};
         static constexpr field_t VREF_CS_OFFSET_BYTE20_ADD_SUB{VREF_OFFSET_STEP_BYTE20_BYTE, VREF_CS_OFFSET_BYTE20_ADD_SUB_START, VREF_CS_OFFSET_BYTE20_ADD_SUB_LEN};
+#endif
 
         // BYTE30-BYTE39: B0 RANK1
-        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE30{VREF_OFFSET_STEP_BYTE30_BYTE, VREF_CA_OFFSET_STEP_BYTE30_START, VREF_CA_OFFSET_STEP_BYTE30_LEN };
+#ifndef __PPE__
+        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE30 {VREF_OFFSET_STEP_BYTE30_BYTE, VREF_CA_OFFSET_STEP_BYTE30_START, VREF_CA_OFFSET_STEP_BYTE30_LEN };
         static constexpr field_t VREF_CS_OFFSET_STEP_BYTE30{VREF_OFFSET_STEP_BYTE30_BYTE, VREF_CS_OFFSET_STEP_BYTE30_START, VREF_CS_OFFSET_STEP_BYTE30_LEN};
         static constexpr field_t VREF_CA_OFFSET_BYTE30_ADD_SUB{VREF_OFFSET_STEP_BYTE30_BYTE, VREF_CA_OFFSET_BYTE30_ADD_SUB_START, VREF_CA_OFFSET_BYTE30_ADD_SUB_LEN};
         static constexpr field_t VREF_CS_OFFSET_BYTE30_ADD_SUB{VREF_OFFSET_STEP_BYTE30_BYTE, VREF_CS_OFFSET_BYTE30_ADD_SUB_START, VREF_CS_OFFSET_BYTE30_ADD_SUB_LEN};
+#endif
 
         // BYTE40-BYTE49: A1 RANK0
-        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE40{VREF_OFFSET_STEP_BYTE40_BYTE, VREF_CA_OFFSET_STEP_BYTE40_START, VREF_CA_OFFSET_STEP_BYTE40_LEN };
+#ifndef __PPE__
+        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE40 {VREF_OFFSET_STEP_BYTE40_BYTE, VREF_CA_OFFSET_STEP_BYTE40_START, VREF_CA_OFFSET_STEP_BYTE40_LEN };
         static constexpr field_t VREF_CS_OFFSET_STEP_BYTE40{VREF_OFFSET_STEP_BYTE40_BYTE, VREF_CS_OFFSET_STEP_BYTE40_START, VREF_CS_OFFSET_STEP_BYTE40_LEN};
         static constexpr field_t VREF_CA_OFFSET_BYTE40_ADD_SUB{VREF_OFFSET_STEP_BYTE40_BYTE, VREF_CA_OFFSET_BYTE40_ADD_SUB_START, VREF_CA_OFFSET_BYTE40_ADD_SUB_LEN};
         static constexpr field_t VREF_CS_OFFSET_BYTE40_ADD_SUB{VREF_OFFSET_STEP_BYTE40_BYTE, VREF_CS_OFFSET_BYTE40_ADD_SUB_START, VREF_CS_OFFSET_BYTE40_ADD_SUB_LEN};
+#endif
 
         // BYTE50-BYTE59: A1 RANK1
-        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE50{VREF_OFFSET_STEP_BYTE50_BYTE, VREF_CA_OFFSET_STEP_BYTE50_START, VREF_CA_OFFSET_STEP_BYTE50_LEN };
+#ifndef __PPE__
+        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE50 {VREF_OFFSET_STEP_BYTE50_BYTE, VREF_CA_OFFSET_STEP_BYTE50_START, VREF_CA_OFFSET_STEP_BYTE50_LEN };
         static constexpr field_t VREF_CS_OFFSET_STEP_BYTE50{VREF_OFFSET_STEP_BYTE50_BYTE, VREF_CS_OFFSET_STEP_BYTE50_START, VREF_CS_OFFSET_STEP_BYTE50_LEN};
         static constexpr field_t VREF_CA_OFFSET_BYTE50_ADD_SUB{VREF_OFFSET_STEP_BYTE50_BYTE, VREF_CA_OFFSET_BYTE50_ADD_SUB_START, VREF_CA_OFFSET_BYTE50_ADD_SUB_LEN};
         static constexpr field_t VREF_CS_OFFSET_BYTE50_ADD_SUB{VREF_OFFSET_STEP_BYTE50_BYTE, VREF_CS_OFFSET_BYTE50_ADD_SUB_START, VREF_CS_OFFSET_BYTE50_ADD_SUB_LEN};
+#endif
 
         // BYTE60-BYTE69: B2 RANK0
-        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE60{VREF_OFFSET_STEP_BYTE60_BYTE, VREF_CA_OFFSET_STEP_BYTE60_START, VREF_CA_OFFSET_STEP_BYTE60_LEN };
+#ifndef __PPE__
+        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE60 {VREF_OFFSET_STEP_BYTE60_BYTE, VREF_CA_OFFSET_STEP_BYTE60_START, VREF_CA_OFFSET_STEP_BYTE60_LEN };
         static constexpr field_t VREF_CS_OFFSET_STEP_BYTE60{VREF_OFFSET_STEP_BYTE60_BYTE, VREF_CS_OFFSET_STEP_BYTE60_START, VREF_CS_OFFSET_STEP_BYTE60_LEN};
         static constexpr field_t VREF_CA_OFFSET_BYTE60_ADD_SUB{VREF_OFFSET_STEP_BYTE60_BYTE, VREF_CA_OFFSET_BYTE60_ADD_SUB_START, VREF_CA_OFFSET_BYTE60_ADD_SUB_LEN};
         static constexpr field_t VREF_CS_OFFSET_BYTE60_ADD_SUB{VREF_OFFSET_STEP_BYTE60_BYTE, VREF_CS_OFFSET_BYTE60_ADD_SUB_START, VREF_CS_OFFSET_BYTE60_ADD_SUB_LEN};
+#endif
 
         // BYTE70-BYTE79: B2 RANK1
-        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE70{VREF_OFFSET_STEP_BYTE70_BYTE, VREF_CA_OFFSET_STEP_BYTE70_START, VREF_CA_OFFSET_STEP_BYTE70_LEN };
+#ifndef __PPE__
+        static constexpr field_t VREF_CA_OFFSET_STEP_BYTE70 {VREF_OFFSET_STEP_BYTE70_BYTE, VREF_CA_OFFSET_STEP_BYTE70_START, VREF_CA_OFFSET_STEP_BYTE70_LEN };
         static constexpr field_t VREF_CS_OFFSET_STEP_BYTE70{VREF_OFFSET_STEP_BYTE70_BYTE, VREF_CS_OFFSET_STEP_BYTE70_START, VREF_CS_OFFSET_STEP_BYTE70_LEN};
         static constexpr field_t VREF_CA_OFFSET_BYTE70_ADD_SUB{VREF_OFFSET_STEP_BYTE70_BYTE, VREF_CA_OFFSET_BYTE70_ADD_SUB_START, VREF_CA_OFFSET_BYTE70_ADD_SUB_LEN};
         static constexpr field_t VREF_CS_OFFSET_BYTE70_ADD_SUB{VREF_OFFSET_STEP_BYTE70_BYTE, VREF_CS_OFFSET_BYTE70_ADD_SUB_START, VREF_CS_OFFSET_BYTE70_ADD_SUB_LEN};
+#endif
 
         // Byte 404-414: Command Address Delay for Port A0
         // Byte 415: Reserved
-        static constexpr field_t CS_DELAYS_A0_0_A0_2_FINE{CS_DELAYS_A0_0_A0_2_BYTE, CS_DELAYS_A0_0_A0_2_FINE_START, CS_DELAYS_A0_0_A0_2_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CS_DELAYS_A0_0_A0_2_FINE {CS_DELAYS_A0_0_A0_2_BYTE, CS_DELAYS_A0_0_A0_2_FINE_START, CS_DELAYS_A0_0_A0_2_FINE_LEN};
         static constexpr field_t CS_DELAYS_A0_0_A0_2_COARSE{CS_DELAYS_A0_0_A0_2_BYTE, CS_DELAYS_A0_0_A0_2_COARSE_START, CS_DELAYS_A0_0_A0_2_COARSE_LEN};
+#endif
 
-        static constexpr field_t CS_DELAYS_A0_1_A0_3_FINE{CS_DELAYS_A0_1_A0_3_BYTE, CS_DELAYS_A0_1_A0_3_FINE_START, CS_DELAYS_A0_1_A0_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CS_DELAYS_A0_1_A0_3_FINE {CS_DELAYS_A0_1_A0_3_BYTE, CS_DELAYS_A0_1_A0_3_FINE_START, CS_DELAYS_A0_1_A0_3_FINE_LEN};
         static constexpr field_t CS_DELAYS_A0_1_A0_3_COARSE{CS_DELAYS_A0_1_A0_3_BYTE, CS_DELAYS_A0_1_A0_3_COARSE_START, CS_DELAYS_A0_1_A0_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CK_DELAYS_A0_0_A0_2_FINE{CK_DELAYS_A0_0_A0_2_BYTE, CK_DELAYS_A0_0_A0_2_FINE_START, CK_DELAYS_A0_0_A0_2_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CK_DELAYS_A0_0_A0_2_FINE {CK_DELAYS_A0_0_A0_2_BYTE, CK_DELAYS_A0_0_A0_2_FINE_START, CK_DELAYS_A0_0_A0_2_FINE_LEN};
         static constexpr field_t CK_DELAYS_A0_0_A0_2_COARSE{CK_DELAYS_A0_0_A0_2_BYTE, CK_DELAYS_A0_0_A0_2_COARSE_START, CK_DELAYS_A0_0_A0_2_COARSE_LEN};
+#endif
 
-        static constexpr field_t CK_DELAYS_A0_1_A0_3_FINE{CK_DELAYS_A0_1_A0_3_BYTE, CK_DELAYS_A0_1_A0_3_FINE_START, CK_DELAYS_A0_1_A0_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CK_DELAYS_A0_1_A0_3_FINE {CK_DELAYS_A0_1_A0_3_BYTE, CK_DELAYS_A0_1_A0_3_FINE_START, CK_DELAYS_A0_1_A0_3_FINE_LEN};
         static constexpr field_t CK_DELAYS_A0_1_A0_3_COARSE{CK_DELAYS_A0_1_A0_3_BYTE, CK_DELAYS_A0_1_A0_3_COARSE_START, CK_DELAYS_A0_1_A0_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A0_0_A0_1_FINE{CA_DELAYS_A0_0_A0_1_BYTE, CA_DELAYS_A0_0_A0_1_FINE_START, CA_DELAYS_A0_0_A0_1_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A0_0_A0_1_FINE {CA_DELAYS_A0_0_A0_1_BYTE, CA_DELAYS_A0_0_A0_1_FINE_START, CA_DELAYS_A0_0_A0_1_FINE_LEN};
         static constexpr field_t CA_DELAYS_A0_0_A0_1_COARSE{CA_DELAYS_A0_0_A0_1_BYTE, CA_DELAYS_A0_0_A0_1_COARSE_START, CA_DELAYS_A0_0_A0_1_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A0_2_A0_3_FINE{CA_DELAYS_A0_2_A0_3_BYTE, CA_DELAYS_A0_2_A0_3_FINE_START, CA_DELAYS_A0_2_A0_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A0_2_A0_3_FINE {CA_DELAYS_A0_2_A0_3_BYTE, CA_DELAYS_A0_2_A0_3_FINE_START, CA_DELAYS_A0_2_A0_3_FINE_LEN};
         static constexpr field_t CA_DELAYS_A0_2_A0_3_COARSE{CA_DELAYS_A0_2_A0_3_BYTE, CA_DELAYS_A0_2_A0_3_COARSE_START, CA_DELAYS_A0_2_A0_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A0_4_A0_5_FINE{CA_DELAYS_A0_4_A0_5_BYTE, CA_DELAYS_A0_4_A0_5_FINE_START, CA_DELAYS_A0_4_A0_5_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A0_4_A0_5_FINE {CA_DELAYS_A0_4_A0_5_BYTE, CA_DELAYS_A0_4_A0_5_FINE_START, CA_DELAYS_A0_4_A0_5_FINE_LEN};
         static constexpr field_t CA_DELAYS_A0_4_A0_5_COARSE{CA_DELAYS_A0_4_A0_5_BYTE, CA_DELAYS_A0_4_A0_5_COARSE_START, CA_DELAYS_A0_4_A0_5_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A0_6_A0_7_FINE{CA_DELAYS_A0_6_A0_7_BYTE, CA_DELAYS_A0_6_A0_7_FINE_START, CA_DELAYS_A0_6_A0_7_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A0_6_A0_7_FINE {CA_DELAYS_A0_6_A0_7_BYTE, CA_DELAYS_A0_6_A0_7_FINE_START, CA_DELAYS_A0_6_A0_7_FINE_LEN};
         static constexpr field_t CA_DELAYS_A0_6_A0_7_COARSE{CA_DELAYS_A0_6_A0_7_BYTE, CA_DELAYS_A0_6_A0_7_COARSE_START, CA_DELAYS_A0_6_A0_7_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A0_8_A0_9_FINE{CA_DELAYS_A0_8_A0_9_BYTE, CA_DELAYS_A0_8_A0_9_FINE_START, CA_DELAYS_A0_8_A0_9_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A0_8_A0_9_FINE {CA_DELAYS_A0_8_A0_9_BYTE, CA_DELAYS_A0_8_A0_9_FINE_START, CA_DELAYS_A0_8_A0_9_FINE_LEN};
         static constexpr field_t CA_DELAYS_A0_8_A0_9_COARSE{CA_DELAYS_A0_8_A0_9_BYTE, CA_DELAYS_A0_8_A0_9_COARSE_START, CA_DELAYS_A0_8_A0_9_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A0_10_A0_11_FINE{CA_DELAYS_A0_10_A0_11_BYTE, CA_DELAYS_A0_10_A0_11_FINE_START, CA_DELAYS_A0_10_A0_11_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A0_10_A0_11_FINE {CA_DELAYS_A0_10_A0_11_BYTE, CA_DELAYS_A0_10_A0_11_FINE_START, CA_DELAYS_A0_10_A0_11_FINE_LEN};
         static constexpr field_t CA_DELAYS_A0_10_A0_11_COARSE{CA_DELAYS_A0_10_A0_11_BYTE, CA_DELAYS_A0_10_A0_11_COARSE_START, CA_DELAYS_A0_10_A0_11_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A0_12_A0_13_FINE{CA_DELAYS_A0_12_A0_13_BYTE, CA_DELAYS_A0_12_A0_13_FINE_START, CA_DELAYS_A0_12_A0_13_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A0_12_A0_13_FINE {CA_DELAYS_A0_12_A0_13_BYTE, CA_DELAYS_A0_12_A0_13_FINE_START, CA_DELAYS_A0_12_A0_13_FINE_LEN};
         static constexpr field_t CA_DELAYS_A0_12_A0_13_COARSE{CA_DELAYS_A0_12_A0_13_BYTE, CA_DELAYS_A0_12_A0_13_COARSE_START, CA_DELAYS_A0_12_A0_13_COARSE_LEN};
+#endif
 
 
         // Byte 416-426: Command Address Delay for Port B0
         // Byte 427: Reserved
-        static constexpr field_t CS_DELAYS_B0_0_B0_2_FINE{CS_DELAYS_B0_0_B0_2_BYTE, CS_DELAYS_B0_0_B0_2_FINE_START, CS_DELAYS_B0_0_B0_2_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CS_DELAYS_B0_0_B0_2_FINE {CS_DELAYS_B0_0_B0_2_BYTE, CS_DELAYS_B0_0_B0_2_FINE_START, CS_DELAYS_B0_0_B0_2_FINE_LEN};
         static constexpr field_t CS_DELAYS_B0_0_B0_2_COARSE{CS_DELAYS_B0_0_B0_2_BYTE, CS_DELAYS_B0_0_B0_2_COARSE_START, CS_DELAYS_B0_0_B0_2_COARSE_LEN};
+#endif
 
-        static constexpr field_t CS_DELAYS_B0_1_B0_3_FINE{CS_DELAYS_B0_1_B0_3_BYTE, CS_DELAYS_B0_1_B0_3_FINE_START, CS_DELAYS_B0_1_B0_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CS_DELAYS_B0_1_B0_3_FINE {CS_DELAYS_B0_1_B0_3_BYTE, CS_DELAYS_B0_1_B0_3_FINE_START, CS_DELAYS_B0_1_B0_3_FINE_LEN};
         static constexpr field_t CS_DELAYS_B0_1_B0_3_COARSE{CS_DELAYS_B0_1_B0_3_BYTE, CS_DELAYS_B0_1_B0_3_COARSE_START, CS_DELAYS_B0_1_B0_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CK_DELAYS_B0_0_B0_2_FINE{CK_DELAYS_B0_0_B0_2_BYTE, CK_DELAYS_B0_0_B0_2_FINE_START, CK_DELAYS_B0_0_B0_2_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CK_DELAYS_B0_0_B0_2_FINE {CK_DELAYS_B0_0_B0_2_BYTE, CK_DELAYS_B0_0_B0_2_FINE_START, CK_DELAYS_B0_0_B0_2_FINE_LEN};
         static constexpr field_t CK_DELAYS_B0_0_B0_2_COARSE{CK_DELAYS_B0_0_B0_2_BYTE, CK_DELAYS_B0_0_B0_2_COARSE_START, CK_DELAYS_B0_0_B0_2_COARSE_LEN};
+#endif
 
-        static constexpr field_t CK_DELAYS_B0_1_B0_3_FINE{CK_DELAYS_B0_1_B0_3_BYTE, CK_DELAYS_B0_1_B0_3_FINE_START, CK_DELAYS_B0_1_B0_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CK_DELAYS_B0_1_B0_3_FINE {CK_DELAYS_B0_1_B0_3_BYTE, CK_DELAYS_B0_1_B0_3_FINE_START, CK_DELAYS_B0_1_B0_3_FINE_LEN};
         static constexpr field_t CK_DELAYS_B0_1_B0_3_COARSE{CK_DELAYS_B0_1_B0_3_BYTE, CK_DELAYS_B0_1_B0_3_COARSE_START, CK_DELAYS_B0_1_B0_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B0_0_B0_1_FINE{CA_DELAYS_B0_0_B0_1_BYTE, CA_DELAYS_B0_0_B0_1_FINE_START, CA_DELAYS_B0_0_B0_1_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B0_0_B0_1_FINE {CA_DELAYS_B0_0_B0_1_BYTE, CA_DELAYS_B0_0_B0_1_FINE_START, CA_DELAYS_B0_0_B0_1_FINE_LEN};
         static constexpr field_t CA_DELAYS_B0_0_B0_1_COARSE{CA_DELAYS_B0_0_B0_1_BYTE, CA_DELAYS_B0_0_B0_1_COARSE_START, CA_DELAYS_B0_0_B0_1_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B0_2_B0_3_FINE{CA_DELAYS_B0_2_B0_3_BYTE, CA_DELAYS_B0_2_B0_3_FINE_START, CA_DELAYS_B0_2_B0_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B0_2_B0_3_FINE {CA_DELAYS_B0_2_B0_3_BYTE, CA_DELAYS_B0_2_B0_3_FINE_START, CA_DELAYS_B0_2_B0_3_FINE_LEN};
         static constexpr field_t CA_DELAYS_B0_2_B0_3_COARSE{CA_DELAYS_B0_2_B0_3_BYTE, CA_DELAYS_B0_2_B0_3_COARSE_START, CA_DELAYS_B0_2_B0_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B0_4_B0_5_FINE{CA_DELAYS_B0_4_B0_5_BYTE, CA_DELAYS_B0_4_B0_5_FINE_START, CA_DELAYS_B0_4_B0_5_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B0_4_B0_5_FINE {CA_DELAYS_B0_4_B0_5_BYTE, CA_DELAYS_B0_4_B0_5_FINE_START, CA_DELAYS_B0_4_B0_5_FINE_LEN};
         static constexpr field_t CA_DELAYS_B0_4_B0_5_COARSE{CA_DELAYS_B0_4_B0_5_BYTE, CA_DELAYS_B0_4_B0_5_COARSE_START, CA_DELAYS_B0_4_B0_5_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B0_6_B0_7_FINE{CA_DELAYS_B0_6_B0_7_BYTE, CA_DELAYS_B0_6_B0_7_FINE_START, CA_DELAYS_B0_6_B0_7_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B0_6_B0_7_FINE {CA_DELAYS_B0_6_B0_7_BYTE, CA_DELAYS_B0_6_B0_7_FINE_START, CA_DELAYS_B0_6_B0_7_FINE_LEN};
         static constexpr field_t CA_DELAYS_B0_6_B0_7_COARSE{CA_DELAYS_B0_6_B0_7_BYTE, CA_DELAYS_B0_6_B0_7_COARSE_START, CA_DELAYS_B0_6_B0_7_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B0_8_B0_9_FINE{CA_DELAYS_B0_8_B0_9_BYTE, CA_DELAYS_B0_8_B0_9_FINE_START, CA_DELAYS_B0_8_B0_9_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B0_8_B0_9_FINE {CA_DELAYS_B0_8_B0_9_BYTE, CA_DELAYS_B0_8_B0_9_FINE_START, CA_DELAYS_B0_8_B0_9_FINE_LEN};
         static constexpr field_t CA_DELAYS_B0_8_B0_9_COARSE{CA_DELAYS_B0_8_B0_9_BYTE, CA_DELAYS_B0_8_B0_9_COARSE_START, CA_DELAYS_B0_8_B0_9_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B0_10_B0_11_FINE{CA_DELAYS_B0_10_B0_11_BYTE, CA_DELAYS_B0_10_B0_11_FINE_START, CA_DELAYS_B0_10_B0_11_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B0_10_B0_11_FINE {CA_DELAYS_B0_10_B0_11_BYTE, CA_DELAYS_B0_10_B0_11_FINE_START, CA_DELAYS_B0_10_B0_11_FINE_LEN};
         static constexpr field_t CA_DELAYS_B0_10_B0_11_COARSE{CA_DELAYS_B0_10_B0_11_BYTE, CA_DELAYS_B0_10_B0_11_COARSE_START, CA_DELAYS_B0_10_B0_11_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B0_12_B0_13_FINE{CA_DELAYS_B0_12_B0_13_BYTE, CA_DELAYS_B0_12_B0_13_FINE_START, CA_DELAYS_B0_12_B0_13_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B0_12_B0_13_FINE {CA_DELAYS_B0_12_B0_13_BYTE, CA_DELAYS_B0_12_B0_13_FINE_START, CA_DELAYS_B0_12_B0_13_FINE_LEN};
         static constexpr field_t CA_DELAYS_B0_12_B0_13_COARSE{CA_DELAYS_B0_12_B0_13_BYTE, CA_DELAYS_B0_12_B0_13_COARSE_START, CA_DELAYS_B0_12_B0_13_COARSE_LEN};
+#endif
 
 
         // Byte 428-438: Command Address Delay for Port A1
         // Byte 439: Reserved
-        static constexpr field_t CS_DELAYS_A1_0_A1_2_FINE{CS_DELAYS_A1_0_A1_2_BYTE, CS_DELAYS_A1_0_A1_2_FINE_START, CS_DELAYS_A1_0_A1_2_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CS_DELAYS_A1_0_A1_2_FINE {CS_DELAYS_A1_0_A1_2_BYTE, CS_DELAYS_A1_0_A1_2_FINE_START, CS_DELAYS_A1_0_A1_2_FINE_LEN};
         static constexpr field_t CS_DELAYS_A1_0_A1_2_COARSE{CS_DELAYS_A1_0_A1_2_BYTE, CS_DELAYS_A1_0_A1_2_COARSE_START, CS_DELAYS_A1_0_A1_2_COARSE_LEN};
+#endif
 
-        static constexpr field_t CS_DELAYS_A1_1_A1_3_FINE{CS_DELAYS_A1_1_A1_3_BYTE, CS_DELAYS_A1_1_A1_3_FINE_START, CS_DELAYS_A1_1_A1_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CS_DELAYS_A1_1_A1_3_FINE {CS_DELAYS_A1_1_A1_3_BYTE, CS_DELAYS_A1_1_A1_3_FINE_START, CS_DELAYS_A1_1_A1_3_FINE_LEN};
         static constexpr field_t CS_DELAYS_A1_1_A1_3_COARSE{CS_DELAYS_A1_1_A1_3_BYTE, CS_DELAYS_A1_1_A1_3_COARSE_START, CS_DELAYS_A1_1_A1_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CK_DELAYS_A1_0_A1_2_FINE{CK_DELAYS_A1_0_A1_2_BYTE, CK_DELAYS_A1_0_A1_2_FINE_START, CK_DELAYS_A1_0_A1_2_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CK_DELAYS_A1_0_A1_2_FINE {CK_DELAYS_A1_0_A1_2_BYTE, CK_DELAYS_A1_0_A1_2_FINE_START, CK_DELAYS_A1_0_A1_2_FINE_LEN};
         static constexpr field_t CK_DELAYS_A1_0_A1_2_COARSE{CK_DELAYS_A1_0_A1_2_BYTE, CK_DELAYS_A1_0_A1_2_COARSE_START, CK_DELAYS_A1_0_A1_2_COARSE_LEN};
+#endif
 
-        static constexpr field_t CK_DELAYS_A1_1_A1_3_FINE{CK_DELAYS_A1_1_A1_3_BYTE, CK_DELAYS_A1_1_A1_3_FINE_START, CK_DELAYS_A1_1_A1_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CK_DELAYS_A1_1_A1_3_FINE {CK_DELAYS_A1_1_A1_3_BYTE, CK_DELAYS_A1_1_A1_3_FINE_START, CK_DELAYS_A1_1_A1_3_FINE_LEN};
         static constexpr field_t CK_DELAYS_A1_1_A1_3_COARSE{CK_DELAYS_A1_1_A1_3_BYTE, CK_DELAYS_A1_1_A1_3_COARSE_START, CK_DELAYS_A1_1_A1_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A1_0_A1_1_FINE{CA_DELAYS_A1_0_A1_1_BYTE, CA_DELAYS_A1_0_A1_1_FINE_START, CA_DELAYS_A1_0_A1_1_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A1_0_A1_1_FINE {CA_DELAYS_A1_0_A1_1_BYTE, CA_DELAYS_A1_0_A1_1_FINE_START, CA_DELAYS_A1_0_A1_1_FINE_LEN};
         static constexpr field_t CA_DELAYS_A1_0_A1_1_COARSE{CA_DELAYS_A1_0_A1_1_BYTE, CA_DELAYS_A1_0_A1_1_COARSE_START, CA_DELAYS_A1_0_A1_1_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A1_2_A1_3_FINE{CA_DELAYS_A1_2_A1_3_BYTE, CA_DELAYS_A1_2_A1_3_FINE_START, CA_DELAYS_A1_2_A1_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A1_2_A1_3_FINE {CA_DELAYS_A1_2_A1_3_BYTE, CA_DELAYS_A1_2_A1_3_FINE_START, CA_DELAYS_A1_2_A1_3_FINE_LEN};
         static constexpr field_t CA_DELAYS_A1_2_A1_3_COARSE{CA_DELAYS_A1_2_A1_3_BYTE, CA_DELAYS_A1_2_A1_3_COARSE_START, CA_DELAYS_A1_2_A1_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A1_4_A1_5_FINE{CA_DELAYS_A1_4_A1_5_BYTE, CA_DELAYS_A1_4_A1_5_FINE_START, CA_DELAYS_A1_4_A1_5_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A1_4_A1_5_FINE {CA_DELAYS_A1_4_A1_5_BYTE, CA_DELAYS_A1_4_A1_5_FINE_START, CA_DELAYS_A1_4_A1_5_FINE_LEN};
         static constexpr field_t CA_DELAYS_A1_4_A1_5_COARSE{CA_DELAYS_A1_4_A1_5_BYTE, CA_DELAYS_A1_4_A1_5_COARSE_START, CA_DELAYS_A1_4_A1_5_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A1_6_A1_7_FINE{CA_DELAYS_A1_6_A1_7_BYTE, CA_DELAYS_A1_6_A1_7_FINE_START, CA_DELAYS_A1_6_A1_7_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A1_6_A1_7_FINE {CA_DELAYS_A1_6_A1_7_BYTE, CA_DELAYS_A1_6_A1_7_FINE_START, CA_DELAYS_A1_6_A1_7_FINE_LEN};
         static constexpr field_t CA_DELAYS_A1_6_A1_7_COARSE{CA_DELAYS_A1_6_A1_7_BYTE, CA_DELAYS_A1_6_A1_7_COARSE_START, CA_DELAYS_A1_6_A1_7_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A1_8_A1_9_FINE{CA_DELAYS_A1_8_A1_9_BYTE, CA_DELAYS_A1_8_A1_9_FINE_START, CA_DELAYS_A1_8_A1_9_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A1_8_A1_9_FINE {CA_DELAYS_A1_8_A1_9_BYTE, CA_DELAYS_A1_8_A1_9_FINE_START, CA_DELAYS_A1_8_A1_9_FINE_LEN};
         static constexpr field_t CA_DELAYS_A1_8_A1_9_COARSE{CA_DELAYS_A1_8_A1_9_BYTE, CA_DELAYS_A1_8_A1_9_COARSE_START, CA_DELAYS_A1_8_A1_9_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A1_10_A1_11_FINE{CA_DELAYS_A1_10_A1_11_BYTE, CA_DELAYS_A1_10_A1_11_FINE_START, CA_DELAYS_A1_10_A1_11_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A1_10_A1_11_FINE {CA_DELAYS_A1_10_A1_11_BYTE, CA_DELAYS_A1_10_A1_11_FINE_START, CA_DELAYS_A1_10_A1_11_FINE_LEN};
         static constexpr field_t CA_DELAYS_A1_10_A1_11_COARSE{CA_DELAYS_A1_10_A1_11_BYTE, CA_DELAYS_A1_10_A1_11_COARSE_START, CA_DELAYS_A1_10_A1_11_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_A1_12_A1_13_FINE{CA_DELAYS_A1_12_A1_13_BYTE, CA_DELAYS_A1_12_A1_13_FINE_START, CA_DELAYS_A1_12_A1_13_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_A1_12_A1_13_FINE {CA_DELAYS_A1_12_A1_13_BYTE, CA_DELAYS_A1_12_A1_13_FINE_START, CA_DELAYS_A1_12_A1_13_FINE_LEN};
         static constexpr field_t CA_DELAYS_A1_12_A1_13_COARSE{CA_DELAYS_A1_12_A1_13_BYTE, CA_DELAYS_A1_12_A1_13_COARSE_START, CA_DELAYS_A1_12_A1_13_COARSE_LEN};
+#endif
 
         // Byte 440-450: Command Address Delay for Port B1
         // Byte 451: Reserved
-        static constexpr field_t CS_DELAYS_B1_0_B1_2_FINE{CS_DELAYS_B1_0_B1_2_BYTE, CS_DELAYS_B1_0_B1_2_FINE_START, CS_DELAYS_B1_0_B1_2_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CS_DELAYS_B1_0_B1_2_FINE {CS_DELAYS_B1_0_B1_2_BYTE, CS_DELAYS_B1_0_B1_2_FINE_START, CS_DELAYS_B1_0_B1_2_FINE_LEN};
         static constexpr field_t CS_DELAYS_B1_0_B1_2_COARSE{CS_DELAYS_B1_0_B1_2_BYTE, CS_DELAYS_B1_0_B1_2_COARSE_START, CS_DELAYS_B1_0_B1_2_COARSE_LEN};
+#endif
 
-        static constexpr field_t CS_DELAYS_B1_1_B1_3_FINE{CS_DELAYS_B1_1_B1_3_BYTE, CS_DELAYS_B1_1_B1_3_FINE_START, CS_DELAYS_B1_1_B1_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CS_DELAYS_B1_1_B1_3_FINE {CS_DELAYS_B1_1_B1_3_BYTE, CS_DELAYS_B1_1_B1_3_FINE_START, CS_DELAYS_B1_1_B1_3_FINE_LEN};
         static constexpr field_t CS_DELAYS_B1_1_B1_3_COARSE{CS_DELAYS_B1_1_B1_3_BYTE, CS_DELAYS_B1_1_B1_3_COARSE_START, CS_DELAYS_B1_1_B1_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CK_DELAYS_B1_0_B1_2_FINE{CK_DELAYS_B1_0_B1_2_BYTE, CK_DELAYS_B1_0_B1_2_FINE_START, CK_DELAYS_B1_0_B1_2_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CK_DELAYS_B1_0_B1_2_FINE {CK_DELAYS_B1_0_B1_2_BYTE, CK_DELAYS_B1_0_B1_2_FINE_START, CK_DELAYS_B1_0_B1_2_FINE_LEN};
         static constexpr field_t CK_DELAYS_B1_0_B1_2_COARSE{CK_DELAYS_B1_0_B1_2_BYTE, CK_DELAYS_B1_0_B1_2_COARSE_START, CK_DELAYS_B1_0_B1_2_COARSE_LEN};
+#endif
 
-        static constexpr field_t CK_DELAYS_B1_1_B1_3_FINE{CK_DELAYS_B1_1_B1_3_BYTE, CK_DELAYS_B1_1_B1_3_FINE_START, CK_DELAYS_B1_1_B1_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CK_DELAYS_B1_1_B1_3_FINE {CK_DELAYS_B1_1_B1_3_BYTE, CK_DELAYS_B1_1_B1_3_FINE_START, CK_DELAYS_B1_1_B1_3_FINE_LEN};
         static constexpr field_t CK_DELAYS_B1_1_B1_3_COARSE{CK_DELAYS_B1_1_B1_3_BYTE, CK_DELAYS_B1_1_B1_3_COARSE_START, CK_DELAYS_B1_1_B1_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B1_0_B1_1_FINE{CA_DELAYS_B1_0_B1_1_BYTE, CA_DELAYS_B1_0_B1_1_FINE_START, CA_DELAYS_B1_0_B1_1_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B1_0_B1_1_FINE {CA_DELAYS_B1_0_B1_1_BYTE, CA_DELAYS_B1_0_B1_1_FINE_START, CA_DELAYS_B1_0_B1_1_FINE_LEN};
         static constexpr field_t CA_DELAYS_B1_0_B1_1_COARSE{CA_DELAYS_B1_0_B1_1_BYTE, CA_DELAYS_B1_0_B1_1_COARSE_START, CA_DELAYS_B1_0_B1_1_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B1_2_B1_3_FINE{CA_DELAYS_B1_2_B1_3_BYTE, CA_DELAYS_B1_2_B1_3_FINE_START, CA_DELAYS_B1_2_B1_3_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B1_2_B1_3_FINE {CA_DELAYS_B1_2_B1_3_BYTE, CA_DELAYS_B1_2_B1_3_FINE_START, CA_DELAYS_B1_2_B1_3_FINE_LEN};
         static constexpr field_t CA_DELAYS_B1_2_B1_3_COARSE{CA_DELAYS_B1_2_B1_3_BYTE, CA_DELAYS_B1_2_B1_3_COARSE_START, CA_DELAYS_B1_2_B1_3_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B1_4_B1_5_FINE{CA_DELAYS_B1_4_B1_5_BYTE, CA_DELAYS_B1_4_B1_5_FINE_START, CA_DELAYS_B1_4_B1_5_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B1_4_B1_5_FINE {CA_DELAYS_B1_4_B1_5_BYTE, CA_DELAYS_B1_4_B1_5_FINE_START, CA_DELAYS_B1_4_B1_5_FINE_LEN};
         static constexpr field_t CA_DELAYS_B1_4_B1_5_COARSE{CA_DELAYS_B1_4_B1_5_BYTE, CA_DELAYS_B1_4_B1_5_COARSE_START, CA_DELAYS_B1_4_B1_5_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B1_6_B1_7_FINE{CA_DELAYS_B1_6_B1_7_BYTE, CA_DELAYS_B1_6_B1_7_FINE_START, CA_DELAYS_B1_6_B1_7_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B1_6_B1_7_FINE {CA_DELAYS_B1_6_B1_7_BYTE, CA_DELAYS_B1_6_B1_7_FINE_START, CA_DELAYS_B1_6_B1_7_FINE_LEN};
         static constexpr field_t CA_DELAYS_B1_6_B1_7_COARSE{CA_DELAYS_B1_6_B1_7_BYTE, CA_DELAYS_B1_6_B1_7_COARSE_START, CA_DELAYS_B1_6_B1_7_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B1_8_B1_9_FINE{CA_DELAYS_B1_8_B1_9_BYTE, CA_DELAYS_B1_8_B1_9_FINE_START, CA_DELAYS_B1_8_B1_9_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B1_8_B1_9_FINE {CA_DELAYS_B1_8_B1_9_BYTE, CA_DELAYS_B1_8_B1_9_FINE_START, CA_DELAYS_B1_8_B1_9_FINE_LEN};
         static constexpr field_t CA_DELAYS_B1_8_B1_9_COARSE{CA_DELAYS_B1_8_B1_9_BYTE, CA_DELAYS_B1_8_B1_9_COARSE_START, CA_DELAYS_B1_8_B1_9_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B1_10_B1_11_FINE{CA_DELAYS_B1_10_B1_11_BYTE, CA_DELAYS_B1_10_B1_11_FINE_START, CA_DELAYS_B1_10_B1_11_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B1_10_B1_11_FINE {CA_DELAYS_B1_10_B1_11_BYTE, CA_DELAYS_B1_10_B1_11_FINE_START, CA_DELAYS_B1_10_B1_11_FINE_LEN};
         static constexpr field_t CA_DELAYS_B1_10_B1_11_COARSE{CA_DELAYS_B1_10_B1_11_BYTE, CA_DELAYS_B1_10_B1_11_COARSE_START, CA_DELAYS_B1_10_B1_11_COARSE_LEN};
+#endif
 
-        static constexpr field_t CA_DELAYS_B1_12_B1_13_FINE{CA_DELAYS_B1_12_B1_13_BYTE, CA_DELAYS_B1_12_B1_13_FINE_START, CA_DELAYS_B1_12_B1_13_FINE_LEN};
+#ifndef __PPE__
+        static constexpr field_t CA_DELAYS_B1_12_B1_13_FINE {CA_DELAYS_B1_12_B1_13_BYTE, CA_DELAYS_B1_12_B1_13_FINE_START, CA_DELAYS_B1_12_B1_13_FINE_LEN};
         static constexpr field_t CA_DELAYS_B1_12_B1_13_COARSE{CA_DELAYS_B1_12_B1_13_BYTE, CA_DELAYS_B1_12_B1_13_COARSE_START, CA_DELAYS_B1_12_B1_13_COARSE_LEN};
+#endif
 
         static constexpr field_t PMIC0_SWA_VOLT_OFF{PMIC0_SWA_VOLT_OFF_BYTE, PMIC0_SWA_VOLT_OFF_START, PMIC0_SWA_VOLT_OFF_LEN};
         static constexpr field_t PMIC0_SWA_OFF_DIRECTION{PMIC0_SWA_VOLT_OFF_BYTE, PMIC0_SWA_OFF_DIRECTION_START, PMIC0_SWA_OFF_DIRECTION_LEN};
