@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -275,7 +275,7 @@ fapi2::ReturnCode pm_occ_fir_init(
     FAPI_TRY(l_occFir.mask(SPARE_41),                        FIR_MASK_ERROR);       // 41
     FAPI_TRY(l_occFir.setRecvAttn(JTAGACC_ERR),              FIR_REC_ATTN_ERROR);   // 42
     FAPI_TRY(l_occFir.setRecvAttn(OCB_OCI_OCISLV_ERR),       FIR_REC_ATTN_ERROR);   // 43
-    FAPI_TRY(l_occFir.setRecvIntr(C405_ECC_UE),              FIR_REC_INTR_ERROR);   // 44
+    FAPI_TRY(l_occFir.setRecvAttn(C405_ECC_UE),              FIR_REC_ATTN_ERROR);   // 44
     FAPI_TRY(l_occFir.setRecvAttn(C405_ECC_CE),              FIR_REC_ATTN_ERROR);   // 45
     FAPI_TRY(l_occFir.setRecvAttn(C405_OCI_MACHINECHECK),    FIR_REC_ATTN_ERROR);   // 46
     FAPI_TRY(l_occFir.setRecvAttn(SRAM_SPARE_DIRECT_ERROR),  FIR_REC_ATTN_ERROR);   // 47
