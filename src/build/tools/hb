@@ -443,6 +443,7 @@ hb_simsetup()
     if [[ $HB_STANDALONE -eq 1 ]] && [[ $PNOR_LAYOUT_SELECTED != "FSP" ]]; then
 
         STANDALONE_SIMICS=${PROJECT_ROOT}/standalone/simics
+        STANDALONE_FFS=${PROJECT_ROOT}/standalone/ffs
 
         if [[ -d ${STANDALONE_SIMICS} ]];then
             # standalone dir exists, ask Dev to clear it out and reinstall
@@ -464,6 +465,8 @@ hb_simsetup()
             # remove Simics
             echo "rm -rf ${STANDALONE_SIMICS}"
             rm -rf "${STANDALONE_SIMICS}"
+            echo "rm -rf ${STANDALONE_FFS}"
+            rm -rf "${STANDALONE_FFS}"
         fi
 
         mkdir -p ${STANDALONE_SIMICS}/hbfw
