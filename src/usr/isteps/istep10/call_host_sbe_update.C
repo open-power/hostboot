@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,16 +188,8 @@ void* call_host_sbe_update (void *io_pArgs)
             {
                 // We need to keep the alt-pnor's version of the EECACHE in sync with
                 //  the active copy to handle a future failover.
-                l_errl = PNOR::copyPnorPartitionToAlt(PNOR::EECACHE);
-                if (l_errl)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"call_host_sbe_update PROBLEM syncing EECACHE to altpnor");
-                    // we don't want to deconfigure any processors since we can recover
-                    l_errl->removeGardAndDeconfigure();
-                    // commit the log but do not kill the IPL (do not use captureError)
-                    l_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
-                    errlCommit( l_errl, ISTEP_COMP_ID );
-                }
+                tid_t l_progTid = task_create(&PNOR::copyEECacheToAltTask, nullptr);
+                assert( l_progTid > 0 ,"Task create of copyEECacheToAltTask failed");
             }
 #endif
         }

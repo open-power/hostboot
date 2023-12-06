@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -219,6 +219,19 @@ errlHndl_t validateAltMaster( void );
  * @return errlHndl_t  Error log if validation failed
  */
 errlHndl_t copyPnorPartitionToAlt( PNOR::SectionId i_section );
+
+/**
+ * @brief Task to copy a given PNOR partition from the active PNOR into the
+ *        alternate copy in the background
+ *
+ * @param[in] io_pArgs:  none
+ *
+ * @return none
+ */
+#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+void* copyEECacheToAltTask( void    *io_pArgs );
+#endif
+
 
 /**
  * @brief Retrieve some information about the PNOR/SFC hardware

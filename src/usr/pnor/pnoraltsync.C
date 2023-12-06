@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <pnor/pnorif.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <lpc/lpcif.H>
+#include <initservice/initserviceif.H>
 
 #if defined(CONFIG_PNORDD_IS_SFC)
 #include "pnor_sfcdd.H"
@@ -63,6 +64,12 @@ extern trace_desc_t* g_trac_pnor;
 
 namespace PNOR
 {
+
+enum msg_preshutdown_types_t
+{
+    EECACHE_MSG_SHUTDOWN = 1
+};
+
 
 /**
  * @brief Copy a given PNOR partition from the active PNOR into the
@@ -273,6 +280,55 @@ errlHndl_t copyPnorPartitionToAlt( PNOR::SectionId i_section )
                i_section, l_sectionName );
     return l_errhdl;
 }
+
+
+#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+void* copyEECacheToAltTask( void    *io_pArgs )
+{
+    errlHndl_t  l_errl  =   NULL;
+
+    TRACFCOMP( g_trac_pnor, ENTER_MRK"copyEECacheToAltTask entry");
+
+    //  istep 10 should not expect us to come back
+    task_detach();
+
+    // Use shutdown events to block a shutdown until this task completes
+    // not really using this as an event, since the message is synchronous
+    msg_q_t l_msgQ = msg_q_create();
+    INITSERVICE::registerShutdownEvent(PNOR_COMP_ID, l_msgQ,
+                                       EECACHE_MSG_SHUTDOWN,
+                                       INITSERVICE::NO_PRIORITY);
+
+    l_errl = PNOR::copyPnorPartitionToAlt(PNOR::EECACHE);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_pnor, ERR_MRK"call_host_sbe_update PROBLEM syncing EECACHE to altpnor");
+        // we don't want to deconfigure any processors since we can recover
+        l_errl->removeGardAndDeconfigure();
+        // commit the log but do not kill the IPL (do not use captureError)
+        l_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+        errlCommit( l_errl, PNOR_COMP_ID );
+    }
+
+    // respond to any shutdown messages (response doesn't matter)
+    // Use minimal time, since whole queue is just to block until until complete
+    std::vector<msg_t*> shutdown_msgs;
+    uint64_t l_ms = 1;
+    shutdown_msgs = msg_wait_timeout(l_msgQ, l_ms);
+    for (auto l_msg : shutdown_msgs)
+    {
+        (void) msg_respond(l_msgQ, l_msg);
+    }
+
+    // Un-register message queue from the shutdown
+    INITSERVICE::unregisterShutdownEvent(l_msgQ);
+
+    TRACFCOMP( g_trac_pnor, EXIT_MRK"copyEECacheToAltTask exit." );
+
+    // End the task.
+    return NULL;
+}
+#endif
 
 
 
