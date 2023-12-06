@@ -40,6 +40,7 @@
 // Memory Hardware Procedures:
 #include <p10_mss_utils_to_throttle.H>
 #include <exp_bulk_pwr_throttles.H>
+#include <ody_bulk_pwr_throttles.H>
 
 // See src/include/usr/targeting/common/utilFilter.H for handy target utilities
 
@@ -263,6 +264,7 @@ errlHndl_t memPowerThrottleOT(
                     }
                 }
 
+                // NOTE: Both ODY/EXP HWP write EXP_PORT_MAXPOWER
                 if (!l_portTarget->tryGetAttr<ATTR_EXP_PORT_MAXPOWER>
                     (l_power[l_port_unit]))
                 {
@@ -655,6 +657,7 @@ errlHndl_t call_bulk_pwr_throttles(
                        const uint32_t i_watt_target)
 {
     errlHndl_t err = nullptr;
+    bool isOdyssey = false;
 
     // Loop through all OBMC chip targets and set inputs
     for(const auto & l_fapi_target : i_fapi_target_list)
@@ -668,6 +671,7 @@ errlHndl_t call_bulk_pwr_throttles(
         TargetHandleList port_list;
         getChildAffinityTargets(port_list, ocmb_target,
                                 CLASS_UNIT, TYPE_MEM_PORT);
+        isOdyssey = isOdysseyChip(ocmb_target);
         // Loop through all Memory ports targets and set inputs
         for(const auto & l_portTarget : port_list)
         {
@@ -709,10 +713,20 @@ errlHndl_t call_bulk_pwr_throttles(
         //          ATTR_EXP_PORT_MAXPOWER
         //
         //         returns: FAPI2_RC_SUCCESS on success
-        TMGT_INF("call_bulk_pwr_throttles: Calling HWP:exp_bulk_pwr_"
-                 "throttles(POWER) with target of %dcW", i_watt_target);
-        FAPI_INVOKE_HWP(err, exp_bulk_pwr_throttles, i_fapi_target_list,
-                        mss::throttle_type::POWER);
+        if (isOdyssey)
+        {
+            TMGT_INF("call_bulk_pwr_throttles: Calling HWP:ody_bulk_pwr_"
+                     "throttles(POWER) with target of %dcW", i_watt_target);
+            FAPI_INVOKE_HWP(err, ody_bulk_pwr_throttles, i_fapi_target_list,
+                            mss::throttle_type::POWER);
+        }
+        else
+        {
+            TMGT_INF("call_bulk_pwr_throttles: Calling HWP:exp_bulk_pwr_"
+                     "throttles(POWER) with target of %dcW", i_watt_target);
+            FAPI_INVOKE_HWP(err, exp_bulk_pwr_throttles, i_fapi_target_list,
+                            mss::throttle_type::POWER);
+        }
     }
 
     if (err)
