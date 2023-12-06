@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <targeting/common/utilFilter.H>
 #include <devicefw/userif.H>
 #include <devicefw/driverif.H>
+#include <sbeio/sbeioif.H>
 #include <util/util_reasoncodes.H>
 #include <errl/errlmanager.H>
 #include <errl/errlreasoncodes.H>
@@ -240,6 +241,170 @@ void cmd_getattr( char*& o_output,
     }
 }
 
+/**
+ * @brief Read a scom addr for i_huid, i_numLoops times
+ * @param[out] o_output    if error, then msg; else empty
+ * @param[in]  i_huid      HUID associated with Target to get attribute from
+ * @param[in]  i_numLoops  number of times to read the scom addr
+ * @param[in]  i_addr      addr to read
+ */
+void cmd_loopGetScom(char  *& o_output,
+                     uint32_t i_huid,
+                     uint32_t i_numLoops,
+                     uint64_t i_addr)
+{
+    UTIL_FT("cmd_loopGetScom> huid=%.8X, numLoops=%d addr=%X%.8X",
+             i_huid, i_numLoops, (uint32_t)(i_addr>>32), (uint32_t)i_addr);
+
+    TARGETING::Target *l_targ{};
+
+    if (0xFFFFFFFF == i_huid)
+    {
+        TARGETING::targetService().getTopLevelTarget(l_targ);
+    }
+    else
+    {
+        l_targ = getTargetFromHUID(i_huid);
+    }
+
+    o_output = new char[100];
+
+    if (l_targ == NULL)
+    {
+        sprintf(o_output, "cmd_loopGetScom> HUID %.8X not found", i_huid);
+        return;
+    }
+
+    uint64_t   l_data   = 0;
+    size_t     l_size   = sizeof(uint64_t);
+    errlHndl_t l_errhdl = nullptr;
+
+    while (i_numLoops--)
+    {
+        l_errhdl = deviceRead(l_targ,
+                              &l_data,
+                              l_size,
+                              DEVICE_SCOM_ADDRESS(i_addr));
+        if (l_errhdl)
+        {
+            sprintf(o_output, "cmd_loopGetScom> FAIL: RC=%.4X",
+                    ERRL_GETRC_SAFE(l_errhdl));
+            errlCommit(l_errhdl, UTIL_COMP_ID);
+            return;
+        }
+    }
+
+    sprintf(o_output, "cmd_loopGetScom> SUCCESS");
+    return;
+}
+
+/**
+ * @brief Write a scom addr for i_huid, i_numLoops times
+ * @param[out] o_output    if error, then msg; else empty
+ * @param[in]  i_huid      HUID associated with Target to get attribute from
+ * @param[in]  i_numLoops  number of times to write the scom addr
+ * @param[in]  i_addr      addr to read
+ * @param[in]  i_data      data to write
+ */
+void cmd_loopPutScom(char  *& o_output,
+                     uint32_t i_huid,
+                     uint32_t i_numLoops,
+                     uint64_t i_addr,
+                     uint64_t i_data)
+{
+    UTIL_FT("cmd_loopPutscom> huid=%.8X, numLoops=%d addr=%X%.8X, data=%.8X %.8X",
+            i_huid, i_numLoops, (uint32_t)(i_addr>>32), (uint32_t)i_addr,
+                                (uint32_t)(i_data>>32), (uint32_t)i_data);
+    TARGETING::Target *l_targ{};
+
+    if (0xFFFFFFFF == i_huid)
+    {
+        TARGETING::targetService().getTopLevelTarget(l_targ);
+    }
+    else
+    {
+        l_targ = getTargetFromHUID(i_huid);
+    }
+
+    o_output = new char[100];
+
+    if (l_targ == NULL)
+    {
+        sprintf(o_output, "cmd_loopPutScom> HUID %.8X not found", i_huid);
+        return;
+    }
+
+    size_t     l_size   = sizeof(uint64_t);
+    errlHndl_t l_errhdl = nullptr;
+
+    while (i_numLoops--)
+    {
+        l_errhdl = deviceWrite(l_targ,
+                              &i_data,
+                               l_size,
+                               DEVICE_SCOM_ADDRESS(i_addr));
+        if (l_errhdl)
+        {
+            sprintf(o_output, "cmd_loopPutScom> FAIL: RC=%.4X",
+                    ERRL_GETRC_SAFE(l_errhdl));
+            errlCommit(l_errhdl, UTIL_COMP_ID);
+            return;
+        }
+    }
+
+    sprintf(o_output, "cmd_loopPutScom> SUCCESS");
+    return;
+}
+
+/**
+ * @brief Send a chipop for i_huid, i_numLoops times
+ * @param[out] o_output    if error, then msg; else empty
+ * @param[in]  i_huid      HUID associated with Target to get attribute from
+ * @param[in]  i_numLoops  number of times to write the scom addr
+ */
+void cmd_loopChipop(char  *& o_output,
+                    uint32_t i_huid,
+                    uint32_t i_numLoops)
+{
+    UTIL_FT("cmd_loopChipop> huid=%.8X, numLoops=%d", i_huid, i_numLoops);
+
+    TARGETING::Target *l_targ{};
+
+    if (0xFFFFFFFF == i_huid)
+    {
+        TARGETING::targetService().getTopLevelTarget(l_targ);
+    }
+    else
+    {
+        l_targ = getTargetFromHUID(i_huid);
+    }
+
+    o_output = new char[100];
+
+    if (l_targ == NULL)
+    {
+        sprintf(o_output, "cmd_loopChipop> HUID %.8X not found", i_huid);
+        return;
+    }
+
+    errlHndl_t l_errhdl = nullptr;
+
+    while (i_numLoops--)
+    {
+        l_errhdl = SBEIO::sendAttrListRequest(l_targ);
+
+        if (l_errhdl)
+        {
+            sprintf(o_output, "cmd_loopChipop> FAIL: RC=%.4X",
+                    ERRL_GETRC_SAFE(l_errhdl));
+            errlCommit(l_errhdl, UTIL_COMP_ID);
+            return;
+        }
+    }
+
+    sprintf(o_output, "cmd_loopChipop> SUCCESS");
+    return;
+}
 
 /**
  * @brief Read or write data out/into SPD, MVPD or PVPD
@@ -1598,6 +1763,58 @@ int hbrtCommand( int argc,
         }
     }
 #endif
+
+#ifdef INCLUDE_LAB_ONLY_INTERFACES
+    else if (strcmp(argv[0], "loopGetScom")==0)
+    {
+        // loopGetScom <huid> <num loops> <addr>
+        if (argc == 4)
+        {
+            cmd_loopGetScom(*l_output,
+                            strtou64( argv[1], NULL, 16),
+                            strtou64( argv[2], NULL, 16),
+                            strtou64( argv[3], NULL, 16));
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output, "ERROR: loopGetScom <huid> <num loops> <addr>\n");
+        }
+    }
+    else if (strcmp( argv[0], "loopPutScom")==0)
+    {
+        // loopPutScom <huid> <num loops> <addr> <data>
+        if (argc == 5)
+        {
+            cmd_loopPutScom(*l_output,
+                            strtou64( argv[1], NULL, 16),
+                            strtou64( argv[2], NULL, 16),
+                            strtou64( argv[3], NULL, 16),
+                            strtou64( argv[4], NULL, 16));
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output, "ERROR: loopPutScom <huid> <num loops> <addr>\n");
+        }
+    }
+    else if (strcmp(argv[0], "loopChipop")==0)
+    {
+        // loopChipop <huid> <num loops>
+        if (argc == 3)
+        {
+            cmd_loopChipop(*l_output,
+                           strtou64( argv[1], NULL, 16),
+                           strtou64( argv[2], NULL, 16));
+        }
+        else
+        {
+            *l_output = new char[100];
+            sprintf(*l_output, "ERROR: loopChipop <huid> <num loops>\n");
+        }
+    }
+#endif
+
     else
     {
         *l_output = new char[50+100*12];
@@ -1646,6 +1863,14 @@ int hbrtCommand( int argc,
         strcat( *l_output, l_tmpstr );
 #ifdef CONFIG_HTMGT
         sprintf( l_tmpstr, "resetPmComplexWithReason [0x<OCC_RESET_REASON>] [0x<chipId>]\n");
+        strcat( *l_output, l_tmpstr );
+#endif
+#ifdef INCLUDE_LAB_ONLY_INTERFACES
+        sprintf(l_tmpstr, "loopGetScom <huid> <num loops> <addr>\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf(l_tmpstr, "loopPutScom <huid> <num loops> <addr>\n");
+        strcat( *l_output, l_tmpstr );
+        sprintf(l_tmpstr, "loopChipop <huid> <num loops>\n");
         strcat( *l_output, l_tmpstr );
 #endif
     }
