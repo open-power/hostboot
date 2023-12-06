@@ -38,6 +38,7 @@ using namespace fapi2;
 enum ODY_SPPE_BOOT_CHECK_Private_Constants
 {
     MAX_POLLS = 100,
+    MAX_SIMICS_POLLS = 1500,
     POLL_DELAY_CYCLES = 10000000, // 10m
     POLL_DELAY_NS = 1000000000,   // 1s
 };
@@ -55,6 +56,18 @@ ReturnCode ody_sppe_check_for_ready(
     l_boot_parms.max_polls = MAX_POLLS;
     l_boot_parms.poll_delay_cycles = POLL_DELAY_CYCLES;
     l_boot_parms.poll_delay_ns = POLL_DELAY_NS;
+
+    // SIMICS workaround
+    fapi2::ATTR_IS_SIMICS_Type l_simics;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, FAPI_SYSTEM, l_simics),
+             "ody_sppe_check_for_ready: Error from FAPI_ATTR_GET (ATTR_IS_SIMICS)");
+
+    if (l_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS)
+    {
+        //  Since the delay in poz_sppe_check_for_ready is much less in simics,
+        //   we must increase the number of polls to allow enough time
+        l_boot_parms.max_polls = MAX_SIMICS_POLLS;
+    }
 
     // call common HWP
     FAPI_TRY(poz_sppe_check_for_ready(i_target, l_boot_parms));
