@@ -44,7 +44,6 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
-#include <map>
 
 ///
 /// @brief Indicating runtime execution or not

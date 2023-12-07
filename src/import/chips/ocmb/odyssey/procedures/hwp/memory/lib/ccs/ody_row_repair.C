@@ -199,8 +199,6 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
         const uint8_t i_row_repair_data[mss::ody::MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK],
         REPAIR_ARR& o_repairs_per_dimm)
 {
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-
     constexpr uint8_t MAX_BANK_GROUP = 8;
     constexpr uint8_t MAX_BANKS = 4;
 
@@ -362,8 +360,11 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
+// TODO: Zen:MST-2412 Uncomment logError once supported on SPPE
+#ifndef __PPE__
     // We've found a valid row repair - log it as predictive, so we get callouts in MFG test but don't fail out
     fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
+#endif
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     return fapi2::FAPI2_RC_SUCCESS;
 }
@@ -976,7 +977,6 @@ fapi2::ReturnCode deploy_mapped_repairs(
         {
             const auto& l_dimm_rank = l_repair.iv_dimm_rank;
             mss::rank::info<mss::mc_type::ODYSSEY> l_rank_info(l_dimm, l_dimm_rank, l_rc);
-            const auto& l_port_rank = l_rank_info.get_port_rank();
 
             // Check rank info completed
             FAPI_TRY(l_rc, "Failed creating rank info " GENTARGTIDFORMAT, GENTARGTID(l_dimm));
@@ -1006,7 +1006,7 @@ fapi2::ReturnCode deploy_mapped_repairs(
                 // Clear bad DQ bits for this port, DIMM, rank that will be fixed by this row repair
                 FAPI_INF_NO_SBE("Updating bad bits on DIMM " GENTARGTIDFORMAT
                                 " , DRAM %d, port rank %d, subrank %d, bg %d, bank %d, row 0x%05x",
-                                GENTARGTID(l_dimm), l_repair.iv_dram, l_port_rank, l_repair.iv_srank, l_repair.iv_bg,
+                                GENTARGTID(l_dimm), l_repair.iv_dram, l_rank_info.get_port_rank(), l_repair.iv_srank, l_repair.iv_bg,
                                 l_repair.iv_bank, l_repair.iv_row);
             }
         }
