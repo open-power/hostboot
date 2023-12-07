@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -497,7 +497,7 @@ class operation
         ///
         /// @brief memdiags multi-port init helper
         /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
-        /// in subclassed constructores more easily.
+        /// in subclassed constructors more easily.
         /// @return FAPI2_RC_SUCCESS iff everything ok
         ///
         fapi2::ReturnCode multi_port_init();
@@ -505,11 +505,33 @@ class operation
         ///
         /// @brief memdiags multi-port init for specific chip
         /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
-        /// in subclassed constructores more easily.
+        /// in subclassed constructors more easily.
         /// @return FAPI2_RC_SUCCESS iff everything ok
         ///
         fapi2::ReturnCode multi_port_init_internal();
 
+        ///
+        /// @brief memdiags multi-port read helper
+        /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+        /// in subclassed constructors more easily.
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode multi_port_read();
+
+        ///
+        /// @brief memdiags multi-port read for specific chip
+        /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+        /// in subclassed constructors more easily.
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode multi_port_read_internal();
+
+        ///
+        /// @brief memdiags multi-port address config helper for "simple" one subtest per port setup
+        /// Initializes the address configs needed for a multi port operation
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode multi_port_addr_simple();
 
         ///
         /// @brief memdiags multi-port address config helper
@@ -702,6 +724,43 @@ inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_init()
     return multi_port_init_internal();
 }
 
+///
+/// @brief memdiags multi-port read helper
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT >
+inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_read()
+{
+    FAPI_INF("multi-port read for " TARGTIDFORMAT, GENTARGTID(iv_target));
+
+    const auto l_port = mss::find_targets<TT::PORT_TYPE>(iv_target);
+
+    // Make sure we have ports, if we don't then exit out
+    if(l_port.size() == 0)
+    {
+        // Cronus can have no ports under an MCBIST, FW deconfigures by association
+        FAPI_INF(TARGTIDFORMAT " has no attached ports skipping setup", GENTARGTID(iv_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Let's assume we are going to send out all subtest unless we are in broadcast mode,
+    // where we only send up to 2 subtests under an port ( 1 for each DIMM) which is why no const
+    auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target);
+
+    if( l_dimms.size() == 0)
+    {
+        // Cronus can have no DIMMS under an MCBIST, FW deconfigures by association
+        FAPI_INF(TARGTIDFORMAT " has no attached DIMMs skipping setup", GENTARGTID(iv_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    return multi_port_read_internal();
+}
 
 ///
 /// @class Class for memdiags' super-fast init
@@ -761,7 +820,7 @@ struct sf_read_operation : public operation<MC>
         operation<MC>(i_target, mss::mcbist::read_subtest<MC>(), i_const)
     {
         // We're a multi-port operation
-        o_rc = this->multi_port_init();
+        o_rc = this->multi_port_read();
     }
 
     sf_read_operation() = delete;

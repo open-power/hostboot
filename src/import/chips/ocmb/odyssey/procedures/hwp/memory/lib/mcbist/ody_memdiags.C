@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,10 +78,127 @@ fapi_try_exit:
 namespace memdiags
 {
 #ifndef __PPE__
+
 ///
 /// @brief Helper to encapsualte the setting of multi-port address configurations - Odyssey specialization
 /// @return FAPI2_RC_SUCCESS iff ok
-/// @note due to an erratum on Odyssey we need to run a subtest per srank
+/// @note this function sets up the address ranges in the "simple" mode, i.e. one subtest per port
+/// and should only be used for tests that don't need a "stop on rank" condition, i.e. sf_init
+///
+template<>
+fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr_simple()
+{
+    using TT = mcbistTraits<mss::mc_type::ODYSSEY>;
+    using AT = mcbistAddrTraits<mss::mc_type::ODYSSEY>;
+
+    // Constexpr's to beautify the code
+    constexpr uint64_t FIRST_ADDRESS = 0;
+    constexpr uint64_t MIDDLE_ADDRESS = 1;
+    constexpr uint64_t LAST_ADDRESS = 2;
+
+    // Get the port/DIMM information for the addresses. This is an integral value which allows us to index
+    // all the DIMM across a controller.
+    const uint64_t l_portdimm_start_address = iv_const.iv_start_address.get_port_dimm();
+    const uint64_t l_portdimm_end_address = iv_const.iv_end_address.get_port_dimm();
+
+    auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target);
+
+    mss::mcbist::address<mss::mc_type::ODYSSEY> l_end_of_start_port;
+    mss::mcbist::address<mss::mc_type::ODYSSEY> l_end_of_complete_port(TT::LARGEST_ADDRESS);
+    mss::mcbist::address<mss::mc_type::ODYSSEY> l_start_of_end_port;
+
+    // The last address in the start port is the start address thru the "port range" (all addresses left on this port)
+    iv_const.iv_start_address.get_range<AT::PORT>(l_end_of_start_port);
+
+    // Set the first address in the end port
+    l_start_of_end_port.set_port(iv_const.iv_end_address.get_port());
+
+    // Before we do anything else, fix up the address for sim. The end address given has to be limited so
+    // we don't run too many cycles. Also, if there are intermediate ports the end addresses of those ports
+    // need to be limited as well - they override the end address of a complete port (which is otherwise the
+    // largest address.)
+    if (iv_sim)
+    {
+        iv_const.iv_start_address.get_sim_end_address(l_end_of_start_port);
+        mss::mcbist::address<mss::mc_type::ODYSSEY>().get_sim_end_address(l_end_of_complete_port);
+        l_start_of_end_port.get_sim_end_address(iv_const.iv_end_address);
+    }
+
+    FAPI_INF("last addr in start port 0x%016lx first addr in end port 0x%016lx for " TARGTIDFORMAT,
+             uint64_t(l_end_of_start_port), uint64_t(l_start_of_end_port), GENTARGTID(iv_target));
+
+    // We know we have three address configs: start address -> end of DIMM, 0 -> end of DIMM and 0 -> end address.
+    FAPI_TRY( mss::mcbist::config_address_range0<mss::mc_type::ODYSSEY>(iv_target, iv_const.iv_start_address,
+              l_end_of_start_port) );
+    FAPI_TRY( mss::mcbist::config_address_range1<mss::mc_type::ODYSSEY>(iv_target,
+              mss::mcbist::address<mss::mc_type::ODYSSEY>(),
+              l_end_of_complete_port) );
+    FAPI_TRY( mss::mcbist::config_address_range2<mss::mc_type::ODYSSEY>(iv_target, l_start_of_end_port,
+              iv_const.iv_end_address) );
+
+    // Loop over all the DIMM on this MCBIST. Check the port/DIMM value for what to do.
+    FAPI_INF("Adding subtests for %d DIMMs on " TARGTIDFORMAT, l_dimms.size(), GENTARGTID(iv_target));
+
+    for (const auto& l_dimm : l_dimms)
+    {
+        // The port/DIMM value for this DIMM is a three-bit field the right-most is the port's index.
+        // For Odyssey, The first two bits are reserved
+        // We use this to decide how to process this dimm/port
+        // Due to this combination, the port/DIMM ID is just the relative position of the port from the MCBIST
+        const auto l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm);
+
+        // The port and DIMM indexes are needed to set the addressing scheme below - compute them here
+        const auto l_portdimm_this_dimm = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+
+        FAPI_INF(TARGTIDFORMAT " port/dimm %d, port/dimm start: %d", GENTARGTID(iv_target), l_portdimm_this_dimm,
+                 l_portdimm_start_address);
+
+        // No need to process DIMM which are lower as they're not between the start and the end of the port.
+        if (l_portdimm_this_dimm < l_portdimm_start_address)
+        {
+            FAPI_INF(TARGTIDFORMAT " Skipping adding the subtest for this DIMM %lu < %lu", GENTARGTID(l_dimm), l_portdimm_this_dimm,
+                     l_portdimm_start_address);
+            continue;
+        }
+
+        // Ok, we're gonna need to push on a subtest.
+        auto l_subtest = iv_subtest;
+
+        l_subtest.enable_port(l_portdimm_this_dimm);
+
+        // Ok this is the starting point. We know it's address selection is config0
+        if (l_portdimm_this_dimm == l_portdimm_start_address)
+        {
+            l_subtest.change_addr_sel(FIRST_ADDRESS);
+        }
+
+        // If this DIMM represents the end, we know that's address config2
+        else if (l_portdimm_this_dimm == l_portdimm_end_address)
+        {
+            l_subtest.change_addr_sel(LAST_ADDRESS);
+        }
+
+        // Otherwise, we're someplace in between - address config1
+        else
+        {
+            l_subtest.change_addr_sel(MIDDLE_ADDRESS);
+        }
+
+        iv_program.iv_subtests.push_back(l_subtest);
+        FAPI_INF("adding subtest for " TARGTIDFORMAT " (port: %d)", GENTARGTID(iv_target), l_portdimm_this_dimm);
+    }
+
+    FAPI_INF("Total subtests added: %d for " TARGTIDFORMAT, iv_program.iv_subtests.size(), GENTARGTID(iv_target));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Helper to encapsualte the setting of multi-port address configurations - Odyssey specialization
+/// @return FAPI2_RC_SUCCESS iff ok
+/// @note due to an erratum on Odyssey we need to run a subtest per srank in order to be able to affect
+/// the "stop on rank" end condition, which is the desired method of running sf_read tests
 ///
 template<>
 fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
@@ -159,6 +276,11 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
             }
         }
 
+        // TODO Zen:MST-2467: to support sf_read of DIMMs with more than 4 logical ranks, we will need the following:
+        // If our vector is larger than the number of supported address pairs (4) we need to remove ranges that are:
+        // 1. on an mrank that's less than our starting address
+        // 2. beyond the end of the starting address's mrank
+
         // Assert if our vector is larger than the number of supported address pairs (4)
         FAPI_ASSERT( l_addrs.size() <= MAX_SUBTEST_ADDR_PAIRS,
                      fapi2::ODY_TOO_MANY_RANKS_FOR_SUBTEST_SUPPORT()
@@ -190,6 +312,9 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
     {
         FAPI_TRY( mss::mcbist::config_address_range3<mss::mc_type::ODYSSEY>(iv_target, l_addrs[3].first, l_addrs[3].second) );
     }
+
+    // TODO Zen:MST-2467: to support sf_read of DIMMs with more than 4 logical ranks, we will need the following:
+    // If we have more than 4 total logical ranks, only set up subtests for the port that's set in the strarting address
 
     // Now we create the subtests we need for the requested address range
     for (uint8_t l_addr_count = 0; l_addr_count < l_addrs.size(); l_addr_count++)
@@ -257,7 +382,7 @@ void operation<mss::mc_type::ODYSSEY>::configure_multiport_subtests(
 /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
 /// in subclassed constructors more easily.
 /// @return FAPI2_RC_SUCCESS iff everything ok
-/// @note due to an erratum on Odyssey we need to run a subtest per srank
+/// @note init tests are write-only so we don't have to stop on rank boundaries
 ///
 template <>
 fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_init_internal()
@@ -291,7 +416,99 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_init_internal()
     // If the address range crosses between ports we need to duplicate subtests for the affected ranges
 
     // Setup the address configurations and subtests
-    FAPI_TRY( multi_port_addr() );
+    // Note: for an init test we don't need to stop on srank boundaries, so we can do a simple subtest setup (1 subtest per port)
+    // TODO Zen:MST-1921: The below code will need to be replaced with the MCBIST address mode test setup
+    FAPI_TRY( multi_port_addr_simple() );
+
+    // Here's an interesting problem. PRD (and others maybe) expect the operation to proceed in address-order.
+    // That is, when PRD finds an address it stops on, it wants to continue from there "to the end." That means
+    // we need to keep the subtests sorted, otherwise PRD could pass one subtest come upon a fail in a subsequent
+    // subtest and re-test something it already passed. So we sort the resulting iv_subtest vector by port/DIMM
+    // in the subtest.
+    std::sort(iv_program.iv_subtests.begin(), iv_program.iv_subtests.end(),
+              [](const decltype(iv_subtest)& a, const decltype(iv_subtest)& b) -> bool
+    {
+        uint16_t l_a_addr_sel = 0;
+        uint16_t l_b_addr_sel = 0;
+        a.iv_mcbmr.extractToRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(l_a_addr_sel);
+        b.iv_mcbmr.extractToRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(l_b_addr_sel);
+
+        if (a.get_port() == b.get_port())
+        {
+            return(l_a_addr_sel < l_b_addr_sel);
+        }
+        return (a.get_port() < b.get_port());
+    });
+
+    // Initialize the common sections
+    FAPI_TRY( base_init() );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief memdiags multi-port read for specific chip - Odyssey specialization
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+/// @note due to an erratum on Odyssey we need to run a subtest per srank
+///
+template <>
+fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_read_internal()
+{
+    constexpr uint8_t MAX_SUBTEST_ADDR_PAIRS = 4;
+
+    FAPI_INF("multi-port read internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
+    using TT = mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    // Let's assume we are going to send out all subtest unless we are in broadcast mode,
+    // where we only send up to 2 subtests under an MCA ( 1 for each DIMM) which is why no const
+    auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target);
+
+    // Get the port/DIMM information for the addresses. This is an integral value which allows us to index
+    // all the DIMM across a controller.
+    const uint64_t l_portdimm_start_address = iv_const.iv_start_address.get_port_dimm();
+    const uint64_t l_portdimm_end_address = iv_const.iv_end_address.get_port_dimm();
+
+    FAPI_INF(TARGTIDFORMAT " start port/dimm: %d end port/dimm: %d", GENTARGTID(iv_target), l_portdimm_start_address,
+             l_portdimm_end_address);
+
+    uint8_t l_attr_num_lranks[mss::ody::MAX_DIMM_PER_PORT] = {};
+
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(iv_target))
+    {
+        FAPI_TRY(mss::attr::get_logical_ranks_per_dimm(l_port, l_attr_num_lranks));
+        break;
+    }
+
+    FAPI_ASSERT( iv_const.iv_start_address <= iv_const.iv_end_address,
+                 fapi2::ODY_START_ADDR_BIGGER_THAN_END_ADDR()
+                 .set_MC_TARGET(iv_target)
+                 .set_START_ADDRESS(l_portdimm_start_address)
+                 .set_END_ADDRESS(l_portdimm_end_address),
+                 "Start address %d larger than end address %d for " TARGTIDFORMAT,
+                 l_portdimm_start_address, l_portdimm_end_address, GENTARGTID(iv_target));
+
+    // If we're here we know start port/rank < end port/rank. We want to run one subtest from start_address
+    // to the max range of the start address port/rank, then one subtest for each port/rank between the
+    // start/end ports/ranks and one test from the start of the end port/rank to the end address.
+    // If the address range crosses between ports we need to duplicate subtests for the affected ranges
+
+    // Setup the address configurations and subtests
+    // Note: for a read test we do need to stop on srank boundaries, so we have to create a subtest per srank
+    if (l_attr_num_lranks[0] > MAX_SUBTEST_ADDR_PAIRS)
+    {
+        // Temporary fix: if we have more logical ranks than we can fit in one test, just make a subtest per port for now
+        // TODO Zen:MST-2467: This will get replaced with multi_port_addr() when the final fix is in there
+        FAPI_TRY( multi_port_addr_simple() );
+    }
+    else
+    {
+        // if we can fit all the sranks into our address pair registers we can make a test that will cover each port's
+        // entire address range
+        FAPI_TRY( multi_port_addr() );
+    }
 
     // Here's an interesting problem. PRD (and others maybe) expect the operation to proceed in address-order.
     // That is, when PRD finds an address it stops on, it wants to continue from there "to the end." That means
