@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ namespace NODECOMM
 // ----------------------------------------------
 // If the link(s) are up the operation should complete right away
 // so there will only be a short polling window
-#define NODE_COMM_POLL_DELAY_NS (10 * NS_PER_MSEC)  // Sleep for 10ms per poll
+#define NODE_COMM_POLL_DELAY_NS ( 10 )  // Sleep for 10ns per poll
 // FSP is expecting a reply in 30 seconds, so leave some buffer
 #define NODE_COMM_POLL_DELAY_TOTAL_NS (25 * NS_PER_SEC) // Total time 25s
 
@@ -170,7 +170,6 @@ errlHndl_t nodeCommRecvMessage(TARGETING::Target* i_pTarget,
 
         // Sleep before polling again
         nanosleep( 0, interval_ns );
-        task_yield(); // wait patiently
         time_polled_ns += interval_ns;
 
         } while(attn_found == false);
