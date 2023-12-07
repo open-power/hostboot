@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -63,6 +63,7 @@ OBJS += ody_code_update.o
 OBJS += sbe_getCodeLevels.o
 OBJS += sbe_getScratchData.o
 OBJS += errlud_sbeio.o
+OBJS += sbe_flashCheck.o
 
 # sbeio's sub directories
 SUBDIRS += test.d

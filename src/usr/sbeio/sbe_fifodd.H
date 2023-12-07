@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,6 +162,7 @@ public:
         SBE_FIFO_CMD_GET_CAPABILITIES    = 0x02,
         SBE_FIFO_CMD_GET_SCRATCH_DATA    = 0x04,
         SBE_FIFO_CMD_GET_CAPABILITIES_2  = 0x07, // Deprecated for Odyssey
+        SBE_FIFO_CMD_SCRUB_MEM_DEVICE    = 0x09,
     };
 
     /**
@@ -618,6 +619,61 @@ public:
             , command(SBE_FIFO_CMD_GET_CAPABILITIES_2)
         {
         }
+    } PACKED;
+
+    /**
+     * @brief Struct for requesting SPPE to perform SPI flash checks.
+     *        Upon receiving this request, SPPE will check its flash devices
+     *        for unrecoverable and correctable errors and report the numbers
+     *        of each back.
+     */
+    struct fifoScrubMemDeviceRequest
+    {
+        uint32_t wordCnt; // 0x3 (The number of 32 bit words in the msg)
+        uint8_t reserved1;
+        uint8_t chipId;
+        uint8_t commandClass; // SBE_FIFO_CLASS_GENERIC_MESSAGE
+        uint8_t command; // SBE_FIFO_CMD_SCRUB_MEM_DEVICE
+        uint8_t reserved2;
+        uint8_t scope; // 0x01 = image; 0x02 = full
+        uint8_t side; // 0x01 = primary; 0x02 = secondary; 0x04 = golden
+        uint8_t deviceId; // 0x01 = physical device 0; 0x02 = physical device 1;
+                          // 0x04 = physical device 2; 0x08 = physical device 3
+        fifoScrubMemDeviceRequest() :
+            wordCnt(3),
+            reserved1(0),
+            chipId(0),
+            commandClass(SBE_FIFO_CLASS_GENERIC_MESSAGE),
+            command(SBE_FIFO_CMD_SCRUB_MEM_DEVICE),
+            reserved2(0),
+            scope(0),
+            side(0),
+            deviceId(0)
+        {}
+    } PACKED;
+
+    /**
+     * @brief Struct to hold a result of flash check for one side of one device.
+     *        SPPE will return this struct for each side and each device that was
+     *        requested to be checked. For example, requesting to check primary
+     *        and secondary sides of two devices will yield four of these structs.
+     */
+    struct spiScrubStatusEntry
+    {
+        uint8_t side;
+        uint8_t deviceId;
+        uint16_t scrubStatus; // 0 = scrub successful, ue and ce fields are valid;
+                              // non-zero = non-ue/ce error occurred, ue and ce fields are invalid
+        uint16_t ce; // number of correctable errors found
+        uint16_t ue; // number of unrecoverable errors found
+
+        spiScrubStatusEntry() :
+            side(0),
+            deviceId(0),
+            scrubStatus(0),
+            ce(0),
+            ue(0)
+        {}
     } PACKED;
 
     enum fifoGetSbeScratchDataOps

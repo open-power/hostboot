@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,6 +98,44 @@ namespace SBEIO
         //Keys are 0xFF and Vals are 0xFFFFFFFFFFFFFFFF
         //So a key w/ FF means its empty or at its default val
         SBE_DEFAULT       = 0xFF
+    };
+
+    /**
+     * @brief Enum denoting the image side of a device to check for SPI flash errors.
+     *        Used with SPI flash checking chip op. The different sides can
+     *        be OR'ed together for multi-side check.
+     */
+    enum flashCheckSide : uint8_t
+    {
+        SIDE_0       = 0x1,
+        SIDE_1       = 0x2,
+        SIDE_GOLDEN  = 0x4,
+        ALL_SIDES    = SIDE_0 | SIDE_1 | SIDE_GOLDEN,
+    };
+
+    /**
+     * @brief Enum denoting the scope of SPI flash check:
+     *        - IMAGE only checks the images present on the flash
+     *        - FULL checks the entire flash side of the device (including padding
+     *        and space between images)
+     */
+    enum flashCheckScope : uint8_t
+    {
+        IMAGE = 0x01,
+        FULL  = 0x02,
+    };
+
+    /**
+     * @brief Enum denoting the device selection of the devices to run SPI flash check on.
+     *        The different devices can be OR'ed together for multi-device check.
+     */
+    enum flashCheckDeviceId : uint8_t
+    {
+        DEVICE_0 = 0x01,
+        DEVICE_1 = 0x02,
+        DEVICE_2 = 0x04,
+        DEVICE_3 = 0x08,
+        ALL_DEVICES = DEVICE_0 | DEVICE_1 | DEVICE_2 | DEVICE_3,
     };
 
     /**
@@ -791,6 +829,21 @@ namespace SBEIO
      *
      */
     void processOdyAsyncFFDC(TARGETING::Target* i_chipTarget);
+
+    /**
+     * @brief Request the SPPE to perform a SPI flash check on the given
+     *        sides of the given devices.
+     * @param[in] i_ocmb the SPPE target to operate on
+     * @param[in] i_scope the scope of the flash check
+     * @param[in] i_side a bitwise OR of the side(s) to perform the check on
+     * @param[in] i_deviceId a bitwise OR of the device ID(s) to perform the check on
+     *
+     * @return nullptr on success; valid error log on failure
+     */
+    errlHndl_t sendSpiFlashCheckRequest(TARGETING::Target* i_ocmb,
+                                        uint8_t i_scope,
+                                        uint8_t i_side,
+                                        uint8_t i_deviceId);
 
 } //end namespace SBEIO
 
