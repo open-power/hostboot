@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,7 @@
 #include <cxxtest/TestSuite.H>
 #include <type_traits>
 
-#define TS_ASSERT(...)                                                  \
+#define TS_CHECK(...)                                                  \
     if (!__VA_ARGS__)                                                   \
     {                                                                   \
         TS_FAIL("testRemoveAllExtents: Test " #__VA_ARGS__ " is false, should be true"); \
@@ -42,27 +42,27 @@ class STLRemoveAllExtentsTest : public CxxTest::TestSuite
             // Leveraging std::is_same, which has already been unit tested
             {
                 using test_type = std::remove_all_extents<uint8_t>::type;
-                TS_ASSERT(std::is_same<uint8_t, test_type>::value);
+                TS_CHECK(std::is_same<uint8_t, test_type>::value);
             }
 
             {
                 using test_type = std::remove_all_extents<uint16_t[ ][1][1]>::type;
-                TS_ASSERT(std::is_same<uint16_t, test_type>::value);
+                TS_CHECK(std::is_same<uint16_t, test_type>::value);
             }
 
             {
                 using test_type = std::remove_all_extents<uint32_t[ ]>::type;
-                TS_ASSERT(std::is_same<uint32_t, test_type>::value);
+                TS_CHECK(std::is_same<uint32_t, test_type>::value);
             }
 
             {
                 using test_type = std::remove_all_extents<int[ ][1]>::type;
-                TS_ASSERT(std::is_same<int, test_type>::value);
+                TS_CHECK(std::is_same<int, test_type>::value);
             }
 
         }
 };
 
-#undef TS_ASSERT
+#undef TS_CHECK
 
 #endif

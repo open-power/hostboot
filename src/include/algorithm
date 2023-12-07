@@ -1125,6 +1125,95 @@ namespace std
         }
         return init;
     }
+
+template<typename It, class Pred>
+inline constexpr bool all_of(It first, const It last, Pred p)
+{
+    bool result = true;
+
+    while (first != last)
+    {
+        if (!p(*first))
+        {
+            result = false;
+            break;
+        }
+        ++first;
+    }
+
+    return result;
+}
+
+template<typename It, class Pred>
+inline constexpr bool any_of(It first, const It last, Pred p)
+{
+    bool result = false;
+
+    while (first != last)
+    {
+        if (p(*first))
+        {
+            result = true;
+            break;
+        }
+        ++first;
+    }
+
+    return result;
+}
+
+template<typename It, class Pred>
+inline constexpr bool none_of(It first, It last, Pred p)
+{
+    bool result = true;
+
+    while (first != last)
+    {
+        if (p(*first))
+        {
+            result = false;
+            break;
+        }
+        ++first;
+    }
+
+    return result;
+}
+
+template<typename It, typename T>
+inline constexpr size_t count(It begin, const It end, const T& value)
+{
+    size_t num = 0;
+
+    while (begin != end)
+    {
+        if (*begin == value)
+        {
+            ++num;
+        }
+        ++begin;
+    }
+
+    return num;
+}
+
+template<typename It, typename Pred>
+inline constexpr size_t count_if(It begin, const It end, Pred predicate)
+{
+    size_t num = 0;
+
+    while (begin != end)
+    {
+        if (predicate(*begin))
+        {
+            ++num;
+        }
+        ++begin;
+    }
+
+    return num;
+}
+
 }
 
 namespace hbstd

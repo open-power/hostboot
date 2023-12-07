@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,8 +34,8 @@
 #include <list>
 #include <initializer_list>
 
-#define TS_ASSERT(...)                                                  \
-    if (!__VA_ARGS__)                                                   \
+#define TS_CHECK(...)                                                   \
+    if (!(__VA_ARGS__))                                                 \
     {                                                                   \
         TS_FAIL("test comparison functors: Test " #__VA_ARGS__ " is false, should be true"); \
     }
@@ -180,63 +180,155 @@ class STLFunctionalTest : public CxxTest::TestSuite
 
         void test_lessFun()
         {
-            TS_ASSERT( std::less<uint32_t>()(1,2) );
-            TS_ASSERT( std::less<uint16_t>()(5,20) );
-            TS_ASSERT( !std::less<uint8_t>()(100,2) );
-            TS_ASSERT( !std::less<int>()(-40,-40) );
-            TS_ASSERT( std::less<int32_t>()(-40,-30) );
+            TS_CHECK( std::less<uint32_t>()(1,2) );
+            TS_CHECK( std::less<uint16_t>()(5,20) );
+            TS_CHECK( !std::less<uint8_t>()(100,2) );
+            TS_CHECK( !std::less<int>()(-40,-40) );
+            TS_CHECK( std::less<int32_t>()(-40,-30) );
         }
 
         void test_lessEqualFun()
         {
-            TS_ASSERT( std::less_equal<int>()(-40,-40) );
-            TS_ASSERT( std::less_equal<uint8_t>()(4,4) );
-            TS_ASSERT( std::less_equal<uint8_t>()(4,200) );
-            TS_ASSERT( std::less_equal<uint32_t>()(5,20) );
-            TS_ASSERT( !std::less_equal<uint16_t>()(300,50) );
+            TS_CHECK( std::less_equal<int>()(-40,-40) );
+            TS_CHECK( std::less_equal<uint8_t>()(4,4) );
+            TS_CHECK( std::less_equal<uint8_t>()(4,200) );
+            TS_CHECK( std::less_equal<uint32_t>()(5,20) );
+            TS_CHECK( !std::less_equal<uint16_t>()(300,50) );
         }
 
         void test_greaterFun()
         {
-            TS_ASSERT( !std::greater<int>()(-40,-40) );
-            TS_ASSERT( !std::greater<uint8_t>()(4,4) );
-            TS_ASSERT( !std::greater<uint8_t>()(4,200) );
-            TS_ASSERT( !std::greater<uint32_t>()(5,20) );
-            TS_ASSERT( std::greater<int64_t>()(-5,-20) );
-            TS_ASSERT( std::greater<uint16_t>()(300,50) );
+            TS_CHECK( !std::greater<int>()(-40,-40) );
+            TS_CHECK( !std::greater<uint8_t>()(4,4) );
+            TS_CHECK( !std::greater<uint8_t>()(4,200) );
+            TS_CHECK( !std::greater<uint32_t>()(5,20) );
+            TS_CHECK( std::greater<int64_t>()(-5,-20) );
+            TS_CHECK( std::greater<uint16_t>()(300,50) );
         }
 
         void test_greaterEqualFun()
         {
-            TS_ASSERT( std::greater_equal<int>()(-40,-40) );
-            TS_ASSERT( std::greater_equal<uint8_t>()(4,4) );
-            TS_ASSERT( !std::greater_equal<uint8_t>()(4,200) );
-            TS_ASSERT( !std::greater_equal<uint32_t>()(5,20) );
-            TS_ASSERT( std::greater_equal<int64_t>()(-5,-20) );
-            TS_ASSERT( std::greater_equal<uint16_t>()(300,50) );
+            TS_CHECK( std::greater_equal<int>()(-40,-40) );
+            TS_CHECK( std::greater_equal<uint8_t>()(4,4) );
+            TS_CHECK( !std::greater_equal<uint8_t>()(4,200) );
+            TS_CHECK( !std::greater_equal<uint32_t>()(5,20) );
+            TS_CHECK( std::greater_equal<int64_t>()(-5,-20) );
+            TS_CHECK( std::greater_equal<uint16_t>()(300,50) );
         }
 
         void test_equalTolFun()
         {
-            TS_ASSERT( std::equal_to<int>()(-40,-40) );
-            TS_ASSERT( std::equal_to<uint8_t>()(4,4) );
-            TS_ASSERT( !std::equal_to<uint8_t>()(4,200) );
-            TS_ASSERT( !std::equal_to<uint32_t>()(5,20) );
-            TS_ASSERT( !std::equal_to<int64_t>()(-5,-20) );
-            TS_ASSERT( !std::equal_to<uint16_t>()(300,50) );
+            TS_CHECK( std::equal_to<int>()(-40,-40) );
+            TS_CHECK( std::equal_to<uint8_t>()(4,4) );
+            TS_CHECK( !std::equal_to<uint8_t>()(4,200) );
+            TS_CHECK( !std::equal_to<uint32_t>()(5,20) );
+            TS_CHECK( !std::equal_to<int64_t>()(-5,-20) );
+            TS_CHECK( !std::equal_to<uint16_t>()(300,50) );
         }
 
         void test_NotEqualTolFun()
         {
-            TS_ASSERT( !std::not_equal_to<int>()(-40,-40) );
-            TS_ASSERT( !std::not_equal_to<uint8_t>()(4,4) );
-            TS_ASSERT( std::not_equal_to<uint8_t>()(4,200) );
-            TS_ASSERT( std::not_equal_to<uint32_t>()(5,20) );
-            TS_ASSERT( std::not_equal_to<int64_t>()(-5,-20) );
-            TS_ASSERT( std::not_equal_to<uint16_t>()(300,50) );
+            TS_CHECK( !std::not_equal_to<int>()(-40,-40) );
+            TS_CHECK( !std::not_equal_to<uint8_t>()(4,4) );
+            TS_CHECK( std::not_equal_to<uint8_t>()(4,200) );
+            TS_CHECK( std::not_equal_to<uint32_t>()(5,20) );
+            TS_CHECK( std::not_equal_to<int64_t>()(-5,-20) );
+            TS_CHECK( std::not_equal_to<uint16_t>()(300,50) );
         }
+
+    static bool predicate_positive(int x)
+    {
+        return x > 0;
+    }
+
+    static bool predicate_negative(int x)
+    {
+        return x < 0;
+    }
+
+    static bool predicate_even(int x)
+    {
+        return (x % 2) == 0;
+    }
+
+    void test_all_of()
+    {
+        std::vector<int> empty;
+        std::vector<int> items { 1, 2, 3, 4 };
+
+        // empty set
+        TS_CHECK(std::all_of(begin(empty), end(empty), predicate_positive));
+        // all true
+        TS_CHECK(std::all_of(begin(items), end(items), predicate_positive));
+        // Some true, some false
+        TS_CHECK(!std::all_of(begin(items), end(items), predicate_even));
+        // All false
+        TS_CHECK(!std::all_of(begin(items), end(items), predicate_negative));
+    }
+
+    void test_any_of()
+    {
+        std::vector<int> empty;
+        std::vector<int> items { 1, 2, 3, 4 };
+
+        // empty set
+        TS_CHECK(!std::any_of(begin(empty), end(empty), predicate_positive));
+        // all true
+        TS_CHECK(std::any_of(begin(items), end(items), predicate_positive));
+        // Some true, some false
+        TS_CHECK(std::any_of(begin(items), end(items), predicate_even));
+        // All false
+        TS_CHECK(!std::any_of(begin(items), end(items), predicate_negative));
+    }
+
+    void test_none_of()
+    {
+        std::vector<int> empty;
+        std::vector<int> items { 1, 2, 3, 4 };
+
+        // empty set
+        TS_CHECK(std::none_of(begin(empty), end(empty), predicate_positive));
+        // all true
+        TS_CHECK(!std::none_of(begin(items), end(items), predicate_positive));
+        // Some true, some false
+        TS_CHECK(!std::none_of(begin(items), end(items), predicate_even));
+        // All false
+        TS_CHECK(std::none_of(begin(items), end(items), predicate_negative));
+    }
+
+    void test_count()
+    {
+        std::vector<int> empty;
+        std::vector<int> items { 1, 2, 3, 4 };
+        std::vector<int> repeats { 1, 2, 1, 3, 4, 5, 6, 1, 2, 1, 1 };
+
+        TS_CHECK(std::count(begin(empty), end(empty), 1) == 0);
+
+        TS_CHECK(std::count(begin(items), end(items), 0) == 0);
+        TS_CHECK(std::count(begin(items), end(items), 1) == 1);
+        TS_CHECK(std::count(begin(items), end(items), 2) == 1);
+
+        TS_CHECK(std::count(begin(repeats), end(repeats), 6) == 1);
+        TS_CHECK(std::count(begin(repeats), end(repeats), 1) == 5);
+        TS_CHECK(std::count(begin(repeats), end(repeats), 2) == 2);
+    }
+
+    void test_count_if()
+    {
+        std::vector<int> empty;
+        std::vector<int> items { 1, 2, 3, 4 };
+        std::vector<int> repeats { 1, 2, 1, 3, 4, 5, 6, 1, 2, 1, 1 };
+
+        TS_CHECK(std::count_if(begin(empty), end(empty), predicate_even) == 0);
+
+        TS_CHECK(std::count_if(begin(items), end(items), predicate_even) == 2);
+        TS_CHECK(std::count_if(begin(items), end(items), predicate_negative) == 0);
+
+        TS_CHECK(std::count_if(begin(repeats), end(repeats), predicate_even) == 4);
+        TS_CHECK(std::count_if(begin(repeats), end(repeats), predicate_negative) == 0);
+    }
 };
 
-#undef TS_ASSERT
+#undef TS_CHECK
 
 #endif

@@ -297,6 +297,16 @@ namespace std
                 return *this;
             }
 
+            /* @brief Assignment operator for pointer types.
+             * This is a hostboot-specific extension.
+             */
+            template<typename U>
+            unique_ptr& operator=(U* const i_ptr)
+            {
+                reset(i_ptr);
+                return *this;
+            }
+
             /* @brief Relinquishes ownership of resource to caller. Does NOT
              * clean up owned resource.
              *
@@ -524,6 +534,30 @@ inline void noop_deleter(const void*)
 {
 }
 
+template<typename T>
+std::unique_ptr<T> own(T* const ptr)
+{
+    return std::unique_ptr<T>(ptr);
 }
+
+template<typename T>
+std::unique_ptr<T[]> own_array(T* const ptr)
+{
+    return std::unique_ptr<T[]>(ptr);
+}
+
+template<typename Del, typename T>
+std::unique_ptr<T, Del> own(T* const ptr, Del&& deleter)
+{
+    return std::unique_ptr<T, Del>(ptr, std::forward<Del>(deleter));
+}
+
+template<typename Del, typename T>
+std::unique_ptr<T[], Del> own_array(T* const ptr, Del&& deleter)
+{
+    return std::unique_ptr<T[], Del>(ptr, std::forward<Del>(deleter));
+}
+
+} // namespace hbstd
 
 #endif
