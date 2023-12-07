@@ -39,11 +39,6 @@
 #include <prdfParserEnums.H>
 #include <prdfParserUtils.H>
 
-#ifdef __HOSTBOOT_MODULE
-#include <prdfMemRrd.H>
-#endif
-
-
 namespace PRDF
 {
 
@@ -793,7 +788,16 @@ bool parseRrdFfdc(void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser,
 
     bool rc = true;
 
-    #ifdef __HOSTBOOT_MODULE
+    // FfdcRrData struct format for ease of parsing. Variables should match
+    // as defined in the FfdcRrData in prdfMemRrd.H
+    struct FfdcRrData
+    {
+        uint8_t prank;
+        uint8_t srank;
+        uint8_t bnkGrp;
+        uint8_t bnk;
+        uint32_t row;
+    };
 
     i_parser.PrintBlank();
     i_parser.PrintHeading("Row Repair Deploy FFDC");
@@ -817,18 +821,18 @@ bool parseRrdFfdc(void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser,
 
         // Print out the initial information
         i_parser.PrintString("Deployed Row Repair:", "");
-        i_parser.PrintString(" Dram Position:", "%d", dramPos);
-        i_parser.PrintString(" Primary Rank:", "%d", deployedRow.prank);
-        i_parser.PrintString(" Secondary Rank:", "%d", deployedRow.srank);
-        i_parser.PrintString(" Bank Group:", "0x%02x", deployedRow.bnkGrp);
-        i_parser.PrintString(" Bank:", "0x%02x", deployedRow.bnk);
-        i_parser.PrintString(" Row:", "0x%08x", deployedRow.row);
+        i_parser.PrintNumber(" Dram Position:", "%d", dramPos);
+        i_parser.PrintNumber(" Primary Rank:", "%d", deployedRow.prank);
+        i_parser.PrintNumber(" Secondary Rank:", "%d", deployedRow.srank);
+        i_parser.PrintNumber(" Bank Group:", "0x%02x", deployedRow.bnkGrp);
+        i_parser.PrintNumber(" Bank:", "0x%02x", deployedRow.bnk);
+        i_parser.PrintNumber(" Row:", "0x%08x", deployedRow.row);
 
 
         uint8_t entries;
         ffdc >> entries;
 
-        i_parser.PrintString("Uninitialized Rows Found, i.e. MCEs hit:", "");
+        i_parser.PrintString("Uninitialized Rows Found:", "");
         // Loop through all entries for uninitialized rows and print their info
         for (uint8_t i = 0; i < entries; i++)
         {
@@ -839,16 +843,14 @@ bool parseRrdFfdc(void * i_buffer, uint32_t i_buflen, ErrlUsrParser & i_parser,
                  >> uninitRow.bnk    // 1 byte
                  >> uninitRow.row;   // 4 bytes
 
-            i_parser.PrintString("Uninitialized Row", "%d", i);
-            i_parser.PrintString(" Primary Rank:", "%d", uninitRow.prank);
-            i_parser.PrintString(" Secondary Rank:", "%d", uninitRow.srank);
-            i_parser.PrintString(" Bank Group:", "0x%02x", uninitRow.bnkGrp);
-            i_parser.PrintString(" Bank:", "0x%02x", uninitRow.bnk);
-            i_parser.PrintString(" Row:", "0x%08x", uninitRow.row);
+            i_parser.PrintNumber("Uninitialized Row", "%d", i);
+            i_parser.PrintNumber(" Primary Rank:", "%d", uninitRow.prank);
+            i_parser.PrintNumber(" Secondary Rank:", "%d", uninitRow.srank);
+            i_parser.PrintNumber(" Bank Group:", "0x%02x", uninitRow.bnkGrp);
+            i_parser.PrintNumber(" Bank:", "0x%02x", uninitRow.bnk);
+            i_parser.PrintNumber(" Row:", "0x%08x", uninitRow.row);
         }
     }
-
-    #endif
 
     return rc;
 }
