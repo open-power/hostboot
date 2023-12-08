@@ -502,8 +502,7 @@ void captureIueCounts<OcmbDataBundle*>( TARGETING::TargetHandle_t i_trgt,
 
 template<>
 void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                 STEP_CODE_DATA_STRUCT & io_sc,
-                                 uint8_t i_port )
+                                 STEP_CODE_DATA_STRUCT & io_sc )
 {
     PRDF_ASSERT( TYPE_OCMB_CHIP == i_chip->getType() );
 
@@ -512,24 +511,30 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     TargetHandle_t ocmbTrgt = i_chip->getTrgt();
 
-    // Add DRAM repairs data from hardware.
-    captureDramRepairsData<TYPE_OCMB_CHIP>( ocmbTrgt, cd, i_port );
-
-    // Add DRAM repairs data from VPD. Port 0 for both Explorer and Odyssey
     if (nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 0))
     {
+        // Add DRAM repairs data from hardware for port0 if it exists.
+        captureDramRepairsData<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 0 );
+
+        // Add DRAM repairs data from VPD for port0 if it exists.
         captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 0 );
+
+        // Add Row Repair data from VPD for port0 if it exists
+        captureRowRepairVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 0 );
     }
 
-    // Add DRAM repairs data from VPD. Port 1 for Odyssey only
     if (isOdysseyOcmb(i_chip->getTrgt()) &&
         nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 1))
     {
-        captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 1 );
-    }
+        // Add DRAM repairs data from hardware for port1 if it exists.
+        captureDramRepairsData<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 1 );
 
-    // Add Row Repair data from VPD
-    captureRowRepairVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, i_port );
+        // Add DRAM repairs data from VPD for port1 if it exists.
+        captureDramRepairsVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 1 );
+
+        // Add Row Repair data from VPD for port1 if it exists
+        captureRowRepairVpd<TYPE_OCMB_CHIP>( ocmbTrgt, cd, 1 );
+    }
 
     // Add IUE counts to capture data.
     captureIueCounts<OcmbDataBundle*>( ocmbTrgt, db, cd );
@@ -545,17 +550,30 @@ void addEccData<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 template<>
 void addEccData<TYPE_OCMB_CHIP>( TargetHandle_t i_trgt,
-                                 errlHndl_t io_errl, uint8_t i_port )
+                                 errlHndl_t io_errl )
 {
     PRDF_ASSERT( TYPE_OCMB_CHIP == getTargetType(i_trgt) );
 
     CaptureData cd;
 
-    // Add DRAM repairs data from hardware.
-    captureDramRepairsData<TYPE_OCMB_CHIP>( i_trgt, cd, i_port );
+    if (nullptr != getConnectedChild(i_trgt, TYPE_MEM_PORT, 0))
+    {
+        // Add DRAM repairs data from hardware for port0 if it exists.
+        captureDramRepairsData<TYPE_OCMB_CHIP>( i_trgt, cd, 0 );
 
-    // Add DRAM repairs data from VPD.
-    captureDramRepairsVpd<TYPE_OCMB_CHIP>( i_trgt, cd, i_port );
+        // Add DRAM repairs data from VPD for port0 if it exists.
+        captureDramRepairsVpd<TYPE_OCMB_CHIP>( i_trgt, cd, 0 );
+    }
+
+    if (isOdysseyOcmb(i_trgt) &&
+        nullptr != getConnectedChild(i_trgt, TYPE_MEM_PORT, 1))
+    {
+        // Add DRAM repairs data from hardware for port1 if it exists.
+        captureDramRepairsData<TYPE_OCMB_CHIP>( i_trgt, cd, 1 );
+
+        // Add DRAM repairs data from VPD for port1 if it exists.
+        captureDramRepairsVpd<TYPE_OCMB_CHIP>( i_trgt, cd, 1 );
+    }
 
     ErrDataService::AddCapData( cd, io_errl );
 }

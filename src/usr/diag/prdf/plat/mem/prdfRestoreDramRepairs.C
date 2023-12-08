@@ -74,7 +74,7 @@ errlHndl_t createErrl( uint32_t i_reasonCode, TargetHandle_t i_trgt,
 
     // Add capture data. Need to do this now before the DIMM callouts are made
     // because the VPD is cleared if a DIMM is added to the callout list.
-    MemCaptureData::addEccData<T>( i_trgt, errl, i_port );
+    MemCaptureData::addEccData<T>( i_trgt, errl );
 
     return errl;
 }

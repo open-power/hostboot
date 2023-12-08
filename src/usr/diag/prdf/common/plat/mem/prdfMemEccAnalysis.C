@@ -814,7 +814,7 @@ uint32_t analyzeFetchMpe( ExtensibleChip * i_chip, const MemRank & i_rank,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    MemCaptureData::addEccData<T>( i_chip, io_sc, i_port );
+    MemCaptureData::addEccData<T>( i_chip, io_sc );
 
     #endif // __HOSTBOOT_RUNTIME
 
@@ -1107,7 +1107,7 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip, uint8_t i_port,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    MemCaptureData::addEccData<T>( i_chip, io_sc, i_port );
+    MemCaptureData::addEccData<T>( i_chip, io_sc );
 
     return o_rc;
 
@@ -1225,7 +1225,7 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip, uint8_t i_port,
     } while (0);
 
     // Add ECC capture data for FFDC.
-    MemCaptureData::addEccData<T>( i_chip, io_sc, i_port );
+    MemCaptureData::addEccData<T>( i_chip, io_sc );
 
     return o_rc;
 

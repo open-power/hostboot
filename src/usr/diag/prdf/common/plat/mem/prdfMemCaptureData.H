@@ -39,11 +39,9 @@ namespace MemCaptureData
  * @brief Adds memory ECC FFDC to an SDC.
  * @param i_chip OCMB.
  * @param io_sc  Step code data struct.
- * @param i_port Target memory port.
  */
 template<TARGETING::TYPE T>
-void addEccData( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
-                 uint8_t i_port );
+void addEccData( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc );
 
 /**
  * @brief Adds Memory ECC FFDC to an error log.
@@ -54,11 +52,9 @@ void addEccData( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc,
  *        information is not relevant during its intended uses.
  * @param i_trgt An OCMB target
  * @param o_errl Error log.
- * @param i_port Target memory port.
  */
 template<TARGETING::TYPE T>
-void addEccData( TARGETING::TargetHandle_t i_trgt, errlHndl_t io_errl,
-                 uint8_t i_port );
+void addEccData( TARGETING::TargetHandle_t i_trgt, errlHndl_t io_errl );
 
 /**
  * @brief Adds a new user data section to the error log containing a MemoryMru

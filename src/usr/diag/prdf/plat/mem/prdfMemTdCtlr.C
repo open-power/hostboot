@@ -259,7 +259,7 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
     if ( !io_sc.service_data->queryDontCommitErrl() )
     {
         collectStateCaptureData( io_sc, TD_CTLR_DATA::END );
-        MemCaptureData::addEccData<T>( iv_chip, io_sc, addr.getPort() );
+        MemCaptureData::addEccData<T>( iv_chip, io_sc );
     }
 
     if ( SUCCESS != o_rc )
