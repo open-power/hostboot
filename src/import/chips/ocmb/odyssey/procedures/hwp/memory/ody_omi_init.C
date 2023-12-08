@@ -46,6 +46,7 @@
 #include <lib/omi/ody_omi_traits.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <generic/memory/lib/utils/c_str.H>
+#include <generic/memory/proc_specific/mss_target_abstractions.H>
 #ifndef __PPE__
     #include <lib/inband/ody_inband.H>
 #else
@@ -119,7 +120,7 @@ fapi2::ReturnCode omiSetUpstreamTemplates(const fapi2::Target<fapi2::TARGET_TYPE
     fapi2::ATTR_ODY_TMPL_B_PACING_Type l_tmpl_b_pacing;
 
     auto const& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
-                         .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+                         .getParent<PROC_TYPE>();
 
     FAPI_TRY(mss::omi::get_us_template_support(l_proc, l_us_only_0159));
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_ENABLE_US_TMPL_1, i_target, l_enable_tmpl_1) );
@@ -236,7 +237,7 @@ fapi2::ReturnCode omiTLVersionShortBackOff(const fapi2::Target<fapi2::TARGET_TYP
     fapi2::ATTR_PROC_OMI_OC_MINOR_VER_Type l_proc_oc_minor;
 
     auto const& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
-                         .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+                         .getParent<PROC_TYPE>();
 
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_SHRT_BACKOFF_TIMER, i_target, l_short_backoff) );
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_OMI_OC_MAJOR_VER,
@@ -368,7 +369,7 @@ fapi2::ReturnCode omiValidateDownstream(const fapi2::Target<fapi2::TARGET_TYPE_O
                                .getParent<fapi2::TARGET_TYPE_MCC>();
 
     const auto& l_proc = i_target.getParent<fapi2::TARGET_TYPE_OMI>()
-                         .getParent<fapi2::TARGET_TYPE_PROC_CHIP>();
+                         .getParent<PROC_TYPE>();
     FAPI_TRY(mss::omi::get_ds_template_support(l_proc, l_ds_only_0147));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_ENABLE_DL_TMPL_1,
                            l_mcc_target,
