@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -812,7 +812,7 @@ fapi2::ReturnCode command_result( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
                  set_COMMAND(l_cmd_data).
                  set_STATUS_DATA(l_fw_status_data).
                  set_EXP_ACTIVE_LOG_SIZE(4096),
-                 "Polling timeout on command 0x%02X (still FW_BUSY) for " TARGTIDFORMAT,
+                 "command_result> Polling timeout on command 0x%02X (still FW_BUSY) for " TARGTIDFORMAT,
                  i_cmd_id, MSSTARGID );
     // Check that Explorer gave a successful return code
     FAPI_ASSERT( (l_status == status_codes::I2C_SUCCESS),
@@ -841,7 +841,8 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                const std::vector<uint8_t>& i_cmd_data,
-                               const std::vector<uint8_t>& i_rsp_data )
+                               const std::vector<uint8_t>& i_rsp_data,
+                               const bool i_skip_logs )
 {
     uint8_t l_boot_mode = 0;
     uint8_t l_status = 0;
@@ -849,11 +850,20 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
     uint64_t l_fw_status_data = 0;
     uint64_t l_cmd_data = convert_to_long(i_cmd_data);
     const auto& l_omi = i_target.getParent<fapi2::TARGET_TYPE_OMI>();
+    uint32_t l_log_size = 4096;
 
     FAPI_TRY(exp::i2c::boot_cfg::get_dl_layer_boot_mode(i_target, i_cmd_data, l_boot_mode));
     FAPI_TRY(status::get_status_code(i_target, i_rsp_data, l_status));
     FAPI_TRY(status::get_fw_status_ext_err(i_target, i_rsp_data, l_ext_err));
     FAPI_TRY(capture_status(i_target, i_rsp_data, l_fw_status_data));
+
+    // Zero out the log size to skip collecting them if asked.
+    // This can be necessary because the attempt to collect the logs may
+    // actually disrupt the operation in progress if the FW is still BUSY.
+    if( i_skip_logs )
+    {
+        l_log_size = 0;
+    }
 
     // Check that Explorer is not still in FW_BUSY state
     FAPI_ASSERT( (l_status != status_codes::FW_BUSY),
@@ -862,8 +872,8 @@ fapi2::ReturnCode boot_config( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                  set_CMD_ID(FW_BOOT_CONFIG).
                  set_COMMAND(l_cmd_data).
                  set_STATUS_DATA(l_fw_status_data).
-                 set_EXP_ACTIVE_LOG_SIZE(4096),
-                 "Polling timeout on FW_BOOT_CONFIG command (still FW_BUSY) for " TARGTIDFORMAT,
+                 set_EXP_ACTIVE_LOG_SIZE(l_log_size),
+                 "boot_config> Polling timeout on FW_BOOT_CONFIG command (still FW_BUSY) for " TARGTIDFORMAT,
                  MSSTARGID );
 
     // Check Explorer return code

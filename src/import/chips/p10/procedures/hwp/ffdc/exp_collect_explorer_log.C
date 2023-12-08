@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,9 +93,12 @@ fapi2::ReturnCode exp_collect_explorer_logs(const fapi2::ffdc_t& i_ocmb_chip,
     uint32_t l_allowable_size = *(reinterpret_cast<const uint32_t*>(i_size.ptr()));
 
     // Just don't grab log if size is zero
+    // This seems like an odd function argument but it is the only way
+    // to dynamically control this logic since it is triggered via a
+    // static call in the error xml.
     if (l_allowable_size == 0)
     {
-        FAPI_INF("exp_collect_explorer_logs(%d) called with 0 size", i_log_type);
+        FAPI_INF("exp_collect_explorer_logs(type=%d) called with 0 size", i_log_type);
         return l_rc;
     }
 

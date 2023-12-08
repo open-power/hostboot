@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,10 +83,16 @@ extern "C"
     ///
     /// @brief Setup the OCMB for enterprise and half-DIMM modes as desired
     /// @param[in] i_target the OCMB target to operate on
-    /// @param[in] i_poll_repeat true if the caller wants to repeat a polling attempt - defaults to false
+    /// @param[in] i_poll_repeat true if the caller wants to repeat a polling
+    ///             attempt - defaults to false
+    /// @param[in] i_final_attempt true if the caller will not call again,
+    ///             triggers enhanced (but disruptive) analysis
+    ///             - defaults to true
     /// @return FAPI2_RC_SUCCESS iff ok
     ///
-    fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target, const bool i_poll_repeat)
+    fapi2::ReturnCode exp_omi_setup( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                     const bool i_poll_repeat,
+                                     const bool i_final_attempt)
     {
         mss::display_git_commit_info("exp_omi_setup");
 
@@ -135,8 +141,11 @@ extern "C"
         // FFE Setup
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_FFE_SETTINGS_COMMAND, i_target, l_enable_ffe_settings));
 
+        // Only run these commands the first time through
         if(!i_poll_repeat)
         {
+            FAPI_INF("%s exp_omi_setup> initial setup", mss::c_str(i_target));
+
             if (l_enable_ffe_settings == fapi2::ENUM_ATTR_OMI_FFE_SETTINGS_COMMAND_ENABLE)
             {
                 FAPI_TRY(mss::exp::omi::ffe_setup(i_target, l_ffe_setup_data));
@@ -156,14 +165,18 @@ extern "C"
             }
 
             FAPI_TRY(mss::exp::workarounds::omi::override_cdr_bw_i2c(i_target, l_cdr_bw_override));
+        }
 
-            // Gets the data setup
-            FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
+        // Gets the data setup
+        FAPI_TRY(mss::exp::omi::train::setup_fw_boot_config(i_target, l_boot_config_data));
 
-            // Set up dl_layer_boot_mode according to FW and HW support
-            // Need to run original sequence (0b00) on Apollo and on legacy FW
-            FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_boot_config_data));
+        // Set up dl_layer_boot_mode according to FW and HW support
+        // Need to run original sequence (0b00) on Apollo and on legacy FW
+        FAPI_TRY(mss::exp::workarounds::omi::select_dl_layer_boot_mode(i_target, l_is_apollo, l_boot_config_data));
 
+        // Only send the BOOT_CONFIG command the first time through
+        if(!i_poll_repeat)
+        {
             // Issues the command and checks for completion
             // Note: This does not kick off OMI training
             FAPI_TRY(mss::exp::i2c::boot_config(i_target, l_boot_config_data));
@@ -178,8 +191,19 @@ extern "C"
         // Convert the poll count over from milliseconds to units of 2 milliseconds rounding up
         l_poll_count = (l_poll_count / 2) + (l_poll_count % 2);
         FAPI_TRY(mss::exp::i2c::poll_fw_status(i_target, 2 * mss::DELAY_1MS, l_poll_count, l_fw_status_data));
-        l_rc_bootconfig0 = mss::exp::i2c::check::boot_config(i_target, l_boot_config_data, l_fw_status_data);
+        l_rc_bootconfig0 = mss::exp::i2c::check::boot_config(i_target, l_boot_config_data, l_fw_status_data, !i_final_attempt);
         l_rc_bootconfig0_copy = l_rc_bootconfig0;
+
+        if(l_rc_bootconfig0 == fapi2::FAPI2_RC_SUCCESS)
+        {
+            FAPI_INF("%s exp_omi_setup> poll_fw_status PASSED", mss::c_str(i_target));
+        }
+
+
+        if(!i_final_attempt && (l_rc_bootconfig0 != fapi2::FAPI2_RC_SUCCESS))
+        {
+            return l_rc_bootconfig0;
+        }
 
         // Unmask FIRs before checking the BOOT_CONFIG0 RC in case we need to blame FIRs
         l_rc_unmask = mss::unmask::after_mc_omi_setup<mss::mc_type::EXPLORER>(i_target);
@@ -201,13 +225,18 @@ extern "C"
                 if(l_rc_bootconfig0 != fapi2::FAPI2_RC_SUCCESS)
                 {
                     fapi2::log_related_error(i_target, l_rc_unmask, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-                    FAPI_TRY(l_rc_bootconfig0, "%s BOOT_CONFIG_0 either failed or timed out", mss::c_str(i_target));
+                    FAPI_TRY(l_rc_bootconfig0, "%s BOOT_CONFIG_0 either failed or timed out 1", mss::c_str(i_target));
                 }
                 // 1b: Return the scom fail
                 else
                 {
                     FAPI_TRY(l_rc_unmask, "%s Unmask after exp_omi_setup failed", mss::c_str(i_target));
                 }
+            }
+
+            if(l_rc_bootconfig0_copy != fapi2::FAPI2_RC_SUCCESS)
+            {
+                return l_rc_bootconfig0_copy;
             }
 
             // Check FIRs if BOOT_CONFIG_0 failed or timed out
@@ -227,7 +256,7 @@ extern "C"
             // 2b/c: Finally, return l_rc_firchk (SUCCESS if we found FIRs set, failing RC otherwise) if BOOT_CONFIG0 failed
             if (l_rc_bootconfig0 != fapi2::FAPI2_RC_SUCCESS)
             {
-                FAPI_ERR("%s BOOT_CONFIG_0 either failed or timed out", mss::c_str(i_target));
+                FAPI_ERR("%s BOOT_CONFIG_0 either failed or timed out 2", mss::c_str(i_target));
                 return l_rc_firchk;
             }
         }
@@ -320,6 +349,8 @@ extern "C"
         {
             FAPI_TRY(exp_omi_setup_csu(i_target));
         }
+
+        FAPI_INF("exp_omi_setup> SUCCESS");
 
     fapi_try_exit:
         return fapi2::current_err;
