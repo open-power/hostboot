@@ -261,7 +261,8 @@ state_transitions_t ody_fsm_transitions[] =
     { { no            , no                     , SIDE0  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_golden,  retry_check_for_ready                 }},
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
                                                                          { IMAGE_SYNC_CHIPOP_FAILURE
-                                                                           | MEAS_REGS_MISMATCH        , {switch_to_side_1, retry_check_for_ready                       }},
+                                                                           | MEAS_REGS_MISMATCH
+                                                                           | OCMB_FLASH_ERROR          , {switch_to_side_1, retry_check_for_ready                       }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_HWP_FAIL_OTHER       , {deconfigure_ocmb                                              }},
                                                                          { IPL_COMPLETE                , {sync_images_normal, reset_ocmb_upd_state                      }} } },
@@ -280,7 +281,8 @@ state_transitions_t ody_fsm_transitions[] =
                                                                            | OTHER_HW_HWP_FAIL         , {perform_code_update, switch_to_side_0, retry_check_for_ready  }},
                                                                          { CODE_UPDATE_CHIPOP_FAILURE  , {switch_to_side_golden, retry_check_for_ready                  }} } },
 
-    { { no            , no                     , SIDE1  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_golden, retry_check_for_ready                  }},
+    { { no            , no                     , SIDE1  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_FLASH_ERROR          , {switch_to_side_golden, retry_check_for_ready                  }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_HWP_FAIL_OTHER
                                                                            | IMAGE_SYNC_CHIPOP_FAILURE
@@ -409,6 +411,8 @@ std::array<char, 256> event_to_str(const ody_upd_event_t i_event)
             strcat(&str[0], "MEAS_REGS_MISMATCH|"); break;
         case IPL_COMPLETE:
             strcat(&str[0], "IPL_COMPLETE|"); break;
+        case OCMB_FLASH_ERROR:
+            strcat(&str[0], "OCMB_FLASH_ERROR|"); break;
         case NO_EVENT: // just to satisfy the compiler
         case ANY_EVENT:
             break;
@@ -784,6 +788,7 @@ errlOwner execute_actions(Target* const i_ocmb,
 
     bool manually_set_errl_sev = false;
     bool apply_gard_record = false;
+    bool force_sync_images = false;
 
     for (const auto& action : i_transition.actions)
     {
@@ -927,7 +932,8 @@ errlOwner execute_actions(Target* const i_ocmb,
                 break;
             case sync_images_forced:
             case sync_images_normal:
-                if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, action == sync_images_forced))
+                force_sync_images = (action == sync_images_forced) || i_ocmb->getAttr<ATTR_OCMB_FORCE_IMAGE_SYNC>();
+                if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, force_sync_images))
                 {
                     TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest failed: "
                           TRACE_ERR_FMT,

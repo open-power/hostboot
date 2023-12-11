@@ -72,6 +72,7 @@ enum sbeioModuleId
     SBEIO_ODY_RECOVERY                  = 0x1B,
     SBEIO_ERRLUD_SPPE_CODE_LEVELS       = 0x1C,
     SBEIO_TEST_INJECT                   = 0x1D,
+    SBEIO_ODY_CHECK_FLASH               = 0x1E,
 };
 
 /**
@@ -180,8 +181,8 @@ enum sbeioReasonCode
     SBEIO_FIFO_SBE_FFDC_INFORMATIONAL  = SBEIO_COMP_ID | 0x71,
     SBEIO_ODY_RECOVERY_NOT_AVAILABLE   = SBEIO_COMP_ID | 0x72,
     SBEIO_OCMB_NULL_TARGET             = SBEIO_COMP_ID | 0x73,
-
     SBEIO_TEST_INJECT_HRESET           = SBEIO_COMP_ID | 0x74,
+    SBEIO_ODY_FLASH_CHECK_ERR          = SBEIO_COMP_ID | 0x75,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

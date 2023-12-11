@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,8 @@ enum ody_upd_event_t : uint32_t
     MEAS_REGS_MISMATCH = 1 << 10,         // measurement regs mismatched
 
     IPL_COMPLETE = 1 << 11,               // host_ipl_complete istep reached
+
+    OCMB_FLASH_ERROR = 1 << 12,           // OCMB reported flash error(s)
 
     NO_EVENT = 0,
     ANY_EVENT = 0xFFFFFFFF
