@@ -97,14 +97,16 @@ fapi_try_exit:
 fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info)
 {
     using DT_REGS  = mss::dt::regs;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
 
     fapi2::buffer<uint8_t> l_dt_data_to_write[NUM_BYTES_TO_WRITE];
 
-    for (auto l_dt_count = 0; l_dt_count < i_target_info.iv_number_of_target_infos_present; l_dt_count++)
+    for (auto l_dt_count = 0; l_dt_count < CONSTS::NUM_PMICS_4U; l_dt_count++)
     {
         // If the corresponding PMIC in the PMIC/DT pair is not overridden to disabled, run the enable
-        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present_dt(i_target_info, l_dt_count, [&l_dt_data_to_write]
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present_dt(i_target_info, l_dt_count, [&l_dt_data_to_write, l_dt_count,
+                          &i_target_info]
                           (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
         {
             FAPI_INF("Setting up DT " GENTARGTIDFORMAT, GENTARGTID(i_dt));
@@ -131,7 +133,7 @@ fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info)
             return fapi2::FAPI2_RC_SUCCESS;
 
         fapi_try_exit_lambda:
-            return fapi2::current_err;
+            return mss::pmic::declare_n_mode(i_target_info.iv_ocmb, l_dt_count);
         }));
     }
 
@@ -214,11 +216,13 @@ fapi2::ReturnCode pre_config(const target_info_redundancy_ddr5& i_target_info,
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
     using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
-    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_target_infos_present; l_pmic_count++)
+    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the status checking
-        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [i_value_comp_config]
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [i_value_comp_config, l_pmic_count,
+                          &i_target_info]
                           (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
             FAPI_INF("Pre-config PMIC " GENTARGTIDFORMAT, GENTARGTID(i_pmic));
@@ -249,7 +253,7 @@ fapi2::ReturnCode pre_config(const target_info_redundancy_ddr5& i_target_info,
             return fapi2::FAPI2_RC_SUCCESS;
 
         fapi_try_exit_lambda:
-            return fapi2::current_err;
+            return mss::pmic::declare_n_mode(i_target_info.iv_ocmb, l_pmic_count);
         }));
     }
 
@@ -300,11 +304,12 @@ fapi2::ReturnCode post_config(const target_info_redundancy_ddr5& i_target_info,
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
     using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
-    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_target_infos_present; l_pmic_count++)
+    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the status checking
-        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [i_value]
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [i_value, l_pmic_count, &i_target_info]
                           (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
             fapi2::buffer<uint8_t> l_pmic_buffer;
@@ -327,7 +332,7 @@ fapi2::ReturnCode post_config(const target_info_redundancy_ddr5& i_target_info,
             return fapi2::FAPI2_RC_SUCCESS;
 
         fapi_try_exit_lambda:
-            return fapi2::current_err;
+            return mss::pmic::declare_n_mode(i_target_info.iv_ocmb, l_pmic_count);
         }));
     }
 
@@ -493,7 +498,6 @@ fapi2::ReturnCode validate_pmic_revisions(const fapi2::Target<fapi2::TARGET_TYPE
             FAPI_DBG("Simulation mode detected. Skipping revision check between attr and pmic register");
         }
     }
-
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -824,12 +828,13 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
 
-    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_target_infos_present; l_pmic_count++)
+    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the status checking
-        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [i_ocmb_target]
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [l_pmic_count, i_ocmb_target]
                           (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
             uint16_t l_vendor_id = 0;
@@ -883,7 +888,7 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
             return fapi2::FAPI2_RC_SUCCESS;
 
         fapi_try_exit_lambda:
-            return fapi2::current_err;
+            return mss::pmic::declare_n_mode(i_ocmb_target, l_pmic_count);
         }));
     }
 
@@ -975,12 +980,9 @@ fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_tar
     // Start success so we can't log and return the same error in loop logic
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    // Reset N Mode attributes
-    FAPI_TRY(mss::pmic::check::reset_n_mode_attrs(i_target_info.iv_ocmb));
-
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_simics));
 
-    for (auto l_dt_count = 0; l_dt_count < i_target_info.iv_number_of_target_infos_present; l_dt_count++)
+    for (auto l_dt_count = 0; l_dt_count < CONSTS::NUM_PMICS_4U; l_dt_count++)
     {
         // If the pmic is not overridden to disabled, run the status checking
         FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present_dt(i_target_info, l_dt_count, [l_dt_count, &i_health_check_info,
@@ -1271,6 +1273,9 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
     // Then we can't properly enable
     FAPI_TRY(l_rc, "Unusable PMIC/POWER_IC/GENERIC_I2C_DEV child target configuration found from "
              GENTARGTIDFORMAT, GENTARGTID(i_ocmb_target));
+
+    // Reset N Mode attributes
+    FAPI_TRY(mss::pmic::check::reset_n_mode_attrs(i_ocmb_target));
 
     // Zeroth, set up the ADC devices
     FAPI_TRY(mss::pmic::ddr5::setup_adc(l_target_info.iv_adc));

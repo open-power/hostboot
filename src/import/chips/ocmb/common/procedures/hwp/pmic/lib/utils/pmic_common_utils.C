@@ -67,6 +67,7 @@ fapi2::ReturnCode declare_n_mode(
     fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
 #endif
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
     return mss::attr::set_n_mode_helper(
                i_ocmb_target,
                i_pmic_id,

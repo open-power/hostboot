@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <pmic_consts.H>
 #include <pmic_common_utils.H>
 #include <mss_pmic_attribute_getters.H>
+#include <mss_pmic_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/find.H>
 
 namespace mss
@@ -54,6 +55,99 @@ namespace pmic
 namespace ddr5
 {
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+
+// Extra constants
+static constexpr uint16_t CURRENT_MULTIPLIER = 125;
+static constexpr uint16_t PHASE_MIN = 250;
+static constexpr uint16_t PHASE_MAX = 1500;
+
+///
+/// @brief
+///
+enum data_position : uint8_t
+{
+    DATA_0   = 0,
+    DATA_1   = 1,
+    DATA_2   = 2,
+    DATA_3   = 3,
+    DATA_4   = 4,
+    DATA_5   = 5,
+    DATA_6   = 6,
+    DATA_7   = 7,
+    DATA_8   = 8,
+    DATA_9   = 9,
+    DATA_10  = 10,
+    DATA_11  = 11,
+    DATA_12  = 12,
+    DATA_13  = 13,
+    DATA_14  = 14,
+    DATA_15  = 15,
+};
+
+///
+/// @brief Trim read reset data
+///
+enum trim_rd_reset : uint16_t
+{
+    TRIM_UNLOCK            = 0x000E,
+    TRIM_LOCK              = 0x000F,
+    TRIM_RD_INIT           = 0x3F21,
+    EXTENDABLE_RD_PULSE_EN = 0x4080,
+    TRIM_PASSWORD          = 0xA55A,
+};
+
+///
+/// @brief Bread crumb values to return
+///
+enum bread_crumb : uint8_t
+{
+    ALL_GOOD             = 0,
+    FIRST_ATTEMPT        = 0x51,
+    RECOVERY_ATTEMPTED   = 0x52,
+    STILL_A_FAIL         = 0x53,
+};
+
+///
+/// @brief N Mode State to return
+///
+enum aggregate_state : uint8_t
+{
+    N_PLUS_1                  = 0,
+    N_MODE_POSSIBLE           = 1,
+    N_MODE_RECOVERY_ATTEMPTED = 2,
+    N_MODE                    = 3,
+    LOST                      = 4,
+    GI2C_I2C_FAIL             = 5,
+    DIMM_NOT_4U               = 6,
+};
+///
+/// @brief States for the pmics to be returned in a uint8_t bitmap
+///
+enum pmic_state : uint8_t
+{
+    PMIC_DECONFIGURED       = 0b10000000,
+    PMIC_NOT_PRESENT        = 0b00001000,
+    PMIC_I2C_FAIL           = 0b00000100,
+    PMIC_CURRENT_IMBALANCE  = 0b00000010,
+    PMIC_PWR_NOT_GOOD       = 0b00000001,
+    PMIC_ALL_GOOD           = 0b00000000,
+};
+
+///
+/// @brief States for the dts to be returned in a uint8_t bitmap
+///
+enum dt_state : uint8_t
+{
+    DT_DECONFIGURED  = 0b10000000,
+    DT_NOT_PRESENT   = 0b01000000,
+    DT_I2C_FAIL      = 0b00100000,
+    DT_SWIN_FAULT_D  = 0b00010000,
+    DT_SWIN_FAULT_C  = 0b00001000,
+    DT_SWIN_FAULT_B  = 0b00000100,
+    DT_SWIN_FAULT_A  = 0b00000010,
+    DT_GPI_1         = 0b00000001,
+    DT_ALL_GOOD      = 0b00000000,
+};
 
 ///
 /// @brief Struct for a pair of PMIC and DT target
@@ -134,6 +228,7 @@ fapi2::ReturnCode run_if_present(
     fapi2::Target<fapi2::TARGET_TYPE_PMIC> l_pmic;
     bool l_disabled = false;
     bool l_pmic_found = false;
+    mss::pmic::n_mode l_pmic_dt_not_responding = mss::pmic::n_mode::N_PLUS_1_MODE;
     uint8_t l_count = 0;
 
     const uint8_t l_num_pmic_4u = CONSTS::NUM_PMICS_4U;
@@ -170,8 +265,13 @@ fapi2::ReturnCode run_if_present(
     // PMIC does exist, now see if it was overridden to disabled via ATTR_PMIC_FORCE_N_MODE
     FAPI_TRY(mss::pmic::disabled(l_pmic, l_disabled));
 
+    // PMIC is present but not functional. We are checking this via ATTR_MEM_PMIC_4U_N_MODE attribute
+    // Passing l_count here for PMIC ID as l_count represents the rel_pos of that PMIC
+    FAPI_TRY(mss::attr::get_n_mode_helper(l_ocmb, l_count, l_pmic_dt_not_responding));
+
     // PMIC target provided here. Other arguments to be provided via capture list
-    if (!l_disabled)
+    if ((!l_disabled) && (!l_pmic_dt_not_responding)
+        && (i_target_info.iv_pmic_dt_map[l_count].iv_pmic_state != mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL))
     {
         FAPI_TRY(i_func(l_pmic));
     }
@@ -199,6 +299,7 @@ fapi2::ReturnCode run_if_present_dt(
     fapi2::Target<fapi2::TARGET_TYPE_PMIC> l_pmic;
     bool l_disabled = false;
     bool l_dt_found = false;
+    mss::pmic::n_mode l_pmic_dt_not_responding = mss::pmic::n_mode::N_PLUS_1_MODE;
     uint8_t l_count = 0;
 
     const uint8_t l_num_dt_4u = CONSTS::NUM_DTS_4U;
@@ -237,8 +338,14 @@ fapi2::ReturnCode run_if_present_dt(
     // We are using the PMIC target here as PMIC and DT are a pair
     FAPI_TRY(mss::pmic::disabled(l_pmic, l_disabled));
 
+    // DT is present but not functional. Since we are treating PMIC and DT as a pair,
+    // we are checking this via ATTR_MEM_PMIC_4U_N_MODE attribute
+    // Passing l_count here for DT ID as l_count represents the rel_pos of that DT
+    FAPI_TRY(mss::attr::get_n_mode_helper(l_ocmb, l_count, l_pmic_dt_not_responding));
+
     // DT target provided here. Other arguments to be provided via capture list
-    if (!l_disabled)
+    if ((!l_disabled) && (!l_pmic_dt_not_responding)
+        && (i_target_info.iv_pmic_dt_map[l_count].iv_dt_state != mss::pmic::ddr5::dt_state::DT_I2C_FAIL))
     {
         FAPI_TRY(i_func(l_dt));
     }
@@ -266,102 +373,6 @@ uint16_t get_minimum_vin_bulk_threshold_helper(
 fapi2::ReturnCode get_minimum_vin_bulk_threshold(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     uint16_t& o_vin_bulk_min);
-
-// Extra constants
-static constexpr uint16_t CURRENT_MULTIPLIER = 125;
-static constexpr uint16_t PHASE_MIN = 250;
-static constexpr uint16_t PHASE_MAX = 1500;
-
-///
-/// @brief
-///
-enum data_position : uint8_t
-{
-    DATA_0   = 0,
-    DATA_1   = 1,
-    DATA_2   = 2,
-    DATA_3   = 3,
-    DATA_4   = 4,
-    DATA_5   = 5,
-    DATA_6   = 6,
-    DATA_7   = 7,
-    DATA_8   = 8,
-    DATA_9   = 9,
-    DATA_10  = 10,
-    DATA_11  = 11,
-    DATA_12  = 12,
-    DATA_13  = 13,
-    DATA_14  = 14,
-    DATA_15  = 15,
-};
-
-
-
-///
-/// @brief Trim read reset data
-///
-enum trim_rd_reset : uint16_t
-{
-    TRIM_UNLOCK            = 0x000E,
-    TRIM_LOCK              = 0x000F,
-    TRIM_RD_INIT           = 0x3F21,
-    EXTENDABLE_RD_PULSE_EN = 0x4080,
-    TRIM_PASSWORD          = 0xA55A,
-};
-
-///
-/// @brief Bread crumb values to return
-///
-enum bread_crumb : uint8_t
-{
-    ALL_GOOD             = 0,
-    FIRST_ATTEMPT        = 0x51,
-    RECOVERY_ATTEMPTED   = 0x52,
-    STILL_A_FAIL         = 0x53,
-};
-
-///
-/// @brief N Mode State to return
-///
-enum aggregate_state : uint8_t
-{
-    N_PLUS_1                  = 0,
-    N_MODE_POSSIBLE           = 1,
-    N_MODE_RECOVERY_ATTEMPTED = 2,
-    N_MODE                    = 3,
-    LOST                      = 4,
-    GI2C_I2C_FAIL             = 5,
-    DIMM_NOT_4U               = 6,
-};
-
-///
-/// @brief States for the pmics to be returned in a uint8_t bitmap
-///
-enum pmic_state : uint8_t
-{
-    PMIC_DECONFIGURED       = 0b10000000,
-    PMIC_NOT_PRESENT        = 0b00001000,
-    PMIC_I2C_FAIL           = 0b00000100,
-    PMIC_CURRENT_IMBALANCE  = 0b00000010,
-    PMIC_PWR_NOT_GOOD       = 0b00000001,
-    PMIC_ALL_GOOD           = 0b00000000,
-};
-
-///
-/// @brief States for the dts to be returned in a uint8_t bitmap
-///
-enum dt_state : uint8_t
-{
-    DT_DECONFIGURED  = 0b10000000,
-    DT_NOT_PRESENT   = 0b01000000,
-    DT_I2C_FAIL      = 0b00100000,
-    DT_SWIN_FAULT_D  = 0b00010000,
-    DT_SWIN_FAULT_C  = 0b00001000,
-    DT_SWIN_FAULT_B  = 0b00000100,
-    DT_SWIN_FAULT_A  = 0b00000010,
-    DT_GPI_1         = 0b00000001,
-    DT_ALL_GOOD      = 0b00000000,
-};
 
 ///
 /// @brief Struct of DT health check telemetry to populate

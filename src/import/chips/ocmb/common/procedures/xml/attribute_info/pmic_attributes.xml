@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2020,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2020,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,9 +27,16 @@
         <id>ATTR_MEM_PMIC_4U_N_MODE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
+            For DDR4:
             States of N-Mode declaration for the PMICs on a 4U DIMM.
             The bit would be set high if GPIO or PMIC setup reported a
             failure relating to that part. If two PMICs in a redundant pair have declared
+            N-Mode, then the DIMM can not be enabled.
+
+            For DDR5:
+            States of N-Mode declaration for the PMICs on a 4U DIMM.
+            The bit would be set high if PMIC or DT setup reported a
+            failure relating to that part. If two PMICs have declared
             N-Mode, then the DIMM can not be enabled.
 
             The bits are as follows: [PMIC0, PMIC1, PMIC2, PMIC3, 0, 0, 0, 0]
