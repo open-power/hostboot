@@ -519,6 +519,37 @@ void determineCallouts(const TargetHandle_t i_ocmbTarget,
     }
     else
     {
+        // Pull the OMI response code out of the P10 side
+        constexpr uint64_t P10_USTLSTATUS = 0x0C010E0A;
+        uint64_t l_scom_data = 0;
+        l_err = getMccScom(i_ocmbTarget,
+                           P10_USTLSTATUS, //MCP.CHAN0.USTL.USTLSTATUS
+                           l_scom_data);
+        if (l_err)
+        {
+            TRACFCOMP(g_trac_mmio, ERR_MRK
+                      "determineCallouts: getscom(P10_USTLSTATUS) failed"
+                      " on OCMB[0x%08x]", get_huid(i_ocmbTarget));
+            // Just delete the log, it won't tell us anything useful
+            delete l_err;
+            l_err = nullptr;
+        }
+        else
+        {
+            // Bits 10:13 = USTLSTATUS_FAIL_RESP
+            // b1011 = Bad address = PIB response code 100
+            if( (l_scom_data & 0x003C000000000000) == 0x002C000000000000 )
+            {
+                l_fwFailure = true;
+            }
+
+            // Add the reg as FFDC
+            ERRORLOG::ErrlUserDetailsLogRegister l_regDump(getParentMcc(i_ocmbTarget));
+            l_regDump.addDataBuffer(&l_scom_data, sizeof(l_scom_data),
+                                    DEVICE_SCOM_ADDRESS(P10_USTLSTATUS));
+            l_regDump.addToLog(i_err);
+        }
+
         if(l_fwFailure)
         {
             TRACFCOMP(g_trac_mmio,
@@ -529,6 +560,15 @@ void determineCallouts(const TargetHandle_t i_ocmbTarget,
             // Add HB code as high priority callout
             i_err->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                        HWAS::SRCI_PRIORITY_HIGH);
+
+            // Add OCMB as low priority as well
+            // This is just in case the chip reports incorrectly (has happened
+            // before) and to prevent a complete outage if we do have a code bug
+            // specific to error handling
+            i_err->addHwCallout(i_ocmbTarget,
+                                HWAS::SRCI_PRIORITY_LOW,
+                                HWAS::DELAYED_DECONFIG,
+                                HWAS::GARD_NULL);
         }
         else
         {
@@ -537,11 +577,7 @@ void determineCallouts(const TargetHandle_t i_ocmbTarget,
                       " OCMB[0x%08x]",
                       get_huid(i_ocmbTarget));
 
-            // Add OCMB as high priority callout
-            i_err->addHwCallout(i_ocmbTarget,
-                                HWAS::SRCI_PRIORITY_HIGH,
-                                HWAS::DELAYED_DECONFIG,
-                                HWAS::GARD_NULL);
+            addDefaultCallouts(i_err, i_ocmbTarget);
         }
     }
 }
@@ -1119,6 +1155,9 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                                   io_buflen),
                                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
 
+                // Dump some debug registers to the error log
+                addChannelFailureRegisterData(i_ocmbTarget, l_err);
+
                 // NOTE: OCMB error regs cannot be cleared without resetting
                 //       the chip.  Error regs may contain failure data from
                 //       previous write transaction.
@@ -1245,6 +1284,9 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                               (i_opType << 31) | l_accessLimit,
                               io_buflen),
                             ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
+
+                // Dump some debug registers to the error log
+                addChannelFailureRegisterData(i_ocmbTarget, l_writeErr);
 
                 // Check if the register read failed
                 if(l_err)
@@ -1566,7 +1608,8 @@ void addChannelFailureRegisterData(Target * i_ocmb, errlHndl_t & io_errl)
 
     const uint32_t mcc_registerList[] = {
                                       0x0C010D00,   // DSTLFIR
-                                      0x0C010E00 }; // USTLFIR
+                                      0x0C010E00,   // USTLFIR
+                                      0x0C010E0A }; // USTLSTATUS
 
     const uint32_t mi_registerList[] = {
                                       0x0C010C00 }; // MCFIR
