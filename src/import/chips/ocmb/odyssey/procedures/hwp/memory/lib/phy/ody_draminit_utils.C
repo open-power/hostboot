@@ -3296,7 +3296,7 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     // every 2 byte of structure (16 bits) makes 1 increment in the address.
     constexpr uint32_t END_ADDR = 0x58000 + sizeof(_PMU_SMB_DDR5_1D_t) / 2;
 
-    for ( l_address = 0x58000; l_address <= END_ADDR; l_address++)
+    for ( l_address = 0x58000; l_address < END_ADDR; l_address++)
     {
         // We need to flush the buffer and write before skipping following addresses
         // to have the previous unskipped address's write become successful.
@@ -3398,7 +3398,7 @@ fapi2::ReturnCode read_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     // every 2 byte of structure (16 bits) makes 1 increment in the address.
     constexpr uint32_t END_ADDR = 0x58000 + sizeof(_PMU_SMB_DDR5_1D_t) / 2;
 
-    for ( l_address = 0x58000; l_address <= END_ADDR; l_address++)
+    for ( l_address = 0x58000; l_address < END_ADDR; l_address++)
     {
         if (l_skip_it < SKIP_END && l_address == l_skip_it->first)
         {
