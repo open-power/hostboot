@@ -45,7 +45,9 @@
 #include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/buffer_ops.H>
-#include <generic/memory/lib/spd/spd_fields_ddr4.H>
+#ifndef __PPE__
+    #include <generic/memory/lib/spd/spd_fields_ddr4.H>
+#endif
 #include <generic/memory/lib/spd/spd_fields_ddr5.H>
 #include <generic/memory/lib/utils/mss_pair.H>
 #include <fapi2_spd_access.H>
@@ -240,6 +242,7 @@ static inline uint8_t align_odt_field_to_attr(const uint8_t i_value)
     return l_value;
 }
 
+#ifndef __PPE__
 namespace ddr4
 {
 
@@ -272,6 +275,7 @@ fapi2::ReturnCode get_supported_cas_latencies(
     uint32_t& o_field);
 
 } // namespace ddr4
+#endif
 
 namespace ddr5
 {

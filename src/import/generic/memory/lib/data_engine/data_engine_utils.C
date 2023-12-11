@@ -44,6 +44,7 @@ namespace mss
 namespace gen
 {
 
+#ifndef __PPE__
 namespace ddr4
 {
 
@@ -121,7 +122,7 @@ fapi_try_exit:
 }
 
 } // ns ddr4
-
+#endif
 namespace ddr5
 {
 
