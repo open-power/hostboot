@@ -1226,9 +1226,12 @@ fapi2::ReturnCode process_n_mode_results(const target_info_redundancy_ddr5& i_ta
 fapi_try_exit:
 
     // If we are allowing redundancy, log the N_MODE error as recovered
-    if (fapi2::current_err == static_cast<uint32_t>(fapi2::RC_DIMM_RUNNING_IN_N_MODE_DDR5))
+    if (fapi2::current_err == static_cast<uint32_t>(fapi2::RC_DIMM_RUNNING_IN_N_MODE_DDR5)
+        && !l_mnfg_thresholds)
     {
+#ifndef __PPE__
         fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+#endif
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
 
