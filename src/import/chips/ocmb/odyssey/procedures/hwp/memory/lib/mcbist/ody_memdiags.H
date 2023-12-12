@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <lib/shared/ody_consts.H>
 #include <lib/mcbist/ody_mcbist.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_amap_config.H>
 
 namespace mss
 {

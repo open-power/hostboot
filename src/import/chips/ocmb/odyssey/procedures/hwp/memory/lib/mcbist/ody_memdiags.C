@@ -75,6 +75,22 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Helper function to check if port1 exists when there is only one port
+/// @param[in] i_ports vector of port targets
+/// @return boolean true if port1 exists else returns false
+///
+bool check_only_port1_exists(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports)
+{
+    if(i_ports.size() == 1)
+    {
+        const auto l_port_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_ports[0]);
+        return l_port_pos == 1 ? true : false;
+    }
+
+    return false;
+}
+
 namespace memdiags
 {
 #ifndef __PPE__
@@ -389,6 +405,77 @@ void operation<mss::mc_type::ODYSSEY>::configure_multiport_subtests(
 }
 
 ///
+/// @brief set the address map for memdiags
+/// @param[in] i_ports vector of port targets
+/// @param[in,out] io_curr_bit_index current index that keeps track of the address
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template<>
+fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::setup_memdiags_address_map(const
+        std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports,
+        uint64_t& io_curr_bit_index)
+{
+    FAPI_DBG(TARGTIDFORMAT " Initial io_curr_bit_index: %d", GENTARGTID(iv_target), io_curr_bit_index);
+
+    const uint8_t l_port_size = i_ports.size();
+
+    // Port bit should be the LSB in the address map if we have more than one port
+    if(l_port_size > 1)
+    {
+        configure_port(io_curr_bit_index, iv_program);
+    }
+
+    FAPI_TRY(configure_bank_groups(i_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_mranks(i_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_bank(i_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_col(i_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_row(i_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_srank(i_ports[0], io_curr_bit_index, iv_program));
+
+
+    // Check which port exists
+    // If only port1 exists we force '1'
+    // in our start and end addresses
+    if(check_only_port1_exists(i_ports))
+    {
+        configure_port(io_curr_bit_index, iv_program);
+    }
+
+    // Do nothing if only port0 exists
+
+
+    FAPI_DBG(TARGTIDFORMAT " Final io_curr_bit_index: %d", GENTARGTID(iv_target), io_curr_bit_index);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief set the address map for memdiags with srank, mrank and port as the MSB
+/// @param[in] i_port port target
+/// @param[in,out] io_curr_bit_index current index that keeps track of the address
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template<>
+fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::setup_memdiags_srank_mrank_port(const
+        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port, uint64_t& io_curr_bit_index)
+{
+
+    FAPI_DBG(TARGTIDFORMAT  " Initial io_curr_bit_index: %d", GENTARGTID(iv_target), io_curr_bit_index);
+
+    FAPI_TRY(configure_bank_groups(i_port, io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_bank(i_port, io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_col(i_port, io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_row(i_port, io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_srank(i_port, io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_mranks(i_port, io_curr_bit_index, iv_program));
+    configure_port(io_curr_bit_index, iv_program);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief memdiags multi-port init for specific chip - Odyssey specialization
 /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
 /// in subclassed constructors more easily.
@@ -398,61 +485,133 @@ void operation<mss::mc_type::ODYSSEY>::configure_multiport_subtests(
 template <>
 fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_init_internal()
 {
+    using AT = mcbistAddrTraits<mss::mc_type::ODYSSEY>;
+
     FAPI_INF_NO_SBE("multi-port init internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
-    using TT = mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
 
-    // Let's assume we are going to send out all subtest unless we are in broadcast mode,
-    // where we only send up to 2 subtests under an MCA ( 1 for each DIMM) which is why no const
-    auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target);
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(iv_target);
+    const uint8_t l_port_size = l_ports.size();
+    fapi2::buffer<uint64_t> l_start_address = 0;
+    fapi2::buffer<uint64_t> l_end_address = 0;
 
-    // Get the port/DIMM information for the addresses. This is an integral value which allows us to index
-    // all the DIMM across a controller.
-    const uint64_t l_portdimm_start_address = iv_const.iv_start_address.get_port_dimm();
-    const uint64_t l_portdimm_end_address = iv_const.iv_end_address.get_port_dimm();
+    uint64_t l_curr_bit_index = AT::MAXADDRESS_MAP_INDEX;
+    uint64_t l_configured_count = 0;
 
-    FAPI_INF_NO_SBE(TARGTIDFORMAT " start port/dimm: %d end port/dimm: %d", GENTARGTID(iv_target), l_portdimm_start_address,
-                    l_portdimm_end_address);
+    FAPI_DBG("l_port_size: %d for " TARGTIDFORMAT, l_port_size, GENTARGTID(iv_target))
 
-    FAPI_ASSERT( iv_const.iv_start_address <= iv_const.iv_end_address,
-                 fapi2::ODY_START_ADDR_BIGGER_THAN_END_ADDR()
-                 .set_MC_TARGET(iv_target)
-                 .set_START_ADDRESS(l_portdimm_start_address)
-                 .set_END_ADDRESS(l_portdimm_end_address),
-                 "Start address %d larger than end address %d for " TARGTIDFORMAT,
-                 l_portdimm_start_address, l_portdimm_end_address, GENTARGTID(iv_target));
+    // Setup the address map
+    FAPI_TRY(setup_memdiags_address_map(l_ports, l_curr_bit_index));
+    l_configured_count = AT::MAXADDRESS_MAP_INDEX - l_curr_bit_index;
 
-    // If we're here we know start port/rank < end port/rank. We want to run one subtest from start_address
-    // to the max range of the start address port/rank, then one subtest for each port/rank between the
-    // start/end ports/ranks and one test from the start of the end port/rank to the end address.
-    // If the address range crosses between ports we need to duplicate subtests for the affected ranges
-
-    // Setup the address configurations and subtests
-    // Note: for an init test we don't need to stop on srank boundaries, so we can do a simple subtest setup (1 subtest per port)
-    // TODO Zen:MST-1921: The below code will need to be replaced with the MCBIST address mode test setup
-    FAPI_TRY( multi_port_addr_simple() );
-
-    // Here's an interesting problem. PRD (and others maybe) expect the operation to proceed in address-order.
-    // That is, when PRD finds an address it stops on, it wants to continue from there "to the end." That means
-    // we need to keep the subtests sorted, otherwise PRD could pass one subtest come upon a fail in a subsequent
-    // subtest and re-test something it already passed. So we sort the resulting iv_subtest vector by port/DIMM
-    // in the subtest.
-    std::sort(iv_program.iv_subtests.begin(), iv_program.iv_subtests.end(),
-              [](const decltype(iv_subtest)& a, const decltype(iv_subtest)& b) -> bool
-    {
-        uint16_t l_a_addr_sel = 0;
-        uint16_t l_b_addr_sel = 0;
-        a.iv_mcbmr.extractToRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(l_a_addr_sel);
-        b.iv_mcbmr.extractToRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(l_b_addr_sel);
-
-        if (a.get_port() == b.get_port())
-        {
-            return(l_a_addr_sel < l_b_addr_sel);
-        }
-        return (a.get_port() < b.get_port());
-    });
+    FAPI_DBG(TARGTIDFORMAT " l_configure_count after setting up the address map: %d", GENTARGTID(iv_target),
+             l_configured_count);
 
     // Initialize the common sections
     FAPI_TRY( base_init() );
+
+    // The end address has all 1's
+    FAPI_TRY(l_end_address.setBit(64 - l_configured_count, l_configured_count));
+
+    // Check if port size is and 1 and only port 1 exists
+    if(check_only_port1_exists(l_ports))
+    {
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " setting port bit in end address for port1-only case ", GENTARGTID(iv_target));
+        // The start address's MSB should have a 1
+        FAPI_TRY(l_start_address.setBit(64 - l_configured_count));
+    }
+
+    FAPI_DBG(TARGTIDFORMAT  " Start Addr:  0x%016llx", GENTARGTID(iv_target), l_start_address);
+    FAPI_DBG(TARGTIDFORMAT  " End Addr:  0x%016llx", GENTARGTID(iv_target), l_end_address);
+
+    // Set the start and end address association
+    iv_subtest.change_addr_sel(0);
+    FAPI_TRY( mss::mcbist::config_address_range0<mss::mc_type::ODYSSEY>(iv_target, l_start_address,
+              l_end_address) );
+
+    // Set the mcbist mode here by disabling the maint mode
+    iv_program.change_maint_address_mode(mss::OFF);
+
+    // 128B allows the code to run faster
+    // If this is changed, then an update for COL3 in configure_col_helper is needed
+    iv_program.change_len64( mss::states::OFF );
+
+    iv_program.iv_subtests.push_back(iv_subtest);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief memdiags single srank init for specific chip - Odyssey specialization
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @param[in] i_port port target
+/// @param[in] i_mrank mrank
+/// @param[in] i_srank srank that needs to initialized
+/// @return FAPI2_RC_SUCCESS iff everything ok
+/// @note init tests are write-only so we don't have to stop on rank boundaries
+///
+template <>
+fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::single_srank_init_internal(const
+        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+        const uint8_t i_mrank, const uint8_t i_srank)
+{
+    using AT = mcbistAddrTraits<mss::mc_type::ODYSSEY>;
+
+    FAPI_INF_NO_SBE("single-srank init internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
+
+    fapi2::buffer<uint64_t> l_start_address = 0;
+    fapi2::buffer<uint64_t> l_end_address = 0;
+    const uint64_t PORTBITS_LEN = 1;
+    const uint64_t SRANKBITS_LEN = 3;
+    const uint64_t MRANKBITS_LEN = 2;
+    const auto l_port_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_port);
+
+    uint64_t l_curr_bit_index = AT::MAXADDRESS_MAP_INDEX;
+    uint64_t l_configured_count = 0;
+
+    // Setup the address map
+    // Addr map: PORT BANK MRANK BG COL ROW SRANK
+    FAPI_TRY(setup_memdiags_srank_mrank_port(i_port, l_curr_bit_index));
+    l_configured_count = AT::MAXADDRESS_MAP_INDEX - l_curr_bit_index;
+
+    FAPI_DBG(TARGTIDFORMAT " l_configure_count after setting up the address map: %d", GENTARGTID(iv_target),
+             l_configured_count);
+
+    // Initialize the common sections
+    FAPI_TRY( base_init() );
+
+    // The end address has all 1's
+    FAPI_TRY(l_end_address.setBit(64 - l_configured_count, l_configured_count));
+
+    // Set the start and end addresses based on the port, mrank and srank that is passed
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " setting the start and end address for the single srank init ", GENTARGTID(iv_target));
+    FAPI_TRY(l_start_address.insertFromRight(64 - l_configured_count + PORTBITS_LEN + MRANKBITS_LEN, SRANKBITS_LEN,
+             i_srank));
+    FAPI_TRY(l_start_address.insertFromRight(64 - l_configured_count + PORTBITS_LEN, MRANKBITS_LEN, i_mrank));
+    FAPI_TRY(l_start_address.writeBit(64 - l_configured_count, l_port_pos));
+
+    // End address should be adjusted for the port,mrank and srank
+    FAPI_TRY(l_end_address.insertFromRight(64 - l_configured_count + PORTBITS_LEN + MRANKBITS_LEN, SRANKBITS_LEN, i_srank));
+    FAPI_TRY(l_end_address.insertFromRight(64 - l_configured_count + PORTBITS_LEN, MRANKBITS_LEN, i_mrank));
+    FAPI_TRY(l_end_address.writeBit(64 - l_configured_count, l_port_pos));
+
+    FAPI_DBG(TARGTIDFORMAT " Start Addr:  0x%016llx", GENTARGTID(iv_target), l_start_address);
+    FAPI_DBG(TARGTIDFORMAT " End Addr:  0x%016llx", GENTARGTID(iv_target), l_end_address);
+
+    // Set the start and end address association
+    iv_subtest.change_addr_sel(0);
+    FAPI_TRY( mss::mcbist::config_address_range0<mss::mc_type::ODYSSEY>(iv_target, l_start_address,
+              l_end_address) );
+
+    // Set the mcbist mode here by disabling the maint mode
+    iv_program.change_maint_address_mode(mss::OFF);
+
+    // 128B allows the code to run faster
+    // If this is changed, then an update for COL3 in configure_col_helper is needed
+    iv_program.change_len64( mss::states::OFF );
+
+    iv_program.iv_subtests.push_back(iv_subtest);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -471,10 +630,6 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_read_internal()
     FAPI_INF_NO_SBE("multi-port read internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
     using TT = mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
 
-    // Let's assume we are going to send out all subtest unless we are in broadcast mode,
-    // where we only send up to 2 subtests under an MCA ( 1 for each DIMM) which is why no const
-    auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target);
-
     // Get the port/DIMM information for the addresses. This is an integral value which allows us to index
     // all the DIMM across a controller.
     const uint64_t l_portdimm_start_address = iv_const.iv_start_address.get_port_dimm();
@@ -482,14 +637,6 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_read_internal()
 
     FAPI_INF_NO_SBE(TARGTIDFORMAT " start port/dimm: %d end port/dimm: %d", GENTARGTID(iv_target), l_portdimm_start_address,
                     l_portdimm_end_address);
-
-    uint8_t l_attr_num_lranks[mss::ody::MAX_DIMM_PER_PORT] = {};
-
-    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(iv_target))
-    {
-        FAPI_TRY(mss::attr::get_logical_ranks_per_dimm(l_port, l_attr_num_lranks));
-        break;
-    }
 
     FAPI_ASSERT( iv_const.iv_start_address <= iv_const.iv_end_address,
                  fapi2::ODY_START_ADDR_BIGGER_THAN_END_ADDR()
@@ -534,11 +681,13 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_read_internal()
     // Configures all subtests under an MCBIST
     // Odyssey workaround: PAUSE_AFTER_RANK doesn't work so we have to create a subtest per rank per port and
     // set PAUSE_ON_ERROR_MODE to PAUSE_AFTER_SUBTEST
+
     if ((iv_const.iv_end_boundary == end_boundary::STOP_AFTER_MASTER_RANK) ||
         (iv_const.iv_end_boundary == end_boundary::STOP_AFTER_SLAVE_RANK))
     {
         iv_program.change_end_boundary(end_boundary::STOP_AFTER_SUBTEST);
     }
+
 
 fapi_try_exit:
     return fapi2::current_err;
