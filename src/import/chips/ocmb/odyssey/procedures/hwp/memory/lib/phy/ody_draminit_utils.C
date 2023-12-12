@@ -6299,11 +6299,27 @@ fapi_try_exit:
 void display_disable_bits(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
                           const uint8_t (&i_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
 {
-    for(uint8_t l_byte = 0; l_byte < BAD_BITS_RANKS; ++l_byte)
-    {
-        FAPI_INF(TARGTIDFORMAT " rank%u mc_byte:%u disable bits 0x%02x", GENTARGTID(i_rank_info.get_port_target()),
-                 i_rank_info.get_port_rank(), l_byte, i_bad_bits[i_rank_info.get_phy_rank()][l_byte]);
-    }
+    const uint32_t l_temp0 = (i_bad_bits[i_rank_info.get_phy_rank()][0] << 24) |
+                             (i_bad_bits[i_rank_info.get_phy_rank()][1] << 16) |
+                             (i_bad_bits[i_rank_info.get_phy_rank()][2] <<  8) |
+                             (i_bad_bits[i_rank_info.get_phy_rank()][3]);
+    const uint32_t l_temp1 = (i_bad_bits[i_rank_info.get_phy_rank()][4] << 24) |
+                             (i_bad_bits[i_rank_info.get_phy_rank()][5] << 16) |
+                             (i_bad_bits[i_rank_info.get_phy_rank()][6] <<  8) |
+                             (i_bad_bits[i_rank_info.get_phy_rank()][7]);
+    const uint16_t l_temp2 = (i_bad_bits[i_rank_info.get_phy_rank()][8] << 8) |
+                             (i_bad_bits[i_rank_info.get_phy_rank()][9]);
+
+    // Note: using separate prints for PPE vs non-PPE to get the target in the non-PPE version
+    // PPE only allows for 4 prints per print statement while other platforms do not have the same limitations
+#ifdef __PPE__
+    FAPI_INF("rank%u bad bits: 0x%08x%08x%04x", i_rank_info.get_phy_rank(),
+             l_temp0, l_temp1, l_temp2);
+#else
+    FAPI_INF(TARGTIDFORMAT "rank%u bad bits: 0x%08x%08x%04x",
+             GENTARGTID(i_rank_info.get_port_target()), i_rank_info.get_phy_rank(),
+             l_temp0, l_temp1, l_temp2);
+#endif
 }
 
 ///
