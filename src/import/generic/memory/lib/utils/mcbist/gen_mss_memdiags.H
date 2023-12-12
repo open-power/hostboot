@@ -46,6 +46,7 @@
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_amap_config.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/conversions.H>
@@ -514,6 +515,18 @@ class operation
         fapi2::ReturnCode multi_port_init_internal();
 
         ///
+        /// @brief memdiags single-rank init for specific chip
+        /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+        /// in subclassed constructors more easily.
+        /// @param[in] i_port port target
+        /// @param[in] i_mrank mrank
+        /// @param[in] i_srank srank that needs to initialized
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode single_srank_init_internal(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                const uint8_t i_mrank, const uint8_t i_srank);
+
+        ///
         /// @brief memdiags multi-port read helper
         /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
         /// in subclassed constructors more easily.
@@ -550,6 +563,26 @@ class operation
         /// @return FAPI2_RC_SUCCESS iff everything ok
         ///
         fapi2::ReturnCode single_port_init();
+
+        ///
+        /// @brief set the address map for memdiags
+        /// @param[in] i_port_target vector of port targets
+        /// @param[in,out] io_curr_bit_index current index that keeps track of the address
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode setup_memdiags_address_map(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>&
+                i_port_target,
+                uint64_t& io_curr_bit_index);
+
+        ///
+        /// @brief set the address map for memdiags with srank, mranka nad port as the MSB
+        /// @param[in] i_port port target
+        /// @param[in,out] io_curr_bit_index current index that keeps track of the address
+        /// @return FAPI2_RC_SUCCESS iff everything ok
+        ///
+        fapi2::ReturnCode setup_memdiags_srank_mrank_port( const
+                fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                uint64_t& io_curr_bit_index);
 
         ///
         /// @brief get the protected mcbist program - useful for testing
@@ -800,6 +833,45 @@ struct sf_init_operation : public operation<MC>
     sf_init_operation() = delete;
 };
 
+///
+/// @class Class for memdiags' super-fast init
+/// @tparam MC the mc type of the T
+/// @tparam T fapi2::TargetType of the MCBIST engine
+/// @tparam TT the mcbistTraits associated with T
+///
+// TODO:ZEN:MST-2579 Fix implementation of single rank sf_init memdiags operation
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, fapi2::TargetType T1 = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+struct sf_init_per_srank_operation : public operation<MC>
+{
+
+    ///
+    /// @brief memdiags::sf_init_per_srank_operation constructor
+    /// @param[in] i_target the target of the mcbist engine
+    /// @param[in] i_const mss::constraint structure
+    /// @param[in] i_port_rank mrank
+    /// @param[in] i_srank srank that needs to initialized
+    /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
+    ///
+    sf_init_per_srank_operation( const fapi2::Target<T>& i_target,
+                                 const constraints<MC> i_const,
+                                 const uint8_t i_port_rank,
+                                 const uint8_t i_srank,
+                                 fapi2::ReturnCode& o_rc):
+        operation<MC>(mss::find_target<mss::mcbistMCTraits<MC>::MC_TARGET_TYPE>(i_target), mss::mcbist::init_subtest<MC>(),
+                      i_const)
+    {
+        // If sf_init was passed the random data pattern, then modify the subtest to use the true random data
+        if(i_const.iv_pattern == PATTERN_RANDOM)
+        {
+            this->iv_subtest.change_data_mode(mss::mcbist::data_mode::RAND_FWD_MAINT);
+        }
+
+        // We're single port per srank operation
+        o_rc = this->single_srank_init_internal(i_target, i_port_rank, i_srank);
+    }
+
+    sf_init_per_srank_operation() = delete;
+};
 
 
 ///
@@ -1330,6 +1402,58 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Super Fast Init - used to init memory per srank behind a target with a given pattern
+/// @note Uses broadcast mode if possible
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType of the target
+/// @param[in] i_target the target behind which all memory should be initialized
+/// @param[in] i_port_rank mrank
+/// @param[in] i_srank srank that needs to initialized
+/// @param[in] i_pattern an index representing a pattern to use to init memory (defaults to 0)
+/// @return FAPI2_RC_SUCCESS iff everything ok
+/// @note The function is asynchronous, and the caller should be looking for a done attention
+///
+// TODO:ZEN:MST-2579 Fix implementation of single rank sf_init memdiags operation
+template<  mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode sf_init_per_srank( const fapi2::Target<T>& i_target,
+                                     const uint8_t i_port_rank,
+                                     const uint8_t i_srank,
+                                     const uint64_t i_pattern = PATTERN_0 )
+{
+    using ET = mss::mcbistMCTraits<MC>;
+    using MC_TARGET = typename mss::mcbistMCTraits<MC>::MC_TARGET_TYPE;
+    FAPI_INF_NO_SBE("superfast init per srank start for " TARGTIDFORMAT, TARGTID);
+
+    uint8_t l_sim = false;
+    FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
+
+    if (l_sim)
+    {
+        // Use some sort of pattern in sim in case the verification folks need to look for something
+        // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
+        // have a good pattern for verification defined.
+        FAPI_INF_NO_SBE("running mss sim init in place of sf_init_per_srank for " TARGTIDFORMAT, TARGTID);
+        return mss::mcbist::sim::sf_init<MC>(mss::find_target<MC_TARGET>(i_target), i_pattern);
+    }
+    else
+    {
+        fapi2::ReturnCode l_rc;
+        constraints<MC> l_const(i_pattern);
+        sf_init_per_srank_operation<MC> l_init_op(i_target, l_const, i_port_rank, i_srank, l_rc);
+
+        FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
+                     ET::memdiags_sf_init_failed_init().set_MC_TARGET(mss::find_target<MC_TARGET>(i_target)),
+                     "Unable to initialize the MCBIST engine for a sf init " TARGTIDFORMAT, TARGTID );
+
+        return l_init_op.execute();
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+
+///
 /// @brief Super Fast Read - used to run superfast read on all memory behind the target
 /// Determines ability to braodcast to all ports behind a target, does so if possible.
 /// @tparam MC the mc type of the T
@@ -1366,7 +1490,7 @@ fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
 
         FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
                      ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
-                     "Unable to initialize the MCBIST engine for a sf read " TARGTIDFORMAT, TARGTID );
+                     "Unable to initialize the MCBIST engine for a sf write " TARGTIDFORMAT, TARGTID );
 
         return l_read_op.execute();
     }

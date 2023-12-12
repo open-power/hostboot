@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,11 @@ class mcbistAddrTraits<mss::mc_type::ODYSSEY>
         static constexpr uint64_t DIMM_BIT = 64;
         static constexpr uint64_t PORT_START = 62;
         static constexpr uint64_t PORT_LEN = 2;
+
+        // Maximum address bits that are used
+        static constexpr uint64_t MAXADDRESS_MAP_BITS = 38;
+        static constexpr uint64_t MAXADDRESS_MAP_INDEX = MAXADDRESS_MAP_BITS - 1;
+
 
         // This magic number represents a range of addresses which cover all
         // cache lines the training algorithms touch. By effecting 0 - this end

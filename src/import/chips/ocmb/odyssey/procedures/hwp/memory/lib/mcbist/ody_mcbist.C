@@ -37,6 +37,7 @@
 #include <fapi2.H>
 #include <lib/mcbist/ody_mcbist_traits.H>
 #include <lib/mcbist/ody_mcbist.H>
+#include <lib/ody_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -132,6 +133,63 @@ const uint64_t mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 
 namespace mcbist
 {
+
+#ifndef __PPE__
+///
+/// @brief Configure the mranks - Odyssey specialization
+/// @param[in] i_target port target
+/// @param[in,out] io_current_bit_index bit index that is updated
+/// @param[in,out] io_program mcbist program
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template<>
+fapi2::ReturnCode configure_mranks<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint64_t& io_current_bit_index,
+        mcbist::program<mss::mc_type::ODYSSEY>& io_program)
+{
+    // Get the attr for master ranks
+    uint8_t l_attr_mranks[2] = {};
+    bool l_is_half_dimm_mode = false;
+    const auto& l_ocmb_chip = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    // Odyssey has one true MRANK...
+    FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_attr_mranks) );
+    FAPI_DBG("l_attr_mranks: %d", l_attr_mranks[0]);
+    io_program.change_mrank0_bit(l_attr_mranks[0] >= 2 ? io_current_bit_index-- : 0);
+
+    // Include half DIMM mode in here as it goes into MRANK1
+    // Is this needed for memdiags? no, but it could be used for lab testing if needed
+    FAPI_TRY(mss::ody::half_dimm_mode(l_ocmb_chip, l_is_half_dimm_mode));
+    io_program.change_mrank1_bit(l_is_half_dimm_mode ? io_current_bit_index-- : 0);
+
+    FAPI_DBG("After configure_mranks() the current bit index: %d", io_current_bit_index);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configure the columns helper to handle special cases based on MC type - Odyssey specialization
+/// @param[in] i_target fapi2 target
+/// @param[in] i_attr_col_bits attr value of the dram col bits
+/// @param[in,out] io_current_bit_index bit index that is updated
+/// @param[in,out] io_program mcbist program
+/// @note Odyssey never uses col2,
+///       col 3 set if burst chop 8 mode is selected for BC8_OTF
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template<>
+fapi2::ReturnCode configure_col_helper<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target,
+        const uint8_t i_attr_col_bits,
+        uint64_t& io_current_bit_index,
+        mcbist::program<mss::mc_type::ODYSSEY>& io_program)
+{
+    // Note: for memdiags, we are explicitly forcing on 128B mode so that COL3 is NOT needed
+    return fapi2::current_err;
+
+}
+#endif
 
 ///
 /// @brief Processes the first AADR/AAER into a beat pair

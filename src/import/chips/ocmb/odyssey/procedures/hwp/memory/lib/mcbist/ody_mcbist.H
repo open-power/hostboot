@@ -47,6 +47,7 @@
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_patterns.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_settings.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_amap_config.H>
 
 namespace mss
 {
