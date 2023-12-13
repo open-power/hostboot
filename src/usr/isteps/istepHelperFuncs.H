@@ -130,6 +130,14 @@ void captureError(errlHndl_t                        &io_err,
                   compId_t                           i_componentId,
                   const TARGETING::TargetHandleList &i_targetList);
 
+template<typename Del, typename... Args>
+inline void captureError(errlOwner_d<Del> i_err,
+                         Args&&... args)
+{
+    errlHndl_t err = i_err.release();
+    return captureError(err, std::forward<Args>(args)...);
+}
+
 #define TRACISTEP(...) TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, __VA_ARGS__)
 
 #endif
