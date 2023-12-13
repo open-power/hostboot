@@ -514,7 +514,7 @@ void determineCallouts(const TargetHandle_t i_ocmbTarget,
         // and add default callouts
         l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
         l_err->plid(i_err->plid());
-        ERRORLOG::errlCommit(l_err, MMIO_COMP_ID);
+        i_err->aggregate(l_err);
         addDefaultCallouts(i_err, i_ocmbTarget);
     }
     else
@@ -1143,7 +1143,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                     // as informational and add default callouts
                     // to l_err.
                     l_err2->plid(l_err->plid());
-                    ERRORLOG::errlCommit(l_err2, MMIO_COMP_ID);
+                    l_err->aggregate(l_err2);
                     addDefaultCallouts(l_err, i_ocmbTarget);
                     break;
                 }
@@ -1279,7 +1279,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                         // Couldn't deterimine if checkstop exists.
                         // Commit the xstop error and assume no checkstop.
                         l_xstopErr->collectTrace(MMIO_COMP_NAME);
-                        ERRORLOG::errlCommit(l_xstopErr, MMIO_COMP_ID);
+                        l_err->aggregate(l_xstopErr);
                     }
                     if(l_checkstopExists)
                     {
@@ -1292,7 +1292,7 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
 
                         l_writeErr->setSev(l_err->sev());
                     }
-                    ERRORLOG::errlCommit(l_err, MMIO_COMP_ID);
+                    l_writeErr->aggregate(l_err);
                     l_err = l_writeErr;
                     break;
                 }
