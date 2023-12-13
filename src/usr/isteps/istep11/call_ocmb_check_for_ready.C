@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@
 #include <targeting/odyutil.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/errlud_sbeio.H>
+#include <sbeio/sbe_retry_handler.H>
 #include <util/misc.H>
 #include <sys/time.h>
 #include <time.h>
@@ -78,14 +79,13 @@
 // sendProgressCode
 #include <initservice/istepdispatcherif.H>
 
-#include    <hwpThread.H>
-#include    <hwpThreadHelper.H>
+#include <hwpThread.H>
+#include <hwpThreadHelper.H>
 
 // Code update
 #include <ocmbupd/ocmbupd.H>
 #include <ocmbupd/ocmbFwImage.H>
 #include <ocmbupd/ody_upd_fsm.H>
-
 #include <secureboot/service.H>
 #include <targeting/common/mfgFlagAccessors.H>
 
@@ -100,27 +100,7 @@ using namespace ocmbupd;
 namespace ISTEP_11
 {
 
-/** @brief Check whether the given error has async FFDC or not.
- */
-bool err_is_sppe_not_ready_with_async_ffdc(Target* const i_ocmb, const errlHndl_t i_errl)
-{
-    bool is_sppe_not_ready_with_async_ffdc = false;
-
-    if (i_errl->reasonCode() == fapi2::RC_POZ_SPPE_NOT_READY_ERR)
-    {
-        errlHndl_t l_errlLocal = ody_has_async_ffdc(i_ocmb, is_sppe_not_ready_with_async_ffdc);
-        if(l_errlLocal)
-        {
-            // Don't care about this error
-            delete l_errlLocal;
-            l_errlLocal = nullptr;
-        }
-    }
-
-    return is_sppe_not_ready_with_async_ffdc;
-}
-
-errlHndl_t handle_ody_upd_hwps_done(Target* const, errlHndl_t&, bool&); // forward declaration
+errlOwner handle_ody_upd_hwps_done(Target* const, errlOwner, bool&); // forward declaration
 
 /** @brief Called to perform the attribute setup for the OCMB.
  *
@@ -407,28 +387,29 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                                  "check_for_ready_work",
                                  [&](Target* const i_ocmb)
         {
-            errlHndl_t i_ocmb_errl = nullptr;
+            errlOwner l_ocmb_errl;
+
             TRACISTEP("parallel_for_each boot_all_proc_ocmbs: WORKING ON HUID=0x%X", get_huid(i_ocmb));
-            fapi2::Target <fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi_ocmb_target(i_ocmb);
+
             do
             {
                 if (UTIL::isOdysseyChip(i_ocmb))
                 {
-                    i_ocmb_errl = ody_attribute_setup(i_ocmb);
-                    if (i_ocmb_errl)
+                    l_ocmb_errl = ody_attribute_setup(i_ocmb);
+                    if (l_ocmb_errl)
                     {
                         TRACISTEP("parallel_for_each ody_attribute_setup: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
                         break;
                     }
                 }
-                i_ocmb_errl = check_for_ready_work(i_ocmb);
-                if (i_ocmb_errl)
+                l_ocmb_errl = check_for_ready_work(i_ocmb);
+                if (l_ocmb_errl)
                 {
                     TRACISTEP("parallel_for_each check_for_ready_work: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
                     break;
                 }
-                i_ocmb_errl = ocmb_idec_sync(i_ocmb);
-                if (i_ocmb_errl)
+                l_ocmb_errl = ocmb_idec_sync(i_ocmb);
+                if (l_ocmb_errl)
                 {
                     TRACISTEP("parallel_for_each ocmb_idec_sync: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
                     break;
@@ -439,20 +420,20 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                     TRACISTEP("parallel_for_each DONE with EXPLORER HUID=0x%X", get_huid(i_ocmb));
                     break;
                 }
-                FAPI_INVOKE_HWP(i_ocmb_errl, ody_sppe_config_update, l_fapi_ocmb_target);
-                if (i_ocmb_errl)
+                FAPI_INVOKE_HWP(l_ocmb_errl, ody_sppe_config_update, { i_ocmb });
+                if (l_ocmb_errl)
                 {
                     TRACISTEP("parallel_for_each ody_sppe_config_update: HUID=0x%X PROBLEM ! ", get_huid(i_ocmb));
                     break;
                 }
-                FAPI_INVOKE_HWP(i_ocmb_errl, ody_cbs_start, l_fapi_ocmb_target);
-                if (i_ocmb_errl)
+                FAPI_INVOKE_HWP(l_ocmb_errl, ody_cbs_start, { i_ocmb });
+                if (l_ocmb_errl)
                 {
                     TRACISTEP("parallel_for_each ody_cbs_start: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
                     break;
                 }
-                FAPI_INVOKE_HWP(i_ocmb_errl, ody_sppe_check_for_ready, l_fapi_ocmb_target);
-                if (i_ocmb_errl)
+                FAPI_INVOKE_HWP(l_ocmb_errl, ody_sppe_check_for_ready, { i_ocmb });
+                if (l_ocmb_errl)
                 {
                     TRACISTEP("parallel_for_each HWP ody_sppe_check_for_ready: HUID=0x%X PROBLEM !", get_huid(i_ocmb));
                     break;
@@ -461,70 +442,56 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
 
             if (UTIL::isOdysseyChip(i_ocmb))
             {
-                i_ocmb_errl = handle_ody_upd_hwps_done(i_ocmb, i_ocmb_errl, proc_reboot_odysseys); // handle_ody_upd_hwps_done may modify i_ocmb_errl
-                if (i_ocmb_errl)
+                l_ocmb_errl = handle_ody_upd_hwps_done(i_ocmb, move(l_ocmb_errl), proc_reboot_odysseys);
+
+                if (l_ocmb_errl)
                 {
-                    TRACISTEP("parallel_for_each handle_ody_upd_hwps_done: OCMB HUID=0x%X proc_reboot_odysseys=%d", get_huid(i_ocmb), proc_reboot_odysseys);
-                    captureError(i_ocmb_errl, io_iStepError, HWPF_COMP_ID, i_ocmb);
+                    TRACISTEP("parallel_for_each handle_ody_upd_hwps_done: OCMB HUID=0x%X proc_reboot_odysseys=%d",
+                              get_huid(i_ocmb), proc_reboot_odysseys);
+                    captureError(move(l_ocmb_errl), io_iStepError, HWPF_COMP_ID, i_ocmb);
                     goto EXIT_OCMBS;
                 }
 
                 if (proc_reboot_odysseys)
                 {
-                    TRACISTEP("parallel_for_each boot_all_proc_ocmbs: OCMB HUID=0x%X proc_reboot_odysseys=%d EXIT_OCMBS", get_huid(i_ocmb), proc_reboot_odysseys);
-                    goto EXIT_OCMBS;
-                }
-                if (!i_ocmb->getAttr<ATTR_HWAS_STATE>().functional)
-                {
-                    TRACISTEP("parallel_for_each boot_all_proc_ocmbs: OCMB HUID=0x%X proc_reboot_odysseys=%d DECONFIG EXIT_OCMBS", get_huid(i_ocmb), proc_reboot_odysseys);
-                    goto EXIT_OCMBS;
-                }
-                errlHndl_t no_error = nullptr; // no error for this call
-                i_ocmb_errl = ody_upd_process_event(i_ocmb,
-                                               CHECK_FOR_READY_COMPLETED,
-                                               no_error,
-                                               proc_reboot_odysseys);
-                if (i_ocmb_errl)
-                {
-                    TRACISTEP("parallel_for_each ody_upd_process_event: OCMB HUID=0x%X proc_reboot_odysseys=%d", get_huid(i_ocmb), proc_reboot_odysseys);
-                    UdSPPECodeLevels(i_ocmb).addToLog(i_ocmb_errl);
-                    captureError(i_ocmb_errl, io_iStepError, HWPF_COMP_ID, i_ocmb);
+                    TRACISTEP("parallel_for_each boot_all_proc_ocmbs: OCMB HUID=0x%X proc_reboot_odysseys=%d EXIT_OCMBS",
+                              get_huid(i_ocmb), proc_reboot_odysseys);
                     goto EXIT_OCMBS;
                 }
 
-                // Check if there is any async FFDC on the Odyssey
-                // TODO JIRA: PFHB-487 Make sure that we check for async FFDC AFTER
-                // we've checked the SBE flash errors.
-                bool l_hasFfdc = false;
-                i_ocmb_errl = ody_has_async_ffdc(i_ocmb, l_hasFfdc);
-                if(i_ocmb_errl)
+                if (!i_ocmb->getAttr<ATTR_HWAS_STATE>().functional)
                 {
-                    TRACISTEP("parallel_for_each ody_has_async_ffdc: could not get async FFDC bit from OCMB 0x%x", get_huid(i_ocmb));
-                    UdSPPECodeLevels(i_ocmb).addToLog(i_ocmb_errl);
-                    errlCommit(i_ocmb_errl, SBEIO_COMP_ID);
+                    TRACISTEP("parallel_for_each boot_all_proc_ocmbs: OCMB HUID=0x%X proc_reboot_odysseys=%d DECONFIG EXIT_OCMBS",
+                              get_huid(i_ocmb), proc_reboot_odysseys);
+                    goto EXIT_OCMBS;
                 }
-                else
+
+                errlOwner no_error = nullptr; // no error for this call
+                l_ocmb_errl = ody_upd_process_event(i_ocmb,
+                                                    CHECK_FOR_READY_COMPLETED,
+                                                    no_error,
+                                                    proc_reboot_odysseys);
+
+                if (l_ocmb_errl)
                 {
-                    if(l_hasFfdc)
-                    {
-                        SBEIO::processOdyAsyncFFDC(i_ocmb);
-                    }
-                    else
-                    {
-                        TRACISTEP("parallel_for_each: No async FFDC for OCMB 0x%x", get_huid(i_ocmb));
-                    }
+                    TRACISTEP("parallel_for_each ody_upd_process_event: OCMB HUID=0x%X proc_reboot_odysseys=%d",
+                              get_huid(i_ocmb), proc_reboot_odysseys);
+                    UdSPPECodeLevels(i_ocmb).addToLog(l_ocmb_errl);
+                    captureError(move(l_ocmb_errl), io_iStepError, HWPF_COMP_ID, i_ocmb);
+                    goto EXIT_OCMBS;
                 }
             }
             else // EXPLORER
             {
-                if (i_ocmb_errl)
+                if (l_ocmb_errl)
                 {
                     TRACISTEP("parallel_for_each boot_all_proc_ocmbs: EXPLORER failed HUID=0x%X", get_huid(i_ocmb));
-                    captureError(i_ocmb_errl, io_iStepError, HWPF_COMP_ID, i_ocmb);
+                    captureError(move(l_ocmb_errl), io_iStepError, HWPF_COMP_ID, i_ocmb);
                 }
             }
-            EXIT_OCMBS:
-                return nullptr; // No error should be passed back from the parallel_for_each
+
+        EXIT_OCMBS:
+            return nullptr; // No error should be passed back from the parallel_for_each
         }); // parallel_for_each i_ocmb
 
         if (proc_reboot_odysseys) // ODYSSEY ONLY PATH BELOW, EXPLORER will NOT set proc_reboot_odysseys
@@ -539,7 +506,9 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
             std::for_each(begin(l_functionalOcmbChipList),
                           end(l_functionalOcmbChipList),
                           clear_ody_code_levels_state);
+
             FAPI_INVOKE_HWP(l_errl, p10_ocmb_enable, { i_proc }); // PROC level, ALL Odysseys reboot, Odyssey ONLY path here
+
             if (l_errl)
             {
                 TRACISTEP(ERR_MRK"boot_all_proc_ocmbs: PROBLEM restarting all Odysseys under PROC HUID=0x%X", get_huid(i_proc));
@@ -553,30 +522,6 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
     return l_errl;
 }
 
-/** @brief Commit an info log if required, and set io_return_errl and io_local_errl
- *         as appropriate.
- *         We want the first error to be visible and all secondary errors to be info.
- *         The first error is most relevant to a failure.
- *
- *  @param[in,out] io_return_errl  The errl to be returned from the calling fcn
- *  @param[in,out] io_local_errl   The errl which was just hit in the calling fcn
- */
-void check_and_set_errl(errlHndl_t& io_return_errl, errlHndl_t& io_local_errl)
-{
-    if (io_return_errl)
-    {
-        // a return errl already exists, so log the new errl as info
-        io_local_errl->plid(io_return_errl->plid());
-        io_local_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-        errlCommit(io_local_errl, HWPF_COMP_ID);
-    }
-    else
-    {
-        io_return_errl = io_local_errl;
-    }
-    io_local_errl = nullptr;
-}
-
 /** @brief Called when all of the check_for_ready HWPs have been invoked on the given OCMB,
  *  whether they failed or not. This function handles errors and checks the code version
  *  running on the OCMB if possible.
@@ -587,44 +532,75 @@ void check_and_set_errl(errlHndl_t& io_return_errl, errlHndl_t& io_local_errl)
  *                                      FSM indicates that the OCMB needs to run
  *                                      through check_for_ready again.
  *
- *  @return    errlHndl_t               Error if any, otherwise nullptr.
- *                                       If io_hwpErrl, return io_hwpErrl
- *                                       If only a local_error, return local_error
- *                                       Except when code update FSM chooses to
- *                                       switch sides, then no errl is returned
+ *  @return    errlOwner                Error if any, otherwise nullptr.
+ *                                       If an error is returned, it means that the
+ *                                       IPL should be halted with the given error.
  */
-errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
-                                    errlHndl_t& io_hwpErrl,
-                                    bool& o_restart_needed)
+errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
+                                   errlOwner i_hwpErrl,
+                                   bool& o_restart_needed)
 {
-    errlHndl_t      l_return_errl = io_hwpErrl;
-    ody_upd_event_t l_event       = NO_EVENT;
+    auto l_fsm_errl = move(i_hwpErrl);
 
-    if (io_hwpErrl)
-    { // If there was a HWP error, check whether there is async FFDC.
+    ody_upd_event_t l_event = NO_EVENT;
+
+    if (l_fsm_errl)
+    {
         l_event = OCMB_BOOT_ERROR_NO_FFDC;
+    }
 
-        // @TODO: Can we could have async FFDC without a HWP error? If so we should check this
-        // in the HWP success path as well.
-        if (err_is_sppe_not_ready_with_async_ffdc(i_ocmb, io_hwpErrl))
-        {
-            l_event = OCMB_BOOT_ERROR_WITH_FFDC;
+    // Check whether the SBE is running or not.
+    if (!l_fsm_errl || !l_fsm_errl->hasUserData1(fapi2::RC_POZ_SPPE_NOT_READY_ERR))
+    {
+        // If the SPPE isn't halted, then we check for async ffdc.
+        // Grab any async FFDC. If there is any async FFDC generated,
+        // SPPE will by design attach all of the FFDC to the response to
+        // NEXT chip-op that comes in, whatever it may be. So, we need to
+        // explicitly check for FFDC as soon as SPPE is up.
+        // If we do get any error logs back from this, we'll
+        // aggregate them all into one error log and that will be
+        // passed to the FSM to decide what to do with them.
+
+        bool async_ffdc = false;
+        if (errlOwner l_errlLocal(ody_has_async_ffdc(i_ocmb, async_ffdc)); async_ffdc)
+        { // ignore any error from ody_has_async_ffdc; we don't care whether it fails.
+            auto async_ffdc_errls = genFifoSBEFFDCErrls(i_ocmb);
+
+            if (!async_ffdc_errls.empty())
+            {
+                l_event = OCMB_BOOT_ERROR_WITH_FFDC;
+                aggregate(l_fsm_errl, move(async_ffdc_errls));
+            }
         }
-        else
+    }
+    else
+    {
+        TRACISTEP("handle_ody_upd_hwps_done(0x%08X): RC_POZ_SPPE_NOT_READY_ERR indicates "
+                  "that the SBE is not running",
+                  get_huid(i_ocmb));
+
+        OdysseySbeRetryHandler retry_handler(i_ocmb);
+        auto halted_rc = hbstd::own(retry_handler.ExtractRC());
+
+        if (halted_rc)
         {
-            // @TODO: call ody_extract_sbe_rc
+            TRACISTEP("handle_ody_upd_hwps_done(0x%08X): ody_extract_sbe_rc returned 0x%08X",
+                      get_huid(i_ocmb),
+                      ERRL_GETEID_SAFE(halted_rc));
+
+            aggregate(l_fsm_errl, move(halted_rc));
         }
     }
 
     if (l_event != OCMB_BOOT_ERROR_NO_FFDC)
-    { // If there is async FFDC, we might be able to read the code levels.
-
+    { // Read the code levels if there was no error. If there is async
+      // FFDC, we also might be able to read the code levels.
         if (i_ocmb->getAttr<ATTR_SBE_NUM_CAPABILITIES>() == 0)
         {
             // This attr is unset, so run the get code levels chipop to pull
             // the data which contains the number of capabilities supported
 
-            if (auto l_local_errl = sendGetCodeLevelsRequest(i_ocmb))
+            if (auto l_local_errl = hbstd::own(sendGetCodeLevelsRequest(i_ocmb)))
             {
                 TRACISTEP("handle_ody_upd_hwps_done: sendGetCodeLevelsRequest "
                           "failed on OCMB 0x%X", get_huid(i_ocmb));
@@ -633,17 +609,18 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
                 // no async FFDC
                 l_event = OCMB_BOOT_ERROR_NO_FFDC;
 
-                check_and_set_errl(l_return_errl, l_local_errl);
+                aggregate(l_fsm_errl, move(l_local_errl));
             }
         }
 
-        if (SPPE_BOOT_SIDE_GOLDEN != i_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_SIDE>())
+        if (l_event != OCMB_BOOT_ERROR_NO_FFDC
+            && SPPE_BOOT_SIDE_GOLDEN != i_ocmb->getAttr<TARGETING::ATTR_OCMB_BOOT_SIDE>())
         {
             // getCapabilities is not supported with GOLDEN image
             //  *This chipop did not make it into the GOLDEN image in time, and
             //   and the golden image is now locked.
 
-            if (auto l_local_errl = getFifoSbeCapabilities(i_ocmb))
+            if (auto l_local_errl = hbstd::own(getFifoSbeCapabilities(i_ocmb)))
             {
                 TRACISTEP("handle_ody_upd_hwps_done: getFifoSbeCapabilities "
                           "failed on OCMB 0x%X", get_huid(i_ocmb));
@@ -652,40 +629,42 @@ errlHndl_t handle_ody_upd_hwps_done(Target* const i_ocmb,
                 // with no async FFDC
                 l_event = OCMB_BOOT_ERROR_NO_FFDC;
 
-                check_and_set_errl(l_return_errl, l_local_errl);
+                aggregate(l_fsm_errl, move(l_local_errl));
             }
         }
     }
 
+    errlOwner l_return_errl;
+
     if (odysseyCodeUpdateSupported()) // no point in doing anything if we have
                                       // no Odyssey images in PNOR.
     {
-
         if (l_event != OCMB_BOOT_ERROR_NO_FFDC)
-        {
+        { // If there was an ERROR_NO_FFDC, the SBE is dead and we don't
+          // know the code levels.
             set_ody_code_levels_state(i_ocmb);
         }
 
-        if (l_return_errl)
+        if (l_fsm_errl)
         {
             // Pass any HWP error to the code update FSM and let it tell us what to do.
 
-            l_return_errl->addHwCallout(i_ocmb,
-                                        HWAS::SRCI_PRIORITY_HIGH,
-                                        HWAS::DECONFIG,
-                                        HWAS::GARD_NULL);
-            UdSPPECodeLevels(i_ocmb).addToLog(l_return_errl);
+            UdSPPECodeLevels(i_ocmb).addToLog(l_fsm_errl);
+            l_fsm_errl->addHwCallout(i_ocmb,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DECONFIG,
+                                     HWAS::GARD_NULL);
             l_return_errl = ody_upd_process_event(i_ocmb,
                                                   l_event,
-                                                  l_return_errl,
+                                                  move(l_fsm_errl),
                                                   o_restart_needed);
         }
     }
-
-    // cleanup this errlHndl_t, since we processed the error logs returned
-    // in this function, and we will return an appropriate error log handle
-    // using l_return_errl
-    io_hwpErrl = nullptr;
+    else
+    { // return the error we were going to pass to the FSM, if code
+      // update isn't supported.
+        l_return_errl = move(l_fsm_errl);
+    }
 
     return l_return_errl;
 }
