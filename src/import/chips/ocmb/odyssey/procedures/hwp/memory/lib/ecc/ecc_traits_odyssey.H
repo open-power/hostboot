@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -175,6 +175,14 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
             P0_TCE_GALOIS_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_0_MAINLINE_TCE_GALOIS_FIELD_LEN,
             P0_TCE_MAGNITUDE = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_0_MAINLINE_TCE_MAGNITUDE_FIELD,
             P0_TCE_MAGNITUDE_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_0_MAINLINE_TCE_MAGNITUDE_FIELD_LEN,
+            P1_NCE_GALOIS = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_1_MAINLINE_NCE_GALOIS_FIELD,
+            P1_NCE_GALOIS_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_1_MAINLINE_NCE_GALOIS_FIELD_LEN,
+            P1_NCE_MAGNITUDE = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_1_MAINLINE_NCE_MAGNITUDE_FIELD,
+            P1_NCE_MAGNITUDE_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_1_MAINLINE_NCE_MAGNITUDE_FIELD_LEN,
+            P1_TCE_GALOIS = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_1_MAINLINE_TCE_GALOIS_FIELD,
+            P1_TCE_GALOIS_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_1_MAINLINE_TCE_GALOIS_FIELD_LEN,
+            P1_TCE_MAGNITUDE = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_1_MAINLINE_TCE_MAGNITUDE_FIELD,
+            P1_TCE_MAGNITUDE_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSEVR0Q_1_MAINLINE_TCE_MAGNITUDE_FIELD_LEN,
             CURRENT_ADDR_TRAP = scomt::ody::ODC_MCBIST_SCOM_MCBMCATQ_ADDR_TRAP,
             CURRENT_ADDR_TRAP_LEN = scomt::ody::ODC_MCBIST_SCOM_MCBMCATQ_ADDR_TRAP_LEN,
             CURRENT_PORT = scomt::ody::ODC_MCBIST_SCOM_MCBMCATQ_PORT_TRAP,
