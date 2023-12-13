@@ -34,6 +34,7 @@
 #include <ocmbupd/ody_upd_fsm.H>
 #include <errl/errludstring.H>
 #include <errl/hberrltypes.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 using namespace TARGETING;
 using namespace ERRORLOG;
@@ -181,6 +182,18 @@ errlHndl_t processSpiFlashCheckResponse(Target* i_ocmb, uint8_t i_numStatusEntri
         }
     }
 
+    // Deconfigure the OCMB and fail the IPL in MFG mode for any detected flash failure.
+    if((l_side0Fail || l_side1Fail || l_goldenFail || l_ceFound) &&
+       areAllSrcsTerminating())
+    {
+        l_errl = makeFlashErrl(i_ocmb, l_side0Fail, l_side1Fail, l_goldenFail,
+                               l_side0Errors, l_side1Errors, l_goldenErrors);
+        l_errl->addHwCallout(i_ocmb,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::DECONFIG,
+                             HWAS::GARD_NULL);
+        goto ERROR_EXIT;
+    }
 
     // If there is a flash check failure on the side we're currently running on,
     // then pass that failure to the code update FSM, and it will handle side-switching
@@ -223,11 +236,14 @@ errlHndl_t processSpiFlashCheckResponse(Target* i_ocmb, uint8_t i_numStatusEntri
         errlCommit(l_errl, SBEIO_COMP_ID);
     }
 
+ERROR_EXIT:
+
     return l_errl;
 }
 
 errlHndl_t sendSpiFlashCheckRequest(Target* i_ocmb, uint8_t i_scope, uint8_t i_side, uint8_t i_deviceId)
 {
+    SBE_TRACF(ENTER_MRK"sendSpiFlashCheckRequest");
     errlHndl_t l_errl = nullptr;
 
     // SPPE will send back a scrub status entry per side requested per device, so
@@ -266,6 +282,7 @@ errlHndl_t sendSpiFlashCheckRequest(Target* i_ocmb, uint8_t i_scope, uint8_t i_s
     }
 
 ERROR_EXIT:
+    SBE_TRACF(EXIT_MRK"sendSpiFlashCheckRequest");
     return l_errl;
 }
 

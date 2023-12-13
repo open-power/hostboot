@@ -91,6 +91,8 @@
 
 #include <arch/magic.H>
 
+#include <targeting/attrrp.H>
+
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -355,6 +357,39 @@ errlHndl_t check_for_ready_work(Target* const i_ocmb)
     return l_errl;
 }
 
+errlHndl_t doOcmbSpiFlashCheck(Target* const i_ocmb)
+{
+    errlHndl_t l_errl = nullptr;
+
+    // Golden side doesn't support flash check chip op
+    if(SPPE_BOOT_SIDE_GOLDEN != i_ocmb->getAttr<ATTR_OCMB_BOOT_SIDE>() &&
+       SBEIO::sbeSpiFlashCheckSupported(i_ocmb))
+    {
+        // Check full SPI flash on all devices in MFG mode
+        if(areAllSrcsTerminating())
+        {
+            // FIXME JIRA: PFHB-730 SPI flash check currently returns UEs if performed
+            // in FULL (in MFG mode). Until the DIMMs on MFG systems are fixed up,
+            // we can't run FULL flash check (unless explicitly requested).
+            if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_FORCE_MFG_SPI_FLASH_CHECK>() == 1)
+            {
+                l_errl = SBEIO::sendSpiFlashCheckRequest(i_ocmb, FULL, ALL_SIDES, DEVICE_0);
+            }
+        }
+        else
+        {
+            l_errl = SBEIO::sendSpiFlashCheckRequest(i_ocmb, IMAGE, SIDE_0 | SIDE_1, DEVICE_0);
+        }
+    }
+    else
+    {
+        TRACISTEP("doOcmbSpiFlashCheck: GOLDEN side or OCMB 0x%x doesn't support SPI flash check; skipping.",
+                  get_huid(i_ocmb));
+    }
+
+    return l_errl;
+}
+
 /** @brief Called to handle the OCMB boot process on a per PROC basis.
  *
  *         This function handles the boot of the OCMB's on a per PROC
@@ -490,6 +525,19 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                     TRACISTEP("parallel_for_each ody_upd_process_event: OCMB HUID=0x%X proc_reboot_odysseys=%d",
                               get_huid(i_ocmb), proc_reboot_odysseys);
                     UdSPPECodeLevels(i_ocmb).addToLog(l_ocmb_errl);
+                    captureError(move(l_ocmb_errl), io_iStepError, HWPF_COMP_ID, i_ocmb);
+                    goto EXIT_OCMBS;
+                }
+
+                l_ocmb_errl = doOcmbSpiFlashCheck(i_ocmb);
+                if(l_ocmb_errl)
+                {
+                    TRACISTEP("parallel_for_each OCMB 0x%x SPI Flash check failed", get_huid(i_ocmb));
+                    // In an error case, the FSM may chose to flip to side1/golden. We need to make
+                    // sure that the attributes are flushed out before proceeding with the shutdown
+                    // so that we can boot off of the correct side on the next boot (as indicated by
+                    // the OCMB_BOOT_SIDE attribute).
+                    AttrRP::syncAllAttributesToSP();
                     captureError(move(l_ocmb_errl), io_iStepError, HWPF_COMP_ID, i_ocmb);
                     goto EXIT_OCMBS;
                 }
