@@ -386,12 +386,11 @@ errlHndl_t SbeFifo::upFifoTimeout(TARGETING::Target * i_target, uint32_t l_data)
             i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
         if(!l_switches.useXscom)
         {
-            l_switches.useSbeScom = 0;
-
             ATTR_FSI_MASTER_TYPE_type fsi_type = { };
             if (i_target->tryGetAttr<ATTR_FSI_MASTER_TYPE>(fsi_type)
                 && fsi_type != FSI_MASTER_TYPE_NO_MASTER)
             {
+                l_switches.useSbeScom = 0;
                 l_switches.useFsiScom = 1;
             }
 
@@ -830,12 +829,11 @@ errlHndl_t SbeFifo::dnFifoTimeout(TARGETING::Target * i_target, uint32_t l_statu
             i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
         if(!l_switches.useXscom)
         {
-            l_switches.useSbeScom = 0;
-
             ATTR_FSI_MASTER_TYPE_type fsi_type = { };
             if (i_target->tryGetAttr<ATTR_FSI_MASTER_TYPE>(fsi_type)
                 && fsi_type != FSI_MASTER_TYPE_NO_MASTER)
             {
+                l_switches.useSbeScom = 0;
                 l_switches.useFsiScom = 1;
             }
 
