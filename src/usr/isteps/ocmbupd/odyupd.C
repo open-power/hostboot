@@ -442,7 +442,7 @@ void odysseyCaptureErrorOcmbUpdateCheck(errlHndl_t& io_err,
                       get_huid(i_target),
                       TRACE_ERR_ARGS(upd_errl));
 
-            captureError(upd_errl, io_stepError, i_componentId);
+            captureError(move(upd_errl), io_stepError, i_componentId);
         }
     }
 

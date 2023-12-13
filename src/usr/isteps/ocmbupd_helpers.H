@@ -32,7 +32,9 @@
 #define HANDLE_ODY_HWP_ERROR(ISTEP_NAME, HWP, STEP_ERR, OCMB, ERRL)     \
     ({                                                                  \
         ISTEP_ERROR::IStepError& M_steperr = STEP_ERR;                  \
-        errlHndl_t& M_errl = ERRL;                                      \
+        errlHndl_t& M_errl_ptr = ERRL;                                  \
+        errlOwner M_errl(M_errl_ptr);                                   \
+        M_errl_ptr = nullptr;                                           \
         TARGETING::Target* const M_ocmb = OCMB;                         \
         if (M_errl)                                                     \
         {                                                               \
@@ -43,14 +45,14 @@
                 {                                                       \
                     TRACISTEP(INFO_MRK #ISTEP_NAME ": HWP signaled incompatible "\
                               "attribute levels for Odyssey 0x%08x.",   \
-                              get_huid(M_ocmb));                                 \
+                              get_huid(M_ocmb));                        \
                     M_update_event = ocmbupd::ATTRS_INCOMPATIBLE;       \
                 }                                                       \
                                                                         \
                 if (auto M_upd_errl =                                   \
                     ocmbupd::ody_upd_process_event(M_ocmb,              \
                                                    M_update_event,      \
-                                                   M_errl))             \
+                                                   move(M_errl)))       \
                 {                                                       \
                     TRACISTEP(ERR_MRK #ISTEP_NAME ": ody_upd_process_event(0x%08x) " \
                               "failed; halting istep "                  \

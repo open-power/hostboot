@@ -84,10 +84,10 @@ enum ody_upd_event_t : uint32_t
  *  @note o_restart_needed is NEVER set to false by this function. It
  *  may be switched from false to true, but never vice versa.
  */
-errlHndl_t ody_upd_process_event(TARGETING::Target* i_ocmb,
-                                 const ody_upd_event_t i_event,
-                                 errlHndl_t& i_errlog,
-                                 bool& o_restart_needed);
+errlOwner ody_upd_process_event(TARGETING::Target* i_ocmb,
+                                const ody_upd_event_t i_event,
+                                errlOwner i_errlog,
+                                bool& o_restart_needed);
 
 /** @brief Process an event on the given OCMB. If an error log is
  *  related to the event, it is passed in as well, and this function
@@ -97,9 +97,9 @@ errlHndl_t ody_upd_process_event(TARGETING::Target* i_ocmb,
  *  the other overload would set o_restart_needed to true, this
  *  overload requests a reconfig loop directly.
  */
-errlHndl_t ody_upd_process_event(TARGETING::Target* i_ocmb,
-                                 const ody_upd_event_t i_event,
-                                 errlHndl_t& i_errlog);
+errlOwner ody_upd_process_event(TARGETING::Target* i_ocmb,
+                                const ody_upd_event_t i_event,
+                                errlOwner i_errlog);
 
 /** @brief Parameter type to ody_upd_all_process_event. */
 enum perform_reconfig_t
@@ -126,7 +126,7 @@ enum functional_ocmbs_only_t
  *  @param[out] o_restart_needed  Set to true if one of the OCMBs needs a restart.
  *                                Optional.
  *
- *  @return errlHndl_t       Error if any, otherwise nullptr.
+ *  @return errlOwner             Error if any, otherwise nullptr.
  *
  *  @note If an error is returned, o_restart_needed is unmodified and no reconfig
  *  loop is requested.
@@ -134,10 +134,10 @@ enum functional_ocmbs_only_t
  *  @note This function is not reentrant and should be called from one thread
  *        at a time.
  */
-errlHndl_t ody_upd_all_process_event(const ody_upd_event_t i_event,
-                                     functional_ocmbs_only_t i_which_ocmbs,
-                                     perform_reconfig_t i_perform_reconfig_if_needed,
-                                     bool* o_restart_needed = nullptr);
+errlOwner ody_upd_all_process_event(const ody_upd_event_t i_event,
+                                    functional_ocmbs_only_t i_which_ocmbs,
+                                    perform_reconfig_t i_perform_reconfig_if_needed,
+                                    bool* o_restart_needed = nullptr);
 
 /** @brief Set the Odyssey code update state related to the firmware
  *  levels on the given target. Assumes that ATTR_SPPE_BOOT_SIDE is already

@@ -562,15 +562,15 @@ std::array<char, 128> action_to_str(const update_action_t i_action)
 
 /** @brief Capture the state of the code update FSM in an error log.
  */
-errlHndl_t capture_state_in_errlog(const errlSeverity_t i_sev,
-                                   const uint8_t i_mod,
-                                   const uint16_t i_rc,
-                                   const bool i_sw_callout,
-                                   Target* const i_ocmb,
-                                   const state_t& i_state,
-                                   const state_transitions_t& i_state_pattern,
-                                   const state_transition_t& i_transition,
-                                   const ody_upd_event_t i_event)
+errlOwner capture_state_in_errlog(const errlSeverity_t i_sev,
+                                  const uint8_t i_mod,
+                                  const uint16_t i_rc,
+                                  const bool i_sw_callout,
+                                  Target* const i_ocmb,
+                                  const state_t& i_state,
+                                  const state_transitions_t& i_state_pattern,
+                                  const state_transition_t& i_transition,
+                                  const ody_upd_event_t i_event)
 {
     const auto errl
         = new ErrlEntry(i_sev,
@@ -599,7 +599,7 @@ errlHndl_t capture_state_in_errlog(const errlSeverity_t i_sev,
             "Odyssey code versions: %s", vsn_summary.data());
     ErrlUserDetailsString(errl_vsn_details).addToLog(errl);
 
-    return errl;
+    return errlOwner(errl);
 }
 
 /** @brief Create and commit an error log that will immediately deconfigure the given
@@ -615,14 +615,14 @@ errlHndl_t capture_state_in_errlog(const errlSeverity_t i_sev,
  *  @param[in] i_event          The event that caused i_transition.
  *  @param[in] i_errlog         The error log that caused this event, if any.
  *
- *  @return errlHndl_t          Error if any, otherwise nullptr.
+ *  @return errlOwner           Error if any, otherwise nullptr.
  */
-errlHndl_t create_and_commit_ocmb_deconfigure_log(Target* const i_ocmb,
-                                                  const state_t& i_state,
-                                                  const state_transitions_t& i_state_pattern,
-                                                  const state_transition_t& i_transition,
-                                                  const ody_upd_event_t i_event,
-                                                  const errlHndl_t i_errlog)
+errlOwner create_and_commit_ocmb_deconfigure_log(Target* const i_ocmb,
+                                                 const state_t& i_state,
+                                                 const state_transitions_t& i_state_pattern,
+                                                 const state_transition_t& i_transition,
+                                                 const ody_upd_event_t i_event,
+                                                 const errlHndl_t i_errlog)
 {
     /*@
      *@moduleid         MOD_ODY_UPD_FSM
@@ -660,17 +660,17 @@ errlHndl_t create_and_commit_ocmb_deconfigure_log(Target* const i_ocmb,
 
     errlCommit(errl, OCMBUPD_COMP_ID);
 
-    return deconfig_errl;
+    return errlOwner(deconfig_errl);
 }
 
 /** @brief Create a log for an internal error in the code update FSM. This should halt the boot.
  */
-errlHndl_t create_internal_error_log(Target* const i_ocmb,
-                                     const state_t& i_state,
-                                     const state_transitions_t& i_state_pattern,
-                                     const state_transition_t& i_transition,
-                                     const ody_upd_event_t i_event,
-                                     const uint16_t i_rc)
+errlOwner create_internal_error_log(Target* const i_ocmb,
+                                    const state_t& i_state,
+                                    const state_transitions_t& i_state_pattern,
+                                    const state_transition_t& i_transition,
+                                    const ody_upd_event_t i_event,
+                                    const uint16_t i_rc)
 {
     auto errl = capture_state_in_errlog(ERRL_SEV_UNRECOVERABLE, MOD_ODY_UPD_FSM, i_rc,
                                         ErrlEntry::ADD_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
@@ -683,11 +683,11 @@ errlHndl_t create_internal_error_log(Target* const i_ocmb,
 /** @brief Create an error log for a fatal error in the Odyssey firmware. This should halt
  *  the boot.
  */
-errlHndl_t create_boot_fail_bad_firmware_log(Target* const i_ocmb,
-                                             const state_t& i_state,
-                                             const state_transitions_t& i_state_pattern,
-                                             const state_transition_t& i_transition,
-                                             const ody_upd_event_t i_event)
+errlOwner create_boot_fail_bad_firmware_log(Target* const i_ocmb,
+                                            const state_t& i_state,
+                                            const state_transitions_t& i_state_pattern,
+                                            const state_transition_t& i_transition,
+                                            const ody_upd_event_t i_event)
 {
     /*@
      *@moduleid         MOD_ODY_UPD_FSM
@@ -706,8 +706,8 @@ errlHndl_t create_boot_fail_bad_firmware_log(Target* const i_ocmb,
      *@devdesc          The OCMB firmware is up to date but invalid.
      *@custdesc         A software error occurred during system boot
      */
-    const auto errl = capture_state_in_errlog(ERRL_SEV_UNRECOVERABLE, MOD_ODY_UPD_FSM, ODY_UPD_BAD_FIRMWARE,
-                                              ErrlEntry::ADD_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
+    auto errl = capture_state_in_errlog(ERRL_SEV_UNRECOVERABLE, MOD_ODY_UPD_FSM, ODY_UPD_BAD_FIRMWARE,
+                                        ErrlEntry::ADD_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
 
     errl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
 
@@ -759,20 +759,20 @@ void create_firmware_update_log(Target* const i_ocmb,
  *  @param[out] o_restart_needed  Whether the ocmb_check_for_ready loop should be
  *                                restarted on the given OCMB.
  *
- *  @return errlHndl_t            Error if any, otherwise nullptr.
+ *  @return errlOwner             Error if any, otherwise nullptr.
  *
  *  @note This function is recursive and does NOT take ownership of i_errlog.
  */
-errlHndl_t execute_actions(Target* const i_ocmb,
-                           const state_t& i_state,
-                           const state_transitions_t& i_state_pattern,
-                           const state_transition_t& i_transition,
-                           const ody_upd_event_t i_event,
-                           errlHndl_t i_errlog,
-                           const bool i_on_update_force_all,
-                           bool& o_restart_needed)
+errlOwner execute_actions(Target* const i_ocmb,
+                          const state_t& i_state,
+                          const state_transitions_t& i_state_pattern,
+                          const state_transition_t& i_transition,
+                          const ody_upd_event_t i_event,
+                          errlHndl_t i_errlog,
+                          const bool i_on_update_force_all,
+                          bool& o_restart_needed)
 {
-    errlHndl_t errl = nullptr;
+    errlOwner errl = nullptr;
 
     bool manually_set_errl_sev = false;
 
@@ -834,7 +834,7 @@ errlHndl_t execute_actions(Target* const i_ocmb,
                                                      // this action is code update, so this is counted
                                                      // as a CODE_UPDATE_CHIPOP_FAILURE
                                                      CODE_UPDATE_CHIPOP_FAILURE,
-                                                     sync_err,
+                                                     errlOwner(sync_err),
                                                      o_restart_needed);
                     }
                 }
@@ -848,7 +848,7 @@ errlHndl_t execute_actions(Target* const i_ocmb,
 
                     return ody_upd_process_event(i_ocmb,
                                                  CODE_UPDATE_CHIPOP_FAILURE,
-                                                 update_err,
+                                                 errlOwner(update_err),
                                                  o_restart_needed);
                 }
 
@@ -924,7 +924,7 @@ errlHndl_t execute_actions(Target* const i_ocmb,
 
                     return ody_upd_process_event(i_ocmb,
                                                  IMAGE_SYNC_CHIPOP_FAILURE,
-                                                 sync_err,
+                                                 errlOwner(sync_err),
                                                  o_restart_needed);
                 }
                 break;
@@ -1025,18 +1025,18 @@ state_transitions_t parse_ody_upd_fsm_attribute_override()
  *  related to the event, it is passed in as well, and this function
  *  takes ownership of it.
  */
-errlHndl_t ody_upd_process_event(Target* const i_ocmb,
-                                 const state_t& i_state,
-                                 const ody_upd_event_t i_event,
-                                 errlHndl_t& i_errlog,
-                                 bool& o_restart_needed)
+errlOwner ody_upd_process_event(Target* const i_ocmb,
+                                const state_t& i_state,
+                                const ody_upd_event_t i_event,
+                                errlOwner i_errlog,
+                                bool& o_restart_needed)
 {
     TRACF(ENTER_MRK"ody_upd_process_event(HUID=0x%08X): Current state+event %s + %s",
           get_huid(i_ocmb),
           state_to_str(i_state).data(),
           event_to_str(i_event).data());
 
-    errlHndl_t errl = nullptr;
+    errlOwner errl = nullptr;
 
     do
     {
@@ -1102,7 +1102,7 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
                   event_to_str(i_event).data());
 
             errl = execute_actions(i_ocmb, i_state, /* state pattern */ { }, /* transition */ { },
-                            IPL_COMPLETE, i_errlog, on_update_force_all, o_restart_needed);
+                                   IPL_COMPLETE, i_errlog.get(), on_update_force_all, o_restart_needed);
             break;
         }
 
@@ -1139,7 +1139,7 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
               state_to_str(matched_state->state).data(),
               event_to_str(matched_event->event).data());
 
-        errl = execute_actions(i_ocmb, i_state, *matched_state, *matched_event, i_event, i_errlog, on_update_force_all, o_restart_needed);
+        errl = execute_actions(i_ocmb, i_state, *matched_state, *matched_event, i_event, i_errlog.get(), on_update_force_all, o_restart_needed);
     }
     else if (matched_state)
     {
@@ -1183,8 +1183,6 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
     {
         SBEIO::UdSPPECodeLevels(i_ocmb).addToLog(i_errlog);
         errlCommit(i_errlog, OCMBUPD_COMP_ID);
-        ErrlManager::callFlushErrorLogs(); // this may deconfigure an ocmb, and we want to
-                                           // communicate that to the caller.
     }
 
     TRACF(EXIT_MRK"ody_upd_process_event(HUID=0x%08X) = 0x%08X",
@@ -1194,9 +1192,9 @@ errlHndl_t ody_upd_process_event(Target* const i_ocmb,
     return errl;
 }
 
-errlHndl_t ocmbupd::ody_upd_process_event(Target* const i_ocmb,
-                                          const ody_upd_event_t i_event,
-                                          errlHndl_t& i_errlog)
+errlOwner ocmbupd::ody_upd_process_event(Target* const i_ocmb,
+                                         const ody_upd_event_t i_event,
+                                         errlOwner i_errlog)
 {
     if (!odysseyCodeUpdateSupported())
     {
@@ -1209,7 +1207,7 @@ errlHndl_t ocmbupd::ody_upd_process_event(Target* const i_ocmb,
 
     bool restart_needed = false;
 
-    const auto errl = ody_upd_process_event(i_ocmb, i_event, i_errlog, restart_needed);
+    auto errl = ody_upd_process_event(i_ocmb, i_event, move(i_errlog), restart_needed);
 
     if (!errl && restart_needed)
     {
@@ -1236,10 +1234,10 @@ errlHndl_t ocmbupd::ody_upd_process_event(Target* const i_ocmb,
  *  This function prepares the inputs to pass to the other overload of
  *  ody_upd_process_event.
  */
-errlHndl_t ocmbupd::ody_upd_process_event(Target* const i_ocmb,
-                                          const ody_upd_event_t i_event,
-                                          errlHndl_t& i_errlog,
-                                          bool& o_restart_needed)
+errlOwner ocmbupd::ody_upd_process_event(Target* const i_ocmb,
+                                         const ody_upd_event_t i_event,
+                                         errlOwner i_errlog,
+                                         bool& o_restart_needed)
 {
     if (!odysseyCodeUpdateSupported())
     {
@@ -1285,16 +1283,16 @@ errlHndl_t ocmbupd::ody_upd_process_event(Target* const i_ocmb,
         break;
     }
 
-    return ody_upd_process_event(i_ocmb, state, i_event, i_errlog, o_restart_needed);
+    return ody_upd_process_event(i_ocmb, state, i_event, move(i_errlog), o_restart_needed);
 }
 
 /** @brief Process an event that concerns all Odyssey OCMBs in the system. This is
  *  a wrapper around ody_upd_process_event.
  */
-errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
-                                              const functional_ocmbs_only_t i_which_ocmbs,
-                                              const perform_reconfig_t i_perform_reconfig_if_needed,
-                                              bool* const o_restart_needed)
+errlOwner ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
+                                             const functional_ocmbs_only_t i_which_ocmbs,
+                                             const perform_reconfig_t i_perform_reconfig_if_needed,
+                                             bool* const o_restart_needed)
 {
     ISTEP_ERROR::IStepError error_accum;
     bool restart_needed = false;
@@ -1326,12 +1324,12 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
               event_to_str(i_event).data(),
               get_huid(ocmb));
 
-        errlHndl_t event_errlog = nullptr; // no error to consider here
+        errlOwner event_errlog = nullptr; // no error to consider here
 
         // Note that all the threads have access to write to
         // restart_needed in parallel; however, since they are doing
         // simple stores (no reads), no synchronization is needed.
-        errlHndl_t fsm_error = ocmbupd::ody_upd_process_event(ocmb, i_event, event_errlog, restart_needed);
+        auto fsm_error = ocmbupd::ody_upd_process_event(ocmb, i_event, move(event_errlog), restart_needed);
 
         if (fsm_error)
         {
@@ -1343,7 +1341,7 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
             SBEIO::UdSPPECodeLevels(ocmb).addToLog(fsm_error);
         }
 
-        return fsm_error;
+        return fsm_error.release();
     });
 
     if (!error_accum.isNull())
@@ -1366,7 +1364,7 @@ errlHndl_t ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
 
     } while (false);
 
-    return error_accum.getErrorHandle();
+    return errlOwner(error_accum.getErrorHandle());
 }
 
 /** @brief Set the Odyssey code update state related to the firmware
@@ -1413,6 +1411,7 @@ void ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
 
     return;
 }
+
 
 namespace ocmbupd
 {
