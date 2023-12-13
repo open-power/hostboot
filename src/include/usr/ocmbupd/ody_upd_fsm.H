@@ -47,10 +47,10 @@ enum ody_upd_event_t : uint32_t
     CHECK_FOR_READY_COMPLETED = 1 << 0,   // istep check_for_ready hwps completed for this OCMB
     UPDATE_OMI_FIRMWARE_REACHED = 1 << 1, // update_omi_firmware reached (and ready to update)
 
-    OCMB_BOOT_ERROR_NO_FFDC = 1 << 2,     // error in check_for_ready boot hwps WITHOUT async ffdc
-    OCMB_BOOT_ERROR_WITH_FFDC = 1 << 3,   // error in check_for_ready boot hwps WITH async ffdc
+    OCMB_BOOT_ERROR_NO_FFDC = 1 << 2,     // error in check_for_ready boot hwps WITHOUT async ffdc (i.e. SBE is halted)
+    OCMB_BOOT_ERROR_WITH_FFDC = 1 << 3,   // error in check_for_ready boot hwps WITH async ffdc (i.e. SBE is responsive)
     OCMB_HWP_FAIL_HASH_FAIL = 1 << 4,     // HWP fail, rc indicates hash fail
-    OCMB_HWP_FAIL_OTHER = 1 << 5,         // HWP fail, any other case
+    OCMB_HWP_FAIL_OTHER = 1 << 5,         // HWP fail, any other case (SBE could be halted or not)
     OTHER_HW_HWP_FAIL = 1 << 6,           // HWP failed but the target wasn't an
                                           // OCMB (there is no error associated with
                                           // this event)
