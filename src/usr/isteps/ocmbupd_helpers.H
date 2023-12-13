@@ -41,12 +41,21 @@
             if (ocmbupd::odysseyCodeUpdateSupported() && TARGETING::UTIL::isOdysseyChip(M_ocmb)) \
             {                                                           \
                 ocmbupd::ody_upd_event_t M_update_event = ocmbupd::OCMB_HWP_FAIL_OTHER; \
-                if(M_errl->getUserData1() == fapi2::RC_UNSUPPORTED_ATTR_LEVEL) \
+                if (M_errl->hasUserdata1(fapi2::RC_UNSUPPORTED_ATTR_LEVEL)) \
                 {                                                       \
                     TRACISTEP(INFO_MRK #ISTEP_NAME ": HWP signaled incompatible "\
-                              "attribute levels for Odyssey 0x%08x.",   \
-                              get_huid(M_ocmb));                        \
+                              "attribute levels for Odyssey 0x%08x, log 0x%08X.", \
+                              get_huid(M_ocmb),                         \
+                              ERRL_GETEID_SAFE(M_errl));                \
                     M_update_event = ocmbupd::ATTRS_INCOMPATIBLE;       \
+                }                                                       \
+                else if (M_errl->hasUserdata1(fapi2::RC_POZ_FILE_HASH_MISMATCH)) \
+                {                                                       \
+                    TRACISTEP(INFO_MRK #ISTEP_NAME ": HWP signaled SecureBoot " \
+                              "fail for Odyssey 0x%08x, log 0x%08x.",   \
+                              get_huid(M_ocmb),                         \
+                              ERRL_GETEID_SAFE(M_errl));                \
+                    M_update_event = ocmbupd::OCMB_HWP_FAIL_HASH_FAIL;  \
                 }                                                       \
                                                                         \
                 if (auto M_upd_errl =                                   \
@@ -64,7 +73,7 @@
                 }                                                       \
             }                                                           \
             else                                                        \
-            { /* @TODO: JIRA PFHB-522 Remove  OCMBFW_HANDLE check when OCMBFW PNOR partition v1 support is removed */ \
+            { /* @TODO: JIRA PFHB-522 Remove OCMBFW_HANDLE check when OCMBFW PNOR partition v1 support is removed */ \
                 TRACISTEP(ERR_MRK"call " #HWP " HWP(): failed on target 0x%08X. " \
                           TRACE_ERR_FMT,                                \
                           get_huid(M_ocmb),                             \
