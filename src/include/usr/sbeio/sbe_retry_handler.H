@@ -66,6 +66,19 @@ public:
     virtual void main_sbe_handler(bool i_sbeHalted = false) = 0;
 
     /**
+     * @brief  This function is the main entry point for all of the
+     *         SBE handler functions.
+     *
+     * @param[in/out]  io_errl     - The error log that caused this event
+     * @param[in]      i_sbeHalted - sbe is halted on purpose, skip error path collection
+     */
+    virtual void main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeHalted = false)
+    {
+        // Call the default implementation that ignores the error log
+        main_sbe_handler(i_sbeHalted);
+    }
+
+    /**
      * @brief Return a bool stating whether or not Hostboot believes
      *        that the SBE is operational at runtime.
      */
@@ -97,7 +110,20 @@ public:
      *         During IPL the dump processing will occur, during HBRT and
      *         MPIPL the hreset processing will occur.
      */
-    void main_sbe_handler(bool i_sbeHalted = false) override;
+    void main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeHalted = false) override;
+
+    /** @brief Forward to the other overload of main_sbe_handler.
+     */
+    void main_sbe_handler(const bool i_sbeHalted = false) override
+    {
+        errlHndl_t errl = nullptr;
+        main_sbe_handler(errl, i_sbeHalted);
+
+        if (errl)
+        {
+            errlCommit(errl, SBEIO_COMP_ID);
+        }
+    }
 
     /**
      * @brief Odyssey implementation not supported at this time.

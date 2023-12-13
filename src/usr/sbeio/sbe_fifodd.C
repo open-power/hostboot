@@ -402,9 +402,9 @@ errlHndl_t SbeFifo::upFifoTimeout(TARGETING::Target * i_target, uint32_t l_data)
         // in the constructor above, this will run *_extract_sbe_rc
         // then, for proc chips, TI the system on fsp-systems. It may
         // collect a dump and/or do an HRESET where applicable.
-        l_SBEobj->main_sbe_handler();
+        l_SBEobj->main_sbe_handler(errl);
 
-    return errl;
+        return errl;
     }
 
 /**
@@ -846,7 +846,7 @@ errlHndl_t SbeFifo::dnFifoTimeout(TARGETING::Target * i_target, uint32_t l_statu
         // in the constructor above, this will run *_extract_sbe_rc
         // then, for proc chips, TI the system on fsp-systems. It may
         // collect a dump and/or do an HRESET where applicable.
-        l_SBEobj->main_sbe_handler();
+        l_SBEobj->main_sbe_handler(l_errl);
 
     return l_errl;
 }

@@ -44,6 +44,9 @@
 
 extern trace_desc_t* g_trac_sbeio;
 
+using namespace TARGETING;
+using namespace ERRORLOG;
+
 namespace SBEIO
 {
 
@@ -55,46 +58,50 @@ GenericSbeRetryHandler::~GenericSbeRetryHandler()
  * OdysseySbeRetryHandler implementation
  */
 
-OdysseySbeRetryHandler::OdysseySbeRetryHandler(TARGETING::Target* const i_ocmb)
+OdysseySbeRetryHandler::OdysseySbeRetryHandler(Target* const i_ocmb)
     : iv_ocmb(i_ocmb)
 {
 }
 
-void OdysseySbeRetryHandler::main_sbe_handler(const bool i_sbeHalted)
+void OdysseySbeRetryHandler::main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeHalted)
 {
     SBE_TRACF(ENTER_MRK"OdysseySbeRetryhandler::main_sbe_handler HUID=0x%X", get_huid(iv_ocmb));
     errlHndl_t l_errl = nullptr;
+
+    auto l_sbe_recovery_in_progress = iv_ocmb->getAttr<ATTR_SBE_RECOVERY_IN_PROGRESS>();
+
+    do
+    {
+
     // Use the SBE_RECOVERY_IN_PROGRESS (a per-target attribute) to prevent any re-entrant callers.
     // If an OCMB target has already entered this function, then we are prohibiting any recursive
     // callers.  During HBRT we are single threaded, so not an issue, however during IPL, in theory,
     // multi-threaded callers *could*  attempt.
-    auto l_sbe_recovery_in_progress = iv_ocmb->getAttr<TARGETING::ATTR_SBE_RECOVERY_IN_PROGRESS>();
     if (!l_sbe_recovery_in_progress)
     {
-        iv_ocmb->setAttr<TARGETING::ATTR_SBE_RECOVERY_IN_PROGRESS>(1);
+        iv_ocmb->setAttr<ATTR_SBE_RECOVERY_IN_PROGRESS>(1);
         SBE_TRACF("OdysseySbeRetryHandler::main_sbe_handler SET RECOVERY IN PROGRESS HUID=0x%X", get_huid(iv_ocmb));
     }
     else
     {
-        /*@ There is no action possible. Gard and Callout the OCMB
-         * @errortype  ERRL_SEV_INFORMATIONAL
-         * @moduleid   SBEIO_ODY_RECOVERY
-         * @reasoncode SBEIO_ODY_RECOVERY_IN_PROGRESS
-         * @userdata1  HUID of Odyssey OCMB
-         * @userdata2  Unused
-         * @devdesc    There is no recovery action on the SBE.
-         * @custdesc   OCMB Error
+        /*@
+         *@errortype  ERRL_SEV_INFORMATIONAL
+         *@moduleid   SBEIO_ODY_RECOVERY
+         *@reasoncode SBEIO_ODY_RECOVERY_IN_PROGRESS
+         *@userdata1  HUID of Odyssey OCMB
+         *@userdata2  Unused
+         *@devdesc    There is no recovery action on the SBE.
+         *@custdesc   OCMB Error
          */
         l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                          SBEIO_ODY_RECOVERY,
                                          SBEIO_ODY_RECOVERY_IN_PROGRESS,
-                                         TARGETING::get_huid(iv_ocmb),
+                                         get_huid(iv_ocmb),
                                          0,
                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         SBE_TRACF("OdysseySbeRetryHandler::main_sbe_handler recovery in progress HUID=0x%X ERRL=0x%X (committing)",
                   get_huid(iv_ocmb), ERRL_GETEID_SAFE(l_errl));
-        errlCommit(l_errl, SBEIO_COMP_ID); // Commit since the caller gets void return
-        goto ERROR_EXIT;
+        break;
     }
 
     // First determine if any errors are resident in the Odyssey SBE, see ExtractRC for its filtering mechanisms
@@ -102,8 +109,11 @@ void OdysseySbeRetryHandler::main_sbe_handler(const bool i_sbeHalted)
     l_errl = ExtractRC();
     if (l_errl)
     {
-        SBE_TRACF("OdysseySbeRetryHandler:main_sbe_handler ody_extract_sbe_rc returned an error 0x%X (committing)", ERRL_GETEID_SAFE(l_errl));
-        errlCommit(l_errl, SBEIO_COMP_ID);
+        SBE_TRACF("OdysseySbeRetryHandler: ody_extract_sbe_rc returned "
+                  "the error 0x%08x",
+                  ERRL_GETEID_SAFE(l_errl));
+
+        break;
     }
     else
     {
@@ -112,23 +122,26 @@ void OdysseySbeRetryHandler::main_sbe_handler(const bool i_sbeHalted)
 
     {
         bool isRuntimeOrMpIpl = false;
-        if(TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>())
+
+#if defined (__HOSTBOOT_RUNTIME)
+        isRuntimeOrMpIpl = true;
+#else
+        if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>())
         {
             isRuntimeOrMpIpl = true;
         }
-#if defined (__HOSTBOOT_RUNTIME)
-        isRuntimeOrMpIpl = true;
 #endif
+
         if (isRuntimeOrMpIpl)
         {
-            // At runtime or MPIPL, the caller enters main_sbe_handler to properly hreset the Odyssey SBE.
-            // During runtime or MPIPL, the only valid option is for the hreset recovery
+            // During runtime or MPIPL we perform an HRESET, because
+            // the SBE can't be restarted after it's dumped, and we
+            // don't want to reboot the entire system here.
             l_errl = hreset();
             if (l_errl)
             {
                 SBE_TRACF("OdysseySbeRetryHandler:main_sbe_handler hreset returned an error 0x%X", ERRL_GETEID_SAFE(l_errl));
-                // @TODO PFHB-542 BAD PATH will refine
-                errlCommit(l_errl, SBEIO_COMP_ID);
+                break;
             }
         }
         else
@@ -137,14 +150,19 @@ void OdysseySbeRetryHandler::main_sbe_handler(const bool i_sbeHalted)
             if (l_errl)
             {
                 SBE_TRACF("OdysseySbeRetryHandler:main_sbe_handler dump returned an error 0x%X", ERRL_GETEID_SAFE(l_errl));
-                // @TODO JIRA: PFHB-290 Dump the Odyssey (work will be addressed during story work)
-                errlCommit(l_errl, SBEIO_COMP_ID);
+                break;
             }
         }
     }
 
-    iv_ocmb->setAttr<TARGETING::ATTR_SBE_RECOVERY_IN_PROGRESS>(0);
-ERROR_EXIT: // Skip the decrement since we were already in progress
+    iv_ocmb->setAttr<ATTR_SBE_RECOVERY_IN_PROGRESS>(0);
+
+    } while (false);
+
+    aggregate(io_errl, l_errl, true /* update plid */);
+
+    l_sbe_recovery_in_progress = iv_ocmb->getAttr<ATTR_SBE_RECOVERY_IN_PROGRESS>();
+
     SBE_TRACF(EXIT_MRK"OdysseySbeRetryHandler::main_sbe_handler HUID=0x%X l_sbe_recovery_in_progress=0x%X",
               get_huid(iv_ocmb), l_sbe_recovery_in_progress);
 }
@@ -155,7 +173,7 @@ errlHndl_t OdysseySbeRetryHandler::ExtractRC()
     const bool isIplTime = false;
 #else
     const bool isIplTime
-        = !TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>();
+        = !UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>();
 #endif
 
     SBE_TRACF(ENTER_MRK"OdysseySbeRetryhandler::ExtractRC HUID=0x%X", get_huid(iv_ocmb));
@@ -230,8 +248,8 @@ errlHndl_t OdysseySbeRetryHandler::hreset()
               get_huid(iv_ocmb));
 
     {
-        uint32_t l_odySensorPollingPeriod = iv_ocmb->getAttr<TARGETING::ATTR_ODY_SENSOR_POLLING_PERIOD_MS_INIT>();
-        uint8_t  l_odyDqsTrackingPeriod = iv_ocmb->getAttr<TARGETING::ATTR_ODY_DQS_TRACKING_PERIOD_INIT>();
+        uint32_t l_odySensorPollingPeriod = iv_ocmb->getAttr<ATTR_ODY_SENSOR_POLLING_PERIOD_MS_INIT>();
+        uint8_t  l_odyDqsTrackingPeriod = iv_ocmb->getAttr<ATTR_ODY_DQS_TRACKING_PERIOD_INIT>();
         // enable thermal sensor polling and DQA tracking, chipop AC-02
         l_errl = SBEIO::sendExecHWPRequestForThermalSensorPolling(iv_ocmb,
                                                                   l_odySensorPollingPeriod,
