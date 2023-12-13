@@ -151,9 +151,23 @@ ERROR_EXIT: // Skip the decrement since we were already in progress
 
 errlHndl_t OdysseySbeRetryHandler::ExtractRC()
 {
+#ifdef __HOSTBOOT_RUNTIME
+    const bool isIplTime = false;
+#else
+    const bool isIplTime
+        = !TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>();
+#endif
+
     SBE_TRACF(ENTER_MRK"OdysseySbeRetryhandler::ExtractRC HUID=0x%X", get_huid(iv_ocmb));
     errlHndl_t l_errl = nullptr;
-    FAPI_INVOKE_HWP(l_errl, ody_extract_sbe_rc, { iv_ocmb });
+    FAPI_INVOKE_HWP(l_errl,
+                    ody_extract_sbe_rc,
+                    { iv_ocmb },
+                    isIplTime /* set SDB at IPL time so we can do
+                                 scoms over I2CR with security on
+                                 (this will halt the SPPE but we're
+                                 going to reboot anyway) */,
+                    false /* prefer CFAM accesses */);
 
     if (l_errl && l_errl->getUserData1() == fapi2::RC_SPPE_RUNNING)
     { // if the SPPE is running, the error log doesn't contain anything useful.
