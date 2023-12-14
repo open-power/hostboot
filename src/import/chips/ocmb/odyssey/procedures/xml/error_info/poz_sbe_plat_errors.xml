@@ -23,8 +23,9 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- EKB-Mirror-To: hostboot                                                -->
-<!-- EKB-Mirror-To: hw/ppe                                                  -->
 <hwpErrors>
+  <format>poz</format>
+<!-- ******************************************************************** -->
 <hwpError>
     <sbeError/>
     <platScomFail/>
