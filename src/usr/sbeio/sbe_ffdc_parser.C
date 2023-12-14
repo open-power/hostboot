@@ -361,7 +361,8 @@ std::vector<errlHndl_t> SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle
             FAPI_SET_SBE_ERROR(fapiRC,
                                package->rc,
                                ffdcBuf,
-                               i_target->getAttr<TARGETING::ATTR_FAPI_POS>());
+                               i_target->getAttr<TARGETING::ATTR_FAPI_POS>(),
+                               convertTargetingTypeToFapi2(i_target->getAttr<TARGETING::ATTR_TYPE>()));
 
             slidErrl = rcToErrl(fapiRC,
                                 package->severity,
