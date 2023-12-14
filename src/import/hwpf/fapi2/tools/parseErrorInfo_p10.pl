@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -662,6 +662,16 @@ foreach my $argnum ( 0 .. $#ARGV )
         print SBFILE "#define FAPI_SET_SBE_ERROR_IMPL(RC, ERRVAL, FFDC_BUFFER, SBE_INSTANCE, CHIP_TYPE)\\\n";
         print SBFILE "{\\\n";
         print SBFILE "bool invalid_data = false;\\\n";
+        print SBFILE "fapi2::sbeFfdc_t* HWPLOCALFFDC_BUFFER;\\\n";
+        print SBFILE "if(CHIP_TYPE == TARGET_TYPE_OCMB_CHIP)\\\n";
+        print SBFILE "{\\\n";
+        print SBFILE "    uint32_t *ffdcblob = reinterpret_cast<uint32_t * >(FFDC_BUFFER);\\\n";
+        print SBFILE "    HWPLOCALFFDC_BUFFER = reinterpret_cast<sbeFfdc_t * >(ffdcblob + 2);\\\n";
+        print SBFILE "}\\\n";
+        print SBFILE "else\\\n";
+        print SBFILE "{\\\n";
+        print SBFILE "    HWPLOCALFFDC_BUFFER = reinterpret_cast<sbeFfdc_t * >(FFDC_BUFFER);\\\n";
+        print SBFILE "}\\\n";
         print SBFILE "switch (ERRVAL)\\\n";
         print SBFILE "{\\\n";
 
@@ -1799,7 +1809,7 @@ foreach my $argnum ( 0 .. $#ARGV )
             print SBFILE "    case fapi2::$err->{rc}: \\\n";
             print SBFILE "    { \\\n";
             print SBFILE "       invalid_data = setSbeError(hwpRcToType<fapi2::$err->{rc}>(),\\\n";
-            print SBFILE "                      RC,FFDC_BUFFER,SBE_INSTANCE, CHIP_TYPE);\\\n";
+            print SBFILE "                      RC,HWPLOCALFFDC_BUFFER,SBE_INSTANCE, CHIP_TYPE);\\\n";
 
             print SBFILE "       break;\\\n    }\\\n";
 
