@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@
             if (ocmbupd::odysseyCodeUpdateSupported() && TARGETING::UTIL::isOdysseyChip(M_ocmb)) \
             {                                                           \
                 ocmbupd::ody_upd_event_t M_update_event = ocmbupd::OCMB_HWP_FAIL_OTHER; \
-                if (M_errl->hasUserdata1(fapi2::RC_UNSUPPORTED_ATTR_LEVEL)) \
+                if (M_errl->hasUserData1(fapi2::RC_UNSUPPORTED_ATTR_LEVEL)) \
                 {                                                       \
                     TRACISTEP(INFO_MRK #ISTEP_NAME ": HWP signaled incompatible "\
                               "attribute levels for Odyssey 0x%08x, log 0x%08X.", \
@@ -49,7 +49,7 @@
                               ERRL_GETEID_SAFE(M_errl));                \
                     M_update_event = ocmbupd::ATTRS_INCOMPATIBLE;       \
                 }                                                       \
-                else if (M_errl->hasUserdata1(fapi2::RC_POZ_FILE_HASH_MISMATCH)) \
+                else if (M_errl->hasUserData1(fapi2::RC_POZ_FILE_HASH_MISMATCH)) \
                 {                                                       \
                     TRACISTEP(INFO_MRK #ISTEP_NAME ": HWP signaled SecureBoot " \
                               "fail for Odyssey 0x%08x, log 0x%08x.",   \
@@ -69,7 +69,7 @@
                               get_huid(M_ocmb),                         \
                               TRACE_ERR_ARGS(M_upd_errl));              \
                                                                         \
-                    captureError(M_upd_errl, M_steperr, HWPF_COMP_ID, M_ocmb); \
+                    captureError(move(M_upd_errl), M_steperr, HWPF_COMP_ID, M_ocmb); \
                 }                                                       \
             }                                                           \
             else                                                        \
@@ -79,7 +79,7 @@
                           get_huid(M_ocmb),                             \
                           TRACE_ERR_ARGS(M_errl));                      \
                                                                         \
-                captureError(M_errl, M_steperr, HWPF_COMP_ID, M_ocmb);  \
+                captureError(move(M_errl), M_steperr, HWPF_COMP_ID, M_ocmb); \
             }                                                           \
         }                                                               \
     })

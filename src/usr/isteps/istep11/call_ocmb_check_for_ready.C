@@ -469,7 +469,7 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                 errlOwner no_error = nullptr; // no error for this call
                 l_ocmb_errl = ody_upd_process_event(i_ocmb,
                                                     CHECK_FOR_READY_COMPLETED,
-                                                    no_error,
+                                                    move(no_error),
                                                     proc_reboot_odysseys);
 
                 if (l_ocmb_errl)

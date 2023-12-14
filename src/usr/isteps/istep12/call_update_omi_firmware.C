@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,7 +148,7 @@ void* call_update_omi_firmware (void *io_pArgs)
             TRACISTEP(ERR_MRK"call_update_omi_firmware: ody_upd_all_process_event(UPDATE_OMI_FIRMWARE_REACHED) failed: "
                       TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(errl));
-            captureError(errl, l_StepError, HWPF_COMP_ID);
+            captureError(move(errl), l_StepError, HWPF_COMP_ID);
         }
     }
 

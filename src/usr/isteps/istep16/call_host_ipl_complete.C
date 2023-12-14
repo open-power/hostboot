@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -221,7 +221,7 @@ void* call_host_ipl_complete(void* const io_pArgs)
         using namespace ocmbupd;
         l_err = ody_upd_all_process_event(IPL_COMPLETE,
                                           EVENT_ON_ALL_OCMBS,
-                                          REQUEST_RECONFIG_IF_NEEDED);
+                                          REQUEST_RECONFIG_IF_NEEDED).release();
 
         if (l_err)
         {

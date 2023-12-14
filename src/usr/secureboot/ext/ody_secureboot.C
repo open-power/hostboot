@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -392,13 +392,15 @@ EXIT:
     {
         // Tell the Odyssey FSM that there's been a secureboot failure so that
         // it can perform the right actions.
-        errlHndl_t l_fsmErrl = ody_upd_process_event(i_ocmb,
-                                                     MEAS_REGS_MISMATCH,
-                                                     l_errl);
+        auto l_fsmErrl = ody_upd_process_event(i_ocmb,
+                                               MEAS_REGS_MISMATCH,
+                                               errlOwner(l_errl));
+        l_errl = nullptr;
+
         if(l_fsmErrl)
         {
             SB_ERR("odySecurebootVerification: Odyssey FSM returned an error");
-            l_errl = l_fsmErrl;
+            l_errl = l_fsmErrl.release();
         }
     }
 
