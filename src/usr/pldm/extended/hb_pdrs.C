@@ -755,6 +755,33 @@ void addSbeManagementPdrs(PdrManager& io_pdrman)
                                     PdrManager::STATE_QUERY_HANDLER_ATTRIBUTE_GETTER,
                                     ATTR_CURRENT_SBE_HRESET_STATUS);
     }
+
+    TargetHandleList dimms;
+    TARGETING::getChildAffinityTargetsByState(dimms, UTIL::assertGetToplevelTarget(), CLASS_NA, TYPE_DIMM, UTIL_FILTER_PRESENT);
+
+    for (const auto dimm : dimms)
+    {
+        const auto target_rsid = getTargetFruRecordSetID(dimm);
+        pldm_entity entity_info = { };
+        const bool entity_found = io_pdrman.findEntityByFruRecordSetId(target_rsid, entity_info);
+
+        if (!entity_found)
+        {
+            continue;
+        }
+
+        if (entity_info.entity_type)
+        { // Only one of the DIMM targets per OCMB are assigned entity
+          // IDs; only create effecters for those.
+            io_pdrman.addStateEffecterPdr(dimm,
+                                          entity_info,
+                                          PLDM_OEM_IBM_SBE_MAINTENANCE_STATE,
+                                          (enum_bit(SBE_DUMP_COMPLETED)
+                                           | enum_bit(SBE_RETRY_REQUIRED)),
+                                          // We ONLY create a dynamic handler for this type of effecter
+                                          PdrManager::STATE_QUERY_HANDLER_INVALID);
+        }
+    }
 }
 
 void addBootProgressPdrs(PdrManager& io_pdrman, const pldm_entity& i_backplane_entity)
