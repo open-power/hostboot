@@ -693,8 +693,11 @@ class errludP_prdf:
                     wiringType = headerData & 0xFF
                     # autopep8: on
 
-                    d[cd]["Dram Repairs Data"] = OrderedDict()
-                    d[cd]["Dram Repairs Data"]["Port"] = port
+                    if "Dram Repairs Data" not in d[cd]:
+                        d[cd]["Dram Repairs Data"] = OrderedDict()
+
+                    ps = "Port{}".format(port)
+                    d[cd]["Dram Repairs Data"][ps] = OrderedDict()
 
                     for y in range(rankCount):
                         # 5 bytes (40 bits) per entry:
@@ -710,21 +713,21 @@ class errludP_prdf:
                         spare1, i = intConcat(buf, i, i + 1)
                         parsedLength += 5
 
-                        d[cd]["Dram Repairs Data"][y] = OrderedDict()
-                        d[cd]["Dram Repairs Data"][y]["Rank"] = rank
+                        d[cd]["Dram Repairs Data"][ps][y] = OrderedDict()
+                        d[cd]["Dram Repairs Data"][ps][y]["Rank"] = rank
 
                         cmStr = "--" if chipMark >= 72 else chipMark
-                        d[cd]["Dram Repairs Data"][y]["Chip Mark"] = cmStr
+                        d[cd]["Dram Repairs Data"][ps][y]["Chip Mark"] = cmStr
 
                         smStr = "--" if symbolMark >= 72 else symbolMark
-                        d[cd]["Dram Repairs Data"][y]["Symbol Mark"] = smStr
+                        d[cd]["Dram Repairs Data"][ps][y]["Symbol Mark"] = smStr
 
                         if 0 != isSpareDram:
                             sp0Str = "--" if spare0 >= 72 else spare0
-                            d[cd]["Dram Repairs Data"][y]["Spare0"] = sp0Str
+                            d[cd]["Dram Repairs Data"][ps][y]["Spare0"] = sp0Str
 
                             sp1Str = "--" if spare1 >= 72 else spare1
-                            d[cd]["Dram Repairs Data"][y]["Spare1"] = sp1Str
+                            d[cd]["Dram Repairs Data"][ps][y]["Spare1"] = sp1Str
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
@@ -741,7 +744,8 @@ class errludP_prdf:
                     # 10-bytes: bad dq bitmap
                     entries = int(dataLength / 12)
 
-                    d[cd]["Dram Repairs VPD"] = OrderedDict()
+                    if "Dram Repairs VPD" not in d[cd]:
+                        d[cd]["Dram Repairs VPD"] = OrderedDict()
 
                     for y in range(entries):
                         rank, i = intConcat(buf, i, i + 1)
@@ -749,13 +753,16 @@ class errludP_prdf:
                         bitmap, i = intConcat(buf, i, i + 10)
                         parsedLength += 12
 
-                        d[cd]["Dram Repairs VPD"][y] = OrderedDict()
-                        d[cd]["Dram Repairs VPD"][y]["Rank"] = rank
-                        d[cd]["Dram Repairs VPD"][y]["Port"] = port
+                        ps = "Port{}".format(port)
+                        if ps not in d[cd]["Dram Repairs VPD"]:
+                            d[cd]["Dram Repairs VPD"][ps] = OrderedDict()
+
+                        d[cd]["Dram Repairs VPD"][ps][y] = OrderedDict()
+                        d[cd]["Dram Repairs VPD"][ps][y]["Rank"] = rank
 
                         # Pad the bitmap with 0s to 20 hex characters (80 bits)
                         formatMap = "0x{0:0{1}x}".format(bitmap, 20)
-                        d[cd]["Dram Repairs VPD"][y]["Bitmap"] = formatMap
+                        d[cd]["Dram Repairs VPD"][ps][y]["Bitmap"] = formatMap
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength
@@ -804,10 +811,13 @@ class errludP_prdf:
                         repair, i = hexConcat(buf, i, i + 4)
                         parsedLength += 6
 
-                        d[cd]["Row Repair VPD"][y] = OrderedDict()
-                        d[cd]["Row Repair VPD"][y]["Rank"] = rank
-                        d[cd]["Row Repair VPD"][y]["Port"] = port
-                        d[cd]["Row Repair VPD"][y]["Repair"] = repair
+                        ps = "Port{}".format(port)
+                        if ps not in d[cd]["Row Repair VPD"]:
+                            d[cd]["Row Repair VPD"][ps] = OrderedDict()
+
+                        d[cd]["Row Repair VPD"][ps][y] = OrderedDict()
+                        d[cd]["Row Repair VPD"][ps][y]["Rank"] = rank
+                        d[cd]["Row Repair VPD"][ps][y]["Repair"] = repair
 
                     # Collect any extra junk data at the end just in case
                     junkLength = dataLength - parsedLength

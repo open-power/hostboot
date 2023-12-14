@@ -294,26 +294,23 @@ class TestUserDataParser(unittest.TestCase):
         self.assertEqual(jsonOut[cd][td]["0"]["TD Type"], "DSD")
 
         drd = "Dram Repairs Data"
-        self.assertEqual(jsonOut[cd][drd]["Port"], 1)
-        self.assertEqual(jsonOut[cd][drd]["0"]["Rank"], 0)
-        self.assertEqual(jsonOut[cd][drd]["0"]["Chip Mark"], 68)
-        self.assertEqual(jsonOut[cd][drd]["0"]["Symbol Mark"], "--")
-        self.assertEqual(jsonOut[cd][drd]["0"]["Spare0"], "--")
-        self.assertEqual(jsonOut[cd][drd]["0"]["Spare1"], 68)
-        self.assertEqual(jsonOut[cd][drd]["1"]["Rank"], 1)
-        self.assertEqual(jsonOut[cd][drd]["1"]["Chip Mark"], 68)
-        self.assertEqual(jsonOut[cd][drd]["1"]["Symbol Mark"], "--")
-        self.assertEqual(jsonOut[cd][drd]["1"]["Spare0"], "--")
-        self.assertEqual(jsonOut[cd][drd]["1"]["Spare1"], 68)
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["0"]["Rank"], 0)
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["0"]["Chip Mark"], 68)
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["0"]["Symbol Mark"], "--")
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["0"]["Spare0"], "--")
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["0"]["Spare1"], 68)
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["1"]["Rank"], 1)
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["1"]["Chip Mark"], 68)
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["1"]["Symbol Mark"], "--")
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["1"]["Spare0"], "--")
+        self.assertEqual(jsonOut[cd][drd]["Port1"]["1"]["Spare1"], 68)
 
         drv = "Dram Repairs VPD"
         bitmap = "0xf000000000ff00000000"
-        self.assertEqual(jsonOut[cd][drv]["0"]["Rank"], 0)
-        self.assertEqual(jsonOut[cd][drv]["0"]["Port"], 0)
-        self.assertEqual(jsonOut[cd][drv]["0"]["Bitmap"], bitmap)
-        self.assertEqual(jsonOut[cd][drv]["1"]["Rank"], 1)
-        self.assertEqual(jsonOut[cd][drv]["1"]["Port"], 0)
-        self.assertEqual(jsonOut[cd][drv]["1"]["Bitmap"], bitmap)
+        self.assertEqual(jsonOut[cd][drv]["Port0"]["0"]["Rank"], 0)
+        self.assertEqual(jsonOut[cd][drv]["Port0"]["0"]["Bitmap"], bitmap)
+        self.assertEqual(jsonOut[cd][drv]["Port0"]["1"]["Rank"], 1)
+        self.assertEqual(jsonOut[cd][drv]["Port0"]["1"]["Bitmap"], bitmap)
 
         cet = "CE Table"
         self.assertEqual(jsonOut[cd][cet]["0"]["Count"], 1)
@@ -469,9 +466,8 @@ class TestUserDataParser(unittest.TestCase):
 
         cd = "Capture Data"
         rrv = "Row Repair VPD"
-        self.assertEqual(jsonOut[cd][rrv]["0"]["Rank"], 1)
-        self.assertEqual(jsonOut[cd][rrv]["0"]["Port"], 0)
-        self.assertEqual(jsonOut[cd][rrv]["0"]["Repair"], "0x08dbffff")
+        self.assertEqual(jsonOut[cd][rrv]["Port0"]["0"]["Rank"], 1)
+        self.assertEqual(jsonOut[cd][rrv]["Port0"]["0"]["Repair"], "0x08dbffff")
 
     def testCaptureDataParserIueCounts(self):
         testData = bytearray.fromhex(
