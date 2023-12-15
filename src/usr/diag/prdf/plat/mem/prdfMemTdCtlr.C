@@ -220,12 +220,21 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
                 // At this point, there are new TD procedures in the queue so we
                 // want to mask certain fetch attentions to avoid the complication
                 // of handling the attentions during the TD procedures.
-                o_rc = maskEccAttns(addr.getPort());
+                o_rc = maskEccAttns(0);
                 if ( SUCCESS != o_rc )
                 {
-                    PRDF_ERR(PRDF_FUNC "maskEccAttns(%x) failed",
-                             addr.getPort());
+                    PRDF_ERR(PRDF_FUNC "maskEccAttns(0) failed");
                     break;
+                }
+
+                if (isOdysseyOcmb(iv_chip->getTrgt()))
+                {
+                    o_rc = maskEccAttns(1);
+                    if ( SUCCESS != o_rc )
+                    {
+                        PRDF_ERR(PRDF_FUNC "maskEccAttns(1) failed");
+                        break;
+                    }
                 }
             }
 
@@ -453,11 +462,21 @@ uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc,
         // At this point, there are new TD procedures in the queue so we
         // want to mask certain fetch attentions to avoid the complication
         // of handling the attentions during the TD procedures.
-        o_rc = maskEccAttns(addr.getPort());
+        o_rc = maskEccAttns(0);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "maskEccAttns(%x) failed", addr.getPort() );
+            PRDF_ERR( PRDF_FUNC "maskEccAttns(0) failed" );
             break;
+        }
+
+        if (isOdysseyOcmb(iv_chip->getTrgt()))
+        {
+            o_rc = maskEccAttns(1);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "maskEccAttns(1) failed" );
+                break;
+            }
         }
 
         #endif

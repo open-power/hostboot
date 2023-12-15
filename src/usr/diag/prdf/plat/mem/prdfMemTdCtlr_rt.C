@@ -785,11 +785,21 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
             // At this point, there are new TD procedures in the queue so we
             // want to mask certain fetch attentions to avoid the complication
             // of handling the attentions during the TD procedures.
-            o_rc = maskEccAttns(addr.getPort());
+            o_rc = maskEccAttns(0);
             if (SUCCESS != o_rc)
             {
-                PRDF_ERR(PRDF_FUNC "maskEccAttns(%x) failed", addr.getPort());
+                PRDF_ERR(PRDF_FUNC "maskEccAttns(0) failed");
                 break;
+            }
+
+            if (isOdysseyOcmb(iv_chip->getTrgt()))
+            {
+                o_rc = maskEccAttns(1);
+                if (SUCCESS != o_rc)
+                {
+                    PRDF_ERR(PRDF_FUNC "maskEccAttns(1) failed");
+                    break;
+                }
             }
         }
 
@@ -859,10 +869,19 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
 
         // Unmask the ECC attentions that were explicitly masked during the
         // TD procedure.
-        o_rc = unmaskEccAttns(i_port);
+        o_rc = unmaskEccAttns(0);
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "unmaskEccAttns(%x) failed", i_port );
+            PRDF_ERR( PRDF_FUNC "unmaskEccAttns(0) failed" );
+        }
+
+        if (isOdysseyOcmb(iv_chip->getTrgt()))
+        {
+            o_rc = unmaskEccAttns(1);
+            if ( SUCCESS != o_rc )
+            {
+                PRDF_ERR( PRDF_FUNC "unmaskEccAttns(1) failed" );
+            }
         }
 
         // Hardware Force Mirror (HWFM) workaround: HWFM needs to be cleared
