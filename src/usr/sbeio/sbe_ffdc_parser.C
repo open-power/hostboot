@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -293,13 +293,15 @@ std::vector<errlHndl_t> SbeFFDCParser::generateSbeErrors(const uint8_t i_modId,
     return sbeErrors;
 }
 
-std::vector<errlHndl_t> SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
+errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                                                          const uint8_t i_modId,
                                                          const uint16_t i_reasonCode,
                                                          const uint64_t i_userdata1,
                                                          const uint64_t i_userdata2)
 {
-    // The SBE could have multiple errors it wants to create for context.
+    // The SBE could have multiple errors it wants to create for context. During the process of creating the logs
+    // use a vector to store them. Later, aggregate all the logs together since one needs to be the main log and
+    // we don't want to create an unnecessary log to be the main log.
     std::vector<errlHndl_t> sbeErrors;
     errlHndl_t slidErrl = nullptr;
 
@@ -432,30 +434,35 @@ std::vector<errlHndl_t> SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle
 
             slidErrl->addProcedureCallout(HWAS::EPUB_PRC_SBE_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
+
+            // @TODO PFHB-551 Stop deleteing when SBE stops sending RC=0 logs back on success. It's causing CI fails for
+            //                us.
+            SBE_TRACF(ERR_MRK"ERROR: SBE sent RC=0. This is a code bug on their part, deleting ERRL %.8x",
+                      ERRL_GETEID_SAFE(slidErrl));
+            delete slidErrl;
+            slidErrl = nullptr;
+
         }
 
-        // If FFDC schema is known and a processing routine is defined then perform the processing.
-        // For scom PIB errors, addFruCallouts is invoked. Only processing known FFDC schemas protects us
-        // from trying to process FFDC formats we do not anticipate. For example, the SBE can send user and
-        // attribute FFDC information after the Scom Error FFDC. We do not want to process that type of data here.
-        // Ignore the return value, in this context it doesn't do anything for the logic of this function.
-        FfdcParsedPackage::doDefaultProcessing(*package,
-                                                     i_target,
-                                                     slidErrl);
-
-
+        if (slidErrl != nullptr)
+        {
+            // If FFDC schema is known and a processing routine is defined then perform the processing.
+            // For scom PIB errors, addFruCallouts is invoked. Only processing known FFDC schemas protects us
+            // from trying to process FFDC formats we do not anticipate. For example, the SBE can send user and
+            // attribute FFDC information after the Scom Error FFDC. We do not want to process that type of data here.
+            // Ignore the return value, in this context it doesn't do anything for the logic of this function.
+            FfdcParsedPackage::doDefaultProcessing(*package,
+                                                   i_target,
+                                                   slidErrl);
+        }
     }
 
-    // Make sure the last error makes it into the list
-    if (slidErrl != nullptr)
-    {
-        // Add existing error to the list of return logs
-        slidErrl->collectTrace(SBEIO_COMP_NAME);
-        sbeErrors.push_back(slidErrl);
-    }
+    // Aggregate all the errors together. There isn't any one error log that ought to be the main one so it doesn't
+    // matter which is returned as the main log.
+    ERRORLOG::aggregate(slidErrl, sbeErrors);
 
-    // Return list of all logs made to caller to deal with (add callouts or whatever)
-    return sbeErrors;
+    // Return aggregated list of all logs made to caller to deal with (add callouts or whatever)
+    return slidErrl;
 }
 
 /*

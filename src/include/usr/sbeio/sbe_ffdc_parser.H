@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -160,11 +160,22 @@ class SbeFFDCParser
                 const uint64_t i_userdata1,
                 const uint64_t i_userdata2);
 
-        std::vector<errlHndl_t> generateSbeErrors(TARGETING::TargetHandle_t i_target,
-                const uint8_t i_modId,
-                const uint16_t i_reasonCode,
-                const uint64_t i_userdata1,
-                const uint64_t i_userdata2);
+        /* @brief Aggregates all the SBE FFDC packages stored in this object into hardware procedure error logs and
+         *        platform error logs depending on the contents of the FFDC packages.
+         *
+         * @param[in] i_target     The OCMB/Proc the SBE FFDC data originated from.
+         * @param[in] i_modId      The module id to attach to any platform error logs, if existing.
+         * @param[in] i_reasonCode The reason code to attach to any platform error logs, if existing.
+         * @param[in] i_userdata1  The userdata1 to attach to any platform error logs, if existing.
+         * @param[in] i_userdata2  The userdata2 to attach to any platform error logs, if existing.
+         *
+         * @return errlHndl_t An error log or nullptr depending on the contents of the FFDC packages.
+         */
+        errlHndl_t generateSbeErrors(TARGETING::TargetHandle_t i_target,
+                                     uint8_t i_modId,
+                                     uint16_t i_reasonCode,
+                                     uint64_t i_userdata1,
+                                     uint64_t i_userdata2);
 
     private:
         /**

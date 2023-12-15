@@ -637,6 +637,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
              *
              * @devdesc  Status header does not start with magic number or
              *           non-zero primary or secondary status
+             * @custdesc An internal firmware error occurred.
              */
 
             errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
@@ -665,23 +666,43 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
         }
 
         // Only parse FFDC from the fifo buffer if the message contains FFDC and this is not a get FFDC chip-op request,
-        // unless the chip-op request failed.
+        // unless the chip-op request failed. This way, the caller can distinguish between the getFFDC chip-op request
+        // failing and it returning the expected data.
         if ( l_fifoBuffer.msgContainsFFDC() && (!l_getSbeFfdcReq || errl))
         {
             SbeFFDCParser l_ffdc_parser;
             l_ffdc_parser.parseFFDCData(const_cast<void*>(l_fifoBuffer.getFFDCPtr()));
 
-            std::vector<errlHndl_t> sbeErrors = l_ffdc_parser.generateSbeErrors(i_target,
-                                                                                SBEIO_FIFO,
-                                                                                SBEIO_FIFO_RESPONSE_ERROR,
-                                                                                0,
-                                                                                0);
-            // Commit any returned logs and return the chip-op failure log
-            // @TODO PFHB-551 Do not commit these here. Instead aggregate/return these logs along with the chip-op.
-            for (auto error : sbeErrors)
+            /*@
+             * @errortype
+             * @moduleid     SBEIO_FIFO
+             * @reasoncode   SBEIO_FIFO_PLATFORM_ERROR
+             * @userdata1[00:31]  HUID of SBE which FFDC originates from
+             * @userdata1[32:63]  FIFO command class and command
+             * @userdata2[00:15]  <unused>
+             * @userdata2[16:31]  Should be magic value 0xC0DE
+             * @userdata2[32:47]  Primary Status
+             * @userdata2[48:63]  Secondary Status
+             *
+             * @devdesc  An SBE returned FFDC as part of a FIFO message response.
+             * @custdesc An internal firmware error occurred.
+             */
+            errlHndl_t sbeErrors = l_ffdc_parser.generateSbeErrors(i_target,
+                                                                   SBEIO_FIFO,
+                                                                   SBEIO_FIFO_PLATFORM_ERROR,
+                                                                   SrcUserData(
+                                                                     bits{0,31},TARGETING::get_huid(i_target),
+                                                                     bits{32,63},i_pFifoRequest[1]),
+                                                                   SrcUserData(
+                                                                     bits{0,15},0,
+                                                                     bits{16,31},l_pStatusHeader->magic,
+                                                                     bits{32,47},l_pStatusHeader->primaryStatus,
+                                                                     bits{48,63},l_pStatusHeader->secondaryStatus));
+            if (uint32_t plid = ERRL_GETPLID_SAFE(errl))
             {
-                ERRORLOG::errlCommit(error, SBEIO_COMP_ID);
+                sbeErrors->plid(plid);
             }
+            ERRORLOG::aggregate(errl, sbeErrors);
         }
     }
     while (0);
