@@ -38,8 +38,9 @@
 #include <lib/ecc/ecc_traits_odyssey.H>
 #include <lib/shared/ody_consts.H>
 #include <lib/ccs/ody_row_repair.H>
-
-#include <generic/memory/lib/dimm/mrs_load.H>
+#ifndef __PPE__
+    #include <generic/memory/lib/dimm/mrs_load.H>
+#endif
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
