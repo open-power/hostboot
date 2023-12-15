@@ -85,12 +85,14 @@ PSPD_BUILD_SCRIPT := ${BUILDPNOR}/buildSPDImages.pl
 # a pre-build one is available in the hb prime cache.
 BUILD_OCMBFW_IMAGE := 1
 ifdef HB_FAST_PRIME
+ifndef HB_FORCE_REBUILD_ODY
 	SBE_CACHE_DIR := ${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/${SBE_SUBREPO_TOP_COMMIT}
 	SBE_CACHE_EXISTS := $(shell ls ${SBE_CACHE_DIR})
 	# The cache doesn't exist, we will need to build OCMBFW partition
 	ifneq ($(SBE_CACHE_EXISTS),)
 		BUILD_OCMBFW_IMAGE := 0
 	endif
+endif
 endif
 
 SBE_SIGN_SCRIPT := ${PPE_DIR}/src/tools/scripts/signSbeImage
@@ -101,10 +103,12 @@ SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
 PPE_CACHE_DIR := ${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}
 PPE_CACHE_EXISTS := $(shell ls ${PPE_CACHE_DIR})
 ifdef HB_FAST_PRIME
+ifndef HB_FORCE_REBUILD_SBE
 ifneq (${PPE_CACHE_EXISTS},)
 	SBE_SIGN_SCRIPT := ${PPE_CACHE_DIR}/signSbeImage
 	SBE_TOOL        := ${PPE_CACHE_DIR}/ipl_image_tool
 	SBE_SEEPROM_IMAGE_DD1 := ${PPE_CACHE_DIR}/sbe_seeprom_DD1.bin
+endif
 endif
 endif
 

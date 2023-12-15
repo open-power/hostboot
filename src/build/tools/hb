@@ -549,7 +549,8 @@ hb_startsimics()
 
         PPE_SUBREPO_TOP_COMMIT=$(git submodule status src/build/tools/extern/ppe | awk '{print $1}' | sed 's/^-//')
         PPE_CACHE_DIR=${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}
-        if [[ "$HB_FAST_PRIME" ]] && [[ -d ${PPE_CACHE_DIR} ]]; then
+        # Pick up cached SBE images unless they don't exist or we were told to rebuild them locally
+        if [[ "$HB_FAST_PRIME" ]] && [[ -d ${PPE_CACHE_DIR} ]] && [[ -z "$HB_FORCE_REBUILD_SBE" ]]; then
             # Pick up pre-built SBE images
             SBE_STANDALONE_IMG=${PPE_CACHE_DIR}/sbe_seeprom_p10.bin.ecc
             SBE_STANDALONE_MEASURE_IMG=${PPE_CACHE_DIR}/sbe_measurement_p10.bin.ecc
@@ -627,7 +628,8 @@ hb_startsimics()
 
         ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
 
-        if [[ "${HB_FAST_PRIME}" ]]
+        # Pick up cached Odyssey images unless we were told to rebuild them locally
+        if [[ "${HB_FAST_PRIME}" ]] && [[ -z "$HB_FORCE_REBUILD_ODY" ]];
         then
             # Pick up pre-built images
             export SBE_SUBREPO_TOP_COMMIT=$(git submodule status $SBE_ODY_DIR | awk '{print $1}' | sed 's/^-//')
