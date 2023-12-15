@@ -196,7 +196,7 @@ uint32_t RrdEvent<T>::checkEcc( const uint32_t & i_eccAttns,
             // Don't abort continue the procedure.
         }
 
-        if ( i_eccAttns & MAINT_MCE )
+        if ( TD_PHASE_1 == iv_phase && i_eccAttns & MAINT_MCE )
         {
             // An MCE in this case will indicate an uninitialized address/row
             // that scrub stopped on. All the uninitialized row information
@@ -239,7 +239,7 @@ uint32_t RrdEvent<T>::verifyRowRepair( STEP_CODE_DATA_STRUCT & io_sc,
 
     do
     {
-        if ( TD_PHASE_1 != iv_phase ) break; // nothing to do
+        if ( TD_PHASE_2 != iv_phase ) break; // nothing to do
 
         o_done = true;
 
@@ -426,19 +426,24 @@ uint32_t RrdEvent<TYPE_OCMB_CHIP>::startCmd()
 
     mss::mcbist::stop_conditions<MC> stopCond;
 
-    // Set the per-symbol counters to count all 3 CE types: hard, soft, int
-    stopCond.set_nce_soft_symbol_count_enable( mss::ON);
-    stopCond.set_nce_inter_symbol_count_enable(mss::ON);
-    stopCond.set_nce_hard_symbol_count_enable( mss::ON);
+    if ( TD_PHASE_1 == iv_phase )
+    {
+        // Set pause on all MCE types, so that uninitialized rows that exist
+        // during the scrub can be recorded for FFDC.
+        stopCond.set_pause_on_mce_hard(mss::ON)
+                .set_pause_on_mce_soft(mss::ON)
+                .set_pause_on_mce_int(mss::ON);
+    }
+    if ( TD_PHASE_2 == iv_phase )
+    {
+        // Set the per-symbol counters to count all 3 CE types: hard, soft, int
+        stopCond.set_nce_soft_symbol_count_enable( mss::ON);
+        stopCond.set_nce_inter_symbol_count_enable(mss::ON);
+        stopCond.set_nce_hard_symbol_count_enable( mss::ON);
 
-    // Set pause on all MCE types, so that uninitialized rows that exist
-    // during the scrub can be recorded for FFDC.
-    stopCond.set_pause_on_mce_hard(mss::ON)
-            .set_pause_on_mce_soft(mss::ON)
-            .set_pause_on_mce_int(mss::ON);
-
-    // Set the per-symbol MCE counters to count only hard MCEs
-    stopCond.set_mce_hard_symbol_count_enable(mss::ON);
+        // Set the per-symbol MCE counters to count only hard MCEs
+        stopCond.set_mce_hard_symbol_count_enable(mss::ON);
+    }
 
     if ( iv_canResumeScrub )
     {
@@ -498,6 +503,11 @@ uint32_t RrdEvent<T>::startNextPhase( STEP_CODE_DATA_STRUCT & io_sc )
             case TD_PHASE_0:
                 iv_phase  = TD_PHASE_1;
                 signature = PRDFSIG_StartRrdPhase1;
+                break;
+
+            case TD_PHASE_1:
+                iv_phase  = TD_PHASE_2;
+                signature = PRDFSIG_StartRrdPhase2;
                 break;
 
             default: PRDF_ASSERT( false ); // invalid phase

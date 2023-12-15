@@ -73,6 +73,7 @@
         "0xffff0005": "TPS: Starting phase 2",
         "0xffff0006": "TPS: Phase 2 completed",
         "0xffff0007": "RRD: Starting phase 1",
+        "0xffff0008": "RRD: Starting phase 2",
         "0xffff0010": "Maintenance UE",
         "0xffff0011": "Maintenance IUE",
         "0xffff0012": "Maintenance MPE",

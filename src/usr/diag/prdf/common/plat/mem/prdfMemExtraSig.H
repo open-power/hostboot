@@ -39,6 +39,7 @@ PRDR_ERROR_SIGNATURE(StartTpsPhase1, 0xffff0004, "", "TPS: Starting phase 1");
 PRDR_ERROR_SIGNATURE(StartTpsPhase2, 0xffff0005, "", "TPS: Starting phase 2");
 PRDR_ERROR_SIGNATURE(EndTpsPhase2,   0xffff0006, "", "TPS: Phase 2 completed");
 PRDR_ERROR_SIGNATURE(StartRrdPhase1, 0xffff0007, "", "RRD: Starting phase 1");
+PRDR_ERROR_SIGNATURE(StartRrdPhase2, 0xffff0008, "", "RRD: Starting phase 2");
 
 PRDR_ERROR_SIGNATURE(MaintUE,        0xffff0010, "", "Maintenance UE");
 PRDR_ERROR_SIGNATURE(MaintIUE,       0xffff0011, "", "Maintenance IUE");
