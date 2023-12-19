@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1891,6 +1891,11 @@ errlHndl_t populate_hbSecurebootData ( void )
 
         l_sysParmsPtr->hdatTpmDrawer = l_maxTpms;
         TRACFCOMP(g_trac_runtime,"Max TPMs = 0x%04X", l_maxTpms);
+
+        // Populate Secureboot Signing Mode
+        auto sb_signing_mode = nodeTgt->getAttr<TARGETING::ATTR_SB_SIGNING_MODE>();
+        l_sysParmsPtr->hdatSbSigningMode = sb_signing_mode;
+        TRACFCOMP(g_trac_runtime,"SB Signing Mode = 0x%02X", sb_signing_mode);
 
         // Populate HW Keys' Hash size + value in HDAT
         l_sysParmsPtr->hdatHwKeyHashSize =

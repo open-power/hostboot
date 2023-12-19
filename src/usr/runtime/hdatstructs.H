@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -262,7 +262,8 @@ struct hdatSysParms_t
     uint32_t hdatProcFeatCode;
     uint32_t hdatEffectivePvr;
     uint32_t hdatSysType;
-    uint8_t  hdatNumLPARsPerOctant[8];
+    uint8_t  hdatSbSigningMode;        // Secureboot Signing Mode
+    uint8_t  reserved[7];
     uint32_t hdatABCBusSpeed;
     uint32_t hdatWXYZBusSpeed;
     uint32_t hdatSystemECOMode;

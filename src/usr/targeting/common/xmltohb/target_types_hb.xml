@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2024                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -26,7 +26,7 @@
 <!-- =====================================================================
      HOST BOOT TARGETS
      Contains the definition of the different types of Hostboot targets
-     and target type extensions to add attributes to common target types
+     and target type extensions to add attributes to common target types.
      ================================================================= -->
 <attributes>
   <targetTypeExtension>
@@ -277,6 +277,9 @@
     </attribute>
     <attribute>
       <id>PHYS_PRES_REQUEST_OPEN_WINDOW</id>
+    </attribute>
+    <attribute>
+      <id>SB_SIGNING_MODE</id>
     </attribute>
     <attribute>
       <id>SERIAL_NUMBER</id>

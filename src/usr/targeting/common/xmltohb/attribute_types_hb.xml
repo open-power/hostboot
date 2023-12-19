@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2024                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1635,6 +1635,44 @@
       <value>0x10</value>
     </enumerator>
   </enumerationType>
+
+  <enumerationType>
+    <id>SB_SIGNING</id>
+    <description>
+        Enumeration used for SB_SIGNING_MODE, as defined in the
+        HDAT specification
+    </description>
+    <enumerator>
+      <description>
+        V1 Container Signing
+      </description>
+      <name>V1_CONTAINER</name>
+      <value>0x00</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        V2 Container Signing
+      </description>
+      <name>V2_CONTAINER</name>
+      <value>0x01</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
+    <id>SB_SIGNING_MODE</id>
+    <description>
+        Secureboot Signing Mode represents the version of which
+        encryption method is being used for the system.
+        See SB_SIGNING enum for values
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
 
   <attribute>
     <id>SCAN_MUTEX</id>
