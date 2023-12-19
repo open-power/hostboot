@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,9 +86,6 @@ fapi2::ReturnCode check_vin_bulk_good(
     // Calculate ADC_READ value
     l_calculated_vin_bulk = l_adc_readout * ADC_VIN_BULK_STEP;
     FAPI_TRY(get_minimum_vin_bulk_threshold(i_pmic_target, l_vin_bulk_min));
-
-    // Disable the PMIC ADC
-    FAPI_TRY(disable_pmic_adc(i_pmic_target));
 
     FAPI_DBG("VIN_BULK voltage %umV, minimum threshold %umV", l_calculated_vin_bulk, l_vin_bulk_min);
 
