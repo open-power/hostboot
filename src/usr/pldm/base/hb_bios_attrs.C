@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,8 @@ const char PLDM_BIOS_HB_INHIBIT_BMC_RESET_STRING[]         = "hb_inhibit_bmc_res
 const char PLDM_BIOS_HB_EFFECTIVE_SECURE_VERSION_STRING[]  = "hb_effective_secure_version";
 const char PLDM_BIOS_HB_LATERAL_CAST_OUT_MODE_STRING[]     = "hb_lateral_cast_out_mode_current";
 const char PLDM_BIOS_HB_PROC_FAVOR_AGGRESSIVE_PREFETCH_STRING[] = "hb_proc_favor_aggressive_prefetch_current";
+const char PLDM_BIOS_HB_STORAGE_PREALLOCATION_FOR_DRAWER_ATTACH[] = "hb_storage_preallocation_for_drawer_attach_current";
+
 
 // When power limit values change, the effect on the OCCs is immediate, so we
 // always want the most recent values here.
@@ -2707,6 +2709,40 @@ errlHndl_t getEnlargedCapacity(
     o_enlargedCapacity =
         static_cast<TARGETING::ATTR_ENLARGED_IO_SLOT_COUNT_type>(l_attr_val);
     } while(0);
+
+    return errl;
+}
+
+
+errlHndl_t getDynamicIoDrawerAttach(
+        std::vector<uint8_t>& io_string_table,
+        std::vector<uint8_t>& io_attr_table,
+        TARGETING::ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT_type &o_dynamic_io_drawer_attach)
+{
+    errlHndl_t errl = nullptr;
+
+    do {
+    PLDM_INF(ENTER_MRK"PLDM::getDynamicIoDrawerAttach");
+
+    uint64_t l_attr_val = 0;
+    errl = systemIntAttrLookup(io_string_table,
+                               io_attr_table,
+                               PLDM_BIOS_HB_STORAGE_PREALLOCATION_FOR_DRAWER_ATTACH,
+                               l_attr_val);
+    if(errl)
+    {
+        PLDM_ERR("getDynamicIoDrawerAttach() Failed to lookup value for %s",
+                 PLDM_BIOS_HB_STORAGE_PREALLOCATION_FOR_DRAWER_ATTACH);
+        break;
+    }
+
+    o_dynamic_io_drawer_attach =
+        static_cast<TARGETING::ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT_type>(l_attr_val);
+    } while(0);
+
+
+    PLDM_INF(EXIT_MRK"PLDM::PLDM::getDynamicIoDrawerAttach: returning %d and %s",
+             o_dynamic_io_drawer_attach, errl ? "Error" : "No Error");
 
     return errl;
 }

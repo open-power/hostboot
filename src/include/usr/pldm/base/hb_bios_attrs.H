@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -504,6 +504,24 @@ namespace PLDM
                                    std::vector<uint8_t>& io_attr_table,
                                    uint32_t &o_CapFreqMhz_min,
                                    uint32_t &o_CapFreqMhz_max);
+
+   /** @brief Retrieve the current value of the hb_storage_preallocation_for_drawer_attach
+    *         PLDM bios attribute and return the value converted
+    *         to an ATTR_DYNAMC_IO_DRAWER_ATTACHMENT_type.
+    *
+    * @param[in,out] io_string_table     See brief at the top of this file.
+    * @param[in,out] io_attr_table       See brief at the top of this file.
+    * @param[out]    o_dynamic_io_drawer_attach If no error occurs will contain the value
+    *                                           for hb_storage_preallocation_for_drawer_attach
+    *                                           translated to ATTR_DYNAMC_IO_DRAWER_ATTACHMENT_type
+    *
+    * @return Error if any, otherwise nullptr.
+    */
+    errlHndl_t getDynamicIoDrawerAttach(std::vector<uint8_t>& io_string_table,
+                                        std::vector<uint8_t>& io_attr_table,
+                                        TARGETING::ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT_type &
+                                            o_dynamic_io_drawer_attach);
+
 }
 
 #endif

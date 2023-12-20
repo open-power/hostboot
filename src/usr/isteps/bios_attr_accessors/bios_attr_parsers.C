@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <isteps/istep_reasoncodes.H>
 #include <pldm/base/hb_bios_attrs.H>
 #include <pldm/pldm_errl.H>
+#include <pldm/pldm_reasoncodes.H>
 #include <targeting/common/mfgFlagAccessors.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/targplatutil.H>
@@ -778,5 +779,59 @@ void parse_hb_ps_config(std::vector<uint8_t>& io_string_table,
     const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
     l_sys->setAttr<ATTR_INDEX_BULK_POWER>(bulk_power_index);
 }
+
+void parse_hb_prealloc_for_drawer_attach(std::vector<uint8_t>& io_string_table,
+                                         std::vector<uint8_t>& io_attr_table,
+                                         ISTEP_ERROR::IStepError & io_stepError)
+{
+    // Create a variable to hold the Dynamic IO Drawer Attach value from the BMC BIOS
+    TARGETING::ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT_type l_dynamicIoDrawerAttach(0);
+
+    // Get the Dynamic IO Drawer Attach from the BMC BIOS
+    errlHndl_t l_errl = PLDM::getDynamicIoDrawerAttach(io_string_table, io_attr_table,
+                                                       l_dynamicIoDrawerAttach);
+
+    // Only need to update master node
+    TARGETING::Target* l_masterNode = nullptr;
+    TARGETING::UTIL::getMasterNodeTarget(l_masterNode);
+
+    if (l_errl == nullptr)
+    {
+        // Set the node attribute ATTR_DYNAMIC_IO_DRAWER_ATTACH to the retrieved value
+        l_masterNode->setAttr<ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT>(l_dynamicIoDrawerAttach);
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                  "parse_hb_prealloc_for_drawer_attach(): Succeeded in getting the BMC "
+                  "BIOS Storage Preallocation for Drawer Attach attribute. Setting "
+                  "the attribute ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT to %d",
+                  l_dynamicIoDrawerAttach);
+    }
+    else
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                  "parse_hb_prealloc_for_drawer_attach(): An error occurred getting "
+                  "Storage Preallocation for Drawer Attach from the BMC BIOS. Leaving the node "
+                  "attribute ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT at its current value %d",
+                  l_masterNode->getAttr<ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT>());
+
+        // Some systems (for example, Bonnell) might not have this attribute. If that's the
+        // case, look for the specific RC from the error and delete it
+        if (l_errl->reasonCode() == PLDM::RC_UNSUPPORTED_ATTRIBUTE)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                      "parse_hb_prealloc_for_drawer_attach(): PLDM::RC_UNSUPPORTED_ATTRIBUTE error "
+                      "was returned. This is expected on some systems so deleting the error.");
+            delete l_errl;
+            l_errl = nullptr;
+        }
+        else
+        {
+            l_errl->collectTrace("ISTEPS_TRACE",256);
+            errlCommit( l_errl, ISTEP_COMP_ID );
+        }
+    }
+
+    return;
+}
+
 
 } // end of namespace ISTEP

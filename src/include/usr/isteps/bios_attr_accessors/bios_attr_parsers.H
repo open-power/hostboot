@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -308,6 +308,20 @@ void parse_hb_ps_config(std::vector<uint8_t>& io_string_table,
                         std::vector<uint8_t>& io_attr_table,
                         ISTEP_ERROR::IStepError & io_stepError);
 
+/**
+ * @brief Retrieve the Storage Preallocation for Drawer Attachment from the BMC BIOS and set the
+ *        node attribute ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT to the retrieved value, if no error
+ *        occurred.  If an error occurs retrieving the BMC BIOS, then the attribute is left as is.
+ *
+ * @param[in,out] io_string_table   See brief in file hb_bios_attrs.H
+ * @param[in,out] io_attr_table     See brief in file hb_bios_attrs.H
+ * @param[in,out] io_stepError      If an error occurs which require a TI it can be attached
+ *                                  to this IstepError log.
+ * @return void
+ */
+void parse_hb_prealloc_for_drawer_attach(std::vector<uint8_t>& io_string_table,
+                                         std::vector<uint8_t>& io_attr_table,
+                                         ISTEP_ERROR::IStepError & io_stepError);
 
 } // end of namespace ISTEP
 

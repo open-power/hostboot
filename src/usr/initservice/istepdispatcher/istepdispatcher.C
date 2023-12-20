@@ -247,6 +247,7 @@ void IStepDispatcher::parsePLDMBiosAttrs(ISTEP_ERROR::IStepError & io_stepError)
         ISTEP::parse_hb_proc_favor_aggressive_prefetch,
         ISTEP::parse_hb_ps_config,
         ISTEP::parse_hb_secure_ver_lockin_enabled,
+        ISTEP::parse_hb_prealloc_for_drawer_attach,
     };
 
     std::vector<uint8_t> bios_string_table, bios_attr_table;
