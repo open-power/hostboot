@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,7 @@ enum update_action_t : uint8_t
 
     perform_code_update      = 4,
 
+    // Deconfigures but does not gard the OCMB. Use deconfig_gard_ocmb to deconfig & gard
     deconfigure_ocmb         = 5,
     fail_boot_bad_firmware   = 6,
 
@@ -116,8 +117,10 @@ enum update_action_t : uint8_t
                                     // loop without switching sides) so that the FSM can keep track of what
                                     // sides have been attempted before.
 
+    deconfig_gard_ocmb       = 0xE,
+
     // This means that an invalid state/event combination has happened.
-    internal_error           = 0xE
+    internal_error           = 0xFF
 };
 
 /** @brief Enumeration corresponding to Odyssey boot sides. These elements can be OR'd
@@ -341,7 +344,7 @@ state_transitions_t ody_fsm_transitions[] =
 
     { { yes           , yes                    , SIDE1  , yes         },{{ OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_HWP_FAIL_HASH_FAIL
-                                                                           | OCMB_HWP_FAIL_OTHER       , {deconfigure_ocmb                                              }},
+                                                                           | OCMB_HWP_FAIL_OTHER       , {deconfig_gard_ocmb                                            }},
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
                                                                          { IPL_COMPLETE                , {reset_ocmb_upd_state                                          }} } },
 
@@ -546,6 +549,7 @@ std::array<char, 128> action_to_str(const update_action_t i_action)
     case mark_error_unrecoverable: strcpy(&str[0], "convert error to unrecoverable"); break;
     case perform_code_update: strcpy(&str[0], "perform code update"); break;
     case deconfigure_ocmb: strcpy(&str[0], "deconfigure ocmb"); break;
+    case deconfig_gard_ocmb: strcpy(&str[0], "deconfigure & guard ocmb"); break;
     case fail_boot_bad_firmware: strcpy(&str[0], "fail boot; bad firmware"); break;
     case reset_ocmb_upd_state: strcpy(&str[0], "reset ocmb update state"); break;
     case sync_images_normal: strcpy(&str[0], "sync images (normal)"); break;
@@ -614,6 +618,7 @@ errlOwner capture_state_in_errlog(const errlSeverity_t i_sev,
  *  @param[in] i_transition     The transition that is being executed.
  *  @param[in] i_event          The event that caused i_transition.
  *  @param[in] i_errlog         The error log that caused this event, if any.
+ *  @param[in] i_apply_gard_record Whether a gard record should be created for this OCMB
  *
  *  @return errlOwner           Error if any, otherwise nullptr.
  */
@@ -622,7 +627,8 @@ errlOwner create_and_commit_ocmb_deconfigure_log(Target* const i_ocmb,
                                                  const state_transitions_t& i_state_pattern,
                                                  const state_transition_t& i_transition,
                                                  const ody_upd_event_t i_event,
-                                                 const errlHndl_t i_errlog)
+                                                 const errlHndl_t i_errlog,
+                                                 const bool i_apply_gard_record)
 {
     /*@
      *@moduleid         MOD_ODY_UPD_FSM
@@ -644,7 +650,9 @@ errlOwner create_and_commit_ocmb_deconfigure_log(Target* const i_ocmb,
     auto errl = capture_state_in_errlog(ERRL_SEV_UNRECOVERABLE, MOD_ODY_UPD_FSM, ODY_UPD_DECONFIGURE_OCMB,
                                         ErrlEntry::NO_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
 
-    errl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_HIGH, HWAS::DECONFIG, HWAS::GARD_NULL);
+    auto l_gard_action = i_apply_gard_record ? HWAS::GARD_Unrecoverable : HWAS::GARD_NULL;
+
+    errl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_HIGH, HWAS::DECONFIG, l_gard_action);
 
     // We have to do this because (1) we want to communicate the deconfigured state of the
     // target to the caller immediately, and (2) on FSP machines, addHwCallout will silently
@@ -775,6 +783,7 @@ errlOwner execute_actions(Target* const i_ocmb,
     errlOwner errl = nullptr;
 
     bool manually_set_errl_sev = false;
+    bool apply_gard_record = false;
 
     for (const auto& action : i_transition.actions)
     {
@@ -892,13 +901,16 @@ errlOwner execute_actions(Target* const i_ocmb,
             case reset_ocmb_upd_state:
                 ody_upd_reset_state(i_ocmb);
                 break;
+            case deconfig_gard_ocmb:
+                apply_gard_record = true;
+                // fall through
             case deconfigure_ocmb:
                 if (i_errlog && !manually_set_errl_sev)
                 {
                     i_errlog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
                 }
 
-                errl = create_and_commit_ocmb_deconfigure_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event, i_errlog);
+                errl = create_and_commit_ocmb_deconfigure_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event, i_errlog, apply_gard_record);
 
                 if (errl)
                 {
