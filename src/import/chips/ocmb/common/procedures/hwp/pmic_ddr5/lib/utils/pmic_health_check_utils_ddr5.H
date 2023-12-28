@@ -357,14 +357,23 @@ fapi2::ReturnCode generate_and_send_response(const mss::pmic::ddr5::target_info_
         fapi2::hwp_data_ostream& o_data);
 
 ///
+/// @brief Check if at least one PMIC has issues
+///
+/// @param[in] i_failed_pmics n-mode states of the 4 PMICs
+/// @return true/false at least one pmic is bad
+///
+bool mnfg_mode_check_failed_pmics (const bool i_failed_pmics);
+
 /// @brief Resets breadcrumb for PMIC/DT pair if both PMIC and DT states are ALL_GOOD
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
-/// None
+/// @param[in] i_mnfg_thresholds mnfg attribute flag
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                                mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
+fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+        const bool i_mnfg_thresholds);
 
 ///
 /// @brief Check all the breadcrumbs and return aggregate state as N_MODE if any PMIC/DT
@@ -384,13 +393,13 @@ inline mss::pmic::ddr5::aggregate_state check_breadcrumbs_subsequent_n_modes(con
 /// @param[in,out] io_additional_info additional health check data
 /// @param[in,out] io_periodic_tele_info periodic telemetry data
 /// @param[in,out] io_number_bytes_to_send number of bytes to send as response to this HWP
-/// @return none
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-void health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
-                       mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
-                       mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info,
-                       uint8_t& io_number_bytes_to_send);
+fapi2::ReturnCode health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                    mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+                                    mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
+                                    mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info,
+                                    uint8_t& io_number_bytes_to_send);
 
 ///
 /// @brief Runtime Health check helper for 4U parts
