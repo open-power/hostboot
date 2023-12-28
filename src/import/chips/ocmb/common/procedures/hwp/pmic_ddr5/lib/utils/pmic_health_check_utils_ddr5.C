@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -573,7 +573,6 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
 {
     using CONSTS  = mss::pmic::id;
     fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ];
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     for (auto l_pmic_count = 0; l_pmic_count < io_target_info.iv_number_of_target_infos_present; l_pmic_count++)
     {

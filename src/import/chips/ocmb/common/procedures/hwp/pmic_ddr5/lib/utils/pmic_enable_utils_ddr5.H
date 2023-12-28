@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -255,7 +255,7 @@ fapi2::ReturnCode redundancy_check_all_pmics(target_info_redundancy_ddr5& io_tar
 ///
 void log_n_modes_as_recoverable_errors_ddr5(
     const target_info_redundancy_ddr5& i_target_info,
-    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
+    const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U]);
 
 ///
 /// @brief Assert the resulting n-mode states with the proper error FFDC
@@ -267,7 +267,7 @@ void log_n_modes_as_recoverable_errors_ddr5(
 ///
 fapi2::ReturnCode assert_n_mode_states_ddr5(
     const target_info_redundancy_ddr5& i_target_info,
-    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic,
+    const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U],
     const bool i_mnfg_thresholds);
 
 ///
@@ -303,6 +303,13 @@ fapi2::ReturnCode pmic_enable(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
 
 namespace check
 {
+///
+/// @brief Check if at least one PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false at least one pmic is bad
+///
+bool bad_any(const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U]);
 
 ///
 /// @brief Check if two or more PMIC has declared N mode
@@ -310,7 +317,7 @@ namespace check
 /// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
 /// @return true/false if two or more pmics are bad
 ///
-bool bad_two_or_more(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic);
+bool bad_two_or_more(const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U]);
 
 } // ns check
 } // ns ddr5

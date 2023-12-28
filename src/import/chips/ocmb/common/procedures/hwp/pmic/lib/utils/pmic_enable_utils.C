@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -342,28 +342,6 @@ fapi2::ReturnCode start_vr_enable(
 
 fapi_try_exit:
     return fapi2::current_err;
-}
-
-///
-/// @brief Declare N-Mode and log fapi2::current_err as recoverable
-///
-/// @param[in] i_ocmb_target OCMB target
-/// @param[in] i_pmic_id PMIC ID (0-3)
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS
-/// @note expected to be called in a fapi_try_exit with bad current_err
-///
-fapi2::ReturnCode declare_n_mode(
-    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-    uint8_t i_pmic_id)
-{
-    // Log as recoverable, set N mode attribute, all will be checked later
-    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
-    return mss::attr::set_n_mode_helper(
-               i_ocmb_target,
-               i_pmic_id,
-               mss::pmic::n_mode::N_MODE);
 }
 
 ///
@@ -1823,6 +1801,22 @@ bool bad_pair(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mod
             (i_n_mode_pmic[1] == N_MODE && i_n_mode_pmic[3] == N_MODE));
 }
 
+///
+/// @brief Check if at least one PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false at least one pmic is bad
+///
+bool bad_any(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic)
+{
+    // For readability
+    static constexpr mss::pmic::n_mode N_MODE = mss::pmic::n_mode::N_MODE;
+    // True if any are N_MODE
+    return i_n_mode_pmic[0] == N_MODE ||
+           i_n_mode_pmic[1] == N_MODE ||
+           i_n_mode_pmic[2] == N_MODE ||
+           i_n_mode_pmic[3] == N_MODE;
+}
 
 ///
 /// @brief Check if at least one primary PMIC has declared N mode

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1061,7 +1061,7 @@ fapi_try_exit:
 ///
 void log_n_modes_as_recoverable_errors_ddr5(
     const target_info_redundancy_ddr5& i_target_info,
-    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic)
+    const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U])
 {
     for (uint8_t l_idx = PMIC0; l_idx < CONSTS::NUM_PMICS_4U; ++l_idx)
     {
@@ -1069,12 +1069,21 @@ void log_n_modes_as_recoverable_errors_ddr5(
         // NOEXIT commits the error log as soon as the FFDC execute function is called,
         // so we do not need to manually log the error, like with FAPI_ASSERT,
         // so long as we pass in the right severity as an argument
+#ifndef __PPE__
         FAPI_ASSERT_NOEXIT((i_n_mode_pmic[l_idx] == mss::pmic::n_mode::N_PLUS_1_MODE),
                            fapi2::PMIC_DROPPED_INTO_N_MODE_DDR5(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                            .set_OCMB_TARGET(i_target_info.iv_ocmb)
                            .set_PMIC_ID(l_idx),
                            GENTARGTIDFORMAT " PMIC%u had errors which caused a drop into N-Mode",
                            GENTARGTID(i_target_info.iv_ocmb), l_idx);
+#else
+        FAPI_ASSERT_NOEXIT((i_n_mode_pmic[l_idx] == mss::pmic::n_mode::N_PLUS_1_MODE),
+                           fapi2::PMIC_DROPPED_INTO_N_MODE_DDR5()
+                           .set_OCMB_TARGET(i_target_info.iv_ocmb)
+                           .set_PMIC_ID(l_idx),
+                           GENTARGTIDFORMAT " PMIC%u had errors which caused a drop into N-Mode",
+                           GENTARGTID(i_target_info.iv_ocmb), l_idx);
+#endif
 
         // Set back to success
         if (fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
@@ -1094,7 +1103,7 @@ void log_n_modes_as_recoverable_errors_ddr5(
 ///
 fapi2::ReturnCode assert_n_mode_states_ddr5(
     const target_info_redundancy_ddr5& i_target_info,
-    const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic,
+    const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U],
     const bool i_mnfg_thresholds)
 {
     // Check if we have lost a redundant pair :(
@@ -1121,7 +1130,7 @@ fapi2::ReturnCode assert_n_mode_states_ddr5(
     // Now in the other case, if at least one is down, assert this error. However, depending on the
     // thresholds policy setting, in most cases this error will be logged as recoverable in the
     // fapi_try_exit of process_n_mode_results(...)
-    FAPI_ASSERT(!(mss::pmic::check::bad_any(i_n_mode_pmic)),
+    FAPI_ASSERT(!(mss::pmic::ddr5::check::bad_any(i_n_mode_pmic)),
                 fapi2::DIMM_RUNNING_IN_N_MODE_DDR5()
                 .set_OCMB_TARGET(i_target_info.iv_ocmb)
                 .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
@@ -1162,7 +1171,7 @@ fapi2::ReturnCode process_n_mode_results(const target_info_redundancy_ddr5& i_ta
     using mss::pmic::id;
 
     // Hold N-Mode states
-    std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U> l_n_mode_pmic =
+    mss::pmic::n_mode l_n_mode_pmic[CONSTS::NUM_PMICS_4U] =
     {
         mss::pmic::n_mode::N_PLUS_1_MODE,
         mss::pmic::n_mode::N_PLUS_1_MODE,
@@ -1365,14 +1374,29 @@ fapi_try_exit:
 
 namespace check
 {
-
+///
+/// @brief Check if at least one PMIC has declared N mode
+///
+/// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
+/// @return true/false at least one pmic is bad
+///
+bool bad_any(const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U])
+{
+    // For readability
+    static constexpr mss::pmic::n_mode N_MODE = mss::pmic::n_mode::N_MODE;
+    // True if any are N_MODE
+    return i_n_mode_pmic[0] == N_MODE ||
+           i_n_mode_pmic[1] == N_MODE ||
+           i_n_mode_pmic[2] == N_MODE ||
+           i_n_mode_pmic[3] == N_MODE;
+}
 ///
 /// @brief Check if two or more PMIC has declared N mode
 ///
 /// @param[in] i_n_mode_pmic n-mode states of the 4 PMICs
 /// @return true/false if two or more pmics are bad
 ///
-bool bad_two_or_more(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& i_n_mode_pmic)
+bool bad_two_or_more(const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U])
 {
     // For readability
     static constexpr mss::pmic::n_mode N_MODE = mss::pmic::n_mode::N_MODE;
@@ -1390,7 +1414,6 @@ bool bad_two_or_more(const std::array<mss::pmic::n_mode, CONSTS::NUM_PMICS_4U>& 
 
     return (l_number_pmic_n_mode >= NUMBER_PMICS_FAIL_NOT_ACCEPTABLE);
 }
-
 } // ns check
 
 } // ns ddr5
