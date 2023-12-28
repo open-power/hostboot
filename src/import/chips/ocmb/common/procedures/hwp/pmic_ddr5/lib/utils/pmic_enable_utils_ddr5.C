@@ -925,12 +925,12 @@ fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmi
     // Calling health check 3 times here to ensure if any PMICs had any issue during IPL, they would be
     // attempted to recover here and would not be in n_mode if not for major issues
     // The number of bytes to send here is 0 as we are not going to send any data to HB. This is just a place holder
-    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
-                      l_number_bytes_to_send);
-    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
-                      l_number_bytes_to_send);
-    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
-                      l_number_bytes_to_send);
+    FAPI_TRY(health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
+                               l_number_bytes_to_send));
+    FAPI_TRY(health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
+                               l_number_bytes_to_send));
+    FAPI_TRY(health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
+                               l_number_bytes_to_send));
 
     // Check all bread crumbs. If any PMIC has bread crumb not set to ALL_GOOD, report those errors
     FAPI_TRY(check_all_breadcrumbs(io_target_info, l_health_check_info));

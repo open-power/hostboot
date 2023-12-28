@@ -861,17 +861,45 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Check if at least one PMIC has issues
+///
+/// @param[in] i_failed_pmics n-mode states of the 4 PMICs
+/// @return true/false at least one pmic is bad
+///
+bool mnfg_mode_check_failed_pmics (const mss::pmic::n_mode i_failed_pmics[mss::dt::dt_i2c_devices::NUM_TOTAL_DEVICES])
+{
+    // For readability
+    static constexpr mss::pmic::n_mode N_MODE = mss::pmic::n_mode::N_MODE;
+
+    // True if any are N_MODE
+    return i_failed_pmics[mss::dt::dt_i2c_devices::DT0] == N_MODE ||
+           i_failed_pmics[mss::dt::dt_i2c_devices::DT1] == N_MODE ||
+           i_failed_pmics[mss::dt::dt_i2c_devices::DT2] == N_MODE ||
+           i_failed_pmics[mss::dt::dt_i2c_devices::DT3] == N_MODE;
+}
+
+///
 /// @brief Resets breadcrumb for PMIC/DT pair if both PMIC and DT states are ALL_GOOD
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
-/// None
+/// @param[in] i_mnfg_thresholds mnfg attribute flag
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                                mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
+fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+        const bool i_mnfg_thresholds)
 {
     using CONSTS = mss::dt::dt_i2c_devices;
     using DT_REGS  = mss::dt::regs;
+
+    mss::pmic::n_mode l_failed_pmics[CONSTS::NUM_TOTAL_DEVICES] =
+    {
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+        mss::pmic::n_mode::N_PLUS_1_MODE,
+    };
 
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_pmic_state
         && !io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state )
@@ -880,6 +908,12 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
                                       mss::pmic::ddr5::bread_crumb::ALL_GOOD);
         // Resetting the struct bread crumb variable
         io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT0].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+    }
+    else
+    {
+        // This is just to show that the PMIC/DT state was something other than ALL_GOOD.
+        // This state will be checked if in mnfg mode. Ignored otherwise.
+        l_failed_pmics[CONSTS::DT0] = mss::pmic::n_mode::N_MODE;
     }
 
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_pmic_state
@@ -890,6 +924,12 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
         // Resetting the struct bread crumb variable
         io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT1].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
     }
+    else
+    {
+        // This is just to show that the PMIC/DT state was something other than ALL_GOOD.
+        // This state will be checked if in mnfg mode. Ignored otherwise.
+        l_failed_pmics[CONSTS::DT1] = mss::pmic::n_mode::N_MODE;
+    }
 
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_pmic_state
         && !io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt_state )
@@ -898,6 +938,12 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
                                       mss::pmic::ddr5::bread_crumb::ALL_GOOD);
         // Resetting the struct bread crumb variable
         io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT2].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+    }
+    else
+    {
+        // This is just to show that the PMIC/DT state was something other than ALL_GOOD.
+        // This state will be checked if in mnfg mode. Ignored otherwise.
+        l_failed_pmics[CONSTS::DT2] = mss::pmic::n_mode::N_MODE;
     }
 
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_pmic_state
@@ -908,6 +954,42 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
         // Resetting the struct bread crumb variable
         io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT3].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
     }
+    else
+    {
+        // This is just to show that the PMIC/DT state was something other than ALL_GOOD.
+        // This state will be checked if in mnfg mode. Ignored otherwise.
+        l_failed_pmics[CONSTS::DT3] = mss::pmic::n_mode::N_MODE;
+    }
+
+    // If any of the PMIC/DTs are in state other than N_PLUS_1, the procedure will fail
+    // in case if we are in manufacturing mode.
+    if (i_mnfg_thresholds)
+    {
+        FAPI_ASSERT(!(mnfg_mode_check_failed_pmics(l_failed_pmics)),
+                    fapi2::PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U()
+                    .set_OCMB_TARGET(io_target_info.iv_ocmb)
+                    .set_N_MODE_PMIC0(l_failed_pmics[CONSTS::DT0])
+                    .set_N_MODE_PMIC1(l_failed_pmics[CONSTS::DT1])
+                    .set_N_MODE_PMIC2(l_failed_pmics[CONSTS::DT2])
+                    .set_N_MODE_PMIC3(l_failed_pmics[CONSTS::DT3]),
+#ifndef __PPE__
+                    GENTARGTIDFORMAT " Warning: At least one of the 4 PMIC/DTs had errors running health check. "
+                    "MNFG_THRESHOLDS has asserted that we %s. N-Mode States:"
+                    "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
+                    GENTARGTID(io_target_info.iv_ocmb),
+                    (i_mnfg_thresholds) ? "EXIT." : "DO NOT EXIT. Continuing boot normally with redundant parts.",
+                    l_failed_pmics[CONSTS::DT0], l_failed_pmics[CONSTS::DT1], l_failed_pmics[CONSTS::DT2], l_failed_pmics[CONSTS::DT3]);
+#else
+                    "Warning: At least one of the 4 PMICs had errors which caused a drop into N-Mode. "
+                    "PMIC0: %u PMIC1: %u PMIC2: %u PMIC3: %u",
+                    l_failed_pmics[CONSTS::DT0], l_failed_pmics[CONSTS::DT1], l_failed_pmics[CONSTS::DT2], l_failed_pmics[CONSTS::DT3]);
+#endif
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -941,16 +1023,22 @@ inline mss::pmic::ddr5::aggregate_state check_breadcrumbs_subsequent_n_modes(con
 /// @param[in,out] io_additional_info additional health check data
 /// @param[in,out] io_periodic_tele_info periodic telemetry data
 /// @param[in,out] io_number_bytes_to_send number of bytes to send as response to this HWP
-/// @return none
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-void health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
-                       mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
-                       mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info,
-                       uint8_t& io_number_bytes_to_send)
+fapi2::ReturnCode health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                    mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+                                    mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
+                                    mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info,
+                                    uint8_t& io_number_bytes_to_send)
 {
     mss::pmic::ddr5::dt_state l_dt_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
     mss::pmic::ddr5::aggregate_state l_n_mode = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
+
+    // MFG flags vars/consts
+    bool l_mnfg_thresholds = false;
+
+    // Get mnfg thresholds policy setting
+    mss::pmic::get_mnfg_thresholds(l_mnfg_thresholds);
 
     // Read and store DT regs for fault calculations
     read_dt_regs(io_target_info, io_health_check_info);
@@ -963,7 +1051,7 @@ void health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_i
     {
         io_health_check_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_MODE;
         io_number_bytes_to_send = SIZEOF_AGGREGATE_STATE;
-        return;
+        return fapi2::FAPI2_RC_SUCCESS;
     }
 
     // Read and store PMIC regs for fault calculations
@@ -978,7 +1066,7 @@ void health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_i
         check_pmic_faults(io_target_info, io_health_check_info);
     }
 
-    check_and_reset_breadcrumb(io_target_info, io_health_check_info);
+    FAPI_TRY(check_and_reset_breadcrumb(io_target_info, io_health_check_info, l_mnfg_thresholds));
 
     l_n_mode = check_n_mode(io_health_check_info);
 
@@ -993,6 +1081,19 @@ void health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_i
     {
         io_number_bytes_to_send = SIZEOF_AGGREGATE_STATE;
     }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+
+    // Do not log error if not in mnfg mode
+    if (fapi2::current_err == static_cast<uint32_t>(fapi2::RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U)
+        && !l_mnfg_thresholds)
+    {
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    return fapi2::current_err;
 }
 
 ///
@@ -1030,8 +1131,10 @@ fapi2::ReturnCode pmic_health_check_ddr5_helper(const fapi2::Target<fapi2::TARGE
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    health_check_ddr5(io_target_info, io_health_check_info, io_additional_info, io_periodic_tele_info,
-                      io_number_bytes_to_send);
+    FAPI_TRY(health_check_ddr5(io_target_info, io_health_check_info, io_additional_info, io_periodic_tele_info,
+                               io_number_bytes_to_send));
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
