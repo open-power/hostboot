@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -131,11 +131,14 @@
     }
 
 
+#define VID_SLOPE_FP_SHIFT_8        8
 #define VID_SLOPE_FP_SHIFT_12       12
 #define THRESH_SLOPE_FP_SHIFT       12
 #define I_SLOPE_FP_SHIFT_9           9
 #define DDS_DELAY_SLOPE_FP_SHIFT_12 12  //DDS Delay slope format 4.12
 #define DDS_SLOPE_FP_SHIFT_6         6  //DDS fields(except delay) slope format 2.6
+
+#define EXTENDED_MAX_FREQUENCY_MHZ  5050
 
 #define THROTTLE_PSTATES            64  //Number of Ptates to index into Throttle Table
 
