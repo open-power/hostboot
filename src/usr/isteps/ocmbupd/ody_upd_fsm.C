@@ -1068,15 +1068,6 @@ errlOwner ody_upd_process_event(Target* const i_ocmb,
         break;
     }
 
-    if (!odysseyCodeUpdateSupported())
-    {
-        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring event until support for "
-              "OCMBFW PNOR partition version 1 is dropped");
-
-        // @TODO: JIRA PFHB-522 Error when OCMBFW V1 support is deprecated
-        break;
-    }
-
     const state_transitions_t* matched_state = nullptr;
     const state_transition_t* matched_event = nullptr;
 
@@ -1214,15 +1205,6 @@ errlOwner ocmbupd::ody_upd_process_event(Target* const i_ocmb,
                                          const ody_upd_event_t i_event,
                                          errlOwner i_errlog)
 {
-    if (!odysseyCodeUpdateSupported())
-    {
-        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring event until support for "
-              "OCMBFW PNOR partition version 1 is dropped");
-
-        // @TODO: JIRA PFHB-522 Error when OCMBFW V1 support is deprecated
-        return nullptr;
-    }
-
     bool restart_needed = false;
 
     auto errl = ody_upd_process_event(i_ocmb, i_event, move(i_errlog), restart_needed);
@@ -1257,15 +1239,6 @@ errlOwner ocmbupd::ody_upd_process_event(Target* const i_ocmb,
                                          errlOwner i_errlog,
                                          bool& o_restart_needed)
 {
-    if (!odysseyCodeUpdateSupported())
-    {
-        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring event until support for "
-              "OCMBFW PNOR partition version 1 is dropped");
-
-        // @TODO: JIRA PFHB-522 Error when OCMBFW V1 support is deprecated
-        return nullptr;
-    }
-
     state_t state = { };
 
     state.update_performed = i_ocmb->getAttr<ATTR_OCMB_CODE_UPDATED>() ? yes : no;
@@ -1317,15 +1290,6 @@ errlOwner ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
 
     do
     {
-
-    if (!odysseyCodeUpdateSupported())
-    {
-        TRACF(INFO_MRK"ody_upd_all_process_event: Ignoring event until support for "
-              "OCMBFW PNOR partition version 1 is dropped");
-
-        // @TODO: JIRA PFHB-522 Error when OCMBFW V1 support is deprecated
-        break;
-    }
 
     ISTEP::parallel_for_each(composable(getAllChips)(TYPE_OCMB_CHIP, i_which_ocmbs == EVENT_ON_FUNCTIONAL_OCMBS),
                              error_accum,
@@ -1389,12 +1353,26 @@ errlOwner ocmbupd::ody_upd_all_process_event(const ody_upd_event_t i_event,
  *  levels on the given target. Assumes that ATTR_SPPE_BOOT_SIDE is already
  *  set on the target.
  */
-void ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
+errlHndl_t ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
 {
+    errlHndl_t errl = nullptr;
+
+    do
+    {
+
     ody_cur_version_new_image_t images;
     uint64_t rt_vsn = 0, bldr_vsn = 0;
 
-    check_for_odyssey_codeupdate_needed(i_ocmb, images, &rt_vsn, &bldr_vsn);
+    errl = check_for_odyssey_codeupdate_needed(i_ocmb, images, &rt_vsn, &bldr_vsn);
+
+    if (errl)
+    {
+        TRACF("set_ody_code_levels_state: check_for_odyssey_codeupdate_needed failed: "
+              TRACE_ERR_FMT,
+              TRACE_ERR_ARGS(errl));
+        errl->collectTrace(OCMBUPD_COMP_NAME);
+        break;
+    }
 
     if (!images.empty())
     { // The golden side is always considered to be out of date for
@@ -1427,7 +1405,9 @@ void ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
 
     i_ocmb->setAttr<ATTR_OCMB_CODE_LEVEL_SUMMARY>(vsn_string);
 
-    return;
+    } while (false);
+
+    return errl;
 }
 
 

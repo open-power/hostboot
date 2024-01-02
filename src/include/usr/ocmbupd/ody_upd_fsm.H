@@ -146,8 +146,9 @@ errlOwner ody_upd_all_process_event(const ody_upd_event_t i_event,
  *  set on the target.
  *
  * @param[in] i_ocmb  The OCMB target to set fsm state on.
+ * @return            Error if any, otherwise nullptr.
  */
-void set_ody_code_levels_state(TARGETING::Target* i_ocmb);
+errlHndl_t set_ody_code_levels_state(TARGETING::Target* i_ocmb);
 
 /** @brief Clears the code update state related to just the Odyssey
  *  code levels on the given OCMB (rather than related to all

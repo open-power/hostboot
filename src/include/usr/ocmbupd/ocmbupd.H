@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,7 +89,7 @@ errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb,
  *
  * @note  Assumes that ATTR_SPPE_BOOT_SIDE is set on the target.
  *
- * @param[in] i_ocmb               The Odyssey chip.
+ * @param[in]  i_ocmb              The Odyssey chip.
  * @param[out] o_updates_required  The images needing update.
  * @param[out] o_rt_hash_prefix    The 64-bit prefix of the hash of the runtime code
  *                                 level on running the Odyssey (optional).
@@ -97,12 +97,13 @@ errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb,
  *                                 code level running on the Odyssey (optional).
  * @param[in]  i_force_update_all  If true, will consider all images in need of update.
  *                                 (Optional.)
+ * @return                         Error if any, otherwise nullptr.
  */
-void check_for_odyssey_codeupdate_needed(TARGETING::Target* i_ocmb,
-                                         ody_cur_version_new_image_t& o_updates_required,
-                                         uint64_t* const o_rt_hash_prefix = nullptr,
-                                         uint64_t* const o_bldr_hash_prefix = nullptr,
-                                         bool i_force_update_all = false);
+errlHndl_t check_for_odyssey_codeupdate_needed(TARGETING::Target* i_ocmb,
+                                               ody_cur_version_new_image_t& o_updates_required,
+                                               uint64_t* const o_rt_hash_prefix = nullptr,
+                                               uint64_t* const o_bldr_hash_prefix = nullptr,
+                                               bool i_force_update_all = false);
 
 /**
  * @brief Checks if update is needed and will perform i2c update if necessary
@@ -228,16 +229,6 @@ inline void captureErrorOcmbUpdateCheck(errlHndl_t& io_err,
 
     TRACISTEP(EXIT_MRK"captureErrorOcmbUpdateCheck");
 }
-
-/**
- * @brief Whether Odyssey code update is supported. This boils down to
- * checking whether the Odyssey firmware is available in PNOR. We are
- * doing this for temporary backward compatibility with old OCMBFW
- * partitions until we drop support.
- *
- * @TODO JIRA: PFHB-522 Remove this function and all calls.
- */
-bool odysseyCodeUpdateSupported();
 
 }//namespace ocmbupd
 

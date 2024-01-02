@@ -1593,7 +1593,8 @@ errlOwner IStepDispatcher::loadModules(uint32_t istepNumber)
                     "Module failed to initialize in istep %d; see related logs",
                     istepNumber);
             ERRORLOG::ErrlUserDetailsString(msg).addToLog(l_errl);
-            l_errl->collectTrace("INITSVC");
+            l_errl->collectTrace(INITSVC_COMP_NAME);
+            l_errl->collectTrace(ISTEP_COMP_NAME);
             aggregate(l_errl, iv_module_load_failed_errls, true);
         }
     }while(0);

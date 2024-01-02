@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 
 #include <hwas/common/hwas.H>
 
+#include <initservice/istepdispatcherif.H>
 #include <targeting/odyutil.H>
 #include <ocmbupd_helpers.H>
 
@@ -52,12 +53,6 @@ namespace ocmbupd
 // This is an owning handle to the OCMBFW PNOR partition, and is used
 // for all PNOR accesses in this module.
 ocmbupd::ocmbfw_owning_ptr_t OCMBFW_HANDLE;
-
-// @TODO: JIRA PFHB-522 Delete this function when OCMBFW header v1 is dropped
-bool odysseyCodeUpdateSupported()
-{
-    return OCMBFW_HANDLE != nullptr;
-}
 
 const char* codelevel_info_type_to_string(const codelevel_info_t::codelevel_info_type t)
 {
@@ -166,17 +161,16 @@ void str_to_hex(char* const o_buf, const uint8_t* const i_bytes, const size_t i_
  * @brief Check which Odyssey images need to be updated in the given chip, compared
  *        to what exists in PNOR.
  */
-void check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
-                                         ody_cur_version_new_image_t& o_updates_required,
-                                         uint64_t* const o_rt_hash_prefix,
-                                         uint64_t* const o_bldr_hash_prefix,
-                                         const bool i_force_all)
+errlHndl_t check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
+                                               ody_cur_version_new_image_t& o_updates_required,
+                                               uint64_t* const o_rt_hash_prefix,
+                                               uint64_t* const o_bldr_hash_prefix,
+                                               const bool i_force_all)
 {
     TRACF(ENTER_MRK"check_for_odyssey_codeupdate_needed(0x%08X)",
           get_huid(i_ocmb));
 
-    do
-    {
+    errlHndl_t result = nullptr;
 
     const auto ec = i_ocmb->getAttr<ATTR_EC>();
     const auto dd_level_major = (ec & 0xF0) >> 4,
@@ -229,17 +223,20 @@ void check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
 
         /* Find the appropriate image in PNOR to compare hashes with. */
         const ocmbfw_ext_image_info* img = nullptr;
-        if (auto errl = find_ocmbfw_ext_image(img,
-                                              OCMBFW_HANDLE.get(),
-                                              OCMB_TYPE_ODYSSEY,
-                                              image_type,
-                                              dd_level_major,
-                                              dd_level_minor))
+
+        result = find_ocmbfw_ext_image(img,
+                                       OCMBFW_HANDLE.get(),
+                                       OCMB_TYPE_ODYSSEY,
+                                       image_type,
+                                       dd_level_major,
+                                       dd_level_minor);
+
+        if (result)
         {
             TRACF("check_for_odyssey_codeupdate_needed: Cannot locate image with ocmb type = %d, "
-                  "image type = %d, dd = %d.%d in OCMBFW PNOR partition; skipping firmware update",
+                  "image type = %d, dd = %d.%d in OCMBFW PNOR partition",
                   OCMB_TYPE_ODYSSEY, image_type, dd_level_major, dd_level_minor);
-            delete errl;
+            result->collectTrace(OCMBUPD_COMP_NAME);
             break;
         }
 
@@ -247,11 +244,11 @@ void check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
 
         // Set the measured hashes for secureboot comparison between measurements
         // from the Odyssey later.
-        if(codelevel.type == codelevel_info_t::bootloader)
+        if (codelevel.type == codelevel_info_t::bootloader)
         {
             i_ocmb->setAttr<ATTR_SPPE_BOOTLOADER_MEASUREMENT_HASH>(img->measured_hash);
         }
-        else if(codelevel.type == codelevel_info_t::runtime)
+        else if (codelevel.type == codelevel_info_t::runtime)
         {
             i_ocmb->setAttr<ATTR_SPPE_RUNTIME_MEASUREMENT_HASH>(img->measured_hash);
         }
@@ -291,11 +288,9 @@ void check_for_odyssey_codeupdate_needed(Target* const i_ocmb,
         }
     }
 
-    } while (false);
-
     TRACF(EXIT_MRK"check_for_odyssey_codeupdate_needed");
 
-    return;
+    return result;
 }
 
 /** @brief Add callouts and collect traces for the given Odyssey code
@@ -317,7 +312,7 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb, const bool i_force_update_a
 {
     errlHndl_t errl = nullptr;
 
-    TRACF(ENTER_MRK"odysseyUpdateImages(0x%08X, i_on_update_force_all=%d)",
+    TRACF(ENTER_MRK"odysseyUpdateImages(0x%08X, i_force_update_all=%d)",
           get_huid(i_ocmb), i_force_update_all);
 
     do
@@ -327,11 +322,16 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb, const bool i_force_update_a
     {
         ody_cur_version_new_image_t images_to_update;
 
-        check_for_odyssey_codeupdate_needed(i_ocmb,
-                                            images_to_update,
-                                            nullptr,
-                                            nullptr,
-                                            i_force_update_all);
+        errl = check_for_odyssey_codeupdate_needed(i_ocmb,
+                                                   images_to_update,
+                                                   nullptr,
+                                                   nullptr,
+                                                   i_force_update_all);
+
+        if (errl)
+        {
+            break;
+        }
 
         errl = odyssey_update_code(i_ocmb, images_to_update);
 
@@ -343,6 +343,10 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb, const bool i_force_update_a
     }
 
     } while (false);
+
+    TRACF(EXIT_MRK"odysseyUpdateImages(0x%08X, i_force_update_all=%d) = "
+          TRACE_ERR_FMT,
+          get_huid(i_ocmb), i_force_update_all, TRACE_ERR_ARGS(errl));
 
     return errl;
 }
@@ -367,17 +371,9 @@ int init_module_ocmbfw_pnor_handle()
                   TRACE_ERR_FMT,
                   TRACE_ERR_ARGS(errl));
 
-        TRACISTEP(INFO_MRK"init_module_ocmbfw_pnor_handle: Ignoring error until support for "
-                  "OCMBFW PNOR partition version 1 is dropped");
-
-        // @TODO: JIRA PFHB-522 Capture this error when OCMBFW V1
-        // support is deprecated, this should fail the boot
-        delete errl;
-        errl = nullptr;
-
         OCMBFW_HANDLE = nullptr;
 
-        //captureError(errl, l_StepError, ISTEP_COMP_ID);
+        INITSERVICE::moduleInitFailed(errlOwner(errl));
     }
 
     return 0;

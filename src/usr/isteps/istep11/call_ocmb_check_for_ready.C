@@ -661,34 +661,25 @@ errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
 
     errlOwner l_return_errl;
 
-    if (odysseyCodeUpdateSupported()) // no point in doing anything if we have
-                                      // no Odyssey images in PNOR.
-    {
-        if (l_event != OCMB_BOOT_ERROR_NO_FFDC)
-        { // If there was an ERROR_NO_FFDC, the SBE is dead and we don't
-          // know the code levels.
-            set_ody_code_levels_state(i_ocmb);
-        }
-
-        if (l_fsm_errl)
-        {
-            // Pass any HWP error to the code update FSM and let it tell us what to do.
-
-            UdSPPECodeLevels(i_ocmb).addToLog(l_fsm_errl);
-            l_fsm_errl->addHwCallout(i_ocmb,
-                                     HWAS::SRCI_PRIORITY_HIGH,
-                                     HWAS::DECONFIG,
-                                     HWAS::GARD_NULL);
-            l_return_errl = ody_upd_process_event(i_ocmb,
-                                                  l_event,
-                                                  move(l_fsm_errl),
-                                                  o_restart_needed);
-        }
+    if (l_event != OCMB_BOOT_ERROR_NO_FFDC)
+    { // If there was an ERROR_NO_FFDC, the SBE is dead and we don't
+      // know the code levels.
+        l_return_errl.reset(set_ody_code_levels_state(i_ocmb));
     }
-    else
-    { // return the error we were going to pass to the FSM, if code
-      // update isn't supported.
-        l_return_errl = move(l_fsm_errl);
+
+    if (!l_return_errl && l_fsm_errl)
+    {
+        // Pass any HWP error to the code update FSM and let it tell us what to do.
+
+        UdSPPECodeLevels(i_ocmb).addToLog(l_fsm_errl);
+        l_fsm_errl->addHwCallout(i_ocmb,
+                                 HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::DECONFIG,
+                                 HWAS::GARD_NULL);
+        l_return_errl = ody_upd_process_event(i_ocmb,
+                                              l_event,
+                                              move(l_fsm_errl),
+                                              o_restart_needed);
     }
 
     return l_return_errl;

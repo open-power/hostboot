@@ -38,7 +38,7 @@
         TARGETING::Target* const M_ocmb = OCMB;                         \
         if (M_errl)                                                     \
         {                                                               \
-            if (ocmbupd::odysseyCodeUpdateSupported() && TARGETING::UTIL::isOdysseyChip(M_ocmb)) \
+            if (TARGETING::UTIL::isOdysseyChip(M_ocmb))                 \
             {                                                           \
                 ocmbupd::ody_upd_event_t M_update_event = ocmbupd::OCMB_HWP_FAIL_OTHER; \
                 if (M_errl->hasUserData1(fapi2::RC_UNSUPPORTED_ATTR_LEVEL)) \
@@ -71,15 +71,6 @@
                                                                         \
                     captureError(move(M_upd_errl), M_steperr, HWPF_COMP_ID, M_ocmb); \
                 }                                                       \
-            }                                                           \
-            else                                                        \
-            { /* @TODO: JIRA PFHB-522 Remove OCMBFW_HANDLE check when OCMBFW PNOR partition v1 support is removed */ \
-                TRACISTEP(ERR_MRK"call " #HWP " HWP(): failed on target 0x%08X. " \
-                          TRACE_ERR_FMT,                                \
-                          get_huid(M_ocmb),                             \
-                          TRACE_ERR_ARGS(M_errl));                      \
-                                                                        \
-                captureError(move(M_errl), M_steperr, HWPF_COMP_ID, M_ocmb); \
             }                                                           \
         }                                                               \
     })
