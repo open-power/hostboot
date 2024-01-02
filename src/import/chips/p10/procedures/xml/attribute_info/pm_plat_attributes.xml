@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -3620,6 +3620,11 @@
     Producer: MRWB
     </description>
     <valueType>uint32</valueType>
+     <enum>
+     NEW_FREQ = 1,
+     OLD_FREQ = 2,
+     USE_RDP  = 3
+     </enum>
     <platInit/>
     <initToZero/>
     <overrideOnly/>

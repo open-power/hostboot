@@ -67,7 +67,7 @@ using namespace ppb;
 #define POUNDV_POINT_CALC(VAL,X,Y,Z)     if (VAL == 0) {VAL = ( (Y - X) * Z) + X; }
 
 
-#define POUNDV_POINTS_CHECK(i) \
+#define POUNDV_POINTS_ZERO_CHECK(i) \
                 (iv_attr_mvpd_data[i].frequency_mhz   == 0 || \
                  iv_attr_mvpd_data[i].vdd_mv          == 0 || \
                  iv_attr_mvpd_data[i].idd_tdp_ac_10ma == 0 || \
@@ -79,6 +79,56 @@ using namespace ppb;
                  iv_attr_mvpd_data[i].ics_tdp_dc_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_rdp_ac_10ma == 0 || \
                  iv_attr_mvpd_data[i].ics_rdp_dc_10ma == 0)
+
+
+#define POUNDV_POINTS_INCREASE_PNEXT_CHECK(i) \
+    ((iv_attr_mvpd_data[i - 1].frequency_mhz >= \
+      iv_attr_mvpd_data[i].frequency_mhz) || \
+     (iv_attr_mvpd_data[i - 1].vdd_mv > \
+      iv_attr_mvpd_data[i].vdd_mv) || \
+     (iv_attr_mvpd_data[i - 1].vcs_mv > \
+      iv_attr_mvpd_data[i].vcs_mv) || \
+     (iv_attr_mvpd_data[i - 1].ics_tdp_ac_10ma > \
+      iv_attr_mvpd_data[i].ics_tdp_ac_10ma) || \
+     (iv_attr_mvpd_data[i - 1].ics_tdp_dc_10ma > \
+      iv_attr_mvpd_data[i].ics_tdp_dc_10ma) || \
+     (iv_attr_mvpd_data[i - 1].ics_rdp_ac_10ma > \
+      iv_attr_mvpd_data[i].ics_rdp_ac_10ma) || \
+     (iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma > \
+      iv_attr_mvpd_data[i].ics_rdp_dc_10ma) || \
+     (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma > \
+      iv_attr_mvpd_data[i].rt_tdp_ac_10ma) || \
+     (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma > \
+      iv_attr_mvpd_data[i].rt_tdp_ac_10ma))
+
+#define POUNDV_POINTS_INCREASE_CHECK(i) \
+    ((iv_attr_mvpd_data[i - 1].frequency_mhz >= \
+      iv_attr_mvpd_data[i].frequency_mhz) || \
+     (iv_attr_mvpd_data[i - 1].vdd_mv > \
+      iv_attr_mvpd_data[i].vdd_mv) || \
+     (iv_attr_mvpd_data[i - 1].idd_tdp_ac_10ma > \
+      iv_attr_mvpd_data[i].idd_tdp_ac_10ma) || \
+     (iv_attr_mvpd_data[i - 1].idd_tdp_dc_10ma > \
+      iv_attr_mvpd_data[i].idd_tdp_dc_10ma) || \
+     (iv_attr_mvpd_data[i - 1].idd_rdp_ac_10ma > \
+      iv_attr_mvpd_data[i].idd_rdp_ac_10ma) || \
+     (iv_attr_mvpd_data[i  -1].idd_rdp_dc_10ma > \
+      iv_attr_mvpd_data[i].idd_rdp_dc_10ma) || \
+     (iv_attr_mvpd_data[i - 1].vcs_mv > \
+      iv_attr_mvpd_data[i].vcs_mv) || \
+     (iv_attr_mvpd_data[i - 1].ics_tdp_ac_10ma > \
+      iv_attr_mvpd_data[i].ics_tdp_ac_10ma) || \
+     (iv_attr_mvpd_data[i - 1].ics_tdp_dc_10ma > \
+      iv_attr_mvpd_data[i].ics_tdp_dc_10ma) || \
+     (iv_attr_mvpd_data[i - 1].ics_rdp_ac_10ma > \
+      iv_attr_mvpd_data[i].ics_rdp_ac_10ma) || \
+     (iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma > \
+      iv_attr_mvpd_data[i].ics_rdp_dc_10ma) || \
+     (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma > \
+      iv_attr_mvpd_data[i].rt_tdp_ac_10ma) || \
+     (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma > \
+      iv_attr_mvpd_data[i].rt_tdp_ac_10ma))
+
 
 // TODO; need to reenable when RT values are guarenteed to be present
 //                 iv_attr_mvpd_data[i].rt_tdp_ac_10ma == 0 ||
@@ -1193,8 +1243,15 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
         float pstatef = 0;
         if (iv_attrs.attr_extended_freq_mode)
-         {
-             pstatef = (float)(5050 * 1000) /(float)(iv_frequency_step_khz);
+        {
+            if ( iv_attrs.attr_extended_freq_mode == ENUM_ATTR_EXTENDED_FREQ_MODE_OLD_FREQ)
+            {
+                pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
+            }
+            else
+            {
+                pstatef = (float)(EXTENDED_MAX_FREQUENCY_MHZ * 1000) /(float)(iv_frequency_step_khz);
+            }
              io_globalppb->base.dpll_pstate0_value = revle32((uint32_t)internal_round(pstatef));
          }
          else
@@ -1264,6 +1321,9 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_THROTTLE_ENABLE] = is_wof_throttle_enabled();
         io_globalppb->base.vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
         io_globalppb->base.vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
+        io_globalppb->pgpe_flags[PGPE_FLAG_NEGATIVE_SLOPE_SUPPORT] = (iv_attrs.attr_extended_freq_mode) ? 1 : 0;
+        io_globalppb->pgpe_flags[PGPE_FLAG_USE_RDP] = (iv_attrs.attr_extended_freq_mode == 3) ? 1 : 0;
+        io_globalppb->pgpe_flags[PGPE_FLAG_SLOPE_FIX_8_8] = 1;
 
         //WOV parameters
         io_globalppb->wov.wov_sample_125us                = revle32(iv_attrs.attr_wov_sample_125us);
@@ -1965,6 +2025,11 @@ void PlatPmPPB::attr_init( void )
     }
 
     FAPI_INF("Setting attribute defaults");
+
+    if ( iv_attrs.attr_freq_proc_refclock_khz == 0)
+    {
+       SET_DEFAULT(attr_freq_proc_refclock_khz, 133333);
+    }
 
     SET_DEFAULT(attr_proc_dpll_divider, 8);
 
@@ -2709,7 +2774,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             //idd_rdp_ac_10ma
             iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
             FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma,
-                    iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
+                    iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma);
             l_buffer_inc += 2;
             //idd_rdp_dc_10ma
             iv_attr_mvpd_poundV_raw[i].idd_rdp_dc_10ma = (uint32_t) UINT16_GET(l_buffer_inc);
@@ -3345,7 +3410,7 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
                     iv_attr_mvpd_data[i].rt_tdp_dc_10ma
                     );
 
-            if (POUNDV_POINTS_CHECK(i))
+            if (POUNDV_POINTS_ZERO_CHECK(i))
             {
                 disable_pstates();
 
@@ -3435,37 +3500,23 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
         // check valid operating points' values have this relationship (power save <= nominal <= turbo <= ultraturbo)
         for (i = 1; i <= (NUM_PV_POINTS) - 1; i++)
         {
+            uint32_t l_cf_point_check_fail = 0;
             FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
                     pv_op_str[i - 1], pv_op_str[i]);
 
-             if ((iv_attr_mvpd_data[i - 1].frequency_mhz >=
-                 iv_attr_mvpd_data[i].frequency_mhz) ||
-                (iv_attr_mvpd_data[i - 1].vdd_mv >
-                 iv_attr_mvpd_data[i].vdd_mv) ||
-                (iv_attr_mvpd_data[i - 1].idd_tdp_ac_10ma >
-                 iv_attr_mvpd_data[i].idd_tdp_ac_10ma) ||
-                (iv_attr_mvpd_data[i - 1].idd_tdp_dc_10ma >
-                iv_attr_mvpd_data[i].idd_tdp_dc_10ma) ||
-                (iv_attr_mvpd_data[i - 1].idd_rdp_ac_10ma >
-                iv_attr_mvpd_data[i].idd_rdp_ac_10ma) ||
-                (iv_attr_mvpd_data[i  -1].idd_rdp_dc_10ma >
-                iv_attr_mvpd_data[i].idd_rdp_dc_10ma) ||
-                (iv_attr_mvpd_data[i - 1].vcs_mv >
-                iv_attr_mvpd_data[i].vcs_mv) ||
-                (iv_attr_mvpd_data[i - 1].ics_tdp_ac_10ma >
-                iv_attr_mvpd_data[i].ics_tdp_ac_10ma) ||
-                (iv_attr_mvpd_data[i - 1].ics_tdp_dc_10ma >
-                iv_attr_mvpd_data[i].ics_tdp_dc_10ma) ||
-                (iv_attr_mvpd_data[i - 1].ics_rdp_ac_10ma >
-                iv_attr_mvpd_data[i].ics_rdp_ac_10ma) ||
-                (iv_attr_mvpd_data[i - 1].ics_rdp_dc_10ma >
-                iv_attr_mvpd_data[i].ics_rdp_dc_10ma) ||
-                (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
-                iv_attr_mvpd_data[i].rt_tdp_ac_10ma) ||
-                (iv_attr_mvpd_data[i - 1].rt_tdp_ac_10ma >
-                iv_attr_mvpd_data[i].rt_tdp_ac_10ma))
+            if ( (iv_attrs.attr_extended_freq_mode) &&
+                 POUNDV_POINTS_INCREASE_PNEXT_CHECK(i))
             {
-                disable_pstates();
+                l_cf_point_check_fail = 1;
+            }
+            else if ( POUNDV_POINTS_INCREASE_CHECK(i))
+            {
+                l_cf_point_check_fail = 1;
+            }
+
+            if ( l_cf_point_check_fail )
+            {
+                 disable_pstates();
 
                  FAPI_INF("%s Frequency value %u is %s %s Frequency value %u",
                         pv_op_str[i - 1], iv_attr_mvpd_data[i - 1].frequency_mhz,
@@ -5589,6 +5640,8 @@ fapi2::ReturnCode PlatPmPPB::freq2pState (
     float deltaf = 0;
     float pstate32 = 0;
     char  round_str[32];
+    static uint32_t freq_cnt = 0;
+    static uint32_t ps_cnt = 0;
 
     deltaf = (float)iv_reference_frequency_khz - (float)i_freq_khz;
 
@@ -5597,8 +5650,15 @@ fapi2::ReturnCode PlatPmPPB::freq2pState (
         if (i_error_mode != PPB_OFF)
         {
             if (i_error_mode != PPB_FAIL)
+            {
+                if (freq_cnt < 2)
+                {
+
                 FAPI_INF("WARNING: iv_reference_frequency_khz %d;  i_freq_khz: %d; deltaf %f",
                             iv_reference_frequency_khz, i_freq_khz, deltaf);
+                }
+            }
+            freq_cnt++;
 
             if (i_error_mode == PPB_INFO)
             {
@@ -5689,7 +5749,14 @@ fapi2::ReturnCode PlatPmPPB::freq2pState (
         if (i_error_mode != PPB_OFF)
         {
             if (i_error_mode == PPB_WARN)
+            {
+                if (ps_cnt < 5)
+                {
                 FAPI_INF("WARNING: Pstate is less than PSTATE_MIN");
+                }
+
+            }
+            ps_cnt++;
 
             if (i_error_mode == PPB_INFO)
             {
@@ -5826,16 +5893,16 @@ void PlatPmPPB::compute_PStateV_I_slope(
         }
 
 #define COMPUTE_V_I_SLOPES(PS_V_I, slope_type, V_I_MAX, V_I_MIN, PSTATE_MAX, PSTATE_MIN)  \
-     if (slope_type == NORMAL) \
-    {\
-        PS_V_I = revle16( \
-                  compute_slope_4_12(V_I_MAX, V_I_MIN, PSTATE_MIN, PSTATE_MAX) );\
-    } \
-    else if (slope_type == INVERTED) \
-    {\
-        PS_V_I = revle16( \
-                  compute_slope_4_12( PSTATE_MIN, PSTATE_MAX, V_I_MAX, V_I_MIN) );\
-    }
+            if (slope_type == NORMAL) \
+            {\
+                PS_V_I = revle16( \
+                        compute_normal_slope_8_8(V_I_MAX, V_I_MIN, PSTATE_MIN, PSTATE_MAX) );\
+            } \
+            else if (slope_type == INVERTED) \
+            {\
+                PS_V_I = revle16( \
+                        compute_inverted_slope_8_8( PSTATE_MIN, PSTATE_MAX, V_I_MAX, V_I_MIN) );\
+            } \
 
         for(auto region(REGION_CF0_CF1); region <= REGION_CF6_CF7; ++region)
         {
@@ -6055,19 +6122,18 @@ void PlatPmPPB::compute_dds_slopes(
                     iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely)
                 {
 
-                    o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
-                            revle16(compute_slope_4_12(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
+                            COMPUTE_V_I_SLOPES(o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region],
+                                NORMAL,iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_operating_points[pt_set][region].pstate,
-                                iv_operating_points[pt_set][region + 1].pstate)
-                           );
+                                iv_operating_points[pt_set][region + 1].pstate);
+
                 } else {
-                    o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
-                           revle16(compute_slope_4_12(iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
+                           COMPUTE_V_I_SLOPES(o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region],
+                                NORMAL,iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_operating_points[pt_set][region].pstate,
-                                iv_operating_points[pt_set][region + 1].pstate)
-                           );
+                                iv_operating_points[pt_set][region + 1].pstate);
                 }
 
                 FAPI_DBG("ps_dds_delay_slopes: [%s][%s][%u] 0x%04x %u 0x%04x %u delay[r]=%u delay[r+1]=%u",

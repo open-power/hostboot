@@ -695,56 +695,114 @@ class PlatPmPPB
         }
 
         /// -----------------------------------------------------------------------
-        /// @brief Compute slope values for fixed point of shift 4.12
-        /// @param[in]     y1
-        /// @param[in]     y0
-        /// @param[in]     x1
-        /// @param[in]     x0
-        /// @return computed slope (y1-y0)/(x1-x0) * (1 << VID_SLOPE_FP_SHIFT_12)
+        /// @brief Compute normal slope values for fixed point of shift 8.8
+        /// @param[in]     i_y1
+        /// @param[in]     i_y0
+        /// @param[in]     i_x1
+        /// @param[in]     i_x0
+        /// @return computed slope (i_y1-i_y0)/(i_x1-i_x0) * (1 << VID_SLOPE_FP_SHIFT_8)
         /// -----------------------------------------------------------------------
-        int16_t compute_slope_4_12(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
+        int16_t compute_normal_slope_8_8(uint32_t i_y1, uint32_t i_y0, uint32_t i_x1, uint32_t i_x0)
+        {
+            int16_t l_slope_val = 0;
+
+            // Perform division using floats for maximum precision
+            // Store resulting slope in 8.8 Fixed-Pt format
+            if ( (int16_t)(i_y1 - i_y0) < 0)
+            {
+                l_slope_val = (int16_t) (((float)(i_y0 - i_y1) / (float)(i_x1 - i_x0)) * (1 << VID_SLOPE_FP_SHIFT_8));
+                l_slope_val |= 0x1;
+                FAPI_INF("Negative l_val %f", l_slope_val);
+            }
+            else
+            {
+                FAPI_INF("Positive slope");
+                l_slope_val = (int16_t) (((float)(i_y1 - i_y0) / (float)(i_x1 - i_x0)) * (1 << VID_SLOPE_FP_SHIFT_8));
+                l_slope_val &= 0xFFFE;
+            }
+
+            return l_slope_val;
+        }
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute inverted slope values for fixed point of shift 8.8
+        /// @param[in]     i_y1
+        /// @param[in]     i_y0
+        /// @param[in]     i_x1
+        /// @param[in]     i_x0
+        /// @return computed slope (i_y1-i_y0)/(i_x1-i_x0) * (1 << VID_SLOPE_FP_SHIFT_8)
+        /// -----------------------------------------------------------------------
+        int16_t compute_inverted_slope_8_8(uint32_t i_y1, uint32_t i_y0, uint32_t i_x1, uint32_t i_x0)
+        {
+            int16_t l_slope_val = 0;
+
+            // Perform division using floats for maximum precision
+            // Store resulting slope in 8.8 Fixed-Pt format
+            if ( (int16_t)(i_x1 - i_x0) < 0)
+            {
+                l_slope_val = (int16_t) (((float)(i_y1 - i_y0) / (float)(i_x0 - i_x1)) * (1 << VID_SLOPE_FP_SHIFT_8));
+                l_slope_val |= 0x1;
+            }
+            else
+            {
+                l_slope_val = (int16_t) (((float)(i_y1 - i_y0) / (float)(i_x1 - i_x0)) * (1 << VID_SLOPE_FP_SHIFT_8));
+                l_slope_val &= 0xFFFE;
+            }
+
+            return l_slope_val;
+        }
+
+        /// -----------------------------------------------------------------------
+        /// @brief Compute slope values for fixed point of shift 4.12
+        /// @param[in]     i_y1
+        /// @param[in]     i_y0
+        /// @param[in]     i_x1
+        /// @param[in]     i_x0
+        /// @return computed slope (i_y1-i_y0)/(i_x1-i_x0) * (1 << VID_SLOPE_FP_SHIFT_12)
+        /// -----------------------------------------------------------------------
+        int16_t compute_slope_4_12(uint32_t i_y1, uint32_t i_y0, uint32_t i_x1, uint32_t i_x0)
         {
             return (int16_t)
                    (
                        // Perform division using floats for maximum precision
                        // Store resulting slope in 4.12 Fixed-Pt format
-                       ((float)(y1 - y0) / (float)(x1 - x0)) * (1 << VID_SLOPE_FP_SHIFT_12)
+                       ((float)(i_y1 - i_y0) / (float)(i_x1 - i_x0)) * (1 << VID_SLOPE_FP_SHIFT_12)
                    );
 
         }
         /// -----------------------------------------------------------------------
         /// @brief Compute slope values for fixed point of shift 2.6
-        /// @param[in]     y1
-        /// @param[in]     y0
-        /// @param[in]     x1
-        /// @param[in]     x0
-        /// @return computed slope (y1-y0)/(x1-x0) * (1 << 6)
+        /// @param[in]     i_y1
+        /// @param[in]     i_y0
+        /// @param[in]     i_x1
+        /// @param[in]     i_x0
+        /// @return computed slope (i_y1-i_y0)/(i_x1-i_x0) * (1 << 6)
         /// -----------------------------------------------------------------------
-        int8_t compute_slope_2_6(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
+        int8_t compute_slope_2_6(uint32_t i_y1, uint32_t i_y0, uint32_t i_x1, uint32_t i_x0)
         {
             return (int8_t)
                    (
                        // Perform division using floats for maximum precision
                        // Store resulting slope in 2.6 Fixed-Pt format
-                       ((float)(y1 - y0) / (float)(x1 - x0)) * (1 << 6)
+                       ((float)(i_y1 - i_y0) / (float)(i_x1 - i_x0)) * (1 << 6)
                    );
 
         }
         /// -----------------------------------------------------------------------
         /// @brief Compute slope values for fixed point of shift 4.9
-        /// @param[in]     y1
-        /// @param[in]     y0
-        /// @param[in]     x1
-        /// @param[in]     x0
-        /// @return computed slope (y1-y0)/(x1-x0) * (1 << I_SLOPE_FP_SHIFT_9)
+        /// @param[in]     i_y1
+        /// @param[in]     i_y0
+        /// @param[in]     i_x1
+        /// @param[in]     i_x0
+        /// @return computed slope (i_y1-i_y0)/(i_x1-i_x0) * (1 << I_SLOPE_FP_SHIFT_9)
         /// -----------------------------------------------------------------------
-        int16_t compute_slope_4_9(uint32_t y1, uint32_t y0, uint32_t x1, uint32_t x0)
+        int16_t compute_slope_4_9(uint32_t i_y1, uint32_t i_y0, uint32_t i_x1, uint32_t i_x0)
         {
             return (int16_t)
                    (
                        // Perform division using floats for maximum precision
                        // Store resulting slope in 4.9 Fixed-Pt format
-                       ((float)(y1 - y0) / (float)(x1 - x0)) * (1 << I_SLOPE_FP_SHIFT_9)
+                       ((float)(i_y1 - i_y0) / (float)(i_x1 - i_x0)) * (1 << I_SLOPE_FP_SHIFT_9)
                    );
 
         }
