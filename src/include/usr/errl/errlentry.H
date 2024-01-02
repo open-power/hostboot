@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -2001,9 +2001,11 @@ template<typename Errorlog, typename Container>
 inline auto aggregate(Errorlog& io_main_error, Container&& cont, const bool i_update_plid = false)
     -> decltype(begin(cont), void())
 {
-    for (auto x : cont)
+    using std::move;
+
+    for (auto&& x : cont)
     {
-        aggregate(io_main_error, x, i_update_plid);
+        aggregate(io_main_error, errlOwner { move(x) }, i_update_plid);
     }
 
     cont.clear();
