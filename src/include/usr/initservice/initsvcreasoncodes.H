@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,6 +89,8 @@ enum    InitServiceReasonCode
     ISTEP_ATTN_MONITOR_MSG_FAILED =  INITSVC_COMP_ID | 0x16,
     ISTEP_IPL_STATS               =  INITSVC_COMP_ID | 0x17,
     ISTEP_ERROR_INJECTED          =  INITSVC_COMP_ID | 0x18,
+
+    ISTEP_MODULE_INIT_FAILED     = INITSVC_COMP_ID | 0x19
 };
 
 enum InitServiceUserDetailDataSubSection

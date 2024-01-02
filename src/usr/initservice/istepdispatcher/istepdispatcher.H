@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,6 +121,15 @@ public:
      *      any errors that might have been encountered.
      */
     void init (errlHndl_t &io_rtaskRetErrl);
+
+    /**
+     * @brief Register with the IStepDispatcher that whatever module is
+     * currently being loaded has failed with the given error, and that
+     * the IPL should halt.
+     *
+     * @param[in] i_errl  The error that caused the failure.
+     */
+    void moduleInitFailed(errlOwner i_errl);
 
     /**
      * @brief Send a SyncPoint
@@ -406,7 +415,7 @@ private:
     /**
      * @brief This function loads the modules for each new Istep
      */
-    void loadModules(uint32_t istepNumber) const;
+    errlOwner loadModules(uint32_t istepNumber);
 
     /**
      * @brief This function unloads the modules for each new Istep
@@ -510,6 +519,8 @@ private:
 
     // Message Queue for receiving message from SP or SPless user console
     msg_q_t iv_msgQ;
+
+    std::vector<errlOwner> iv_module_load_failed_errls;
 
 #ifdef CONFIG_RECONFIG_LOOP_TESTS_ENABLE
     // Reconfigure Loop Test data structure for accessing the

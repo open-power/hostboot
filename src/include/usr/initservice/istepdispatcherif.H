@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,6 +127,18 @@ void setAcceptIstepMessages ( bool i_accept );
  * @return None.
  */
 void setNewGardRecord ( void );
+
+/**
+ * @brief Register with the IStepDispatcher that whatever module is
+ * currently being loaded has failed with the given error, and that
+ * the IPL should halt.
+ *
+ * @note This just invokes the member function of the same name on the
+ * IStepDispatcher singleton.
+ *
+ * @param[in] i_errl  The error that caused the failure.
+ */
+void moduleInitFailed(errlOwner i_errl);
 
 }
 

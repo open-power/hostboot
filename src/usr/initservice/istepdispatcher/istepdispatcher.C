@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -43,6 +43,7 @@
 #include <sys/misc.h>                    //  cpu_all_winkle
 #include <errl/errlentry.H>              //  errlHndl_t
 #include <errl/errlmanager.H>
+#include <errl/errludstring.H>
 #include <initservice/isteps_trace.H>    //  ISTEPS_TRACE buffer
 #include <initservice/initsvcudistep.H>  //  InitSvcUserDetailsIstep
 #include <initservice/taskargs.H>        //  TASK_ENTRY_MACRO
@@ -558,6 +559,14 @@ void IStepDispatcher::init(errlHndl_t &io_rtaskRetErrl)
     printk( "IStepDispatcher exit.\n" );
     io_rtaskRetErrl = err;
     err = nullptr;
+}
+
+void IStepDispatcher::moduleInitFailed(errlOwner i_errl)
+{
+    TRACFCOMP(g_trac_initsvc, "Module initialization failed: "
+              TRACE_ERR_FMT,
+              TRACE_ERR_ARGS(i_errl));
+    iv_module_load_failed_errls.push_back(move(i_errl));
 }
 
 // ----------------------------------------------------------------------------
@@ -1154,8 +1163,19 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             unLoadModules(iv_istepModulesLoaded);
 
             // load modules for this step
-            loadModules(i_istep);
-            iv_istepModulesLoaded = i_istep;
+            err = loadModules(i_istep).release();
+
+            if (err)
+            {
+                TRACFCOMP(g_trac_initsvc,
+                          ERR_MRK"loadModules() failed for istep %d.%d",
+                          i_istep, i_substep);
+                break;
+            }
+            else
+            {
+                iv_istepModulesLoaded = i_istep;
+            }
         }
 
         // Zero ATTR_RECONFIGURE_LOOP
@@ -1505,9 +1525,9 @@ const TaskInfo * IStepDispatcher::findTaskInfo(const uint32_t i_IStep,
 // ----------------------------------------------------------------------------
 // loadModules()
 // ----------------------------------------------------------------------------
-void IStepDispatcher::loadModules(uint32_t istepNumber) const
+errlOwner IStepDispatcher::loadModules(uint32_t istepNumber)
 {
-    errlHndl_t l_errl = NULL;
+    errlOwner l_errl = NULL;
     do
     {
         const ExtTaskInfo* l_stepPtr = nullptr;
@@ -1538,8 +1558,7 @@ void IStepDispatcher::loadModules(uint32_t istepNumber) const
                     "loading [%s]",
                     l_stepPtr->depModules->modulename[i]);
 
-            l_errl = VFS::module_load(
-                    l_stepPtr->depModules->modulename[i] );
+            l_errl.reset(VFS::module_load(l_stepPtr->depModules->modulename[i]));
             i++;
         }
 
@@ -1549,7 +1568,35 @@ void IStepDispatcher::loadModules(uint32_t istepNumber) const
             assert(0);
         }
 
+        if (!iv_module_load_failed_errls.empty())
+        {
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"loadModules() failed to load "
+                      "modules for istep %d; module init failed", istepNumber);
+
+            /*@
+             *@reasoncode       ISTEP_MODULE_INIT_FAILED
+             *@moduleid         ISTEP_INITSVC_MOD_ID
+             *@userdata1[00:63] istep requested
+             *@devdesc          Module initialization failed
+             *@custdesc         An internal firmware error occured
+             */
+            l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                             ISTEP_INITSVC_MOD_ID,
+                                             ISTEP_MODULE_INIT_FAILED,
+                                             istepNumber,
+                                             0,
+                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            char msg[1024] = { };
+            sprintf(msg,
+                    "Module failed to initialize in istep %d; see related logs",
+                    istepNumber);
+            ERRORLOG::ErrlUserDetailsString(msg).addToLog(l_errl);
+            l_errl->collectTrace("INITSVC");
+            aggregate(l_errl, iv_module_load_failed_errls, true);
+        }
     }while(0);
+
+    return l_errl;
 }
 // ----------------------------------------------------------------------------
 // unloadModules()
@@ -3109,6 +3156,11 @@ void setAcceptIstepMessages(bool i_accept)
 void setNewGardRecord()
 {
     return IStepDispatcher::getTheInstance().setNewGardRecord();
+}
+
+void moduleInitFailed(errlOwner i_errl)
+{
+    return IStepDispatcher::getTheInstance().moduleInitFailed(move(i_errl));
 }
 
 void requestReboot(const char* i_reason)
