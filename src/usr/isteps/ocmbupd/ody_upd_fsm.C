@@ -1054,6 +1054,16 @@ errlOwner ody_upd_process_event(Target* const i_ocmb,
           state_to_str(i_state).data(),
           event_to_str(i_event).data());
 
+    if (i_errlog)
+    {
+        SBEIO::UdSPPECodeLevels(i_ocmb).addToLog(i_errlog);
+
+        const auto boot_side = ocmb_boot_side_to_str(i_state.ocmb_boot_side);
+        char buf[1024] = { };
+        sprintf(buf, "SPPE boot side: %s", boot_side.data());
+        ErrlUserDetailsString(buf).addToLog(i_errlog);
+    }
+
     errlOwner errl = nullptr;
 
     do
@@ -1190,7 +1200,6 @@ errlOwner ody_upd_process_event(Target* const i_ocmb,
 
     if (i_errlog)
     {
-        SBEIO::UdSPPECodeLevels(i_ocmb).addToLog(i_errlog);
         errlCommit(i_errlog, OCMBUPD_COMP_ID);
     }
 
