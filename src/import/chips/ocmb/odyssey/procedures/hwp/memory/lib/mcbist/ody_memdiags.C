@@ -210,6 +210,7 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
     // For Odyssey, The port bits are reserved and we use the DIMM bit to select the port
     const uint64_t l_port_start_address = iv_const.iv_start_address.get_port();
     const uint64_t l_port_end_address = iv_const.iv_end_address.get_port();
+    const uint64_t l_start_mrank = iv_const.iv_start_address.get_master_rank();
 
     // <start, end> address pairs
     std::vector<mss::pair<mss::mcbist::address<mss::mc_type::ODYSSEY>, mss::mcbist::address<mss::mc_type::ODYSSEY>>>
@@ -219,13 +220,8 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
 
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(iv_target))
     {
-        l_port_exists[mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port)] = true;
-
-        // Only need to build address ranges for one port because we reuse them between ports
-        if (l_addrs.size() > 0)
-        {
-            continue;
-        }
+        const auto l_port_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+        l_port_exists[l_port_pos] = true;
 
         uint8_t l_attr_num_mranks[mss::ody::MAX_DIMM_PER_PORT] = {};
         uint8_t l_attr_num_lranks[mss::ody::MAX_DIMM_PER_PORT] = {};
@@ -238,9 +234,29 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
         l_num_mranks = (l_attr_num_mranks[0] == 0) ? 1 : l_attr_num_mranks[0];
         l_num_sranks = l_attr_num_lranks[0] / l_attr_num_mranks[0];
 
+        // If our DIMM has more than 4 logical ranks, we run a test per mrank
+        // so we only want to make subtests for the port in the starting address
+        if ((l_attr_num_lranks[0] > MAX_SUBTEST_ADDR_PAIRS) && (l_port_pos != l_port_start_address))
+        {
+            l_port_exists[l_port_pos] = false;
+        }
+
+        // Only need to build address ranges for one port because we reuse them between ports
+        if (l_addrs.size() > 0)
+        {
+            continue;
+        }
+
         // First set up our address ranges to cover the full range of addresses for all the mranks/sranks
         for (uint8_t l_mrank = 0; l_mrank < l_num_mranks; l_mrank++)
         {
+            // If our DIMM has more than 4 logical ranks, we run a test per mrank
+            // so only process the mrank of our starting address
+            if ((l_attr_num_lranks[0] > MAX_SUBTEST_ADDR_PAIRS) && (l_mrank != l_start_mrank))
+            {
+                continue;
+            }
+
             for (uint8_t l_srank = 0; l_srank < l_num_sranks; l_srank++)
             {
                 mss::mcbist::address<mss::mc_type::ODYSSEY> l_start_addr = 0;
@@ -276,12 +292,9 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
             }
         }
 
-        // TODO Zen:MST-2467: to support sf_read of DIMMs with more than 4 logical ranks, we will need the following:
-        // If our vector is larger than the number of supported address pairs (4) we need to remove ranges that are:
-        // 1. on an mrank that's less than our starting address
-        // 2. beyond the end of the starting address's mrank
-
         // Assert if our vector is larger than the number of supported address pairs (4)
+        // Note we do support DIMMs with more than 4 logical ranks, but in those cases we make a test
+        // on one rank at a time, so this should not trigger if everything is working properly
         FAPI_ASSERT( l_addrs.size() <= MAX_SUBTEST_ADDR_PAIRS,
                      fapi2::ODY_TOO_MANY_RANKS_FOR_SUBTEST_SUPPORT()
                      .set_MC_TARGET(iv_target)
@@ -312,9 +325,6 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
     {
         FAPI_TRY( mss::mcbist::config_address_range3<mss::mc_type::ODYSSEY>(iv_target, l_addrs[3].first, l_addrs[3].second) );
     }
-
-    // TODO Zen:MST-2467: to support sf_read of DIMMs with more than 4 logical ranks, we will need the following:
-    // If we have more than 4 total logical ranks, only set up subtests for the port that's set in the strarting address
 
     // Now we create the subtests we need for the requested address range
     for (uint8_t l_addr_count = 0; l_addr_count < l_addrs.size(); l_addr_count++)
@@ -457,8 +467,6 @@ fapi_try_exit:
 template <>
 fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_read_internal()
 {
-    constexpr uint8_t MAX_SUBTEST_ADDR_PAIRS = 4;
-
     FAPI_INF("multi-port read internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
     using TT = mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
 
@@ -497,18 +505,7 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_read_internal()
 
     // Setup the address configurations and subtests
     // Note: for a read test we do need to stop on srank boundaries, so we have to create a subtest per srank
-    if (l_attr_num_lranks[0] > MAX_SUBTEST_ADDR_PAIRS)
-    {
-        // Temporary fix: if we have more logical ranks than we can fit in one test, just make a subtest per port for now
-        // TODO Zen:MST-2467: This will get replaced with multi_port_addr() when the final fix is in there
-        FAPI_TRY( multi_port_addr_simple() );
-    }
-    else
-    {
-        // if we can fit all the sranks into our address pair registers we can make a test that will cover each port's
-        // entire address range
-        FAPI_TRY( multi_port_addr() );
-    }
+    FAPI_TRY( multi_port_addr() );
 
     // Here's an interesting problem. PRD (and others maybe) expect the operation to proceed in address-order.
     // That is, when PRD finds an address it stops on, it wants to continue from there "to the end." That means
