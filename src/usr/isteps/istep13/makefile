@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -60,6 +60,7 @@ EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/memory/lib/workarounds
 EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/memory/lib/fir
 EXTRAINCDIR += ${ODYSSEY_HWP_PATH}/memory/lib/power_thermal
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 
 # from src/usr/isteps/istep13
 OBJS += call_mss_scominit.o
