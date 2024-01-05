@@ -705,11 +705,16 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
     {
 
     // We need to do an explicit delay before our first i2c operation
-    //  to the OCMBs to ensure we don't catch them too early in the boot
-    //  and lock them up.
-    const auto ocmb_delay = UTIL::assertGetToplevelTarget()
-      ->getAttr<ATTR_OCMB_RESET_DELAY_SEC>();
-    nanosleep(ocmb_delay,0);
+    //  to the Explorer OCMBs to ensure we don't catch them too early in the
+    //  boot and lock them up.
+    if( getOcmbChipTypesInSystem(UTIL_FILTER_FUNCTIONAL) & UTIL_EXPLORER_FOUND )
+    {
+        const auto ocmb_delay = UTIL::assertGetToplevelTarget()
+          ->getAttr<ATTR_OCMB_RESET_DELAY_SEC>();
+        TRACISTEP("call_ocmb_check_for_ready> Pausing for %d seconds for Explorer to boot",
+                  ocmb_delay);
+        nanosleep(ocmb_delay,0);
+    }
 
     TargetHandleList functionalProcChipList;
 
