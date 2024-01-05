@@ -89,6 +89,8 @@
 #include <secureboot/service.H>
 #include <targeting/common/mfgFlagAccessors.H>
 
+#include <arch/magic.H>
+
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
@@ -174,6 +176,17 @@ errlHndl_t ody_attribute_setup(Target* const i_ocmb)
             // always turn on bit11, *temporary*
             //   @TODO: JIRA: PFHB-664 Remove hardcode setting bit11
             ocmb_boot_flags_new |= BOOT_FLAGS_BIT11;  // Disable SCOM Security
+        }
+
+        // Do not turn on security in Simics because it is very slow,
+        //  unless explicitly told to do it
+        if( Util::isSimicsRunning() && security_enabled )
+        {
+            if( !magic_check_feature(MAGIC_FEATURE__ODYSECURITY) )
+            {
+                TRACISTEP("ody_attribute_setup: Skip security enablement in Simics");
+                security_enabled = false;
+            }
         }
 
         if (security_enabled)

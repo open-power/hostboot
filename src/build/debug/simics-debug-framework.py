@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2023
+# Contributors Listed Below - COPYRIGHT 2011,2024
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -1011,6 +1011,10 @@ def magic_instruction_callback(user_arg, cpu, arg):
             value = 1 if simenv.hb_skipocc  == 1 else 0
             if value != 0:
                 print("HB> MAGIC_FEATURE__SKIPOCC = %d" % (value))
+        elif feature == 6:  #MAGIC_FEATURE__ODYSECURITY
+            value = 1 if simenv.hb_odysecurity  == 1 else 0
+            if value != 0:
+                print("HB> MAGIC_FEATURE__ODYSECURITY = %d" % (value))
         else:
             print("MAGIC_CHECK_FEATURE> Unknown feature %d requested for" % (feature))
         cpu.r3 = value

@@ -263,6 +263,14 @@ try {
     $hb_skipocc = 0
 }
 
+# Allow a user to enable Odyssey security that is normally disabled in simics
+try {
+    echo "hb_odysecurity = "+$hb_odysecurity
+} except {
+    #default to not being enabled
+    $hb_odysecurity = 0
+}
+
 # Handle the SIMICS_MORECACHE environment variable, if set, and enable more
 # backing caches
 run-command-file (lookup-file -query ($hb_script_location + "/morecache.simics"))

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -340,6 +340,7 @@ constexpr uint8_t MAGIC_FEATURE__IGNORESMPFAIL = 2;
 constexpr uint8_t MAGIC_FEATURE__IGNORETODFAIL = 3;
 constexpr uint8_t MAGIC_FEATURE__USEOLDSPI_DEPRECATED = 4;
 constexpr uint8_t MAGIC_FEATURE__SKIPOCC       = 5;
+constexpr uint8_t MAGIC_FEATURE__ODYSECURITY   = 6;
 
 /**
  * @brief Check if a running Bonito machine
