@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -360,11 +360,9 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-// TODO: Zen:MST-2412 Uncomment logError once supported on SPPE
-#ifndef __PPE__
     // We've found a valid row repair - log it as predictive, so we get callouts in MFG test but don't fail out
     fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
-#endif
+
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     return fapi2::FAPI2_RC_SUCCESS;
 }

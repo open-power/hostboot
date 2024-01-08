@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,15 +155,12 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_
 
         if (l_port_rc != fapi2::FAPI2_RC_SUCCESS)
         {
-// TODO: Zen:MST-2412 Uncomment logError once supported on SPPE
-#ifndef __PPE__
             // Log error from previous port if it failed
             if (l_rc != fapi2::FAPI2_RC_SUCCESS)
             {
                 fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE);
             }
 
-#endif
             // Set HWP RC to last port's fail so it gets logged upon HWP exit
             l_rc = l_port_rc;
         }
