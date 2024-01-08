@@ -581,8 +581,20 @@ errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
 
             if (!async_ffdc_errls.empty())
             {
-                l_event = OCMB_BOOT_ERROR_WITH_FFDC;
-                aggregate(l_fsm_errl, move(async_ffdc_errls));
+                if (l_event == NO_EVENT)
+                { // if check_for_ready did not fail, then we don't
+                  // want the existence of async FFDC to cause the
+                  // boot to halt.
+                    for (auto errl : async_ffdc_errls)
+                    {
+                        errlCommit(errl, ISTEP_COMP_ID);
+                    }
+                }
+                else
+                {
+                    l_event = OCMB_BOOT_ERROR_WITH_FFDC;
+                    aggregate(l_fsm_errl, move(async_ffdc_errls));
+                }
             }
         }
     }
