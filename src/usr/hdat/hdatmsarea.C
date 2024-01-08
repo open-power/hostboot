@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -362,7 +362,8 @@ errlHndl_t HdatMsArea::addMmioAddrRange(hdatMsAddr_t &i_start,
                                         uint32_t i_mmioMemCntlId,
                                         uint32_t i_mmioProcPhyChipId,
                                         uint64_t i_mmioHbrtChipId,
-                                        uint64_t i_mmioFlags)
+                                        uint64_t i_mmioFlags,
+                                        uint16_t i_ocmbChipId)
 {
     HDAT_ENTER();
     errlHndl_t l_errlHndl = NULL;
@@ -381,6 +382,7 @@ errlHndl_t HdatMsArea::addMmioAddrRange(hdatMsAddr_t &i_start,
         l_addr->hdatMmioProcPhyChipId = i_mmioProcPhyChipId;
         l_addr->hdatMmioHbrtChipId = i_mmioHbrtChipId;
         l_addr->hdatMmioFlags = i_mmioFlags;
+        l_addr->hdatMmioChipId = i_ocmbChipId;
         iv_mmioAddrRngArrayHdr.hdatArrayCnt++;
     }
     else
@@ -795,6 +797,7 @@ void HdatMsArea::prt()
         HDAT_INF("      hdatMmioHbrtChipId = %u",
                  l_mmioAddr->hdatMmioHbrtChipId);
         HDAT_INF("      hdatMmioFlags = %u", l_mmioAddr->hdatMmioFlags);
+        HDAT_INF("      hdatMmioChipId = %u", l_mmioAddr->hdatMmioChipId);
         l_mmioAddr++;
         l_mmioCnt++;
     }

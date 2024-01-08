@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -649,7 +649,8 @@ errlHndl_t HdatMsVpd::addMsAreaMmioAddrRange(uint16_t i_msAreaId,
                                              uint32_t i_mmioMemCntlId,
                                              uint32_t i_mmioProcPhyChipId,
                                              uint64_t i_mmioHbrtChipId,
-                                             uint64_t i_mmioFlags)
+                                             uint64_t i_mmioFlags,
+                                             uint16_t i_ocmbChipId)
 {
     errlHndl_t l_errlHndl = nullptr;
     HdatMsArea *l_obj;
@@ -662,7 +663,8 @@ errlHndl_t HdatMsVpd::addMsAreaMmioAddrRange(uint16_t i_msAreaId,
                                              i_mmioMemCntlId,
                                              i_mmioProcPhyChipId,
                                              i_mmioHbrtChipId,
-                                             i_mmioFlags);
+                                             i_mmioFlags,
+                                             i_ocmbChipId);
     }
     else
     {
@@ -1463,6 +1465,16 @@ errlHndl_t HdatMsVpd::loadMsDataAllProcs()
                                 hdatGetMemTargetMmioInfo(l_pOcmbTarget, l_mmioDevEntries);
                             }
 
+                            // Add the OCMB chip id (Explorer vs Odyssey)
+                            uint16_t l_ocmbChipId = 0;
+                            if (l_pOcmbTarget != nullptr)
+                            {
+                                // Data is really only 2 bytes wide but
+                                //  attribute is 4 bytes wide
+                                l_ocmbChipId = static_cast<uint16_t>
+                                  (l_pOcmbTarget->getAttr<TARGETING::ATTR_CHIP_ID>());
+                            }
+
                             if(l_mmioDevEntries.empty())
                             {
                                 HDAT_INF("No MMIO entries found with HUID of 0x%08X",
@@ -1479,7 +1491,8 @@ errlHndl_t HdatMsVpd::loadMsDataAllProcs()
                                             l_hdatMemcntrlID,
                                             l_procChipId,
                                             mmioDev.hdatMmioHbrtChipId,
-                                            mmioDev.hdatMmioFlags);
+                                            mmioDev.hdatMmioFlags,
+                                            l_ocmbChipId);
                                     if (l_err != nullptr)
                                     {
                                         // Max number of entries hit. Just leave.

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -689,6 +689,7 @@ class HdatMsVpd : public HdatHdif
          *                                  processor
          * @param[in] i_mmioHbrtChipId - MMIO HBRT Chip ID
          * @param[in] i_mmioFlags -  MMIO flags
+         * @param[in] i_ocmbChipId -  OCMB Chip ID
          *
          * @return A null error log handle if successful, else the return code
          *         pointed to by o_errlHndl indicates that the mmio array size
@@ -703,7 +704,8 @@ class HdatMsVpd : public HdatHdif
                                            uint32_t i_mmioMemCntlId,
                                            uint32_t i_mmioProcPhyChipId,
                                            uint64_t i_mmioHbrtChipId,
-                                           uint64_t i_mmioFlags);
+                                           uint64_t i_mmioFlags,
+                                           uint16_t i_ocmbChipId);
 
         /**
          * @brief Add engineering change information for memory interface chips

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -290,6 +290,7 @@ struct hdatMsAreaMmioAddrRange_t
     uint32_t hdatMmioProcPhyChipId;         // 0x0014 Processor Physical Chip ID
     uint64_t hdatMmioHbrtChipId;            // 0x0018 HBRT Chip ID
     uint64_t hdatMmioFlags;                 // 0x0020 Flags
+    uint16_t hdatMmioChipId;                // 0x0028 OCMB Chip ID
 }  __attribute__ ((packed));
 
 /** @brief Defines the Host SPI device info
