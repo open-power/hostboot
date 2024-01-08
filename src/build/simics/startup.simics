@@ -1,4 +1,41 @@
 
+# Allow customization for capturing hostboot.simics.log
+try {
+    echo "Using hb_simics_log = "+$hb_simics_log
+} except {
+    # default to enabling
+    $hb_simics_log = 1
+    echo "Defaulting hb_simics_log = "+$hb_simics_log
+}
+
+@from datetime import datetime as dt
+@simenv.save_name = dt.utcnow().strftime("%Y_%m%d_%H%M_%S%f")+'_UTC'
+
+try {
+    `os.system("cp hostboot.simics.log hostboot.simics.log.%s 2>/dev/null"%(simenv.save_name))`
+} except {
+    echo "WARN: hb_simics_log problem processing save of original hostboot.simics.log"
+    local $error_msg = (get-error-message)
+    local $error_file = (get-error-file)
+    local $error_line_no = (dec (get-error-line))
+    local $error_cmd = (get-error-command)
+    echo "> get-error-message"
+    echo $error_msg
+    echo "> get-error-command"
+    echo $error_cmd
+    echo "> get-error-file"
+    echo $error_file
+    echo "> get-error-line"
+    echo $error_line_no
+}
+
+if($hb_simics_log == 1) {
+    start-command-line-capture hostboot.simics.log -overwrite -timestamp
+    echo "Begin capture of simics log to hostboot.simics.log"
+} else {
+    echo "NO capture of simics log to hostboot.simics.log, to enable set hb_simics_log=1 in runsim"
+}
+
 # The directory of the startup.simics script. Any other necessary scripts/tools are located here.
 # This path should be prepended to any lookup-file in the same directory
 $hb_script_location = (lookup-file "%script%/")

@@ -128,7 +128,6 @@ enum
     MAGIC_PRINT_ISTEP         =  7020, // Print istep to simics console
     MAGIC_PRINT_TWO_REGS      =  7021, // Print 2 numbers passed in
     MAGIC_SET_LOG_LEVEL       =  7022, // Set log level for given component
-    MAGIC_TOGGLE_OUTPUT       =  7023, // Enable simic log capture
 
     MAGIC_SETUP_THREADS       =  7025, // Manually set thread regs pre-enable
     MAGIC_ATTR_WRITE          =  7026, // Write attribute value in hostboot
@@ -261,18 +260,6 @@ constexpr uint8_t LOG_LEVEL_LOW  = 1;
 constexpr uint8_t LOG_LEVEL_MED  = 2;
 constexpr uint8_t LOG_LEVEL_HIGH = 3;
 constexpr uint8_t LOG_LEVEL_MAX  = 4;
-
-
-/**
- * @brief Toggle simics log collections on or off, if one
- *        all simics logs will be collected in <sandbox>/simics/hb_simics_log.txt
- * @param[in]  1 > will enable log collections, 0 stops collection
- */
-#define MAGIC_INST_TOGGLE_OUTPUT(_enable) \
-    asm volatile("mr 4, %0" :: \
-                 "r" (_enable) : \
-                 "4"); \
-    MAGIC_INSTRUCTION(MAGIC_TOGGLE_OUTPUT); \
 
 
 /**

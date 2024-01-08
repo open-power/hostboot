@@ -840,24 +840,6 @@ def magic_instruction_callback(user_arg, cpu, arg):
             else :
                 print("Unable to find valid object on this system type, neither %s nor %s were found"%(D1Proc0String, P9Proc0String))
 
-    if arg == 7023:  # MAGIC_TOGGLE_OUTPUT
-        if( not 'ENABLE_HB_SIMICS_LOGS' in os.environ ):
-            #print("Skipping Hostboot Simics Logging because ENABLE_HB_SIMICS_LOGS is not set")
-            return
-
-        enable = cpu.r4
-        zero = 0;
-        if enable > zero :
-            startCommand = "output-file-start hostboot_simics_log.txt -append -timestamp"
-            SIM_run_alone(run_command, startCommand )
-            printCommand = "shell \" date +'>> MAGIC_TOGGLE_OUTPUT(1) starting output' \""
-            SIM_run_alone(run_command, printCommand )
-        else :
-            printCommand = "shell \" date +'<< MAGIC_TOGGLE_OUTPUT(0) stopping output' \""
-            SIM_run_alone(run_command, printCommand )
-            stopCommand = "output-file-stop hostboot_simics_log.txt"
-            SIM_run_alone(run_command, stopCommand )
-
     if arg == 7055:   # MAGIC_CONTINUOUS_TRACE
 
         hb_tracBinaryBuffer = cpu.r4

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,7 +188,6 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
         // Check that target is not NULL
         assert(i_target != nullptr,"performPsuChipOp: proc target is NULL");
 
-        MAGIC_INST_TOGGLE_OUTPUT(ENABLE_OUTPUT);
         MAGIC_INST_SET_LOG_LEVEL(PIB_PSU, LOG_LEVEL_MAX);
         MAGIC_INST_SET_LOG_LEVEL(SBE_INT_BO, LOG_LEVEL_MAX);
 
@@ -386,7 +385,6 @@ errlHndl_t SbePsu::performPsuChipOp(TARGETING::Target *    i_target,
 
     MAGIC_INST_SET_LOG_LEVEL(PIB_PSU, LOG_LEVEL_OFF);
     MAGIC_INST_SET_LOG_LEVEL(SBE_INT_BO, LOG_LEVEL_OFF);
-    MAGIC_INST_TOGGLE_OUTPUT(DISABLE_OUTPUT);
 
     iv_psuResponse = nullptr;
     if( l_needUnlock )
