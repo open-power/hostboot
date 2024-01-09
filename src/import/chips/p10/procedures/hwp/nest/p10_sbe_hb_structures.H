@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,8 +77,9 @@ union BootloaderSecureSettings
 struct sb_settings_t
 {
     uint8_t hwKeyHash[64]; // HW Key Hash which is the first 64Bytes in the XIP
-    uint8_t msv;           // Minimum Secure Version of the secure containier
-    uint8_t reserved[7];   // 7Bytes reserved to align
+    uint8_t msv;           // Minimum Secure Version of the secure container
+    uint8_t sbMode;        // Secure Boot Mode (Secure Container version)
+    uint8_t reserved[6];   // 6Bytes reserved to align
 };
 
 // Structure starts at the bootloader zero address

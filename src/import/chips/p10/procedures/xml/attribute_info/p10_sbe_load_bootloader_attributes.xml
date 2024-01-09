@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -136,6 +136,15 @@
   <id>ATTR_SBE_MINIMUM_SECURE_VERSION</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Minimum secure version for the container</description>
+  <valueType>uint8</valueType>
+  <persistRuntime/>
+  <platInit/>
+  <initToZero/>
+</attribute>
+<attribute>
+  <id>ATTR_SBE_SECURE_BOOT_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Secure Container Version</description>
   <valueType>uint8</valueType>
   <persistRuntime/>
   <platInit/>
