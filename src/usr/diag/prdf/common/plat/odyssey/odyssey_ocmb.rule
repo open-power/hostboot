@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -1618,7 +1618,7 @@ rule rSRQ_FIR
 
 group gSRQ_FIR
     filter singlebit,
-           cs_root_cause(1,5,7,10,11,12,13,16,17,18,19,20,22,26,27,31,37,38,39,40,43,44,45)
+           cs_root_cause(1,5,7,9,10,11,12,13,16,17,18,19,20,22,26,27,31,36,37,38,39,40,43,44,45)
 {
     /** SRQ_FIR[0]
      *  Internal parity error
@@ -1668,7 +1668,7 @@ group gSRQ_FIR
     /** SRQ_FIR[9]
      *  WRQ or RRQ is in a hung state port0
      */
-    (rSRQ_FIR, bit(9)) ? mem_port0_M_th1;
+    (rSRQ_FIR, bit(9)) ? mem_port0_M_th1_chnlFail;
 
     /** SRQ_FIR[10]
      *  state machine one hot error port0
@@ -1803,7 +1803,7 @@ group gSRQ_FIR
     /** SRQ_FIR[36]
      *  WRQ or RRQ is in a hung state port1
      */
-    (rSRQ_FIR, bit(36)) ? mem_port1_M_th1;
+    (rSRQ_FIR, bit(36)) ? mem_port1_M_th1_chnlFail;
 
     /** SRQ_FIR[37]
      *  state machine one hot error port1
