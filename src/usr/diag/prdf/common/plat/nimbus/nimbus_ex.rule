@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2021
+# Contributors Listed Below - COPYRIGHT 2016,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -339,12 +339,12 @@ group gL2FIR
     /** L2FIR[17]
      *  (RC) load received pb cresp addr error
      */
-    (rL2FIR, bit(17)) ? self_M_level2_L_th_1;
+    (rL2FIR, bit(17)) ? self_M_level2_L_th_1_UERE;
 
     /** L2FIR[18]
      *  (RC) store received pb cresp addr error
      */
-    (rL2FIR, bit(18)) ? self_M_level2_L_th_1;
+    (rL2FIR, bit(18)) ? self_M_level2_L_th_1_UERE;
 
     /** L2FIR[19]
      *  RC or NCU PB data CE error
