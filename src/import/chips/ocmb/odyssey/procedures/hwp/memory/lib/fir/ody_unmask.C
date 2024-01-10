@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,7 +152,7 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::ODYSSEY>( const fapi2::T
     {
         l_srq_reg.recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN02>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN07>()
-        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN09>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN09>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN10>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN11>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN12>()
@@ -167,7 +167,7 @@ fapi2::ReturnCode after_draminit_training<mss::mc_type::ODYSSEY>( const fapi2::T
     {
         l_srq_reg.checkstop<scomt::ody::ODC_SRQ_LFIR_IN27>()
         .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN32>()
-        .recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN36>()
+        .checkstop<scomt::ody::ODC_SRQ_LFIR_IN36>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN37>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN38>()
         .checkstop<scomt::ody::ODC_SRQ_LFIR_IN39>()
