@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -3068,12 +3068,12 @@ group gOCC_FIR
     /** OCC_FIR[44]
      *  PPC405 cache UE to PM Hcode for PM Complex Restart
      */
-    (rOCC_FIR, bit(44)) ? occInterrupt;
+    (rOCC_FIR, bit(44)) ? self_th_1;
 
     /** OCC_FIR[45]
      *  PPC405 cache CE
      */
-    (rOCC_FIR, bit(45)) ? self_th_1;
+    (rOCC_FIR, bit(45)) ? threshold_and_mask_self;
 
     /** OCC_FIR[46]
      *  PPC405 Machine Check
