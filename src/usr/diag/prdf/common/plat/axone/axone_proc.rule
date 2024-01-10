@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2019
+# Contributors Listed Below - COPYRIGHT 2018,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -2327,12 +2327,12 @@ group gOCCFIR
     /** OCCFIR[44]
      *  C405_ECC_UE
      */
-    (rOCCFIR, bit(44)) ? threshold_and_mask_self;
+    (rOCCFIR, bit(44)) ? self_th_1;
 
     /** OCCFIR[45]
      *  C405_ECC_CE
      */
-    (rOCCFIR, bit(45)) ? self_th_1;
+    (rOCCFIR, bit(45)) ? threshold_and_mask_self;
 
     /** OCCFIR[46]
      *  C405_OCI_MACHINECHECK
