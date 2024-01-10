@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,6 +93,7 @@ namespace ISTEP
         MOD_BIOS_ATTR_PARSERS                             = 0x3F,
         MOD_BIOS_ATTR_SETTERS                             = 0x40,
         MOD_FINISH_PDR_EXCHANGE                           = 0x41,
+        MOD_MSS_ATTR_CLEANUP                              = 0x42,
     };
 
     /**
@@ -199,6 +200,7 @@ namespace ISTEP
         RC_TOO_SMALL_BMC_PDR_COUNT               = ISTEP_COMP_ID | 0x6E,
         RC_BOOT_CORE_REPLACEMENT                 = ISTEP_COMP_ID | 0x6F,
         RC_REQUESTED_FREQ_OUTSIDE_BOUNDARY       = ISTEP_COMP_ID | 0x70,
+        RC_OCMB_MIXING_RULES_ERROR               = ISTEP_COMP_ID | 0x71,
     };
 
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,8 @@
 #include    <devicefw/userif.H>
 #include    <vpd/spdenums.H>
 #include    <util/misc.H>
+#include    <chipids.H>
+#include    <hwas/common/hwasCallout.H>
 
 
 namespace   ISTEP_07
@@ -54,23 +56,103 @@ using   namespace   ISTEPS_TRACE;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
 
-//
-//  Wrapper function to call mss_attr_update
-//  mss_attr_update no longer used
-//  will use this for other misc functions
-//
-void*    host_mss_attr_cleanup( void *io_pArgs )
+
+/*******************************************************************************
+ * @brief if mix of exp/ody ocmb is found, deconfigure the ocmbs of lesser number
+ *
+ * @return   true if mixed ocmbs are found and require deconfig, else false
+ ******************************************************************************/
+int enforce_ocmb_mixing_rules(void)
 {
-    IStepError l_StepError;
+    TRACFCOMP(g_trac_isteps_trace, ">>enforce_ocmb_mixing_rules");
 
-    TRACFCOMP( g_trac_isteps_trace, "host_mss_attr_cleanup entry");
+    int              l_rc = 0; // exit rc
+    TargetHandleList l_exp{};  // list of exp in system
+    TargetHandleList l_ody{};  // list of ody in system
 
-    //*****************************************************
-    //  Clear out any memory repairs from the DIMMS
+    //--------------------------------------------------------------------------
+    // loop through the exp/ody in the system
+    // *save vectors of each exp/ody
+    //--------------------------------------------------------------------------
+    for (const auto ocmb : composable(getChipResources)(TYPE_OCMB_CHIP,
+                                                        UTIL_FILTER_FUNCTIONAL))
+    {
+        ATTR_CHIP_ID_type chipId = ocmb->getAttr<ATTR_CHIP_ID>();
+
+        if      (chipId == POWER_CHIPID::EXPLORER_16) {l_exp.push_back(ocmb);}
+        else if (chipId == POWER_CHIPID::ODYSSEY_16)  {l_ody.push_back(ocmb);}
+    }
+
+    //--------------------------------------------------------------------------
+    // check for a mix of exp/ody
+    //--------------------------------------------------------------------------
+    if (l_exp.size() && l_ody.size())
+    {
+        // ERROR, mix of exp/ody
+        TRACFCOMP(g_trac_isteps_trace,
+                  "enforce_ocmb_mixing_rules: ERROR: mix of exp:%d ody:%d found",
+                  l_exp.size(), l_ody.size());
+
+        TargetHandleList *l_deconfigs = nullptr; // ptr to ocmbs to deconfig
+
+        if (l_exp.size() > l_ody.size())
+        {
+            l_deconfigs = &l_ody; // more exp, deconfig odysseys
+        }
+        else
+        {
+            l_deconfigs = &l_exp; // equal or more ody, deconfig explorers
+        }
+
+        errlHndl_t l_errl = nullptr;  // error log, if there is a deconfig
+
+        // deconfig the type of ocmbs with a smaller count
+        for (const auto ocmb : *l_deconfigs)
+        {
+            if (!l_errl)    // allocate only one error log for all deconfigs
+            {
+                /*@
+                * @errortype
+                * @severity   ERRL_SEV_UNRECOVERABLE
+                * @moduleid   MOD_MSS_ATTR_CLEANUP
+                * @reasoncode RC_OCMB_MIXING_RULES_ERROR
+                * @userdata1  number of explorer ocmbs
+                * @userdata2  number of odyssey ocmbs
+                * @devdesc    Cannot mix explorer and odyssey ocmbs
+                * @custdesc   Firmware detected an invalid mix of DIMMs
+                */
+                l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                       MOD_MSS_ATTR_CLEANUP,
+                                       RC_OCMB_MIXING_RULES_ERROR,
+                                       l_exp.size(),
+                                       l_ody.size());
+                l_errl->addProcedureCallout(HWAS::EPUB_PRC_MEMORY_PLUGGING_ERROR,
+                                            HWAS::SRCI_PRIORITY_MED);
+            }
+
+            l_errl->addHwCallout(ocmb, HWAS::SRCI_PRIORITY_MED,
+                                       HWAS::DELAYED_DECONFIG,
+                                       HWAS::GARD_NULL);
+        }
+        l_rc = -1;
+        errlCommit(l_errl, ISTEP_COMP_ID);
+    }
+
+    TRACFCOMP(g_trac_isteps_trace, "<<enforce_ocmb_mixing_rules: rc:%d", l_rc);
+    return l_rc;
+}
+
+/*******************************************************************************
+ * @brief Clear out any memory repairs from the DIMMS
+ *        -get all the functional Dimms
+ *        -clear DDIM repairs
+ ******************************************************************************/
+void clearMemRepairs()
+{
+    errlHndl_t       l_err = nullptr;
+    TargetHandleList l_funcDimmList;
 
     // Get all the functional Dimms
-    errlHndl_t l_err = nullptr;
-    TargetHandleList l_funcDimmList;
     getAllLogicalCards(l_funcDimmList, TYPE_DIMM, true);
 
     // DIMM_BAD_DQ_DATA
@@ -131,11 +213,14 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
             }
         }
     }
+    return;
+}
 
-    //*****************************************************
-    //  Setup any dynamic attributes
-
-    // Replicate HB memory mirroring policy into HWP policy
+/*******************************************************************************
+ * @brief Replicate HB memory mirroring policy into HWP policy
+ ******************************************************************************/
+void setupDynamicAttrs()
+{
     Target* l_pTopLevel = UTIL::assertGetToplevelTarget();
     auto l_mirror = l_pTopLevel->getAttr<TARGETING::ATTR_PAYLOAD_IN_MIRROR_MEM>();
 
@@ -149,12 +234,45 @@ void*    host_mss_attr_cleanup( void *io_pArgs )
         l_pTopLevel->setAttr<TARGETING::ATTR_MRW_HW_MIRRORING_ENABLE>
           (TARGETING::MRW_HW_MIRRORING_ENABLE_OFF);
     }
+    return;
+}
 
-    //*****************************************************
+/*******************************************************************************
+ * @brief   Wrapper function to call mss_attr_update
+ *          mss_attr_update no longer used
+ *          will use this for other misc functions
+ ******************************************************************************/
+void* host_mss_attr_cleanup(void *io_pArgs)
+{
+    TRACFCOMP(g_trac_isteps_trace, "host_mss_attr_cleanup entry");
+
+    IStepError l_StepError;
+
+    //--------------------------------------------------------------------------
+    // Enforce mixing rules between Explorer and Odyssey
+    //--------------------------------------------------------------------------
+    if (enforce_ocmb_mixing_rules())
+    {
+        // a delayed deconfig of ocmb is pending, so just exit
+        goto EXIT;
+    }
+
+    //--------------------------------------------------------------------------
+    //  Clear out any memory repairs from the DIMMS
+    //--------------------------------------------------------------------------
+    clearMemRepairs();
+
+    //--------------------------------------------------------------------------
+    // Setup any dynamic attributes
+    //--------------------------------------------------------------------------
+    setupDynamicAttrs();
+
+    //--------------------------------------------------------------------------
     //  Setup any SPPE state attributes before sync to OCMB (like Odyssey)
+    //--------------------------------------------------------------------------
     TARGETING::update_sppe_target_state();
 
-    //*******************************************
+EXIT:
     TRACFCOMP( g_trac_isteps_trace, "host_mss_attr_cleanup exit");
 
     return l_StepError.getErrorHandle();
