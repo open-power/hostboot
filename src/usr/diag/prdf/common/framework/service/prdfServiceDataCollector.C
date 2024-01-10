@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -289,6 +289,49 @@ void ServiceDataCollector::clearNvdimmMruListGard()
     #undef PRDF_FUNC
 }
 
+//------------------------------------------------------------------------------
+
+void ServiceDataCollector::adjustOcmbGard()
+{
+    #define PRDF_FUNC "[ServiceDataCollector::adjustOcmbGard] "
+
+    bool ocmbCallout = false;
+    SdcCallout* ocmbMru;
+
+    // Loop through the MRU list.
+    for (auto & mru : xMruList)
+    {
+        PRDcallout callout = mru.callout;
+        PRDcalloutData::MruType mruType = callout.getType();
+
+        // If any target is being GARDed, just break out without adjusting
+        // any gard policy.
+        if (GARD == mru.gardState)
+        {
+            ocmbCallout = false;
+            break;
+        }
+
+        if (mruType == PRDcalloutData::TYPE_TARGET)
+        {
+            TargetHandle_t trgt = callout.getTarget();
+            if (TYPE_OCMB_CHIP == PlatServices::getTargetType(trgt))
+            {
+                ocmbCallout = true;
+                ocmbMru = &mru;
+            }
+        }
+    }
+
+    // If there was a OCMB callout not being GARDed and no other targets GARDed,
+    // adjust the GARD state of the OCMB callout to GARD.
+    if (ocmbCallout)
+    {
+        ocmbMru->gardState = GARD;
+    }
+
+    #undef PRDF_FUNC
+}
 //------------------------------------------------------------------------------
 
 bool ServiceDataCollector::isGardRequested()

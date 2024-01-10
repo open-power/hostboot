@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -712,6 +712,15 @@ public:
      * @brief Iterates the MRU list and clears gard for any NVDIMM targets.
      */
     void clearNvdimmMruListGard();
+
+    /**
+     * @brief Iterates the MRU list and in the event there is a low priority
+     *        OCMB callout with a higher priority level2 callout, adjusts the
+     *        OCMB callout to GARD. This is used only in the situation where PRD
+     *        sees the PRD_HWP_PLID attribute set indicating there was a
+     *        hardware procedure error (see the hwpErrorIsolation function).
+     */
+    void adjustOcmbGard();
 
     /**
      * @brief  Iterates the MRU list and returns true if at least on target in

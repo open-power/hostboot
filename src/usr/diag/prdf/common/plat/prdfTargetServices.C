@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,14 +129,16 @@ void hwpErrorIsolation( ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc )
     TargetHandle_t trgt = i_chip->getTrgt();
     uint32_t plid = 0;
 
-    // TODO Odyssey - if we have a low priority OCMB callout with a higher
-    // priority level2 callout, we want to adjust the OCMB callout to GARD.
-
     // Check for non-zero value in PLID attribute.
     if ( trgt->tryGetAttr<ATTR_PRD_HWP_PLID>(plid) && (0 != plid) )
     {
         PRDF_INF( "ATTR_PRD_HWP_PLID found on 0x%08x with value 0x%08x",
                   getHuid(trgt), plid );
+
+        // If there is a low priority OCMB callout set to NO_GARD and no other
+        // targets being GARDed (i.e. the only callout is level2 support),
+        // adjust the OCMB callout to GARD.
+        io_sc.service_data->adjustOcmbGard();
 
         // Link HWP PLID to PRD error log.
         ServiceGeneratorClass::ThisServiceGenerator().getErrl()->plid( plid );
