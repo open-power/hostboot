@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -666,12 +666,12 @@ group gEQ_L2_FIR
     /** EQ_L2_FIR[17]
      *  (RC) load received pb cresp addr error
      */
-    (rEQ_L2_FIR, bit(17)) ? self_M_level2_L_th_1;
+    (rEQ_L2_FIR, bit(17)) ? self_M_level2_L_th_1_UERE;
 
     /** EQ_L2_FIR[18]
      *  (RC) store received pb cresp addr error
      */
-    (rEQ_L2_FIR, bit(18)) ? self_M_level2_L_th_1;
+    (rEQ_L2_FIR, bit(18)) ? self_M_level2_L_th_1_UERE;
 
     /** EQ_L2_FIR[19]
      *  RC incoming Power Bus data had a CE error.
