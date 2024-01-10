@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,8 @@ struct PVR_t
      */
     enum chipFamily_t : uint16_t
     {
-        P10 = 0x80
+        P10    = 0x80,
+        PVR_82 = 0x82
     };
 
     union
@@ -109,7 +110,8 @@ struct PVR_t
      */
     bool isP10DD10() const
     {
-        return (chipFamily == P10)
+        return ((chipFamily == P10) ||
+                (chipFamily == PVR_82))
             && (getDDLevel() == DD10);
     }
 
@@ -120,7 +122,8 @@ struct PVR_t
      */
     bool isP10DD20() const
     {
-        return (chipFamily == P10)
+        return ((chipFamily == P10) ||
+                (chipFamily == PVR_82))
             && (getDDLevel() == DD20);
     }
 };
