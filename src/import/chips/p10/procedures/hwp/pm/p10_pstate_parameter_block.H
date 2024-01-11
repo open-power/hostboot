@@ -211,6 +211,7 @@ typedef struct
     uint16_t attr_vratio_vcs_10th_pct[NUM_WOF_VRATIO_PCT];
 
     ///Undervolt and Overvolt Attributes
+    uint8_t attr_wov_dds_calibration_enable;
     uint8_t attr_wov_underv_disable;
     uint8_t attr_wov_overv_disable;
     uint8_t attr_wov_underv_force;
@@ -231,6 +232,8 @@ typedef struct
     uint8_t  attr_rvrm_deadzone_mv;
     uint8_t attr_vcs_vdd_offset_mv;
     uint16_t attr_vcs_floor_mv;
+    uint16_t attr_wov_underv_extended_max_pct;
+    uint16_t attr_wov_overv_extended_max_pct;
 
     // Only 3 of the 8 are actually consumed
     uint8_t attr_current_scaling_factor[8];

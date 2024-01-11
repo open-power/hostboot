@@ -167,7 +167,8 @@ enum PGPE_FLAGS_IDX
     PGPE_FLAG_SLOPE_FIX_8_8                 = 25,
     PGPE_FLAG_NEGATIVE_SLOPE_SUPPORT        = 26,
     PGPE_FLAG_USE_RDP                       = 27,
-    PGPE_FLAG_MAX_DEFINED                   = 28
+    PGPE_FLAG_DDS_CALIBRATION_ENABLE        = 28,
+    PGPE_FLAG_MAX_DEFINED                   = 29
 };
 
 //WOF Vratio vdd attribute indices
@@ -496,7 +497,6 @@ typedef struct
 } VRMParms_v1_t;
 
 
-
 /// @todo Need to define the DDS control block
 
 /// Pstate Parameter consumed by PGPE
@@ -802,6 +802,9 @@ typedef struct
     uint16_t wov_idd_thresh;
 
     uint8_t wov_dirty_undercurr_control[NUM_WOV_DIRTY_UC_CTRL];
+
+    //WOV undervolting extended range max percentage(in 0.1%, tenths of percent)
+    uint16_t wov_underv_extended_max_pct;
 
 } GlobalPstateParmBlockWOV_t;
 

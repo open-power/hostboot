@@ -2549,7 +2549,7 @@
     Enables DDS calibration in creating the Pstate Parameter Block. In this mode,
     the following are inherently disabled:
     - PStates
-    - DDS (as these a mangaged by other means in this mode)
+    - DDS (as these are mangaged by other means in this mode)
     - WOF
 
     The functions that are enabled are:

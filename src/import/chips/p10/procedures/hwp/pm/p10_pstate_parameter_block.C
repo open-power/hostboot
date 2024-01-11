@@ -855,6 +855,85 @@ void gppb_print(
     FAPI_INF("%s", l_buffer);
 
     // -------------------
+    sprintf(l_buffer, "WOV Controls:");
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "UV PERF LOSS THRESH 0.1%");
+    HEX_DEC_STR(l_buffer,
+            i_gppb->wov.wov_underv_perf_loss_thresh_pct);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "UV STEP INCR %");
+    HEX_DEC_STR(l_buffer,
+            i_gppb->wov.wov_underv_step_incr_pct);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ",  "UV MAX %");
+    HEX_DEC_STR(l_buffer,
+            i_gppb->wov.wov_underv_max_pct);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "UV VMIN MV");
+    HEX_DEC_STR(l_buffer,
+            revle16(i_gppb->wov.wov_underv_vmin_mv));
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "OV VMAX MV");
+    HEX_DEC_STR(l_buffer,
+            revle16(i_gppb->wov.wov_overv_vmax_mv));
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "WOV SAMPLE 125us");
+    HEX_DEC_STR(l_buffer,
+            revle32(i_gppb->wov.wov_sample_125us));
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "WOV MAX DROOP 0.1%");
+    HEX_DEC_STR(l_buffer,
+            revle32(i_gppb->wov.wov_max_droop_pct));
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "OV STEP INCR 0.1%");
+    HEX_DEC_STR(l_buffer,
+            i_gppb->wov.wov_overv_step_incr_pct);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "OV STEP INCR 0.1%");
+    HEX_DEC_STR(l_buffer,
+            i_gppb->wov.wov_overv_step_incr_pct);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "OV STEP DECR 0.1%");
+    HEX_DEC_STR(l_buffer,
+            i_gppb->wov.wov_overv_step_decr_pct);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "OV MAX %");
+    HEX_DEC_STR(l_buffer,
+            i_gppb->wov.wov_overv_max_pct);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "WOV IDD THRESH 0.1%");
+    HEX_DEC_STR(l_buffer,
+            revle16(i_gppb->wov.wov_idd_thresh));
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "WOV DIRTY UNDER CURR LIGHT");
+    HEX_DEC_STR(l_buffer,
+            i_gppb->wov.wov_dirty_undercurr_control[0]);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "WOV DIRTY UNDER CURR HEAVY");
+    HEX_DEC_STR(l_buffer,
+            i_gppb->wov.wov_dirty_undercurr_control[1]);
+    FAPI_INF("%s", l_buffer);
+
+    PRINT_LEAD1(l_buffer, "  %-26s : ", "UV EXTENDED MAX 0.1%");
+    HEX_DEC_STR(l_buffer,
+            revle16(i_gppb->wov.wov_underv_extended_max_pct));
+    FAPI_INF("%s", l_buffer);
+
+    // -------------------
     FAPI_INF("PGPE Flags:");
 
     FAPI_INF("  %-26s : %1d", "resclk_enable",
@@ -923,6 +1002,9 @@ void gppb_print(
     FAPI_INF("  %-26s : 0x%2X (eco_count_en | eco_count) -> count = %d", "eco_count",
             i_gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT],
             (i_gppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] & 0x7F));
+
+    FAPI_INF("  %-26s : %1d", "wov_dds_calibraton_enable",
+            i_gppb->pgpe_flags[PGPE_FLAG_DDS_CALIBRATION_ENABLE]);
 
     FAPI_INF("Other Info:");
 
@@ -1284,6 +1366,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
                            (l_hw543384 && iv_attrs.attr_war_mode == fapi2::ENUM_ATTR_HW543384_WAR_MODE_TIE_NEST_TO_PAU) ? 1 : 0;
         io_globalppb->pgpe_flags[PGPE_FLAG_SADDLEBACK_ROLLOVER_ENABLE] = iv_attrs.attr_saddleback_rollover_enable;
 
+
         if ( iv_eco_count )
         {
             io_globalppb->pgpe_flags[PGPE_FLAG_ECO_COUNT] = 0x80 | iv_eco_count;
@@ -1320,6 +1403,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_RVRM_ENABLE] = iv_rvrm_enabled;
         io_globalppb->pgpe_flags[PGPE_FLAG_RVRM_QVID_ENABLE_VEC] = iv_qrvrm_enable_flag;
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_THROTTLE_ENABLE] = is_wof_throttle_enabled();
+        io_globalppb->pgpe_flags[PGPE_FLAG_DDS_CALIBRATION_ENABLE] = iv_attrs.attr_wov_dds_calibration_enable;
+
         io_globalppb->base.vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
         io_globalppb->base.vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
         io_globalppb->pgpe_flags[PGPE_FLAG_NEGATIVE_SLOPE_SUPPORT] = (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable) ? 1 : 0;
@@ -1333,6 +1418,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->wov.wov_underv_step_incr_pct        = iv_attrs.attr_wov_underv_step_incr_pct;
         io_globalppb->wov.wov_underv_step_decr_pct        = iv_attrs.attr_wov_underv_step_decr_pct;
         io_globalppb->wov.wov_underv_max_pct              = iv_attrs.attr_wov_underv_max_pct;
+        io_globalppb->wov.wov_underv_extended_max_pct     = revle16(iv_attrs.attr_wov_underv_extended_max_pct);
         io_globalppb->wov.wov_underv_vmin_mv              = revle16(iv_attrs.attr_wov_underv_vmin_mv);
         io_globalppb->wov.wov_overv_vmax_mv               = revle16(iv_attrs.attr_wov_overv_vmax_mv);
         io_globalppb->wov.wov_overv_step_incr_pct         = iv_attrs.attr_wov_overv_step_incr_pct;
@@ -1363,6 +1449,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         //Throttle
         io_globalppb->thr.thr_kp = iv_attrs.attr_system_wof_throttle_control_kp;
         io_globalppb->thr.thr_ki = iv_attrs.attr_system_wof_throttle_control_ki;
+
 
 #if 0
         io_globalppb->attr.fields.pstates_enabled     = is_pstates_enabled();
@@ -1926,8 +2013,6 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR_4(ATTR_PROC_R_LOADLINE_UOHM,               iv_procChip,  attr_proc_r_loadline_uohm);
     PPB_GET_ATTR_4(ATTR_PROC_VRM_VOFFSET_UV,                iv_procChip,  attr_proc_vrm_voffset_uv);
 
-
-
     // Feature control
     PPB_GET_ATTR(ATTR_SYSTEM_PSTATES_MODE,                  FAPI_SYSTEM,  attr_pstate_mode);
     PPB_GET_ATTR(ATTR_SYSTEM_WOF_DISABLE,                   FAPI_SYSTEM,  attr_system_wof_disable);
@@ -1938,6 +2023,7 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR(ATTR_SYSTEM_PGPE_CURRENT_READ_DISABLE,     FAPI_SYSTEM,  attr_system_current_read_disable);
     PPB_GET_ATTR(ATTR_SYSTEM_WOV_OVERV_DISABLE,             FAPI_SYSTEM,  attr_wov_overv_disable);
     PPB_GET_ATTR(ATTR_SYSTEM_WOV_UNDERV_DISABLE,            FAPI_SYSTEM,  attr_wov_underv_disable);
+    PPB_GET_ATTR(ATTR_SYSTEM_WOV_DDS_CALIBRATION_ENABLE,    FAPI_SYSTEM,  attr_wov_dds_calibration_enable);
     PPB_GET_ATTR_5(ATTR_SYSTEM_WOF_DISABLE_DIMENSION,       FAPI_SYSTEM,  attr_system_wof_disable_dimension);
     PPB_GET_ATTR(ATTR_PGPE_HCODE_FUNCTION_ENABLE,           FAPI_SYSTEM,  attr_pgpe_hcode_function_enable);
     PPB_GET_ATTR(ATTR_PGPE_PHANTOM_HALT_ENABLE,             FAPI_SYSTEM,  attr_phantom_halt_enable);
@@ -1970,11 +2056,13 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR(ATTR_WOV_UNDERV_STEP_INCR_10THPCT,         iv_procChip,  attr_wov_underv_step_incr_pct);
     PPB_GET_ATTR(ATTR_WOV_UNDERV_STEP_DECR_10THPCT,         iv_procChip,  attr_wov_underv_step_decr_pct);
     PPB_GET_ATTR(ATTR_WOV_UNDERV_MAX_10THPCT,               iv_procChip,  attr_wov_underv_max_pct);
+    PPB_GET_ATTR(ATTR_WOV_UNDERV_EXTENDED_MAX_10THPCT,      iv_procChip,  attr_wov_underv_extended_max_pct);
     PPB_GET_ATTR(ATTR_WOV_UNDERV_VMIN_MV,                   iv_procChip,  attr_wov_underv_vmin_mv);
     PPB_GET_ATTR(ATTR_WOV_OVERV_VMAX_SETPOINT_MV,           iv_procChip,  attr_wov_overv_vmax_mv);
     PPB_GET_ATTR(ATTR_WOV_OVERV_STEP_INCR_10THPCT,          iv_procChip,  attr_wov_overv_step_incr_pct);
     PPB_GET_ATTR(ATTR_WOV_OVERV_STEP_DECR_10THPCT,          iv_procChip,  attr_wov_overv_step_decr_pct);
     PPB_GET_ATTR(ATTR_WOV_OVERV_MAX_10THPCT,                iv_procChip,  attr_wov_overv_max_pct);
+    PPB_GET_ATTR(ATTR_WOV_OVERV_EXTENDED_MAX_10THPCT,       iv_procChip,  attr_wov_overv_extended_max_pct);
     PPB_GET_ATTR_2(ATTR_WOV_DIRTY_UNCURRENT_CONTROL,        FAPI_SYSTEM,  attr_wov_dirty_uncurrent_ctrl);
 
     // Current Scaling Factors
@@ -7069,5 +7157,6 @@ fapi_try_exit:
     FAPI_INF("PlatPmPPB::set_wof_override_flags <<<<<<<");
     return fapi2::current_err;
 }
+
 
 // *INDENT-ON*
