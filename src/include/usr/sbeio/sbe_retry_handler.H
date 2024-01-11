@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,12 +96,12 @@ public:
 /**
  * @brief SBE Retry Handler implementation for Odyssey SBEs.
  */
-class OdysseySbeRetryHandler : public GenericSbeRetryHandler
+class OdySbeRetryHandler : public GenericSbeRetryHandler
 {
     TARGETING::Target* iv_ocmb = nullptr;
 
 public:
-    OdysseySbeRetryHandler(TARGETING::Target* i_ocmb);
+    OdySbeRetryHandler(TARGETING::Target* i_ocmb);
 
     /**
      * @brief  This function is the main entry point for all of the
@@ -131,7 +131,7 @@ public:
      */
     bool isSbeAtRuntime() override
     {
-        assert(false,"OdysseySbeRetryHandler.isSbeAtRuntime() NOT supported at this time");
+        assert(false,"OdySbeRetryHandler.isSbeAtRuntime() NOT supported at this time");
         return false;
     }
 
@@ -151,9 +151,43 @@ public:
      */
     errlHndl_t ExtractRC() override;
 
-    virtual ~OdysseySbeRetryHandler() override;
+    inline auto getOdyRecoveryState()
+    {
+        return iv_ocmb->getAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>();
+    }
 
-}; // End of class OdysseySbeRetryHandler
+    inline void setOdyRecoveryState(TARGETING::ATTR_ODY_RECOVERY_STATE_type i_recovery_state)
+    {
+        iv_ocmb->setAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>(i_recovery_state);
+    }
+
+    virtual ~OdySbeRetryHandler() override;
+
+    private:
+        /** We cannot always trust the status that the sbe reports about itself.
+         *  This enum will be used by iv_currentSBEState so Hostboot can track what
+         *  we think the status of the SBE is.
+         */
+        enum ODY_SBE_STATUS
+        {
+            SBE_AT_RUNTIME     = 0, // SBE is at runtime and booted
+            SBE_NOT_AT_RUNTIME = 1, // SBE is NOT at runtime
+        };
+
+        ODY_SBE_STATUS iv_currentSBEState;
+
+    /**
+     * @brief Perform the actions and HWPs needed to cycle the
+     *        Odyssey from boot to runtime.
+     */
+    errlHndl_t run_hreset_flow();
+
+    /**
+     * @brief Set ATTR_SPPE_BOOT_SIDE to the alternate side
+     */
+    void side_switch();
+
+}; // End of class OdySbeRetryHandler
 
 /**
  * @brief SBE Retry Handler implementation for processor SBEs.
@@ -240,6 +274,7 @@ class ProcSbeRetryHandler : public GenericSbeRetryHandler
             {TEST_MAX_LIMITS, P10_EXTRACT_SBE_RC::REIPL_UPD_MSEEPROM},
             {TEST_SBE_FAILURE, P10_EXTRACT_SBE_RC::RESTART_SBE}, // NOTE: covers REIPL_BKP_BMSEEPROM
         };
+
 #endif
 
         /**

@@ -845,6 +845,15 @@ namespace SBEIO
                                         uint8_t i_side,
                                         uint8_t i_deviceId);
 
+    /**
+     * @brief If FFDC is available, grab it, parse it, and commit the
+     *        resulting error logs as informational
+     *
+     * @param[in] i_chipTarget grab the FFDC for this OCMB target
+     *
+     */
+    void checkOdyFFDC(TARGETING::Target* i_chipTarget);
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */

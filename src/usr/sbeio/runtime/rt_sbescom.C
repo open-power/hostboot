@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,10 +55,6 @@ static void markUseSbeScom(TARGETING::TargetHandle_t i_ocmb)
     TARGETING::ScomSwitches l_switches = {0};
     if (i_ocmb->tryGetAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches))
     {
-        TRACFCOMP(g_trac_sbeio,
-              "markUseSbeScom: switching to use SBESCOM on OCMB 0x%.8X",
-              TARGETING::get_huid(i_ocmb));
-
         l_switches.useSbeScom = 1;
         l_switches.useInbandScom = 0;
 
@@ -67,6 +63,10 @@ static void markUseSbeScom(TARGETING::TargetHandle_t i_ocmb)
 
         // also turn off the inband PIPE FIFO
         i_ocmb->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
+        TRACFCOMP(g_trac_sbeio,
+                  "markUseSbeScom: switching to use SBESCOM on OCMB 0x%.8X "
+                  "useSbeScom=1 useInbandScom=0 USE_PIPE_FIFO=0",
+                  TARGETING::get_huid(i_ocmb));
     }
 }
 

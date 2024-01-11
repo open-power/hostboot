@@ -1209,6 +1209,42 @@
   </attribute>
 
   <attribute>
+    <id>ODY_RECOVERY_STATE</id>
+    <description>
+        Odyssey RECOVERY State
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
+  </attribute>
+
+  <enumerationType>
+    <id>ODY_RECOVERY_STATUS</id>
+    <description>
+        Enumeration of possible Odyssey SBE states.
+        0 - VIABLE      - Ody may attempt an hreset
+        1 - IN_PROGRESS - Ody is currently running an hreset. Block other hreset requests.
+        2 - DEAD        - Ody has failed hreset
+    </description>
+    <enumerator>
+      <name>VIABLE</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>IN_PROGRESS</name>
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <name>DEAD</name>
+      <value>2</value>
+    </enumerator>
+  </enumerationType>
+
+  <attribute>
     <description>
       While in Secureboot, this value is set to 1 the first time attribute
       override is attempted and error logged.
@@ -1496,20 +1532,6 @@
   </attribute>
 
   <attribute>
-    <id>SBE_FIFO_IN_PROGRESS</id>
-    <description>Notates if a FIFO op is in progress</description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-  </attribute>
-
-  <attribute>
     <id>SBE_FIFO_MUTEX</id>
     <description>Ensures atomic SBE FIFO Operations</description>
     <simpleType>
@@ -1543,22 +1565,6 @@
     <description>Cached Virtual Address of SBE PSU memory space</description>
     <simpleType>
       <uint64_t/>
-    </simpleType>
-    <persistency>volatile-zeroed</persistency>
-    <readable/>
-    <writeable/>
-    <hbOnly/>
-  </attribute>
-
-  <attribute>
-    <id>SBE_RECOVERY_IN_PROGRESS</id>
-    <description>
-        Odyssey SBE RECOVERY in progress (as a bool)
-    </description>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
     </simpleType>
     <persistency>volatile-zeroed</persistency>
     <readable/>

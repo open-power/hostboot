@@ -1302,6 +1302,18 @@ private:
                                         uint64_t   *o_pData);
 
     /**
+     * @brief Encapsulates an Odyssey Reset Fifo write.
+     *
+     * @param[in]  i_target         Target to access
+     * @param[in]  i_addrIdx        FIFO address enum index
+     * @param[in]  i_pData          Pointer to receive data
+     * @return errlHndl_t Error log handle on failure.
+     */
+    errlHndl_t OdyResetWriteFifoReg(TARGETING::Target   *i_target,
+                                    fifoRegAddr i_addrIdx,
+                                    uint32_t *i_pData);
+
+    /**
      * @brief Encapsulates a Fifo write.
      *
      * @param[in]  i_target         Target to access

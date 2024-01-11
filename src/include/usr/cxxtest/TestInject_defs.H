@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,8 +46,15 @@ namespace CxxTest
         MMIO_INJECT_IN_PROGRESS,
         MMIO_INJECT_OP_ERROR,
         MMIO_INJECT_CHECKSTOP,
-        MMIO_INJECT_FIFO_HANG,
-        MMIO_INJECT_FIFO_BREAKAGE,
+        SBEIO_INJECT_IN_PROGRESS,
+        SBEIO_INJECT_FIFO_HANG,
+        SBEIO_INJECT_FIFO_BREAKAGE,
+        SBEIO_INJECT_HRESET_ody_sbe_hreset,
+        SBEIO_INJECT_HRESET_ody_sppe_check_for_ready,
+        SBEIO_INJECT_HRESET_sendAttrUpdateRequest,
+        SBEIO_INJECT_HRESET_ThermalSensorPolling,
+        SBEIO_INJECT_HRESET_TWO_FAILS,
+        SBEIO_INJECT_HRESET_SKIP_DUMP,
         MAX_CXX_TEST_INJECTS = 63,
     };
 

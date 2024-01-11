@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,7 @@ enum sbeioModuleId
     SBEIO_FIFO_SBE_FFDC                 = 0x1A,
     SBEIO_ODY_RECOVERY                  = 0x1B,
     SBEIO_ERRLUD_SPPE_CODE_LEVELS       = 0x1C,
+    SBEIO_TEST_INJECT                   = 0x1D,
 };
 
 /**
@@ -177,8 +178,10 @@ enum sbeioReasonCode
 
     SBEIO_RECEIVE_CODE_LEVELS_BAD_MSG  = SBEIO_COMP_ID | 0x70,
     SBEIO_FIFO_SBE_FFDC_INFORMATIONAL  = SBEIO_COMP_ID | 0x71,
-    SBEIO_ODY_RECOVERY_IN_PROGRESS     = SBEIO_COMP_ID | 0x72,
+    SBEIO_ODY_RECOVERY_NOT_AVAILABLE   = SBEIO_COMP_ID | 0x72,
     SBEIO_OCMB_NULL_TARGET             = SBEIO_COMP_ID | 0x73,
+
+    SBEIO_TEST_INJECT_HRESET           = SBEIO_COMP_ID | 0x74,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -410,7 +410,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             uint64_t custom_addr = 0x0;
             uint64_t *data64 = static_cast<uint64_t*>(data);
 
-            TRACFCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_read chipid=0x%llX addr=0x%llX",
+            TRACDCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_read chipid=0x%llX addr=0x%llX",
                           chipid, addr);
 
             errlHndl_t l_errl = nullptr;
@@ -422,7 +422,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             }
             else
             {
-                TRACFCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_read get_target_for_hbrt_id TARGET=0x%X", get_huid(l_target));
+                TRACDCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_read get_target_for_hbrt_id TARGET=0x%X", get_huid(l_target));
             }
 
             size_t l_size = sizeof(uint64_t);
@@ -457,7 +457,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             if(l_errl)
             {
-                TRACFCOMP(g_trac_hbrt, "rt_loader.H rt_scom_read ERROR USING CACHE, deleting ERROR !");
+                TRACDCOMP(g_trac_hbrt, "rt_loader.H rt_scom_read ERROR USING CACHE, deleting ERROR !");
                 delete l_errl;
                 l_errl = nullptr;
 
@@ -515,7 +515,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             int rc = 0;
             uint64_t * data64 = static_cast<uint64_t *>(data);
             uint64_t custom_addr = 0x0;
-            TRACFCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_write chipid=0x%llX addr=0x%llX data=0x%llX",
+            TRACDCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_write chipid=0x%llX addr=0x%llX data=0x%llX",
                           chipid, addr, *data64);
 
             errlHndl_t l_errl = nullptr;
@@ -561,7 +561,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             if(l_errl)
             {
-                TRACFCOMP(g_trac_hbrt, "rt_loader.H rt_scom_write ERROR USING CACHE, deleting ERROR !");
+                TRACDCOMP(g_trac_hbrt, "rt_loader.H rt_scom_write ERROR USING CACHE, deleting ERROR !");
                 delete l_errl;
                 l_errl = nullptr;
 
@@ -1414,7 +1414,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             //  HB input is right-justified
             uint16_t l_devAddr = i_devAddr << 1;
 
-            TRACFCOMP(g_trac_hbrt,
+            TRACDCOMP(g_trac_hbrt,
                       "rt_i2c_read: l_chip=%d(0x%08X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=0x%02X",
                       l_chip, TARGETING::get_huid(l_chipTarg),
                       l_engine, l_port, l_offset, l_devAddr);
@@ -1469,7 +1469,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             //  HB input is right-justified
             uint16_t l_devAddr = i_devAddr << 1;
 
-            TRACFCOMP(g_trac_hbrt,
+            TRACDCOMP(g_trac_hbrt,
                       "rt_i2c_write: l_chip=%d(0x%08X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=0x%02X",
                       l_chip, TARGETING::get_huid(l_chipTarg),
                       l_engine, l_port, l_offset, l_devAddr);

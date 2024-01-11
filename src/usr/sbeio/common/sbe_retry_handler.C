@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2111,7 +2111,7 @@ make_sbe_retry_handler(TARGETING::Target* const i_target,
 {
     if (TARGETING::UTIL::isOdysseyChip(i_target))
     {
-        return std::make_unique<OdysseySbeRetryHandler>(i_target);
+        return std::make_unique<OdySbeRetryHandler>(i_target);
     }
     else
     {

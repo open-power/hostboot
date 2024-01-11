@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,7 +63,7 @@ namespace SBEIO
     {
         errlHndl_t l_errl = NULL;
 
-        SBE_TRACF(ENTER_MRK "sending get SBE FFDC for chip %d, HUID 0x%.8X",
+        SBE_TRACF(ENTER_MRK "getFifoSBEFFDC sending get SBE FFDC for chip %d, HUID 0x%.8X",
                   i_chipTarget->getAttr<TARGETING::ATTR_POSITION>(),
                   TARGETING::get_huid(i_chipTarget));
 
@@ -81,7 +81,7 @@ namespace SBEIO
                                    o_pFifoResponse,
                                    i_responseSize);
 
-        SBE_TRACD(EXIT_MRK "sendGetSBEFFDC");
+        SBE_TRACD(EXIT_MRK "getFifoSBEFFDC");
 
         return l_errl;
     };
@@ -99,7 +99,8 @@ namespace SBEIO
                                            l_responseSize);
         if(l_errl)
         {
-            SBE_TRACF(ERR_MRK"genFifoSBEFFDCErrl: Error returned from SBE FFDC chip op");
+            SBE_TRACF(ERR_MRK"genFifoSBEFFDCErrl: Error returned from SBE FFDC "
+                             "chip op ERRL=0x%X", ERRL_GETEID_SAFE(l_errl));
             l_errls.push_back(l_errl);
             break;
         }
@@ -136,7 +137,9 @@ namespace SBEIO
             l_errls = SBEIO::genFifoSBEFFDCErrls(l_ocmb);
             for(auto l_errl : l_errls)
             {
-                SBE_TRACF(INFO_MRK"handleGenFifoSBEFFDCErrlRequest: Committing errl PLID 0x%x for OCMB 0x%x", l_errl->plid(), get_huid(l_ocmb));
+                SBE_TRACF(INFO_MRK"handleGenFifoSBEFFDCErrlRequest: Committing "
+                                  "errl PLID 0x%x for OCMB 0x%x",
+                                  l_errl->plid(), get_huid(l_ocmb));
 
                 // Force these to be informational so there is no potential
                 // callouts logged/parts deconfigured.
@@ -160,7 +163,71 @@ namespace SBEIO
                 // have valid callouts in the error logs for resolved issues.
                 l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
             }
-            SBE_TRACF(INFO_MRK"processOdyAsyncFFDC: Committing error log PLID 0x%x for OCMB 0x%x", l_errl->plid(), get_huid(i_chipTarget));
+            SBE_TRACF(INFO_MRK"processOdyAsyncFFDC: Committing error log PLID "
+                              "0x%x for OCMB 0x%x", l_errl->plid(), get_huid(i_chipTarget));
+            errlCommit(l_errl, SBEIO_COMP_ID);
+        }
+    }
+
+    void checkOdyFFDC(TARGETING::Target* i_chipTarget)
+    {
+        using namespace TARGETING;
+        errlHndl_t l_errl         = nullptr;
+        bool       l_hasAsyncFfdc = false;
+
+        typedef union // See mbxscratch.H for this definition
+        {
+            struct
+            {
+                uint64_t iv_sbeBooted : 1;
+                uint64_t iv_asyncFFDC : 1;
+                uint64_t iv_reserved1 : 1;
+                uint64_t iv_currImage : 1; // If 0->SROM , 1->Boot Loader/Runtime
+                uint64_t iv_prevState : 4;
+                uint64_t iv_currState : 4;
+                uint64_t iv_majorStep : 4;
+                uint64_t iv_minorStep : 6;
+                uint64_t iv_reserved2 : 4;
+                uint64_t iv_progressCode : 6;
+                uint64_t iv_unused : 32;
+            };
+            uint64_t iv_messagingReg;
+        } messagingReg_t;
+
+        uint32_t l_data     = 0;
+        size_t   l_dataSize = sizeof(l_data);
+
+        l_errl = deviceRead(i_chipTarget,
+                            &l_data,
+                            l_dataSize,
+                            DEVICE_CFAM_ADDRESS(0x2809));
+        SBE_TRACF(INFO_MRK"checkOdyFFDC: SBE MSG register for OCMB 0x%x l_data=%llx",
+                  get_huid(i_chipTarget), l_data);
+        if(l_errl)
+        {
+            SBE_TRACF(INFO_MRK"checkOdyFFDC: Could not read SBE MSG register "
+                              "for OCMB 0x%x ERRL=0x%X (committing)",
+                              get_huid(i_chipTarget), ERRL_GETEID_SAFE(l_errl));
+            errlCommit(l_errl, SBEIO_COMP_ID);
+        }
+        else
+        {
+            messagingReg_t l_msgReg;
+            l_msgReg.iv_messagingReg = l_data;
+            l_hasAsyncFfdc           = l_msgReg.iv_asyncFFDC;
+        }
+
+        std::vector<errlHndl_t> l_errls = genFifoSBEFFDCErrls(i_chipTarget);
+        SBE_TRACF(INFO_MRK"checkOdyFFDC: gathered FFDC for OCMB 0x%x "
+                          "l_hasAsyncFfdc=0x%X l_errls.size=0x%X",
+                          get_huid(i_chipTarget), l_hasAsyncFfdc, l_errls.size());
+
+        for(auto l_errl : l_errls)
+        {
+            // Set the severity to informational
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            SBE_TRACF(INFO_MRK"checkOdyFFDC: Committing error log PLID 0x%x for OCMB 0x%x",
+                      l_errl->plid(), get_huid(i_chipTarget));
             errlCommit(l_errl, SBEIO_COMP_ID);
         }
     }

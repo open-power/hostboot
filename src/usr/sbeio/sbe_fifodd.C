@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,25 +147,11 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
 {
     errlHndl_t errl = nullptr;
 
-    SBE_TRACD(ENTER_MRK "performFifoChipOp");
+    SBE_TRACD(ENTER_MRK "performFifoChipOp HUID=0x%X", get_huid(i_target));
 
     // Serialize access to the FIFO for i_target
     mutex_t *l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
     const auto lock  = scoped_recursive_mutex_lock(*l_mutex);
-
-    // This counter tells us if the same thread has re-entered this function for
-    // the same target
-    auto l_fifo_in_progress = i_target->getAttr<TARGETING::ATTR_SBE_FIFO_IN_PROGRESS>();
-
-    if (l_fifo_in_progress)
-    {
-        // It is possible for a thread to hit an error doing a FIFO op, and then
-        //  re-enter this function for the same target to do another FIFO op.
-        //  If this happens, we must reset the FIFO so the second FIFO op has
-        //  a chance to succeed.
-        performFifoReset(i_target);
-    }
-    i_target->setAttr<TARGETING::ATTR_SBE_FIFO_IN_PROGRESS>(++l_fifo_in_progress);
 
     std::array<uint32_t, 2> request_header = { };
     errl = writeRequest(i_target, i_requestStream, request_header);
@@ -188,14 +174,12 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
     ERROR_EXIT:
     if (errl)
     {
-        SBE_TRACF(ERR_MRK  "performFifoChipOp: PIPE Fifo");
+        SBE_TRACF(ERR_MRK"performFifoChipOp: PIPE Fifo HUID=0x%X", get_huid(i_target));
         if (TARGETING::UTIL::isOdysseyChip(i_target))
         {
             UdSPPECodeLevels(i_target).addToLog(errl);
         }
     }
-
-    i_target->setAttr<TARGETING::ATTR_SBE_FIFO_IN_PROGRESS>(--l_fifo_in_progress);
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
 
@@ -218,7 +202,16 @@ errlHndl_t SbeFifo::performFifoReset(TARGETING::Target * i_target)
 
     // Perform a write to the DNFIFO Reset to cleanup the fifo
     uint32_t l_dummy = 0xDEAD;
-    errl = writeFifoReg(i_target, FIFO_DNFIFO_RESET, &l_dummy);
+
+    if (TARGETING::UTIL::isOdysseyChip(i_target))
+    {
+        // specialized handling to reset both FIFO's for Odyssey
+        errl = OdyResetWriteFifoReg(i_target, FIFO_DNFIFO_RESET, &l_dummy);
+    }
+    else
+    {
+        errl = writeFifoReg(i_target, FIFO_DNFIFO_RESET, &l_dummy);
+    }
 
     if (errl) {SBE_TRACF(ERR_MRK "performFifoReset");}
     SBE_TRACF(EXIT_MRK "performFifoReset: HUID 0x%08X", TARGETING::get_huid(i_target));
@@ -561,7 +554,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
         // if the hang inject is on, create the timeout errl
         CI_INJECT_FIFO_HANG(CxxTest::g_cxxTestInject,
                             i_target,
-                            CxxTest::MMIO_INJECT_FIFO_HANG,
+                            CxxTest::SBEIO_INJECT_FIFO_HANG,
                             "readResponse: INJECT_FIFO_HANG",
                             errl);
         if (errl) {break;}
@@ -897,7 +890,7 @@ errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
 
     CI_INJECT_FIFO_BREAKAGE(CxxTest::g_cxxTestInject,
                             i_target,
-                            CxxTest::MMIO_INJECT_FIFO_BREAKAGE,
+                            CxxTest::SBEIO_INJECT_FIFO_BREAKAGE,
                             timeout,
                             "waitDnFifoReady: INJECT_FIFO_BREAKAGE");
 
@@ -1083,6 +1076,89 @@ errlHndl_t SbeFifo::readFifoReg(TARGETING::Target     *i_target,
     }
 
     if (l_errl) {SBE_TRACD(ERR_MRK "readFifoReg");}
+    return l_errl;
+}
+
+/**
+ * @brief Odyssey Reset Write FIFO register
+ */
+errlHndl_t SbeFifo::OdyResetWriteFifoReg(TARGETING::Target *i_target,
+                                                fifoRegAddr i_addrIdx,
+                                                uint32_t   *i_pData)
+{
+    size_t     l_32bitSize = sizeof(uint32_t);
+    errlHndl_t l_errl      = NULL;
+    uint32_t   l_addr{};
+
+    // Save only the useInbandScom to restore, we do not save the pipe setting since it could
+    // have been turned off due to an error, if the useInbandScom switch is on, use it to
+    // restore the pipe setting
+    TARGETING::ScomSwitches l_switches = i_target->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
+    bool l_inband = l_switches.useInbandScom;
+    SBE_TRACF(ENTER_MRK"OdyResetWriteFifoReg HUID=0x%X l_switches.useInbandScom=0x%X "
+                       "l_switches.useSbeScom=0x%X",
+                        get_huid(i_target), l_switches.useInbandScom,
+                        l_switches.useSbeScom);
+
+    // Prepare for SPPE CFAM FIFO reset, caller has grabbed appropriate locks
+    i_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(0);
+    l_switches.useInbandScom = 0;
+    i_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+
+    // Applying reset function to upstream and downstream FIFO
+    l_addr = getFifoRegValue(FIFO_SPPE, FIFO_DNFIFO_RESET); // 0x00002414, CFAM addr
+
+    l_errl = deviceOp(DeviceFW::WRITE,
+                      i_target,
+                      i_pData,
+                      l_32bitSize,
+                      DEVICE_CFAM_ADDRESS(l_addr));
+
+    if (l_errl)
+    {
+        SBE_TRACF("OdyResetWriteFifoReg SPPE CFAM FIFO HUID=0x%X ERRL=0x%X (committing)",
+                  get_huid(i_target), ERRL_GETEID_SAFE(l_errl));
+        ERRORLOG::errlCommit(l_errl, SBEIO_COMP_ID);
+    }
+
+    l_switches.useSbeScom = 1;
+    i_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+
+    // scom data and addrs must be 64-bit
+    size_t   l_64bitSize = sizeof(uint64_t);
+    uint64_t l_data = *i_pData;
+    l_data <<= 32;
+
+    // Prepare for SPPE CFAM PIPE FIFO reset, caller has grabbed appropriate locks
+    //     0x000B0204, SCOM addr, PIPE2_upfifo_reset
+    l_addr = getFifoRegValue(FIFO_PIPE, FIFO_DNFIFO_RESET);
+    l_errl = deviceOp(DeviceFW::WRITE,
+                      i_target,
+                      &l_data,
+                      l_64bitSize,
+                      DEVICE_SCOM_ADDRESS(l_addr));
+    if (l_errl)
+    {
+        SBE_TRACF("OdyResetWriteFifoReg CFAM PIPE FIFO HUID=0x%X ERRL=0x%X (committing)",
+                  get_huid(i_target), ERRL_GETEID_SAFE(l_errl));
+        ERRORLOG::errlCommit(l_errl, SBEIO_COMP_ID);
+    }
+
+    // Restore based on the saved useInbandScom
+    // set to l_inband value, we could have come in with USE_PIPE_FIFO=0
+    i_target->setAttr<TARGETING::ATTR_USE_PIPE_FIFO>(l_inband);
+    l_switches.useInbandScom = l_inband;
+    if (l_inband)
+    {
+        l_switches.useSbeScom=0;
+    }
+    i_target->setAttr<TARGETING::ATTR_SCOM_SWITCHES>(l_switches);
+
+    if (l_errl) {SBE_TRACF(ERR_MRK "OdyResetWriteFifoReg");}
+    SBE_TRACF(EXIT_MRK"OdyResetWriteFifoReg HUID=0x%X l_switches.useInbandScom=0x%X "
+                      "l_switches.useSbeScom=0x%X USE_PIPE_FIFO=0x%X",
+                       get_huid(i_target), l_switches.useInbandScom,
+                       l_switches.useSbeScom, l_inband);
     return l_errl;
 }
 

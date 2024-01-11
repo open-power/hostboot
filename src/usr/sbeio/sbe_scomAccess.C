@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,7 @@ errlHndl_t getFifoScom(TARGETING::Target * i_target,
 {
     errlHndl_t errl = NULL;
 
-    SBE_TRACD(ENTER_MRK "getFifoScom");
+    SBE_TRACD(ENTER_MRK "getFifoScom HUID=0x%X i_addr=0x%X", get_huid(i_target), i_addr);
     do
     {
         // error check input parameters
@@ -70,6 +70,7 @@ errlHndl_t getFifoScom(TARGETING::Target * i_target,
                                     i_addr);
         if (errl)
         {
+            SBE_TRACF("getFifoScom HUID=0x%X ERRL=0x%X", get_huid(i_target), ERRL_GETEID_SAFE(errl));
             break;
         }
 
@@ -100,7 +101,7 @@ errlHndl_t getFifoScom(TARGETING::Target * i_target,
     }
     while (0);
 
-    SBE_TRACD(EXIT_MRK "getFifoScom");
+    SBE_TRACD(EXIT_MRK "getFifoScom HUID=0x%X ERRL=0x%X", get_huid(i_target), ERRL_GETEID_SAFE(errl));
 
     return errl;
 };
@@ -112,7 +113,7 @@ errlHndl_t putFifoScom(TARGETING::Target * i_target,
 {
     errlHndl_t errl = NULL;
 
-    SBE_TRACD(ENTER_MRK "putFifoScom");
+    SBE_TRACD(ENTER_MRK "putFifoScom HUID=0x%X i_addr=0x%X", get_huid(i_target), i_addr);
     do
     {
         // error check input parameters
@@ -122,6 +123,7 @@ errlHndl_t putFifoScom(TARGETING::Target * i_target,
                                     i_addr);
         if (errl)
         {
+            SBE_TRACF("putFifoScom ERRL=0x%X HUID=0x%X i_addr=0x%X", ERRL_GETEID_SAFE(errl), get_huid(i_target), i_addr);
             break;
         }
 
@@ -151,7 +153,7 @@ errlHndl_t putFifoScom(TARGETING::Target * i_target,
     }
     while (0);
 
-    SBE_TRACD(EXIT_MRK "putFifoScom");
+    SBE_TRACD(EXIT_MRK "putFifoScom HUID=0x%X", get_huid(i_target));
 
     return errl;
 };

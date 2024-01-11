@@ -604,7 +604,7 @@ errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
                   "that the SBE is not running",
                   get_huid(i_ocmb));
 
-        OdysseySbeRetryHandler retry_handler(i_ocmb);
+        OdySbeRetryHandler retry_handler(i_ocmb);
         auto halted_rc = hbstd::own(retry_handler.ExtractRC());
 
         if (halted_rc)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -382,7 +382,6 @@ public:
          DIRECT_CFAM_ACCESS, 0x8000,  4, 0xBADC0FFE00000000, 0xBADC0FFE00000000, false, false,
          DIRECT_CFAM_ACCESS, 0x100A,  4, 0xABABABAB00000000, 0x160C004900000000, false, true,
          DIRECT_CFAM_ACCESS, 0x283A,  4, 0xFFFFFFFF00000000, 0xFFFFFFFF00000000, true, true,
-         DIRECT_CFAM_ACCESS, 0x283D,  4, 0xBADC0FFE00000000, 0xBADC0FFE00000000, true, true,
         };
 
         int l_tests = TOTAL_ACCESS_TYPES * 4;

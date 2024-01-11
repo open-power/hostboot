@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,6 +121,7 @@ namespace SBEIO
     */
     errlHndl_t sendAttrListRequest(TARGETING::Target * i_chipTarget)
     {
+        SBE_TRACF(ENTER_MRK "sendAttrListRequest");
         errlHndl_t errl = nullptr;
         SbeFifo::fifoAttrListRequest* l_request = new SbeFifo::fifoAttrListRequest;
         SbeFifo::fifoAttrListResponse* l_response = new SbeFifo::fifoAttrListResponse;
@@ -168,7 +169,7 @@ namespace SBEIO
         delete l_request;
         delete l_response;
 
-        SBE_TRACD(EXIT_MRK "sendAttrListRequest");
+        SBE_TRACF(EXIT_MRK "sendAttrListRequest");
         return errl;
     }
 
@@ -187,6 +188,7 @@ namespace SBEIO
         errlHndl_t errl = nullptr;
         SbeFifo::fifoAttrUpdateRequest* l_request = new SbeFifo::fifoAttrUpdateRequest;
         SbeFifo::fifoAttrUpdateResponse* l_response = new SbeFifo::fifoAttrUpdateResponse;
+        SBE_TRACF(ENTER_MRK "sendAttrUpdateRequest");
 
         do
         {
@@ -242,7 +244,7 @@ namespace SBEIO
         delete l_request;
         delete l_response;
 
-        SBE_TRACD(EXIT_MRK "sendAttrUpdateRequest");
+        SBE_TRACF(EXIT_MRK "sendAttrUpdateRequest");
         return errl;
     }
 } //end namespace SBEIO
