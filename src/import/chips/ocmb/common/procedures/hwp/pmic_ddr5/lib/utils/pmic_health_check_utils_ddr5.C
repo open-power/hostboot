@@ -88,7 +88,7 @@ void attempt_recovery(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_targ
     static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
     fapi2::buffer<uint8_t> l_dt_data_to_write[NUM_BYTES_TO_WRITE];
     fapi2::buffer<uint8_t> l_pmic_buffer;
-
+    fapi2::buffer<uint8_t> l_data_recovery_count;
     // Disable efuse
     mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::EN_REGISTER, 0x00);
 
@@ -113,6 +113,14 @@ void attempt_recovery(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_targ
 
     // Enable efuse
     mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::EN_REGISTER, 0x01);
+
+    // Read register Recovery Count register 0xE1
+    mss::pmic::ddr5::dt_reg_read(io_pmic_dt_target_info, DT_REGS::RECOVERY_COUNT, l_data_recovery_count);
+    // Increment by 1, but reset to 0 when the counter is 0xFF(255)
+    // Since it is a uint8_t buffer, it will automatically reset to 0 when incremented from 0XFF
+    l_data_recovery_count++;
+    // Write the incremented value back to the register
+    mss::pmic::ddr5::dt_reg_write(io_pmic_dt_target_info, DT_REGS::RECOVERY_COUNT, l_data_recovery_count);
 
     // Delay for 10 ms. Might remove this if natural delay is sufficient
     fapi2::delay(10 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);

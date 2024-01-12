@@ -584,6 +584,9 @@ struct __attribute__ ((__packed__)) dt_periodic_telemetry_data
     uint16_t iv_ra5_iin_max  = 0;
 
     uint8_t iv_breadcrumb        = 0;
+    uint8_t iv_recovery_count    = 0;
+    uint8_t iv_reserved0         = 0;
+    uint16_t iv_reserved1        = 0;
     uint8_t iv_neg_orfet_cnt_swa = 0;
     uint8_t iv_neg_orfet_cnt_swc = 0;
     uint8_t iv_neg_orfet_cnt_swd = 0;

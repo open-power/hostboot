@@ -329,6 +329,9 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
             mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
             io_periodic_tele_info.iv_dt[l_dt_count].iv_breadcrumb = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
 
+            mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RECOVERY_COUNT, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+            io_periodic_tele_info.iv_dt[l_dt_count].iv_recovery_count = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
+
             // Read neg orfet cnt for SWA
             read_neg_orfet_cnt(io_target_info.iv_pmic_dt_map[l_dt_count], SEL_SWA_ORFET_CNT, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
             io_periodic_tele_info.iv_dt[l_dt_count].iv_neg_orfet_cnt_swa = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
