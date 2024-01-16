@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -293,7 +293,6 @@ template<TARGETING::TYPE TT, typename SCT>
 uint32_t startTdScrubOnNextRow( ExtensibleChip * i_chip, const MemRank & i_rank,
         const MemAddr & i_addr, AddrRangeType i_rangeType, SCT i_stopCond,
         mss::mcbist::end_boundary i_endBound = mss::mcbist::NONE );
-
 
 /**
  * @brief  Starts a single address steer command for the input address.

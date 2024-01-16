@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -115,10 +115,9 @@ class MemTdCtlr
      *
      * @note   Initializes the TD controller, if needed.
      * @param  io_sc    The step code data struct.
-     * @param  i_port   Target memory port.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port );
+    uint32_t handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc );
 
 
     #ifdef __HOSTBOOT_RUNTIME
@@ -219,10 +218,10 @@ class MemTdCtlr
      * At runtime, this function will restart background scrubbing.
      *
      * @param  io_sc  The step code data struct.
-     * @param  i_port The target memory port.
+     * @param  i_addr The address the command complete stopped on.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t defaultStep(STEP_CODE_DATA_STRUCT & io_sc, const uint8_t& i_port);
+    uint32_t defaultStep(STEP_CODE_DATA_STRUCT & io_sc, const MemAddr & i_addr);
 
     /**
      * @brief Progresses onto the next step of the state machine.
@@ -232,10 +231,10 @@ class MemTdCtlr
      * queue, if one exists, and starts that procedure.
      *
      * @param  io_sc  The step code data struct.
-     * @param  i_port The target memory port.
+     * @param  i_addr The address the command complete stopped on.
      * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
      */
-    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, const uint8_t& i_port )
+    uint32_t nextStep( STEP_CODE_DATA_STRUCT & io_sc, const MemAddr & i_addr )
     {
         uint32_t rc = SUCCESS;
 
@@ -243,13 +242,13 @@ class MemTdCtlr
         {
             if ( iv_queue.empty() ) // No more TD procedures.
             {
-                rc = defaultStep( io_sc, i_port );
+                rc = defaultStep( io_sc, i_addr );
             }
             else
             {
                 // Get the next entry in the queue and move forward.
                 iv_curProcedure = iv_queue.getNextEntry();
-                rc = nextStep( io_sc, i_port );
+                rc = nextStep( io_sc, i_addr );
             }
         }
         else
@@ -266,7 +265,7 @@ class MemTdCtlr
             {
                 // This procedure is done so clean it up and move on.
                 iv_curProcedure = nullptr; iv_queue.pop();
-                rc = nextStep( io_sc, i_port );
+                rc = nextStep( io_sc, i_addr );
             }
         }
 
@@ -298,6 +297,17 @@ class MemTdCtlr
      */
     TdRankListEntry getStopRank(const MemAddr & i_addr);
 
+
+    /**
+     * @brief  Checks for, and handles, any ECC errors that have triggered.
+     * @param  i_chip        OCMB chip.
+     * @param  i_addr        The address the command stopped on.
+     * @param  o_errorsFound True if any ECC error found and handled.
+     * @param  io_sc         The step code data struct.
+     * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
+     */
+    uint32_t checkEcc( ExtensibleChip * i_chip, const MemAddr & i_addr,
+                       bool & o_errorsFound, STEP_CODE_DATA_STRUCT & io_sc );
 
     #ifdef __HOSTBOOT_RUNTIME
 
@@ -369,6 +379,12 @@ class MemTdCtlr
      *  False if a TD procedure had been executed and background scrubbing needs
      *  to be restarted with a new command. */
     bool iv_resumeBgScrub = false;
+
+    /** Odyssey only. True if background steering should be restarted on the
+     * next address as opposed to the next rank. This is solely for scenarios
+     * where a single address steer was used during error analysis and as such
+     * the continue_cmd procedure cannot be used to resume background steer. */
+    bool iv_restartOnNextAddr = false;
 
     /** Map to keep track of ranks that have banned TPS. */
     std::map< std::tuple<ExtensibleChip *, MemRank, uint8_t>, bool > iv_tpsBans;

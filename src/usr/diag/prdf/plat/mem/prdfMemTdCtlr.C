@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,15 +47,6 @@ namespace PRDF
 {
 
 using namespace PlatServices;
-
-//------------------------------------------------------------------------------
-
-// This is a forward reference to a function that is locally defined in
-// prdfMemTdCtlr_ipl.C and prdfMemTdCtlr_rt.C.
-template<TARGETING::TYPE T>
-uint32_t __checkEcc( ExtensibleChip * i_chip,
-                     const MemAddr & i_addr, bool & o_errorsFound,
-                     STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -189,10 +180,10 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
             // Check for ECC errors. This will add TD procedures to iv_queue in
             // some cases.
             bool errorsFound;
-            o_rc = __checkEcc<T>(iv_chip, addr, errorsFound, io_sc);
+            o_rc = checkEcc(iv_chip, addr, errorsFound, io_sc);
             if (SUCCESS != o_rc)
             {
-                PRDF_ERR(PRDF_FUNC "__checkEcc<T>(0x%08x) failed",
+                PRDF_ERR(PRDF_FUNC "checkEcc(0x%08x) failed",
                          iv_chip->getHuid());
                 break;
             }
@@ -252,10 +243,10 @@ uint32_t MemTdCtlr<T>::handleCmdComplete( STEP_CODE_DATA_STRUCT & io_sc )
         }
 
         // Move onto the next step in the state machine.
-        o_rc = nextStep( io_sc, addr.getPort() );
+        o_rc = nextStep( io_sc, addr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "nextStep(%x) failed", addr.getPort() );
+            PRDF_ERR( PRDF_FUNC "nextStep() failed" );
             break;
         }
 
@@ -415,8 +406,7 @@ void MemTdCtlr<T>::collectStateCaptureData( STEP_CODE_DATA_STRUCT & io_sc,
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc,
-                                        uint8_t i_port )
+uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc )
 {
     #define PRDF_FUNC "[MemTdCtlr::handleDsdImpeTh] "
 
@@ -436,6 +426,9 @@ uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc,
         // Don't interrupt a TD procedure if one is already in progress.
         if ( nullptr != iv_curProcedure ) break;
 
+        // Only used for runtime, but needs to exist to pass to nextStep
+        MemAddr addr;
+
         #ifdef __HOSTBOOT_RUNTIME
 
         // Stop background scrubbing.
@@ -447,7 +440,6 @@ uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc,
             break;
         }
 
-        MemAddr addr;
         o_rc = getMemMaintAddr<T>( iv_chip, addr );
         if ( SUCCESS != o_rc )
         {
@@ -488,11 +480,11 @@ uint32_t MemTdCtlr<T>::handleDsdImpeTh( STEP_CODE_DATA_STRUCT & io_sc,
         collectStateCaptureData( io_sc, TD_CTLR_DATA::START );
 
         // Move onto the next step in the state machine.
-        o_rc = nextStep( io_sc, i_port );
+        o_rc = nextStep( io_sc, addr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "nextStep(%x) failed on 0x%08x",
-                      i_port, iv_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "nextStep() failed on 0x%08x",
+                      iv_chip->getHuid() );
             break;
         }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1553,7 +1553,6 @@ uint32_t startTdScrubOnNextRow<TYPE_OCMB_CHIP>(
 
     #undef PRDF_FUNC
 }
-
 
 template<>
 uint32_t singleAddrSteer<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,

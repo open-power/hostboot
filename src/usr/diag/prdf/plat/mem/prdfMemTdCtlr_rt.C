@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -521,11 +521,11 @@ bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
 //------------------------------------------------------------------------------
 
 template <TARGETING::TYPE T>
-uint32_t __checkEcc( ExtensibleChip * i_chip,
-                     const MemAddr & i_addr, bool & o_errorsFound,
-                     STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t MemTdCtlr<T>::checkEcc( ExtensibleChip * i_chip,
+                                 const MemAddr & i_addr, bool & o_errorsFound,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[__checkEcc] "
+    #define PRDF_FUNC "[MemTdCtlr::checkEcc] "
 
     PRDF_ASSERT( nullptr != i_chip );
     PRDF_ASSERT( T == i_chip->getType() );
@@ -667,18 +667,20 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
             }
         }
 
+        // Odyssey only: If no TD events are in queue, background steer will
+        // need to be restarted on the next address. The continue_cmd
+        // procedure cannot be used after a single addr steer.
+        if (isOdysseyOcmb(trgt) && iv_queue.empty())
+        {
+            iv_restartOnNextAddr = true;
+        }
+
     } while (0);
 
     return o_rc;
 
     #undef PRDF_FUNC
 }
-
-template
-uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                     const MemAddr & i_addr,
-                                     bool & o_errorsFound,
-                                     STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 
@@ -755,10 +757,10 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         // Check for ECC errors. This will add TD procedures to iv_queue in
         // some cases.
         bool errorsFound;
-        o_rc = __checkEcc<T>(iv_chip, addr, errorsFound, io_sc);
+        o_rc = checkEcc(iv_chip, addr, errorsFound, io_sc);
         if (SUCCESS != o_rc)
         {
-            PRDF_ERR(PRDF_FUNC "__checkEcc<T>(0x%08x) failed",
+            PRDF_ERR(PRDF_FUNC "checkEcc(0x%08x) failed",
                      iv_chip->getHuid());
             break;
         }
@@ -806,11 +808,11 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
         #endif
 
         // Move onto the next step in the state machine.
-        o_rc = nextStep( io_sc, addr.getPort() );
+        o_rc = nextStep( io_sc, addr );
         if ( SUCCESS != o_rc )
         {
-            PRDF_ERR( PRDF_FUNC "nextStep(%x) failed on 0x%08x",
-                      addr.getPort(), iv_chip->getHuid() );
+            PRDF_ERR( PRDF_FUNC "nextStep() failed on 0x%08x",
+                      iv_chip->getHuid() );
             break;
         }
 
@@ -841,7 +843,7 @@ uint32_t MemTdCtlr<T>::handleTdEvent( STEP_CODE_DATA_STRUCT & io_sc,
 
 template <TARGETING::TYPE T>
 uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                    const uint8_t& i_port )
+                                    const MemAddr & i_addr )
 {
     #define PRDF_FUNC "[MemTdCtlr::defaultStep] "
 
@@ -850,9 +852,15 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
     if ( iv_resumeBgScrub )
     {
         // Background scrubbing paused for FFDC collection only. Resume the
-        // current command.
-
+        // current command. iv_resumeBgScrub will not be set when a background
+        // steer command is being used for Odyssey OCMBs (see the
+        // canResumeBgScrub function).
         iv_resumeBgScrub = false;
+
+        // Reset iv_restartOnNextAddr as well. This would be for the case where
+        // an Odyssey OCMB in mnfg mode is running background scrub instead of
+        // background steer.
+        iv_restartOnNextAddr = false;
 
         PRDF_TRAC( PRDF_FUNC "Calling resumeBgScrub<T>(0x%08x)",
                    iv_chip->getHuid() );
@@ -864,9 +872,27 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
                       iv_chip->getHuid() );
         }
     }
+    else if (iv_restartOnNextAddr)
+    {
+        // Odyssey only: Background steer was stopped, a single address
+        // steer was performed, and no targeted diagnostics procedure was
+        // performed. As such background steer needs to be restarted on the
+        // next address instead of the next rank.
+        iv_restartOnNextAddr = false;
+
+        PRDF_TRAC(PRDF_FUNC "Calling restartBgSteerOnNextAddr<T>(0x%08x)",
+                  iv_chip->getHuid());
+
+
+        o_rc = restartBgSteerOnNextAddr<T>(iv_chip, i_addr, io_sc);
+        if (SUCCESS != o_rc)
+        {
+            PRDF_ERR(PRDF_FUNC "restartBgSteerOnNextAddr<T>(0x%08x) failed",
+                     iv_chip->getHuid());
+        }
+    }
     else
     {
-
         // Unmask the ECC attentions that were explicitly masked during the
         // TD procedure.
         o_rc = unmaskEccAttns(0);

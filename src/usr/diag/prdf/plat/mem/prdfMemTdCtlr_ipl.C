@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,7 +75,7 @@ uint32_t MemTdCtlr<T>::initialize()
 
 template <TARGETING::TYPE T>
 uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc,
-                                    const uint8_t& i_port )
+                                    const MemAddr & i_addr )
 {
     #define PRDF_FUNC "[MemTdCtlr::defaultStep] "
 
@@ -157,11 +157,11 @@ bool __mnfgCeCheck<TYPE_OCMB_CHIP>( uint32_t i_eccAttns )
 }
 
 template <TARGETING::TYPE T>
-uint32_t __checkEcc( ExtensibleChip * i_chip,
-                     const MemAddr & i_addr, bool & o_errorsFound,
-                     STEP_CODE_DATA_STRUCT & io_sc )
+uint32_t MemTdCtlr<T>::checkEcc( ExtensibleChip * i_chip,
+                                 const MemAddr & i_addr, bool & o_errorsFound,
+                                 STEP_CODE_DATA_STRUCT & io_sc )
 {
-    #define PRDF_FUNC "[__checkEcc] "
+    #define PRDF_FUNC "[MemTdCtlr::checkEcc] "
 
     uint32_t o_rc = SUCCESS;
 
@@ -254,12 +254,6 @@ uint32_t __checkEcc( ExtensibleChip * i_chip,
 
     #undef PRDF_FUNC
 }
-
-template
-uint32_t __checkEcc<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-                                     const MemAddr & i_addr,
-                                     bool & o_errorsFound,
-                                     STEP_CODE_DATA_STRUCT & io_sc );
 
 //------------------------------------------------------------------------------
 

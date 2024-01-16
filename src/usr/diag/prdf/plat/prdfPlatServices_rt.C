@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 // Platform includes
 #include <prdfOcmbDataBundle.H>
 #include <prdfMemScrubUtils.H>
+#include <prdfMemUtils.H>
 #include <prdfPlatServices.H>
 
 // Other includes
@@ -270,6 +271,318 @@ uint32_t resumeBgScrub<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         }
 
     } while (0);
+
+    return o_rc;
+
+    #undef PRDF_FUNC
+}
+
+//------------------------------------------------------------------------------
+
+template<>
+uint32_t restartBgSteerOnNextAddr<TYPE_OCMB_CHIP>(ExtensibleChip * i_ocmb,
+    const MemAddr & i_addr, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #define PRDF_FUNC "[restartBgSteerOnNextAddr<TYPE_OCMB_CHIP>] "
+
+    PRDF_ASSERT(nullptr != i_ocmb);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == i_ocmb->getType());
+    PRDF_ASSERT(isOdysseyOcmb(i_ocmb->getTrgt()));
+
+    // Odyssey:
+    // Format of mss::mcbist::address, bits in ascending order
+    // 0:1   unused
+    // 2     port select
+    // 3     prank
+    // 4:6   srank(0 to 2)
+    // 7:24  row(0 to 17)
+    // 25:32 col(3 to 10)
+    // 33:34 bank(0 to 1)
+    // 35:37 bank_group(0 to 2)
+
+    uint32_t o_rc;
+
+    // Pull apart the individual parts of the address;
+    uint8_t port    = i_addr.getPort() & 0x1;
+    uint8_t prank   = i_addr.getRank().getRankSlct() & 0x1;
+    uint8_t srank   = i_addr.getRank().getSlave() & 0x7;
+    uint32_t row    = i_addr.getRow() & 0x3ffff;
+    uint32_t col    = i_addr.getCol() & 0xff;
+    uint32_t bnk    = (i_addr.getBank() >> 3) & 0x3;
+    uint32_t bnkGrp = i_addr.getBank() & 0x7;
+
+    bool twoPortConfig, col3Config, col10Config, bank1Config, bankGrp2Config;
+    uint8_t prnkBits, srnkBits, extraRowBits;
+
+    int32_t rc = MemUtils::odyGetAddrConfig( i_ocmb, port,
+        twoPortConfig, prnkBits, srnkBits, extraRowBits, col3Config,
+        col10Config, bank1Config, bankGrp2Config );
+    if ( SUCCESS != rc )
+    {
+        PRDF_ERR( PRDF_FUNC "odyGetAddrConfig(0x%08x, %d)", i_ocmb->getHuid(),
+                  port );
+    }
+
+    // Determine the last possible value for each part of the address, dependent
+    // on what bits are configured.
+    uint8_t lastPort = 0x1;
+    uint8_t lastPrank = 0x1;
+    uint8_t lastSrank = 0x7;
+    uint32_t lastRow = 0x3ffff;
+    uint32_t lastCol = 0xff;
+    uint32_t lastBnk = 0x3;
+    uint32_t lastBnkGrp = 0x7;
+
+    uint8_t prankShift = 1 - prnkBits;
+    lastPrank = (lastPrank >> prankShift) << prankShift;
+
+    uint8_t srankShift = 3 - srnkBits;
+    lastSrank = (lastSrank >> srankShift) << srankShift;
+
+    uint8_t rowShift = 2 - extraRowBits;
+    lastRow = (lastRow >> rowShift) << rowShift;
+
+    if (!col3Config)
+    {
+        lastCol = lastCol & 0x7f;
+    }
+    if (!col10Config)
+    {
+        lastCol = lastCol & 0xfe;
+    }
+
+    if (!bank1Config)
+    {
+        lastBnk = lastBnk & 0x2;
+    }
+
+    if (!bankGrp2Config)
+    {
+        lastBnkGrp = lastBnkGrp & 0x6;
+    }
+
+    // Check each part of the address to determine where to increment. The
+    // address is incremented right to left, but cannot be blindly incremented
+    // due to potential bits not being configured.
+    do
+    {
+        // bank_group(0 to 2)
+        if (bnkGrp != lastBnkGrp)
+        {
+            // Increment bank group, adjusting if bank group 2 is not configured
+            if (!bankGrp2Config)
+            {
+                bnkGrp = (((bnkGrp >> 1) + 1) << 1) & 0x7;
+            }
+            else
+            {
+                bnkGrp = (bnkGrp + 1) & 0x7;
+            }
+            break;
+        }
+        else
+        {
+            // Bank group is at it's last possible value, some next part of the
+            // address will need to the incremented. Zero out bank group.
+            bnkGrp = 0;
+        }
+
+        // bank(0 to 1)
+        if (bnk != lastBnk)
+        {
+            // Increment bank, adjusting if bank 1 is not configured
+            if (!bank1Config)
+            {
+                bnk = (((bnk >> 1) +  1) << 1) & 0x3;
+            }
+            else
+            {
+                bnk = (bnk + 1) & 0x3;
+            }
+            break;
+        }
+        else
+        {
+            // Bank is at it's last possible value, some next part of the
+            // address will need to the incremented. Zero out bank.
+            bnk = 0;
+        }
+
+        // col(3 to 10)
+        if (col != lastCol)
+        {
+            // Increment column, adjusting if column 10 is not configured
+            if (!col10Config)
+            {
+                col = (((col >> 1) + 1) << 1) & 0xff;
+            }
+            else
+            {
+                col = (col + 1) & 0xff;
+            }
+            break;
+        }
+        else
+        {
+            // Column is at it's last possible value, some next part of the
+            // address will need to the incremented. Zero out column.
+            col = 0;
+        }
+
+        // row(0 to 17)
+        if (row != lastRow)
+        {
+            row = (((row >> rowShift) + 1) << rowShift) & 0x3ffff;
+            break;
+        }
+        else
+        {
+            // Row is at it's last possible value, some next part of the
+            // address will need to the incremented. Zero out row.
+            row = 0;
+        }
+
+        // srank(0 to 2)
+        if (srank != lastSrank)
+        {
+            srank = (((srank >> srankShift) + 1) << srankShift) & 0x7;
+            break;
+        }
+        else
+        {
+            // Srank is at it's last possible value, some next part of the
+            // address will need to the incremented. Zero out srank.
+            srank = 0;
+        }
+
+        // prank
+        if (prank != lastPrank)
+        {
+            prank = (((prank >> prankShift) + 1) << prankShift) & 0x1;
+            break;
+        }
+        else
+        {
+            // Prank is at it's last possible value, some next part of the
+            // address will need to the incremented. Zero out prank.
+            prank = 0;
+        }
+
+        // port select
+        // If only one port is configured, just use the port value as is.
+        if (twoPortConfig)
+        {
+            if (port != lastPort)
+            {
+                port++;
+                break;
+            }
+            else
+            {
+                // Port is at it's last possible value, some next part of the
+                // address will need to the incremented. Zero out port.
+                port = 0;
+            }
+        }
+
+    }while (0);
+
+    // Note: the uint64_t will be right justified as that is the format needed
+    // for passing into the constructor of mss::mcbist::address.
+    uint8_t fullBank = ((bnk << 3) | bnkGrp) & 0x1f;
+    uint64_t addr64 =
+    (
+        ((uint64_t)(port     & 0x1    ) << 35) | // 2
+        ((uint64_t)(prank    & 0x1    ) << 34) | // 3
+        ((uint64_t)(srank    & 0x7    ) << 31) | // 4:6
+        ((uint64_t)(row      & 0x3ffff) << 13) | // 7:24
+        ((uint64_t)(col      & 0xff   ) <<  5) | // 25:32
+        ((uint64_t)(fullBank & 0x1f   ))         // 33:37
+    );
+
+    mss::mcbist::address<mss::mc_type::ODYSSEY> mssAddr(addr64);
+
+    // Get the OCMB fapi target
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt (i_ocmb->getTrgt());
+
+    do
+    {
+        // Clear all of the counters and maintenance ECC attentions.
+        o_rc = prepareNextCmd<TYPE_OCMB_CHIP>(i_ocmb);
+        if (SUCCESS != o_rc)
+        {
+            PRDF_ERR(PRDF_FUNC "prepareNextCmd(0x%08x) failed",
+                     i_ocmb->getHuid());
+            break;
+        }
+
+        // Start the background steer command.
+        errlHndl_t errl = nullptr;
+
+        // Get the stop conditions. See startBgScrub for more details on
+        // why these stop conditions are set.
+        mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY> stopCond;
+
+
+        if (getOcmbDataBundle(i_ocmb)->iv_ueStopCounter.thReached(io_sc))
+        {
+            // If we've reached the limit of UEs we're allowed to stop on
+            // per rank, only set the stop on mpe stop condition.
+            stopCond.set_pause_on_mpe(mss::ON);
+        }
+        else if (getOcmbDataBundle(i_ocmb)->iv_ceStopCounter.thReached(io_sc))
+        {
+            // If we've reached the limit of CEs we're allowed to stop on
+            // per rank, set all the normal stop conditions except stop on
+            // CE
+            stopCond.set_pause_on_aue(mss::ON);
+
+            #ifdef CONFIG_HBRT_PRD
+
+            stopCond.set_pause_on_mpe(mss::ON)
+                    .set_pause_on_ue(mss::ON);
+
+            // In MNFG mode, stop on RCE_ETE to get an accurate callout for
+            // IUEs
+            if (mfgMode()) stopCond.set_thresh_rce(1);
+
+            #endif
+        }
+        else
+        {
+            // If we haven't reached threshold on the number of UEs or CEs we
+            // have stopped on, use the default stop conditions.
+            stopCond.set_pause_on_aue(mss::ON);
+
+            #ifdef CONFIG_HBRT_PRD
+
+            stopCond.set_thresh_nce_int(1)
+                .set_thresh_nce_soft(1)
+                .set_thresh_nce_hard(1)
+                .set_pause_on_mpe(mss::ON)
+                .set_pause_on_ue(mss::ON)
+                .set_nce_inter_symbol_count_enable(mss::ON)
+                .set_nce_soft_symbol_count_enable(mss::ON)
+                .set_nce_hard_symbol_count_enable(mss::ON);
+
+            // In MNFG mode, stop on RCE_ETE to get an accurate callout for IUEs.
+            if (mfgMode()) stopCond.set_thresh_rce(1);
+
+            #endif
+        }
+
+        FAPI_INVOKE_HWP(errl, ody_background_steer, fapiTrgt, stopCond,
+                        mss::mcbist::BG_SCRUB, mssAddr);
+        if (nullptr != errl)
+        {
+            PRDF_ERR(PRDF_FUNC "background_steer(0x%08x,0x%016llx) "
+                     "failed", i_ocmb->getHuid(), addr64);
+            PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+            o_rc = FAIL;
+            break;
+        }
+
+    }while(0);
 
     return o_rc;
 

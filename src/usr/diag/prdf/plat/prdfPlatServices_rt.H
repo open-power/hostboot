@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,6 +96,18 @@ uint32_t stopBgScrub( ExtensibleChip * i_chip );
 template<TARGETING::TYPE T>
 uint32_t resumeBgScrub( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc );
+
+/**
+ * @brief  Odyssey only. Restarts background steer on the next address after the
+ *         input address.
+ * @param  i_ocmb OCMB chip.
+ * @param  i_addr Target address.
+ * @param  io_sc  The step code data struct.
+ * @return Non-SUCCESS if an internal function fails, otherwise SUCCESS.
+ */
+template<TARGETING::TYPE T>
+uint32_t restartBgSteerOnNextAddr(ExtensibleChip * i_ocmb,
+  const MemAddr & i_addr, STEP_CODE_DATA_STRUCT & io_sc);
 
 //##############################################################################
 //##                       Core/cache functions

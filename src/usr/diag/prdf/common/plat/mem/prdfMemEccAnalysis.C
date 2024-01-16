@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1595,8 +1595,7 @@ uint32_t analyzeImpe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
                 {
                     // If a dram spare deploy procedure has been started,
                     // trigger the TD controller
-                    MemDbUtils::triggerDsdImpeTh<TYPE_OCMB_CHIP>(i_chip, io_sc,
-                                                                 i_port);
+                    MemDbUtils::triggerDsdImpeTh<TYPE_OCMB_CHIP>(i_chip, io_sc);
                 }
 
                 #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,19 +132,17 @@ void pushToQueue<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
  * @brief  Wrapper to tell the TdCtlr to call handleDsdImpeTh
  * @param  i_chip  OCMB.
  * @param  io_sc   The step code data struct.
- * @param  i_port  Target memory port.
  * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
  */
 template<TARGETING::TYPE T>
 uint32_t triggerDsdImpeTh( ExtensibleChip * i_chip,
-                           STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port );
+                           STEP_CODE_DATA_STRUCT & io_sc );
 
 template<> inline
 uint32_t triggerDsdImpeTh<TARGETING::TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
-        STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port )
+        STEP_CODE_DATA_STRUCT & io_sc )
 {
-    return getOcmbDataBundle(i_chip)->getTdCtlr()->handleDsdImpeTh(io_sc,
-                                                                   i_port);
+    return getOcmbDataBundle(i_chip)->getTdCtlr()->handleDsdImpeTh(io_sc);
 }
 
 #endif // Hostboot IPL/Runtime
