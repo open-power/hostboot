@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,8 +34,8 @@
 /// *HWP Consumed by: HB:CI
 ///
 
-#ifndef _EXP_MAINT_CMDS_H
-#define _EXP_MAINT_CMDS_H
+#ifndef _MSS_MAINT_CMDS_H
+#define _MSS_MAINT_CMDS_H
 
 //------------------------------------------------------------------------------
 //    Includes

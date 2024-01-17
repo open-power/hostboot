@@ -2249,7 +2249,7 @@
 
   <hwpError>
     <sbeError/>
-    <rc>RC_EXP_MAINT_BAD_RANK_INPUT</rc>
+    <rc>RC_MSS_MAINT_BAD_RANK_INPUT</rc>
     <description>
        The rank passed into a steer function was invalid.
     </description>
@@ -2263,7 +2263,7 @@
 
   <hwpError>
     <sbeError/>
-    <rc>RC_EXP_MAINT_BAD_STEER_MUX_TYPE</rc>
+    <rc>RC_MSS_MAINT_BAD_STEER_MUX_TYPE</rc>
     <description>
        The steer mux type passed into a steer function was invalid.
     </description>
@@ -2277,7 +2277,7 @@
 
   <hwpError>
     <sbeError/>
-    <rc>RC_EXP_MAINT_INVALID_SYMBOL</rc>
+    <rc>RC_MSS_MAINT_INVALID_SYMBOL</rc>
     <description>
        The symbol passed into a steer function was invalid.
     </description>
@@ -2291,7 +2291,7 @@
 
   <hwpError>
     <sbeError/>
-    <rc>RC_EXP_MAINT_BAD_SPARE_INDEX</rc>
+    <rc>RC_MSS_MAINT_BAD_SPARE_INDEX</rc>
     <description>
        A spare index returned from symbol translation was invalid.
     </description>
@@ -2306,7 +2306,7 @@
 
   <hwpError>
     <sbeError/>
-    <rc>RC_EXP_MAINT_SYMBOL_NOT_FOUND</rc>
+    <rc>RC_MSS_MAINT_SYMBOL_NOT_FOUND</rc>
     <description>
        The requested symbol does not match a steer index.
     </description>
@@ -2319,7 +2319,7 @@
 
   <hwpError>
     <sbeError/>
-    <rc>RC_EXP_MAINT_DO_STEER_ALL_SPARES_DEPLOYED</rc>
+    <rc>RC_MSS_MAINT_DO_STEER_ALL_SPARES_DEPLOYED</rc>
     <description>
        All spares are already deployed when do_steer called.
     </description>

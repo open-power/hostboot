@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -152,10 +152,9 @@ fapi2::ReturnCode rank(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const uint8_t i_port_rank)
 {
-    // TODO: Zen-1554: Remove EXP_* error codes
     // Check for i_port_rank out of range
     FAPI_ASSERT(i_port_rank < TT::MAX_MRANK_PER_PORT,
-                fapi2::EXP_MAINT_BAD_RANK_INPUT()
+                fapi2::MSS_MAINT_BAD_RANK_INPUT()
                 .set_PORT_TARGET(i_target)
                 .set_RANK(i_port_rank),
                 "i_port_rank input to exp steer function out of range on " TARGTIDFORMAT, TARGTID);
@@ -175,11 +174,10 @@ inline fapi2::ReturnCode mux_type(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
     const steer_type i_steer_type)
 {
-    // TODO: Zen-1554: Remove EXP_* error codes
     // Check for i_steer_type out of range
     FAPI_ASSERT(((i_steer_type == steer_type::DRAM_SPARE0)
                  || (i_steer_type == steer_type::DRAM_SPARE1)),
-                fapi2::EXP_MAINT_BAD_STEER_MUX_TYPE()
+                fapi2::MSS_MAINT_BAD_STEER_MUX_TYPE()
                 .set_PORT_TARGET(i_target)
                 .set_STEER_TYPE(i_steer_type),
                 "i_steer_type input to exp steer function out of range on " TARGTIDFORMAT,
@@ -202,10 +200,9 @@ template<mss::mc_type MC, typename TT = portTraits<MC> >
 fapi2::ReturnCode symbol(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                          const uint8_t i_symbol)
 {
-    // TODO: Zen-1554: Remove EXP_* error codes
     // Check for i_symbol out of range
     FAPI_ASSERT((i_symbol < TT::MAX_SYMBOLS_PER_PORT),
-                fapi2::EXP_MAINT_INVALID_SYMBOL()
+                fapi2::MSS_MAINT_INVALID_SYMBOL()
                 .set_PORT_TARGET(i_target)
                 .set_SYMBOL(i_symbol),
                 "i_symbol input to put_steer_mux out of range on " TARGTIDFORMAT,
@@ -234,11 +231,10 @@ fapi2::ReturnCode spare_index(
     const uint8_t i_dram_spare0_index,
     const uint8_t i_dram_spare1_index )
 {
-    // TODO: Zen-1554: Remove EXP_* error codes
     // Check for spare indeces out of range
     FAPI_ASSERT(((i_dram_spare0_index < TT::spare_to_symbol.size() || i_dram_spare0_index == TT::SPARE_UNUSED) &&
                  (i_dram_spare1_index < TT::spare_to_symbol.size() || i_dram_spare1_index == TT::SPARE_UNUSED)),
-                fapi2::EXP_MAINT_BAD_SPARE_INDEX()
+                fapi2::MSS_MAINT_BAD_SPARE_INDEX()
                 .set_PORT_TARGET(i_target)
                 .set_SPARE0_INDEX(i_dram_spare0_index)
                 .set_SPARE1_INDEX(i_dram_spare1_index),
@@ -451,9 +447,8 @@ fapi2::ReturnCode symbol_to_spare( const uint8_t i_symbol, uint8_t& o_spare_inde
     // Check if symbol is in table
     const auto l_it = std::find(TT::spare_to_symbol.begin(), TT::spare_to_symbol.end(), i_symbol);
 
-    // TODO: Zen-1554: Remove EXP_* error codes
     FAPI_ASSERT(l_it != TT::spare_to_symbol.end(),
-                fapi2::EXP_MAINT_SYMBOL_NOT_FOUND()
+                fapi2::MSS_MAINT_SYMBOL_NOT_FOUND()
                 .set_SYMBOL(i_symbol),
                 "Invalid symbol for spare index %d.", i_symbol);
 
@@ -858,10 +853,9 @@ fapi2::ReturnCode do_steering(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& 
     //------------------------------------------------------
     FAPI_TRY(check_if_spare_is_free<MC>(i_target, i_port_rank, i_ignore_bad_bits, i_width, l_spare0_free, l_spare1_free) );
 
-    // TODO: Zen-1554: Remove EXP_* error codes
     // If neither spare is free, assert out
     FAPI_ASSERT(l_spare0_free || l_spare1_free,
-                fapi2::EXP_MAINT_DO_STEER_ALL_SPARES_DEPLOYED()
+                fapi2::MSS_MAINT_DO_STEER_ALL_SPARES_DEPLOYED()
                 .set_PORT_TARGET(i_target)
                 .set_RANK(i_port_rank)
                 .set_SYMBOL(i_symbol),
