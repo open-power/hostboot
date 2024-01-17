@@ -209,12 +209,6 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                     // *INDENT-ON*
                 }
             }
-
-            // Disable the DDSs during runtime as the core is now throttled, the frequency
-            // has be put to the safe value and the voltage has been adjusted for the lack
-            // of DDS protection.
-            FAPI_TRY(p10_disable_dds(i_target));
-
         }
 
         // Set DPLL after ext volt update because of dpll is lesser the safe
@@ -226,6 +220,14 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                                             l_safe_mode_dpll_value,
                                             l_safe_mode_dpll_fmin_value),
                       "Error from p10_update_dpll_value function");
+        }
+
+        if (l_coreList.size())
+        {
+            // Disable the DDSs during runtime as the core is now throttled, the frequency
+            // has be put to the safe value and the voltage has been adjusted for the lack
+            // of DDS protection.
+            FAPI_TRY(p10_disable_dds(i_target));
         }
 
         // Set Boot VDN Voltage

@@ -267,7 +267,7 @@ class PlatPmPPB
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
             iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_eco_count(0), iv_spare_count(0),
-            iv_core_count(0), iv_safe_mode_throt_idx(0),
+            iv_safe_mode_throt_idx(0),
             iv_dccr_value(0), iv_flmr_value(0), iv_fmmr_value(0),
             iv_wts_vddPsavFreq(0), iv_wts_vddWofBaseFreq(0), iv_wts_vddUTFreq(0), iv_wts_vddFixedFreq(0)
 

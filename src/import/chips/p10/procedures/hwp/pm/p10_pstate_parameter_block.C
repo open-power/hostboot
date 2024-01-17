@@ -4997,7 +4997,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     }
 
     // Only process VDD and VCS if there are cores enabled.
-    if (iv_core_count)
+    if (!iv_core_count)
     {
         FAPI_INF("Skipping VDD and VCS safe mode voltage compututations as there are no cores enabled");
 
