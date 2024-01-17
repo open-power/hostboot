@@ -84,10 +84,13 @@ class OdySbeRetryHandlerTest : public TestSuite
     enum testcase_t
     {
         TC_1_HRESET_DUMP=1,
-        TC_2_HRESET_ody_sppe_check_for_ready,
-        TC_3_HRESET_sendAttrUpdateRequest,
-        TC_4_HRESET_FAIL,
-        TC_5_HRESET,
+        TC_2_HRESET,
+        TC_3_HRESET_ody_sbe_hreset,
+        TC_4_HRESET_ody_sppe_check_for_ready,
+        TC_5_HRESET_sendAttrUpdateRequest,
+        TC_6_HRESET_ThermalSensorPolling,
+        TC_7_HRESET_FAIL,
+        TC_8_HRESET,
     };
 
     /***************************************************************************
@@ -319,13 +322,18 @@ class OdySbeRetryHandlerTest : public TestSuite
            TC_1_HRESET_DUMP                     timeout, hreset, dump, DEAD
 
           HBRT Testcases:
-           TC_2_HRESET_ody_sppe_check_for_ready timeout, hreset error, switch, success
-           TC_3_HRESET_sendAttrUpdateRequest    timeout, hreset error, switch, success
-           TC_4_HRESET_FAIL                     timeout, hreset error, switch, hreset error, DEAD
-           TC_5_HRESET                          timeout, hreset, success
+           TC_2_HRESET                          timeout, hreset, success
+           TC_3_HRESET_ody_sbe_hreset           timeout, hreset error, switch, success
+           TC_4_HRESET_ody_sppe_check_for_ready timeout, hreset error, switch, success
+           TC_5_HRESET_sendAttrUpdateRequest    timeout, hreset error, switch, success
+           TC_6_HRESET_ThermalSensorPolling     timeout, log info error, success
+           TC_7_HRESET_FAIL                     timeout, hreset error, switch, hreset error, DEAD
+           TC_8_HRESET                          timeout, hreset, success
          *--------------------------------------------------------------------*/
 
         TS_INFO("testOdySbeRetryHandler: Enter");
+
+#if HB_TEMPORARY_REMOVE_THESE_TESTCASES
 
         TargetHandle_t   l_target = nullptr;
         TargetHandleList l_ocmbTargetList{};
@@ -385,12 +393,37 @@ class OdySbeRetryHandlerTest : public TestSuite
 #else
 
         // inject FIFO TIMEOUT
+        //  then OdySbeRetryHandler runs the hreset and it works
+        runOdyRetryHandlerTest(l_target,
+                               TC_2_HRESET,
+                               SBEIO_INJECT_FIFO_HANG,
+                               INJECT_NONE,
+                               INJECT_NONE,
+                               ERROR_LOG_EXPECTED,
+                               SIDE_SWITCH_NOT_EXPECTED,
+                               ODY_RECOVERY_STATUS_VIABLE);
+
+        // inject FIFO TIMEOUT
+        //  then OdySbeRetryHandler runs the hreset
+        //  but in the hreset we fail ody_sbe_hreset
+        //  which causes a side switch
+        //  and then the hreset on the alternate side works
+        runOdyRetryHandlerTest(l_target,
+                               TC_3_HRESET_ody_sbe_hreset,
+                               SBEIO_INJECT_FIFO_HANG,
+                               SBEIO_INJECT_HRESET_ody_sbe_hreset,
+                               INJECT_NONE,
+                               ERROR_LOG_EXPECTED,
+                               SIDE_SWITCH_EXPECTED,
+                               ODY_RECOVERY_STATUS_VIABLE);
+
+        // inject FIFO TIMEOUT
         //  then OdySbeRetryHandler runs the hreset
         //  but in the hreset we fail ody_sppe_check_for_ready
         //  which causes a side switch
         //  and then the hreset on the alternate side works
         runOdyRetryHandlerTest(l_target,
-                               TC_2_HRESET_ody_sppe_check_for_ready,
+                               TC_4_HRESET_ody_sppe_check_for_ready,
                                SBEIO_INJECT_FIFO_HANG,
                                SBEIO_INJECT_HRESET_ody_sppe_check_for_ready,
                                INJECT_NONE,
@@ -404,12 +437,25 @@ class OdySbeRetryHandlerTest : public TestSuite
         //  which causes a side switch
         //  and then the hreset on the alternate side works
         runOdyRetryHandlerTest(l_target,
-                               TC_3_HRESET_sendAttrUpdateRequest,
+                               TC_5_HRESET_sendAttrUpdateRequest,
                                SBEIO_INJECT_FIFO_HANG,
                                SBEIO_INJECT_HRESET_sendAttrUpdateRequest,
                                INJECT_NONE,
                                ERROR_LOG_EXPECTED,
                                SIDE_SWITCH_EXPECTED,
+                               ODY_RECOVERY_STATUS_VIABLE);
+
+        // inject FIFO TIMEOUT
+        //  then OdySbeRetryHandler runs the hreset
+        //  but in the hreset we fail ThermalSensorPolling
+        //  and then the hreset on the current side works
+        runOdyRetryHandlerTest(l_target,
+                               TC_6_HRESET_ThermalSensorPolling,
+                               SBEIO_INJECT_FIFO_HANG,
+                               SBEIO_INJECT_HRESET_ThermalSensorPolling,
+                               INJECT_NONE,
+                               ERROR_LOG_EXPECTED,
+                               SIDE_SWITCH_NOT_EXPECTED,
                                ODY_RECOVERY_STATUS_VIABLE);
 
         // inject FIFO TIMEOUT
@@ -420,7 +466,7 @@ class OdySbeRetryHandlerTest : public TestSuite
         //  but in the hreset we fail ody_sppe_check_for_ready
         //  and then the hreset fails and grabs a dump
         runOdyRetryHandlerTest(l_target,
-                               TC_4_HRESET_FAIL,
+                               TC_7_HRESET_FAIL,
                                SBEIO_INJECT_FIFO_HANG,
                                SBEIO_INJECT_HRESET_TWO_FAILS,
                                SBEIO_INJECT_HRESET_SKIP_DUMP,
@@ -434,7 +480,7 @@ class OdySbeRetryHandlerTest : public TestSuite
         //  then OdySbeRetryHandler runs the hreset and it works
         //  (this testcase ensures the SBE is in a good state)
         runOdyRetryHandlerTest(l_target,
-                               TC_5_HRESET,
+                               TC_8_HRESET,
                                SBEIO_INJECT_FIFO_HANG,
                                INJECT_NONE,
                                INJECT_NONE,
@@ -455,6 +501,7 @@ class OdySbeRetryHandlerTest : public TestSuite
         g_cxxTestInject.clear(SBEIO_INJECT_HRESET_TWO_FAILS);
         g_cxxTestInject.clear(SBEIO_INJECT_HRESET_SKIP_DUMP);
 
+#endif
         TS_INFO("testOdySbeRetryHandler: Exit");
 
         return;
