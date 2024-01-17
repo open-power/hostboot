@@ -199,6 +199,8 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
         const uint8_t i_row_repair_data[mss::ody::MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK],
         REPAIR_ARR& o_repairs_per_dimm)
 {
+    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+
     constexpr uint8_t MAX_BANK_GROUP = 8;
     constexpr uint8_t MAX_BANKS = 4;
 
@@ -237,7 +239,7 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
                      BITS_PER_BYTE));
         }
 
-        FAPI_INF(TARGTIDFORMAT " row repair entry for rank%u 0x%08x", TARGTID, l_dimm_rank, l_row_repair_data);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " row repair entry for rank%u 0x%08x", TARGTID, l_dimm_rank, l_row_repair_data);
 
         // Create repair entry
         mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_entry(l_row_repair_data, l_dimm_rank);
@@ -247,36 +249,36 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
             const uint64_t MAX_ROW = 1 << l_rows;
             const uint64_t MAX_SRANK = 1 << l_num_subrank;
 
-            // srank, BG, BA, and row address are used bit-reversed in the row repair commands,
+            // srank, BG, BA, and row address are stored bit-reversed in the row repair entry struct,
             // so need to reverse them to print and do boundary checking
             fapi2::buffer<uint32_t> l_logical_data;
             fapi2::buffer<uint32_t> l_original_data(l_entry.iv_bg);
-            mss::swizzle < 32 - mss::ody::row_repair_data::ROW_REPAIR_BANK_GROUP_LEN,
-                mss::ody::row_repair_data::ROW_REPAIR_BANK_GROUP_LEN,
+            mss::swizzle < 32 - TT::ROW_REPAIR_BANK_GROUP_LEN,
+                TT::ROW_REPAIR_BANK_GROUP_LEN,
                 31 > (l_original_data, l_logical_data);
             const uint64_t l_logical_bg = l_logical_data;
 
             l_original_data.flush<0>();
             l_logical_data.flush<0>();
             l_original_data = l_entry.iv_bank;
-            mss::swizzle < 32 - mss::ody::row_repair_data::ROW_REPAIR_BANK_LEN,
-                mss::ody::row_repair_data::ROW_REPAIR_BANK_LEN,
+            mss::swizzle < 32 - TT::ROW_REPAIR_BANK_LEN,
+                TT::ROW_REPAIR_BANK_LEN,
                 31 > (l_original_data, l_logical_data);
             const uint64_t l_logical_bank = l_logical_data;
 
             l_original_data.flush<0>();
             l_logical_data.flush<0>();
             l_original_data = l_entry.iv_row;
-            mss::swizzle < 32 - ROW_REPAIR_ROW_ADDR_LEN,
-                ROW_REPAIR_ROW_ADDR_LEN,
+            mss::swizzle < 32 - TT::ROW_REPAIR_ROW_ADDR_LEN,
+                TT::ROW_REPAIR_ROW_ADDR_LEN,
                 31 > (l_original_data, l_logical_data);
             const uint64_t l_logical_row = l_logical_data;
 
             l_original_data.flush<0>();
             l_logical_data.flush<0>();
             l_original_data = l_entry.iv_srank;
-            mss::swizzle < 32 - ROW_REPAIR_SRANK_LEN,
-                ROW_REPAIR_SRANK_LEN,
+            mss::swizzle < 32 - TT::ROW_REPAIR_SRANK_LEN,
+                TT::ROW_REPAIR_SRANK_LEN,
                 31 > (l_original_data, l_logical_data);
             const uint64_t l_logical_srank = l_logical_data;
 
@@ -368,34 +370,38 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Swizzle CCS bits between two fapi2 buffers, and insert from source to destination
+/// @brief Swizzle fields in the repair_entry to the format we want for the CCS command API
 /// @param[in,out] io_repair the address repair information
+/// @note srank, BG, BA, and row fields are reversed in repair_entry class due to backward-compatibility.
+/// See class definition for field format
 ///
 void swizzle_repair_entry(mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& io_repair)
 {
+    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+
     // swizzle srank bits
-    fapi2::buffer<uint8_t> l_temp_buffer_8_in(io_repair.iv_srank);
-    fapi2::buffer<uint8_t> l_temp_buffer_8_out;
-    swizzle<SRANK_START, SRANK_LEN, SRANK_LAST>( l_temp_buffer_8_in, l_temp_buffer_8_out );
-    io_repair.iv_srank = l_temp_buffer_8_out;
+    fapi2::buffer<uint8_t> l_data_in(io_repair.iv_srank);
+    fapi2::buffer<uint8_t> l_data_out;
+    swizzle < 8 - TT::ROW_REPAIR_SRANK_LEN, TT::ROW_REPAIR_SRANK_LEN, 7 > ( l_data_in, l_data_out );
+    io_repair.iv_srank = l_data_out;
 
     // swizzle bank group
-    l_temp_buffer_8_in = io_repair.iv_bg;
-    l_temp_buffer_8_out.flush<0>();
-    swizzle<BG_START, BG_LEN, BG_LAST>( l_temp_buffer_8_in, l_temp_buffer_8_out );
-    io_repair.iv_bg = l_temp_buffer_8_out;
+    l_data_in = io_repair.iv_bg;
+    l_data_out.flush<0>();
+    swizzle < 8 - TT::ROW_REPAIR_BANK_GROUP_LEN, TT::ROW_REPAIR_BANK_GROUP_LEN, 7 > ( l_data_in, l_data_out );
+    io_repair.iv_bg = l_data_out;
 
     // swizzle bank
-    l_temp_buffer_8_in = io_repair.iv_bank;
-    l_temp_buffer_8_out.flush<0>();
-    swizzle<BANK_START, BANK_LEN, BANK_LAST>( l_temp_buffer_8_in, l_temp_buffer_8_out );
-    io_repair.iv_bank = l_temp_buffer_8_out;
+    l_data_in = io_repair.iv_bank;
+    l_data_out.flush<0>();
+    swizzle < 8 - TT::ROW_REPAIR_BANK_LEN, TT::ROW_REPAIR_BANK_LEN, 7 > ( l_data_in, l_data_out );
+    io_repair.iv_bank = l_data_out;
 
     // swizzle row
-    fapi2::buffer<uint32_t> l_temp_buffer_32_in(io_repair.iv_row);
-    fapi2::buffer<uint32_t> l_temp_buffer_32_out;
-    swizzle<ROW_START, ROW_LEN, ROW_LAST>( l_temp_buffer_32_in, l_temp_buffer_32_out );
-    io_repair.iv_row = l_temp_buffer_32_out;
+    fapi2::buffer<uint32_t> l_row_data_in(io_repair.iv_row);
+    fapi2::buffer<uint32_t> l_row_data_out;
+    swizzle < 32 - TT::ROW_REPAIR_ROW_ADDR_LEN, TT::ROW_REPAIR_ROW_ADDR_LEN, 31 > ( l_row_data_in, l_row_data_out );
+    io_repair.iv_row = l_row_data_out;
 }
 
 ///
@@ -478,8 +484,8 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
     io_program.iv_instructions.push_back(mss::ccs::ddr5::precharge_all_command<mss::mc_type::ODYSSEY>(l_port_rank,
                                          l_repair.iv_srank, tRP));
 
-    FAPI_MFG( "Running srank fix on dimm " GENTARGTIDFORMAT " with srank %d", GENTARGTID(l_dimm_target),
-              i_repair.iv_srank );
+    FAPI_INF_NO_SBE( "Running sPPR fix on dimm " GENTARGTIDFORMAT " with srank %d", GENTARGTID(l_dimm_target),
+                     l_repair.iv_srank );
 
     // 4. Enable sPPR using MR23 bits "OP[2:1]=01" and wait tMRD.
     io_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>(l_port_rank, MR23_PPR,
@@ -593,7 +599,7 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSE
     l_poll_result = mss::poll(l_ocmb_target, CCS::STATQ_REG, poll_parameters(),
                               [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
-        FAPI_INF("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
+        FAPI_INF_NO_SBE("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
         // We're done polling when we see ccs is not in progress.
         return stat_reg.getBit<CCS::CCS_IN_PROGRESS>() != 1;
     });
@@ -615,7 +621,7 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSE
     l_poll_result = mss::poll(l_ocmb_target, MCB::STATQ_REG, poll_parameters(),
                               [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
-        FAPI_INF("mcbist statq (stop) ", UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
+        FAPI_INF_NO_SBE("mcbist statq (stop) ", UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
         // We're done polling when we see mcbist is not in progress.
         return stat_reg.getBit<MCB::MCBIST_IN_PROGRESS>() != 1;
     });
@@ -628,7 +634,7 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSE
                 " MCBIST failed to exit previous command and is not available for repair",
                 GENTARGTID(l_ocmb_target));
 
-    FAPI_INF(GENTARGTIDFORMAT " Deploying dynamic row repair", GENTARGTID(l_ocmb_target));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying dynamic row repair", GENTARGTID(l_ocmb_target));
 
     // Configure CCS regs for execution
     FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg ) );
@@ -656,7 +662,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target_ocmb)
 {
-    FAPI_INF(GENTARGTIDFORMAT" Deploying row repairs to test all spare rows", GENTARGTID(i_target_ocmb));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT" Deploying row repairs to test all spare rows", GENTARGTID(i_target_ocmb));
 
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target_ocmb))
     {
@@ -728,6 +734,8 @@ fapi2::ReturnCode get_num_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                                    const uint8_t i_bad_bits[BAD_DQ_BYTE_COUNT],
                                    uint8_t& o_num_bad_bits_for_dram)
 {
+    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+
     o_num_bad_bits_for_dram = 0;
 
     uint8_t l_dram = 0;
@@ -735,7 +743,7 @@ fapi2::ReturnCode get_num_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
 
     // Note: we're using the 0-31 values here;
     // however, the ones we want are on the first byte, so we should be ok
-    l_buffer.extractToRight<mss::ROW_REPAIR_DRAM_POS, ROW_REPAIR_DRAM_POS_LEN>(l_dram);
+    l_buffer.extractToRight<TT::ROW_REPAIR_DRAM_POS, TT::ROW_REPAIR_DRAM_POS_LEN>(l_dram);
     uint8_t l_byte = 0;
 
     // Mask assuming a x8 DRAM, so the whole byte
@@ -920,7 +928,7 @@ fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODY
     l_poll_result = mss::poll(l_ocmb_target, CCS::STATQ_REG, poll_parameters(),
                               [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
-        FAPI_INF("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
+        FAPI_INF_NO_SBE("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
         // We're done polling when we see ccs is not in progress.
         return stat_reg.getBit<CCS::CCS_IN_PROGRESS>() != 1;
     });
@@ -935,7 +943,7 @@ fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODY
 
 
 
-    FAPI_INF(GENTARGTIDFORMAT " Deploying row repair using standalone CCS", GENTARGTID(l_ocmb_target));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying row repair using standalone CCS", GENTARGTID(l_ocmb_target));
 
     // Configure CCS regs for execution
     FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg ) );
@@ -982,11 +990,6 @@ fapi2::ReturnCode deploy_mapped_repairs(
             if (l_repair.is_valid())
             {
                 // Deploy row repair and clear bad DQs
-                FAPI_INF_NO_SBE(
-                    GENTARGTIDFORMAT" Deploying row repair on DRAM %d, dimm rank %d, subrank %d, bg %d, bank %d, row 0x%05x",
-                    GENTARGTID(l_dimm), l_repair.iv_dram, l_dimm_rank, l_repair.iv_srank, l_repair.iv_bg, l_repair.iv_bank,
-                    l_repair.iv_row);
-
                 // Check if at runtime for dynamic vs standalone
                 if (i_runtime)
                 {

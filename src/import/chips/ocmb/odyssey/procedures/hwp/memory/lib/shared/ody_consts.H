@@ -269,15 +269,6 @@ enum phy_mem_types
     IMEM = 1,
 };
 
-///
-/// @brief ATTR_ROW_REPAIR_DATA Organization
-///
-enum row_repair_data
-{
-    ROW_REPAIR_BANK_GROUP_LEN = 3,
-    ROW_REPAIR_BANK_LEN = 2,
-};
-
 } // namespace ody
 
 } // namespace mss

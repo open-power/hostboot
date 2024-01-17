@@ -171,6 +171,19 @@ class ccsTraits<mss::mc_type::ODYSSEY>
 
             NUM_DRAM_X4 = 20,
             NUM_DRAM_X8 = 10,
+
+            // ATTR_ROW_REPAIR_DATA Organization
+            ROW_REPAIR_DRAM_POS = 0,
+            ROW_REPAIR_DRAM_POS_LEN = 5,
+            ROW_REPAIR_SRANK = 5,
+            ROW_REPAIR_SRANK_LEN = 3,
+            ROW_REPAIR_BANK_GROUP = 8,
+            ROW_REPAIR_BANK_GROUP_LEN = 3,
+            ROW_REPAIR_BANK = 11,
+            ROW_REPAIR_BANK_LEN = 2,
+            ROW_REPAIR_ROW_ADDR = 13,
+            ROW_REPAIR_ROW_ADDR_LEN = 18,
+            ROW_REPAIR_VALID = 31,
         };
 
         ///

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -135,17 +135,6 @@ enum conversions
 enum row_repair_data
 {
     ROW_REPAIR_BYTES_PER_RANK = 4,
-    ROW_REPAIR_DRAM_POS = 0,
-    ROW_REPAIR_DRAM_POS_LEN = 5,
-    ROW_REPAIR_SRANK = 5,
-    ROW_REPAIR_SRANK_LEN = 3,
-    ROW_REPAIR_BANK_GROUP = 8,
-    ROW_REPAIR_BANK_GROUP_LEN = 2,
-    ROW_REPAIR_BANK = 10,
-    ROW_REPAIR_BANK_LEN = 3,
-    ROW_REPAIR_ROW_ADDR = 13,
-    ROW_REPAIR_ROW_ADDR_LEN = 18,
-    ROW_REPAIR_VALID = 31,
 };
 
 enum generic_sizes
@@ -158,7 +147,7 @@ enum generic_sizes
 ///
 /// @brief FFDC generic codes
 ///
-enum generic_ffdc_codes : uint16_t
+enum generic_ffdc_codes
 {
     // Starting at 0x1%%% to avoid
     // any collisions with values
@@ -1149,7 +1138,7 @@ enum preipl_prbs_time
 ///
 /// @brief Supported DIMM speed equality deliberations
 ///
-enum class speed_equality : uint8_t
+enum class speed_equality
 {
     NOT_EQUAL_DIMM_SPEEDS = 0, ///< denotes all DIMMs don't have the same speed
     EQUAL_DIMM_SPEEDS = 1, ///< denotes all DIMMs have the same speed
@@ -1169,7 +1158,7 @@ enum ddr5_spd
 ///
 /// @brief SPD revisions - not tied any particular module
 ///
-enum rev : uint8_t
+enum rev
 {
     V0_0 = 0x00, ///< represents Rev 0.0
     V0_3 = 0x03, ///< represents Rev 0.3
@@ -1226,7 +1215,7 @@ enum base_module_type
     MINIRDIMM = 0b0101,
 };
 
-enum guard_band : uint16_t
+enum guard_band
 {
     // Used for caclulating spd timing values - from JEDEC rounding algorithm
     // Correction factor is 1% (for DDR3) or 2.5% (for DDR4)

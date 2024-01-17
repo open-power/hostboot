@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -360,10 +360,10 @@ namespace row_repair
 /// Bit formats for the internal variables follow the attribute and how they were logged from the hardware
 /// Format: field (start_bit:end_bit) - bits are right justified in the fields
 /// iv_srank (0:2)
-/// iv_bg    (0:1)
-/// iv_ba    (0:2)
+/// iv_bg    (0:1) for DDR4, (0:2) for DDR5
+/// iv_ba    (0:2) for DDR4, (0:1) for DDR5
 /// iv_row   (0:17)
-template< mss::mc_type MC >
+template< mss::mc_type MC, typename TT = ccsTraits<MC> >
 struct repair_entry
 {
     bool iv_valid = true;
@@ -380,34 +380,34 @@ struct repair_entry
     /// @param[in] i_dimm_rank the dimm rank number of the repair
     ///
     repair_entry( const fapi2::buffer<uint32_t>& i_buffer, const uint8_t i_dimm_rank):
-        iv_valid(i_buffer.getBit<ROW_REPAIR_VALID>())
+        iv_valid(i_buffer.getBit<TT::ROW_REPAIR_VALID>())
     {
         fapi2::buffer<uint32_t> l_data;
         iv_dimm_rank = i_dimm_rank;
-        i_buffer.extractToRight<ROW_REPAIR_DRAM_POS, ROW_REPAIR_DRAM_POS_LEN>(iv_dram);
+        i_buffer.extractToRight<TT::ROW_REPAIR_DRAM_POS, TT::ROW_REPAIR_DRAM_POS_LEN>(iv_dram);
 
         // srank, BG, BA, and row address are stored in reverse bit order in the VPD, so need to swizzle these values
-        mss::swizzle < 32 - ROW_REPAIR_SRANK_LEN,
-            ROW_REPAIR_SRANK_LEN,
-            ROW_REPAIR_SRANK + ROW_REPAIR_SRANK_LEN - 1 > (i_buffer, l_data);
+        mss::swizzle < 32 - TT::ROW_REPAIR_SRANK_LEN,
+            TT::ROW_REPAIR_SRANK_LEN,
+            TT::ROW_REPAIR_SRANK + TT::ROW_REPAIR_SRANK_LEN - 1 > (i_buffer, l_data);
         iv_srank = l_data;
 
         l_data.flush<0>();
-        mss::swizzle < 32 - ROW_REPAIR_BANK_GROUP_LEN,
-            ROW_REPAIR_BANK_GROUP_LEN,
-            ROW_REPAIR_BANK_GROUP + ROW_REPAIR_BANK_GROUP_LEN - 1 > (i_buffer, l_data);
+        mss::swizzle < 32 - TT::ROW_REPAIR_BANK_GROUP_LEN,
+            TT::ROW_REPAIR_BANK_GROUP_LEN,
+            TT::ROW_REPAIR_BANK_GROUP + TT::ROW_REPAIR_BANK_GROUP_LEN - 1 > (i_buffer, l_data);
         iv_bg = l_data;
 
         l_data.flush<0>();
-        mss::swizzle < 32 - ROW_REPAIR_BANK_LEN,
-            ROW_REPAIR_BANK_LEN,
-            ROW_REPAIR_BANK + ROW_REPAIR_BANK_LEN - 1 > (i_buffer, l_data);
+        mss::swizzle < 32 - TT::ROW_REPAIR_BANK_LEN,
+            TT::ROW_REPAIR_BANK_LEN,
+            TT::ROW_REPAIR_BANK + TT::ROW_REPAIR_BANK_LEN - 1 > (i_buffer, l_data);
         iv_bank = l_data;
 
         l_data.flush<0>();
-        mss::swizzle < 32 - ROW_REPAIR_ROW_ADDR_LEN,
-            ROW_REPAIR_ROW_ADDR_LEN,
-            ROW_REPAIR_ROW_ADDR + ROW_REPAIR_ROW_ADDR_LEN - 1 > (i_buffer, l_data);
+        mss::swizzle < 32 - TT::ROW_REPAIR_ROW_ADDR_LEN,
+            TT::ROW_REPAIR_ROW_ADDR_LEN,
+            TT::ROW_REPAIR_ROW_ADDR + TT::ROW_REPAIR_ROW_ADDR_LEN - 1 > (i_buffer, l_data);
         iv_row = l_data;
     }
 

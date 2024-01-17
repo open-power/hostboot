@@ -336,8 +336,8 @@ inline instruction_t<MC> act_command( const uint64_t i_port_rank,
 
     // Row 17 and CID3 share this bit
     // Or'ing and writing them in
-    l_boilerplate_arr0.writeBit<TT::WR_RD_CID3>(i_row_addr.getBit<api_addr_bits::CID3>()
-            || i_cid.getBit<api_addr_bits::ROW17>());
+    l_boilerplate_arr0.writeBit<TT::WR_RD_CID3>(i_cid.getBit<api_addr_bits::CID3>()
+            || i_row_addr.getBit<api_addr_bits::ROW17>());
 
     return instruction_t<MC>(i_port_rank, l_boilerplate_arr0, l_boilerplate_arr1, i_idle);
 }

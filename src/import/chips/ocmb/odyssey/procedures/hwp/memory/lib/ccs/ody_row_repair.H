@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,25 +50,6 @@ namespace ody
 
 namespace row_repair
 {
-
-///
-/// @brief Enums to keep track of swizzle bit positions within the row repair class
-///
-enum swizzle_pos
-{
-    ROW_LEN = 18,
-    ROW_START = 14,
-    ROW_LAST = 31,
-    BANK_LEN = 2,
-    BANK_START = 6,
-    BANK_LAST = 7,
-    BG_LEN = 3,
-    BG_START = 5,
-    BG_LAST = 7,
-    SRANK_LEN = 4,
-    SRANK_START = 4,
-    SRANK_LAST = 7,
-};
 
 typedef mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> REPAIR_ARR[mss::ody::MAX_RANK_PER_DIMM];
 typedef REPAIR_ARR REPAIR_MAP[mss::ody::MAX_DIMM_PER_OCMB];
@@ -156,6 +137,8 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
 ///
 /// @brief Swizzle CCS bits between two fapi2 buffers, and insert from source to destination
 /// @param[in,out] io_repair the address repair information
+/// @note srank, BG, BA, and row fields are reversed in repair_entry class due to backward-compatibility.
+/// See class definition for field format
 ///
 void swizzle_repair_entry(mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& io_repair);
 

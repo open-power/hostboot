@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -273,6 +273,8 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
         const uint8_t i_row_repair_data[mss::exp::MAX_RANK_PER_DIMM][ROW_REPAIR_BYTES_PER_RANK],
         std::vector<mss::row_repair::repair_entry<mss::mc_type::EXPLORER>>& o_repairs_per_dimm)
 {
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     constexpr uint8_t MAX_BANK_GROUP = 4;
@@ -321,32 +323,32 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
             // so need to reverse them to print and do boundary checking
             fapi2::buffer<uint32_t> l_logical_data;
             fapi2::buffer<uint32_t> l_original_data(l_entry.iv_bg);
-            mss::swizzle < 32 - ROW_REPAIR_BANK_GROUP_LEN,
-                ROW_REPAIR_BANK_GROUP_LEN,
+            mss::swizzle < 32 - TT::ROW_REPAIR_BANK_GROUP_LEN,
+                TT::ROW_REPAIR_BANK_GROUP_LEN,
                 31 > (l_original_data, l_logical_data);
             const uint64_t l_logical_bg = l_logical_data;
 
             l_original_data.flush<0>();
             l_logical_data.flush<0>();
             l_original_data = l_entry.iv_bank;
-            mss::swizzle < 32 - ROW_REPAIR_BANK_LEN,
-                ROW_REPAIR_BANK_LEN,
+            mss::swizzle < 32 - TT::ROW_REPAIR_BANK_LEN,
+                TT::ROW_REPAIR_BANK_LEN,
                 31 > (l_original_data, l_logical_data);
             const uint64_t l_logical_bank = l_logical_data;
 
             l_original_data.flush<0>();
             l_logical_data.flush<0>();
             l_original_data = l_entry.iv_row;
-            mss::swizzle < 32 - ROW_REPAIR_ROW_ADDR_LEN,
-                ROW_REPAIR_ROW_ADDR_LEN,
+            mss::swizzle < 32 - TT::ROW_REPAIR_ROW_ADDR_LEN,
+                TT::ROW_REPAIR_ROW_ADDR_LEN,
                 31 > (l_original_data, l_logical_data);
             const uint64_t l_logical_row = l_logical_data;
 
             l_original_data.flush<0>();
             l_logical_data.flush<0>();
             l_original_data = l_entry.iv_srank;
-            mss::swizzle < 32 - ROW_REPAIR_SRANK_LEN,
-                ROW_REPAIR_SRANK_LEN,
+            mss::swizzle < 32 - TT::ROW_REPAIR_SRANK_LEN,
+                TT::ROW_REPAIR_SRANK_LEN,
                 31 > (l_original_data, l_logical_data);
             const uint64_t l_logical_srank = l_logical_data;
 
@@ -1069,6 +1071,8 @@ fapi2::ReturnCode get_num_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
                                    const uint8_t i_bad_bits[BAD_DQ_BYTE_COUNT],
                                    uint8_t& o_num_bad_bits_for_dram)
 {
+    using TT = ccsTraits<mss::mc_type::EXPLORER>;
+
     constexpr size_t MASK_NIBBLE0 = 0xF0;
     constexpr size_t MASK_NIBBLE1 = 0x0F;
 
@@ -1079,7 +1083,7 @@ fapi2::ReturnCode get_num_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
 
     // Note: we're using the 0-31 values here;
     // however, the ones we want are on the first byte, so we should be ok
-    l_buffer.extractToRight<mss::ROW_REPAIR_DRAM_POS, ROW_REPAIR_DRAM_POS_LEN>(l_dram);
+    l_buffer.extractToRight<TT::ROW_REPAIR_DRAM_POS, TT::ROW_REPAIR_DRAM_POS_LEN>(l_dram);
     uint8_t l_byte = 0;
 
     // Mask assuming a x8 DRAM, so the whole byte
