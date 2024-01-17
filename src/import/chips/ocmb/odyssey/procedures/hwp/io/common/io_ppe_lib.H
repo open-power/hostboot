@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -294,7 +294,23 @@ uint64_t io_ppe_regs<K, M, V>::extractData(const uint64_t i_8b_data,
 {
     uint64_t l_reg16 = i_address & 0x03;
     uint64_t l_data = i_8b_data;
-    l_data >>= (3 - l_reg16) * 16;
+
+    if (i_mask > 0xFFFF)
+    {
+        if (l_reg16 > 2)
+        {
+            FAPI_ERR("Attempting to align a register greater than 16 bits across a 64 bit boundary");
+        }
+        else
+        {
+            l_data >>= (2 - l_reg16) * 16;
+        }
+    }
+    else
+    {
+        l_data >>= (3 - l_reg16) * 16;
+    }
+
     l_data &= i_mask;
     l_data >>= i_shift;
     return l_data;
@@ -311,11 +327,28 @@ uint64_t io_ppe_regs<K, M, V>::updateData(const uint64_t i_8b_data,
     uint64_t l_update_8b = i_reg_data;
     l_update_8b <<= i_shift;
     l_update_8b &= i_mask;
-    l_update_8b <<= (3 - l_reg16) * 16;
 
+    //Some registers can be 32 bits now.  Test if the mask covers more than 16 bits.
     uint64_t l_wrt_mask = i_mask;
-    l_wrt_mask <<= (3 - l_reg16) * 16;
-    // FAPI_DBG("l_wrt_mask before invert: %llx", l_wrt_mask);
+
+    if (i_mask > 0xFFFF)
+    {
+        if (l_reg16 > 2)
+        {
+            FAPI_ERR("Attempting to align a register greater than 16 bits across a 64 bit boundary");
+        }
+        else
+        {
+            l_wrt_mask <<= (2 - l_reg16) * 16;
+            l_update_8b <<= (2 - l_reg16) * 16;
+        }
+    }
+    else
+    {
+        l_update_8b <<= (3 - l_reg16) * 16;
+        l_wrt_mask <<= (3 - l_reg16) * 16;
+    }
+
     l_wrt_mask = ~l_wrt_mask;
 
     uint64_t l_data = l_wrt_mask & i_8b_data;

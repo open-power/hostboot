@@ -91,7 +91,7 @@ void auto_increment_ctrl(const fapi2::Target<K, M, V>& i_target,
             FAPI_ERR("Auto increment disable getScom failed");
         }
 
-        l_data |= 0x7FFFFFFFFFFFFFFF;
+        l_data &= 0x7FFFFFFFFFFFFFFF;
         l_rc = fapi2::putScom(i_target, c_incr_reg, l_data);
 
         if (l_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -112,7 +112,7 @@ void stream_scom_data(const fapi2::Target<K, M, V>& i_target,
                       fapi2::hwp_bit_ostream& o_ostream,
                       const uint64_t i_base_addr)
 {
-    uint32_t offsets[] = {0x00, 0x02, 0x04, 0x05, 0x0A, 0x0D, 0x0E, 0x13, 0x14, 0x15, 0x17, 0x18, 0x19, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x27, 0x2C, 0x2D};
+    uint32_t offsets[] = {0x00, 0x02, 0x04, 0x05, 0x0A, 0x0D, 0x0E, 0x13, 0x14, 0x15, 0x17, 0x18, 0x19, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x26, 0x27, 0x2C, 0x2D, 0x2E};
 
     fapi2::buffer<uint64_t> l_data = 0;
     uint64_t l_addr = 0;
@@ -202,15 +202,15 @@ void stream_mem_data_pt(const fapi2::Target<K, M, V>& i_target,
 
     // Loop over # of threads for FW & Mem regs
     //                      firmware regs       mem regs
-    uint64_t l_base[] = {0xFFF30E0000000000, 0xFFFF580000000000};
+    uint64_t l_base[] = {0xFFFF30E000000000, 0xFFFF580000000000};
     uint32_t l_size[] = {0x20,               0x400};
 
-    for (uint32_t thread = 0; thread < i_threads; thread++)
+    for (uint32_t i = 0; i < sizeof(l_base) / sizeof(l_base[0]); i++)
     {
-        for (uint32_t i = 0; i < sizeof(l_base) / sizeof(l_base[0]); i++)
-        {
-            fapi2::putScom(i_target, c_addr_reg, l_base[i]);
+        fapi2::putScom(i_target, c_addr_reg, l_base[i]);
 
+        for (uint32_t thread = 0; thread < i_threads; thread++)
+        {
             for (uint32_t offset = 0; offset < l_size[i]; offset += 0x8)
             {
                 l_rc = fapi2::getScom(i_target, c_data_reg, l_data);
@@ -245,16 +245,52 @@ void stream_hw_data(const fapi2::Target<K, M, V>& i_target,
                     const uint64_t i_base_addr,
                     const uint16_t i_num_groups,
                     const uint16_t i_max_lanes,
-                    const uint16_t i_start,
-                    const uint16_t i_end)
+                    const bool i_tx,
+                    const bool i_per_lane)
 {
-    FAPI_DBG("Stream PL Data");
+    FAPI_DBG("Stream HW Data");
+
+    //                                         start    end
+    constexpr uint16_t l_pl_tx_endpoints[] = {0x0808, 0x0BF8};
+    constexpr uint16_t l_pl_rx_endpoints[] = {0x0000, 0x0D40};
+
+    constexpr uint16_t l_pg_tx_endpoints[] = {0x1808, 0x1C88};
+    constexpr uint16_t l_pg_rx_endpoints[] = {0x1000, 0x16F0};
 
     fapi2::buffer<uint64_t> l_data = 0;
     uint64_t l_addr = 0;
     uint32_t l_rc = 0; // FAPI_RC_SUCCESS
+    uint16_t l_start = 0;
+    uint16_t l_end = 0;
 
-    for (uint32_t l_reg_addr = i_start; l_reg_addr <= i_end; l_reg_addr += 0x10)
+    if (i_per_lane)
+    {
+        if (i_tx)
+        {
+            l_start = l_pl_tx_endpoints[0];
+            l_end = l_pl_tx_endpoints[1];
+        }
+        else
+        {
+            l_start = l_pl_rx_endpoints[0];
+            l_end = l_pl_rx_endpoints[1];
+        }
+    }
+    else
+    {
+        if (i_tx)
+        {
+            l_start = l_pg_tx_endpoints[0];
+            l_end = l_pg_tx_endpoints[1];
+        }
+        else
+        {
+            l_start = l_pg_rx_endpoints[0];
+            l_end = l_pg_rx_endpoints[1];
+        }
+    }
+
+    for (uint32_t l_reg_addr = l_start; l_reg_addr <= l_end; l_reg_addr += 0x10)
     {
         for (uint32_t l_ioo_unit = 0; l_ioo_unit < i_num_groups; l_ioo_unit++)
         {

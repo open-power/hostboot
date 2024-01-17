@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,7 @@ inline uint64_t buildAddr(const uint32_t i_base_addr,
     // 21 is the starting location for Tx, but need to shift back another 3 bits so the
     //  direction bit of the nibble is in the correct position
     r_addr |= static_cast<uint64_t>(i_lane & 0x1F) << 32;   // 63-31=32
-    r_addr |= static_cast<uint64_t>(i_group & 0xF) << 37;   // 63-26=37
+    r_addr |= static_cast<uint64_t>(i_group & 0x1F) << 37;   // 63-26=37
     r_addr |= static_cast<uint64_t>(0x1) << 63;
 
     return r_addr;

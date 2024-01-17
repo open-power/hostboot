@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,7 +35,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <ody_omi_hss_tx_zcal.H>
-#include <common_io_omi_tdr.H>
+#include <ody_io_tdr_utils.H>
 #include <ody_io_ppe_common.H>
 
 //------------------------------------------------------------------------------
@@ -45,10 +45,15 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 {
     FAPI_DBG("Start");
 
+    constexpr uint32_t c_groupa_mask = 0xA5;
+    constexpr uint32_t c_groupb_mask = 0x5A;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> l_sys;
     fapi2::ATTR_IS_SIMULATION_Type l_sim = 0;
     fapi2::ATTR_IS_SIMICS_Type l_simics = fapi2::ENUM_ATTR_IS_SIMICS_REALHW;
     fapi2::ATTR_MSS_IS_APOLLO_Type l_is_apollo;
+
+    uint32_t l_groupa = 0x0;
+    uint32_t l_groupb = 0x0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, l_sys, l_sim));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, l_sys, l_simics));
@@ -61,8 +66,68 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
         FAPI_DBG("Running OMI TDR");
         // Run TDR isolation
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_freq));
-        FAPI_TRY(common_io_omi_tdr(i_target, l_freq, PHY_ODY_OMI_BASE),
-                 "Error on TDR isolation");
+
+        // Leave l_sev comments for future development to pass severity to error checking
+        //  SBE doesn't handle severity passing
+        //  Passing severity to FAPI_ASSERT_NOEXIT is not supported by SBE
+        // fapi2::errlSeverity_t l_sev;
+        fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags = {0};
+        TdrResult l_status = TdrResult::None;
+        uint32_t l_length = 0;
+
+        char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
+        fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags));
+
+        for (uint8_t l_lane = 0; l_lane < 8; l_lane++)
+        {
+            FAPI_TRY(ody_io_tdr(i_target, PHY_ODY_OMI_BASE, l_groupa, l_lane, l_freq, l_status, l_length));
+
+            FAPI_DBG("Checking %s on lane %d with status %d.", l_tgt_str, l_lane, l_status);
+
+            if (l_status != TdrResult::NoIssues)
+            {
+                // if (l_mfg_flags[fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / 32] & (1 << (31 -
+                //         (fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % 32))))
+                // {
+                //     l_sev = fapi2::FAPI2_ERRL_SEV_PREDICTIVE;
+                // }
+                // else
+                // {
+                //     l_sev = fapi2::FAPI2_ERRL_SEV_RECOVERED;
+                // }
+
+                // note - FAPI_ASSERT_NOEXIT clears current_err on return
+                FAPI_ASSERT_NOEXIT(false,
+                                   // This is being left in for future-proofing.
+                                   //  The intent is to get this ability working in SBE.
+                                   //    fapi2::POZ_IO_TX_TDR_ERROR(l_sev)
+                                   fapi2::POZ_IO_TX_TDR_ERROR()
+                                   .set_TARGET_CHIP(i_target)
+                                   .set_LANE(l_lane)
+                                   .set_STATUS(l_status)
+                                   .set_DISTANCE(l_length),
+                                   "OMI Tx TDR Fail on %s :: lane(%d), status(0x%04X) length(%d)...",
+                                   l_tgt_str, l_lane, l_status, l_length);
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+                l_groupa |= (0x1 << l_lane) & c_groupa_mask;
+                l_groupb |= (0x1 << l_lane) & c_groupb_mask;
+            }
+        }
+
+        if (l_groupa && l_groupb)
+        {
+            // note - FAPI_ASSERT_NOEXIT clears current_err on return
+            FAPI_ASSERT_NOEXIT(false,
+                               fapi2::POZ_IO_TX_TDR_MULTI_GROUP_ERROR()
+                               .set_TARGET_CHIP(i_target)
+                               .set_GROUPA(l_groupa)
+                               .set_GROUPB(l_groupb),
+                               "OMI Tx TDR Multiple Degrade Groups Fail on %s :: groupa(0x%02X), groupb(0x%02X)...",
+                               l_tgt_str, l_groupa, l_groupb);
+        }
     }
 
 fapi_try_exit:
