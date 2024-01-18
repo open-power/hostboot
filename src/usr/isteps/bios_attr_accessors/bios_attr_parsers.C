@@ -224,19 +224,20 @@ void parse_hb_memory_mirror_mode(std::vector<uint8_t>& io_string_table,
 
     const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
 
-    if (unlikely(l_errl != nullptr))
+    if (l_errl != nullptr)
     {
-        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                  "parse_hb_memory_mirror_mode(): An error occurred getting "
-                  "Mirror Memory value from the BMC BIOS. Leaving the system "
-                  "attribute ATTR_PAYLOAD_IN_MIRROR_MEM at its current value %d",
-                  l_sys->getAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>());
-        l_errl->collectTrace("ISTEPS_TRACE",256);
-        errlCommit( l_errl, ISTEP_COMP_ID );
+        // Error means the hb_memory_mirror_mode bios attr does not exist,
+        // set the mirror mem attr to 0 and delete the error log
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
+                  "parse_hb_memory_mirror_mode(): Mirror Memory value from the "
+                  "BMC BIOS not found, setting ATTR_PAYLOAD_IN_MIRROR_MEM = 0");
+        l_sys->setAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>(0);
+        delete l_errl;
+        l_errl = nullptr;
     }
     else
     {
-        // Set the system attribute ATTR_PAYLOAD_IN_MIRROR_MEM to the retrieved value
+        // Set the system attr ATTR_PAYLOAD_IN_MIRROR_MEM to the retrieved value
         l_sys->setAttr<ATTR_PAYLOAD_IN_MIRROR_MEM>(l_mirrorMemory);
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
                   "parse_hb_memory_mirror_mode(): Succeeded in getting the BMC "
