@@ -122,6 +122,8 @@ enum
     MAGIC_IS_QME_ENABLED      =  7013, // Check if QME is enabled in the SIMICS
                                        // model
     MAGIC_HB_DUMP             =  7014, // Create a hostboot dump
+    MAGIC_BREAK_ON_TSFAIL     =  7017, // Breakpoint in error cases if
+                                       //  env var HB_BREAK_ON_TSFAIL
     MAGIC_BREAK_ON_ERROR      =  7018, // Breakpoint in error cases if
                                        //  env var HB_BREAK_ON_ERROR
     MAGIC_GET_SBE_TRACES      =  7019, // Collect SBE traces

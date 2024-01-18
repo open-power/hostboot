@@ -694,6 +694,13 @@ def magic_instruction_callback(user_arg, cpu, arg):
             cmd1 = "hb-Dump quiet"
             SIM_run_alone(run_command, cmd1 )
 
+    if arg == 7017:   # MAGIC_BREAK_ON_TSFAIL
+        # Stop the simulation if an env var is set
+        if( 'HB_BREAK_ON_TSFAIL' in os.environ ):
+            SIM_break_simulation( "Stopping sim on HB Testcase Failure. (hap 7017)"  )
+        else:
+            print( "HB_BREAK_ON_TSFAIL not set" )
+
     if arg == 7018:   # MAGIC_BREAK_ON_ERROR
         # Stop the simulation if an env var is set
         if( 'HB_BREAK_ON_ERROR' in os.environ ):

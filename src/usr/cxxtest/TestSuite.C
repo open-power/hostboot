@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <arch/ppc.H>
+#include <arch/magic.H>
 #include <string.h>
 #include <cxxtest/TestSuite.H>
 
@@ -116,6 +117,7 @@ void doFailTest( )
     }
     __sync_add_and_fetch( &g_FailedTests, 1 );
 
+    MAGIC_INSTRUCTION(MAGIC_BREAK_ON_TSFAIL);
 }
 
 void sortTests(std::vector<const char *> & i_list,
@@ -180,6 +182,7 @@ void doFailTest( const char *filename, uint32_t linenum )
     }
     __sync_add_and_fetch( &g_FailedTests, 1 );
 
+    MAGIC_INSTRUCTION(MAGIC_BREAK_ON_TSFAIL);
 }
 /**
  *  @brief Report total number of unit tests in a test suite
