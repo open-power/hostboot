@@ -577,7 +577,17 @@ errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
         bool async_ffdc = false;
         if (errlOwner l_errlLocal(ody_has_async_ffdc(i_ocmb, async_ffdc)); async_ffdc)
         { // ignore any error from ody_has_async_ffdc; we don't care whether it fails.
-            auto async_ffdc_errls = genFifoSBEFFDCErrls(i_ocmb);
+            std::vector<errlHndl_t> async_ffdc_errls;
+            errlOwner chipop_fail = genFifoSBEFFDCErrls(i_ocmb, async_ffdc_errls);
+
+            if (chipop_fail)
+            {
+                TRACISTEP("getFifoSBEFFDCErrls failed for chip 0x%08X: "
+                          TRACE_ERR_FMT,
+                          get_huid(i_ocmb),
+                          TRACE_ERR_ARGS(chipop_fail));
+                errlCommit(chipop_fail, ISTEP_COMP_ID);
+            }
 
             if (!async_ffdc_errls.empty())
             {

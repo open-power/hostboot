@@ -76,6 +76,19 @@ enum sbeioModuleId
 };
 
 /**
+ * @enum sbeioErrorType
+ *
+ * @brief Codes describing classes of errors.
+ *
+ */
+enum sbeioErrorType
+{
+    // Errors will have this error type if they caused an HRESET to be
+    // performed on the hardware involved.
+    SBEIO_ERROR_TYPE_HRESET_PERFORMED   = SBEIO_COMP_ID | 1
+};
+
+/**
  * @enum sbeReasonCode
  *
  * @brief Reasoncodes used to describe what errors are being indicated.

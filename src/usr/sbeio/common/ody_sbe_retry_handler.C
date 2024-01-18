@@ -157,7 +157,7 @@ void OdySbeRetryHandler::main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeH
     }
     else // either ODY_RECOVERY_IN_PROGRESS or DEAD
     {
-        /*@ There is no action possible.
+        /*@
          * @errortype  ERRL_SEV_INFORMATIONAL
          * @moduleid   SBEIO_ODY_RECOVERY
          * @reasoncode SBEIO_ODY_RECOVERY_NOT_AVAILABLE
@@ -237,13 +237,34 @@ void OdySbeRetryHandler::main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeH
         iv_ocmb->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_VIABLE);
     }
 
-EXIT:
+ EXIT:
     aggregate(io_errl, l_errl, true /* update plid */);
 
     SBE_TRACF(EXIT_MRK"OdySbeRetryHandler::main_sbe_handler HUID=0x%X "
                       "ODY_RECOVERY_STATE=0x%X",
                       get_huid(iv_ocmb), iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>());
     return;
+}
+
+uint32_t OdySbeRetryHandler::getSbeRegister()
+{
+    uint32_t l_data = 0;
+    uint64_t l_dataSize = sizeof(l_data);
+    auto l_errl = deviceRead(iv_ocmb,
+                             &l_data,
+                             l_dataSize,
+                             DEVICE_CFAM_ADDRESS(0x2809));
+
+    if (l_errl)
+    {
+        SBE_TRACF(ERR_MRK"OdySbeRetryHandler::getSbeRegister: deviceRead "
+                  " failed: " TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(l_errl));
+        errlCommit(l_errl, SBEIO_COMP_ID);
+        l_data = 0;
+    }
+
+    return l_data;
 }
 
 /*******************************************************************************
@@ -468,6 +489,7 @@ errlHndl_t OdySbeRetryHandler::run_hreset_flow()
     {
         // ODY_RECOVERY_STATUS_DEAD
         iv_ocmb->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_DEAD);
+        iv_currentSBEState = ODY_SBE_STATUS::SBE_NOT_AT_RUNTIME;
         SBE_TRACF(ERR_MRK"OdySbeRetryHandler::run_hreset_flow: sendAttrUpdateRequest "
                          "failed ODY_RECOVERY_STATUS_DEAD "
                          "HUID=0x%X ERRL=0x%X",

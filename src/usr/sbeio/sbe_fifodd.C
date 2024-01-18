@@ -336,6 +336,7 @@ errlHndl_t SbeFifo::upFifoTimeout(TARGETING::Target * i_target, uint32_t l_data)
                                                   TARGETING::get_huid(i_target),
                                                   l_data));
 
+        errl->setErrorType(SBEIO_ERROR_TYPE_HRESET_PERFORMED);
         errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                   HWAS::SRCI_PRIORITY_HIGH);
 
@@ -788,6 +789,7 @@ errlHndl_t SbeFifo::dnFifoTimeout(TARGETING::Target * i_target, uint32_t l_statu
                                TWO_UINT32_TO_UINT64(TARGETING::get_huid(i_target),
                                                     l_status));
 
+        l_errl->setErrorType(SBEIO_ERROR_TYPE_HRESET_PERFORMED);
         l_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                     HWAS::SRCI_PRIORITY_HIGH);
 

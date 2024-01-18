@@ -812,13 +812,15 @@ namespace SBEIO
      *        uses a chipop to Odyssey to get the data.
      *
      * @param[in] i_chipTarget The Odyssey chip to perform the chipop on
+     * @param[out] o_err       All error logs returned from SBE as FFDC
      *
-     * @return std::vector<errlHndl_t> all error logs returned from SBE as FFDC
+     * @return The error encountered while fetching FFDC, if any
      *
-     * @note If a failure occurred during the chip op to the SBE, the error log
-     *       returned will be included in the vector.
+     * @note The original contents of o_errs are never removed by this function.
+     * @note If an error is returned, o_errs will be unmodified.
      */
-    std::vector<errlHndl_t> genFifoSBEFFDCErrls(TARGETING::Target* i_chipTarget);
+    errlOwner genFifoSBEFFDCErrls(TARGETING::Target* i_chipTarget,
+                                  std::vector<errlHndl_t>& o_errs);
 
     /**
      * @brief Calls genFifoSBEFFDCErrl per each functional Odyssey OBMC chip
@@ -827,19 +829,6 @@ namespace SBEIO
      * @note  All errors are committed internally.
      */
     void handleGenFifoSBEFFDCErrlRequest();
-
-    /**
-     * @brief Grab the target Odyssey chip's async FFDC, parse it, and commit the
-     *        resulting error logs. If the given OCMB's code levels are up-to-date
-     *        (the code update has been performed on this OCMB), the errors are
-     *        committed with the original severity. If the code is out-of-date,
-     *        the errors are committed as informational, since the code update
-     *        procedure may fix the errors reported.
-     *
-     * @param[in] i_chipTarget grab the async FFDC for this OCMB target
-     *
-     */
-    void processOdyAsyncFFDC(TARGETING::Target* i_chipTarget);
 
     /**
      * @brief Request the SPPE to perform a SPI flash check on the given

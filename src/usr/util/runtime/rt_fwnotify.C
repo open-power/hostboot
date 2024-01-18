@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <runtime/interface.h>             // g_hostInterfaces
 #include <runtime/runtime_reasoncodes.H>   // MOD_RT_FIRMWARE_NOTIFY, etc
+#include <sbeio/sbeioreasoncodes.H>
 #include <errl/errlentry.H>                // ErrlEntry
 #include <errl/errlmanager.H>              // errlCommit
 #include <errl/hberrltypes.H>              // TWO_UINT32_TO_UINT64
@@ -48,7 +49,8 @@
 #include <sys/time.h>                      // nanosleep
 #include <util/util_reasoncodes.H>
 #include <runtime/hbrt_utilities.H>        // HBRT_TRACE_NAME
-#include <util/misc.H>                      // isSimicsRunning()
+#include <util/misc.H>                     // isSimicsRunning()
+#include <targeting/odyutil.H>             // isOdysseyChip
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -230,12 +232,17 @@ void sbeAttemptRecovery(uint64_t i_data)
 
     errlHndl_t l_err = nullptr;
 
-    TargetHandle_t l_target = nullptr;
+    // We're going to lock this target so that the PHYP doesn't try to
+    // communicate with it over SPI.
+    TargetHandle_t l_locked_target = nullptr;
+
+    const int SPI_LOCK_TARGET = 1;
+    const int SPI_UNLOCK_TARGET = 0;
 
     do
     {
         // Extract the target from the given HUID
-        l_target = Target::getTargetFromHuid(l_sbeRetryData->huid);
+        const TargetHandle_t l_target = Target::getTargetFromHuid(l_sbeRetryData->huid);
 
         // If HUID invalid, log error and quit
         if (nullptr == l_target)
@@ -263,20 +270,81 @@ void sbeAttemptRecovery(uint64_t i_data)
             break;
         }
 
-        // Before restarting the SBE, need to block out PHYP access
-        //  to the SPI engine
-        spiLockRequest(l_target,1);
+        // We only need to lock the SPI bus if we have a PROC target
+        // here, because for processors there's contention between
+        // MVPD access and proc SBE flash access, which doesn't exist
+        // for Odyssey SBEs.
+        if (l_target->getAttr<ATTR_TYPE>() == TYPE_PROC)
+        {
+            l_locked_target = l_target;
+            spiLockRequest(l_locked_target, SPI_LOCK_TARGET);
+        }
+
+        bool hreset_already_performed = false;
+
+        if (UTIL::isOdysseyChip(l_target))
+        {
+            TRACFCOMP(g_trac_runtime,
+                      "sbeAttemptRecovery: Retrieving FFDC from Odyssey chip 0x%08X",
+                      get_huid(l_target));
+
+
+            std::vector<errlHndl_t> ffdc_errls;
+            errlOwner sbe_err = SBEIO::genFifoSBEFFDCErrls(l_target, ffdc_errls);
+
+            if (sbe_err)
+            {
+                TRACFCOMP(g_trac_runtime,
+                          "sbeAttemptRecovery(0x%08X): genFifoSBEFFDCErrls failed"
+                          TRACE_ERR_FMT,
+                          get_huid(l_target), TRACE_ERR_ARGS(sbe_err));
+
+                if (sbe_err->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED))
+                {
+                    TRACFCOMP(g_trac_runtime,
+                              "sbeAttemptRecovery: genFifoSBEFFDCErrls already "
+                              "performed an HRESET for 0x%08X",
+                              get_huid(l_target));
+                    hreset_already_performed = true;
+                }
+
+                sbe_err->setSev(ERRL_SEV_INFORMATIONAL);
+                errlCommit(sbe_err, RUNTIME_COMP_ID);
+            }
+
+            for (auto& ffdc : ffdc_errls)
+            {
+                TRACFCOMP(g_trac_runtime,
+                          "sbeAttemptRecovery: Committing Odyssey FFDC package "
+                          TRACE_ERR_FMT,
+                          TRACE_ERR_ARGS(ffdc));
+                errlCommit(ffdc, RUNTIME_COMP_ID);
+            }
+        }
 
         // Get the SBE Retry Handler, propagating the supplied PLID
-        SbeRetryHandler l_SBEobj =
-              SbeRetryHandler(l_target,
-                              SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
-                              SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
-                              l_sbeRetryData->plid,
-                              NOT_INITIAL_POWERON);
+        auto l_SBEobj = make_sbe_retry_handler(l_target,
+                                               SbeRetryHandler::SBE_MODE_OF_OPERATION::ATTEMPT_REBOOT,
+                                               SbeRetryHandler::SBE_RESTART_METHOD::HRESET,
+                                               l_sbeRetryData->plid,
+                                               NOT_INITIAL_POWERON);
 
-        //Attempt to recover the SBE
-        l_SBEobj.main_sbe_handler();
+        if (hreset_already_performed)
+        {
+            TRACFCOMP(g_trac_runtime,
+                      "sbeAttemptRecovery: Skipping HRESET for 0x%08X because "
+                      "it was already performed",
+                      get_huid(l_target));
+        }
+        else
+        {
+            TRACFCOMP(g_trac_runtime,
+                      "sbeAttemptRecovery: Invoking SBE retry handler for 0x%08X",
+                      get_huid(l_target));
+
+            //Attempt to recover the SBE
+            l_SBEobj->main_sbe_handler();
+        }
 
         // Create the firmware_request request struct to send data
         hostInterfaces::hbrt_fw_msg l_req_fw_msg;
@@ -292,7 +360,7 @@ void sbeAttemptRecovery(uint64_t i_data)
         l_req_fw_msg.generic_msg.data = i_data;
 
         // Set msgType based on recovery success or failure (If sbe made it back to runtime)
-        if (l_SBEobj.isSbeAtRuntime())
+        if (l_SBEobj->isSbeAtRuntime())
         {
             TRACFCOMP(g_trac_runtime, "sbeAttemptRecovery: RECOVERY_SUCCESS");
             l_req_fw_msg.generic_msg.msgType =
@@ -323,7 +391,7 @@ void sbeAttemptRecovery(uint64_t i_data)
                                       l_sbeRetryData->huid,
                                       l_sbeRetryData->plid),
                                   TWO_UINT32_TO_UINT64(
-                                      l_SBEobj.getSbeRegister().reg,
+                                      l_SBEobj->getSbeRegister(),
                                       0),
                                   ErrlEntry::NO_SW_CALLOUT);
             l_err->addHwCallout( l_target, HWAS::SRCI_PRIORITY_HIGH,
@@ -387,9 +455,9 @@ void sbeAttemptRecovery(uint64_t i_data)
     } while(0);
 
     // No matter what happened, always release the lock at the end
-    if( l_target )
+    if( l_locked_target )
     {
-        spiLockRequest(l_target,0);
+        spiLockRequest(l_locked_target, SPI_UNLOCK_TARGET);
     }
 
     if (l_err)

@@ -27,6 +27,7 @@
 * @brief Get SBE FFDC.
 */
 
+#include <util/align.H>
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include "sbe_fifodd.H"
@@ -86,46 +87,46 @@ namespace SBEIO
         return l_errl;
     };
 
-    std::vector<errlHndl_t> genFifoSBEFFDCErrls(TARGETING::Target* i_chipTarget)
+    errlOwner genFifoSBEFFDCErrls(TARGETING::Target* i_chipTarget, std::vector<errlHndl_t>& o_errs)
     {
-        std::vector<errlHndl_t> l_errls;
+        errlOwner errl { nullptr };
+
         uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS;
-        uint32_t *l_pFifoResponse = reinterpret_cast<uint32_t *>(malloc(l_responseSize));
+        std::vector<uint32_t> l_fifoResponse(l_responseSize);
 
         do {
 
-        errlHndl_t l_errl = getFifoSBEFFDC(i_chipTarget,
-                                           l_pFifoResponse,
-                                           l_responseSize);
-        if(l_errl)
+        errl = getFifoSBEFFDC(i_chipTarget,
+                              l_fifoResponse.data(),
+                              l_responseSize);
+
+        if (errl)
         {
             SBE_TRACF(ERR_MRK"genFifoSBEFFDCErrl: Error returned from SBE FFDC "
-                             "chip op ERRL=0x%X", ERRL_GETEID_SAFE(l_errl));
-            l_errls.push_back(l_errl);
+                             "chip op ERRL=0x%X", ERRL_GETEID_SAFE(errl));
             break;
         }
 
         auto l_ffdcParser = std::make_shared<SbeFFDCParser>();
-        l_ffdcParser->parseFFDCData(l_pFifoResponse);
-        l_errls = l_ffdcParser->generateSbeErrors(SBEIO_FIFO_SBE_FFDC,
-                                                  SBEIO_FIFO_SBE_FFDC_INFORMATIONAL,
-                                                  get_huid(i_chipTarget), // userdata1
-                                                  0);                     // userdata2
+        l_ffdcParser->parseFFDCData(l_fifoResponse.data());
+        const auto errs = l_ffdcParser->generateSbeErrors(SBEIO_FIFO_SBE_FFDC,
+                                                          SBEIO_FIFO_SBE_FFDC_INFORMATIONAL,
+                                                          get_huid(i_chipTarget), // userdata1
+                                                          0);                     // userdata2
+
+        o_errs.insert(end(o_errs), begin(errs), end(errs));
+
         }while(0);
 
-        free(l_pFifoResponse);
-        l_pFifoResponse = nullptr;
-
-        return l_errls;
+        return errl;
     }
 
     void handleGenFifoSBEFFDCErrlRequest()
     {
         using namespace TARGETING;
-        std::vector<errlHndl_t> l_errls;
 
         TargetHandleList l_ocmbs;
-        getAllChips(l_ocmbs, TYPE_OCMB_CHIP); // Functional and non-functional
+        getAllChips(l_ocmbs, TYPE_OCMB_CHIP, true /* only functional */);
 
         for(auto l_ocmb : l_ocmbs)
         {
@@ -134,38 +135,34 @@ namespace SBEIO
                 continue;
             }
 
-            l_errls = SBEIO::genFifoSBEFFDCErrls(l_ocmb);
+            std::vector<errlHndl_t> l_errls;
+            errlOwner err = SBEIO::genFifoSBEFFDCErrls(l_ocmb, l_errls);
+
+            if(err)
+            {
+                SBE_TRACF(INFO_MRK"handleGenFifoSBEFFDCErrlRequest: "
+                          "genFifoSBEFFDCErrls failed for OCMB 0x%x."
+                          TRACE_ERR_FMT,
+                          get_huid(l_ocmb),
+                          TRACE_ERR_ARGS(err));
+
+                err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit(err, SBEIO_COMP_ID);
+            }
+
             for(auto l_errl : l_errls)
             {
                 SBE_TRACF(INFO_MRK"handleGenFifoSBEFFDCErrlRequest: Committing "
-                                  "errl PLID 0x%x for OCMB 0x%x",
-                                  l_errl->plid(), get_huid(l_ocmb));
+                          "FFDC errl for OCMB 0x%x."
+                          TRACE_ERR_FMT,
+                          get_huid(l_ocmb),
+                          TRACE_ERR_ARGS(l_errl));
 
                 // Force these to be informational so there is no potential
                 // callouts logged/parts deconfigured.
                 l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 errlCommit(l_errl, SBEIO_COMP_ID);
             }
-        }
-    }
-
-    void processOdyAsyncFFDC(TARGETING::Target* i_chipTarget)
-    {
-        using namespace TARGETING;
-        std::vector<errlHndl_t> l_errls = genFifoSBEFFDCErrls(i_chipTarget);
-
-        for(auto l_errl : l_errls)
-        {
-            if(i_chipTarget->getAttr<ATTR_OCMB_FW_STATE>() != OCMB_FW_STATE_UP_TO_DATE)
-            {
-                // Set the severities to informational, since code update could
-                // fix the issues SBE is complaining about, and we don't want to
-                // have valid callouts in the error logs for resolved issues.
-                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            }
-            SBE_TRACF(INFO_MRK"processOdyAsyncFFDC: Committing error log PLID "
-                              "0x%x for OCMB 0x%x", l_errl->plid(), get_huid(i_chipTarget));
-            errlCommit(l_errl, SBEIO_COMP_ID);
         }
     }
 
@@ -217,19 +214,31 @@ namespace SBEIO
             l_hasAsyncFfdc           = l_msgReg.iv_asyncFFDC;
         }
 
-        std::vector<errlHndl_t> l_errls = genFifoSBEFFDCErrls(i_chipTarget);
-        SBE_TRACF(INFO_MRK"checkOdyFFDC: gathered FFDC for OCMB 0x%x "
-                          "l_hasAsyncFfdc=0x%X l_errls.size=0x%X",
-                          get_huid(i_chipTarget), l_hasAsyncFfdc, l_errls.size());
+        std::vector<errlHndl_t> l_errls;
+        errlOwner err = genFifoSBEFFDCErrls(i_chipTarget, l_errls);
 
-        for(auto l_errl : l_errls)
+        if (err)
         {
-            // Set the severity to informational
-            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            SBE_TRACF(INFO_MRK"checkOdyFFDC: Committing error log PLID 0x%x for OCMB 0x%x",
-                      l_errl->plid(), get_huid(i_chipTarget));
-            errlCommit(l_errl, SBEIO_COMP_ID);
+            SBE_TRACF(INFO_MRK"checkOdyFFDC: gathered FFDC failed " TRACE_ERR_FMT,
+                      TRACE_ERR_ARGS(err));
+            errlCommit(err, SBEIO_COMP_ID);
         }
+        else
+        {
+            SBE_TRACF(INFO_MRK"checkOdyFFDC: gathered FFDC for OCMB 0x%x "
+                      "l_hasAsyncFfdc=0x%X l_errls.size=0x%X",
+                      get_huid(i_chipTarget), l_hasAsyncFfdc, l_errls.size());
+
+            for(auto l_errl : l_errls)
+            {
+                // Set the severity to informational
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                SBE_TRACF(INFO_MRK"checkOdyFFDC: Committing error log PLID 0x%x for OCMB 0x%x",
+                          l_errl->plid(), get_huid(i_chipTarget));
+                errlCommit(l_errl, SBEIO_COMP_ID);
+            }
+        }
+
     }
 
 } //end namespace SBEIO
