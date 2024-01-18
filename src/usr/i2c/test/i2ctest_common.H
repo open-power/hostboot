@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -194,6 +194,16 @@ class I2CTestCommon: public CxxTest::TestSuite
             {
                 for( uint32_t i = 0; i < NUM_CMDS; i++ )
                 {
+                    TS_INFO( "testI2CDirect_ONE_BYTE_ADDR> Starting test %d/%d : data=0x%016llX, target=0x%08X, i2cMaster=0x%08X, p/e/devAddr=0x%X/0x%X/0x%X",
+                             i + 1,
+                             NUM_CMDS,
+                             testData[i].addrAndData,
+                             get_huid(testData[i].testTarget),
+                             get_huid(testData[i].i2cMasterTarg),
+                             testData[i].eeprom_info.port,
+                             testData[i].eeprom_info.engine,
+                             testData[i].eeprom_info.devAddr);
+
                     // Make sure size is less than or = to 8 bytes
                     // to fit into data
                     if (testData[i].writeSize > 8)
@@ -240,7 +250,7 @@ class I2CTestCommon: public CxxTest::TestSuite
                             data = testData[i].addrAndData & (~dataMask);
                             dataSize = 1;
                             TRACFCOMP( g_trac_i2c,
-                                       "Writting eeprom addr: 0x%016llX",
+                                       "Writing eeprom addr: 0x%016llX",
                                        data);
                         }
                         // For Loop 1, 5: Read orig data in EEPROM
@@ -261,7 +271,7 @@ class I2CTestCommon: public CxxTest::TestSuite
                             data = testData[i].addrAndData;
                             dataSize = testData[i].writeSize;
                             TRACFCOMP( g_trac_i2c,
-                                       "Writting test data and addr: 0x%016llX",
+                                       "Writing test data and addr: 0x%016llX",
                                        data);
                         }
 
@@ -280,7 +290,7 @@ class I2CTestCommon: public CxxTest::TestSuite
                             data = (testData[i].addrAndData & (~dataMask)) + (original_data >> 8);
                             dataSize = testData[i].writeSize;
                             TRACFCOMP( g_trac_i2c,
-                                       "Writting back orig data with addr: 0x%016llX",
+                                       "Writing back orig data with addr: 0x%016llX",
                                        data);
                         }
 
@@ -346,7 +356,7 @@ class I2CTestCommon: public CxxTest::TestSuite
                             data = testData[i].addrAndData & (~dataMask);
                             dataSize = 1;
                             TRACFCOMP( g_trac_i2c,
-                                       "Writting eeprom addr: 0x%016llX",
+                                       "Writing eeprom addr: 0x%016llX",
                                        data);
 
                             // increment cmd op counter
@@ -631,6 +641,16 @@ class I2CTestCommon: public CxxTest::TestSuite
             {
                 for( uint32_t i = 0; i < NUM_CMDS; i++ )
                 {
+                    TS_INFO( "testI2CDirect_TWO_BYTE_ADDR> Starting test %d/%d : data=0x%016llX, target=0x%08X, i2cMaster=0x%08X, p/e/devAddr=0x%X/0x%X/0x%X",
+                             i + 1,
+                             NUM_CMDS,
+                             testData[i].data,
+                             get_huid(testData[i].testTarget),
+                             get_huid(testData[i].i2cMasterTarg),
+                             testData[i].eeprom_info.port,
+                             testData[i].eeprom_info.engine,
+                             testData[i].eeprom_info.devAddr);
+
                     // Make sure size is less than or = to 8 bytes
                     // to fit into data
                     if (testData[i].size > 8)

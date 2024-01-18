@@ -73,6 +73,7 @@ TRAC_INIT( & g_trac_spd, "SPD", KILOBYTE );
 #define TRACSSCOMP(args...)
 
 using namespace TARGETING;
+using namespace errl_util;
 
 // ----------------------------------------------
 // Defines
@@ -373,6 +374,7 @@ void buildDDR4CCIN ( Target * i_target, const COMPOSED_FN_typeStdArr &i_fruNumbe
         { "78P7317", "331A" },
         { "78P7318", "331F" },
         { "78P6815", "32BB" },
+        { "SIMONLY", "DIMM" }, //Used internally
     };
     static_assert (SPD::IBM_11S_FN_SIZE == 7);   // Future check to catch if things change since this table is using 7 char FN
     static_assert (SPD::IBM_11S_CCIN_SIZE == 4); // Future check to catch if things change since this table is using 4 char CCIN
@@ -391,6 +393,11 @@ void buildDDR4CCIN ( Target * i_target, const COMPOSED_FN_typeStdArr &i_fruNumbe
 
     if (missing)
     {
+        TRACFCOMP(g_trac_spd, ERR_MRK"buildDDR4CCIN> Could not find a valid CCIN for HUID=0x%X given FN=%s ",
+                  get_huid(i_target),
+                  reinterpret_cast<const char *>(&i_fruNumber));
+        uint64_t l_fnAscii = 0;
+        memcpy( &l_fnAscii, reinterpret_cast<const char *>(&i_fruNumber), SPD::IBM_11S_FN_SIZE );
         // If we did -NOT- find the PN in the composed PN means that something
         // changed and the part/spd is -NOT- in the known set of supported hw/pn's
         // This is intended to show up in manufacturing to be reconciled, versus
@@ -400,7 +407,7 @@ void buildDDR4CCIN ( Target * i_target, const COMPOSED_FN_typeStdArr &i_fruNumbe
          * @reasoncode       VPD::VPD_ISDIMM_UNSUPPORTED_FN_FOR_CCIN
          * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
          * @userdata1        target huid
-         * @userdata2        fruNumber
+         * @userdata2        fruNumber (ASCII)
          * @devdesc          Unsupported FRU number
          * @custdesc         Unexpected FRU number detected
          */
@@ -408,7 +415,7 @@ void buildDDR4CCIN ( Target * i_target, const COMPOSED_FN_typeStdArr &i_fruNumbe
                                           VPD::VPD_SPD_PRESENCE_DETECT,
                                           VPD::VPD_ISDIMM_UNSUPPORTED_FN_FOR_CCIN,
                                           get_huid(i_target),
-                                          strtoul(reinterpret_cast<const char *>(&i_fruNumber), nullptr, 16),
+                                          l_fnAscii,
                                           ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
          l_err->addPartCallout( i_target,
                               HWAS::VPD_PART_TYPE,
@@ -418,6 +425,7 @@ void buildDDR4CCIN ( Target * i_target, const COMPOSED_FN_typeStdArr &i_fruNumbe
                             HWAS::SRCI_PRIORITY_MED,
                             HWAS::NO_DECONFIG,
                             HWAS::GARD_NULL );
+         l_err->collectTrace( "SPD", 256);
          errlCommit(l_err, VPD_COMP_ID);
     }
 
@@ -454,6 +462,7 @@ void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber
         { "8529B28", "78P4200" },
         { "8631008", "78P6815" },
         { "8631928", "78P6925" },
+        { "1561005", "SIMONLY" }, //Used internally
     };
 
     // The second column in the freq_table is the MTB units (byte 18)
@@ -473,6 +482,7 @@ void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber
         { "78P4200", 6 },
         { "78P6815", 5 },
         { "78P6925", 6 },
+        { "SIMONLY", 5 }, //Used internally
     };
     // PN and FN have same sizes
     static_assert (SPD::IBM_11S_PN_SIZE == 7); // Future check to catch if things change since this table is using 7 char PN and FN
@@ -480,6 +490,7 @@ void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber
     bool missing = true;
     errlHndl_t l_err = nullptr;
 
+    auto l_tckmin = i_SPD[18]; //SDRAM Minimum Cycle Time (t CKAVG min)
     for (const auto [ pn, fn ] : pn_fn)
     {
         if (!strcmp(pn, reinterpret_cast<const char *> (&i_partNumber)))
@@ -488,7 +499,7 @@ void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber
             {
                 if (!strcmp(fn, fru))
                 {
-                    if (freq == i_SPD[SPD::ddr4Data[SPD::TCK_MIN].offset]) // byte 18 SPD enum=0x10 MTB units determines frequency
+                    if (freq == l_tckmin)
                     {
                         // ONLY copy IBM_11S_FN_SIZE, preserve the NULL byte
                         memcpy(&io_fruNumber, fn, SPD::IBM_11S_FN_SIZE);
@@ -506,6 +517,10 @@ void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber
 
     if (missing)
     {
+        TRACFCOMP(g_trac_spd, ERR_MRK"buildDDR4FN> Could not find a valid FN for HUID=0x%X given PN=%s, TCK_MIN=%d",
+                  get_huid(i_target),
+                  reinterpret_cast<const char *>(&i_partNumber),
+                  l_tckmin);
         // If we did -NOT- find the PN in the composed PN means that something
         // changed and the part/spd is -NOT- in the known set of supported hw/pn's
         // This is intended to show up in manufacturing to be reconciled, versus
@@ -514,7 +529,8 @@ void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber
         /*@
          * @reasoncode       VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_FN
          * @moduleid         VPD::VPD_SPD_PRESENCE_DETECT
-         * @userdata1        target huid
+         * @userdata1[00:31] TCK_MIN
+         * @userdata1[32:63] target huid
          * @userdata2        partNumber
          * @devdesc          Unsupported FRU part number
          * @custdesc         Unexpected FRU part number detected
@@ -522,7 +538,9 @@ void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber
          l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
                                           VPD::VPD_SPD_PRESENCE_DETECT,
                                           VPD::VPD_ISDIMM_UNSUPPORTED_PN_FOR_FN,
-                                          get_huid(i_target),
+                                          SrcUserData(bits{0,23},0,
+                                                      bits{24,31},l_tckmin,
+                                                      bits{32,63},get_huid(i_target)),
                                           strtoul(reinterpret_cast<const char *>(&i_partNumber), nullptr, 16),
                                           ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
          l_err->addPartCallout( i_target,
@@ -533,6 +551,7 @@ void buildDDR4FN ( Target * i_target, const COMPOSED_PN_typeStdArr &i_partNumber
                             HWAS::SRCI_PRIORITY_MED,
                             HWAS::NO_DECONFIG,
                             HWAS::GARD_NULL );
+         l_err->collectTrace( "SPD", 256);
          errlCommit(l_err, VPD_COMP_ID);
     }
 
@@ -557,23 +576,27 @@ void buildDDR4SN ( const uint8_t * i_SPD, COMPOSED_SN_typeStdArr &io_string)
 {
     // First calculate the number of nibbles by composing the desired string
     size_t num_nibbles = snprintf(NULL, 0, "%02X%02X%02X%02X%02X%02X",
-                        i_SPD[SPD::ddr4Data[SPD::MFG_ID_MSB].offset],  // byte 321  SPD enum=0x60
-                        i_SPD[SPD::ddr4Data[SPD::MFG_ID_LSB].offset],  // byte 320  SPD enum=0x61
-                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE0].offset],    // byte 325  SPD enum=0x62
-                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE1].offset],    // byte 326  SPD enum=0x63
-                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE2].offset],    // byte 327  SPD enum=0x64
-                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE3].offset]);   // byte 328  SPD enum=0x65
+                        i_SPD[321],  // MFG_ID_MSB
+                        i_SPD[320],  // MFG_ID_LSB
+                        i_SPD[325],  // SN_BYTE0
+                        i_SPD[326],  // SN_BYTE1
+                        i_SPD[327],  // SN_BYTE2
+                        i_SPD[328]); // SN_BYTE3
     // We can have 12 bytes in the SN, the composed SN is only using 6 bytes today
     assert( num_nibbles <= (2* SPD::IBM_11S_SN_SIZE) );
     // Now copy the desired string to its output destination
     snprintf(reinterpret_cast<char *>(&io_string), SPD::IBM_11S_SN_SIZE+1, "%02X%02X%02X%02X%02X%02X",
-                        i_SPD[SPD::ddr4Data[SPD::MFG_ID_MSB].offset],  // byte 321  SPD enum=0x60
-                        i_SPD[SPD::ddr4Data[SPD::MFG_ID_LSB].offset],  // byte 320  SPD enum=0x61
-                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE0].offset],    // byte 325  SPD enum=0x62
-                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE1].offset],    // byte 326  SPD enum=0x63
-                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE2].offset],    // byte 327  SPD enum=0x64
-                        i_SPD[SPD::ddr4Data[SPD::SN_BYTE3].offset]);   // byte 328  SPD enum=0x65
+                        i_SPD[321],  // MFG_ID_MSB
+                        i_SPD[320],  // MFG_ID_LSB
+                        i_SPD[325],  // SN_BYTE0
+                        i_SPD[326],  // SN_BYTE1
+                        i_SPD[327],  // SN_BYTE2
+                        i_SPD[328]); // SN_BYTE3
     return;
+    // Note - we could use the enums to find the byte offsets based on the
+    //  contents of ddrData but the specification for this conversion has
+    //  explicit byte numbers NOT the logical definitions so we will use
+    //  those numbers rather than doing a bunch of searches.
 }
 
 /**
@@ -594,19 +617,23 @@ void buildDDR4PN ( const uint8_t * i_SPD, COMPOSED_PN_typeStdArr &io_string)
 {
     // First calculate the number of nibbles by composing the desired string
     size_t num_nibbles = snprintf(NULL, 0, "%02X%02X%02X%X",
-                        i_SPD[SPD::ddr4Data[SPD::MODULE_SDRAM_DENSITY_BANK].offset],    // byte  4 SPD enum=0x04
-                        i_SPD[SPD::ddr4Data[SPD::SDRAM_ADDRESSING].offset],             // byte  5 SPD enum=0x05
-                        i_SPD[SPD::ddr4Data[SPD::DRAM_PRI_PACKAGE_OFFSET].offset],      // byte  6 SPD enum=0x06
-                        i_SPD[SPD::ddr4Data[SPD::MODULE_ORGANIZATION].offset] & 0x0F);  // byte 12 SPD enum=0x0c
+                        i_SPD[4],           // MODULE_SDRAM_DENSITY_BANK
+                        i_SPD[5],           // SDRAM_ADDRESSING
+                        i_SPD[6],           // DRAM_PRI_PACKAGE_OFFSET
+                        i_SPD[12] & 0x0F);  // MODULE_ORGANIZATION
     // We can have 7 bytes in the PN, the composed PN is only using 3.5 bytes today (MODULE_ORGANIZATION one nibble)
     assert( num_nibbles <= (2* SPD::IBM_11S_PN_SIZE) );
     // Now copy the desired string to its output destination
     snprintf(reinterpret_cast<char *>(&io_string), SPD::IBM_11S_PN_SIZE+1, "%02X%02X%02X%X",
-                        i_SPD[SPD::ddr4Data[SPD::MODULE_SDRAM_DENSITY_BANK].offset],    // byte  4 SPD enum=0x04
-                        i_SPD[SPD::ddr4Data[SPD::SDRAM_ADDRESSING].offset],             // byte  5 SPD enum=0x05
-                        i_SPD[SPD::ddr4Data[SPD::DRAM_PRI_PACKAGE_OFFSET].offset],      // byte  6 SPD enum=0x06
-                        i_SPD[SPD::ddr4Data[SPD::MODULE_ORGANIZATION].offset] & 0x0F);  // byte 12 SPD enum=0x0c
+                        i_SPD[4],           // MODULE_SDRAM_DENSITY_BANK
+                        i_SPD[5],           // SDRAM_ADDRESSING
+                        i_SPD[6],           // DRAM_PRI_PACKAGE_OFFSET
+                        i_SPD[12] & 0x0F);  // MODULE_ORGANIZATION
     return;
+    // Note - we could use the enums to find the byte offsets based on the
+    //  contents of ddrData but the specification for this conversion has
+    //  explicit byte numbers NOT the logical definitions so we will use
+    //  those numbers rather than doing a bunch of searches.
 }
 
 /**

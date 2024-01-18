@@ -296,8 +296,15 @@ try {
 try {
     echo "hb_skipocc = "+$hb_skipocc
 } except {
-    #default to running OCC
-    $hb_skipocc = 0
+    # Skip OCC enablement in the Bonito config because the temperature
+    # polling interferes with the i2c use in our testcases
+    if($machine_name == "bonito") {
+        echo "Disabling OCC in Bonito config (override with '$hb_skipocc=0')"
+        $hb_skipocc = 1
+    } else {
+        #default to running OCC
+        $hb_skipocc = 0
+    }
 }
 
 # Allow a user to enable Odyssey security that is normally disabled in simics

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -407,6 +407,10 @@
         <id>POSITION</id>
         <default>0</default>
     </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
+    </attribute>
     <attribute><id>FSP_BASE_ADDR</id>
         <default>0x0006030100000000</default>
     </attribute>
@@ -495,6 +499,10 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
         <default>1</default>
     </attribute>
     <attribute><id>FSP_BASE_ADDR</id>
@@ -1524,6 +1532,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-0/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1563,6 +1575,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-0/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1606,6 +1622,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-1/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1645,6 +1665,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-1/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1688,6 +1712,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-2/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1727,6 +1755,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-2/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1770,6 +1802,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-3/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1809,6 +1845,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-3/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1852,6 +1892,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-4/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1891,6 +1935,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-4/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -1934,6 +1982,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-5/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -1973,6 +2025,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-5/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2016,6 +2072,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-6/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2055,6 +2115,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-6/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2098,6 +2162,10 @@
         <default>physical:sys-0/node-0/proc-0/eq-7/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2137,6 +2205,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-0/eq-7/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2180,6 +2252,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-0/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2219,6 +2295,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-0/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2262,6 +2342,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-1/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2301,6 +2385,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-1/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2344,6 +2432,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-2/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2383,6 +2475,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-2/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>5</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2426,6 +2522,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-3/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2465,6 +2565,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-3/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2508,6 +2612,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-4/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2547,6 +2655,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-4/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>9</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2590,6 +2702,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-5/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2629,6 +2745,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-5/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>11</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2672,6 +2792,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-6/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2711,6 +2835,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-6/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>13</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -2754,6 +2882,10 @@
         <default>physical:sys-0/node-0/proc-1/eq-7/fc-0</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
         <id>REL_POS</id>
         <default>0</default>
     </attribute>
@@ -2793,6 +2925,10 @@
     <attribute>
         <id>PHYS_PATH</id>
         <default>physical:sys-0/node-0/proc-1/eq-7/fc-1</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>15</default>
     </attribute>
     <attribute>
         <id>REL_POS</id>
@@ -14276,6 +14412,10 @@
         <default>0x00030010</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>POSITION</id>
         <default>0</default>
     </attribute>
@@ -14346,6 +14486,10 @@
     <attribute>
         <id>HUID</id>
         <default>0x00030014</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
@@ -14420,6 +14564,10 @@
         <default>0x00030018</default>
     </attribute>
     <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>POSITION</id>
         <default>2</default>
     </attribute>
@@ -14488,6 +14636,10 @@
     <attribute>
         <id>HUID</id>
         <default>0x0003001C</default>
+    </attribute>
+    <attribute>
+        <id>PDR_ENTITY_INSTANCE</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
