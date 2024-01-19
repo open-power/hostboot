@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -69,6 +69,7 @@
 #endif
 
 #define HWAS_90_PERCENT_OF(num) ((num * 9) / 10)
+#include <arch/magic.H>
 
 namespace HWAS
 {
@@ -106,6 +107,7 @@ static bool getGardSectionInfoCalled;
 //******************************************************************************
 
 void _flush(void *i_addr);
+errlHndl_t _flush(void* const i_addr, const size_t i_length);
 const TARGETING::Target * getFRU_Target(const TARGETING::Target * i_target);
 errlHndl_t _GardRecordIdSetup(void *&io_platDeconfigGard);
 errlHndl_t setGuardWriteInProgress(DeconfigGard::GardRecordsBinary& io_gard_records_header,
@@ -1050,6 +1052,16 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
                                 true); // merge
                 errlCommit(l_gardFFDC, HWAS_COMP_ID);
 
+                // Protect ourselves from failing in the middle of updating records
+                l_pErr = setGuardWriteInProgress( *l_pGardRecordsBinary,
+                                                  DeconfigGard::GARD_FLAG_PNOR_WRITE_IS_IN_PROGRESS );
+                if( l_pErr )
+                {
+                    HWAS_ERR("Problem calling setGuardWriteInProgress, falling through as we may be able to survive");
+                    l_pErr->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                    errlCommit(l_pErr, HWAS_COMP_ID);
+                }
+
                 l_hbDeconfigGard->iv_GardVersion = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
                 l_pGardRecordsBinary->iv_version = HWAS::DeconfigGard::CURRENT_GARD_VERSION_LAYOUT;
                 l_pGardRecordsBinary->iv_flags = HWAS::DeconfigGard::GARD_FLAGS_DEFAULT;
@@ -1058,17 +1070,33 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
                     sizeof(l_pGardRecordsBinary->iv_magicNumber));
                 HWAS_INF("_GardRecordIdSetup: CASE DEFAULT l_hbDeconfigGard->iv_GardVersion=0x%X",
                     l_hbDeconfigGard->iv_GardVersion);
-                // _flush iv_version
-                _flush((void *)&(l_pGardRecordsBinary->iv_version));
                 //  clear the MEMORY structure
                 for (uint32_t i = 0;
                      i < l_hbDeconfigGard->iv_maxGardRecords;
                      i++)
                 {
                     l_pGardRecords[i].iv_recordId = EMPTY_GARD_RECORDID;
-                    _flush(&l_pGardRecords[i]);
                 }
                 l_hbDeconfigGard->iv_nextGardRecordId = 1;
+
+                // flush the whole section out to pnor
+                l_pErr = _flush((void*)l_section.vaddr,l_section.size);
+                if( l_pErr )
+                {
+                    HWAS_ERR("Problem flushing gard contents to pnor, falling through as we may be able to survive");
+                    l_pErr->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                    errlCommit(l_pErr, HWAS_COMP_ID);
+                }
+
+                l_pErr = setGuardWriteInProgress( *l_pGardRecordsBinary,
+                                                  DeconfigGard::GARD_FLAG_PNOR_WRITE_NOT_IN_PROGRESS );
+                if( l_pErr )
+                {
+                    HWAS_ERR("Problem calling setGuardWriteInProgress, falling through as we may be able to survive");
+                    l_pErr->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+                    errlCommit(l_pErr, HWAS_COMP_ID);
+                }
+
                 break;
         }
         // Done with version checking
