@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -169,7 +169,8 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     l_tlxcfg2.set_SYS_XSTOP_IN_DIS(0);
     l_tlxcfg2.set_CFG_TLXT_ENHANCED_LL_MODE_DIS(1);
     l_tlxcfg2.set_CFG_TLXT_CD6_THRESHOLD(4);
-    l_tlxcfg2.set_CFG_XMETA_LANE_WIDTH_COMP_DIS(1);
+    l_tlxcfg2.set_CFG_XMETA_LANE_WIDTH_COMP_DIS(0);
+
     FAPI_TRY(l_tlxcfg2.putScom(i_target));
 
     FAPI_TRY(l_tlxcfg3.getScom(i_target));
