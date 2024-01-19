@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1035,8 +1035,9 @@ ReturnCode __badDqBitTranslation( const Target<TARGET_TYPE_DIMM>& i_fapiDimm,
                     if ( i_initial_bm[rank][byte] & (0x80 >> bit) )
                     {
                         // Check the spares
-                        if ( byte == SPARE_DRAM_DQ_BYTE_NUMBER_INDEX &&
-                             i_spareByte[rank] & (0x80 >> bit) )
+                        if (i_mcLogicalToDimmDq &&
+                            (byte == SPARE_DRAM_DQ_BYTE_NUMBER_INDEX) &&
+                            (i_spareByte[rank] & (0x80 >> bit)))
                         {
                             // The spareByte can be one of: 0x00 0x0F 0xF0
                             // 0xFF If a bit is set, then that spare is
