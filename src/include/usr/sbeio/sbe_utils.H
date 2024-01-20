@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,9 @@ namespace SBEIO
     // GetSBEScratchData chip-op requires at least 64k (16 pages) for the return data. Adding a couple extra for FFDC.
     static constexpr uint8_t SBE_FFDC_MAX_PAGES = 18;
 
-    // For 4U max is 181 bytes - setting max to 256 words
+    // For 4U DDR4 max is 224 bytes - runtime_n_mode_telem_info
+    // For 4U DDR5 max is 256 bytes - periodic_telemetry_data
+    // For 4U DDR5 max is 476 bytes - consolidated_health_check_data
     // See fips1010 sbeiInternal.H
     // SBE is a 32-bit engine so use uint32_t (Hostboot words are uint64_t)
     static constexpr uint32_t SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES = 256 * sizeof(uint32_t);

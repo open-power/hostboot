@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,10 @@
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
 #include <pmic_n_mode_detect.H>
-
+#include <pmic_periodic_telemetry_ddr5.H>
+#include <pmic_health_check_ddr5.H>
+#include <pmic_periodic_telemetry_utils_ddr5.H>
+#include <pmic_health_check_utils_ddr5.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -85,6 +88,10 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
         uint32_t l_response_size = 0;
         uint32_t l_ocmb_pmic_data_size = SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES;
         uint8_t l_ocmb_pmic_data[l_ocmb_pmic_data_size] = {0};
+        // consolidated_health_check_data is the super structure for DDR5
+        static_assert(SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES >= std::max(sizeof(runtime_n_mode_telem_info),
+                sizeof(mss::pmic::ddr5::consolidated_health_check_data)),
+                "getMultiPmicHealthCheckData SBE_PMIC_HLTH_CHECK_BUFFER_LEN_BYTES TOO SMALL for PMIC structure");
 
         // Loop through OCMB list to collect PMIC telemetry data.
         for (const auto l_pOcmb: i_OCMBs)
@@ -107,31 +114,48 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                 delete l_err;
                 l_err = nullptr;
             }
-            // Only (DDR4 4U DDIMMS) support this interface
-            else if( (SPD::DDR4_TYPE == l_memType)
-                && (SPD::MOD_TYPE_DDIMM == l_memModType)
-                && (SPD::DDIMM_MOD_HEIGHT_4U == l_memHeight) )
+            else if (((SPD::DDR4_TYPE == l_memType) && (SPD::MOD_TYPE_DDIMM == l_memModType) && (SPD::DDIMM_MOD_HEIGHT_4U == l_memHeight))
+                     || ((SPD::DDR5_TYPE == l_memType) && (SPD::MOD_TYPE_DDIMM == l_memModType)))
             {
-
                 if (l_err_telemetry == nullptr)
                 {
-                    /*@
-                    * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
-                    * @reasoncode       SBEIO_PMIC_HEALTH_CHECK_DATA
-                    * @userdata1[00:31] PROC Target HUID
-                    * @userdata1[32:63] First OCMB Target HUID
-                    * @userdata1[00:31] Last  OCMB Target HUID
-                    * @userdata2[32:47] Reserved 0xFFFF default
-                    * @userdata2[48:55] Number of OCMBs in log
-                    * @userdata2[56:63] Worst pmic status
-                    * @devdesc          PMIC Health Check Data
-                    * @custdesc         PMIC Health Check Data
-                    */
-                    l_err_telemetry = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                                                            SBEIO_PSU_PMIC_HEALTH_CHECK,
-                                                            SBEIO_PMIC_HEALTH_CHECK_DATA);
+                    if (SPD::DDR4_TYPE == l_memType)
+                    {
+                        /*@
+                         * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
+                         * @reasoncode       SBEIO_PMIC_HEALTH_CHECK_DATA
+                         * @userdata1[00:31] PROC Target HUID
+                         * @userdata1[32:63] First OCMB Target HUID
+                         * @userdata2[00:31] Last  OCMB Target HUID
+                         * @userdata2[32:47] Reserved 0xFFFF default
+                         * @userdata2[48:55] Number of OCMBs in log
+                         * @userdata2[56:63] Worst pmic status
+                         * @devdesc          PMIC Health Check Data
+                         * @custdesc         PMIC Health Check Data
+                         */
+                        l_err_telemetry = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                                                   SBEIO_PSU_PMIC_HEALTH_CHECK,
+                                                                   SBEIO_PMIC_HEALTH_CHECK_DATA);
+                    }
+                    else
+                    {
+                        /*@
+                         * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
+                         * @reasoncode       SBEIO_PMIC_TELEMETRY_DATA_DDR5
+                         * @userdata1[00:31] PROC Target HUID
+                         * @userdata1[32:63] First OCMB Target HUID
+                         * @userdata2[00:31] Last  OCMB Target HUID
+                         * @userdata2[32:47] Reserved 0xFFFF default
+                         * @userdata2[48:55] Number of OCMBs in log
+                         * @userdata2[56:63] Worst pmic status
+                         * @devdesc          PMIC Telemetry Data
+                         * @custdesc         PMIC Telemetry Data
+                         */
+                        l_err_telemetry = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                                                   SBEIO_PSU_PMIC_HEALTH_CHECK,
+                                                                   SBEIO_PMIC_TELEMETRY_DATA_DDR5);
+                    }
                 }
-                // get the proc chip fapi2 target       /src/usr/fapi2/target.C
                 const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi2_ocmb_target( l_pOcmb );
 
                 const ATTR_FAPI_POS_type l_fapiPos = l_pOcmb->getAttr<ATTR_FAPI_POS>();
@@ -139,17 +163,59 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
 
                 fapi2::hwp_array_ostream l_pmic_data( (uint32_t*) &l_ocmb_pmic_data[0],
                                                         l_ocmb_pmic_data_size);
+                fapi2::hwp_array_ostream l_pmic_data_ddr5( (uint32_t*) &l_ocmb_pmic_data[0],
+                                                        l_ocmb_pmic_data_size);
 
-                FAPI_INVOKE_HWP(l_err,
-                                pmic_n_mode_detect,
-                                l_fapi2_ocmb_target,
-                                l_pmic_data );
+                if (SPD::DDR4_TYPE == l_memType)
+                {
+                    FAPI_INVOKE_HWP(l_err,
+                                    pmic_n_mode_detect,
+                                    l_fapi2_ocmb_target,
+                                    l_pmic_data );
+                }
+                else if (SPD::DDR5_TYPE == l_memType)
+                {
+                    FAPI_INVOKE_HWP(l_err,
+                                    pmic_periodic_telemetry_ddr5,
+                                    l_fapi2_ocmb_target,
+                                    l_pmic_data_ddr5 );
+                }
+                // SRC user words must have first OCMB Huid and last OCMB Huid.
+                if (l_first_ocmb_huid_num == 0)
+                {
+                    l_first_ocmb_huid_num = get_huid(l_pOcmb);
+                }
+                // In case of one OCMB both first and last would be the same.
+                l_last_ocmb_huid_num = get_huid(l_pOcmb);
+
+                uint8_t l_pmic_revision = 0;
+                uint8_t l_pmic_status = 0;
+
+                runtime_n_mode_telem_info l_pmic_health_data =
+                    * reinterpret_cast<runtime_n_mode_telem_info*>(&l_ocmb_pmic_data[0]);
+                mss::pmic::ddr5::periodic_telemetry_data l_pmic_health_data_ddr5 =
+                    * reinterpret_cast<mss::pmic::ddr5::periodic_telemetry_data*>(&l_ocmb_pmic_data[0]);
+
+                if (SPD::DDR4_TYPE == l_memType)
+                {
+                    l_pmic_revision = l_pmic_health_data.iv_revision;
+                    l_pmic_status = l_pmic_health_data.iv_aggregate_error;
+                    l_response_size = l_pmic_data.getLength() * 4; // data size
+                }
+                else // DDR5_TYPE
+                {
+                    // l_pmic_status is NOT populated in this logic flow
+                    // For DDR5 the consolidated_health_check_data struct is required which
+                    // is retrieved by calling the HWP pmic_health_check_ddr5, see PFHB-493
+                    l_pmic_revision = l_pmic_health_data_ddr5.iv_revision; // use ONLY on periodic_telemetry_data struct
+                    l_response_size = l_pmic_data_ddr5.getLength() * 4; // data size
+                }
 
                 if (l_err)
                 {
                     // This function is collecting additional "nice to have" data.
                     // Since we couldn't get PMIC telemetry data, commit and try next OCMB.
-                    TRACFCOMP( g_trac_sbeio, ERR_MRK"pmic_n_mode_detect: ERROR: "
+                    TRACFCOMP( g_trac_sbeio, ERR_MRK"PMIC data: ERROR: "
                             "PROC HUID=0x%X  OCMB HUID=0x%X l_InstanceId=%d"
                             "FAPI PLID=0x%X",
                             get_huid(i_proc), get_huid(l_pOcmb), l_InstanceId,
@@ -165,30 +231,16 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                     continue;
                 }
 
-                // SRC user words must have first OCMB Huid and last OCMB Huid.
-                if (l_first_ocmb_huid_num == 0)
-                {
-                    l_first_ocmb_huid_num = get_huid(l_pOcmb);
-                }
-                // In case of one OCMB both first and last would be the same.
-                l_last_ocmb_huid_num = get_huid(l_pOcmb);
-
-
-                runtime_n_mode_telem_info l_pmic_health_data =
-                        * reinterpret_cast<runtime_n_mode_telem_info*>(&l_ocmb_pmic_data[0]);
-
-                uint8_t l_pmic_revision = l_pmic_health_data.iv_revision;
-                uint8_t l_pmic_status = l_pmic_health_data.iv_aggregate_error;
-                TRACFCOMP( g_trac_sbeio, "getPmicHealthCheckData: l_pmic_revision=0x%X l_pmic_status=0x%X",
-                           l_pmic_revision, l_pmic_status);
-
-                // Update mask for this pmic status in the SRC word 9
+                // DDR4 Update mask for this pmic status in the SRC word 9
+                // DDR5 currently will NOT populate l_pmic_status
+                // DDR5 iv_aggregate_state comes from the consolidated_health_check_data struct, see PFHB-493
                 if( l_pmic_status > l_pmic_combined_status )
                 {
                     l_pmic_combined_status = l_pmic_status;
                 }
 
-                // Produce a visible log in Mfg Mode for failed health check
+                // DDR4 Produce a visible log in Mfg Mode for failed health check
+                // DDR5 will NOT trigger this condition, DDR5 mfg check will be done in PFHB-493
                 errlHndl_t mfg_err = nullptr;
                 if( (l_pmic_status != N_PLUS_1) && TARGETING::areAllSrcsTerminating() )
                 {
@@ -234,8 +286,6 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                     mfg_err->collectTrace(FAPI_IMP_TRACE_NAME,256);
                     mfg_err->collectTrace(FAPI_TRACE_NAME,384);
                 }
-
-                l_response_size = l_pmic_data.getLength() * 4; // data size
                 if (l_response_size == 0)
                 {
                     // We have no data to log, but no explicit ERRORS
@@ -285,6 +335,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                                             static_abs_location_code,
                                             static_abs_location_code +
                                             strlen(static_abs_location_code));
+                    full_location_code.push_back('\0');
 
                     // Identify this OCMB for the Health Check Data Log
                     l_err_telemetry->addFFDC( HWPF_COMP_ID,
@@ -334,7 +385,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                 TRACFCOMP( g_trac_sbeio,"getMultiPmicHealthCheckData: PMIC "
                         "Health Check Data for "
                         "PROC HUID=0x%X OCMB HUID=0x%X "
-                        "l_psuResponse.pmic_health_check_data_size=%d "
+                        "l_response_size=%d "
                         "pmic_revision=0x%X pmic_status=0x%X "
                         "l_InstanceId=%d OCMB location=%s ",
                         get_huid(i_proc), get_huid(l_pOcmb),
@@ -344,7 +395,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                         l_InstanceId,
                         full_location_code.data());
 
-            } // end if DDR4 4U DIMM.
+            } // end if DDR4 4U DDIMM, DDR5 4U DDIMM and DDR5 2U DDIMM
             l_list_index++;
         } // end for loop on OCMBs
 
@@ -395,10 +446,8 @@ void get4uDdimmPmicHealthCheckData(Target * i_ocmb, const uint32_t i_plid)
             break;
         }
 
-        // Only DDR4 DDIMMS support this interface
-        if( (SPD::DDR4_TYPE == l_memType)
-            && (SPD::MOD_TYPE_DDIMM == l_memModType)
-            && (SPD::DDIMM_MOD_HEIGHT_4U == l_memHeight) )
+        if (((SPD::DDR4_TYPE == l_memType) && (SPD::MOD_TYPE_DDIMM == l_memModType) && (SPD::DDIMM_MOD_HEIGHT_4U == l_memHeight))
+                     || ((SPD::DDR5_TYPE == l_memType) && (SPD::MOD_TYPE_DDIMM == l_memModType)))
         {
             TargetHandleList parentProc;
             getParentAffinityTargetsByState(parentProc,

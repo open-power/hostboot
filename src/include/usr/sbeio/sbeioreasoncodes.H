@@ -182,7 +182,7 @@ enum sbeioReasonCode
     SBEIO_NO_RUNTIME_BUFFER            = SBEIO_COMP_ID | 0x68,
     SBEIO_EARLY_ERROR                  = SBEIO_COMP_ID | 0x69,
     // PMIC Health Check Data Logs
-    SBEIO_PMIC_HEALTH_CHECK_DATA       = SBEIO_COMP_ID | 0x6A,
+    SBEIO_PMIC_HEALTH_CHECK_DATA       = SBEIO_COMP_ID | 0x6A, // Do NOT alter the value, HMC dependency
     SBEIO_PMIC_FAILED_HEALTH_CHECK     = SBEIO_COMP_ID | 0x6B,
     SBEIO_RECONFIG_WITH_CLOCK_GUARD    = SBEIO_COMP_ID | 0x6C,
     // SBE Runtime Odyssey support
@@ -197,6 +197,7 @@ enum sbeioReasonCode
     SBEIO_OCMB_NULL_TARGET             = SBEIO_COMP_ID | 0x73,
     SBEIO_TEST_INJECT_HRESET           = SBEIO_COMP_ID | 0x74,
     SBEIO_ODY_FLASH_CHECK_ERR          = SBEIO_COMP_ID | 0x75,
+    SBEIO_PMIC_TELEMETRY_DATA_DDR5     = SBEIO_COMP_ID | 0x76, // Do NOT alter the value, HMC dependency
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
