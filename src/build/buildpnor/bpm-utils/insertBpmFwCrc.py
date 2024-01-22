@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019
+# Contributors Listed Below - COPYRIGHT 2019,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -44,9 +44,9 @@ def InsertCrcSignature(inFile, outFile, crcProgram):
     #
     try:
         print("\nOpening outFile = %s" % outFile)
-        outFileObj = open(outFile, "w")
+        outFileObj = open(outFile, "w", encoding="UTF-8")
     except Exception as e:
-        print "\nException {0} occured, args: {1!r}".format(type(e).__name__, e.args)
+        print("\nException {0} occured, args: {1!r}".format(type(e).__name__, e.args))
         sys.exit(999)
 
     #
@@ -75,18 +75,18 @@ def InsertCrcSignature(inFile, outFile, crcProgram):
     # ....
 
     # Call imageCrc here
-    proc = Popen([crcProgram, inFile], stdout=PIPE, stderr=PIPE)
+    proc = Popen([crcProgram, inFile], stdout=PIPE, stderr=PIPE, universal_newlines=True)
     out,err = proc.communicate()
     exitCode = proc.returncode
 
     if exitCode:
-        print "\nCRC generation using imageCrc utility for {0} failed, below are stdout and stderr".format(inFile)
-        print "Command stdout - \n{0}".format(out)
-        print "Command stderr - \n{0}".format(err)
+        print( "\nCRC generation using imageCrc utility for {0} failed, below are stdout and stderr".format(inFile))
+        print( "Command stdout - \n{0}".format(out))
+        print( "Command stderr - \n{0}".format(err))
         sys.exit(999)
     else:
-        print "\nCRC generation using imageCrc utility successful"
-        print "Command output - \n{0}".format(out)
+        print( "\nCRC generation using imageCrc utility successful")
+        print( "Command output - \n{0}".format(out))
 
     # Parse through output of imageCrc and get addr and signature
     splitLines_crc = out.splitlines()
@@ -95,6 +95,8 @@ def InsertCrcSignature(inFile, outFile, crcProgram):
         if splitLines_crc[counter].startswith("@"):
             crcAddressLine = splitLines_crc[counter]
             crcSignature = splitLines_crc[counter+1].strip().upper()
+    print("crcSignature:")
+    print(crcSignature)
 
     # Open infile here
     # Keep reading infile lines, when read address > the address in signature,
@@ -102,7 +104,7 @@ def InsertCrcSignature(inFile, outFile, crcProgram):
     try:
         crcWritten = 0
         print("\nOpening inFile = %s and writing to outFile now..." % inFile)
-        with open(inFile, "r") as ins:
+        with open(inFile, "r", encoding="UTF-8") as ins:
             #
             # TODO: Have the logic to insert the signature from the
             # SignatureFile inserted at the correct location in the
@@ -116,10 +118,10 @@ def InsertCrcSignature(inFile, outFile, crcProgram):
                     # If equal, write only once, if not equal, write calculated value
                     if crcWritten == 0 and inputFileAddr == crcAddressLine:
                         outFileObj.write(line.strip()+' \n')
-                        if ins.next().upper() == crcSignature:
-                            print "Correct crc already present at {0} in input file, will skip writing calculated crc again to output file".format(inputFileAddr)
+                        if ins.readline().upper() == crcSignature:
+                            print( "Correct crc already present at {0} in input file, will skip writing calculated crc again to output file".format(inputFileAddr))
                         else:
-                            print "Incorrect crc present at {0} in input file, will write calculated crc {1} to output file".format(inputFileAddr, crcSignature)
+                            print( "Incorrect crc present at {0} in input file, will write calculated crc {1} to output file".format(inputFileAddr, crcSignature))
                         outFileObj.write(crcSignature+' \n')
                         crcWritten = 1
                         continue
@@ -133,7 +135,7 @@ def InsertCrcSignature(inFile, outFile, crcProgram):
                     outFileObj.write(line.strip()+' \n')
 
     except Exception as e:
-        print "\nException {0} occured, args: {1!r}".format(type(e).__name__, e.args)
+        print( "\nException {0} occured, args: {1!r}".format(type(e).__name__, e.args))
         sys.exit(999)
 
     print("\nClosing Files\n")
@@ -152,7 +154,7 @@ if __name__ == '__main__':
     crcProgram=""
 
     if (len(sys.argv) < 4):
-        print "\nUsage: %s <IN FILE> <OUT FILE> <CRC PROGRAM>\n" % sys.argv[0]
+        print( "\nUsage: %s <IN FILE> <OUT FILE> <CRC PROGRAM>\n" % sys.argv[0])
         sys.exit(1)
     else:
         #
@@ -163,7 +165,7 @@ if __name__ == '__main__':
             inFile = os.getcwd() + '/' + inFile
 
         if not os.path.exists(inFile) or os.path.getsize(inFile) == 0:
-            print "\nInput File {0} does not exist or is zero in size".format(inFile)
+            print( "\nInput File {0} does not exist or is zero in size".format(inFile))
         #
         # Name of the firmware image file to be generated with the signature
         #
@@ -172,7 +174,7 @@ if __name__ == '__main__':
             outFile = os.getcwd() + '/' + outFile
 
         if os.path.exists(outFile):
-            print "\nOutput File {0} already exists, will be overwritten".format(outFile)
+            print( "\nOutput File {0} already exists, will be overwritten".format(outFile))
 
         #
         # Name of the CRC calculation program to be used to calculate the
@@ -183,7 +185,7 @@ if __name__ == '__main__':
             crcProgram = os.getcwd() + '/' + crcProgram
 
         if not os.path.exists(crcProgram) or os.path.getsize(crcProgram) == 0:
-            print "\nCRC Program {0} does not exist or is zero in size".format(crcProgram)
+            print( "\nCRC Program {0} does not exist or is zero in size".format(crcProgram))
 
     #
     # Call the function to insert the CRC signature
