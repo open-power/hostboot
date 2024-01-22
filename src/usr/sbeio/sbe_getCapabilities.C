@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -711,5 +711,35 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
 };
 
 #endif //#ifdef __HOSTBOOT_RUNTIME
+
+bool sbeHasFifoCapability(Target* const i_sbe, uint8_t i_commandClass, uint32_t i_capability)
+{
+    bool l_hasCapability = false;
+
+    if(i_sbe->getAttr<ATTR_SBE_NUM_CAPABILITIES>() != 0)
+    {
+        uint32_t l_commandClass32 = i_commandClass << 24;
+        auto l_sbeFifoCapabilities = i_sbe->getAttrAsStdArr<ATTR_SBE_FIFO_CAPABILITIES>();
+        for(auto l_sbeFifoCapability : l_sbeFifoCapabilities)
+        {
+            // The format of each of the capability entries is 0xAABBBBBB:
+            // AA is the command class of the chip op
+            // BBBBBB is the bit mask of the capability in question
+            if( ((l_sbeFifoCapability & l_commandClass32) == l_commandClass32) &&
+                ((l_sbeFifoCapability & i_capability) != 0) )
+            {
+                l_hasCapability = true;
+                break;
+            }
+        }
+    }
+
+    return l_hasCapability;
+}
+
+bool sbeSpiFlashCheckSupported(Target* const i_sbe)
+{
+    return sbeHasFifoCapability(i_sbe, SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE, SbeFifo::SBE_FIFO_CAP_SCRUB_MEM_DEVICE);
+}
 
 } //end namespace SBEIO

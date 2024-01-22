@@ -166,6 +166,16 @@ public:
     };
 
     /**
+    * @brief enums representing the bit masks of various SBE FIFO capabilities
+    *        related to the GenericMessage class of chip ops. See POZ SBE FIFO
+    *        Interface Specification document for these definitions.
+    */
+    enum fifoGenericMessageCapabilities : uint32_t
+    {
+        SBE_FIFO_CAP_SCRUB_MEM_DEVICE = 0x100,
+    };
+
+    /**
      * @brief enums for FIFO MPIPL Messages
      */
     enum fifoMpiplMessage

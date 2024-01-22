@@ -355,6 +355,17 @@ namespace SBEIO
      */
     errlHndl_t getFifoSbeCapabilities(TARGETING::TargetHandle_t i_target);
 
+    /**
+    * @brief Checks whether the SBE supports the SPI flash check chip-op.
+    * @note If ATTR_SBE_NUM_CAPABILITIES or ATTR_SBE_FIFO_CAPABILITIES
+    *       are not populated, the function will return false.
+    *
+    * @param[in] i_sbe the SBE chip to check for capability
+    * @return true : SBE supports SPI flash check; false : SBE does not
+    *         support SPI flash check.
+    */
+    bool sbeSpiFlashCheckSupported(TARGETING::Target* const i_sbe);
+
 
 
     /**
