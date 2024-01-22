@@ -613,6 +613,7 @@ foreach my $argnum ( 0 .. $#ARGV )
         print CRFILE "#include <explorer_scom_addresses.H>\n";
         print CRFILE "#include <ody_scom_ody_odc.H>\n";
         print CRFILE "#include <ody_scom_perv.H>\n";
+        print CRFILE "#include <poz_scom_perv.H>\n";
 
         print CRFILE "namespace fapi2\n";
         print CRFILE "{\n";

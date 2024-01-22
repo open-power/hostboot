@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 # [+] YADRO
@@ -321,6 +321,7 @@ print EDISFILE "#include <p10_scom_nmmu.H>\n";
 print EDISFILE "#include <ody_scom_ody_odc.H>\n";
 print EDISFILE "#include <ody_scom_perv_tcmc.H>\n";
 print EDISFILE "#include <ody_scom_perv_cfam.H>\n";
+print EDISFILE "#include <poz_scom_perv.H>\n";
 print EDISFILE "namespace fapi2\n";
 print EDISFILE "{\n\n";
 

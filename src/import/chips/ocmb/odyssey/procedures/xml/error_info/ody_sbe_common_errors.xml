@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -28,65 +28,106 @@
 <hwpErrors>
    <!-- ******************************************************************** -->
     <registerFfdc>
-       <id>CBS_STATUS_REGS_CFAM</id>
-       <cfamRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS_FSI</cfamRegister>
-       <cfamRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS_FSI</cfamRegister>
-       <cfamRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG_FSI</cfamRegister>
-       <cfamRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_HIST_FSI</cfamRegister>
-       <cfamRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_FSI</cfamRegister>
-       <cfamRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST_FSI</cfamRegister>
+       <id>ODY_CBS_STATUS_REGS_CFAM</id>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_CS_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_TR_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_EL_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_TR_HIST_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_EL_HIST_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SB_CS_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SB_MSG_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_STAT_FSI</cfamRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>CBS_STATUS_REGS_SCOM</id>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_CS</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_CS</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SB_MSG</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_RO</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_TR_HIST</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_EL_HIST</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_ENVSTAT_RO</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_CBS_STAT_RO</scomRegister>
+       <id>ODY_CBS_STATUS_REGS_SCOM</id>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_CS</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_TR_RO</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_EL</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_ENVSTAT_RO</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_TR_HIST</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_EL_HIST</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SB_CS</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SB_MSG</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_STAT_RO</scomRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>ROOT_CTRL_REGS_SCOM</id>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL0_RW</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL1_RW</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL2_RW</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL3_RW</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL4_RW</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL5_RW</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL6_RW</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL7_RW</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_ROOT_CTRL8_RW</scomRegister>
+       <id>ODY_ROOT_CTRL_REGS_CFAM</id>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL0_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL1_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL2_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL3_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL4_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL5_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL6_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL7_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL8_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL9_FSI</cfamRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>PERV_CTRL_REGS_SCOM</id>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_PERV_CTRL0_RW</scomRegister>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_PERV_CTRL1_RW</scomRegister>
+       <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL0_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL1_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL2_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL3_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL4_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL5_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL6_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL7_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL8_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL9_RW</scomRegister>
     </registerFfdc>
     <registerFfdc>
-        <id>SBE_IPL_SCRATCH_REGS_SCOM</id>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_12_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_RW</scomRegister>
-        <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_RW</scomRegister>
+       <id>ODY_PERV_CTRL_REGS_CFAM</id>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL0_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL1_FSI</cfamRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>OSC_SWITCH_SENSE_REG_SCOM</id>
-       <scomRegister>scomt::perv::CFAM_FSI_W_MAILBOX_FSXCOMP_FSXLOG_SNS1LTH_RO</scomRegister>
+       <id>ODY_PERV_CTRL_REGS_SCOM</id>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL0_RW</scomRegister>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL1_RW</scomRegister>
+    </registerFfdc>
+    <registerFfdc>
+       <id>ODY_SCRATCH_REGS_CFAM</id>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_12_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_FSI</cfamRegister>
+       <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_FSI</cfamRegister>
+    </registerFfdc>
+    <registerFfdc>
+        <id>ODY_SCRATCH_REGS_SCOM</id>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_12_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_RW</scomRegister>
+        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_RW</scomRegister>
+    </registerFfdc>
+    <registerFfdc>
+       <id>ODY_OSC_SWITCH_SENSE_REG_SCOM</id>
+       <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SNS1LTH_RO</scomRegister>
     </registerFfdc>
    <!-- ******************************************************************** -->
     <hwpError>
