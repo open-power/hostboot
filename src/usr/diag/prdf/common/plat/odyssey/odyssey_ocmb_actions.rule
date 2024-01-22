@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022,2023
+# Contributors Listed Below - COPYRIGHT 2022,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -610,18 +610,6 @@ actionclass mainline_iue_handling
     # TODO
     #funccall("AnalyzeMainlineIue");
     TBDDefaultCallout;
-};
-
-actionclass mainline_ircd_handling_0
-{
-    dimm0_H_mem_port0_L_th_32perDay;
-    funccall("hwfmWorkaround_port0_bit19");
-};
-
-actionclass mainline_ircd_handling_1
-{
-    dimm1_H_mem_port1_L_th_32perDay;
-    funccall("hwfmWorkaround_port1_bit19");
 };
 
 /**  Handle Maintenance IUEs */

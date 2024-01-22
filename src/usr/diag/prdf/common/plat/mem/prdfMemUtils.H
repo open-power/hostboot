@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,28 +200,6 @@ uint32_t getAddrConfig( ExtensibleChip * i_chip, uint8_t i_dslct,
  */
 template<TARGETING::TYPE T>
 bool queryChnlFail(ExtensibleChip * i_chip);
-
-/**
- * @brief  Clears Hardware Force Mirror (HWFM) as long as no mainline UEs have
- *         previously been hit on the attached OCMBs. Note: the FIR bit must
- *         be cleared before HWFM is cleared.
- * @param  i_mcc MCC chip
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-uint32_t clearHwfm(ExtensibleChip * i_mcc);
-
-/**
- * @brief  Clears the given bit for the input FIR and then calls clearHwfm to
- *         clear Hardware Force Mirror. This is needed as the FIR bit needs to
- *         be cleared before HWFM is cleared, as such it must be done manually
- *         here instead of leaving it to the PRD framework.
- * @param  i_ocmb OCMB chip
- * @param  i_fir  Input FIR_AND or write-to-clear FIR to write to clear the FIR.
- * @param  i_bit  Input FIR bit to clear.
- * @return Non-SUCCESS if an internal function fails, SUCCESS otherwise.
- */
-uint32_t clearFirAndHwfm(ExtensibleChip * i_ocmb, const char * i_fir,
-                         uint8_t i_firBit);
 
 } // end namespace MemUtils
 

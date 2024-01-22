@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -2062,7 +2062,7 @@ group gRDF_FIR_0
     /** RDF_FIR_0[19]
      *  Mainline read IRCD
      */
-    (rRDF_FIR_0, bit(19)) ? mainline_ircd_handling_0;
+    (rRDF_FIR_0, bit(19)) ? dimm0_H_mem_port0_L_th_32perDay;
 
     /** RDF_FIR_0[20]
      *  Mainline read IMPE
@@ -2344,7 +2344,7 @@ group gRDF_FIR_1
     /** RDF_FIR_1[19]
      *  Mainline read IRCD
      */
-    (rRDF_FIR_1, bit(19)) ? mainline_ircd_handling_1;
+    (rRDF_FIR_1, bit(19)) ? dimm1_H_mem_port1_L_th_32perDay;
 
     /** RDF_FIR_1[20]
      *  Mainline read IMPE

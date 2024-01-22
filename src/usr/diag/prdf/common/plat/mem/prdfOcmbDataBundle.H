@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -231,11 +231,6 @@ class OcmbDataBundle : public DataBundle
     // error is on so that we can clear our respective thresholds if the
     // next error we stop on is on a different rank.
     MemRank iv_ceUeRank;
-
-    // Hardware Force Mirror (HWFM) workaround. Whether this OCMB has
-    // hit a mainline UE needs to be tracked to help determine whether HWFM will
-    // need to be cleared or not after other certain errors.
-    bool iv_hwfmMainlineUe = false;
 
     #else // IPL only
 

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2023
+# Contributors Listed Below - COPYRIGHT 2018,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -457,64 +457,19 @@ actionclass mcbist_program_complete
 };
 
 /** Verify Chip Mark */
-actionclass verify_chip_mark_0
-{
-    funccall("AnalyzeFetchMpe_0");
-    funccall("hwfmWorkaround_bit0");
-};
-
-actionclass verify_chip_mark_1
-{
-    funccall("AnalyzeFetchMpe_1");
-    funccall("hwfmWorkaround_bit1");
-};
-
-actionclass verify_chip_mark_2
-{
-    funccall("AnalyzeFetchMpe_2");
-    funccall("hwfmWorkaround_bit2");
-};
-
-actionclass verify_chip_mark_3
-{
-    funccall("AnalyzeFetchMpe_3");
-    funccall("hwfmWorkaround_bit3");
-};
-
-actionclass verify_chip_mark_4
-{
-    funccall("AnalyzeFetchMpe_4");
-    funccall("hwfmWorkaround_bit4");
-};
-
-actionclass verify_chip_mark_5
-{
-    funccall("AnalyzeFetchMpe_5");
-    funccall("hwfmWorkaround_bit5");
-};
-
-actionclass verify_chip_mark_6
-{
-    funccall("AnalyzeFetchMpe_6");
-    funccall("hwfmWorkaround_bit6");
-};
-
-actionclass verify_chip_mark_7
-{
-    funccall("AnalyzeFetchMpe_7");
-    funccall("hwfmWorkaround_bit7");
-};
+actionclass verify_chip_mark_0 { funccall("AnalyzeFetchMpe_0"); };
+actionclass verify_chip_mark_1 { funccall("AnalyzeFetchMpe_1"); };
+actionclass verify_chip_mark_2 { funccall("AnalyzeFetchMpe_2"); };
+actionclass verify_chip_mark_3 { funccall("AnalyzeFetchMpe_3"); };
+actionclass verify_chip_mark_4 { funccall("AnalyzeFetchMpe_4"); };
+actionclass verify_chip_mark_5 { funccall("AnalyzeFetchMpe_5"); };
+actionclass verify_chip_mark_6 { funccall("AnalyzeFetchMpe_6"); };
+actionclass verify_chip_mark_7 { funccall("AnalyzeFetchMpe_7"); };
 
 /** Mainline NCE/TCE handling */
-actionclass mainline_nce_handling
+actionclass mainline_nce_tce_handling
 {
     funccall("AnalyzeFetchNceTce");
-};
-
-actionclass mainline_tce_handling
-{
-    funccall("AnalyzeFetchNceTce");
-    funccall("hwfmWorkaround_bit9");
 };
 
 /** Handle Mainline AUEs/IAUEs */
@@ -567,16 +522,9 @@ actionclass maintenance_iue_handling
     funccall("AnalyzeMaintIue");
 };
 
-actionclass mainline_ircd_handling
-{
-    all_dimm_H_memport_L_th_32perDay;
-    funccall("hwfmWorkaround_bit18");
-};
-
 actionclass memory_impe_handling
 {
     funccall("AnalyzeImpe");
-    funccall("hwfmWorkaround_bit19");
 };
 
 /** Handle Maintenance AUEs */

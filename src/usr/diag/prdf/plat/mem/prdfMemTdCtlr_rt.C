@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,16 +186,6 @@ uint32_t MemTdCtlr<T>::defaultStep( STEP_CODE_DATA_STRUCT & io_sc )
         if ( SUCCESS != o_rc )
         {
             PRDF_ERR( PRDF_FUNC "unmaskEccAttns() failed" );
-        }
-
-        // Hardware Force Mirror (HWFM) workaround: HWFM needs to be cleared
-        // after runtime targeted diagnostics has completed in case a mainline
-        // NCE/TCE was hit which would trigger HWFM even though those errors
-        // were masked.
-        ExtensibleChip * mcc = getConnectedParent(iv_chip, TYPE_MCC);
-        if (SUCCESS != MemUtils::clearHwfm(mcc))
-        {
-            PRDF_ERR(PRDF_FUNC "clearHwFm(0x%08x) failed", mcc->getHuid());
         }
 
         // A TD procedure has completed. Restart background scrubbing on the

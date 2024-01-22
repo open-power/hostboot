@@ -19,11 +19,6 @@
         "description": "MC USTL Error Report 1",
         "name": "MC_USTL_ERR_RPT_1"
     },
-    "0x4019": {
-        "address": "0x000000000c010e0f",
-        "description": "P10 USTL Memory Controller Hardware Force Mirror Register",
-        "name": "USTLMCHWFM"
-    },
     "0x4da4": {
         "address": "0x000000000c010d01",
         "description": "P10 MCC target DSTLFIR atomic AND",
