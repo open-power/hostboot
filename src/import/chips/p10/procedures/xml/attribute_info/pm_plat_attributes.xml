@@ -2543,6 +2543,75 @@
 
   <!-- ********************************************************************* -->
   <attribute>
+    <id>ATTR_SYSTEM_WOV_DDS_CALIBRATION_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enables DDS calibration in creating the Pstate Parameter Block. In this mode,
+    the following are inherently disabled:
+    - PStates
+    - DDS (as these a mangaged by other means in this mode)
+    - WOF
+
+    The functions that are enabled are:
+    - AVSBus
+    - Undervolting
+    - Overvolting
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        OFF=0,
+        ON=1
+    </enum>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_UNDERV_EXTENDED_MAX_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If DDS calibration is performed, this specifies the maximum percentage
+    that the voltage can move below the base voltage. The value is specified in
+    tenths of percentage(0.1%).
+
+    If, 0, then default value of 20%(200) is used.
+
+    Value can range from 10(1%) to 1000(100.0%).
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <default>200</default>  <!-- 20.0% -->
+    <overrideOnly/>
+    <writeable/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOV_OVERV_EXTENDED_MAX_10THPCT</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    If DDS calibration is performed, this specifies the maximum percentage
+    that the voltage can move above the base voltage. The value is specified in
+    tenths of percentage(0.1%).
+
+    If, 0, then default value of 20%(200) is used.
+
+    Value can range from 10(1%) to 1000(100.0%).
+    </description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <default>200</default>  <!-- 20.0% -->
+    <overrideOnly/>
+    <writeable/>
+    <group>wov</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
     <id>ATTR_WOV_LIGHT_PERF_LOSS_THRESH_10THPCT</id>
     <targetType>TARGET_TYPE_PROC_CHIP</targetType>
     <description>
