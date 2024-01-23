@@ -309,7 +309,9 @@ generate_hcode_image()
         fi
 
         cd ${EKB_DIR}
-        CTEPATH=/afs/awd.austin.ibm.com/projects/cte PROJECT_ROOT=${EKB_DIR} \
+        CTEPATH=/afs/awd.austin.ibm.com/projects/cte \
+               env -u ECMD_RELEASE \
+               PROJECT_ROOT=${EKB_DIR} \
                ./ekb workon<<<'unset HOST_PREFIX && \
         git submodule update --init chips/p10/engd/p10 && \
         ./ekb build p10.hw_image && \
