@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <sys/time.h>
 
 #include <cxxtest/TestSuite.H>
+#include <cxxtest/TestInject.H>
 #include <errl/errlmanager.H>
 #include <errl/errlentry.H>
 #include <devicefw/driverif.H>
@@ -52,7 +53,10 @@
 extern trace_desc_t* g_trac_spd;
 
 using namespace TARGETING;
+using namespace ERRORLOG;
 using namespace SPD;
+using namespace std;
+using namespace CxxTest;
 
 void getDIMMTargets ( TargetHandleList & o_dimmList )
 {
@@ -80,7 +84,323 @@ errlHndl_t getMemType( TARGETING::Target * i_target,
 
 class SPDTest: public CxxTest::TestSuite
 {
-    public:
+  public:
+
+   // Compile out this code because it uses data types from TestInject_defs.H
+   //  and TestInject.C
+   // Those data types are compiled out using this flag in those files, so this
+   //  code must be compiled out also.
+
+    /**
+     * @brief This test ensures the correct CRC handling for the DDR5 End_User VPD
+     */
+    void testCRCforDDR5(void)
+    {
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+        /*----------------------------------------------------------------------
+          These testcases manipulate the End_User section of the vpd, in order
+          to verify that its CRC is handled correctly.
+
+          Expectations for the End_User section CRC handling:
+            1. if CRC is zero, then checkCRC updates the section with good CRC
+            2. if bad CRC is detected, then checkCRC bzero's the data and CRC
+            3. A deviceWrite to the vpd also updates the CRC
+
+            The Testcases verify these functions:
+            1. detect bad CRC value
+            2. repair bad CRC value
+            3. detect bad VPD data
+            4. repair bad VPD data
+            5. CRC==0                    (new)
+            6. keyword write updates CRC (new)
+
+            TC1_FIRST_TIME_USE_ZERO_CRC
+               a. write a zero CRC value, when the section has valid data
+               b. call checkCRC with CHECK to ensure bad CRC is detected,
+                   the bad CRC is fixed,
+                   no error log is returned
+            TC2_CORRUPTED_VPD_DATA
+               a. write a keyword without updating the CRC
+               b. call checkCRC with CHECK to ensure bad CRC is detected,
+                   the entire section is bzero'd, which repairs the CRC
+                   no error log is returned
+            TC3_KEYWORD_WRITE_UPDATES_CRC
+               a. call deviceWrite to write a keyword (which will update the CRC)
+               b. call checkCRC with CHECK to ensure CRC is good,
+                   no error log is returned
+            TC4_CORRUPT_OTHER_CRC
+               a. write a bad CRC value to a different section than End_User
+               b. call checkCRC with CHECK to ensure the bad CRC is detected,
+                   an error log is returned
+               c. call checkCRC with FIX to ensure the bad CRC is detected,
+                   the bad CRC is fixed,
+                   no error log is returned
+         *--------------------------------------------------------------------*/
+
+        TRACFCOMP( g_trac_spd, ENTER_MRK"testCRCforDDR5" );
+
+        TargetHandleList      l_dimmList{};
+        crc_section_t         l_end_user(SPD_DDR5_DDIMM_USER_SECTION_START,
+                                         SPD_DDR5_DDIMM_USER_SECTION_LENGTH);
+        crc_section_t         l_other(512,128);
+        vector<crc_section_t> l_sections;
+        Target               *l_target   = nullptr;
+        errlHndl_t            l_errl     = nullptr;
+        const KeywordData    *l_keyword  = {nullptr};
+        uint8_t               l_mem_type = 0x0;
+        uint32_t              l_huid{};
+        size_t                l_addr{};
+        size_t                l_bytes{};
+        uint8_t               l_buf[256]{0};
+
+        getDIMMTargets(l_dimmList);
+
+        for (auto l_dimm : l_dimmList)
+        {
+            l_errl = getMemType( l_dimm, l_mem_type );
+            if (l_errl)
+            {
+                TS_FAIL("testCRCforDDR5 - failed to read memtype %x", get_huid(l_dimm));
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+                continue;
+            }
+            if (l_mem_type == SPD::DDR5_TYPE)
+            {
+                l_target = l_dimm;
+                break;
+            }
+        }
+        if (!l_target)
+        {
+            TS_INFO("testCRCforDDR5 - No DDR5 DIMM target found");
+            goto EXIT;
+        }
+
+        // add the End_User section to the l_sections
+        l_sections.push_back(l_end_user);
+
+        // Get SPD keyword EXPLORER_FW_VERSION info
+        //  (use this keyword addr/len to test the update of the VPD data)
+        l_errl = getKeywordEntry(SPD::EXPLORER_FW_VERSION,
+                                 SPD::DDR5_TYPE,
+                                 l_target,
+                                 l_keyword);
+        if (l_errl)
+        {
+            TS_FAIL("testCRCforDDR5: failed to get addr of EXPLORER_FW_VERSION 0x%x",
+                    get_huid(l_target));
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+            goto EXIT;
+        }
+        l_huid = get_huid(l_target);
+
+        //----------------------------------------------------------------------
+        // INIT the VPD so it contains some data, then the CRC is non-zero
+        //----------------------------------------------------------------------
+        TS_INFO("testCRCforDDR5: 0x%x init a keyword in End_User VPD", l_huid);
+        l_buf[0] = getTB()%16; l_buf[1] = l_buf[0]+1; l_buf[2] = l_buf[0]+2;
+        l_addr   = l_keyword->offset;
+        l_bytes  = l_keyword->length;
+        l_errl   = DeviceFW::deviceOp(DeviceFW::WRITE,  // write some VPD data
+                                      l_target,
+                                      &l_buf,
+                                      l_bytes,
+                                      DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
+                                                            l_addr,
+                                                            EEPROM::AUTOSELECT));
+        if (l_errl)
+        {
+            TS_FAIL("testCRCforDDR5: failed writing initial VPD data on 0x%x",
+                    l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+            goto EXIT;
+        }
+        // The VPD is now non-zero, with non-zero section CRC
+
+        //----------------------------------------------------------------------
+        // TC1_FIRST_TIME_USE_ZERO_CRC
+        //----------------------------------------------------------------------
+        TS_INFO("testCRCforDDR5: TC1_FIRST_TIME_USE_ZERO_CRC 0x%x", l_huid);
+        l_end_user.crcActual = 0; // write zero to create bad CRC
+        l_errl = updateCRC(l_target, EEPROM::VPD_AUTO, EEPROM::AUTOSELECT, l_end_user);
+        if (l_errl)
+        {
+            TS_FAIL("testCRCforDDR5: TC1_FIRST_TIME_USE_ZERO_CRC "
+                    "0x%x: zero CRC write failed",
+                    l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        else
+        {
+            l_errl = SPD::checkCRC(l_target,   // call to detect bad CRC and repair
+                                   SPD::CHECK,
+                                   EEPROM::VPD_AUTO,
+                                   EEPROM::AUTOSELECT,
+                                   l_sections);
+            if (l_errl)
+            {
+                // we do not expect an error log here
+                TS_FAIL("testCRCforDDR5: TC1_FIRST_TIME_USE_ZERO_CRC "
+                        "0x%x: error log is not expected",
+                        l_huid);
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+            }
+        }
+
+        //----------------------------------------------------------------------
+        // TC2_CORRUPTED_VPD_DATA
+        //----------------------------------------------------------------------
+        TS_INFO("testCRCforDDR5: TC2_CORRUPTED_VPD_DATA 0x%x", l_huid);
+        TS_INFO("testCRCforDDR5: TC2_CORRUPTED_VPD_DATA 0x%x "
+                "write a keyword to End_User VPD to corrupt the CRC", l_huid);
+        l_buf[0] = getTB()%16; l_buf[1] = l_buf[0]+1; l_buf[2] = l_buf[0]+2;
+        l_errl  = DeviceFW::deviceOp(DeviceFW::WRITE,  // corrupt VPD
+                                     l_target,
+                                     &l_buf,
+                                     l_bytes,
+                                     DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
+                                                           l_addr,
+                                                           EEPROM::AUTOSELECT));
+        if (l_errl)
+        {
+            TS_FAIL("testCRCforDDR5: TC2_CORRUPTED_VPD_DATA 0x%x: VPD write failed",
+                    l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        else
+        {
+            l_errl = SPD::checkCRC(l_target,         // call to detect bad CRC,
+                                   SPD::CHECK,       // section is bzeroed
+                                   EEPROM::VPD_AUTO,
+                                   EEPROM::AUTOSELECT,
+                                   l_sections);
+            if (l_errl)
+            {
+                TS_FAIL("testCRCforDDR5: TC2_CORRUPTED_VPD_DATA 0x%x: "
+                        "error log is not expected",
+                        l_huid);
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+            }
+        }
+        //----------------------------------------------------------------------
+        // TC2 just did a bzero of the section
+        //   Write to the VPD so it is non-zero, and the CRC is non-zero
+        //----------------------------------------------------------------------
+        l_buf[0] = getTB()%16; l_buf[1] = l_buf[0]+1; l_buf[2] = l_buf[0]+2;
+        l_addr   = l_keyword->offset;
+        l_bytes  = l_keyword->length;
+        l_errl   = DeviceFW::deviceOp(DeviceFW::WRITE,  // write some VPD data
+                                      l_target,
+                                      &l_buf,
+                                      l_bytes,
+                                      DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
+                                                            l_addr,
+                                                            EEPROM::AUTOSELECT));
+        if (l_errl)
+        {
+            TS_FAIL("testCRCforDDR5: failed writing keyword VPD data on 0x%x",
+                    l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+            goto EXIT;
+        }
+        // The keyword is now non-zero, with good section CRC
+
+        //----------------------------------------------------------------------
+        // TC3_KEYWORD_WRITE_UPDATES_CRC
+        //----------------------------------------------------------------------
+        TS_INFO("testCRCforDDR5: TC3_KEYWORD_WRITE_UPDATES_CRC 0x%x", l_huid);
+        TS_INFO("testCRCforDDR5: TC3_KEYWORD_WRITE_UPDATES_CRC 0x%x "
+                "write a keyword to End_User VPD, and expect CRC to be updated.", l_huid);
+        l_buf[0] = getTB()%16; l_buf[1] = l_buf[0]+1; l_buf[2] = l_buf[0]+2;
+        l_bytes = l_keyword->length;
+        l_errl  = deviceWrite(l_target,
+                              l_buf,
+                              l_bytes,
+                              DEVICE_SPD_ADDRESS(EXPLORER_FW_VERSION));
+        if (l_errl)
+        {
+            TS_FAIL("testCRCforDDR5: TC3_KEYWORD_WRITE_UPDATES_CRC 0x%x: VPD write failed",
+                    l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        else
+        {
+            l_errl = SPD::checkCRC(l_target,   // call to ensure good CRC
+                                   SPD::CHECK,
+                                   EEPROM::VPD_AUTO,
+                                   EEPROM::AUTOSELECT,
+                                   l_sections);
+            if (l_errl)
+            {
+                TS_FAIL("testCRCforDDR5: TC3_KEYWORD_WRITE_UPDATES_CRC 0x%x: "
+                        "error is not expected",
+                        l_huid);
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+            }
+        }
+
+        //----------------------------------------------------------------------
+        // TC4_CORRUPT_OTHER_CRC
+        //----------------------------------------------------------------------
+        TS_INFO("testCRCforDDR5: TC4_CORRUPT_OTHER_CRC 0x%x", l_huid);
+        l_sections.clear();            // empty the vector
+        l_sections.push_back(l_other); // push on the "other" section
+        l_other.crcActual = 0xCDBA;    // write bad CRC
+        l_errl = updateCRC(l_target, EEPROM::VPD_AUTO, EEPROM::AUTOSELECT, l_other);
+        if (l_errl)
+        {
+            TS_FAIL("testCRCforDDR5: TC4_CORRUPT_OTHER_CRC "
+                    "0x%x: corrupt CRC write failed",
+                    l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        else
+        {
+            l_errl = SPD::checkCRC(l_target,   // call to detect bad CRC
+                                   SPD::CHECK,
+                                   EEPROM::VPD_AUTO,
+                                   EEPROM::AUTOSELECT,
+                                   l_sections);
+            if (l_errl)
+            {
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+            }
+            else
+            {
+                // we expected an error log here
+                TS_FAIL("testCRCforDDR5: TC4_CORRUPT_OTHER_CRC "
+                        "0x%x: error log is expected",
+                        l_huid);
+            }
+        }
+        l_errl = SPD::checkCRC(l_target,   // call to fix the bad CRC
+                               SPD::FIX,
+                               EEPROM::VPD_AUTO,
+                               EEPROM::AUTOSELECT,
+                               l_sections);
+        if (l_errl)
+        {
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+
+      EXIT:
+        TRACFCOMP( g_trac_spd, EXIT_MRK"testCRCforDDR5" );
+#endif
+        return;
+    }
 
         /**
          * @brief This test reads all of the keywords for all of the

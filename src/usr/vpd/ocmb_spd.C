@@ -76,8 +76,16 @@ struct SectionMapTOC_t
     spdEntry_t PSPD_images[];
 } PACKED;
 
+enum BadCrcRepairType_t
+{
+    REPAIR_WRITE_CRC,
+    REPAIR_BZERO_SECTION
+};
+
 // Namespace alias for targeting
 namespace T = TARGETING;
+
+using namespace errl_util;
 
 namespace SPD
 {
@@ -631,18 +639,18 @@ errlHndl_t ocmbSPDPerformOp(DeviceFW::OperationType i_opType,
 }
 
 /**
- * @brief Generates a 16 bit CRC in CCITT XModem mode
- * @param[in] i_ptr - pointer to the data to compute CRC of
+ * @brief   Generate a 16 bit CRC in CCITT XModem mode
+ *           Reference code taken from JEDEC Standard No. 21-C
+ *           Page 4.1.2.12.3 ?? 44,
+ * @param[in] i_ptr   - pointer to the data to compute CRC of
  * @param[in] i_count - number of bytes in i_data for the CRC calculation
  * @return Computed CRC value
- *
- * Reference code taken from JEDEC Standard No. 21-C
- *  Page 4.1.2.12.3 ?? 44
  */
 uint16_t jedec_Crc16( const uint8_t *i_ptr, size_t i_count )
 {
-    TRACDCOMP( g_trac_spd, "jedec_Crc16(%p,%d)", i_ptr, i_count );
     uint16_t crc = 0;
+
+    // calculate the CRC across i_ptr for i_count
     for( size_t c=0; c<i_count; c++ )
     {
         crc = crc ^ (static_cast<uint16_t>(*(i_ptr++)) << 8);
@@ -661,27 +669,255 @@ uint16_t jedec_Crc16( const uint8_t *i_ptr, size_t i_count )
     return crc;
 }
 
-
 /**
- * @brief Evaluate and/or correct all CRC entries for this DDIMM
+ * @brief    if the keyword requires a CRC update when written,
+ *            then write a new section CRC which includes the keyword
  */
-errlHndl_t checkCRC( T::TargetHandle_t i_target,
-                     enum CRCMODE_t i_mode,
-                     EEPROM::EEPROM_ROLE i_role,
-                     EEPROM::EEPROM_SOURCE i_location,
-                     std::vector<crc_section_t>& o_crc_sections,
-                     bool* const o_missing_vpd )
+errlHndl_t checkForCRCUpdate(T::TargetHandle_t  i_target,
+                             VPD::vpdKeyword    i_keyword,
+                             const KeywordData *i_entry,
+                             uint64_t           i_DDRRev,
+                             void              *io_buffer,
+                             size_t             io_buflen)
 {
     errlHndl_t l_errl = nullptr;
+
+    // check if this is the END_USER area
+    if (SPD::DDR5_TYPE == i_DDRRev                           &&
+        i_entry->offset >= SPD_DDR5_DDIMM_USER_SECTION_START &&
+        i_entry->offset <= SPD_DDR5_DDIMM_USER_SECTION_DATA_END)
+    {
+        TRACFCOMP( g_trac_spd,
+                   "checkForCRCUpdate: update END_USER CRC "
+                   "i_keyword=0x%X offset=0x%X length=0x%X HUID=0x%X",
+                   i_keyword, i_entry->offset, i_entry->length, get_huid(i_target));
+
+        // get the current CRC
+        crc_section_t l_section(SPD_DDR5_DDIMM_USER_SECTION_START,
+                                SPD_DDR5_DDIMM_USER_SECTION_LENGTH);
+        uint8_t l_spddata[l_section.numbytes] = {};
+        l_errl = computeCRC(i_target,
+                            EEPROM::VPD_AUTO,
+                            EEPROM::AUTOSELECT,
+                            l_section,
+                            l_spddata);
+        if (l_errl) {goto ERROR_EXIT;}
+
+        // write the CRC we just calculated in computeCRC
+        l_errl = updateCRC(i_target,
+                           EEPROM::VPD_AUTO,
+                           EEPROM::AUTOSELECT,
+                           l_section);
+        if (l_errl) {goto ERROR_EXIT;}
+    }
+
+ERROR_EXIT:
+    return l_errl;
+}
+
+/**
+ * @brief  Read and calculate the CRC for the VPD section
+ */
+errlHndl_t computeCRC(T::TargetHandle_t     i_target,
+                      EEPROM::EEPROM_ROLE   i_role,
+                      EEPROM::EEPROM_SOURCE i_location,
+                      crc_section_t        &io_section,
+                      uint8_t              *o_spddata)
+{
+    errlHndl_t l_errl = nullptr;
+
+    l_errl = DeviceFW::deviceOp( DeviceFW::READ,
+                                 i_target,
+                                 o_spddata,
+                                 io_section.numbytes,
+                                 DEVICE_EEPROM_ADDRESS(i_role,
+                                                       io_section.start,
+                                                       i_location));
+    if (l_errl)
+    {
+        TRACFCOMP( g_trac_spd, "computeCRC: READ ERROR %.08X addr:%d numbytes:%d",
+                               T::get_huid(i_target),
+                               io_section.start,
+                               io_section.numbytes);
+        goto ERROR_EXIT;
+    }
+
+    // pull and byte-swap the CRC from the VPD data
+    io_section.crcSPD = htole16((reinterpret_cast<uint16_t*>(o_spddata))
+                                                   [(io_section.numbytes-2)/2]);
+    // Compute the CRC from the VPD data
+    io_section.crcActual = jedec_Crc16(o_spddata, io_section.numbytes-2);
+
+    TRACDCOMP(g_trac_spd, "computeCRC: DEBUG: addr:%d len:%d "
+                          "crcSPD=%04X crcActual=%04X",
+                  io_section.start,
+                  io_section.numbytes,
+                  io_section.crcSPD,
+                  io_section.crcActual);
+    TRACDBIN( g_trac_spd, "computeCRC: DEBUG: SPD Data",
+                          o_spddata, io_section.numbytes);
+
+ERROR_EXIT:
+    return l_errl;
+}
+
+/**
+ * @brief  Write i_section.crcActual to the CRC for this VPD section
+ */
+errlHndl_t updateCRC(T::TargetHandle_t     i_target,
+                     EEPROM::EEPROM_ROLE   i_role,
+                     EEPROM::EEPROM_SOURCE i_location,
+                     crc_section_t         i_section)
+{
+    errlHndl_t l_errl     = nullptr;
+    uint16_t   l_swapped  = htole16(i_section.crcActual);   // byteswap the CRC
+    uint64_t   l_addr     = i_section.start + i_section.numbytes-2;
+    size_t     l_crcBytes = 2;
+
+    TRACFCOMP( g_trac_spd, "updateCRC: %.08X addr:%d leCRC:%x bytes:%d",
+                           T::get_huid(i_target),
+                           l_addr,
+                           l_swapped,
+                           l_crcBytes);
+
+    l_errl = DeviceFW::deviceOp(DeviceFW::WRITE,
+                                i_target,
+                                &l_swapped,
+                                l_crcBytes,
+                                DEVICE_EEPROM_ADDRESS(i_role,
+                                                      l_addr,
+                                                      i_location));
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_spd, "updateCRC: WRITE ERROR %.08X addr:%d",
+                              T::get_huid(i_target),
+                              i_section.start);
+    }
+    return l_errl;
+}
+
+/**
+ * @brief   bzero the entire VPD section including CRC
+ */
+errlHndl_t bzeroSection(T::TargetHandle_t     i_target,
+                        EEPROM::EEPROM_ROLE   i_role,
+                        EEPROM::EEPROM_SOURCE i_location,
+                        crc_section_t         i_section)
+{
+    errlHndl_t l_errl = nullptr;
+    uint8_t    l_data[i_section.numbytes] = {0};
+
+    TRACFCOMP( g_trac_spd, "bzeroSection: %.08X addr:%d numbytes:%d",
+                           T::get_huid(i_target),
+                           i_section.start,
+                           i_section.numbytes);
+
+    l_errl = DeviceFW::deviceOp(DeviceFW::WRITE,
+                                i_target,
+                                l_data,
+                                i_section.numbytes,
+                                DEVICE_EEPROM_ADDRESS(i_role,
+                                                      i_section.start,
+                                                      i_location));
+    if (l_errl)
+    {
+        TRACFCOMP( g_trac_spd, "bzeroSection: WRITE ERROR %.08X addr:%d numbytes:%d",
+                               T::get_huid(i_target),
+                               i_section.start,
+                               i_section.numbytes);
+    }
+    return l_errl;
+}
+
+/**
+ * @brief     repair the section CRC
+ * @return    true  - repair success
+ *            false - repair failure
+ */
+bool repairCRCSection(T::TargetHandle_t     i_target,
+                      EEPROM::EEPROM_ROLE   i_role,
+                      EEPROM::EEPROM_SOURCE i_location,
+                      crc_section_t         i_section,
+                      BadCrcRepairType_t    i_repair_type)
+{
+    uint8_t     l_spddata[i_section.numbytes] = {0};
+    errlHndl_t  l_errl = nullptr;
+    bool        l_rc   = false;
+    const char *l_repair_type = (i_repair_type == REPAIR_WRITE_CRC) ? "WRITE_CRC" :
+                                                                      "BZERO";
+    if (i_repair_type == REPAIR_WRITE_CRC)
+    {
+        // write the good CRC
+        l_errl = updateCRC(i_target, i_role, i_location, i_section);
+    }
+    else
+    {
+        // zero all the data in the section, including the CRC
+        l_errl = bzeroSection(i_target, i_role, i_location, i_section);
+    }
+    if (l_errl)
+    {
+        goto ERROR_EXIT;  // repair failed
+    }
+
+    // read the VPD, calculate the CRC values, and save into i_section
+    l_errl = computeCRC(i_target, i_role, i_location, i_section, l_spddata);
+    if (l_errl)
+    {
+        goto ERROR_EXIT;  // repair verify failed
+    }
+
+    // check if the CRC is good
+    if (i_section.crcSPD == i_section.crcActual)
+    {
+        l_rc = true;  // now there is good CRC on this section
+    }
+
+ERROR_EXIT:
+    if (l_errl)
+    {
+        TRACFCOMP( g_trac_spd, "repairCRCSection: ERROR %.08X %s addr:%d",
+                               T::get_huid(i_target),
+                               l_repair_type,
+                               i_section.start);
+        // commit the failed repair attempt
+        l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+        ERRORLOG::errlCommit(l_errl, VPD_COMP_ID);
+    }
+    else
+    {
+        TRACFCOMP( g_trac_spd, "repairCRCSection: %.08X %s SUCCESS addr:%d",
+                               T::get_huid(i_target),
+                               l_repair_type,
+                               i_section.start);
+    }
+    return l_rc;
+}
+
+/**
+ * @brief   Evaluate and/or correct all CRC entries for this DDIMM
+ * @return  error log - if UNRECOVERABLE CRC error
+ *          nullptr   - if no CRC error or RECOVERED CRC error
+ */
+errlHndl_t checkCRC( T::TargetHandle_t           i_target,
+                     enum CRCMODE_t              i_mode,
+                     EEPROM::EEPROM_ROLE         i_role,
+                     EEPROM::EEPROM_SOURCE       i_location,
+                     std::vector<crc_section_t> &o_crc_sections,
+                     bool* const                 o_missing_vpd )
+{
+    errlHndl_t l_errl = nullptr;
+    auto       l_huid = T::get_huid(i_target);
 
     // Skip the CRC check if the data isn't coming from a regular EEPROM
     T::ATTR_EEPROM_VPD_PRIMARY_INFO_type l_eepromVpd;
     if( !i_target->tryGetAttr<T::ATTR_EEPROM_VPD_PRIMARY_INFO>(l_eepromVpd) )
     {
-        TRACFCOMP( g_trac_spd, "Skipping CRC check on %.08X", T::get_huid(i_target) );
+        TRACFCOMP( g_trac_spd, "checkCRC: Skipping CRC check on %.08X", l_huid );
         return nullptr;
     }
-    TRACDCOMP( g_trac_spd, "Start checkCRC on %08X", T::get_huid(i_target) );
+    TRACFCOMP( g_trac_spd, "checkCRC: Start on %08X mode:%d role:%d location:%d",
+               l_huid, i_mode, i_role, i_location );
 
     o_crc_sections.clear();
 
@@ -693,11 +929,11 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
     l_errl = SPD::getMemInfo(i_target, l_memType, l_memMod, l_memHeight);
     if (l_errl)
     {
-        TRACFCOMP( g_trac_spd, "getMemInfo failed on %.08X", T::get_huid(i_target) );
+        TRACFCOMP( g_trac_spd, "checkCRC: getMemInfo ERROR on %.08X", l_huid );
         return l_errl;
     }
 
-    std::vector <crc_section_t> l_sections;
+    std::vector<crc_section_t> l_sections;
 
     l_sections.push_back(crc_section_t(0, 128));       // common to DDR4/DDR5
 
@@ -711,6 +947,7 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
     {
         // DDR5 SPD data that has CRC (per DDIMM spec)
         l_sections.push_back(crc_section_t(512,  128));
+        l_sections.push_back(crc_section_t(640,  384));
         l_sections.push_back(crc_section_t(1024, 512));
         l_sections.push_back(crc_section_t(1536, 512));
         l_sections.push_back(crc_section_t(2048, 512));
@@ -725,87 +962,154 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
         l_sections.push_back(crc_section_t(3456, 128));
     }
 
-    // Remember if we found a miscompare and if we repaired it
-    bool l_foundMiscompare = false;
-    bool l_repairedMiscompare = false;
+    std::vector<uint16_t>    l_failed_sections;
+    ERRORLOG::errlSeverity_t l_log_severity{};
+    bool                     l_found_miscompare = false;
 
-    // Compute/correct CRC for every defined section
+    //--------------------------------------------------------------------------
+    // compute/repair CRC for every defined section
+    //--------------------------------------------------------------------------
     for( auto l_section : l_sections )
     {
         uint8_t l_spddata[l_section.numbytes] = {};
 
-        l_errl = DeviceFW::deviceOp(DeviceFW::READ,
-                                    i_target,
-                                    l_spddata,
-                                    l_section.numbytes,
-                                    DEVICE_EEPROM_ADDRESS(i_role,
-                                                          l_section.start,
-                                                          i_location) );
-        if( l_errl )
+        // read the VPD section and calc the CRC
+        l_errl = computeCRC(i_target, i_role, i_location, l_section, l_spddata);
+        if (l_errl)
         {
-            TRACFCOMP( g_trac_spd,
-                      "Error fetching SPD for CRC verification" );
-
+            TRACFCOMP(g_trac_spd, "checkCRC: Error with computeCRC");
             o_missing_vpd && (*o_missing_vpd = true);
-
             break;
         }
 
-        // Pull the CRC from the last 2 bytes, it is stored little-endian
-        TRACDCOMP( g_trac_spd, "crcSPD=%04X",
-                   ((reinterpret_cast<uint16_t*>(l_spddata))
-                   [(l_section.numbytes-2)/2]) );
-        l_section.crcSPD = htole16((reinterpret_cast<uint16_t*>(l_spddata))
-                                   [(l_section.numbytes-2)/2]);
-        TRACDCOMP( g_trac_spd, "crcSPD=%04X (swap)", l_section.crcSPD );
-        TRACDBIN( g_trac_spd, "SPD Data", l_spddata, l_section.numbytes );
-
-        // Compute the CRC from the current data
-        l_section.crcActual = jedec_Crc16( l_spddata, l_section.numbytes-2 );
-        TRACDCOMP( g_trac_spd, "crcActual=%04X", l_section.crcActual );
-
-        // Take some actions if there is a miscompare
-        if( l_section.crcSPD != l_section.crcActual )
+        //----------------------------------------------------------------------
+        // if CRC miscompare
+        //----------------------------------------------------------------------
+        if( l_section.crcSPD != l_section.crcActual ) // BAD CRC on this section
         {
-            TRACFCOMP( g_trac_spd,
-                   "%s CRC Miscompare found on 0x%08X for range %d, SPD=0x%04X, Computed=0x%04X (loc=%d)",
-                   i_location == EEPROM::CACHE ? "CACHE" : "HW",
-                   T::get_huid(i_target), l_section.start,
-                   l_section.crcSPD, l_section.crcActual,
-                   i_location );
-            TRACFBIN( g_trac_spd, "SPD Data", l_spddata, l_section.numbytes );
+            l_failed_sections.push_back(l_section.start); // save for error log
 
-            l_foundMiscompare = true;
-
-            // Write the new CRC out to the SPD if asked
-            if( (FIX == i_mode) || (CHECK_AND_FIX == i_mode) )
+            //------------------------------------------------------------------
+            // if Special Handling is required for the section End_User
+            //------------------------------------------------------------------
+            if (l_memType       == SPD::DDR5_TYPE &&
+                l_section.start == SPD_DDR5_DDIMM_USER_SECTION_START)
             {
-                TRACFCOMP( g_trac_spd, "Fixing CRC on %08X", T::get_huid(i_target) );
-                l_repairedMiscompare = true;
-
-                // byteswap the data before writing it back
-                uint16_t l_swapped = htole16(l_section.crcActual);
-
-                // Write out the updated value.
-                size_t l_crcBytes = 2;
-                l_errl = DeviceFW::deviceOp( DeviceFW::WRITE,
-                                             i_target,
-                                             &l_swapped,
-                                             l_crcBytes,
-                                             DEVICE_EEPROM_ADDRESS(
-                                                  i_role,
-                                                  l_section.start+l_section.numbytes-2,
-                                                  i_location) );
-                if( l_errl )
+                if (l_section.crcSPD == 0) // CRC is zero - no error, fix the CRC
                 {
-                    // commit the attempt to fix and keep going
-                    //  so that we find all errors
-                    ERRORLOG::errlCommit(l_errl, VPD_COMP_ID );
+                    TRACFCOMP(g_trac_spd,
+                              "checkCRC: (%s) End_User, Ignoring CRC Miscompare found "
+                              "on 0x%08X addr:%d crcSPD:0x%04X crcActual:0x%04X loc:%d",
+                              i_location == EEPROM::CACHE ? "CACHE" : "HW",
+                              l_huid,
+                              l_section.start,
+                              l_section.crcSPD,
+                              l_section.crcActual,
+                              i_location );
+                    l_found_miscompare = true; // create an error log
 
-                    // change the mode to CHECK to force a visible
-                    //  error below since we couldn't actually fix
-                    //  the problem
-                    i_mode = CHECK;
+                    //----------------------------------------------------------
+                    // REPAIR - write good CRC to the section
+                    //----------------------------------------------------------
+                    TRACFCOMP(g_trac_spd, "checkCRC: fix the CRC section on %08X", l_huid);
+
+                    if (repairCRCSection(i_target,
+                                         i_role,
+                                         i_location,
+                                         l_section,
+                                         REPAIR_WRITE_CRC))
+                    {
+                        // this value is cumulative for all sections,
+                        //  so ensure we dont downgrade a more severe crc error
+                        l_log_severity = std::max(l_log_severity,
+                                                  ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                    }
+                    else
+                    {
+                        // repair failed, set severity for error log
+                        l_log_severity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+                    }
+                }
+                else // CRC is bad non-zero - bzero the entire section
+                {
+                    TRACFCOMP(g_trac_spd,
+                              "checkCRC: (%s) End_User, CRC Miscompare found "
+                              "on 0x%08X addr:%d crcSPD:0x%04X crcActual:0x%04X loc:%d",
+                              i_location == EEPROM::CACHE ? "CACHE" : "HW",
+                              l_huid,
+                              l_section.start,
+                              l_section.crcSPD,
+                              l_section.crcActual,
+                              i_location );
+                    l_found_miscompare = true; // create an error log
+
+                    //----------------------------------------------------------
+                    // REPAIR - bzero section
+                    //----------------------------------------------------------
+                    TRACFCOMP(g_trac_spd, "checkCRC: bzero CRC section on %08X", l_huid);
+
+                    if (repairCRCSection(i_target,
+                                         i_role,
+                                         i_location,
+                                         l_section,
+                                         REPAIR_BZERO_SECTION))
+                    {
+                        // this value is cumulative for all sections,
+                        //  so ensure we dont downgrade a more severe crc error
+                        l_log_severity = std::max(l_log_severity,ERRORLOG::ERRL_SEV_RECOVERED);
+                    }
+                    else
+                    {
+                        // repair failed, set severity for error log
+                        l_log_severity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+                    }
+                }
+            }
+            //------------------------------------------------------------------
+            // else bad CRC - normal handling
+            //------------------------------------------------------------------
+            else
+            {
+                TRACFCOMP( g_trac_spd,
+                           "checkCRC: (%s) CRC Miscompare found "
+                           "on 0x%08X addr:%d crcSPD:0x%04X crcActual:0x%04X loc:%d",
+                           i_location == EEPROM::CACHE ? "CACHE" : "HW",
+                           l_huid,
+                           l_section.start,
+                           l_section.crcSPD,
+                           l_section.crcActual,
+                           i_location );
+                l_found_miscompare = true;  // create an error log
+
+                if (FIX == i_mode || CHECK_AND_FIX == i_mode)
+                {
+                    //----------------------------------------------------------
+                    // REPAIR - write good CRC to the section
+                    //----------------------------------------------------------
+                    TRACFCOMP(g_trac_spd, "checkCRC: fix the CRC section on %08X", l_huid);
+
+                    if (repairCRCSection(i_target,
+                                         i_role,
+                                         i_location,
+                                         l_section,
+                                         REPAIR_WRITE_CRC))
+                    {
+                        // this value is cumulative for all sections,
+                        //  so ensure we dont downgrade a more severe crc error
+                        l_log_severity = std::max(l_log_severity,ERRORLOG::ERRL_SEV_RECOVERED);
+                    }
+                    else
+                    {
+                        // repair failed, set severity for error log
+                        l_log_severity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
+                    }
+                }
+                else
+                {
+                    //----------------------------------------------------------
+                    // NO REPAIR - set severity for error log
+                    //----------------------------------------------------------
+                    l_log_severity = ERRORLOG::ERRL_SEV_UNRECOVERABLE;
                 }
             }
         }
@@ -814,20 +1118,12 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
         o_crc_sections.push_back(l_section);
     } // end l_sections for loop
 
-    // Create some errors as requested if we find an error
-    if( l_foundMiscompare )
+    //--------------------------------------------------------------------------
+    // if a CRC Miscompare was Found - create an error log
+    //--------------------------------------------------------------------------
+    if (l_found_miscompare)
     {
-        TRACFCOMP( g_trac_spd, "Found at least 1 miscompare, create an error" );
-        uint16_t l_failedRanges[6] = {};
-        size_t l_next = 0;
-        for( auto l_section : l_sections )
-        {
-            if( l_section.crcSPD != l_section.crcActual )
-            {
-                l_failedRanges[l_next++] = l_section.start;
-            }
-        }
-
+        l_failed_sections.resize(5); // ensure five elements for the log data
         /*@
          * @errortype
          * @severity         ERRORLOG::ERRL_SEV_UNRECOVERABLE
@@ -843,79 +1139,46 @@ errlHndl_t checkCRC( T::TargetHandle_t i_target,
          * @custdesc         There is a problem with the vital product
          *                   data of a DIMM.
          */
-        l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+        l_errl = new ERRORLOG::ErrlEntry(l_log_severity, // severity is set above
                                          VPD::VPD_OCMB_CHECK_CRC,
                                          VPD::VPD_DDIMM_SPD_CRC_MISCOMPARE,
-                                TWO_UINT32_TO_UINT64(T::get_huid(i_target),
-                                    l_failedRanges[0]
-                                    | (l_failedRanges[1] >> 16)),
-                                FOUR_UINT16_TO_UINT64(l_failedRanges[2],
-                                    l_failedRanges[3],
-                                    l_failedRanges[4],
-                                    TWO_UINT8_TO_UINT16(i_role, i_location)) );
-
-        // Default to deconfiguring the part immediately.
-        // This should allow us to mark the target as present, but non-functional
-        HWAS::DeconfigEnum l_deconfig = HWAS::DECONFIG;
-        if( CHECK_AND_FIX == i_mode )
-        {
-            // Since we fixed the problem, do not deconfigure the part
-            l_deconfig = HWAS::NO_DECONFIG;
-        }
-
-        l_errl->addHwCallout(i_target,
-                             HWAS::SRCI_PRIORITY_HIGH,
-                             l_deconfig,
-                             HWAS::GARD_NULL);
+                                         SrcUserData(bits{0,  31}, l_huid,
+                                                     bits{32, 47}, l_failed_sections[0],
+                                                     bits{48, 63}, l_failed_sections[1]),
+                                         SrcUserData(bits{0,  15}, l_failed_sections[2],
+                                                     bits{16, 31}, l_failed_sections[3],
+                                                     bits{32, 47}, l_failed_sections[4],
+                                                     bits{48, 55}, i_role,
+                                                     bits{56, 63}, i_location));
 
         l_errl->collectTrace( "SPD", 1*KILOBYTE );
 
-        // If we're explicitly trying to fix things, only make an info log
-        if( FIX == i_mode )
+        if (l_log_severity == ERRORLOG::ERRL_SEV_UNRECOVERABLE)
         {
-            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            ERRORLOG::errlCommit(l_errl, VPD_COMP_ID );
-        }
-        // Commit the log inline and don't return the error if asked
-        else if( CHECK_AND_FIX == i_mode )
-        {
-            ERRORLOG::errlCommit(l_errl, VPD_COMP_ID );
-        }
-        // else error is returned
-    }
-
-    // If we repaired something check to see if the repair worked
-    if( l_repairedMiscompare )
-    {
-        TRACFCOMP( g_trac_spd, "Rechecking repaired SPD" );
-        // Force a check of the raw hardware
-        std::vector<crc_section_t> vSections;
-        errlHndl_t l_checkErrl = checkCRC( i_target,
-                                           CHECK,
-                                           i_role,
-                                           EEPROM::HARDWARE,
-                                           vSections );
-        if( l_checkErrl )
-        {
-            TRACFCOMP( g_trac_spd, "Recheck of repaired SPD still shows CRC errors" );
-            if( !l_errl )
-            {
-                l_errl = l_checkErrl;
-            }
-            else
-            {
-                l_checkErrl->plid(l_errl->plid());
-                ERRORLOG::errlCommit(l_checkErrl, VPD_COMP_ID );
-            }
+            //------------------------------------------------------------------
+            // NO REPAIR or REPAIR FAILED - deconfig, return the error log
+            //------------------------------------------------------------------
+            l_errl->addHwCallout(i_target,
+                                 HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::DECONFIG, // mark present, but non-functional
+                                 HWAS::GARD_NULL);
         }
         else
         {
-            TRACFCOMP( g_trac_spd, "All errors repaired" );
+            //------------------------------------------------------------------
+            // REPAIR SUCCESS - commit log, no return error log
+            //------------------------------------------------------------------
+            l_errl->addHwCallout(i_target,
+                                 HWAS::SRCI_PRIORITY_HIGH,
+                                 HWAS::NO_DECONFIG,    // fixed, do not deconfig
+                                 HWAS::GARD_NULL);
+            ERRORLOG::errlCommit(l_errl, VPD_COMP_ID);
         }
-    }
+    } //l_found_miscompare
 
-
-    TRACDCOMP( g_trac_spd, "Finish checkCRC on %08X", T::get_huid(i_target) );
+    TRACFCOMP( g_trac_spd, "checkCRC: finish on %08X plid:0x%x",
+                           l_huid,
+                           l_errl ? l_errl->plid() : 0);
     return l_errl;
 }
 
@@ -1029,7 +1292,7 @@ errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target)
         && !tl_parkRecursion ) //avoid infinite recursion
     {
         tl_parkRecursion = true;
-        spdMemType_t l_memType(SPD::MEM_TYPE_INVALID);      
+        spdMemType_t l_memType(SPD::MEM_TYPE_INVALID);
         l_errhdl = OCMB_SPD::getMemType(l_memType, i_target);
         if (l_errhdl)
         {
@@ -1064,9 +1327,9 @@ errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target)
         tl_parkRecursion = false;
     }
 
-#endif //#ifdef CONFIG_SUPPORT_EEPROM_CACHING
     ERROR_EXIT:
 
+#endif //#ifdef CONFIG_SUPPORT_EEPROM_CACHING
     return l_errhdl;
 }
 

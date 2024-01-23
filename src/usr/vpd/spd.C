@@ -59,6 +59,8 @@
 #include <targeting/targplatutil.H>     // assertGetToplevelTarget
 #include <arch/magic.H>
 
+#include <cxxtest/TestInject.H>
+
 // ----------------------------------------------
 // Trace definitions
 // ----------------------------------------------
@@ -82,6 +84,23 @@ using namespace errl_util;
 
 namespace SPD
 {
+/**
+ * @brief    If this keyword requires a CRC update, then update the section CRC
+ * @param[in] i_target  - Target to update the CRC
+ * @param[in] i_keyword - typedef for keyword
+ * @param[in] i_entry   - lookup table for a keyword
+ * @param[in] i_DDRRev  - The DIMM DDR Revision.
+ * @param[in] i_buffer  - keyword data
+ * @param[in] i_buflen  - keyword length
+ * @return   error log, if a failure with read/write of the CRC
+ */
+errlHndl_t checkForCRCUpdate(TARGETING::TargetHandle_t i_target,
+                             VPD::vpdKeyword           i_keyword,
+                             const KeywordData        *i_entry,
+                             uint64_t                  i_DDRRev,
+                             void                     *i_buffer,
+                             size_t                    i_buflen);
+
 // ----------------------------------------------
 // Globals
 // ----------------------------------------------
@@ -1202,7 +1221,6 @@ errlHndl_t spdGetValue(VPD::vpdKeyword       i_keyword,
     return err;
 }
 
-
 // ------------------------------------------------------------------
 // spdWriteValue
 // ------------------------------------------------------------------
@@ -1344,14 +1362,27 @@ errlHndl_t spdWriteValue ( VPD::vpdKeyword i_keyword,
             break;
         }
 
-        TRACSSCOMP( g_trac_spd, "spdWriteValue() spdWriteData g_spdWriteHW=0x%X i_keyword=0x%X io_buflen=0x%X HUID=0x%X",
-            g_spdWriteHW, i_keyword, io_buflen, get_huid(i_target));
+        TRACSSCOMP( g_trac_spd, "spdWriteValue() spdWriteData i_keyword=0x%X "
+                                "io_buflen=0x%X HUID=0x%X",
+                                i_keyword, io_buflen, get_huid(i_target));
         // Write value
         err = spdWriteData( entry->offset,
                             io_buflen,
                             io_buffer,
                             i_target );
 
+        if( err )
+        {
+            break;
+        }
+
+        // If this keyword requires a CRC update, then update the section CRC
+        err = checkForCRCUpdate(i_target,
+                                i_keyword,
+                                entry,
+                                i_DDRRev,
+                                io_buffer,
+                                io_buflen);
         if( err )
         {
             break;

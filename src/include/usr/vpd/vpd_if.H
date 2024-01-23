@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -204,14 +204,20 @@ namespace SPD
 
     // Define a range to compute CRC for
     struct crc_section_t {
-        size_t start; //starting byte to check
-        size_t numbytes; //number of bytes to check plus 2 bytes for CRC itself
-
-        // store CRC values for later logging
-        uint16_t crcSPD;
-        uint16_t crcActual;
+        size_t   start;      // offset of this section in the VPD
+        size_t   numbytes;   // number of bytes in the section, including 2 CRC bytes
+        uint16_t crcSPD;     // existing CRC value, stored in the VPD
+        uint16_t crcActual;  // CRC calculated after the VPD read,
+                             //  this shows the current state of the CRC
         crc_section_t(size_t i_start, size_t i_numbytes) :
                start(i_start), numbytes(i_numbytes), crcSPD(0), crcActual(0) {}
+    };
+
+    enum
+    {
+        SPD_DDR5_DDIMM_USER_SECTION_START    = 640,
+        SPD_DDR5_DDIMM_USER_SECTION_LENGTH   = 384,
+        SPD_DDR5_DDIMM_USER_SECTION_DATA_END = 1021,
     };
 
     /**
@@ -238,6 +244,53 @@ namespace SPD
                          EEPROM::EEPROM_SOURCE i_location,
                          std::vector<crc_section_t> & o_crc_sections,
                          bool* o_missing_vpd = nullptr);
+
+    /**
+     * @brief read the vpd and compute the CRC for a section in this DDIMM
+     * @param[in]     i_target - Target to fetch SPD for
+     * @param[in]     i role   - Describes which EEPROM associated to the
+     *                           target that is being requested to check the CRC on.
+     *                           PRIMARY, BACKUP, etc.
+     * @param[in]     i_location  - Read from cache or hardware
+     * @param[in,out] io_section  - Data representing the section of VPD.
+     *                              [in]  Data used to read the VPD section
+     *                              [out] The CRC read from the end of the VPD,
+     *                                    and the CRC calculated from the VPD read.
+     * @param[out]    o_spd_data  - actual vpd data read from this DDIMM
+     * @return Error log
+     */
+    errlHndl_t computeCRC(TARGETING::TargetHandle_t i_target,
+                          EEPROM::EEPROM_ROLE       i_role,
+                          EEPROM::EEPROM_SOURCE     i_location,
+                          crc_section_t            &io_section,
+                          uint8_t                  *o_spddata);
+
+    /**
+     * @brief write the CRC for a section of vpd in this DDIMM
+     * @param[in]  i_target - Target to write the CRC for
+     * @param[in]  i role   - Describes which EEPROM associated to the
+     *                        target that is being requested to check the CRC on.
+     *                        PRIMARY, BACKUP, etc.
+     * @param[in]  i_location - Read from cache or hardware
+     * @param[in]  i_section  - data representing the section of vpd
+     * @return Error log
+     */
+    errlHndl_t updateCRC(TARGETING::TargetHandle_t i_target,
+                         EEPROM::EEPROM_ROLE       i_role,
+                         EEPROM::EEPROM_SOURCE     i_location,
+                         crc_section_t             i_section);
+
+    /**
+     * @brief Generates a 16 bit CRC in CCITT XModem mode
+     * @param[in]     i_ptr    - array of bytes to calculate CRC over
+     * @param[in]     i_bytes  - number of bytes to calculate CRC
+     * @return CRC calculated from the array
+     *
+     * Reference code taken from JEDEC Standard No. 21-C
+     *  Page 4.1.2.12.3 ?? 44
+     */
+    uint16_t jedec_Crc16(const uint8_t *i_ptr,
+                               size_t   i_bytes);
 
     /**
      * @brief Forcibly write our cached SPD data out to the hardware
