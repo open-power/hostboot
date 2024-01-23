@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1029,7 +1029,21 @@ errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target)
         && !tl_parkRecursion ) //avoid infinite recursion
     {
         tl_parkRecursion = true;
-        constexpr size_t DDIMM_SPD_SAFE_OFFSET = 2048;
+        spdMemType_t l_memType(SPD::MEM_TYPE_INVALID);      
+        l_errhdl = OCMB_SPD::getMemType(l_memType, i_target);
+        if (l_errhdl)
+        {
+            tl_parkRecursion = false;
+            goto ERROR_EXIT;
+        }
+
+        // Use different offsets based on type
+        size_t DDIMM_SPD_SAFE_OFFSET = 2048; //DDR4
+        if( SPD::DDR5_TYPE == l_memType )
+        {
+            DDIMM_SPD_SAFE_OFFSET = 3200;
+        }
+
         uint8_t l_byte = 0;
         size_t l_numBytes = 1;
         l_errhdl = DeviceFW::deviceOp(DeviceFW::READ,
@@ -1046,10 +1060,12 @@ errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target)
                       TARGETING::get_huid(i_target));
             l_errhdl->collectTrace( "SPD", 1*KILOBYTE );
         }
+
         tl_parkRecursion = false;
     }
 
 #endif //#ifdef CONFIG_SUPPORT_EEPROM_CACHING
+    ERROR_EXIT:
 
     return l_errhdl;
 }

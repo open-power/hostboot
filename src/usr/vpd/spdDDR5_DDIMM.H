@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -98,7 +98,7 @@ const KeywordData ddr5DDIMMData[] =
     { IBM_11S_SN,                       0x1aa,  0x0c,   0x00,   0x00, false, false, ALL },
     { IBM_11S_CC,                       0x1b6,  0x04,   0x00,   0x00, false, false, ALL },
     { EXPLORER_FW_VERSION,              0x3c0,  0x40,   0x00,   0x00, false, true,  ALL },
-    { SAFE_PARK_ZONE,                   0x800,  0x01,   0x00,   0x00, false, false, ALL },
+    { SAFE_PARK_ZONE,                   0xC80,  0x01,   0x00,   0x00, false, false, ALL },
     { DDIMM_MODULE_HEIGHT,              0xe6,   0x01,   0xFF,   0x00, false, false, ALL },
     // Module Specific fields supported on DDR4/DDR5
     { ENTIRE_SPD_WITHOUT_EFD,           0x00,   0x280,  0x00,   0x00, false, false, ALL },
