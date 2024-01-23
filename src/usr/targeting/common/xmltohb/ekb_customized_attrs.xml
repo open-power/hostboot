@@ -673,6 +673,12 @@
     </attribute>
 
     <attribute>
+          <!-- Set dynamically inside the SBE -->
+          <id>ATTR_SBE_SECURE_BOOT_MODE</id>
+          <no_export/>
+    </attribute>
+
+    <attribute>
           <!-- This is set dynamically based on the boot processor -->
           <id>ATTR_PROC_SBE_MASTER_CHIP</id>
           <writeable/>
