@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2023
+# Contributors Listed Below - COPYRIGHT 2014,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -117,7 +117,7 @@ if [ "$CHIP" == "ODYSSEY" ]; then
 fi
 
 # Use the cached HB prime images wherever possible
-export HB_FAST_PRIME=1
+#export HB_FAST_PRIME=1
 
 #export HOSTBOOT_DEBUG=1    #-- Ensure printkd / tracd is compiled in.
 

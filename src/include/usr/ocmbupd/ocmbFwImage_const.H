@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,6 +141,9 @@ enum compression_type_t : uint64_t
 /* @brief Storage for SHA3-512 hashes. */
 using ocmbfw_hash_t = uint8_t[64];
 
+/* @brief Storage for version string */
+using vsn_string_t = uint8_t[256];
+
 /* @brief A structure describing a single firmware image within the
  * OCMBFW PNOR partition.
  * If this structure changes, pkgOcmbFw_ext.py must be updated.
@@ -158,6 +161,7 @@ struct ocmbfw_ext_image_info
     ocmbfw_hash_t measured_hash; // Hash of the expected measurements that OCMB
                                  // will write into measurement registers for
                                  // secureboot validation.
+    vsn_string_t version_string; // Human-readable version string.
     uint64_t image_offset; // byte offset from the V2 PNOR section header to image contents.
     uint64_t image_size; // Size of image contents in bytes
 } PACKED;

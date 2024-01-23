@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2023
+# Contributors Listed Below - COPYRIGHT 2019,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -399,6 +399,8 @@ ifeq (${BUILD_OCMBFW_IMAGE},1)
 	cpp "-DUNPKGD_EXP_FW_IMG=\"${UNPKGD_OCMBFW_IMG}\"" \
 	    "-DUNPKGD_ODY_BLDR_IMG=\"${SBE_DIR}/simics/sbe/odyssey_standalone/images/gen/final/boot.pak\"" \
 	    "-DUNPKGD_ODY_RT_IMG=\"${SBE_DIR}/simics/sbe/odyssey_standalone/images/gen/final/rt.pak\"" \
+	    "-DODY_FW_VSN_STRING=\"standalone\"" \
+	    "-DEXP_FW_VSN_STRING=\"standalone\"" \
 	    ${BUILDPNOR}/ocmbfw-layout.json.template >ocmbfw-layout.json
 
 # Package ocmbfw image

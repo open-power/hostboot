@@ -6,6 +6,7 @@
 // Preprocessor definitions for this file:
 //
 //   UNPKGD_EXP_FW_IMG          Quoted absolute path to the Explorer fw image.
+//   EXP_FW_VSN_STRING          Human-readable version string for Explorer fw image.
 //
 {
     "version": 1,
@@ -18,7 +19,8 @@
             "image_path": UNPKGD_EXP_FW_IMG,
             "compression": "none",
             "image_hash": "sha512",
-            "unhashed_header_size": 640
+            "unhashed_header_size": 640,
+            "vsn_string": EXP_FW_VSN_STRING
         }
     ]
 }

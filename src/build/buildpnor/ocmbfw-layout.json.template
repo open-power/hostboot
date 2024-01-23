@@ -7,7 +7,9 @@
 //
 //   UNPKGD_ODY_BLDR_IMG        Quoted absolute path to the Odyssey bootloader fw PAK file.
 //   UNPKGD_ODY_RT_IMG          Quoted absolute path to the Odyssey runtime fw PAK file.
+//   ODY_FW_VSN_STRING          Human-readable version string for Odyssey firmware image.
 //   UNPKGD_EXP_FW_IMG          Quoted absolute path to the Explorer fw image.
+//   EXP_FW_VSN_STRING          Human-readable version string for Explorer firmware image.
 //
 {
     "version": 1,
@@ -20,7 +22,8 @@
             "image_path": UNPKGD_ODY_BLDR_IMG,
             "pakfile_hash_path": "boot/image.hash",
             "measured_hash_path": "boot/measured.hash",
-            "compression": "none"
+            "compression": "none",
+            "vsn_string": ODY_FW_VSN_STRING
         },
         {
             "ocmb_type": "odyssey",
@@ -30,7 +33,8 @@
             "image_path": UNPKGD_ODY_RT_IMG,
             "pakfile_hash_path": "rt/image.hash",
             "measured_hash_path": "rt/measured.hash",
-            "compression": "none"
+            "compression": "none",
+            "vsn_string": ODY_FW_VSN_STRING
         },
         {
             "ocmb_type": "explorer",
@@ -40,7 +44,8 @@
             "image_path": UNPKGD_EXP_FW_IMG,
             "compression": "none",
             "image_hash": "sha512",
-            "unhashed_header_size": 640
+            "unhashed_header_size": 640,
+            "vsn_string": EXP_FW_VSN_STRING
         }
     ]
 }

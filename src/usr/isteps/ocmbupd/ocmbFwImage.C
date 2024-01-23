@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -647,8 +647,8 @@ errlHndl_t ocmbFwValidateImage(const uint64_t i_imageStart,
             o_imageInfo.imagePtr = reinterpret_cast<const uint8_t*>(ext_header) + imageinfo->image_offset;
             o_imageInfo.imageSize = imageinfo->image_size;
             o_imageInfo.imageSHA512HashPtr = imageinfo->image_hash;
-            o_imageInfo.fwVersionStrPtr = reinterpret_cast<const uint8_t*>("http://www.ibm.com");
-            o_imageInfo.fwVersionStrSize = strlen(reinterpret_cast<const char*>(o_imageInfo.fwVersionStrPtr));
+            o_imageInfo.fwVersionStrPtr = imageinfo->version_string;
+            o_imageInfo.fwVersionStrSize = strlen(reinterpret_cast<const char*>(imageinfo->version_string));
 
             TRACFCOMP(g_trac_ocmbupd,
                       "ocmbFwValidateImage: Found Explorer firmware image: Pointer=%p, size=%d",
