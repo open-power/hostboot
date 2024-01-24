@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2023
+# Contributors Listed Below - COPYRIGHT 2011,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -107,9 +107,6 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     if [ -z "${HB_USE_ODYSSEY}" ]; then
         echo "Using DDR4/Explorer DDIMMs"
     else
-        # FIXME JIRA: PFHB-477 copy in customized DDR5 SPD for Odyssey.
-        cp /gsa/ausgsa/home/i/s/ismirno/public/debug/odyssey/DDR5_new.bin ${STANDALONE}/simics
-
         echo "Using DDR5/Odyssey DDIMMs"
         START_SIMICS_CMD+=" dimm_type=ody"
         # Odyssey params
