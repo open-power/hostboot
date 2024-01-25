@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #include <secureboot/settings.H>
 #include <console/consoleif.H>
 #include <kernel/console.H>
+#include <kernel/bltohbdatamgr.H>
 
 // SECUREBOOT : General driver traces
 #include "../common/securetrace.H"
@@ -67,12 +68,12 @@ namespace SECUREBOOT
                             static_cast<uint64_t>(ProcSecurity::SabBit)));
 
         auto l_min_secure_version = getMinimumSecureVersion();
+        auto l_sb_signing_mode = g_BlToHbDataManager.getSecurebootSigningMode();
 
-        SB_INF("getEnabled() state:%i, (minimum secure version=0x%.02X)",
-               iv_enabled,
-               l_min_secure_version);
-        printk("SECUREBOOT::enabled() state:%i (minimum secure version=0x%.02X)\n",
-               iv_enabled, l_min_secure_version);
+        SB_INF("getEnabled() state:%i, (minimum secure version=0x%.02X secureboot signing mode=0x%.02X)",
+               iv_enabled, l_min_secure_version, l_sb_signing_mode);
+        printk("SECUREBOOT::enabled() state:%i (minimum secure version=0x%.02X secureboot signing mode=0x%.02X)\n",
+               iv_enabled, l_min_secure_version, l_sb_signing_mode);
 
         // Set SECURITY_MODE based on SAB.
         // If SAB is 0, then request SBE to disable security for other processors;
@@ -89,11 +90,28 @@ namespace SECUREBOOT
 
         // Report if secure boot is disabled
         #ifdef CONFIG_SECUREBOOT
+        // String to hold version representing secureboot signing mode
+        char l_sbsm_string[10] = {};
+        switch (l_sb_signing_mode)
+        {
+            case 0x0: // V1
+                strcpy(l_sbsm_string,"V1");
+                break;
+            case 0x1: // V2
+                strcpy(l_sbsm_string,"V2");
+                break;
+            default:
+                strcpy(l_sbsm_string,"Undefined");
+                break;
+        }
+
         if (!iv_enabled)
         {
             #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "Booting in non-secure mode (minimum secure version=0x%.02X)",
-                      l_min_secure_version);
+            CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME,
+                "Booting in non-secure mode (minimum secure version=0x%.02X)"
+                " sb signing mode is %s (0x%.02X)",
+                l_min_secure_version, l_sbsm_string, l_sb_signing_mode);
             #endif
 
             uint64_t cbsValue = 0;
@@ -122,8 +140,10 @@ namespace SECUREBOOT
         else
         {
             #ifdef CONFIG_CONSOLE
-            CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME, "Booting in secure mode (minimum secure version=0x%.02X)",
-                      l_min_secure_version);
+            CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME,
+                "Booting in secure mode (minimum secure version=0x%.02X)"
+                " sb signing mode is %s (0x%.02X)",
+                l_min_secure_version, l_sbsm_string, l_sb_signing_mode);
             #endif
         }
         #endif

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,6 +138,13 @@ class BlToHbDataManager
          * @return uint8_t     min_secure_version
          */
         const uint8_t getMinimumSecureVersion() const;
+
+        /*
+         * @brief Returns internal secureboot signing mode value
+         *
+         * @return uint8_t     sb_signing_mode
+         */
+        const uint8_t getSecurebootSigningMode() const;
 
         /*
          * @brief Returns Measurement Seeprom version

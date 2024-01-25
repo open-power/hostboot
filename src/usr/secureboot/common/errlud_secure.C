@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -145,7 +145,7 @@ UdSecuritySettings::UdSecuritySettings()
 {
     // Set up Ud instance variables
     iv_CompId = SECURE_COMP_ID;
-    iv_Version = SECURE_UDT_VERSION_3;
+    iv_Version = SECURE_UDT_VERSION_4;
     iv_SubSection = SECURE_UDT_SECURITY_SETTINGS;
 
     char * l_pBuf = reinterpret_cast<char *>(reallocUsrBuf(
@@ -166,11 +166,16 @@ UdSecuritySettings::UdSecuritySettings()
     // The following is appended onto VERSION_2 for VERSION_3:
     // 4 bytes  : Measurement Seeprom Version
 
+    //***** Version SECURE_UDT_VERSION_4 Memory Layout *****
+    // The following is appended onto VERSION_3 for VERSION_4:
+    // 1 byte   : Secureboot Signing Mode
+
     l_pDetailsLayout->secAccessBit = 0xFF;
     l_pDetailsLayout->secOverride = 0xFF;
     l_pDetailsLayout->allowAttrOverride = 0xFF;
     l_pDetailsLayout->minSecureVersion = 0xFF;
     l_pDetailsLayout->measurementSeepromVersion = 0xFFFFFFFF;
+    l_pDetailsLayout->securebootSigningMode = 0xFF;
 
 #ifndef __HOSTBOOT_RUNTIME
     // Only check BlToHbData if it is valid, otherwise fields defaulted to 0xFF
@@ -182,6 +187,8 @@ UdSecuritySettings::UdSecuritySettings()
         l_pDetailsLayout->minSecureVersion = g_BlToHbDataManager.getMinimumSecureVersion();
         l_pDetailsLayout->measurementSeepromVersion =
             g_BlToHbDataManager.getMeasurementSeepromVersion();
+        l_pDetailsLayout->securebootSigningMode =
+            g_BlToHbDataManager.getSecurebootSigningMode();
     }
 #endif
 

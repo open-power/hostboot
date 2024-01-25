@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -178,6 +178,7 @@ class UdSecuritySettings : public ERRORLOG::ErrlUserDetails
             uint8_t allowAttrOverride;
             uint8_t minSecureVersion;
             uint32_t measurementSeepromVersion;
+            uint8_t securebootSigningMode;
         };
 
 };

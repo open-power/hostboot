@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@
 #include <errl/errlmanager.H>
 #include <arch/pirformat.H>
 #include <algorithm>
+#include <kernel/bltohbdatamgr.H>
 
 #ifdef CONFIG_PLDM
 #include <pldm/extended/pdr_manager.H>
@@ -514,6 +515,9 @@ void* host_gard( void *io_pArgs )
     node_tgt->setAttr<ATTR_SECURE_VERSION_SEEPROM>(SECUREBOOT::getMinimumSecureVersion());
     // Set the same BMC-related attribute if it's present
     l_pTopLevel->trySetAttr<ATTR_SECURE_VERSION_NUM>(SECUREBOOT::getMinimumSecureVersion());
+
+    // Set Secureboot Signing Mode Attribute
+    node_tgt->setAttr<ATTR_SB_SIGNING_MODE>(g_BlToHbDataManager.getSecurebootSigningMode());
 
 #ifdef CONFIG_PLDM
     // Notify the BMC via PLDM BIOS attribute hb_effective_secure_version.

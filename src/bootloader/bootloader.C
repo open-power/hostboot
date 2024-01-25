@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -171,6 +171,9 @@ namespace Bootloader{
 
             // Set Bootloader preceived size of structure
             g_blData->blToHbData.sizeOfStructure = sizeof(BlToHbData);
+
+            // Get Secureboot Signing Mode
+            g_blData->blToHbData.sb_signing_mode = l_blConfigData->sbSettings.sbMode;
         }
     }
 

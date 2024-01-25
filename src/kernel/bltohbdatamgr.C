@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,6 +64,8 @@ void BlToHbDataManager::print() const
                 iv_data.hwKeysHashSize);
         printkd("-- Minimum FW Secure Version  = 0x%02X\n",
                 iv_data.min_secure_version);
+        printkd("-- Secureboot Signing Mode  = 0x%02X\n",
+                iv_data.sb_signing_mode);
         printkd("-- Measurement Seeprom Version  = 0x%08X\n",
                 iv_data.measurement_seeprom_version);
         printkd("-- HBB header Addr = 0x%lX Size = 0x%lX\n", getHbbHeaderAddr(),
@@ -128,6 +130,7 @@ void BlToHbDataManager::initValid (const Bootloader::BlToHbData& i_data)
     iv_data.allowAttrOverrides = i_data.allowAttrOverrides;
     iv_data.secBackdoorBit = i_data.secBackdoorBit;
     iv_data.min_secure_version = i_data.min_secure_version;
+    iv_data.sb_signing_mode = i_data.sb_signing_mode;
     if(iv_data.version >= Bootloader::BLTOHB_SB_SETTING)
     {
         iv_data.measurement_seeprom_version = i_data.measurement_seeprom_version;
@@ -315,6 +318,16 @@ const uint8_t BlToHbDataManager::getMinimumSecureVersion() const
         crit_assert(iv_dataValid);
     }
     return iv_data.min_secure_version;
+}
+
+const uint8_t BlToHbDataManager::getSecurebootSigningMode() const
+{
+    if(!iv_dataValid)
+    {
+        printk("E> BlToHbDataManager is invalid, cannot access Secureboot Signing Mode\n");
+        crit_assert(iv_dataValid);
+    }
+    return iv_data.sb_signing_mode;
 }
 
 const uint32_t BlToHbDataManager::getMeasurementSeepromVersion() const

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2021
+# Contributors Listed Below - COPYRIGHT 2017,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -219,7 +219,7 @@ sub main
     my $blToHbAddrStr = sprintf("0x%08X", $blToHbAddr);
     # blToHbSize is the size of the bootloader -> hostboot data section (in bytes)
     # @DEP_ON_BL_TO_HB_SIZE all of the tags need to be kept in sync
-    my $blToHbSize = 2424;
+    my $blToHbSize = 2425;
     my $blToHb = ::readData($blToHbAddr,$blToHbSize);
     my $blToHbData = formatData($blToHb);
     $dataOffset += ::alignUp($blToHbSize, 16);

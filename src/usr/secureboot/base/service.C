@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -734,12 +734,14 @@ errlHndl_t traceSecuritySettings(bool i_doConsoleTrace)
     // Trace Settings from SBE-to-HBBL
     SB_INF("traceSecuritySettings(): SBE-to-HBBL Security Settings: "
            "secAccessBit=0x%.2X, secOverride=0x%.2X, allowAttrOverride=0%.2X, "
-           "minSecureVersion=0x%.2X, measurementSeepromVersion=0x%.8X",
+           "minSecureVersion=0x%.2X, measurementSeepromVersion=0x%.8X, "
+           "securebootSigningMode=0x%.2X",
            g_BlToHbDataManager.getSecureAccessBit(),
            g_BlToHbDataManager.getSecurityOverride(),
            g_BlToHbDataManager.getAllowAttrOverrides(),
            g_BlToHbDataManager.getMinimumSecureVersion(),
-           g_BlToHbDataManager.getMeasurementSeepromVersion());
+           g_BlToHbDataManager.getMeasurementSeepromVersion(),
+           g_BlToHbDataManager.getSecurebootSigningMode());
 
     // Trace Security Regisgers
     err = getAllSecurityRegisters(registerList);

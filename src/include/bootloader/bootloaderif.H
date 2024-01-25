@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -138,7 +138,8 @@ struct BlToHbData
                    sizeOfStructure(0), secBackdoorBit(0),
                    cacheSizeMb(0), numKeyAddrPair(0),
                    min_secure_version(0), tdpSource(TDP_BIT_UNSET),
-                   measurement_seeprom_version(0), tpmRc(0)
+                   measurement_seeprom_version(0), tpmRc(0),
+                   sb_signing_mode(0)
     {
         memset(keyAddrStashData, 0, sizeof(keyAddrStashData));
     }
@@ -189,6 +190,8 @@ struct BlToHbData
     uint32_t measurement_seeprom_version;
     // The RC of the error that happened during TPM ops
     uint32_t tpmRc;
+    // Secureboot signing mode
+    uint8_t sb_signing_mode;
 
 } __attribute__((packed));
 
