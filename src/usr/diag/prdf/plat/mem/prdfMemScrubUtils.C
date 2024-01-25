@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -369,6 +369,7 @@ uint32_t __odyCheckEccFirs( ExtensibleChip * i_chip, const uint8_t& i_port,
         if ( mcbistfir->IsBitSet(6) ) o_eccAttns |= MAINT_HARD_NCE_ETE;
         if ( mcbistfir->IsBitSet(7) ) o_eccAttns |= MAINT_SOFT_NCE_ETE;
         if ( mcbistfir->IsBitSet(8) ) o_eccAttns |= MAINT_INT_NCE_ETE;
+        if ( mcbistfir->IsBitSet(9) ) o_eccAttns |= MAINT_RCE_ETE;
 
     } while(0);
 
