@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,8 +43,11 @@
 #include <targeting/common/targetservice.H>
 #include <targeting/common/attributeTank.H>
 #include <chips/common/utils/chipids.H>
+#include <sbeio/sbe_retry_handler.H>       // OdysseySbeRetryHandler
+#include <sbeio/sbeioif.H>                 // OdysseySbeRetryHandler
 
 using namespace TARGETING;
+using namespace SBEIO;                     // OdysseySbeRetryHandler
 
 namespace HTMGT
 {
@@ -809,21 +812,20 @@ namespace HTMGT
                 // Call hostboot function to perform hreset on memory buffer.
                 if (l_occMemoryReset == true)
                 {
-                    errlHndl_t l_errl = nullptr;
                     l_recovery_status = OCC_MEMORY_BUFFER_RECOVERY_SUCCESS;
                     l_HwpCalled = true;
 
-                    // @TODO JIRA: PFES-27 Implement call to reset
-                    TMGT_ERR("!!!!!!!!!!!! CALL HWP NOW !!!!!!!!!!!!!!!!");
+                    // Call Hostboot to handle SBE OCMB hreset
+                    TMGT_INF("elogProcessActions: call SBE hreset OCMB chip_id(0x%X)",
+                            l_target->getAttr<ATTR_CHIP_ID>());
+                    OdySbeRetryHandler l_SBEobj = OdySbeRetryHandler(l_target);
+                    l_HwpCalled = l_SBEobj.odyssey_recovery_handler();
 
-                    if (l_errl != nullptr)
+                    if (l_HwpCalled == false)
                     {
+                        TMGT_ERR("elogProcessActions: False return from Log from OCMB reset!");
                         l_recovery_status = OCC_MEMORY_BUFFER_RECOVERY_FAILED;
-                        TMGT_ERR("elogProcessActions: Error Log from reset! (rc=0x%04X)",
-                                    l_errl->reasonCode());
-                        l_errl->collectTrace("HTMGT");
-                        ERRORLOG::errlCommit(l_errl, HTMGT_COMP_ID);
-                    }// end if reset returned an error log.
+                    }// end if reset returned a false.
                 }// end if need to call reset.
 
                 // if in this loop we success OR

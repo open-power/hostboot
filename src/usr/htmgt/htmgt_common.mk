@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2023
+# Contributors Listed Below - COPYRIGHT 2014,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -32,6 +32,11 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/include/libpldm
+
+# Needed to get Hostboot OdySbeRetryHandler.odyssey_recovery_handler compiled
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/sbe
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/sbeio/
 
 # common objects between hostboot and hbrt
 OBJS += htmgt.o
