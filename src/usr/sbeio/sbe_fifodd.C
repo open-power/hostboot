@@ -664,7 +664,9 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
 
         }
 
-        if(l_fifoBuffer.msgContainsFFDC())
+        // Only parse FFDC from the fifo buffer if the message contains FFDC and this is not a get FFDC chip-op request,
+        // unless the chip-op request failed.
+        if ( l_fifoBuffer.msgContainsFFDC() && (!l_getSbeFfdcReq || errl))
         {
             SbeFFDCParser l_ffdc_parser;
             l_ffdc_parser.parseFFDCData(const_cast<void*>(l_fifoBuffer.getFFDCPtr()));
