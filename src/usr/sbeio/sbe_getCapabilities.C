@@ -712,21 +712,20 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
 
 #endif //#ifdef __HOSTBOOT_RUNTIME
 
-bool sbeHasFifoCapability(Target* const i_sbe, uint8_t i_commandClass, uint32_t i_capability)
+bool sbeHasFifoCapability(Target* const i_sbe, uint8_t i_commandClass, uint8_t i_capability)
 {
     bool l_hasCapability = false;
 
     if(i_sbe->getAttr<ATTR_SBE_NUM_CAPABILITIES>() != 0)
     {
-        uint32_t l_commandClass32 = i_commandClass << 24;
+        uint32_t l_capabilityBitMask = (i_commandClass << 24) | (1 << i_capability);
         auto l_sbeFifoCapabilities = i_sbe->getAttrAsStdArr<ATTR_SBE_FIFO_CAPABILITIES>();
         for(auto l_sbeFifoCapability : l_sbeFifoCapabilities)
         {
             // The format of each of the capability entries is 0xAABBBBBB:
             // AA is the command class of the chip op
             // BBBBBB is the bit mask of the capability in question
-            if( ((l_sbeFifoCapability & l_commandClass32) == l_commandClass32) &&
-                ((l_sbeFifoCapability & i_capability) != 0) )
+            if((l_sbeFifoCapability & l_capabilityBitMask) == l_capabilityBitMask)
             {
                 l_hasCapability = true;
                 break;
@@ -739,7 +738,7 @@ bool sbeHasFifoCapability(Target* const i_sbe, uint8_t i_commandClass, uint32_t 
 
 bool sbeSpiFlashCheckSupported(Target* const i_sbe)
 {
-    return sbeHasFifoCapability(i_sbe, SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE, SbeFifo::SBE_FIFO_CAP_SCRUB_MEM_DEVICE);
+    return sbeHasFifoCapability(i_sbe, SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE, SbeFifo::SBE_FIFO_CMD_SCRUB_MEM_DEVICE);
 }
 
 } //end namespace SBEIO
