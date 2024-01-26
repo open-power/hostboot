@@ -287,7 +287,10 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
     size_t l_readSize = sizeof(uint64_t);
     uint64_t l_regValue = 0;
 
-    if(!UTIL::isOdysseyChip(i_ocmb))
+    // No need to perform security checks on non-Odysseys or if the FW
+    // level on the Odyssey hasn't been updated.
+    if(!UTIL::isOdysseyChip(i_ocmb) ||
+       i_ocmb->getAttr<ATTR_OCMB_FW_STATE>() != OCMB_FW_STATE_UP_TO_DATE)
     {
         goto EXIT;
     }
