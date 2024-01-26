@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -597,7 +597,7 @@ void* call_host_secureboot_lockdown (void *io_pArgs)
             // required in some failure recovery cases.
             // A separate check will ensure there are not both Explorers and
             // Odysseys in the system.
-            if (getOcmbChipTypesInSystem() == UTIL_EXPLORER_FOUND)
+            if (getOcmbChipTypesInSystem(UTIL_FILTER_FUNCTIONAL) & UTIL_EXPLORER_FOUND)
             {
                 const bool overrideForceDisable = false;// No need to force security
                 const bool overrideSULsetup = true;     // Flag for SUL stage OCMB lock,
