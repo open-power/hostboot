@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,11 @@ fapi2::ReturnCode pm_set_frequency(
 fapi2::ReturnCode pm_set_wofbase_frequency(
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target);
 
+
+fapi2::ReturnCode pm_set_pau_frequency(
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+    fapi2::voltageBucketData_t &i_poundV_dat);
 ///////////////////////////////////////////////////////////
 ////////    p10_pm_set_system_freq
 ///////////////////////////////////////////////////////////
@@ -240,6 +245,9 @@ fapi2::ReturnCode pm_set_frequency(
                 //Read #V data from each proc
                 FAPI_TRY(p10_pm_get_poundv_bucket(l_proc_target, l_poundV_data));
             }
+
+            //Set PAU frequency from #V
+            FAPI_TRY(pm_set_pau_frequency(i_sys_target,l_proc_target, l_poundV_data));
 
 #ifndef FIPSODE
             if ((l_poundV_data.static_rails.modelDataFlag & 0x1) == 0x1)
@@ -593,6 +601,57 @@ fapi_try_exit:
     FAPI_INF("pm_set_frequency <<<<<<<");
     return fapi2::current_err;
 }
+
+////////////////////////////////////////////////////////////
+////////  pm_set_pau_frequency
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode pm_set_pau_frequency(
+   const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>& i_sys_target,
+   const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+    fapi2::voltageBucketData_t &i_poundV_data)
+{
+    fapi2::ATTR_FREQ_PAU_VPD_MHZ_Type l_sys_pau_freq_mhz;
+    do
+    {
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_VPD_MHZ,
+                    i_sys_target, l_sys_pau_freq_mhz));
+
+        if ((i_poundV_data.static_rails.modelDataFlag & PDV_MODEL_DATA_PNEXT)
+                == PDV_MODEL_DATA_PNEXT)
+        {
+            //Set the pau frequency from vpd, if attr value is 0
+            if (!l_sys_pau_freq_mhz && i_poundV_data.other_info.PAUFreq)
+            {
+                l_sys_pau_freq_mhz = i_poundV_data.other_info.PAUFreq;
+            }
+            //Make sure attribute value and vpd freq matches
+            else if ( l_sys_pau_freq_mhz != i_poundV_data.other_info.PAUFreq)
+            {
+                FAPI_ASSERT(false,
+                        fapi2::PSTATE_NODE_PAU_FREQ_MISMATCH()
+                        .set_CHIP_TARGET(i_proc_target)
+                        .set_PAU_FREQ(l_sys_pau_freq_mhz)
+                        .set_VPD_PAU_FREQ(i_poundV_data.other_info.PAUFreq),
+                        "The PAU frequencies need to be compatible");
+
+            }
+        }
+
+        if (!l_sys_pau_freq_mhz)
+        {
+            //Default value
+            l_sys_pau_freq_mhz = 2250;
+        }
+
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_PAU_VPD_MHZ,
+                    i_sys_target, l_sys_pau_freq_mhz));
+    } while(0);
+fapi_try_exit:
+    FAPI_INF("pm_set_pau_frequency <<<<<<<");
+    return fapi2::current_err;
+}
+
 
 ////////////////////////////////////////////////////////////
 ////////  pm_set_wofbase_frequency

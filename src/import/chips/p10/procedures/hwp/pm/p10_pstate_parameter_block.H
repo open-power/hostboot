@@ -82,13 +82,6 @@ enum PPB_ERROR
     PPB_FAIL
 };
 
-// Masks for #V Model Data (aka Flags) field
-static const uint8_t PDV_MODEL_DATA_PNEXT           = 0x80;
-static const uint8_t PDV_MODEL_DATA_ISC             = 0x40;
-static const uint8_t PDV_MODEL_DATA_VDN_CORRECT     = 0x10;
-static const uint8_t PDV_MODEL_DATA_WOF_READY       = 0x02;
-static const uint8_t PDV_MODEL_DATA_MODELED         = 0x01;
-
 typedef uint8_t Pstate;
 #define PSTATE_LT_PSTATE_MIN 0x00778a03
 #define PSTATE_GT_PSTATE_MAX 0x00778a04

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -26,6 +26,8 @@ PROCEDURE=p10_check_freq_compat
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/procedures/hwp/lib)
 PPB_INCLUDES+=$(PROJECT_ROOT)/chips/p10/procedures/hwp/lib
 PPB_INCLUDES+=$(PROJECT_ROOT)/chips/p10/procedures/hwp/pm
+lib${PROCEDURE}_DEPLIBS += p10_pm_utils
+lib${PROCEDURE}_DEPLIBS += p10_pm_get_poundv_bucket
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PPB_INCLUDES))
 $(call ADD_MODULE_INCDIR,$(PROCEDURE),$(PROJECT_ROOT)/chips/p10/common/pmlib/include/registers)
 $(call BUILD_PROCEDURE)
