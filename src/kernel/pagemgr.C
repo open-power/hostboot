@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -186,7 +186,7 @@ void* PageManager::allocatePage(size_t n, bool userspace)
 
             // Didn't successfully allocate, so yield in hopes that memory
             // will eventually free up (ex. VMM flushes).
-            constexpr size_t MAX_ATTEMPTS = 10000;
+            constexpr size_t MAX_ATTEMPTS = 100000;
             if (NULL == page)
             {
                 l_attempts++;
