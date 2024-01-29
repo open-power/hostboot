@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -163,7 +163,6 @@
       (DIMM) Data (DQ) Pin to the Module Package Data (DQ) Pinout
     </description>
     <platInit/>
-    <mrwHide/>
     <default>
         <!-- Default to a 1:1 layout to match the DDIMM specification -->
         0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,
