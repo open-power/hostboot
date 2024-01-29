@@ -750,6 +750,44 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <rc>RC_SYSTEM_PAU_FREQ_MISMATCH</rc>
+    <description>The PAU frequency for this part does not match
+    the values in across nodes in the system.This indicates the parts
+    from different sorts may be plugged into the machine.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>PAU_FREQ</ffdc>
+    <ffdc>VPD_PAU_FREQ</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_PSTATE_NODE_PAU_FREQ_MISMATCH</rc>
+    <description>The PAU frequency for this part does not match the others
+    in the same node. This indicates the parts from different sorts may be plugged
+    into the machine.
+    </description>
+    <ffdc>CHIP_TARGET</ffdc>
+    <ffdc>PAU_FREQ</ffdc>
+    <ffdc>VPD_PAU_FREQ</ffdc>
+    <callout>
+      <target>CHIP_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
     <rc>RC_SET_SYS_FREQ_ORIGINAL_CORRUPTION</rc>
     <description>The retaining attributes that hold the original values of the
     core floor and the core ceiling frequencies are bad.  They should have

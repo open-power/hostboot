@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,13 @@
 #define __PM_UTILS_H__
 
 #include <p10_pm_get_poundv_bucket.H>
+// Masks for #V Model Data (aka Flags) field
+static const uint8_t PDV_MODEL_DATA_PNEXT           = 0x80;
+static const uint8_t PDV_MODEL_DATA_ISC             = 0x40;
+static const uint8_t PDV_MODEL_DATA_VDN_CORRECT     = 0x10;
+static const uint8_t PDV_MODEL_DATA_WOF_READY       = 0x02;
+static const uint8_t PDV_MODEL_DATA_MODELED         = 0x01;
+
 
 // Byte-reverse a 16-bit integer if on a little-endian machine
 uint16_t revle16(const uint16_t i_x);
