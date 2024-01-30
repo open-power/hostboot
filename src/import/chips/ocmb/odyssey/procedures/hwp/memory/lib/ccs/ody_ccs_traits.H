@@ -168,6 +168,9 @@ class ccsTraits<mss::mc_type::ODYSSEY>
 
             // Due to extra deselect at beginning and end of arr, max depth is decremented by 2
             MAX_INST_DEPTH = CCS_ARRAY_LEN - 2,
+
+            NUM_DRAM_X4 = 20,
+            NUM_DRAM_X8 = 10,
         };
 
         ///

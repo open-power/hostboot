@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,6 +132,95 @@ const uint64_t mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
 
 namespace mcbist
 {
+
+///
+/// @brief Processes the first AADR/AAER into a beat pair
+/// @param[in] i_aadr the AADR to process
+/// @param[in] i_aaer the AAER to process
+/// @param[in,out] io_beat_pair the beat pair to update
+///
+void process_first_data_compare_trap(const fapi2::buffer<uint64_t>& i_aadr,
+                                     const fapi2::buffer<uint64_t>& i_aaer,
+                                     mss::beat_pair& io_beat_pair)
+{
+    constexpr uint64_t BYTE4_IDX = 4;
+    constexpr uint64_t BYTE3_IDX = 3;
+    constexpr uint64_t BYTE2_IDX = 2;
+    constexpr uint64_t BYTE1_IDX = 1;
+    constexpr uint64_t BYTE0_IDX = 0;
+    constexpr uint64_t BEAT0 = 0;
+    constexpr uint64_t BEAT1 = 1;
+    constexpr uint64_t AAER_START = 0;
+    constexpr uint64_t BYTE0_POS = 0 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE1_POS = 1 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE2_POS = 2 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE3_POS = 3 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE4_POS = 4 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE5_POS = 5 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE6_POS = 6 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE7_POS = 7 * BITS_PER_BYTE;
+    i_aadr.extractToRight<BYTE0_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE3_IDX][BEAT1]);
+    i_aadr.extractToRight<BYTE1_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE3_IDX][BEAT0]);
+    i_aadr.extractToRight<BYTE2_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE2_IDX][BEAT1]);
+    i_aadr.extractToRight<BYTE3_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE2_IDX][BEAT0]);
+    i_aadr.extractToRight<BYTE4_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE1_IDX][BEAT1]);
+    i_aadr.extractToRight<BYTE5_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE1_IDX][BEAT0]);
+    i_aadr.extractToRight<BYTE6_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE0_IDX][BEAT1]);
+    i_aadr.extractToRight<BYTE7_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE0_IDX][BEAT0]);
+
+
+    i_aaer.extractToRight<AAER_START, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE4_IDX][BEAT0]);
+}
+
+///
+/// @brief Processes the second AADR/AAER into a beat pair
+/// @param[in] i_aadr the AADR to process
+/// @param[in] i_aaer the AAER to process
+/// @param[in,out] io_beat_pair the beat pair to update
+///
+void process_second_data_compare_trap(const fapi2::buffer<uint64_t>& i_aadr,
+                                      const fapi2::buffer<uint64_t>& i_aaer,
+                                      mss::beat_pair& io_beat_pair)
+{
+    constexpr uint64_t BYTE4_IDX = 4;
+    constexpr uint64_t BYTE9_IDX = 9;
+    constexpr uint64_t BYTE8_IDX = 8;
+    constexpr uint64_t BYTE7_IDX = 7;
+    constexpr uint64_t BYTE6_IDX = 6;
+    constexpr uint64_t BEAT0 = 0;
+    constexpr uint64_t BEAT1 = 1;
+    constexpr uint64_t AAER_START = 0;
+    constexpr uint64_t BYTE0_POS = 0 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE1_POS = 1 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE2_POS = 2 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE3_POS = 3 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE4_POS = 4 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE5_POS = 5 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE6_POS = 6 * BITS_PER_BYTE;
+    constexpr uint64_t BYTE7_POS = 7 * BITS_PER_BYTE;
+    i_aadr.extractToRight<BYTE0_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE9_IDX][BEAT1]);
+    i_aadr.extractToRight<BYTE1_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE9_IDX][BEAT0]);
+    i_aadr.extractToRight<BYTE2_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE8_IDX][BEAT1]);
+    i_aadr.extractToRight<BYTE3_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE8_IDX][BEAT0]);
+    i_aadr.extractToRight<BYTE4_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE7_IDX][BEAT1]);
+    i_aadr.extractToRight<BYTE5_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE7_IDX][BEAT0]);
+    i_aadr.extractToRight<BYTE6_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE6_IDX][BEAT1]);
+    i_aadr.extractToRight<BYTE7_POS, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE6_IDX][BEAT0]);
+
+
+    i_aaer.extractToRight<AAER_START, BITS_PER_BYTE>(io_beat_pair.iv_data[BYTE4_IDX][BEAT1]);
+}
+
+///
+/// @brief Reads in a single beat pair of compare data from a raw data trap
+/// @param[in] i_trap the data trap to process
+/// @param[in,out] io_beat_pair the beat pair processed from the data trap
+///
+void process_data_compare_beat_pair(const raw_data_trap& i_trap, beat_pair& io_beat_pair)
+{
+    process_first_data_compare_trap(i_trap.iv_aadr_first, i_trap.iv_aaer_first, io_beat_pair);
+    process_second_data_compare_trap(i_trap.iv_aadr_second, i_trap.iv_aaer_second, io_beat_pair);
+}
 
 ///
 /// @brief Enable a specific port for this test - maint address mode - ODYSSEY specialization

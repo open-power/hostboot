@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2023
+# Contributors Listed Below - COPYRIGHT 2013,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -101,6 +101,7 @@ prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/ccs/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/mcbist/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/
@@ -251,6 +252,7 @@ prd_obj_no_sim += ecc_traits_odyssey.o
 prd_obj_no_sim += ody_unmask.o
 prd_obj_no_sim += ody_ccs_des_insert_workaround.o
 prd_obj_no_sim += ody_ccs.o
+prd_obj_no_sim += ody_ccs_read_processing.o
 prd_obj_no_sim += ody_fir.o
 prd_obj_no_sim += ody_dqs_track_utils.o
 

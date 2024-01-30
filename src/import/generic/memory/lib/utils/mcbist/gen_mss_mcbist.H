@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,60 @@
 
 namespace mss
 {
+
+///
+/// @brief Contains all of the trap data for a beat pair
+/// @note contains all bytes on the port for two beats
+///
+struct beat_pair
+{
+    enum
+    {
+        NUM_BEATS = 2,
+        // Note: this could be MC dependent but using our maximum we have seen since p8
+        MAX_BYTES_PER_PORT = 10,
+    };
+    uint8_t iv_data[MAX_BYTES_PER_PORT][NUM_BEATS];
+
+    ///
+    /// @brief Constructor
+    ///
+    beat_pair()
+    {
+        std::fill_n(&iv_data[0][0], sizeof(iv_data), 0);
+    }
+
+    ///
+    /// @brief Default destructor
+    ///
+    ~beat_pair() = default;
+};
+
+///
+/// @brief Assembles the data to be printed
+/// @param[in] i_beat_pair the beat pair to process
+/// @param[in] i_beat the beat in the beat pair to process
+/// @return returns a pair of the data to be printed
+///
+inline mss::pair<uint64_t, uint16_t> assemble_print_data(const beat_pair& i_pair, const uint8_t i_beat)
+{
+    fapi2::buffer<uint64_t> l_first;
+    fapi2::buffer<uint16_t> l_second;
+
+    l_first.insertFromRight<BIT_POS_FOR_BYTE0, BITS_PER_BYTE>(i_pair.iv_data[0][i_beat]);
+    l_first.insertFromRight<BIT_POS_FOR_BYTE1, BITS_PER_BYTE>(i_pair.iv_data[1][i_beat]);
+    l_first.insertFromRight<BIT_POS_FOR_BYTE2, BITS_PER_BYTE>(i_pair.iv_data[2][i_beat]);
+    l_first.insertFromRight<BIT_POS_FOR_BYTE3, BITS_PER_BYTE>(i_pair.iv_data[3][i_beat]);
+    l_first.insertFromRight<BIT_POS_FOR_BYTE4, BITS_PER_BYTE>(i_pair.iv_data[4][i_beat]);
+    l_first.insertFromRight<BIT_POS_FOR_BYTE5, BITS_PER_BYTE>(i_pair.iv_data[5][i_beat]);
+    l_first.insertFromRight<BIT_POS_FOR_BYTE6, BITS_PER_BYTE>(i_pair.iv_data[6][i_beat]);
+    l_first.insertFromRight<BIT_POS_FOR_BYTE7, BITS_PER_BYTE>(i_pair.iv_data[7][i_beat]);
+
+    l_second.insertFromRight<BIT_POS_FOR_BYTE0, BITS_PER_BYTE>(i_pair.iv_data[8][i_beat]);
+    l_second.insertFromRight<BIT_POS_FOR_BYTE1, BITS_PER_BYTE>(i_pair.iv_data[9][i_beat]);
+
+    return mss::pair<uint64_t, uint16_t>(l_first, l_second);
+}
 
 ///
 /// @brief Gets the attribute for freq

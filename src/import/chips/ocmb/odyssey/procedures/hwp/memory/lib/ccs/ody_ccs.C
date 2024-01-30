@@ -41,6 +41,7 @@
 #include <generic/memory/lib/ccs/ccs.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <lib/ccs/ody_ccs.H>
+#include <lib/ccs/ody_ccs_read_processing.H>
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/find.H>
 #include <ody_scom_ody_odc.H>
@@ -768,6 +769,68 @@ fapi2::ReturnCode get_rank_config<mss::mc_type::ODYSSEY>(const fapi2::Target<fap
     // Odyssey only supports dual direct
     o_rank_config = rank_configuration::DUAL_DIRECT;
     return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Turns off data inversion before MR access - Odyssey specialization
+/// @param[in] i_target the port target on which to operate
+/// @param[out] o_orig_recr to restore the RECR register's data inversion bits to original state
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful, fapi2 error code otherwise
+///
+template<>
+fapi2::ReturnCode disable_recr_data_inversion<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    fapi2::buffer<uint64_t>& o_orig_recr)
+
+{
+    fapi2::buffer<uint64_t> l_data;
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
+    FAPI_TRY(fapi2::getScom(l_ocmb, scomt::ody::ODC_WDF_REGS_RECR, o_orig_recr));
+    l_data = o_orig_recr;
+    l_data.clearBit<scomt::ody::ODC_WDF_REGS_RECR_MBSECCQ_DATA_INVERSION, scomt::ody::ODC_WDF_REGS_RECR_MBSECCQ_DATA_INVERSION_LEN>();
+    FAPI_TRY(fapi2::putScom(l_ocmb, scomt::ody::ODC_WDF_REGS_RECR, l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Process the MR data out of the trace array - Odyssey specialization
+/// @param[in] i_target the port target on which to operate
+/// @param[out] o_data array of mr values per dram
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful, fapi2 error code otherwise
+///
+template<>
+fapi2::ReturnCode mr_data_process<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    uint8_t (&o_data)[ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4])
+{
+    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+
+    mss::pair<uint64_t, uint16_t> l_processed_data[mss::ody::CCS_BEAT_DATA_SIZE];
+
+    // Read and process the CCS data out of the buffers
+    FAPI_TRY(mss::ccs::prepare_ody_ccs_beat_data(i_target, l_processed_data));
+    {
+        uint8_t l_dram_width[mss::ody::MAX_PORT_PER_OCMB] = {};
+        int l_num_dram = 0;
+
+        FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, i_target, l_dram_width) );
+        l_num_dram = (l_dram_width[0] == 4) ? TT::NUM_DRAM_X4 : TT::NUM_DRAM_X8;
+
+        for (uint8_t l_dq_index = 0; l_dq_index < l_num_dram; l_dq_index++)
+        {
+            uint8_t l_op_code = 0;
+            FAPI_TRY(mss::ccs::get_op_code(l_dq_index, l_dram_width[0], l_processed_data, l_op_code ));
+            FAPI_DBG(GENTARGTIDFORMAT " DRAM%d OP=0x%02X", GENTARGTID(i_target), l_dq_index, l_op_code);
+            o_data[l_dq_index] = l_op_code;
+        }
+
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 namespace workarounds

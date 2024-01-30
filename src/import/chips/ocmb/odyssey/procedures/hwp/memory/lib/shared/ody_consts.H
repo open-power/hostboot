@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,6 +116,9 @@ enum sizes
     // SPD max possible value for decode into csr's pulled from look-up tables in DDR5 SPD spec rev. 1.21
     SPD_TX_SLEW_DECODE_MAX = 0x0B,
     SPD_ATXCMD_DECODE_MAX = 0x0F,
+
+    // number of elements of CCS beat data from the trace buffers
+    CCS_BEAT_DATA_SIZE = 16,
 };
 
 ///

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -298,6 +298,32 @@ inline fapi2::ReturnCode write_mode( const fapi2::Target<T>& i_target, const fap
 {
     return mss::putScom(i_target, TT::MODEQ_REG, i_buffer);
 }
+
+///
+/// @brief Turns off data inversion before MR access
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @param[in] i_target the port target on which to operate
+/// @param[out] o_orig_recr to restore the RECR register's data inversion bits to original state
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful, fapi2 error code otherwise
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode disable_recr_data_inversion(
+    const fapi2::Target<T>& i_target,
+    fapi2::buffer<uint64_t>& o_orig_recr);
+
+///
+/// @brief Process the MR data out of the trace array
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the port target on which to operate
+/// @param[out] o_data array of mr values per dram
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful, fapi2 error code otherwise
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
+fapi2::ReturnCode mr_data_process(
+    const fapi2::Target<T>& i_target,
+    uint8_t (&o_data)[TT::NUM_DRAM_X4]);
 
 ///
 /// @brief config the NTTM

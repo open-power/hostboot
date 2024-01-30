@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,6 +53,47 @@ namespace mss
 
 namespace mcbist
 {
+
+///
+/// @brief Custom structure for holding data trap information
+/// @note Traps the raw scom data. Utilizing a structure to clean up the code
+///
+struct raw_data_trap
+{
+    // Each raw data trap has data split up across the AADR and AAER buffers
+    // Each raw data trap takes two reads of each of those registers to get the full data trap read
+    fapi2::buffer<uint64_t> iv_aadr_first;
+    fapi2::buffer<uint64_t> iv_aaer_first;
+    fapi2::buffer<uint64_t> iv_aadr_second;
+    fapi2::buffer<uint64_t> iv_aaer_second;
+};
+
+///
+/// @brief Processes the first AADR/AAER into a beat pair
+/// @param[in] i_aadr the AADR to process
+/// @param[in] i_aaer the AAER to process
+/// @param[in,out] io_beat_pair the beat pair to update
+///
+void process_first_data_compare_trap(const fapi2::buffer<uint64_t>& i_aadr,
+                                     const fapi2::buffer<uint64_t>& i_aaer,
+                                     beat_pair& io_beat_pair);
+
+///
+/// @brief Processes the second AADR/AAER into a beat pair
+/// @param[in] i_aadr the AADR to process
+/// @param[in] i_aaer the AAER to process
+/// @param[in,out] io_beat_pair the beat pair to update
+///
+void process_second_data_compare_trap(const fapi2::buffer<uint64_t>& i_aadr,
+                                      const fapi2::buffer<uint64_t>& i_aaer,
+                                      beat_pair& io_beat_pair);
+
+///
+/// @brief Reads in a single beat pair of compare data from a raw data trap
+/// @param[in] i_trap the data trap to process
+/// @param[in,out] io_beat_pair the beat pair processed from the data trap
+///
+void process_data_compare_beat_pair(const raw_data_trap& i_trap, beat_pair& io_beat_pair);
 
 ///
 /// @brief Get the address of mrank 0 buffer
