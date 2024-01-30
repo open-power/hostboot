@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -146,11 +146,13 @@ enum sensor_timeout
 /// @param[in] i_ocmb the OCMB target
 /// @param[in] i_reg_addr the register address upon which to operate
 /// @param[in] i_data register data to write. Note: this is not a pass-by-reference as it could be updated internally
+/// @param[in] i_sensor_pos the sensor position index
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
                                   const uint64_t i_reg_addr,
-                                  fapi2::buffer<uint64_t> i_data);
+                                  fapi2::buffer<uint64_t> i_data,
+                                  const uint8_t i_sensor_pos);
 
 ///
 /// @brief Class containing information for reading thermal sensors
@@ -179,10 +181,12 @@ class thermal_sensor
         /// @brief Function that reads and processes the thermal information
         /// @param[in] i_ocmb the OCMB target
         /// @param[in] i_i2c the i2c responder target
+        /// @param[in] i_sensor_pos the sensor position index
         /// @return FAPI2_RC_SUCCESS iff okay
         ///
         fapi2::ReturnCode read(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb,
-                               const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& i_i2c) const;
+                               const fapi2::Target<fapi2::TARGET_TYPE_TEMP_SENSOR>& i_i2c,
+                               const uint8_t i_sensor_pos) const;
 
         ///
         /// @brief Helper function to conduct the i2c reads

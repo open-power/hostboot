@@ -257,6 +257,22 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_SENSOR_READ_FIRST_FAIL</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            To track the error produced for the first i2c sensor read fail
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            FALSE = 0,
+            TRUE  = 1
+        </enum>
+        <default>FALSE</default>
+        <writeable/>
+        <array>5</array>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_DRAMINIT_VERBOSITY</id>
         <targetType>TARGET_TYPE_MEM_PORT</targetType>
         <description>
