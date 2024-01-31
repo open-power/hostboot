@@ -57,6 +57,9 @@
 #include <ocmbupd/ody_upd_fsm.H>
 
 #include <secureboot/ody_secureboot.H>
+#include <secureboot/service.H>
+#include <arch/magic.H>
+#include <util/misc.H>
 
 using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
@@ -152,21 +155,36 @@ void* call_update_omi_firmware (void *io_pArgs)
         }
     }
 
-#if 0 // TODO JIRA: PFHB-455 Currently the secureboot settings check doesn't pass
-      // because we don't program any security settings into SPPE.
 #ifdef CONFIG_SECUREBOOT
-    errlHndl_t l_securebootErrl = nullptr;
-    for(auto l_ocmb : l_ocmbTargetList)
+
+    bool l_doOdySecurebootVerification = SECUREBOOT::enabled();
+
+    // Do not perform the Odyssey secureboot verification in simics unless Ody
+    // secureboot is explicitly enabled.
+    if( Util::isSimicsRunning() )
     {
-        l_securebootErrl = odySecurebootVerification(l_ocmb);
-        if(l_securebootErrl)
+        if( !magic_check_feature(MAGIC_FEATURE__ODYSECURITY) )
         {
-            TRACISTEP(ERR_MRK"call_update_omi_firmware: Secureboot verification for OCMB 0x%x failed",
-                      get_huid(l_ocmb));
-            captureError(l_securebootErrl, l_StepError, SECURE_COMP_ID);
+            TRACISTEP("Skipping Ody security verification in Simics");
+            l_doOdySecurebootVerification = false;
         }
     }
-#endif
+
+    if(l_doOdySecurebootVerification)
+    {
+
+        errlHndl_t l_securebootErrl = nullptr;
+        for(auto l_ocmb : l_ocmbTargetList)
+        {
+            l_securebootErrl = odySecurebootVerification(l_ocmb);
+            if(l_securebootErrl)
+            {
+                TRACISTEP(ERR_MRK"call_update_omi_firmware: Secureboot verification for OCMB 0x%x failed",
+                          get_huid(l_ocmb));
+                captureError(l_securebootErrl, l_StepError, SECURE_COMP_ID);
+            }
+        }
+    }
 #endif
 
     TRACISTEP("call_update_omi_firmware exit");

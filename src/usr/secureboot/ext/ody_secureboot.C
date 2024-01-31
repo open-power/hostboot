@@ -282,6 +282,7 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
 
     ody_secureboot_config_reg_t l_ocmbSBConfigReg;
     size_t l_readSize = sizeof(uint64_t);
+    uint64_t l_regValue = 0;
 
     // No need to perform security checks on non-Odysseys or if the FW
     // level on the Odyssey hasn't been updated.
@@ -297,7 +298,7 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
         // of the Odyssey match those settings we programmed into OCMB using
         // ATTR_OCMB_BOOT_FLAGS.
         l_errl = deviceRead(i_ocmb,
-                            &(l_ocmbSBConfigReg.value),
+                            &l_regValue,
                             l_readSize,
                             DEVICE_SCOM_ADDRESS(l_controlReg));
         if(l_errl)
@@ -306,6 +307,8 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
                    l_controlReg, get_huid(i_ocmb));
             goto EXIT;
         }
+
+        l_ocmbSBConfigReg.value = (l_regValue>>32); // The actual reg data lives in the top 32 bits
 
         l_errl = verifyOdySecuritySettings(i_ocmb, l_ocmbSBConfigReg);
         if(l_errl)
@@ -391,30 +394,37 @@ EXIT:
 
     if(!l_errl)
     {
-        // Extend the secure register settings into the PCR3 of the TPM (only one set
-        // of settings needs to be extended, since they need to match).
-        for(auto l_controlReg = SROM_SB_CONTROL_REG; l_controlReg <= BL_SB_CONTROL_REG; ++l_controlReg)
+        // In a non-error case, all secureboot settings will match between the OCMBs,
+        // so we can just extend one set of settings to the TPM.
+        static bool l_extendOnce = true;
+
+        if(l_extendOnce)
         {
-            char l_pcrExtendMessage[100];
-            if(l_controlReg == SROM_SB_CONTROL_REG)
+            // Extend the secure register settings into the PCR3 of the TPM
+            for(auto l_controlReg = SROM_SB_CONTROL_REG; l_controlReg <= BL_SB_CONTROL_REG; ++l_controlReg)
             {
-                snprintf(l_pcrExtendMessage, 100, "Odyssey SROM SB\n");
+                char l_pcrExtendMessage[100];
+                if(l_controlReg == SROM_SB_CONTROL_REG)
+                {
+                    snprintf(l_pcrExtendMessage, 100, "Odyssey SROM SB\n");
+                }
+                else if(l_controlReg == BL_SB_CONTROL_REG)
+                {
+                    snprintf(l_pcrExtendMessage, 100, "Odyssey BOOT SB\n");
+                }
+                l_errl = pcrExtend(PCR_3,
+                                   EV_PLATFORM_CONFIG_FLAGS,
+                                   reinterpret_cast<const uint8_t*>(&(l_ocmbSBConfigReg.value)),
+                                   sizeof(l_ocmbSBConfigReg.value),
+                                   reinterpret_cast<const uint8_t*>(l_pcrExtendMessage),
+                                   strlen(l_pcrExtendMessage));
+                if(l_errl)
+                {
+                    SB_ERR("verifyOdyMeasurementRegs: Could not extend SPPE bootloader measurement");
+                    break;
+                }
             }
-            else if(l_controlReg == BL_SB_CONTROL_REG)
-            {
-                snprintf(l_pcrExtendMessage, 100, "Odyssey BOOT SB\n");
-            }
-            l_errl = pcrExtend(PCR_3,
-                            EV_PLATFORM_CONFIG_FLAGS,
-                            reinterpret_cast<const uint8_t*>(&(l_ocmbSBConfigReg.value)),
-                            sizeof(l_ocmbSBConfigReg.value),
-                            reinterpret_cast<const uint8_t*>(l_pcrExtendMessage),
-                            strlen(l_pcrExtendMessage));
-            if(l_errl)
-            {
-                SB_ERR("verifyOdyMeasurementRegs: Could not extend SPPE bootloader measurement");
-                // Fall through, the error will be caught below
-            }
+            l_extendOnce = false;
         }
     }
 
