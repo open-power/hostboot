@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,14 +230,17 @@ enum maxTargetsPerProc : uint16_t
     INVALID_FAPI_POS     = INVALID_TARGET_COUNT,
 };
 
+// @brief used when translating the Odyssey SBE target instance into a fapi pos.
 enum maxTargetsPerOcmb : uint16_t
 {
     MAX_MDS_CTLR_PER_OCMB           = 1,
     MAX_PMIC_PER_OCMB               = 4,
     MAX_POWER_IC_PER_OCMB           = 4,
     MAX_GENERIC_I2C_DEVICE_PER_OCMB = 4,
-    MAX_TEMP_SENSOR_PER_OCMB        = 3,
+    MAX_TEMP_SENSOR_PER_OCMB        = 4, // Space for 4, Odyssey only using 3
     MAX_MEM_PORT_PER_OCMB           = 2,
+    MAX_PERV_PER_OCMB               = 9, // Only using instance 1,8 for Odyssey
+    MAX_DIMM_PER_OCMB               = 4, // Hardware supports 4, but Odyssey only using even numbered
 };
 
 

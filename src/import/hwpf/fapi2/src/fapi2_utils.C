@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,7 +93,15 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
         {
             case  TARGET_TYPE_DIMM:
                 {
-                    max_targets = MAX_DIMM_PER_PROC;
+                    if ((i_sbeChipType & TARGET_TYPE_PROC_CHIP) != 0)
+                    {
+                        max_targets = MAX_DIMM_PER_PROC;
+                    }
+                    else
+                    {
+                        max_targets = MAX_DIMM_PER_OCMB;
+                    }
+
                     break;
                 }
 
@@ -153,7 +161,15 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
 
             case  TARGET_TYPE_PERV:
                 {
-                    max_targets = MAX_PERV_PER_PROC;
+                    if ((i_sbeChipType & TARGET_TYPE_PROC_CHIP) != 0)
+                    {
+                        max_targets = MAX_PERV_PER_PROC;
+                    }
+                    else
+                    {
+                        max_targets = MAX_PERV_PER_OCMB;
+                    }
+
                     break;
                 }
 
@@ -322,10 +338,19 @@ uint16_t convertSbeTargInstanceToFapiPos(fapi2::TargetType i_targType,
         else
         {
             fapi_pos = max_targets * i_sbeChipFapiPos + (i_instance % max_targets);
+
+            if (((i_sbeChipType & TARGET_TYPE_OCMB_CHIP) != 0) && (i_targType == TARGET_TYPE_PERV))
+            {
+                // There is a special case with Odyssey SBEs where there is an agreement between Hostboot and Cronus to
+                // add an arbitrary 0x8000 to FAPI_POS for PERV targs. This differentiates Odyssey SBE PERV targets from
+                // P10 SBE PERV targets.
+                fapi_pos |= 0x8000;
+            }
+
         }
     }
 
-    FAPI_INF("Returning FAPI_POS= %d for target type 0x%.16lX", fapi_pos, i_targType);
+    FAPI_INF("Returning FAPI_POS= 0x%X for target type 0x%.16lX", fapi_pos, i_targType);
 
     return fapi_pos;
 }
