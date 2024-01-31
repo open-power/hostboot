@@ -64,8 +64,8 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     fi
 
     SBE_DIR=${PROJECT_ROOT}/src/build/tools/extern/sbe
-
-    ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
+ 
+    ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odysseylab_debug_files_tools/
     if [[ "${HB_FAST_PRIME}" ]]
     then
         # Pick up pre-built images
@@ -74,9 +74,21 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         # Check if the cached images exist; rebuild the SBE submodule if they don't
         if [ -d ${ODYSSEY_SBE_IMAGES} ]; then
             echo "\n***Using default pre-built SBE Odyssey images from ${ODYSSEY_SBE_IMAGES}\n"
-            ODY_SBE_DEBUG_DIR=${ODYSSEY_SBE_IMAGES}/odyssey_debug_files_tools/
+            ODY_SBE_DEBUG_DIR=${ODYSSEY_SBE_IMAGES}/odysseylab_debug_files_tools/
         else
             unset ODYSSEY_SBE_IMAGES
+        fi
+    fi
+
+    # Temporary hack to get CI to pass until we have the correct images cached
+    if [ ! -d ${ODY_SBE_DEBUG_DIR} ]; then
+        echo "No odysseylab found, using non-lab"
+        ODY_SBE_DEBUG_DIR=${ODYSSEY_SBE_IMAGES}/odyssey_debug_files_tools/
+        if [ ! -d ${ODY_SBE_DEBUG_DIR} ]; then
+            ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
+            if [ ! -d ${ODY_SBE_DEBUG_DIR} ]; then
+                ODY_SBE_DEBUG_DIR=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/latest/odyssey_debug_files_tools/
+            fi
         fi
     fi
 

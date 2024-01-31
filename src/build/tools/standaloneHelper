@@ -166,7 +166,7 @@ generate_sbe_odyssey_images()
     fi
 
     if [ -z $ODYSSEY_DEBUG_TAR_IMG ]; then
-        ODYSSEY_DEBUG_TAR_IMG=${SBE_DIR}/images/odyssey/odyssey_sbe_debug_DD1.tar.gz
+        ODYSSEY_DEBUG_TAR_IMG=${SBE_DIR}/images/odysseylab/odysseylab_sbe_debug_DD1.tar.gz
     fi
 
     # If any of the Odyssey images don't exist, re-generate all of them

@@ -624,7 +624,7 @@ hb_startsimics()
         # Odyssey params/images
         SBE_ODY_DIR=${PROJECT_ROOT}/src/build/tools/extern/sbe/
 
-        ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
+        ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odysseylab_debug_files_tools/
 
         # Pick up cached Odyssey images unless we were told to rebuild them locally
         if [[ "${HB_FAST_PRIME}" ]] && [[ -z "$HB_FORCE_REBUILD_ODY" ]];
@@ -633,9 +633,23 @@ hb_startsimics()
             export SBE_SUBREPO_TOP_COMMIT=$(git submodule status $SBE_ODY_DIR | awk '{print $1}' | sed 's/^-//')
             export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/$SBE_SUBREPO_TOP_COMMIT/
             if [ -d ${ODYSSEY_SBE_IMAGES} ]; then
-                ODY_SBE_DEBUG_DIR=${ODYSSEY_SBE_IMAGES}/odyssey_debug_files_tools/
+                ODY_SBE_DEBUG_DIR=${ODYSSEY_SBE_IMAGES}/odysseylab_debug_files_tools/
             else
                 unset ODYSSEY_SBE_IMAGES
+            fi
+        fi
+        
+        # Temporary hack until we cache the correct images
+        if [ ! -d ${ODY_SBE_DEBUG_DIR} ];
+        then
+            echo "No odysseylab found, using non-lab"
+            ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
+            if [ ! -d ${ODY_SBE_DEBUG_DIR} ];
+            then
+                ODY_SBE_DEBUG_DIR=${ODYSSEY_SBE_IMAGES}/odyssey_debug_files_tools/
+                if [ ! -d ${ODY_SBE_DEBUG_DIR} ]; then
+                    ODY_SBE_DEBUG_DIR=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/latest/odyssey_debug_files_tools/
+                fi
             fi
         fi
 
