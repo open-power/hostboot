@@ -46,6 +46,7 @@ SCOMT_ODY_USE_ODC_TLXT_REGS_TLXCFG1
 SCOMT_ODY_USE_ODC_TLXT_REGS_TLXCFG2
 SCOMT_ODY_USE_ODC_TLXT_REGS_TLXCFG3
 SCOMT_ODY_USE_ODC_SRQ_MBA_ROQ0Q
+SCOMT_ODY_USE_ODC_MMIO_MXMETA
 
 ///
 /// @brief Setup OMI DL
@@ -74,8 +75,11 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     ODC_TLXT_REGS_TLXCFG2_t l_tlxcfg2;
     ODC_TLXT_REGS_TLXCFG3_t l_tlxcfg3;
     ODC_SRQ_MBA_ROQ0Q_t l_srq_mba_roq0q;
+    ODC_MMIO_MXMETA_t l_mmio_mxmeta;
 
     bool l_mfg_mode = false;
+
+    fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_Type l_half_dimm_mode;
 
     FAPI_TRY(ody_io::get_functional_margin_mfg_mode(l_mfg_mode));
 
@@ -187,6 +191,20 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     FAPI_TRY(l_ppe_firs.mc_omi_fir_set(i_target));
     FAPI_TRY(l_ppe_firs.tlx_fir_set(i_target));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, i_target, l_half_dimm_mode));
+    FAPI_TRY(l_mmio_mxmeta.getScom(i_target));
+
+    if (l_half_dimm_mode == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM)
+    {
+        l_mmio_mxmeta.set_MXMETA_XMETA_MODE(1);
+    }
+    else
+    {
+        l_mmio_mxmeta.set_MXMETA_XMETA_MODE(0);
+    }
+
+    FAPI_TRY(l_mmio_mxmeta.putScom(i_target));
 
 fapi_try_exit:
     FAPI_DBG("End ody_omi_setup");
