@@ -119,6 +119,7 @@ namespace SECUREBOOT
         RC_ODY_BOOT_MEASUREMENT_FAIL       = SECURE_COMP_ID | 0x1C,
         RC_ODY_RT_MEASUREMENT_FAIL         = SECURE_COMP_ID | 0x1D,
         RC_ODY_BAD_MSV                     = SECURE_COMP_ID | 0x1E,
+        RC_ODY_BAD_IMAGE                   = SECURE_COMP_ID | 0x1F,
 
         // Use 0x20-0x3F range for Node Communications
         RC_NCDD_HW_ERROR_FOUND             = SECURE_COMP_ID | 0x20,

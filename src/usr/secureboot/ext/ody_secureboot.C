@@ -41,17 +41,16 @@ using namespace ocmbupd;
 using namespace TRUSTEDBOOT;
 
 errlHndl_t verifyOdySecuritySettings(Target* i_ocmb,
-                                     const ody_secureboot_config_reg_t& i_odySecurebootReg,
-                                     const ocmb_boot_flags_t& i_ocmbBootFlags)
+                                     const ody_secureboot_config_reg_t& i_odySecurebootReg)
 {
     errlHndl_t l_errl = nullptr;
     if(i_odySecurebootReg.fields.securebootEnforcement != SECUREBOOT::enabled() ||
-       i_odySecurebootReg.fields.ECDSAVerificationEnable != i_ocmbBootFlags.fields.enableECDSASignature ||
-       i_odySecurebootReg.fields.dilithiumVerificationEnable != i_ocmbBootFlags.fields.enableDilithiumSignature ||
-       i_odySecurebootReg.fields.ECIDVerificationEnable != i_ocmbBootFlags.fields.enableECIDVerification ||
-       i_odySecurebootReg.fields.hwKeyHashVerificationEnable != i_ocmbBootFlags.fields.enableHWKeyHashVerification||
+       i_odySecurebootReg.fields.ECDSAVerificationEnable != 1 ||
+       i_odySecurebootReg.fields.dilithiumVerificationEnable != 1 ||
+       i_odySecurebootReg.fields.ECIDVerificationEnable != 0 ||
+       i_odySecurebootReg.fields.hwKeyHashVerificationEnable != 1 ||
        i_odySecurebootReg.fields.secureModeEnable != SECUREBOOT::enabled() ||
-       i_odySecurebootReg.fields.enableHashCalculation != i_ocmbBootFlags.fields.enableFileHashCalculation ||
+       i_odySecurebootReg.fields.enableHashCalculation != 1 ||
        i_odySecurebootReg.fields.bootComplete != 1)
     {
         SB_ERR("verifyOdySecuritySettings: Verification failed for OCMB 0x%x", get_huid(i_ocmb));
@@ -68,12 +67,12 @@ errlHndl_t verifyOdySecuritySettings(Target* i_ocmb,
          * @userdata2[5] Ody Secureboot Reg: secure mode enabled
          * @userdata2[6] Ody Secureboot Reg: File hash calculation enabled
          * @userdata2[7] System: secureboot enabled
-         * @userdata2[8] OCMB_BOOT_FLAGS: ECDSA signature enabled
-         * @userdata2[9] OCMB_BOOT_FLAGS: Dilithium signature enabled
-         * @userdata2[10] OCMB_BOOT_FLAGS: ECID verification enabled
-         * @userdata2[11] OCMB_BOOT_FLAGS: HW Key hash verification enabled
+         * @userdata2[8] ECDSA signature enabled (1)
+         * @userdata2[9] Dilithium signature enabled (1)
+         * @userdata2[10] ECID verification enabled (0)
+         * @userdata2[11] HW Key hash verification enabled (1)
          * @userdata2[12] System: secureboot enabled
-         * @userdata2[13] OCMB_BOOT_FLAGS: File hash calculation enabled
+         * @userdata2[13] File hash calculation enabled (1)
          * @userdata2[14] Ody Secureboot Reg: Odyssey boot complete flag
          * @devdesc Odyssey secureboot settings don't match between the Odyssey
          *          chip and the system.
@@ -91,12 +90,12 @@ errlHndl_t verifyOdySecuritySettings(Target* i_ocmb,
                                            bits{5}, i_odySecurebootReg.fields.secureModeEnable,
                                            bits{6}, i_odySecurebootReg.fields.enableHashCalculation,
                                            bits{7}, SECUREBOOT::enabled(),
-                                           bits{8}, i_ocmbBootFlags.fields.enableECDSASignature,
-                                           bits{9}, i_ocmbBootFlags.fields.enableDilithiumSignature,
-                                           bits{10}, i_ocmbBootFlags.fields.enableECIDVerification,
-                                           bits{11}, i_ocmbBootFlags.fields.enableHWKeyHashVerification,
+                                           bits{8}, 1,
+                                           bits{9}, 1,
+                                           bits{10}, 0,
+                                           bits{11}, 1,
                                            bits{12}, SECUREBOOT::enabled(),
-                                           bits{13}, i_ocmbBootFlags.fields.enableFileHashCalculation,
+                                           bits{13}, 1,
                                            bits{14}, i_odySecurebootReg.fields.bootComplete),
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
     }
@@ -281,8 +280,6 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
     const uint32_t SROM_SB_CONTROL_REG = 0x501b8;
     const uint32_t BL_SB_CONTROL_REG = 0x501b9;
 
-    ocmb_boot_flags_t l_ocmbBootFlags;
-    l_ocmbBootFlags.value = i_ocmb->getAttr<ATTR_OCMB_BOOT_FLAGS>();
     ody_secureboot_config_reg_t l_ocmbSBConfigReg;
     size_t l_readSize = sizeof(uint64_t);
 
@@ -310,7 +307,7 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
             goto EXIT;
         }
 
-        l_errl = verifyOdySecuritySettings(i_ocmb, l_ocmbSBConfigReg, l_ocmbBootFlags);
+        l_errl = verifyOdySecuritySettings(i_ocmb, l_ocmbSBConfigReg);
         if(l_errl)
         {
             SB_ERR("odySecurebootVerification: Secureboot verification of SB control reg 0x%x failed for OCMB 0x%x",
@@ -318,9 +315,9 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
             goto EXIT;
         }
 
-        // Also verify that Odyssey MSV (comes from the BL SB control reg) is not less than the MSV set by P10 SBE
         if(l_controlReg == BL_SB_CONTROL_REG)
         {
+            // Verify that Odyssey MSV (comes from the BL SB control reg) is not less than the MSV set by P10 SBE
             if(l_ocmbSBConfigReg.fields.minimumSecureVersion < SECUREBOOT::getMinimumSecureVersion())
             {
                 SB_ERR("odySecurebootVerification: Odyssey 0x%x MSV value (0x%x) is less than system MSV (0x%x)",
@@ -345,6 +342,36 @@ errlHndl_t odySecurebootVerification(Target* i_ocmb)
                                        get_huid(i_ocmb),
                                        SrcUserData(bits{0,31}, l_ocmbMSV,
                                                    bits{32,63}, SECUREBOOT::getMinimumSecureVersion()),
+                                       ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                goto EXIT;
+            }
+
+            // Verify that Ody production mode matches HB production mode
+            bool l_hostProdMode = (SECUREBOOT::getSbeSecurityBackdoor() == false);
+            bool l_odyProdMode = l_ocmbSBConfigReg.fields.productionImage;
+            if(l_odyProdMode != l_hostProdMode)
+            {
+                SB_ERR("odysseySecurebootVerification: Odyssey 0x%x is running wrong image. Prod mode expected: %d; actual: %d",
+                       get_huid(i_ocmb),
+                       l_hostProdMode,
+                       l_odyProdMode);
+                /*@
+                 * @errortype
+                 * @moduleid MOD_ODY_SECUREBOOT_VERIF
+                 * @reasoncode RC_ODY_BAD_IMAGE
+                 * @userdata1 Odyssey Chip HUID
+                 * @userdata2[0:31] Host production mode
+                 * @userdata2[32:63] Odyssey production mode
+                 * @devdesc Odyssey image version doesn't match
+                 *          what host expects.
+                 * @custdesc Secureboot failure
+                 */
+                l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                       MOD_ODY_SECUREBOOT_VERIF,
+                                       RC_ODY_BAD_IMAGE,
+                                       get_huid(i_ocmb),
+                                       SrcUserData(bits{0,31}, l_hostProdMode,
+                                                   bits{32,63}, l_odyProdMode),
                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
                 goto EXIT;
             }
