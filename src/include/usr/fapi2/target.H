@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1126,7 +1126,7 @@ inline void toString(const Target<T, M, V> *i_target, char* io_buffer, size_t i_
 #ifdef FAPI2_ENABLE_PLATFORM_GET_TARGET
 template<TargetType T, MulticastType M=MULTICAST_OR,
     typename V=fapi2::plat_target_handle_t>
-inline Target<T, M, V>* getTarget(TargetType i_type, uint8_t instance)
+inline Target<T, M, V>* getTarget(TargetType i_type, TARGETING::ATTR_FAPI_POS_type instance)
 {
 
     Target<T, M, V> * l_target = nullptr;
