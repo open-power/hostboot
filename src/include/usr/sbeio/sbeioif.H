@@ -465,14 +465,14 @@ namespace SBEIO
     /**
     * @brief Get the SBE FFDC.  Request that SBE retrieve the SBE FFDC
     *
-    * @param[in]     i_procChip      The proc from which to get the SBE FFDC
+    * @param[in]     i_chip      The chip from which to get the SBE FFDC
     * @param[out]    o_pFifoResponse Pointer to response
     * @param[in]     i_responseSize  Size of response in bytes
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
-    errlHndl_t getFifoSBEFFDC(TARGETING::Target *i_procChip,
+    errlHndl_t getFifoSBEFFDC(TARGETING::Target *i_chip,
                               uint32_t *o_pFifoResponse,
                               uint32_t &i_responseSize);
 

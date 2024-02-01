@@ -64,6 +64,7 @@ OBJS += sbe_getCodeLevels.o
 OBJS += sbe_getScratchData.o
 OBJS += errlud_sbeio.o
 OBJS += sbe_flashCheck.o
+OBJS += sbe_testFfdc.o
 
 # sbeio's sub directories
 SUBDIRS += test.d

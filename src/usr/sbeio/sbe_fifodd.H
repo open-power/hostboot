@@ -89,6 +89,15 @@ public:
         SBE_FIFO_CLASS_TELEMETRY_COMMANDS   = 0xAC,
         SBE_FIFO_CLASS_ATTRIBUTE_MESSAGES   = 0xAD, // Only supported on Odyssey chips
         SBE_FIFO_CLASS_CODE_UPDATE_MESSAGES = 0xAE, // Only supported on Odyssey chips
+        SBE_FIFO_CLASS_TEST_FFDC            = 0xC1, // Used to test Odyssey FFDC
+    };
+
+    /**
+     * @brief enums for SBE FFDC Test Messages
+     */
+    enum fifoTestFfdcMessages
+    {
+        SBE_FIFO_CMD_TEST_FFDC = 0x01 // Odyssey Only
     };
 
     /**
@@ -281,6 +290,66 @@ public:
         //avoid misuse
         fifoStandardResponse(const fifoStandardResponse&);
         fifoStandardResponse& operator=(const fifoStandardResponse&);
+    } PACKED;
+
+    ///////////////////////////////////////////////////////////////////////
+    //                     Test FFDC Messages
+    ///////////////////////////////////////////////////////////////////////
+
+    enum fifoTestFfdcResponseFormat
+    {
+        FIFO_TEST_ASYNC_NON_FATAL_FFDC = 0x01,
+        FIFO_TEST_ASYNC_FATAL_FFDC     = 0x02,
+        FIFO_TEST_SYNC_NON_FATAL_FFDC  = 0x03,
+        FIFO_TEST_SYNC_FATAL_FFDC      = 0x04,
+        FIFO_TEST_TIMEOUT              = 0x05,
+    };
+
+    struct fifoTestFfdcErrorRecord
+    {
+        uint32_t returnCode; // Hardware Procedure RC as defined in hwp_return_codes.H
+        uint16_t reserved;
+        uint8_t  severity;   // fapi2::errlSeverity_t
+        uint8_t  count;      // How many unique SLIDs with this kind of error
+
+        fifoTestFfdcErrorRecord() :
+            returnCode(0),
+            reserved(0),
+            severity(fapi2::FAPI2_ERRL_SEV_UNDEFINED),
+            count(1)
+        {};
+
+        fifoTestFfdcErrorRecord(uint32_t i_rc, uint8_t i_sev, uint8_t i_count) :
+            returnCode(i_rc),
+            reserved(0),
+            severity(i_sev),
+            count(i_count)
+        {};
+
+    } PACKED;
+
+    // This is the format for the test FFDC request header, following the header are a number of
+    // fifoTestFfdcErrorRecord.
+    struct fifoTestFfdcRequest
+    {
+        uint32_t wordCnt;
+        uint8_t reserved;
+        uint8_t chipId;
+        uint8_t commandClass;
+        uint8_t command;
+        uint16_t numErrorRecords;// How many fifoTestFfdcErrorRecord follow this structure
+        uint16_t responseFormat;
+
+        fifoTestFfdcRequest() :
+            wordCnt(0),
+            reserved(0),
+            chipId(0),
+            commandClass(SBE_FIFO_CLASS_TEST_FFDC),
+            command(SBE_FIFO_CMD_TEST_FFDC),
+            numErrorRecords(0),
+            responseFormat(0)
+        {};
+
     } PACKED;
 
     ///////////////////////////////////////////////////////////////////////
