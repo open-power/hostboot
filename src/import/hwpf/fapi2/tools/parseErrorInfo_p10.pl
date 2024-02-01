@@ -735,9 +735,12 @@ foreach my $argnum ( 0 .. $#ARGV )
         }
 
         #----------------------------------------------------------------------
-        # Set the error enum value in a global hash
+        # Set the error enum value in a global hash only for those who has the sbeError tag
         #---------------------------------------------------------------------
-        setErrorEnumValue( $err->{rc} );
+        if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
+        {
+            setErrorEnumValue( $err->{rc} );
+        }
 
         #----------------------------------------------------------------------
         # if there is an sbeTarget, we will add a method for it regardless
@@ -764,7 +767,10 @@ foreach my $argnum ( 0 .. $#ARGV )
             my $objNum = addEntryToArray( \@eiObjects, $ffdc );
 
             # Add a method to the ffdc-gathering class
-            addFfdcMethod( \%methods, $ffdc, $err->{rc}, $ffdc_type, $objNum );
+            if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
+            {
+                addFfdcMethod( \%methods, $ffdc, $err->{rc}, $ffdc_type, $objNum );
+            }
 
             $ffdc = $mangle_names{$ffdc} if ( $mangle_names{$ffdc} ne undef );
 
@@ -818,7 +824,10 @@ foreach my $argnum ( 0 .. $#ARGV )
 
                 # add a set method for each parameter too..
                 @elements[$i] =~ s/^\s+|\s+$//g;
-                addFfdcMethod( \%methods, @elements[$i], $err->{rc}, $ffdc_type, $objNum );
+                if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
+                {
+                    addFfdcMethod( \%methods, @elements[$i], $err->{rc}, $ffdc_type, $objNum );
+                }
 
                 $collectFfdc .= "@elements[$i]";
 
@@ -1633,7 +1642,10 @@ foreach my $argnum ( 0 .. $#ARGV )
         $class_name = ( split( /_/, $class_name, 2 ) )[1];
 
         # Class declaration
-        print ECFILE "\nclass $class_name\n{\n  public:\n";
+        if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
+        {
+            print ECFILE "\nclass $class_name\n{\n  public:\n";
+        }
 
         # Constructor. This traces the description. If this is too much, we can
         # remove it.
@@ -1650,10 +1662,13 @@ foreach my $argnum ( 0 .. $#ARGV )
             }
             else
             {
-                $constructor .= "    $class_name()\n";
-                $constructor .=
-                    "    {\n        fapi2::current_err = RC_$class_name;\n#if !defined(MINIMUM_FFDC)\n        FAPI_ERR(\"$err->{description}\");\n#endif\n";
-                $constructor .= "        fapi2::g_FfdcData.fapiRc = RC_$class_name;\n";
+                if ( exists $err->{sbeError} )
+                {
+                    $constructor .= "    $class_name()\n";
+                    $constructor .=
+                        "    {\n        fapi2::current_err = RC_$class_name;\n#if !defined(MINIMUM_FFDC)\n        FAPI_ERR(\"$err->{description}\");\n#endif\n";
+                    $constructor .= "        fapi2::g_FfdcData.fapiRc = RC_$class_name;\n";
+                }
             }
         }
         else
@@ -1776,31 +1791,37 @@ foreach my $argnum ( 0 .. $#ARGV )
         }
         else
         {
-            if ( $ffdc_format eq undef )
+            if ( exists $err->{sbeError} )
             {
-                $constructor .= "        fapi2::g_FfdcData.ffdcLength = ( $count * sizeof(sbeFfdc_t));\n ";
+                if ( $ffdc_format eq undef )
+                {
+                    $constructor .= "        fapi2::g_FfdcData.ffdcLength = ( $count * sizeof(sbeFfdc_t));\n ";
+                }
+                else
+                {
+                    $constructor .= "#ifdef __PPE__\n";
+                    $constructor .= "        fapi2::g_FfdcData.ffdcLength = ( $count * sizeof(sbeFfdc_t));\n ";
+                    $constructor .= "        fapi2::g_FfdcData.ffdcDataPtr = (sbeFfdc_t*) Heap::get_instance().\n";
+                    $constructor .= "             scratch_alloc( $count * sizeof(sbeFfdc_t));\n";
+                    $constructor .= "#else\n";
+                    $constructor .= "        if(g_FfdcData.ffdcDataPtr) { free(g_FfdcData.ffdcDataPtr); } \n";
+                    $constructor .=
+                        "        g_FfdcData.ffdcDataPtr = (sbeFfdc_t*) malloc ( $count * sizeof(sbeFfdc_t));\n ";
+                    $constructor .= "#endif\n";
+                    $constructor .= "        }\n";
+                }
+                print ECFILE "    void execute()\n";
+                print ECFILE "    {\n";
+                print ECFILE "$executeStr\n";
+                print ECFILE "    }\n";
             }
-            else
-            {
-                $constructor .= "#ifdef __PPE__\n";
-                $constructor .= "        fapi2::g_FfdcData.ffdcLength = ( $count * sizeof(sbeFfdc_t));\n ";
-                $constructor .= "        fapi2::g_FfdcData.ffdcDataPtr = (sbeFfdc_t*) Heap::get_instance().\n";
-                $constructor .= "             scratch_alloc( $count * sizeof(sbeFfdc_t));\n";
-                $constructor .= "#else\n";
-                $constructor .= "        if(g_FfdcData.ffdcDataPtr) { free(g_FfdcData.ffdcDataPtr); } \n";
-                $constructor .=
-                    "        g_FfdcData.ffdcDataPtr = (sbeFfdc_t*) malloc ( $count * sizeof(sbeFfdc_t));\n ";
-                $constructor .= "#endif\n";
-                $constructor .= "        }\n";
-            }
-            print ECFILE "    void execute()\n";
-            print ECFILE "    {\n";
-            print ECFILE "$executeStr\n";
-            print ECFILE "    }\n";
         }
-        print ECFILE $constructor;
 
-        print ECFILE "};\n\n";
+        if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
+        {
+            print ECFILE $constructor;
+            print ECFILE "};\n\n";
+        }
 
         #----------------------------------------------------------------------
         # If this is an SBE error, add it to set_sbe_error.H

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -114,6 +114,7 @@
    </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_RCS_INVALID_SIDE</rc>
       <description> User selected side is not valid</description>
       <ffdc>SELECTED_SIDE</ffdc>

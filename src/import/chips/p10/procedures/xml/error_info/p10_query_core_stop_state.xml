@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,6 +25,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_STOP_TRANSITION_PENDING</rc>
     <description>
       Indicates the targeted core is still pending in make a transition
@@ -32,6 +33,7 @@
   </hwpError>
  <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ILLEGAL_EXPECTED_STOP_LEVEL</rc>
     <description>
       Indicates the expected stop level was invalid.
@@ -45,6 +47,7 @@
   </hwpError>
  <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_EXPECTED_STOP_LEVEL_NOT_REACHED</rc>
     <description>
       Indicates the targeted core is not at an actual STOP level that meets

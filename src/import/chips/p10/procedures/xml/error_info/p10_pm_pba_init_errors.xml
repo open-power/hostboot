@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,6 +34,7 @@
 <hwpErrors>
   <!-- *********************************************************************-->
   <hwpError>
+    <sbeError/>
     <rc>RC_PM_PBA_INIT_INCORRECT_MODE</rc>
     <description>Incorrect mode passed to pba init procedure.
     </description>
@@ -45,6 +46,7 @@
   </hwpError>
   <!-- *********************************************************************-->
   <hwpError>
+    <sbeError/>
     <rc>RC_PM_PBA_SLAVE_RESET_TIMEOUT</rc>
     <description>pba_init timed out waiting for the PBA slave to reset.
     </description>
@@ -64,6 +66,7 @@
   </hwpError>
   <!-- *********************************************************************-->
   <hwpError>
+    <sbeError/>
     <rc>RC_PM_PBA_SLAVE_BUSY_AFTER_RESET</rc>
     <description>pba_init detected a busy PBA slave after the slave was reset.
     </description>
@@ -83,6 +86,7 @@
   </hwpError>
   <!-- *********************************************************************-->
   <hwpError>
+    <sbeError/>
     <rc>RC_PM_PBA_BCDE_STOP_TIMEOUT</rc>
     <description>pba_init timed out waiting to stop the Block Copy Download
                  Engine.
@@ -103,6 +107,7 @@
   </hwpError>
     <!-- *******************************************************************-->
   <hwpError>
+    <sbeError/>
     <rc>RC_PM_PBA_BCUE_STOP_TIMEOUT</rc>
     <description>pba_init timed out waiting to stop the Block Copy Upload
                  Engine.

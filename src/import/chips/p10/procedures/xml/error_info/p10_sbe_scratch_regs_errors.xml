@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,6 +25,7 @@
 <hwpErrors>
 <!-- ******************************************************************** -->
 <hwpError>
+  <sbeError/>
   <rc>RC_P10_SBE_SCRATCH_REGS_MC_FREQ_LOOKUP_ERR</rc>
   <description>
     Frequency requested via ATTR_FREQ_MC_MHZ was not found in list
@@ -40,6 +41,7 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <sbeError/>
   <rc>RC_P10_SBE_SCRATCH_REGS_IOHS_FREQ_LOOKUP_ERR</rc>
   <description>
     Frequency requested via ATTR_FREQ_IOHS_MHZ was not found in list
@@ -55,6 +57,7 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <sbeError/>
   <rc>RC_P10_SBE_SCRATCH_REGS_PCIE_FREQ_LOOKUP_ERR</rc>
   <description>
     Frequency requested via ATTR_FREQ_PCIE_MHZ was not found in list
@@ -69,6 +72,7 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <sbeError/>
   <rc>RC_P10_SBE_SCRATCH_REGS_PAUC_GARD_ERR</rc>
   <description>
     Requested PAUC GARD state is not supported by current IPL type
@@ -84,6 +88,7 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <sbeError/>
   <rc>RC_P10_SBE_ATTR_SETUP_NMMU1_ERR</rc>
   <description>
     NMMU1 unit is logically required by PAU unit configuration, but is
@@ -102,6 +107,7 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <sbeError/>
   <rc>RC_P10_HW549287_WAR_ERR</rc>
   <description>
     Workaround for HW549287 failed
@@ -118,6 +124,7 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
+  <sbeError/>
   <rc>RC_P10_SBE_SCRATCH_REGS_INVALID_ACCESS_ERR</rc>
   <description>
     Requested hardware access method is not supported by platform

@@ -39,6 +39,7 @@
 
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH_RANK0</rc>
     <description>
        Mirroring settings mismatch between channels in DDR5 SPD byte 365
@@ -63,6 +64,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH_RANK1</rc>
     <description>
        Mirroring settings mismatch between channels in DDR5 SPD byte 365
@@ -87,6 +89,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_DDR5_DRAM_WR_PREAMBLE</rc>
     <description>
        An invalid value was detected in ATTR_DDR5_DRAM_WR_PREAMBLE
@@ -107,6 +110,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_NEGATIVE_VPD_SIZE</rc>
     <description>
        A negative size was found while reading the VPD
@@ -131,6 +135,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_BAD_MR_PARAMETER</rc>
     <description>
        A bad parameter was passed to MR processing
@@ -158,6 +163,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_DIVIDE_BY_ZERO</rc>
     <description>
       Attempt to divide by zero
@@ -172,6 +178,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_EMPTY_VECTOR</rc>
     <description>
       Empty vector conditional failed.
@@ -190,6 +197,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FAILED_TO_FIND_TRFC</rc>
     <description>
         Unable to find tRFC (ps) from map with SDRAM density key
@@ -217,6 +225,7 @@
  </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FREQ_CL_EXCEEDS_TAA_MAX</rc>
     <description>
         Calculated Cas Latency exceeds JEDEC value for TAA Max
@@ -253,6 +262,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FREQ_FAILED_TO_FIND_SUPPORTED_CL</rc>
     <description>
       Desired CAS latency isn't supported in the common CAS latency bin retrieved from SPD.
@@ -295,6 +305,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FREQ_DDR5_FAILED_TO_FIND_SUPPORTED_CL</rc>
     <description>
       Desired CAS latency isn't supported in the common CAS latency bin retrieved from SPD.
@@ -338,6 +349,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FREQ_DDR5_COMPUTED_ZERO_TCK_STD</rc>
     <description>
       Dutring CAS latency computation, tCKstd value of zero was computed, likely due to a problem with the SPD.
@@ -378,6 +390,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_OVERFLOW_WHEN_ROUNDING_TO_EVEN</rc>
     <description>Overflow when rounding a timing value to the next larger even value</description>
     <ffdc>TIMING_PS</ffdc>
@@ -389,6 +402,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FREQ_INDEX_TOO_LARGE</rc>
     <description>Error calculating the index into max_freq array</description>
     <ffdc>INDEX</ffdc>
@@ -400,6 +414,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FREQ_INVALID_CALCULATED_TCK</rc>
     <description>
         Invalid value clock period (less than equal 0).
@@ -435,6 +450,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_CW_ENCODING</rc>
     <description>
       Set if a controlword is invalid
@@ -449,6 +465,7 @@
   </hwpError>
 
    <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_RTT_WR_ENCODING</rc>
     <description>
       An invalid/unsupported RTT_WR encoding was received
@@ -462,6 +479,7 @@
    </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FREQ_NO_COMMON_SUPPORTED_CL</rc>
     <description>
         Current Configuration has no common supported CL values.
@@ -493,6 +511,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FREQ_SELECTED_FREQ_NOT_SUPPORTED</rc>
     <description>Selected freq based on calculations from the DIMM and VPD is not supported</description>
     <ffdc>SUPPORTED_FREQ_0</ffdc>
@@ -526,6 +545,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_CAST_WHEN_ROUNDING</rc>
     <description>Invalid cast or calculation for corrected_ps_per_jedec</description>
     <ffdc>TIMING_PS</ffdc>
@@ -538,6 +558,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_CAST_CALC_NCK</rc>
     <description>Invalid cast or calculation for calc_nck</description>
     <ffdc>TIMING_PS</ffdc>
@@ -551,6 +572,7 @@
   </hwpError>
 
 <hwpError>
+  <sbeError/>
   <rc>RC_MSS_INVALID_CLOCK_PERIOD</rc>
   <description>
     An invalid clock period was passed to clock period to frequency
@@ -563,6 +585,7 @@
 </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_DB_MDQ_DRIVE_STRENGTH</rc>
     <description>
         Bad SPD data for bytes 145 - 147.
@@ -584,6 +607,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_DIMM_SPEED</rc>
     <description>
       Invalid DIMM speed received. Possibly a programming error.
@@ -603,6 +627,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_DIMM_TYPE</rc>
     <description>
       Received a DIMM type unsupported by the SPD decoder factory
@@ -634,6 +659,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_DRAM_GEN</rc>
     <description>
       Received a DRAM gen unsupported by the SPD decoder factory
@@ -666,6 +692,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_FREQ_PASSED_IN</rc>
     <description>
         An invalid Freq value has been set
@@ -680,6 +707,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_FREQUENCY</rc>
     <description>
       An invalid frequency was passed to frequency to clock period
@@ -692,6 +720,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_FREQ_LIST_PASSED</rc>
     <description>
        Wrong size vector passed into frequency scoreboard function
@@ -705,6 +734,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_FINE_REFRESH_MODE</rc>
     <description>
       Invalid fine refresh mode received from the mrw
@@ -717,6 +747,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_PORT_INDEX_PASSED</rc>
     <description>An invalid port index was passed into an MSS function</description>
     <ffdc>INDEX</ffdc>
@@ -728,6 +759,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_RANK</rc>
     <description>
       Invalid rank passed into function
@@ -742,6 +774,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_REFRESH_RATE_REQUEST</rc>
     <description>
       Invalid refresh request rate received.
@@ -756,6 +789,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_NONHYBRID_MDS</rc>
     <description>
         Conflict in SPD fields: HYBRID_MEDIA_TYPE (byte 3, bits 1:3) cannot be MDS
@@ -784,6 +818,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_REVISION</rc>
     <description>
       Unable to fall back SPD decoder to the highest decoded
@@ -814,6 +849,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_REVISION_FOR_MODULE_SPECIFC</rc>
     <description>
       Unable to fall back SPD decoder to the highest decoded
@@ -845,6 +881,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_RANK</rc>
     <description>
       Invalid rank passed into attribute engine.
@@ -872,6 +909,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_RESERVED_BITS</rc>
     <description>
         Invalid SPD reserved bits received.
@@ -901,6 +939,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_TIMING_VALUE</rc>
     <description>Invalid value calculated for timing value based on MTB and FTB from SPD.</description>
     <ffdc>VALUE</ffdc>
@@ -926,6 +965,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_VPD_FREQ_LIST_PASSED</rc>
     <description>
        Wrong size vector passed into limit_freq_by_vpd function
@@ -939,6 +979,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_VPD_KEYWORD_MAX</rc>
     <description>
       VPD keyword is too big for space allocated for it.
@@ -959,6 +1000,7 @@
   </hwpError>
 
 <hwpError>
+  <sbeError/>
   <rc>RC_MSS_LOOKUP_FAILED</rc>
   <description>
     Conditional that tests whether a certain key value is located in a map.
@@ -981,6 +1023,7 @@
 </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MEMDIAGS_NO_MCBIST_SUBTESTS</rc>
     <description>Attempt to run an MCBIST program with no subtests</description>
     <ffdc>MC_TARGET</ffdc>
@@ -991,6 +1034,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MCBIST_EXCEEDED_MAX_SUBTESTS</rc>
     <description>Attempt to run an MCBIST program exceeding the max number of subtests (32)</description>
     <ffdc>MC_TARGET</ffdc>
@@ -1002,6 +1046,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MCBIST_INCORRECT_PATTERN_LENGTH</rc>
     <description>MCBIST pattern has an incorrect length</description>
     <ffdc>TARGET</ffdc>
@@ -1014,6 +1059,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES</rc>
     <description>Incorrect number of voltages supplied to set_voltage_attributes function</description>
     <ffdc>VOLT_TARGET</ffdc>
@@ -1026,6 +1072,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_VOLT_DDR4_TYPE_REQUIRED_VOLTAGE</rc>
     <description>One or more DIMMs do not support required voltage for DDR4.</description>
     <ffdc>EXPECTED_OPERABLE</ffdc>
@@ -1046,6 +1093,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_VOLT_DDR5_TYPE_REQUIRED_VOLTAGE</rc>
     <description>One or more DIMMs do not support required voltage for DDR5.</description>
     <ffdc>EXPECTED_OPERABLE</ffdc>
@@ -1070,6 +1118,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_VOLT_INVALID_DRAM_GEN</rc>
     <description>Invalid DRAM generation at p10_mss_volt</description>
     <ffdc>DRAM_GEN</ffdc>
@@ -1084,6 +1133,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_UNSUPPORTED_DRAM_GEN</rc>
     <description>Unsupported DRAM generation</description>
     <ffdc>DRAM_GEN</ffdc>
@@ -1095,6 +1145,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ</rc>
     <description>
       When considering the frequencies in the MRW and the max supported
@@ -1134,6 +1185,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_OUT_OF_BOUNDS_INDEXING</rc>
     <description>
       Desired index is larger than list (std::vector, array, etc.) size.
@@ -1150,6 +1202,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_CONVERSION_ERROR</rc>
     <description>
       Overflow or underflow occured converting one integral type to another.
@@ -1166,6 +1219,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FAILED_DATA_INTEGRITY_CHECK</rc>
     <description>
         Bad data received.
@@ -1197,6 +1251,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_ZERO_FREQ_OR_SIZE</rc>
     <description>
       An zero memory frequency was passed to calculate min cmd gap
@@ -1210,6 +1265,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MEMDIAGS_INVALID_PATTERN_INDEX</rc>
     <description>An invalid pattern index was passed to the pattern loader</description>
     <ffdc>INDEX</ffdc>
@@ -1221,6 +1277,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MCBIST_PROGRAM_TOO_BIG</rc>
     <description>MCBIST program larger than currently supported size</description>
     <ffdc>PROGRAM_LENGTH</ffdc>
@@ -1233,6 +1290,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MCBIST_INVALID_ADDRESS_PAIR_INDEX</rc>
     <description>An invalid address pair index</description>
     <ffdc>INDEX</ffdc>
@@ -1245,6 +1303,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_POWER_INTERCEPT_NOT_SET</rc>
     <description>
       The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
@@ -1257,6 +1316,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_POWER_SLOPE_NOT_SET</rc>
     <description>
       The attribute ATTR_MSS_TOTAL_POWER_INTERCEPT was not set and equals 0
@@ -1269,6 +1329,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_NO_DATABUS_UTILIZATION</rc>
     <description>
       There are 2 DIMMS on the port but both have 0 databus utilization
@@ -1283,6 +1344,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_NO_SAFEMODE_UTILIZATION</rc>
     <description>
       Safemode utilization is zero
@@ -1296,6 +1358,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_CALC_POWER_CURVE_DIVIDE_BY_ZERO</rc>
     <description>
       Denominator equals 0
@@ -1312,6 +1375,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_CALC_POWER_CURVE_NEGATIVE_OR_ZERO_SLOPE</rc>
     <description>
       Power curve slope equals 0 or is negative
@@ -1327,6 +1391,7 @@
   </hwpError>
 
  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_NO_PORT_POWER_LIMIT</rc>
     <description>
         Got 0 when calculating port power limit.
@@ -1342,6 +1407,7 @@
  </hwpError>
 
  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_NO_PORT_POWER</rc>
     <description>
         Got 0 when calculating port power limits using the DIMMs databus utilization
@@ -1359,6 +1425,7 @@
  </hwpError>
 
  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_M_DRAM_CLOCKS_EQUALS_ZERO</rc>
     <description>
         ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS was not set and equals zero
@@ -1370,6 +1437,7 @@
  </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MAX_FREQ_ATTR_SIZE_CHANGED</rc>
     <description>
         Number of entries for MSS_MRW_MAX_FREQ attribute from VPD has changed without updating the code
@@ -1385,6 +1453,7 @@
   </hwpError>
 
  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_CALC_PORT_POWER_EXCEEDS_MAX</rc>
     <description>
       The calculated port power from equalizing throttles exceeds the maximum allowed power
@@ -1406,6 +1475,7 @@
  </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_SPD_TIMING_FAIL</rc>
     <description>
       Timing SPD parameter failed to meet JEDEC SPD timing
@@ -1438,6 +1508,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_TOO_MANY_DIMMS_ON_PORT</rc>
     <description>There seem to be too many dimms on the port</description>
     <ffdc>DIMM_COUNT</ffdc>
@@ -1455,6 +1526,7 @@
   </hwpError>
 
  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_SLOT_UTIL_EXCEEDS_PORT</rc>
     <description>
       The memory throttle per slot (DIMM) exceeds the allowed throttle for the port
@@ -1476,6 +1548,7 @@
  </hwpError>
 
  <hwpError>
+     <sbeError/>
      <rc>RC_MSS_OUTPUT_OVERFLOW_CALC_UTIL</rc>
     <description>
         Type of output variable is not large enough for the calculations
@@ -1491,6 +1564,7 @@
  </hwpError>
 
  <hwpError>
+     <sbeError/>
      <rc>RC_MSS_TCCDL_OVERFLOW_CALC</rc>
     <description>
         TCCD_L calculation experienced an overflow
@@ -1516,6 +1590,7 @@
  </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_POWER_THERMAL_DECODE_ERROR</rc>
     <description>
       There was no match or value found in decoding the power thermal attributes
@@ -1536,6 +1611,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MRW_SAFEMODE_UTIL_THROTTLE_NOT_SUPPORTED</rc>
     <description>
         The MRW safemode utilization that is less than the minimum utilization supported.  Check ATTR_MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL.
@@ -1549,6 +1625,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_NO_POWER_THERMAL_ATTR_FOUND</rc>
     <description>
       There was no match or value found in decoding the power thermal attributes
@@ -1579,6 +1656,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_POWER_THERMAL_ENCODE_ERROR</rc>
     <description>
       There was no match or value found in encoding the power thermal attributes
@@ -1599,6 +1677,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_POWER_THERMAL_ATTR_VECTORS_INCORRECT</rc>
     <description>
       The attributes vectors size is incorrect for find_xxx functions
@@ -1613,6 +1692,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_POWER_THERMAL_DIMM_INDEX_OUT_OF_BOUND</rc>
     <description>
       The dimm index is out of bound for the port
@@ -1627,6 +1707,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_UNSUPPORTED_MRW_POWER_CONTROL_REQUESTED</rc>
     <description>
       The value of ATTR_MSS_MRW_POWER_CONTROL_REQUESTED is unsupported
@@ -1641,6 +1722,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_DIMM</rc>
     <description>
         Too many primary ranks were seen on the dimm according
@@ -1668,6 +1750,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_TOO_MANY_PRIMARY_RANKS_ON_PORT</rc>
     <description>
         Too many primary ranks were seen on the port according
@@ -1694,6 +1777,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_RANK_OUT_OF_RANGE</rc>
     <description>
         The rank provided to the rank::info constructor exceeded
@@ -1708,6 +1792,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_GALOIS_TO_SYMBOL</rc>
     <description> An invalid galois code was found</description>
     <ffdc>GALOIS</ffdc>
@@ -1718,6 +1803,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_SYMBOL_FOR_GALOIS</rc>
     <description> An invalid symbol was passed to symbol_to_galois</description>
     <ffdc>SYMBOL</ffdc>
@@ -1728,6 +1814,7 @@
   </hwpError>
 
   <hwpError>
+      <sbeError/>
       <rc>RC_MSS_INVALID_DQ_TO_SYMBOL</rc>
     <description> An invalid DQ bit index received to map to Galois symbol</description>
     <ffdc>DQ</ffdc>
@@ -1738,6 +1825,7 @@
   </hwpError>
 
   <hwpError>
+      <sbeError/>
       <rc>RC_MSS_INVALID_SYMBOL_TO_DQ</rc>
     <description> An invalid symbol received to map to DQ bit index</description>
     <ffdc>SYMBOL</ffdc>
@@ -1748,6 +1836,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_RANK_PASSED</rc>
     <description> An invalid rank was passed to ecc::read function</description>
     <ffdc>RANK</ffdc>
@@ -1760,6 +1849,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_INDEX_PASSED</rc>
     <description> An invalid index was passed to the specified function</description>
     <ffdc>INDEX</ffdc>
@@ -1772,6 +1862,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_PAGE_SIZE</rc>
     <description>
         Invalid page size
@@ -1803,6 +1894,7 @@
   </hwpError>
 
  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MIN_UTILIZATION_ERROR</rc>
     <description>
         The input utilization is less than the minimum utilization allowed.
@@ -1816,6 +1908,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_DDIMM_RESET_N_DEAD_LOAD</rc>
     <description>
         A DDIMM shares a reset_n signal with a deconfigured DDIMM.
@@ -1835,6 +1928,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_RESTORE_REPAIRS_NIBBLE_OUT_OF_RANGE</rc>
     <description>
         The nibble index to perform repairs on / deploy a spare was out of range.
@@ -1849,6 +1943,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_RESTORE_REPAIRS_BYTE_OUT_OF_RANGE</rc>
     <description>
         The byte index to perform repairs on / deploy a spare was out of range.
@@ -1863,6 +1958,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PLUG_RULES_MIXED_MDS_PLUG_ERROR</rc>
     <description>
         An invalid mixing of MDS and non-MDS dimms detected.
@@ -1884,6 +1980,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_INVALID_MDS_MEDIA_CNTL_TARGET_CONFIG</rc>
     <description>
        Did not find a valid media controller target on an MDS DDIMM
@@ -1901,6 +1998,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PLUG_RULES_PLANAR_DRAM_GEN</rc>
     <description>
         DRAM generation other than DDR4 detected
@@ -1921,6 +2019,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PLUG_RULES_PLANAR_DRAM_DIMM_TYPE</rc>
     <description>
         DRAM type other than UDIMM/RDIMM detected
@@ -1941,6 +2040,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PLUG_RULES_PLANAR_DRAM_WIDTH</rc>
     <description>
         DRAM width other than X4/X8 detected
@@ -1961,6 +2061,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PLUG_RULES_PLANAR_DRAM_DENSITY</rc>
     <description>
         DRAM density other than 8G/16G detected
@@ -1981,6 +2082,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PLUG_RULES_INVALID_DIMM_SIZE_MIX</rc>
     <description>
         Memory addressing setup requires DIMMs under an OMI channel pair to be of equal size.
@@ -2007,6 +2109,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_FINE_REFRESH</rc>
     <description>
         Incorrect FINE Refresh Mode received
@@ -2019,6 +2122,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PLUG_RULES_INVALID_DIMM_HEIGHT_MIX</rc>
     <description>
         This is due to mechanical restrictions on the system boards.
@@ -2044,6 +2148,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PLUG_RULES_DDR5_NOT_SUPPORTED</rc>
     <description>
         A DDR5 DIMM was plugged when support is not allowed
@@ -2063,6 +2168,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_PLUG_RULES_DRAM_GENERATION_MIXING_NOT_SUPPORTED</rc>
     <description>
         Different DRAM generations were plugged on the same backplane which is not supported
@@ -2084,6 +2190,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_CONCURRENT_CCS_EXCEEDS_INSTRUCTION_LIMIT</rc>
     <description>
         Requested CCS Program exceeds the 32 instruction limit for concurrent CCS.
@@ -2095,6 +2202,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_CCS_STUCK_IN_PROGRESS</rc>
     <description>
         CCS engine is in use and is not available
@@ -2110,6 +2218,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MCBIST_STUCK_IN_PROGRESS</rc>
     <description>
         MCBIST engine is in use and is not available
@@ -2125,6 +2234,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_PRIMARY_RANK_COUNT</rc>
     <description>
         Invalid number of primary ranks per port retrieved
@@ -2138,6 +2248,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_MAINT_BAD_RANK_INPUT</rc>
     <description>
        The rank passed into a steer function was invalid.
@@ -2151,6 +2262,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_MAINT_BAD_STEER_MUX_TYPE</rc>
     <description>
        The steer mux type passed into a steer function was invalid.
@@ -2164,6 +2276,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_MAINT_INVALID_SYMBOL</rc>
     <description>
        The symbol passed into a steer function was invalid.
@@ -2177,6 +2290,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_MAINT_BAD_SPARE_INDEX</rc>
     <description>
        A spare index returned from symbol translation was invalid.
@@ -2191,6 +2305,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_MAINT_SYMBOL_NOT_FOUND</rc>
     <description>
        The requested symbol does not match a steer index.
@@ -2203,6 +2318,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_MAINT_DO_STEER_ALL_SPARES_DEPLOYED</rc>
     <description>
        All spares are already deployed when do_steer called.

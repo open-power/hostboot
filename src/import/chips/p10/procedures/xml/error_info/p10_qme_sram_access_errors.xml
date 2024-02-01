@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- *********************************************************************-->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_SRAM_ACCESS_ERROR</rc>
     <description>Incorrect Address passed to QME SRAM Display routine
     </description>
@@ -41,6 +42,7 @@
   </hwpError>
   <!-- *********************************************************************-->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_SRAM_ACCESS_DENIED</rc>
     <description>Qme sram access denied because ownership is not yet released
     </description>

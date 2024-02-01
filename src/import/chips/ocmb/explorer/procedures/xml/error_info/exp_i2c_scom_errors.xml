@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,6 +25,7 @@
 <hwpErrors>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_I2C_GET_SCOM_INVALID_READ_SIZE</rc>
     <description>
        First Byte data returned from the i2c register read contains
@@ -45,6 +46,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_I2C_SCOM_EXPECTED_IBM_INDICATOR</rc>
     <description>
        First Byte of the address passed to i2c_scom operation did not match
@@ -64,6 +66,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_I2C_SCOM_UNEXPECTED_IBM_INDICATOR</rc>
     <description>
        First Byte of the address passed to i2c_scom operation had 0x08 set which

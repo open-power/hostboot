@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,6 +34,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_BAD_MODE</rc>
     <description>Unknown mode passed to p10_pm_qme_init.
     </description>
@@ -46,6 +47,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_VREF_CALIBRATION_FAILED</rc>
     <description>VDMs/IVRM enabled but necessary VREF calibration failed.
     </description>
@@ -72,6 +74,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_START_TIMEOUT</rc>
     <description>QME start timed out while waiting for QME Active in OCCFLG register.
     </description>
@@ -108,6 +111,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_START_HALTED</rc>
     <description>QME start hit a QME engine halt.
     </description>
@@ -135,6 +139,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_HALT_TIMEOUT</rc>
     <description>QME init timedout while waiting for HALT status in XSR register.
     </description>
@@ -160,6 +165,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_INVALID_CORE_EX_CONFIG</rc>
     <description> Invalid configuration of good core and bad EX detected
     </description>
@@ -176,6 +182,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_INVALID_CORE_EQ_CONFIG</rc>
     <description> Invalid configuration of good core and bad EQ detected
     </description>
@@ -192,6 +199,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_INVALID_EX_CORE_CONFIG</rc>
     <description> Invalid configuration of good EX and no functional cores detected
     </description>
@@ -208,6 +216,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_BCE_BUSY_ERR</rc>
     <description> QME's block copy engine was found busy and transfer of QME's
      hcode could not be initiated.
@@ -229,6 +238,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_BCE_HW_ERR</rc>
     <description> QME's block copy engine was found in errorneous state and transfer
     of QME's hcode could not be initiated.
@@ -244,6 +254,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_HCODE_TRANSFER_FAILED</rc>
     <description> HWP initiated transfer of QME hcode but could not complete
     within a specified amount of time.
@@ -269,6 +280,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_OPIT_INTERRUPT_NOT_CLEAR</rc>
     <description> OPIT Type A Interrupts could not be cleared by writing to PIG registers
     </description>
@@ -282,6 +294,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_QME_FAILED_TO_ENTER_QUIESCE_MODE</rc>
     <description> QME(s) failed to confirm entry to quiesce mode
     </description>
@@ -299,6 +312,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PPEBAR_TOPOLOGY_INIT_ERROR</rc>
     <description> PPE BAR register is initialized with an address which do not fall into
      list of regions marked valid in topology scom registers.
@@ -312,6 +326,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_BCEBAR0_TOPOLOGY_INIT_ERROR</rc>
     <description> BCEBAR0 register is initialized with an address which do not fall into
      list of regions marked valid in topology scom registers.
@@ -325,6 +340,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_BCEBAR1_TOPOLOGY_INIT_ERROR</rc>
     <description> BCEBAR1 register is initialized with an address which do not fall into
      list of regions marked valid in topology scom registers.

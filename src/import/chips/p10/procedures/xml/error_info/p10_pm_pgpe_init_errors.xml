@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -34,6 +34,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PGPE_BAD_MODE</rc>
     <description>Unknown mode passed to p10_pm_pgpe_init.
     </description>
@@ -45,6 +46,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PGPE_INIT_TIMEOUT</rc>
     <description> Pstate GPE init timed out while waiting for PGPE Active in OCC
     Flag 2.
@@ -79,6 +81,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PGPE_INIT_PSTATE_AUTOSTART_TIMEOUT</rc>
     <description> Pstate GPE Protocol Auto Start timeout.  This is only
     used in lab test modes.
@@ -108,6 +111,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PGPE_INIT_HALT</rc>
     <description> PGPE init detected a Halt condition.  This can happen if the
     boot image in memory is not accessible.
@@ -143,6 +147,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PGPE_INIT_DEBUG_HALT</rc>
     <description> Pstate GPE init detected a Debug Halt condition.  This should only
     assert in a development debug environment.
@@ -172,6 +177,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PGPE_RESET_TIMEOUT</rc>
     <description> Pstate GPE init timed out while waiting for HALT status in XSR register.
     </description>
@@ -200,6 +206,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PGPE_PBA_INIT_FAILED</rc>
     <description>p10_pm_pba_init failed in PM_INIT mode.
     </description>

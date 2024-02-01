@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,6 +26,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_GETPUTMEMPROC_INVALID_FLAGS</rc>
     <description>
       Procedure: p10_getmemproc, p10_putmemproc
@@ -45,6 +46,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_GETPUTMEMPROC_UNSUPPORTED_FLAGS</rc>
     <description>
       Procedure: p10_getmemproc, p10_putmemproc
@@ -64,6 +66,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_GETPUTMEMPROC_INVALID_SIZE_CI</rc>
     <description>
       Procedure: p10_getmemproc, p10_putmemproc
@@ -80,6 +83,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_GETPUTMEMPROC_INVALID_SIZE_DMA</rc>
     <description>
       Procedure: p10_getmemproc, p10_putmemproc

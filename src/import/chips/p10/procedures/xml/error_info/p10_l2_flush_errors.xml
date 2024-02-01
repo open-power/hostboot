@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -32,6 +32,7 @@
   </registerFfdc>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_PURGE_CMD_REG_ERR</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>CMD_REG</ffdc>
@@ -58,6 +59,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_P10_PURGE_COMPLETE_TIMEOUT</rc>
     <ffdc>TARGET</ffdc>
     <ffdc>CMD_REG</ffdc>

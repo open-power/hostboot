@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,6 +26,7 @@
 <hwpErrors>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_EXP_HALF_DIMM_MODE_NOT_SUPPORTED</rc>
     <description>
       The enterprise settings do not support half dimm mode.

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,6 +25,7 @@
 <hwpErrors>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PM_OCC_GPE_BAD_MODE</rc>
     <description>Unknown mode passed to p10_pm_occ_gpe_init.</description>
     <ffdc>BADMODE</ffdc>
@@ -36,6 +37,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+      <sbeError/>
       <rc>RC_PM_OCC_GPE0_HALT_TIMEOUT</rc>
       <description>Failed to halt OCC GPE0 during HALT operation.</description>
       <ffdc>CHIP</ffdc>
@@ -61,6 +63,7 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PM_OCC_GPE1_HALT_TIMEOUT</rc>
     <description>Failed to halt OCC GPE1 during HALT operation.</description>
     <ffdc>CHIP</ffdc>

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -357,6 +357,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_EXP_FW_STATUS_POLLING_TIMEOUT</rc>
     <description>
       An OCMB chip failed to reply over i2c during FW_STATUS loop.
@@ -404,6 +405,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_EXP_I2C_FW_STATUS_BUSY</rc>
     <description>
       Received FW_BUSY status after polling timeout for
@@ -456,6 +458,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_EXP_I2C_CMD_FAIL</rc>
     <description>
       Received non-SUCCESS status for command ID EXP_FW_STATUS.

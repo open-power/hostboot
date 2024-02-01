@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2020                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,6 +25,7 @@
 <hwpErrors>
  <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_P10_REVERT_SBE_MCS_SETUP_NO_MI_TARGETS_FOUND</rc>
       <description>
         Procedure: p10_revert_sbe_mcs_setup
@@ -38,6 +39,7 @@
    </hwpError>
  <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_P10_REVERT_SBE_MCS_SETUP_SELECTED_MC_NOT_FOUND</rc>
       <description>
         Procedure: p10_revert_sbe_mcs_setup
