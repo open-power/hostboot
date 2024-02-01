@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -324,6 +324,7 @@
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       DRAM VREF CA value. Decodes are noted in MR11 in the DDR5 JEDEC spec
+      The Leftmost bit (OP[7]) is a VALID bit
       ARRAY[DIMM][RANK][DRAM]
     </description>
     <initToZero></initToZero>
@@ -342,6 +343,7 @@
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       DRAM VREF CS value. Decodes are noted in MR11 in the DDR5 JEDEC spec
+      The Leftmost bit (OP[7]) is a VALID bit
       ARRAY[DIMM][RANK][DRAM]
     </description>
     <initToZero></initToZero>

@@ -131,7 +131,8 @@ class mr12_data : public mr_base_data<MC>
                                            const uint8_t i_dram,
                                            const uint8_t i_vref) const
         {
-            constexpr uint64_t MAX = 0b01111101;
+            // NOTE: Leftmost bit is a VALID bit
+            constexpr uint64_t MAX = 0b11111101;
             FAPI_ASSERT( (i_vref <= MAX),
                          fapi2::MSS_DDR5_MR12_BAD_VREFCS()
                          .set_DIMM_IN_ERROR(i_target)
