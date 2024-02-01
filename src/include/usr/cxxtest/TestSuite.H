@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,7 +50,6 @@ public:
 #define  TS_INFO(...)  { TRACFCOMP( g_trac_test, "TS_INFO> " __VA_ARGS__ ); }
 #define  TS_WARN(...)  { TRACFCOMP( g_trac_test, "!TS_WARN> " __VA_ARGS__ ); }
 #define  TS_FAIL(...)  { TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__); }
-
 
 }; //namespace CxxTest
 
@@ -156,20 +155,6 @@ extern uint64_t g_ModulesCompleted;
 #define TS_FAIL(...)   { TRACFCOMP( g_trac_test, "!!!TS_FAIL> " __VA_ARGS__);   \
     CxxTest::doFailTest( __FILE__, __LINE__ ); }
 
-#define TS_FAIL_FN(...)                         \
-    TS_FAIL(TEST_FUNC ": " __VA_ARGS__)
-
-#define TS_ASSERT(COND, ...)                    \
-    if (!(COND)) {                              \
-        TS_FAIL_FN(__VA_ARGS__);                \
-    }                                           \
-
-#define TS_ASSERT_RETURN(COND, ...)             \
-    if (!(COND)) {                              \
-        TS_FAIL_FN(__VA_ARGS__);                \
-        return;                                 \
-    }                                           \
-
 // Statistics structure for passing original pointers to the runtime test suite.
 struct CxxTestStats
 {
@@ -184,5 +169,19 @@ struct CxxTestStats
 } // namespace CxxTest
 
 #endif // AUTO_CXXTEST
+
+#define TS_FAIL_FN(...)                         \
+    TS_FAIL(TEST_FUNC ": " __VA_ARGS__)
+
+#define TS_ASSERT(COND, ...)                    \
+    if (!(COND)) {                              \
+        TS_FAIL_FN(__VA_ARGS__);                \
+    }                                           \
+
+#define TS_ASSERT_RETURN(COND, ...)             \
+    if (!(COND)) {                              \
+        TS_FAIL_FN(__VA_ARGS__);                \
+        return;                                 \
+    }                                           \
 
 #endif // __CXXTEST_TESTSUITE_H
