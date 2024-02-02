@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -111,9 +111,9 @@ fapi2::ReturnCode get_supported_cas_latencies(
         // Update output value only if range check passes
         l_field = uint32_t(l_buffer);
 
-        FAPI_INF("%s. CAS latencies supported (bitmap): 0x%llX",
-                 spd::c_str(i_dimm),
-                 l_field);
+        FAPI_INF_NO_SBE("%s. CAS latencies supported (bitmap): 0x%llX",
+                        spd::c_str(i_dimm),
+                        l_field);
         o_field = l_field;
     }
 
@@ -176,9 +176,9 @@ fapi2::ReturnCode get_supported_cas_latencies(
         // so no range checking is needed
         o_field = uint64_t(l_buffer);
 
-        FAPI_INF("%s. CAS latencies supported (bitmap): 0x%010X",
-                 spd::c_str(i_dimm),
-                 o_field);
+        FAPI_INF_NO_SBE("%s. CAS latencies supported (bitmap): 0x%010X",
+                        spd::c_str(i_dimm),
+                        o_field);
     }
 
 fapi_try_exit:
@@ -213,7 +213,10 @@ fapi2::ReturnCode calc_vref_offset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     // Stores in io_vref array to be written to attr
     uint16_t l_calc_vref_step = i_vref_offset[i_dimm_rank][i_dram] * i_vref_multiplier;
 
-    if(i_vref_add_sub[i_dimm_rank][i_dram] == mss::ddr5::mr::VREF_ADD)
+    // Note that as we increment the MR encoding value the Vref range decreases, and vice versa
+    // (see the MR11 and MR12 tables in the DDR5 Jedec spec). For this reason, when the
+    // "add or subtract" bit tells us to "subtract" we need to 'add' to the encoding value
+    if(i_vref_add_sub[i_dimm_rank][i_dram] == mss::ddr5::mr::VREF_SUB)
     {
         if((l_calc_vref_step + i_vref_byte[i_byte_index]) <=  mss::ddr5::mr::VREF_MAX )
         {
@@ -221,8 +224,8 @@ fapi2::ReturnCode calc_vref_offset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         }
         else
         {
-            FAPI_INF("Port %s VREF Overflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
-                     spd::c_str(i_port),
+            FAPI_INF(GENTARGTIDFORMAT " VREF Overflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
+                     GENTARGTID(i_port),
                      i_dram,
                      i_dimm_rank,
                      l_calc_vref_step);
@@ -241,8 +244,8 @@ fapi2::ReturnCode calc_vref_offset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         }
         else
         {
-            FAPI_INF("Port %s VREF Underflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
-                     spd::c_str(i_port),
+            FAPI_INF(GENTARGTIDFORMAT " VREF Underflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
+                     GENTARGTID(i_port),
                      i_dram,
                      i_dimm_rank,
                      l_calc_vref_step);
@@ -285,7 +288,7 @@ fapi2::ReturnCode apply_vref_offset_mult(const fapi2::Target<fapi2::TARGET_TYPE_
                 set_FUNCTION(i_ffdc_code).
                 set_RANK(i_dimm_rank).
                 set_PORT_TARGET(i_port),
-                "%s rank out of bounds rank %u", spd::c_str(i_port), i_dimm_rank);
+                GENTARGTIDFORMAT " rank out of bounds rank %u", GENTARGTID(i_port), i_dimm_rank);
 
     // Multiplies offset by l_vref_mult then adds or subtracts from vrefca
     //    Port  Rank  Dram   Byte
@@ -388,6 +391,8 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+// Note: Removed planar SPD support from SBE since it's not needed on SPD-supported systems
+#ifndef __PPE__
 ///
 /// @brief Retrieve module specific portion of SPD data from planar config
 /// @param[in] i_target the OCMB_CHIP target
@@ -467,6 +472,7 @@ void combine_planar_spd(
               i_isdimm_spd.begin() + MODULE_SUPPLIER_DATA_END,
               o_spd.begin() + MODULE_SUPPLIER_DATA_START);
 }
+#endif
 
 ///
 /// @brief Retrieve SPD data
@@ -484,6 +490,8 @@ fapi2::ReturnCode get_raw_data(
     {
         FAPI_TRY(mss::spd::get_raw_data_dimm(i_target, o_spd));
     }
+
+#ifndef __PPE__
     else
     {
         // For planar config, we need to read the SPD from both the DIMM and planar then combine
@@ -500,6 +508,8 @@ fapi2::ReturnCode get_raw_data(
         // Then combine them into a single blob like we get from a DDIMM
         mss::spd::combine_planar_spd(l_planar_vpd, l_isdimm_spd, o_spd);
     }
+
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1474,15 +1474,14 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR32_next(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            // TODO Zen:MST-1770 Set *_next fields differently if needed
-            io_msg_block.MR32_A0_next = iv_msg_block_vars.iv_MR32[0];
-            io_msg_block.MR32_A1_next = iv_msg_block_vars.iv_MR32[1];
-            io_msg_block.MR32_A2_next = iv_msg_block_vars.iv_MR32[2];
-            io_msg_block.MR32_A3_next = iv_msg_block_vars.iv_MR32[3];
-            io_msg_block.MR32_B0_next = iv_msg_block_vars.iv_MR32[0];
-            io_msg_block.MR32_B1_next = iv_msg_block_vars.iv_MR32[1];
-            io_msg_block.MR32_B2_next = iv_msg_block_vars.iv_MR32[2];
-            io_msg_block.MR32_B3_next = iv_msg_block_vars.iv_MR32[3];
+            io_msg_block.MR32_A0_next = 0;
+            io_msg_block.MR32_A1_next = 0;
+            io_msg_block.MR32_A2_next = 0;
+            io_msg_block.MR32_A3_next = 0;
+            io_msg_block.MR32_B0_next = 0;
+            io_msg_block.MR32_B1_next = 0;
+            io_msg_block.MR32_B2_next = 0;
+            io_msg_block.MR32_B3_next = 0;
 
             return fapi2::current_err;
         }
@@ -1513,15 +1512,14 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR32_ORG_next(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            // TODO Zen:MST-1770 Set *_next fields differently if needed
-            io_msg_block.MR32_ORG_A0_next = iv_msg_block_vars.iv_MR32_ORG[0];
-            io_msg_block.MR32_ORG_A1_next = iv_msg_block_vars.iv_MR32_ORG[1];
-            io_msg_block.MR32_ORG_A2_next = iv_msg_block_vars.iv_MR32_ORG[2];
-            io_msg_block.MR32_ORG_A3_next = iv_msg_block_vars.iv_MR32_ORG[3];
-            io_msg_block.MR32_ORG_B0_next = iv_msg_block_vars.iv_MR32_ORG[0];
-            io_msg_block.MR32_ORG_B1_next = iv_msg_block_vars.iv_MR32_ORG[1];
-            io_msg_block.MR32_ORG_B2_next = iv_msg_block_vars.iv_MR32_ORG[2];
-            io_msg_block.MR32_ORG_B3_next = iv_msg_block_vars.iv_MR32_ORG[3];
+            io_msg_block.MR32_ORG_A0_next = 0;
+            io_msg_block.MR32_ORG_A1_next = 0;
+            io_msg_block.MR32_ORG_A2_next = 0;
+            io_msg_block.MR32_ORG_A3_next = 0;
+            io_msg_block.MR32_ORG_B0_next = 0;
+            io_msg_block.MR32_ORG_B1_next = 0;
+            io_msg_block.MR32_ORG_B2_next = 0;
+            io_msg_block.MR32_ORG_B3_next = 0;
 
             return fapi2::current_err;
         }
@@ -1837,15 +1835,14 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR11_next(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            // TODO Zen:MST-1770 Set *_next fields differently if needed
-            io_msg_block.MR11_A0_next = iv_msg_block_vars.iv_MR11[0][0];
-            io_msg_block.MR11_A1_next = iv_msg_block_vars.iv_MR11[1][0];
-            io_msg_block.MR11_A2_next = iv_msg_block_vars.iv_MR11[2][0];
-            io_msg_block.MR11_A3_next = iv_msg_block_vars.iv_MR11[3][0];
-            io_msg_block.MR11_B0_next = iv_msg_block_vars.iv_MR11[0][0];
-            io_msg_block.MR11_B1_next = iv_msg_block_vars.iv_MR11[1][0];
-            io_msg_block.MR11_B2_next = iv_msg_block_vars.iv_MR11[2][0];
-            io_msg_block.MR11_B3_next = iv_msg_block_vars.iv_MR11[3][0];
+            io_msg_block.MR11_A0_next = 0;
+            io_msg_block.MR11_A1_next = 0;
+            io_msg_block.MR11_A2_next = 0;
+            io_msg_block.MR11_A3_next = 0;
+            io_msg_block.MR11_B0_next = 0;
+            io_msg_block.MR11_B1_next = 0;
+            io_msg_block.MR11_B2_next = 0;
+            io_msg_block.MR11_B3_next = 0;
 
             return fapi2::current_err;
         }
@@ -1857,15 +1854,14 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR12_next(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            // TODO Zen:MST-1770 Set *_next fields differently if needed
-            io_msg_block.MR12_A0_next = iv_msg_block_vars.iv_MR12[0][0];
-            io_msg_block.MR12_A1_next = iv_msg_block_vars.iv_MR12[1][0];
-            io_msg_block.MR12_A2_next = iv_msg_block_vars.iv_MR12[2][0];
-            io_msg_block.MR12_A3_next = iv_msg_block_vars.iv_MR12[3][0];
-            io_msg_block.MR12_B0_next = iv_msg_block_vars.iv_MR12[0][0];
-            io_msg_block.MR12_B1_next = iv_msg_block_vars.iv_MR12[1][0];
-            io_msg_block.MR12_B2_next = iv_msg_block_vars.iv_MR12[2][0];
-            io_msg_block.MR12_B3_next = iv_msg_block_vars.iv_MR12[3][0];
+            io_msg_block.MR12_A0_next = 0;
+            io_msg_block.MR12_A1_next = 0;
+            io_msg_block.MR12_A2_next = 0;
+            io_msg_block.MR12_A3_next = 0;
+            io_msg_block.MR12_B0_next = 0;
+            io_msg_block.MR12_B1_next = 0;
+            io_msg_block.MR12_B2_next = 0;
+            io_msg_block.MR12_B3_next = 0;
 
             return fapi2::current_err;
         }
@@ -1877,15 +1873,14 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR13_next(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            // TODO Zen:MST-1770 Set *_next fields differently if needed
-            io_msg_block.MR13_A0_next = iv_msg_block_vars.iv_MR13[0];
-            io_msg_block.MR13_A1_next = iv_msg_block_vars.iv_MR13[1];
-            io_msg_block.MR13_A2_next = iv_msg_block_vars.iv_MR13[2];
-            io_msg_block.MR13_A3_next = iv_msg_block_vars.iv_MR13[3];
-            io_msg_block.MR13_B0_next = iv_msg_block_vars.iv_MR13[0];
-            io_msg_block.MR13_B1_next = iv_msg_block_vars.iv_MR13[1];
-            io_msg_block.MR13_B2_next = iv_msg_block_vars.iv_MR13[2];
-            io_msg_block.MR13_B3_next = iv_msg_block_vars.iv_MR13[3];
+            io_msg_block.MR13_A0_next = 0;
+            io_msg_block.MR13_A1_next = 0;
+            io_msg_block.MR13_A2_next = 0;
+            io_msg_block.MR13_A3_next = 0;
+            io_msg_block.MR13_B0_next = 0;
+            io_msg_block.MR13_B1_next = 0;
+            io_msg_block.MR13_B2_next = 0;
+            io_msg_block.MR13_B3_next = 0;
 
             return fapi2::current_err;
         }
@@ -1897,15 +1892,14 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR33_ORG_next(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            // TODO Zen:MST-1770 Set *_next fields differently if needed
-            io_msg_block.MR33_ORG_A0_next = iv_msg_block_vars.iv_MR33_ORG[0];
-            io_msg_block.MR33_ORG_A1_next = iv_msg_block_vars.iv_MR33_ORG[1];
-            io_msg_block.MR33_ORG_A2_next = iv_msg_block_vars.iv_MR33_ORG[2];
-            io_msg_block.MR33_ORG_A3_next = iv_msg_block_vars.iv_MR33_ORG[3];
-            io_msg_block.MR33_ORG_B0_next = iv_msg_block_vars.iv_MR33_ORG[0];
-            io_msg_block.MR33_ORG_B1_next = iv_msg_block_vars.iv_MR33_ORG[1];
-            io_msg_block.MR33_ORG_B2_next = iv_msg_block_vars.iv_MR33_ORG[2];
-            io_msg_block.MR33_ORG_B3_next = iv_msg_block_vars.iv_MR33_ORG[3];
+            io_msg_block.MR33_ORG_A0_next = 0;
+            io_msg_block.MR33_ORG_A1_next = 0;
+            io_msg_block.MR33_ORG_A2_next = 0;
+            io_msg_block.MR33_ORG_A3_next = 0;
+            io_msg_block.MR33_ORG_B0_next = 0;
+            io_msg_block.MR33_ORG_B1_next = 0;
+            io_msg_block.MR33_ORG_B2_next = 0;
+            io_msg_block.MR33_ORG_B3_next = 0;
 
             return fapi2::current_err;
         }
@@ -1917,15 +1911,14 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR33_next(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            // TODO Zen:MST-1770 Set *_next fields differently if needed
-            io_msg_block.MR33_A0_next = iv_msg_block_vars.iv_MR33[0];
-            io_msg_block.MR33_A1_next = iv_msg_block_vars.iv_MR33[1];
-            io_msg_block.MR33_A2_next = iv_msg_block_vars.iv_MR33[2];
-            io_msg_block.MR33_A3_next = iv_msg_block_vars.iv_MR33[3];
-            io_msg_block.MR33_B0_next = iv_msg_block_vars.iv_MR33[0];
-            io_msg_block.MR33_B1_next = iv_msg_block_vars.iv_MR33[1];
-            io_msg_block.MR33_B2_next = iv_msg_block_vars.iv_MR33[2];
-            io_msg_block.MR33_B3_next = iv_msg_block_vars.iv_MR33[3];
+            io_msg_block.MR33_A0_next = 0;
+            io_msg_block.MR33_A1_next = 0;
+            io_msg_block.MR33_A2_next = 0;
+            io_msg_block.MR33_A3_next = 0;
+            io_msg_block.MR33_B0_next = 0;
+            io_msg_block.MR33_B1_next = 0;
+            io_msg_block.MR33_B2_next = 0;
+            io_msg_block.MR33_B3_next = 0;
 
             return fapi2::current_err;
         }
@@ -2013,7 +2006,14 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_ReservedF6(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
-            io_msg_block.ReservedF6 = iv_msg_block_vars.iv_ReservedF6;
+            // Need to set ReservedF6[6] (counting right-to-left) to get per-DRAM CK/CS/CA ODT
+            constexpr uint8_t PER_DRAM_ODT = 1;
+
+            fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_ReservedF6);
+
+            l_buffer.setBit<PER_DRAM_ODT>();
+
+            io_msg_block.ReservedF6 = l_buffer;
 
             return fapi2::FAPI2_RC_SUCCESS;
         }
@@ -3278,6 +3278,7 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_VrefDq(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
+            // Note the swizzle from DRAM indexing to Synopsys indexing
             io_msg_block.VrefDqR0Nib0 = iv_msg_block_vars.iv_MR10[0][0];
             io_msg_block.VrefDqR0Nib1 = iv_msg_block_vars.iv_MR10[0][1];
             io_msg_block.VrefDqR0Nib2 = iv_msg_block_vars.iv_MR10[0][2];
@@ -3286,16 +3287,16 @@ class msg_block_params
             io_msg_block.VrefDqR0Nib5 = iv_msg_block_vars.iv_MR10[0][5];
             io_msg_block.VrefDqR0Nib6 = iv_msg_block_vars.iv_MR10[0][6];
             io_msg_block.VrefDqR0Nib7 = iv_msg_block_vars.iv_MR10[0][7];
-            io_msg_block.VrefDqR0Nib8 = iv_msg_block_vars.iv_MR10[0][8];
-            io_msg_block.VrefDqR0Nib9 = iv_msg_block_vars.iv_MR10[0][9];
-            io_msg_block.VrefDqR0Nib10 = iv_msg_block_vars.iv_MR10[0][10];
-            io_msg_block.VrefDqR0Nib11 = iv_msg_block_vars.iv_MR10[0][11];
-            io_msg_block.VrefDqR0Nib12 = iv_msg_block_vars.iv_MR10[0][12];
-            io_msg_block.VrefDqR0Nib13 = iv_msg_block_vars.iv_MR10[0][13];
-            io_msg_block.VrefDqR0Nib14 = iv_msg_block_vars.iv_MR10[0][14];
-            io_msg_block.VrefDqR0Nib15 = iv_msg_block_vars.iv_MR10[0][15];
-            io_msg_block.VrefDqR0Nib16 = iv_msg_block_vars.iv_MR10[0][16];
-            io_msg_block.VrefDqR0Nib17 = iv_msg_block_vars.iv_MR10[0][17];
+            io_msg_block.VrefDqR0Nib8 = iv_msg_block_vars.iv_MR10[0][10];
+            io_msg_block.VrefDqR0Nib9 = iv_msg_block_vars.iv_MR10[0][11];
+            io_msg_block.VrefDqR0Nib10 = iv_msg_block_vars.iv_MR10[0][12];
+            io_msg_block.VrefDqR0Nib11 = iv_msg_block_vars.iv_MR10[0][13];
+            io_msg_block.VrefDqR0Nib12 = iv_msg_block_vars.iv_MR10[0][14];
+            io_msg_block.VrefDqR0Nib13 = iv_msg_block_vars.iv_MR10[0][15];
+            io_msg_block.VrefDqR0Nib14 = iv_msg_block_vars.iv_MR10[0][16];
+            io_msg_block.VrefDqR0Nib15 = iv_msg_block_vars.iv_MR10[0][17];
+            io_msg_block.VrefDqR0Nib16 = iv_msg_block_vars.iv_MR10[0][8];
+            io_msg_block.VrefDqR0Nib17 = iv_msg_block_vars.iv_MR10[0][9];
             io_msg_block.VrefDqR0Nib18 = iv_msg_block_vars.iv_MR10[0][18];
             io_msg_block.VrefDqR0Nib19 = iv_msg_block_vars.iv_MR10[0][19];
 
@@ -3307,16 +3308,16 @@ class msg_block_params
             io_msg_block.VrefDqR1Nib5 = iv_msg_block_vars.iv_MR10[1][5];
             io_msg_block.VrefDqR1Nib6 = iv_msg_block_vars.iv_MR10[1][6];
             io_msg_block.VrefDqR1Nib7 = iv_msg_block_vars.iv_MR10[1][7];
-            io_msg_block.VrefDqR1Nib8 = iv_msg_block_vars.iv_MR10[1][8];
-            io_msg_block.VrefDqR1Nib9 = iv_msg_block_vars.iv_MR10[1][9];
-            io_msg_block.VrefDqR1Nib10 = iv_msg_block_vars.iv_MR10[1][10];
-            io_msg_block.VrefDqR1Nib11 = iv_msg_block_vars.iv_MR10[1][11];
-            io_msg_block.VrefDqR1Nib12 = iv_msg_block_vars.iv_MR10[1][12];
-            io_msg_block.VrefDqR1Nib13 = iv_msg_block_vars.iv_MR10[1][13];
-            io_msg_block.VrefDqR1Nib14 = iv_msg_block_vars.iv_MR10[1][14];
-            io_msg_block.VrefDqR1Nib15 = iv_msg_block_vars.iv_MR10[1][15];
-            io_msg_block.VrefDqR1Nib16 = iv_msg_block_vars.iv_MR10[1][16];
-            io_msg_block.VrefDqR1Nib17 = iv_msg_block_vars.iv_MR10[1][17];
+            io_msg_block.VrefDqR1Nib8 = iv_msg_block_vars.iv_MR10[1][10];
+            io_msg_block.VrefDqR1Nib9 = iv_msg_block_vars.iv_MR10[1][11];
+            io_msg_block.VrefDqR1Nib10 = iv_msg_block_vars.iv_MR10[1][12];
+            io_msg_block.VrefDqR1Nib11 = iv_msg_block_vars.iv_MR10[1][13];
+            io_msg_block.VrefDqR1Nib12 = iv_msg_block_vars.iv_MR10[1][14];
+            io_msg_block.VrefDqR1Nib13 = iv_msg_block_vars.iv_MR10[1][15];
+            io_msg_block.VrefDqR1Nib14 = iv_msg_block_vars.iv_MR10[1][16];
+            io_msg_block.VrefDqR1Nib15 = iv_msg_block_vars.iv_MR10[1][17];
+            io_msg_block.VrefDqR1Nib16 = iv_msg_block_vars.iv_MR10[1][8];
+            io_msg_block.VrefDqR1Nib17 = iv_msg_block_vars.iv_MR10[1][9];
             io_msg_block.VrefDqR1Nib18 = iv_msg_block_vars.iv_MR10[1][18];
             io_msg_block.VrefDqR1Nib19 = iv_msg_block_vars.iv_MR10[1][19];
 
@@ -3328,16 +3329,16 @@ class msg_block_params
             io_msg_block.VrefDqR2Nib5 = iv_msg_block_vars.iv_MR10[2][5];
             io_msg_block.VrefDqR2Nib6 = iv_msg_block_vars.iv_MR10[2][6];
             io_msg_block.VrefDqR2Nib7 = iv_msg_block_vars.iv_MR10[2][7];
-            io_msg_block.VrefDqR2Nib8 = iv_msg_block_vars.iv_MR10[2][8];
-            io_msg_block.VrefDqR2Nib9 = iv_msg_block_vars.iv_MR10[2][9];
-            io_msg_block.VrefDqR2Nib10 = iv_msg_block_vars.iv_MR10[2][10];
-            io_msg_block.VrefDqR2Nib11 = iv_msg_block_vars.iv_MR10[2][11];
-            io_msg_block.VrefDqR2Nib12 = iv_msg_block_vars.iv_MR10[2][12];
-            io_msg_block.VrefDqR2Nib13 = iv_msg_block_vars.iv_MR10[2][13];
-            io_msg_block.VrefDqR2Nib14 = iv_msg_block_vars.iv_MR10[2][14];
-            io_msg_block.VrefDqR2Nib15 = iv_msg_block_vars.iv_MR10[2][15];
-            io_msg_block.VrefDqR2Nib16 = iv_msg_block_vars.iv_MR10[2][16];
-            io_msg_block.VrefDqR2Nib17 = iv_msg_block_vars.iv_MR10[2][17];
+            io_msg_block.VrefDqR2Nib8 = iv_msg_block_vars.iv_MR10[2][10];
+            io_msg_block.VrefDqR2Nib9 = iv_msg_block_vars.iv_MR10[2][11];
+            io_msg_block.VrefDqR2Nib10 = iv_msg_block_vars.iv_MR10[2][12];
+            io_msg_block.VrefDqR2Nib11 = iv_msg_block_vars.iv_MR10[2][13];
+            io_msg_block.VrefDqR2Nib12 = iv_msg_block_vars.iv_MR10[2][14];
+            io_msg_block.VrefDqR2Nib13 = iv_msg_block_vars.iv_MR10[2][15];
+            io_msg_block.VrefDqR2Nib14 = iv_msg_block_vars.iv_MR10[2][16];
+            io_msg_block.VrefDqR2Nib15 = iv_msg_block_vars.iv_MR10[2][17];
+            io_msg_block.VrefDqR2Nib16 = iv_msg_block_vars.iv_MR10[2][8];
+            io_msg_block.VrefDqR2Nib17 = iv_msg_block_vars.iv_MR10[2][9];
             io_msg_block.VrefDqR2Nib18 = iv_msg_block_vars.iv_MR10[2][18];
             io_msg_block.VrefDqR2Nib19 = iv_msg_block_vars.iv_MR10[2][19];
 
@@ -3349,16 +3350,16 @@ class msg_block_params
             io_msg_block.VrefDqR3Nib5 = iv_msg_block_vars.iv_MR10[3][5];
             io_msg_block.VrefDqR3Nib6 = iv_msg_block_vars.iv_MR10[3][6];
             io_msg_block.VrefDqR3Nib7 = iv_msg_block_vars.iv_MR10[3][7];
-            io_msg_block.VrefDqR3Nib8 = iv_msg_block_vars.iv_MR10[3][8];
-            io_msg_block.VrefDqR3Nib9 = iv_msg_block_vars.iv_MR10[3][9];
-            io_msg_block.VrefDqR3Nib10 = iv_msg_block_vars.iv_MR10[3][10];
-            io_msg_block.VrefDqR3Nib11 = iv_msg_block_vars.iv_MR10[3][11];
-            io_msg_block.VrefDqR3Nib12 = iv_msg_block_vars.iv_MR10[3][12];
-            io_msg_block.VrefDqR3Nib13 = iv_msg_block_vars.iv_MR10[3][13];
-            io_msg_block.VrefDqR3Nib14 = iv_msg_block_vars.iv_MR10[3][14];
-            io_msg_block.VrefDqR3Nib15 = iv_msg_block_vars.iv_MR10[3][15];
-            io_msg_block.VrefDqR3Nib16 = iv_msg_block_vars.iv_MR10[3][16];
-            io_msg_block.VrefDqR3Nib17 = iv_msg_block_vars.iv_MR10[3][17];
+            io_msg_block.VrefDqR3Nib8 = iv_msg_block_vars.iv_MR10[3][10];
+            io_msg_block.VrefDqR3Nib9 = iv_msg_block_vars.iv_MR10[3][11];
+            io_msg_block.VrefDqR3Nib10 = iv_msg_block_vars.iv_MR10[3][12];
+            io_msg_block.VrefDqR3Nib11 = iv_msg_block_vars.iv_MR10[3][13];
+            io_msg_block.VrefDqR3Nib12 = iv_msg_block_vars.iv_MR10[3][14];
+            io_msg_block.VrefDqR3Nib13 = iv_msg_block_vars.iv_MR10[3][15];
+            io_msg_block.VrefDqR3Nib14 = iv_msg_block_vars.iv_MR10[3][16];
+            io_msg_block.VrefDqR3Nib15 = iv_msg_block_vars.iv_MR10[3][17];
+            io_msg_block.VrefDqR3Nib16 = iv_msg_block_vars.iv_MR10[3][8];
+            io_msg_block.VrefDqR3Nib17 = iv_msg_block_vars.iv_MR10[3][9];
             io_msg_block.VrefDqR3Nib18 = iv_msg_block_vars.iv_MR10[3][18];
             io_msg_block.VrefDqR3Nib19 = iv_msg_block_vars.iv_MR10[3][19];
 
@@ -3373,6 +3374,7 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR3_per_dram(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
+            // Note the swizzle from DRAM indexing to Synopsys indexing
             io_msg_block.MR3R0Nib0 = iv_msg_block_vars.iv_MR33_per_dram[0][0];
             io_msg_block.MR3R0Nib1 = iv_msg_block_vars.iv_MR33_per_dram[0][1];
             io_msg_block.MR3R0Nib2 = iv_msg_block_vars.iv_MR33_per_dram[0][2];
@@ -3381,16 +3383,16 @@ class msg_block_params
             io_msg_block.MR3R0Nib5 = iv_msg_block_vars.iv_MR33_per_dram[0][5];
             io_msg_block.MR3R0Nib6 = iv_msg_block_vars.iv_MR33_per_dram[0][6];
             io_msg_block.MR3R0Nib7 = iv_msg_block_vars.iv_MR33_per_dram[0][7];
-            io_msg_block.MR3R0Nib8 = iv_msg_block_vars.iv_MR33_per_dram[0][8];
-            io_msg_block.MR3R0Nib9 = iv_msg_block_vars.iv_MR33_per_dram[0][9];
-            io_msg_block.MR3R0Nib10 = iv_msg_block_vars.iv_MR33_per_dram[0][10];
-            io_msg_block.MR3R0Nib11 = iv_msg_block_vars.iv_MR33_per_dram[0][11];
-            io_msg_block.MR3R0Nib12 = iv_msg_block_vars.iv_MR33_per_dram[0][12];
-            io_msg_block.MR3R0Nib13 = iv_msg_block_vars.iv_MR33_per_dram[0][13];
-            io_msg_block.MR3R0Nib14 = iv_msg_block_vars.iv_MR33_per_dram[0][14];
-            io_msg_block.MR3R0Nib15 = iv_msg_block_vars.iv_MR33_per_dram[0][15];
-            io_msg_block.MR3R0Nib16 = iv_msg_block_vars.iv_MR33_per_dram[0][16];
-            io_msg_block.MR3R0Nib17 = iv_msg_block_vars.iv_MR33_per_dram[0][17];
+            io_msg_block.MR3R0Nib8 = iv_msg_block_vars.iv_MR33_per_dram[0][10];
+            io_msg_block.MR3R0Nib9 = iv_msg_block_vars.iv_MR33_per_dram[0][11];
+            io_msg_block.MR3R0Nib10 = iv_msg_block_vars.iv_MR33_per_dram[0][12];
+            io_msg_block.MR3R0Nib11 = iv_msg_block_vars.iv_MR33_per_dram[0][13];
+            io_msg_block.MR3R0Nib12 = iv_msg_block_vars.iv_MR33_per_dram[0][14];
+            io_msg_block.MR3R0Nib13 = iv_msg_block_vars.iv_MR33_per_dram[0][15];
+            io_msg_block.MR3R0Nib14 = iv_msg_block_vars.iv_MR33_per_dram[0][16];
+            io_msg_block.MR3R0Nib15 = iv_msg_block_vars.iv_MR33_per_dram[0][17];
+            io_msg_block.MR3R0Nib16 = iv_msg_block_vars.iv_MR33_per_dram[0][8];
+            io_msg_block.MR3R0Nib17 = iv_msg_block_vars.iv_MR33_per_dram[0][9];
             io_msg_block.MR3R0Nib18 = iv_msg_block_vars.iv_MR33_per_dram[0][18];
             io_msg_block.MR3R0Nib19 = iv_msg_block_vars.iv_MR33_per_dram[0][19];
 
@@ -3402,16 +3404,16 @@ class msg_block_params
             io_msg_block.MR3R1Nib5 = iv_msg_block_vars.iv_MR33_per_dram[1][5];
             io_msg_block.MR3R1Nib6 = iv_msg_block_vars.iv_MR33_per_dram[1][6];
             io_msg_block.MR3R1Nib7 = iv_msg_block_vars.iv_MR33_per_dram[1][7];
-            io_msg_block.MR3R1Nib8 = iv_msg_block_vars.iv_MR33_per_dram[1][8];
-            io_msg_block.MR3R1Nib9 = iv_msg_block_vars.iv_MR33_per_dram[1][9];
-            io_msg_block.MR3R1Nib10 = iv_msg_block_vars.iv_MR33_per_dram[1][10];
-            io_msg_block.MR3R1Nib11 = iv_msg_block_vars.iv_MR33_per_dram[1][11];
-            io_msg_block.MR3R1Nib12 = iv_msg_block_vars.iv_MR33_per_dram[1][12];
-            io_msg_block.MR3R1Nib13 = iv_msg_block_vars.iv_MR33_per_dram[1][13];
-            io_msg_block.MR3R1Nib14 = iv_msg_block_vars.iv_MR33_per_dram[1][14];
-            io_msg_block.MR3R1Nib15 = iv_msg_block_vars.iv_MR33_per_dram[1][15];
-            io_msg_block.MR3R1Nib16 = iv_msg_block_vars.iv_MR33_per_dram[1][16];
-            io_msg_block.MR3R1Nib17 = iv_msg_block_vars.iv_MR33_per_dram[1][17];
+            io_msg_block.MR3R1Nib8 = iv_msg_block_vars.iv_MR33_per_dram[1][10];
+            io_msg_block.MR3R1Nib9 = iv_msg_block_vars.iv_MR33_per_dram[1][11];
+            io_msg_block.MR3R1Nib10 = iv_msg_block_vars.iv_MR33_per_dram[1][12];
+            io_msg_block.MR3R1Nib11 = iv_msg_block_vars.iv_MR33_per_dram[1][13];
+            io_msg_block.MR3R1Nib12 = iv_msg_block_vars.iv_MR33_per_dram[1][14];
+            io_msg_block.MR3R1Nib13 = iv_msg_block_vars.iv_MR33_per_dram[1][15];
+            io_msg_block.MR3R1Nib14 = iv_msg_block_vars.iv_MR33_per_dram[1][16];
+            io_msg_block.MR3R1Nib15 = iv_msg_block_vars.iv_MR33_per_dram[1][17];
+            io_msg_block.MR3R1Nib16 = iv_msg_block_vars.iv_MR33_per_dram[1][8];
+            io_msg_block.MR3R1Nib17 = iv_msg_block_vars.iv_MR33_per_dram[1][9];
             io_msg_block.MR3R1Nib18 = iv_msg_block_vars.iv_MR33_per_dram[1][18];
             io_msg_block.MR3R1Nib19 = iv_msg_block_vars.iv_MR33_per_dram[1][19];
 
@@ -3423,16 +3425,16 @@ class msg_block_params
             io_msg_block.MR3R2Nib5 = iv_msg_block_vars.iv_MR33_per_dram[2][5];
             io_msg_block.MR3R2Nib6 = iv_msg_block_vars.iv_MR33_per_dram[2][6];
             io_msg_block.MR3R2Nib7 = iv_msg_block_vars.iv_MR33_per_dram[2][7];
-            io_msg_block.MR3R2Nib8 = iv_msg_block_vars.iv_MR33_per_dram[2][8];
-            io_msg_block.MR3R2Nib9 = iv_msg_block_vars.iv_MR33_per_dram[2][9];
-            io_msg_block.MR3R2Nib10 = iv_msg_block_vars.iv_MR33_per_dram[2][10];
-            io_msg_block.MR3R2Nib11 = iv_msg_block_vars.iv_MR33_per_dram[2][11];
-            io_msg_block.MR3R2Nib12 = iv_msg_block_vars.iv_MR33_per_dram[2][12];
-            io_msg_block.MR3R2Nib13 = iv_msg_block_vars.iv_MR33_per_dram[2][13];
-            io_msg_block.MR3R2Nib14 = iv_msg_block_vars.iv_MR33_per_dram[2][14];
-            io_msg_block.MR3R2Nib15 = iv_msg_block_vars.iv_MR33_per_dram[2][15];
-            io_msg_block.MR3R2Nib16 = iv_msg_block_vars.iv_MR33_per_dram[2][16];
-            io_msg_block.MR3R2Nib17 = iv_msg_block_vars.iv_MR33_per_dram[2][17];
+            io_msg_block.MR3R2Nib8 = iv_msg_block_vars.iv_MR33_per_dram[2][10];
+            io_msg_block.MR3R2Nib9 = iv_msg_block_vars.iv_MR33_per_dram[2][11];
+            io_msg_block.MR3R2Nib10 = iv_msg_block_vars.iv_MR33_per_dram[2][12];
+            io_msg_block.MR3R2Nib11 = iv_msg_block_vars.iv_MR33_per_dram[2][13];
+            io_msg_block.MR3R2Nib12 = iv_msg_block_vars.iv_MR33_per_dram[2][14];
+            io_msg_block.MR3R2Nib13 = iv_msg_block_vars.iv_MR33_per_dram[2][15];
+            io_msg_block.MR3R2Nib14 = iv_msg_block_vars.iv_MR33_per_dram[2][16];
+            io_msg_block.MR3R2Nib15 = iv_msg_block_vars.iv_MR33_per_dram[2][17];
+            io_msg_block.MR3R2Nib16 = iv_msg_block_vars.iv_MR33_per_dram[2][8];
+            io_msg_block.MR3R2Nib17 = iv_msg_block_vars.iv_MR33_per_dram[2][9];
             io_msg_block.MR3R2Nib18 = iv_msg_block_vars.iv_MR33_per_dram[2][18];
             io_msg_block.MR3R2Nib19 = iv_msg_block_vars.iv_MR33_per_dram[2][19];
 
@@ -3444,16 +3446,16 @@ class msg_block_params
             io_msg_block.MR3R3Nib5 = iv_msg_block_vars.iv_MR33_per_dram[3][5];
             io_msg_block.MR3R3Nib6 = iv_msg_block_vars.iv_MR33_per_dram[3][6];
             io_msg_block.MR3R3Nib7 = iv_msg_block_vars.iv_MR33_per_dram[3][7];
-            io_msg_block.MR3R3Nib8 = iv_msg_block_vars.iv_MR33_per_dram[3][8];
-            io_msg_block.MR3R3Nib9 = iv_msg_block_vars.iv_MR33_per_dram[3][9];
-            io_msg_block.MR3R3Nib10 = iv_msg_block_vars.iv_MR33_per_dram[3][10];
-            io_msg_block.MR3R3Nib11 = iv_msg_block_vars.iv_MR33_per_dram[3][11];
-            io_msg_block.MR3R3Nib12 = iv_msg_block_vars.iv_MR33_per_dram[3][12];
-            io_msg_block.MR3R3Nib13 = iv_msg_block_vars.iv_MR33_per_dram[3][13];
-            io_msg_block.MR3R3Nib14 = iv_msg_block_vars.iv_MR33_per_dram[3][14];
-            io_msg_block.MR3R3Nib15 = iv_msg_block_vars.iv_MR33_per_dram[3][15];
-            io_msg_block.MR3R3Nib16 = iv_msg_block_vars.iv_MR33_per_dram[3][16];
-            io_msg_block.MR3R3Nib17 = iv_msg_block_vars.iv_MR33_per_dram[3][17];
+            io_msg_block.MR3R3Nib8 = iv_msg_block_vars.iv_MR33_per_dram[3][10];
+            io_msg_block.MR3R3Nib9 = iv_msg_block_vars.iv_MR33_per_dram[3][11];
+            io_msg_block.MR3R3Nib10 = iv_msg_block_vars.iv_MR33_per_dram[3][12];
+            io_msg_block.MR3R3Nib11 = iv_msg_block_vars.iv_MR33_per_dram[3][13];
+            io_msg_block.MR3R3Nib12 = iv_msg_block_vars.iv_MR33_per_dram[3][14];
+            io_msg_block.MR3R3Nib13 = iv_msg_block_vars.iv_MR33_per_dram[3][15];
+            io_msg_block.MR3R3Nib14 = iv_msg_block_vars.iv_MR33_per_dram[3][16];
+            io_msg_block.MR3R3Nib15 = iv_msg_block_vars.iv_MR33_per_dram[3][17];
+            io_msg_block.MR3R3Nib16 = iv_msg_block_vars.iv_MR33_per_dram[3][8];
+            io_msg_block.MR3R3Nib17 = iv_msg_block_vars.iv_MR33_per_dram[3][9];
             io_msg_block.MR3R3Nib18 = iv_msg_block_vars.iv_MR33_per_dram[3][18];
             io_msg_block.MR3R3Nib19 = iv_msg_block_vars.iv_MR33_per_dram[3][19];
 
@@ -3467,6 +3469,7 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_VrefCS(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
+            // Note the swizzle from DRAM indexing to Synopsys indexing
             io_msg_block.VrefCSR0Nib0 = iv_msg_block_vars.iv_MR12[0][0];
             io_msg_block.VrefCSR0Nib1 = iv_msg_block_vars.iv_MR12[0][1];
             io_msg_block.VrefCSR0Nib2 = iv_msg_block_vars.iv_MR12[0][2];
@@ -3475,16 +3478,16 @@ class msg_block_params
             io_msg_block.VrefCSR0Nib5 = iv_msg_block_vars.iv_MR12[0][5];
             io_msg_block.VrefCSR0Nib6 = iv_msg_block_vars.iv_MR12[0][6];
             io_msg_block.VrefCSR0Nib7 = iv_msg_block_vars.iv_MR12[0][7];
-            io_msg_block.VrefCSR0Nib8 = iv_msg_block_vars.iv_MR12[0][8];
-            io_msg_block.VrefCSR0Nib9 = iv_msg_block_vars.iv_MR12[0][9];
-            io_msg_block.VrefCSR0Nib10 = iv_msg_block_vars.iv_MR12[0][10];
-            io_msg_block.VrefCSR0Nib11 = iv_msg_block_vars.iv_MR12[0][11];
-            io_msg_block.VrefCSR0Nib12 = iv_msg_block_vars.iv_MR12[0][12];
-            io_msg_block.VrefCSR0Nib13 = iv_msg_block_vars.iv_MR12[0][13];
-            io_msg_block.VrefCSR0Nib14 = iv_msg_block_vars.iv_MR12[0][14];
-            io_msg_block.VrefCSR0Nib15 = iv_msg_block_vars.iv_MR12[0][15];
-            io_msg_block.VrefCSR0Nib16 = iv_msg_block_vars.iv_MR12[0][16];
-            io_msg_block.VrefCSR0Nib17 = iv_msg_block_vars.iv_MR12[0][17];
+            io_msg_block.VrefCSR0Nib8 = iv_msg_block_vars.iv_MR12[0][10];
+            io_msg_block.VrefCSR0Nib9 = iv_msg_block_vars.iv_MR12[0][11];
+            io_msg_block.VrefCSR0Nib10 = iv_msg_block_vars.iv_MR12[0][12];
+            io_msg_block.VrefCSR0Nib11 = iv_msg_block_vars.iv_MR12[0][13];
+            io_msg_block.VrefCSR0Nib12 = iv_msg_block_vars.iv_MR12[0][14];
+            io_msg_block.VrefCSR0Nib13 = iv_msg_block_vars.iv_MR12[0][15];
+            io_msg_block.VrefCSR0Nib14 = iv_msg_block_vars.iv_MR12[0][16];
+            io_msg_block.VrefCSR0Nib15 = iv_msg_block_vars.iv_MR12[0][17];
+            io_msg_block.VrefCSR0Nib16 = iv_msg_block_vars.iv_MR12[0][8];
+            io_msg_block.VrefCSR0Nib17 = iv_msg_block_vars.iv_MR12[0][9];
             io_msg_block.VrefCSR0Nib18 = iv_msg_block_vars.iv_MR12[0][18];
             io_msg_block.VrefCSR0Nib19 = iv_msg_block_vars.iv_MR12[0][19];
 
@@ -3496,16 +3499,16 @@ class msg_block_params
             io_msg_block.VrefCSR1Nib5 = iv_msg_block_vars.iv_MR12[1][5];
             io_msg_block.VrefCSR1Nib6 = iv_msg_block_vars.iv_MR12[1][6];
             io_msg_block.VrefCSR1Nib7 = iv_msg_block_vars.iv_MR12[1][7];
-            io_msg_block.VrefCSR1Nib8 = iv_msg_block_vars.iv_MR12[1][8];
-            io_msg_block.VrefCSR1Nib9 = iv_msg_block_vars.iv_MR12[1][9];
-            io_msg_block.VrefCSR1Nib10 = iv_msg_block_vars.iv_MR12[1][10];
-            io_msg_block.VrefCSR1Nib11 = iv_msg_block_vars.iv_MR12[1][11];
-            io_msg_block.VrefCSR1Nib12 = iv_msg_block_vars.iv_MR12[1][12];
-            io_msg_block.VrefCSR1Nib13 = iv_msg_block_vars.iv_MR12[1][13];
-            io_msg_block.VrefCSR1Nib14 = iv_msg_block_vars.iv_MR12[1][14];
-            io_msg_block.VrefCSR1Nib15 = iv_msg_block_vars.iv_MR12[1][15];
-            io_msg_block.VrefCSR1Nib16 = iv_msg_block_vars.iv_MR12[1][16];
-            io_msg_block.VrefCSR1Nib17 = iv_msg_block_vars.iv_MR12[1][17];
+            io_msg_block.VrefCSR1Nib8 = iv_msg_block_vars.iv_MR12[1][10];
+            io_msg_block.VrefCSR1Nib9 = iv_msg_block_vars.iv_MR12[1][11];
+            io_msg_block.VrefCSR1Nib10 = iv_msg_block_vars.iv_MR12[1][12];
+            io_msg_block.VrefCSR1Nib11 = iv_msg_block_vars.iv_MR12[1][13];
+            io_msg_block.VrefCSR1Nib12 = iv_msg_block_vars.iv_MR12[1][14];
+            io_msg_block.VrefCSR1Nib13 = iv_msg_block_vars.iv_MR12[1][15];
+            io_msg_block.VrefCSR1Nib14 = iv_msg_block_vars.iv_MR12[1][16];
+            io_msg_block.VrefCSR1Nib15 = iv_msg_block_vars.iv_MR12[1][17];
+            io_msg_block.VrefCSR1Nib16 = iv_msg_block_vars.iv_MR12[1][8];
+            io_msg_block.VrefCSR1Nib17 = iv_msg_block_vars.iv_MR12[1][9];
             io_msg_block.VrefCSR1Nib18 = iv_msg_block_vars.iv_MR12[1][18];
             io_msg_block.VrefCSR1Nib19 = iv_msg_block_vars.iv_MR12[1][19];
 
@@ -3517,16 +3520,16 @@ class msg_block_params
             io_msg_block.VrefCSR2Nib5 = iv_msg_block_vars.iv_MR12[2][5];
             io_msg_block.VrefCSR2Nib6 = iv_msg_block_vars.iv_MR12[2][6];
             io_msg_block.VrefCSR2Nib7 = iv_msg_block_vars.iv_MR12[2][7];
-            io_msg_block.VrefCSR2Nib8 = iv_msg_block_vars.iv_MR12[2][8];
-            io_msg_block.VrefCSR2Nib9 = iv_msg_block_vars.iv_MR12[2][9];
-            io_msg_block.VrefCSR2Nib10 = iv_msg_block_vars.iv_MR12[2][10];
-            io_msg_block.VrefCSR2Nib11 = iv_msg_block_vars.iv_MR12[2][11];
-            io_msg_block.VrefCSR2Nib12 = iv_msg_block_vars.iv_MR12[2][12];
-            io_msg_block.VrefCSR2Nib13 = iv_msg_block_vars.iv_MR12[2][13];
-            io_msg_block.VrefCSR2Nib14 = iv_msg_block_vars.iv_MR12[2][14];
-            io_msg_block.VrefCSR2Nib15 = iv_msg_block_vars.iv_MR12[2][15];
-            io_msg_block.VrefCSR2Nib16 = iv_msg_block_vars.iv_MR12[2][16];
-            io_msg_block.VrefCSR2Nib17 = iv_msg_block_vars.iv_MR12[2][17];
+            io_msg_block.VrefCSR2Nib8 = iv_msg_block_vars.iv_MR12[2][10];
+            io_msg_block.VrefCSR2Nib9 = iv_msg_block_vars.iv_MR12[2][11];
+            io_msg_block.VrefCSR2Nib10 = iv_msg_block_vars.iv_MR12[2][12];
+            io_msg_block.VrefCSR2Nib11 = iv_msg_block_vars.iv_MR12[2][13];
+            io_msg_block.VrefCSR2Nib12 = iv_msg_block_vars.iv_MR12[2][14];
+            io_msg_block.VrefCSR2Nib13 = iv_msg_block_vars.iv_MR12[2][15];
+            io_msg_block.VrefCSR2Nib14 = iv_msg_block_vars.iv_MR12[2][16];
+            io_msg_block.VrefCSR2Nib15 = iv_msg_block_vars.iv_MR12[2][17];
+            io_msg_block.VrefCSR2Nib16 = iv_msg_block_vars.iv_MR12[2][8];
+            io_msg_block.VrefCSR2Nib17 = iv_msg_block_vars.iv_MR12[2][9];
             io_msg_block.VrefCSR2Nib18 = iv_msg_block_vars.iv_MR12[2][18];
             io_msg_block.VrefCSR2Nib19 = iv_msg_block_vars.iv_MR12[2][19];
 
@@ -3538,16 +3541,16 @@ class msg_block_params
             io_msg_block.VrefCSR3Nib5 = iv_msg_block_vars.iv_MR12[3][5];
             io_msg_block.VrefCSR3Nib6 = iv_msg_block_vars.iv_MR12[3][6];
             io_msg_block.VrefCSR3Nib7 = iv_msg_block_vars.iv_MR12[3][7];
-            io_msg_block.VrefCSR3Nib8 = iv_msg_block_vars.iv_MR12[3][8];
-            io_msg_block.VrefCSR3Nib9 = iv_msg_block_vars.iv_MR12[3][9];
-            io_msg_block.VrefCSR3Nib10 = iv_msg_block_vars.iv_MR12[3][10];
-            io_msg_block.VrefCSR3Nib11 = iv_msg_block_vars.iv_MR12[3][11];
-            io_msg_block.VrefCSR3Nib12 = iv_msg_block_vars.iv_MR12[3][12];
-            io_msg_block.VrefCSR3Nib13 = iv_msg_block_vars.iv_MR12[3][13];
-            io_msg_block.VrefCSR3Nib14 = iv_msg_block_vars.iv_MR12[3][14];
-            io_msg_block.VrefCSR3Nib15 = iv_msg_block_vars.iv_MR12[3][15];
-            io_msg_block.VrefCSR3Nib16 = iv_msg_block_vars.iv_MR12[3][16];
-            io_msg_block.VrefCSR3Nib17 = iv_msg_block_vars.iv_MR12[3][17];
+            io_msg_block.VrefCSR3Nib8 = iv_msg_block_vars.iv_MR12[3][10];
+            io_msg_block.VrefCSR3Nib9 = iv_msg_block_vars.iv_MR12[3][11];
+            io_msg_block.VrefCSR3Nib10 = iv_msg_block_vars.iv_MR12[3][12];
+            io_msg_block.VrefCSR3Nib11 = iv_msg_block_vars.iv_MR12[3][13];
+            io_msg_block.VrefCSR3Nib12 = iv_msg_block_vars.iv_MR12[3][14];
+            io_msg_block.VrefCSR3Nib13 = iv_msg_block_vars.iv_MR12[3][15];
+            io_msg_block.VrefCSR3Nib14 = iv_msg_block_vars.iv_MR12[3][16];
+            io_msg_block.VrefCSR3Nib15 = iv_msg_block_vars.iv_MR12[3][17];
+            io_msg_block.VrefCSR3Nib16 = iv_msg_block_vars.iv_MR12[3][8];
+            io_msg_block.VrefCSR3Nib17 = iv_msg_block_vars.iv_MR12[3][9];
             io_msg_block.VrefCSR3Nib18 = iv_msg_block_vars.iv_MR12[3][18];
             io_msg_block.VrefCSR3Nib19 = iv_msg_block_vars.iv_MR12[3][19];
 
@@ -3561,6 +3564,7 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_VrefCA(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
+            // Note the swizzle from DRAM indexing to Synopsys indexing
             io_msg_block.VrefCAR0Nib0 = iv_msg_block_vars.iv_MR11[0][0];
             io_msg_block.VrefCAR0Nib1 = iv_msg_block_vars.iv_MR11[0][1];
             io_msg_block.VrefCAR0Nib2 = iv_msg_block_vars.iv_MR11[0][2];
@@ -3569,16 +3573,16 @@ class msg_block_params
             io_msg_block.VrefCAR0Nib5 = iv_msg_block_vars.iv_MR11[0][5];
             io_msg_block.VrefCAR0Nib6 = iv_msg_block_vars.iv_MR11[0][6];
             io_msg_block.VrefCAR0Nib7 = iv_msg_block_vars.iv_MR11[0][7];
-            io_msg_block.VrefCAR0Nib8 = iv_msg_block_vars.iv_MR11[0][8];
-            io_msg_block.VrefCAR0Nib9 = iv_msg_block_vars.iv_MR11[0][9];
-            io_msg_block.VrefCAR0Nib10 = iv_msg_block_vars.iv_MR11[0][10];
-            io_msg_block.VrefCAR0Nib11 = iv_msg_block_vars.iv_MR11[0][11];
-            io_msg_block.VrefCAR0Nib12 = iv_msg_block_vars.iv_MR11[0][12];
-            io_msg_block.VrefCAR0Nib13 = iv_msg_block_vars.iv_MR11[0][13];
-            io_msg_block.VrefCAR0Nib14 = iv_msg_block_vars.iv_MR11[0][14];
-            io_msg_block.VrefCAR0Nib15 = iv_msg_block_vars.iv_MR11[0][15];
-            io_msg_block.VrefCAR0Nib16 = iv_msg_block_vars.iv_MR11[0][16];
-            io_msg_block.VrefCAR0Nib17 = iv_msg_block_vars.iv_MR11[0][17];
+            io_msg_block.VrefCAR0Nib8 = iv_msg_block_vars.iv_MR11[0][10];
+            io_msg_block.VrefCAR0Nib9 = iv_msg_block_vars.iv_MR11[0][11];
+            io_msg_block.VrefCAR0Nib10 = iv_msg_block_vars.iv_MR11[0][12];
+            io_msg_block.VrefCAR0Nib11 = iv_msg_block_vars.iv_MR11[0][13];
+            io_msg_block.VrefCAR0Nib12 = iv_msg_block_vars.iv_MR11[0][14];
+            io_msg_block.VrefCAR0Nib13 = iv_msg_block_vars.iv_MR11[0][15];
+            io_msg_block.VrefCAR0Nib14 = iv_msg_block_vars.iv_MR11[0][16];
+            io_msg_block.VrefCAR0Nib15 = iv_msg_block_vars.iv_MR11[0][17];
+            io_msg_block.VrefCAR0Nib16 = iv_msg_block_vars.iv_MR11[0][8];
+            io_msg_block.VrefCAR0Nib17 = iv_msg_block_vars.iv_MR11[0][9];
             io_msg_block.VrefCAR0Nib18 = iv_msg_block_vars.iv_MR11[0][18];
             io_msg_block.VrefCAR0Nib19 = iv_msg_block_vars.iv_MR11[0][19];
 
@@ -3590,16 +3594,16 @@ class msg_block_params
             io_msg_block.VrefCAR1Nib5 = iv_msg_block_vars.iv_MR11[1][5];
             io_msg_block.VrefCAR1Nib6 = iv_msg_block_vars.iv_MR11[1][6];
             io_msg_block.VrefCAR1Nib7 = iv_msg_block_vars.iv_MR11[1][7];
-            io_msg_block.VrefCAR1Nib8 = iv_msg_block_vars.iv_MR11[1][8];
-            io_msg_block.VrefCAR1Nib9 = iv_msg_block_vars.iv_MR11[1][9];
-            io_msg_block.VrefCAR1Nib10 = iv_msg_block_vars.iv_MR11[1][10];
-            io_msg_block.VrefCAR1Nib11 = iv_msg_block_vars.iv_MR11[1][11];
-            io_msg_block.VrefCAR1Nib12 = iv_msg_block_vars.iv_MR11[1][12];
-            io_msg_block.VrefCAR1Nib13 = iv_msg_block_vars.iv_MR11[1][13];
-            io_msg_block.VrefCAR1Nib14 = iv_msg_block_vars.iv_MR11[1][14];
-            io_msg_block.VrefCAR1Nib15 = iv_msg_block_vars.iv_MR11[1][15];
-            io_msg_block.VrefCAR1Nib16 = iv_msg_block_vars.iv_MR11[1][16];
-            io_msg_block.VrefCAR1Nib17 = iv_msg_block_vars.iv_MR11[1][17];
+            io_msg_block.VrefCAR1Nib8 = iv_msg_block_vars.iv_MR11[1][10];
+            io_msg_block.VrefCAR1Nib9 = iv_msg_block_vars.iv_MR11[1][11];
+            io_msg_block.VrefCAR1Nib10 = iv_msg_block_vars.iv_MR11[1][12];
+            io_msg_block.VrefCAR1Nib11 = iv_msg_block_vars.iv_MR11[1][13];
+            io_msg_block.VrefCAR1Nib12 = iv_msg_block_vars.iv_MR11[1][14];
+            io_msg_block.VrefCAR1Nib13 = iv_msg_block_vars.iv_MR11[1][15];
+            io_msg_block.VrefCAR1Nib14 = iv_msg_block_vars.iv_MR11[1][16];
+            io_msg_block.VrefCAR1Nib15 = iv_msg_block_vars.iv_MR11[1][17];
+            io_msg_block.VrefCAR1Nib16 = iv_msg_block_vars.iv_MR11[1][8];
+            io_msg_block.VrefCAR1Nib17 = iv_msg_block_vars.iv_MR11[1][9];
             io_msg_block.VrefCAR1Nib18 = iv_msg_block_vars.iv_MR11[1][18];
             io_msg_block.VrefCAR1Nib19 = iv_msg_block_vars.iv_MR11[1][19];
 
@@ -3611,16 +3615,16 @@ class msg_block_params
             io_msg_block.VrefCAR2Nib5 = iv_msg_block_vars.iv_MR11[2][5];
             io_msg_block.VrefCAR2Nib6 = iv_msg_block_vars.iv_MR11[2][6];
             io_msg_block.VrefCAR2Nib7 = iv_msg_block_vars.iv_MR11[2][7];
-            io_msg_block.VrefCAR2Nib8 = iv_msg_block_vars.iv_MR11[2][8];
-            io_msg_block.VrefCAR2Nib9 = iv_msg_block_vars.iv_MR11[2][9];
-            io_msg_block.VrefCAR2Nib10 = iv_msg_block_vars.iv_MR11[2][10];
-            io_msg_block.VrefCAR2Nib11 = iv_msg_block_vars.iv_MR11[2][11];
-            io_msg_block.VrefCAR2Nib12 = iv_msg_block_vars.iv_MR11[2][12];
-            io_msg_block.VrefCAR2Nib13 = iv_msg_block_vars.iv_MR11[2][13];
-            io_msg_block.VrefCAR2Nib14 = iv_msg_block_vars.iv_MR11[2][14];
-            io_msg_block.VrefCAR2Nib15 = iv_msg_block_vars.iv_MR11[2][15];
-            io_msg_block.VrefCAR2Nib16 = iv_msg_block_vars.iv_MR11[2][16];
-            io_msg_block.VrefCAR2Nib17 = iv_msg_block_vars.iv_MR11[2][17];
+            io_msg_block.VrefCAR2Nib8 = iv_msg_block_vars.iv_MR11[2][10];
+            io_msg_block.VrefCAR2Nib9 = iv_msg_block_vars.iv_MR11[2][11];
+            io_msg_block.VrefCAR2Nib10 = iv_msg_block_vars.iv_MR11[2][12];
+            io_msg_block.VrefCAR2Nib11 = iv_msg_block_vars.iv_MR11[2][13];
+            io_msg_block.VrefCAR2Nib12 = iv_msg_block_vars.iv_MR11[2][14];
+            io_msg_block.VrefCAR2Nib13 = iv_msg_block_vars.iv_MR11[2][15];
+            io_msg_block.VrefCAR2Nib14 = iv_msg_block_vars.iv_MR11[2][16];
+            io_msg_block.VrefCAR2Nib15 = iv_msg_block_vars.iv_MR11[2][17];
+            io_msg_block.VrefCAR2Nib16 = iv_msg_block_vars.iv_MR11[2][8];
+            io_msg_block.VrefCAR2Nib17 = iv_msg_block_vars.iv_MR11[2][9];
             io_msg_block.VrefCAR2Nib18 = iv_msg_block_vars.iv_MR11[2][18];
             io_msg_block.VrefCAR2Nib19 = iv_msg_block_vars.iv_MR11[2][19];
 
@@ -3632,16 +3636,16 @@ class msg_block_params
             io_msg_block.VrefCAR3Nib5 = iv_msg_block_vars.iv_MR11[3][5];
             io_msg_block.VrefCAR3Nib6 = iv_msg_block_vars.iv_MR11[3][6];
             io_msg_block.VrefCAR3Nib7 = iv_msg_block_vars.iv_MR11[3][7];
-            io_msg_block.VrefCAR3Nib8 = iv_msg_block_vars.iv_MR11[3][8];
-            io_msg_block.VrefCAR3Nib9 = iv_msg_block_vars.iv_MR11[3][9];
-            io_msg_block.VrefCAR3Nib10 = iv_msg_block_vars.iv_MR11[3][10];
-            io_msg_block.VrefCAR3Nib11 = iv_msg_block_vars.iv_MR11[3][11];
-            io_msg_block.VrefCAR3Nib12 = iv_msg_block_vars.iv_MR11[3][12];
-            io_msg_block.VrefCAR3Nib13 = iv_msg_block_vars.iv_MR11[3][13];
-            io_msg_block.VrefCAR3Nib14 = iv_msg_block_vars.iv_MR11[3][14];
-            io_msg_block.VrefCAR3Nib15 = iv_msg_block_vars.iv_MR11[3][15];
-            io_msg_block.VrefCAR3Nib16 = iv_msg_block_vars.iv_MR11[3][16];
-            io_msg_block.VrefCAR3Nib17 = iv_msg_block_vars.iv_MR11[3][17];
+            io_msg_block.VrefCAR3Nib8 = iv_msg_block_vars.iv_MR11[3][10];
+            io_msg_block.VrefCAR3Nib9 = iv_msg_block_vars.iv_MR11[3][11];
+            io_msg_block.VrefCAR3Nib10 = iv_msg_block_vars.iv_MR11[3][12];
+            io_msg_block.VrefCAR3Nib11 = iv_msg_block_vars.iv_MR11[3][13];
+            io_msg_block.VrefCAR3Nib12 = iv_msg_block_vars.iv_MR11[3][14];
+            io_msg_block.VrefCAR3Nib13 = iv_msg_block_vars.iv_MR11[3][15];
+            io_msg_block.VrefCAR3Nib14 = iv_msg_block_vars.iv_MR11[3][16];
+            io_msg_block.VrefCAR3Nib15 = iv_msg_block_vars.iv_MR11[3][17];
+            io_msg_block.VrefCAR3Nib16 = iv_msg_block_vars.iv_MR11[3][8];
+            io_msg_block.VrefCAR3Nib17 = iv_msg_block_vars.iv_MR11[3][9];
             io_msg_block.VrefCAR3Nib18 = iv_msg_block_vars.iv_MR11[3][18];
             io_msg_block.VrefCAR3Nib19 = iv_msg_block_vars.iv_MR11[3][19];
 
@@ -3738,6 +3742,7 @@ class msg_block_params
         ///
         fapi2::ReturnCode setup_MR32_per_dram(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
+            // Note the swizzle from DRAM indexing to Synopsys indexing
             io_msg_block.MR32R0Nib0 = iv_msg_block_vars.iv_MR32_per_dram[0][0];
             io_msg_block.MR32R0Nib1 = iv_msg_block_vars.iv_MR32_per_dram[0][1];
             io_msg_block.MR32R0Nib2 = iv_msg_block_vars.iv_MR32_per_dram[0][2];
@@ -3746,16 +3751,16 @@ class msg_block_params
             io_msg_block.MR32R0Nib5 = iv_msg_block_vars.iv_MR32_per_dram[0][5];
             io_msg_block.MR32R0Nib6 = iv_msg_block_vars.iv_MR32_per_dram[0][6];
             io_msg_block.MR32R0Nib7 = iv_msg_block_vars.iv_MR32_per_dram[0][7];
-            io_msg_block.MR32R0Nib8 = iv_msg_block_vars.iv_MR32_per_dram[0][8];
-            io_msg_block.MR32R0Nib9 = iv_msg_block_vars.iv_MR32_per_dram[0][9];
-            io_msg_block.MR32R0Nib10 = iv_msg_block_vars.iv_MR32_per_dram[0][10];
-            io_msg_block.MR32R0Nib11 = iv_msg_block_vars.iv_MR32_per_dram[0][11];
-            io_msg_block.MR32R0Nib12 = iv_msg_block_vars.iv_MR32_per_dram[0][12];
-            io_msg_block.MR32R0Nib13 = iv_msg_block_vars.iv_MR32_per_dram[0][13];
-            io_msg_block.MR32R0Nib14 = iv_msg_block_vars.iv_MR32_per_dram[0][14];
-            io_msg_block.MR32R0Nib15 = iv_msg_block_vars.iv_MR32_per_dram[0][15];
-            io_msg_block.MR32R0Nib16 = iv_msg_block_vars.iv_MR32_per_dram[0][16];
-            io_msg_block.MR32R0Nib17 = iv_msg_block_vars.iv_MR32_per_dram[0][17];
+            io_msg_block.MR32R0Nib8 = iv_msg_block_vars.iv_MR32_per_dram[0][10];
+            io_msg_block.MR32R0Nib9 = iv_msg_block_vars.iv_MR32_per_dram[0][11];
+            io_msg_block.MR32R0Nib10 = iv_msg_block_vars.iv_MR32_per_dram[0][12];
+            io_msg_block.MR32R0Nib11 = iv_msg_block_vars.iv_MR32_per_dram[0][13];
+            io_msg_block.MR32R0Nib12 = iv_msg_block_vars.iv_MR32_per_dram[0][14];
+            io_msg_block.MR32R0Nib13 = iv_msg_block_vars.iv_MR32_per_dram[0][15];
+            io_msg_block.MR32R0Nib14 = iv_msg_block_vars.iv_MR32_per_dram[0][16];
+            io_msg_block.MR32R0Nib15 = iv_msg_block_vars.iv_MR32_per_dram[0][17];
+            io_msg_block.MR32R0Nib16 = iv_msg_block_vars.iv_MR32_per_dram[0][8];
+            io_msg_block.MR32R0Nib17 = iv_msg_block_vars.iv_MR32_per_dram[0][9];
             io_msg_block.MR32R0Nib18 = iv_msg_block_vars.iv_MR32_per_dram[0][18];
             io_msg_block.MR32R0Nib19 = iv_msg_block_vars.iv_MR32_per_dram[0][19];
 
@@ -3767,16 +3772,16 @@ class msg_block_params
             io_msg_block.MR32R1Nib5 = iv_msg_block_vars.iv_MR32_per_dram[1][5];
             io_msg_block.MR32R1Nib6 = iv_msg_block_vars.iv_MR32_per_dram[1][6];
             io_msg_block.MR32R1Nib7 = iv_msg_block_vars.iv_MR32_per_dram[1][7];
-            io_msg_block.MR32R1Nib8 = iv_msg_block_vars.iv_MR32_per_dram[1][8];
-            io_msg_block.MR32R1Nib9 = iv_msg_block_vars.iv_MR32_per_dram[1][9];
-            io_msg_block.MR32R1Nib10 = iv_msg_block_vars.iv_MR32_per_dram[1][10];
-            io_msg_block.MR32R1Nib11 = iv_msg_block_vars.iv_MR32_per_dram[1][11];
-            io_msg_block.MR32R1Nib12 = iv_msg_block_vars.iv_MR32_per_dram[1][12];
-            io_msg_block.MR32R1Nib13 = iv_msg_block_vars.iv_MR32_per_dram[1][13];
-            io_msg_block.MR32R1Nib14 = iv_msg_block_vars.iv_MR32_per_dram[1][14];
-            io_msg_block.MR32R1Nib15 = iv_msg_block_vars.iv_MR32_per_dram[1][15];
-            io_msg_block.MR32R1Nib16 = iv_msg_block_vars.iv_MR32_per_dram[1][16];
-            io_msg_block.MR32R1Nib17 = iv_msg_block_vars.iv_MR32_per_dram[1][17];
+            io_msg_block.MR32R1Nib8 = iv_msg_block_vars.iv_MR32_per_dram[1][10];
+            io_msg_block.MR32R1Nib9 = iv_msg_block_vars.iv_MR32_per_dram[1][11];
+            io_msg_block.MR32R1Nib10 = iv_msg_block_vars.iv_MR32_per_dram[1][12];
+            io_msg_block.MR32R1Nib11 = iv_msg_block_vars.iv_MR32_per_dram[1][13];
+            io_msg_block.MR32R1Nib12 = iv_msg_block_vars.iv_MR32_per_dram[1][14];
+            io_msg_block.MR32R1Nib13 = iv_msg_block_vars.iv_MR32_per_dram[1][15];
+            io_msg_block.MR32R1Nib14 = iv_msg_block_vars.iv_MR32_per_dram[1][16];
+            io_msg_block.MR32R1Nib15 = iv_msg_block_vars.iv_MR32_per_dram[1][17];
+            io_msg_block.MR32R1Nib16 = iv_msg_block_vars.iv_MR32_per_dram[1][8];
+            io_msg_block.MR32R1Nib17 = iv_msg_block_vars.iv_MR32_per_dram[1][9];
             io_msg_block.MR32R1Nib18 = iv_msg_block_vars.iv_MR32_per_dram[1][18];
             io_msg_block.MR32R1Nib19 = iv_msg_block_vars.iv_MR32_per_dram[1][19];
 
@@ -3788,16 +3793,16 @@ class msg_block_params
             io_msg_block.MR32R2Nib5 = iv_msg_block_vars.iv_MR32_per_dram[2][5];
             io_msg_block.MR32R2Nib6 = iv_msg_block_vars.iv_MR32_per_dram[2][6];
             io_msg_block.MR32R2Nib7 = iv_msg_block_vars.iv_MR32_per_dram[2][7];
-            io_msg_block.MR32R2Nib8 = iv_msg_block_vars.iv_MR32_per_dram[2][8];
-            io_msg_block.MR32R2Nib9 = iv_msg_block_vars.iv_MR32_per_dram[2][9];
-            io_msg_block.MR32R2Nib10 = iv_msg_block_vars.iv_MR32_per_dram[2][10];
-            io_msg_block.MR32R2Nib11 = iv_msg_block_vars.iv_MR32_per_dram[2][11];
-            io_msg_block.MR32R2Nib12 = iv_msg_block_vars.iv_MR32_per_dram[2][12];
-            io_msg_block.MR32R2Nib13 = iv_msg_block_vars.iv_MR32_per_dram[2][13];
-            io_msg_block.MR32R2Nib14 = iv_msg_block_vars.iv_MR32_per_dram[2][14];
-            io_msg_block.MR32R2Nib15 = iv_msg_block_vars.iv_MR32_per_dram[2][15];
-            io_msg_block.MR32R2Nib16 = iv_msg_block_vars.iv_MR32_per_dram[2][16];
-            io_msg_block.MR32R2Nib17 = iv_msg_block_vars.iv_MR32_per_dram[2][17];
+            io_msg_block.MR32R2Nib8 = iv_msg_block_vars.iv_MR32_per_dram[2][10];
+            io_msg_block.MR32R2Nib9 = iv_msg_block_vars.iv_MR32_per_dram[2][11];
+            io_msg_block.MR32R2Nib10 = iv_msg_block_vars.iv_MR32_per_dram[2][12];
+            io_msg_block.MR32R2Nib11 = iv_msg_block_vars.iv_MR32_per_dram[2][13];
+            io_msg_block.MR32R2Nib12 = iv_msg_block_vars.iv_MR32_per_dram[2][14];
+            io_msg_block.MR32R2Nib13 = iv_msg_block_vars.iv_MR32_per_dram[2][15];
+            io_msg_block.MR32R2Nib14 = iv_msg_block_vars.iv_MR32_per_dram[2][16];
+            io_msg_block.MR32R2Nib15 = iv_msg_block_vars.iv_MR32_per_dram[2][17];
+            io_msg_block.MR32R2Nib16 = iv_msg_block_vars.iv_MR32_per_dram[2][8];
+            io_msg_block.MR32R2Nib17 = iv_msg_block_vars.iv_MR32_per_dram[2][9];
             io_msg_block.MR32R2Nib18 = iv_msg_block_vars.iv_MR32_per_dram[2][18];
             io_msg_block.MR32R2Nib19 = iv_msg_block_vars.iv_MR32_per_dram[2][19];
 
@@ -3809,16 +3814,16 @@ class msg_block_params
             io_msg_block.MR32R3Nib5 = iv_msg_block_vars.iv_MR32_per_dram[3][5];
             io_msg_block.MR32R3Nib6 = iv_msg_block_vars.iv_MR32_per_dram[3][6];
             io_msg_block.MR32R3Nib7 = iv_msg_block_vars.iv_MR32_per_dram[3][7];
-            io_msg_block.MR32R3Nib8 = iv_msg_block_vars.iv_MR32_per_dram[3][8];
-            io_msg_block.MR32R3Nib9 = iv_msg_block_vars.iv_MR32_per_dram[3][9];
-            io_msg_block.MR32R3Nib10 = iv_msg_block_vars.iv_MR32_per_dram[3][10];
-            io_msg_block.MR32R3Nib11 = iv_msg_block_vars.iv_MR32_per_dram[3][11];
-            io_msg_block.MR32R3Nib12 = iv_msg_block_vars.iv_MR32_per_dram[3][12];
-            io_msg_block.MR32R3Nib13 = iv_msg_block_vars.iv_MR32_per_dram[3][13];
-            io_msg_block.MR32R3Nib14 = iv_msg_block_vars.iv_MR32_per_dram[3][14];
-            io_msg_block.MR32R3Nib15 = iv_msg_block_vars.iv_MR32_per_dram[3][15];
-            io_msg_block.MR32R3Nib16 = iv_msg_block_vars.iv_MR32_per_dram[3][16];
-            io_msg_block.MR32R3Nib17 = iv_msg_block_vars.iv_MR32_per_dram[3][17];
+            io_msg_block.MR32R3Nib8 = iv_msg_block_vars.iv_MR32_per_dram[3][10];
+            io_msg_block.MR32R3Nib9 = iv_msg_block_vars.iv_MR32_per_dram[3][11];
+            io_msg_block.MR32R3Nib10 = iv_msg_block_vars.iv_MR32_per_dram[3][12];
+            io_msg_block.MR32R3Nib11 = iv_msg_block_vars.iv_MR32_per_dram[3][13];
+            io_msg_block.MR32R3Nib12 = iv_msg_block_vars.iv_MR32_per_dram[3][14];
+            io_msg_block.MR32R3Nib13 = iv_msg_block_vars.iv_MR32_per_dram[3][15];
+            io_msg_block.MR32R3Nib14 = iv_msg_block_vars.iv_MR32_per_dram[3][16];
+            io_msg_block.MR32R3Nib15 = iv_msg_block_vars.iv_MR32_per_dram[3][17];
+            io_msg_block.MR32R3Nib16 = iv_msg_block_vars.iv_MR32_per_dram[3][8];
+            io_msg_block.MR32R3Nib17 = iv_msg_block_vars.iv_MR32_per_dram[3][9];
             io_msg_block.MR32R3Nib18 = iv_msg_block_vars.iv_MR32_per_dram[3][18];
             io_msg_block.MR32R3Nib19 = iv_msg_block_vars.iv_MR32_per_dram[3][19];
 

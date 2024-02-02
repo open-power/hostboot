@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,9 @@ extern "C"
         mss::display_git_commit_info("ody_sppe_draminit");
 
 
+#ifdef __PPE__
         FAPI_TRY(mss::ody::phy::check_draminit_verbosity(i_target));
+#endif
         FAPI_TRY(mss::ody::draminit(i_target, o_log_data));
 
     fapi_try_exit:
