@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <fapi2.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle_traits.H>
 #include <ody_scom_ody_odc.H>
+#include <lib/shared/ody_consts.H>
 
 namespace mss
 {
@@ -189,6 +190,12 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             DIMM_ATTACHED_START = 26,
             DIMM_ATTACHED_LEN = 2,
         };
+
+        // Max achievable utilization value based on frequency per port
+        // and number of ports on the dimm in c% units
+        static const uint32_t PORT_UTIL_MAP_3200[mss::ody::sizes::MAX_PORT_PER_OCMB];
+        static const uint32_t PORT_UTIL_MAP_4000[mss::ody::sizes::MAX_PORT_PER_OCMB];
+        static const uint32_t PORT_UTIL_MAP_4800[mss::ody::sizes::MAX_PORT_PER_OCMB];
 
 #ifndef __PPE__
         // Definition is in chip folder

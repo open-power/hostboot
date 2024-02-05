@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -353,6 +353,87 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Adjusts memory power according to max achievable
+///        utilization based on DIMM freq and port count  - Explorer specialization
+/// @param[in] i_port_target mem port target that is being executed
+/// @param[in,out] io_fin_power Final power that is calculated based on frequency and port
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode memory_power_adjustment<mss::mc_type::EXPLORER>(const
+        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port_target,
+        uint32_t& io_fin_power)
+{
+    uint32_t l_throttle_denominator = 0;
+
+    uint64_t l_dram_freq = 0;
+    uint32_t l_max_util = 10000;
+    uint32_t l_n_throttle_for_maxutil = 0;
+    uint32_t l_max_achievable_pwr = 0;
+
+    //Need to create throttle object for each MC in order to get dimm configuration and power curves
+    //To calculate the slot/port utilization and total port power consumption
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    const auto l_dummy = mss::power_thermal::throttle<mss::mc_type::EXPLORER>(i_port_target, l_rc);
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_MRW_MEM_M_DRAM_CLOCKS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_throttle_denominator));
+    FAPI_TRY(l_rc, "Failed creating a throttle object in equalize_throttles for " GENTARGTIDFORMAT,
+             GENTARGTID(i_port_target));
+
+    // Get the DRAM frequency for the port
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_port_target, l_dram_freq));
+
+    // Get the max achievable utilization based on frequency and port
+    if (l_dram_freq == 2666)
+    {
+        l_max_util = throttle_traits<mss::mc_type::EXPLORER>::PORT_UTIL_MAP_2666;
+    }
+    else if (l_dram_freq == 2933)
+    {
+        l_max_util = throttle_traits<mss::mc_type::EXPLORER>::PORT_UTIL_MAP_2933;
+    }
+    else if (l_dram_freq == 3200)
+    {
+        l_max_util = throttle_traits<mss::mc_type::EXPLORER>::PORT_UTIL_MAP_3200;
+    }
+
+    // Calculate out the throttle value using the utilization value
+    l_n_throttle_for_maxutil = calc_n_from_dram_util(l_max_util, l_throttle_denominator);
+
+    // Calculate the max achievable value from the above throttle value
+    FAPI_TRY( l_dummy.calc_power_from_n(l_n_throttle_for_maxutil, l_n_throttle_for_maxutil, l_max_achievable_pwr),
+              "Failed calculating the power value for throttles: slot %d, port %d for target: " GENTARGTIDFORMAT,
+              l_n_throttle_for_maxutil,
+              l_n_throttle_for_maxutil,
+              GENTARGTID(i_port_target));
+
+    // Compare to the calculated power at the hardcoded util value
+    // If the calculated power is less than what is in the attribute
+    // then update the attribute with the calculated power value
+    if( l_max_achievable_pwr < io_fin_power)
+    {
+        FAPI_INF("Memory power adjustment was made because max achievable power: %d is less than final power: %d for target "
+                 GENTARGTIDFORMAT,
+                 l_max_achievable_pwr, io_fin_power, GENTARGTID(i_port_target));
+    }
+    else
+    {
+        FAPI_INF("Memory power adjustment was not made because max achievable power: %d is greater than final power: %d for target "
+                 GENTARGTIDFORMAT,
+                 l_max_achievable_pwr, io_fin_power, GENTARGTID(i_port_target));
+    }
+
+    io_fin_power = std::min(io_fin_power, l_max_achievable_pwr);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    FAPI_ERR("Error on memory power adjustment on " GENTARGTIDFORMAT, GENTARGTID(i_port_target));
+    return fapi2::current_err;
+}
+
+///
 /// @brief Equalize the throttles and estimated power at those throttle levels - Explorer specialization
 /// @param[in] i_targets vector of MC targets all on the same VDDR domain
 /// @param[in] i_throttle_type denotes if this was done for POWER (VMEM) or THERMAL (VMEM+VPP) throttles
@@ -506,6 +587,7 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::EXPLORER>(const
                 //Better to set the throttles than leave them 0, and potentially brick the memory
                 FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_PORT,  l_port, l_fin_port) );
                 FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT,  l_port, l_fin_slot) );
+                FAPI_TRY(memory_power_adjustment<mss::mc_type::EXPLORER>( l_port, l_fin_power));
                 FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_PORT_MAXPOWER,  l_port, l_fin_power) );
             }
         }

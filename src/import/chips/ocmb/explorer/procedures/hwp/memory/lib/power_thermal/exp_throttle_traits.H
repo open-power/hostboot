@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,6 +180,11 @@ class throttle_traits<mss::mc_type::EXPLORER>
             DIMM_ATTACHED_START = 26,
             DIMM_ATTACHED_LEN = 2,
         };
+
+        // Max achievable utilization value based on frequency per port in c% units
+        static constexpr uint32_t PORT_UTIL_MAP_2666 = 8000;
+        static constexpr uint32_t PORT_UTIL_MAP_2933 = 8000;
+        static constexpr uint32_t PORT_UTIL_MAP_3200 = 7500;
 
         // Definition is in chip folder
         static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_TYPE_MAP;

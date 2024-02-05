@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1359,6 +1359,21 @@ fapi_try_exit:
              ((i_throttle_type == mss::throttle_type::POWER) ? "power" : "thermal"));
     return fapi2::current_err;
 }
+
+///
+/// @brief Adjusts memory power according to max achievable
+///        utilization based on DIMM freq and port count
+/// @tparam MC mss::mc_type
+/// @tparam T the fapi2 target type of the target
+/// @tparam TT throttle traits for the given MC target type
+/// @param[in] i_target mem port target that is being executed
+/// @param[in,out] io_fin_power Final power that is calculated based on frequency and port
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::mc_type MC, fapi2::TargetType T>
+fapi2::ReturnCode memory_power_adjustment(const fapi2::Target<T>& i_target,
+        uint32_t& io_fin_power
+                                         );
 
 ///
 /// @brief Write the runtime memory throttle settings from attributes to scom registers
