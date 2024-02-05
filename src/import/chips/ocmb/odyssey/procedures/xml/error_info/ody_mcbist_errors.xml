@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -186,6 +186,7 @@
   <hwpError>
     <rc>RC_ODY_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT</rc>
     <description>A continuous scrub operation failed initialization</description>
+    <ffdc>MC_TARGET</ffdc>
     <collectRegisterFfdc>
       <id>REG_FFDC_ODY_MEMDIAGS_FAILURE</id>
       <target>MC_TARGET</target>
