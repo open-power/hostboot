@@ -103,7 +103,7 @@ class OdySbeRetryHandlerTest : public TestSuite
     uint32_t getBootSide(TargetHandle_t i_target,
                          testcase_t     i_testcase)
     {
-        uint32_t   l_attr_side   = i_target->getAttr<ATTR_SPPE_BOOT_SIDE>();
+        uint32_t   l_attr_side   = i_target->getAttr<TARGETING::ATTR_SPPE_BOOT_SIDE>();
         uint32_t   l_return_side = l_attr_side;
         uint32_t   l_query_side  = 0;
         size_t     l_dataSize    = sizeof(l_query_side);

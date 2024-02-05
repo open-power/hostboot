@@ -374,6 +374,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
 
             if (slidErrl != nullptr)
             {
+                slidErrl->setErrorType(package->rc);
                 slidErrl->collectTrace(FAPI_TRACE_NAME);
             }
         }

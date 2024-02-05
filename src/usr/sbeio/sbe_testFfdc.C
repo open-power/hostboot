@@ -93,7 +93,7 @@ namespace SBEIO
 
             l_fifoRequest.responseFormat = i_format;
 
-            uint32_t * l_request = reinterpret_cast<uint32_t *>(
+            uint8_t * l_request = reinterpret_cast<uint8_t *>(
                     malloc(l_fifoRequest.wordCnt * SbeFifo::BYTES_PER_WORD));
 
             // Copy data into allocated memory
@@ -108,7 +108,7 @@ namespace SBEIO
             // this chip-op since this chip-op should only ever be called during unit tests and they would know what
             // they'd expect to get back.
             l_errl = SbeFifo::getTheInstance().performFifoChipOp(i_target,
-                                                                 l_request,
+                                                                 reinterpret_cast<uint32_t *>(l_request),
                                                                  reinterpret_cast<uint32_t *>(&l_fifoResponse),
                                                                  sizeof(l_fifoResponse));
 

@@ -30,27 +30,29 @@
 #include <sys/time.h>
 #include <trace/interface.H>
 #include <devicefw/driverif.H>
+
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludtarget.H>
+#include <errl/errlreasoncodes.H>
+#include <errl/errludlogregister.H>
+
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
-#include <sbeio/sbeioreasoncodes.H>
-#include <errl/errlreasoncodes.H>
+#include <targeting/odyutil.H>
+
 #include "sbe_fifo_buffer.H"
 #include "sbe_fifodd.H"
 #include <sbeio/errlud_sbeio.H>
 #include <sbeio/sbe_ffdc_package_parser.H>
 #include <sbeio/sbe_ffdc_parser.H>
-#include <fapi2.H>
-#include <set_sbe_error.H>
-#include <sbeio/sbe_sp_intf.H>
-#include <xscom/piberror.H>
 #include <sbeio/sbe_retry_handler.H>
+#include <sbeio/sbeioreasoncodes.H>
+#include <sbeio/sbe_sp_intf.H>
+
+#include <xscom/piberror.H>
 #include <initservice/initserviceif.H>
-#include <targeting/odyutil.H>
 #include <util/misc.H>
-#include <errl/errludlogregister.H>
 #include <cxxtest/TestInject.H>
 
 extern trace_desc_t* g_trac_sbeio;
