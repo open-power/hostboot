@@ -108,6 +108,7 @@ bool OdySbeRetryHandler::odyssey_recovery_handler()
     SBE_TRACF(ENTER_MRK"OdySbeRetryhandler::odyssey_recovery_handler HUID=0x%X", get_huid(iv_ocmb));
     bool l_recovered = false;
     bool isRuntimeOrMpIpl = TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
+    bool hreset_already_run = false;
 #if defined (__HOSTBOOT_RUNTIME)
     isRuntimeOrMpIpl = true;
 #endif
@@ -122,10 +123,15 @@ bool OdySbeRetryHandler::odyssey_recovery_handler()
     {
         // If timeouts occur during checkOdyFFDC, the main_sbe_handler will
         // be invoked within the checkOdyFFDC scope to perform an hreset
-        SBEIO::checkOdyFFDC(iv_ocmb);
+        hreset_already_run = SBEIO::checkOdyFFDC(iv_ocmb);
+        l_ody_recovery_state = iv_ocmb->getAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>();
     }
     // Let main_sbe_handler own the ODY_RECOVERY_STATUS_IN_PROGRESS
-    main_sbe_handler();
+
+    if ((!hreset_already_run) && (l_ody_recovery_state != ODY_RECOVERY_STATUS_DEAD))
+    {
+        main_sbe_handler();
+    }
     l_ody_recovery_state = iv_ocmb->getAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>();
 
     if (l_ody_recovery_state == ODY_RECOVERY_STATUS_VIABLE)
@@ -241,8 +247,8 @@ void OdySbeRetryHandler::main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeH
     aggregate(io_errl, l_errl, true /* update plid */);
 
     SBE_TRACF(EXIT_MRK"OdySbeRetryHandler::main_sbe_handler HUID=0x%X "
-                      "ODY_RECOVERY_STATE=0x%X",
-                      get_huid(iv_ocmb), iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>());
+                      "ODY_RECOVERY_STATE=0x%X ERRL=0x%X",
+                      get_huid(iv_ocmb), iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>(), ERRL_GETEID_SAFE(io_errl));
     return;
 }
 

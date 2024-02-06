@@ -166,11 +166,12 @@ namespace SBEIO
         }
     }
 
-    void checkOdyFFDC(TARGETING::Target* i_chipTarget)
+    bool checkOdyFFDC(TARGETING::Target* i_chipTarget)
     {
         using namespace TARGETING;
         errlHndl_t l_errl         = nullptr;
         bool       l_hasAsyncFfdc = false;
+        bool       hreset_already_performed = false;
 
         typedef union // See mbxscratch.H for this definition
         {
@@ -221,6 +222,12 @@ namespace SBEIO
         {
             SBE_TRACF(INFO_MRK"checkOdyFFDC: gathered FFDC failed " TRACE_ERR_FMT,
                       TRACE_ERR_ARGS(err));
+            if (err->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED))
+            {
+                hreset_already_performed = true;
+                err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                SBE_TRACF("checkOdyFFDC: hreset_already_performed ERRL=0x%X", ERRL_GETEID_SAFE(err))
+            }
             errlCommit(err, SBEIO_COMP_ID);
         }
         else
@@ -239,6 +246,7 @@ namespace SBEIO
             }
         }
 
+    return hreset_already_performed;
     }
 
 } //end namespace SBEIO

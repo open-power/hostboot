@@ -851,8 +851,9 @@ namespace SBEIO
      *
      * @param[in] i_chipTarget grab the FFDC for this OCMB target
      *
+     * @return bool, flag to indicate if hreset had already been called
      */
-    void checkOdyFFDC(TARGETING::Target* i_chipTarget);
+    bool checkOdyFFDC(TARGETING::Target* i_chipTarget);
 
 } //end namespace SBEIO
 
