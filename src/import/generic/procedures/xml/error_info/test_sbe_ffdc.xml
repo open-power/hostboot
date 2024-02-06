@@ -24,14 +24,15 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- EKB-Mirror-To: hostboot                                                -->
 <hwpErrors>
-    <format>poz</format>
     <!-- RC test Dimm Target -->
+    <format>poz</format>
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_DIMM_TARGET0</rc>
         <description>
             Test sbe ffdc with bad target dimm with target instance 0.
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -55,6 +56,7 @@
         <description>
             Test sbe ffdc with bad target dimm with target instance 2
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -78,6 +80,7 @@
         <description>
             Test sbe ffdc with bad target dimm callout with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -104,6 +107,7 @@
         <description>
             Test sbe ffdc with bad target dimm callout with target instance 2
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -131,6 +135,7 @@
         <description>
             Test sbe ffdc with bad target dimm with deconfig with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -160,6 +165,7 @@
         <description>
             Test sbe ffdc with bad target dimm with deconfig with target instance 2
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -190,6 +196,7 @@
         <description>
             Test sbe ffdc with bad target dimm with gard with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -219,6 +226,7 @@
         <description>
             Test sbe ffdc with bad target dimm with gard with target instance 2
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -249,6 +257,7 @@
         <description>
             Test sbe ffdc with bad target dimm with deconfig and gard with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -281,6 +290,7 @@
         <description>
             Test sbe ffdc with bad target dimm with deconfig and gard with target instance 2
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_DIMM</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -315,6 +325,7 @@
         <description>
             Test sbe ffdc with bad target port with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -337,6 +348,7 @@
         <description>
             Test sbe ffdc with bad target port with target instance 1
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -360,6 +372,7 @@
         <description>
             Test sbe ffdc with bad target port callout with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -386,6 +399,7 @@
         <description>
             Test sbe ffdc with bad target port callout with target instance 1
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -413,6 +427,7 @@
         <description>
             Test sbe ffdc with bad target port with deconfigure with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -443,6 +458,7 @@
         <description>
             Test sbe ffdc with bad target port with deconfigure with target instance 1
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -473,6 +489,7 @@
         <description>
             Test sbe ffdc with bad target memport with gard with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -502,6 +519,7 @@
         <description>
             Test sbe ffdc with bad target memport with gard with target instance 1
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -532,6 +550,7 @@
         <description>
             Test sbe ffdc with bad target memport with deconfigure and gard with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -564,6 +583,7 @@
         <description>
             Test sbe ffdc with bad target memport with deconfigure and gard with target instance 1
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PORT</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -598,6 +618,7 @@
         <description>
             Test sbe ffdc with bad target perv with instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -620,6 +641,7 @@
         <description>
             Test sbe ffdc with bad target perv with instance 8
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -643,6 +665,7 @@
         <description>
             Test sbe ffdc with bad target perv callout target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -669,6 +692,7 @@
         <description>
             Test sbe ffdc with bad target perv callout target instance 8
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -697,6 +721,7 @@
         <description>
             Test sbe ffdc with bad target with deconfigure with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -726,6 +751,7 @@
         <description>
             Test sbe ffdc with bad target with deconfigure with target instance 8
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -756,6 +782,7 @@
         <description>
             Test sbe ffdc with bad target perv with gard with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -785,6 +812,7 @@
         <description>
             Test sbe ffdc with bad target perv with gard with target instance 8
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -815,6 +843,7 @@
         <description>
             Test sbe ffdc with bad target perv with deconfigure and gard with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -847,6 +876,7 @@
         <description>
             Test sbe ffdc with bad target perv with deconfigure and gard with target instance 8
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -947,6 +977,7 @@
         <description>
             Test sbe ffdc with target temp sensor with instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_TEMP_SENSOR</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -969,6 +1000,7 @@
         <description>
             Test sbe ffdc with target temp sensor with instance 1
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_TEMP_SENSOR</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -991,6 +1023,7 @@
         <description>
             Test sbe ffdc with target temp sensor and callouts with target instance 0
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_TEMP_SENSOR</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
@@ -1017,6 +1050,7 @@
         <description>
             Test sbe ffdc with target temp sensor and callouts with target instance 1
         </description>
+        <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_TEMP_SENSOR</ffdc>
         <ffdc>MY_TEST_UINT8</ffdc>
         <ffdc>MY_TEST_UINT16</ffdc>
