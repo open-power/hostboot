@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,7 @@
 #include    <vfs/vfs.H>
 #include    <xscom/xscomif.H>
 #include    <kernel/machchk.H>
+#include <kernel/bltohbdatamgr.H>
 
 namespace   THREAD_ACTIVATE
 {
@@ -160,6 +161,9 @@ void activate_threads( errlHndl_t& io_rtaskRetErrl )
         task_affinity_migrate_to_master(); //just in case...
         uint64_t cpuid = task_getcpuid();
         CONSOLE::displayf(CONSOLE::DEFAULT,  nullptr, "BootThread=%d", cpuid);
+
+        auto l_cacheSize = g_BlToHbDataManager.getHbCacheSizeMb();
+        CONSOLE::displayf(CONSOLE::DEFAULT,  nullptr, "CacheSize=%d MB", l_cacheSize);
 
         // Now that the checkstop handler is running (or we don't have one),
         //  setup the machine check code to trigger a checkstop for UE
