@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1291,7 +1291,7 @@ uint32_t hwfmSetExit1(ExtensibleChip * i_ocmb)
     // Get FIR register
     SCAN_COMM_REGISTER_CLASS * recr = i_ocmb->getRegister("RECR");
 
-    o_rc = recr->Read();
+    o_rc = recr->ForceRead();
     if (SUCCESS != o_rc)
     {
         PRDF_ERR(PRDF_FUNC "Failed to Read RECR on 0x%08x", i_ocmb->getHuid());
