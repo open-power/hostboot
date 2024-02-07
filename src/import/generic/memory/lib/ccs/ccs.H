@@ -742,6 +742,23 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Setup and Execute a set of CCS instructions, then Restore state after
+/// @tparam MC the memory controller type running CCS
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam P  the port type for this CCS engine
+/// @param[in] i_target the target to effect
+/// @param[in, out] io_program the vector of instructions
+/// @param[in] i_port the port to execute on
+/// @param[in] i_runtime true if at runtime requiring dynamic
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P >
+fapi2::ReturnCode setup_execute_restore( const fapi2::Target<T>& i_target,
+        ccs::program<MC>& io_program,
+        const fapi2::Target<P>& i_port,
+        const bool i_runtime);
+
+///
 /// @brief Setup CCS and MCBIST before running concurrent CCS
 /// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the memory controller which executes the CCS instruction

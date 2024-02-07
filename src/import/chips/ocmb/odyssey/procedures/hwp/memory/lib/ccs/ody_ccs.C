@@ -38,6 +38,7 @@
 
 #include <lib/ecc/ecc_traits_odyssey.H>
 #include <lib/ccs/ody_ccs_traits.H>
+#include <lib/mcbist/ody_mcbist_traits.H>
 #include <generic/memory/lib/ccs/ccs.H>
 #include <generic/memory/lib/utils/conversions.H>
 #include <lib/ccs/ody_ccs.H>
@@ -773,23 +774,22 @@ fapi2::ReturnCode get_rank_config<mss::mc_type::ODYSSEY>(const fapi2::Target<fap
 
 ///
 /// @brief Turns off data inversion before MR access - Odyssey specialization
-/// @param[in] i_target the port target on which to operate
+/// @param[in] i_target the ocmb target on which to operate
 /// @param[out] o_orig_recr to restore the RECR register's data inversion bits to original state
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful, fapi2 error code otherwise
 ///
 template<>
 fapi2::ReturnCode disable_recr_data_inversion<mss::mc_type::ODYSSEY>(
-    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     fapi2::buffer<uint64_t>& o_orig_recr)
 
 {
     fapi2::buffer<uint64_t> l_data;
-    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    FAPI_TRY(fapi2::getScom(l_ocmb, scomt::ody::ODC_WDF_REGS_RECR, o_orig_recr));
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_WDF_REGS_RECR, o_orig_recr));
     l_data = o_orig_recr;
     l_data.clearBit<scomt::ody::ODC_WDF_REGS_RECR_MBSECCQ_DATA_INVERSION, scomt::ody::ODC_WDF_REGS_RECR_MBSECCQ_DATA_INVERSION_LEN>();
-    FAPI_TRY(fapi2::putScom(l_ocmb, scomt::ody::ODC_WDF_REGS_RECR, l_data));
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_WDF_REGS_RECR, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -827,6 +827,114 @@ fapi2::ReturnCode mr_data_process<mss::mc_type::ODYSSEY>(
             o_data[l_dq_index] = l_op_code;
         }
 
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup and Execute a set of CCS instructions, then Restore state after - Odyssey specialization
+/// @param[in] i_target the target to effect
+/// @param[in, out] io_program the vector of instructions
+/// @param[in] i_port the port to execute on
+/// @param[in] i_runtime true if at runtime requiring dynamic
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<>
+fapi2::ReturnCode setup_execute_restore<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    ccs::program<mss::mc_type::ODYSSEY>& io_program,
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+    const bool i_runtime)
+{
+    using CCS = ccsTraits<mss::mc_type::ODYSSEY>;
+    using MCB = mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
+
+    fapi2::buffer<uint64_t> l_modeq_reg;
+    fapi2::buffer<uint64_t> l_farb0_reg;
+    fapi2::buffer<uint64_t> l_recr_reg;
+    bool l_poll_result = false;
+
+    // Stop the CCS engine just for giggles - it might be running ...
+    FAPI_TRY( start_stop<mss::mc_type::ODYSSEY>(i_target, mss::states::STOP),
+              "Error stopping CCS engine before ccs::execution on ",
+              GENTARGTIDFORMAT, GENTARGTID(i_target) );
+
+    // Verify that the in-progress bit has not been set for CCS, meaning no other CCS is running
+    l_poll_result = mss::poll(i_target, CCS::STATQ_REG, poll_parameters(),
+                              [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+    {
+        FAPI_INF_NO_SBE("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
+        // We're done polling when we see ccs is not in progress.
+        return stat_reg.getBit<CCS::CCS_IN_PROGRESS>() != 1;
+    });
+
+    // Check that ccs is not being used after poll
+    FAPI_ASSERT(l_poll_result == true,
+                fapi2::MSS_CCS_STUCK_IN_PROGRESS().
+                set_MC_TARGET(i_target),
+                TARGTIDFORMAT
+                " CCS engine is in use and is not available for execution",
+                TARGTID);
+
+    if (i_runtime)
+    {
+        // Stop any ongoing MCBIST command
+        FAPI_TRY( mss::memdiags::stop<mss::mc_type::ODYSSEY>(i_target),
+                  "MCBIST engine failed to stop current command in progress on "
+                  GENTARGTIDFORMAT, GENTARGTID(i_target) );
+
+        // Verify that the in-progress bit has not been set for MCBIST, meaning the MCBIST is free
+        l_poll_result = mss::poll(i_target, MCB::STATQ_REG, poll_parameters(),
+                                  [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
+        {
+            FAPI_INF_NO_SBE("mcbist statq (stop) ", UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
+            // We're done polling when we see mcbist is not in progress.
+            return stat_reg.getBit<MCB::MCBIST_IN_PROGRESS>() != 1;
+        });
+
+        // Check that mcbist is not being used after poll
+        FAPI_ASSERT(l_poll_result == true,
+                    fapi2::ODY_ROW_REPAIR_MCBIST_STUCK_IN_PROGRESS().
+                    set_OCMB_TARGET(i_target),
+                    GENTARGTIDFORMAT
+                    " MCBIST failed to exit previous command and is not available for repair",
+                    GENTARGTID(i_target));
+
+        // Configure CCS regs for execution
+        FAPI_TRY( config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(i_target, l_modeq_reg ) );
+
+        // Backup ODC_SRQ_MBA_FARB0Q value before running Concurrent CCS
+        FAPI_TRY( pre_execute_via_mcbist<mss::mc_type::ODYSSEY>(i_target, l_farb0_reg) );
+
+        FAPI_TRY( disable_recr_data_inversion<mss::mc_type::ODYSSEY>(i_target, l_recr_reg) );
+
+        // Run CCS via MCBIST for Concurrent CCS
+        FAPI_TRY( execute_via_mcbist<mss::mc_type::ODYSSEY>(i_target, io_program, i_port) );
+
+        FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_WDF_REGS_RECR, l_recr_reg));
+
+        // Restore ODC_SRQ_MBA_FARB0Q value after running Concurrent CCS
+        FAPI_TRY( post_execute_via_mcbist<mss::mc_type::ODYSSEY>(i_target, l_farb0_reg) );
+
+        // Revert CCS regs after execution
+        FAPI_TRY( revert_config_regs<mss::mc_type::ODYSSEY>(i_target, l_modeq_reg) );
+    }
+    else
+    {
+        // Configure CCS regs for execution
+        FAPI_TRY( config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(i_target, l_modeq_reg ) );
+
+        FAPI_TRY( disable_recr_data_inversion<mss::mc_type::ODYSSEY>(i_target, l_recr_reg) );
+
+        // Run CCS standalone execution
+        FAPI_TRY( execute<mss::mc_type::ODYSSEY>(i_target, io_program, i_port) );
+
+        FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_WDF_REGS_RECR, l_recr_reg));
+
+        // Revert CCS regs after execution
+        FAPI_TRY( revert_config_regs<mss::mc_type::ODYSSEY>(i_target, l_modeq_reg) );
     }
 
 fapi_try_exit:

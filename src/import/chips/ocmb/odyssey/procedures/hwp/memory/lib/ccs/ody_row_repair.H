@@ -98,13 +98,75 @@ void get_dram_count(const uint8_t i_dram_width,
                     uint8_t& io_dram_num);
 
 ///
+/// @brief Get MR index for a given BG
+/// @param[in] i_bg the given bank group index
+/// @return MR index (54/55/56/57) for the given BG
+///
+inline uint8_t get_ppr_resource_mr(const uint8_t i_bg)
+{
+    // map the BG to the MR which contains the PPR resource info for it
+    // BG[0:1]=MR54, BG[2:3]=MR55, BG[4:5]=MR56, BG[6:7]=MR57
+    return (i_bg / 2) + 54;
+}
+
+///
+/// @brief Get "hPPR resource available" bit for a given BG and BA
+/// @param[in] i_bg the given bank group index
+/// @param[in] i_ba the given bank index
+/// @return index into MR54/55/56 for the resultant bit
+///
+inline uint8_t get_ppr_resource_bit(const uint8_t i_bg, const uint8_t i_ba)
+{
+    constexpr uint8_t OFFSET_FOR_EVEN_BG = 4;
+
+    // Map the BA into the bit in the MR that contains the resource info
+    // Per Jedec DRAM spec it's {BG_ODD[3:0], BG_EVEN[3:0]}
+    return (3 - i_ba) + (mss::is_odd(i_bg) ? 0 : OFFSET_FOR_EVEN_BG);
+}
+
+///
+/// @brief Read PPR resource availability
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_runtime true if at runtime requiring dynamic
+/// @param[out] o_data array of mr values per dram
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode get_ppr_resources(
+    const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+    const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
+    const bool i_runtime,
+    uint8_t (&o_data)[ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4]);
+
+///
+/// @brief Check if PPR resource is available
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_runtime true if at runtime requiring dynamic
+/// @param[out] o_available will be set to true if PPR resource is available on given BG, false otherwise
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode get_ppr_available(
+    const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+    const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
+    const bool i_runtime,
+    bool& o_available);
+
+///
+/// @brief Read PPR resource availability for entire DIMM
+/// @param[in] i_target_ocmb ocmb target
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode get_all_ppr_resources(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port_target);
+
+///
 /// @brief Calculates appropriate byte and byte mask per DRAM width
 /// @param[in] i_target i_target DIMM target
 /// @param[in] i_dram_nibbles  DRAM nibbles
 /// @param[in] i_dram_width  DRAM width
 /// @param[in,out] io_byte  DRAM byte index
 /// @param[in,out] io_mask  Byte mask
-/// @return @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
 fapi2::ReturnCode get_dram_byte_mask(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,

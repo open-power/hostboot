@@ -156,4 +156,24 @@
     </callout>
   </hwpError>
 
+  <hwpError>
+    <sbeError/>
+    <rc>RC_ODY_PPR_RESOURCE_UNAVAILABLE</rc>
+    <description>
+        PPR resources on DRAM were not available for a requested
+        row repair operation
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>DRAM</ffdc>
+    <ffdc>MRANK</ffdc>
+    <ffdc>SRANK</ffdc>
+    <ffdc>BANK_GROUP</ffdc>
+    <ffdc>BANK</ffdc>
+    <ffdc>ROW</ffdc>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
 </hwpErrors>

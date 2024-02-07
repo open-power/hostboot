@@ -218,21 +218,25 @@ fapi2::ReturnCode get_op_code(const uint8_t i_dram_number, const uint8_t i_dram_
     int l_target_incr = 7;
     //to ignore the BL0-7 as per Jedec spec
     constexpr uint8_t OP_CODE_OFFSET = 8;
+    constexpr uint8_t BUFFER_SIZE = 16;
 
     for(uint8_t l_data_index = OP_CODE_OFFSET; l_data_index < mss::ody::CCS_BEAT_DATA_SIZE; ++l_data_index )
     {
-        fapi2::buffer<uint8_t> l_data_dq0;
-        fapi2::variable_buffer l_extra(mss::ody::MAX_DQ_BITS_PER_PORT);
-        FAPI_TRY(l_extra.insert(i_data[l_data_index].first, 0, 64));
-        FAPI_TRY(l_extra.insert(i_data[l_data_index].second, 64, 16));
+        fapi2::buffer<uint16_t> __attribute__ ((aligned (8))) l_extra[5];
+        l_extra[0].insert<0, BUFFER_SIZE, 0>(i_data[l_data_index].first);
+        l_extra[1].insert<0, BUFFER_SIZE, BUFFER_SIZE>(i_data[l_data_index].first);
+        l_extra[2].insert<0, BUFFER_SIZE, BUFFER_SIZE * 2>(i_data[l_data_index].first);
+        l_extra[3].insert<0, BUFFER_SIZE, BUFFER_SIZE * 3>(i_data[l_data_index].first);
+        l_extra[4].insert<0, BUFFER_SIZE>(i_data[l_data_index].second);
 
 #ifndef __PPE__
         FAPI_DBG("maint_processed_data:%d 0x%016lx 0x%016lx",
                  l_data_index, i_data[l_data_index].first, i_data[l_data_index].second);
 #endif
         // extracts op code from DQ0 only of each dram based on dram width and inserts it in OP7:0 format
-        FAPI_TRY(l_extra.extractToRight(l_data_dq0, i_dram_number * i_dram_width, 1));
-        FAPI_TRY(l_mr_temp_value.insert(l_data_dq0, l_target_incr, 1, 7));
+        const size_t l_index = i_dram_number * i_dram_width / BUFFER_SIZE;
+        const size_t l_bit = i_dram_number * i_dram_width % BUFFER_SIZE;
+        FAPI_TRY(l_mr_temp_value.writeBit(l_extra[l_index].getBit(l_bit), l_target_incr));
         l_target_incr -= 1;
     }
 

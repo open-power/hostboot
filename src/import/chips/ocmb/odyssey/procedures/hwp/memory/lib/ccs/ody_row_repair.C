@@ -136,13 +136,152 @@ void get_dram_count(const uint8_t i_dram_width,
 }
 
 ///
+/// @brief Read PPR resource availability
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_runtime true if at runtime requiring dynamic
+/// @param[out] o_data array of mr values per dram
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode get_ppr_resources(
+    const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+    const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
+    const bool i_runtime,
+    uint8_t (&o_data)[ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4])
+{
+    // tMRD value is taken from Table 20 of JEDEC spec revision JESD79-5B_v1.20
+    const uint64_t tMRD = 34;
+    constexpr uint8_t MR14_ECC_CONFIG = 14;
+
+    // First (un)swizzle our repair entry to get the fields in the logical orientation
+    mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair = i_repair;
+    swizzle_repair_entry(l_repair);
+
+    mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
+
+    // First program MR14 to select the CID for our srank
+    l_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
+                                        (i_rank_info.get_port_rank(), MR14_ECC_CONFIG, l_repair.iv_srank, tMRD));
+
+    // map the BG to the MR which contains the PPR resource info for it
+    // BG[0:1]=MR54, BG[2:3]=MR55, BG[4:5]=MR56, BG[6:7]=MR57
+    const uint8_t l_mr = get_ppr_resource_mr(l_repair.iv_bg);
+
+    l_program.iv_instructions.push_back(mss::ccs::ddr5::mrr_command<mss::mc_type::ODYSSEY>
+                                        (i_rank_info.get_port_rank(), l_mr));
+
+    const auto& l_port = i_rank_info.get_port_target();
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+
+    FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb, l_program, l_port, i_runtime));
+
+    FAPI_TRY(mss::ccs::mr_data_process<mss::mc_type::ODYSSEY>(l_port, o_data));
+
+#ifndef __PPE__
+
+    for (uint8_t l_dram = 0; l_dram < ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4; l_dram++)
+    {
+        const uint8_t l_even_bg = mss::is_odd(l_repair.iv_bg) ? (l_repair.iv_bg - 1) : l_repair.iv_bg;
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " PPR Resources for DRAM%d: 0x%02X (BG%d BA[3:0], BG%d BA[3:0]) 1=available",
+                        GENTARGTID(l_ocmb), l_dram, o_data[l_dram], l_even_bg + 1, l_even_bg);
+    }
+
+#endif
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if PPR resource is available
+/// @param[in] i_rank_info rank info of the address to repair
+/// @param[in] i_repair the address repair information
+/// @param[in] i_runtime true if at runtime requiring dynamic
+/// @param[out] o_available will be set to true if PPR resource is available on given BG, false otherwise
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode get_ppr_available(
+    const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+    const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair,
+    const bool i_runtime,
+    bool& o_available)
+{
+    o_available = false;
+
+    // First (un)swizzle our repair entry to get the fields in the logical orientation
+    mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair = i_repair;
+    swizzle_repair_entry(l_repair);
+
+    uint8_t l_data[ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4] = {};
+    fapi2::buffer<uint8_t> l_resources = 0;
+
+    FAPI_TRY(get_ppr_resources(i_rank_info, i_repair, i_runtime, l_data));
+
+    l_resources = l_data[i_repair.iv_dram];
+    o_available = l_resources.getBit(get_ppr_resource_bit(l_repair.iv_bg, l_repair.iv_bank));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Read PPR resource availability for entire DIMM
+/// @param[in] i_target_ocmb ocmb target
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+///
+fapi2::ReturnCode get_all_ppr_resources(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port_target)
+{
+    constexpr bool REPAIR_VALID = 1;
+    constexpr uint8_t DRAM_POS = 0;
+    constexpr uint8_t BANK_POS = 0;
+    constexpr uint8_t ROW_POS = 0;
+
+    for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_port_target))
+    {
+        uint8_t l_num_sranks = 0;
+
+        // Gets the rank info for this DIMM
+        std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+        FAPI_TRY(ranks_on_dimm(l_dimm, l_rank_infos),
+                 "Failed to retrieve ranks on dimm on " GENTARGTIDFORMAT,
+                 GENTARGTID(l_dimm) );
+
+        // Get dimm information
+        FAPI_TRY(mss::ody::get_srank_count(l_dimm, l_num_sranks));
+
+        // Loops thru RANKs
+        for (const auto& l_rank_info : l_rank_infos)
+        {
+            const auto l_dimm_rank = l_rank_info.get_dimm_rank();
+
+            for (uint8_t l_srank = 0; l_srank < l_num_sranks; ++l_srank)
+            {
+                // Note: DRAMs store PPR resources for groups of two BGs, so we loop on BG and use BA=0
+                for (uint8_t l_bg = 0; l_bg < mss::ody::MAX_BG_PER_DIMM; l_bg += 2)
+                {
+                    uint8_t l_data[ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4] = {};
+                    mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair(REPAIR_VALID, l_dimm_rank, DRAM_POS, l_srank, l_bg,
+                            BANK_POS, ROW_POS);
+
+                    FAPI_TRY(get_ppr_resources(l_rank_info, l_repair, false, l_data));
+
+                }
+            }
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Calculates appropriate byte and byte mask per DRAM width
 /// @param[in] i_target i_target DIMM target
 /// @param[in] i_dram_nibbles  DRAM nibbles
 /// @param[in] i_dram_width  DRAM width
 /// @param[in,out] io_byte  DRAM byte index
 /// @param[in,out] io_mask  Byte mask
-/// @return @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
+/// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff get is OK
 ///
 fapi2::ReturnCode get_dram_byte_mask(
     const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
@@ -311,13 +450,13 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
                         set_ROW(l_logical_row).
                         set_ROW_MAX(MAX_ROW),
 #ifndef __PPE__
-                        "%s SPD contained out of bounds row repair entry: DRAM: " TARGTIDFORMAT " MAX: %d mrank %d srank %d MAX: %d"
+                        TARGTIDFORMAT " SPD contained out of bounds row repair entry: DRAM: %d MAX: %d mrank %d srank %d MAX: %d"
                         "bg %d MAX: %d bank %d MAX: %d row 0x%05x MAX: 0x%05x",
                         TARGTID, l_entry.iv_dram, l_num_dram, l_dimm_rank, l_logical_srank, MAX_SRANK,
                         l_logical_bg, MAX_BANK_GROUP, l_logical_bank, MAX_BANKS, l_logical_row, MAX_ROW
 
 #else
-                        TARGTIDFORMAT" SPD contained out of bounds row repair entry: DRAM: %d MAX: %d mrank %d"
+                        TARGTIDFORMAT " SPD contained out of bounds row repair entry: DRAM: %d MAX: %d mrank %d"
                         TARGTID, l_entry.iv_dram, l_num_dram, l_dimm_rank
 
 #endif
@@ -351,11 +490,12 @@ fapi2::ReturnCode log_repairs_disabled_errors(const fapi2::Target<fapi2::TARGET_
                 set_BANK(i_repair.iv_bank).
                 set_ROW(i_repair.iv_row),
 #ifndef __PPE__
-                TARGTIDFORMAT" Row repair valid but DRAM repairs are disabled for DRAM %d, mrank %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                TARGTIDFORMAT
+                " Row repair valid but DRAM repairs are disabled for DRAM %d, mrank %d, subrank %d, bg %d, bank %d, row 0x%05x",
                 TARGTID, i_repair.iv_dram, i_repair.iv_dimm_rank, i_repair.iv_srank, i_repair.iv_bg, i_repair.iv_bank,
                 i_repair.iv_row
 #else
-                TARGTIDFORMAT" Row repair valid but DRAM repairs are disabled for DRAM %d, mrank %d, subrank %d",
+                TARGTIDFORMAT " Row repair valid but DRAM repairs are disabled for DRAM %d, mrank %d, subrank %d",
                 TARGTID, i_repair.iv_dram, i_repair.iv_dimm_rank, i_repair.iv_srank
 #endif
                );
@@ -478,7 +618,7 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
     //       Repairs are performed during runtime.
     //       In this case the memory controller will clean up after the row repair
     // 2. Check shared hppr resource destination registers (MR 54, 55, 56, 57)
-    //    TODO: ZEN-MST:2222 Check shared hppr/sppr resource destination registers for row repair
+    //    This gets done before calling this function
 
     // 3. Precharge_all(): Create instruction for precharge and add it to the instruction array.
     io_program.iv_instructions.push_back(mss::ccs::ddr5::precharge_all_command<mss::mc_type::ODYSSEY>(l_port_rank,
@@ -560,14 +700,7 @@ fapi_try_exit:
 fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
                                       const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair)
 {
-    using CCS = ccsTraits<mss::mc_type::ODYSSEY>;
-    using MCB = mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
-
-    fapi2::buffer<uint64_t> l_modeq_reg;
-    fapi2::buffer<uint64_t> l_mcbist_status;
-    fapi2::buffer<uint64_t> l_ccs_status;
-    fapi2::buffer<uint64_t> l_reg_data;
-    bool l_poll_result = false;
+    constexpr bool DYNAMIC = true;
 
     // Get port rank and target
     const auto& l_port_target = i_rank_info.get_port_target();
@@ -590,66 +723,9 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSE
               "Failed sppr program setup for dynamic_row_repair on ",
               GENTARGTIDFORMAT, GENTARGTID(l_port_target) );
 
-    // Stop the CCS engine just for giggles - it might be running ...
-    FAPI_TRY( mss::ccs::start_stop<mss::mc_type::ODYSSEY>(l_ocmb_target, mss::states::STOP),
-              "Error stopping CCS engine before ccs::execution on ",
-              GENTARGTIDFORMAT, GENTARGTID(l_ocmb_target) );
+    FAPI_INF(GENTARGTIDFORMAT " Deploying dynamic row repair", GENTARGTID(l_ocmb_target));
 
-    // Verify that the in-progress bit has not been set for CCS, meaning no other CCS is running
-    l_poll_result = mss::poll(l_ocmb_target, CCS::STATQ_REG, poll_parameters(),
-                              [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
-    {
-        FAPI_INF_NO_SBE("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
-        // We're done polling when we see ccs is not in progress.
-        return stat_reg.getBit<CCS::CCS_IN_PROGRESS>() != 1;
-    });
-
-    // Check that ccs is not being used after poll
-    FAPI_ASSERT(l_poll_result == true,
-                fapi2::ODY_ROW_REPAIR_CCS_STUCK_IN_PROGRESS().
-                set_OCMB_TARGET(l_ocmb_target),
-                GENTARGTIDFORMAT
-                " CCS engine is in use and is not available for repair",
-                GENTARGTID(l_ocmb_target));
-
-    // Stop any ongoing MCBIST command
-    FAPI_TRY( mss::memdiags::stop<mss::mc_type::ODYSSEY>(l_ocmb_target),
-              "MCBIST engine failed to stop current command in progress on "
-              GENTARGTIDFORMAT, GENTARGTID(l_ocmb_target) );
-
-    // Verify that the in-progress bit has not been set for MCBIST, meaning the MCBIST is free
-    l_poll_result = mss::poll(l_ocmb_target, MCB::STATQ_REG, poll_parameters(),
-                              [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
-    {
-        FAPI_INF_NO_SBE("mcbist statq (stop) ", UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
-        // We're done polling when we see mcbist is not in progress.
-        return stat_reg.getBit<MCB::MCBIST_IN_PROGRESS>() != 1;
-    });
-
-    // Check that mcbist is not being used after poll
-    FAPI_ASSERT(l_poll_result == true,
-                fapi2::ODY_ROW_REPAIR_MCBIST_STUCK_IN_PROGRESS().
-                set_OCMB_TARGET(l_ocmb_target),
-                GENTARGTIDFORMAT
-                " MCBIST failed to exit previous command and is not available for repair",
-                GENTARGTID(l_ocmb_target));
-
-    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying dynamic row repair", GENTARGTID(l_ocmb_target));
-
-    // Configure CCS regs for execution
-    FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg ) );
-
-    // Backup ODC_SRQ_MBA_FARB0Q value before running Concurrent CCS
-    FAPI_TRY( mss::ccs::pre_execute_via_mcbist<mss::mc_type::ODYSSEY>(l_ocmb_target, l_reg_data) );
-
-    // Run CCS via MCBIST for Concurrent CCS
-    FAPI_TRY( mss::ccs::execute_via_mcbist<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target) );
-
-    // Restore ODC_SRQ_MBA_FARB0Q value after running Concurrent CCS
-    FAPI_TRY( mss::ccs::post_execute_via_mcbist<mss::mc_type::ODYSSEY>(l_ocmb_target, l_reg_data) );
-
-    // Revert CCS regs after execution
-    FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg) );
+    FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target, DYNAMIC));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -695,20 +771,43 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                 uint32_t l_row = l_dimm_rank;
 
                 // Note: DIMM can only support one repair per BG, so we loop on BG and use BA=0
-                // TODO: ZEN:MST-2222 likely hit the limitation on allowed PPR resources while doing this
                 for (uint8_t l_bg = 0; l_bg < mss::ody::MAX_BG_PER_DIMM; ++l_bg)
                 {
+                    bool l_resource_available = true;
                     mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair(REPAIR_VALID, l_dimm_rank, DRAM_POS, l_srank, l_bg,
                             BANK_POS,
                             l_row);
 #ifndef __PPE__
-                    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
-                                    GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
+                    FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                             GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
 #else
                     FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d",
                              GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank);
                     FAPI_INF(" bg %d, bank %d, row 0x%05x", l_bg, BANK_POS, l_row);
 #endif
+                    // Check if we have PPR resources available for the repair
+                    // If we don't, assert out since this is manufacturing mode
+                    FAPI_TRY(get_ppr_available(l_rank_info, l_repair, false, l_resource_available));
+                    FAPI_ASSERT(l_resource_available,
+                                fapi2::ODY_PPR_RESOURCE_UNAVAILABLE().
+                                set_DIMM_TARGET(l_dimm).
+                                set_DRAM(DRAM_POS).
+                                set_MRANK(l_dimm_rank).
+                                set_SRANK(l_srank).
+                                set_BANK_GROUP(l_bg).
+                                set_BANK(BANK_POS).
+                                set_ROW(l_row),
+#ifndef __PPE__
+                                GENTARGTIDFORMAT " PPR resource unavailable when deploying all spares: DRAM: %d mrank %d srank %d "
+                                "bg %d bank %d row 0x%05x",
+                                GENTARGTID(l_dimm), DRAM_POS, l_dimm_rank, l_srank,
+                                l_bg, BANK_POS, l_row
+#else
+                                GENTARGTIDFORMAT " PPR resource unavailable when deploying all spares: DRAM: %d mrank %d",
+                                GENTARGTID(l_dimm), DRAM_POS, l_dimm_rank
+#endif
+                               );
+
                     FAPI_TRY( standalone_row_repair(l_rank_info, l_repair),
                               "Failed standalone_row_repair on " GENTARGTIDFORMAT " rank %d",
                               GENTARGTID(l_dimm), l_dimm_rank );
@@ -890,13 +989,8 @@ fapi_try_exit:
 fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
         const mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>& i_repair)
 {
-    using CCS = ccsTraits<mss::mc_type::ODYSSEY>;
-
-    fapi2::buffer<uint64_t> l_modeq_reg;
-    fapi2::buffer<uint64_t> l_mcbist_status;
-    fapi2::buffer<uint64_t> l_ccs_status;
-    fapi2::buffer<uint64_t> l_reg_data;
-    bool l_poll_result = false;
+    // Constant to help with readability
+    constexpr bool STATIC = false;
 
     // Get port rank and target
     const auto& l_port_target = i_rank_info.get_port_target();
@@ -916,43 +1010,12 @@ fapi2::ReturnCode standalone_row_repair( const mss::rank::info<mss::mc_type::ODY
 
     // Setup SPPR CCS program
     FAPI_TRY( setup_sppr(i_rank_info, i_repair, l_program),
-              "Failed sppr program setup for dynamic_row_repair on "
+              "Failed sppr program setup for standalone_row_repair on "
               GENTARGTIDFORMAT, GENTARGTID(l_port_target) );
-
-    // Stop the CCS engine just for giggles - it might be running ...
-    FAPI_TRY( mss::ccs::start_stop<mss::mc_type::ODYSSEY>(l_ocmb_target, mss::states::STOP),
-              "Error stopping CCS engine before ccs::execution on "
-              GENTARGTIDFORMAT, GENTARGTID(l_ocmb_target) );
-
-    // Verify that the in-progress bit has not been set for CCS, meaning no other CCS is running
-    l_poll_result = mss::poll(l_ocmb_target, CCS::STATQ_REG, poll_parameters(),
-                              [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
-    {
-        FAPI_INF_NO_SBE("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
-        // We're done polling when we see ccs is not in progress.
-        return stat_reg.getBit<CCS::CCS_IN_PROGRESS>() != 1;
-    });
-
-    // Check that ccs is not being used after poll
-    FAPI_ASSERT(l_poll_result == true,
-                fapi2::ODY_ROW_REPAIR_CCS_STUCK_IN_PROGRESS().
-                set_OCMB_TARGET(l_ocmb_target),
-                GENTARGTIDFORMAT
-                " CCS engine is in use and is not available for repair",
-                GENTARGTID(l_ocmb_target));
-
-
 
     FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying row repair using standalone CCS", GENTARGTID(l_ocmb_target));
 
-    // Configure CCS regs for execution
-    FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg ) );
-
-    // Run CCS standalone execution
-    FAPI_TRY( mss::ccs::execute<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target) );
-
-    // Revert CCS regs after execution
-    FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg) );
+    FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target, STATIC));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -989,7 +1052,46 @@ fapi2::ReturnCode deploy_mapped_repairs(
 
             if (l_repair.is_valid())
             {
+                // First (un)swizzle our repair entry to get the fields in the logical orientation
+                mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair_printable = l_repair;
+                swizzle_repair_entry(l_repair_printable);
+                bool l_resource_available = true;
+
                 // Deploy row repair and clear bad DQs
+                FAPI_INF_NO_SBE(
+                    GENTARGTIDFORMAT" Deploying row repair on DRAM %d, dimm rank %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                    GENTARGTID(l_dimm), l_repair.iv_dram, l_dimm_rank, l_repair.iv_srank, l_repair.iv_bg, l_repair.iv_bank,
+                    l_repair.iv_row);
+
+                // Check if we have PPR resources available for the repair
+                // If we don't, log the error as RECOVERED and continue to the next repair
+                FAPI_TRY(get_ppr_available(l_rank_info, l_repair, i_runtime, l_resource_available));
+
+                if (!l_resource_available)
+                {
+                    FAPI_ASSERT_NOEXIT(false,
+                                       fapi2::ODY_PPR_RESOURCE_UNAVAILABLE(fapi2::FAPI2_ERRL_SEV_RECOVERED).
+                                       set_DIMM_TARGET(l_dimm).
+                                       set_DRAM(l_repair_printable.iv_dram).
+                                       set_MRANK(l_dimm_rank).
+                                       set_SRANK(l_repair_printable.iv_srank).
+                                       set_BANK_GROUP(l_repair_printable.iv_bg).
+                                       set_BANK(l_repair_printable.iv_bank).
+                                       set_ROW(l_repair_printable.iv_row),
+#ifndef __PPE__
+                                       GENTARGTIDFORMAT " PPR resource unavailable row repair entry: DRAM: %d mrank %d srank %d "
+                                       "bg %d bank %d row 0x%05x",
+                                       GENTARGTID(l_dimm), l_repair_printable.iv_dram, l_dimm_rank, l_repair_printable.iv_srank,
+                                       l_repair_printable.iv_bg, l_repair_printable.iv_bank, l_repair_printable.iv_row
+#else
+                                       GENTARGTIDFORMAT " PPR resource unavailable row repair entry: DRAM: %d mrank %d",
+                                       GENTARGTID(l_dimm), l_repair_printable.iv_dram, l_dimm_rank
+#endif
+                                      );
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                    continue;
+                }
+
                 // Check if at runtime for dynamic vs standalone
                 if (i_runtime)
                 {
