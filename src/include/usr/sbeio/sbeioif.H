@@ -807,20 +807,22 @@ namespace SBEIO
                                                          uint8_t i_dqa);
 
     /**
-     * @brief Grab the Odyssey FIFO FFDC and create informational error log(s) with
-     *        the returned data (SBE traces and attribute data). The function
-     *        uses a chipop to Odyssey to get the data.
+     * @brief Grab the Odyssey FIFO FFDC and create error log(s) with the returned data.
+     *        The function uses a chipop to Odyssey to get the data. The data returned from
+     *        the chip varies based on a number of circumstances. When there are no error conditions
+     *        on the chip the return data will be trace and attribute data. The severity of the logs
+     *        are given by the SBE and it's the callers responsibility to overwrite that severity if
+     *        necessary.
      *
      * @param[in] i_chipTarget The Odyssey chip to perform the chipop on
      * @param[out] o_err       All error logs returned from SBE as FFDC
      *
      * @return The error encountered while fetching FFDC, if any
      *
-     * @note The original contents of o_errs are never removed by this function.
      * @note If an error is returned, o_errs will be unmodified.
      */
     errlOwner genFifoSBEFFDCErrls(TARGETING::Target* i_chipTarget,
-                                  std::vector<errlHndl_t>& o_errs);
+                                  errlHndl_t& o_errs);
 
     /**
      * @brief Calls genFifoSBEFFDCErrl per each functional Odyssey OBMC chip

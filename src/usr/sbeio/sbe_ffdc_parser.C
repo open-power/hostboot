@@ -295,17 +295,6 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
     SBE_TRACD(EXIT_MRK "parseFFDCData");
 }
 
-std::vector<errlHndl_t> SbeFFDCParser::generateSbeErrors(const uint8_t i_modId,
-                                                         const uint16_t i_reasonCode,
-                                                         const uint64_t i_userdata1,
-                                                         const uint64_t i_userdata2)
-{
-    // @TODO JIRA PFHB-551 Remove this function and replace with the filled in version.
-    // The SBE could have multiple errors it wants to create for context.
-    std::vector<errlHndl_t> sbeErrors;
-    return sbeErrors;
-}
-
 errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                                                          const uint8_t i_modId,
                                                          const uint16_t i_reasonCode,

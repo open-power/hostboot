@@ -289,7 +289,7 @@ void sbeAttemptRecovery(uint64_t i_data)
                       get_huid(l_target));
 
 
-            std::vector<errlHndl_t> ffdc_errls;
+            errlHndl_t ffdc_errls;
             errlOwner sbe_err = SBEIO::genFifoSBEFFDCErrls(l_target, ffdc_errls);
 
             if (sbe_err)
@@ -312,15 +312,12 @@ void sbeAttemptRecovery(uint64_t i_data)
                 errlCommit(sbe_err, RUNTIME_COMP_ID);
             }
 
-            for (auto& ffdc : ffdc_errls)
-            {
                 TRACFCOMP(g_trac_runtime,
                           "sbeAttemptRecovery: Committing Odyssey FFDC package "
                           TRACE_ERR_FMT,
-                          TRACE_ERR_ARGS(ffdc));
-                errlCommit(ffdc, RUNTIME_COMP_ID);
+                          TRACE_ERR_ARGS(ffdc_errls));
+                errlCommit(ffdc_errls, RUNTIME_COMP_ID);
             }
-        }
 
         // Get the SBE Retry Handler, propagating the supplied PLID
         auto l_SBEobj = make_sbe_retry_handler(l_target,

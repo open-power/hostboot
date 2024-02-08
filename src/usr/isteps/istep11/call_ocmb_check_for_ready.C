@@ -625,7 +625,7 @@ errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
         bool async_ffdc = false;
         if (errlOwner l_errlLocal(ody_has_async_ffdc(i_ocmb, async_ffdc)); async_ffdc)
         { // ignore any error from ody_has_async_ffdc; we don't care whether it fails.
-            std::vector<errlHndl_t> async_ffdc_errls;
+            errlHndl_t async_ffdc_errls;
             errlOwner chipop_fail = genFifoSBEFFDCErrls(i_ocmb, async_ffdc_errls);
 
             if (chipop_fail)
@@ -637,21 +637,19 @@ errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
                 errlCommit(chipop_fail, ISTEP_COMP_ID);
             }
 
-            if (!async_ffdc_errls.empty())
+            if (async_ffdc_errls)
             {
                 if (l_event == NO_EVENT)
-                { // if check_for_ready did not fail, then we don't
-                  // want the existence of async FFDC to cause the
-                  // boot to halt.
-                    for (auto errl : async_ffdc_errls)
-                    {
-                        errlCommit(errl, ISTEP_COMP_ID);
-                    }
+                {
+                    // if check_for_ready did not fail, then we don't
+                    // want the existence of async FFDC to cause the
+                    // boot to halt.
+                    errlCommit(async_ffdc_errls, ISTEP_COMP_ID);
                 }
                 else
                 {
                     l_event = OCMB_BOOT_ERROR_WITH_FFDC;
-                    aggregate(l_fsm_errl, move(async_ffdc_errls));
+                    aggregate(l_fsm_errl, async_ffdc_errls);
                 }
             }
         }

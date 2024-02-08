@@ -152,14 +152,6 @@ class SbeFFDCParser
          */
         PIB::PibError getPibRc (size_t i_index);
 
-        /* @JIRA PFHB-551 Fill in this interface
-         *
-         */
-        std::vector<errlHndl_t> generateSbeErrors(const uint8_t i_modId,
-                const uint16_t i_reasonCode,
-                const uint64_t i_userdata1,
-                const uint64_t i_userdata2);
-
         /* @brief Aggregates all the SBE FFDC packages stored in this object into hardware procedure error logs and
          *        platform error logs depending on the contents of the FFDC packages.
          *
