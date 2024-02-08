@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022,2023
+# Contributors Listed Below - COPYRIGHT 2022,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -576,7 +576,8 @@ actionclass mainline_tce_handling_1
 actionclass mainline_aue_iaue_handling0_chnlFail
 {
     SueSource;
-    mem_port0_M;
+    funccall("AnalyzeMainlineAue_0");
+    mem_port0_L;
     threshold1;
     funccall("returnNoClearFirBits");
 };
@@ -584,7 +585,8 @@ actionclass mainline_aue_iaue_handling0_chnlFail
 actionclass mainline_aue_iaue_handling1_chnlFail
 {
     SueSource;
-    mem_port1_M;
+    funccall("AnalyzeMainlineAue_1");
+    mem_port1_L;
     threshold1;
     funccall("returnNoClearFirBits");
 };

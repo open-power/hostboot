@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -714,6 +714,56 @@ PRDF_PLUGIN_DEFINE( odyssey_ocmb, AnalyzeImpe_##POS );
 
 ANALYZE_IMPE_PLUGIN(0);
 ANALYZE_IMPE_PLUGIN(1);
+
+//------------------------------------------------------------------------------
+
+/**
+ * @brief  RDFFIR[14] - Mainline AUE
+ * @param  i_chip OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_port Target port select.
+ * @return SUCCESS
+ */
+int32_t AnalyzeMainlineAue( ExtensibleChip * i_chip,
+    STEP_CODE_DATA_STRUCT & io_sc, uint8_t i_port )
+{
+    #define PRDF_FUNC "[odyssey_ocmb::AnalyzeMainlineAue] "
+
+    PRDpriority dimmPriority = MRU_HIGH;
+    GARD_POLICY dimmGard = GARD;
+
+    TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT,
+                                               i_port);
+
+    // If there is a possible root cause in the ODP_FIR, adjust the
+    // callout to MEM_PORT high, DIMMs low
+    if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, i_port))
+    {
+        io_sc.service_data->SetCallout(memport, MRU_HIGH);
+        dimmPriority = MRU_LOW;
+        dimmGard = NO_GARD;
+    }
+
+    // Callout all attached DIMMs
+    for (auto & dimm : getConnectedChildren(memport, TYPE_DIMM))
+        io_sc.service_data->SetCallout(dimm, dimmPriority, dimmGard);
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+
+#define ANALYZE_MAINLINE_AUE_PLUGIN(POS) \
+int32_t AnalyzeMainlineAue_##POS(ExtensibleChip * i_chip, \
+                                STEP_CODE_DATA_STRUCT & io_sc) \
+{ \
+    return AnalyzeMainlineAue(i_chip, io_sc, POS); \
+} \
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, AnalyzeMainlineAue_##POS);
+
+ANALYZE_MAINLINE_AUE_PLUGIN(0);
+ANALYZE_MAINLINE_AUE_PLUGIN(1);
+
 
 //------------------------------------------------------------------------------
 
