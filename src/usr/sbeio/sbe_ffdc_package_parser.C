@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -238,8 +238,6 @@ bool FfdcScomPibErrorPackage::doesPackageMatchSchema(const ffdc_package&
 
         if(l_expectedSize != i_ffdc.size)
         {
-            SBE_TRACF(ERR_MRK "i_ffdc.size != l_expectedSize. i_ffdc.size = 0x%08X, "
-                      "l_expectedSize = 0x%08X", i_ffdc.size, l_expectedSize);
             break;
         }
 
@@ -259,8 +257,6 @@ bool FfdcScomPibErrorPackage::doesPackageMatchSchema(const ffdc_package&
 
         if(isInvalidSize)
         {
-            SBE_TRACF(ERR_MRK "scomAddrSize is of an unexpected size. scomAddrSize = %d, "
-                      "expected sizes are 4 or 8", l_scomAddrSize);
             break;
         }
 
@@ -268,8 +264,6 @@ bool FfdcScomPibErrorPackage::doesPackageMatchSchema(const ffdc_package&
                                                    (l_buffer + l_pibSizeOffset));
         if(l_expectedPIBSize != l_pibSize)
         {
-            SBE_TRACF(ERR_MRK "l_pibSize != l_expectedPIBSize. l_pibSize = %d, "
-                      "l_expectedPIBSize = %d", l_pibSize, l_expectedPIBSize);
             break;
         }
 
