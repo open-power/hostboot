@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,17 +78,18 @@ static inline uint64_t be64toh_xlate(uint64_t in)
  */
 enum SbeAttributeRC : uint32_t
 {
-    SBE_ATTRIBUTE_RC_SUCCESS,
-    SBE_ATTRIBUTE_RC_TGT_TYPE_NOT_FOUND,
-    SBE_ATTRIBUTE_RC_ATTR_NOT_FOUND,
-    SBE_ATTRIBUTE_RC_SIZE_NOT_MATCHING,
-    SBE_ATTRIBUTE_RC_TARGET_INST_OUT_RANGE,
-    SBE_ATTRIBUTE_RC_ARRAY_INDEX_OUT_RANGE,
-    SBE_ATTRIBUTE_RC_ATTR_NOT_ARRAY,
-    SBE_ATTRIBUTE_RC_OVRD_NOT_ALLOWED,
-    SBE_ATTRIBUTE_RC_SET_ATTR_FAILED,
-    SBE_ATTRIBUTE_RC_SBE_FAPI_TGT_CREATION_FAILED,
-    SBE_ATTRIBUTE_RC_EXPECTED_BUT_NOT_RECEIVED,
+    SBE_ATTRIBUTE_RC_SUCCESS                        = 0,
+    SBE_ATTRIBUTE_RC_TGT_TYPE_NOT_FOUND             = 1,
+    SBE_ATTRIBUTE_RC_ATTR_NOT_FOUND                 = 2,
+    SBE_ATTRIBUTE_RC_SIZE_NOT_MATCHING              = 3,
+    SBE_ATTRIBUTE_RC_TARGET_INST_OUT_RANGE          = 4,
+    SBE_ATTRIBUTE_RC_ARRAY_INDEX_OUT_RANGE          = 5,
+    SBE_ATTRIBUTE_RC_ATTR_NOT_ARRAY                 = 6,
+    SBE_ATTRIBUTE_RC_OVRD_NOT_ALLOWED               = 7,
+    SBE_ATTRIBUTE_RC_SET_ATTR_FAILED                = 8,
+    SBE_ATTRIBUTE_RC_SBE_FAPI_TGT_CREATION_FAILED   = 9,
+    SBE_ATTRIBUTE_RC_EXPECTED_BUT_NOT_RECEIVED      = 10,
+    SBE_ATTRIBUTE_RC_DENIED_UPDATE                  = 11,
 };
 
 /**
