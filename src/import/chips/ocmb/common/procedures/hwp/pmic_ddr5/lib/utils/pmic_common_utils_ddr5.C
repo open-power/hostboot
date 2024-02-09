@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -524,7 +524,7 @@ fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_
     }
     else
     {
-        FAPI_INF(GENTARGTIDFORMAT " PMIC is not from TI, exiting get_nominal_voltage_ddr5", GENTARGTID(l_pmic_target));
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " PMIC is not from TI, exiting get_nominal_voltage_ddr5", GENTARGTID(l_pmic_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -600,8 +600,8 @@ fapi2::ReturnCode get_nominal_voltage_ddr5(const target_info_redundancy_ddr5& i_
     // Get nominial voltage using: range_min + (step * setting)
     o_nominal_voltage = l_range_min_value + (CONSTS::VOLT_STEP * l_voltage_setting);
 
-    FAPI_INF(GENTARGTIDFORMAT " Rail %u Nominal voltage: %lumV", GENTARGTID(l_pmic_target), i_rail,
-             o_nominal_voltage);
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Rail %u Nominal voltage: %lumV", GENTARGTID(l_pmic_target), i_rail,
+                    o_nominal_voltage);
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -462,7 +462,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
 ///
 /// @brief Enable PMIC for 2U
 ///

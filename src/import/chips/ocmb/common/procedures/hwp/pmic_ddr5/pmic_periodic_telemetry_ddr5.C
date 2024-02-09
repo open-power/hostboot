@@ -57,7 +57,7 @@ extern "C"
     fapi2::ReturnCode pmic_periodic_telemetry_ddr5(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
             fapi2::hwp_data_ostream& o_data)
     {
-        FAPI_INF(GENTARGTIDFORMAT " Running pmic_periodic_telemetry HWP", GENTARGTID(i_ocmb_target));
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Running pmic_periodic_telemetry HWP", GENTARGTID(i_ocmb_target));
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
         mss::pmic::ddr5::periodic_telemetry_data l_info;
