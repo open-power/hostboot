@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1596,7 +1596,7 @@ errlHndl_t calcMemThrottles()
     if (nullptr == err)
     {
         TargetHandleList dimm_list;
-        getClassResources(dimm_list, CLASS_LOGICAL_CARD, TYPE_DIMM, UTIL_FILTER_PRESENT);
+        getClassResources(dimm_list, CLASS_LOGICAL_CARD, TYPE_DIMM, UTIL_FILTER_FUNCTIONAL);
         const size_t numDimms = dimm_list.size();
 
         //Calculate Throttle settings when system has redundant power (N+1)
