@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,7 +141,7 @@ void attempt_recovery(pmic_info& io_pmic,
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
     fapi2::buffer<uint8_t> l_reg;
 
-    FAPI_INF(TARGTIDFORMAT " Attempting Recovery", MSSTARGID(io_pmic.iv_pmic));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Attempting Recovery", MSSTARGID(io_pmic.iv_pmic));
 
     // Clear EFUSE
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_gpio, mss::gpio::regs::EFUSE_OUTPUT, l_reg));
@@ -211,7 +211,7 @@ void update_breadcrumb(aggregate_state& io_state,
 
     fapi2::buffer<uint8_t> l_reg;
 
-    FAPI_INF(TARGTIDFORMAT " Updating bread crumb", MSSTARGID(io_pmic.iv_pmic));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Updating bread crumb", MSSTARGID(io_pmic.iv_pmic));
 
     switch(io_pmic_tele_data.iv_breadcrumb)
     {
@@ -269,7 +269,7 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESP
                            const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc1,
                            const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc2)
 {
-    FAPI_INF(TARGTIDFORMAT " Performing GPIO N-Mode Detection", MSSTARGID(i_gpio));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Performing GPIO N-Mode Detection", MSSTARGID(i_gpio));
 
     aggregate_state l_state = aggregate_state::N_PLUS_1;
 
@@ -280,7 +280,7 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESP
     if (mss::pmic::i2c::reg_read_reverse_buffer(i_gpio, mss::gpio::regs::INPUT_PORT_REG, l_reg)
         != fapi2::FAPI2_RC_SUCCESS)
     {
-        FAPI_INF(TARGTIDFORMAT " INPUT_PORT_REG register read failed", MSSTARGID(i_gpio));
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " INPUT_PORT_REG register read failed", MSSTARGID(i_gpio));
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         l_state = aggregate_state::GI2C_I2C_FAIL;
         // no recovery
@@ -297,14 +297,14 @@ aggregate_state gpio_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESP
 
     if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR0>())
     {
-        FAPI_INF(TARGTIDFORMAT " PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
         io_pmic1.iv_state |= PWR_NOT_GOOD;
         update_breadcrumb(l_state, io_pmic1, i_gpio, i_adc1, i_adc2, io_pmic_data1);
     }
 
     if (!l_reg.getBit<mss::gpio::fields::INPUT_PORT_REG_PMIC_PAIR1>())
     {
-        FAPI_INF(TARGTIDFORMAT " PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " PMIC PWR_NOT_GOOD", MSSTARGID(i_gpio));
         io_pmic2.iv_state |= PWR_NOT_GOOD;
         update_breadcrumb(l_state, io_pmic2, i_gpio, i_adc1, i_adc2, io_pmic_data2);
     }
@@ -424,7 +424,7 @@ aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPO
                           pmic_telemetry& io_pmic_data1,
                           pmic_telemetry& io_pmic_data2)
 {
-    FAPI_INF(TARGTIDFORMAT " Checking ADC for EVENT_FLAG", MSSTARGID(i_adc1));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Checking ADC for EVENT_FLAG", MSSTARGID(i_adc1));
 
     aggregate_state l_state = aggregate_state::N_PLUS_1;
     constexpr uint8_t EVENT_FLAG_GOOD = 0x00;
@@ -436,7 +436,7 @@ aggregate_state adc_check(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPO
     // We don't care if this read fails. We would treat it the same as a bad EVENT_FLAG reg
     if (mss::pmic::i2c::reg_read_reverse_buffer(i_adc1, mss::adc::regs::EVENT_FLAG, l_reg) != fapi2::FAPI2_RC_SUCCESS)
     {
-        FAPI_INF(TARGTIDFORMAT " EVENT_FLAG register read failed", MSSTARGID(i_adc1));
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " EVENT_FLAG register read failed", MSSTARGID(i_adc1));
         fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
         return aggregate_state::GI2C_I2C_FAIL;
     }
@@ -656,21 +656,21 @@ aggregate_state voltage_checks(std::vector<pmic_info>& io_pmics,
     // Note that for RCDless dimms this voltage domain does not exist, but this is fine.
     // We should read out close to 0A for both currents and therefore should not trigger
     // the N-mode condition.
-    FAPI_INF("Checking voltage domain VDDR1");
+    FAPI_INF_NO_SBE("Checking voltage domain VDDR1");
     read_double_domain(io_pmics[mss::pmic::id::PMIC0], io_pmics[mss::pmic::id::PMIC2], SWA_CURRENT, SWB_CURRENT,
                        l_aggregate_state, io_tele_data.iv_pmic1, io_tele_data.iv_pmic2, i_adc1, i_adc2, i_gpio1, i_gpio2);
     // VPP
-    FAPI_INF("Checking voltage domain VPP");
+    FAPI_INF_NO_SBE("Checking voltage domain VPP");
     read_single_domain(io_pmics[mss::pmic::id::PMIC0], io_pmics[mss::pmic::id::PMIC2], SWD_CURRENT, l_aggregate_state,
                        io_tele_data.iv_pmic1, io_tele_data.iv_pmic2, i_adc1, i_adc2, i_gpio1, i_gpio2);
 
     // VDDR2 (or VDDR for RCDless dimms)
-    FAPI_INF("Checking voltage domain VDDR2");
+    FAPI_INF_NO_SBE("Checking voltage domain VDDR2");
     read_double_domain(io_pmics[mss::pmic::id::PMIC1], io_pmics[mss::pmic::id::PMIC3], SWA_CURRENT, SWB_CURRENT,
                        l_aggregate_state, io_tele_data.iv_pmic3, io_tele_data.iv_pmic4, i_adc1, i_adc2, i_gpio1, i_gpio2);
 
     // VDD
-    FAPI_INF("Checking voltage domain VDD");
+    FAPI_INF_NO_SBE("Checking voltage domain VDD");
     read_single_domain(io_pmics[mss::pmic::id::PMIC1], io_pmics[mss::pmic::id::PMIC3], SWC_CURRENT, l_aggregate_state,
                        io_tele_data.iv_pmic3, io_tele_data.iv_pmic4, i_adc1, i_adc2, i_gpio1, i_gpio2);
 
@@ -739,42 +739,42 @@ void populate_gpio_data(
     // We already handled earlier i2c failures on these parts and how to log them
     // appropriately. We will op to skip error handling now.
 
-    FAPI_INF(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio1));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio1));
     mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::INPUT_PORT_REG, l_reg_contents_1);
     o_data.iv_gpio1_port_state = l_reg_contents_1;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio2));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Reading GPIO Input Port State", MSSTARGID(i_gpio2));
     mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::INPUT_PORT_REG, l_reg_contents_2);
     o_data.iv_gpio2_port_state = l_reg_contents_2;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(TARGTIDFORMAT " Reading GPIO EFUSE output", MSSTARGID(i_gpio1));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Reading GPIO EFUSE output", MSSTARGID(i_gpio1));
     mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::EFUSE_OUTPUT, l_reg_contents_1);
     o_data.iv_gpio1_r01_efuse_output = l_reg_contents_1;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(TARGTIDFORMAT " Reading GPIO EFUSE output", MSSTARGID(i_gpio2));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Reading GPIO EFUSE output", MSSTARGID(i_gpio2));
     mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::EFUSE_OUTPUT, l_reg_contents_2);
     o_data.iv_gpio2_r01_efuse_output = l_reg_contents_2;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(TARGTIDFORMAT " Reading GPIO EFUSE Polarity", MSSTARGID(i_gpio1));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Reading GPIO EFUSE Polarity", MSSTARGID(i_gpio1));
     mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::EFUSE_POLARITY, l_reg_contents_1);
     o_data.iv_gpio1_r02_efuse_polarity = l_reg_contents_1;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(TARGTIDFORMAT " Reading GPIO EFUSE Polarity", MSSTARGID(i_gpio2));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Reading GPIO EFUSE Polarity", MSSTARGID(i_gpio2));
     mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::EFUSE_POLARITY, l_reg_contents_2);
     o_data.iv_gpio2_r02_efuse_polarity = l_reg_contents_2;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(TARGTIDFORMAT " Reading GPIO Configuration", MSSTARGID(i_gpio1));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Reading GPIO Configuration", MSSTARGID(i_gpio1));
     mss::pmic::i2c::reg_read(i_gpio1, mss::gpio::regs::CONFIGURATION, l_reg_contents_1);
     o_data.iv_gpio1_r03_configuration = l_reg_contents_1;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
-    FAPI_INF(TARGTIDFORMAT " Reading GPIO Configuration", MSSTARGID(i_gpio2));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Reading GPIO Configuration", MSSTARGID(i_gpio2));
     mss::pmic::i2c::reg_read(i_gpio2, mss::gpio::regs::CONFIGURATION, l_reg_contents_2);
     o_data.iv_gpio2_r03_configuration = l_reg_contents_2;
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -793,7 +793,7 @@ void populate_pmic_data(
 {
     if (!(io_pmic.iv_state & pmic_state::NOT_PRESENT))
     {
-        FAPI_INF(TARGTIDFORMAT " Populating PMIC data", MSSTARGID(io_pmic.iv_pmic));
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " Populating PMIC data", MSSTARGID(io_pmic.iv_pmic));
 
         // Required regs
         static constexpr uint8_t R08 = 0x08;
@@ -966,7 +966,7 @@ void populate_adc_data(
     const mss::generic_i2c_responder_ddr4 i_adc_num,
     adc_telemetry& o_adc_data)
 {
-    FAPI_INF(TARGTIDFORMAT " Populating ADC data", MSSTARGID(i_adc));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Populating ADC data", MSSTARGID(i_adc));
 
     static constexpr uint64_t TO_MV = 1000000;
     static constexpr uint8_t ADC_U16_MAP_LEN = 24;
@@ -1180,7 +1180,7 @@ fapi2::ReturnCode pmic_n_mode_detect(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
     fapi2::hwp_data_ostream& o_data)
 {
-    FAPI_INF(TARGTIDFORMAT " Running pmic_n_mode_detect HWP", MSSTARGID(i_ocmb_target));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Running pmic_n_mode_detect HWP", MSSTARGID(i_ocmb_target));
 
     fapi2::buffer<uint8_t> l_failed_pmics_1;
     fapi2::buffer<uint8_t> l_failed_pmics_2;
@@ -1282,7 +1282,7 @@ fapi2::ReturnCode pmic_n_mode_detect(
 
     FAPI_TRY(send_struct(l_info, o_data));
 
-    FAPI_INF(TARGTIDFORMAT " Compeleted pmic_n_mode_detect procedure", MSSTARGID(i_ocmb_target));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Compeleted pmic_n_mode_detect procedure", MSSTARGID(i_ocmb_target));
 
 fapi_try_exit:
     return fapi2::current_err;
