@@ -179,14 +179,16 @@ p10_setup_evid (const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
                       "Error from p10_update_dpll_value function");
         }
 
+        //Read VDD/VCS/VDN/VIO present voltage from HW
+        FAPI_TRY(p10_setup_evid_voltageRead(i_target,
+                                            attrs.attr_avs_bus_num,
+                                            attrs.attr_avs_bus_rail_select,
+                                            l_present_boot_voltage),
+                 "Error from voltage read function");
+
         if (l_coreList.size())
         {
-            //Read VDD and VCS present voltage from HW
-            FAPI_TRY(p10_setup_evid_voltageRead(i_target,
-                                                attrs.attr_avs_bus_num,
-                                                attrs.attr_avs_bus_rail_select,
-                                                l_present_boot_voltage),
-                     "Error from voltage read function");
+
 
             // Set Boot VDD/VCS Voltage
             if(attrs.attr_avs_bus_num[VDD] != INVALID_BUS_NUM &&
