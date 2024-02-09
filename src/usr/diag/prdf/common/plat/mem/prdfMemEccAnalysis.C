@@ -998,18 +998,13 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip, uint8_t i_port,
         // Check both RDF_FIR[9:10] for mainline NCE/TCEs
         SCAN_COMM_REGISTER_CLASS * rdf0 = i_chip->getRegister("RDF_FIR_0");
         SCAN_COMM_REGISTER_CLASS * rdf1 = i_chip->getRegister("RDF_FIR_1");
-        SCAN_COMM_REGISTER_CLASS * msk0 = i_chip->getRegister("RDF_FIR_MASK_0");
-        SCAN_COMM_REGISTER_CLASS * msk1 = i_chip->getRegister("RDF_FIR_MASK_1");
-        if ( SUCCESS != (rdf0->ForceRead() | rdf0->ForceRead() |
-                         msk0->ForceRead() | msk1->ForceRead()) )
+        if ( SUCCESS != (rdf0->ForceRead() | rdf0->ForceRead()) )
         {
             PRDF_ERR( PRDF_FUNC "Read() failed on RDF_FIRs: i_chip=0x%08x",
                       i_chip->getHuid() );
         }
-        else if ( (0 != (rdf0->GetBitFieldJustified(9,2) &
-                        ~msk0->GetBitFieldJustified(9,2))) &&
-                  (0 != (rdf1->GetBitFieldJustified(9,2) &
-                        ~msk1->GetBitFieldJustified(9,2))) )
+        else if ( (0 != rdf0->GetBitFieldJustified(9,2)) &&
+                  (0 != rdf1->GetBitFieldJustified(9,2)) )
         {
             // Set a flag indicating the address is invalid
             invAddr = true;
@@ -1154,24 +1149,20 @@ uint32_t analyzeFetchUe( ExtensibleChip * i_chip, uint8_t i_port,
         nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 0) &&
         nullptr != getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT, 1))
     {
-        // Check both RDF_FIR[9:10] for mainline NCE/TCEs
+        // Check both RDF_FIR[9:10] for mainline UEs
         SCAN_COMM_REGISTER_CLASS * rdf0 = i_chip->getRegister("RDF_FIR_0");
         SCAN_COMM_REGISTER_CLASS * rdf1 = i_chip->getRegister("RDF_FIR_1");
-        SCAN_COMM_REGISTER_CLASS * msk0 = i_chip->getRegister("RDF_FIR_MASK_0");
-        SCAN_COMM_REGISTER_CLASS * msk1 = i_chip->getRegister("RDF_FIR_MASK_1");
-        if ( SUCCESS != (rdf0->Read() | rdf0->Read() |
-                         msk0->Read() | msk1->Read()) )
+        if (SUCCESS != (rdf0->Read() | rdf0->Read()))
         {
             PRDF_ERR( PRDF_FUNC "Read() failed on RDF_FIRs: i_chip=0x%08x",
                       i_chip->getHuid() );
         }
-        else if ( (rdf0->IsBitSet(15) && !msk0->IsBitSet(15)) &&
-                  (rdf1->IsBitSet(15) && !msk1->IsBitSet(15)) )
+        else if (rdf0->IsBitSet(15) && rdf1->IsBitSet(15))
         {
             // Set a flag indicating the address is invalid
             invAddr = true;
 
-            // Clear NCE/TCE FIR bits on both RDFs. Write to clear.
+            // Clear UE FIR bits on both RDFs. Write to clear.
             rdf0->clearAllBits();
             rdf1->clearAllBits();
             rdf0->SetBit(15);
