@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -348,7 +348,7 @@ public:
 
         // Create a vector of data which is large enough to cause a buffer overflow.
         std::vector<uint32_t> data;
-        while (data.size() < (((PAGESIZE * SBEIO::SBE_FFDC_MAX_PAGES) / sizeof(uint32_t))
+        while (data.size() < (((PAGESIZE * SBEIO::SBE_FFDC_MAX_PAGES_POZ) / sizeof(uint32_t))
                     + odyPackage.size()))
         {
             data.insert(data.end(), odyPackage.begin(), odyPackage.end());

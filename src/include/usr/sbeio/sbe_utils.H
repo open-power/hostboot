@@ -54,10 +54,15 @@ namespace SBEIO
     static constexpr uint32_t SBE_CMD_HALT_SUPPORTED = 0xAB000001;
 
     // The maximum amount of pages hostboot will allow FFDC package buffers from SBE to be.
-    // This is chosen arbitrarily as a defense against cases where the End-of-Transmission (EOT) is not
-    // recieved from SBE.
-    // GetSBEScratchData chip-op requires at least 64k (16 pages) for the return data. Adding a couple extra for FFDC.
-    static constexpr uint8_t SBE_FFDC_MAX_PAGES = 18;
+    // This is chosen arbitrarily as a defense against cases where the End-of-Transmission (EOT)
+    // is not recieved from SBE.
+    // Also, different sizes based on whether or not the target is a P10 proc (the original support)
+    // or an ocmb (new POZ support)
+    // GetSBEScratchData chip-op (in the new POZ support) requires at least 64k (16 pages) for the
+    // return data.  Adding a couple extra for FFDC.
+    static constexpr uint8_t SBE_FFDC_MAX_PAGES_P10 = 2;
+    static constexpr uint8_t SBE_FFDC_MAX_PAGES_POZ = 18;
+
 
     // For 4U DDR4 max is 224 bytes - runtime_n_mode_telem_info
     // For 4U DDR5 max is 256 bytes - periodic_telemetry_data

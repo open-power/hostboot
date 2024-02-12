@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,7 +38,8 @@ constexpr size_t STATUS_WORD_SIZE = sizeof(SBEIO::SbeFifo::statusHeader)/sizeof(
 namespace SBEIO
 {
 
-const size_t SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS;
+// Use the larger of the MSG_BUFFER_SIZE_WORDS_* values to be safe
+const size_t SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_POZ;
 
 //------------------------------------------------------------------------
 const char* SbeFifoRespBuffer::cv_stateStrings[] = {
@@ -55,11 +56,13 @@ SbeFifoRespBuffer::SbeFifoRespBuffer(uint32_t* i_fifoBuffer,
                                      size_t bufferWordSize,
                                      bool i_getSbeFfdcFmt)
                         : iv_callerBufferPtr(i_fifoBuffer),
-                          iv_callerWordSize( std::min(bufferWordSize, MSG_BUFFER_SIZE_WORDS) ),
+                        // Use the larger of the MSG_BUFFER_SIZE_WORDS_* values to be safe
+                        iv_callerWordSize( std::min(bufferWordSize, MSG_BUFFER_SIZE_WORDS_POZ) ),
                           iv_getSbeFfdcFmt(i_getSbeFfdcFmt)
 {
     do {
-        iv_localMsgBuffer = std::make_unique<std::array<uint32_t, MSG_BUFFER_SIZE_WORDS>>();
+        // Use the larger of the MSG_BUFFER_SIZE_WORDS_* values to be safe
+        iv_localMsgBuffer = std::make_unique<std::array<uint32_t, MSG_BUFFER_SIZE_WORDS_POZ>>();
 
         if(not i_fifoBuffer || iv_callerWordSize < STATUS_WORD_SIZE)
         {
@@ -85,7 +88,8 @@ bool SbeFifoRespBuffer::append(uint32_t i_value)
             iv_callerBufferPtr[iv_index] = i_value;
         }
 
-        if(iv_index < MSG_BUFFER_SIZE_WORDS)
+        // Use the larger of the MSG_BUFFER_SIZE_WORDS_* values to be safe
+        if(iv_index < MSG_BUFFER_SIZE_WORDS_POZ)
         {
             iv_localMsgBuffer->at(iv_index) = i_value;
             ++iv_index;

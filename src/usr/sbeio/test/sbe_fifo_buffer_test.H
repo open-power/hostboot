@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -155,7 +155,7 @@ std::vector<uint32_t>  bufferGetSbeFFDC = {
                                     0x00000001, //EOT
                                 };
 
-size_t overrun_element_count{SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS + 1};
+size_t overrun_element_count{SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_POZ + 1};
 uint32_t overrun_element_value{34};
 std::vector<uint32_t> bufferOverrun(overrun_element_count,
                                     overrun_element_value);

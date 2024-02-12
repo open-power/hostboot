@@ -1340,7 +1340,8 @@ void ProcSbeRetryHandler::handleFspIplTimeFail()
 void ProcSbeRetryHandler::sbe_get_ffdc_handler()
 {
     SBE_TRACF(ENTER_MRK "sbe_get_ffdc_handler()");
-    uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS;
+    // Use the MSG_BUFFER_SIZE_WORDS_P10 since this is for a P10 processor
+    uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_P10;
     uint32_t *l_pFifoResponse =
         reinterpret_cast<uint32_t *>(malloc(l_responseSize));
 

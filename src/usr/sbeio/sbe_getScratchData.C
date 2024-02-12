@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -118,7 +118,8 @@ namespace SBEIO
             // the heap. To ease the caller's responsibility we allocate a shared_ptr of the correct size and return it
             // to the caller.
             o_pFifoResponse = std::make_shared<std::array<uint32_t, MAX_SBE_SCRATCH_DATA_WORDS>>();
-            static_assert(MAX_SBE_SCRATCH_DATA_WORDS < SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS,
+            // Use larger MSG_BUFFER_SIZE_WORDS_POZ for the check since this should only be called on Ody chips
+            static_assert(MAX_SBE_SCRATCH_DATA_WORDS < SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_POZ,
                           "Not enough space return all SBE scratch data");
             static_assert((MAX_SBE_SCRATCH_DATA_WORDS * sizeof(uint32_t)) == (64 * KILOBYTE),
                           "Expected MAX_SBE_SCRATCH_DATA_WORDS to be 64k, consider current design.");

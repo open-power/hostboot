@@ -91,7 +91,23 @@ namespace SBEIO
     {
         errlOwner errl { nullptr };
 
-        uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS;
+        // Use the appropriate MSG_BUFFER_SIZE_WORDS_* depending on the target
+        uint32_t l_responseSize = 0;
+        if (i_chipTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC)
+        {
+            l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_POZ;
+        }
+        else if (i_chipTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
+        {
+            l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_POZ;
+        }
+        else
+        {
+            assert(false,"genFifoSBEFFDCErrls: Unknown tgt 0x%X of type 0x%X",
+                   TARGETING::get_huid(i_chipTarget),
+                   i_chipTarget->getAttr<TARGETING::ATTR_TYPE>());
+        }
+
         std::vector<uint32_t> l_fifoResponse(l_responseSize);
 
         do {

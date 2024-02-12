@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1103,13 +1103,14 @@ class SbePsu
         static const uint64_t MAX_PSU_SHORT_TIMEOUT_NS=90*NS_PER_SEC; //=90sec
 
         /**
-         * @brief get SBE FFDC buffer size
+         * @brief get SBE PSU FFDC buffer size for a processor target
          *
-         * @return const size_t Size of SBE FFDC buffer.
+         * @return const size_t Size of SBE PSU FFDC buffer.
          */
-        const size_t getSbeFFDCBufferSize(void)
+        const size_t getSbeFFDCBufferSize()
         {
-            return (SBE_FFDC_MAX_PAGES * PAGESIZE);
+            // Since SBE PSU class is only for processors, return max pages for a processor
+            return (SBE_FFDC_MAX_PAGES_P10 * PAGESIZE);
         }
 
         // Structure to give to performPsuChipOp to indicate how unsupported

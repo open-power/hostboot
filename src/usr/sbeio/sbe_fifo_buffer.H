@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -263,7 +263,9 @@ public:
     // Class Constants
     //=========================
 
-    static constexpr size_t MSG_BUFFER_SIZE_WORDS = (PAGE_SIZE * SBE_FFDC_MAX_PAGES) / sizeof(uint32_t);
+    // Different size FIFO buffers are used for P10 and POZ (which includes Odyssey)
+    static constexpr size_t MSG_BUFFER_SIZE_WORDS_P10 = (PAGE_SIZE * SBE_FFDC_MAX_PAGES_P10) / sizeof(uint32_t);
+    static constexpr size_t MSG_BUFFER_SIZE_WORDS_POZ = (PAGE_SIZE * SBE_FFDC_MAX_PAGES_POZ) / sizeof(uint32_t);
     static constexpr size_t INVALID_INDEX = size_t(-1);
 
 protected:
@@ -294,7 +296,8 @@ private:
    // Buffers
    //====================
 
-   std::unique_ptr<std::array<uint32_t, MSG_BUFFER_SIZE_WORDS>> iv_localMsgBuffer; /* local buffer large enough
+   // Use the larger of the possible MSG_BUFFER_SIZE_WORDS_* to be safe
+   std::unique_ptr<std::array<uint32_t, MSG_BUFFER_SIZE_WORDS_POZ>> iv_localMsgBuffer; /* local buffer large enough
                                                                                       to hold FFDC data */
 
    uint32_t * const iv_callerBufferPtr{}; /**< caller supplied buffer should

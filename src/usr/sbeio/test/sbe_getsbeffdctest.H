@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,8 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
         TS_TRACE("getSBEFFDCTest entry");
 
         errlHndl_t l_errl = nullptr;
-        uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS * sizeof(uint32_t);
+        // Since this test only uses procs, use smaller size MSG_BUFFER_SIZE_WORDS_P10
+        uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_P10 * sizeof(uint32_t);
         uint32_t *l_pFifoResponse =
             reinterpret_cast<uint32_t *>(malloc(l_responseSize));
 

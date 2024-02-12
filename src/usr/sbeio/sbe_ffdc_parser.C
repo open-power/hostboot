@@ -28,6 +28,7 @@
 #include <errl/errlreasoncodes.H>
 #include <sbeio/sbeioreasoncodes.H>
 #include <errl/errlmanager.H>
+#include <errl/hberrltypes.H>
 #include <util/utilbyte.H>
 #include <sbeio/sbe_ffdc_parser.H>
 #include <sbeio/sbe_ffdc_package_parser.H>
@@ -177,27 +178,39 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
 
             // Check to see if what we're copying is beyond the buffer size.
             const uint32_t OFFSET_INTO_FFDC_BUFFER = i + HDR_SIZE_IN_BYTES + FFDC_BUFFER_LENGTH_IN_BYTES;
-            if( OFFSET_INTO_FFDC_BUFFER > (PAGESIZE * SBE_FFDC_MAX_PAGES))
+
+            // There are different maximum amount of pages based on the Magic Byte
+            const uint32_t SBE_FFDC_MAX_PAGES = (l_magicByte == SbeFifo::FIFO_ODY_FFDC_MAGIC) ?
+                                                  SBE_FFDC_MAX_PAGES_POZ : SBE_FFDC_MAX_PAGES_P10;
+
+            if(OFFSET_INTO_FFDC_BUFFER > (PAGESIZE * SBE_FFDC_MAX_PAGES))
             {
-                SBE_TRACF(ERR_MRK"parseFFDCData: FFDC Package buffer overflow detected.");
+                SBE_TRACF(ERR_MRK"parseFFDCData: FFDC Package buffer overflow detected: "
+                                 "FFDC_MAGIC = 0x%X, OFFSET = 0x%X, max size = 0x%X",
+                                 l_magicByte, OFFSET_INTO_FFDC_BUFFER, SBE_FFDC_MAX_PAGES);
 
                 /*@
                  * @errortype
-                 * @moduleid     SBEIO_FFDC_PARSER
-                 * @reasoncode   SBEIO_FFDC_PARSER_BUFF_OVERFLOW
-                 * @userdata1    size of FFDC package that overflows the buffer
-                 * @devdesc      If the size of the FFDC package exceeds our
-                 *               allocated buffer size, we log it.
+                 * @moduleid          SBEIO_FFDC_PARSER
+                 * @reasoncode        SBEIO_FFDC_PARSER_BUFF_OVERFLOW
+                 * @userdata1[00:63]  Size of FFDC package that overflows the buffer
+                 * @userdata2[00:31]  Magic Byte
+                 * @userdata2[32:63]  SBE FFDC MAX PAGES
+                 * @devdesc           If the size of the FFDC package exceeds our
+                 *                    allocated buffer size, we log it.
+                 * @custdesc          Firmware error communicating with a chip
                  */
 
                 errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                         SBEIO_FFDC_PARSER,
                         SBEIO_FFDC_PARSER_BUFF_OVERFLOW,
-                        TO_UINT64(OFFSET_INTO_FFDC_BUFFER),
-                        0);
+                        errl_util::SrcUserData(
+                            errl_util::bits{0,63},OFFSET_INTO_FFDC_BUFFER),
+                        errl_util::SrcUserData(
+                            errl_util::bits{0,31},l_magicByte,
+                            errl_util::bits{32,63},SBE_FFDC_MAX_PAGES));
                 errl->collectTrace(SBEIO_COMP_NAME);
                 errlCommit(errl, SBEIO_COMP_ID);
-
                 break;
             }
             else
