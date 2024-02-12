@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,18 +88,16 @@ inline MemportState_t get_memport_state(const uint8_t* i_spd,
     {
         uint8_t l_ports = i_spd[DDR5_PHY_WIDTH_BYTE] & DDR5_MEMPORT_MASK;
 
+        // Enabled ports are PRESENT and FUNCTIONAL
         if( ((i_memport_id == 0) && (l_ports & DDR5_MEMPORT0))
             || ((i_memport_id == 1) && (l_ports & DDR5_MEMPORT1)) )
         {
             return MEMPORT_FUNCTIONAL;
         }
-        else if( i_memport_id > 1 )
-        {
-            return MEMPORT_NOT_PRESENT;
-        }
+        // Disabled ports are neither FUNCTIONAL nor PRESENT
         else
         {
-            return MEMPORT_PRESENT_NOT_FUNCTIONAL;
+            return MEMPORT_NOT_PRESENT;
         }
     }
     else
