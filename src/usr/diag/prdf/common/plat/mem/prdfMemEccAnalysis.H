@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,17 @@ template<TARGETING::TYPE T>
 uint32_t handleMemUe( ExtensibleChip * i_chip, const MemAddr & i_addr,
                       UE_TABLE::Type i_type, STEP_CODE_DATA_STRUCT & io_sc,
                       bool i_invAddr = false );
+
+
+/**
+ * @brief  Handles a maintenance AUE attention. Odyssey OCMB specific.
+ *
+ * @param  i_chip    OCMB.
+ * @param  i_addr    Maint address.
+ * @param  io_sc     The step code data struct.
+ */
+void handleOdyMaintAue(ExtensibleChip * i_chip, const MemAddr & i_addr,
+                       STEP_CODE_DATA_STRUCT & io_sc);
 
 /**
  * @brief Does mainline and maintenance IUE handling.

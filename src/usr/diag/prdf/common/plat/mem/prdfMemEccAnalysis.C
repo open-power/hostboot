@@ -185,6 +185,42 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
 //------------------------------------------------------------------------------
 
+void handleOdyMaintAue(ExtensibleChip * i_chip, const MemAddr & i_addr,
+                       STEP_CODE_DATA_STRUCT & io_sc)
+{
+    PRDF_ASSERT(nullptr != i_chip);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == i_chip->getType());
+
+    // DIMM rank high priority, MEM_PORT low priority callout.
+    PRDpriority dimmPriority = MRU_HIGH;
+    GARD_POLICY dimmGard = GARD;
+
+    PRDpriority memportPriority = MRU_LOW;
+    GARD_POLICY memportGard = NO_GARD;
+
+    // If there is a possible root cause in the ODP_FIR, adjust the
+    // callout to MEM_PORT high, DIMM low
+    if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, i_addr.getPort()))
+    {
+        memportPriority = MRU_HIGH;
+        memportGard = GARD;
+
+        dimmPriority = MRU_LOW;
+        dimmGard = NO_GARD;
+    }
+
+    TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(), TYPE_MEM_PORT,
+                                               i_addr.getPort());
+    io_sc.service_data->SetCallout(memport, memportPriority, memportGard);
+
+    MemRank rank = i_addr.getRank();
+    MemoryMru mm {i_chip->getTrgt(), rank, i_addr.getPort(),
+                  MemoryMruData::CALLOUT_RANK};
+    io_sc.service_data->SetCallout(mm, dimmPriority, dimmGard);
+}
+
+//------------------------------------------------------------------------------
+
 #ifdef __HOSTBOOT_MODULE
 
 uint32_t __expMaskMemPort( ExtensibleChip * i_chip, uint8_t i_port )

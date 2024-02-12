@@ -681,20 +681,10 @@ actionclass mainline_impe_handling_1
 };
 
 /** Handle Maintenance AUEs */
-actionclass maintenance_aue_handling0_chnlFail
+actionclass maintenance_aue_handling_chnlFail
 {
     SueSource;
     funccall("AnalyzeMaintAue");
-    mem_port0_L;
-    threshold1;
-    funccall("returnNoClearFirBits");
-};
-
-actionclass maintenance_aue_handling1_chnlFail
-{
-    SueSource;
-    funccall("AnalyzeMaintAue");
-    mem_port1_L;
     threshold1;
     funccall("returnNoClearFirBits");
 };

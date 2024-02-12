@@ -786,23 +786,7 @@ int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
     }
     else
     {
-        PRDpriority dimmPriority = MRU_HIGH;
-        GARD_POLICY dimmGard = GARD;
-        // If there is a possible root cause in the ODP_FIR, adjust the
-        // callout to MEM_PORT high, DIMM low
-        if (MemUtils::checkOdpRootCause<TYPE_OCMB_CHIP>(i_chip, addr.getPort()))
-        {
-            TargetHandle_t memport = getConnectedChild(i_chip->getTrgt(),
-                TYPE_MEM_PORT, addr.getPort());
-            io_sc.service_data->SetCallout(memport, MRU_HIGH);
-            dimmPriority = MRU_LOW;
-            dimmGard = NO_GARD;
-        }
-
-        MemRank rank = addr.getRank();
-        MemoryMru mm { i_chip->getTrgt(), rank, addr.getPort(),
-                       MemoryMruData::CALLOUT_RANK };
-        io_sc.service_data->SetCallout( mm, dimmPriority, dimmGard );
+        MemEcc::handleOdyMaintAue(i_chip, addr, io_sc);
     }
 
     return SUCCESS; // nothing to return to rule code
