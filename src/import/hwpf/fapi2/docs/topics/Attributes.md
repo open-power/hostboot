@@ -165,6 +165,10 @@ Note : It is unusual, though not unheard of, for an attribute to be both platIni
 
 `<writeable/>`
 
+### denyForSecurityUpdate
+Indicates that the attribute cannot be updated from outside by attribute update chip-op.
+
+`<denyForSecurityUpdate/>`
 
 
 ## Ignored/Deprecated Tags

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -227,6 +227,7 @@
     <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
   </sbeAttrSync>
   <mrwHide/>
+  <denyForSecurityUpdate/>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>
