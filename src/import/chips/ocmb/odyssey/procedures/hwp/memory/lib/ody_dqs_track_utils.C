@@ -552,23 +552,33 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
     }
 
     // Now check which index exists and choose that temp delta
-    if (l_sensor_info.iv_dram_exists )
+    // but only if temperature is within reasonable range (0-125C)
+    o_temp_delta = 0;
+
+    if (l_sensor_info.iv_dram_exists &&
+        (o_current_temp_values[l_sensor_info.iv_dram_index] >= 0) &&
+        (o_current_temp_values[l_sensor_info.iv_dram_index] <= 125))
     {
         o_temp_delta = l_temp_delta_values[l_sensor_info.iv_dram_index];
     }
-    else if(l_sensor_info.iv_pmic_exists)
+    else if (l_sensor_info.iv_pmic_exists &&
+             (o_current_temp_values[l_sensor_info.iv_pmic_index] >= 0) &&
+             (o_current_temp_values[l_sensor_info.iv_pmic_index] <= 125))
     {
         o_temp_delta = l_temp_delta_values[l_sensor_info.iv_pmic_index];
     }
-    else if(l_sensor_info.iv_mem_buf_ext_exists)
+    else if (l_sensor_info.iv_mem_buf_ext_exists &&
+             (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] >= 0) &&
+             (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] <= 125))
     {
         o_temp_delta = l_temp_delta_values[l_sensor_info.iv_mem_buf_ext_index];
     }
-    else // if none of the above sensors exist use the differential one
+    // if none of the above sensors exist use the differential one
+    else if ((o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] >= 0) &&
+             (o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] <= 125))
     {
         o_temp_delta = l_temp_delta_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR];
     }
-
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -584,16 +594,26 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
 
-    // Threshold is 5C but this code uses 100x the temperature to avoid the use of floats
-    const uint16_t l_threshold = 500;
+    uint8_t l_threshold = 0;
     int16_t l_temp_delta = 0;
     int16_t l_curr_temp_values[TT::temp_sensor::NUM_SENSORS] = {0};
+    uint16_t l_count = 0;
+    uint16_t l_count_threshold = 0;
 
-    // Get the temperature delta and the current temperature values
-    FAPI_TRY(ody_calc_temp_sensors_delta(i_target, l_temp_delta, l_curr_temp_values));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_TEMP_THRESHOLD, i_target, l_threshold));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL, i_target, l_count));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_THRESHOLD, i_target, l_count_threshold));
 
-    // Run DQS tracking only if the delta is more than the threshold and update the previous value attributes
-    if(l_temp_delta > l_threshold)
+    // Get the temperature delta and the current temperature values, both in centi-degrees
+    if (l_count <= l_count_threshold)
+    {
+        FAPI_TRY(ody_calc_temp_sensors_delta(i_target, l_temp_delta, l_curr_temp_values));
+    }
+
+    // Run DQS tracking only if the temp delta or count is more than the associated threshold
+    // Threshold is in degrees-C so needs to be multiplied by 100
+    if ((l_temp_delta > static_cast<int16_t>(l_threshold) * 100) ||
+        (l_count > l_count_threshold))
     {
         for(auto& l_port_target : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target) )
         {
@@ -611,7 +631,17 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             FAPI_TRY(mss::ody::thermal::set_therm_sensor_prev_value[l_sensor_index](i_target, l_curr_temp_values[l_sensor_index]));
         }
 
+        // Reset the "count since last recal" value
+        l_count = 0;
     }
+    else
+    {
+        // We didn't recal, so increment the "count since last recal" value
+        l_count++;
+    }
+
+    // Update the "count since last recal" value
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL, i_target, l_count));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -209,6 +209,53 @@
     </attribute>
 
      <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_TEMP_THRESHOLD</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Threshold value (in degrees C) for difference in sensor
+            temperature since the previous recalibration that will trigger
+            another DQS drift recalibration.
+        </description>
+        <valueType>uint8</valueType>
+        <default>5</default>
+        <writeable/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
+    </attribute>
+
+     <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_COUNT_THRESHOLD</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Threshold value (in number of attempts) for a DQS drift recalibration
+            to be run. Even if a significant temperature change has not occurred
+            since the previous recalibration, another one will be triggered
+            after this many attempts have passed. Set to zero to disable upper
+            threshold (recalibration will not be forced unless temperature changes
+            more than temperature threshold)
+        </description>
+        <valueType>uint16</valueType>
+        <default>3600</default>
+        <writeable/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
+    </attribute>
+
+     <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Count of DQS drift tracking attempts since the last time recalibration
+            was run. Updated in DQS tracking procedure.
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+     <attribute>
         <id>ATTR_ODY_THERMAL_SENSOR_DIFF_PREVIOUS_VALUE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
