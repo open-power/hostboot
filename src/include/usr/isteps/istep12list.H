@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -246,7 +246,7 @@ const   TaskInfo    g_istep12[]  =   {
         {
                 ISTEPNAME(12,03,"proc_omi_scominit"),
                 ISTEP_12::call_proc_omi_scominit,
-                { START_FN, EXT_IMAGE, NORMAL_IPL_OP, true }
+                { START_FN, EXT_IMAGE, NORMAL_IPL_OP | MPIPL_OP, true }
         },
         {
                 ISTEPNAME(12,04,"ocmb_omi_scominit"),

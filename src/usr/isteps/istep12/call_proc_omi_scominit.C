@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@ using   namespace   ISTEP;
 using   namespace   ISTEP_ERROR;
 using   namespace   ERRORLOG;
 using   namespace   TARGETING;
+using   namespace   TARGETING::UTIL;
 
 
 namespace ISTEP_12
@@ -71,6 +72,17 @@ void* call_proc_omi_scominit (void *io_pArgs)
 {
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
+
+    do
+    {
+
+    if (assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>())
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_proc_omi_scominit entry. Skipping HWPs for MPIPL.");
+
+        break;
+    }
 
     TARGETING::TargetHandleList l_procTargetList;
     getAllChips(l_procTargetList, TYPE_PROC);
@@ -148,6 +160,8 @@ void* call_proc_omi_scominit (void *io_pArgs)
     }
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, EXIT_MRK"p10_omi_setup_bars");
+
+    } while (false);
 
     // map OCMBs into Hostboot memory
     l_err = MMIO::mmioSetup();

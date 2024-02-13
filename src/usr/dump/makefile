@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2020
+# Contributors Listed Below - COPYRIGHT 2012,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -29,5 +29,8 @@ MODULE = dump
 OBJS += dumpCollect.o
 
 SUBDIRS += test.d
+
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
 include ${ROOTPATH}/config.mk

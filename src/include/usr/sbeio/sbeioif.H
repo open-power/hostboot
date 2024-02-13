@@ -855,6 +855,19 @@ namespace SBEIO
      */
     bool checkOdyFFDC(TARGETING::Target* i_chipTarget);
 
+    /**
+     * @brief Perform a chipop to the given OCMB to request an Odyssey
+     * hardware dump, and place the contents of that dump at the given
+     * (virtual) address.
+     * @param[in] i_ocmb              The OCMB to dump.
+     * @param[in] i_buffer            The buffer to place the dump in.
+     * @param[in/out] io_buffer_size  In: the size of i_buffer. Out: The size of the dump.
+     * @return Error if any, otherwise nullptr.
+     */
+    errlOwner getOdysseyHardwareDump(TARGETING::Target* i_ocmb,
+                                     uint8_t* i_buffer,
+                                     uint32_t& io_buffer_size);
+
 } //end namespace SBEIO
 
 #endif /* _SBEIOIF_H */

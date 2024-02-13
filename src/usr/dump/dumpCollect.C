@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,8 @@
 #include <mbox/mbox_queues.H>            //
 #include <kernel/vmmmgr.H>
 #include <targeting/targplatutil.H>
+#include <sbeio/sbeioif.H>
+#include <targeting/odyutil.H>
 
 // Trace definition
 trace_desc_t* g_trac_dump = NULL;
@@ -66,6 +68,9 @@ TRAC_INIT(&g_trac_dump, "DUMP", 4*KILOBYTE);
 //Minimum space required for Master Fused Core
 //and its 8 threads
 #define HYP_REQUIRED_MIN_REG_SIZE 0x5BC0
+
+using namespace TARGETING;
+using namespace ERRORLOG;
 
 namespace DUMP
 {
@@ -241,8 +246,130 @@ typedef std::map<uint32_t, const char*>::iterator SPRNUM_MAP_IT;
 #define DO_SPRNUM_MAP(in_name, in_number)\
     SPRNUM_MAP[in_number] = #in_name;
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+static void unmapVirtAddr(void* i_addr)
+{
+    errlHndl_t l_elog = nullptr;
+
+    int l_rc = mm_block_unmap(i_addr);
+
+    if(l_rc)
+    {
+        TRACFCOMP( g_trac_dump,
+                   "unmapVirtAddr fail to unmap virt addr %p",
+                   i_addr);
+        /*@
+         * @errortype
+         * @moduleid     DUMP::DUMP_ARCH_REGS
+         * @reasoncode   DUMP::DUMP_MM_BLOCK_UNMAP_FAIL
+         * @userdata1    VA to unmap
+         * @userdata2    rc value from unmap
+         * @devdesc      Cannot unmap the virtual address
+         * @custdesc     An internal firmware error occurred
+         */
+        l_elog = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         DUMP_ARCH_REGS,
+                                         DUMP_MM_BLOCK_UNMAP_FAIL,
+                                         reinterpret_cast<uint64_t>(i_addr),
+                                         l_rc,
+                                         ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+        l_elog->collectTrace(RUNTIME_COMP_NAME);
+        errlCommit(l_elog, DUMP_COMP_ID);
+    }
+}
+
+/**
+ * @brief Collect HW dumps for all the Odyssey OCMBs under the given
+ * processor and store them in the dump section allocated by PHYP at
+ * the given physical address.
+ *
+ * @param[in] i_proc                 The processor whose OCMBs will be dumped.
+ * @param[in] hwDataMemoryAddr       The physical memory address of the HW dump area (allocated by PHYP)
+ * @param[in] hwDataMemAllocSize     The size of the allocation pointed to by hwDataMemoryAddr
+ * @param[in] hwDataMemCapturedSize  The size of the data already in hwDataMemoryAddr
+ * @return                           The amount of memory newly occupied in hwDataMemoryAddr
+ */
+uint64_t collectOdysseyHwDumps(Target* const i_proc,
+                               const uint64_t hwDataMemoryAddr,
+                               const uint64_t hwDataMemAllocSize,
+                               uint64_t hwDataMemCapturedSize)
+{
+    TRACFCOMP(g_trac_dump,
+              ENTER_MRK"collectOdysseyHwDumps(0x%08X, 0x%X, 0x%X, 0x%X)",
+              get_huid(i_proc),
+              hwDataMemoryAddr,
+              hwDataMemAllocSize,
+              hwDataMemCapturedSize);
+
+    uint8_t* const hw_dump_vaddr
+        = static_cast<uint8_t*>(mm_block_map(reinterpret_cast<void*>(hwDataMemoryAddr),
+                                             hwDataMemAllocSize));
+
+    do
+    {
+
+    if (!hwDataMemoryAddr || !hwDataMemAllocSize)
+    {
+        TRACFCOMP(g_trac_dump,
+                  "collectOdysseyHwDumps: No space allocated "
+                  "for dumps, skipping dump collection");
+        break;
+    }
+
+    for (const auto ocmb : composable(getChildAffinityTargets)(i_proc, CLASS_NA, TYPE_OCMB_CHIP, true /* functional only */))
+    {
+        if (!UTIL::isOdysseyChip(ocmb))
+        {
+            continue;
+        }
+
+        using namespace SBEIO;
+
+        uint8_t* const dump_dest = hw_dump_vaddr + hwDataMemCapturedSize;
+        uint32_t buffer_size = hwDataMemAllocSize - hwDataMemCapturedSize;
+
+        TRACFCOMP(g_trac_dump,
+                  "collectOdysseyHwDumps: Dumping OCMB 0x%08X into "
+                  "0x%16X (space available = %d bytes)",
+                  get_huid(ocmb),
+                  dump_dest,
+                  buffer_size);
+
+        auto dump_errl
+            = SBEIO::getOdysseyHardwareDump(ocmb, dump_dest, buffer_size);
+
+        if (dump_errl)
+        {
+            TRACFCOMP(g_trac_dump,
+                      ERR_MRK"collectOdysseyHwDumps: failed to get Odyssey "
+                      "hardware dump for 0x%08X: "
+                      TRACE_ERR_FMT,
+                      get_huid(ocmb),
+                      TRACE_ERR_ARGS(dump_errl));
+            dump_errl->collectTrace(SBEIO_COMP_NAME);
+            dump_errl->collectTrace(RUNTIME_COMP_NAME);
+            errlCommit(dump_errl, RUNTIME_COMP_ID);
+            continue;
+        }
+
+        // buffer_size has been updated by getOdysseyHardwareDump
+        hwDataMemCapturedSize += buffer_size;
+    }
+
+    } while (false);
+
+    if (hw_dump_vaddr)
+    {
+        unmapVirtAddr(hw_dump_vaddr);
+    }
+
+    TRACFCOMP(g_trac_dump,
+              EXIT_MRK"collectOdysseyHwDumps(0x%08X) = 0x%08X",
+              i_proc,
+              hwDataMemCapturedSize);
+
+    return hwDataMemCapturedSize;
+}
 
 errlHndl_t doDumpCollect(void)
 {
@@ -354,7 +481,6 @@ void* getPhysAddr( uint64_t i_phypAddr )
 errlHndl_t copyArchitectedRegs(void)
 {
     errlHndl_t l_err = nullptr;
-    int rc;
     // Processor dump area address and size from HDAT
     uint64_t procTableAddr = 0;
     uint64_t procTableSize = 0;
@@ -782,74 +908,36 @@ errlHndl_t copyArchitectedRegs(void)
                       metadata->archDataMemoryAddr);
             uint32_t procId = procChips[procNum]->getAttr<TARGETING::ATTR_ORDINAL_ID>();
 
-            hwDumpTable->procHwRegDataToc[procId].dataOffset= metadata->hwDataMemoryAddr;
-            hwDumpTable->procHwRegDataToc[procId].dataSize=metadata->hwDataMemCapturedSize;
+            auto hwDataMemCapturedSize = metadata->hwDataMemCapturedSize;
+
+            if (getOcmbChipTypesInSystem(UTIL_FILTER_FUNCTIONAL) == UTIL_ODYSSEY_FOUND)
+            {
+                hwDataMemCapturedSize
+                    = collectOdysseyHwDumps(procChips[procNum],
+                                            metadata->hwDataMemoryAddr,
+                                            metadata->hwDataMemAllocSize,
+                                            metadata->hwDataMemCapturedSize);
+            }
+
+            hwDumpTable->procHwRegDataToc[procId].dataOffset = metadata->hwDataMemoryAddr;
+            hwDumpTable->procHwRegDataToc[procId].dataSize = hwDataMemCapturedSize;
             hwDumpTable->procHwRegDataToc[procId].nodeId = nodeId;
             TRACFCOMP(g_trac_dump, "PROC[%d] HWDataOffset=0x%.16llx Size=0x%.8x",
                       procId,hwDumpTable->procHwRegDataToc[procId].dataOffset,hwDumpTable->procHwRegDataToc[procId].dataSize);
 
         }
-
     } while (0);
 
     // Unmap destination memory
     if (vMapDstAddrBase)
     {
-        rc = mm_block_unmap(vMapDstAddrBase);
-        if (rc != 0)
-        {
-            /*@
-             * @errortype
-             * @moduleid     DUMP::DUMP_ARCH_REGS
-             * @reasoncode   DUMP::DUMP_PDAT_CANNOT_UNMAP_DST_ADDR
-             * @userdata1    VA of Destination Array Address for PDAT
-             * @userdata2    rc value from unmap
-             * @devdesc      Cannot unmap the PDAT Destinatin Array Addr
-             * @custdesc     An internal firmware error occurred
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                  DUMP_ARCH_REGS,
-                                  DUMP_PDAT_CANNOT_UNMAP_DST_ADDR,
-                                  (uint64_t)vMapDstAddrBase,
-                                  rc,
-                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-
-            // Commit the error and continue.
-            // Leave the devices unmapped?
-            errlCommit(l_err, DUMP_COMP_ID);
-            l_err = NULL;
-        }
+        unmapVirtAddr(vMapDstAddrBase);
     }
 
     // Unmap source memory
     if(vMapSrcAddrBase)
     {
-        rc = mm_block_unmap(vMapSrcAddrBase);
-        if (rc != 0)
-        {
-            /*@
-             * @errortype
-             * @moduleid     DUMP::DUMP_ARCH_REGS
-             * @reasoncode   DUMP::DUMP_PDAT_CANNOT_UNMAP_SRC_ADDR
-             * @userdata1    VA address of Source Array Address for PDAT
-             * @userdata2    rc value from unmap
-             * @devdesc      Cannot unmap the PDAT Source Array Address
-             * @custdesc     An internal firmware error occurred
-             */
-            l_err = new ERRORLOG::ErrlEntry(
-                                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                  DUMP_ARCH_REGS,
-                                  DUMP_PDAT_CANNOT_UNMAP_SRC_ADDR,
-                                  (uint64_t)vMapSrcAddrBase,
-                                  rc,
-                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-
-            // Commit the error and continue.
-            // Leave the devices unmapped?
-            errlCommit(l_err, DUMP_COMP_ID);
-            l_err = NULL;
-        }
+        unmapVirtAddr(vMapSrcAddrBase);
     }
     TRACFCOMP(g_trac_dump, "copyArchitectedRegs - end ");
     return (l_err);
