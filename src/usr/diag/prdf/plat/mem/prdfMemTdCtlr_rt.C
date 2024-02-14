@@ -1043,6 +1043,13 @@ uint32_t MemTdCtlr<TYPE_OCMB_CHIP>::unmaskEccAttns(uint8_t i_port)
         {
             PRDF_ERR( PRDF_FUNC "Write() failed on RDFFIR_MASK_AND" );
         }
+
+        // Clear the register cache for the RDF_FIR and RDF_FIR_MASK since
+        // they've been written so the next time they're read, the new data
+        // will be read from hardware.
+        RegDataCache & cache = RegDataCache::getCachedRegisters();
+        cache.flush(iv_chip, fir);
+        cache.flush(iv_chip, mask);
     }
     // Explorer OCMBs
     else
