@@ -73,6 +73,7 @@ enum sbeioModuleId
     SBEIO_ERRLUD_SPPE_CODE_LEVELS       = 0x1C,
     SBEIO_TEST_INJECT                   = 0x1D,
     SBEIO_ODY_CHECK_FLASH               = 0x1E,
+    SBEIO_ODY_READ_SCRATCH_DATA         = 0x1F,
 };
 
 /**
@@ -199,6 +200,7 @@ enum sbeioReasonCode
     SBEIO_ODY_FLASH_CHECK_ERR          = SBEIO_COMP_ID | 0x75,
     SBEIO_PMIC_TELEMETRY_DATA_DDR5     = SBEIO_COMP_ID | 0x76, // Do NOT alter the value, HMC dependency
     SBEIO_HRESET_CHECK_FOR_READY_FAIL  = SBEIO_COMP_ID | 0x77,
+    SBEIO_ODY_SCRATCH_DATA             = SBEIO_COMP_ID | 0x78,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

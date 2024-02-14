@@ -39,6 +39,7 @@
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
 #include <trace/interface.H>
+#include <util/misc.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -49,18 +50,25 @@ extern trace_desc_t* g_trac_sbeio;
     TRACFCOMP(g_trac_sbeio,"GenericMsg: " printf_string,##args)
 
 using namespace TARGETING;
+using namespace ERRORLOG;
 
 namespace SBEIO
 {
 
-    errlHndl_t sendPurgeScratchDataRequest(TARGETING::Target      * i_chipTarget,
-                                           uint32_t               * o_pFifoResponse,
-                                           const uint32_t           i_responseSize)
+    errlHndl_t sendPurgeScratchDataRequest(Target           * i_chipTarget,
+                                           uint32_t         * o_pFifoResponse,
+                                           const uint32_t   i_responseSize)
     {
         errlHndl_t errl = nullptr;
 
         do
         {
+            if(Util::isSimicsRunning())
+            {
+                // The scratch data doesn't get logged in simics, so no need to clear it.
+                break;
+            }
+
             // Only support Odyssey OCMB targets.
             errl = sbeioOdysseyCheck(i_chipTarget,
                                      SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
@@ -92,12 +100,14 @@ namespace SBEIO
      * @param[in] i_chipTarget The chip you would like to perform the chipop on
      *                       NOTE: HB should only be sending this to Odyssey chips
      * @param[out]    o_pFifoResponse Pointer to response
+     * @param[out]    o_actualSize the actual size of returned data
      *
      * @return errlHndl_t Error log handle on failure.
      *
      */
-    errlHndl_t sendGetScratchDataRequest(TARGETING::Target      * i_chipTarget,
-                                         sbeScratchDataResponse_t & o_pFifoResponse)
+    errlHndl_t sendGetScratchDataRequest(Target                   * i_chipTarget,
+                                         sbeScratchDataResponse_t & o_pFifoResponse,
+                                         uint32_t                 & o_actualSize)
     {
         errlHndl_t errl = nullptr;
 
@@ -126,12 +136,94 @@ namespace SBEIO
             errl = SbeFifo::getTheInstance().performFifoChipOp(i_chipTarget,
                                                                reinterpret_cast<uint32_t *>(&l_fifoRequest),
                                                                &(o_pFifoResponse->at(0)),
-                                                               MAX_SBE_SCRATCH_DATA_WORDS);
+                                                               MAX_SBE_SCRATCH_DATA_WORDS,
+                                                               o_actualSize);
 
         }while(0);
 
         SBE_TRACD(EXIT_MRK "sendGetScratchDataRequest");
         return errl;
     };
+
+    void makeScratchDataErrls(Target* i_chipTarget,
+                              std::vector<uint8_t>& i_scratchData,
+                              errlHndl_t& o_errls)
+    {
+        /*@
+         * @errortype
+         * @moduleid SBEIO_ODY_READ_SCRATCH_DATA
+         * @reasoncode SBEIO_ODY_SCRATCH_DATA
+         * @userdata1 The Odyssey chip HUID
+         * @userdata2 The total size of scratch data
+         * @devdesc This error log (and those that are linked to
+         *          this log) contains the Odyssey scratch data
+         *          in its FFDC fields.
+         * @custdesc Informational event
+         */
+        o_errls = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                SBEIO_ODY_READ_SCRATCH_DATA,
+                                SBEIO_ODY_SCRATCH_DATA,
+                                get_huid(i_chipTarget),
+                                i_scratchData.size(),
+                                ErrlEntry::NO_SW_CALLOUT);
+
+        uint32_t l_maxErrlSize = 0;
+        uint32_t l_currentErrlSize = 0;
+        o_errls->getErrlSize(l_currentErrlSize, l_maxErrlSize);
+
+        if(i_scratchData.size() <= (l_maxErrlSize - l_currentErrlSize))
+        {
+            o_errls->addFFDC(SBEIO_COMP_ID,
+                             i_scratchData.data(),
+                             i_scratchData.size(),
+                             1, // Version
+                             SBEIO_UDT_NO_FORMAT,
+                             false, // Do not merge
+                             // Do not propagate; the FFDC data needs to be unique per error log created here
+                             propagation_t::NO_PROPAGATE);
+        }
+        // else TODO JIRA PFHB-543 split the remaining data up into multiple errls
+    }
+
+    errlHndl_t getAndProcessScratchData(Target* i_chipTarget, errlHndl_t& o_errls)
+    {
+        SBE_TRACF(ENTER_MRK"getAndProcessScratchData");
+        errlHndl_t l_returnErrl = nullptr;
+        std::vector<uint8_t>l_scratchData;
+        uint32_t l_returnedDataSize = 0;
+
+        sbeScratchDataResponse_t l_scratchDataResponse;
+
+        if(Util::isSimicsRunning())
+        {
+            // This is technically not an error; the Synopsys data doesn't get logged
+            // in simics.
+            goto ERROR_EXIT;
+        }
+
+        l_returnErrl = sendGetScratchDataRequest(i_chipTarget,
+                                                 l_scratchDataResponse,
+                                                 l_returnedDataSize);
+        if(l_returnErrl)
+        {
+            goto ERROR_EXIT;
+        }
+
+        // Grab only the relevant data out of the respose;
+        // Skip the standard response header, the distance to 0xC0DE,
+        // and the EOT flag that are attached at the end of the data we're
+        // interested in.
+        l_returnedDataSize = l_returnedDataSize -
+                             sizeof(SbeFifo::statusHeader) -
+                             sizeof(uint32_t) - // distance to 0xC0DE magic word
+                             sizeof(uint32_t);  // EOT flag
+        l_scratchData.resize(l_returnedDataSize);
+        memcpy(l_scratchData.data(), l_scratchDataResponse.get(), l_returnedDataSize);
+        makeScratchDataErrls(i_chipTarget, l_scratchData, o_errls);
+
+        ERROR_EXIT:
+        SBE_TRACF(EXIT_MRK"getAndProcessScratchData");
+        return l_returnErrl;
+    }
 
 };

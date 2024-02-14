@@ -502,6 +502,7 @@ namespace SBEIO
      * @param[in] i_chipTarget The chip you would like to perform the chipop on
      *                       NOTE: HB should only be sending this to Odyssey chips
      * @param[out]    o_pFifoResponse Pointer to response. IN: nullptr OUT: Points to the response buffer
+     * @param[out]    o_actualSize The size of the actual returned data
      *
      * @return errlHndl_t Error log handle on failure.
      *
@@ -510,7 +511,27 @@ namespace SBEIO
     constexpr uint32_t MAX_SBE_SCRATCH_DATA_WORDS = (64 * KILOBYTE) / sizeof(uint32_t);
     typedef std::shared_ptr<std::array<uint32_t, MAX_SBE_SCRATCH_DATA_WORDS>> sbeScratchDataResponse_t;
     errlHndl_t sendGetScratchDataRequest(TARGETING::Target      * i_chipTarget,
-                                         sbeScratchDataResponse_t & o_pFifoResponse);
+                                         sbeScratchDataResponse_t & o_pFifoResponse,
+                                         uint32_t                 & o_actualSize);
+
+    /**
+     * @brief Retrieve data stored in the SBE scratch area and produce error log(s)
+     *        with this data as FFDC fields. If the total size of scratch data is
+     *        bigger than the size of one error log, the data will be split between
+     *        multiple error logs. The resulting error logs are tied with PLID and
+     *        are aggregated together for ease of management.
+     *
+     * @param[in] i_chipTarget the Odyssey chip target to retrieve the scratch
+     *            data from.
+     * @param[out] o_errls the error log(s) with Odyssey scratch data.
+     *
+     * @return Valid error log if a failure occurred while fetching the scratch
+     *         data; nullptr otherwise.
+     * @note o_errls will not be valid if an error is returned.
+     */
+    errlHndl_t getAndProcessScratchData(TARGETING::Target* i_chipTarget,
+                                        errlHndl_t& o_errls);
+
 
 #ifndef __HOSTBOOT_RUNTIME
     /**
