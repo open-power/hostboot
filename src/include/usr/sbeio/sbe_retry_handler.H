@@ -142,11 +142,14 @@ public:
         }
     }
 
+    /**
+     * @note Callers of this function should ensure that
+     * main_sbe_handler is called on the OCMB at least once before.
+     */
     bool isSbeAtRuntime() override
     {
         using namespace TARGETING;
-        return (iv_currentSBEState == ODY_SBE_STATUS::SBE_AT_RUNTIME
-                && iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>() != ODY_RECOVERY_STATUS_DEAD);
+        return iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>() != ODY_RECOVERY_STATUS_DEAD;
     }
 
     uint32_t getSbeRegister() override;

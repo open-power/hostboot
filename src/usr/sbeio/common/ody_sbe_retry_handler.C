@@ -426,7 +426,7 @@ errlHndl_t OdySbeRetryHandler::run_hreset_flow()
     /*--------------------------------------------------------------------------
      * ody_sbe_hreset - boot up SBE
      *------------------------------------------------------------------------*/
-    FAPI_INVOKE_HWP(l_errl, ody_sbe_hreset, { iv_ocmb });
+    FAPI_INVOKE_HWP(l_errl, ody_sbe_hreset, { iv_ocmb }, /*i_use_scom=*/false);
 
     CI_INJECT_HRESET_FAIL(CxxTest::g_cxxTestInject,
                           iv_ocmb,
