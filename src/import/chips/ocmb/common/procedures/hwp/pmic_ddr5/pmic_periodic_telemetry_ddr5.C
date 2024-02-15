@@ -62,27 +62,27 @@ extern "C"
 
         mss::pmic::ddr5::periodic_telemetry_data l_info;
 
-        // Temp workaround: Return success if this is a 2U
-        // TODO Zen:MST-2318 Add telemetry collecton for DDR5 2U PMIC
         uint8_t l_module_height = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, i_ocmb_target, l_module_height));
 
-        if (l_module_height != fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U)
-        {
-            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " DIMM is not 4U height, exiting pmic_periodic_telemetry_ddr5",
-                            GENTARGTID(i_ocmb_target));
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
+#ifndef __PPE__
 
+        if (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_2U)
+        {
+            mss::pmic::ddr5::periodic_2U_telemetry_data l_info_2u;
+
+            FAPI_TRY(pmic_periodic_telemetry_ddr5_2U_helper(i_ocmb_target, l_info_2u));
+            FAPI_TRY(send_struct(reinterpret_cast<uint8_t*>(&l_info_2u), sizeof(l_info_2u), o_data));
+        }
+        else
+#endif
         {
             // Grab the targets as a struct, if they exist
             mss::pmic::ddr5::target_info_redundancy_ddr5 l_target_info(i_ocmb_target, l_rc);
 
             FAPI_TRY(mss::pmic::ddr5::set_pmic_dt_states(l_target_info));
-
             FAPI_TRY(pmic_periodic_telemetry_ddr5_helper(i_ocmb_target, l_target_info, l_info));
-
-            FAPI_TRY(send_struct(l_info, o_data));
+            FAPI_TRY(send_struct(reinterpret_cast<uint8_t*>(&l_info), sizeof(l_info), o_data));
         }
 
     fapi_try_exit:

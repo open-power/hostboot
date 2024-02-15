@@ -343,6 +343,7 @@ struct consts<mss::pmic::product::JEDEC_COMPLIANT>
     static constexpr uint8_t RANGE_0                    = 0;
     static constexpr uint8_t RANGE_1                    = 1;
     static constexpr uint8_t RANGE_2                    = 2;
+    static constexpr uint8_t NUM_PMICS_2U               = 2;
     static constexpr uint8_t NUM_PRIMARY_PMICS          = 2; // PMIC0/2, PMIC1/3
     static constexpr uint8_t NUM_PMICS_4U               = 4; // DDR4: 2 redundant, DDR5: 1 redundant
     static constexpr uint8_t NUM_DTS_4U                 = 4; // DDR4: not present, DDR5: 1 redundant

@@ -585,11 +585,12 @@ struct __attribute__ ((__packed__)) dt_periodic_telemetry_data
 
     uint8_t iv_breadcrumb        = 0;
     uint8_t iv_recovery_count    = 0;
-    uint8_t iv_reserved0         = 0;
-    uint16_t iv_reserved1        = 0;
     uint8_t iv_neg_orfet_cnt_swa = 0;
     uint8_t iv_neg_orfet_cnt_swc = 0;
+
     uint8_t iv_neg_orfet_cnt_swd = 0;
+    uint8_t iv_reserved0         = 0;
+    uint16_t iv_reserved1        = 0;
 };
 
 ///
@@ -639,6 +640,57 @@ struct __attribute__ ((__packed__)) consolidated_health_check_data
     uint8_t iv_dt1_errors = 0;
     uint8_t iv_dt2_errors = 0;
     uint8_t iv_dt3_errors = 0;
+};
+
+///
+/// @brief Struct of 2U pmic data for periodic telemetry data collected once every 24 hours
+///
+struct __attribute__ ((__packed__)) pmic_periodic_2u_telemetry_data
+{
+    // Error register
+    // Direct read from 8 bit register
+    uint8_t iv_r04 = 0;
+    uint8_t iv_r05 = 0;
+    uint8_t iv_r06 = 0;
+    uint8_t iv_r07 = 0;
+
+    // Status register
+    // Direct read from 8 bit register
+    uint8_t iv_r08 = 0;
+    uint8_t iv_r09 = 0;
+    uint8_t iv_r0a = 0;
+    uint8_t iv_r0b = 0;
+
+    // Values in mA
+    uint16_t iv_swa_current_mA = 0;
+    uint16_t iv_swb_current_mA = 0;
+    uint16_t iv_swc_current_mA = 0;
+    uint16_t iv_swd_current_mA = 0;
+
+    uint16_t iv_r31_sample_vin     = 0;
+    uint16_t iv_r31_sample_temp    = 0;
+};
+
+///
+/// @brief Struct of 2U periodic telemetry data collected once every 24 hours
+/// Revision history:
+///     0x21: Initial revision supporting periodic data collection logic from
+///       "Non-Redundant PoD5 - Functional Specification dated 20230818 version 0.03"
+///       document provided by the Power team
+///
+struct __attribute__ ((__packed__)) periodic_2U_telemetry_data
+{
+    // Revision of this struct formatting, to be updated
+    // when the structure changes
+    uint8_t iv_revision = 0x21;
+    uint8_t reserved = 0;
+    uint16_t reserved1 = 0;
+
+    uint8_t iv_serial_number[26] = {0};
+    uint8_t reserved2 = 0;
+    uint8_t reserved3 = 0;
+
+    pmic_periodic_2u_telemetry_data iv_pmic[CONSTS::NUM_PMICS_2U];
 };
 
 ///

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 
 #include <fapi2.H>
 #include <lib/utils/pmic_common_utils_ddr5.H>
+#include <lib/utils/pmic_periodic_telemetry_utils_ddr5.H>
 #include <hwp_data_stream.H>
 
 typedef fapi2::ReturnCode (*pmic_periodic_telemetry_ddr5_FP_t) (
