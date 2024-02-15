@@ -50,7 +50,7 @@
 #include <ody_dts_read.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
-#include <ody_temp_sensor_traits.H>
+#include <lib/power_thermal/ody_temp_sensor_traits.H>
 
 
 namespace mss
@@ -401,13 +401,13 @@ fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     // If the current error is not successful, mark it as recovered
     if(fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
     {
-        FAPI_ATTR_GET(fapi2::ATTR_ODY_SENSOR_READ_FIRST_FAIL, i_ocmb, l_err_track);
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SENSOR_READ_FIRST_FAIL, i_ocmb, l_err_track));
 
         if(l_err_track[i_sensor_pos] == fapi2::ENUM_ATTR_ODY_SENSOR_READ_FIRST_FAIL_FALSE)
         {
             fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
             l_err_track[i_sensor_pos] = fapi2::ENUM_ATTR_ODY_SENSOR_READ_FIRST_FAIL_TRUE;
-            FAPI_ATTR_SET(fapi2::ATTR_ODY_SENSOR_READ_FIRST_FAIL, i_ocmb, l_err_track);
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_SENSOR_READ_FIRST_FAIL, i_ocmb, l_err_track));
         }
 
         // Note: this code does discard the current error
@@ -422,7 +422,10 @@ fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     }
 
     // Write out the data to the storage address
-    return fapi2::putScom(i_ocmb, i_reg_addr, i_data);
+    FAPI_TRY(fapi2::putScom(i_ocmb, i_reg_addr, i_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
