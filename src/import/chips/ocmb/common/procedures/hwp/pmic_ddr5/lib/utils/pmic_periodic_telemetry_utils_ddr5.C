@@ -44,18 +44,18 @@
 ///
 /// @brief Read and store serial number and CCIN number
 ///
-/// @param[in,out] io_target_info PMIC and DT target info struct
-/// @param[in,out] io_periodic_tele_info periodic telemetry struct
+/// @param[in] i_ocmb_target OCMB target info struct
+/// @param[in,out] io_serial_number serail number array
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-void read_serial_ccin_number(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                             mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
+void read_serial_ccin_number(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                             uint8_t io_serial_number[])
 {
     uint8_t l_serial_number[26] = {0};
 
-    FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SERIAL_NUMBER, io_target_info.iv_ocmb, l_serial_number);
+    FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SERIAL_NUMBER, i_ocmb_target, l_serial_number);
 
-    memcpy(io_periodic_tele_info.iv_serial_number, l_serial_number, sizeof(l_serial_number));
+    memcpy(io_serial_number, l_serial_number, sizeof(l_serial_number));
 }
 
 ///
@@ -368,8 +368,6 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
         {
             using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
             using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
-            static constexpr uint16_t ADC_VIN_BULK_STEP = 70;
-            static constexpr uint16_t ADC_TEMP_STEP = 2;
             fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ_TELE];
 
             FAPI_INF(GENTARGTIDFORMAT " Populating PMIC data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic));
@@ -394,7 +392,6 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
             io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r31_sample_vin = static_cast<uint16_t>(l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]()) * ADC_VIN_BULK_STEP;
 
             // Set PMIC internal ADC to sample temp
-            //l_adc_read_vin_bulk = 0x50;
             mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
             l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].setBit<6>();
             l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].clearBit<5>();
@@ -431,7 +428,7 @@ void collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
                                 mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
 {
     // Read and store serial number and CCIN number
-    read_serial_ccin_number(io_target_info, io_periodic_tele_info);
+    read_serial_ccin_number(io_target_info.iv_ocmb, io_periodic_tele_info.iv_serial_number);
 
     // Read and store ADC regs
     read_adc_regs(io_target_info, io_periodic_tele_info);
@@ -446,28 +443,27 @@ void collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
 ///
 /// @brief Send the periodic_telemetry_data struct
 ///
-/// @param[in] io_periodic_tele_info periodic telemetry struct
+/// @param[in] i_info periodic telemetry struct
+/// @param[in] i_size size of telemetry struct
 /// @param[out] o_data hwp_data_ostream of struct information
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode send_struct(mss::pmic::ddr5::periodic_telemetry_data& i_info,
+fapi2::ReturnCode send_struct(const uint8_t* i_info,
+                              const uint16_t i_size,
                               fapi2::hwp_data_ostream& o_data)
 {
-    // Casted to char pointer so we can increment in single bytes
-    char* i_info_casted  = reinterpret_cast<char*>(&i_info);
-
     // Loop through in increments of hwp_data_unit size (currently uint32_t)
     // Until we have copied the entire structure
-    for (uint16_t l_byte = 0; l_byte < sizeof(i_info); l_byte += sizeof(fapi2::hwp_data_unit))
+    for (uint16_t l_byte = 0; l_byte < i_size; l_byte += sizeof(fapi2::hwp_data_unit))
     {
         fapi2::hwp_data_unit l_data_unit = 0;
 
         // The number of bytes to copy is either always 4 (size of hwp_data_unit),
         // OR less if we have fewer than 4 bytes left in the struct, in which case we copy
         // that amount.
-        const size_t l_bytes_to_copy = std::min(sizeof(fapi2::hwp_data_unit), sizeof(i_info) - l_byte);
+        const size_t l_bytes_to_copy = std::min(sizeof(fapi2::hwp_data_unit), static_cast<size_t>(i_size - l_byte));
 
-        memcpy(&l_data_unit, i_info_casted + l_byte, l_bytes_to_copy);
+        memcpy(&l_data_unit, i_info + l_byte, l_bytes_to_copy);
         FAPI_TRY(o_data.put(l_data_unit));
     }
 
@@ -494,14 +490,118 @@ fapi2::ReturnCode pmic_periodic_telemetry_ddr5_helper(const fapi2::Target<fapi2:
              io_target_info,
              l_aggregate_state_not_used));
 
-    if((l_aggregate_state_not_used == mss::pmic::ddr5::aggregate_state::DIMM_NOT_4U))
-    {
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
     // Read and store ADC/DT/PMIC regs
     collect_periodic_tele_data(io_target_info, io_periodic_tele_info);
 
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+#ifndef __PPE__
+///
+/// @brief Read and store PMIC data
+///
+/// @param[in] i_pmic_target PMIC target
+/// @param[in,out] io_info 2U periodic telemetry struct
+/// None
+///
+fapi2::ReturnCode collect_periodic_tele_data_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
+        mss::pmic::ddr5::pmic_periodic_2u_telemetry_data& io_info)
+{
+    using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_2U_REGS_READ];
+
+    FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(i_pmic_target, REGS::R04, l_data_buffer));
+
+    io_info.iv_r04 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0];
+    io_info.iv_r05 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_1];
+    io_info.iv_r06 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_2];
+    io_info.iv_r07 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_3];
+    io_info.iv_r08 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_4];
+    io_info.iv_r09 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_5];
+    io_info.iv_r0a = l_data_buffer[mss::pmic::ddr5::data_position::DATA_6];
+    io_info.iv_r0b = l_data_buffer[mss::pmic::ddr5::data_position::DATA_7];
+    io_info.iv_swa_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_8] *
+                                mss::pmic::ddr5::CURRENT_MULTIPLIER;
+    io_info.iv_swb_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_9] *
+                                mss::pmic::ddr5::CURRENT_MULTIPLIER;
+    io_info.iv_swc_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_10] *
+                                mss::pmic::ddr5::CURRENT_MULTIPLIER;
+    io_info.iv_swd_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_11] *
+                                mss::pmic::ddr5::CURRENT_MULTIPLIER;
+
+    // Set PMIC internal ADC to sample VIN
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R30,
+             l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]));
+    l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].clearBit<6>();
+    l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].setBit<5>();
+    l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].clearBit<4>();
+    l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].setBit<3>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R30,
+             l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]));
+
+    // Delay
+    fapi2::delay(2 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+    // VIN
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]));
+    io_info.iv_r31_sample_vin = static_cast<uint16_t>(l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]()) *
+                                ADC_VIN_BULK_STEP;
+
+    // Set PMIC internal ADC to sample temp
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R30,
+             l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]));
+    l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].setBit<6>();
+    l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].clearBit<5>();
+    l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].setBit<4>();
+    l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].clearBit<3>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R30,
+             l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]));
+
+    // Delay
+    fapi2::delay(2 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
+
+    // Temp
+    FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R31, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]));
+    io_info.iv_r31_sample_temp = static_cast<uint16_t>(l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]()) *
+                                 ADC_TEMP_STEP;
+
+    // GLOBAL_CLEAR_STATUS
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R14, 0x01));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Runtime periodic telemetry data collection helper for 2U parts
+///
+/// @param[in] i_ocmb_target ocmb target
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_periodic_tele_info periodic telemetry struct
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+///
+fapi2::ReturnCode pmic_periodic_telemetry_ddr5_2U_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_ocmb_target,
+        mss::pmic::ddr5::periodic_2U_telemetry_data& io_info)
+{
+    fapi2::buffer<uint8_t> l_pmic_buffer;
+
+    auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
+
+    read_serial_ccin_number(i_ocmb_target, io_info.iv_serial_number);
+
+    for (const auto& l_pmic : l_pmics)
+    {
+        // PMIC position/ID under OCMB target
+        uint8_t l_relative_pmic_id = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_pmic, l_relative_pmic_id));
+
+        collect_periodic_tele_data_2U(l_pmic, io_info.iv_pmic[l_relative_pmic_id]);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+#endif
