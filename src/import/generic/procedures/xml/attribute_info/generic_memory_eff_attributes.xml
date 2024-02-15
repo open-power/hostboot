@@ -139,7 +139,7 @@
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
-    <enum> 4G = 4, 8G = 8, 12G = 12, 16G = 16, 24G = 24, 32G = 32, 48G = 48, 64G = 64</enum>
+    <enum> 4G = 4, 8G = 8, 12G = 12, 16G = 16, 24G = 24, 32G = 32, 48G = 48, 64G = 64, RESERVED=0xFF</enum>
     <writeable/>
     <array>2</array>
     <mssUnit>Gb</mssUnit>
@@ -245,7 +245,8 @@
       D6 = 6,
       D7 = 7,
       D8 = 8,
-      D16 = 16
+      D16 = 16,
+      RESERVED=0xFF
     </enum>
     <writeable/>
     <array>2</array>
@@ -682,7 +683,7 @@
       </description>
       <initToZero></initToZero>
       <valueType>uint16</valueType>
-      <enum>PLANAR = 0, H2 = 2, H4 = 4, H8 = 8, H16 = 16</enum>
+      <enum>PLANAR = 0, H2 = 2, H4 = 4, H8 = 8, H16 = 16, RESERVED=0xFF</enum>
       <array>2</array>
       <writeable/>
       <mssAccessorName>3ds_height</mssAccessorName>
