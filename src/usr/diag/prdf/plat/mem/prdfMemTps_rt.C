@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -810,25 +810,34 @@ uint32_t TpsEvent<TYPE_OCMB_CHIP>::analyzeCeSymbolCounts( CeCount i_badDqCount,
                     // If placing a chip mark is safe i.e. does not risk a UE
                     if (noSpareUeRisk)
                     {
-                        // Place a chip mark
-                        MemMark newCM(i_badDqCount.symList.at(0).symbol);
-                        o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>(iv_chip,
-                            iv_rank, newCM);
-                        if ( SUCCESS != o_rc )
+                        // Place a chip mark on the unrepaired symbol
+                        for ( auto sym : i_badDqCount.symList )
                         {
-                            PRDF_ERR( PRDF_FUNC "writeChipMark(0x%08x,0x%02x) "
-                                      "failed", iv_chip->getHuid(), getKey() );
-                            break;
+                            // Skip the repair symbol from the symbol mark
+                            if (sym.symbol == symMark.getSymbol()) continue;
+
+                            MemMark newCM(sym.symbol);
+                            o_rc = MarkStore::writeChipMark<TYPE_OCMB_CHIP>(
+                                iv_chip, iv_rank, newCM);
+                            if (SUCCESS != o_rc )
+                            {
+                                PRDF_ERR(PRDF_FUNC "writeChipMark(0x%08x,"
+                                         "0x%02x) failed", iv_chip->getHuid(),
+                                         getKey());
+                                break;
+                            }
+
+                            // Trigger VCM to see if it's contained to a single
+                            // row. Set the flag for VCM indicating that an
+                            // unrepaired DQ should be used if a row repair
+                            // cannot be.
+                            TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{
+                                iv_chip, iv_rank, newCM, iv_port, false, true};
+
+                            MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>(iv_chip,
+                                                                    vcm);
+                            vcmQueued = true;
                         }
-
-                        // Trigger VCM to see if it's contained to a single row
-                        // Set the flag for VCM indicating that an unrepaired DQ
-                        // should be used if a row repair cannot be.
-                        TdEntry * vcm = new VcmEvent<TYPE_OCMB_CHIP>{ iv_chip,
-                            iv_rank, newCM, iv_port, false, true };
-
-                        MemDbUtils::pushToQueue<TYPE_OCMB_CHIP>( iv_chip, vcm );
-                        vcmQueued = true;
                     }
                     else
                     {
