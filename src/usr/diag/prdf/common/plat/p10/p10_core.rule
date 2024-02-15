@@ -860,7 +860,7 @@ group gEQ_CORE_FIR
     /** EQ_CORE_FIR[9]
      *  VSU Slice Targeted File (STF) recoverable error
      */
-    (rEQ_CORE_FIR, bit(9)) ? self_th_5perHour;
+    (rEQ_CORE_FIR, bit(9)) ? self_th_1;
 
     /** EQ_CORE_FIR[10]
      *  reserved
