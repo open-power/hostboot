@@ -393,6 +393,16 @@ class io_ppe_common
                                        uint32_t& o_fail);
 
         ///
+        /// @brief Set the external command clear mode to 1
+        ///
+        /// @param[in] i_target         Chip target to start
+        /// @param[in] i_thread         Thread to run on
+        ///
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
+        fapi2::ReturnCode set_ext_cmd_clear_mode(const fapi2::Target<K, M, V>& i_target,
+                const uint8_t i_thread);
+
+        ///
         /// @brief Print debug info, primarily BIST and PPE statuses
         ///
         /// @param[in] i_target         Chip target to start
@@ -1216,6 +1226,18 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_start(const fapi2::Target<K, M
 {
     FAPI_DBG("Starting io_ppe_common::ext_cmd_start_thread");
 
+    fapi2::buffer<uint64_t> l_clear_mode = 0;
+
+    FAPI_TRY(FW_REG_EXT_CMD_STATUS_CLEAR_MODE_GET(iv_regs, i_target, i_thread, l_clear_mode));
+
+    if (l_clear_mode)
+    {
+        FAPI_TRY(FW_REG_EXT_CMD_REQ_00_31_PUT(iv_regs, i_target, i_thread, 0));
+        FAPI_TRY(iv_regs->flushCache(i_target));
+        FAPI_TRY(FW_REG_EXT_CMD_DONE_00_31_PUT(iv_regs, i_target, i_thread, 0));
+        FAPI_TRY(iv_regs->flushCache(i_target));
+    }
+
     // RX / TX
     FAPI_TRY(FW_REG_EXT_CMD_LANES_RX_00_31_PUT(iv_regs, i_target, i_thread, i_rx_lanes_0_31));
     FAPI_TRY(FW_REG_EXT_CMD_LANES_TX_00_31_PUT(iv_regs, i_target, i_thread, i_tx_lanes_0_31));
@@ -1291,6 +1313,21 @@ fapi_try_exit:
     FAPI_DBG("Ending io_ppe_common::ext_cmd_req_poll");
     return fapi2::current_err;
 }
+
+template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
+fapi2::ReturnCode io_ppe_common<K, M, V>::set_ext_cmd_clear_mode(const fapi2::Target<K, M, V>& i_target,
+        const uint8_t i_thread)
+{
+    FAPI_DBG("Starting io_ppe_common::set_ext_cmd_clear_mode");
+
+    FAPI_TRY(FW_REG_EXT_CMD_STATUS_CLEAR_MODE_PUT(iv_regs, i_target, i_thread, 1));
+    FAPI_TRY(iv_regs->flushCache(i_target));
+
+fapi_try_exit:
+    FAPI_DBG("Ending io_ppe_common::set_ext_cmd_clear_mode");
+    return fapi2::current_err;
+}
+
 
 // ===============================================================
 // Debug dump
@@ -1497,20 +1534,6 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::fast_mode(const fapi2::Target<K, M, V>
 fapi_try_exit:
     FAPI_DBG("Ending io_ppe_common::fast_mode");
     return fapi2::current_err;
-}
-
-template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
-uint8_t io_ppe_common<K, M, V>::get_num_lanes(uint32_t i_lane_mask)
-{
-    uint8_t count = 0;
-
-    while(i_lane_mask)
-    {
-        count += i_lane_mask & 0x1;
-        i_lane_mask >>= 0x1;
-    }
-
-    return count;
 }
 
 template <fapi2::TargetType K, fapi2::MulticastType M, typename V>
@@ -1736,12 +1759,12 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::set_recal_not_run_disable(const fapi2:
         const uint8_t i_thread,
         const uint32_t i_data)
 {
-    FAPI_INF("Setting set_auto_recal to 0x%08X", i_data);
+    FAPI_INF("Setting set_recal_not_run_disable to %d", i_data);
 
     FAPI_TRY(MEM_REG_PPE_RECAL_NOT_RUN_DISABLE_PUT(iv_regs, i_target, i_thread, i_data));
     FAPI_TRY(iv_regs->flushCache(i_target));
 
 fapi_try_exit:
-    FAPI_INF("End - set_auto_recal");
+    FAPI_INF("End - set_recal_not_run_disable");
     return fapi2::current_err;
 }
