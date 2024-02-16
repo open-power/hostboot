@@ -7114,6 +7114,22 @@
   </attribute>
 
   <attribute>
+    <id>PMIC_HEALTH_CHECK_DDR5_TIMER</id>
+    <description>
+        Time to wait before PHYP makes HBRT callback to handle the
+        call to do the PMIC health check DDR5, time in milliseconds,
+        default to 6 hours, MS_PER_SEC * 60 * 60 * 6, 0xFFFFFFFF = disabled
+    </description>
+    <simpleType>
+      <uint32_t>
+        <default>21600000</default>
+      </uint32_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <id>PMIC_HEALTH_CHECK_TIMER</id>
     <description>
         Time to wait before PHYP makes HBRT callback to handle the

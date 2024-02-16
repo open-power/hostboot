@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -191,6 +191,9 @@ runtimeInterfaces_t* rt_start(hostInterfaces_t* intf)
 #endif
     // set up PHYP callback to HBRT
     rtPost->callSetupPmicHealthCheck();
+
+    // set up PHYP callback to HBRT
+    rtPost->callSetupPmicHealthCheckDDR5();
 
     // check for possible missed in-flight messages/interrupts
     if (rtPost->callClearPendingOccMsgs != nullptr )

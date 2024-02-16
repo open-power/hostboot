@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -593,6 +593,7 @@ typedef struct hostInterfaces
        HBRT_FW_MSG_TYPE_DEALLOCATE        = 21, // struct deallocate_t
        HBRT_FW_MSG_MCTP_BRIDGE_ENABLED    = 22, // struct mctp_bridge_enabled
        HBRT_FW_MSG_TYPE_LOAD_START_PMC    = 23, // No additional data required
+       HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK_DDR5 = 24, // no additional data required
     };
 
     // I2C Lock Operations for PHYP
@@ -1368,6 +1369,12 @@ struct postInitCalls_t
      *
      */
     void (*callLastPostInit)();
+
+    /** @brief Initiates callback from PHYP into HBRT for PMIC health check DDR5
+     *         using the host_callback interface function. Callback will be
+     *         made to the firmware_notify function.
+     */
+    void (*callSetupPmicHealthCheckDDR5)();
 };
 
 extern hostInterfaces_t* g_hostInterfaces;

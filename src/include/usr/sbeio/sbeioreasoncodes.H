@@ -199,8 +199,9 @@ enum sbeioReasonCode
     SBEIO_TEST_INJECT_HRESET           = SBEIO_COMP_ID | 0x74,
     SBEIO_ODY_FLASH_CHECK_ERR          = SBEIO_COMP_ID | 0x75,
     SBEIO_PMIC_TELEMETRY_DATA_DDR5     = SBEIO_COMP_ID | 0x76, // Do NOT alter the value, HMC dependency
-    SBEIO_HRESET_CHECK_FOR_READY_FAIL  = SBEIO_COMP_ID | 0x77,
-    SBEIO_ODY_SCRATCH_DATA             = SBEIO_COMP_ID | 0x78,
+    SBEIO_PMIC_HEALTH_CHECK_DATA_DDR5  = SBEIO_COMP_ID | 0x77, // Do NOT alter the value, HMC dependency
+    SBEIO_HRESET_CHECK_FOR_READY_FAIL  = SBEIO_COMP_ID | 0x78,
+    SBEIO_ODY_SCRATCH_DATA             = SBEIO_COMP_ID | 0x79,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc

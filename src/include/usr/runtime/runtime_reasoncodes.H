@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,7 @@ namespace RUNTIME
         MOD_DEALLOCATE_RESOURCE          = 0x32,  /** < rt_fwnotify.C */
         MOD_CONVERT_TO_HB_TARGET         = 0x33,  /** < rt_fwnotify.C */
         MOD_CREATE_PMC_LOAD_START_CALLBACK   = 0x34,  /**< rt_fwnotify.C */
+        MOD_CREATE_PMIC_HEALTH_CHECK_DDR5_CALLBACK = 0x35,  /**< rt_fwnotify.C */
     };
 
     enum RuntimeReasonCode
@@ -173,6 +174,8 @@ namespace RUNTIME
         RC_FAPI_I2C_CONTROL_INFO_MISSING = RUNTIME_COMP_ID | 0x5A,
         RC_TARGET_CHIP_NOT_FOUND       = RUNTIME_COMP_ID | 0x5B,
         RC_RT_NULL_FIRMWARE_REQUEST_PTR = RUNTIME_COMP_ID | 0x5C,
+        RC_HOST_CALLBACK_INTERFACE_DDR5_ERR = RUNTIME_COMP_ID | 0x5D,
+        RC_HOST_CALLBACK_DDR5_ERR           = RUNTIME_COMP_ID | 0x5E,
     };
 
     enum UserDetailsTypes

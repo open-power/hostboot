@@ -295,6 +295,10 @@
         <default>0xFFFFFFFF</default><!-- Disabled -->
     </attribute>
     <attribute>
+        <id>PMIC_HEALTH_CHECK_DDR5_TIMER</id>
+        <default>0xFFFFFFFF</default><!-- Disabled -->
+    </attribute>
+    <attribute>
         <id>MSL_MFG_ALLOW</id>
         <default>0x20A9,0x20,0x60D2,0x20</default>
     </attribute>

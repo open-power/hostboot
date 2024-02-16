@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -689,6 +689,7 @@ bool ErrlManager::sendErrLogToBmc(errlHndl_t &io_err, bool i_isPrevBootErr)
 
         uint32_t l_errSize = io_err->flatten(vPelData.data(),
                                              l_totalErrlSize, true /* truncate */);
+        TRACFCOMP( g_trac_errl, "sendErrLogToBmc: l_totalErrlSize=%d l_errSize=%d", l_totalErrlSize, l_errSize);
         if (l_errSize == 0 )
         {
             // flatten didn't work

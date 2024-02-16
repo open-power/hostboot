@@ -330,10 +330,14 @@ namespace SBEIO
     /**
      * @brief Get PMIC Health Check Data from the SBE
      *
+     * @param[in] i_ddr5_health_check A flag set from the registered
+     *            callback which indicates if this is for a HWP Health
+     *            Check or HWP Telemetry Check
+     *
      * @return errlHndl_t Error log handle on failure.
      *
      */
-    errlHndl_t getAllPmicHealthCheckData();
+    errlHndl_t getAllPmicHealthCheckData(bool i_ddr5_health_check = false);
 
      /**
      * @brief Get the capabilities of the SBE via PSU
