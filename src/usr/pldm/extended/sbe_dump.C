@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,14 +56,14 @@ const uint16_t PLDM_OEM_IBM_SBE_HRESET_STATE = 32776;
 
 #ifndef __HOSTBOOT_RUNTIME
 
-/* @brief Get the BMC's SBE Dump effecter ID for the given proc. Returns 0 if not found.
+/* @brief Get the BMC's SBE Dump effecter ID for the given target. Returns 0 if not found.
  *
- * @param[in] i_proc      The processor to search for.
+ * @param[in] i_target    The target to search for.
  * @return effecter_id_t  The BMC's SBE dump effecter ID, or 0 if not found.
  */
-effecter_id_t getSbeDumpEffecterId(const Target* const i_proc)
+effecter_id_t getSbeDumpEffecterId(const Target* const i_target)
 {
-    pldm_entity entity_info = targeting_to_pldm_entity_id(i_proc->getAttr<ATTR_PLDM_ENTITY_ID_INFO>());
+    pldm_entity entity_info = targeting_to_pldm_entity_id(i_target->getAttr<ATTR_PLDM_ENTITY_ID_INFO>());
 
     return thePdrManager()
         .findNumericEffecterId(entity_info,
@@ -73,29 +73,85 @@ effecter_id_t getSbeDumpEffecterId(const Target* const i_proc)
                                });
 }
 
-errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
+/** @brief Get the target related to the given target that contains
+ *  the info for the SBE dump sensors/effecters for the given
+ *  target. E.g. for OCMBs, get the child DIMM that the effecters are
+ *  attached to.
+ */
+Target* getDumpTarget(Target* const i_target)
 {
-    PLDM_ENTER("dumpSbe(0x%08x, 0x%08x)", get_huid(i_proc), i_plid);
+    switch (i_target->getAttr<ATTR_TYPE>())
+    {
+    case TYPE_PROC:
+        return i_target;
+    case TYPE_OCMB_CHIP: {
+        const auto dimms = composable(getChildAffinityTargets)(i_target, CLASS_NA, TYPE_DIMM, true);
+
+        for (const auto dimm : dimms)
+        {
+            if (getSbeDumpEffecterId(dimm) != 0)
+            {
+                return dimm;
+            }
+        }
+        break;
+    }
+    default:
+        break;
+    }
+    return nullptr;
+}
+
+errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
+{
+    PLDM_ENTER("dumpSbe(0x%08x, 0x%08x)", get_huid(i_target), i_plid);
 
     errlHndl_t errl = nullptr;
 
     do
     {
 
+    Target* const dump_target = getDumpTarget(i_target);
+
+    if (!dump_target)
+    {
+        /*@
+         *@moduleid         MOD_SBE_DUMP
+         *@reasoncode       RC_DUMP_TARGET_NOT_FOUND
+         *@userdata1        Input target HUID
+         *@devdesc          Missing target to dump
+         *@custdesc         Error occurred during system boot.
+         */
+        errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                             MOD_SBE_DUMP,
+                             RC_DUMP_TARGET_NOT_FOUND,
+                             get_huid(i_target),
+                             0,
+                             ErrlEntry::ADD_SW_CALLOUT);
+
+        PLDM_ERR("dumpSbe: No dump target exists for input target 0x%08X",
+                 get_huid(i_target));
+        errl->collectTrace(PLDM_COMP_NAME);
+        break;
+    }
+
+    PLDM_INF("dumpSbe: Using target 0x%08X for SBE dump request",
+             get_huid(dump_target));
+
     /* Search for the effecter IDs (one from the BMC, to ask it to dump the SBE,
      * and one from Hostboot, which the BMC will use to signal HB that it's done. */
 
-    const effecter_id_t sbe_dump_effecter = getSbeDumpEffecterId(i_proc);
+    const effecter_id_t sbe_dump_effecter = getSbeDumpEffecterId(dump_target);
 
     const uint16_t dump_complete_effecter
         = thePdrManager().getHostStateQueryIdForStateSet(PdrManager::STATE_QUERY_EFFECTER,
                                                          PLDM_OEM_IBM_SBE_MAINTENANCE_STATE,
-                                                         i_proc);
+                                                         dump_target);
 
     if (sbe_dump_effecter == 0 || dump_complete_effecter == 0)
     {
-        PLDM_ERR("dumpSbe: Can't find either SBE dump effecter or dump complete effecter on processor 0x%08x (%d, %d)",
-                 get_huid(i_proc),
+        PLDM_ERR("dumpSbe: Can't find either SBE dump effecter or dump complete effecter on target 0x%08x (%d, %d)",
+                 get_huid(dump_target),
                  sbe_dump_effecter,
                  dump_complete_effecter);
 
@@ -104,7 +160,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
          * @severity         ERRL_SEV_INFORMATIONAL
          * @moduleid         MOD_SBE_DUMP
          * @reasoncode       RC_EFFECTER_NOT_FOUND
-         * @userdata1        Processor HUID
+         * @userdata1        Dump target HUID
          * @userdata2[0:31]  BMC's SBE start-dump effecter ID
          * @userdata2[32:63] Host's SBE dump-complete effecter ID
          * @devdesc          Missing SBE dump effecter ID
@@ -113,7 +169,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
         errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                              MOD_SBE_DUMP,
                              RC_EFFECTER_NOT_FOUND,
-                             get_huid(i_proc),
+                             get_huid(dump_target),
                              TWO_UINT32_TO_UINT64(sbe_dump_effecter,
                                                   dump_complete_effecter),
                              ErrlEntry::ADD_SW_CALLOUT);
@@ -123,7 +179,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
     }
 
     /* Set the effecter on the BMC, which will cause it to dump the SBE under
-     * the proc that the effecter is attached to. */
+     * the target that the effecter is attached to. */
 
     std::unique_ptr<void, decltype(&msg_q_destroy)> msgQ { msg_q_create(), msg_q_destroy };
 
@@ -135,14 +191,14 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
 
     if (errl)
     {
-        PLDM_ERR("dumpSbe: Failed to send numeric effecter value set request for processor 0x%08x (err = 0x%08x)",
-                 get_huid(i_proc), ERRL_GETPLID_SAFE(errl));
+        PLDM_ERR("dumpSbe: Failed to send numeric effecter value set request for target 0x%08x (err = 0x%08x)",
+                 get_huid(dump_target), ERRL_GETPLID_SAFE(errl));
         break;
     }
 
     /* Wait on the BMC to set our effecter. */
 
-    uint64_t sbe_dump_timeout_milliseconds = 30 * MS_PER_SEC; // 30 seconds
+    uint64_t sbe_dump_timeout_milliseconds = 180 * MS_PER_SEC; // 3 minutes
     const auto dump_done_msgs = msg_wait_timeout(msgQ.get(), sbe_dump_timeout_milliseconds);
 
     // After waiting, we remove our queue from the PDR manager's callback list,
@@ -177,9 +233,9 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
             const int rc = msg_respond(msgQ.get(), msg);
 
             assert(rc == 0,
-                   "dumpSbe: msg_respond failed: rc = %d, plid = 0x%08x, proc huid = 0x%08x, "
+                   "dumpSbe: msg_respond failed: rc = %d, plid = 0x%08x, target huid = 0x%08x, "
                    "dump_complete_effecter = %d",
-                   rc, i_plid, get_huid(i_proc), dump_complete_effecter);
+                   rc, i_plid, get_huid(dump_target), dump_complete_effecter);
 
             return this_completed || prev_completed;
         };
@@ -200,8 +256,8 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
 
     if (!dump_completed)
     {
-        PLDM_ERR("dumpSbe: Request for SBE dump on processor 0x%08x (effecter IDs %d, %d) timed out",
-                 get_huid(i_proc),
+        PLDM_ERR("dumpSbe: Request for SBE dump on target 0x%08x (effecter IDs %d, %d) timed out",
+                 get_huid(dump_target),
                  sbe_dump_effecter,
                  dump_complete_effecter);
 
@@ -210,7 +266,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
          * @errortype        ERRL_SEV_INFORMATIONAL
          * @moduleid         MOD_SBE_DUMP
          * @reasoncode       RC_SBE_DUMP_TIMED_OUT
-         * @userdata1        Processor HUID
+         * @userdata1        Dump target HUID
          * @userdata2[0:31]  BMC's SBE start-dump effecter ID
          * @userdata2[32:63] Host's SBE dump-complete effecter ID
          * @devdesc          Missing SBE dump effecter ID
@@ -219,7 +275,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
         errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                              MOD_SBE_DUMP,
                              RC_SBE_DUMP_TIMED_OUT,
-                             get_huid(i_proc),
+                             get_huid(dump_target),
                              TWO_UINT32_TO_UINT64(sbe_dump_effecter,
                                                   dump_complete_effecter),
                              ErrlEntry::ADD_SW_CALLOUT);
@@ -234,7 +290,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_proc, const uint32_t i_plid)
     addPldmFrData(errl);
 
     PLDM_EXIT("dumpSbe(0x%08x, 0x%08x) = 0x%08x",
-              get_huid(i_proc), i_plid, ERRL_GETPLID_SAFE(errl));
+              get_huid(i_target), i_plid, ERRL_GETPLID_SAFE(errl));
 
     return errl;
 }

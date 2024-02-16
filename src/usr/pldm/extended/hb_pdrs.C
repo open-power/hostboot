@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,7 @@
 #include <targeting/common/util.H>
 #include <targeting/common/predicates/predicatehwas.H>
 #include <targeting/targplatutil.H>
+#include <targeting/odyutil.H>
 
 // Misc
 #include <secureboot/service.H>
@@ -761,25 +762,29 @@ void addSbeManagementPdrs(PdrManager& io_pdrman)
 
     for (const auto dimm : dimms)
     {
-        const auto target_rsid = getTargetFruRecordSetID(dimm);
-        pldm_entity entity_info = { };
-        const bool entity_found = io_pdrman.findEntityByFruRecordSetId(target_rsid, entity_info);
-
-        if (!entity_found)
+        // Only Odyssey OCMBs have SBEs that can be dumped
+        if (UTIL::isOdysseyChip(getAffinityParent(dimm, TYPE_OCMB_CHIP)))
         {
-            continue;
-        }
+            const auto target_rsid = getTargetFruRecordSetID(dimm);
+            pldm_entity entity_info = { };
+            const bool entity_found = io_pdrman.findEntityByFruRecordSetId(target_rsid, entity_info);
 
-        if (entity_info.entity_type)
-        { // Only one of the DIMM targets per OCMB are assigned entity
-          // IDs; only create effecters for those.
-            io_pdrman.addStateEffecterPdr(dimm,
-                                          entity_info,
-                                          PLDM_OEM_IBM_SBE_MAINTENANCE_STATE,
-                                          (enum_bit(SBE_DUMP_COMPLETED)
-                                           | enum_bit(SBE_RETRY_REQUIRED)),
-                                          // We ONLY create a dynamic handler for this type of effecter
-                                          PdrManager::STATE_QUERY_HANDLER_INVALID);
+            if (!entity_found)
+            {
+                continue;
+            }
+
+            if (entity_info.entity_type)
+            { // Only one of the DIMM targets per OCMB are assigned entity
+                // IDs; only create effecters for those.
+                io_pdrman.addStateEffecterPdr(dimm,
+                                              entity_info,
+                                              PLDM_OEM_IBM_SBE_MAINTENANCE_STATE,
+                                              (enum_bit(SBE_DUMP_COMPLETED)
+                                               | enum_bit(SBE_RETRY_REQUIRED)),
+                                              // We ONLY create a dynamic handler for this type of effecter
+                                              PdrManager::STATE_QUERY_HANDLER_INVALID);
+            }
         }
     }
 }

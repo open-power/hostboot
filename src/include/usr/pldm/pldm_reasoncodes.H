@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,6 +188,7 @@ namespace PLDM
         RC_CCIN_NOT_FOUND             = PLDM_COMP_ID | 0x41,
         RC_PS_INPUT_VOLTAGE_NOT_FOUND = PLDM_COMP_ID | 0x42,
         RC_FILE_IO_PROBLEM            = PLDM_COMP_ID | 0x43,
+        RC_DUMP_TARGET_NOT_FOUND      = PLDM_COMP_ID | 0x44
     };
 
     /**
