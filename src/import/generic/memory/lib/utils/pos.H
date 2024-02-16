@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,7 @@ class posTraits<fapi2::TARGET_TYPE_PMIC>
 /// @brief DIMM Trait class for the mss::pos functions
 ///
 template<>
-class posTraits<fapi2::TARGET_TYPE_GENERICI2CSLAVE>
+class posTraits<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>
 {
     public:
         typedef uint32_t pos_type;
