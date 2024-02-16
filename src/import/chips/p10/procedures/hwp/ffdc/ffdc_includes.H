@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
     #include <exp_collect_explorer_active_log.H>
     #include <exp_collect_explorer_saved_A_log.H>
     #include <exp_collect_explorer_saved_B_log.H>
+    #include <ody_pack_ecs_data.H>
 
 #endif
 
