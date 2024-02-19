@@ -171,18 +171,54 @@ namespace SBEIO
         uint32_t l_currentErrlSize = 0;
         o_errls->getErrlSize(l_currentErrlSize, l_maxErrlSize);
 
-        if(i_scratchData.size() <= (l_maxErrlSize - l_currentErrlSize))
+        uint32_t l_sizeAddedToErrl = i_scratchData.size() <= (l_maxErrlSize - l_currentErrlSize) ?
+                                     i_scratchData.size() :
+                                     (l_maxErrlSize - l_currentErrlSize);
+
+        o_errls->addFFDC(SBEIO_COMP_ID,
+                         i_scratchData.data(),
+                         l_sizeAddedToErrl,
+                         1, // Version
+                         SBEIO_UDT_NO_FORMAT,
+                         false, // Do not merge
+                         // Do not propagate; the FFDC data needs to be unique per error log created here
+                         propagation_t::NO_PROPAGATE);
+
+        // Split the remaining data up between logs. We will put the max amount of
+        // scratch data into each before creating more. The logs are linked via PLID
+        // to the original log.
+        if(l_sizeAddedToErrl < i_scratchData.size())
         {
-            o_errls->addFFDC(SBEIO_COMP_ID,
-                             i_scratchData.data(),
-                             i_scratchData.size(),
-                             1, // Version
-                             SBEIO_UDT_NO_FORMAT,
-                             false, // Do not merge
-                             // Do not propagate; the FFDC data needs to be unique per error log created here
-                             propagation_t::NO_PROPAGATE);
+            uint32_t l_remainingSizeToAdd = i_scratchData.size() - l_sizeAddedToErrl;
+            uint8_t* l_dataToAddPtr = i_scratchData.data();
+            while(l_remainingSizeToAdd > 0)
+            {
+                l_dataToAddPtr += l_sizeAddedToErrl;
+                errlHndl_t l_secondaryErrl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                                                           SBEIO_ODY_READ_SCRATCH_DATA,
+                                                           SBEIO_ODY_SCRATCH_DATA,
+                                                           get_huid(i_chipTarget),
+                                                           i_scratchData.size(),
+                                                           ErrlEntry::NO_SW_CALLOUT);
+
+                l_secondaryErrl->getErrlSize(l_currentErrlSize, l_maxErrlSize);
+                l_sizeAddedToErrl = l_remainingSizeToAdd <= (l_maxErrlSize - l_currentErrlSize) ?
+                                    l_remainingSizeToAdd :
+                                    (l_maxErrlSize - l_currentErrlSize);
+
+                l_secondaryErrl->addFFDC(SBEIO_COMP_ID,
+                                         l_dataToAddPtr,
+                                         l_sizeAddedToErrl,
+                                         1, // version
+                                         SBEIO_UDT_NO_FORMAT,
+                                         false, // Do not merge
+                                         // Do not propagate; the FFDC data needs to be unique per error log created here
+                                         propagation_t::NO_PROPAGATE);
+                l_secondaryErrl->plid(o_errls->plid());
+                o_errls->aggregate(l_secondaryErrl);
+                l_remainingSizeToAdd -= l_sizeAddedToErrl;
+            }
         }
-        // else TODO JIRA PFHB-543 split the remaining data up into multiple errls
     }
 
     errlHndl_t getAndProcessScratchData(Target* i_chipTarget, errlHndl_t& o_errls)
