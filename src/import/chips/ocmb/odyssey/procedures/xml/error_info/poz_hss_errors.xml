@@ -118,4 +118,20 @@
       </deconfigure>
     </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+      <sbeError/>
+      <rc>RC_LINK_TRAINING_DONE_POLL_FAILED</rc>
+      <description>Link training done poll fail</description>
+      <ffdc>TARGET</ffdc>
+      <ffdc>DONE</ffdc>
+      <ffdc>FAIL</ffdc>
+      <callout>
+        <target>TARGET_CHIP</target>
+        <priority>HIGH</priority>
+      </callout>
+      <deconfigure>
+        <target>TARGET_CHIP</target>
+      </deconfigure>
+    </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

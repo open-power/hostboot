@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,9 +75,11 @@ fapi2::ReturnCode ody_omi_train_check(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     }
 
     FAPI_ASSERT(l_state_machine == ODY_OMI_TRAINING_COMPLETE_STATE,
-                fapi2::OMI_TRAINING_DONE_POLL_FAILED()
-                .set_TARGET(i_target),
-                "OMI training done poll time-out" );
+                fapi2::LINK_TRAINING_DONE_POLL_FAILED()
+                .set_TARGET(i_target)
+                .set_DONE(0)
+                .set_FAIL(1),
+                "OMI training done poll time-out | Current State(0x%8X).", l_state_machine );
 
 fapi_try_exit:
     FAPI_DBG("End ody_omi_train_check");
