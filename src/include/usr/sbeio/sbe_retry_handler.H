@@ -173,18 +173,6 @@ public:
     virtual ~OdySbeRetryHandler() override;
 
 private:
-    /** We cannot always trust the status that the sbe reports about itself.
-     *  This enum will be used by iv_currentSBEState so Hostboot can track what
-     *  we think the status of the SBE is.
-     */
-    enum ODY_SBE_STATUS
-    {
-        SBE_AT_RUNTIME     = 0, // SBE is at runtime and booted
-        SBE_NOT_AT_RUNTIME = 1, // SBE is NOT at runtime
-    };
-
-    ODY_SBE_STATUS iv_currentSBEState;
-
     /**
      * @brief Perform the actions and HWPs needed to cycle the
      *        Odyssey from boot to runtime.

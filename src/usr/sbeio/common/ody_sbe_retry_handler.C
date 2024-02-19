@@ -99,7 +99,6 @@ GenericSbeRetryHandler::~GenericSbeRetryHandler()
 
 OdySbeRetryHandler::OdySbeRetryHandler(Target* const i_ocmb)
     : iv_ocmb(i_ocmb)
-    , iv_currentSBEState(ODY_SBE_STATUS::SBE_NOT_AT_RUNTIME)
 {
 }
 
@@ -374,9 +373,8 @@ errlHndl_t OdySbeRetryHandler::hreset()
     l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
     errlCommit(l_errl, SBEIO_COMP_ID);
 
-    SBE_TRACF("OdySbeRetryHandler::hreset: iv_currentSBEState=0x%X "
-              "ODY_RECOVERY_STATE=0x%X",
-              iv_currentSBEState, iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>());
+    SBE_TRACF("OdySbeRetryHandler::hreset: ODY_RECOVERY_STATE=0x%X",
+              iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>());
 
     // @TODO -  need some kind of SEV_PREDICTIVE log if we aren't able to recover
 
@@ -419,9 +417,6 @@ errlHndl_t OdySbeRetryHandler::run_hreset_flow()
                        "ODY_RECOVERY_STATE=0x%X",
                         get_huid(iv_ocmb), iv_ocmb->getAttr<ATTR_SPPE_BOOT_SIDE>(),
                         iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>());
-
-    // safeguard the error flows to reset to default
-    iv_currentSBEState = ODY_SBE_STATUS::SBE_NOT_AT_RUNTIME;
 
     /*--------------------------------------------------------------------------
      * ody_sbe_hreset - boot up SBE
@@ -466,18 +461,17 @@ errlHndl_t OdySbeRetryHandler::run_hreset_flow()
     if (l_errl)
     {
         SBE_TRACF("OdySbeRetryHandler::run_hreset_flow: ody_sppe_check_for_ready failed "
-                  "HUID=0x%X ERRL=0x%X iv_currentSBEState=0x%X",
-                  get_huid(iv_ocmb), ERRL_GETEID_SAFE(l_errl), iv_currentSBEState);
+                  "HUID=0x%X ERRL=0x%X",
+                  get_huid(iv_ocmb), ERRL_GETEID_SAFE(l_errl));
         goto ERROR_EXIT;
     }
 
     // If FFDC is available, grab it, parse it, and commit the resulting error logs
     SBEIO::checkOdyFFDC(iv_ocmb);
 
-    iv_currentSBEState = ODY_SBE_STATUS::SBE_AT_RUNTIME;
     SBE_TRACF("OdySbeRetryHandler::run_hreset_flow: ody_sppe_check_for_ready success "
-              "HUID=0x%X iv_currentSBEState=0x%X",
-              get_huid(iv_ocmb), iv_currentSBEState);
+              "HUID=0x%X",
+              get_huid(iv_ocmb));
 
     /*--------------------------------------------------------------------------
      * sendAttrUpdateRequest
@@ -495,7 +489,6 @@ errlHndl_t OdySbeRetryHandler::run_hreset_flow()
     {
         // ODY_RECOVERY_STATUS_DEAD
         iv_ocmb->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_DEAD);
-        iv_currentSBEState = ODY_SBE_STATUS::SBE_NOT_AT_RUNTIME;
         SBE_TRACF(ERR_MRK"OdySbeRetryHandler::run_hreset_flow: sendAttrUpdateRequest "
                          "failed ODY_RECOVERY_STATUS_DEAD "
                          "HUID=0x%X ERRL=0x%X",
