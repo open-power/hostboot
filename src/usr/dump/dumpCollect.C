@@ -283,38 +283,52 @@ static void unmapVirtAddr(void* i_addr)
  * processor and store them in the dump section allocated by PHYP at
  * the given physical address.
  *
- * @param[in] i_proc                 The processor whose OCMBs will be dumped.
- * @param[in] hwDataMemoryAddr       The physical memory address of the HW dump area (allocated by PHYP)
- * @param[in] hwDataMemAllocSize     The size of the allocation pointed to by hwDataMemoryAddr
- * @param[in] hwDataMemCapturedSize  The size of the data already in hwDataMemoryAddr
- * @return                           The amount of memory newly occupied in hwDataMemoryAddr
+ * @param[in] i_proc                   The processor whose OCMBs will be dumped.
+ * @param[in] i_hwDataMemoryAddr       The physical memory address of the HW dump area (allocated by PHYP)
+ * @param[in] i_hwDataMemAllocSize     The size of the allocation pointed to by i_hwDataMemoryAddr
+ * @param[in] i_hwDataMemCapturedSize  The size of the data already in i_hwDataMemoryAddr
+ * @return                             The amount of memory now occupied in i_hwDataMemoryAddr
  */
 uint64_t collectOdysseyHwDumps(Target* const i_proc,
-                               const uint64_t hwDataMemoryAddr,
-                               const uint64_t hwDataMemAllocSize,
-                               uint64_t hwDataMemCapturedSize)
+                               const uint64_t i_hwDataMemoryAddr,
+                               const uint64_t i_hwDataMemAllocSize,
+                               uint64_t i_hwDataMemCapturedSize)
 {
     TRACFCOMP(g_trac_dump,
               ENTER_MRK"collectOdysseyHwDumps(0x%08X, 0x%X, 0x%X, 0x%X)",
               get_huid(i_proc),
-              hwDataMemoryAddr,
-              hwDataMemAllocSize,
-              hwDataMemCapturedSize);
+              i_hwDataMemoryAddr,
+              i_hwDataMemAllocSize,
+              i_hwDataMemCapturedSize);
 
-    uint8_t* const hw_dump_vaddr
-        = static_cast<uint8_t*>(mm_block_map(reinterpret_cast<void*>(hwDataMemoryAddr),
-                                             hwDataMemAllocSize));
+    uint8_t* hw_dump_vaddr = nullptr;
 
     do
     {
 
-    if (!hwDataMemoryAddr || !hwDataMemAllocSize)
+    if (!i_hwDataMemoryAddr || !i_hwDataMemAllocSize)
     {
         TRACFCOMP(g_trac_dump,
                   "collectOdysseyHwDumps: No space allocated "
                   "for dumps, skipping dump collection");
+
+        /*@
+         *@moduleid     DUMP_ARCH_REGS
+         *@reasoncode   DUMP_ODY_HW_NOT_COLLECTED
+         *@devdesc      PHYP did not allocate storage for HW dump; Odyssey dump skipped.
+         *@custdesc     Internal status report.
+         */
+        auto err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                           DUMP_ARCH_REGS,
+                                           DUMP_ODY_HW_NOT_COLLECTED);
+        err->collectTrace(DUMP_COMP_NAME);
+        errlCommit(err, DUMP_COMP_ID);
         break;
     }
+
+    hw_dump_vaddr
+        = static_cast<uint8_t*>(mm_block_map(reinterpret_cast<void*>(i_hwDataMemoryAddr),
+                                             i_hwDataMemAllocSize));
 
     for (const auto ocmb : composable(getChildAffinityTargets)(i_proc, CLASS_NA, TYPE_OCMB_CHIP, true /* functional only */))
     {
@@ -325,8 +339,8 @@ uint64_t collectOdysseyHwDumps(Target* const i_proc,
 
         using namespace SBEIO;
 
-        uint8_t* const dump_dest = hw_dump_vaddr + hwDataMemCapturedSize;
-        uint32_t buffer_size = hwDataMemAllocSize - hwDataMemCapturedSize;
+        uint8_t* const dump_dest = hw_dump_vaddr + i_hwDataMemCapturedSize;
+        uint32_t buffer_size = i_hwDataMemAllocSize - i_hwDataMemCapturedSize;
 
         TRACFCOMP(g_trac_dump,
                   "collectOdysseyHwDumps: Dumping OCMB 0x%08X into "
@@ -347,13 +361,14 @@ uint64_t collectOdysseyHwDumps(Target* const i_proc,
                       get_huid(ocmb),
                       TRACE_ERR_ARGS(dump_errl));
             dump_errl->collectTrace(SBEIO_COMP_NAME);
-            dump_errl->collectTrace(RUNTIME_COMP_NAME);
-            errlCommit(dump_errl, RUNTIME_COMP_ID);
+            dump_errl->collectTrace(DUMP_COMP_NAME);
+            dump_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(dump_errl, DUMP_COMP_ID);
             continue;
         }
 
         // buffer_size has been updated by getOdysseyHardwareDump
-        hwDataMemCapturedSize += buffer_size;
+        i_hwDataMemCapturedSize += buffer_size;
     }
 
     } while (false);
@@ -366,9 +381,9 @@ uint64_t collectOdysseyHwDumps(Target* const i_proc,
     TRACFCOMP(g_trac_dump,
               EXIT_MRK"collectOdysseyHwDumps(0x%08X) = 0x%08X",
               i_proc,
-              hwDataMemCapturedSize);
+              i_hwDataMemCapturedSize);
 
-    return hwDataMemCapturedSize;
+    return i_hwDataMemCapturedSize;
 }
 
 errlHndl_t doDumpCollect(void)

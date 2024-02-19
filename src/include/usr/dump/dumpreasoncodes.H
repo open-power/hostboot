@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@ namespace DUMP
         DUMP_PDAT_INSUF_SPACE_FOR_NODE  = DUMP_COMP_ID | 0x13,
         DUMP_MDDT_INVALID_REGION        = DUMP_COMP_ID | 0x14,
         DUMP_MM_BLOCK_UNMAP_FAIL        = DUMP_COMP_ID | 0x15,
+        DUMP_ODY_HW_NOT_COLLECTED       = DUMP_COMP_ID | 0x16,
     };
 };
 
