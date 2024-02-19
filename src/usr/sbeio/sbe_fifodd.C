@@ -686,6 +686,29 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                HWAS::GARD_NULL);
             errl->collectTrace(SBEIO_COMP_NAME);
 
+            //FIXME-Remove this hack once a full boot works
+            if( (FIFO_STATUS_MAGIC == l_pStatusHeader->magic)
+                && (SBE_PRI_UNSECURE_ACCESS_DENIED == l_pStatusHeader->primaryStatus)
+                && (SBE_SEC_BLACKLISTED_REG_ACCESS == l_pStatusHeader->secondaryStatus) )
+            {
+                const SbeFifo::fifoPutScomRequest* pScomRequest =
+                  reinterpret_cast<const SbeFifo::fifoPutScomRequest*>(
+                                                                       i_pFifoRequest);
+                SBE_TRACF(ERR_MRK "SbeFifo::readResponse: Secure Boot "
+                          "violation; request blacklisted by SBE.  Reference EID "
+                          "0x%08X, PLID 0x%08X, reason code 0x%04X, "
+                          "class 0x%02X, command 0x%02X, address 0x%016llX, "
+                          "data 0x%016llX -- IGNORING",
+                          errl->eid(),errl->plid(),errl->reasonCode(),
+                          pScomRequest->commandClass, pScomRequest->command,
+                          pScomRequest->address, pScomRequest->data);
+                errl->collectTrace(SBEIO_COMP_NAME); //to get the above trace
+                errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                ERRORLOG::errlCommit( errl, SBEIO_COMP_ID );
+
+                // skip the rest of the ffdc
+                break;
+            }
         }
 
         // Only parse FFDC from the fifo buffer if the message contains FFDC and this is not a get FFDC chip-op request,
