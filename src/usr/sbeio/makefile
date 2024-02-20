@@ -32,6 +32,8 @@ include common/common.mk
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include
+EXTRAINCDIR += ${ROOTPATH}/src/usr/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ocmbupd/
 
 # sbeio's unique objects
 OBJS += sbe_psudd.o

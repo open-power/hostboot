@@ -710,6 +710,21 @@
   </enumerationType>
 
   <attribute>
+    <description>This attribute controls whether the
+        SBE scratch data should be collected on SBE HWP
+        errors. This is set after the draminit istep runs
+        on SBE.
+    </description>
+    <id>COLLECT_SBE_SCRATCH_DATA</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <description>CPU Attribute</description>
     <id>CPU_ATTR</id>
     <persistency>non-volatile</persistency>
@@ -2104,6 +2119,21 @@
         checks to run in MFG mode, where they are now disabled by default.
     </description>
     <id>FORCE_ODY_SB_CHK_IN_MFG</id>
+    <persistency>volatile</persistency>
+    <readable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description> Force the SBE scratch data to be collected
+        after draminit istep (with or without HWP failure).
+    </description>
+    <id>FORCE_SBE_SCRATCH_DATA_COLLECTION</id>
     <persistency>volatile</persistency>
     <readable/>
     <simpleType>

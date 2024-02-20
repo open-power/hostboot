@@ -476,6 +476,13 @@ namespace SBEIO
                               uint32_t *o_pFifoResponse,
                               uint32_t &i_responseSize);
 
+    /**
+     * @brief Sends a scratch data request to all OCMB chips
+     *
+     * @return errlHndl_t Error log handle on failure.
+     */
+    errlHndl_t purgeAllSbeScratchData();
+
 
     /**
      * @brief Purges data stored in the SBE Scratch area.

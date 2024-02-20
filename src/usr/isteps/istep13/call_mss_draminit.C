@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,9 +116,33 @@ void* call_mss_draminit (void *io_pArgs)
             {
                 RUN_ODY_CHIPOP(CONTEXT, l_stepError, l_err, i_ocmb, MEM_ODY_LOAD_IMEM);
                 RUN_ODY_CHIPOP(CONTEXT, l_stepError, l_err, i_ocmb, MEM_ODY_LOAD_DMEM);
+                // Set this attr ahead of the actual draminit chip-op so that if
+                // that fails, the HWP failure processing code can fetch the data
+                // for the failing draminit.
+                i_ocmb->setAttr<TARGETING::ATTR_COLLECT_SBE_SCRATCH_DATA>(1);
                 RUN_ODY_CHIPOP(CONTEXT, l_stepError, l_err, i_ocmb, MEM_ODY_SPPE_DRAMINIT);
                 RUN_ODY_HWP   (CONTEXT, l_stepError, l_err, i_ocmb, ody_host_draminit, l_fapi_target);
                 RUN_ODY_CHIPOP(CONTEXT, l_stepError, l_err, i_ocmb, MEM_ODY_LOAD_PIE);
+
+                // Dump the scratch reg data if explicitly requested via attr override
+                if(UTIL::assertGetToplevelTarget()->
+                    getAttr<ATTR_FORCE_SBE_SCRATCH_DATA_COLLECTION>() == 1)
+                {
+                    errlHndl_t l_scratchErrls = nullptr;
+                    l_err = getAndProcessScratchData(i_ocmb, l_scratchErrls);
+                    if(l_err)
+                    {
+                        errlCommit(l_err, SBEIO_COMP_ID);
+                    }
+                    else
+                    {
+                        // Need to reset the attr here because repeated calls
+                        // to the Scratch data chip-op will fail if there is
+                        // no scratch data available.
+                        i_ocmb->setAttr<ATTR_COLLECT_SBE_SCRATCH_DATA>(0);
+                        errlCommit(l_scratchErrls, SBEIO_COMP_ID);
+                    }
+                }
             }
         }
         else

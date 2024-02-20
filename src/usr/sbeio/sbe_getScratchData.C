@@ -38,8 +38,13 @@
 
 #include <errl/errlmanager.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
+#include <targeting/odyutil.H>
 #include <trace/interface.H>
 #include <util/misc.H>
+#include <algorithm>
+#include <isteps/hwpisteperror.H>
+#include <isteps/hwpThreadHelper.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -91,6 +96,40 @@ namespace SBEIO
         SBE_TRACD(EXIT_MRK "sendPurgeScratchDataRequest");
         return errl;
     };
+
+    errlHndl_t purgeAllSbeScratchData()
+    {
+        ISTEP_ERROR::IStepError l_istepError;
+
+        ISTEP::parallel_for_each(composable(getAllChips)(TYPE_OCMB_CHIP, true/*functional*/),
+                                 l_istepError,
+                                 "purgeAllSbeScratchData",
+                                 [&](Target* const i_ocmb) -> errlHndl_t
+        {
+            errlHndl_t l_errl = nullptr;
+            if(!UTIL::isOdysseyChip(i_ocmb))
+            {
+                return l_errl;
+            }
+
+            // No scratch data is returned by the SBE if we request to purge, so
+            // the standard response will work here.
+            SBEIO::SbeFifo::fifoStandardResponse l_resp;
+            uint32_t l_responseSize = sizeof(l_resp);
+            l_errl = sendPurgeScratchDataRequest(i_ocmb,
+                                                 reinterpret_cast<uint32_t*>(&l_resp),
+                                                 l_responseSize);
+            if(l_errl)
+            {
+                SBE_TRACF(ERR_MRK"sendPurgeScratchDataRequest failed");
+                errlCommit(l_errl, SBEIO_COMP_ID);
+            }
+
+            return l_errl;
+        });
+
+        return l_istepError.getErrorHandle();
+    }
 
     /**
      * @brief Retrieves data stored in the SBE Scratch area. Due to tight memory constraints, the SBE scratch area will
@@ -171,9 +210,8 @@ namespace SBEIO
         uint32_t l_currentErrlSize = 0;
         o_errls->getErrlSize(l_currentErrlSize, l_maxErrlSize);
 
-        uint32_t l_sizeAddedToErrl = i_scratchData.size() <= (l_maxErrlSize - l_currentErrlSize) ?
-                                     i_scratchData.size() :
-                                     (l_maxErrlSize - l_currentErrlSize);
+        uint32_t l_scratchDataSize = i_scratchData.size();
+        uint32_t l_sizeAddedToErrl = std::min(l_scratchDataSize, l_maxErrlSize - l_currentErrlSize);
 
         o_errls->addFFDC(SBEIO_COMP_ID,
                          i_scratchData.data(),
@@ -202,10 +240,7 @@ namespace SBEIO
                                                            ErrlEntry::NO_SW_CALLOUT);
 
                 l_secondaryErrl->getErrlSize(l_currentErrlSize, l_maxErrlSize);
-                l_sizeAddedToErrl = l_remainingSizeToAdd <= (l_maxErrlSize - l_currentErrlSize) ?
-                                    l_remainingSizeToAdd :
-                                    (l_maxErrlSize - l_currentErrlSize);
-
+                l_sizeAddedToErrl = std::min(l_remainingSizeToAdd, l_maxErrlSize - l_currentErrlSize);
                 l_secondaryErrl->addFFDC(SBEIO_COMP_ID,
                                          l_dataToAddPtr,
                                          l_sizeAddedToErrl,
@@ -214,8 +249,7 @@ namespace SBEIO
                                          false, // Do not merge
                                          // Do not propagate; the FFDC data needs to be unique per error log created here
                                          propagation_t::NO_PROPAGATE);
-                l_secondaryErrl->plid(o_errls->plid());
-                o_errls->aggregate(l_secondaryErrl);
+                aggregate(o_errls, l_secondaryErrl, true /*update the PLID*/);
                 l_remainingSizeToAdd -= l_sizeAddedToErrl;
             }
         }
@@ -230,10 +264,11 @@ namespace SBEIO
 
         sbeScratchDataResponse_t l_scratchDataResponse;
 
-        if(Util::isSimicsRunning())
+        if(Util::isSimicsRunning() ||
+           !UTIL::isOdysseyChip(i_chipTarget))
         {
             // This is technically not an error; the Synopsys data doesn't get logged
-            // in simics.
+            // in simics or on non-Odyssey chips.
             goto ERROR_EXIT;
         }
 

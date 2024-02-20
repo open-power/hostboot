@@ -28,6 +28,8 @@
 
 #include <ody_upd_fsm.H>
 #include <hwp_return_codes.H>
+#include <sbeio/sbeioif.H>
+#include <sbeio/sbeioreasoncodes.H>
 
 #define HANDLE_ODY_HWP_ERROR(ISTEP_NAME, HWP, STEP_ERR, OCMB, ERRL)     \
     ({                                                                  \
@@ -40,6 +42,22 @@
         {                                                               \
             if (TARGETING::UTIL::isOdysseyChip(M_ocmb))                 \
             {                                                           \
+                if(M_ocmb->getAttr<TARGETING::ATTR_COLLECT_SBE_SCRATCH_DATA>() == 1 && \
+                   !M_errl->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED)) \
+                {                                                       \
+                    errlHndl_t l_scratchErrls;                          \
+                    auto l_errl = SBEIO::getAndProcessScratchData(M_ocmb,\
+                                                       l_scratchErrls); \
+                    if(l_errl)                                          \
+                    {                                                   \
+                        errlCommit(l_errl, SBEIO_COMP_ID);              \
+                    }                                                   \
+                    else                                                \
+                    {                                                   \
+                        errlCommit(l_scratchErrls, SBEIO_COMP_ID);      \
+                        M_ocmb->setAttr<TARGETING::ATTR_COLLECT_SBE_SCRATCH_DATA>(0); \
+                    }                                                   \
+                }                                                       \
                 ocmbupd::ody_upd_event_t M_update_event = ocmbupd::OCMB_HWP_FAIL_OTHER; \
                 if (M_errl->hasUserData1(fapi2::RC_UNSUPPORTED_ATTR_LEVEL)) \
                 {                                                       \

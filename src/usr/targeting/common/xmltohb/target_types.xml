@@ -323,6 +323,9 @@
     <id>chip-ocmb</id>
     <parent>chip-ocmb-generic</parent>
     <attribute>
+      <id>COLLECT_SBE_SCRATCH_DATA</id>
+    </attribute>
+    <attribute>
       <id>EECACHE_VPD_STATE</id>
     </attribute>
     <attribute>
@@ -2523,6 +2526,9 @@
     </attribute>
     <attribute>
       <id>FORCE_ODY_SB_CHK_IN_MFG</id>
+    </attribute>
+    <attribute>
+      <id>FORCE_SBE_SCRATCH_DATA_COLLECTION</id>
     </attribute>
     <attribute>
       <id>FORCE_SERIAL_ISTEPS</id>

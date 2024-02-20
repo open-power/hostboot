@@ -68,6 +68,8 @@
 #include <targeting/odyutil.H>
 #include <ocmbupd/ody_upd_fsm.H>
 
+#include <sbeio/sbeioif.H>
+
 #define TRACF(...) TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, __VA_ARGS__)
 
 using namespace ERRORLOG;
@@ -214,6 +216,21 @@ void* call_host_ipl_complete(void* const io_pArgs)
         auto keyClearRequests = KEY_CLEAR_REQUEST_NONE;
         sys->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
         l_nodeTgt->setAttr<ATTR_KEY_CLEAR_REQUEST>(keyClearRequests);
+
+        // SBE scratch data is not collected in MPIPL, so no need to purge it
+        if(!sys->getAttr<ATTR_IS_MPIPL_HB>())
+        {
+
+            l_err = SBEIO::purgeAllSbeScratchData();
+            if(l_err)
+            {
+                TRACF(ERR_MRK"host_ipl_complete: could not purge SBE scratch data: "
+                      TRACE_ERR_FMT,
+                    TRACE_ERR_ARGS(l_err));
+                // We don't want to fail the boot for this error, so just commit it.
+                errlCommit(l_err, SBEIO_COMP_ID);
+            }
+        }
 
         // Note that we're iterating ALL OCMB chips here, not just
         // functional ones. This is required for this particular
