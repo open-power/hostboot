@@ -38,6 +38,10 @@
 #include <ody_sbe_hreset.H>
 #include <ody_sppe_check_for_ready.H>
 
+#ifdef CONFIG_PLDM
+#include <pldm/extended/sbe_dump.H>
+#endif
+
 #include <cxxtest/TestInject.H>
 
 #define SBE_TRACF(printf_string,args...) \
@@ -219,7 +223,7 @@ void OdySbeRetryHandler::main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeH
     else
     {
         // IPL, only action is dump
-        l_errl = dump();
+        l_errl = dump(ERRL_GETEID_SAFE(io_errl));
         if (l_errl)
         {
             SBE_TRACF("OdySbeRetryHandler:main_sbe_handler: dump error 0x%8X",
@@ -325,6 +329,9 @@ errlHndl_t OdySbeRetryHandler::hreset()
 {
     errlHndl_t l_errl = nullptr;
 
+    do
+    {
+
     SBE_TRACF(ENTER_MRK"OdySbeRetryHandler::hreset HUID=0x%X", get_huid(iv_ocmb));
 
     /*--------------------------------------------------------------------------
@@ -336,7 +343,7 @@ errlHndl_t OdySbeRetryHandler::hreset()
         // SUCCESS
         SBE_TRACF("OdySbeRetryHandler::hreset success (current side) HUID=0x%X",
                   get_huid(iv_ocmb));
-        goto EXIT;
+        break;
     }
 
     /*--------------------------------------------------------------------------
@@ -360,7 +367,7 @@ errlHndl_t OdySbeRetryHandler::hreset()
         // SUCCESS
         SBE_TRACF("OdySbeRetryHandler::hreset success (alternate side) HUID=0x%X",
                   get_huid(iv_ocmb));
-        goto EXIT;
+        break;
     }
 
     /*--------------------------------------------------------------------------
@@ -371,6 +378,9 @@ errlHndl_t OdySbeRetryHandler::hreset()
               "(alternate side) HUID=0x%X ERRL=0x%X (committing), will gather FFDC",
               get_huid(iv_ocmb), ERRL_GETEID_SAFE(l_errl));
     l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+
+    const uint32_t l_dump_eid = ERRL_GETEID_SAFE(l_errl);
+
     errlCommit(l_errl, SBEIO_COMP_ID);
 
     SBE_TRACF("OdySbeRetryHandler::hreset: ODY_RECOVERY_STATE=0x%X",
@@ -384,14 +394,15 @@ errlHndl_t OdySbeRetryHandler::hreset()
      *------------------------------------------------------------------------*/
     SBE_TRACF("OdySbeRetryHandler::hreset: collect dump (alternate side) HUID=0x%X",
               get_huid(iv_ocmb));
-    l_errl = dump();
+    l_errl = dump(l_dump_eid);
     if (l_errl)
     {
         l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
         errlCommit(l_errl, SBEIO_COMP_ID);
     }
 
-EXIT:
+    } while (false);
+
     SBE_TRACF(EXIT_MRK"OdySbeRetryHandler::hreset: HUID=0x%X ERRL=0x%X "
                       "ODY_RECOVERY_STATE=0x%X",
                       get_huid(iv_ocmb), ERRL_GETEID_SAFE(l_errl),
@@ -585,7 +596,7 @@ void OdySbeRetryHandler::side_switch()
 /*******************************************************************************
  * @brief Execute the Odyssey dump
  ******************************************************************************/
-errlHndl_t OdySbeRetryHandler::dump()
+errlHndl_t OdySbeRetryHandler::dump(const uint32_t i_eid)
 {
     errlHndl_t l_errl      = nullptr;
     bool       l_skip_dump = false;
@@ -601,7 +612,9 @@ errlHndl_t OdySbeRetryHandler::dump()
 
     if (!l_skip_dump)
     {
-        // @TODO JIRA: PFHB-290 Dump the Odyssey SBE HERE
+#if defined(CONFIG_PLDM) && !defined(__HOSTBOOT_RUNTIME)
+        l_errl = PLDM::dumpSbe(iv_ocmb, i_eid);
+#endif
     }
 
     iv_ocmb->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_DEAD);
