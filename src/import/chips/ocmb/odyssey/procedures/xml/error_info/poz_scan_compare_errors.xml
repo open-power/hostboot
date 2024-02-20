@@ -28,6 +28,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_NONZERO_MISCOMPARES</rc>
       <description>At least one ring failed compare check</description>
       <ffdc>FAILING_RING_COUNT</ffdc>
