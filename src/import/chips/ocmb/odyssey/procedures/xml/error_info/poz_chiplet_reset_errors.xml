@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2023                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2023,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,6 +29,7 @@
   <format>poz</format>
    <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_POZ_HEARTBEAT_NOT_SET_ERR</rc>
       <description>Chiplet HEARTBEAT not running </description>
       <ffdc>PERV_HEARTBEAT_REG</ffdc>

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,6 +29,7 @@
   <format>poz</format>
    <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_POZ_OPCG_DONE_NOT_SET_ERR</rc>
       <description>OPCG_DONE not set </description>
       <ffdc>PERV_CPLT_STAT0</ffdc>
@@ -38,6 +39,7 @@
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_POZ_SRAM_ABIST_DONE_BIT_ERR</rc>
       <description>SRAM abist done bit is not set</description>
       <ffdc>PERV_CPLT_STAT0</ffdc>
@@ -46,6 +48,7 @@
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_POZ_THOLD_ERR</rc>
       <description>thold status not matching the expected value
 	in clock start stop sequence</description>
@@ -57,6 +60,7 @@
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_POZ_INVALID_CLOCK_TYPE</rc>
       <description>Invalid clock_type passed to check_clock_status function</description>
       <ffdc>CLOCK_TYPE_VALUE</ffdc>
@@ -64,6 +68,7 @@
    </hwpError>
    <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_POZ_CPLT_NOT_ALIGNED_ERR</rc>
       <description>Chiplet not aligned</description>
       <ffdc>PERV_CPLT_STAT0</ffdc>

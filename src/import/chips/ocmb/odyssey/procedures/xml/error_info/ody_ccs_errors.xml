@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -113,6 +113,7 @@
 
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_ODY_CCS_READ_MISCOMPARE</rc>
     <description>
         CCS reports a read miscompare.
@@ -138,6 +139,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_ODY_CCS_UE_SUE</rc>
     <description>
         CCS reports a UE or SUE in the CCS program array
@@ -163,6 +165,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_ODY_CCS_HUNG</rc>
     <description>
         Software reported that the machine is not seeing the CCS finish in the alloted time
@@ -190,6 +193,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_CCS_HUNG_TRYING_TO_STOP</rc>
     <description>
         CCS failed to return from in-progress status while trying to stop a previous program
@@ -214,6 +218,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_ODY_CCS_INCONSISTENT_RANK</rc>
     <description>
         Odyssey CCS requires all reads and writes in a program to target the same rank.
@@ -244,6 +249,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_ODY_CCS_XMETA_BOTH_HALVES_SELECTED</rc>
     <description>
         Odyssey CCS requires only one half selected in MODEQ for XMETA mode.

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,6 +27,7 @@
   <format>poz</format>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_IO_PPE_DONE_POLL_FAILED</rc>
       <description>IO PPE done poll time-out</description>
       <ffdc>TARGET</ffdc>
@@ -40,6 +41,7 @@
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_IO_PPE_DONE_CLEANUP_FAILED</rc>
       <description>IO PPE done BIST clenaup failed</description>
       <ffdc>TARGET</ffdc>
@@ -53,6 +55,7 @@
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_IO_PPE_DONE_DCCAL_FAILED</rc>
       <description>IO PPE done DCCAL poll failed</description>
       <ffdc>POS</ffdc>
@@ -66,6 +69,7 @@
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_IO_EXT_CMD_POLL_FAILED</rc>
       <description>IO external command done poll time-out</description>
       <ffdc>TARGET</ffdc>
@@ -79,6 +83,7 @@
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_IO_PPE_UNDEGRADE_FAIL</rc>
       <description>IO PPE undegrade attempt failed</description>
       <ffdc>TARGET</ffdc>

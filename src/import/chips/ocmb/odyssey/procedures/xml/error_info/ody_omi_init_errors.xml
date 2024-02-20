@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,6 +29,7 @@
 
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_OCMB_IS_NOT_ODYSSEY</rc>
     <description>
       Procedure: ody_omi_init.C

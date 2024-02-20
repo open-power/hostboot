@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,12 +27,14 @@
   <format>poz</format>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_UNSUPPORTED_SCAN_TARGET_TYPE</rc>
       <description>Unsupported FAPI target type for scanning</description>
       <ffdc>TARGET</ffdc>
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_SCAN_CHIPLET_NOT_FUNCTIONAL</rc>
       <description>Attempted to create a single chiplet target for scanning but the requested chiplet is not functional</description>
       <ffdc>CHIP_TARGET</ffdc>
@@ -40,6 +42,7 @@
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_INVALID_SCAN_TARGET_TYPE</rc>
       <description>Scan image target type does not match expectation based on FAPI target</description>
       <ffdc>TARGET</ffdc>
@@ -49,6 +52,7 @@
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_CORE_MULTICAST_SCAN_INVALID_ARGS</rc>
       <description>Core multicast scan attempted with empty core selection or on regions that don't support parallel scan</description>
       <ffdc>TARGET</ffdc>
@@ -58,6 +62,7 @@
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_INVALID_RING_IMAGE</rc>
       <description>Invalid RS4 header in scan image</description>
       <ffdc>RS4_HEADER</ffdc>

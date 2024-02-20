@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,6 +31,7 @@
   </registerFfdc>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DTS_READ_DATA_TIMEOUT</rc>
     <description>
       DTS did not return data within allotted timeout.

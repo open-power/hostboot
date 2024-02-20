@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,6 +29,7 @@
   <format>poz</format>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_POZ_CBS_NOT_IN_IDLE_STATE</rc>
       <description>CBS did not complete (did not arrive in IDLE state) within timeout</description>
       <ffdc>CBS_CS_READ</ffdc>
@@ -39,6 +40,7 @@
     </hwpError>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_POZ_VDN_POWER_NOT_ON</rc>
       <description>Nest power VDN is not on.(VDD_NEST_OBSERVE not set)</description>
       <!-- <ffdc>CBS_ENVSTAT_READ</ffdc> -->
@@ -47,6 +49,7 @@
     </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_POZ_INVALID_GROUP_ID</rc>
       <description>Invalid group id passed to module multicast setup</description>
       <ffdc>GROUP_ID_VALUE</ffdc>
@@ -54,6 +57,7 @@
    </hwpError>
   <!-- ******************************************************************** -->
    <hwpError>
+      <sbeError/>
       <rc>RC_POZ_CHIPLET_NOT_FOUND</rc>
       <description>Provided chiplet number does not match anything in provided target</description>
       <ffdc>CHIPLET_NUMBER</ffdc>

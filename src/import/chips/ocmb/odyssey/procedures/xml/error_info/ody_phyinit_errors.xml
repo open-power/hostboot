@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,6 +26,7 @@
   <format>poz</format>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_INVALID_DBYTENUMBER</rc>
     <description>Ody phyinit invalid Dbyte number.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -44,6 +45,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_INVALID_CONFIGURATION</rc>
     <description>Ody phyinit invalid configuration.</description>
     <ffdc>NUMACTIVEDBYTEDFI0</ffdc>
@@ -64,6 +66,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_INVALID_WRITE_PREAMBLE</rc>
     <description>Ody phyinit invalid value for Write Preamble Settings.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -83,6 +86,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_INVALID_WRITE_POSTAMBLE</rc>
     <description>Ody phyinit invalid value for Write Postamble Settings.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -102,6 +106,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_INVALID_PREAMBLE_CTRL</rc>
     <description>Ody phyinit invalid preamble control.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -120,6 +125,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_UNSUPPORTED_DDR_FREQ</rc>
     <description>An unsupported DDR frequency passed into ddrphyinit</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -138,6 +144,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_INVALID_EN_TX_DM_PREAMBLE_PATTERN</rc>
     <description>Ody phyinit invalid EnTxDmPreamblePattern.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -156,6 +163,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_INVALID_EN_TX_DQ_PREAMBLE_PATTERN_U0</rc>
     <description>Ody phyinit invalid EnTxDqPreamblePatternU0.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -174,6 +182,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_INVALID_EN_TX_DQ_PREAMBLE_PATTERN_U1</rc>
     <description>Ody phyinit invalid EnTxDqPreamblePatternU1.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -194,6 +203,7 @@
 <!-- PHY Init step I/J errors -->
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_PIE_INVALID_DQS_OSC_TIME</rc>
     <description>Invalid value for i_user_input_advanced.DqsOscRunTimeSel</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -212,6 +222,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_PIE_INVALID_NUM_RANKS</rc>
     <description>Invalid number of ranks on a given DFI (channel)</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -231,6 +242,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_PHYINIT_PIE_SPACE_OVERFILL</rc>
     <description>PIE instruction space overspilled, Address is not part of PIE instruction space</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -251,6 +263,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DMEM_RESET_TIMEOUT</rc>
     <description>Odyssey timed out while trying to reset the DMEM</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -268,6 +281,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_INVALID_ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR</rc>
     <description>
         Invalid value detected in ATTR_MEM_SI_MC_DRV_IMP_CMD_ADDR.
@@ -290,6 +304,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_INVALID_ATX_OVERRIDE</rc>
     <description>
         Invalid attribute value recieved in phyinit CSR override.

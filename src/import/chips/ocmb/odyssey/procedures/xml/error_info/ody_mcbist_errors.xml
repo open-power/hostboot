@@ -65,6 +65,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN</rc>
     <description>A miscompare error was caused by the last MCBIST pattern</description>
     <ffdc>PORT</ffdc>
@@ -83,6 +84,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_ERROR_IN_LAST_PATTERN</rc>
     <description>An error was caused by the last MCBIST pattern</description>
     <ffdc>STATUS0</ffdc>
@@ -101,6 +103,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_MCBIST_FAILED_TO_START</rc>
     <description>The MCBIST engine failed to start its program</description>
     <ffdc>MC_TARGET</ffdc>
@@ -117,6 +120,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_PORT_NOT_FUNCTIONAL</rc>
     <description>The port used in an MCBIST program is not functional</description>
     <ffdc>RELATIVE_PORT_POSITION</ffdc>
@@ -135,6 +139,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_SUPERFAST_INIT_FAILED_TO_INIT</rc>
     <description>A superfast init operation failed initialization</description>
     <ffdc>MC_TARGET</ffdc>
@@ -151,6 +156,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_SUPERFAST_READ_FAILED_TO_INIT</rc>
     <description>A superfast read operation failed initialization</description>
     <ffdc>MC_TARGET</ffdc>
@@ -167,6 +173,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_MCBIST_FAILED_TO_STOP</rc>
     <description>The MCBIST engine failed to stop its program</description>
     <ffdc>MC_TARGET</ffdc>
@@ -184,6 +191,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_CONTINUOUS_SCRUB_FAILED_TO_INIT</rc>
     <description>A continuous scrub operation failed initialization</description>
     <ffdc>MC_TARGET</ffdc>
@@ -200,6 +208,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT</rc>
     <description>A continuous scrub operation failed initialization</description>
     <ffdc>MC_TARGET</ffdc>
@@ -216,6 +225,7 @@
 
   <!-- Note: error should be handled by PRD, so no deconfig desired -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MEMDIAGS_ALREADY_AT_BOUNDARY</rc>
     <description>A continue request asked to stop at a boundary, but we are there already</description>
     <ffdc>MC_TARGET</ffdc>
@@ -232,6 +242,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MCBIST_TIMEOUT</rc>
     <description>
         MCBIST program failed to return in the time allowed
@@ -256,6 +267,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MCBIST_DATA_FAIL</rc>
     <description>
         MCBIST program appeared to have failed, but set conflicting bits in the status register
@@ -280,6 +292,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_MCBIST_UNKNOWN_FAILURE</rc>
     <description>MCBIST program reported a failure but no error status was found</description>
     <ffdc>STATUS_REGISTER</ffdc>
@@ -302,6 +315,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_START_ADDR_BIGGER_THAN_END_ADDR</rc>
     <description>A starting address larger than an ending address was passed into multi-port init</description>
     <ffdc>START_ADDRESS</ffdc>
@@ -321,6 +335,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_TOO_MANY_RANKS_FOR_SUBTEST_SUPPORT</rc>
     <description>
         DIMM contains too many mranks/sranks to use an MCBIST subtest per port/rank.

@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,6 +26,7 @@
   <format>poz</format>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_FIR_FOUND</rc>
     <description>Ody draminit found a FIR. Custom assert so the caller can handle it</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -36,6 +37,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_HARDCODE_UNSUPPORTED</rc>
     <description>Ody draminit using hardcoded values is unsupported on the SBE.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -53,6 +55,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_PERDRAM_RECOVERY_ATTEMPTS_EXCEEDED</rc>
     <description>Ody draminit's per DRAM recovery algorithm exceeded recovery attempts.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -70,6 +73,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_TOTAL_RECOVERY_ATTEMPTS_EXCEEDED</rc>
     <description>Ody draminit's recovery algorithm exceeded the total number of recovery attempts.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -89,6 +93,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_REPAIRS_EXCEEDED</rc>
     <description>Ody draminit's recovery algorithm exceeded available repairs.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -118,6 +123,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_PERDRAM_REPAIRS_EXCEEDED</rc>
     <description>Ody per DRAM draminit's recovery algorithm exceeded available repairs.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -147,6 +153,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_TRAINING_TIMEOUT</rc>
     <description>Ody draminit training poll timed out.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -165,6 +172,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_TRAINING_FW_MISMATCH</rc>
     <description>
         Ody draminit training message block has an unsupported FW version.
@@ -187,6 +195,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_TRAINING_FAILURE_MAIL</rc>
     <description>
         Ody draminit training mailbox message indicated a
@@ -210,6 +219,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_TRAINING_FAILURE_MSG_BLOCK</rc>
     <description>
         Ody draminit training message block indicated a
@@ -233,6 +243,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_GET_MAIL_FAILURE</rc>
     <description>Ody draminit get_mail poll timed out.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -250,6 +261,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_SMBUS_SYNC_MSG_NOT_FOUND</rc>
     <description>A Synopsys SMBus message was not followed by the sync message. This should be marked as recovered</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -265,6 +277,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_START_DATA_PTR_NULL</rc>
     <description>
       Checks that the pointer to the starting location
@@ -282,6 +295,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS</rc>
     <description>
       Check to see if the imem/dmem start address and size
@@ -304,6 +318,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_OFFSET_UNSUPPORTED</rc>
     <description>
      OFFSET in memory PHY FW image block must be even
@@ -325,6 +340,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_DFI_INIT_TIMEOUT</rc>
     <description>Ody DFI initialization timed out.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -342,6 +358,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_INVALID_DDR5_DRAM_WR_PREAMBLE</rc>
     <description>
        An invalid value was detected in ATTR_DDR5_DRAM_WR_PREAMBLE
@@ -361,6 +378,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_ZERO_DRAM_WIDTH</rc>
     <description>Saw a zero value in ATTR_MEM_EFF_DRAM_WIDTH.</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -378,6 +396,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_OUT_OF_BOUNDS_RANK_PASSED_TO_SWIZZLE</rc>
     <description>Bad rank index passed to swizzle function</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -397,6 +416,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_OUT_OF_BOUNDS_DBYTE_PASSED_TO_SWIZZLE</rc>
     <description>Bad dbyte index passed to swizzle function</description>
     <ffdc>PORT_TARGET</ffdc>
@@ -416,6 +436,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_INVALID_GI2C_TARGET_CONFIG</rc>
     <description>RCD target not found. RCD should be at GI2C Target position 1</description>
     <ffdc>OCMB_TARGET</ffdc>
@@ -434,6 +455,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_INVALID_VERBOSITY_CONFIG</rc>
     <description>DRAMINIT verbosity cannot be configured to higher than COARSE_DEBUG on more than one port</description>
     <ffdc>OCMB_TARGET</ffdc>

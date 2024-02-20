@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -29,11 +29,13 @@
   <format>poz</format>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_BAD_BIST_PARAMS_FORMAT</rc>
       <description>bist_params does not have correct format</description>
       <ffdc>BIST_PARAMS</ffdc>
     </hwpError>
     <hwpError>
+      <sbeError/>
       <rc>RC_DONE_HALT_NOT_SET</rc>
       <description>DONE / HALT not measured by end of polling</description>
       <ffdc>PERV_CPLT_STAT0</ffdc>
@@ -43,11 +45,13 @@
       <ffdc>PROC_TARGET</ffdc>
     </hwpError>
     <hwpError>
+      <sbeError/>
       <rc>RC_INVALID_TP_REGIONS</rc>
       <description>Invalid permutation of regions for TP BIST</description>
       <ffdc>TP_REGIONS</ffdc>
     </hwpError>
     <hwpError>
+      <sbeError/>
       <rc>RC_MIXED_TP_CHIPLET_BIST_REQUESTED</rc>
       <description>Attempted BIST with TP and non-TP chiplet(s)</description>
       <ffdc>CHIPLETS</ffdc>

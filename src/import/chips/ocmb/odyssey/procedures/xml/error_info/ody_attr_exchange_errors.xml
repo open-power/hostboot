@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2023                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2023,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,6 +27,7 @@
   <format>poz</format>
   <!-- ******************************************************************** -->
     <hwpError>
+      <sbeError/>
       <rc>RC_UNSUPPORTED_ATTR_LEVEL</rc>
       <description>Indicates that an attribute level of SPPE/Host
                    is incompatible with the other. This RC will likely

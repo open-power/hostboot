@@ -36,6 +36,7 @@
   <!-- Halt codes for PPE -->
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SPPE_RUNNING</rc>
     <description>
     SBE engine is in running state, but an error was raised by external FW code.
@@ -48,6 +49,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PROGRAM_INTERRUPT</rc>
     <description>
     Program interrupt promoted
@@ -58,6 +60,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_INST_STORE_INTR</rc>
     <description>
     Instruction storage interrupt
@@ -68,6 +71,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ALIGN_INTR</rc>
     <description>
     Alignment interrupt
@@ -78,6 +82,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_DATA_STORE_INTR</rc>
     <description>
     Data storage interrupt
@@ -88,6 +93,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_OTP_UNCORR_ERR</rc>
     <description>
     Uncorrectable error detected in OTPROM memory read
@@ -99,6 +105,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_OTP_ECC_ERR</rc>
     <description>
     Parity/ECC error detected in OTPROM memory
@@ -111,6 +118,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_OTP_TIMEOUT</rc>
     <description>
     PIB Timeout error detected during access to OTPROM
@@ -123,6 +131,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_OTP_PIB_ERR</rc>
     <description>
     Scom error or 10.2 chipop error detected
@@ -135,6 +144,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ADDR_NOT_RECOGNIZED</rc>
     <description>
     Address scope out of range
@@ -144,6 +154,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PIBMEM_ECC_ERR</rc>
     <description>
     Uncorrectable error occurred while PIB memory access
@@ -156,6 +167,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SPI_CLK_ERR</rc>
     <description>
     SPI is configured with invalid clock divider (less than 0x4) error detected
@@ -168,6 +180,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SPI_ECC_ERR</rc>
     <description>
     There are 2 bit flips in read data which cannot be corrected
@@ -180,6 +193,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SPI_SPRM_CFG_ERR</rc>
     <description>
     SPI configuration error detected
@@ -192,6 +206,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SPI_RSC_ERR</rc>
     <description>
     SPI resources being accessed is not available. Port multiplexer or lock error detected
@@ -204,6 +219,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SECURE_BOOT_FAIL</rc>
     <description>
     Secure boot failed (any error code starting with 0x1-0x5)
@@ -215,6 +231,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_PIBMEM_PIB_ERR</rc>
     <description>
     Error detected during pibmem access

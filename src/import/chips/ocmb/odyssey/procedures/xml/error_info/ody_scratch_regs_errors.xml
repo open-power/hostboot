@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,6 +26,7 @@
   <format>poz</format>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_SCRATCH_REGS_INVALID_ACCESS_ERR</rc>
     <description>
       Requested hardware access method is not supported by platform
@@ -39,6 +40,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_SPPE_ATTR_SETUP_INVALID_TARGET</rc>
     <description>
       Unexpected pervasive target unit ID
@@ -53,6 +55,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_SPPE_ATTR_SETUP_GRID_FREQ_MISMATCH</rc>
     <description>
       Grid frequency posted in scratch register by cmdtable execution
@@ -69,6 +72,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_SCRATCH_REGS_UTILS_BUCKET_LOOKUP_ERR</rc>
     <description>
       Unable to match desired Odyssey freqeuncy with supported PLL bucket
@@ -84,6 +88,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_SCRATCH_REGS_UTILS_BUCKET_OUT_OF_RANGE_ERR</rc>
     <description>
       Specified PLL bucket is out of range

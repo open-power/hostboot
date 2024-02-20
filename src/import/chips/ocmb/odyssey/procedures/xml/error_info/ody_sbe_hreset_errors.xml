@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2023                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2023,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,6 +27,7 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SBE_BOOT_CHECK_ERR_CFAM_PATH</rc>
     <description>SBE did not Boot prior to timeout in CFAM Path</description>
     <ffdc>TARGET</ffdc>
@@ -34,6 +35,7 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_SBE_BOOT_CHECK_ERR_SCOM_PATH</rc>
     <description>SBE did not Boot prior to timeout in SCOM Path</description>
     <ffdc>TARGET</ffdc>
