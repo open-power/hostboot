@@ -157,13 +157,15 @@ fapi_try_exit:
 /// @param[in] i_target - the target on which to operate
 /// @param[in,out] io_rc - the return code for the function
 /// @param[in,out] io_fircheck_scom_err - the return code for reading the FIR scoms
+/// @param[out] o_firactive indicates if FIRs were active or not
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 /// @note This is a helper function to enable unit testing
 ///
 template< mss::mc_type MC, firChecklist F, fapi2::TargetType T >
 fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target,
         fapi2::ReturnCode& io_rc,
-        fapi2::ReturnCode& io_fircheck_scom_err)
+        fapi2::ReturnCode& io_fircheck_scom_err,
+        bool& o_firactive)
 {
     // We didn't have an error, so return success
     if(io_rc == fapi2::FAPI2_RC_SUCCESS)
@@ -185,6 +187,9 @@ fapi2::ReturnCode hostboot_fir_or_pll_fail( const fapi2::Target<T>& i_target,
     FAPI_ERR(TARGTIDFORMAT " took a fail. FIR was %s", TARGTID,
              l_fir_error ? "set - returning FIR RC" : "unset - returning inputted RC");
 #endif
+
+    // update the firactive bool
+    o_firactive |= l_fir_error;
 
     // If we had a FIR error, log the original error and return success
     // PRD will handle the original error
@@ -224,7 +229,8 @@ fapi2::ReturnCode fir_or_pll_fail( const fapi2::Target<T>& i_target,
     if(i_check_fir)
     {
         // Handle any issues according to PRD FIR scheme, as a FIR could have caused this issue
-        l_rc = hostboot_fir_or_pll_fail<MC, F>(i_target, l_rc, l_fircheck_scom_err);
+        bool l_fir_error = false;
+        l_rc = hostboot_fir_or_pll_fail<MC, F>(i_target, l_rc, l_fircheck_scom_err, l_fir_error);
     }
 
     // If we encountered a scom error while checking FIRs, return that RC

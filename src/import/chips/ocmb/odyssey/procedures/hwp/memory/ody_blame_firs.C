@@ -42,27 +42,27 @@
 
 extern "C"
 {
-
     ///
     /// @brief Check for FIR bits related to a HWP fail
     /// @param[in] i_target OCMB chip
-    /// @param[in] i_ports vector of failing MEM_PORT targets, derived from FFDC of draminit fails
+    /// @param[in] i_ports vector of failing MEM_PORT targets
     /// @param[in] i_substep the IPL substep to check FIRs for
-    /// @param[in] i_rc return code from the IPL substep
-    /// @return FAPI2_RC_SUCCESS iff ok
+    /// @param[out] o_firactive indicates if FIRs were active or not
+    /// @return FAPI2_RC_SUCCESS iff ok, otherwise indicates an internal failure
     /// @note This procedure should be called when a failing RC is received from SPPE draminit or draminit_mc chip-ops.
     ///       It will return the original RC if no unmasked FIR could be blamed for the fail, or
     ///       log a recovered error if an unmasked FIR was set and return SUCCESS
-    /// @note Hostboot should collect the failing mem_port target(s) from the FFDC to populate the i_ports
-    ///       vector for any port-specific fails, such as from draminit
     ///
     fapi2::ReturnCode ody_blame_firs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                      const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports,
                                      const mss::ipl_substep i_substep,
-                                     const fapi2::ReturnCode& i_rc)
+                                     bool& o_firactive)
     {
-        fapi2::ReturnCode l_rc(i_rc);
+        fapi2::ReturnCode l_rc(fapi2::FAPI2_RC_FALSE);
         fapi2::ReturnCode l_scom_error(fapi2::FAPI2_RC_SUCCESS);
+
+        // Start by assuming we do not have a FIR
+        o_firactive = false;
 
         FAPI_INF("Checking for FIRs on %s", mss::c_str(i_target));
 
@@ -70,17 +70,18 @@ extern "C"
         {
             case mss::ipl_substep::DRAMINIT_MC:
                 l_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::CCS>
-                       (i_target, l_rc, l_scom_error);
+                       (i_target, l_rc, l_scom_error, o_firactive);
                 break;
 
             case mss::ipl_substep::DRAMINIT:
                 for (const auto& l_port : i_ports)
                 {
-                    fapi2::ReturnCode l_port_rc(i_rc);
+                    fapi2::ReturnCode l_port_rc(l_rc);
                     fapi2::ReturnCode l_port_scom_error(fapi2::FAPI2_RC_SUCCESS);
+                    bool l_port_fir_error = false;
 
                     l_port_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::DRAMINIT>
-                                (l_port, l_port_rc, l_scom_error);
+                                (l_port, l_port_rc, l_port_scom_error, l_port_fir_error);
 
                     // If the blame-a-fir function returns a non-successful RC, return that
                     if (l_port_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -93,20 +94,26 @@ extern "C"
                     {
                         l_scom_error = l_port_scom_error;
                     }
+
+                    // If FIRs were active, capture and keep it
+                    if (l_port_fir_error)
+                    {
+                        o_firactive = l_port_fir_error;
+                    }
                 }
 
                 break;
 
             case mss::ipl_substep::OCMB_OMI_SCOMINIT:
                 l_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::IO_GENERAL>(i_target,
-                        l_rc, l_scom_error);
+                        l_rc, l_scom_error, o_firactive);
 
                 break;
 
             case mss::ipl_substep::OMI_TRAIN_CHECK:
                 // General check of the FIRs
                 l_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::IO_GENERAL>(i_target,
-                        l_rc, l_scom_error);
+                        l_rc, l_scom_error, o_firactive);
 
                 // If the blame-a-fir function returns a non-successful RC, return that
                 if (l_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -122,7 +129,7 @@ extern "C"
 
                 // Check the FIRs after training (includes P10 checks)
                 l_rc = mss::check::hostboot_fir_or_pll_fail<mss::mc_type::ODYSSEY, mss::check::firChecklist::IO_TRAIN>(i_target,
-                        l_rc, l_scom_error);
+                        l_rc, l_scom_error, o_firactive);
 
                 break;
 
@@ -131,14 +138,8 @@ extern "C"
                 break;
         }
 
-        // If we took a scom error while checking FIRs, return that
-        if (l_scom_error != fapi2::FAPI2_RC_SUCCESS)
-        {
-            return l_scom_error;
-        }
+        return l_scom_error;
 
-        // Else return the resulting RC (the original bad RC if no FIRs blamed or SUCCESS if we found a FIR to blame)
-        return l_rc;
     }
 
 }

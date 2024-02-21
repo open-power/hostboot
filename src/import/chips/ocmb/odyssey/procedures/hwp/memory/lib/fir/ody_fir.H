@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,9 +85,6 @@ fapi2::ReturnCode bad_fir_bits_helper_with_mask(const fapi2::Target<T>& i_target
     FAPI_INF_NO_SBE(TARGTIDFORMAT " %s on reg 0x%016lx value 0x%016lx and mask value 0x%016lx", TARGTID,
                     io_fir_error ? "has FIR's set" : "has no FIR's set",
                     i_fir_addr, l_reg_data, (i_mask | l_mask_data));
-
-    // Log the error if need be
-    log_fir_helper(i_target, io_fir_error, io_rc);
 
     // Exit if we have found a FIR
     if(io_fir_error)
