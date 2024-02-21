@@ -1581,7 +1581,7 @@ group gOCMB_PHY_FIR
     /** OCMB_PHY_FIR[26]
      *  PPE Code Recal Not Run
      */
-    (rOCMB_PHY_FIR, bit(26)) ? level2_M_ocmb_L_th1_CrcRootPhy26;
+    (rOCMB_PHY_FIR, bit(26)) ? level2_M_ocmb_L_th_32perDay_CrcRootPhy26;
 
     /** OCMB_PHY_FIR[27]
      *  PPE Code Thread Locked

@@ -183,6 +183,13 @@ actionclass level2_M_ocmb_L_th1
     threshold1;
 };
 
+actionclass level2_M_ocmb_L_th_32perDay
+{
+    callout2ndLvlMed;
+    calloutOcmbLowNoGard;
+    threshold32pday;
+};
+
 actionclass ocmb_M_level2_L_th1
 {
     calloutOcmbMed;
@@ -1052,9 +1059,9 @@ actionclass level2_M_ocmb_L_th1_CrcRootPhy23
 };
 
 # OCMB_PHY_FIR[26]
-actionclass level2_M_ocmb_L_th1_CrcRootPhy26
+actionclass level2_M_ocmb_L_th_32perDay_CrcRootPhy26
 {
-    level2_M_ocmb_L_th1;
+    level2_M_ocmb_L_th_32perDay;
     funccall("crcErrorRootCausePhy_26"); # must be called after threshold
 };
 
