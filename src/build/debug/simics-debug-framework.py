@@ -1102,6 +1102,17 @@ def magic_instruction_callback(user_arg, cpu, arg):
         #file.write("%s\n" % (saveCommand))
         #file.close()
 
+    if arg == 7061:   # MAGIC_GET_CI_RUN_LEVEL
+        run_level_env = os.getenv('HB_CI_RUN_LEVEL')
+        if run_level_env == "MIN":
+            run_level = 1
+        elif run_level_env == "MED":
+            run_level = 2
+        elif run_level_env == "MAX":
+            run_level = 3
+        else:
+            run_level = 1
+        cpu.r3 = run_level
 
 # Continuous trace: Clear these files.
 rc = os.system( "rm -f hbTracMERG" )

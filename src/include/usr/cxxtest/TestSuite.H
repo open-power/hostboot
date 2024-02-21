@@ -30,6 +30,8 @@
 #ifndef __CXXTEST_TESTSUITE_H
 #define __CXXTEST_TESTSUITE_H
 
+#include <arch/magic.H>
+
 // Set by code that wants to manually execute a testcase outside of the
 // normal CxxTest framework
 #ifdef MANUAL_CXXTEST
@@ -77,6 +79,12 @@ extern  trace_desc_t   *g_trac_test;
 
 namespace CxxTest
 {
+enum ci_run_level_t
+{
+  CI_RUN_LEVEL_MIN = 1,  // HB_CI_RUN_LEVEL=MIN      - run only MIN
+  CI_RUN_LEVEL_MED,      // HB_CI_RUN_LEVEL=MED      - run levels MIN, MED
+  CI_RUN_LEVEL_MAX,      // HB_CI_RUN_LEVEL=MAX      - run levels MIN, MED, MAX
+};
 
 /**
  * @note extern declarations - see lib/cxxtest_data.C
@@ -100,10 +108,17 @@ extern  CxxTestFailedEntry g_FailedTestList[CXXTEST_FAIL_LIST_SIZE];
  */
 class TestSuite
 {
+    ci_run_level_t iv_run_level;
+
 public:
+    TestSuite();
     virtual ~TestSuite();
     virtual void setUp();
     virtual void tearDown();
+
+    bool isRunLevelMed(void)   {return(CI_RUN_LEVEL_MED   == iv_run_level ||
+                                       CI_RUN_LEVEL_MAX   == iv_run_level);}
+    bool isRunLevelMax(void)   {return(CI_RUN_LEVEL_MAX   == iv_run_level);}
 };
 
 class AbortTest {};

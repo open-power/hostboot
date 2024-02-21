@@ -62,6 +62,10 @@ std::vector<const char *> CxxSerialTests{ "libtesthwas.so",
 //
 // TestSuite members
 //
+TestSuite::TestSuite()
+{
+    iv_run_level = static_cast<ci_run_level_t>(MAGIC_INST_GET_CI_RUN_LEVEL());
+}
 TestSuite::~TestSuite() {}
 void TestSuite::setUp() {}
 void TestSuite::tearDown() {}
@@ -133,7 +137,7 @@ void sortTests(std::vector<const char *> & i_list,
     for(std::vector<const char *>::const_iterator i = i_list.begin();
         i != i_list.end(); ++i)
     {
-        bool is_serial = false;
+        bool is_serial  = false;
 
         for(std::vector<const char *>::const_iterator j = CxxSerialTests.begin();
             j !=  CxxSerialTests.end(); ++j)

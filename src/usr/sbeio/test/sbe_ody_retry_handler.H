@@ -332,10 +332,9 @@ class OdySbeRetryHandlerTest : public TestSuite
            TC_7_HRESET_FAIL                     timeout, hreset error, switch, hreset error, DEAD
            TC_8_HRESET                          timeout, hreset, success
          *--------------------------------------------------------------------*/
-
+        if (isRunLevelMax())
+        {
         TS_INFO("testOdySbeRetryHandler: Enter");
-
-#if HB_TEMPORARY_REMOVE_THESE_TESTCASES
 
         TargetHandle_t   l_target = nullptr;
         TargetHandleList l_ocmbTargetList{};
@@ -503,8 +502,8 @@ class OdySbeRetryHandlerTest : public TestSuite
         g_cxxTestInject.clear(SBEIO_INJECT_HRESET_TWO_FAILS);
         g_cxxTestInject.clear(SBEIO_INJECT_HRESET_SKIP_DUMP);
 
-#endif // temporary
         TS_INFO("testOdySbeRetryHandler: Exit");
+        } // isRunLevelMax
 #endif // cxxhooks
         return;
     }
@@ -606,9 +605,9 @@ class OdySbeRetryHandlerTest : public TestSuite
     void testOdyRecovery(void)
     {
 #ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+        if (isRunLevelMax())
+        {
         TS_INFO("testOdyRecovery: Enter");
-
-#if HB_TEMPORARY_REMOVE_THESE_TESTCASES
 
         TargetHandle_t   l_target = nullptr;
         TargetHandleList l_ocmbTargetList{};
@@ -726,9 +725,8 @@ class OdySbeRetryHandlerTest : public TestSuite
         g_cxxTestInject.clear(SBEIO_INJECT_HRESET_TWO_FAILS);
         g_cxxTestInject.clear(SBEIO_INJECT_HRESET_SKIP_DUMP);
 
-#endif // HB_TEMPORARY_REMOVE_THESE_TESTCASES
-
         TS_INFO("testOdyRecovery: Exit TESTS");
+        } // isRunLevelMax
 #endif // cxxhooks
         return;
     }

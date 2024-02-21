@@ -141,6 +141,7 @@ enum
     MAGIC_SAVE_ATTR_VALUE     =  7057, // record attribute value
     MAGIC_CHECK_FEATURE       =  7058, // check for feature enablement
     MAGIC_SAVE_PEL            =  7060, // save a single PEL
+    MAGIC_GET_CI_RUN_LEVEL    =  7061, // extract HB CI Run Level
 
     MAGIC_CHECK_BONITO_CONFIG =  7777, // check if MACHINE=bonito is set in the ENV
 
@@ -342,6 +343,18 @@ inline bool magic_check_bonito()
                  "r" (1):
                  "4");
     MAGIC_INSTRUCTION(MAGIC_CHECK_BONITO_CONFIG);
+    return r3;
+}
+
+/**
+ * @brief   Get CI Run Level
+ * @return  run level
+ */
+#define MAGIC_INST_GET_CI_RUN_LEVEL() magic_get_ci_run_level()
+inline int magic_get_ci_run_level()
+{
+    long register r3 asm("r3") = 0;
+    MAGIC_INSTRUCTION(MAGIC_GET_CI_RUN_LEVEL);
     return r3;
 }
 
