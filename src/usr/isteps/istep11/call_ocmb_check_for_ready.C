@@ -625,7 +625,7 @@ errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
         bool async_ffdc = false;
         if (errlOwner l_errlLocal(ody_has_async_ffdc(i_ocmb, async_ffdc)); async_ffdc)
         { // ignore any error from ody_has_async_ffdc; we don't care whether it fails.
-            errlHndl_t async_ffdc_errls;
+            errlHndl_t async_ffdc_errls = nullptr;
             errlOwner chipop_fail = genFifoSBEFFDCErrls(i_ocmb, async_ffdc_errls);
 
             if (chipop_fail)

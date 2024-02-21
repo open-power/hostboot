@@ -124,7 +124,7 @@ private:
         {
             if ( !i_error->hasErrorType(record.returnCode) )
             {
-                TS_FAIL("%s> Expected error to have error type = 0x%.8X", i_testName, record.returnCode);
+                TS_FAIL("%s> Expected error PLID=0x%X to have error type = 0x%.8X", i_testName, i_error->plid(), record.returnCode);
                 retVal = false;
             }
         }

@@ -285,26 +285,26 @@ void sbeAttemptRecovery(uint64_t i_data)
         if (UTIL::isOdysseyChip(l_target))
         {
             TRACFCOMP(g_trac_runtime,
-                      "sbeAttemptRecovery: Retrieving FFDC from Odyssey chip 0x%08X",
-                      get_huid(l_target));
+                    "sbeAttemptRecovery: Retrieving FFDC from Odyssey chip 0x%08X",
+                    get_huid(l_target));
 
 
-            errlHndl_t ffdc_errls;
+            errlHndl_t ffdc_errls = nullptr;
             errlOwner sbe_err = SBEIO::genFifoSBEFFDCErrls(l_target, ffdc_errls);
 
             if (sbe_err)
             {
                 TRACFCOMP(g_trac_runtime,
-                          "sbeAttemptRecovery(0x%08X): genFifoSBEFFDCErrls failed"
-                          TRACE_ERR_FMT,
-                          get_huid(l_target), TRACE_ERR_ARGS(sbe_err));
+                        "sbeAttemptRecovery(0x%08X): genFifoSBEFFDCErrls failed"
+                        TRACE_ERR_FMT,
+                        get_huid(l_target), TRACE_ERR_ARGS(sbe_err));
 
                 if (sbe_err->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED))
                 {
                     TRACFCOMP(g_trac_runtime,
-                              "sbeAttemptRecovery: genFifoSBEFFDCErrls already "
-                              "performed an HRESET for 0x%08X",
-                              get_huid(l_target));
+                            "sbeAttemptRecovery: genFifoSBEFFDCErrls already "
+                            "performed an HRESET for 0x%08X",
+                            get_huid(l_target));
                     hreset_already_performed = true;
                 }
 
@@ -312,12 +312,15 @@ void sbeAttemptRecovery(uint64_t i_data)
                 errlCommit(sbe_err, RUNTIME_COMP_ID);
             }
 
+            if (ffdc_errls)
+            {
                 TRACFCOMP(g_trac_runtime,
-                          "sbeAttemptRecovery: Committing Odyssey FFDC package "
-                          TRACE_ERR_FMT,
-                          TRACE_ERR_ARGS(ffdc_errls));
+                        "sbeAttemptRecovery: Committing Odyssey FFDC package "
+                        TRACE_ERR_FMT,
+                        TRACE_ERR_ARGS(ffdc_errls));
                 errlCommit(ffdc_errls, RUNTIME_COMP_ID);
             }
+        }
 
         // Get the SBE Retry Handler, propagating the supplied PLID
         auto l_SBEobj = make_sbe_retry_handler(l_target,

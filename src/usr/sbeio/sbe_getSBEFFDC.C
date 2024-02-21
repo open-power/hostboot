@@ -150,31 +150,34 @@ namespace SBEIO
                 continue;
             }
 
-            errlHndl_t async_errls;
+            errlHndl_t async_errls = nullptr;
             errlOwner request_errl = SBEIO::genFifoSBEFFDCErrls(l_ocmb, async_errls);
 
             if(request_errl)
             {
                 SBE_TRACF(INFO_MRK"handleGenFifoSBEFFDCErrlRequest: "
-                          "genFifoSBEFFDCErrls failed for OCMB 0x%x."
-                          TRACE_ERR_FMT,
-                          get_huid(l_ocmb),
-                          TRACE_ERR_ARGS(request_errl));
+                        "genFifoSBEFFDCErrls failed for OCMB 0x%x."
+                        TRACE_ERR_FMT,
+                        get_huid(l_ocmb),
+                        TRACE_ERR_ARGS(request_errl));
 
                 request_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
                 errlCommit(request_errl, SBEIO_COMP_ID);
             }
 
-            SBE_TRACF(INFO_MRK"handleGenFifoSBEFFDCErrlRequest: Committing "
-                    "FFDC errl for OCMB 0x%x."
-                    TRACE_ERR_FMT,
-                    get_huid(l_ocmb),
-                    TRACE_ERR_ARGS(async_errls));
+            if (async_errls)
+            {
+                SBE_TRACF(INFO_MRK"handleGenFifoSBEFFDCErrlRequest: Committing "
+                        "FFDC errl for OCMB 0x%x."
+                        TRACE_ERR_FMT,
+                        get_huid(l_ocmb),
+                        TRACE_ERR_ARGS(async_errls));
 
-            // Force these to be informational so there is no potential
-            // callouts logged/parts deconfigured.
-            async_errls->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            errlCommit(async_errls, SBEIO_COMP_ID);
+                // Force these to be informational so there is no potential
+                // callouts logged/parts deconfigured.
+                async_errls->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit(async_errls, SBEIO_COMP_ID);
+            }
         }
     }
 
