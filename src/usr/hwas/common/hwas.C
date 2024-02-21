@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -925,6 +925,57 @@ errlHndl_t validateEcMslLevels()
 }
 #endif // defined __HOSTBOOT_MODULE not defined CONFIG_FSP_BUILD
 
+// This function counts the number of spare core bits in the partial good vector for a chip.
+uint8_t countSpareCores(partialGoodVector i_pgData, Target * i_chip)
+{
+    uint8_t spareCount = 0;
+    // Spare bit is the 27th bit of the EQ PG.
+    const uint32_t EQ_PG_SPARE_BIT_MASK = 0x00000010;
+    for (const auto index : VPD_CP00_PG_EQ_INDEX)
+    {
+        // In the partial good vector a bit being zero means it's set. To count the number of spares,
+        // count the number of zero bits.
+        if (!(i_pgData[index] & EQ_PG_SPARE_BIT_MASK))
+        {
+            ++spareCount;
+        }
+    }
+
+    if (spareCount % 2)
+    {
+        /*@
+          * @errortype
+          * @severity           ERRL_SEV_UNRECOVERABLE
+          * @moduleid           MOD_COUNT_SPARE_CORES
+          * @reasoncode         RC_UNEVEN_SPARE_CORE_COUNT
+          * @devdesc            An uneven number of spare core bits were set in the partial good for a chip.
+          * @custdesc           An internal firmware error occurred.
+          * @userdata1          HUID of the chip
+          * @userdata2          Number of spare bits set
+          */
+        errlHndl_t error = hwasError(ERRL_SEV_UNRECOVERABLE,
+                                     MOD_COUNT_SPARE_CORES,
+                                     RC_UNEVEN_SPARE_CORE_COUNT,
+                                     get_huid(i_chip),
+                                     spareCount);
+        platHwasErrorAddHWCallout(error,
+                                  i_chip,
+                                  SRCI_PRIORITY_HIGH,
+                                  NO_DECONFIG,
+                                  GARD_NULL);
+
+        // Commit the error so that manufacturing can replace the part.
+        errlCommit(error, HWAS_COMP_ID);
+    }
+
+    if (is_fused_mode())
+    {
+        spareCount /= 2;
+    }
+
+    return spareCount;
+}
+
 errlHndl_t discoverTargets()
 {
     HWAS::HWASDiscovery l_HWASDiscovery;
@@ -1145,6 +1196,10 @@ errlHndl_t HWASDiscovery::discoverTargets()
                         //  functionality of this proc
                         chipFunctional =
                             isChipFunctional(pTarget, pgData_expanded);
+
+                        // Count the number of spare cores for this chip and set the attribute
+                        auto count = countSpareCores(pgData_expanded, pTarget);
+                        pTarget->setAttr<ATTR_SPARE_CORES>(count);
 
                         if(!chipFunctional)
                         {

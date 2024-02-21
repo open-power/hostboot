@@ -843,6 +843,9 @@
       <id>SCRATCH_UINT8_2</id>
     </attribute>
     <attribute>
+      <id>SPARE_CORES</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>reserved</id>
@@ -2516,10 +2519,10 @@
       <id>FIELD_TH_L3_LINE_DELETES</id>
     </attribute>
     <attribute>
-      <id>FORCE_ODY_SB_CHK_IN_MFG</id>
+      <id>FORCE_MFG_SPI_FLASH_CHECK</id>
     </attribute>
     <attribute>
-      <id>FORCE_MFG_SPI_FLASH_CHECK</id>
+      <id>FORCE_ODY_SB_CHK_IN_MFG</id>
     </attribute>
     <attribute>
       <id>FORCE_SERIAL_ISTEPS</id>

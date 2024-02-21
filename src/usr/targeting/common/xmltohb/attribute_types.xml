@@ -2075,25 +2075,6 @@
   </attribute>
 
   <attribute>
-    <description>
-        Force the Odyssey secureboot checks to run in manufacturing mode.
-        Currently we have DIMMs that don't have security bits fused correctly,
-        which causes secureboot failures when Ody secureboot checks are run in
-        manufacturing mode. This attribute is a workaround to force those SB
-        checks to run in MFG mode, where they are now disabled by default.
-    </description>
-    <id>FORCE_ODY_SB_CHK_IN_MFG</id>
-    <persistency>volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <no_export/>
-  </attribute>
-
-  <attribute>
     <!-- TODO JIRA: PFHB-730 remove this attr -->
     <description>
         This flag is used to force SPI flash check to run
@@ -2106,6 +2087,25 @@
     <persistency>volatile</persistency>
     <readable/>
     <writeable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <description>
+        Force the Odyssey secureboot checks to run in manufacturing mode.
+        Currently we have DIMMs that don't have security bits fused correctly,
+        which causes secureboot failures when Ody secureboot checks are run in
+        manufacturing mode. This attribute is a workaround to force those SB
+        checks to run in MFG mode, where they are now disabled by default.
+    </description>
+    <id>FORCE_ODY_SB_CHK_IN_MFG</id>
+    <persistency>volatile</persistency>
+    <readable/>
     <simpleType>
       <uint8_t>
         <default>0</default>
@@ -8703,6 +8703,17 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
+  </attribute>
+
+  <attribute>
+    <description>The number of spare cores on this proc chip read from partial good on EQ chiplets</description>
+    <id>SPARE_CORES</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
   </attribute>
 
   <attribute>

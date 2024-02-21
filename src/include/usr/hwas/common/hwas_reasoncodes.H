@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@ namespace HWAS
         MOD_OCMB_TRANSLATE_SPD_IDEC             = 0x11,
         MOD_DECONFIG_TARGETS_FROM_GARD_AND_VPD  = 0x12,
         MOD_VALIDATE_EC_MSL_LEVELS              = 0x13,
+        MOD_COUNT_SPARE_CORES                   = 0x14,
     };
 
     enum HwasReasonCode
@@ -96,6 +97,7 @@ namespace HWAS
         RC_SYSAVAIL_SBE_NOT_ENOUGH_BACKING_CACHE = HWAS_COMP_ID | 0x26,
         RC_FAILED_MSL_EC_VALIDATION              = HWAS_COMP_ID | 0x27,
         RC_EMPTY_MRW_MSL_ARRAY                   = HWAS_COMP_ID | 0x28,
+        RC_UNEVEN_SPARE_CORE_COUNT               = HWAS_COMP_ID | 0x29,
     };
 
     enum HwasPlatUserDetailsTypes
