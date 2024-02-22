@@ -546,9 +546,9 @@ errlHndl_t SbePsu::writeRequest(TARGETING::Target * i_target,
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
-            MAGIC_INST_GET_SBE_TRACES(
-                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
-                  SBEIO_PSU_NOT_READY);
+            MAGIC_INST_GET_SBE_TRACES(i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                                      SBEIO_PSU_NOT_READY,
+                                      MAGIC_GET_P10_SBE_TRACES);
 
             break; // return with error
         }
@@ -848,9 +848,9 @@ errlHndl_t SbePsu::checkResponse(TARGETING::Target  * i_target,
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                  HWAS::SRCI_PRIORITY_HIGH);
             errl->collectTrace(SBEIO_COMP_NAME);
-            MAGIC_INST_GET_SBE_TRACES(
-                  i_target->getAttr<TARGETING::ATTR_POSITION>(),
-                  SBEIO_PSU_RESPONSE_ERROR);
+            MAGIC_INST_GET_SBE_TRACES(i_target->getAttr<TARGETING::ATTR_POSITION>(),
+                                      SBEIO_PSU_RESPONSE_ERROR,
+                                      MAGIC_GET_P10_SBE_TRACES);
 
             break;
         }
@@ -943,7 +943,8 @@ errlHndl_t SbePsu::pollForPsuComplete(TARGETING::Target * i_target,
 
             // Collect SBE traces in simics
             MAGIC_INST_GET_SBE_TRACES(i_target->getAttr<TARGETING::ATTR_POSITION>(),
-                                      SBEIO_PSU_RESPONSE_TIMEOUT);
+                                      SBEIO_PSU_RESPONSE_TIMEOUT,
+                                      MAGIC_GET_P10_SBE_TRACES);
 
             // Response regs start at MBOX4, check for an error
             psuResponse* l_resp = reinterpret_cast<psuResponse*>(&(l_mboxRegs[4]));

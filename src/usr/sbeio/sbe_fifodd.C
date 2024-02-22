@@ -54,6 +54,7 @@
 #include <initservice/initserviceif.H>
 #include <util/misc.H>
 #include <cxxtest/TestInject.H>
+#include <arch/magic.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -340,7 +341,18 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target *i_target,
  */
 errlHndl_t SbeFifo::upFifoTimeout(TARGETING::Target * i_target, uint32_t l_data)
 {
-    errlHndl_t errl = NULL;
+    errlHndl_t           errl         = NULL;
+    magicGetSbeTraceType l_magic_type = MAGIC_GET_P10_SBE_TRACES;
+
+    if (TARGETING::UTIL::isOdysseyChip(i_target))
+    {
+        l_magic_type = MAGIC_GET_ODY_SBE_TRACES;
+    }
+
+    // pull the SBE traces for debug
+    MAGIC_INST_GET_SBE_TRACES(i_target->getAttr<TARGETING::ATTR_ORDINAL_ID>(),
+                              SBEIO_FIFO_UPSTREAM_TIMEOUT,
+                              l_magic_type);
 
         /*@
          * @errortype
@@ -848,7 +860,18 @@ errlHndl_t SbeFifo::parseDataOutReg(TARGETING::Target   *i_target,
  */
 errlHndl_t SbeFifo::dnFifoTimeout(TARGETING::Target * i_target, uint32_t l_status)
 {
-    errlHndl_t l_errl            = NULL;
+    errlHndl_t           l_errl       = NULL;
+    magicGetSbeTraceType l_magic_type = MAGIC_GET_P10_SBE_TRACES;
+
+    if (TARGETING::UTIL::isOdysseyChip(i_target))
+    {
+        l_magic_type = MAGIC_GET_ODY_SBE_TRACES;
+    }
+
+    // pull the SBE traces for debug
+    MAGIC_INST_GET_SBE_TRACES(i_target->getAttr<TARGETING::ATTR_ORDINAL_ID>(),
+                              SBEIO_FIFO_DOWNSTREAM_TIMEOUT,
+                              l_magic_type);
 
         /*@
          * @errortype

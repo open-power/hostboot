@@ -52,6 +52,7 @@ import struct
 import time
 import binascii
 import sys
+from datetime import datetime
 
 # @class DebugFrameworkIPCMessage
 # @brief Wrapper class for constructing a properly formed IPC message for the
@@ -708,20 +709,37 @@ def magic_instruction_callback(user_arg, cpu, arg):
 
     if arg == 7019:   # MAGIC_GET_SBE_TRACES
         # Collect SBE traces out to a file
-        proc_num = cpu.r4
-        rc = cpu.r5
-        # generate the traces
-        cmd1 = "sbe-trace %d"%(proc_num)
+        target = cpu.r4
+        rc     = cpu.r5
+        type   = cpu.r6
+        print("MAGIC_GET_SBE_TRACES (%d, %x, %d)" % (target, rc, type))
+        stamp = os.popen("date '+%Y%m%d_%H%M%S'").read()
+        stamp = stamp[:-1]
+
+        if type == 15:
+          # MAGIC_GET_ODY_SBE_TRACES
+          fn   = "sbetrace.ddimm_ody.%d.%s.log"%(target,stamp)
+          cmd1 = "shell \"echo '==HB Collecting Odyssey SBE Traces (iar=%X,rc=%X,sbe=%d)==' > \
+                  %s\"" % (cpu.iar,rc,target,fn)
+          cmd2 = 'pipe "poz-sbe-trace %d" "cat >> %s"' % (target,fn)
+        else:
+          # MAGIC_GET_P10_SBE_TRACES
+          fn   = "sbetrace.proc_p10.%d.%s.log"%(target,stamp)
+          cmd1 = "sbe-trace %d"%(target)
+          # copy the file somewhere safe
+          # Ignore any issues with generating tracMERG via || true on cat, best to
+          # continue running and gather other FFDC to debug why SBE tracMERG can not be
+          # retrieved then cause SIMICS to fail with a "file not found" exception
+          cmd2 = "shell \"echo '==HB Collecting P10 SBE Traces (iar=%X,rc=%X,sbe=%d)==' > \
+                  %s; ( cat sbe_*%d_tracMERG || true ) >> %s\"" \
+                  %(cpu.iar,rc,target,fn,target,fn)
+
         print("cmd1", cmd1)
-        # copy the file somewhere safe
-        # Ignore any issues with generating tracMERG via || true on cat, best to
-        # continue running and gather other FFDC to debug why SBE tracMERG can not be
-        # retrieved then cause SIMICS to fail with a "file not found" exception
-        cmd2 = "shell \"echo '==HB Collecting Traces (iar=%X,rc=%X,sbe=%d)==' >> sbetrace.hb.txt; ( cat sbe_%d_tracMERG || true ) >> sbetrace.hb.txt\""%(cpu.iar,rc,proc_num,proc_num)
         print("cmd2", cmd2)
 
         saveCommand = "%s; %s"%(cmd1,cmd2)
         SIM_run_alone(run_command, saveCommand )
+        print("SBE_TRACE: ",fn);
 
     if arg == 7020:   # MAGIC_PRINT_ISTEP
         # Print current istep out to simics console
@@ -1129,7 +1147,7 @@ rc = os.system( "rm -f tracMERG" )
 rc = os.system( "rm -f tracBINARY" )
 
 # SBE traces: Clear these files.
-rc = os.system( "rm -f sbetrace.hb.txt" )
+rc = os.system( "rm -f sbetrace*.log" )
 
 # PELs: Clear these files.
 rc = os.system( "rm -f pel.*.bin" )

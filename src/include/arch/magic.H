@@ -175,14 +175,24 @@ enum
     MAGIC_INSTRUCTION(MAGIC_SAVE_ATTR_VALUE);                           \
 
 /**
+ * @brief  Specify the type of SBE traces to collect
+ */
+enum magicGetSbeTraceType
+{
+    MAGIC_GET_P10_SBE_TRACES = 14,
+    MAGIC_GET_ODY_SBE_TRACES = 15,
+};
+
+/**
  * @brief Collect SBE traces via external debug commands
  * @param[in]  Processor number
  * @param[in]  SBE Return Code
+ * @param[in]  magicGetSbeTraceType to collect
  */
-#define MAGIC_INST_GET_SBE_TRACES(_procnum,_rc) \
-    asm volatile("mr 4, %0; mr 5, %1" :: \
-                 "r" (_procnum), "r" (_rc) : "4", "5"); \
-    MAGIC_INSTRUCTION(MAGIC_GET_SBE_TRACES); \
+#define MAGIC_INST_GET_SBE_TRACES(_procnum,_rc,_type) \
+    asm volatile("mr 4, %0; mr 5, %1; mr 6, %2" :: \
+                 "r" (_procnum), "r" (_rc) , "r" (_type) : "4", "5", "6"); \
+    MAGIC_INSTRUCTION(MAGIC_GET_SBE_TRACES);
 
 /**
  * @brief Display istep numbers on the simics console

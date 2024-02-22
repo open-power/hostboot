@@ -33,6 +33,7 @@
 #include <errl/errlreasoncodes.H>
 #include "sbe_fifodd.H"
 #include <sbeio/sbeioif.H>
+#include <arch/magic.H>
 
 #include <ody_extract_sbe_rc.H>
 #include <ody_sbe_hreset.H>
@@ -471,6 +472,10 @@ errlHndl_t OdySbeRetryHandler::run_hreset_flow()
                                l_errl);
     if (l_errl)
     {
+        // pull the SBE traces, since checkOdyFFDC wont run for this case
+        MAGIC_INST_GET_SBE_TRACES(iv_ocmb->getAttr<TARGETING::ATTR_ORDINAL_ID>(),
+                                  SBEIO_HRESET_CHECK_FOR_READY_FAIL,
+                                  MAGIC_GET_ODY_SBE_TRACES);
         SBE_TRACF("OdySbeRetryHandler::run_hreset_flow: ody_sppe_check_for_ready failed "
                   "HUID=0x%X ERRL=0x%X",
                   get_huid(iv_ocmb), ERRL_GETEID_SAFE(l_errl));
