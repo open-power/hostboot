@@ -386,6 +386,8 @@ bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             if (eccAttns & MAINT_UE)
             {
                 // Handle the error as a UE
+                io_sc.service_data->setSignature(i_chip->getHuid(),
+                                                 PRDFSIG_SasMaintUe);
                 io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
                                                      PRDFSIG_SteerUe);
                 if (SUCCESS != MemEcc::handleMemUe<TYPE_OCMB_CHIP>(i_chip,
@@ -401,6 +403,8 @@ bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             else if (eccAttns & MAINT_MPE)
             {
                 // Handle the error as an MPE to trigger VCM
+                io_sc.service_data->setSignature(i_chip->getHuid(),
+                                                 PRDFSIG_SasMaintMpe);
                 io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
                                                      PRDFSIG_SteerMpe);
                 if (SUCCESS != MemEcc::handleMpe<TYPE_OCMB_CHIP>(i_chip,
@@ -416,6 +420,8 @@ bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             else if (eccAttns & MAINT_HARD_NCE_ETE)
             {
                 // Handle as a hard CE, let the calling code take normal action
+                io_sc.service_data->setSignature(i_chip->getHuid(),
+                                                 PRDFSIG_SasMaintHardCe);
                 io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
                                                      PRDFSIG_SteerCe);
                 break;
@@ -423,6 +429,8 @@ bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             // else no error found
             else
             {
+                io_sc.service_data->setSignature(i_chip->getHuid(),
+                                                 PRDFSIG_SasMaintInterCe);
                 io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
                                                      PRDFSIG_SteerNone);
                 // Handle as a soft/intermittent CE
@@ -441,6 +449,8 @@ bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             if (eccAttns & MAINT_UE)
             {
                 // Handle as a UE, let the calling code take normal action
+                io_sc.service_data->setSignature(i_chip->getHuid(),
+                                                 PRDFSIG_SasMaintUe);
                 io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
                                                      PRDFSIG_SteerUe);
                 break;
@@ -448,6 +458,8 @@ bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             // else if maint MPE found
             else if (eccAttns & MAINT_MPE)
             {
+                io_sc.service_data->setSignature(i_chip->getHuid(),
+                                                 PRDFSIG_SasMaintIue);
                 io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
                                                      PRDFSIG_SteerMpe);
                 // Handle as an IUE
@@ -474,6 +486,8 @@ bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             // else if maint NCE/TCE
             else if (eccAttns & MAINT_HARD_NCE_ETE)
             {
+                io_sc.service_data->setSignature(i_chip->getHuid(),
+                                                 PRDFSIG_SasMaintIue);
                 io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
                                                      PRDFSIG_SteerCe);
                 // Handle as an IUE
@@ -490,6 +504,8 @@ bool __handleSteerRetries<TYPE_OCMB_CHIP>(ExtensibleChip * i_chip,
             // Else no error found
             else
             {
+                io_sc.service_data->setSignature(i_chip->getHuid(),
+                                                 PRDFSIG_SasMaintIue);
                 io_sc.service_data->AddSignatureList(i_chip->getTrgt(),
                                                      PRDFSIG_SteerNone);
                 // Handle as an IUE

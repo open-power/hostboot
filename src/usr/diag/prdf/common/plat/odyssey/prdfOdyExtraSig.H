@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,12 @@ PRDR_ERROR_SIGNATURE(SteerCe, 0x00ef0002, "", "Single Address Steer found Maint 
 PRDR_ERROR_SIGNATURE(SteerUe, 0x00ef0003, "", "Single Address Steer found Maint UE");
 PRDR_ERROR_SIGNATURE(SteerMpe, 0x00ef0004, "", "Single Address Steer found Maint MPE");
 PRDR_ERROR_SIGNATURE(SteerNone, 0x00ef0005, "", "Single Address Steer found no error");
+
+PRDR_ERROR_SIGNATURE(SasMaintUe, 0x00ef0006, "", "Maintenance UE - Found due to single address steer");
+PRDR_ERROR_SIGNATURE(SasMaintMpe, 0x00ef0007, "", "Maintenance MPE - Found due to single address steer");
+PRDR_ERROR_SIGNATURE(SasMaintHardCe, 0x00ef0008, "", "Maintenance HARD CE - Found due to single address steer");
+PRDR_ERROR_SIGNATURE(SasMaintInterCe, 0x00ef0009, "", "Maintenance INTER CE - Found due to single address steer");
+PRDR_ERROR_SIGNATURE(SasMaintIue, 0x00ef000a, "", "Maintenance IUE - Found due to single address steer");
 
 PRDR_ERROR_SIGNATURE(McbistCmdComp0, 0x00ff0000, "", "MCBIST_FIR[11]: MCBIST program complete - stopped on port0");
 PRDR_ERROR_SIGNATURE(McbistCmdComp1, 0x00ff0001, "", "MCBIST_FIR[11]: MCBIST program complete - stopped on port1");
