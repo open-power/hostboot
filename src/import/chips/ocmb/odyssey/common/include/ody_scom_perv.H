@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,4 +26,5 @@
 
 #include "ody_scom_perv_cfam.H"
 #include "ody_scom_perv_tcmc.H"
+
 #include "ody_scom_perv_tpchip.H"

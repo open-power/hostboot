@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -26,4 +26,5 @@
 
 #include "poz_scom_perv_cfam.H"
 #include "poz_scom_perv_tpchip.H"
+
 #include "poz_scom_tp.H"
