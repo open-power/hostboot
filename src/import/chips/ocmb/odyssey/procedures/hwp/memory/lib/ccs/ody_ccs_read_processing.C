@@ -133,6 +133,9 @@ void process_aaer_second(mss::beat_pair& io_beat_pair, const fapi2::buffer<uint6
 fapi2::ReturnCode prepare_ody_ccs_beat_data(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         mss::pair<uint64_t, uint16_t> (&o_data)[mss::ody::CCS_BEAT_DATA_SIZE])
 {
+    // Clear the o_data buffer before each read to ensure no data from a previous run is present
+    memset(&o_data, 0, sizeof(o_data) / sizeof(o_data[0]));
+
     // Loops over all 8 beats of data that can be in burst
     constexpr uint64_t BEATS_PER_BURST = 16;
     constexpr uint64_t BEATS_PER_TRAP = 2;
