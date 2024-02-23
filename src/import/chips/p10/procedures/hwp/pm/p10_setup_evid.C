@@ -318,6 +318,8 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
     uint32_t    l_present_voltage_mv;
     uint32_t    l_count;
     char        rail_str[8];
+    auto l_coreList  =
+        i_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
 
     FAPI_INF("> p10_setup_evid_voltageRead");
 
@@ -331,6 +333,11 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                     FAPI_INF("VCS not connected. skipping");
                     continue;
                 }
+                else if ( !l_coreList.size())
+                {
+                    FAPI_INF("VCS No cores. skipping");
+                    continue;
+                }
 
                 strcpy(rail_str, "VCS");
                 break;
@@ -339,6 +346,11 @@ p10_setup_evid_voltageRead(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_
                 if (i_bus_num[i_evid_value] == INVALID_BUS_NUM)
                 {
                     FAPI_INF("VDD not connected. skipping");
+                    continue;
+                }
+                else if ( !l_coreList.size())
+                {
+                    FAPI_INF("VDD No cores. skipping");
                     continue;
                 }
 
