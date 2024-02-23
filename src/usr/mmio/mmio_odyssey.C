@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -237,16 +237,20 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
         // Make a convenient local var to deal with
         uint64_t* l_scomdata = (reinterpret_cast<uint64_t *>(io_buffer));
 
+        // Use a local buffer to avoid changing the input buffer value on writes
+        uint64_t* l_buffer = (uint64_t*)malloc(io_buflen);
+        memcpy(l_buffer, l_scomdata, io_buflen);
+
         // OMI is little-endian, need to byteswap the data
         if(i_opType == DeviceFW::WRITE)
         {
-            *l_scomdata = __builtin_bswap64(*l_scomdata);
+            *l_buffer = __builtin_bswap64(*l_buffer);
         }
 
         // Call the MMIO driver to actually perform the operation
         l_errhdl = DeviceFW::deviceOp(i_opType,
                                       i_target,
-                                      io_buffer,
+                                      l_buffer,
                                       io_buflen,
                                       DEVICE_MMIO_ADDRESS(l_mmioAddr, io_buflen));
         if( l_errhdl )
@@ -255,14 +259,17 @@ errlHndl_t routeIbScom(DeviceFW::OperationType i_opType,
                       "routeIbScom: MMIO failed for SCOM 0x%.8X on %.8X",
                       l_scomAddr,
                       TARGETING::get_huid(i_target));
+            free(l_buffer);
             break;
         }
 
         // OMI is little-endian, need to byteswap the data
         if(i_opType == DeviceFW::READ)
         {
-            *l_scomdata = __builtin_bswap64(*l_scomdata);
+            *l_scomdata = __builtin_bswap64(*l_buffer);
         }
+
+        free(l_buffer);
 
     } while(0);
 
