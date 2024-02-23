@@ -709,7 +709,8 @@ errlHndl_t composeIsDimmVPD ( Target * i_target)
 
     // Set the attributes with composed values for SN PN FN and CCIN
     setDDR4SN(i_target, tmpSN);
-    setDDR4PN(i_target, tmpPN);
+    // Spec requires that PN matches the FN
+    setDDR4PN(i_target, tmpFN);
     setDDR4FN(i_target, tmpFN);
     setDDR4CCIN(i_target, tmpCCIN);
 
