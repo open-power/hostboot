@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -412,6 +412,10 @@ fapi2::ReturnCode qme_init(
         fapi2::buffer<uint64_t> l_tod_fsm_reg;
         fapi2::buffer<uint64_t> l_qme_flag_mask;
 
+        //Enable LPAR attribute
+        l_data64.flush<0>().setBit<p10hcd::QME_SCRB_USE_LPAR_ATTRIBUTE>();
+        FAPI_TRY( putScom( l_eq_mc_or, QME_SCRB_WO_OR, l_data64) );
+
         //If this function called after istep 16.2, then we are in runtime mode
         //and need to set that qme flag register
         if ( pm::PM_START_RUNTIME == i_mode)
@@ -536,6 +540,7 @@ fapi2::ReturnCode qme_init(
     l_data64.flush<0>().setBit<QME_QMCR_STOP_OVERRIDE_MODE>().setBit< QME_QMCR_STOP_ACTIVE_MASK>();
     FAPI_TRY( putScom( l_eq_mc_or, QME_QMCR_WO_CLEAR, l_data64) );
 
+
     FAPI_INF( "QME was activated successfully!!!!" );
     FAPI_INF( "Initialising QME FIR" );
     FAPI_TRY( p10_pm_qme_firinit( i_target, pm::PM_INIT_SOFT ),
@@ -603,6 +608,10 @@ fapi2::ReturnCode qme_halt(
     FAPI_INF("Clear QME_FLAG Flag Register...");
     l_data64.flush<0>();
     FAPI_TRY( putScom( l_eq_mc_or, QME_FLAGS_RW, l_data64 ) );
+
+    //Disable LPAR attribute
+    l_data64.flush<0>().setBit<p10hcd::QME_SCRB_USE_LPAR_ATTRIBUTE>();
+    FAPI_TRY( putScom( l_eq_mc_or, QME_SCRB_WO_CLEAR, l_data64) );
 
 fapi_try_exit:
     FAPI_IMP("<< qme_halt...");
