@@ -234,6 +234,17 @@ uint32_t omiDegradeDlReconfig(TARGETING::TargetHandle_t i_target);
  */
 void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid = 0);
 
+/**
+ * @brief Calls a Hostboot interface to collect the SBE (Odyssey) scratch reg
+ *        data (Synopsys training data). An error log with the data will be
+ *        created and committed. An optional PLID may be used as a parameter
+ *        to link the created error log to another error.
+ *
+ * @param i_ocmb The OCMB (Odyssey) target to collect the scratch data for.
+ * @param i_plid The optional PLID to link the created error to.
+ */
+void getSbeScratchData(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid = 0);
+
 //##############################################################################
 //##                    Maintenance Command wrappers
 //##############################################################################

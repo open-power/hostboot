@@ -483,6 +483,16 @@ namespace SBEIO
      */
     errlHndl_t purgeAllSbeScratchData();
 
+    /**
+     * @brief A helper function to handle the PRD's request to grab the SBE
+     *        scratch reg data (Synopsys data). The function will commit any
+     *        internal error logs that are produced. If any are produced, they
+     *        will be linked to the input PLID.
+     *
+     * @param[in] i_chipTarget the Odyssey chip target
+     * @param[in] i_plid the optional PLID to link the error log(s) to
+     */
+    void handleGetScratchDataPrdRequest(TARGETING::Target* i_chipTarget, uint32_t i_plid = 0);
 
     /**
      * @brief Purges data stored in the SBE Scratch area.

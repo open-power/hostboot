@@ -101,6 +101,7 @@ namespace SBEIO
     {
         ISTEP_ERROR::IStepError l_istepError;
 
+#ifndef __HOSTBOOT_RUNTIME
         ISTEP::parallel_for_each(composable(getAllChips)(TYPE_OCMB_CHIP, true/*functional*/),
                                  l_istepError,
                                  "purgeAllSbeScratchData",
@@ -127,6 +128,7 @@ namespace SBEIO
 
             return l_errl;
         });
+#endif
 
         return l_istepError.getErrorHandle();
     }
@@ -295,6 +297,37 @@ namespace SBEIO
         ERROR_EXIT:
         SBE_TRACF(EXIT_MRK"getAndProcessScratchData");
         return l_returnErrl;
+    }
+
+    void handleGetScratchDataPrdRequest(Target* i_chipTarget, uint32_t i_plid)
+    {
+        SBE_TRACF(ENTER_MRK"handleGetScratchDataPrdRequest");
+        errlHndl_t l_scratchDataErrls = nullptr;
+
+        errlHndl_t l_chipOpErrl = getAndProcessScratchData(i_chipTarget, l_scratchDataErrls);
+        if(l_chipOpErrl)
+        {
+            // We couldn't get the scratch data. This is a "nice-to-have" debug
+            // data, so just link the errl to the input PLID and commit.
+            if(i_plid)
+            {
+                l_chipOpErrl->plid(i_plid);
+            }
+            errlCommit(l_chipOpErrl, SBEIO_COMP_ID);
+        }
+        else
+        {
+            if(l_scratchDataErrls)
+            {
+                if(i_plid)
+                {
+                    l_scratchDataErrls->plid(i_plid);
+                }
+                errlCommit(l_scratchDataErrls, SBEIO_COMP_ID);
+            }
+        }
+
+        SBE_TRACF(EXIT_MRK"handleGetScratchDataPrdRequest");
     }
 
 };

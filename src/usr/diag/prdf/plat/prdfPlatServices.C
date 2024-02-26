@@ -1017,6 +1017,15 @@ void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid)
     SBEIO::get4uDdimmPmicHealthCheckData(i_ocmb, i_plid);
 }
 
+//------------------------------------------------------------------------------
+
+void getSbeScratchData(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid)
+{
+    PRDF_ASSERT(nullptr != i_ocmb);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == getTargetType(i_ocmb));
+    SBEIO::handleGetScratchDataPrdRequest(i_ocmb, i_plid);
+}
+
 //##############################################################################
 //##                OCMB Maintenance Command wrappers
 //##############################################################################

@@ -63,7 +63,6 @@ OBJS += p10_clock_test_cmn.o
 OBJS += ody_code_getlevels.o
 OBJS += ody_code_update.o
 OBJS += sbe_getCodeLevels.o
-OBJS += sbe_getScratchData.o
 OBJS += errlud_sbeio.o
 OBJS += sbe_flashCheck.o
 OBJS += sbe_testFfdc.o

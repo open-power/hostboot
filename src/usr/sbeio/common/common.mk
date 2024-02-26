@@ -53,9 +53,11 @@ EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/common/procedures/hwp/pmic/lib
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import
+EXTRAINCDIR += ${ROOTPATH}/src/usr/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/sbeio
 EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ocmbupd/
 
 #Common Objects
 OBJS += sbe_attn.o
@@ -95,6 +97,7 @@ OBJS += ody_apply_sbe_attribute_data.o
 OBJS += ody_analyze_sbe_attr_response.o
 OBJS += sbe_iplControl.o
 OBJS += sbe_telemetry.o
+OBJS += sbe_getScratchData.o
 
 #Common VPATHs
 VPATH += ${ROOTPATH}/src/usr/sbeio/common
