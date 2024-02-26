@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,7 +73,9 @@ ReturnCode poz_sbe_hreset(
         FAPI_INF("Checking if SBE is in Runtime State");
         FAPI_TRY(SB_MSG.getCfam(i_target));
 
-        if (SB_MSG.getBits<8, 4>() == 3)
+        // TODO: Need to remove check of 3 once HB and cronus team will be
+        // Stable to check with 6.
+        if ((SB_MSG.getBits<8, 4>() == 6) || (SB_MSG.getBits<8, 4>() == 3))
         {
             FAPI_INF("SBE is in Runtime State");
         }
@@ -137,7 +139,9 @@ ReturnCode poz_sbe_hreset(
         FAPI_INF("Checking if SBE is in Runtime State");
         FAPI_TRY(SB_MSG.getScom(i_target));
 
-        if (SB_MSG.getBits<8, 4>() == 3)
+        // TODO: Need to remove check of 3 once HB and cronus team will be
+        // Stable to check with 6.
+        if ((SB_MSG.getBits<8, 4>() == 6) || (SB_MSG.getBits<8, 4>() == 3))
         {
             FAPI_INF("SBE is in Runtime State");
         }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@ enum ODY_SPPE_BOOT_CHECK_Private_Constants
 };
 
 ReturnCode ody_sppe_check_for_ready(
-    const Target<TARGET_TYPE_OCMB_CHIP>& i_target)
+    const Target<TARGET_TYPE_OCMB_CHIP>& i_target, const bool i_isHreset)
 {
     poz_sppe_boot_parms l_boot_parms;
     Target<TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -70,7 +70,7 @@ ReturnCode ody_sppe_check_for_ready(
     }
 
     // call common HWP
-    FAPI_TRY(poz_sppe_check_for_ready(i_target, l_boot_parms));
+    FAPI_TRY(poz_sppe_check_for_ready(i_target, l_boot_parms, i_isHreset));
 
 fapi_try_exit:
     FAPI_DBG("Exiting...");

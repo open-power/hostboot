@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,8 +40,11 @@ typedef fapi2::ReturnCode (*ody_sppe_check_for_ready_FP_t)(const fapi2::Target<f
 ///
 /// @param[in]   i_target                  Reference to TARGET_TYPE_OCMB_CHIP
 ///
+/// @param[in]   i_isHreset        To check Hreset bit is set or not , default is false
+//
 /// @return  FAPI2_RC_SUCCESS if success, else error code.
 extern "C"
 {
-    fapi2::ReturnCode ody_sppe_check_for_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+    fapi2::ReturnCode ody_sppe_check_for_ready(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+            const bool i_isHreset = false);
 }
