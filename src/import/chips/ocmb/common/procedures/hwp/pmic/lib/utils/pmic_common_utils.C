@@ -86,9 +86,13 @@ fapi2::ReturnCode disabled(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_
     uint8_t l_pmic_force_n_mode_attr = 0;
     fapi2::buffer<uint8_t> l_force_n_mode;
 
+#ifdef __PPE__
+    l_pmic_force_n_mode_attr = fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_PMIC_FORCE_N_MODE;
+#else
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target);
 
     FAPI_TRY(mss::attr::get_pmic_force_n_mode(l_ocmb, l_pmic_force_n_mode_attr));
+#endif
     l_force_n_mode = l_pmic_force_n_mode_attr;
 
     o_disabled = !(l_force_n_mode.getBit(mss::index(i_pmic_target)));
@@ -344,10 +348,74 @@ fapi2::ReturnCode calculate_voltage_bitmap_from_attr(
     int8_t l_volt_offset = 0;
     int8_t l_efd_volt_offset = 0;
 
+#ifdef __PPE__
+    static const uint8_t VOLT_SETTING [] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWA_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWA_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_SETTING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_SETTING,
+    };
+    static const int8_t VOLT_OFFSET[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWA_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWA_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_OFFSET
+    };
+    const static int8_t EFD_VOLT_OFFSET[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC0_SWA_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC0_SWB_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC0_SWC_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC0_SWD_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC1_SWA_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC1_SWB_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC1_SWC_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC1_SWD_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC2_SWA_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC2_SWB_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC2_SWC_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC2_SWD_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC3_SWA_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC3_SWB_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC3_SWC_VOLTAGE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_EFD_PMIC3_SWD_VOLTAGE_OFFSET
+    };
     // Get the attributes corresponding to the rail and PMIC indices
+    uint8_t l_index = i_id << 2 | i_rail;
+    l_volt = VOLT_SETTING[l_index];
+    l_volt_offset = VOLT_OFFSET[l_index];
+    l_efd_volt_offset = EFD_VOLT_OFFSET[l_index];
+#else
     FAPI_TRY(mss::attr::get_volt_setting[i_rail][i_id](l_ocmb, l_volt));
     FAPI_TRY(mss::attr::get_volt_offset[i_rail][i_id](l_ocmb, l_volt_offset));
     FAPI_TRY(mss::attr::get_efd_volt_offset[i_rail][i_id](l_ocmb, l_efd_volt_offset));
+#endif
 
     // Set output buffer
     o_volt_bitmap = l_volt + l_volt_offset + l_efd_volt_offset;
@@ -401,10 +469,36 @@ fapi2::ReturnCode set_current_limiter_warnings(
         REGS::R1F  // SWD
     };
 
+#ifdef __PPE__
+    const static uint8_t CURRENT_WARNING[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWA_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWB_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWC_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWD_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWA_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWB_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWC_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWD_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWA_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWB_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWC_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWD_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWA_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWB_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWC_CURRENT_WARNING,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWD_CURRENT_WARNING
+    };
+#endif
+
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
         uint8_t l_warning_threshold = 0;
+#ifdef __PPE__
+        l_warning_threshold = CURRENT_WARNING[i_relative_pmic_id << 2 | l_rail_index];
+#else
         FAPI_TRY(mss::attr::get_current_warning[l_rail_index][i_relative_pmic_id](i_ocmb_target, l_warning_threshold));
+#endif
 
         // If we have 0, then we either have an old SPD (< 0.4), or some bad values in there.
         // In which case, we will leave the register alone at its default (3000mA warning)
@@ -447,6 +541,17 @@ fapi2::ReturnCode order_pmics_by_sequence(
         uint8_t l_sequence_pmic_0 = 0;
         uint8_t l_sequence_pmic_1 = 0;
 
+#ifdef __PPE__
+        const static uint8_t SEQUENCE[] =
+        {
+            fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SEQUENCE,
+            fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SEQUENCE,
+            fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SEQUENCE,
+            fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SEQUENCE
+        };
+        l_sequence_pmic_0 = SEQUENCE[get_relative_pmic_id(l_first_pmic)];
+        l_sequence_pmic_1 = SEQUENCE[get_relative_pmic_id(l_second_pmic)];
+#else
         // If we have redundant PMICs, this will result in a redundant pair being treated as the same ID,
         // so we will end up enabling a redundant pair first, then the other pair
 
@@ -463,7 +568,7 @@ fapi2::ReturnCode order_pmics_by_sequence(
         {
             l_rc_1_out = l_rc_1;
         }
-
+#endif
         return l_sequence_pmic_0 < l_sequence_pmic_1;
     });
 
@@ -508,13 +613,58 @@ fapi2::ReturnCode update_seq_with_order_and_delay_attr(
     uint8_t l_sequence_orders[CONSTS::NUMBER_OF_RAILS];
     uint8_t l_sequence_delays[CONSTS::NUMBER_OF_RAILS];
 
+#ifdef __PPE__
+    const static uint8_t SEQUENCE_ORDER[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWA_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWB_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWC_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWD_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWA_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWB_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWC_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWD_SEQUENCE_ORDER
+    };
+    const static uint8_t SEQUENCE_DELAY[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWB_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWC_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWD_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWB_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWC_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWD_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWA_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWB_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWC_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWD_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWA_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWB_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWC_SEQUENCE_DELAY,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWD_SEQUENCE_DELAY
+    };
+#endif
+
     // Loop through each rail to populate the order and delay arrays
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
+#ifdef __PPE__
+        l_sequence_orders[l_rail_index] = SEQUENCE_ORDER[i_id << 2 | l_rail_index];
+        l_sequence_delays[l_rail_index] = SEQUENCE_DELAY[i_id << 2 | l_rail_index];
+#else
         // We know after these FAPI_TRY's that all 4 entries must be populated, else the TRYs fail
         FAPI_TRY(((mss::attr::get_sequence_order[l_rail_index][i_id]))(i_ocmb_target, l_sequence_orders[l_rail_index]));
         FAPI_TRY(((mss::attr::get_sequence_delay[l_rail_index][i_id]))(i_ocmb_target, l_sequence_delays[l_rail_index]));
-
+#endif
         // The SPD allows for up to 8 sequences, but there are only 4 on the PMIC. The SPD defaults never go higher than 2.
         // We put this check in here as with anything over 4, we don't really know what we can do.
         FAPI_ASSERT((l_sequence_orders[l_rail_index] < CONSTS::ORDER_LIMIT ),
@@ -599,15 +749,50 @@ fapi2::ReturnCode update_seq_with_reg_attr(const fapi2::Target<fapi2::TARGET_TYP
     uint8_t l_pmic_seq_cfg2_r42 = 0;
     uint8_t l_pmic_seq_cfg3_r43 = 0;
 
+#ifdef __PPE__
+    const static uint8_t SEQUENCE_ORDER_REG40[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SEQUENCE_CFG0_R40,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SEQUENCE_CFG0_R40,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SEQUENCE_CFG0_R40,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SEQUENCE_CFG0_R40
+    };
+    const static uint8_t SEQUENCE_ORDER_REG41[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SEQUENCE_CFG1_R41,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SEQUENCE_CFG1_R41,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SEQUENCE_CFG1_R41,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SEQUENCE_CFG1_R41
+    };
+    const static uint8_t SEQUENCE_ORDER_REG42[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SEQUENCE_CFG2_R42,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SEQUENCE_CFG2_R42,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SEQUENCE_CFG2_R42,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SEQUENCE_CFG2_R42
+    };
+    const static uint8_t SEQUENCE_ORDER_REG43[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SEQUENCE_CFG3_R43,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SEQUENCE_CFG3_R43,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SEQUENCE_CFG3_R43,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SEQUENCE_CFG3_R43
+    };
     // Get PMIC register attributes that is for defined for SPD rev 0.7.0
     // The power-on-sequence is controlled by register 0x40 to 0x43
     // The controller executes Power On Sequence Config0 to Power On Sequence Config3
     // as configured in registers R40 to R43 to enable its
     // output regulators in the sequence as specified.
+    l_pmic_seq_cfg0_r40 = SEQUENCE_ORDER_REG40[i_id];
+    l_pmic_seq_cfg1_r41 = SEQUENCE_ORDER_REG41[i_id];
+    l_pmic_seq_cfg2_r42 = SEQUENCE_ORDER_REG42[i_id];
+    l_pmic_seq_cfg3_r43 = SEQUENCE_ORDER_REG43[i_id];
+#else
     FAPI_TRY(mss::attr::get_sequence_order_reg40[i_id](i_ocmb_target, l_pmic_seq_cfg0_r40));
     FAPI_TRY(mss::attr::get_sequence_order_reg41[i_id](i_ocmb_target, l_pmic_seq_cfg1_r41));
     FAPI_TRY(mss::attr::get_sequence_order_reg42[i_id](i_ocmb_target, l_pmic_seq_cfg2_r42));
     FAPI_TRY(mss::attr::get_sequence_order_reg43[i_id](i_ocmb_target, l_pmic_seq_cfg3_r43));
+#endif
 
     // Write the attribute values to the PMIC regs
     FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R40_POWER_ON_SEQUENCE_CONFIG_1, l_pmic_seq_cfg0_r40));
@@ -641,7 +826,19 @@ fapi2::ReturnCode bias_with_spd_phase_comb(
 
     uint8_t l_phase_comb = 0;
     fapi2::buffer<uint8_t> l_phase;
+
+#ifdef __PPE__
+    const static uint8_t PHASE_COMB[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_PHASE_COMB,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_PHASE_COMB,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_PHASE_COMB,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_PHASE_COMB
+    };
+    l_phase_comb = PHASE_COMB[i_id];
+#else
     FAPI_TRY(mss::attr::get_phase_comb[i_id](i_ocmb_target, l_phase_comb));
+#endif
 
     // Read, replace bit, and then re-write
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R4F, l_phase));
@@ -669,26 +866,47 @@ fapi2::ReturnCode bias_with_spd_volt_ranges(
     using FIELDS = pmicFields<J>;
     using REGS = pmicRegs<J>;
 
-    uint8_t l_swa_range = 0;
-    uint8_t l_swb_range = 0;
-    uint8_t l_swc_range = 0;
-    uint8_t l_swd_range = 0;
-
+    uint8_t l_sw_range[4] __attribute__ ((aligned (4))) = {0};
     fapi2::buffer<uint8_t> l_volt_range_buffer;
+#ifdef __PPE__
+    static const uint8_t SW_VOLT_RANGE_SELECT[] __attribute__ ((aligned (4))) =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWA_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWA_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_RANGE_SELECT,
+    };
 
-    FAPI_TRY(mss::attr::get_swa_voltage_range_select[i_id](i_ocmb_target, l_swa_range));
-    FAPI_TRY(mss::attr::get_swb_voltage_range_select[i_id](i_ocmb_target, l_swb_range));
-    FAPI_TRY(mss::attr::get_swc_voltage_range_select[i_id](i_ocmb_target, l_swc_range));
-    FAPI_TRY(mss::attr::get_swd_voltage_range_select[i_id](i_ocmb_target, l_swd_range));
+    for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
+    {
+        l_sw_range[l_rail_index] = SW_VOLT_RANGE_SELECT[i_id << 2 | l_rail_index];
+    }
 
+#else
+    FAPI_TRY(mss::attr::get_swa_voltage_range_select[i_id](i_ocmb_target, l_sw_range[0]));
+    FAPI_TRY(mss::attr::get_swb_voltage_range_select[i_id](i_ocmb_target, l_sw_range[1]));
+    FAPI_TRY(mss::attr::get_swc_voltage_range_select[i_id](i_ocmb_target, l_sw_range[2]));
+    FAPI_TRY(mss::attr::get_swd_voltage_range_select[i_id](i_ocmb_target, l_sw_range[3]));
+#endif
     // Read in what the register has, as to not overwrite any default values
     FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(i_pmic_target, REGS::R2B, l_volt_range_buffer));
-
     // Set the buffer bits appropriately
-    l_volt_range_buffer.writeBit<FIELDS::SWA_VOLTAGE_RANGE>(l_swa_range);
-    l_volt_range_buffer.writeBit<FIELDS::SWB_VOLTAGE_RANGE>(l_swb_range);
-    l_volt_range_buffer.writeBit<FIELDS::SWC_VOLTAGE_RANGE>(l_swc_range);
-    l_volt_range_buffer.writeBit<FIELDS::SWD_VOLTAGE_RANGE>(l_swd_range);
+    l_volt_range_buffer.writeBit<FIELDS::SWA_VOLTAGE_RANGE>(l_sw_range[0]);
+    l_volt_range_buffer.writeBit<FIELDS::SWB_VOLTAGE_RANGE>(l_sw_range[1]);
+    l_volt_range_buffer.writeBit<FIELDS::SWC_VOLTAGE_RANGE>(l_sw_range[2]);
+    l_volt_range_buffer.writeBit<FIELDS::SWD_VOLTAGE_RANGE>(l_sw_range[3]);
 
     // Write back to PMIC
     FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(i_pmic_target, REGS::R2B, l_volt_range_buffer));
@@ -714,32 +932,53 @@ fapi2::ReturnCode bias_with_spd_coarse_volt_offset(
     using FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
     using REGS = pmicRegs<mss::pmic::product::TPS5383X>;
 
-    uint8_t l_swa_coarse_offset = 0;
-    uint8_t l_swb_coarse_offset = 0;
-    uint8_t l_swc_coarse_offset = 0;
-    uint8_t l_swd_coarse_offset = 0;
-
+    uint8_t l_sw_coarse_offset[4] __attribute__ ((aligned (4))) = {0};
     fapi2::buffer<uint8_t> l_volt_coarse_offset_buffer;
+#ifdef __PPE__
+    const static uint8_t SW_VOLTAGE_COARSE_OFFSET[] __attribute__ ((aligned (4))) =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWA_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWA_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_COARSE_OFFSET,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_COARSE_OFFSET
+    };
 
-    FAPI_TRY(mss::attr::get_swa_voltage_coarse_offset[i_id](i_ocmb_target, l_swa_coarse_offset));
-    FAPI_TRY(mss::attr::get_swb_voltage_coarse_offset[i_id](i_ocmb_target, l_swb_coarse_offset));
-    FAPI_TRY(mss::attr::get_swc_voltage_coarse_offset[i_id](i_ocmb_target, l_swc_coarse_offset));
-    FAPI_TRY(mss::attr::get_swd_voltage_coarse_offset[i_id](i_ocmb_target, l_swd_coarse_offset));
+    for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
+    {
+        l_sw_coarse_offset[l_rail_index] = SW_VOLTAGE_COARSE_OFFSET[l_rail_index << 2 | i_id];
+    }
 
+#else
+    FAPI_TRY(mss::attr::get_swa_voltage_coarse_offset[i_id](i_ocmb_target, l_sw_coarse_offset[0]));
+    FAPI_TRY(mss::attr::get_swb_voltage_coarse_offset[i_id](i_ocmb_target, l_sw_coarse_offset[1]));
+    FAPI_TRY(mss::attr::get_swc_voltage_coarse_offset[i_id](i_ocmb_target, l_sw_coarse_offset[2]));
+    FAPI_TRY(mss::attr::get_swd_voltage_coarse_offset[i_id](i_ocmb_target, l_sw_coarse_offset[3]));
+#endif
     // Read in what the register has, as to not overwrite any default values
     FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R78_VID_OFFSET_COARSE,
                                       l_volt_coarse_offset_buffer));
-
     // Set the buffer bits appropriately
     // Note that the SPD and attributes are numbered right-to-left, so we access the register without reversing it
     l_volt_coarse_offset_buffer.insertFromRight<FIELDS::R78_SWA_VID_OFFSET_COARSE_START_NON_REVERSED,
-                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_swa_coarse_offset);
+                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_sw_coarse_offset[0]);
     l_volt_coarse_offset_buffer.insertFromRight<FIELDS::R78_SWB_VID_OFFSET_COARSE_START_NON_REVERSED,
-                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_swb_coarse_offset);
+                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_sw_coarse_offset[1]);
     l_volt_coarse_offset_buffer.insertFromRight<FIELDS::R78_SWC_VID_OFFSET_COARSE_START_NON_REVERSED,
-                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_swc_coarse_offset);
+                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_sw_coarse_offset[2]);
     l_volt_coarse_offset_buffer.insertFromRight<FIELDS::R78_SWD_VID_OFFSET_COARSE_START_NON_REVERSED,
-                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_swd_coarse_offset);
+                                                FIELDS::R78_VID_OFFSET_COARSE_LENGTH>(l_sw_coarse_offset[3]);
 
     // Write back to PMIC
     FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R78_VID_OFFSET_COARSE,
@@ -779,12 +1018,23 @@ fapi2::ReturnCode bias_with_spd_startup_seq(
         break;
     }
 
+#ifdef __PPE__
+    const static uint8_t SWA_SEQUENCE_ORDER[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWA_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWA_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWA_SEQUENCE_ORDER,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWA_SEQUENCE_ORDER
+    };
+    l_sequence_order_swa = SWA_SEQUENCE_ORDER[i_id];
+#else
     // Get the SWA attribute value just for checking purposes
     // We are keying off the sequence order attribute (which is set to invalid/reserved value when SPD rev is 0.7.0)
     // and when the dram_gen attribute is DDR5
     // So just getting one attribute is good enough to check for that, since all of the attributes that are
     // defined for SPD rev 0.0 are made invalid/reserved
     FAPI_TRY(((mss::attr::get_sequence_order[mss::pmic::rail::SWA][i_id]))(i_ocmb_target, l_sequence_order_swa));
+#endif
 
     // Checking for the sequence order attribute for an invalid value
     // And if the dram gen is DDR5, only then use the attributes defined for SPD rev 0.7.0
@@ -866,7 +1116,33 @@ fapi2::ReturnCode bias_with_spd_voltages_TI_rev_less_then_23(
 
     FAPI_TRY(mss::pmic::calculate_voltage_bitmap_from_attr(i_pmic_target, i_id, i_rail_index, l_volt_bitmap));
 
+#ifndef __PPE__
     FAPI_TRY(mss::attr::get_volt_range_select[i_rail_index][i_id](i_ocmb_target, l_volt_range_select));
+#else
+    const static uint8_t VOLT_RANGE_SELECT[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWA_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWB_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWC_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_SWD_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWA_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWB_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWC_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_SWD_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWA_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWB_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWC_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_SWD_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWA_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWB_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWC_VOLTAGE_RANGE_SELECT,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_SWD_VOLTAGE_RANGE_SELECT
+    };
+    {
+        uint8_t l_index = i_id << 2 | i_rail_index;
+        l_volt_range_select = VOLT_RANGE_SELECT[l_index];
+    }
+#endif
 
     // SWD supports a RANGE 1, but NOT SWA-C
     if (i_rail_index == mss::pmic::rail::SWD)
@@ -1559,8 +1835,19 @@ fapi2::ReturnCode validate_and_return_pmic_revisions(
     uint8_t l_rev = 0;
     uint8_t l_simics = 0;
 
+#ifdef __PPE__
+    const static uint8_t REVISION[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_REVISION,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_REVISION,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_REVISION,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_REVISION
+    };
+    l_rev = REVISION[l_pmic_id];
+#else
     // Get attribute
     FAPI_TRY(mss::attr::get_revision[l_pmic_id](i_ocmb_target, l_rev));
+#endif
 
     // Now check the register
     FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, o_rev_reg));
@@ -1607,8 +1894,19 @@ fapi2::ReturnCode matching_vendors(
     fapi2::buffer<uint8_t> l_vendor_reg0;
     fapi2::buffer<uint8_t> l_vendor_reg1;
 
+#ifdef __PPE__
+    const static uint16_t MFG_ID[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_MFG_ID,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_MFG_ID,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_MFG_ID,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_MFG_ID
+    };
+    l_vendor_attr = MFG_ID[l_pmic_id];
+#else
     // Get attribute
     FAPI_TRY(mss::attr::get_mfg_id[l_pmic_id](i_ocmb_target, l_vendor_attr));
+#endif
 
     // Now check the register
     FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3C_VENDOR_ID_BYTE_0, l_vendor_reg0));

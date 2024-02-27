@@ -41,8 +41,10 @@
 #include <pmic_regs.H>
 #include <pmic_regs_fld.H>
 #include <lib/utils/pmic_consts.H>
-#include <mss_pmic_attribute_getters.H>
 #include <generic/memory/lib/utils/fapi_try_lambda.H>
+#ifndef __PPE__
+    #include <mss_pmic_attribute_getters.H>
+#endif
 
 namespace mss
 {
