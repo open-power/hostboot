@@ -56,7 +56,6 @@ public:
     }
 
     //expose data for testing
-    using SbeFifoRespBuffer::localBuffer;
     using SbeFifoRespBuffer::callerBuffer;
     using SbeFifoRespBuffer::callerWordSize;
     using SbeFifoRespBuffer::index;
@@ -186,6 +185,70 @@ public:
 
         char strMessage[512];
     };
+
+    void testDiscontiguousBuffer()
+    {
+        TS_INFO(ENTER_MRK"testDiscontiguousBuffer");
+
+        discontiguous_buffer buf;
+
+        for (int i = 0; i < 1024; ++i)
+        {
+            buf.append(0xab);
+        }
+
+        char data[4096];
+        memset(data, 0xdc, 4096);
+        buf.append(data, 4096);
+
+        if (buf.size() != 1024 + 4096)
+        {
+            TS_FAIL("testDiscontiguousBuffer: size is %d, expected %d",
+                    1024 + 4096,
+                    buf.size());
+            return;
+        }
+
+        unsigned int i = 0;
+        for (; i < 1024 / 4; ++i)
+        {
+            if (buf.word_at(i) != 0xabababab)
+            {
+                TS_FAIL("testDiscontiguousBuffer: Word at index %d "
+                        "is 0x%08X, expected 0xabababab",
+                        i,
+                        buf.word_at(i));
+                return;
+            }
+        }
+
+        while (i < buf.size() / 4)
+        {
+            if (buf.word_at(i) != 0xdcdcdcdc)
+            {
+                TS_FAIL("testDiscontiguousBuffer: Word at index %d "
+                        "is 0x%08X, expected 0xdcdcdcdc",
+                        i,
+                        buf.word_at(i));
+                return;
+            }
+            ++i;
+        }
+
+        char buf2[4];
+        buf.memcpy(buf2, 1024 - 2, 4);
+
+        if (buf2[0] != 0xab || buf2[1] != 0xab
+            || buf2[2] != 0xdc || buf2[3] != 0xdc)
+        {
+            TS_FAIL("testDiscontiguousBuffer: memcpy failed, expected "
+                    "0xababdcdc, got 0x%02x%02x%02x%02x",
+                    buf2[0], buf2[1], buf2[2], buf2[3]);
+            return;
+        }
+
+        TS_INFO(EXIT_MRK"testDiscontiguousBuffer");
+    }
 
     //------------------------------------------------
     void testState()
@@ -1613,26 +1676,14 @@ private:
                 break;
             }
 
-            if(not fifoBuffer.getStatusHeader())
-            {
-                snprintf(expData.strMessage,
-                         sizeof(expData.strMessage),
-                         "%s: "
-                         "getStatusHeader unexpectedly returned a nullptr.",
-                         expData.test_name
-                        );
-
-                result = false;
-                break;
-            }
-
-            if(memcmp(expData.expected_status, fifoBuffer.getStatusHeader(),
+            auto status_hdr = fifoBuffer.getStatusHeader();
+            if(memcmp(expData.expected_status, &status_hdr,
                                     sizeof(SbeFifo::statusHeader)) != 0)
             {
                 char expected_xxd[128];
                 char actual_xxd[128];
 
-                xxdPrint(fifoBuffer.getStatusHeader(),
+                xxdPrint(&status_hdr,
                          sizeof(SbeFifo::statusHeader),
                          actual_xxd);
 
@@ -1685,12 +1736,12 @@ private:
                     break;
                 }
 
-                if(not fifoBuffer.getFFDCPtr())
+                if(fifoBuffer.getFFDCData().empty())
                 {
                     snprintf(expData.strMessage,
                              sizeof(expData.strMessage),
                             "%s: "
-                            "getFFDCPtr unexpectedly returned a nullptr.",
+                            "getFFDCPtr unexpectedly returned nothing.",
                              expData.test_name
                             );
 
@@ -1729,13 +1780,15 @@ private:
                     break;
                 }
 
-                if(memcmp(fifoBuffer.getFFDCPtr(),
+                const auto ffdc = fifoBuffer.getFFDCData();
+
+                if(memcmp(ffdc.data(),
                        expData.expected_ffdc_data, expData.ffdcByteSize) != 0)
                 {
                     char expected_xxd[128];
                     char ffdc_xxd[128];
 
-                    xxdPrint(fifoBuffer.getFFDCPtr(),
+                    xxdPrint(ffdc.data(),
                              expData.ffdcByteSize,
                              ffdc_xxd);
 
@@ -1788,12 +1841,13 @@ private:
                     break;
                 }
 
-                if(fifoBuffer.getFFDCPtr())
+                const auto ffdc = fifoBuffer.getFFDCData();
+                if(!ffdc.empty())
                 {
                     snprintf(expData.strMessage,
                              sizeof(expData.strMessage),
                             "%s: "
-                            "getFFDCPtr unexpectedly returned a non-nullptr.",
+                            "getFFDCPtr unexpectedly returned data.",
                              expData.test_name
                             );
 
@@ -1847,7 +1901,7 @@ private:
                     break;
                 }
 
-                if(not fifoBuffer.getReturnData())
+                if(not fifoBuffer.getReturnData().data())
                 {
                     snprintf(expData.strMessage,
                              sizeof(expData.strMessage),
@@ -1891,13 +1945,14 @@ private:
                     break;
                 }
 
-                if(memcmp(fifoBuffer.getReturnData(),
+                auto return_data = fifoBuffer.getReturnData();
+                if(memcmp(return_data.data(),
                           expData.expected_data, expData.dataByteSize) != 0)
                 {
                     char expected_xxd[128];
                     char data_xxd[128];
 
-                    xxdPrint(fifoBuffer.getReturnData(),
+                    xxdPrint(return_data.data(),
                              expData.dataByteSize,
                              data_xxd);
 
@@ -1935,7 +1990,9 @@ private:
                     break;
                 }
 
-                if(fifoBuffer.getReturnData())
+                auto return_data = fifoBuffer.getReturnData();
+
+                if(return_data.data())
                 {
                     snprintf(expData.strMessage,
                              sizeof(expData.strMessage),

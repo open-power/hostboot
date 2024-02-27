@@ -28,12 +28,163 @@
 #include <stdint.h>
 
 #include "sbe_fifodd.H"
+#include <memory>
+
+#ifndef __HOSTBOOT_RUNTIME
+#include <kernel/pagemgr.H>
+#endif
 
 namespace SBEIO
 {
 
+/*
+ * @brief A buffer backed by discontiguous physical pages.
+ */
+class discontiguous_buffer
+{
+public:
+    /** @brief Append a byte to the buffer. */
+    void append(const uint8_t i_byte)
+    {
+        *get_ptr(iv_bytes_contained++) = i_byte;
+    }
+
+    /** @brief Append data to this buffer. */
+    void append(const void* i_data, size_t i_amt)
+    {
+        const uint8_t* data_bytes = static_cast<const uint8_t*>(i_data);
+
+        while (i_amt > 0)
+        {
+            append(*data_bytes);
+            --i_amt;
+            ++data_bytes;
+        }
+    }
+
+    /** @brief Retrieve the 32-bit value at a given offset in the
+     *  buffer.
+     *
+     *  Asserts on out-of-bounds accesses.
+     */
+    uint32_t word_at(const size_t i_word_offset) const
+    {
+        uint32_t word = 0;
+        const size_t begin_copy = i_word_offset * sizeof(uint32_t);
+
+        this->memcpy(&word, begin_copy, sizeof(uint32_t));
+        return word;
+    }
+
+    /** @brief Retrieve the size of the buffer in bytes.
+     */
+    size_t size() const
+    {
+        return iv_bytes_contained;
+    }
+
+    /**
+     * @brief Copy data out of the buffer at the given offset.
+     *
+     * @param[in] i_dest    The destination buffer.
+     * @param[in] i_offset  The offset in the source buffer to copy from.
+     * @param[in] i_count   The number of bytes to copy.
+     *
+     * @note Asserts on out-of-bounds access in the source buffer.
+     */
+    void memcpy(void* const i_dest, size_t i_offset, size_t i_count) const
+    {
+        if (i_offset + i_count < i_offset
+            || i_offset > iv_bytes_contained
+            || i_offset + i_count > iv_bytes_contained)
+        {
+            assert(false,
+                   "discontiguous_buffer::memcpy index %ld + count %ld out of bounds %ld",
+                   i_offset, i_count, iv_bytes_contained);
+        }
+
+        uint8_t* dest_bytes = static_cast<uint8_t*>(i_dest);
+
+        while (i_offset < iv_bytes_contained && i_count > 0)
+        {
+            *dest_bytes = *get_ptr(i_offset);
+            ++dest_bytes;
+            ++i_offset;
+            --i_count;
+        }
+    }
+
+private:
+    /** @brief Deleter class for a page. */
+    struct free_page
+    {
+        void operator()(uint8_t* const i_page) const {
+#ifdef __HOSTBOOT_RUNTIME
+            free(i_page);
+#else
+            return PageManager::freePage(i_page);
+#endif
+        }
+    };
+
+    using page_ptr = std::unique_ptr<uint8_t, free_page>;
+    std::vector<page_ptr> iv_pages;
+
+    // The number of bytes actually used.
+    size_t iv_bytes_contained = 0;
+
+    /** @brief Allocate a single page of data. */
+    static uint8_t* allocate_page()
+    {
+#ifdef __HOSTBOOT_RUNTIME
+        return static_cast<uint8_t*>(malloc(PAGE_SIZE));
+#else
+        return static_cast<uint8_t*>(PageManager::allocatePage(1, /*userspace=*/true));
+#endif
+    }
+
+    /**
+     * @brief Retrieve a pointer to the byte at the given index in the
+     * buffer.
+     *
+     * @note Automatically resizes when the index is out-of-bounds.
+     */
+    uint8_t* get_ptr(const size_t i_idx)
+    {
+        const size_t page = i_idx / PAGE_SIZE;
+        const size_t offset = i_idx % PAGE_SIZE;
+
+        while (iv_pages.size() <= page)
+        {
+            iv_pages.push_back(page_ptr(allocate_page(), free_page { }));
+        }
+
+        return iv_pages[page].get() + offset;
+    }
+
+    /**
+     * @brief Retrieve a pointer to the byte at the given index in the
+     * buffer.
+     *
+     * @note Asserts when the index is out-of-bounds.
+     */
+    const uint8_t* get_ptr(const size_t i_idx) const
+    {
+        const size_t page = i_idx / PAGE_SIZE;
+        const size_t offset = i_idx % PAGE_SIZE;
+
+        if (page >= iv_pages.size())
+        {
+            assert(false, "discontiguous_buffer::get_ptr() const: Index %ld out of bounds (pages = %ld)",
+                   i_idx, iv_pages.size());
+        }
+
+        return iv_pages[page].get() + offset;
+    }
+};
+
 /**
- * @brief A class for managing duel input buffers for sbeio fifo response
+ * @brief A class for managing dual input buffers for sbeio fifo response
  *        messaging.
  *
  * Sbeio messaging uses a pair of buffers for parsing fifo response
@@ -161,21 +312,32 @@ public:
     bool msgContainsFFDC();
 
     /**
-     * @brief Accessor to FFDC data.
-     *
-     * @returns pointer to FFDC data if the message is complete and contains
-     *          FFDC data. A nullptr is returned otherwise.
-     *
-     */
-    const void * getFFDCPtr();
-
-    /**
      * @brief FFDC data size.
      *
      * @return FFDC data size in bytes or 0 if the message is incomplete
      *         or does not have FFDC data.
      */
     size_t getFFDCByteSize();
+
+    /**
+     * @brief Return a copy of the FFDC data in the message, if any.
+     *
+     * @note Return vector will be empty if there is no FFDC data in the message.
+     */
+    std::vector<uint8_t> getFFDCData();
+
+    /**
+     * @brief Copy data out of the SbeFifoRespBuffer and into the
+     * given destination buffer.
+     *
+     * @param[in] i_dest    The destination buffer.
+     * @param[in] i_offset  The offset in the source buffer to copy from.
+     * @param[in] i_count   The byte count to copy.
+     */
+    void memcpy(void* const i_dest, size_t i_offset, size_t i_count) const
+    {
+        iv_buffer.memcpy(i_dest, i_offset, i_count);
+    }
 
     /**
      * @brief FFDC data size.
@@ -190,13 +352,12 @@ public:
     //=================================
 
     /**
-     * @brief Returns a pointer to the StatusHeader struct.
+     * @brief Returns the StatusHeader struct from the message.
      *
-     * @return A pointer to the StatusHeader struct if the
-     *         buffer state is MSG_COMPLETE, or a NULL pointer
-     *         otherwise.
+     * @return The StatusHeader struct, valid only if the
+     *         buffer state is MSG_COMPLETE.
      */
-    const SbeFifo::statusHeader * getStatusHeader();
+    SbeFifo::statusHeader getStatusHeader();
 
     //================================
     // Return Data
@@ -212,12 +373,12 @@ public:
     bool msgContainsReturnData();
 
     /**
-     * @brief Obtain a pointer to return data
+     * @brief Obtain a copy of return data
      *
-     * @return A pointer to return data if the message is complete and
-     *         contains return data. A nullptr is returned otherwise.
+     * @return A copy of the return data if the message is complete and
+     *         contains return data. Empty vector is returned otherwise.
      */
-    const void * getReturnData();
+    std::vector<uint8_t> getReturnData();
 
     /**
      * @brief Obtain the return data size in bytes.
@@ -257,7 +418,7 @@ public:
      * @return - The offset to the status header.
      *
      */
-    size_t offset() const {return iv_localMsgBuffer->at(iv_offsetIndex);}
+    size_t offset() const { return iv_buffer.word_at(iv_offsetIndex);}
 
     //=========================
     // Class Constants
@@ -269,13 +430,6 @@ public:
     static constexpr size_t INVALID_INDEX = size_t(-1);
 
 protected:
-
-    /*
-     * @brief Obtain the local buffer for debugging.
-     *
-     * @return A pointer to the local buffer.
-     */
-    const uint32_t * localBuffer() const { return &iv_localMsgBuffer->at(0); }
 
    //=====================
    // Unit Test Access
@@ -296,9 +450,7 @@ private:
    // Buffers
    //====================
 
-   // Use the larger of the possible MSG_BUFFER_SIZE_WORDS_* to be safe
-   std::unique_ptr<std::array<uint32_t, MSG_BUFFER_SIZE_WORDS_POZ>> iv_localMsgBuffer; /* local buffer large enough
-                                                                                      to hold FFDC data */
+   discontiguous_buffer iv_buffer;
 
    uint32_t * const iv_callerBufferPtr{}; /**< caller supplied buffer should
                                              be large enough to hold at least

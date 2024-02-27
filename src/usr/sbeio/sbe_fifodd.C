@@ -559,9 +559,11 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
             //  16 words fits most normal responses
             size_t l_numwords = std::min( (size_t)16,
                                           l_fifoBuffer.index() );
+            std::vector<uint8_t> buffer(l_numwords * sizeof(uint32_t));
+            l_fifoBuffer.memcpy(buffer.data(), 0, buffer.size());
             errl->addFFDC( SBEIO_COMP_ID,
-                           l_fifoBuffer.localBuffer(),
-                           l_numwords*sizeof(uint32_t),
+                           buffer.data(),
+                           buffer.size(),
                            2,
                            ERRL_UDT_NOFORMAT,//raw data
                            false );
@@ -571,10 +573,13 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
 
             if( l_numwords )
             {
+                buffer.resize(l_numwords * sizeof(uint32_t));
+                l_fifoBuffer.memcpy(buffer.data(),
+                                    (l_fifoBuffer.index() - l_numwords) * sizeof(uint32_t),
+                                    buffer.size());
                 errl->addFFDC( SBEIO_COMP_ID,
-                               l_fifoBuffer.localBuffer()
-                               + (l_fifoBuffer.index() - l_numwords),
-                               l_numwords*sizeof(uint32_t),
+                               buffer.data(),
+                               buffer.size(),
                                3,
                                ERRL_UDT_NOFORMAT,//raw data
                                false );
@@ -608,9 +613,13 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                       io_responseSize,
                       l_fifoBuffer.index());
 
+            std::vector<uint8_t> data(l_fifoBuffer.index() * sizeof(uint32_t));
+
+            l_fifoBuffer.memcpy(data.data(), 0, data.size());
+
             SBE_TRACFBIN("Invalid Response from SBE",
-                         l_fifoBuffer.localBuffer(),
-                         l_fifoBuffer.index()*sizeof(uint32_t));
+                         data.data(),
+                         data.size());
 
             /*@
              * @errortype
@@ -647,18 +656,18 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
         }
 
         // Check status for success.
-        const statusHeader * l_pStatusHeader = l_fifoBuffer.getStatusHeader();
+        const statusHeader l_statusHeader = l_fifoBuffer.getStatusHeader();
 
-        if ((FIFO_STATUS_MAGIC != l_pStatusHeader->magic) ||
-            (SBE_PRI_OPERATION_SUCCESSFUL != l_pStatusHeader->primaryStatus) ||
-            (SBE_SEC_OPERATION_SUCCESSFUL != l_pStatusHeader->secondaryStatus))
+        if ((FIFO_STATUS_MAGIC != l_statusHeader.magic) ||
+            (SBE_PRI_OPERATION_SUCCESSFUL != l_statusHeader.primaryStatus) ||
+            (SBE_SEC_OPERATION_SUCCESSFUL != l_statusHeader.secondaryStatus))
         {
             SBE_TRACF(ERR_MRK "readResponse: failing downstream status "
                       " cmd=0x%08x magic=0x%08x prim=0x%08x secondary=0x%08x on %.8X",
                       i_pFifoRequest[1],
-                      l_pStatusHeader->magic,
-                      l_pStatusHeader->primaryStatus,
-                      l_pStatusHeader->secondaryStatus,
+                      l_statusHeader.magic,
+                      l_statusHeader.primaryStatus,
+                      l_statusHeader.secondaryStatus,
                       TARGETING::get_huid(i_target));
 
             /*@
@@ -685,9 +694,9 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                    bits{32,63},i_pFifoRequest[1]),
                                  SrcUserData(
                                    bits{0,15},0,
-                                   bits{16,31},l_pStatusHeader->magic,
-                                   bits{32,47},l_pStatusHeader->primaryStatus,
-                                   bits{48,63},l_pStatusHeader->secondaryStatus));
+                                   bits{16,31},l_statusHeader.magic,
+                                   bits{32,47},l_statusHeader.primaryStatus,
+                                   bits{48,63},l_statusHeader.secondaryStatus));
 
             collectRegFFDC(i_target,errl);
 
@@ -701,9 +710,9 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
             errl->collectTrace(SBEIO_COMP_NAME);
 
             //FIXME-Remove this hack once a full boot works
-            if( (FIFO_STATUS_MAGIC == l_pStatusHeader->magic)
-                && (SBE_PRI_UNSECURE_ACCESS_DENIED == l_pStatusHeader->primaryStatus)
-                && (SBE_SEC_BLACKLISTED_REG_ACCESS == l_pStatusHeader->secondaryStatus) )
+            if( (FIFO_STATUS_MAGIC == l_statusHeader.magic)
+                && (SBE_PRI_UNSECURE_ACCESS_DENIED == l_statusHeader.primaryStatus)
+                && (SBE_SEC_BLACKLISTED_REG_ACCESS == l_statusHeader.secondaryStatus) )
             {
                 const SbeFifo::fifoPutScomRequest* pScomRequest =
                   reinterpret_cast<const SbeFifo::fifoPutScomRequest*>(
@@ -731,7 +740,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
         if ( l_fifoBuffer.msgContainsFFDC() && (!l_getSbeFfdcReq || errl))
         {
             SbeFFDCParser l_ffdc_parser;
-            l_ffdc_parser.parseFFDCData(const_cast<void*>(l_fifoBuffer.getFFDCPtr()));
+            auto ffdc = l_fifoBuffer.getFFDCData();
+            l_ffdc_parser.parseFFDCData(ffdc.data());
 
             /*@
              * @errortype
@@ -755,9 +765,9 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                                                      bits{32,63},i_pFifoRequest[1]),
                                                                    SrcUserData(
                                                                      bits{0,15},0,
-                                                                     bits{16,31},l_pStatusHeader->magic,
-                                                                     bits{32,47},l_pStatusHeader->primaryStatus,
-                                                                     bits{48,63},l_pStatusHeader->secondaryStatus));
+                                                                     bits{16,31},l_statusHeader.magic,
+                                                                     bits{32,47},l_statusHeader.primaryStatus,
+                                                                     bits{48,63},l_statusHeader.secondaryStatus));
             if (uint32_t plid = ERRL_GETPLID_SAFE(errl))
             {
                 if (sbeErrors)
@@ -768,9 +778,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
 
             ERRORLOG::aggregate(errl, sbeErrors);
 
-            io_responseSize
-                = (reinterpret_cast<const char*>(l_fifoBuffer.getFFDCPtr())
-                   - reinterpret_cast<const char*>(l_fifoBuffer.localBuffer()));
+            io_responseSize = ((l_fifoBuffer.index() * sizeof(uint32_t))
+                               - l_fifoBuffer.getFFDCByteSize());
         }
         else
         {

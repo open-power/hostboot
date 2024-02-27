@@ -61,9 +61,6 @@ SbeFifoRespBuffer::SbeFifoRespBuffer(uint32_t* i_fifoBuffer,
                           iv_getSbeFfdcFmt(i_getSbeFfdcFmt)
 {
     do {
-        // Use the larger of the MSG_BUFFER_SIZE_WORDS_* values to be safe
-        iv_localMsgBuffer = std::make_unique<std::array<uint32_t, MSG_BUFFER_SIZE_WORDS_POZ>>();
-
         if(not i_fifoBuffer || iv_callerWordSize < STATUS_WORD_SIZE)
         {
             SBE_TRACF(ERR_MRK"SbeFifoRespBuffer CTOR: Caller buffer invalid.");
@@ -89,9 +86,9 @@ bool SbeFifoRespBuffer::append(uint32_t i_value)
         }
 
         // Use the larger of the MSG_BUFFER_SIZE_WORDS_* values to be safe
-        if(iv_index < iv_localMsgBuffer->size())
+        if(iv_index < MSG_BUFFER_SIZE_WORDS_POZ)
         {
-            iv_localMsgBuffer->at(iv_index) = i_value;
+            iv_buffer.append(&i_value, sizeof(i_value));
             ++iv_index;
             retval = true;
         }
@@ -105,8 +102,7 @@ bool SbeFifoRespBuffer::append(uint32_t i_value)
     {
          SBE_TRACF(INFO_MRK"SbeFifoRespBuffer::append. "
                            "Invalid state for append, current state %s",
-                            getStateString()
-                  );
+                            getStateString());
     }
 
     return retval;
@@ -142,31 +138,33 @@ void SbeFifoRespBuffer::completeMessage()
             // to get the index of the Status Header.
             iv_offsetIndex = (iv_index - 2);
 
+            const uint32_t ffdc_header_offset = iv_buffer.word_at(iv_offsetIndex);
+
             //Validate that the offset to the status header is in range
-            if((iv_localMsgBuffer->at(iv_offsetIndex) - 1) > iv_offsetIndex)
+            if((ffdc_header_offset - 1) > iv_offsetIndex)
             {
                 //offset is to large - would go before the buffer.
                 SBE_TRACF(ERR_MRK"SbeFifoRespBuffer::completeMessage: "
                          "The offset to the StatusHeader is too large. "
                          "(%d > %d)",
-                         iv_localMsgBuffer->at(iv_offsetIndex) - 1,
+                         ffdc_header_offset - 1,
                          iv_offsetIndex);
                 iv_state = MSG_INVALID_OFFSET;
                 break;
             }
-            else if(iv_localMsgBuffer->at(iv_offsetIndex) < (STATUS_WORD_SIZE + 1))
+            else if(ffdc_header_offset < (STATUS_WORD_SIZE + 1))
             {
                 //Minimum offset (no ffdc) is StatusHeader size + 1
                 SBE_TRACF(ERR_MRK"SbeFifoRespBuffer::completeMessage: "
                                  "The offset to the StatusHeader is too small. (%d < %d)",
-                         iv_localMsgBuffer->at(iv_offsetIndex),
+                         ffdc_header_offset,
                          STATUS_WORD_SIZE + 1);
                 iv_state = MSG_INVALID_OFFSET;
                 break;
             }
 
             //Set The StatusHeader index
-            iv_statusIndex = iv_offsetIndex - (iv_localMsgBuffer->at(iv_offsetIndex) - 1);
+            iv_statusIndex = iv_offsetIndex - (ffdc_header_offset - 1);
 
             //Determine if there is FFDC data in the buffer. We check if the
             //buffer contains a get SBE FFDC response. If so, the FFDC is at the
@@ -178,7 +176,7 @@ void SbeFifoRespBuffer::completeMessage()
             {
                 iv_ffdcIndex = 0;
                 iv_ffdcSize = iv_statusIndex;
-                assert( iv_localMsgBuffer->at(iv_offsetIndex) == (STATUS_WORD_SIZE + 1),
+                assert( ffdc_header_offset == (STATUS_WORD_SIZE + 1),
                         "Offset to status header is not 3");
             }
             else if((iv_statusIndex + STATUS_WORD_SIZE) < iv_offsetIndex)
@@ -212,16 +210,19 @@ bool SbeFifoRespBuffer::msgContainsFFDC()
 }
 
 //------------------------------------------------------------------------
-const void * SbeFifoRespBuffer::getFFDCPtr()
+std::vector<uint8_t> SbeFifoRespBuffer::getFFDCData()
 {
-    const void* retval{};
+    std::vector<uint8_t> data;
 
     if(msgContainsFFDC())
     {
-        retval = reinterpret_cast<const void*>(&iv_localMsgBuffer->at(iv_ffdcIndex));
+        const size_t data_begin = iv_ffdcIndex * sizeof(uint32_t);
+        const size_t data_len = iv_buffer.size() - data_begin;
+        data.resize(data_len);
+        iv_buffer.memcpy(data.data(), data_begin, data_len);
     }
 
-    return retval;
+    return data;
 }
 
 //--------------------------------------------------------------------------
@@ -251,13 +252,13 @@ size_t SbeFifoRespBuffer::getFFDCWordSize()
 }
 
 //---------------------------------------------------------------------------
-const SbeFifo::statusHeader * SbeFifoRespBuffer::getStatusHeader()
+SbeFifo::statusHeader SbeFifoRespBuffer::getStatusHeader()
 {
-    const SbeFifo::statusHeader* retval{};
+    SbeFifo::statusHeader retval{};
 
     if(isMsgComplete())
     {
-        retval = reinterpret_cast<const SbeFifo::statusHeader *>(&iv_localMsgBuffer->at(iv_statusIndex));
+        iv_buffer.memcpy(&retval, iv_statusIndex * sizeof(uint32_t), sizeof(retval));
     }
 
     return retval;
@@ -277,13 +278,14 @@ bool SbeFifoRespBuffer::msgContainsReturnData()
 }
 
 //---------------------------------------------------------------------------
-const void * SbeFifoRespBuffer::getReturnData()
+std::vector<uint8_t> SbeFifoRespBuffer::getReturnData()
 {
-    const void * retval{};
+    std::vector<uint8_t> retval{};
 
     if(msgContainsReturnData())
     {
-        retval = reinterpret_cast<const void*>(&iv_localMsgBuffer->at(0));
+        retval.resize(iv_buffer.size());
+        iv_buffer.memcpy(retval.data(), 0, iv_buffer.size());
     }
 
     return retval;
