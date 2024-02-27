@@ -111,9 +111,10 @@ function runtraceSBE()
     autosim $NOWIN --simcmd "pipe \"list-objects -all ddimm_ody\" \"grep ody\" " |
     while read -r line
     do
-      stamp=$(date '+%Y%m%d_%H%M%S')
+      if [[ $line == *Error* ]]; then continue; fi          # if error, skip
       sbenum=$(echo -n ${line//[!0-9]/})                    # remove all non-digits
       if [[ ! $sbenum == ?(-)+([0-9]) ]]; then continue; fi # if not a number, skip
+      stamp=$(date '+%Y%m%d_%H%M%S')
       fn="sbetrace.ddimm_ody.${sbenum}.${stamp}.log"
       output=`autosim $NOWIN --simcmd "pipe \"poz-sbe-trace $sbenum\" \"cat > $fn\"" \
               --timeout 300`
@@ -133,10 +134,11 @@ function runtraceSBE()
     autosim $NOWIN --simcmd "pipe \"list-objects -all\" \"grep '<proc_p10>'|grep chip\"" |
     while read -r line
     do
-      stamp=$(date '+%Y%m%d_%H%M%S')
+      if [[ $line == *Error* ]]; then continue; fi          # if error, skip
       sbenum=${line##*chip}                                 # remove prefix chars
       sbenum=$(echo -n ${sbenum//[!0-9]/})                  # remove all non-digits
       if [[ ! $sbenum == ?(-)+([0-9]) ]]; then continue; fi # if not a number, skip
+      stamp=$(date '+%Y%m%d_%H%M%S')
       fn="sbetrace.proc_p10.${sbenum}.${stamp}.log"
       output=`autosim $NOWIN --simcmd "pipe \"sbe-trace $sbenum\" \"cat > $fn\"" \
               --timeout 300`
