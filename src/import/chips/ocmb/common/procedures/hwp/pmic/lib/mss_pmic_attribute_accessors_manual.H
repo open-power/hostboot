@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,8 +37,10 @@
 #define _MSS_PMIC_ATTR_ACCESSORS_MANUAL_H_
 
 #include <fapi2.H>
-#include <mss_pmic_attribute_getters.H>
-#include <mss_pmic_attribute_setters.H>
+#ifndef __PPE__
+    #include <mss_pmic_attribute_getters.H>
+    #include <mss_pmic_attribute_setters.H>
+#endif
 #include <lib/utils/pmic_consts.H>
 
 namespace mss
@@ -54,6 +56,7 @@ namespace attr
 typedef fapi2::ReturnCode (*mfg_id_attr_ptr)(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         uint16_t& o_value);
 
+#ifndef __PPE__
 // Manufacturer / Vendor ID
 static constexpr mfg_id_attr_ptr get_mfg_id[] =
 {
@@ -444,6 +447,7 @@ static constexpr pmic_attr_ptr get_phase_comb[] =
     mss::attr::get_pmic2_phase_comb,
     mss::attr::get_pmic3_phase_comb
 };
+#endif
 
 ///
 /// @brief Get pmic n mode state for the given PMIC ID
