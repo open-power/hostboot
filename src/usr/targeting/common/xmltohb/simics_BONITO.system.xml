@@ -14460,7 +14460,7 @@
             <field><id>port</id><value>0</value></field>
             <field><id>maxMemorySizeKB</id><value>0x1</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
-            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>writePageSize</id><value>0x8</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14536,7 +14536,7 @@
             <field><id>port</id><value>1</value></field>
             <field><id>maxMemorySizeKB</id><value>0x1</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
-            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>writePageSize</id><value>0x8</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14610,7 +14610,7 @@
             <field><id>port</id><value>2</value></field>
             <field><id>maxMemorySizeKB</id><value>0x1</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
-            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>writePageSize</id><value>0x8</value></field>
         </default>
     </attribute>
     <attribute>
@@ -14684,7 +14684,7 @@
             <field><id>port</id><value>3</value></field>
             <field><id>maxMemorySizeKB</id><value>0x1</value></field>
             <field><id>writeCycleTime</id><value>05</value></field>
-            <field><id>writePageSize</id><value>0x20</value></field>
+            <field><id>writePageSize</id><value>0x8</value></field>
         </default>
     </attribute>
     <attribute>

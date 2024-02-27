@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1276,9 +1276,11 @@ errlHndl_t eepromI2cWrite ( TARGETING::Target * i_target,
     do
     {
         TRACUCOMP( g_trac_eeprom,
-                   "EEPROM WRITE START : Eeprom Role : %02d : Offset %.2X : Len %d : %016llx",
+                   "EEPROM WRITE START : Eeprom Role %02d : Offset %.2X : "
+                   "Len %d : io_buffer %016llx : PageSize %x",
                    i_i2cInfo.eepromRole, i_i2cInfo.offset, io_buflen,
-                   *((uint64_t*)io_buffer) );
+                   *((uint64_t*)io_buffer),
+                   i_i2cInfo.accessAddr.i2c_addr.writePageSize);
 
 
         // Prepare address parameters
@@ -1721,7 +1723,10 @@ errlHndl_t eepromPrepareI2cAddress ( TARGETING::Target * i_target,
     errlHndl_t err = NULL;
     o_bufSize = 0;
 
-    TRACDCOMP( g_trac_eeprom, ENTER_MRK"eepromPrepareI2cAddress()" );
+    TRACDCOMP( g_trac_eeprom,
+               ENTER_MRK"eepromPrepareI2cAddress: offset:%X addrSize:%d",
+               i_i2cInfo.offset,
+               i_i2cInfo.accessAddr.i2c_addr.addrSize);
 
     do
     {

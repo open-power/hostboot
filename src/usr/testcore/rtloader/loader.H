@@ -1408,16 +1408,18 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             uint32_t l_engine = (HBRT_I2C_MASTER_ENGINE_MASK & i_master) >> 8;
             uint32_t l_port = (HBRT_I2C_MASTER_PORT_MASK & i_master);
             TARGETING::Target* l_chipTarg = get_target_for_hbrt_id(l_chip);
-            uint32_t l_offset = i_offset << (sizeof(i_offset)-i_offsetSize);
+            uint32_t l_offset = i_offset << ((sizeof(i_offset)-i_offsetSize)*8);
             size_t l_length = i_length;
-            // PHYP/OPAL expet the 7-bits to be left-justified,
+            // PHYP/OPAL expect the 7-bits to be left-justified,
             //  HB input is right-justified
             uint16_t l_devAddr = i_devAddr << 1;
 
             TRACDCOMP(g_trac_hbrt,
-                      "rt_i2c_read: l_chip=%d(0x%08X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=0x%02X",
+                      "rt_i2c_read: l_chip=%d(0x%08X), l_engine=%d, l_port=%d, "
+                      "i_offset=0x%08X, i_offsetSize=%d, l_offset=0x%08X, "
+                      "l_devAddr=0x%02X",
                       l_chip, TARGETING::get_huid(l_chipTarg),
-                      l_engine, l_port, l_offset, l_devAddr);
+                      l_engine, l_port, i_offset, i_offsetSize, l_offset, l_devAddr);
 
             errlHndl_t l_err = deviceOp( DeviceFW::READ,
                                   l_chipTarg,
@@ -1463,16 +1465,18 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             uint32_t l_engine = (HBRT_I2C_MASTER_ENGINE_MASK & i_master) >> 8;
             uint32_t l_port = (HBRT_I2C_MASTER_PORT_MASK & i_master);
             TARGETING::Target* l_chipTarg = get_target_for_hbrt_id(l_chip);
-            uint32_t l_offset = i_offset << (sizeof(i_offset)-i_offsetSize);
+            uint32_t l_offset = i_offset << ((sizeof(i_offset)-i_offsetSize)*8);
             size_t l_length = i_length;
             // PHYP/OPAL expet the 7-bits to be left-justified,
             //  HB input is right-justified
             uint16_t l_devAddr = i_devAddr << 1;
 
             TRACDCOMP(g_trac_hbrt,
-                      "rt_i2c_write: l_chip=%d(0x%08X), l_engine=%d, l_port=%d, l_offset=%d, l_devAddr=0x%02X",
+                      "rt_i2c_write: l_chip=%d(0x%08X), l_engine=%d, l_port=%d, "
+                      "i_offset=0x%08X, i_offsetSize=%d, l_offset=0x%08X, "
+                      "l_devAddr=0x%02X",
                       l_chip, TARGETING::get_huid(l_chipTarg),
-                      l_engine, l_port, l_offset, l_devAddr);
+                      l_engine, l_port, i_offset, i_offsetSize, l_offset, l_devAddr);
 
             // Look for special parms to test i2c lock path
             if( i_offset == 1234 )

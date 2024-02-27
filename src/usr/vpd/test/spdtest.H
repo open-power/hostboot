@@ -650,241 +650,309 @@ class SPDTest: public CxxTest::TestSuite
                        fails, cmds );
         }
 
-        /**
-         * @brief Test a SPD Write
-         */
-        void testSpdWriteDQ ( void )
+    /**
+     * @brief Test a SPD Write
+     */
+    void testSpdWriteDQ ( void )
+    {
+        errlHndl_t err        = nullptr;
+        uint8_t   *testData   = nullptr;
+        uint8_t   *origData   = nullptr;
+        uint8_t   *verifyData = nullptr;
+
+        // 1. read the DIMM_BAD_DQ_DATA into an orig buffer to save for the restore
+        // 2. write,read,verify test data
+        // 3. write,read,verify the orig data
+
+        TS_INFO("testSpdWriteDQ Entry");
+
+        do
         {
-            errlHndl_t err = nullptr;
-            uint64_t cmds = 0x0;
-            uint64_t fails = 0x0;
-            uint8_t * testData = nullptr;
-            uint8_t * origData = nullptr;
-            uint8_t * verifyData = nullptr;
 
-            TS_INFO("testSpdWriteDQ Entry");
+        TARGETING::Target * theTarget = nullptr;
 
-            do
-            {
-                TARGETING::Target * theTarget = nullptr;
+        // Get DIMM Targets
+        TargetHandleList dimmList;
+        getDIMMTargets( dimmList );
 
-                // Get DIMM Targets
-                TargetHandleList dimmList;
-                getDIMMTargets( dimmList );
+        TS_INFO( "testSpdWriteDQ dimmList.size()=%d", dimmList.size() );
+        if( ( 0 == dimmList.size() ) ||
+            ( nullptr == dimmList[0] ) )
+        {
+            TS_FAIL("testSpdWriteDQ - No DIMMs found! Why not?");
+            break;
+        }
 
-                TS_INFO( "testSpdWriteDQ dimmList.size()=%d", dimmList.size() );
-                if( ( 0 == dimmList.size() ) ||
-                    ( nullptr == dimmList[0] ) )
-                {
-                    TS_FAIL("testSpdWriteDQ - No DIMMs found! Why not?");
-                    break;
-                }
+        // Operate on first DIMM
+        theTarget = dimmList[0];
+        uint16_t theKeyword{};
+        size_t   theSize{};
+        size_t   theOffset{};
 
-                // Operate on first DIMM
-                cmds++;
-                theTarget = dimmList[0];
-                size_t theSize = 0;
+        // Get Memory Type
+        uint8_t memType = 0x0;
+        err = getMemType( theTarget, memType );
+        if (err)
+        {
+            TS_FAIL( "testSpdWriteDQ - failed to read memtype" );
+            errlCommit( err, VPD_COMP_ID );
+            break;
+        }
 
-                // Get Memory Type
-                uint8_t memType = 0x0;
-                err = getMemType( theTarget,
-                                  memType );
+        if (memType == SPD::DDR5_TYPE)
+        {
+            TS_INFO( "testSpdWriteDQ - running DDR5_TYPE" );
+        }
+        else if ( SPD::DDR4_TYPE != memType )
+        {
+            TS_FAIL( "testSpdWriteDQ - Unsupported memory type: 0x%04X", memType );
+            errlCommit( err, VPD_COMP_ID);
+            break;
+        }
 
-                if( err )
-                {
-                    fails++;
-                    TS_FAIL( "testSpdWriteDQ - failed to read memtype!" );
-                    errlCommit( err, VPD_COMP_ID );
-                    break;
-                }
+        // Get the module type.
+        modSpecTypes_t modType = NA;
+        err = getModType(modType,
+                         theTarget,
+                         memType);
+        if (err)
+        {
+            TS_FAIL("testSpdRead- Failure reading memory module type");
+            errlCommit( err, VPD_COMP_ID );
+            break;
+        }
 
-                // TODO JIRA: PFHB-477 actually fix this test
-                if(memType == SPD::DDR5_TYPE)
-                {
-                    return;
-                }
+        auto l_keyword = DIMM_BAD_DQ_DATA;
 
-                // Get the module type.
-                modSpecTypes_t modType = NA;
-                err = getModType(modType,
-                                 theTarget,
-                                 memType);
+        if (memType == SPD::DDR5_TYPE)
+        {
+            // DDR5 has a different keyword name
+            l_keyword = DIMM_BAD_DQ_DATA_0;
+        }
 
-                if( err )
-                {
-                    fails++;
-                    TS_FAIL("testSpdRead- Failure reading memory module type!");
-                    errlCommit( err, VPD_COMP_ID );
-                    break;
-                }
+        const KeywordData *l_entry{nullptr};
+        err = getKeywordEntry( l_keyword,
+                               memType,
+                               theTarget,
+                               l_entry );
+        if (err)
+        {
+            TS_FAIL("testSpdWriteDQ - getKeywordEntry error for DIMM_BAD_DQ_DATA");
+            errlCommit(err, VPD_COMP_ID);
+            break;
+        }
 
-                // Get the size
-                if( SPD::DDR4_TYPE == memType )
-                {
-                    size_t dataSize = (modType == DDIMM)
-                        ? (sizeof(ddr4DDIMMData)/sizeof(ddr4DDIMMData[0]))
-                        : (sizeof(ddr4Data)/sizeof(ddr4Data[0]));
+        theKeyword = l_entry->keyword;
+        theOffset  = l_entry->offset;
+        theSize    = l_entry->length;
 
-                    for( uint32_t entry = 0;
-                         entry < dataSize;
-                         entry++ )
-                    {
-                        if (modType == DDIMM)
-                        {
-                            if( SPD::DIMM_BAD_DQ_DATA == ddr4DDIMMData[entry].keyword )
-                            {
-                                theSize = ddr4DDIMMData[entry].length;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            if( SPD::DIMM_BAD_DQ_DATA == ddr4Data[entry].keyword )
-                            {
-                                theSize = ddr4Data[entry].length;
-                                break;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    fails++;
-                    TS_FAIL( "testSpdWriteDQ - Unsupported memory type: 0x%04X", memType );
-                    errlCommit( err, VPD_COMP_ID);
-                    break;
-                }
+        if (0 == theSize)
+        {
+            // memType or Keyword not supported
+            TS_INFO("testSpdWriteDQ memType or Keyword not supported");
+            break;
+        }
 
-                if( 0 == theSize )
-                {
-                    // memType or Keyword not supported
-                    TS_INFO("testSpdWriteDQ memType Keyword not supported, but we tried...");
-                    cmds++;
-                    break;
-                }
+        // Allocate data buffers
+        origData   = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
+        testData   = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
+        verifyData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
 
-                // Allocate data buffer
-                origData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
+        //----------------------------------------------------------------------
+        // 1. read,verify ORIGINAL data, EEPROM vs SPD
+        //----------------------------------------------------------------------
 
-                // Read the data out first
-                err = deviceRead( theTarget,
+        TS_INFO( "testSpdWriteDQ_TC1: Read the ORIG data via EEPROM ADDR" );
+        err = DeviceFW::deviceOp( DeviceFW::READ,
+                                  theTarget,
                                   origData,
                                   theSize,
-                                  DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
+                                  DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
+                                                        theOffset,
+                                                        EEPROM::HARDWARE));
+        if (err)
+        {
+            TS_FAIL("testSpdWriteDQ_TC1: Error reading EEPROM ADDR DIMM BAD DQ ORIGINAL DATA");
+            errlCommit( err, VPD_COMP_ID );
+            break;
+        }
 
-                TRACFBIN( g_trac_spd, "testSpdWriteDQ ORIGINAL DIMM BAD DQ DATA read=", origData, theSize );
+        TRACFBIN( g_trac_spd, "DIMM BAD DQ ORIGINAL DATA read=",
+                              origData, theSize );
 
-                if( err )
-                {
-                    fails++;
-                    TS_FAIL( "testSpdWriteDQ - failed to read ORIGINAL DIMM BAD DQ DATA!" );
-                    errlCommit( err,
-                                VPD_COMP_ID );
-                    break;
-                }
+        TS_INFO( "testSpdWriteDQ_TC1: Read the ORIG data via SPD ADDR" );
+        memset(verifyData,0,theSize);
+        err = deviceRead( theTarget,
+                          verifyData,
+                          theSize,
+                          DEVICE_SPD_ADDRESS(theKeyword) );
+        if (err)
+        {
+            TS_FAIL("testSpdWriteDQ_TC1: Error reading SPD ADDR DIMM BAD DQ ORIGINAL DATA");
+            errlCommit( err, VPD_COMP_ID );
+            break;
+        }
 
-                // fill it up with some dummy data
-                testData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
-                for( size_t x=0; x<theSize; x++ )
-                {
-                    testData[x] = x;
-                }
+        if (memcmp( origData, verifyData, theSize))
+        {
+            TS_FAIL( "testSpdWriteDQ_TC1: SPD ADDR DIMM BAD DQ ORIGINAL DATA mismatch" );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ ORIG DATA: MISMATCH wrote=", origData, theSize );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ ORIG DATA: MISMATCH read=", verifyData, theSize );
+            break;
+        }
+        else
+        {
+            TS_INFO( "testSpdWriteDQ_TC1: SUCCESS - read SPD ADDR ORIG data" );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ ORIGINAL DATA", origData, theSize );
+        }
 
-                // Write the test data in
-                TS_INFO( "testSpdWriteDQ - Write the test data in" );
-                err = deviceWrite( theTarget,
-                                   testData,
-                                   theSize,
-                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
+        //----------------------------------------------------------------------
+        // 2. write,read,verify TEST data
+        //----------------------------------------------------------------------
 
-                if( err )
-                {
-                    fails++;
-                    TS_FAIL( "testSpdWriteDQ - Error writing data to DIMM BAD DQ DATA" );
-                    break;
-                }
+        for ( size_t x=0; x<theSize; x++ ) // fill buffer with TEST data
+        {
+            testData[x] = x;
+        }
+        TRACFBIN( g_trac_spd, "DIMM BAD DQ TEST DATA =", testData, theSize );
 
-                // Read the data out again to check it
-                TS_INFO( "testSpdWriteDQ - Read the data out again to check it" );
-                verifyData = static_cast<uint8_t*>(calloc( theSize,sizeof(uint8_t) ));
-                err = deviceRead( theTarget,
+        TS_INFO( "testSpdWriteDQ_TC2: Write the TEST data via SPD ADDR");
+        err = DeviceFW::deviceOp(DeviceFW::WRITE,
+                                 theTarget,
+                                 testData,
+                                 theSize,
+                                 DEVICE_SPD_ADDRESS(theKeyword));
+        if (err)
+        {
+            TS_FAIL( "testSpdWriteDQ_TC2: Error writing SPD ADDR DIMM BAD DQ TEST DATA" );
+            errlCommit( err, VPD_COMP_ID );
+            break;
+        }
+
+        TS_INFO( "testSpdWriteDQ_TC2: Read the TEST data via SPD ADDR to check it" );
+        memset(verifyData,0,theSize);
+        err = deviceRead( theTarget,
+                          verifyData,
+                          theSize,
+                          DEVICE_SPD_ADDRESS(theKeyword));
+        if (err)
+        {
+            TS_FAIL( "testSpdWriteDQ_TC2: Error reading SPD ADDR DIMM BAD DQ TEST DATA" );
+            errlCommit( err, VPD_COMP_ID );
+            break;
+        }
+
+        if (memcmp( testData, verifyData, theSize))
+        {
+            TS_FAIL( "testSpdWriteDQ_TC2: SPD ADDR DIMM BAD DQ TEST DATA mismatch" );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ TEST DATA: MISMATCH wrote=", testData, theSize );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ TEST DATA: MISMATCH read=", verifyData, theSize );
+            break;
+        }
+
+        TS_INFO( "testSpdWriteDQ_TC2: Read the TEST data via EEPROM ADDR to check it" );
+        memset(verifyData,0,theSize);
+        err = DeviceFW::deviceOp( DeviceFW::READ,
+                                  theTarget,
                                   verifyData,
                                   theSize,
-                                  DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
-
-                TRACFBIN( g_trac_spd, "testSpdWriteDQ TEST DATA read=", verifyData, theSize );
-
-                if( err )
-                {
-                    fails++;
-                    TS_FAIL( "testSpdWriteDQ - failed to read DUMMY DIMM BAD DQ DATA!" );
-                    errlCommit( err,
-                                VPD_COMP_ID );
-                    break;
-                }
-
-                if( memcmp( testData, verifyData, theSize ) )
-                {
-                    fails++;
-                    TS_FAIL( "testSpdWriteDQ - DIMM BAD DQ DATA does not match what we wrote!" );
-                    TRACFBIN( g_trac_spd, "PROBLEM DIMM BAD DQ DATA MISMATCH wrote=", testData, theSize );
-                    TRACFBIN( g_trac_spd, "PROBLEM DIMM BAD DQ DATA MISMATCH read=", verifyData, theSize );
-                }
-                else
-                {
-                    TS_INFO( "testSpdWriteDQ - DIMM BAD DQ DATA written successfully!" );
-                    TRACFBIN( g_trac_spd, "CONFIRMED DIMM BAD DQ DATA wrote=", testData, theSize );
-                    TRACFBIN( g_trac_spd, "CONFIRMED DIMM BAD DQ DATA read=", verifyData, theSize );
-                }
-
-                // put the original data back to be a good citizen
-                TS_INFO( "testSpdWriteDQ - deviceWrite Restoring ORIGINAL DIMM BAD DQ DATA" );
-                err = deviceWrite( theTarget,
-                                   origData,
-                                   theSize,
-                                   DEVICE_SPD_ADDRESS( DIMM_BAD_DQ_DATA ) );
-
-                if( err )
-                {
-                    fails++;
-                    TS_FAIL( "testSpdWriteDQ - Error writing original data back to "
-                             "DIMM BAD DQ DATA, things may be corrupted!");
-                    break;
-                }
-                else
-                {
-                    TS_INFO("testSpdWriteDQ - Successfully restored original "
-                            "DIMM BAD DQ DATA theSize=0x%X", theSize);
-                }
-
-
-            } while( 0 );
-
-            if( nullptr != testData )
-            {
-                free( testData );
-                testData = nullptr;
-            }
-
-            if( nullptr != origData )
-            {
-                free( origData );
-                origData = nullptr;
-            }
-
-            if( nullptr != verifyData )
-            {
-                free( verifyData );
-                verifyData = nullptr;
-            }
-
-            if( cmds == 0 )
-            {
-                TS_FAIL("testSpdWriteDQ - No tests ran, something is wrong...");
-            }
-
-            TS_INFO("testSpdWriteDQ Exit - %d/%d fails", fails, cmds);
+                                  DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
+                                                        theOffset,
+                                                        EEPROM::HARDWARE));
+        if (err)
+        {
+            TS_FAIL("testSpdWriteDQ_TC2: Error reading EEPROM ADDR DIMM BAD DQ TEST DATA");
+            errlCommit(err, VPD_COMP_ID);
+            break;
         }
+
+        if (memcmp( testData, verifyData, theSize))
+        {
+            TS_FAIL( "testSpdWriteDQ_TC2: EEPROM ADDR DIMM BAD DQ TEST DATA mismatch" );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ TEST DATA: MISMATCH wrote=", testData, theSize );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ TEST DATA: MISMATCH read=", verifyData, theSize );
+            break;
+        }
+        else
+        {
+            TS_INFO( "testSpdWriteDQ_TC2: SUCCESS - write SPD ADDR TEST data" );
+        }
+
+        //----------------------------------------------------------------------
+        // 3. write,read,verify ORIGINAL data
+        //----------------------------------------------------------------------
+
+        TS_INFO( "testSpdWriteDQ_TC3: Write DIMM BAD DQ ORIGINAL DATA to restore it" );
+        err = DeviceFW::deviceOp(DeviceFW::WRITE,
+                                 theTarget,
+                                 origData,
+                                 theSize,
+                                 DEVICE_SPD_ADDRESS(theKeyword));
+        if (err)
+        {
+            TS_FAIL("testSpdWriteDQ_TC3: Error restoring SPD ADDR DIMM BAD DQ "
+                    "ORIGINAL DATA, VPD may be corrupted");
+            errlCommit( err, VPD_COMP_ID );
+            break;
+        }
+
+        TS_INFO( "testSpdWriteDQ_TC3: Read the ORIGINAL data via SPD ADDR to check it" );
+        memset(verifyData,0,theSize);
+        err = deviceRead(theTarget,
+                         verifyData,
+                         theSize,
+                         DEVICE_SPD_ADDRESS(theKeyword));
+        if (err)
+        {
+            TS_FAIL( "testSpdWriteDQ_TC3: Error reading SPD ADDR DIMM BAD DQ ORIGINAL DATA" );
+            errlCommit( err, VPD_COMP_ID );
+            break;
+        }
+
+        if (memcmp(origData, verifyData, theSize))
+        {
+            TS_FAIL( "testSpdWriteDQ_TC3: SPD ADDR DIMM BAD DQ ORIGINAL DATA mismatch" );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ ORIGINAL DATA: MISMATCH wrote=", origData, theSize );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ ORIGINAL DATA: MISMATCH read=", verifyData, theSize );
+            break;
+        }
+
+        TS_INFO( "testSpdWriteDQ_TC3: Read the ORIGINAL data via EEPROM ADDR to check it" );
+        memset(verifyData,0,theSize);
+        err = DeviceFW::deviceOp(DeviceFW::READ,
+                                 theTarget,
+                                 verifyData,
+                                 theSize,
+                                 DEVICE_EEPROM_ADDRESS(EEPROM::VPD_AUTO,
+                                                       theOffset,
+                                                       EEPROM::HARDWARE));
+        if (err)
+        {
+            TS_FAIL( "testSpdWriteDQ_TC3: Error reading EEPROM ADDR DIMM BAD DQ ORIGINAL DATA" );
+            errlCommit( err, VPD_COMP_ID );
+            break;
+        }
+
+        if (memcmp(origData, verifyData, theSize))
+        {
+            TS_FAIL( "testSpdWriteDQ_TC3: EEPROM ADDR DIMM BAD DQ ORIGINAL DATA mismatch" );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ ORIGINAL DATA MISMATCH wrote=", origData, theSize );
+            TRACFBIN( g_trac_spd, "DIMM BAD DQ ORIGINAL DATA MISMATCH read=", verifyData, theSize );
+            break;
+        }
+        else
+        {
+            TS_INFO( "testSpdWriteDQ_TC3: SUCCESS - restore SPD ADDR ORIG data" );
+        }
+
+        } while( 0 );
+
+        if (nullptr != origData)   {free(origData);}
+        if (nullptr != testData)   {free(testData);}
+        if (nullptr != verifyData) {free(verifyData);}
+
+        TS_INFO("testSpdWriteDQ Exit");
+    }
 
         /**
          * @brief Test a SPD Write EXPLORER_FW_VERSION
