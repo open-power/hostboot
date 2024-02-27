@@ -473,8 +473,20 @@ fapi2::ReturnCode validate_pmic_revisions(const fapi2::Target<fapi2::TARGET_TYPE
     const uint8_t l_pmic_id = mss::index(i_pmic_target);
     uint8_t l_simics = 0;
 
-    // Get attribute value
+#ifdef __PPE__
+    const static uint8_t REVISION[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_REVISION,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_REVISION,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_REVISION,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_REVISION
+    };
+    l_rev_attr = REVISION[l_pmic_id];
+#else
+    // Get attribute
     FAPI_TRY(mss::attr::get_revision[l_pmic_id](i_ocmb_target, l_rev_attr));
+#endif
+
 
     // Get the register value
     FAPI_TRY(mss::pmic::i2c::reg_read(i_pmic_target, REGS::R3B_REVISION, l_rev_reg));
@@ -579,8 +591,19 @@ fapi2::ReturnCode enable_2u(
     // Ensure the PMICs are in sorted order
     FAPI_TRY(mss::pmic::order_pmics_by_sequence(i_ocmb_target, l_pmics));
 
+#ifdef __PPE__
+    const static uint16_t MFG_ID[] =
+    {
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_MFG_ID,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_MFG_ID,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_MFG_ID,
+        fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_MFG_ID
+    };
     // Get vendor ID. We just need vendor ID from 1 PMIC as both PMICs will be from the same vendor
+    l_vendor_id = MFG_ID[l_first_pmic_id];
+#else
     FAPI_TRY(mss::attr::get_mfg_id[l_first_pmic_id](i_ocmb_target, l_vendor_id));
+#endif
 
     // Validate vendor id
     FAPI_TRY((mss::pmic::check::matching_vendors(i_ocmb_target, l_pmics[PMIC0])));
@@ -871,14 +894,25 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
             // Set VIN_BULK PG threshold
             FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, REGS::R1A, 0x60));
 
-            // Get PMIC vendor
+#ifdef __PPE__
+            const static uint16_t MFG_ID[] =
+            {
+                fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC0_MFG_ID,
+                fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC1_MFG_ID,
+                fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC2_MFG_ID,
+                fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_PMIC3_MFG_ID
+            };
+            // Get vendor ID. We just need vendor ID from 1 PMIC as both PMICs will be from the same vendor
+            l_vendor_id = MFG_ID[l_relative_pmic_id];
+#else
             FAPI_TRY_LAMBDA(mss::attr::get_mfg_id[l_relative_pmic_id](i_ocmb_target, l_vendor_id));
+#endif
 
             // Bias with SPD
             if (l_vendor_id == mss::pmic::vendor::TI)
             {
                 FAPI_TRY_LAMBDA(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(i_pmic, i_ocmb_target,
-                static_cast<mss::pmic::id>(l_relative_pmic_id)));
+                                static_cast<mss::pmic::id>(l_relative_pmic_id)));
             }
             else
             {

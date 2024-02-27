@@ -44,7 +44,9 @@
 #include <i2c_pmic.H>
 #include <pmic_consts.H>
 #include <pmic_common_utils.H>
-#include <mss_pmic_attribute_getters.H>
+#ifndef __PPE__
+    #include <mss_pmic_attribute_getters.H>
+#endif
 #include <mss_pmic_attribute_accessors_manual.H>
 #include <generic/memory/lib/utils/find.H>
 
