@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -143,5 +143,7 @@ OBJS += ody_inband.o
 OBJS += ody_putsram.o
 OBJS += ody_putsram_io_ppe.o
 OBJS += io_ppe_cache.o
+OBJS += ody_mask_firs_omi_init.o
+
 
 include ${ROOTPATH}/config.mk

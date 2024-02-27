@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@
 #include    <ody_omi_init.H>
 #include    <p10_omi_init.H>
 #include    <p10_disable_ocmb_i2c.H>
+#include    <ody_mask_firs_omi_init.H>
 
 // Explorer error logs
 #include    <expscom/expscom_errlog.H>
@@ -150,8 +151,19 @@ void* call_host_omi_init (void *io_pArgs)
             const auto ocmbs = composable(getChildAffinityTargets)(i_mcc, CLASS_NA, TYPE_OCMB_CHIP, true);
             enableInbandScomsOCMB(ocmbs);
             enablePipeFifoOCMB(ocmbs);
+
+            // Finish the FIR inits, this must come after inband scoms are
+            // enabled because it touches scoms in the deny list
+            for (const auto l_ocmb : ocmbs)
+            {
+                if (UTIL::isOdysseyChip(l_ocmb))
+                {
+                    RUN_ODY_HWP(CONTEXT, l_StepError, l_err, l_ocmb, ody_mask_firs_omi_init, { l_ocmb });
+                }
+            }
         }
 
+    ERROR_EXIT: // label used by RUN_ODY_* above
         return l_err;
     });
 
