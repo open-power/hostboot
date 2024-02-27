@@ -760,7 +760,10 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                                                      bits{48,63},l_pStatusHeader->secondaryStatus));
             if (uint32_t plid = ERRL_GETPLID_SAFE(errl))
             {
-                sbeErrors->plid(plid);
+                if (sbeErrors)
+                {
+                    sbeErrors->plid(plid);
+                }
             }
 
             ERRORLOG::aggregate(errl, sbeErrors);
