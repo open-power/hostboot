@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -6647,6 +6647,52 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                                    PMU_SMB_DDR5U_1D_t& io_struct,
                                    fapi2::hwp_data_ostream& o_log_data)
 {
+    if(has_new_bad_bits(io_start_bad_bits, io_struct))
+    {
+        // Get the bytes into uint32_t for rank0 and rank1 for start bad bits
+        uint32_t l_start_bad_bits_r0_byte0_3 = io_start_bad_bits[0][0] << 24 | io_start_bad_bits[0][1] << 16 |
+                                               io_start_bad_bits[0][2] << 8 | io_start_bad_bits[0][3];
+        uint32_t l_start_bad_bits_r0_byte4_7 = io_start_bad_bits[0][4] << 24 | io_start_bad_bits[0][5] << 16 |
+                                               io_start_bad_bits[0][6] << 8 | io_start_bad_bits[0][7];
+        uint16_t l_start_bad_bits_r0_byte8_9 = io_start_bad_bits[0][8] << 24 | io_start_bad_bits[0][9] << 16;
+        uint32_t l_start_bad_bits_r1_byte0_3 = io_start_bad_bits[1][0] << 24 | io_start_bad_bits[1][1] << 16 |
+                                               io_start_bad_bits[1][2] << 8 | io_start_bad_bits[1][3];
+        uint32_t l_start_bad_bits_r1_byte4_7 = io_start_bad_bits[1][4] << 24 | io_start_bad_bits[1][5] << 16 |
+                                               io_start_bad_bits[1][6] << 8 | io_start_bad_bits[1][7];
+        uint16_t l_start_bad_bits_r1_byte8_9 = io_start_bad_bits[1][8] << 24 | io_start_bad_bits[1][9] << 16;
+        // Get the bytes into uint32_t for rank0 and rank1 for new bad bits
+        uint32_t l_new_bad_bits_r0_byte0_3 = io_struct.DisabledDB0LaneR0 << 24 | io_struct.DisabledDB1LaneR0 << 16 |
+                                             io_struct.DisabledDB2LaneR0 << 8 | io_struct.DisabledDB3LaneR0;
+        uint32_t l_new_bad_bits_r0_byte4_7 = io_struct.DisabledDB4LaneR0 << 24 | io_struct.DisabledDB5LaneR0 << 16 |
+                                             io_struct.DisabledDB6LaneR0 << 8 | io_struct.DisabledDB7LaneR0;
+        uint16_t l_new_bad_bits_r0_byte8_9 = io_struct.DisabledDB8LaneR0 << 24 | io_struct.DisabledDB9LaneR0 << 16;
+        uint32_t l_new_bad_bits_r1_byte0_3 = io_struct.DisabledDB0LaneR1 << 24 | io_struct.DisabledDB1LaneR1 << 16 |
+                                             io_struct.DisabledDB2LaneR1 << 8 | io_struct.DisabledDB3LaneR1;
+        uint32_t l_new_bad_bits_r1_byte4_7 = io_struct.DisabledDB4LaneR1 << 24 | io_struct.DisabledDB5LaneR1 << 16 |
+                                             io_struct.DisabledDB6LaneR1 << 8 | io_struct.DisabledDB7LaneR1;
+        uint16_t l_new_bad_bits_r1_byte8_9 = io_struct.DisabledDB8LaneR1 << 24 | io_struct.DisabledDB9LaneR1 << 16;
+
+
+        // When running training with all options, new bad_bit disables found
+        FAPI_ASSERT_NOEXIT(false,
+                           fapi2::ODY_DRAMINIT_NEW_BAD_BITS_FOUND(fapi2::FAPI2_ERRL_SEV_RECOVERED)
+                           .set_PORT_TARGET(i_target)
+                           .set_START_BAD_BITS_R0_BYTE0_3(l_start_bad_bits_r0_byte0_3)
+                           .set_START_BAD_BITS_R0_BYTE4_7(l_start_bad_bits_r0_byte4_7)
+                           .set_START_BAD_BITS_R0_BYTE8_9(l_start_bad_bits_r0_byte8_9)
+                           .set_START_BAD_BITS_R1_BYTE0_3(l_start_bad_bits_r1_byte0_3)
+                           .set_START_BAD_BITS_R1_BYTE4_7(l_start_bad_bits_r1_byte4_7)
+                           .set_START_BAD_BITS_R1_BYTE8_9(l_start_bad_bits_r1_byte8_9)
+                           .set_NEW_BAD_BITS_R0_BYTE0_3(l_new_bad_bits_r0_byte0_3)
+                           .set_NEW_BAD_BITS_R0_BYTE4_7(l_new_bad_bits_r0_byte4_7)
+                           .set_NEW_BAD_BITS_R0_BYTE8_9(l_new_bad_bits_r0_byte8_9)
+                           .set_NEW_BAD_BITS_R1_BYTE0_3(l_new_bad_bits_r1_byte0_3)
+                           .set_NEW_BAD_BITS_R1_BYTE4_7(l_new_bad_bits_r1_byte4_7)
+                           .set_NEW_BAD_BITS_R1_BYTE8_9(l_new_bad_bits_r1_byte8_9),
+                           TARGTIDFORMAT "New bad_bit disables found ", TARGTID
+                          );
+    }
+
     // If we have address fails, do not run regardless of new bad bits
     // If this card has new bad bits, then run the recovery
     if(!has_new_bad_bits(io_start_bad_bits, io_struct) || has_address_fails(io_status, io_struct))

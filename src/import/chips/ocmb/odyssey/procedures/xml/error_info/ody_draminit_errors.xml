@@ -92,6 +92,29 @@
     </deconfigure>
   </hwpError>
 
+   <hwpError>
+    <sbeError/>
+    <rc>RC_ODY_DRAMINIT_NEW_BAD_BITS_FOUND</rc>
+    <description>Ody draminit's recovery algorithm found new bad bits.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>START_BAD_BITS_R0_BYTE0_3</ffdc>
+    <ffdc>START_BAD_BITS_R0_BYTE4_7</ffdc>
+    <ffdc>START_BAD_BITS_R0_BYTE8_9</ffdc>
+    <ffdc>START_BAD_BITS_R1_BYTE0_3</ffdc>
+    <ffdc>START_BAD_BITS_R1_BYTE4_7</ffdc>
+    <ffdc>START_BAD_BITS_R1_BYTE8_9</ffdc>
+    <ffdc>NEW_BAD_BITS_R0_BYTE0_3</ffdc>
+    <ffdc>NEW_BAD_BITS_R0_BYTE4_7</ffdc>
+    <ffdc>NEW_BAD_BITS_R0_BYTE8_9</ffdc>
+    <ffdc>NEW_BAD_BITS_R1_BYTE0_3</ffdc>
+    <ffdc>NEW_BAD_BITS_R1_BYTE4_7</ffdc>
+    <ffdc>NEW_BAD_BITS_R1_BYTE8_9</ffdc>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
   <hwpError>
     <sbeError/>
     <rc>RC_ODY_DRAMINIT_REPAIRS_EXCEEDED</rc>
