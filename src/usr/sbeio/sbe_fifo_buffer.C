@@ -89,7 +89,7 @@ bool SbeFifoRespBuffer::append(uint32_t i_value)
         }
 
         // Use the larger of the MSG_BUFFER_SIZE_WORDS_* values to be safe
-        if(iv_index < MSG_BUFFER_SIZE_WORDS_POZ)
+        if(iv_index < iv_localMsgBuffer->size())
         {
             iv_localMsgBuffer->at(iv_index) = i_value;
             ++iv_index;

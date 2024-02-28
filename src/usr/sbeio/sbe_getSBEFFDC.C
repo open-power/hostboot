@@ -95,7 +95,7 @@ namespace SBEIO
         uint32_t l_responseSize = 0;
         if (i_chipTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC)
         {
-            l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_POZ;
+            l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_P10;
         }
         else if (i_chipTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
         {

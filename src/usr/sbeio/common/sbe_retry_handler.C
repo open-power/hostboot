@@ -1343,7 +1343,7 @@ void ProcSbeRetryHandler::sbe_get_ffdc_handler()
     // Use the MSG_BUFFER_SIZE_WORDS_P10 since this is for a P10 processor
     uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_P10;
     uint32_t *l_pFifoResponse =
-        reinterpret_cast<uint32_t *>(malloc(l_responseSize));
+        reinterpret_cast<uint32_t *>(malloc(l_responseSize*sizeof(uint32_t)));
 
     // For OpenPower systems if a piece of HW is garded then we will
     // need to force a reconfigure loop and avoid the rest of the
