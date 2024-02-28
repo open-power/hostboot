@@ -211,6 +211,39 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
     // (3) at the very least we will leak the message.
     thePdrManager().unregisterStateEffecterCallbackMsgQ(dump_complete_effecter, 0, msgQ.get());
 
+    sbe_dump_timeout_milliseconds = MS_PER_SEC; // 1 second for stragglers
+    const auto stragglers = msg_wait_timeout(msgQ.get(), sbe_dump_timeout_milliseconds);
+
+    const bool dump_completed = !dump_done_msgs.empty() || !stragglers.empty();
+
+    if (!dump_completed)
+    {
+        PLDM_ERR("dumpSbe: Request for SBE dump on target 0x%08x (effecter IDs %d, %d) timed out",
+                 get_huid(dump_target),
+                 sbe_dump_effecter,
+                 dump_complete_effecter);
+
+        /*@
+         *@moduleid         MOD_SBE_DUMP
+         *@reasoncode       RC_SBE_DUMP_TIMED_OUT
+         *@userdata1        Dump target HUID
+         *@userdata2[0:31]  BMC's SBE start-dump effecter ID
+         *@userdata2[32:63] Host's SBE dump-complete effecter ID
+         *@devdesc          BMC failed to respond to dump request.
+         *@custdesc         Error occurred during failure-data capture.
+         */
+        errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                             MOD_SBE_DUMP,
+                             RC_SBE_DUMP_TIMED_OUT,
+                             get_huid(dump_target),
+                             TWO_UINT32_TO_UINT64(sbe_dump_effecter,
+                                                  dump_complete_effecter),
+                             ErrlEntry::ADD_SW_CALLOUT);
+
+        addBmcErrorCallouts(errl);
+        break;
+    }
+
     const auto respond_to_msg =
         [&](const bool prev_completed, msg_t* const msg)
         {
@@ -240,41 +273,36 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
             return this_completed || prev_completed;
         };
 
-    bool dump_completed = false;
+    bool dump_succeeded = false;
 
-    dump_completed = std::accumulate(begin(dump_done_msgs), end(dump_done_msgs),
-                                     dump_completed, respond_to_msg);
+    dump_succeeded = std::accumulate(begin(dump_done_msgs), end(dump_done_msgs),
+                                     dump_succeeded, respond_to_msg);
 
-    sbe_dump_timeout_milliseconds = MS_PER_SEC; // 1 second for stragglers
-    const auto stragglers = msg_wait_timeout(msgQ.get(), sbe_dump_timeout_milliseconds);
-
-    dump_completed = std::accumulate(begin(stragglers), end(stragglers),
-                                     dump_completed, respond_to_msg);
+    dump_succeeded = std::accumulate(begin(stragglers), end(stragglers),
+                                     dump_succeeded, respond_to_msg);
 
     /* If we got a message instead of a timeout, then we succeeded. If not,
      * create an error log. */
 
-    if (!dump_completed)
+    if (!dump_succeeded)
     {
-        PLDM_ERR("dumpSbe: Request for SBE dump on target 0x%08x (effecter IDs %d, %d) timed out",
+        PLDM_ERR("dumpSbe: Request for SBE dump on target 0x%08x (effecter IDs %d, %d) failed",
                  get_huid(dump_target),
                  sbe_dump_effecter,
                  dump_complete_effecter);
 
         /*@
-         * @errorlog
-         * @errortype        ERRL_SEV_INFORMATIONAL
-         * @moduleid         MOD_SBE_DUMP
-         * @reasoncode       RC_SBE_DUMP_TIMED_OUT
-         * @userdata1        Dump target HUID
-         * @userdata2[0:31]  BMC's SBE start-dump effecter ID
-         * @userdata2[32:63] Host's SBE dump-complete effecter ID
-         * @devdesc          Missing SBE dump effecter ID
-         * @custdesc         Error occurred during system boot.
+         *@moduleid         MOD_SBE_DUMP
+         *@reasoncode       RC_SBE_DUMP_FAILED
+         *@userdata1        Dump target HUID
+         *@userdata2[0:31]  BMC's SBE start-dump effecter ID
+         *@userdata2[32:63] Host's SBE dump-complete effecter ID
+         *@devdesc          SBE dump request failed.
+         *@custdesc         Error occurred during failure-data capture.
          */
         errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                              MOD_SBE_DUMP,
-                             RC_SBE_DUMP_TIMED_OUT,
+                             RC_SBE_DUMP_FAILED,
                              get_huid(dump_target),
                              TWO_UINT32_TO_UINT64(sbe_dump_effecter,
                                                   dump_complete_effecter),
@@ -290,7 +318,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
     addPldmFrData(errl);
 
     PLDM_EXIT("dumpSbe(0x%08x, 0x%08x) = 0x%08x",
-              get_huid(i_target), i_plid, ERRL_GETPLID_SAFE(errl));
+              get_huid(i_target), i_plid, ERRL_GETEID_SAFE(errl));
 
     return errl;
 }
