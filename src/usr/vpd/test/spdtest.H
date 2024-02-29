@@ -45,6 +45,7 @@
 #include "../spdDDR3.H"
 #include "../spdDDR4.H"
 #include "../spdDDR4_DDIMM.H"
+#include "../spdDDR5_DDIMM.H"
 #include "../spd_planar.H"
 #include "../spd.H"
 
@@ -1003,12 +1004,6 @@ class SPDTest: public CxxTest::TestSuite
                     break;
                 }
 
-                // TODO JIRA: PFHB-477 actually fix this test
-                if(memType == SPD::DDR5_TYPE)
-                {
-                    return;
-                }
-
                 // Get the module type.
                 modSpecTypes_t modType = NA;
                 err = getModType(modType,
@@ -1049,6 +1044,21 @@ class SPDTest: public CxxTest::TestSuite
                                 theSize = ddr4Data[entry].length;
                                 break;
                             }
+                        }
+                    }
+                }
+                else if(SPD::DDR5_TYPE == memType)
+                {
+                    size_t dataSize = sizeof(ddr5DDIMMData)/sizeof(ddr5DDIMMData[0]);
+
+                    for(uint32_t entry = 0; entry < dataSize; entry++)
+                    {
+                        // DDR5 VPD also contains the EXPLORER_FW_VERSION keyword, so
+                        // use it here for DDR5 testing.
+                        if(SPD::EXPLORER_FW_VERSION == ddr5DDIMMData[entry].keyword)
+                        {
+                            theSize = ddr5DDIMMData[entry].length;
+                            break;
                         }
                     }
                 }
@@ -2197,12 +2207,6 @@ class SPDTest: public CxxTest::TestSuite
                     break;
                 }
 
-                // TODO JIRA: PFHB-477 actually fix this test
-                if(memType == SPD::DDR5_TYPE)
-                {
-                    return;
-                }
-
                 // Get the module type.
                 modSpecTypes_t modType = NA;
                 err = getModType(modType,
@@ -2243,6 +2247,21 @@ class SPDTest: public CxxTest::TestSuite
                                 theSize = ddr4Data[entry].length;
                                 break;
                             }
+                        }
+                    }
+                }
+                else if(SPD::DDR5_TYPE == memType)
+                {
+                    size_t dataSize = sizeof(ddr5DDIMMData)/sizeof(ddr5DDIMMData[0]);
+
+                    for(uint32_t entry = 0; entry < dataSize; entry++)
+                    {
+                        // DDR5 VPD also contains the EXPLORER_FW_VERSION keyword, so
+                        // use it here for DDR5 testing.
+                        if(SPD::EXPLORER_FW_VERSION == ddr5DDIMMData[entry].keyword)
+                        {
+                            theSize = ddr5DDIMMData[entry].length;
+                            break;
                         }
                     }
                 }

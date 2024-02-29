@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -276,16 +276,10 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
-        // TODO JIRA: PFHB-477 re-enable this test for Odyssey
-        if(TARGETING::UTIL::isOdysseyChip(l_ocmbChipTarget.get()))
-        {
-            break;
-        }
-
         TS_INFO("testGetVPD_EFD: Test case 7 start");
 
         // Initialize the other input variables
-        l_vpdInfo.iv_omi_freq_mhz = 21330;
+        l_vpdInfo.iv_omi_freq_mhz = 25600; // This frequency is common between Explorer and Odyssey
         l_vpdInfo.iv_rank = 0;
         l_vpdInfo.iv_is_config_ffdc_enabled = false;
 
@@ -315,12 +309,6 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     ++l_numTests;
     do
     {
-        // TODO JIRA: PFHB-477 re-enable this test for Odyssey
-        if(TARGETING::UTIL::isOdysseyChip(l_ocmbChipTarget.get()))
-        {
-            break;
-        }
-
         TS_INFO("testGetVPD_EFD: Test case 8 start");
 
         // Initialize the other input variables
@@ -383,22 +371,15 @@ void fapi2PlatGetVpdOcmbChipTest::testPlatGetVPD_EFD()
     TS_INFO("testGetVPD_EFD: Test case 9 end");
 
 **/
-
     /// Test case 10
     // Test with data that is guaranteed to find a match 3
     ++l_numTests;
     do
     {
-        // TODO JIRA: PFHB-477 re-enable this test for Odyssey
-        if(TARGETING::UTIL::isOdysseyChip(l_ocmbChipTarget.get()))
-        {
-            break;
-        }
-
         TS_INFO("testGetVPD_EFD: Test case 10 start");
 
         // Initialize the other input variables
-        l_vpdInfo.iv_omi_freq_mhz = 21330;
+        l_vpdInfo.iv_omi_freq_mhz = 25600; // This frequency is common between Explorer and Odyssey
         l_vpdInfo.iv_rank = 0;
         l_vpdInfo.iv_is_config_ffdc_enabled = true;
 

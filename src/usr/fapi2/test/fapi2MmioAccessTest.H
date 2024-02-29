@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,8 @@
 #include <plat_hwp_invoker.H>
 #include <test/exptest_utils.H>
 #include <targeting/odyutil.H>
+#include <mmio_odyssey.H>
+#include <mmio_ocmb_common.H>
 
 using namespace fapi2;
 
@@ -120,11 +122,6 @@ void test_fapi2MmioInvalidSizes()
 
     for (auto & l_ocmb: l_ocmbTargetList)
     {
-        if(TARGETING::UTIL::isOdysseyChip(l_ocmb))
-        {
-            TS_INFO("test_fapi2MmioInvalidSizes() - Odyssey chip detected; skipping the test");
-            continue; // TODO JIRA: PFHB-477 re-enable this test for Odyssey
-        }
         Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapi2_ocmbTarget( l_ocmb );
         auto first_ocmb_info = l_ocmb->getAttr<TARGETING::ATTR_SCOM_SWITCHES>();
         if (!first_ocmb_info.useInbandScom)
@@ -184,6 +181,8 @@ void test_fapi2MmioAccess()
     int numFails = 0;
 
     errlHndl_t l_errl = nullptr;
+    uint64_t l_mmioAddr = EXPLR_IB_RSP_ADDR;
+    size_t l_mmioSize = 4; // 4bytes for Explorer, 8bytes for Odyssey
 
     // Create a vector of TARGETING::Target pointers
     TARGETING::TargetHandleList l_chipList;
@@ -201,14 +200,13 @@ void test_fapi2MmioAccess()
     {
         if(TARGETING::UTIL::isOdysseyChip(l_ocmb))
         {
-            TS_INFO("test_fapi2MmioAccess() - Odyssey chip detected; skipping the test");
-            continue; // TODO JIRA: PFHB-477 re-enable this test for Odyssey
+            l_mmioAddr = MMIOCOMMON_scom_to_offset(MMIOODY::ODY_MMIO_MCFGERR);
+            l_mmioSize = 8;
         }
-
         Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi2_target( l_ocmb );
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_getmmio_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_getmmio_pass, l_fapi2_target, l_mmioAddr, l_mmioSize);
         if(l_errl)
         {
             TS_FAIL("Error from p10_mmiotest_getmmio_pass !!");
@@ -218,9 +216,14 @@ void test_fapi2MmioAccess()
                           // a false negative on the next case
             l_errl = nullptr;
         }
-
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_putmmio_pass, l_fapi2_target);
+
+        if(!TARGETING::UTIL::isOdysseyChip(l_ocmb))
+        {
+            l_mmioSize = 4;
+        }
+
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_putmmio_pass, l_fapi2_target, l_mmioAddr, l_mmioSize);
         if(l_errl)
         {
             TS_FAIL("Error from p10_mmiotest_putmmio_pass !!");
@@ -231,8 +234,13 @@ void test_fapi2MmioAccess()
             l_errl = nullptr;
         }
 
+        if(TARGETING::UTIL::isOdysseyChip(l_ocmb))
+        {
+            l_mmioSize = 8;
+        }
+
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_double_read_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_double_read_pass, l_fapi2_target, l_mmioAddr, l_mmioSize);
         if(l_errl)
         {
             TS_FAIL("Error from p10_mmiotest_double_read_pass !!");
@@ -244,7 +252,7 @@ void test_fapi2MmioAccess()
         }
 
         numTests++;
-        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_write_read_pass, l_fapi2_target);
+        FAPI_INVOKE_HWP(l_errl, p10_mmiotest_write_read_pass, l_fapi2_target, l_mmioAddr, l_mmioSize);
         if(l_errl)
         {
             TS_FAIL("Error from p10_mmiotest_write_read_pass !!");
