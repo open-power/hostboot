@@ -241,7 +241,7 @@ namespace SBEIO
             {
                 hreset_already_performed = true;
                 err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                SBE_TRACF("checkOdyFFDC: hreset_already_performed ERRL=0x%X", ERRL_GETEID_SAFE(err))
+                SBE_TRACF("checkOdyFFDC: hreset_already_performed ERRL=0x%X", ERRL_GETEID_SAFE(err));
             }
             errlCommit(err, SBEIO_COMP_ID);
         }
