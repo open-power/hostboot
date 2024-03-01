@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,6 +100,15 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
 
     do
     {
+        // Each OCMB needs to keep track of whether it has hit a UE. This
+        // is needed for a workaround for clearing Hardware Force Mirror (HWFM)
+        // when certain errors are hit, however if an OCMB has hit a UE, then
+        // HWFM will not be cleared.
+        #ifdef __HOSTBOOT_RUNTIME
+        OcmbDataBundle * db = getOcmbDataBundle(i_chip);
+        db->iv_hwfmUeSeen = true;
+        #endif
+
         // Handle the memory UE.
         o_rc = __handleMemUe<TYPE_OCMB_CHIP>( i_chip, i_addr, i_type, io_sc );
         if ( SUCCESS != o_rc )

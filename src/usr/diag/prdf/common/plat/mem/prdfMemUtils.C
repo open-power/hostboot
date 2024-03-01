@@ -1018,7 +1018,7 @@ uint32_t clearHwfm(ExtensibleChip * i_mcc)
     for (const auto & ocmb : getConnectedChildren(i_mcc, TYPE_OCMB_CHIP))
     {
         OcmbDataBundle * db = getOcmbDataBundle(ocmb);
-        if (db->iv_hwfmMainlineUe)
+        if (db->iv_hwfmUeSeen)
         {
             return o_rc;
         }
