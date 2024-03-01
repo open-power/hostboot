@@ -191,6 +191,8 @@ void handleOdyMaintAue(ExtensibleChip * i_chip, const MemAddr & i_addr,
     PRDF_ASSERT(nullptr != i_chip);
     PRDF_ASSERT(TYPE_OCMB_CHIP == i_chip->getType());
 
+    io_sc.service_data->setServiceCall();
+
     // DIMM rank high priority, MEM_PORT low priority callout.
     PRDpriority dimmPriority = MRU_HIGH;
     GARD_POLICY dimmGard = GARD;
