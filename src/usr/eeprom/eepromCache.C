@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1125,6 +1125,7 @@ errlHndl_t updateExistingEecacheEntry(
     bool l_updateHeader = true;
     bool l_updateContents = true;
     bool l_isNewPart = true;
+    bool l_needs_refresh = false;
 
     do {
         // Make a local copy to ensure that internal_offset has been set.
@@ -1144,12 +1145,32 @@ errlHndl_t updateExistingEecacheEntry(
                                              i_eepromType,
                                              l_completeRecordHeader,
                                              io_recordFromPnorToUpdate);
+        // alreadyUpdated means that we had previously updated the cache map.
+        //   alreadyUpdated = already in global map of cached eeproms
+        // First time pass the alreadyUpdated flag will not be set which skips
+        // any of the conditional logic to kick out of the validation processing steps.
         if (alreadyUpdated)
         {
-            // Force the update for EECACHE_VPD_NEEDS_REFRESH
-            // i_normal_update will be set to false if we need to force the update
-            if (i_normal_update)
+
+            TARGETING::ATTR_EECACHE_VPD_STATE_type vpd_state = TARGETING::EECACHE_VPD_STATE_VPD_GOOD;
+            if (i_target->tryGetAttr<TARGETING::ATTR_EECACHE_VPD_STATE>(vpd_state))
             {
+                if (vpd_state == TARGETING::EECACHE_VPD_STATE_VPD_NEEDS_REFRESH)
+                {
+                    // This will get set to VPD_GOOD later in the processing
+                    // We want to locally flag that we have VPD_NEEDS_REFRESH so that we will not break
+                    // and skip the update flow below
+                    l_needs_refresh = true;
+                    TRACFCOMP(g_trac_eeprom, "updateExistingEecacheEntry HUID=0x%X VPD_NEEDS_REFRESH i_normal_update=%d l_needs_refresh=%d",
+                                     get_huid(i_target), i_normal_update, l_needs_refresh);
+                }
+            }
+            // Force the update for EECACHE_VPD_NEEDS_REFRESH
+            // i_normal_update or l_needs_refresh will be set to false if we need to force the update
+            if ((i_normal_update) && (!l_needs_refresh))
+            {
+                TRACFCOMP(g_trac_eeprom, "updateExistingEecacheEntry normal update flow HUID=0x%X alreadyUpdated=%d i_normal_update=%d l_needs_refresh=%d",
+                             get_huid(i_target), alreadyUpdated, i_normal_update, l_needs_refresh);
                 break;
             }
         }
@@ -1671,7 +1692,7 @@ errlHndl_t cacheEeprom(TARGETING::Target*        i_target,
         else
         {
             // Case 3: Record will only be updated if necessary.
-            TRACSSCOMP(g_trac_eeprom,
+            TRACFCOMP(g_trac_eeprom,
                     "Case 3 cacheEeprom() - record in PNOR found for "
                     "%s HUID=0x%X eepromRole=%d, check for updates",
                     i_present ? "present" : "non-present",
