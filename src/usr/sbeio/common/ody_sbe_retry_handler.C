@@ -45,6 +45,10 @@
 
 #include <cxxtest/TestInject.H>
 
+#include <initservice/initserviceif.H>
+#include <mbox/mbox_queues.H>
+#include <mbox/mboxif.H>
+
 #define SBE_TRACF(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"ody_sbe_retry_handler: " printf_string,##args)
 
@@ -598,6 +602,43 @@ void OdySbeRetryHandler::side_switch()
     return;
 }
 
+errlHndl_t sendFspOdyDumpRequest(Target* const i_ocmb)
+{
+#ifdef __HOSTBOOT_RUNTIME
+    return nullptr;
+#else
+    SBE_TRACF(ENTER_MRK"sendFspOdyDumpRequest(0x%08X)", get_huid(i_ocmb));
+    const auto DO_ODY_SBE_DUMP = MBOX::FIRST_UNSECURE_MSG | 0x40;
+
+    auto msg = hbstd::own(msg_allocate(), &msg_free);
+
+    msg->type = DO_ODY_SBE_DUMP;
+    msg->data[0] = get_huid(i_ocmb);
+
+    const auto err = MBOX::sendrecv(MBOX::IPL_SERVICE_QUEUE, msg.get());
+
+    if (err)
+    {
+        SBE_TRACF("sendFspOdyDumpRequest(0x%08X) failed"
+                  TRACE_ERR_FMT,
+                  get_huid(i_ocmb),
+                  TRACE_ERR_ARGS(err));
+        err->collectTrace(SBEIO_COMP_NAME);
+    }
+    else
+    {
+        SBE_TRACF("sendFspOdyDumpRequest(0x%08X) succeeded",
+                  get_huid(i_ocmb));
+    }
+
+    SBE_TRACF(EXIT_MRK"sendFspOdyDumpRequest(0x%08X) = 0x%08X",
+              get_huid(i_ocmb),
+              ERRL_GETEID_SAFE(err));
+
+    return err;
+#endif
+}
+
 /*******************************************************************************
  * @brief Execute the Odyssey dump
  ******************************************************************************/
@@ -617,8 +658,16 @@ errlHndl_t OdySbeRetryHandler::dump(const uint32_t i_eid)
 
     if (!l_skip_dump)
     {
-#if defined(CONFIG_PLDM) && !defined(__HOSTBOOT_RUNTIME)
+#if !defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
         l_errl = PLDM::dumpSbe(iv_ocmb, i_eid);
+#else
+        if (INITSERVICE::spBaseServicesEnabled())
+        {
+            if (false)
+            { // @TODO JIRA: PHFB-760 Enable this code
+                l_errl = sendFspOdyDumpRequest(iv_ocmb);
+            }
+        }
 #endif
     }
 
