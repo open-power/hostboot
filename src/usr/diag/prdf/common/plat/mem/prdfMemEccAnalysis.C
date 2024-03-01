@@ -70,6 +70,15 @@ uint32_t handleMemUe<TYPE_OCMB_CHIP>( ExtensibleChip * i_chip,
         // All memory UEs should be customer viewable.
         io_sc.service_data->setServiceCall();
 
+        // Each OCMB needs to keep track of whether it has hit a UE. This
+        // is needed for a workaround for clearing Hardware Force Mirror (HWFM)
+        // when certain errors are hit, however if an OCMB has hit a UE, then
+        // HWFM will not be cleared.
+        #ifdef __HOSTBOOT_RUNTIME
+        OcmbDataBundle * db = getOcmbDataBundle(i_chip);
+        db->iv_hwfmUeSeen = true;
+        #endif
+
         // Actions if we have potentially invalid address information
         if (i_invAddr)
         {

@@ -587,15 +587,6 @@ int32_t __analyzeFetchUe(ExtensibleChip * i_chip, uint8_t i_port,
 {
     MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, i_port, io_sc );
 
-    // Each OCMB needs to keep track of whether it has hit a mainline UE. This
-    // is needed for a workaround for clearing Hardware Force Mirror (HWFM) when
-    // certain errors are hit, however if an OCMB has hit a mainline UE, then
-    // HWFM will not be cleared.
-    #ifdef __HOSTBOOT_RUNTIME
-    OcmbDataBundle * db = getOcmbDataBundle(i_chip);
-    db->iv_hwfmMainlineUe = true;
-    #endif
-
     return SUCCESS;
 }
 

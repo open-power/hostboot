@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -658,15 +658,6 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
     MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, 0, io_sc );
-
-    // Each OCMB needs to keep track of whether it has hit a mainline UE. This
-    // is needed for a workaround for clearing Hardware Force Mirror (HWFM) when
-    // certain errors are hit, however if an OCMB has hit a mainline UE, then
-    // HWFM will not be cleared.
-    #ifdef __HOSTBOOT_RUNTIME
-    OcmbDataBundle * db = getOcmbDataBundle(i_chip);
-    db->iv_hwfmMainlineUe = true;
-    #endif
 
     return SUCCESS; // nothing to return to rule code
 }
