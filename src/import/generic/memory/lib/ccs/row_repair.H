@@ -488,7 +488,7 @@ struct repair_entry
     /// @brief default dtor
     ///
     ~repair_entry() = default;
-};
+} __attribute__ ((aligned (8)));
 
 ///
 /// @brief Configures registers for ccs repair execution

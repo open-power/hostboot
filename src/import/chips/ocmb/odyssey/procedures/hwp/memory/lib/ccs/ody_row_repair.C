@@ -789,7 +789,7 @@ fapi2::ReturnCode clear_row_repairs_on_bad_dram(const fapi2::Target<fapi2::TARGE
     constexpr uint8_t ROW_REPAIR_DRAM_BYTE = 0;
     constexpr uint8_t ROW_REPAIR_VALID_BYTE = 3;
     constexpr uint8_t ROW_REPAIR_VALID_BIT = 7;
-    uint8_t l_bad_dq_bitmap[mss::ody::MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] = {};
+    uint8_t l_bad_dq_bitmap[mss::ody::MAX_RANK_PER_DIMM][BAD_DQ_BYTE_COUNT] __attribute__ ((aligned (8))) = {};
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, i_target, l_bad_dq_bitmap) );
 
     // Load row repair data for the dimm
