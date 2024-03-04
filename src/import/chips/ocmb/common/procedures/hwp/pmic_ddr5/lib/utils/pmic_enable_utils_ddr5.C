@@ -1037,15 +1037,20 @@ fapi2::ReturnCode redundancy_check_all_pmics(target_info_redundancy_ddr5& io_tar
     mss::pmic::ddr5::health_check_telemetry_data l_health_check_info;
     mss::pmic::ddr5::additional_n_mode_telemetry_data l_additional_info;
     mss::pmic::ddr5::periodic_telemetry_data l_periodic_telemetry_data;
+    uint8_t l_number_bytes_to_send = 0;
 
     // Run Telemetry to reset/clear various trackers
     collect_periodic_tele_data(io_target_info, l_periodic_telemetry_data);
 
     // Calling health check 3 times here to ensure if any PMICs had any issue during IPL, they would be
     // attempted to recover here and would not be in n_mode if not for major issues
-    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data);
-    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data);
-    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data);
+    // The number of bytes to send here is 0 as we are not going to send any data to HB. This is just a place holder
+    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
+                      l_number_bytes_to_send);
+    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
+                      l_number_bytes_to_send);
+    health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
+                      l_number_bytes_to_send);
 
     // Check all bread crumbs. If any PMIC has bread crumb not set to ALL_GOOD, report those errors
     FAPI_TRY(check_all_breadcrumbs(io_target_info, l_health_check_info));

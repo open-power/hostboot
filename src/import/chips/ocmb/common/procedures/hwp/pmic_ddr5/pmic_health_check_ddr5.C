@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,7 @@ extern "C"
         mss::pmic::ddr5::additional_n_mode_telemetry_data l_additional_info;
         mss::pmic::ddr5::periodic_telemetry_data l_periodic_telemetry_data;
         mss::pmic::ddr5::consolidated_health_check_data l_consolidated_health_check_data;
+        uint8_t l_number_bytes_to_send = 0;
 
         // Grab the targets as a struct, if they exist
         mss::pmic::ddr5::target_info_redundancy_ddr5 l_target_info(i_ocmb_target, l_rc);
@@ -69,10 +70,10 @@ extern "C"
         FAPI_TRY(mss::pmic::ddr5::set_pmic_dt_states(l_target_info));
 
         FAPI_TRY(pmic_health_check_ddr5_helper(i_ocmb_target, l_target_info, l_health_check_info, l_additional_info,
-                                               l_periodic_telemetry_data, l_consolidated_health_check_data));
+                                               l_periodic_telemetry_data, l_consolidated_health_check_data, l_number_bytes_to_send));
 
         FAPI_TRY(generate_and_send_response(l_target_info, l_health_check_info, l_additional_info,
-                                            l_periodic_telemetry_data, l_consolidated_health_check_data,
+                                            l_periodic_telemetry_data, l_consolidated_health_check_data, l_number_bytes_to_send,
                                             o_data));
 
     fapi_try_exit:
