@@ -923,6 +923,7 @@ fapi_try_exit:
 /// @param[in] i_additional_info additional data collected struct in case of n-mode detected
 /// @param[in] i_periodic_tele_info periodic telemetry data collected struct in case of n-mode detected
 /// @param[in,out] io_consolidated_data consolidate data of all the structs to be sent
+/// @param[in] i_number_bytes_to_send number of bytes to send as response to this HWP
 /// @param[out] o_data hwp_data_ostream of struct information
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
@@ -931,15 +932,19 @@ fapi2::ReturnCode generate_and_send_response(const mss::pmic::ddr5::target_info_
         const mss::pmic::ddr5::additional_n_mode_telemetry_data& i_additional_info,
         const mss::pmic::ddr5::periodic_telemetry_data& i_periodic_tele_info,
         mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_data,
+        const uint8_t i_number_bytes_to_send,
         fapi2::hwp_data_ostream& o_data)
 {
     using CONSTS  = mss::pmic::id;
     using CONSTS_DT = mss::dt::dt_i2c_devices;
-    static constexpr uint8_t LENGTH_BYTES_TO_SEND = 1;
 
     io_consolidated_data.iv_health_check = i_health_check_info;
 
-    if(io_consolidated_data.iv_health_check.iv_aggregate_state == mss::pmic::ddr5::aggregate_state::N_MODE)
+    if(i_number_bytes_to_send == SIZEOF_AGGREGATE_STATE)
+    {
+        FAPI_TRY(send_struct(io_consolidated_data, SIZEOF_AGGREGATE_STATE, o_data));
+    }
+    else
     {
         io_consolidated_data.iv_additional_data = i_additional_info;
         io_consolidated_data.iv_periodic_telemetry_data = i_periodic_tele_info;
@@ -955,10 +960,6 @@ fapi2::ReturnCode generate_and_send_response(const mss::pmic::ddr5::target_info_
         io_consolidated_data.iv_dt3_errors = i_target_info.iv_pmic_dt_map[CONSTS_DT::DT3].iv_dt_state;
 
         FAPI_TRY(send_struct(io_consolidated_data, sizeof(io_consolidated_data), o_data));
-    }
-    else
-    {
-        FAPI_TRY(send_struct(io_consolidated_data, LENGTH_BYTES_TO_SEND, o_data));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -1018,24 +1019,58 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
 }
 
 ///
+/// @brief Check all the breadcrumbs and return aggregate state as N_MODE if any PMIC/DT
+///         pair has breadcrumb set to STILL_A_FAIL
+///
+/// @param[in,out] io_health_check_info health check struct
+/// @return Aggregate state
+///
+inline mss::pmic::ddr5::aggregate_state check_breadcrumbs_subsequent_n_modes(const
+        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
+{
+    if ((io_health_check_info.iv_dt0.iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
+        (io_health_check_info.iv_dt1.iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
+        (io_health_check_info.iv_dt2.iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
+        (io_health_check_info.iv_dt3.iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL))
+    {
+        return mss::pmic::ddr5::aggregate_state::N_MODE;
+    }
+
+    return mss::pmic::ddr5::aggregate_state::N_PLUS_1;
+}
+
+///
 /// @brief Runs the actual health check for 4U parts
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
 /// @param[in,out] io_additional_info additional health check data
 /// @param[in,out] io_periodic_tele_info periodic telemetry data
+/// @param[in,out] io_number_bytes_to_send number of bytes to send as response to this HWP
 /// @return none
 ///
 void health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
                        mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
-                       mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
+                       mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info,
+                       uint8_t& io_number_bytes_to_send)
 {
     mss::pmic::ddr5::dt_state l_dt_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
     mss::pmic::ddr5::aggregate_state l_n_mode = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
 
     // Read and store DT regs for fault calculations
     read_dt_regs(io_target_info, io_health_check_info);
+
+    l_n_mode = check_breadcrumbs_subsequent_n_modes(io_health_check_info);
+
+    // If subsequent n-mode detected, then no need to perform any calculations.
+    // Just return 1 byte of aggregate state
+    if(l_n_mode == mss::pmic::ddr5::aggregate_state::N_MODE)
+    {
+        io_health_check_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_MODE;
+        io_number_bytes_to_send = SIZEOF_AGGREGATE_STATE;
+        return;
+    }
 
     // Read and store PMIC regs for fault calculations
     read_pmic_regs(io_target_info, io_health_check_info);
@@ -1053,11 +1088,16 @@ void health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_i
 
     l_n_mode = check_n_mode(io_health_check_info);
 
-    // If n-mode detected, then collect additional data
-    if(l_n_mode == mss::pmic::ddr5::aggregate_state::N_MODE)
+    // If n_mode or n_mode_possible detected, then collect additional data
+    if((l_n_mode == mss::pmic::ddr5::aggregate_state::N_MODE)
+       || (l_n_mode == mss::pmic::ddr5::aggregate_state::N_MODE_POSSIBLE))
     {
         collect_additional_n_mode_data(io_target_info, io_additional_info);
         collect_periodic_tele_data(io_target_info, io_periodic_tele_info);
+    }
+    else
+    {
+        io_number_bytes_to_send = SIZEOF_AGGREGATE_STATE;
     }
 }
 
@@ -1070,6 +1110,7 @@ void health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_i
 /// @param[in,out] io_additional_info additional health check data
 /// @param[in,out] io_periodic_tele_info periodic telemetry data
 /// @param[in,out] io_consolidated_data consolidate data of all the structs to be sent
+/// @param[in,out] io_number_bytes_to_send number of bytes to send as response to this HWP
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode pmic_health_check_ddr5_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
@@ -1077,7 +1118,8 @@ fapi2::ReturnCode pmic_health_check_ddr5_helper(const fapi2::Target<fapi2::TARGE
         mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
         mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
         mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info,
-        mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_health_check_data)
+        mss::pmic::ddr5::consolidated_health_check_data& io_consolidated_health_check_data,
+        uint8_t& io_number_bytes_to_send)
 {
     io_health_check_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
 
@@ -1090,10 +1132,12 @@ fapi2::ReturnCode pmic_health_check_ddr5_helper(const fapi2::Target<fapi2::TARGE
         mss::pmic::ddr5::aggregate_state::DIMM_NOT_4U) ||
        (io_consolidated_health_check_data.iv_health_check.iv_aggregate_state == mss::pmic::ddr5::aggregate_state::N_MODE))
     {
+        io_number_bytes_to_send = SIZEOF_AGGREGATE_STATE;
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    health_check_ddr5(io_target_info, io_health_check_info, io_additional_info, io_periodic_tele_info);
+    health_check_ddr5(io_target_info, io_health_check_info, io_additional_info, io_periodic_tele_info,
+                      io_number_bytes_to_send);
 
 fapi_try_exit:
     return fapi2::current_err;
