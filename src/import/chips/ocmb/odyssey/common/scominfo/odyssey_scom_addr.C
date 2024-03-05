@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,12 +45,14 @@ extern "C"
     {
         bool l_pervTarget = false;
 
-        if (getChipletId() <= 0x1)  // Allow PIB (0x00) and Perv chiplet (0x01)
+        if ( (getChipletId() == ODY_PIB_CHIPLET_ID) ||    // 0x0
+             (getChipletId() == ODY_PERV_CHIPLET_ID) ||   // 0x1
+             (getChipletId() == ODY_MEM_CHIPLET_ID) )     // 0x8
         {
-            if (getEndpoint() == ODY_PSCOM_ENDPOINT)            // 0x1
+            if (getEndpoint() == ODY_PSCOM_ENDPOINT)          // 0x1
             {
                 if ( (getRingId() == ODY_PSCOM_RING_ID) ||    // 0x0
-                     (getRingId() == ODY_PERV_RING_ID) )    // 0x1
+                     (getRingId() == ODY_PERV_RING_ID) )      // 0x1
                 {
                     l_pervTarget = true;
                 }
