@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -114,21 +114,6 @@ struct sppeImage_t
     sppeImageHash_t hash;
     size_t pakSize;
     void* pak;  // Pointer to the pak data for the image
-};
-
-/**
- * @brief Response structure for Odyssey getCodeLevels chipop
- */
-struct getCodeLevelsResponse_t
-{
-    uint16_t num_capabilities;
-    uint16_t num_images;
-    uint16_t major;
-    uint16_t minor;
-
-    static constexpr int MAX_IMG_CNT = 4;
-
-    sppeCLIP_t updatable_images[MAX_IMG_CNT];
 };
 
 #endif
