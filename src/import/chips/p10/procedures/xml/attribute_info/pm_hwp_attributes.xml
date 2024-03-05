@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -1026,6 +1026,28 @@
     <valueType>uint16</valueType>
     <writeable/>
     <initToZero/>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_AVSBUS_VRM_FAIL_OVERRIDE</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    This attr is used to inject VRM fail to verify VRM callouts
+
+    Consumer: p10_avsbus_lib.C
+    </description>
+    <valueType>uint8</valueType>
+    <initToZero/>
+    <enum>NO_ERROR = 0,
+          ZERO_RESP_ERR = 1,
+          NO_RESP_ERROR = 2,
+          MASTER_BAD_CRC_ERROR = 3,
+          SLAVE_BAD_CRC_ERROR = 4,
+          UNAVAILABLE_RESOURCE_ERROR = 5,
+          INVALID_DATA_ERROR = 6
+    </enum>
+    <overrideOnly/>
+    <group>debug</group>
   </attribute>
   <!-- ********************************************************************* -->
 </attributes>

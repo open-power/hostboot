@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -542,6 +542,8 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     fapi2::buffer<uint32_t> l_command        ;          // Command sent
     uint8_t                 l_goodResponse;             // Internal use
     uint32_t                l_buffer = 0;
+    fapi2::ATTR_AVSBUS_VRM_FAIL_OVERRIDE_Type l_vrm_fail_override =
+    fapi2::ENUM_ATTR_AVSBUS_VRM_FAIL_OVERRIDE_NO_ERROR;
 
     bool                    b_avs_in_control = true;
     bool                    b_status_alert   = false;
@@ -552,6 +554,9 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
 
     uint32_t l_rsp_computed_crc;
     o_goodResponse = false;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_AVSBUS_VRM_FAIL_OVERRIDE,
+    i_target, l_vrm_fail_override));
 
     // Read the command register
     FAPI_DBG("Reading the OS2SRD register to check status");
@@ -573,9 +578,36 @@ avsValidateResponse(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     // Compute CRC on Response frame
     l_rsp_computed_crc = avsCRCcalc(l_rsp_data);
 
+    // Error inject code to log VRM fail
+    if (l_vrm_fail_override !=
+    fapi2::ENUM_ATTR_AVSBUS_VRM_FAIL_OVERRIDE_NO_ERROR)
+    {
+        switch (l_vrm_fail_override)
+        {
+            case fapi2::ENUM_ATTR_AVSBUS_VRM_FAIL_OVERRIDE_ZERO_RESP_ERR:
+                l_rsp_data = 0x00000000;
+                break;
+
+            case fapi2::ENUM_ATTR_AVSBUS_VRM_FAIL_OVERRIDE_NO_RESP_ERROR:
+                l_rsp_data = 0xFFFFFFFF;
+                break;
+
+            case fapi2::ENUM_ATTR_AVSBUS_VRM_FAIL_OVERRIDE_MASTER_BAD_CRC_ERROR:
+                l_rsp_rcvd_crc = ~l_rsp_computed_crc;
+                break;
+
+            case fapi2::ENUM_ATTR_AVSBUS_VRM_FAIL_OVERRIDE_SLAVE_BAD_CRC_ERROR:
+                l_rsp_ack_code = 2;
+                break;
+
+            default:
+                break;
+        }
+    }
+
     if ((l_rsp_ack_code == 0) &&                               // no error code
-    (l_rsp_rcvd_crc == l_rsp_computed_crc) &&              // good crc
-    (l_rsp_data != 0) && (l_rsp_data != 0xFFFFFFFF))       // valid response
+        (l_rsp_rcvd_crc == l_rsp_computed_crc) &&              // good crc
+        (l_rsp_data != 0) && (l_rsp_data != 0xFFFFFFFF))       // valid response
     {
         o_goodResponse = true;
     }
