@@ -1596,7 +1596,7 @@ errlHndl_t calcMemThrottles()
     if (nullptr == err)
     {
         TargetHandleList dimm_list;
-        getClassResources(dimm_list, CLASS_LOGICAL_CARD, TYPE_DIMM, UTIL_FILTER_FUNCTIONAL);
+        getClassResources(dimm_list, CLASS_LOGICAL_CARD, TYPE_DIMM, UTIL_FILTER_PRESENT);
         const size_t numDimms = dimm_list.size();
 
         //Calculate Throttle settings when system has redundant power (N+1)
