@@ -333,7 +333,8 @@ state_transitions_t ody_fsm_transitions[] =
     { { yes           , yes                    , SIDE0  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap
 
     { { yes           , yes                    , SIDE0  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL
-                                                                           | OCMB_HWP_FAIL_OTHER       , {switch_to_side_1, retry_check_for_ready                       }},
+                                                                           | OCMB_HWP_FAIL_OTHER
+                                                                           | OCMB_FLASH_ERROR          , {switch_to_side_1, retry_check_for_ready                       }},
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC   , {deconfigure_ocmb                                              }},
                                                                          { IPL_COMPLETE                , {reset_ocmb_upd_state                                          }} } },
@@ -348,7 +349,8 @@ state_transitions_t ody_fsm_transitions[] =
 
     { { yes           , yes                    , SIDE1  , yes         },{{ OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_HWP_FAIL_HASH_FAIL
-                                                                           | OCMB_HWP_FAIL_OTHER       , {deconfig_gard_ocmb                                            }},
+                                                                           | OCMB_HWP_FAIL_OTHER
+                                                                           | OCMB_FLASH_ERROR          , {deconfig_gard_ocmb                                            }},
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
                                                                          { IPL_COMPLETE                , {reset_ocmb_upd_state                                          }} } },
 
