@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -73,17 +73,25 @@ ScanFacility & ScanFacility::Access(void)
 }
 //-----------------------------------------------------------------------------
 SCAN_COMM_REGISTER_CLASS & ScanFacility::GetScanCommRegister( uint64_t address,
-                                uint32_t i_scomLength, TARGETING::TYPE i_type,
-                                SCAN_COMM_REGISTER_CLASS::AccessLevel i_regOp )
+                                uint8_t i_scomLength, TARGETING::TYPE i_type,
+                                SCAN_COMM_REGISTER_CLASS::AccessLevel i_regOp,
+                                uint16_t i_sigOff )
 {
-    /* i_regOp is not used to determine uniqueness of the object for following
-      reason -
-      There can not be two registers in hardware with same address and target
-      type supporting different operations say one supports only write and
-      other both read and write.
-      */
+    // i_regOp is not used to determine uniqueness of the object for following
+    // reason -
+    // There can not be two registers in hardware with same address, target
+    // type, and signature offset supporting different operations say one
+    // supports only write and other both read and write.
 
-    ScomRegister scrKey( address, i_scomLength, i_type, i_regOp );
+    // Signature offset (i_sigOff) is included solely for determining
+    // uniqueness of the object since there may be different registers that
+    // otherwise share the same address and target type, e.g. registers
+    // in Explorer vs Odyssey OCMBs. The hash ID of the register cannot be used
+    // for this due to some registers (mask and reset regs defined for FIRs) may
+    // not have hash IDs.
+
+    ScomRegister scrKey( address, i_scomLength, i_type, i_regOp, i_sigOff );
+
     // in case we get a object with different default operation, we shall reset
     // it to what it should be as per rule file.
     ScomRegister &regCreated = iv_scomRegFw.get(scrKey);

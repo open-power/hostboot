@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,11 +48,12 @@ namespace PRDF
 template <bool Type>
 struct ResetAndMaskTransformer
 {
-    ResetAndMaskTransformer( ScanFacility & i_scanFactory,size_t i_scomlen ,
-                                TARGETING::TYPE i_type )
+    ResetAndMaskTransformer( ScanFacility & i_scanFactory, size_t i_scomlen,
+                             TARGETING::TYPE i_type, uint16_t i_sigOff )
         :cv_scanFactory( i_scanFactory ),
         cv_scomlen( i_scomlen ),
-        iv_chipType( i_type )
+        iv_chipType( i_type ),
+        iv_sigOff( i_sigOff )
     { };
 
     virtual ~ResetAndMaskTransformer() {};
@@ -108,12 +109,10 @@ struct ResetAndMaskTransformer
         }
 
         o.read = & cv_scanFactory.GetScanCommRegister( i.addr_r, cv_scomlen,
-                                        iv_chipType,
-                                        l_readRegAccess );
+            iv_chipType, l_readRegAccess, iv_sigOff );
 
         o.write = & cv_scanFactory.GetScanCommRegister( i.addr_w, cv_scomlen,
-                                        iv_chipType,
-                                        SCAN_COMM_REGISTER_CLASS::ACCESS_WO );
+            iv_chipType, SCAN_COMM_REGISTER_CLASS::ACCESS_WO, iv_sigOff );
 
         return o;
     };
@@ -122,6 +121,7 @@ struct ResetAndMaskTransformer
         ScanFacility & cv_scanFactory;
         size_t cv_scomlen;
         TARGETING::TYPE iv_chipType;
+        uint16_t iv_sigOff;
 };
 
 
@@ -222,7 +222,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
                                 = &i_scanFactory.GetScanCommRegister(
                                         l_chip->cv_registers[i].cv_scomAddr,
                                         l_chip->cv_registers[i].cv_scomLen,
-                                        i_type, l_regAccess );
+                                        i_type, l_regAccess, iv_sigOff );
             l_regMap[l_id]->SetId(hashId);
 
             // Copy reset registers.
@@ -232,7 +232,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
                             ResetAndMaskTransformer<RESETOPERATOR_RESET>(
                                             i_scanFactory,
                                             l_chip->cv_registers[i].cv_scomLen,
-                                            i_type )
+                                            i_type, iv_sigOff )
                 );
 
             // Copy mask registers.
@@ -242,7 +242,7 @@ errlHndl_t RuleMetaData::loadRuleFile( ScanFacility & i_scanFactory ,
                             ResetAndMaskTransformer<RESETOPERATOR_MASK>(
                                             i_scanFactory,
                                             l_chip->cv_registers[i].cv_scomLen,
-                                            i_type ) );
+                                            i_type, iv_sigOff ) );
             l_id++;
 
         }

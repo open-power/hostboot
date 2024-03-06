@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 1996,2020                        */
+/* Contributors Listed Below - COPYRIGHT 1996,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,14 +58,17 @@ class ScomRegister : public SCAN_COMM_REGISTER_CLASS
      * @param     i_address        address of the register
      * @param     i_bitLength      bit length of register
      * @param     i_targetType     target type associated with register
+     * @param     i_sigOff         signature offset associated with the target
      */
-    ScomRegister( uint64_t i_address, uint32_t i_bitLength,
-                  TARGETING::TYPE i_targetType, AccessLevel i_access ) :
+    ScomRegister( uint64_t i_address, uint8_t i_bitLength,
+                  TARGETING::TYPE i_targetType, AccessLevel i_access,
+                  uint16_t i_sigOff ) :
         SCAN_COMM_REGISTER_CLASS(),
         iv_bitLength( i_bitLength ),
         iv_chipType( i_targetType ),
         iv_scomAddress( i_address ),
-        iv_operationType( i_access )
+        iv_operationType( i_access ),
+        iv_sigOff( i_sigOff )
     {}
 
     /**
@@ -77,7 +80,8 @@ class ScomRegister : public SCAN_COMM_REGISTER_CLASS
         iv_bitLength( 0 ),
         iv_chipType( TARGETING::TYPE_NA ),
         iv_scomAddress( 0 ),
-        iv_operationType( ACCESS_NONE )
+        iv_operationType( ACCESS_NONE ),
+        iv_sigOff( 0 )
     {}
 
     /** @brief Destructor. */
@@ -139,6 +143,12 @@ class ScomRegister : public SCAN_COMM_REGISTER_CLASS
      * @return    Nil
      */
     virtual void SetId(uint16_t i_id) { iv_shortId = i_id; };
+
+    /**
+     * @brief     Returns the signature offset of the register
+     * @return    returns signature offset associated with the register
+     */
+    uint16_t getSigOff() const { return iv_sigOff; };
 
    /**
     * @brief    Returns type of Target associated with register.
@@ -234,11 +244,19 @@ private: // functions
 
   private: // Data
 
-    uint32_t        iv_bitLength;     // bit length of scom
+    uint8_t         iv_bitLength;     // bit length of scom
     uint16_t        iv_shortId;       // unique hash id of register
     TARGETING::TYPE iv_chipType;      // type of target associated with register
     uint64_t        iv_scomAddress;   // scom address associated with regiser
     AccessLevel     iv_operationType; // Operation supported (RO, WO, or RW)
+
+    // Signature offset (iv_sigOff) is included solely for determining
+    // uniqueness of the object since there may be different registers that
+    // otherwise share the same address and target type, e.g. registers
+    // in Explorer vs Odyssey OCMBs. The hash ID of the register (iv_shortId)
+    // cannot be used for this due to some registers (mask and reset regs
+    // defined for FIRs) may not have hash IDs.
+    uint16_t iv_sigOff;
 
 };
 

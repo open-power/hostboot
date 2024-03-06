@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -268,14 +268,9 @@ void ScomRegister::flushCache( ExtensibleChip *i_pChip ) const
 
 bool ScomRegister::operator == ( const ScomRegister & i_rightRegister ) const
 {
-    if( iv_scomAddress == i_rightRegister.GetAddress() )
-    {
-        return ( iv_chipType == i_rightRegister.getChipType() );
-    }
-    else
-    {
-        return false ;
-    }
+    return ((iv_scomAddress == i_rightRegister.GetAddress()) &&
+            (iv_chipType == i_rightRegister.getChipType()) &&
+            (iv_sigOff == i_rightRegister.getSigOff()));
 
 }
 
@@ -284,13 +279,19 @@ bool ScomRegister::operator < ( const ScomRegister & i_rightRegister  ) const
 {
     if( iv_scomAddress == i_rightRegister.GetAddress() )
     {
-        return ( iv_chipType < i_rightRegister.getChipType() );
+        if (iv_chipType == i_rightRegister.getChipType())
+        {
+            return (iv_sigOff < i_rightRegister.getSigOff());
+        }
+        else
+        {
+            return ( iv_chipType < i_rightRegister.getChipType() );
+        }
     }
     else
     {
         return( iv_scomAddress  < i_rightRegister.GetAddress() );
     }
-
 
 }
 //-----------------------------------------------------------------------------

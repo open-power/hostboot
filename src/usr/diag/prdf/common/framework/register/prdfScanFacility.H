@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,11 +72,13 @@ public:
     * @param     i_scomLength     length of the bit string
     * @param     i_type           type of target associated with register
     * @param     i_regOp          operations supported for given register
+    * @param     i_sigOff         signature offset associated with this target
     * @return   returns reference to flyweight object from factory
     */
    SCAN_COMM_REGISTER_CLASS & GetScanCommRegister( uint64_t address,
-                                uint32_t i_scomLength, TARGETING::TYPE i_type,
-                                SCAN_COMM_REGISTER_CLASS::AccessLevel i_regOp );
+                                uint8_t i_scomLength, TARGETING::TYPE i_type,
+                                SCAN_COMM_REGISTER_CLASS::AccessLevel i_regOp,
+                                uint16_t i_sigOff );
 
   /**
    * @brief  Get a register that bitwise inverts the bitstring of a register
