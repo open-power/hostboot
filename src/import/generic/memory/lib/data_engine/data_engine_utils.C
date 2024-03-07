@@ -184,6 +184,8 @@ fapi2::ReturnCode get_supported_cas_latencies(
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+#ifndef __PPE__
 ///
 /// @brief Performs vref calculations per dram
 /// @param[in] i_port MEM PORT target
@@ -328,6 +330,7 @@ fapi2::ReturnCode apply_vref_offset_mult(const fapi2::Target<fapi2::TARGET_TYPE_
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif
 } // ns ddr5
 
 } // ns gen

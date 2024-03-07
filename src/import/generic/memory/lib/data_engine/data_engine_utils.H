@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -316,7 +316,6 @@ fapi2::ReturnCode get_supported_cas_latencies(
 
     o_field = 0;
 
-    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_dimm);
     uint8_t l_first_raw_byte = 0;
     uint8_t l_sec_raw_byte = 0;
     uint8_t l_third_raw_byte = 0;
@@ -324,11 +323,11 @@ fapi2::ReturnCode get_supported_cas_latencies(
     uint8_t l_fifth_raw_byte = 0;
     uint8_t l_dimm_type = 0;
 
-    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_FIRST_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_first_raw_byte));
-    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_SECOND_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_sec_raw_byte));
-    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_THIRD_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_third_raw_byte));
-    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_FOURTH_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_fourth_raw_byte));
-    FAPI_TRY(mss::spd::get_field_spd(l_ocmb, F::CL_FIFTH_BYTE, i_spd, SET_SPD_CL_SUPPORTED, l_fifth_raw_byte));
+    FAPI_TRY(mss::spd::get_field_spd(F::CL_FIRST_BYTE, i_spd, l_first_raw_byte));
+    FAPI_TRY(mss::spd::get_field_spd(F::CL_SECOND_BYTE, i_spd, l_sec_raw_byte));
+    FAPI_TRY(mss::spd::get_field_spd(F::CL_THIRD_BYTE, i_spd, l_third_raw_byte));
+    FAPI_TRY(mss::spd::get_field_spd(F::CL_FOURTH_BYTE, i_spd, l_fourth_raw_byte));
+    FAPI_TRY(mss::spd::get_field_spd(F::CL_FIFTH_BYTE, i_spd, l_fifth_raw_byte));
 
     FAPI_TRY(mss::attr::get_dimm_type(i_dimm, l_dimm_type));
 
@@ -356,6 +355,7 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+#ifndef __PPE__
 ///
 /// @brief Performs vref calculations per dram
 /// @param[in] i_port MEM PORT target
@@ -400,6 +400,7 @@ fapi2::ReturnCode apply_vref_offset_mult(const fapi2::Target<fapi2::TARGET_TYPE_
         const uint8_t (&i_vref_offset)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM],
         uint8_t (&io_vref)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM]);
 
+#endif
 } // namespace ddr5
 
 } // namespace gen
@@ -511,11 +512,8 @@ fapi2::ReturnCode set_bytes_per_dram_helper_func(const fapi2::Target<fapi2::TARG
         const uint16_t i_ffdc_code,
         const uint8_t i_rank,
         const uint8_t i_pos,
-        uint8_t (&o_bytes)[mss::generic_sizes::MAX_RANK_PER_DIMM_ATTR][mss::ddr5::mr::ATTR_DRAM])
+        uint8_t (&o_bytes)[mss::ddr5::mr::ATTR_DRAM])
 {
-    // Get the ocmb target
-    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
-
     // Get the byte number
     size_t l_start_byte_num = i_field.get_byte(i_binary);
 
@@ -580,7 +578,7 @@ fapi2::ReturnCode set_bytes_per_dram_helper_func(const fapi2::Target<fapi2::TARG
     // Update the o_bytes with the fields
     for(uint8_t l_dram = 0; l_dram < mss::ddr5::mr::ATTR_DRAM; l_dram++)
     {
-        FAPI_TRY(mss::spd::get_field_spd(l_ocmb, PER_DRAM_FIELDS[l_dram], i_binary, i_ffdc_code, o_bytes[i_rank][l_dram]));
+        FAPI_TRY(mss::spd::get_field_spd(PER_DRAM_FIELDS[l_dram], i_binary, o_bytes[l_dram]));
     }
 
 fapi_try_exit:

@@ -194,7 +194,7 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <enum>OHM_34 = 34, OHM_40 = 40, OHM_48 = 48</enum>
+    <enum>OHM_34 = 34, OHM_40 = 40, OHM_48 = 48, RESERVED = 0xFF</enum>
     <mssUnits> Ohms </mssUnits>
     <array>2 4</array>
     <mssAccessorName>dram_pu_drv_imp</mssAccessorName>
@@ -228,7 +228,7 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <enum>OHM_34 = 34, OHM_40 = 40, OHM_48 = 48</enum>
+    <enum>OHM_34 = 34, OHM_40 = 40, OHM_48 = 48, RESERVED = 0xFF</enum>
     <mssUnits> Ohms </mssUnits>
     <array>2 4</array>
     <mssAccessorName>dram_pd_drv_imp</mssAccessorName>
@@ -263,7 +263,7 @@
     </description>
     <valueType>uint8</valueType>
     <writeable/>
-    <enum>TCK2 = 1, TCK3 = 2, TCK4 = 3</enum>
+    <enum>TCK2 = 1, TCK3 = 2, TCK4 = 3, RESERVED = 0xFF</enum>
     <default>TCK2</default>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
@@ -491,7 +491,7 @@
     <writeable/>
     <array>2 4 2</array>
     <mssUnits>ohm</mssUnits>
-    <enum>DISABLE = 0, OHM480 = 480, OHM240 = 240, OHM120 = 120, OHM80 = 80, OHM60 = 60, OHM40 = 40</enum>
+    <enum>DISABLE = 0, OHM480 = 480, OHM240 = 240, OHM120 = 120, OHM80 = 80, OHM60 = 60, OHM40 = 40, RESERVED = 0xFF</enum>
     <mssAccessorName>ddr5_dram_ck_odt</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
@@ -510,7 +510,7 @@
     <writeable/>
     <array>2 4 2</array>
     <mssUnits>ohm</mssUnits>
-    <enum>DISABLE = 0, OHM480 = 480, OHM240 = 240, OHM120 = 120, OHM80 = 80, OHM60 = 60, OHM40 = 40</enum>
+    <enum>DISABLE = 0, OHM480 = 480, OHM240 = 240, OHM120 = 120, OHM80 = 80, OHM60 = 60, OHM40 = 40, RESERVED = 0xFF</enum>
     <mssAccessorName>ddr5_dram_cs_odt</mssAccessorName>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>

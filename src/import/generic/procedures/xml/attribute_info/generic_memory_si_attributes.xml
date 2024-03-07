@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -305,7 +305,8 @@
               OHM_30 = 30,
               OHM_40 = 40,
               OHM_60 = 60,
-              OHM_120 = 120</enum>
+              OHM_120 = 120,
+              RESERVED = 0xFF</enum>
         <mssUnits>ohm</mssUnits>
         <mssAccessorName>si_mc_drv_imp_cmd_addr</mssAccessorName>
         <array>2 4</array>
