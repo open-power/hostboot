@@ -31,7 +31,19 @@
     <rc>RC_SBE_BOOT_CHECK_ERR_CFAM_PATH</rc>
     <description>SBE did not Boot prior to timeout in CFAM Path</description>
     <ffdc>TARGET</ffdc>
+    <ffdc>POLL_COUNT</ffdc>
+    <ffdc>POLL_DELAY</ffdc>
+    <ffdc>SB_CS</ffdc>
     <ffdc>SB_MSG</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -39,7 +51,19 @@
     <rc>RC_SBE_BOOT_CHECK_ERR_SCOM_PATH</rc>
     <description>SBE did not Boot prior to timeout in SCOM Path</description>
     <ffdc>TARGET</ffdc>
+    <ffdc>POLL_COUNT</ffdc>
+    <ffdc>POLL_DELAY</ffdc>
+    <ffdc>SB_CS</ffdc>
     <ffdc>SB_MSG</ffdc>
+    <callout>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

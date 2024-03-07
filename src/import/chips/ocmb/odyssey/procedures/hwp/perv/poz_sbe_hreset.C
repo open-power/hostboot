@@ -116,7 +116,10 @@ ReturnCode poz_sbe_hreset(
             FAPI_ASSERT((l_poll <= i_boot_parms.max_polls),
                         fapi2::SBE_BOOT_CHECK_ERR_CFAM_PATH()
                         .set_TARGET(i_target)
-                        .set_SB_MSG(SB_MSG()),
+                        .set_POLL_COUNT(i_boot_parms.max_polls)
+                        .set_POLL_DELAY(i_boot_parms.poll_delay_ns)
+                        .set_SB_CS(SB_CS)
+                        .set_SB_MSG(SB_MSG),
                         //.set_BOOT_TYPE(l_check_for_runtime),
                         "SBE did not Boot up prior to timeout!");
         }
@@ -181,7 +184,10 @@ ReturnCode poz_sbe_hreset(
             FAPI_ASSERT((l_poll <= i_boot_parms.max_polls),
                         fapi2::SBE_BOOT_CHECK_ERR_SCOM_PATH()
                         .set_TARGET(i_target)
-                        .set_SB_MSG(SB_MSG()),
+                        .set_POLL_COUNT(i_boot_parms.max_polls)
+                        .set_POLL_DELAY(i_boot_parms.poll_delay_ns)
+                        .set_SB_CS(SB_CS)
+                        .set_SB_MSG(SB_MSG),
                         //.set_BOOT_TYPE(l_check_for_runtime),
                         "SBE did not Boot up prior to timeout!");
         }

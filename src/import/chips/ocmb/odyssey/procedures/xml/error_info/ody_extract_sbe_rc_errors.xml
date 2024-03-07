@@ -46,6 +46,10 @@
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_PERV_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -57,6 +61,19 @@
     <ffdc>TARGET_CHIP</ffdc>
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -68,6 +85,19 @@
     <ffdc>TARGET_CHIP</ffdc>
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -79,6 +109,19 @@
     <ffdc>TARGET_CHIP</ffdc>
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -90,6 +133,19 @@
     <ffdc>TARGET_CHIP</ffdc>
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -102,6 +158,15 @@
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -115,6 +180,15 @@
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -128,19 +202,37 @@
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
     <sbeError/>
     <rc>RC_OTP_PIB_ERR</rc>
     <description>
-    Scom error or 10.2 chipop error detected
+    Scom error detected while accessing OTPROM data range
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -151,6 +243,15 @@
     </description>
     <ffdc>TARGET_CHIP</ffdc>
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -164,6 +265,15 @@
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -177,6 +287,15 @@
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -190,6 +309,15 @@
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -203,6 +331,19 @@
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -216,6 +357,19 @@
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -228,6 +382,11 @@
     <ffdc>ERROR_CODE</ffdc>
     <ffdc>SCRATCH_REGISTER_13</ffdc>
     <ffdc>SB_MSG</ffdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
@@ -240,6 +399,15 @@
     <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <callout>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>TARGET_CHIP</target>
+      <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    </deconfigure>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

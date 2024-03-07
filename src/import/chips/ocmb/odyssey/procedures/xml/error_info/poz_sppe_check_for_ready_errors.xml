@@ -34,6 +34,14 @@
     <ffdc>TARGET</ffdc>
     <ffdc>SB_MSG</ffdc>
     <ffdc>BOOT_TYPE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
   </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
