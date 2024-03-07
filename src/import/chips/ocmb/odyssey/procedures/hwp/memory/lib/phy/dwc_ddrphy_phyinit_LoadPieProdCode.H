@@ -95,7 +95,7 @@ void initRuntimeConfigEnableBits(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 /// @brief Generates calls to dwc_ddrphy_phyinit_userCustom_io_write16
 /// @param[in] i_target - the memory port on which to operate
 /// @param[in] i_runtime_config - the runtime configuration
-/// @param[in] code_sections Array of structures for continuous address sections of code
+/// @param[in] code_sections hwp_bit_istream for continuous address sections of code
 /// @param[in] code_section_count Size of the code_sections array
 /// @param[in] code_data - hwp_bit_istream for the PIE image data
 /// @param[in] code_data_count Size of the code_data array
@@ -111,7 +111,7 @@ void initRuntimeConfigEnableBits(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const runtime_config_t& i_runtime_config,
-        code_section_t* code_sections, size_t code_section_count,
+        fapi2::hwp_bit_istream& code_sections, size_t code_section_count,
         fapi2::hwp_bit_istream& code_data, size_t code_data_count,
         code_marker_t* code_markers, size_t code_marker_count);
 
@@ -120,22 +120,26 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fap
 /// @param[in] i_target - the memory port on which to operate
 /// @param[in] i_runtime_config - the runtime configuration
 /// @param[in] code_data - hwp_bit_istream for the PIE image data
+/// @param[in] code_sections - hwp_bit_istream for the PIE code sections
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPieProdCode(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const runtime_config_t& i_runtime_config,
-        fapi2::hwp_bit_istream& code_data);
+        fapi2::hwp_bit_istream& code_data,
+        fapi2::hwp_bit_istream& code_sections);
 
 ///
 /// @brief Loads the PHY Initialization Engine (PIE) code for RDIMM's
 /// @param[in] i_target - the memory port on which to operate
 /// @param[in] i_runtime_config - the runtime configuration
 /// @param[in] code_data - hwp_bit_istream for the PIE image data
+/// @param[in] code_sections - hwp_bit_istream for the PIE code sections
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPieProdCode_rdimm(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const runtime_config_t& i_runtime_config,
-        fapi2::hwp_bit_istream& code_data);
+        fapi2::hwp_bit_istream& code_data,
+        fapi2::hwp_bit_istream& code_sections);
 
 ///
 /// @brief Tests that the given enable bits are set in the phyctx

@@ -57,11 +57,15 @@ extern "C"
 /// @param[in] i_target, the MC of the ports
 /// @param[in] i_code_data0 - hwp_data_istream for the PIE image data for port0
 /// @param[in] i_code_data1 - hwp_data_istream for the PIE image data for port1
+/// @param[in] i_code_sections0 - hwp_data_istream for the PIE code sections for port0
+/// @param[in] i_code_sections1 - hwp_data_istream for the PIE code sections for port1
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
     fapi2::ReturnCode ody_load_pie( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                     fapi2::hwp_data_istream& i_code_data0,
-                                    fapi2::hwp_data_istream& i_code_data1 )
+                                    fapi2::hwp_data_istream& i_code_data1,
+                                    fapi2::hwp_data_istream& i_code_sections0,
+                                    fapi2::hwp_data_istream& i_code_sections1 )
     {
         mss::display_git_commit_info("ody_load_pie");
 
@@ -82,7 +86,9 @@ extern "C"
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_port, l_pos));
 
-            FAPI_TRY(dwc_ddrphy_phyinit_I_loadPIEImage(l_port, (l_pos == 0) ? i_code_data0 : i_code_data1));
+            FAPI_TRY(dwc_ddrphy_phyinit_I_loadPIEImage(l_port,
+                     (l_pos == 0) ? i_code_data0 : i_code_data1,
+                     (l_pos == 0) ? i_code_sections0 : i_code_sections1));
 
             // Throws the DRAM into self-time refresh mode
             FAPI_TRY(mss::change_force_str<mss::mc_type::ODYSSEY>( i_target, mss::states::ON ));

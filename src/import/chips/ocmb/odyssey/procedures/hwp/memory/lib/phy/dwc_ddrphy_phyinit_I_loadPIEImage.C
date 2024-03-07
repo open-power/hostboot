@@ -96,10 +96,12 @@ fapi_try_exit:
 /// @brief Generates structures, loads registers and programs the PHY initialization engine (PIE) after training
 /// @param[in] i_target - the memory port on which to operate
 /// @param[in] i_code_data - hwp_data_istream for the PIE image data
+/// @param[in] i_code_sections - hwp_bit_istream for the PIE code sections
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        fapi2::hwp_data_istream& i_code_data)
+        fapi2::hwp_data_istream& i_code_data,
+        fapi2::hwp_data_istream& i_code_sections)
 {
     // Configuring the runtime config via hard codes -> none of these values should change for firmware
     runtime_config_t l_runtime_config;
@@ -153,7 +155,8 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
              l_user_input_basic,
              l_user_input_advanced,
              l_dram_config,
-             i_code_data));
+             i_code_data,
+             i_code_sections));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -167,6 +170,7 @@ fapi_try_exit:
 /// @param[in] i_user_input_advanced - Synopsys advanced user input structure
 /// @param[in] i_dram_config the draminit message block
 /// @param[in] i_code_data - hwp_data_istream for the PIE image data
+/// @param[in] i_code_sections - hwp_bit_istream for the PIE code sections
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
@@ -174,7 +178,8 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
         const user_input_basic_t& i_user_input_basic,
         const user_input_advanced_t& i_user_input_advanced,
         const user_input_dram_config_t& i_dram_config,
-        fapi2::hwp_data_istream& i_code_data)
+        fapi2::hwp_data_istream& i_code_data,
+        fapi2::hwp_data_istream& i_code_sections)
 {
 
     int skip_training = io_runtime_config.skip_train;
@@ -221,14 +226,15 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
 
         // Convert istream into bit_istream so we can grab 16 bits at a time
         fapi2::hwp_bit_istream l_istream(i_code_data);
+        fapi2::hwp_bit_istream l_sections_istream(i_code_sections);
 
         if(i_user_input_basic.DimmType == UDIMM)
         {
-            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode(i_target, io_runtime_config, l_istream));
+            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode(i_target, io_runtime_config, l_istream, l_sections_istream));
         }
         else
         {
-            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode_rdimm(i_target, io_runtime_config, l_istream));
+            FAPI_TRY(dwc_ddrphy_phyinit_LoadPieProdCode_rdimm(i_target, io_runtime_config, l_istream, l_sections_istream));
         }
 
         FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, (tINITENG | csr_Seq0BDisableFlag0_ADDR), 0x0000));
@@ -707,10 +713,44 @@ int dwc_ddrphy_phyinit_TestPIEProdEnableBits( const runtime_config_t& i_runtime_
 }
 
 ///
+/// @brief Get next code_section from istream
+/// @param[in] code_sections hwp_bit_istream for continuous address sections of code
+/// @param[in,out] io_code_section_p pointer to a code_section_t which will be populated from istream
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+inline fapi2::ReturnCode get_next_code_section(fapi2::hwp_bit_istream& code_sections,
+        code_section_t* io_code_section_p)
+{
+    uint8_t l_section_type = 0;
+    uint8_t l_enable_type = 0;
+    uint16_t l_section_len = 0;
+    uint32_t l_start_address = 0;
+
+    FAPI_TRY(code_sections.get32(l_start_address));
+    FAPI_TRY(code_sections.get16(l_section_len));
+    FAPI_TRY(code_sections.get8(l_enable_type));
+    FAPI_TRY(code_sections.get8(l_section_type));
+
+    io_code_section_p->start_address = l_start_address;
+    io_code_section_p->section_len = l_section_len;
+    io_code_section_p->enable_type = l_enable_type;
+    io_code_section_p->section_type = l_section_type;
+
+    FAPI_DBG ("get_next_code_section: start_address: 0x%08x section_len: %d enable_type: 0x%02x section_type: 0x%02x",
+              io_code_section_p->start_address,
+              io_code_section_p->section_len,
+              io_code_section_p->enable_type,
+              io_code_section_p->section_type);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Generates calls to dwc_ddrphy_phyinit_userCustom_io_write16
 /// @param[in] i_target - the memory port on which to operate
 /// @param[in] i_runtime_config - the runtime configuration
-/// @param[in] code_sections Array of structures for continuous address sections of code
+/// @param[in] code_sections hwp_bit_istream for continuous address sections of code
 /// @param[in] code_section_count Size of the code_sections array
 /// @param[in] code_data - hwp_bit_istream for the PIE image data
 /// @param[in] code_data_count Size of the code_data array
@@ -726,23 +766,35 @@ int dwc_ddrphy_phyinit_TestPIEProdEnableBits( const runtime_config_t& i_runtime_
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const runtime_config_t& i_runtime_config,
-        code_section_t* code_sections, size_t code_section_count,
+        fapi2::hwp_bit_istream& code_sections, size_t code_section_count,
         fapi2::hwp_bit_istream& code_data, size_t code_data_count,
         code_marker_t* code_markers, size_t code_marker_count)
 {
     FAPI_DBG (TARGTIDFORMAT " // [phyinit_LoadPIECodeSections] Start of dwc_ddrphy_phyinit_LoadPIECodeSections()",
               TARGTID);
 
-    code_section_t* current_code_section = code_sections;
+    code_section_t l_code_section;
+    l_code_section.start_address = 0;
+    l_code_section.section_len = 0;
+    l_code_section.enable_type = 0;
+    l_code_section.section_type = 0;
+    code_section_t* current_code_section = &l_code_section;
     uint32_t current_address = 0;
     size_t marker_index = 0;
     size_t data_index = 0;
     uint32_t pubRev = i_runtime_config.pubRev;
 
+
     for (size_t section_index = 0; section_index < code_section_count;
-         data_index += current_code_section->section_len,
-         ++section_index, ++current_code_section)
+         ++section_index)
     {
+        // Note: the original code updates the data_index before updating the code_section
+        // So doing the same here so the checks later still work
+        data_index += current_code_section->section_len;
+
+        // grab next code section
+        FAPI_TRY(get_next_code_section(code_sections, current_code_section));
+
         // Handle conditional and start address (jump) sections
         uint8_t section_type = current_code_section->section_type;
 
@@ -907,9 +959,12 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_LoadPIECodeSections(const fapi2::Target<fap
                 FAPI_TRY(dwc_ddrphy_phyinit_userCustom_io_write16(i_target, current_address, current_data));
             }
         }
+
     }
 
     // Warn of mismatched input data
+    data_index += current_code_section->section_len;
+
     if (data_index != code_data_count)
     {
         FAPI_DBG (TARGTIDFORMAT " // [phyinit_LoadPIECodeSections] Warning, sum of code section lengths (%zu) != "

@@ -57,10 +57,12 @@
 /// @brief Generates structures, loads registers and programs the PHY initialization engine (PIE) after training
 /// @param[in] i_target - the memory port on which to operate
 /// @param[in] i_code_data - hwp_data_istream for the PIE image data
+/// @param[in] i_code_sections - hwp_bit_istream for the PIE code sections
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        fapi2::hwp_data_istream& i_code_data);
+        fapi2::hwp_data_istream& i_code_data,
+        fapi2::hwp_data_istream& i_code_sections);
 
 ///
 /// @brief Loads registers and programs the PHY initialization engine (PIE) after training
@@ -70,6 +72,7 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
 /// @param[in] i_user_input_advanced - Synopsys advanced user input structure
 /// @param[in] i_dram_config the draminit message block
 /// @param[in] i_code_data - hwp_data_istream for the PIE image data
+/// @param[in] i_code_sections - hwp_bit_istream for the PIE code sections
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
@@ -77,6 +80,7 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
         const user_input_basic_t& i_user_input_basic,
         const user_input_advanced_t& i_user_input_advanced,
         const user_input_dram_config_t& i_dram_config,
-        fapi2::hwp_data_istream& i_code_data);
+        fapi2::hwp_data_istream& i_code_data,
+        fapi2::hwp_data_istream& i_code_sections);
 
 #endif
