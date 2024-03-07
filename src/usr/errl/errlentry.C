@@ -92,8 +92,8 @@ uint32_t ErrlEntry::iv_maxSize = 0;
 std::vector<ErrlEntry*> ErrlEntry::cv_pendingLogs = {};
 
 #ifdef CONFIG_PLDM
-// 16K for PLDM supported error logging
-constexpr uint32_t DEFAULT_MAX_LOG_SIZE = 16*KILOBYTE;
+// 15K for PLDM supported error logging, see MAX_TRANSFER_SIZE_BYTES for detailed reasoning.
+constexpr uint32_t DEFAULT_MAX_LOG_SIZE = 15*KILOBYTE;
 #else
 // 4K for all other types
 constexpr uint32_t DEFAULT_MAX_LOG_SIZE = 4*KILOBYTE;
