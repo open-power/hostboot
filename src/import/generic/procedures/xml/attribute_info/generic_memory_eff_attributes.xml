@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -752,7 +752,7 @@
       DRAM Modlue Height
       Decodes SPD Byte 193
     </description>
-    <enum>1U = 0, 2U = 1, 4U = 4 </enum>
+    <enum>1U = 0, 2U = 1, 4U = 4, RESERVED=0xFF</enum>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
