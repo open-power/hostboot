@@ -712,20 +712,36 @@ errlHndl_t getFifoSbeCapabilities(TargetHandle_t i_target)
 
 #endif //#ifdef __HOSTBOOT_RUNTIME
 
-bool sbeHasFifoCapability(Target* const i_sbe, uint8_t i_commandClass, uint8_t i_capability)
+bool sbeHasFifoCapability(Target* const i_sbe, uint8_t i_commandClass, uint8_t i_command)
 {
     bool l_hasCapability = false;
+    const uint8_t MAX_COMMANDS_PER_WORD = 20;
+
+    union sbe_capability_word_t
+    {
+        typedef struct
+        {
+            uint32_t command_class : 8;
+            uint32_t class_word_num : 4;
+            uint32_t command_bits : 20;
+        } fields_t;
+        fields_t fields;
+        uint32_t value;
+        sbe_capability_word_t(uint32_t i_value) :
+            value (i_value)
+        {
+        }
+    };
 
     if(i_sbe->getAttr<ATTR_SBE_NUM_CAPABILITIES>() != 0)
     {
-        uint32_t l_capabilityBitMask = (i_commandClass << 24) | (1 << i_capability);
         auto l_sbeFifoCapabilities = i_sbe->getAttrAsStdArr<ATTR_SBE_FIFO_CAPABILITIES>();
         for(auto l_sbeFifoCapability : l_sbeFifoCapabilities)
         {
-            // The format of each of the capability entries is 0xAABBBBBB:
-            // AA is the command class of the chip op
-            // BBBBBB is the bit mask of the capability in question
-            if((l_sbeFifoCapability & l_capabilityBitMask) == l_capabilityBitMask)
+            sbe_capability_word_t l_capabilityWord (l_sbeFifoCapability);
+            if(l_capabilityWord.fields.command_class == i_commandClass &&
+               l_capabilityWord.fields.class_word_num == (i_command / MAX_COMMANDS_PER_WORD) &&
+               (l_capabilityWord.fields.command_bits & (1 << (i_command % MAX_COMMANDS_PER_WORD))))
             {
                 l_hasCapability = true;
                 break;
