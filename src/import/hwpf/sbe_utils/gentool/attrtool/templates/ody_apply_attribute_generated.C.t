@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ ReturnCode ody_apply_sbe_attribute_row<{{target_type}}>(
                     fapi2::current_err = FAPI2_RC_SUCCESS;
                 }
              {% else %}
-                FAPI_INF("{{attr.name}} is not required to sync from sbe");
+                FAPI_DBG("{{attr.name}} is not required to sync from sbe");
              {% endif %}
                 break;
             }
