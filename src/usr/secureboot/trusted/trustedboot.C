@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2317,7 +2317,7 @@ bool disableTpmCheck(TpmTarget* i_pTpm)
                        "Per Settings, Must Disable TPM i_pTpm=0x%X",
                        TARGETING::get_huid(i_pTpm));
 
-            // First unset TPM Required if it is set
+            // Check if TPM Required is set
             bool l_isTpmRequired = isTpmRequired();
             if (l_isTpmRequired == false)
             {
@@ -2326,23 +2326,48 @@ bool disableTpmCheck(TpmTarget* i_pTpm)
             }
             else
             {
-                // Must unset TPM Required
-                // First unset Attribute
-                TRACFCOMP( g_trac_trustedboot, "disableTpmCheck: "
-                           "Since TPM will be disabled, unset TPM Required");
-                pTopLevel->setAttr<TARGETING::ATTR_TPM_REQUIRED>(false);
+                // Invalid Configuration - Terminate IPL immediately
+                TRACFCOMP( g_trac_trustedboot, ERR_MRK"disableTpmCheck: "
+                           "INVALID CONFIG: Both 'Disable TPM' and "
+                           "'TPM Required' are set");
 
+                /*@
+                 * @errortype
+                 * @reasoncode     RC_TPM_INVALID_CONFIG
+                 * @severity       ERRL_SEV_UNRECOVERABLE
+                 * @moduleid       MOD_DISABLE_TPM_CHECK
+                 * @userdata1      0
+                 * @userdata2      0
+                 * @devdesc        The system is configured with both
+                 *                 the "TPM Required" policy set and the
+                 *                 "Disable TPM" policy set. This is an invalid
+                 *                 configuration and the system will terminate.
+                 * @custdesc       The system is configured with both
+                 *                 the "TPM Required" policy set and the
+                 *                 "Disable TPM" policy set. This is an invalid
+                 *                 configuration and the system will terminate.
+                 *                 Please only set 1 of these policies and
+                 *                 then attempt another system boot.
+                 */
+                auto err = new ERRORLOG::ErrlEntry(
+                                         ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                         MOD_DISABLE_TPM_CHECK,
+                                         RC_TPM_INVALID_CONFIG);
 
-                // Second unset/clear TPM Required Sensor
-                // @TODO STGD 589636
-                // This is optional. Technically the "Disable TPM" setting
-                // supersedes the "TPM Required" setting and this clear
-                // isn't necessary
+                // Add low priority HB SW callout
+                err->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                         HWAS::SRCI_PRIORITY_LOW);
+                err->collectTrace(TRBOOT_COMP_NAME);
+                err->collectTrace(TPMDD_COMP_NAME );
+                const auto reasonCode = err->reasonCode();
+                errlCommit(err, TRBOOT_COMP_ID);
 
+                // terminating the IPL immediately with this fail
+                INITSERVICE::doShutdown(reasonCode);
             }
 
-            // Now that TPM Required is not set, call tpmMarkFailed to set
-            // TDP bit and set the TPM as non-functional
+            // Call tpmMarkFailed to set TDP bit and set the TPM as
+            // non-functional
             TRACFCOMP( g_trac_trustedboot, "disableTpmCheck: "
                        "Mark TPM as failed, which will set TDP Bit");
             errlHndl_t l_err = nullptr;
