@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,11 @@
 #include <stdio.h>
 #include <trace/interface.H>
 
+// This is necessary to avoid issues with FAPI_DBG
+#ifdef __HOSTBOOT_RUNTIME
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
+
 //******************************************************************************
 // Trace buffer names
 //******************************************************************************
@@ -69,7 +74,11 @@ extern trace_desc_t* g_fapiMfgTd;
 #define FAPI_ERR(_fmt_, _args_...) TRACFCOMP_CHECKED(true, g_fapiImpTd, TRACE_FILENAME _fmt_, ##_args_ )
 
 // Debug traces
+#ifdef __HOSTBOOT_RUNTIME
+#define FAPI_DBG(_fmt_, _args_...) 
+#else
 #define FAPI_DBG(_fmt_, _args_...) TRACSCOMP_CHECKED(true, g_fapiDbgTd, TRACE_FILENAME _fmt_, ##_args_)
+#endif
 
 // Lab traces
 #define FAPI_LAB(_fmt_, _args_...) TRACSCOMP_CHECKED(true, g_fapiDbgTd, TRACE_FILENAME _fmt_, ##_args_)
