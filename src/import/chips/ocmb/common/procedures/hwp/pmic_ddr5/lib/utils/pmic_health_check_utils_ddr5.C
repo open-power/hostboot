@@ -65,13 +65,10 @@ void reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_in
             mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, mss::pmic::ddr5::bread_crumb::ALL_GOOD);
             return fapi2::FAPI2_RC_SUCCESS;
         });
-    }
 
-    // Resetting the struct bread crumb variable
-    io_health_check_info.iv_dt0.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
-    io_health_check_info.iv_dt1.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
-    io_health_check_info.iv_dt2.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
-    io_health_check_info.iv_dt3.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+        // Resetting the struct bread crumb variable
+        io_health_check_info.iv_dt[l_dt_count].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+    }
 }
 
 ///
@@ -196,29 +193,31 @@ void update_breadcrumb(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_tar
                        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
                        const uint8_t i_dt_number)
 {
+    using CONSTS = mss::dt::dt_i2c_devices;
+
     switch(i_dt_number)
     {
         case mss::dt::dt_i2c_devices::DT0:
             {
-                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt0);
+                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt[CONSTS::DT0]);
                 break;
             }
 
         case mss::dt::dt_i2c_devices::DT1:
             {
-                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt1);
+                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt[CONSTS::DT1]);
                 break;
             }
 
         case mss::dt::dt_i2c_devices::DT2:
             {
-                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt2);
+                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt[CONSTS::DT2]);
                 break;
             }
 
         case mss::dt::dt_i2c_devices::DT3:
             {
-                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt3);
+                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt[CONSTS::DT3]);
                 break;
             }
     }
@@ -247,9 +246,9 @@ void phase_comparison(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_in
     l_phase_min_index = check_phase_min(i_phase_values);
     l_phase_max_index = check_phase_max(i_phase_values);
 
-    if (i_phase_values[l_phase_min_index] < mss::pmic::ddr5::PHASE_MIN)
+    if (i_phase_values[l_phase_min_index] < mss::pmic::ddr5::PHASE_MIN_MA)
     {
-        if (i_phase_values[l_phase_max_index] > mss::pmic::ddr5::PHASE_MAX)
+        if (i_phase_values[l_phase_max_index] > mss::pmic::ddr5::PHASE_MAX_MA)
         {
             const auto l_index = i_pmic[l_phase_min_index];
             mss::pmic::ddr5::run_if_present_dt(io_target_info, l_index,
@@ -279,23 +278,25 @@ void read_ivddq(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     uint32_t l_phase[4] = {};
     const uint8_t l_pmic[] = {0, 1, 2, 3};
 
+    using CONSTS = mss::pmic::id;
+
     // IVDDQ is made up of the following phase currents
     // (SWA0 + SWB0)
     // (SWA1 + SWB1)
     // (SWA2 + SWB2)
     // (SWA3 + SWB2)
 
-    l_phase[0] = (io_health_check_info.iv_pmic0.iv_swa_current_mA) +
-                 (io_health_check_info.iv_pmic0.iv_swb_current_mA);
+    l_phase[0] = (io_health_check_info.iv_pmic[CONSTS::PMIC0].iv_swa_current_mA) +
+                 (io_health_check_info.iv_pmic[CONSTS::PMIC0].iv_swb_current_mA);
 
-    l_phase[1] = (io_health_check_info.iv_pmic1.iv_swa_current_mA) +
-                 (io_health_check_info.iv_pmic1.iv_swb_current_mA);
+    l_phase[1] = (io_health_check_info.iv_pmic[CONSTS::PMIC1].iv_swa_current_mA) +
+                 (io_health_check_info.iv_pmic[CONSTS::PMIC1].iv_swb_current_mA);
 
-    l_phase[2] = (io_health_check_info.iv_pmic2.iv_swa_current_mA) +
-                 (io_health_check_info.iv_pmic2.iv_swb_current_mA);
+    l_phase[2] = (io_health_check_info.iv_pmic[CONSTS::PMIC2].iv_swa_current_mA) +
+                 (io_health_check_info.iv_pmic[CONSTS::PMIC2].iv_swb_current_mA);
 
-    l_phase[3] = (io_health_check_info.iv_pmic3.iv_swa_current_mA) +
-                 (io_health_check_info.iv_pmic3.iv_swb_current_mA);
+    l_phase[3] = (io_health_check_info.iv_pmic[CONSTS::PMIC3].iv_swa_current_mA) +
+                 (io_health_check_info.iv_pmic[CONSTS::PMIC3].iv_swb_current_mA);
 
     phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
 }
@@ -315,9 +316,11 @@ void read_ivio(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     uint32_t l_phase[2] = {};
     const uint8_t l_pmic[] = {1, 2};
 
+    using CONSTS = mss::pmic::id;
+
     // IVIO is made up of SWD1 and SWC2
-    l_phase[0] = io_health_check_info.iv_pmic1.iv_swd_current_mA;
-    l_phase[1] = io_health_check_info.iv_pmic2.iv_swc_current_mA;
+    l_phase[0] = io_health_check_info.iv_pmic[CONSTS::PMIC1].iv_swd_current_mA;
+    l_phase[1] = io_health_check_info.iv_pmic[CONSTS::PMIC2].iv_swc_current_mA;
 
     phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
 }
@@ -337,9 +340,11 @@ void read_ivpp(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     uint32_t l_phase[2] = {};
     const uint8_t l_pmic[] = {0, 2};
 
+    using CONSTS = mss::pmic::id;
+
     // IVPP is made up of SWD0 and SWD2
-    l_phase[0] = (io_health_check_info.iv_pmic0.iv_swd_current_mA);
-    l_phase[1] = (io_health_check_info.iv_pmic2.iv_swd_current_mA);
+    l_phase[0] = (io_health_check_info.iv_pmic[CONSTS::PMIC0].iv_swd_current_mA);
+    l_phase[1] = (io_health_check_info.iv_pmic[CONSTS::PMIC2].iv_swd_current_mA);
 
     phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
 }
@@ -369,19 +374,26 @@ void read_ivdd(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
     static constexpr uint8_t RAW_CARD_REF_DESIGN_C = 0x02;
     static constexpr uint8_t RAW_CARD_REV = 0x00;
 
+    using CONSTS = mss::pmic::id;
+
+    // Get the RAW card attribute
+#ifndef __PPE__
     // Get OCMB target
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(io_target_info.iv_pmic_dt_map[0].iv_pmic);
-    // Get the RAW card attribute
     FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_RAW_CARD_REFERENCE_DESIGN, l_ocmb, l_raw_card_ref_design);
     FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_RAW_CARD_DESIGN_REVISION,  l_ocmb, l_raw_card_design);
+#else
+    l_raw_card_design = fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_DIMM_RAW_CARD_REFERENCE_DESIGN;
+    l_raw_card_design = fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_DIMM_RAW_CARD_DESIGN_REVISION;
+#endif
 
 
     if (!((l_raw_card_ref_design == RAW_CARD_REF_DESIGN_C) && (l_raw_card_design == RAW_CARD_REV)))
     {
         // IVDD is made up of SWC0, SWC1 and SWC3
-        l_phase[0] = (io_health_check_info.iv_pmic0.iv_swc_current_mA);
-        l_phase[1] = (io_health_check_info.iv_pmic1.iv_swc_current_mA);
-        l_phase[2] = (io_health_check_info.iv_pmic3.iv_swc_current_mA);
+        l_phase[0] = (io_health_check_info.iv_pmic[CONSTS::PMIC0].iv_swc_current_mA);
+        l_phase[1] = (io_health_check_info.iv_pmic[CONSTS::PMIC1].iv_swc_current_mA);
+        l_phase[2] = (io_health_check_info.iv_pmic[CONSTS::PMIC3].iv_swc_current_mA);
 
         phase_comparison(io_target_info, io_health_check_info, l_phase, l_pmic);
     }
@@ -398,19 +410,19 @@ void check_current_imbalance(mss::pmic::ddr5::target_info_redundancy_ddr5& io_ta
                              mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
     // VDDQ
-    FAPI_INF("Checking voltage domain VDDQ");
+    FAPI_INF_NO_SBE("Checking voltage domain VDDQ");
     read_ivddq(io_target_info, io_health_check_info);
 
     // VIO
-    FAPI_INF("Checking voltage domain VIO");
+    FAPI_INF_NO_SBE("Checking voltage domain VIO");
     read_ivio(io_target_info, io_health_check_info);
 
     // VPP
-    FAPI_INF("Checking voltage domain VPP");
+    FAPI_INF_NO_SBE("Checking voltage domain VPP");
     read_ivpp(io_target_info, io_health_check_info);
 
     // VDD
-    FAPI_INF("Checking voltage domain VDD");
+    FAPI_INF_NO_SBE("Checking voltage domain VDD");
     read_ivdd(io_target_info, io_health_check_info);
 }
 
@@ -434,39 +446,44 @@ void check_pmic_faults(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_i
 ///
 /// @brief Check for DT faults in regs of a specific DT
 ///
-/// @param[in] dt_health_check_telemetry struct which contains DT regs data
-/// @return mss::pmic::ddr5::dt_state fault state of current DT
+/// @param[in,out] io_target_info  PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @return none
 ///
-mss::pmic::ddr5::dt_state get_dt_state(const mss::pmic::ddr5::dt_health_check_telemetry& i_dt_health_check)
+void get_dt_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                  mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
     using DT_FIELDS  = mss::dt::fields;
     mss::pmic::ddr5::dt_state l_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
 
-    fapi2::buffer<uint16_t> l_reg0 = i_dt_health_check.iv_ro_inputs_0;
-    fapi2::buffer<uint16_t> l_reg1 = i_dt_health_check.iv_ro_inputs_1;
+    for (auto l_dt_count = 0; l_dt_count < io_target_info.iv_number_of_target_infos_present; l_dt_count++)
+    {
+        fapi2::buffer<uint16_t> l_reg0 = io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_0;
+        fapi2::buffer<uint16_t> l_reg1 = io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_1;
 
-    if(!l_reg1.getBit<DT_FIELDS::GPI_1>())
-    {
-        l_state = mss::pmic::ddr5::dt_state::DT_GPI_1;
-    }
-    else if (l_reg0.getBit<DT_FIELDS::SWIN_FAULT_A>())
-    {
-        l_state = mss::pmic::ddr5::dt_state::DT_SWIN_FAULT_A;
-    }
-    else if (l_reg0.getBit<DT_FIELDS::SWIN_FAULT_B>())
-    {
-        l_state = mss::pmic::ddr5::dt_state::DT_SWIN_FAULT_B;
-    }
-    else if (l_reg0.getBit<DT_FIELDS::SWIN_FAULT_C>())
-    {
-        l_state = mss::pmic::ddr5::dt_state::DT_SWIN_FAULT_C;
-    }
-    else if (l_reg0.getBit<DT_FIELDS::SWIN_FAULT_D>())
-    {
-        l_state = mss::pmic::ddr5::dt_state::DT_SWIN_FAULT_D;
-    }
+        if(!l_reg1.getBit<DT_FIELDS::GPI_1>())
+        {
+            l_state = mss::pmic::ddr5::dt_state::DT_GPI_1;
+        }
+        else if (l_reg0.getBit<DT_FIELDS::SWIN_FAULT_A>())
+        {
+            l_state = mss::pmic::ddr5::dt_state::DT_SWIN_FAULT_A;
+        }
+        else if (l_reg0.getBit<DT_FIELDS::SWIN_FAULT_B>())
+        {
+            l_state = mss::pmic::ddr5::dt_state::DT_SWIN_FAULT_B;
+        }
+        else if (l_reg0.getBit<DT_FIELDS::SWIN_FAULT_C>())
+        {
+            l_state = mss::pmic::ddr5::dt_state::DT_SWIN_FAULT_C;
+        }
+        else if (l_reg0.getBit<DT_FIELDS::SWIN_FAULT_D>())
+        {
+            l_state = mss::pmic::ddr5::dt_state::DT_SWIN_FAULT_D;
+        }
 
-    return l_state;
+        io_target_info.iv_pmic_dt_map[l_dt_count].iv_dt_state = l_state;
+    }
 }
 
 ///
@@ -475,20 +492,26 @@ mss::pmic::ddr5::dt_state get_dt_state(const mss::pmic::ddr5::dt_health_check_te
 ///        After the operations have been performed, we would like to revert
 ///        the style so as to print the data in PMIC style.
 ///
-/// @param[in,out] io_dt_health_check struct to be filled in
+/// @param[in] i_number_of_target_infos_present number of DT targets to reverse regs
+/// @param[in,out] io_health_check_info struct to be filled in
 /// @return None
 ///
-void reverse_dt_regs(mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check)
+void reverse_dt_regs(const uint8_t i_number_of_target_infos_present,
+                     mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
-    // Re-reverse the I2C read data
     fapi2::buffer<uint16_t> l_reg = 0;
-    l_reg = io_dt_health_check.iv_ro_inputs_1;
-    l_reg.reverse();
-    io_dt_health_check.iv_ro_inputs_1 = l_reg;
 
-    l_reg = io_dt_health_check.iv_ro_inputs_0;
-    l_reg.reverse();
-    io_dt_health_check.iv_ro_inputs_0 = l_reg;
+    for (auto l_dt_count = 0; l_dt_count < i_number_of_target_infos_present; l_dt_count++)
+    {
+        // Re-reverse the I2C read data
+        l_reg = io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_1;
+        l_reg.reverse();
+        io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_1 = l_reg;
+
+        l_reg = io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_0;
+        l_reg.reverse();
+        io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_0 = l_reg;
+    }
 }
 
 ///
@@ -502,71 +525,24 @@ mss::pmic::ddr5::dt_state check_dt_faults(mss::pmic::ddr5::target_info_redundanc
         mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
     using CONSTS = mss::dt::dt_i2c_devices;
+    FAPI_INF_NO_SBE("Checking DT faults");
 
-    FAPI_INF("Checking DT faults");
+    get_dt_state(io_target_info, io_health_check_info);
 
-    io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state = get_dt_state(io_health_check_info.iv_dt0);
-    io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt_state = get_dt_state(io_health_check_info.iv_dt1);
-    io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt_state = get_dt_state(io_health_check_info.iv_dt2);
-    io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_dt_state = get_dt_state(io_health_check_info.iv_dt3);
-
-    if (io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state)
+    for (auto l_dt_count = 0; l_dt_count < io_target_info.iv_number_of_target_infos_present; l_dt_count++)
     {
-        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT0], io_health_check_info.iv_dt0);
+        if (io_target_info.iv_pmic_dt_map[l_dt_count].iv_dt_state)
+        {
+            check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[l_dt_count], io_health_check_info.iv_dt[l_dt_count]);
+        }
     }
 
-    if (io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt_state)
-    {
-        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT1], io_health_check_info.iv_dt1);
-    }
-
-    if (io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt_state)
-    {
-        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT2], io_health_check_info.iv_dt2);
-    }
-
-    if (io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_dt_state)
-    {
-        check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[CONSTS::DT3], io_health_check_info.iv_dt3);
-    }
-
-    reverse_dt_regs(io_health_check_info.iv_dt0);
-    reverse_dt_regs(io_health_check_info.iv_dt1);
-    reverse_dt_regs(io_health_check_info.iv_dt2);
-    reverse_dt_regs(io_health_check_info.iv_dt3);
+    reverse_dt_regs(io_target_info.iv_number_of_target_infos_present, io_health_check_info);
 
     return static_cast<mss::pmic::ddr5::dt_state>(std::max(std::max(io_target_info.iv_pmic_dt_map[CONSTS::DT0].iv_dt_state,
             io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_dt_state),
             std::max(io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_dt_state,
                      io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_dt_state)));
-}
-
-///
-/// @brief Store the read regs into struct
-///
-/// @param[in] i_data PMIC data to be filled into the health_check struct
-/// @param[in,out] io_pmic_health_check struct to be filled in
-/// @return None
-///
-void fill_pmic_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_PMIC_REGS_READ],
-                      mss::pmic::ddr5::pmic_health_check_telemetry& io_pmic_health_check)
-{
-    io_pmic_health_check.iv_r04 = i_data[mss::pmic::ddr5::data_position::DATA_0];
-    io_pmic_health_check.iv_r05 = i_data[mss::pmic::ddr5::data_position::DATA_1];
-    io_pmic_health_check.iv_r06 = i_data[mss::pmic::ddr5::data_position::DATA_2];
-    io_pmic_health_check.iv_r07 = i_data[mss::pmic::ddr5::data_position::DATA_3];
-    io_pmic_health_check.iv_r08 = i_data[mss::pmic::ddr5::data_position::DATA_4];
-    io_pmic_health_check.iv_r09 = i_data[mss::pmic::ddr5::data_position::DATA_5];
-    io_pmic_health_check.iv_r0a = i_data[mss::pmic::ddr5::data_position::DATA_6];
-    io_pmic_health_check.iv_r0b = i_data[mss::pmic::ddr5::data_position::DATA_7];
-    io_pmic_health_check.iv_swa_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_8] *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_pmic_health_check.iv_swb_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_9] *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_pmic_health_check.iv_swc_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_10] *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
-    io_pmic_health_check.iv_swd_current_mA = i_data[mss::pmic::ddr5::data_position::DATA_11] *
-            mss::pmic::ddr5::CURRENT_MULTIPLIER;
 }
 
 ///
@@ -579,64 +555,39 @@ void fill_pmic_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_PMIC_REGS_RE
 void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                     mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
-    using CONSTS  = mss::pmic::id;
-    fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ];
-
     for (auto l_pmic_count = 0; l_pmic_count < io_target_info.iv_number_of_target_infos_present; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the below code
-        mss::pmic::ddr5::run_if_present(io_target_info, l_pmic_count, [&io_target_info, l_pmic_count, &l_data_buffer]
+        mss::pmic::ddr5::run_if_present(io_target_info, l_pmic_count, [&io_target_info, l_pmic_count, &io_health_check_info]
                                         (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
             using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+            fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ];
 
-            FAPI_INF(GENTARGTIDFORMAT " Raeding PMIC data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic));
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Raeding PMIC data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic));
 
             mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R04, l_data_buffer);
+
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r04 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0];
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r05 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_1];
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r06 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_2];
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r07 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_3];
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r08 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_4];
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r09 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_5];
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r0a = l_data_buffer[mss::pmic::ddr5::data_position::DATA_6];
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r0b = l_data_buffer[mss::pmic::ddr5::data_position::DATA_7];
+            io_health_check_info.iv_pmic[l_pmic_count].iv_swa_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_8] *
+            mss::pmic::ddr5::CURRENT_MULTIPLIER;
+            io_health_check_info.iv_pmic[l_pmic_count].iv_swb_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_9] *
+            mss::pmic::ddr5::CURRENT_MULTIPLIER;
+            io_health_check_info.iv_pmic[l_pmic_count].iv_swc_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_10] *
+            mss::pmic::ddr5::CURRENT_MULTIPLIER;
+            io_health_check_info.iv_pmic[l_pmic_count].iv_swd_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_11] *
+            mss::pmic::ddr5::CURRENT_MULTIPLIER;
+
             return fapi2::FAPI2_RC_SUCCESS;
         });
-
-        switch(l_pmic_count)
-        {
-            case CONSTS::PMIC0:
-                fill_pmic_struct(l_data_buffer, io_health_check_info.iv_pmic0);
-                break;
-
-            case CONSTS::PMIC1:
-                fill_pmic_struct(l_data_buffer, io_health_check_info.iv_pmic1);
-                break;
-
-            case CONSTS::PMIC2:
-                fill_pmic_struct(l_data_buffer, io_health_check_info.iv_pmic2);
-                break;
-
-            case CONSTS::PMIC3:
-                fill_pmic_struct(l_data_buffer, io_health_check_info.iv_pmic3);
-                break;
-        }
     }
-}
-
-///
-/// @brief Store the read regs into struct
-///
-/// @param[in] i_data DT data to be filled into the health_check struct
-/// @param[in] i_data DT data1 to be filled into the health_check struct
-/// @param[in] i_data_breadcrumb data to be filled into the health_check struct
-/// @param[in,out] io_dt_health_check struct to be filled in
-/// @return None
-///
-void fill_dt_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_DT_REGS_READ],
-                    const fapi2::buffer<uint8_t> (&i_data1)[NUMBER_DT_REGS_READ],
-                    const fapi2::buffer<uint8_t>& i_data_breadcrumb,
-                    mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check)
-{
-    static constexpr uint8_t BITS_PER_BYTE = 8;
-
-    io_dt_health_check.iv_ro_inputs_1 = (i_data[0] << BITS_PER_BYTE) | i_data[1];
-    io_dt_health_check.iv_ro_inputs_0 = (i_data1[0] << BITS_PER_BYTE) | i_data1[1];
-
-    io_dt_health_check.iv_breadcrumb = i_data_breadcrumb;
 }
 
 ///
@@ -649,47 +600,30 @@ void fill_dt_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_DT_REGS_READ],
 void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                   mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
-    using CONSTS  = mss::dt::dt_i2c_devices;
-
-    fapi2::buffer<uint8_t> l_data_buffer[NUMBER_DT_REGS_READ];
-    fapi2::buffer<uint8_t> l_data_buffer1[NUMBER_DT_REGS_READ];
-    fapi2::buffer<uint8_t> l_data_breadcrumb = 0;;
-
     for (auto l_dt_count = 0; l_dt_count < io_target_info.iv_number_of_target_infos_present; l_dt_count++)
     {
         // If the pmic is not overridden to disabled, run the below code
-        mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, l_dt_count, &l_data_buffer,
-                                           &l_data_buffer1, &l_data_breadcrumb]
+        mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, l_dt_count, &io_health_check_info]
                                            (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_pmic) -> fapi2::ReturnCode
         {
+            static constexpr uint8_t BITS_PER_BYTE = 8;
             using DT_REGS  = mss::dt::regs;
+            fapi2::buffer<uint8_t> l_data_buffer[NUMBER_DT_REGS_READ];
+            fapi2::buffer<uint8_t> l_data_breadcrumb = 0;
 
-            FAPI_INF(GENTARGTIDFORMAT " Reading DT data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_dt_count].iv_dt));
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Reading DT data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_dt_count].iv_dt));
 
             mss::pmic::ddr5::dt_reg_read_contiguous_reverse(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RO_INPUTS_1, l_data_buffer);
-            mss::pmic::ddr5::dt_reg_read_contiguous_reverse(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RO_INPUTS_0, l_data_buffer1);
+            io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_1 = (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_data_buffer[mss::pmic::ddr5::data_position::DATA_1];
+
+            mss::pmic::ddr5::dt_reg_read_contiguous_reverse(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RO_INPUTS_0, l_data_buffer);
+            io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_0 = (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0] << BITS_PER_BYTE) | l_data_buffer[mss::pmic::ddr5::data_position::DATA_1];
+
             mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, l_data_breadcrumb);
+            io_health_check_info.iv_dt[l_dt_count].iv_breadcrumb = l_data_breadcrumb;
+
             return fapi2::FAPI2_RC_SUCCESS;
         });
-
-        switch(l_dt_count)
-        {
-            case CONSTS::DT0:
-                fill_dt_struct(l_data_buffer, l_data_buffer1, l_data_breadcrumb, io_health_check_info.iv_dt0);
-                break;
-
-            case CONSTS::DT1:
-                fill_dt_struct(l_data_buffer, l_data_buffer1, l_data_breadcrumb, io_health_check_info.iv_dt1);
-                break;
-
-            case CONSTS::DT2:
-                fill_dt_struct(l_data_buffer, l_data_buffer1, l_data_breadcrumb, io_health_check_info.iv_dt2);
-                break;
-
-            case CONSTS::DT3:
-                fill_dt_struct(l_data_buffer, l_data_buffer1, l_data_breadcrumb, io_health_check_info.iv_dt3);
-                break;
-        }
     }
 }
 
@@ -701,10 +635,10 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
 ///
 mss::pmic::ddr5::aggregate_state check_n_mode(mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
-    const auto l_max_breadcrumb = std::max(std::max(io_health_check_info.iv_dt0.iv_breadcrumb,
-                                           io_health_check_info.iv_dt1.iv_breadcrumb),
-                                           std::max(io_health_check_info.iv_dt2.iv_breadcrumb,
-                                                   io_health_check_info.iv_dt3.iv_breadcrumb));
+    const auto l_max_breadcrumb = std::max(std::max(io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT0].iv_breadcrumb,
+                                           io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT1].iv_breadcrumb),
+                                           std::max(io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT2].iv_breadcrumb,
+                                                   io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT3].iv_breadcrumb));
 
     mss::pmic::ddr5::bread_crumb l_breadcrumb_value = static_cast<mss::pmic::ddr5::bread_crumb>(l_max_breadcrumb);
 
@@ -987,7 +921,7 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
         mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT0], DT_REGS::BREADCRUMB,
                                       mss::pmic::ddr5::bread_crumb::ALL_GOOD);
         // Resetting the struct bread crumb variable
-        io_health_check_info.iv_dt0.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+        io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT0].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
     }
 
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT1].iv_pmic_state
@@ -996,7 +930,7 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
         mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT1], DT_REGS::BREADCRUMB,
                                       mss::pmic::ddr5::bread_crumb::ALL_GOOD);
         // Resetting the struct bread crumb variable
-        io_health_check_info.iv_dt1.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+        io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT1].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
     }
 
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT2].iv_pmic_state
@@ -1005,7 +939,7 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
         mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT2], DT_REGS::BREADCRUMB,
                                       mss::pmic::ddr5::bread_crumb::ALL_GOOD);
         // Resetting the struct bread crumb variable
-        io_health_check_info.iv_dt2.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+        io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT2].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
     }
 
     if (!io_target_info.iv_pmic_dt_map[CONSTS::DT3].iv_pmic_state
@@ -1014,7 +948,7 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
         mss::pmic::ddr5::dt_reg_write(io_target_info.iv_pmic_dt_map[CONSTS::DT3], DT_REGS::BREADCRUMB,
                                       mss::pmic::ddr5::bread_crumb::ALL_GOOD);
         // Resetting the struct bread crumb variable
-        io_health_check_info.iv_dt3.iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
+        io_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT3].iv_breadcrumb = mss::pmic::ddr5::bread_crumb::ALL_GOOD;
     }
 }
 
@@ -1028,10 +962,12 @@ void check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io
 inline mss::pmic::ddr5::aggregate_state check_breadcrumbs_subsequent_n_modes(const
         mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
-    if ((io_health_check_info.iv_dt0.iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
-        (io_health_check_info.iv_dt1.iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
-        (io_health_check_info.iv_dt2.iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
-        (io_health_check_info.iv_dt3.iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL))
+    using CONSTS = mss::dt::dt_i2c_devices;
+
+    if ((io_health_check_info.iv_dt[CONSTS::DT0].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
+        (io_health_check_info.iv_dt[CONSTS::DT1].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
+        (io_health_check_info.iv_dt[CONSTS::DT2].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
+        (io_health_check_info.iv_dt[CONSTS::DT3].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL))
     {
         return mss::pmic::ddr5::aggregate_state::N_MODE;
     }

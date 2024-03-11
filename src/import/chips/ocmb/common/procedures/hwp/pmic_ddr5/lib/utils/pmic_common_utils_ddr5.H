@@ -60,8 +60,8 @@ using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
 // Extra constants
 static constexpr uint16_t CURRENT_MULTIPLIER = 125;
-static constexpr uint16_t PHASE_MIN = 250;
-static constexpr uint16_t PHASE_MAX = 1500;
+static constexpr uint16_t PHASE_MIN_MA = 250;
+static constexpr uint16_t PHASE_MAX_MA = 1500;
 
 ///
 /// @brief
@@ -425,15 +425,9 @@ struct __attribute__((__packed__)) health_check_telemetry_data
     uint8_t reserved = 0;
     uint16_t reserved1 = 0;
 
-    dt_health_check_telemetry iv_dt0;
-    dt_health_check_telemetry iv_dt1;
-    dt_health_check_telemetry iv_dt2;
-    dt_health_check_telemetry iv_dt3;
+    dt_health_check_telemetry iv_dt[CONSTS::NUM_DTS_4U];
 
-    pmic_health_check_telemetry iv_pmic0;
-    pmic_health_check_telemetry iv_pmic1;
-    pmic_health_check_telemetry iv_pmic2;
-    pmic_health_check_telemetry iv_pmic3;
+    pmic_health_check_telemetry iv_pmic[CONSTS::NUM_PMICS_4U];
 };
 
 ///

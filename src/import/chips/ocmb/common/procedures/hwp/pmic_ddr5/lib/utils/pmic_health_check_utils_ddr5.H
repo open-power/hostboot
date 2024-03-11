@@ -237,10 +237,12 @@ void check_pmic_faults(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_i
 ///
 /// @brief Check for DT faults in regs of a specific DT
 ///
-/// @param[in] dt_health_check_telemetry struct which contains DT regs data
-/// @return mss::pmic::ddr5::dt_state fault state of current DT
+/// @param[in,out] io_target_info  PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @return none
 ///
-mss::pmic::ddr5::dt_state get_dt_state(const mss::pmic::ddr5::dt_health_check_telemetry& i_dt_health_check);
+void get_dt_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                  mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
 
 ///
 /// @brief Reverse the DT regs. When performing bit operations on DT regs,
@@ -248,10 +250,12 @@ mss::pmic::ddr5::dt_state get_dt_state(const mss::pmic::ddr5::dt_health_check_te
 ///        After the operations have been performed, we would like to revert
 ///        the style so as to print the data in PMIC style.
 ///
-/// @param[in,out] io_dt_health_check struct to be filled in
+/// @param[in] i_number_of_target_infos_present number of DT targets to reverse regs
+/// @param[in,out] io_health_check_info struct to be filled in
 /// @return None
 ///
-void reverse_dt_regs(mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check);
+void reverse_dt_regs(const uint8_t i_number_of_target_infos_present,
+                     mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
 
 ///
 /// @brief Check DT faults for all given DTs
@@ -266,36 +270,12 @@ mss::pmic::ddr5::dt_state check_dt_faults(mss::pmic::ddr5::target_info_redundanc
 ///
 /// @brief Store the read regs into struct
 ///
-/// @param[in] i_data PMIC data to be filled into the health_check struct
-/// @param[in,out] io_pmic_health_check struct to be filled in
-/// @return None
-///
-void fill_pmic_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_PMIC_REGS_READ],
-                      mss::pmic::ddr5::pmic_health_check_telemetry& io_pmic_health_check);
-
-///
-/// @brief Store the read regs into struct
-///
 /// @param[in] i_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
 /// @return none
 ///
 void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                     mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
-
-///
-/// @brief Store the read regs into struct
-///
-/// @param[in] i_data DT data to be filled into the health_check struct
-/// @param[in] i_data DT data1 to be filled into the health_check struct
-/// @param[in] i_data_breadcrumb data to be filled into the health_check struct
-/// @param[in,out] io_dt_health_check struct to be filled in
-/// @return None
-///
-void fill_dt_struct(const fapi2::buffer<uint8_t> (&i_data)[NUMBER_DT_REGS_READ],
-                    const fapi2::buffer<uint8_t> (&i_data1)[NUMBER_DT_REGS_READ],
-                    const fapi2::buffer<uint8_t>& i_data_breadcrumb,
-                    mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check);
 
 ///
 /// @brief Read all DT regs and store in the array of structs

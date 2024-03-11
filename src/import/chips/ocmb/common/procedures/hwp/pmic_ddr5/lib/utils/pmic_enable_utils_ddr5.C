@@ -973,25 +973,25 @@ uint8_t get_breadcrumb_state(const mss::pmic::ddr5::health_check_telemetry_data&
     {
         case mss::dt::dt_i2c_devices::DT0:
             {
-                l_breadcrumb = i_health_check_info.iv_dt0.iv_breadcrumb;
+                l_breadcrumb = i_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT0].iv_breadcrumb;
                 break;
             }
 
         case mss::dt::dt_i2c_devices::DT1:
             {
-                l_breadcrumb = i_health_check_info.iv_dt1.iv_breadcrumb;
+                l_breadcrumb = i_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT1].iv_breadcrumb;
                 break;
             }
 
         case mss::dt::dt_i2c_devices::DT2:
             {
-                l_breadcrumb = i_health_check_info.iv_dt2.iv_breadcrumb;
+                l_breadcrumb = i_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT2].iv_breadcrumb;
                 break;
             }
 
         case mss::dt::dt_i2c_devices::DT3:
             {
-                l_breadcrumb = i_health_check_info.iv_dt3.iv_breadcrumb;
+                l_breadcrumb = i_health_check_info.iv_dt[mss::dt::dt_i2c_devices::DT3].iv_breadcrumb;
                 break;
             }
     }
