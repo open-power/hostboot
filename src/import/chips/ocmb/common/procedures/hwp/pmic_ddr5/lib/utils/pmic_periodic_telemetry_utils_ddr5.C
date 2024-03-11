@@ -53,7 +53,11 @@ void read_serial_ccin_number(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
 {
     uint8_t l_serial_number[26] = {0};
 
+#ifndef __PPE__
     FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DIMM_SERIAL_NUMBER, i_ocmb_target, l_serial_number);
+#else
+    memcpy (l_serial_number, fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_EFF_DIMM_SERIAL_NUMBER, 26);
+#endif
 
     memcpy(io_serial_number, l_serial_number, sizeof(l_serial_number));
 }
