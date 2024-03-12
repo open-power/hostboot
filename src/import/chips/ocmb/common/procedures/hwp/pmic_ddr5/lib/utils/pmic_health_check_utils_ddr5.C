@@ -182,48 +182,6 @@ void check_and_advance_breadcrumb_reg(mss::pmic::ddr5::target_info_pmic_dt_pair&
 }
 
 ///
-/// @brief Update bread crumbs for a specific PMIC/DT pair
-///
-/// @param[in,out] io_pmic_dt_target_info PMIC and DT target info struct
-/// @param[in,out] io_health_check_info health check struct
-/// @param[in] DT number to be checked for breadcrumbs
-/// @return FAPI2_RC_SUCCESS iff okay
-///
-void update_breadcrumb(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_target_info,
-                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
-                       const uint8_t i_dt_number)
-{
-    using CONSTS = mss::dt::dt_i2c_devices;
-
-    switch(i_dt_number)
-    {
-        case mss::dt::dt_i2c_devices::DT0:
-            {
-                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt[CONSTS::DT0]);
-                break;
-            }
-
-        case mss::dt::dt_i2c_devices::DT1:
-            {
-                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt[CONSTS::DT1]);
-                break;
-            }
-
-        case mss::dt::dt_i2c_devices::DT2:
-            {
-                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt[CONSTS::DT2]);
-                break;
-            }
-
-        case mss::dt::dt_i2c_devices::DT3:
-            {
-                check_and_advance_breadcrumb_reg(io_pmic_dt_target_info, io_health_check_info.iv_dt[CONSTS::DT3]);
-                break;
-            }
-    }
-}
-
-///
 /// @brief Compare 4 phases provided from 4 pmics, update pmic states if needed
 ///
 /// @tparam N size of the phase value data buffer
@@ -256,7 +214,7 @@ void phase_comparison(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_in
                                                (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
             {
                 io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_CURRENT_IMBALANCE;
-                update_breadcrumb(io_target_info.iv_pmic_dt_map[l_index], io_health_check_info, l_index);
+                check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[l_index], io_health_check_info.iv_dt[l_index]);
                 return fapi2::FAPI2_RC_SUCCESS;
             });
         }
