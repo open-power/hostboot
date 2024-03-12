@@ -1293,7 +1293,11 @@ errlHndl_t ddimmParkEeprom(TARGETING::TargetHandle_t i_target)
     {
         tl_parkRecursion = true;
         spdMemType_t l_memType(SPD::MEM_TYPE_INVALID);
-        l_errhdl = OCMB_SPD::getMemType(l_memType, i_target);
+
+        // Need to force a hardware read here because this function
+        // can get called while we are in the middle of populating
+        // the cache which can create some undesireable results.
+        l_errhdl = OCMB_SPD::getMemType(l_memType, i_target, EEPROM::HARDWARE);
         if (l_errhdl)
         {
             tl_parkRecursion = false;
