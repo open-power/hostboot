@@ -57,13 +57,17 @@ namespace ddr5
 {
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
+static constexpr uint8_t PRE_CONFIG = true;
+static constexpr uint8_t POST_CONFIG = false;
+
 ///
 /// @brief Updates VDD domain during dt enable sequence
 /// @param[in] i_target_info target info struct
 /// @param[in] i_pmic_id PMIC being addressed in sorted array
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
-fapi2::ReturnCode update_vdd_ov_threshold(const target_info_redundancy_ddr5& i_target_info,
+fapi2::ReturnCode inline __attribute__((always_inline)) update_vdd_ov_threshold(const target_info_redundancy_ddr5&
+        i_target_info,
         const uint8_t i_pmic_id);
 
 ///
@@ -88,18 +92,22 @@ fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info);
 fapi2::ReturnCode power_down_sequence_2u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 ///
-/// @brief Pre config PMIC for power down or pmic enable.
-///        Enable/disable power off seq, enable/disable soft-stop, on-off config global
+/// @brief Pre/post config PMIC
+///        Pre -- for power down or pmic enable.
+///               Enable/disable power off seq, enable/disable soft-stop, on-off config global
+///        Post --  PMIC post-config. Set/Clear VR_ENABLE, write on_off_config_global reg
 ///
 /// @param[in] i_target_info target info struct
-/// @param[in] i_value_comp_config bool value to be written to the comp_config register
+/// @param[in] i_is_preconfig bool set context for execution
+/// @param[in] i_value bool value to be written to the comp_config register (pre) / PMIC R32 reg (post)
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
+///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///       document provided by the Power team
 ///
-fapi2::ReturnCode pre_config(const target_info_redundancy_ddr5& i_target_info,
-                             const bool i_value_comp_config);
+fapi2::ReturnCode prepost_config(const target_info_redundancy_ddr5& i_target_info,
+                                 const bool i_is_preconfig,
+                                 const bool i_value);
 
 ///
 /// @brief Enable/disable PMIC
@@ -111,21 +119,21 @@ fapi2::ReturnCode pre_config(const target_info_redundancy_ddr5& i_target_info,
 ///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
 ///       document provided by the Power team
 ///
-fapi2::ReturnCode enable_disable_pmic(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc,
-                                      const uint8_t i_value);
+fapi2::ReturnCode inline __attribute__((always_inline)) enable_disable_pmic(const
+        fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc,
+        const uint8_t i_value)
+{
+    using ADC_REGS = mss::adc::regs;
 
-///
-/// @brief PMIC post-config. Set/Clear VR_ENABLE, write on_off_config_global reg
-///
-/// @param[in] i_target_info target info struct
-/// @param[in] i_value to be written to PMIC R32 reg
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-/// @note The below values of DT regs are taken from the
-///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
-///       document provided by the Power team
-///
-fapi2::ReturnCode post_config(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info,
-                              const uint8_t i_value);
+    // Set PMIC_EN to 1
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_adc, ADC_REGS::GPO_VALUE, i_value));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 ///
 /// @brief PMIC power down sequence for 4U parts
 ///
@@ -139,7 +147,8 @@ fapi2::ReturnCode power_down_sequence_4u(const fapi2::Target<fapi2::TARGET_TYPE_
 /// @param[in] i_target ocmb target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode pmic_power_down(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+fapi2::ReturnCode inline __attribute__((always_inline)) pmic_power_down(const
+        fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 ///
 /// @brief Disable PMICs and clear status bits in preparation for enable
@@ -167,10 +176,32 @@ fapi2::ReturnCode validate_pmic_revisions(const fapi2::Target<fapi2::TARGET_TYPE
 /// @param[in]  i_rev_reg register value of the revision
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff no error
 ///
-fapi2::ReturnCode validate_pmic_revisions_helper(
+fapi2::ReturnCode inline __attribute__((always_inline)) validate_pmic_revisions_helper(
     const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
     const uint8_t i_rev_attr,
-    const uint8_t i_rev_reg);
+    const uint8_t i_rev_reg)
+{
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmic_target);
+
+    FAPI_INF_NO_SBE("PMIC i_rev_attr: 0x%02X, PMIC i_rev_reg: 0x%02X " GENTARGTIDFORMAT, i_rev_attr, i_rev_reg,
+                    GENTARGTID(i_pmic_target));
+
+    FAPI_ASSERT(i_rev_attr == i_rev_reg,
+                fapi2::PMIC_MISMATCHING_REVISIONS_DDR5()
+                .set_REVISION_ATTR(i_rev_attr)
+                .set_REVISION_REG(i_rev_reg)
+                .set_PMIC_TARGET(i_pmic_target)
+                .set_OCMB_TARGET(l_ocmb),
+                "Mismatching PMIC revisions for ATTR: 0x%02X REG: 0x%02X. May have the wrong SPD for this DIMM." GENTARGTIDFORMAT,
+                i_rev_attr,
+                i_rev_reg,
+                GENTARGTID(i_pmic_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Enable PMIC for 2U
@@ -217,17 +248,22 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 ///       "Redundant PoD5 - Functional Specification dated 20230216 version 0.06"
 ///       document provided by the Power team
 ///
-fapi2::ReturnCode clear_adc_events(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc);
+fapi2::ReturnCode inline __attribute__((always_inline)) clear_adc_events(const
+        fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_adc)
+{
+    using ADC_REGS = mss::adc::regs;
 
-///
-/// @brief Check all the breadcrumbs
-///
-/// @param[in] i_health_check_info health check info struct
-/// @param[in] i_dt_number DT number to read bread crumb from
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
-///
-uint8_t get_breadcrumb_state(const mss::pmic::ddr5::health_check_telemetry_data& i_health_check_info,
-                             const uint8_t i_dt_number);
+    fapi2::buffer<uint8_t> l_reg_contents;
+
+    FAPI_INF_NO_SBE("Clearing previous ADC events port pmic_enable() " GENTARGTIDFORMAT, GENTARGTID(i_adc));
+
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_adc, ADC_REGS::LOW_EVENT_FLAGS, 0xFF));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Check all the breadcrumbs
@@ -245,7 +281,8 @@ fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_tar
 /// @param[in,out] io_target_info target info struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode redundancy_check_all_pmics(target_info_redundancy_ddr5& io_target_info);
+fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmics(target_info_redundancy_ddr5&
+        io_target_info);
 
 ///
 /// @brief Log recoverable errors for each PMIC that declared N-mode
@@ -253,7 +290,7 @@ fapi2::ReturnCode redundancy_check_all_pmics(target_info_redundancy_ddr5& io_tar
 /// @param[in] i_target_info Target info struct
 /// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
 ///
-void log_n_modes_as_recoverable_errors_ddr5(
+void inline __attribute__((always_inline)) log_n_modes_as_recoverable_errors_ddr5(
     const target_info_redundancy_ddr5& i_target_info,
     const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U]);
 
@@ -265,7 +302,7 @@ void log_n_modes_as_recoverable_errors_ddr5(
 /// @param[in] i_mnfg_thresholds thresholds policy setting
 /// @return fapi2::ReturnCode iff no n-modes, else, relevant error FFDC
 ///
-fapi2::ReturnCode assert_n_mode_states_ddr5(
+fapi2::ReturnCode inline __attribute__((always_inline)) assert_n_mode_states_ddr5(
     const target_info_redundancy_ddr5& i_target_info,
     const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U],
     const bool i_mnfg_thresholds);
