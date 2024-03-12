@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,9 +126,10 @@ void ErrDataService::commitErrLog( errlHndl_t & io_errl,
 
 //------------------------------------------------------------------------------
 
-void collectPmicTelemetry(const SDC_MRU_LIST & i_mruList, uint32_t i_plid)
+TargetHandleList ___getOcmbsFromMruList(const SDC_MRU_LIST & i_mruList)
 {
-    // List of ocmbs to collect telemetry for
+    // This function will return a list of OCMB associated with any memory
+    // callout in the MRU list.
     TargetHandleList ocmbList;
 
     // Loop through the callout list
@@ -196,11 +197,51 @@ void collectPmicTelemetry(const SDC_MRU_LIST & i_mruList, uint32_t i_plid)
         }
     }
 
+    return ocmbList;
+}
+
+//------------------------------------------------------------------------------
+
+void collectPmicTelemetry(const SDC_MRU_LIST & i_mruList, uint32_t i_plid)
+{
+    // List of ocmbs to collect telemetry for
+    TargetHandleList ocmbList = ___getOcmbsFromMruList(i_mruList);
+
     // Call the function to collect the PMIC telemetry for all DIMMs in the list
     for (const auto & ocmb : ocmbList)
     {
         getPmicTelemetry(ocmb, i_plid);
     }
+}
+
+//------------------------------------------------------------------------------
+
+void collectSbeScratchRegData(const SDC_MRU_LIST & i_mruList, uint32_t i_plid )
+{
+    #ifndef __HOSTBOOT_RUNTIME
+
+    // Only collect the SBE scratch reg data during memdiags
+    if (!isInMdiaMode())
+    {
+        return;
+    }
+
+    // List of ocmbs to collect data for
+    TargetHandleList ocmbList = ___getOcmbsFromMruList(i_mruList);
+
+    // Call the function to collect the SBE data for all DIMMs in the list
+    for (const auto & ocmb : ocmbList)
+    {
+        // Skip non Odyssey OCMBs
+        if (!isOdysseyOcmb(ocmb))
+        {
+            continue;
+        }
+
+        getSbeScratchData(ocmb, i_plid);
+    }
+
+    #endif
 }
 
 } // end namespace PRDF

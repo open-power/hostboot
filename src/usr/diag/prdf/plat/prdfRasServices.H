@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,18 @@ namespace PRDF
  */
 void collectPmicTelemetry(const SDC_MRU_LIST & i_mruList,
                           uint32_t i_plid = 0);
+
+/**
+ * @brief Will loop through the input MRU list and call a Hostboot interface
+ *        to collect SBE scratch reg data for any Odyssey dimms in the callout
+ *        list. An optional plid can be input to link a log to the SBE scratch
+ *        reg data log that will be created.
+ * @param i_mruList List of the targets that have been called out.
+ * @param i_plid    The optional plid of the PRD log to link to. If 0, the
+ *                  logs will not be linked.
+ */
+void collectSbeScratchRegData(const SDC_MRU_LIST & i_mruList,
+                              uint32_t i_plid = 0);
 
 } // end namespace PRDF
 

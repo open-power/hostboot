@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -732,6 +732,10 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
     uint32_t errlPlid = 0;
     PRDF_GET_PLID(iv_errl, errlPlid);
     collectPmicTelemetry(mruList, errlPlid);
+
+    // Collect SBE scratch reg data (Synopsys training data) during memdiags on
+    // any Odyssey OCMBs called out.
+    collectSbeScratchRegData(mruList, errlPlid);
     #endif
 
     // If this is not a terminating condition, commit the error log. If the
