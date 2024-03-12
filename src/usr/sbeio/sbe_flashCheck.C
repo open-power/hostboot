@@ -212,6 +212,7 @@ errlHndl_t processSpiFlashCheckResponse(Target* i_ocmb, uint8_t i_numStatusEntri
         auto l_fsmErrl = ody_upd_process_event(i_ocmb,
                                                OCMB_FLASH_ERROR,
                                                errlOwner(l_errl));
+        l_errl = nullptr;
         if(l_fsmErrl)
         {
             SBE_TRACF("processSpiFlashCheckResponse: could not process Ody event");
@@ -271,6 +272,17 @@ errlHndl_t sendSpiFlashCheckRequest(Target* i_ocmb, uint8_t i_scope, uint8_t i_s
     if(l_errl)
     {
         SBE_TRACF("sendSpiFlashCheckRequest: chip op failed for OCMB 0x%x", get_huid(i_ocmb));
+        // If the flash check chip-op fails, we have to assume that the flash
+        // is bad, so treat this error like UE failure on the current side.
+        auto l_fsmError = ody_upd_process_event(i_ocmb,
+                                                OCMB_FLASH_ERROR,
+                                                errlOwner(l_errl));
+        l_errl = nullptr;
+        if(l_fsmError)
+        {
+            SBE_TRACF("sendSpiFlashCheckRequest: could not process Ody event");
+            l_errl = l_fsmError.release();
+        }
         goto ERROR_EXIT;
     }
 
