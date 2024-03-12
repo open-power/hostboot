@@ -3957,7 +3957,7 @@ class msg_block_params
             io_msg_block.CDD_ChA_WW_0_3 = 0;
             io_msg_block.CDD_ChA_WW_0_2 = 0;
             io_msg_block.CDD_ChA_WW_0_1 = 0;
-            io_msg_block.CDD_ChA_RR_3_2 = 0;
+            io_msg_block.CDD_ChB_RR_3_2 = 0;
             io_msg_block.CDD_ChB_RR_3_1 = 0;
             io_msg_block.CDD_ChB_RR_3_0 = 0;
             io_msg_block.CDD_ChB_RR_2_3 = 0;
