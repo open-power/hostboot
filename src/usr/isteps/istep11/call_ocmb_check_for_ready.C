@@ -538,7 +538,8 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                     // so that we can boot off of the correct side on the next boot (as indicated by
                     // the OCMB_BOOT_SIDE attribute).
                     AttrRP::syncAllAttributesToSP();
-                    captureError(move(l_ocmb_errl), io_iStepError, HWPF_COMP_ID, i_ocmb);
+                    // Commit the errl. FSM will handle shutdowns/reconfig loops.
+                    errlCommit(l_ocmb_errl, SBEIO_COMP_ID);
                     goto EXIT_OCMBS;
                 }
             }
