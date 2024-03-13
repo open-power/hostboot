@@ -1508,5 +1508,24 @@
         <writeable/>
     </attribute>
 
+    <attribute>
+        <id>ATTR_ODY_SETUP_SAFEMODE_THROTTLES</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Setup emergeny throttles. This attribute gets set automatically in the code,
+            and it's enabled only in the case of P Hostboot
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            ENABLE = 1,
+            DISABLE = 0
+        </enum>
+        <default>DISABLE</default>
+        <writeable/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
+        </sbeAttrSync>
+    </attribute>
+
 
 </attributes>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,18 +48,23 @@ extern "C"
     ///
     fapi2::ReturnCode ody_thermal_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target )
     {
+        uint8_t l_setup_safemode_throttles = 0;
+
         // ensure i2c controller is a clean state before proceeding
         FAPI_TRY(mss::ody::thermal::reset_i2cc(i_target));
 
         // Polls the DTS for initial values
         FAPI_TRY(mss::ody::thermal::read_dts_sensors(i_target));
 
-        // TODO:ZEN:MST-1893 Update hostboot only ifdef's to include PPE callers
-#ifdef __HOSTBOOT_MODULE
+        // This attribute gets set to DISABLED automatically in the code, and it's enabled only in the case of P Hostboot
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SETUP_SAFEMODE_THROTTLES, i_target, l_setup_safemode_throttles));
+
         // Prior to starting OCC, we go into "safemode" throttling
         // After OCC is started, they can change throttles however they want
-        FAPI_TRY (mss::ody::thermal::mc::setup_emergency_throttles(i_target));
-#endif
+        if (l_setup_safemode_throttles == fapi2::ENUM_ATTR_ODY_SETUP_SAFEMODE_THROTTLES_ENABLE)
+        {
+            FAPI_TRY (mss::ody::thermal::mc::setup_emergency_throttles(i_target));
+        }
 
         // Clear the emergency mode throttle bit
         FAPI_TRY (mss::ody::thermal::mc::disable_safe_mode_throttles(i_target));

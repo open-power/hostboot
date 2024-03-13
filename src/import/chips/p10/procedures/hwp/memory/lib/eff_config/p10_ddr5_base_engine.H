@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1362,6 +1362,12 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY(set_dram_mfg_id(i_spd));
             FAPI_TRY(set_dram_cwl(i_spd));
             FAPI_TRY(set_burst_length(i_spd));
+
+            // We only intend to set this to ENABLE in the case of P Hostboot (and not for Cronus-mode IPL)
+#ifdef __HOSTBOOT_MODULE
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_SETUP_SAFEMODE_THROTTLES, iv_ocmb,
+                                         fapi2::ENUM_ATTR_ODY_SETUP_SAFEMODE_THROTTLES_ENABLE));
+#endif
 
             return fapi2::FAPI2_RC_SUCCESS;
 
