@@ -39,7 +39,6 @@
 
 #include <fapi2.H>
 #include <generic/memory/lib/utils/scom.H>
-#include <math.h>
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/power_thermal/gen_temp_sensor_traits.H>
 
