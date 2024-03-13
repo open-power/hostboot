@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,6 +26,7 @@
 
   <!-- ******************************************************************** -->
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_OMI_TRAIN_ERR</rc>
     <description>
       exp_omi_train_check did not see expected trained status from OCMB DL0 status register
@@ -79,6 +80,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FFE_CURSOR_OVERFLOW</rc>
     <description>
       Sum of FFE pre-cursor and post-cursor needs to be less than 64
@@ -96,6 +98,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_OMI_CDR_BW_UNKNOWN_FREQ</rc>
     <description>
       Got unsupported OMI frequency when fetching OMI CDR BW override

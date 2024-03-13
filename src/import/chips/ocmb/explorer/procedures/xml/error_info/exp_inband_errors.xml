@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -26,6 +26,7 @@
 
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_INBAND_RSP_CRC_ERR</rc>
     <description>
        Inband response CRC failed to validate.
@@ -45,6 +46,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_INBAND_LE_DATA_RANGE</rc>
     <description>
        Data is not long enough for little endian conversion
@@ -61,6 +63,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_INBAND_BE_DATA_RANGE</rc>
     <description>
        Data is not long enough for big endian conversion
@@ -76,6 +79,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_INBAND_RSP_NO_DOORBELL</rc>
     <description>
        Doorbell is low when expecting a response

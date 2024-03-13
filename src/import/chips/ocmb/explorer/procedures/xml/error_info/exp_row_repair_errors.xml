@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -27,6 +27,7 @@
 
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_DRAM_INDEX_OUT_OF_BOUNDS</rc>
     <description>
         Index supplied to row repair function out of bounds.
@@ -51,6 +52,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS</rc>
     <description>
         Input supplied to row repair function out of bounds.
@@ -84,6 +86,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_ROW_REPAIR_WITH_MNFG_REPAIRS_DISABLED</rc>
     <description>
         Valid row repair was requested while repairs are disabled.
@@ -102,6 +105,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_ROW_REPAIR_MCBIST_STUCK_IN_PROGRESS</rc>
     <description>
         MCBIST is failed to exit scrub or is in use and not available for repair.
@@ -118,6 +122,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_EXP_ROW_REPAIR_CCS_STUCK_IN_PROGRESS</rc>
     <description>
         CCS engine is in use and not available for repair.

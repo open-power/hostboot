@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,6 +31,7 @@
 
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_UPDATE_INVALID_IMAGE_SIZE</rc>
         <description>
             Explorer firmware image must be less than 16MB
@@ -44,6 +45,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_UPDATE_CMD_FAILED</rc>
         <description>
             Explorer firmware update command returned an unknown error
@@ -81,6 +83,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_UPDATE_DEV_INF_ERR</rc>
         <description>
             Explorer firmware update command encountered a device info retrieve error.
@@ -115,6 +118,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_UPDATE_DEV_SECTOR_INF_ERR</rc>
         <description>
             Explorer firmware update command encountered a device sector info retrieve error
@@ -149,6 +153,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_UPDATE_DEV_ERASE_ERR</rc>
         <description>
             Explorer firmware update command encountered a device erase error
@@ -183,6 +188,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_UPDATE_WRITE_FAIL</rc>
         <description>
             Explorer firmware update command encountered a device write error
@@ -217,6 +223,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_UPDATE_INV_IMAGE_LEN</rc>
         <description>
             Explorer firmware update command indicated an invalid firmware image size
@@ -240,6 +247,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_UPDATE_AUTH_FAIL</rc>
         <description>
             Explorer firmware update command indicated a firmware image authentication failure
@@ -274,6 +282,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_SPI_FLASH_AUTH_FAIL_MFG</rc>
         <description>
             Explorer SPI flash authentication failed for one FW image during MFG test.
@@ -299,6 +308,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_SPI_FLASH_AUTH_FAIL</rc>
         <description>
             Explorer SPI flash authentication failed for one FW image during MFG test.
@@ -319,6 +329,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_FLASH_COMMAND_ERR</rc>
         <description>
             Explorer flash command returned a failure
@@ -342,6 +353,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_MNFG_SPI_FLASH_CE</rc>
         <description>
             Explorer SPI Flash CE FIR bit, LOCAL_FIR[23], was set during MNFG SPI Flash screen test.
@@ -363,6 +375,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_MNFG_SPI_FLASH_TIMEOUT_READING_IMAGE</rc>
         <description>
             Explorer SPI flash timeout reading FW image during MNFG SPI Flash screen test.
@@ -385,6 +398,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_MNFG_SPI_FLASH_TIMEOUT_WRITING_TEMP_BANK</rc>
         <description>
             Explorer SPI flash timeout writing FW image to temp bank during MNFG SPI Flash screen test.
@@ -406,6 +420,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_TWI_INVALID_STATUS_ID</rc>
         <description>
             The status_id field of the TWI status was invalid
@@ -427,6 +442,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_TWI_UNEXPECTED_STATUS</rc>
         <description>
             Received unexpected TWI status
@@ -449,6 +465,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_TWI_UNEXPECTED_WRITE_OFFSET</rc>
         <description>
             Received unexpected TWI write offset
@@ -471,6 +488,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_TWI_INVALID_IMAGE_SIZE</rc>
         <description>
             Explorer TWI firmware image must be less than 256KB
@@ -485,6 +503,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_MSS_EXP_I2C_FW_DOWNLOAD_INVALID_STATE</rc>
         <description>
             Must be in BOOT_ROM or FW_UPGRADE boot stage to issue FW_DOWNLOAD command
@@ -499,6 +518,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_FW_UPDATE_WRITE_NO_DOORBELL</rc>
         <description>
             Explorer firmware update write command did not receive the doorbell
@@ -531,6 +551,7 @@
     </hwpError>
 
     <hwpError>
+        <sbeError/>
         <rc>RC_EXP_FW_UPDATE_COMMIT_NO_DOORBELL</rc>
         <description>
             Explorer firmware update write command did not receive the doorbell
