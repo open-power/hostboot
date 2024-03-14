@@ -44,10 +44,13 @@ namespace mss
 
 enum class ipl_substep
 {
+    // used as placeholder for any step that doesn't require this support
+    NO_FIR_STEP         = 0,
+
     OCMB_OMI_SCOMINIT   = 124,
     OMI_TRAIN_CHECK     = 128,
     DRAMINIT            = 132,
-    DRAMINIT_MC         = 133
+    DRAMINIT_MC         = 133,
 };
 
 } // namespace mss

@@ -133,9 +133,14 @@ extern "C"
 
                 break;
 
-            default:
-                // If we're passed an unknown substep, just return the incoming RC
+            case mss::ipl_substep::NO_FIR_STEP:
+                // Just return the incoming RC
                 break;
+
+                // No default case so that the compiler catches when
+                // a new enum gets  added without the associated
+                // functional change.
+
         }
 
         return l_scom_error;
