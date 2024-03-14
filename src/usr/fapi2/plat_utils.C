@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -373,7 +373,40 @@ void xlateTargetType(const fapi2::TargetType i_targetType,
             o_class = TARGETING::CLASS_UNIT;
             o_type = TARGETING::TYPE_MEM_PORT;
             break;
-        default:
+        case fapi2::TARGET_TYPE_MEMBUF_CHIP:
+        case fapi2::TARGET_TYPE_EX:
+        case fapi2::TARGET_TYPE_MBA:
+        case fapi2::TARGET_TYPE_MCS:
+        case fapi2::TARGET_TYPE_XBUS:
+        case fapi2::TARGET_TYPE_ABUS:
+        case fapi2::TARGET_TYPE_L4:
+        case fapi2::TARGET_TYPE_MCA:
+        case fapi2::TARGET_TYPE_MCBIST:
+        case fapi2::TARGET_TYPE_CAPP:
+        case fapi2::TARGET_TYPE_DMI:
+        case fapi2::TARGET_TYPE_OBUS:
+        case fapi2::TARGET_TYPE_OBUS_BRICK:
+        case fapi2::TARGET_TYPE_SBE:
+        case fapi2::TARGET_TYPE_PPE:
+        case fapi2::TARGET_TYPE_NMMU:
+        case fapi2::TARGET_TYPE_RESERVED:
+        case fapi2::TARGET_TYPE_PAU:
+        case fapi2::TARGET_TYPE_IOHS:
+        case fapi2::TARGET_TYPE_PMIC:
+        case fapi2::TARGET_TYPE_PAUC:
+        case fapi2::TARGET_TYPE_GENERICI2CSLAVE:
+        case fapi2::TARGET_TYPE_IOLINK:
+        case fapi2::TARGET_TYPE_MDS_CTLR:
+        case fapi2::TARGET_TYPE_POWER_IC:
+        case fapi2::TARGET_TYPE_TEMP_SENSOR:
+        case fapi2::TARGET_TYPE_MULTICAST:
+        case fapi2::TARGET_TYPE_ALL:
+        case fapi2::TARGET_TYPE_ALL_MC:
+        case fapi2::TARGET_TYPE_CHIPS:
+        case fapi2::TARGET_TYPE_CHIPLETS:
+        case fapi2::TARGET_TYPE_MULTICASTABLE:
+        case fapi2::TARGET_TYPE_MULTICAST_CHIP:
+        case fapi2::TARGET_TYPE_NONE:
             o_class = TARGETING::CLASS_NA;
             o_type = TARGETING::TYPE_NA;
     }
@@ -526,7 +559,7 @@ void processEIHwCallouts(const ErrorInfo & i_errInfo,
                     // Low Priority
                     // => No Gard / Deconfig
                     case HWAS::SRCI_PRIORITY_LOW:
-                    default:
+                    case HWAS::SRCI_PRIORITY_NONE:
                         io_pError->addClockCallout(l_pRefTarget,
                                                    l_clock,
                                                    l_priority);
@@ -1190,7 +1223,7 @@ void createPlatLog(
         case fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE:
             // l_sev set above
             break;
-        default:
+        case fapi2::FAPI2_ERRL_SEV_UNDEFINED:
             FAPI_ERR("severity (i_sev) of %d is unknown",i_sev);
             break;
     }
