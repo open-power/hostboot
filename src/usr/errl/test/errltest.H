@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2441,6 +2441,207 @@ public:
             errl = nullptr;
       }while(0);
   };
+
+    void testFRUAdd(void)
+    {
+        /*
+          Unit Test for adding FRUs to ErrlSrc.io_vec
+
+          The Unit Test adds these FRUs in this order:
+            present LOC1
+            present LOC2
+            non-present LOC1
+            present LOC1
+            non-present LOC3
+            present LOC3
+            present LOC4 with priority=0
+            present LOC4 with priority=1
+            present LOC5 with partNumber=PN5
+            present LOC5 with partNumber=PNA
+
+          The Expected Result is:
+            present LOC1
+            present LOC2
+            present LOC3
+            present LOC4 with priority=1
+            present LOC5 with partNumber=PN5
+            present LOC5 with partNumber=PNA
+         */
+#ifdef CONFIG_BUILD_FULL_PEL
+        fruCallOutEntry_t entry1 =
+        {
+                0,   // priority
+                0,
+                {'L','O','C','1','\0'},
+                0,
+                {'P','N','1','\0'},
+                {'C','C','\0'},
+                {'S','N','\0'}
+        };
+        fruCallOutEntry_t entry2 =
+        {
+                0,   // priority
+                0,
+                {'L','O','C','2','\0'},
+                0,
+                {'P','N','2','\0'},
+                {'C','C','\0'},
+                {'S','N','\0'}
+        };
+        fruCallOutEntry_t entry3 =
+        {
+                0,   // priority
+                0,
+                {'L','O','C','1','\0'},
+                0,
+                {'\0'},
+                {'\0'},
+                {'\0'}
+        };
+        fruCallOutEntry_t entry4 =
+        {
+                0,   // priority
+                0,
+                {'L','O','C','1','\0'},
+                0,
+                {'P','N','1','\0'},
+                {'\0'},
+                {'\0'}
+        };
+        fruCallOutEntry_t entry5 =
+        {
+                0,   // priority
+                0,
+                {'L','O','C','3','\0'},
+                0,
+                {'\0'},
+                {'\0'},
+                {'\0'}
+        };
+        fruCallOutEntry_t entry6 =
+        {
+                0,   // priority
+                0,
+                {'L','O','C','3','\0'},
+                0,
+                {'P','N','3','\0'},
+                {'C','C','\0'},
+                {'S','N','\0'}
+        };
+        fruCallOutEntry_t entry7 =
+        {
+                0,   // priority
+                0,
+                {'L','O','C','4','\0'},
+                0,
+                {'P','N','4','\0'},
+                {'C','C','\0'},
+                {'S','N','\0'}
+        };
+        fruCallOutEntry_t entry8 =
+        {
+                1,   // priority
+                0,
+                {'L','O','C','4','\0'},
+                0,
+                {'P','N','4','\0'},
+                {'C','C','\0'},
+                {'S','N','\0'}
+        };
+        fruCallOutEntry_t entry9 =
+        {
+                0,   // priority
+                0,
+                {'L','O','C','5','\0'},
+                0,
+                {'P','N','5','\0'},
+                {'C','C','\0'},
+                {'S','N','\0'}
+        };
+        fruCallOutEntry_t entry10 =
+        {
+                0,   // priority
+                0,
+                {'L','O','C','5','\0'},
+                0,
+                {'P','N','A','\0'},
+                {'C','C','\0'},
+                {'S','N','\0'}
+        };
+
+        ErrlSrc l_e(SRC_ERR_INFO,
+                    ERRL_TEST_MOD_ID,
+                    ERRL_TEST_REASON_CODE,
+                    0,0);
+
+        // add the FRUs
+        // some will be discarded as duplicates
+        l_e.addFruCallout(entry1);
+        l_e.addFruCallout(entry2);
+        l_e.addFruCallout(entry3);
+        l_e.addFruCallout(entry4);
+        l_e.addFruCallout(entry5);
+        l_e.addFruCallout(entry6);
+        l_e.addFruCallout(entry7);
+        l_e.addFruCallout(entry8);
+        l_e.addFruCallout(entry9);
+        l_e.addFruCallout(entry10);
+
+        // verify these entries exist in the FRU vector
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry1)  == l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry1 not found");
+        }
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry2)  == l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry2 not found");
+        }
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry6)  == l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry6 not found");
+        }
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry8)  == l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry8 not found");
+        }
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry9)  == l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry9 not found");
+        }
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry10) == l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry10 not found");
+        }
+
+        // verify these entries were discarded as duplicates and do not exist in the FRU vector
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry3) != l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry3 found");
+        }
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry4) != l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry4 found");
+        }
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry5) != l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry5 found");
+        }
+        if (std::find(l_e.iv_coVec.begin(), l_e.iv_coVec.end(), entry7) != l_e.iv_coVec.end())
+        {
+            TS_FAIL("testFRUAdd: entry7 found");
+        }
+
+        // log the FRUs which exist in the vector
+        for (auto it =  l_e.iv_coVec.begin();
+                  it != l_e.iv_coVec.end();
+                  it++ )
+        {
+            TS_INFO("testAddFRU: iv_coVec: %d %s %s",
+                      (*it).priority, (*it).locationCode, (*it).partNumber);
+        }
+#endif
+        return;
+    };
 
 };
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -869,6 +869,21 @@ typedef struct frucoentry
     char            partNumber[PEL_PART_NUM_SIZE] = {0};
     char            ccin[PEL_CCIN_SIZE] = {0};
     char            serialNumber[PEL_SERIAL_NUM_SIZE] = {0};
+
+    bool operator==(const frucoentry &other) const
+    {
+        if (priority    == other.priority    &&
+            locCodeLen  == other.locCodeLen  &&
+            fruCompType == other.fruCompType &&
+            0 == strncmp(locationCode, other.locationCode, PEL_LOC_CODE_SIZE)   &&
+            0 == strncmp(partNumber,   other.partNumber,   PEL_PART_NUM_SIZE)   &&
+            0 == strncmp(ccin,         other.ccin,         PEL_CCIN_SIZE)       &&
+            0 == strncmp(serialNumber, other.serialNumber, PEL_SERIAL_NUM_SIZE))
+        {
+           return true;
+        }
+        return false;
+    }
 } fruCallOutEntry_t;
 
 #endif

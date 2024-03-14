@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,8 @@ class ErrlSrc : public ErrlSctn
     // in this class.
     friend class ErrlEntry;
     friend class ErrlManager;
+
+    friend class ErrlTest;
 
 
 private:

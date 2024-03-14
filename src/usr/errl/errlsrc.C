@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -287,21 +287,37 @@ bool ErrlSrc::checkForDuplicateCallout(fruCallOutEntry_t& io_co)
          it != iv_coVec.end();
          it++ )
     {
-        if (!strcmp(io_co.partNumber, (*it).partNumber) &&
-            !strcmp(io_co.locationCode, (*it).locationCode))
+        if (0 == strcmp(io_co.locationCode, (*it).locationCode))
         {
-            // Found a match, check the priority
-            if (io_co.priority > (*it).priority)
+            if (strlen(io_co.partNumber) == 0)
             {
-                // New priority is higher, keep it.
-                // Erase the old callout entry
-                it = iv_coVec.erase(it);
+                // MATCH - but the New_Callout partNumber is NULL
+                // so discard the New_Callout as a duplicate
+                retDup = true;
                 break;
             }
+            if (strlen((*it).partNumber) == 0)
+            {
+                // MATCH - but the Existing_Callout partNumber is NULL
+                // so discard the Existing_Callout as a duplicate
+                iv_coVec.erase(it);
+                break;
+            }
+            if (0 == strcmp(io_co.partNumber, (*it).partNumber))
+            {
+                // MATCH - check the priority
+                if (io_co.priority > (*it).priority)
+                {
+                    // New priority is higher, keep it.
+                    // Erase the old callout entry
+                    it = iv_coVec.erase(it);
+                    break;
+                }
 
-            // New entry is a duplicate, don't add the new callout to the vector
-            retDup = true;
-            break;
+                // New entry is a duplicate, don't add the new callout to the vector
+                retDup = true;
+                break;
+            }
         }
     }
     return retDup;
