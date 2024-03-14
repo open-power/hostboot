@@ -24,7 +24,7 @@
 #
 # IBM_PROLOG_END_TAG
 #
-# @file   parseErrorInfo.pl
+# @file   parseErrorInfo_p10.pl
 # @brief  This perl script will parse HWP Error XML files and generate required
 #         FAPI code to create and error log and add FFDC to the error.
 #
@@ -35,7 +35,7 @@
 # *HWP Consumed by: HB/SBE/FSP
 #
 # Usage:
-# parseErrorInfo.pl <output dir> <filename1> <filename2> ...
+# parseErrorInfo_p10.pl <output dir> <filename1> <filename2> ...
 
 use strict;
 
@@ -71,7 +71,6 @@ my $clock_ffdc_type           = "uint8_t";
 my $avsbus_ffdc_type          = "uint8_t";
 my $ffdc_format               = undef;
 my $avsrail_ffdc_type         = "uint8_t";
-my $include_onlyonce          = 0;
 
 # There are some names used in the XML files which exist in either
 # c++ keywords (case, for example) or macros (DOMAIN). The one's which
@@ -97,7 +96,6 @@ my $arg_use_variable_buffers = undef;
 # be filenames
 GetOptions(
     "empty-ffdc-classes"   => \$arg_empty_ffdc,
-    "local-ffdc"           => \$arg_local_ffdc,
     "output-dir=s"         => \$arg_output_dir,
     "use-variable-buffers" => \$arg_use_variable_buffers
 );
@@ -106,7 +104,7 @@ my $numArgs = $#ARGV + 1;
 if ( ( $numArgs < 1 ) || ( $arg_output_dir eq undef ) )
 {
     print(
-        "Usage: parseErrorInfo.pl [--empty-ffdc-classes] [--use-variable-buffers] --output-dir=<output dir> <filename1> <filename2> ...\n"
+        "Usage: parseErrorInfo_p10.pl [--empty-ffdc-classes] [--use-variable-buffers] --output-dir=<output dir> <filename1> <filename2> ...\n"
     );
     print("  This perl script will parse HWP Error XML files and creates\n");
     print("  the following files:\n");
@@ -177,7 +175,7 @@ sub setErrorEnumValue
     if ( exists( $errNameToValueHash{$name} ) )
     {
         # Two different errors with the same name!
-        print( "fapiParseErrorInfo.pl ERROR. Duplicate error name ", $name, "\n" );
+        print( "parseErrorInfo_p10.pl ERROR. Duplicate error name ", $name, "\n" );
         exit(1);
     }
 
@@ -199,7 +197,7 @@ sub setErrorEnumValue
     if ( exists( $errValuePresentHash{$errHash24Bit} ) )
     {
         # Two different errors generate the same hash-value!
-        print("fapiParseAttributeInfo.pl ERROR. Duplicate error hash value\n");
+        print("parseErrorInfo_p10.pl ERROR. Duplicate error hash value\n");
         exit(1);
     }
 
@@ -224,7 +222,7 @@ sub setFfdcIdValue
     if ( exists( $ffdcNameToValueHash{$name} ) )
     {
         # Two different FFDCs with the same name!
-        print( "fapiParseErrorInfo.pl ERROR. Duplicate FFDC name ", $name, "\n" );
+        print( "parseErrorInfo_p10.pl ERROR. Duplicate FFDC name ", $name, "\n" );
         exit(1);
     }
 
@@ -241,7 +239,7 @@ sub setFfdcIdValue
     if ( exists( $ffdcValuePresentHash{$ffdcHash32Bit} ) )
     {
         # Two different FFDCs generate the same hash-value!
-        print("fapiParseAttributeInfo.pl ERROR. Duplicate FFDC hash value\n");
+        print("parseErrorInfo_p10.pl ERROR. Duplicate FFDC hash value\n");
         exit(1);
     }
 
@@ -303,44 +301,12 @@ sub addFfdcMethod
         $method = "    template< typename T >\n";
         $method .= "    inline $class_name& set_$ffdc_uc(const T& $param)\n";
 
-        if ( $arg_local_ffdc eq undef )
-        {
-            $method_body = "    {\n        $ffdc_uc.ptr() = &i_value;\n        $ffdc_uc.size() =";
-            $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n        return *this;\n    }\n\n";
-            $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
-            $methods->{$objectNumber}{localvar} =
-                "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],chip_instance, chip_type, invalid_data);";
-            $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
-        }
-        else
-        {
-            # need to use the objectNumber here so when we decode the info at the hwsv/hb side we have a reference,
-            # they will be copied into/out of the sbe buffer in the correct order
-
-            # Error xml files provide a check as a $ffdc_format to use to identify
-            # which ffdc data structure required to parse the sbe buffer in
-            # hwsv/hb [ P10 -or- p10 with Odyssey ]
-            if ( $ffdc_format eq undef )
-            {
-                $method_body .=
-                    "    {\n        fapi2::g_FfdcData.ffdcData[$objectNumber].data= convertType(i_value);\n";
-                $method_body .= "        fapi2::g_FfdcData.ffdcData[$objectNumber].size =";
-            }
-            else
-            {
-                $method_body .=
-                    "    {\n        fapi2::g_FfdcData.ffdcDataPtr[$objectNumber].data= convertType(i_value);\n";
-                $method_body .= "        fapi2::g_FfdcData.ffdcDataPtr[$objectNumber].size =";
-            }
-            $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n";
-            $method_body .= "        return *this;\n    };\n\n";
-
-            # ffdc_count is used to determine the maximum index written in sbe buffer
-            if ( $objectNumber > $ffdc_count )
-            {
-                $ffdc_count = $objectNumber;
-            }
-        }
+        $method_body = "    {\n        $ffdc_uc.ptr() = &i_value;\n        $ffdc_uc.size() =";
+        $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n        return *this;\n    }\n\n";
+        $methods->{$key}{member} = "$ffdc_type $ffdc_uc;";
+        $methods->{$objectNumber}{localvar} =
+            "$ffdc_type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],chip_instance, chip_type, invalid_data);";
+        $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
 
     }
     elsif ( $type eq $buffer_ffdc_type )
@@ -398,50 +364,19 @@ sub addFfdcMethod
     }
     elsif ( $type eq $scom_addr_type )
     {
-        if ( $arg_local_ffdc eq undef )
-        {
-            $method      = "\n    static $type $ffdc_uc(const sbeFfdc_t *ffdc)\n";
-            $method_body = "    {\n        return ffdc[$objectNumber].data;\n    }\n\n";
-        }
+        $method      = "\n    static $type $ffdc_uc(const sbeFfdc_t *ffdc)\n";
+        $method_body = "    {\n        return ffdc[$objectNumber].data;\n    }\n\n";
     }
     else
     {
         $method .= "    inline $class_name& set_$ffdc_uc($type $param)\n";
 
-        if ( $arg_local_ffdc eq undef )
-        {
-            $method_body = "    { $ffdc_uc = i_value; ";
-            $method_body .= " return *this;}\n\n";
-            $methods->{$key}{member} = "$type $ffdc_uc;";
-            $methods->{$objectNumber}{localvar} =
-                "$type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],chip_instance, chip_type, invalid_data);";
-            $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
-        }
-        else
-        {
-            # need to use the objectNumber here so when we decode the info at the hwsv/hb side we have a point of
-            # reference and they will be copied into/out of the sbe buffer in the correct order
-            if ( $ffdc_format eq undef )
-            {
-                $method_body .=
-                    "    {\n        fapi2::g_FfdcData.ffdcData[$objectNumber].data= convertType(i_value);\n";
-                $method_body .= "        fapi2::g_FfdcData.ffdcData[$objectNumber].size =";
-            }
-            else
-            {
-                $method_body .=
-                    "    {\n        fapi2::g_FfdcData.ffdcDataPtr[$objectNumber].data= convertType(i_value);\n";
-                $method_body .= "        fapi2::g_FfdcData.ffdcDataPtr[$objectNumber].size =";
-            }
-            $method_body .= " fapi2::getErrorInfoFfdcSize(i_value);\n";
-            $method_body .= "        return *this;\n    };\n\n";
-
-            # ffdc_count is used to determine the maximum index written in sbe buffer
-            if ( $objectNumber > $ffdc_count )
-            {
-                $ffdc_count = $objectNumber;
-            }
-        }
+        $method_body = "    { $ffdc_uc = i_value; ";
+        $method_body .= " return *this;}\n\n";
+        $methods->{$key}{member} = "$type $ffdc_uc;";
+        $methods->{$objectNumber}{localvar} =
+            "$type $ffdc_uc = fapi2::getFfdcData(i_ebuf[$objectNumber],chip_instance, chip_type, invalid_data);";
+        $methods->{$objectNumber}{assignment_string} = "l_obj.$ffdc_uc = $ffdc_uc;";
     }
 
     $method .= ( $arg_empty_ffdc eq undef ) ? $method_body : "    {return *this;}\n\n";
@@ -483,6 +418,227 @@ $sbFuncFile .= "set_sbe_error_funcs.H";
 open( SBFUNFILE, ">", $sbFuncFile );
 
 #------------------------------------------------------------------------------
+# Print start of file information to hwp_error_info.H
+#------------------------------------------------------------------------------
+print EIFILE "// hwp_error_info.H\n";
+print EIFILE "// This file is generated by the perl script parseErrorInfo_p10.pl\n\n";
+print EIFILE "#ifndef FAPI2_HWPERRORINFO_H_\n";
+print EIFILE "#define FAPI2_HWPERRORINFO_H_\n\n";
+print EIFILE "#include <target.H>\n";
+print EIFILE "#include <plat_trace.H>\n";
+print EIFILE "#ifdef __PPE__\n";
+print EIFILE "#include <heap.H>\n";
+print EIFILE "#else\n";
+print EIFILE "#include <stdlib.h>\n";
+print EIFILE "#endif\n";
+print EIFILE "#include <hwp_return_codes.H>\n";
+print EIFILE "#include <hwp_executor.H>\n";
+print EIFILE "/**\n";
+print EIFILE " * \@brief Error Information macros and HwpFfdcId enumeration\n";
+print EIFILE " *\/\n";
+
+#------------------------------------------------------------------------------
+# Print start of file information to hwp_ffdc_classes.H
+#------------------------------------------------------------------------------
+print ECFILE "// hwp_ffdc_classes.H\n";
+print ECFILE "// This file is generated by the perl script parseErrorInfo_p10.pl\n\n";
+print ECFILE "#ifndef FAPI2_HWP_FFDC_CLASSES_H_\n";
+print ECFILE "#define FAPI2_HWP_FFDC_CLASSES_H_\n\n";
+print ECFILE "#include <return_code.H>\n";
+print ECFILE "#include <fapi2_hwp_executor.H>\n";
+print ECFILE "#include <error_info.H>\n";
+print ECFILE "#include <buffer.H>\n";
+print ECFILE "#include <variable_buffer.H>\n" if ( $arg_use_variable_buffers ne undef );
+print ECFILE "#include <hwp_error_info.H>\n";
+print ECFILE "#if !defined(FAPI2_NO_FFDC) && !defined(MINIMUM_FFDC)\n";
+print ECFILE "#include <utils.H>\n";
+print ECFILE "#include <ffdc_includes.H>\n";
+print ECFILE "#include <collect_reg_ffdc.H>\n";
+print ECFILE "#endif\n";
+print ECFILE "/**\n";
+print ECFILE " * \@brief FFDC gathering classes\n";
+print ECFILE " *\/\n";
+print ECFILE "namespace fapi2\n{\n";
+
+#------------------------------------------------------------------------------
+# Print start of file information to collect_reg_ffdc_regs.C
+#------------------------------------------------------------------------------
+print CRFILE "// collect_reg_ffdc_regs.C\n";
+print CRFILE "// This file is generated by the perl script parseErrorInfo_p10.pl\n\n";
+print CRFILE "#include <stdint.h>\n";
+print CRFILE "#include <vector>\n";
+print CRFILE "#include <plat_trace.H>\n";
+print CRFILE "#include <hwp_error_info.H>\n";
+print CRFILE "#include <p10_scom_c.H>\n";
+print CRFILE "#include <p10_scom_eq.H>\n";
+print CRFILE "#include <p10_scom_iohs.H>\n";
+print CRFILE "#include <p10_scom_mcc.H>\n";
+print CRFILE "#include <p10_scom_mc.H>\n";
+print CRFILE "#include <p10_scom_omic.H>\n";
+print CRFILE "#include <p10_scom_omi.H>\n";
+print CRFILE "#include <p10_scom_pec.H>\n";
+print CRFILE "#include <p10_scom_perv.H>\n";
+print CRFILE "#include <p10_scom_phb.H>\n";
+print CRFILE "#include <p10_scom_proc.H>\n";
+print CRFILE "#include <p10_scom_pauc.H>\n";
+print CRFILE "#include <p10_scom_pau.H>\n";
+print CRFILE "#include <p10_scom_nmmu.H>\n";
+
+print CRFILE "#include <explorer_scom_addresses.H>\n";
+print CRFILE "#include <ody_scom_ody_odc.H>\n";
+print CRFILE "#include <ody_scom_perv.H>\n";
+print CRFILE "#include <poz_scom_perv.H>\n";
+
+print CRFILE "namespace fapi2\n";
+print CRFILE "{\n";
+print CRFILE "void getAddressData(const fapi2::HwpFfdcId i_ffdcId,\n";
+print CRFILE "                        std::vector<uint64_t>& o_scomAddresses ,\n";
+print CRFILE "                        std::vector<uint32_t>& o_cfamAddresses ,\n";
+print CRFILE "                        uint32_t & o_ffdcSize )\n";
+print CRFILE "{\n";
+print CRFILE "    FAPI_INF(\"getAddresses. FFDC ID: 0x%x\", i_ffdcId);\n";
+print CRFILE "    o_ffdcSize = 0;\n\n";
+print CRFILE "    switch (i_ffdcId)\n";
+print CRFILE "    {\n";
+
+#------------------------------------------------------------------------------
+# Print start of file information to setSbeError.H
+#------------------------------------------------------------------------------
+print SBFILE "// setSbeError.H\n";
+print SBFILE "// This file is generated by the perl script parseErrorInfo_p10.pl\n\n";
+print SBFILE "// When SBE code creates an error, it produces an error value\n";
+print SBFILE "// that matches a value in the HwpReturnCode enum in\n";
+print SBFILE "// fapiHwpReturnCodes.H. The SBE uses the __ASSEMBLER__\n";
+print SBFILE "// primitives in hwpReturnCodes.H to do this. The function\n";
+print SBFILE "// that extracts the error value from the SBE needs to call\n";
+print SBFILE "// FAPI_SET_HWP_ERROR to create the error and get all the\n";
+print SBFILE "// actions in the error XML file performed, but that macro can\n";
+print SBFILE "// only be called with the enumerator, not the value. This\n";
+print SBFILE "// FAPI_SET_SBE_ERROR macro can be called instead, it calls\n";
+print SBFILE "// FAPI_SET_HWP_ERROR with the correct error enumerator.\n";
+print SBFILE "// Errors containing <sbeError/> in their XML are supported\n";
+print SBFILE "// in this macro.\n\n";
+print SBFILE "// Note that it is expected that this macro will be called\n";
+print SBFILE "// in one place (the function that extracts the error from\n";
+print SBFILE "// the SBE), if this changes and it is called in multiple\n";
+print SBFILE "// places then the macro could be turned into a function to\n";
+print SBFILE "// avoid the code size increase of expanding the macro in\n";
+print SBFILE "// multiple places. The function approach is slightly more\n";
+print SBFILE "// complicated, there is an extra C file and the function\n";
+print SBFILE "// must take a parameter for the generic chip ID in the error\n";
+print SBFILE "// XML.\n\n";
+print SBFILE "#ifndef FAPI2_SETSBEERROR_H_\n";
+print SBFILE "#define FAPI2_SETSBEERROR_H_\n\n";
+print SBFILE "#include <set_sbe_error_funcs.H>\n\n";
+print SBFILE "#define FAPI_SET_SBE_ERROR_IMPL(RC, ERRVAL, FFDC_BUFFER, SBE_INSTANCE, CHIP_TYPE)\\\n";
+print SBFILE "{\\\n";
+print SBFILE "bool invalid_data = false;\\\n";
+print SBFILE "fapi2::sbeFfdc_t* HWPLOCALFFDC_BUFFER;\\\n";
+print SBFILE "if(CHIP_TYPE == fapi2::TARGET_TYPE_OCMB_CHIP)\\\n";
+print SBFILE "{\\\n";
+print SBFILE "    uint32_t *ffdcblob = reinterpret_cast<uint32_t * >(FFDC_BUFFER);\\\n";
+print SBFILE "    HWPLOCALFFDC_BUFFER = reinterpret_cast<fapi2::sbeFfdc_t * >(ffdcblob + 2);\\\n";
+print SBFILE "}\\\n";
+print SBFILE "else\\\n";
+print SBFILE "{\\\n";
+print SBFILE "    HWPLOCALFFDC_BUFFER = reinterpret_cast<fapi2::sbeFfdc_t * >(FFDC_BUFFER);\\\n";
+print SBFILE "}\\\n";
+print SBFILE "switch (ERRVAL)\\\n";
+print SBFILE "{\\\n";
+
+print SBFUNFILE "#ifndef FAPI2_SETSBEERRORFUNCS_H_\n";
+print SBFUNFILE "#define FAPI2_SETSBEERRORFUNCS_H_\n\n";
+print SBFUNFILE "#include <hwp_return_codes.H>\n\n";
+print SBFUNFILE "#include <hwp_ffdc_classes.H>\n\n";
+print SBFUNFILE "#include <hwp_error_info.H>\n\n";
+
+#print SBFUNFILE "namespace fapi2 {\n\n";
+# used to convert each HwpReturnCode into a unique tupe
+print SBFUNFILE "inline void collectHWRegister(
+uint32_t* i_ffdcBuffer,
+const fapi2::TargetType i_chipType,
+std::vector<std::shared_ptr<fapi2::ErrorInfoFfdc>>& ffdc)
+{
+    do
+    {
+    /* Check for HW Register FFDC packets only for OCMB chip */
+    if(i_chipType != fapi2::TARGET_TYPE_OCMB_CHIP)
+    {
+        break;
+    }
+
+    /* Calculate hw register start and end pointer */
+    uint32_t hwpDumpFields = *i_ffdcBuffer;
+    uint32_t hwpLocalFfdcLenInWords = 0;
+    uint32_t hwRegisterFfdcLenInWords = 0;
+
+    // Assuming first word will always be the hardware procedure dump fields, advance past for first field id.
+    uint32_t* localFfdcPtr = i_ffdcBuffer + 1;
+
+    if(hwpDumpFields & 0x1)
+    {
+        /* HWP Local FFDC */
+        // Lower 16-bit will be blob length excluding the blob header
+        auto hwpLocalFfdcLenInBytes = (*localFfdcPtr) & 0xFFFF;
+        // Add length of blob header also
+        hwpLocalFfdcLenInBytes += 4;
+        // convert it to words, since we want to add uin32_t*
+        hwpLocalFfdcLenInWords = hwpLocalFfdcLenInBytes / sizeof(uint32_t);
+    }
+
+    uint32_t* hwRegisterStartPtr = localFfdcPtr + hwpLocalFfdcLenInWords;
+
+    if(hwpDumpFields & 0x2)
+    {
+        /* HWP Register FFDC */
+        // Lower 16-bit will be blob length excluding the blob header
+        auto hwRegisterFfdcLenInBytes = (*hwRegisterStartPtr) & 0xFFFF;
+        // Add length of blob header also
+        hwRegisterFfdcLenInBytes += 4;
+        // convert it to words, since we want to add uin32_t*
+        hwRegisterFfdcLenInWords = hwRegisterFfdcLenInBytes / sizeof(uint32_t);
+    }
+    else
+    {
+        // No register data. So break from this function
+        break;
+    }
+
+    uint32_t* hwRegisterEndPtr = hwRegisterStartPtr + hwRegisterFfdcLenInWords;
+
+    // iterate through all register ffdc packets returned.
+    //   starting from last since size is at the end of each blob
+    // Advance the start pointer to the beginning of the first reg blob for the loop termination condition.
+    hwRegisterStartPtr += 1;
+    while(hwRegisterStartPtr < hwRegisterEndPtr)
+    {
+        // find the size field of the register ffdc (last word of the packet)
+        uint32_t collectRegisterblobsize = *(hwRegisterEndPtr - 1);
+
+        uint32_t* collectRegisterblobStartPtr = hwRegisterEndPtr - collectRegisterblobsize;
+
+        // First word of the blob is the FFDC ID the blob corresponds to.
+        uint32_t ffdcId = *collectRegisterblobStartPtr;
+        // The ErrorInfoFfdc object doesn't need the FFDC ID as part of the blob so move past the FFDC ID field
+        collectRegisterblobStartPtr += 1;
+
+        // Add the blob into the vector. Subtract 1 from size to account for skipping over FFDC ID and convert to bytes.
+        ffdc.push_back(std::shared_ptr<fapi2::ErrorInfoFfdc>(
+                        new fapi2::ErrorInfoFfdc(ffdcId, collectRegisterblobStartPtr, (collectRegisterblobsize - 1) * sizeof(uint32_t))));
+
+        /* Decrement the last pointer.*/
+        hwRegisterEndPtr = hwRegisterEndPtr - collectRegisterblobsize;
+    }
+    }
+    while(0);
+}\n";
+
+print SBFUNFILE "template<fapi2::HwpReturnCode T>\n";
+print SBFUNFILE "struct hwpRcToType {\n";
+print SBFUNFILE "   enum { value = T };\n";
+print SBFUNFILE "};\n";
+
+#------------------------------------------------------------------------------
 # For each XML file
 #------------------------------------------------------------------------------
 foreach my $argnum ( 0 .. $#ARGV )
@@ -520,176 +676,14 @@ foreach my $argnum ( 0 .. $#ARGV )
             $ffdc_format = "@elements[0]";
             if ( not $ffdc_format eq "poz" )
             {
-                print("ERROR: parseErrorInfo.pl ffdc_format is set to bad format: $ffdc_format\n");
+                print("ERROR: parseErrorInfo_p10.pl ffdc_format is set to bad format: $ffdc_format\n");
                 exit(1);
             }
         }
     }
-
-    #------------------------------------------------------------------------------
-    # Print start of file information to hwp_error_info.H
-    #------------------------------------------------------------------------------
-    if ( $include_onlyonce == 0 )
+    else
     {
-        print EIFILE "// hwp_error_info.H\n";
-        print EIFILE "// This file is generated by the perl script parseErrorInfo.pl\n\n";
-        print EIFILE "#ifndef FAPI2_HWPERRORINFO_H_\n";
-        print EIFILE "#define FAPI2_HWPERRORINFO_H_\n\n";
-        print EIFILE "#include <target.H>\n";
-        print EIFILE "#include <plat_trace.H>\n";
-        if ( $ffdc_format ne undef )
-        {
-            print EIFILE "#ifdef __PPE__\n";
-            print EIFILE "#include <heap.H>\n";
-            print EIFILE "#else\n";
-            print EIFILE "#include <stdlib.h>\n";
-            print EIFILE "#endif\n";
-        }
-        print EIFILE "#include <hwp_return_codes.H>\n";
-        print EIFILE "#include <hwp_executor.H>\n";
-        print EIFILE "/**\n";
-        print EIFILE " * \@brief Error Information macros and HwpFfdcId enumeration\n";
-        print EIFILE " *\/\n";
-
-        #------------------------------------------------------------------------------
-        # Print start of file information to hwp_ffdc_classes.H
-        #------------------------------------------------------------------------------
-        print ECFILE "// hwp_ffdc_classes.H\n";
-        print ECFILE "// This file is generated by the perl script parseErrorInfo.pl\n\n";
-        print ECFILE "#ifndef FAPI2_HWP_FFDC_CLASSES_H_\n";
-        print ECFILE "#define FAPI2_HWP_FFDC_CLASSES_H_\n\n";
-        print ECFILE "#include <return_code.H>\n";
-        print ECFILE "#include <fapi2_hwp_executor.H>\n";
-        print ECFILE "#include <error_info.H>\n";
-        print ECFILE "#include <buffer.H>\n";
-        print ECFILE "#include <variable_buffer.H>\n" if ( $arg_use_variable_buffers ne undef );
-        print ECFILE "#include <hwp_error_info.H>\n";
-        print ECFILE "#if !defined(FAPI2_NO_FFDC) && !defined(MINIMUM_FFDC)\n";
-        print ECFILE "#include <utils.H>\n";
-        print ECFILE "#include <ffdc_includes.H>\n";
-        print ECFILE "#include <collect_reg_ffdc.H>\n";
-        print ECFILE "#endif\n";
-        print ECFILE "/**\n";
-        print ECFILE " * \@brief FFDC gathering classes\n";
-        print ECFILE " *\/\n";
-        print ECFILE "namespace fapi2\n{\n";
-
-        if ($arg_local_ffdc)
-        {
-            if ( $ffdc_format eq undef )
-            {
-                print ECFILE "extern SbeFfdcData_t g_FfdcData; \n";
-            }
-            else
-            {
-                print ECFILE "extern pozFfdcData_t g_FfdcData;\n";
-            }
-        }
-
-        #------------------------------------------------------------------------------
-        # Print start of file information to collect_reg_ffdc_regs.C
-        #------------------------------------------------------------------------------
-        print CRFILE "// collect_reg_ffdc_regs.C\n";
-        print CRFILE "// This file is generated by the perl script parseErrorInfo.pl\n\n";
-        print CRFILE "#include <stdint.h>\n";
-        print CRFILE "#include <vector>\n";
-        print CRFILE "#include <plat_trace.H>\n";
-        print CRFILE "#include <hwp_error_info.H>\n";
-        print CRFILE "#include <p10_scom_c.H>\n";
-        print CRFILE "#include <p10_scom_eq.H>\n";
-        print CRFILE "#include <p10_scom_iohs.H>\n";
-        print CRFILE "#include <p10_scom_mcc.H>\n";
-        print CRFILE "#include <p10_scom_mc.H>\n";
-        print CRFILE "#include <p10_scom_omic.H>\n";
-        print CRFILE "#include <p10_scom_omi.H>\n";
-        print CRFILE "#include <p10_scom_pec.H>\n";
-        print CRFILE "#include <p10_scom_perv.H>\n";
-        print CRFILE "#include <p10_scom_phb.H>\n";
-        print CRFILE "#include <p10_scom_proc.H>\n";
-        print CRFILE "#include <p10_scom_pauc.H>\n";
-        print CRFILE "#include <p10_scom_pau.H>\n";
-        print CRFILE "#include <p10_scom_nmmu.H>\n";
-
-        print CRFILE "#include <explorer_scom_addresses.H>\n";
-        print CRFILE "#include <ody_scom_ody_odc.H>\n";
-        print CRFILE "#include <ody_scom_perv.H>\n";
-        print CRFILE "#include <poz_scom_perv.H>\n";
-
-        print CRFILE "namespace fapi2\n";
-        print CRFILE "{\n";
-        print CRFILE "void getAddressData(const fapi2::HwpFfdcId i_ffdcId,\n";
-        print CRFILE "                        std::vector<uint64_t>& o_scomAddresses ,\n";
-        print CRFILE "                        std::vector<uint32_t>& o_cfamAddresses ,\n";
-        print CRFILE "                        uint32_t & o_ffdcSize )\n";
-        print CRFILE "{\n";
-        print CRFILE "    FAPI_INF(\"getAddresses. FFDC ID: 0x%x\", i_ffdcId);\n";
-        print CRFILE "    o_ffdcSize = 0;\n\n";
-
-        if ( $arg_local_ffdc eq undef )
-        {
-            print CRFILE "    switch (i_ffdcId)\n";
-            print CRFILE "    {\n";
-        }
-
-        #------------------------------------------------------------------------------
-        # Print start of file information to setSbeError.H
-        #------------------------------------------------------------------------------
-        print SBFILE "// setSbeError.H\n";
-        print SBFILE "// This file is generated by the perl script parseErrorInfo.pl\n\n";
-        print SBFILE "// When SBE code creates an error, it produces an error value\n";
-        print SBFILE "// that matches a value in the HwpReturnCode enum in\n";
-        print SBFILE "// fapiHwpReturnCodes.H. The SBE uses the __ASSEMBLER__\n";
-        print SBFILE "// primitives in hwpReturnCodes.H to do this. The function\n";
-        print SBFILE "// that extracts the error value from the SBE needs to call\n";
-        print SBFILE "// FAPI_SET_HWP_ERROR to create the error and get all the\n";
-        print SBFILE "// actions in the error XML file performed, but that macro can\n";
-        print SBFILE "// only be called with the enumerator, not the value. This\n";
-        print SBFILE "// FAPI_SET_SBE_ERROR macro can be called instead, it calls\n";
-        print SBFILE "// FAPI_SET_HWP_ERROR with the correct error enumerator.\n";
-        print SBFILE "// Errors containing <sbeError/> in their XML are supported\n";
-        print SBFILE "// in this macro.\n\n";
-        print SBFILE "// Note that it is expected that this macro will be called\n";
-        print SBFILE "// in one place (the function that extracts the error from\n";
-        print SBFILE "// the SBE), if this changes and it is called in multiple\n";
-        print SBFILE "// places then the macro could be turned into a function to\n";
-        print SBFILE "// avoid the code size increase of expanding the macro in\n";
-        print SBFILE "// multiple places. The function approach is slightly more\n";
-        print SBFILE "// complicated, there is an extra C file and the function\n";
-        print SBFILE "// must take a parameter for the generic chip ID in the error\n";
-        print SBFILE "// XML.\n\n";
-        print SBFILE "#ifndef FAPI2_SETSBEERROR_H_\n";
-        print SBFILE "#define FAPI2_SETSBEERROR_H_\n\n";
-        print SBFILE "#include <set_sbe_error_funcs.H>\n\n";
-        print SBFILE "#define FAPI_SET_SBE_ERROR_IMPL(RC, ERRVAL, FFDC_BUFFER, SBE_INSTANCE, CHIP_TYPE)\\\n";
-        print SBFILE "{\\\n";
-        print SBFILE "bool invalid_data = false;\\\n";
-        print SBFILE "fapi2::sbeFfdc_t* HWPLOCALFFDC_BUFFER;\\\n";
-        print SBFILE "if(CHIP_TYPE == fapi2::TARGET_TYPE_OCMB_CHIP)\\\n";
-        print SBFILE "{\\\n";
-        print SBFILE "    uint32_t *ffdcblob = reinterpret_cast<uint32_t * >(FFDC_BUFFER);\\\n";
-        print SBFILE "    HWPLOCALFFDC_BUFFER = reinterpret_cast<fapi2::sbeFfdc_t * >(ffdcblob + 2);\\\n";
-        print SBFILE "}\\\n";
-        print SBFILE "else\\\n";
-        print SBFILE "{\\\n";
-        print SBFILE "    HWPLOCALFFDC_BUFFER = reinterpret_cast<fapi2::sbeFfdc_t * >(FFDC_BUFFER);\\\n";
-        print SBFILE "}\\\n";
-        print SBFILE "switch (ERRVAL)\\\n";
-        print SBFILE "{\\\n";
-
-        print SBFUNFILE "#ifndef FAPI2_SETSBEERRORFUNCS_H_\n";
-        print SBFUNFILE "#define FAPI2_SETSBEERRORFUNCS_H_\n\n";
-        print SBFUNFILE "#include <hwp_return_codes.H>\n\n";
-        print SBFUNFILE "#include <hwp_ffdc_classes.H>\n\n";
-        print SBFUNFILE "#include <hwp_error_info.H>\n\n";
-
-        #print SBFUNFILE "namespace fapi2 {\n\n";
-        # used to convert each HwpReturnCode into a unique tupe
-        print SBFUNFILE "template<fapi2::HwpReturnCode T>\n";
-        print SBFUNFILE "struct hwpRcToType {\n";
-        print SBFUNFILE "   enum { value = T };\n";
-        print SBFUNFILE "};\n";
-
-        $include_onlyonce = 1;
+        $ffdc_format = undef;
     }
 
     #--------------------------------------------------------------------------
@@ -715,13 +709,13 @@ foreach my $argnum ( 0 .. $#ARGV )
         #----------------------------------------------------------------------
         if ( !exists $err->{rc} )
         {
-            print("parseErrorInfo.pl ERROR. rc missing\n");
+            print("parseErrorInfo_p10.pl ERROR. rc missing\n");
             exit(1);
         }
 
         if ( !exists $err->{description} )
         {
-            print("parseErrorInfo.pl ERROR in $err->{rc}. description missing\n");
+            print("parseErrorInfo_p10.pl ERROR in $err->{rc}. description missing\n");
             exit(1);
         }
 
@@ -735,21 +729,9 @@ foreach my $argnum ( 0 .. $#ARGV )
         }
 
         #----------------------------------------------------------------------
-        # Set the error enum value in a global hash only for those who has the sbeError tag
+        # Set the error enum value in a global hash
         #---------------------------------------------------------------------
-        if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
-        {
-            setErrorEnumValue( $err->{rc} );
-        }
-
-        #----------------------------------------------------------------------
-        # if there is an sbeTarget, we will add a method for it regardless
-        #---------------------------------------------------------------------
-
-        if ( ( exists $errors->{sbeTarget} ) && $arg_local_ffdc )
-        {
-            addFfdcMethod( \%methods, $errors->{sbeTarget}, $err->{rc}, $target_ffdc_type, 0, 1 );
-        }
+        setErrorEnumValue( $err->{rc} );
 
         #----------------------------------------------------------------------
         # Process the ffdc tags first -
@@ -767,10 +749,7 @@ foreach my $argnum ( 0 .. $#ARGV )
             my $objNum = addEntryToArray( \@eiObjects, $ffdc );
 
             # Add a method to the ffdc-gathering class
-            if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
-            {
-                addFfdcMethod( \%methods, $ffdc, $err->{rc}, $ffdc_type, $objNum );
-            }
+            addFfdcMethod( \%methods, $ffdc, $err->{rc}, $ffdc_type, $objNum );
 
             $ffdc = $mangle_names{$ffdc} if ( $mangle_names{$ffdc} ne undef );
 
@@ -824,10 +803,7 @@ foreach my $argnum ( 0 .. $#ARGV )
 
                 # add a set method for each parameter too..
                 @elements[$i] =~ s/^\s+|\s+$//g;
-                if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
-                {
-                    addFfdcMethod( \%methods, @elements[$i], $err->{rc}, $ffdc_type, $objNum );
-                }
+                addFfdcMethod( \%methods, @elements[$i], $err->{rc}, $ffdc_type, $objNum );
 
                 $collectFfdc .= "@elements[$i]";
 
@@ -875,18 +851,24 @@ foreach my $argnum ( 0 .. $#ARGV )
         {
             foreach my $collectRegisterFfdc ( @{ $err->{collectRegisterFfdc} } )
             {
+                if ( $ffdc_format eq "poz" )
+                {
+                    # POZ errors have their own way to collect register FFDC.
+                    last;
+                }
+
                 #------------------------------------------------------------------
                 # Check that expected fields are present
                 #------------------------------------------------------------------
                 if ( !exists $collectRegisterFfdc->{id}[0] )
                 {
-                    print("parseErrorInfo.pl ERROR in $err->{rc}. id(s) missing from collectRegisterFfdc $infile\n");
+                    print(
+                        "parseErrorInfo_p10.pl ERROR in $err->{rc}. id(s) missing from collectRegisterFfdc $infile\n");
                     exit(1);
                 }
 
                 foreach my $id ( @{ $collectRegisterFfdc->{id} } )
                 {
-
                     if ( $crffdcCount eq 0 )
                     {
                         print EIFILE " \\\n{ \\\n";
@@ -896,7 +878,6 @@ foreach my $argnum ( 0 .. $#ARGV )
                     {
                         $crffdcStr = "";
                     }
-
                     $crffdcCount++;
 
                     #---------------------------------------------------------------------------------
@@ -907,14 +888,13 @@ foreach my $argnum ( 0 .. $#ARGV )
                         if ( !( exists $collectRegisterFfdc->{targetType} ) )
                         {
                             print(
-                                "parseErrorInfo.pl ERROR: target type missing from $collectRegisterFfdc->{target} in file $infile\n"
+                                "parseErrorInfo_p10.pl ERROR: target type missing from $collectRegisterFfdc->{target} in file $infile\n"
                             );
                             exit(1);
                         }
                         $crffdcStr .=
                             "    fapi2::collectRegFfdc<$collectRegisterFfdc->{targetType}>($collectRegisterFfdc->{target},";
                         $crffdcStr .= "fapi2::$id,ffdc); \\\n";
-
                         addFfdcMethod( \%methods, $collectRegisterFfdc->{target}, $err->{rc}, $target_ffdc_type );
                     }
                     elsif ( exists $collectRegisterFfdc->{childTargets} )
@@ -922,25 +902,22 @@ foreach my $argnum ( 0 .. $#ARGV )
                         if ( !( exists $collectRegisterFfdc->{childTargets}{parent} ) )
                         {
                             print(
-                                "parseErrorInfo.pl ERROR:  parent missing from $collectRegisterFfdc->{id} in  $infile\n"
+                                "parseErrorInfo_p10.pl ERROR:  parent missing from $collectRegisterFfdc->{id} in  $infile\n"
                             );
                             exit(1);
                         }
-
                         if ( !( exists $collectRegisterFfdc->{childTargets}{parentType} ) )
                         {
                             print(
-                                "parseErrorInfo.pl ERROR: parent type missing from $collectRegisterFfdc->{id} in $infile\n"
+                                "parseErrorInfo_p10.pl ERROR: parent type missing from $collectRegisterFfdc->{id} in $infile\n"
                             );
                             exit(1);
                         }
-
                         $crffdcStr .=
                             "    fapi2::collectRegFfdc<fapi2::$collectRegisterFfdc->{childTargets}->{childType},";
                         $crffdcStr .= "$collectRegisterFfdc->{childTargets}->{parentType}>";
                         $crffdcStr .= "($collectRegisterFfdc->{childTargets}->{parent}, ";
                         $crffdcStr .= "fapi2::TARGET_STATE_FUNCTIONAL,fapi2::$id, ffdc); \\\n";
-
                         addFfdcMethod( \%methods, $collectRegisterFfdc->{childTargets}->{parent},
                             $err->{rc}, $target_ffdc_type );
                     }
@@ -950,20 +927,20 @@ foreach my $argnum ( 0 .. $#ARGV )
                         {
                             if ( !exists $collectRegisterFfdc->{basedOnPresentChildren}->{childType} )
                             {
-                                die("parseErrorInfo.pl ERROR: childType missing from collectRegisterFfdc $infile\n");
+                                die( "parseErrorInfo_p10.pl ERROR: childType missing from collectRegisterFfdc $infile\n"
+                                );
                                 exit(1);
                             }
                             if ( !( exists $collectRegisterFfdc->{basedOnPresentChildren}{targetType} ) )
                             {
-                                print("parseErrorInfo.pl ERROR:  type missing from ");
+                                print("parseErrorInfo_p10.pl ERROR:  type missing from ");
                                 print("$collectRegisterFfdc->{basedOnPresentChildren}{parent} in file $infile\n");
                                 exit(1);
                             }
-
                             if ( !exists $collectRegisterFfdc->{basedOnPresentChildren}->{childPosOffsetMultiplier} )
                             {
                                 print(
-                                    "parseErrorInfo.pl ERROR: childPosOffsetMultiplier missing from collectRegisterFfdc $infile\n"
+                                    "parseErrorInfo_p10.pl ERROR: childPosOffsetMultiplier missing from collectRegisterFfdc $infile\n"
                                 );
                                 exit(1);
                             }
@@ -976,35 +953,30 @@ foreach my $argnum ( 0 .. $#ARGV )
                             $crffdcStr .=
                                 "$collectRegisterFfdc->{basedOnPresentChildren}->{childPosOffsetMultiplier});\\\n";
                             $crffdcCount++;
-
                             addFfdcMethod( \%methods, $collectRegisterFfdc->{basedOnPresentChildren}->{target},
                                 $err->{rc}, $target_ffdc_type );
                         }
                         else
                         {
-                            print("parseErrorInfo.pl ERROR: Invalid collectRegisterFfdc configuration in $infile\n");
+                            print(
+                                "parseErrorInfo_p10.pl ERROR: Invalid collectRegisterFfdc configuration in $infile\n");
                             exit(1);
-
                         }
                     }
                     else
                     {
-                        print("parseErrorInfo.pl ERROR: Invalid collectRegisterFfdc configuration in $infile\n");
+                        print("parseErrorInfo_p10.pl ERROR: Invalid collectRegisterFfdc configuration in $infile\n");
                         exit(1);
                     }
 
                     #print the collectRegFfdc string to the info file
                     print EIFILE "$crffdcStr";
-
                 }    #end foreach register id
-
             }    # end foreach collectRegisterFfdc
-
             if ( $crffdcCount > 0 )
             {
                 print EIFILE "    RC.addErrorInfo(ffdc);\\\n}\n";
             }
-
         }
         print EIFILE "\n";
 
@@ -1095,464 +1067,457 @@ foreach my $argnum ( 0 .. $#ARGV )
             $eiEntryCount++;
         }    #foreach mcastId
 
-        if ( $arg_local_ffdc eq undef )
+        # Buffers, looks a lot like local ffdc
+        foreach my $buffer ( @{ $err->{buffer} } )
         {
-            # Buffers, looks a lot like local ffdc
-            foreach my $buffer ( @{ $err->{buffer} } )
+            # Set the FFDC ID value in a global hash. The name is <rc>_<ffdc>
+            my $bufferName = $err->{rc} . "_";
+            $bufferName = $bufferName . $buffer;
+            setFfdcIdValue($bufferName);
+
+            # Add the FFDC data to the EI Object array if it doesn't already exist
+            my $objNum = addEntryToArray( \@eiObjects, $buffer );
+
+            # Add a method to the ffdc-gathering class - one for each buffer type
+            addFfdcMethod( \%methods, $buffer, $err->{rc}, $buffer_ffdc_type );
+            addFfdcMethod( \%methods, $buffer, $err->{rc}, $variable_buffer_ffdc_type );
+
+            # Add an EI entry to eiEntryStr
+            $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_FFDC; \\\n";
+            $eiEntryStr .= "    l_entries[$eiEntryCount].ffdc.iv_ffdcObjIndex = $objNum; \\\n";
+            $eiEntryStr .= "    l_entries[$eiEntryCount].ffdc.iv_ffdcId = fapi2::$bufferName; \\\n";
+            $eiEntryStr .= "    l_entries[$eiEntryCount].ffdc.iv_ffdcSize = fapi2::getErrorInfoFfdcSize($buffer); \\\n";
+            $eiEntryCount++;
+        }    #foreach $buffer
+
+        # Procedure/Target/Bus/Child callouts
+        foreach my $callout ( @{ $err->{callout} } )
+        {
+            if ( !exists $callout->{priority} )
             {
-                # Set the FFDC ID value in a global hash. The name is <rc>_<ffdc>
-                my $bufferName = $err->{rc} . "_";
-                $bufferName = $bufferName . $buffer;
-                setFfdcIdValue($bufferName);
+                print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Callout priority missing\n");
+                exit(1);
+            }
 
-                # Add the FFDC data to the EI Object array if it doesn't already exist
-                my $objNum = addEntryToArray( \@eiObjects, $buffer );
+            my $elementsFound = 0;
+            if ( exists $callout->{hw} )
+            {
+                # HW Callout
+                if ( !exists $callout->{hw}->{hwid} )
+                {
+                    print("parseErrorInfo_p10.pl ERROR in $err->{rc}. HW Callout hwid missing\n");
+                    exit(1);
+                }
 
-                # Add a method to the ffdc-gathering class - one for each buffer type
-                addFfdcMethod( \%methods, $buffer, $err->{rc}, $buffer_ffdc_type );
-                addFfdcMethod( \%methods, $buffer, $err->{rc}, $variable_buffer_ffdc_type );
+                # Check that those HW callouts that need reference targets have them
+                if (   ( $callout->{hw}->{hwid} eq "TOD_CLOCK" )
+                    || ( $callout->{hw}->{hwid} eq "MEM_REF_CLOCK" )
+                    || ( $callout->{hw}->{hwid} eq "PROC_REF_CLOCK" )
+                    || ( $callout->{hw}->{hwid} eq "PCI_REF_CLOCK" )
+                    || ( $callout->{hw}->{hwid} eq "SPIVID_SLAVE_PART" ) )
+                {
+                    if ( !exists $callout->{hw}->{refTarget} )
+                    {
+                        print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Callout missing refTarget\n");
+                        exit(1);
+                    }
+                }
 
                 # Add an EI entry to eiEntryStr
-                $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_FFDC; \\\n";
-                $eiEntryStr .= "    l_entries[$eiEntryCount].ffdc.iv_ffdcObjIndex = $objNum; \\\n";
-                $eiEntryStr .= "    l_entries[$eiEntryCount].ffdc.iv_ffdcId = fapi2::$bufferName; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_HW_CALLOUT; \\\n";
                 $eiEntryStr .=
-                    "    l_entries[$eiEntryCount].ffdc.iv_ffdcSize = fapi2::getErrorInfoFfdcSize($buffer); \\\n";
-                $eiEntryCount++;
-            }    #foreach $buffer
-
-            # Procedure/Target/Bus/Child callouts
-            foreach my $callout ( @{ $err->{callout} } )
-            {
-                if ( !exists $callout->{priority} )
+                    "    l_entries[$eiEntryCount].hw_callout.iv_hw = fapi2::HwCallouts::$callout->{hw}->{hwid}; \\\n";
+                $eiEntryStr .=
+                    "    l_entries[$eiEntryCount].hw_callout.iv_calloutPriority = fapi2::CalloutPriorities::$callout->{priority}; \\\n";
+                if ( exists $callout->{hw}->{refTarget} )
                 {
-                    print("parseErrorInfo.pl ERROR in $err->{rc}. Callout priority missing\n");
-                    exit(1);
-                }
-
-                my $elementsFound = 0;
-                if ( exists $callout->{hw} )
-                {
-                    # HW Callout
-                    if ( !exists $callout->{hw}->{hwid} )
-                    {
-                        print("parseErrorInfo.pl ERROR in $err->{rc}. HW Callout hwid missing\n");
-                        exit(1);
-                    }
-
-                    # Check that those HW callouts that need reference targets have them
-                    if (   ( $callout->{hw}->{hwid} eq "TOD_CLOCK" )
-                        || ( $callout->{hw}->{hwid} eq "MEM_REF_CLOCK" )
-                        || ( $callout->{hw}->{hwid} eq "PROC_REF_CLOCK" )
-                        || ( $callout->{hw}->{hwid} eq "PCI_REF_CLOCK" )
-                        || ( $callout->{hw}->{hwid} eq "SPIVID_SLAVE_PART" ) )
-                    {
-                        if ( !exists $callout->{hw}->{refTarget} )
-                        {
-                            print("parseErrorInfo.pl ERROR in $err->{rc}. Callout missing refTarget\n");
-                            exit(1);
-                        }
-                    }
-
-                    # Add an EI entry to eiEntryStr
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_HW_CALLOUT; \\\n";
-                    $eiEntryStr .=
-                        "    l_entries[$eiEntryCount].hw_callout.iv_hw = fapi2::HwCallouts::$callout->{hw}->{hwid}; \\\n";
-                    $eiEntryStr .=
-                        "    l_entries[$eiEntryCount].hw_callout.iv_calloutPriority = fapi2::CalloutPriorities::$callout->{priority}; \\\n";
-                    if ( exists $callout->{hw}->{refTarget} )
-                    {
-                        # Add the Targets to the objectlist if they don't already exist
-                        my $objNum = addEntryToArray( \@eiObjects, $callout->{hw}->{refTarget} );
-                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = $objNum; \\\n";
-
-                        # Add a method to the ffdc-gathering class
-                        addFfdcMethod( \%methods, $callout->{hw}->{refTarget}, $err->{rc}, $target_ffdc_type, $objNum );
-                    }
-                    else
-                    {
-                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = 0xff; \\\n";
-                    }
-
-                    # HW Callout - Clock position
-                    if ( exists $callout->{hw}->{clkPos} )
-                    {
-                        $eiEntryStr .=
-                            "    l_entries[$eiEntryCount].hw_callout.iv_clkPos = $callout->{hw}->{clkPos}; \\\n";
-                    }
-                    else
-                    {
-                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_clkPos = 0xff; \\\n";
-                    }
-
-                    # HW Callout - AVS Bus
-                    if ( exists $callout->{hw}->{avsbus} )
-                    {
-                        $eiEntryStr .=
-                            "    l_entries[$eiEntryCount].hw_callout.iv_avsbus = $callout->{hw}->{avsbus}; \\\n";
-                    }
-                    else
-                    {
-                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_avsbus = 0xff; \\\n";
-                    }
-
-                    # HW Callout - AVS Rail
-                    if ( exists $callout->{hw}->{avsrail} )
-                    {
-                        $eiEntryStr .=
-                            "    l_entries[$eiEntryCount].hw_callout.iv_avsrail = $callout->{hw}->{avsrail}; \\\n";
-                    }
-                    else
-                    {
-                        $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_avsrail = 0xff; \\\n";
-                    }
-
-                    $eiEntryCount++;
-                    $elementsFound++;
-                }
-                if ( exists $callout->{procedure} )
-                {
-                    # Procedure Callout
-                    # Add an EI entry to eiEntryStr
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_PROCEDURE_CALLOUT; \\\n";
-                    $eiEntryStr .=
-                        "    l_entries[$eiEntryCount].proc_callout.iv_procedure = fapi2::ProcedureCallouts::$callout->{procedure}; \\\n";
-                    $eiEntryStr .=
-                        "    l_entries[$eiEntryCount].proc_callout.iv_calloutPriority = fapi2::CalloutPriorities::$callout->{priority}; \\\n";
-                    $eiEntryCount++;
-                    $elementsFound++;
-                }
-                if ( exists $callout->{bus} )
-                {
-                    # A Bus Callout consists of two targets separated by
-                    # commas/spaces
-                    my @targets = split( /\s*,\s*|\s+/, $callout->{bus} );
-
-                    if ( scalar @targets != 2 )
-                    {
-                        print("parseErrorInfo.pl ERROR in $err->{rc}. did not find two targets in bus callout\n");
-                        exit(1);
-                    }
-
                     # Add the Targets to the objectlist if they don't already exist
-                    my $objNum1 = addEntryToArray( \@eiObjects, $targets[0] );
-
-                    my $objNum2 = addEntryToArray( \@eiObjects, $targets[1] );
+                    my $objNum = addEntryToArray( \@eiObjects, $callout->{hw}->{refTarget} );
+                    $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = $objNum; \\\n";
 
                     # Add a method to the ffdc-gathering class
-                    addFfdcMethod( \%methods, $targets[0], $err->{rc}, $target_ffdc_type, $objNum1 );
-                    addFfdcMethod( \%methods, $targets[1], $err->{rc}, $target_ffdc_type, $objNum2 );
+                    addFfdcMethod( \%methods, $callout->{hw}->{refTarget}, $err->{rc}, $target_ffdc_type, $objNum );
+                }
+                else
+                {
+                    $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_refObjIndex = 0xff; \\\n";
+                }
 
-                    # Add an EI entry to eiEntryStr
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_BUS_CALLOUT; \\\n";
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].bus_callout.iv_endpoint1ObjIndex = $objNum1; \\\n";
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].bus_callout.iv_endpoint2ObjIndex = $objNum2; \\\n";
+                # HW Callout - Clock position
+                if ( exists $callout->{hw}->{clkPos} )
+                {
+                    $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_clkPos = $callout->{hw}->{clkPos}; \\\n";
+                }
+                else
+                {
+                    $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_clkPos = 0xff; \\\n";
+                }
+
+                # HW Callout - AVS Bus
+                if ( exists $callout->{hw}->{avsbus} )
+                {
+                    $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_avsbus = $callout->{hw}->{avsbus}; \\\n";
+                }
+                else
+                {
+                    $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_avsbus = 0xff; \\\n";
+                }
+
+                # HW Callout - AVS Rail
+                if ( exists $callout->{hw}->{avsrail} )
+                {
                     $eiEntryStr .=
-                        "    l_entries[$eiEntryCount].bus_callout.iv_calloutPriority = fapi2::CalloutPriorities::$callout->{priority}; \\\n";
-                    $eiEntryCount++;
-                    $elementsFound++;
+                        "    l_entries[$eiEntryCount].hw_callout.iv_avsrail = $callout->{hw}->{avsrail}; \\\n";
                 }
-                if ( exists $callout->{target} )
+                else
                 {
-                    # Catch error when using target for CODE callout (must use procedure)
-                    if ( $callout->{target} eq "CODE" )
-                    {
-                        print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Must use procedure tag for CODE callout.\n");
-                        exit(1);
-                    }
-
-                    # Add the Target to cdgTargetHash to be processed with any
-                    # deconfigure and GARD requests
-                    $cdgTargetHash{ $callout->{target} }{callout} = 1;
-                    $cdgTargetHash{ $callout->{target} }{priority} =
-                        $callout->{priority};
-
-                    $elementsFound++;
-
-                    addFfdcMethod( \%methods, $callout->{target}, $err->{rc}, $target_ffdc_type );
+                    $eiEntryStr .= "    l_entries[$eiEntryCount].hw_callout.iv_avsrail = 0xff; \\\n";
                 }
-                if ( exists $callout->{childTargets} )
-                {
-                    # Check that the parent and childType subelements exist
-                    if ( !exists $callout->{childTargets}->{parent} )
-                    {
-                        print("parseErrorInfo.pl ERROR in $err->{rc}. Child Callout parent missing\n");
-                        exit(1);
-                    }
 
-                    if ( !exists $callout->{childTargets}->{childType} )
-                    {
-                        print("parseErrorInfo.pl ERROR in $err->{rc}. Child Callout childType missing\n");
-                        exit(1);
-                    }
-
-                    # Add the child info to cdgChildHash to be processed with
-                    # any deconfigure and GARD requests
-                    my $parent    = $callout->{childTargets}->{parent};
-                    my $childType = $callout->{childTargets}->{childType};
-                    $cdgChildHash{$parent}{$childType}{callout} = 1;
-                    $cdgChildHash{$parent}{$childType}{priority} =
-                        $callout->{priority};
-
-                    $elementsFound++;
-
-                    if ( exists $callout->{childTargets}->{childPort} )
-                    {
-                        my $childPort = $callout->{childTargets}->{childPort};
-
-                        $cdgChildHash{$parent}{$childType}{childPort} = $childPort;
-                    }
-
-                    if ( exists $callout->{childTargets}->{childNumber} )
-                    {
-                        my $childNum = $callout->{childTargets}->{childNumber};
-                        $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
-                    }
-
-                }
-                if ( $elementsFound == 0 )
-                {
-                    print("parseErrorInfo.pl ERROR in $err->{rc}. Callout incomplete\n");
-                    exit(1);
-                }
-                elsif ( $elementsFound > 1 )
-                {
-                    print("parseErrorInfo.pl ERROR in $err->{rc}. Callout has multiple elements\n");
-                    exit(1);
-                }
-            }    # callout
-
-            # Target/Child deconfigures
-            foreach my $deconfigure ( @{ $err->{deconfigure} } )
+                $eiEntryCount++;
+                $elementsFound++;
+            }
+            if ( exists $callout->{procedure} )
             {
-                my $elementsFound = 0;
-                if ( exists $deconfigure->{target} )
-                {
-                    # Add the Target to cdgTargetHash to be processed with any
-                    # callout and GARD requests
-                    $cdgTargetHash{ $deconfigure->{target} }{deconf} = 1;
-                    $elementsFound++;
-                }
-                if ( exists $deconfigure->{childTargets} )
-                {
-                    # Check that the parent and childType subelements exist
-                    if ( !exists $deconfigure->{childTargets}->{parent} )
-                    {
-                        print("parseErrorInfo.pl ERROR in $err->{rc}. Child Deconfigure parent missing\n");
-                        exit(1);
-                    }
-                    if ( !exists $deconfigure->{childTargets}->{childType} )
-                    {
-                        print("parseErrorInfo.pl ERROR in $err->{rc}. Child Deconfigure childType missing\n");
-                        exit(1);
-                    }
-
-                    # Add the child info to cdgChildHash to be processed with
-                    # any callout and GARD requests
-                    my $parent    = $deconfigure->{childTargets}->{parent};
-                    my $childType = $deconfigure->{childTargets}->{childType};
-                    $cdgChildHash{$parent}{$childType}{deconf} = 1;
-
-                    $elementsFound++;
-
-                    if ( exists $deconfigure->{childTargets}->{childPort} )
-                    {
-                        my $childPort = $deconfigure->{childTargets}->{childPort};
-
-                        $cdgChildHash{$parent}{$childType}{childPort} = $childPort;
-                    }
-
-                    if ( exists $deconfigure->{childTargets}->{childNumber} )
-                    {
-                        my $childNum = $deconfigure->{childTargets}->{childNumber};
-                        $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
-
-                    }
-                }
-                if ( $elementsFound == 0 )
-                {
-                    print("parseErrorInfo.pl ERROR in $err->{rc}. Deconfigure incomplete\n");
-                    exit(1);
-                }
-                elsif ( $elementsFound > 1 )
-                {
-                    print("parseErrorInfo.pl ERROR in $err->{rc}. Deconfigure has multiple elements\n");
-                    exit(1);
-                }
-            }    # deconfigure
-
-            # Target/Child Gards
-            foreach my $gard ( @{ $err->{gard} } )
+                # Procedure Callout
+                # Add an EI entry to eiEntryStr
+                $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_PROCEDURE_CALLOUT; \\\n";
+                $eiEntryStr .=
+                    "    l_entries[$eiEntryCount].proc_callout.iv_procedure = fapi2::ProcedureCallouts::$callout->{procedure}; \\\n";
+                $eiEntryStr .=
+                    "    l_entries[$eiEntryCount].proc_callout.iv_calloutPriority = fapi2::CalloutPriorities::$callout->{priority}; \\\n";
+                $eiEntryCount++;
+                $elementsFound++;
+            }
+            if ( exists $callout->{bus} )
             {
-                my $elementsFound = 0;
-                if ( exists $gard->{target} )
+                # A Bus Callout consists of two targets separated by
+                # commas/spaces
+                my @targets = split( /\s*,\s*|\s+/, $callout->{bus} );
+
+                if ( scalar @targets != 2 )
                 {
-                    # Add the Target to cdgTargetHash to be processed with any
-                    # callout and deconfigure requests
-                    $cdgTargetHash{ $gard->{target} }{gard} = 1;
-                    if ( exists $gard->{gardType} )
-                    {
-                        $cdgTargetHash{ $gard->{target} }{gardType} = $gard->{gardType};
-                    }
-                    $elementsFound++;
-                }
-                if ( exists $gard->{childTargets} )
-                {
-                    # Check that the parent and childType subelements exist
-                    if ( !exists $gard->{childTargets}->{parent} )
-                    {
-                        print("parseErrorInfo.pl ERROR in $err->{rc}. Child GARD parent missing\n");
-                        exit(1);
-                    }
-                    if ( !exists $gard->{childTargets}->{childType} )
-                    {
-                        print("parseErrorInfo.pl ERROR in $err->{rc}. Child GARD childType missing\n");
-                        exit(1);
-                    }
-
-                    # Add the child info to cdgChildHash to be processed with
-                    # any callout and deconfigure requests
-                    my $parent    = $gard->{childTargets}->{parent};
-                    my $childType = $gard->{childTargets}->{childType};
-                    $cdgChildHash{$parent}{$childType}{gard} = 1;
-
-                    $elementsFound++;
-
-                    if ( exists $gard->{childTargets}->{childPort} )
-                    {
-                        my $childPort = $gard->{childTargets}->{childPort};
-
-                        $cdgChildHash{$parent}{$childType}{childPort} = $childPort;
-
-                    }
-
-                    if ( exists $gard->{childTargets}->{childNumber} )
-                    {
-                        my $childNum = $gard->{childTargets}->{childNumber};
-                        $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
-                    }
-                }
-                if ( $elementsFound == 0 )
-                {
-                    print("parseErrorInfo.pl ERROR in $err->{rc}. GARD incomplete\n");
+                    print("parseErrorInfo_p10.pl ERROR in $err->{rc}. did not find two targets in bus callout\n");
                     exit(1);
                 }
-                elsif ( $elementsFound > 1 )
-                {
-                    print("parseErrorInfo.pl ERROR in $err->{rc}. GARD has multiple elements\n");
-                    exit(1);
-                }
-            }    # gard
 
-            # Process the callout, deconfigures and GARDs for each Target
-            foreach my $cdg ( keys %cdgTargetHash )
+                # Add the Targets to the objectlist if they don't already exist
+                my $objNum1 = addEntryToArray( \@eiObjects, $targets[0] );
+
+                my $objNum2 = addEntryToArray( \@eiObjects, $targets[1] );
+
+                # Add a method to the ffdc-gathering class
+                addFfdcMethod( \%methods, $targets[0], $err->{rc}, $target_ffdc_type, $objNum1 );
+                addFfdcMethod( \%methods, $targets[1], $err->{rc}, $target_ffdc_type, $objNum2 );
+
+                # Add an EI entry to eiEntryStr
+                $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_BUS_CALLOUT; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].bus_callout.iv_endpoint1ObjIndex = $objNum1; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].bus_callout.iv_endpoint2ObjIndex = $objNum2; \\\n";
+                $eiEntryStr .=
+                    "    l_entries[$eiEntryCount].bus_callout.iv_calloutPriority = fapi2::CalloutPriorities::$callout->{priority}; \\\n";
+                $eiEntryCount++;
+                $elementsFound++;
+            }
+            if ( exists $callout->{target} )
             {
-                my $callout  = 0;
-                my $priority = 'NONE';
-                my $deconf   = 0;
-                my $gard     = 0;
-                my $gardType = 'GARD_Fatal';
+                # Catch error when using target for CODE callout (must use procedure)
+                if ( $callout->{target} eq "CODE" )
+                {
+                    print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Must use procedure tag for CODE callout.\n");
+                    exit(1);
+                }
 
-                if ( exists $cdgTargetHash{$cdg}->{callout} )
+                # Add the Target to cdgTargetHash to be processed with any
+                # deconfigure and GARD requests
+                $cdgTargetHash{ $callout->{target} }{callout} = 1;
+                $cdgTargetHash{ $callout->{target} }{priority} =
+                    $callout->{priority};
+
+                $elementsFound++;
+
+                addFfdcMethod( \%methods, $callout->{target}, $err->{rc}, $target_ffdc_type );
+            }
+            if ( exists $callout->{childTargets} )
+            {
+                # Check that the parent and childType subelements exist
+                if ( !exists $callout->{childTargets}->{parent} )
+                {
+                    print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Child Callout parent missing\n");
+                    exit(1);
+                }
+
+                if ( !exists $callout->{childTargets}->{childType} )
+                {
+                    print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Child Callout childType missing\n");
+                    exit(1);
+                }
+
+                # Add the child info to cdgChildHash to be processed with
+                # any deconfigure and GARD requests
+                my $parent    = $callout->{childTargets}->{parent};
+                my $childType = $callout->{childTargets}->{childType};
+                $cdgChildHash{$parent}{$childType}{callout} = 1;
+                $cdgChildHash{$parent}{$childType}{priority} =
+                    $callout->{priority};
+
+                $elementsFound++;
+
+                if ( exists $callout->{childTargets}->{childPort} )
+                {
+                    my $childPort = $callout->{childTargets}->{childPort};
+
+                    $cdgChildHash{$parent}{$childType}{childPort} = $childPort;
+                }
+
+                if ( exists $callout->{childTargets}->{childNumber} )
+                {
+                    my $childNum = $callout->{childTargets}->{childNumber};
+                    $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
+                }
+
+            }
+            if ( $elementsFound == 0 )
+            {
+                print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Callout incomplete\n");
+                exit(1);
+            }
+            elsif ( $elementsFound > 1 )
+            {
+                print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Callout has multiple elements\n");
+                exit(1);
+            }
+        }    # callout
+
+        # Target/Child deconfigures
+        foreach my $deconfigure ( @{ $err->{deconfigure} } )
+        {
+            my $elementsFound = 0;
+            if ( exists $deconfigure->{target} )
+            {
+                # Add the Target to cdgTargetHash to be processed with any
+                # callout and GARD requests
+                $cdgTargetHash{ $deconfigure->{target} }{deconf} = 1;
+                $elementsFound++;
+            }
+            if ( exists $deconfigure->{childTargets} )
+            {
+                # Check that the parent and childType subelements exist
+                if ( !exists $deconfigure->{childTargets}->{parent} )
+                {
+                    print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Child Deconfigure parent missing\n");
+                    exit(1);
+                }
+                if ( !exists $deconfigure->{childTargets}->{childType} )
+                {
+                    print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Child Deconfigure childType missing\n");
+                    exit(1);
+                }
+
+                # Add the child info to cdgChildHash to be processed with
+                # any callout and GARD requests
+                my $parent    = $deconfigure->{childTargets}->{parent};
+                my $childType = $deconfigure->{childTargets}->{childType};
+                $cdgChildHash{$parent}{$childType}{deconf} = 1;
+
+                $elementsFound++;
+
+                if ( exists $deconfigure->{childTargets}->{childPort} )
+                {
+                    my $childPort = $deconfigure->{childTargets}->{childPort};
+
+                    $cdgChildHash{$parent}{$childType}{childPort} = $childPort;
+                }
+
+                if ( exists $deconfigure->{childTargets}->{childNumber} )
+                {
+                    my $childNum = $deconfigure->{childTargets}->{childNumber};
+                    $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
+
+                }
+            }
+            if ( $elementsFound == 0 )
+            {
+                print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Deconfigure incomplete\n");
+                exit(1);
+            }
+            elsif ( $elementsFound > 1 )
+            {
+                print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Deconfigure has multiple elements\n");
+                exit(1);
+            }
+        }    # deconfigure
+
+        # Target/Child Gards
+        foreach my $gard ( @{ $err->{gard} } )
+        {
+            my $elementsFound = 0;
+            if ( exists $gard->{target} )
+            {
+                # Add the Target to cdgTargetHash to be processed with any
+                # callout and deconfigure requests
+                $cdgTargetHash{ $gard->{target} }{gard} = 1;
+                if ( exists $gard->{gardType} )
+                {
+                    $cdgTargetHash{ $gard->{target} }{gardType} = $gard->{gardType};
+                }
+                $elementsFound++;
+            }
+            if ( exists $gard->{childTargets} )
+            {
+                # Check that the parent and childType subelements exist
+                if ( !exists $gard->{childTargets}->{parent} )
+                {
+                    print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Child GARD parent missing\n");
+                    exit(1);
+                }
+                if ( !exists $gard->{childTargets}->{childType} )
+                {
+                    print("parseErrorInfo_p10.pl ERROR in $err->{rc}. Child GARD childType missing\n");
+                    exit(1);
+                }
+
+                # Add the child info to cdgChildHash to be processed with
+                # any callout and deconfigure requests
+                my $parent    = $gard->{childTargets}->{parent};
+                my $childType = $gard->{childTargets}->{childType};
+                $cdgChildHash{$parent}{$childType}{gard} = 1;
+
+                $elementsFound++;
+
+                if ( exists $gard->{childTargets}->{childPort} )
+                {
+                    my $childPort = $gard->{childTargets}->{childPort};
+
+                    $cdgChildHash{$parent}{$childType}{childPort} = $childPort;
+
+                }
+
+                if ( exists $gard->{childTargets}->{childNumber} )
+                {
+                    my $childNum = $gard->{childTargets}->{childNumber};
+                    $cdgChildHash{$parent}{$childType}{childNumber} = $childNum;
+                }
+            }
+            if ( $elementsFound == 0 )
+            {
+                print("parseErrorInfo_p10.pl ERROR in $err->{rc}. GARD incomplete\n");
+                exit(1);
+            }
+            elsif ( $elementsFound > 1 )
+            {
+                print("parseErrorInfo_p10.pl ERROR in $err->{rc}. GARD has multiple elements\n");
+                exit(1);
+            }
+        }    # gard
+
+        # Process the callout, deconfigures and GARDs for each Target
+        foreach my $cdg ( keys %cdgTargetHash )
+        {
+            my $callout  = 0;
+            my $priority = 'NONE';
+            my $deconf   = 0;
+            my $gard     = 0;
+            my $gardType = 'GARD_Fatal';
+
+            if ( exists $cdgTargetHash{$cdg}->{callout} )
+            {
+                $callout = 1;
+            }
+            if ( exists $cdgTargetHash{$cdg}->{priority} )
+            {
+                $priority = $cdgTargetHash{$cdg}->{priority};
+            }
+            if ( exists $cdgTargetHash{$cdg}->{deconf} )
+            {
+                $deconf = 1;
+            }
+            if ( exists $cdgTargetHash{$cdg}->{gard} )
+            {
+                $gard = 1;
+
+                if ( exists $cdgTargetHash{$cdg}->{gardType} )
+                {
+                    $gardType = $cdgTargetHash{$cdg}->{gardType};
+                }
+            }
+
+            # Add the Target to the objectlist if it doesn't already exist
+            my $objNum = addEntryToArray( \@eiObjects, $cdg );
+
+            # Add a method to the ffdc-gathering class
+            addFfdcMethod( \%methods, $cdg, $err->{rc}, $target_ffdc_type, $objNum );
+
+            # Add an EI entry to eiEntryStr
+            $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_CDG; \\\n";
+            $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_targetObjIndex = $objNum; \\\n";
+            $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_callout = $callout; \\\n";
+            $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_deconfigure = $deconf; \\\n";
+            $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_gard = $gard; \\\n";
+            $eiEntryStr .=
+                "    l_entries[$eiEntryCount].target_cdg.iv_calloutPriority = fapi2::CalloutPriorities::$priority; \\\n";
+            $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_gardType = fapi2::GardTypes::$gardType; \\\n";
+            $eiEntryCount++;
+        }
+
+        # Process the callout, deconfigures and GARDs for Child Targets
+        foreach my $parent ( keys %cdgChildHash )
+        {
+            foreach my $childType ( keys %{ $cdgChildHash{$parent} } )
+            {
+                my $callout     = 0;
+                my $priority    = 'NONE';
+                my $deconf      = 0;
+                my $gard        = 0;
+                my $childPort   = 0xFF;
+                my $childNumber = 0xFF;
+
+                if ( exists $cdgChildHash{$parent}{$childType}->{callout} )
                 {
                     $callout = 1;
                 }
-                if ( exists $cdgTargetHash{$cdg}->{priority} )
+                if ( exists $cdgChildHash{$parent}->{$childType}->{priority} )
                 {
-                    $priority = $cdgTargetHash{$cdg}->{priority};
+                    $priority =
+                        $cdgChildHash{$parent}->{$childType}->{priority};
                 }
-                if ( exists $cdgTargetHash{$cdg}->{deconf} )
+                if ( exists $cdgChildHash{$parent}->{$childType}->{deconf} )
                 {
                     $deconf = 1;
                 }
-                if ( exists $cdgTargetHash{$cdg}->{gard} )
+                if ( exists $cdgChildHash{$parent}->{$childType}->{childPort} )
+                {
+                    $childPort =
+                        $cdgChildHash{$parent}->{$childType}->{childPort};
+                    addFfdcMethod( \%methods, $childPort, $err->{rc} );
+                }
+                if ( exists $cdgChildHash{$parent}->{$childType}->{childNumber} )
+                {
+                    $childNumber =
+                        $cdgChildHash{$parent}->{$childType}->{childNumber};
+                    addFfdcMethod( \%methods, $childNumber, $err->{rc} );
+                }
+                if ( exists $cdgChildHash{$parent}->{$childType}->{gard} )
                 {
                     $gard = 1;
-
-                    if ( exists $cdgTargetHash{$cdg}->{gardType} )
-                    {
-                        $gardType = $cdgTargetHash{$cdg}->{gardType};
-                    }
                 }
 
                 # Add the Target to the objectlist if it doesn't already exist
-                my $objNum = addEntryToArray( \@eiObjects, $cdg );
-
-                # Add a method to the ffdc-gathering class
-                addFfdcMethod( \%methods, $cdg, $err->{rc}, $target_ffdc_type, $objNum );
+                my $objNum = addEntryToArray( \@eiObjects, $parent );
+                addFfdcMethod( \%methods, $parent, $err->{rc}, $target_ffdc_type, $objNum );
 
                 # Add an EI entry to eiEntryStr
-                $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_CDG; \\\n";
-                $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_targetObjIndex = $objNum; \\\n";
-                $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_callout = $callout; \\\n";
-                $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_deconfigure = $deconf; \\\n";
-                $eiEntryStr .= "    l_entries[$eiEntryCount].target_cdg.iv_gard = $gard; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_CHILDREN_CDG; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_parentObjIndex = $objNum; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_callout = $callout; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_deconfigure = $deconf; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_childType = fapi2::$childType; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_childPort = $childPort; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_childNumber = $childNumber; \\\n";
+                $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_gard = $gard; \\\n";
                 $eiEntryStr .=
-                    "    l_entries[$eiEntryCount].target_cdg.iv_calloutPriority = fapi2::CalloutPriorities::$priority; \\\n";
-                $eiEntryStr .=
-                    "    l_entries[$eiEntryCount].target_cdg.iv_gardType = fapi2::GardTypes::$gardType; \\\n";
+                    "    l_entries[$eiEntryCount].children_cdg.iv_calloutPriority = fapi2::CalloutPriorities::$priority; \\\n";
                 $eiEntryCount++;
-            }
-
-            # Process the callout, deconfigures and GARDs for Child Targets
-            foreach my $parent ( keys %cdgChildHash )
-            {
-                foreach my $childType ( keys %{ $cdgChildHash{$parent} } )
-                {
-                    my $callout     = 0;
-                    my $priority    = 'NONE';
-                    my $deconf      = 0;
-                    my $gard        = 0;
-                    my $childPort   = 0xFF;
-                    my $childNumber = 0xFF;
-
-                    if ( exists $cdgChildHash{$parent}{$childType}->{callout} )
-                    {
-                        $callout = 1;
-                    }
-                    if ( exists $cdgChildHash{$parent}->{$childType}->{priority} )
-                    {
-                        $priority =
-                            $cdgChildHash{$parent}->{$childType}->{priority};
-                    }
-                    if ( exists $cdgChildHash{$parent}->{$childType}->{deconf} )
-                    {
-                        $deconf = 1;
-                    }
-                    if ( exists $cdgChildHash{$parent}->{$childType}->{childPort} )
-                    {
-                        $childPort =
-                            $cdgChildHash{$parent}->{$childType}->{childPort};
-                        addFfdcMethod( \%methods, $childPort, $err->{rc} );
-                    }
-                    if ( exists $cdgChildHash{$parent}->{$childType}->{childNumber} )
-                    {
-                        $childNumber =
-                            $cdgChildHash{$parent}->{$childType}->{childNumber};
-                        addFfdcMethod( \%methods, $childNumber, $err->{rc} );
-                    }
-                    if ( exists $cdgChildHash{$parent}->{$childType}->{gard} )
-                    {
-                        $gard = 1;
-                    }
-
-                    # Add the Target to the objectlist if it doesn't already exist
-                    my $objNum = addEntryToArray( \@eiObjects, $parent );
-                    addFfdcMethod( \%methods, $parent, $err->{rc}, $target_ffdc_type, $objNum );
-
-                    # Add an EI entry to eiEntryStr
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].iv_type = fapi2::EI_TYPE_CHILDREN_CDG; \\\n";
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_parentObjIndex = $objNum; \\\n";
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_callout = $callout; \\\n";
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_deconfigure = $deconf; \\\n";
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_childType = fapi2::$childType; \\\n";
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_childPort = $childPort; \\\n";
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_childNumber = $childNumber; \\\n";
-                    $eiEntryStr .= "    l_entries[$eiEntryCount].children_cdg.iv_gard = $gard; \\\n";
-                    $eiEntryStr .=
-                        "    l_entries[$eiEntryCount].children_cdg.iv_calloutPriority = fapi2::CalloutPriorities::$priority; \\\n";
-                    $eiEntryCount++;
-                }
             }
         }
 
@@ -1602,7 +1567,7 @@ foreach my $argnum ( 0 .. $#ARGV )
         # same target on multiple return codes. Typically the target used will be the
         # proc target the SBE is running on so we will just need to get the instance from
         # hwsv/hb and create a target in that context
-        if ( exists $errors->{sbeTarget} && ( $arg_local_ffdc eq undef ) )
+        if ( exists $errors->{sbeTarget} )
         {
             $objectStr .= "        fapi2::Target<fapi2::TARGET_TYPE_ANY_POZ_CHIP>$errors->{sbeTarget}"
                 . " = fapi2::getTarget<fapi2::TARGET_TYPE_ANY_POZ_CHIP>(chip_instance); \n";
@@ -1642,34 +1607,17 @@ foreach my $argnum ( 0 .. $#ARGV )
         $class_name = ( split( /_/, $class_name, 2 ) )[1];
 
         # Class declaration
-        if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
-        {
-            print ECFILE "\nclass $class_name\n{\n  public:\n";
-        }
+        print ECFILE "\nclass $class_name\n{\n  public:\n";
 
-        # Constructor. This traces the description. If this is too much, we can
-        # remove it.
-        my $constructor = '';
         if ( $arg_empty_ffdc eq undef )
         {
-            if ( $arg_local_ffdc eq undef )
-            {
-                $constructor .=
-                    "    $class_name(fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE, fapi2::ReturnCode& i_rc = fapi2::current_err):\n";
-                $constructor .= "        iv_rc(i_rc),\n";
-                $constructor .= "        iv_sev(i_sev)\n";
-                $constructor .= "        { FAPI_ERR(\"$err->{description}\"); }\n\n";
-            }
-            else
-            {
-                if ( exists $err->{sbeError} )
-                {
-                    $constructor .= "    $class_name()\n";
-                    $constructor .=
-                        "    {\n        fapi2::current_err = RC_$class_name;\n#if !defined(MINIMUM_FFDC)\n        FAPI_ERR(\"$err->{description}\");\n#endif\n";
-                    $constructor .= "        fapi2::g_FfdcData.fapiRc = RC_$class_name;\n";
-                }
-            }
+            # Constructor. This traces the description. If this is too much, we can
+            # remove it.
+            print ECFILE
+                "    $class_name(fapi2::errlSeverity_t i_sev = fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE, fapi2::ReturnCode& i_rc = fapi2::current_err):\n";
+            print ECFILE "        iv_rc(i_rc),\n";
+            print ECFILE "        iv_sev(i_sev)\n";
+            print ECFILE "        { FAPI_ERR(\"$err->{description}\"); }\n\n";
         }
         else
         {
@@ -1702,126 +1650,89 @@ foreach my $argnum ( 0 .. $#ARGV )
 
         # Actual count is +1, as indices start from 0
         $count += 1;
-        if ( $arg_local_ffdc eq undef )
+
+        # add a method to adjust the severity if desired
+        print ECFILE "    inline void setSev(const fapi2::errlSeverity_t i_sev)\n";
+        if ( $arg_empty_ffdc eq undef )
         {
-            # add a method to adjust the severity if desired
-            print ECFILE "    inline void setSev(const fapi2::errlSeverity_t i_sev)\n";
-            if ( $arg_empty_ffdc eq undef )
-            {
-                print ECFILE "    {\n        iv_sev = i_sev;\n    };\n\n";
-            }
-            else
-            {
-                print ECFILE "        { static_cast<void>(i_sev);\n    };\n\n";
-            }
-
-            # add a method to read the severity if desired
-            print ECFILE "    inline fapi2::errlSeverity_t getSev() const\n";
-            if ( $arg_empty_ffdc eq undef )
-            {
-                print ECFILE "    {\n        return iv_sev;\n    };\n\n";
-            }
-            else
-            {
-                print ECFILE "    {\n        return fapi2::FAPI2_ERRL_SEV_UNDEFINED;\n    };\n\n";
-            }
-
+            print ECFILE "    {\n        iv_sev = i_sev;\n    };\n\n";
+        }
+        else
+        {
+            print ECFILE "        { static_cast<void>(i_sev);\n    };\n\n";
         }
 
-        if ( $arg_local_ffdc eq undef )
+        # add a method to read the severity if desired
+        print ECFILE "    inline fapi2::errlSeverity_t getSev() const\n";
+        if ( $arg_empty_ffdc eq undef )
         {
-            # Stick the execute method at the end of the other methods. We allow
-            # passing in of the severity so that macros which call execute() can over-ride
-            # the default severity.
-            print ECFILE "    void execute(fapi2::errlSeverity_t "
-                . "i_sev = fapi2::FAPI2_ERRL_SEV_UNDEFINED,"
-                . "bool commit = false )\n";
-            if ( $arg_empty_ffdc eq undef )
-            {
-                print ECFILE "        {\n";
+            print ECFILE "    {\n        return iv_sev;\n    };\n\n";
+        }
+        else
+        {
+            print ECFILE "    {\n        return fapi2::FAPI2_ERRL_SEV_UNDEFINED;\n    };\n\n";
+        }
 
-                # Need to create a temporary RC if using current_err, since FAPI_SET_HWP_ERROR and
-                # FAPI_ADD_INFO_TO_HWP_ERROR can call a HWP that changes fapi2::current_err. It should be named
-                # something programmers aren't likely to choose to avoid variable shadowing with the various macros
-                # and inline functions that eventually replace FAPI_SET_HWP_ERROR and FAPI_ADD_INFO_TO_HWP_ERROR.
-                print ECFILE "            if (iv_rc == fapi2::current_err)\n";
-                print ECFILE "            {\n";
-                print ECFILE "                fapi2::ReturnCode func_local_$err->{rc} = iv_rc;\n";
-                print ECFILE "                FAPI_SET_HWP_ERROR(func_local_$err->{rc},$err->{rc});\n";
-                print ECFILE "                iv_rc = func_local_$err->{rc};\n";
-                print ECFILE "            }\n";
-                print ECFILE "            else\n";
-                print ECFILE "            {\n";
-                print ECFILE "                FAPI_SET_HWP_ERROR(iv_rc,$err->{rc});\n";
-                print ECFILE "            }\n\n";
-                print ECFILE "            if( commit )\n";
-                print ECFILE "            {\n";
-                print ECFILE "                fapi2::logError(iv_rc, "
-                    . "(i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED)"
-                    . " ? iv_sev : i_sev);\n";
-                print ECFILE "            }\n";
-                print ECFILE "        }\n";
+        # Stick the execute method at the end of the other methods. We allow
+        # passing in of the severity so that macros which call execute() can over-ride
+        # the default severity.
+        print ECFILE "    void execute(fapi2::errlSeverity_t "
+            . "i_sev = fapi2::FAPI2_ERRL_SEV_UNDEFINED,"
+            . "bool commit = false )\n";
+        if ( $arg_empty_ffdc eq undef )
+        {
+            print ECFILE "        {\n";
 
-            }
-            else
-            {
-                print ECFILE "    {\n";
-                print ECFILE "        static_cast<void>(i_sev);\n";
-                print ECFILE "        static_cast<void>(commit);\n";
-                print ECFILE "    }\n\n";
-            }
-
-            # Instance variables
-            if ( $arg_empty_ffdc eq undef )
-            {
-                print ECFILE "    public:\n";
-                foreach my $key ( keys %methods )
-                {
-                    if ( !( $methods{$key}{member} eq undef ) )
-                    {
-                        print ECFILE "        $methods{$key}{member}\n";
-                    }
-
-                }
-
-                print ECFILE "        fapi2::ReturnCode& iv_rc;\n";
-                print ECFILE "        fapi2::errlSeverity_t iv_sev;\n";
-            }
+            # Need to create a temporary RC if using current_err, since FAPI_SET_HWP_ERROR and
+            # FAPI_ADD_INFO_TO_HWP_ERROR can call a HWP that changes fapi2::current_err. It should be named
+            # something programmers aren't likely to choose to avoid variable shadowing with the various macros
+            # and inline functions that eventually replace FAPI_SET_HWP_ERROR and FAPI_ADD_INFO_TO_HWP_ERROR.
+            print ECFILE "            if (iv_rc == fapi2::current_err)\n";
+            print ECFILE "            {\n";
+            print ECFILE "                fapi2::ReturnCode func_local_$err->{rc} = iv_rc;\n";
+            print ECFILE "                FAPI_SET_HWP_ERROR(func_local_$err->{rc},$err->{rc});\n";
+            print ECFILE "                iv_rc = func_local_$err->{rc};\n";
+            print ECFILE "            }\n";
+            print ECFILE "            else\n";
+            print ECFILE "            {\n";
+            print ECFILE "                FAPI_SET_HWP_ERROR(iv_rc,$err->{rc});\n";
+            print ECFILE "            }\n\n";
+            print ECFILE "            if( commit )\n";
+            print ECFILE "            {\n";
+            print ECFILE "                fapi2::logError(iv_rc, "
+                . "(i_sev == fapi2::FAPI2_ERRL_SEV_UNDEFINED)"
+                . " ? iv_sev : i_sev);\n";
+            print ECFILE "            }\n";
+            print ECFILE "        }\n";
 
         }
         else
         {
-            if ( exists $err->{sbeError} )
-            {
-                if ( $ffdc_format eq undef )
-                {
-                    $constructor .= "        fapi2::g_FfdcData.ffdcLength = ( $count * sizeof(sbeFfdc_t));\n ";
-                }
-                else
-                {
-                    $constructor .= "#ifdef __PPE__\n";
-                    $constructor .= "        fapi2::g_FfdcData.ffdcLength = ( $count * sizeof(sbeFfdc_t));\n ";
-                    $constructor .= "        fapi2::g_FfdcData.ffdcDataPtr = (sbeFfdc_t*) Heap::get_instance().\n";
-                    $constructor .= "             scratch_alloc( $count * sizeof(sbeFfdc_t));\n";
-                    $constructor .= "#else\n";
-                    $constructor .= "        if(g_FfdcData.ffdcDataPtr) { free(g_FfdcData.ffdcDataPtr); } \n";
-                    $constructor .=
-                        "        g_FfdcData.ffdcDataPtr = (sbeFfdc_t*) malloc ( $count * sizeof(sbeFfdc_t));\n ";
-                    $constructor .= "#endif\n";
-                    $constructor .= "        }\n";
-                }
-                print ECFILE "    void execute()\n";
-                print ECFILE "    {\n";
-                print ECFILE "$executeStr\n";
-                print ECFILE "    }\n";
-            }
+            print ECFILE "    {\n";
+            print ECFILE "        static_cast<void>(i_sev);\n";
+            print ECFILE "        static_cast<void>(commit);\n";
+            print ECFILE "    }\n\n";
         }
 
-        if ( ( $arg_local_ffdc eq undef ) || ( exists $err->{sbeError} ) )
+        # Instance variables
+        if ( $arg_empty_ffdc eq undef )
         {
-            print ECFILE $constructor;
-            print ECFILE "};\n\n";
+            print ECFILE "    public:\n";
+            foreach my $key ( keys %methods )
+            {
+                if ( !( $methods{$key}{member} eq undef ) )
+                {
+                    print ECFILE "        $methods{$key}{member}\n";
+                }
+
+            }
+
+            print ECFILE "        fapi2::ReturnCode& iv_rc;\n";
+            print ECFILE "        fapi2::errlSeverity_t iv_sev;\n";
         }
+
+        # End class declaration
+        print ECFILE "};\n\n";
 
         #----------------------------------------------------------------------
         # If this is an SBE error, add it to set_sbe_error.H
@@ -1832,6 +1743,10 @@ foreach my $argnum ( 0 .. $#ARGV )
             print SBFILE "    { \\\n";
             print SBFILE "       invalid_data = setSbeError(hwpRcToType<fapi2::$err->{rc}>(),\\\n";
             print SBFILE "                      RC,HWPLOCALFFDC_BUFFER,SBE_INSTANCE, CHIP_TYPE);\\\n";
+
+            print SBFILE "       std::vector<std::shared_ptr<fapi2::ErrorInfoFfdc>> ffdc;\\\n";
+            print SBFILE "       collectHWRegister((uint32_t*)FFDC_BUFFER, CHIP_TYPE, ffdc);\\\n";
+            print SBFILE "       RC.addErrorInfo(ffdc);\\\n";
 
             print SBFILE "       break;\\\n    }\\\n";
 
@@ -1869,42 +1784,39 @@ foreach my $argnum ( 0 .. $#ARGV )
         #----------------------------------------------------------------------
         if ( !exists $registerFfdc->{id}[0] )
         {
-            print("parseErrorInfo.pl ERROR. id missing from registerFfdc\n");
+            print("parseErrorInfo_p10.pl ERROR. id missing from registerFfdc\n");
             exit(1);
         }
 
         if ( scalar @{ $registerFfdc->{id} } > 1 )
         {
-            print("parseErrorInfo.pl ERROR. multiple ids in registerFfdc\n");
+            print("parseErrorInfo_p10.pl ERROR. multiple ids in registerFfdc\n");
             exit(1);
         }
 
-        if ( $arg_local_ffdc eq undef )
+        #----------------------------------------------------------------------
+        # Set the FFDC ID value in a global hash
+        #----------------------------------------------------------------------
+        setFfdcIdValue( $registerFfdc->{id}[0] );
+
+        #----------------------------------------------------------------------
+        # Generate code to capture the registers in collect_reg_ffdc_regs.C
+        #----------------------------------------------------------------------
+        print CRFILE "        case $registerFfdc->{id}[0]:\n";
+
+        # Look for CFAM Register addresses
+        foreach my $cfamRegister ( @{ $registerFfdc->{cfamRegister} } )
         {
-            #----------------------------------------------------------------------
-            # Set the FFDC ID value in a global hash
-            #----------------------------------------------------------------------
-            setFfdcIdValue( $registerFfdc->{id}[0] );
-
-            #----------------------------------------------------------------------
-            # Generate code to capture the registers in collect_reg_ffdc_regs.C
-            #----------------------------------------------------------------------
-            print CRFILE "        case $registerFfdc->{id}[0]:\n";
-
-            # Look for CFAM Register addresses
-            foreach my $cfamRegister ( @{ $registerFfdc->{cfamRegister} } )
-            {
-                print CRFILE "            o_cfamAddresses.push_back($cfamRegister);\n";
-            }
-
-            # Look for SCOM Register addresses
-            foreach my $scomRegister ( @{ $registerFfdc->{scomRegister} } )
-            {
-                print CRFILE "            o_scomAddresses.push_back($scomRegister);\n";
-            }
-
-            print CRFILE "            break;\n";
+            print CRFILE "            o_cfamAddresses.push_back($cfamRegister);\n";
         }
+
+        # Look for SCOM Register addresses
+        foreach my $scomRegister ( @{ $registerFfdc->{scomRegister} } )
+        {
+            print CRFILE "            o_scomAddresses.push_back($scomRegister);\n";
+        }
+
+        print CRFILE "            break;\n";
     }
 
 }
@@ -1912,15 +1824,12 @@ foreach my $argnum ( 0 .. $#ARGV )
 #------------------------------------------------------------------------------
 # Print end of file information to collect_reg_ffdc_regs.C
 #------------------------------------------------------------------------------
-if ( $arg_local_ffdc eq undef )
-{
-    print CRFILE "        default:\n";
-    print CRFILE "            FAPI_ERR(\"collect_reg_ffdc_regs.C: Invalid FFDC ID 0x%x\", ";
-    print CRFILE "i_ffdcId);\n";
-    print CRFILE "            return;\n";
-    print CRFILE "    }\n";
+print CRFILE "        default:\n";
+print CRFILE "            FAPI_ERR(\"collect_reg_ffdc_regs.C: Invalid FFDC ID 0x%x\", ";
+print CRFILE "i_ffdcId);\n";
+print CRFILE "            return;\n";
+print CRFILE "    }\n";
 
-}
 print CRFILE "o_ffdcSize = o_scomAddresses.size() * sizeof(uint64_t);\n";
 print CRFILE "o_ffdcSize += o_cfamAddresses.size() * sizeof(uint32_t);\n";
 print CRFILE "}\n";
@@ -1930,7 +1839,7 @@ print CRFILE "} // end namespace\n\n";
 # Print the fapiHwpReturnCodes.H file
 #------------------------------------------------------------------------------
 print RCFILE "// fapiHwpReturnCodes.H\n";
-print RCFILE "// This file is generated by perl script parseErrorInfo.pl\n\n";
+print RCFILE "// This file is generated by perl script parseErrorInfo_p10.pl\n\n";
 print RCFILE "#ifndef FAPI2_HWPRETURNCODES_H_\n";
 print RCFILE "#define FAPI2_HWPRETURNCODES_H_\n\n";
 print RCFILE "#ifndef __ASSEMBLER__\n";
@@ -1961,22 +1870,12 @@ print RCFILE "#endif\n";
 #------------------------------------------------------------------------------
 print EIFILE "namespace fapi2\n";
 print EIFILE "{\n\n";
-if ($arg_local_ffdc)
-{
-    if ( $ffdc_format eq undef )
-    {
-        print EIFILE "extern SbeFfdcData_t g_FfdcData; \n";
-    }
-    else
-    {
-        print EIFILE "  extern pozFfdcData_t g_FfdcData;\n";
-    }
-}
 print EIFILE "/**\n";
 print EIFILE " * \@brief Enumeration of FFDC identifiers\n";
 print EIFILE " *\/\n";
 print EIFILE "enum HwpFfdcId\n";
 print EIFILE "{\n";
+
 foreach my $key ( keys %ffdcNameToValueHash )
 {
     print EIFILE "    $key = 0x$ffdcNameToValueHash{$key},\n";
