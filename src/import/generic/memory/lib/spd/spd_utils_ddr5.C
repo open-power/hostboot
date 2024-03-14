@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -132,8 +132,8 @@ fapi2::ReturnCode get_timing(
                     set_VALUE(l_buffer).
                     set_FUNCTION(i_ffdc_codes).
                     set_DIMM_TARGET(i_target),
-                    "%s. timing is 0 in the SPD for byte %u, which is invalid",
-                    spd::c_str(i_target), i_start_byte);
+                    "timing is 0 in the SPD for byte %u, which is invalid",
+                    i_start_byte);
         o_time_in_ps = l_buffer;
     }
 
@@ -323,8 +323,8 @@ fapi2::ReturnCode get_nck_for_timing_helper(
                     set_VALUE(l_timing_byte).
                     set_FUNCTION(i_ffdc_codes).
                     set_DIMM_TARGET(i_target),
-                    "%s. timing is 0 in the SPD for byte:%u, which is invalid",
-                    spd::c_str(i_target), l_timing_byte);
+                    "timing is 0 in the SPD for byte:%u, which is invalid",
+                    l_timing_byte);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;

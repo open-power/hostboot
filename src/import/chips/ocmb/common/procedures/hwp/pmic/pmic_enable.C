@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,7 @@ extern "C"
         // Check if there are any DIMM targets
         if (mss::count_dimm(i_ocmb_target) == 0)
         {
-            FAPI_INF("Skipping %s because it has no DIMM targets", mss::c_str(i_ocmb_target));
+            FAPI_INF("Skipping " GENTARGTIDFORMAT " because it has no DIMM targets", GENTARGTID(i_ocmb_target));
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
