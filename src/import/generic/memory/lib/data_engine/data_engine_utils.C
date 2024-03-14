@@ -226,13 +226,13 @@ fapi2::ReturnCode calc_vref_offset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         }
         else
         {
-            FAPI_INF(GENTARGTIDFORMAT " VREF Overflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
-                     GENTARGTID(i_port),
-                     i_dram,
-                     i_dimm_rank,
-                     l_calc_vref_step);
-            FAPI_INF("Base Vref on that DRAM and RANK was %d, value set to 155",
-                     i_vref_byte[i_byte_index])
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " VREF Overflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
+                            GENTARGTID(i_port),
+                            i_dram,
+                            i_dimm_rank,
+                            l_calc_vref_step);
+            FAPI_INF_NO_SBE("Base Vref on that DRAM and RANK was %d, value set to 155",
+                            i_vref_byte[i_byte_index])
 
             // Set to VREF_MAX if overflow detected
             io_vref[i_dimm_rank][i_dram] = mss::ddr5::mr::VREF_MAX;
@@ -246,14 +246,14 @@ fapi2::ReturnCode calc_vref_offset(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         }
         else
         {
-            FAPI_INF(GENTARGTIDFORMAT " VREF Underflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
-                     GENTARGTID(i_port),
-                     i_dram,
-                     i_dimm_rank,
-                     l_calc_vref_step);
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " VREF Underflow detected on DRAM %u Rank %u (Offset w/ multiplier value %d)",
+                            GENTARGTID(i_port),
+                            i_dram,
+                            i_dimm_rank,
+                            l_calc_vref_step);
 
-            FAPI_INF("Base Vref on that DRAM and RANK was %d, value set to 0",
-                     i_vref_byte[i_byte_index])
+            FAPI_INF_NO_SBE("Base Vref on that DRAM and RANK was %d, value set to 0",
+                            i_vref_byte[i_byte_index])
 
             // Set to VREF_MIN if underflow detected
             io_vref[i_dimm_rank][i_dram] = mss::ddr5::mr::VREF_MIN;

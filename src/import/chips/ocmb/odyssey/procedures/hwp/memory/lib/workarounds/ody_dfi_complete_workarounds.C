@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,8 +83,8 @@ fapi2::ReturnCode check_dfi_init_helper( const fapi2::Target<fapi2::TARGET_TYPE_
     // Check if the workaround is needed
     if(is_simulation_dfi_init_workaround_needed( i_is_simulation, i_is_simics ))
     {
-        FAPI_INF(TARGTIDFORMAT " Running the DFI workaround for simulation",
-                 TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " Running the DFI workaround for simulation",
+                        TARGTID);
         FAPI_TRY(stop_wait_for_dfi_init(i_target),
                  TARGTIDFORMAT " Failed DFI init workaround for simulation",
                  TARGTID);
@@ -92,8 +92,8 @@ fapi2::ReturnCode check_dfi_init_helper( const fapi2::Target<fapi2::TARGET_TYPE_
     else
     {
         // Check that the DFI init completed successfully
-        FAPI_INF(TARGTIDFORMAT " Polling for DFI init complete",
-                 TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " Polling for DFI init complete",
+                        TARGTID);
         FAPI_TRY(mss::ody::poll_for_dfi_init_complete(i_target),
                  TARGTIDFORMAT " Failed to poll_for_dfi_init_complete",
                  TARGTID );

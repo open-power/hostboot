@@ -465,7 +465,7 @@ class subtest_t
         inline void change_goto_subtest( const uint64_t i_jmp_to )
         {
             iv_mcbmr.template insertFromRight<TT::GOTO_SUBTEST, TT::GOTO_SUBTEST_LEN>(i_jmp_to);
-            FAPI_INF("changing subtest to jump to %d (0x%02x)", i_jmp_to, iv_mcbmr);
+            FAPI_INF_NO_SBE("changing subtest to jump to %d (0x%02x)", i_jmp_to, iv_mcbmr);
             return;
         }
 
@@ -545,7 +545,7 @@ class subtest_t
         {
             // Roll the index around - tidy support for an index which is out of range.
             iv_mcbmr.template insertFromRight<TT::ADDR_SEL, TT::ADDR_SEL_LEN>(i_index % TT::MAX_ADDRESS_START_END_REGISTERS);
-            FAPI_INF("changed address select to index %d (0x%x)", i_index, iv_mcbmr);
+            FAPI_INF_NO_SBE("changed address select to index %d (0x%x)", i_index, iv_mcbmr);
             return;
         }
 
@@ -2227,7 +2227,7 @@ class program
 
                 // Default is a no forced pause (as we cleared all the bits)
                 default:
-                    FAPI_INF("no forced pause state - end state %d unknown", i_end);
+                    FAPI_INF_NO_SBE("no forced pause state - end state %d unknown", i_end);
                     break;
             };
 
@@ -2293,13 +2293,13 @@ class program
 
                 if ((l_seconds - l_scrub_time_fff) > (l_scrub_time_001 - l_seconds))
                 {
-                    FAPI_INF(TARGTIDFORMAT " gap is greater than the field will allow. Setting to: 0x%03x", TARGTID, MIN_CMD_GAP);
+                    FAPI_INF_NO_SBE(TARGTIDFORMAT " gap is greater than the field will allow. Setting to: 0x%03x", TARGTID, MIN_CMD_GAP);
                     o_min_cmd_gap = MIN_CMD_GAP;
                     o_timebase = mss::ON;
                 }
                 else
                 {
-                    FAPI_INF(TARGTIDFORMAT " gap is greater than the field will allow. Setting to: 0x%03x", TARGTID, MAX_CMD_GAP);
+                    FAPI_INF_NO_SBE(TARGTIDFORMAT " gap is greater than the field will allow. Setting to: 0x%03x", TARGTID, MAX_CMD_GAP);
                     o_min_cmd_gap = MAX_CMD_GAP;
                     o_timebase = mss::OFF;
                 }
@@ -2348,10 +2348,10 @@ class program
 
                         FAPI_TRY( calculate_min_cmd_gap(i_target, l_freq, l_size, l_min_cmd_gap, l_timebase) );
 
-                        FAPI_INF(TARGTIDFORMAT " setting bg scrub speed: %dMT/s, memory: %dGB, duration: %ds",
-                                 TARGTID, l_freq, l_size, l_seconds);
-                        FAPI_INF(TARGTIDFORMAT " gap: %d",
-                                 TARGTID, l_min_cmd_gap);
+                        FAPI_INF_NO_SBE(TARGTIDFORMAT " setting bg scrub speed: %dMT/s, memory: %dGB, duration: %ds",
+                                        TARGTID, l_freq, l_size, l_seconds);
+                        FAPI_INF_NO_SBE(TARGTIDFORMAT " gap: %d",
+                                        TARGTID, l_min_cmd_gap);
 
                         change_min_cmd_gap(l_min_cmd_gap);
                         change_min_gap_timebase(l_timebase);
@@ -2408,8 +2408,8 @@ class program
 
             const uint64_t l_detect_slave = fapi2::buffer<uint64_t>(i_end).getBit<TT::SLAVE_RANK_INDICATED_BIT>();
             iv_addr_gen.writeBit<TT::MAINT_DETECT_SRANK_BOUNDARIES>( l_detect_slave );
-            FAPI_INF("load MCBIST end boundaries 0x%016lx detect slave? %s",
-                     i_end, (l_detect_slave == 1 ? "yes" : "no") );
+            FAPI_INF_NO_SBE("load MCBIST end boundaries 0x%016lx detect slave? %s",
+                            i_end, (l_detect_slave == 1 ? "yes" : "no") );
         }
 
         ///
@@ -2700,7 +2700,7 @@ class program
             if (TT::MULTI_PORTS == mss::states::YES)
             {
                 iv_control.insertFromRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(i_ports);
-                FAPI_INF("mcbist select ports: iv_control 0x%016lx (ports: 0x%x)", iv_control, i_ports);
+                FAPI_INF_NO_SBE("mcbist select ports: iv_control 0x%016lx (ports: 0x%x)", iv_control, i_ports);
             }
 
             return;
@@ -2771,7 +2771,7 @@ class program
         ///
         inline fapi2::ReturnCode change_pattern( const uint64_t i_pattern )
         {
-            FAPI_INF("change MCBIST pattern index %d", i_pattern);
+            FAPI_INF_NO_SBE("change MCBIST pattern index %d", i_pattern);
 
             // Sanity check the pattern since they're just numbers.
             FAPI_ASSERT( i_pattern <= mcbist::NO_PATTERN,
@@ -2797,7 +2797,7 @@ class program
         ///
         inline fapi2::ReturnCode change_random_24b_seeds( const uint64_t i_random24_seed )
         {
-            FAPI_INF("change MCBIST 24b random data seeds index %d", i_random24_seed );
+            FAPI_INF_NO_SBE("change MCBIST 24b random data seeds index %d", i_random24_seed );
 
             // TK Want a new RC for random 24
             // Sanity check the pattern since they're just numbers.
@@ -2824,7 +2824,7 @@ class program
         ///
         inline fapi2::ReturnCode change_random_24b_maps( const uint64_t i_random24_map )
         {
-            FAPI_INF("change MCBIST 24b random data seed mappings index %d", i_random24_map );
+            FAPI_INF_NO_SBE("change MCBIST 24b random data seed mappings index %d", i_random24_map );
 
             // TK Want a new RC for random 24
             // Sanity check the pattern since they're just numbers.
@@ -3225,7 +3225,7 @@ fapi2::ReturnCode load_mcbmr( const fapi2::Target<T>& i_target, const mcbist::pr
     // Leave if there are no subtests.
     if (0 == i_program.iv_subtests.size())
     {
-        FAPI_INF("no subtests, nothing to do for " TARGTIDFORMAT, TARGTID);
+        FAPI_INF_NO_SBE("no subtests, nothing to do for " TARGTIDFORMAT, TARGTID);
         return fapi2::current_err;
     }
 
@@ -4019,7 +4019,7 @@ fapi2::ReturnCode load_data_compare_mask( const fapi2::Target<T>& i_target,
 
     // Load the MCBCM Data compare masks
     const auto l_ports =  mss::find_targets<TT::PORT_TYPE>(i_target);
-    FAPI_INF("Loading the MCBIST data compare mask registers!");
+    FAPI_INF_NO_SBE("Loading the MCBIST data compare mask registers!");
 
     for (const auto& p : l_ports)
     {

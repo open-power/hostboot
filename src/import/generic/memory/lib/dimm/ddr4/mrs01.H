@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,12 +110,12 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     l_rtt_nom_buffer = i_data.iv_rtt_nom[l_dimm_rank];
 
     // Print this here as opposed to the MRS01 ctor as we want to see the specific rtt now information
-    FAPI_INF("%s MR1 rank %d attributes: DLL_ENABLE: 0x%x, ODIC: 0x%x(0x%x), AL: 0x%x, WLE: 0x%x, "
-             "RTT_NOM:0x%x, TDQS: 0x%x, QOFF: 0x%x",
-             mss::c_str(i_target), i_port_rank, i_data.iv_dll_enable,
-             i_data.iv_odic[l_dimm_rank], uint8_t(l_odic_buffer),
-             uint8_t(l_additive_latency), i_data.iv_wl_enable,
-             uint8_t(l_rtt_nom_buffer), i_data.iv_tdqs, i_data.iv_qoff);
+    FAPI_INF_NO_SBE("%s MR1 rank %d attributes: DLL_ENABLE: 0x%x, ODIC: 0x%x(0x%x), AL: 0x%x, WLE: 0x%x, "
+                    "RTT_NOM:0x%x, TDQS: 0x%x, QOFF: 0x%x",
+                    mss::c_str(i_target), i_port_rank, i_data.iv_dll_enable,
+                    i_data.iv_odic[l_dimm_rank], uint8_t(l_odic_buffer),
+                    uint8_t(l_additive_latency), i_data.iv_wl_enable,
+                    uint8_t(l_rtt_nom_buffer), i_data.iv_tdqs, i_data.iv_qoff);
 
     io_inst.arr0.template writeBit<TT::A0>(i_data.iv_dll_enable);
     mss::swizzle<TT::A1, ODIC_LENGTH, ODIC_START_BIT>(l_odic_buffer, io_inst.arr0);
@@ -126,7 +126,7 @@ fapi2::ReturnCode mrs01(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.template writeBit<TT::A11>(i_data.iv_tdqs);
     io_inst.arr0.template writeBit<TT::A12>(i_data.iv_qoff);
 
-    FAPI_INF("%s MR1: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
+    FAPI_INF_NO_SBE("%s MR1: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -195,10 +195,10 @@ fapi2::ReturnCode mrs01_decode_helper(const ccs::instruction_t<MC>& i_inst,
     mss::swizzle<6, 2, TT::A4>(i_inst.arr0, o_additive_latency);
     mss::swizzle<5, 3, TT::A10>(i_inst.arr0, o_rtt_nom);
 
-    FAPI_INF("MR1 rank %d decode: DLL_ENABLE: 0x%x, ODIC: 0x%x, AL: 0x%x, WLE: 0x%x, "
-             "RTT_NOM: 0x%x, TDQS: 0x%x, QOFF: 0x%x",
-             i_port_rank, o_dll_enable, uint8_t(o_odic), uint8_t(o_additive_latency),
-             o_wrl_enable, uint8_t(o_rtt_nom), o_tdqs, o_qoff);
+    FAPI_INF_NO_SBE("MR1 rank %d decode: DLL_ENABLE: 0x%x, ODIC: 0x%x, AL: 0x%x, WLE: 0x%x, "
+                    "RTT_NOM: 0x%x, TDQS: 0x%x, QOFF: 0x%x",
+                    i_port_rank, o_dll_enable, uint8_t(o_odic), uint8_t(o_additive_latency),
+                    o_wrl_enable, uint8_t(o_rtt_nom), o_tdqs, o_qoff);
 
     return fapi2::FAPI2_RC_SUCCESS;
 }

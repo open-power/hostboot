@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -270,9 +270,9 @@ class mr3_data : public mr_base_data<MC>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
             // Inputs were checked in the public display method
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR3. WR LVL internal cycle rank%u, DRAM%u - lower byte: %u. Note: WR LVL internal cycle - upper byte is unused and will be 0",
-                     TARGTID, i_rank, i_dram_number, iv_wr_lvl_internal_lower[i_rank][i_dram_number]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR3. WR LVL internal cycle rank%u, DRAM%u - lower byte: %u. Note: WR LVL internal cycle - upper byte is unused and will be 0",
+                            TARGTID, i_rank, i_dram_number, iv_wr_lvl_internal_lower[i_rank][i_dram_number]);
 #pragma GCC diagnostic pop
         }
 

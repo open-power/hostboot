@@ -565,8 +565,8 @@ fapi2::ReturnCode get_steer_mux(
         o_dram_spare1_symbol = genSteerTraits<MC>::spare_to_symbol[l_dramSpare1Index];
     }
 
-    FAPI_INF("get_steer_mux(): target = " TARGTIDFORMAT ", rank%d, spare0 = %d, spare1 = %d",
-             TARGTID, i_port_rank, o_dram_spare0_symbol, o_dram_spare1_symbol );
+    FAPI_INF_NO_SBE("get_steer_mux(): target = " TARGTIDFORMAT ", rank%d, spare0 = %d, spare1 = %d",
+                    TARGTID, i_port_rank, o_dram_spare0_symbol, o_dram_spare1_symbol );
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,7 +64,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::MARK_SHADOW_REG, o_data) );
-    FAPI_INF("%s read: 0x%016lx", mss::c_str(i_target), o_data);
+    FAPI_INF_NO_SBE("%s read: 0x%016lx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -82,7 +82,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::MARK_SHADOW_REG, i_data) );
-    FAPI_INF("%s write: 0x%016lx", mss::c_str(i_target), i_data);
+    FAPI_INF_NO_SBE("%s write: 0x%016lx", mss::c_str(i_target), i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -99,7 +99,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_chipmark( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SHADOW_CHIPMARK, TT::SHADOW_CHIPMARK_LEN>(i_value);
-    FAPI_INF("set_chipmark: 0x%016lx", i_value);
+    FAPI_INF_NO_SBE("set_chipmark: 0x%016lx", i_value);
 }
 
 ///
@@ -114,7 +114,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_chipmark( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SHADOW_CHIPMARK, TT::SHADOW_CHIPMARK_LEN>(o_value);
-    FAPI_INF("get_chipmark: 0x%016lx", o_value);
+    FAPI_INF_NO_SBE("get_chipmark: 0x%016lx", o_value);
 }
 
 ///
@@ -129,7 +129,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_rank( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SHADOW_RANK, TT::SHADOW_RANK_LEN>(i_value);
-    FAPI_INF("set_rank: 0x%016lx", i_value);
+    FAPI_INF_NO_SBE("set_rank: 0x%016lx", i_value);
 }
 
 ///
@@ -144,7 +144,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_rank( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SHADOW_RANK, TT::SHADOW_RANK_LEN>(o_value);
-    FAPI_INF("get_rank: 0x%016lx", o_value);
+    FAPI_INF_NO_SBE("get_rank: 0x%016lx", o_value);
 }
 
 } // close namespace mark_shadow_reg

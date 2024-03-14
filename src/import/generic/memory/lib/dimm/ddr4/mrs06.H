@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,17 +93,17 @@ fapi2::ReturnCode mrs06(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     l_tccd_l_buffer = tccd_l_map[i_data.iv_tccd_l - LOWEST_TCCD];
     l_vrefdq_train_value_buffer = i_data.iv_vrefdq_train_value[mss::index(i_port_rank)];
 
-    FAPI_INF("%s MR6 rank %d attributes: TRAIN_V: 0x%x(0x%x), TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x(0x%x)",
-             mss::c_str(i_target), i_port_rank, i_data.iv_vrefdq_train_value[mss::index(i_port_rank)],
-             uint8_t(l_vrefdq_train_value_buffer), i_data.iv_vrefdq_train_range[mss::index(i_port_rank)],
-             i_data.iv_vrefdq_train_enable[mss::index(i_port_rank)], i_data.iv_tccd_l, uint8_t(l_tccd_l_buffer));
+    FAPI_INF_NO_SBE("%s MR6 rank %d attributes: TRAIN_V: 0x%x(0x%x), TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x(0x%x)",
+                    mss::c_str(i_target), i_port_rank, i_data.iv_vrefdq_train_value[mss::index(i_port_rank)],
+                    uint8_t(l_vrefdq_train_value_buffer), i_data.iv_vrefdq_train_range[mss::index(i_port_rank)],
+                    i_data.iv_vrefdq_train_enable[mss::index(i_port_rank)], i_data.iv_tccd_l, uint8_t(l_tccd_l_buffer));
 
     mss::swizzle<TT::A0, VREFDQ_TRAIN_LENGTH, VREFDQ_TRAIN_START>(l_vrefdq_train_value_buffer, io_inst.arr0);
     io_inst.arr0.template writeBit<TT::A6>(i_data.iv_vrefdq_train_range[mss::index(i_port_rank)]);
     io_inst.arr0.template writeBit<TT::A7>(i_data.iv_vrefdq_train_enable[mss::index(i_port_rank)]);
     mss::swizzle<TT::A10, TCCD_L_LENGTH, TCCD_L_START>(l_tccd_l_buffer, io_inst.arr0);
 
-    FAPI_INF("%s MR6: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
+    FAPI_INF_NO_SBE("%s MR6: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -161,9 +161,9 @@ fapi2::ReturnCode mrs06_decode_helper(const ccs::instruction_t<MC>& i_inst,
     o_vrefdq_train_enable = i_inst.arr0.template getBit<TT::A7>();
     mss::swizzle<5, 3, TT::A12>(i_inst.arr0, o_tccd_l_buffer);
 
-    FAPI_INF("MR6 rank %d decode: TRAIN_V: 0x%x, TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x",
-             i_port_rank, uint8_t(o_vrefdq_train_value_buffer), o_vrefdq_train_range,
-             o_vrefdq_train_enable, uint8_t(o_tccd_l_buffer));
+    FAPI_INF_NO_SBE("MR6 rank %d decode: TRAIN_V: 0x%x, TRAIN_R: 0x%x, TRAIN_E: 0x%x, TCCD_L: 0x%x",
+                    i_port_rank, uint8_t(o_vrefdq_train_value_buffer), o_vrefdq_train_range,
+                    o_vrefdq_train_enable, uint8_t(o_tccd_l_buffer));
 
     return fapi2::FAPI2_RC_SUCCESS;
 }

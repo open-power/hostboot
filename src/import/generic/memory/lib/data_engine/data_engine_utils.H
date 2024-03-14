@@ -346,9 +346,9 @@ fapi2::ReturnCode get_supported_cas_latencies(
         // so no range checking is needed
         o_field = uint64_t(l_buffer);
 
-        FAPI_INF(GENTARGTIDFORMAT " CAS latencies supported (bitmap): 0x%010X",
-                 GENTARGTID(i_dimm),
-                 o_field);
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " CAS latencies supported (bitmap): 0x%010X",
+                        GENTARGTID(i_dimm),
+                        o_field);
     }
 
 fapi_try_exit:

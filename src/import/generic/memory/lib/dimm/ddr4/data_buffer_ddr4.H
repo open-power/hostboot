@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,9 +183,9 @@ static fapi2::ReturnCode settings_boilerplate(const fapi2::Target< fapi2::TARGET
 
     // I don't know what already existed in this ccs instruction vector beforehand so
     // I use the back() method to access the last added ccs instruction of interest
-    FAPI_INF("%s. F%dBC%02lx ccs inst 0x%016llx:0x%016llx, data: %d",
-             mss::c_str(i_target), uint8_t(i_data.iv_func_space), uint8_t(i_data.iv_number),
-             uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(i_data.iv_data) );
+    FAPI_INF_NO_SBE("%s. F%dBC%02lx ccs inst 0x%016llx:0x%016llx, data: %d",
+                    mss::c_str(i_target), uint8_t(i_data.iv_func_space), uint8_t(i_data.iv_number),
+                    uint64_t(io_inst.back().arr0), uint64_t(io_inst.back().arr1), uint8_t(i_data.iv_data) );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -225,7 +225,7 @@ fapi2::ReturnCode set_pba_mode( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_
         constexpr uint64_t PBA_POSITION = 7;
         cw_data l_data(TT::FUNC_SPACE_0, TT::BUFF_CONFIG_CW, l_nominal_bc_value, mss::tmrd_l2());
         l_data.iv_data.writeBit<PBA_POSITION>(i_state);
-        FAPI_INF("%s data 0x%02x", mss::c_str(i_target), l_data.iv_data);
+        FAPI_INF_NO_SBE("%s data 0x%02x", mss::c_str(i_target), l_data.iv_data);
         FAPI_TRY( settings_boilerplate<BCW_8BIT>(i_target, l_data, io_inst) );
     }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,7 @@ extern "C"
         o_chipId = POWER_CHIPID::extract_chipid16(CHIP_IDEC());
         o_chipEc = POWER_CHIPID::extract_ddlevel(CHIP_IDEC());
 
-        FAPI_INF("Target " TARGTIDFORMAT ": EC 0x%.02x   ChipId 0x%.04x", TARGTID, o_chipEc, o_chipId);
+        FAPI_INF_NO_SBE("Target " TARGTIDFORMAT ": EC 0x%.02x   ChipId 0x%.04x", TARGTID, o_chipEc, o_chipId);
 
     fapi_try_exit:
         FAPI_DBG("ody_getidec: Exiting.");

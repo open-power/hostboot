@@ -170,7 +170,7 @@ fapi2::ReturnCode read_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
     // Writing 0 to DctWriteProt.
     FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_DCTWRITEPROT, RECEPTION_ACK));
 
-    FAPI_INF(TARGTIDFORMAT " o_mail message: 0x%016x", TARGTID, o_mail);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " o_mail message: 0x%016x", TARGTID, o_mail);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2469,6 +2469,8 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     const msg_block_params l_msg_block_config(i_target, l_rc);
     FAPI_TRY(l_rc, "Unable to instantiate msg_block_params for target " TARGTIDFORMAT, TARGTID);
 
+    memset(&o_struct, 0, sizeof(PMU_SMB_DDR5U_1D_t));
+
     FAPI_TRY(l_msg_block_config.setup_AdvTrainOpt(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MsgMisc(o_struct));
     FAPI_TRY(l_msg_block_config.setup_Pstate(o_struct));
@@ -2507,9 +2509,7 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     FAPI_TRY(l_msg_block_config.setup_MR4(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR5(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR6(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_MR32_next(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR8(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_MR32_ORG_next(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR10(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR11(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR12(o_struct));
@@ -2526,11 +2526,6 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     FAPI_TRY(l_msg_block_config.setup_MR38(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR39(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR33_ORG(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_MR11_next(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_MR12_next(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_MR13_next(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_MR33_ORG_next(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_MR33_next(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR50(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR51(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR52(o_struct));
@@ -2539,8 +2534,6 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     FAPI_TRY(l_msg_block_config.setup_ReservedF7(o_struct));
     FAPI_TRY(l_msg_block_config.setup_ReservedF8(o_struct));
     FAPI_TRY(l_msg_block_config.setup_ReservedF9(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_BCW04_next(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_BCW05_next(o_struct));
     FAPI_TRY(l_msg_block_config.setup_WR_RD_RTT_PARK(o_struct));
     FAPI_TRY(l_msg_block_config.setup_Reserved1E2(i_sim, o_struct));
     FAPI_TRY(l_msg_block_config.setup_Reserved1E3(o_struct));
@@ -2559,8 +2552,6 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     FAPI_TRY(l_msg_block_config.setup_DisabledDB(o_struct));
     FAPI_TRY(l_msg_block_config.setup_vref_sweeps(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR32_per_dram(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_reserved7(o_struct));
-    FAPI_TRY(l_msg_block_config.setup_output_fields(o_struct));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -2762,7 +2753,7 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 
     if (i_data_start == NULL && i_mem_size == 0)
     {
-        FAPI_INF("Last HWP consume call after hash checking passed, nothing further to load");
+        FAPI_INF_NO_SBE("Last HWP consume call after hash checking passed, nothing further to load");
         return fapi2::current_err;
     }
 
@@ -2925,10 +2916,10 @@ fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_M
         // Process the mail data into the RCW format
         const rcw_id l_rcw_info(l_mail);
 
-        FAPI_INF(TARGTIDFORMAT " RCW info. Channel id: 0x%x, DIMM id: 0x%x, RCW id: 0x%02x",
-                 TARGTID, l_rcw_info.iv_channel_id, l_rcw_info.iv_dimm_id, l_rcw_info.iv_rcw_id);
-        FAPI_INF(TARGTIDFORMAT " RCW page: 0x%02x, RCW val: 0x%02x",
-                 TARGTID, l_rcw_info.iv_rcw_page, l_rcw_info.iv_rcw_val);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " RCW info. Channel id: 0x%x, DIMM id: 0x%x, RCW id: 0x%02x",
+                        TARGTID, l_rcw_info.iv_channel_id, l_rcw_info.iv_dimm_id, l_rcw_info.iv_rcw_id);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " RCW page: 0x%02x, RCW val: 0x%02x",
+                        TARGTID, l_rcw_info.iv_rcw_page, l_rcw_info.iv_rcw_val);
 
         // Need to be removed when the puti2c commands are updated in hostboot and SBE
 #if (!defined(__HOSTBOOT_MODULE) && !defined(__PPE__))
@@ -3939,7 +3930,7 @@ fapi2::ReturnCode set_mr_attributes(const fapi2::Target<fapi2::TARGET_TYPE_MEM_P
     // Checks that we have at least one rank (we should)
     if(l_rank_infos.empty())
     {
-        FAPI_INF( TARGTIDFORMAT "has no ranks! Skipping setting the MR attributes", TARGTID );
+        FAPI_INF_NO_SBE( TARGTIDFORMAT "has no ranks! Skipping setting the MR attributes", TARGTID );
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -6143,7 +6134,7 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
         FAPI_TRY(mss::record_bad_bits(i_target, l_interface));
     }
 
-    FAPI_INF(TARGTIDFORMAT " DRAM training returned PASSING status", TARGTID);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " DRAM training returned PASSING status", TARGTID);
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -6284,7 +6275,7 @@ fapi2::ReturnCode run_training_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM
     }
     else
     {
-        FAPI_INF(TARGTIDFORMAT " skipping checking FIR's. Training will continue", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " skipping checking FIR's. Training will continue", TARGTID);
     }
 
 fapi_try_exit:
@@ -6851,7 +6842,7 @@ fapi2::ReturnCode check_draminit_verbosity(const fapi2::Target<fapi2::TARGET_TYP
 
     if(l_ports.size() < mss::ody::sizes::MAX_PORT_PER_OCMB)
     {
-        FAPI_INF(TARGTIDFORMAT " only one port or less was found, skipping verbosity check", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " only one port or less was found, skipping verbosity check", TARGTID);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 

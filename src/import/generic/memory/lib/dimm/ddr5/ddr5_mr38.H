@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -309,9 +309,9 @@ class mr38_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank)  const
         {
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR38 rank%u. ODTLon NT WR:%u. ODTLoff NT WR:%u.", TARGTID, i_dimm_rank, iv_odtlon_wr_nt_offset[i_dimm_rank],
-                     iv_odtloff_wr_nt_offset[i_dimm_rank]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR38 rank%u. ODTLon NT WR:%u. ODTLoff NT WR:%u.", TARGTID, i_dimm_rank, iv_odtlon_wr_nt_offset[i_dimm_rank],
+                            iv_odtloff_wr_nt_offset[i_dimm_rank]);
         }
 
 };

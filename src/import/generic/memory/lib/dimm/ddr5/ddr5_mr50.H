@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -216,11 +216,12 @@ class mr50_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR50. RD CRC enable: %u. WR CRC enable lower nibble: %u. WR CRC enable upper nibble: %u.",
-                     TARGTID, iv_rd_crc_enable, iv_wr_crc_enable_lower_nibble, iv_wr_crc_enable_upper_nibble);
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR50. WR CRC error status: %u. WR CRC auto-disable enable: %u. WR CRC auto-disable status: %u.",
-                     TARGTID, iv_wr_crc_error_status, iv_wr_crc_autodisable_enable, iv_wr_crc_autodisable_status);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR50. RD CRC enable: %u. WR CRC enable lower nibble: %u. WR CRC enable upper nibble: %u.",
+                            TARGTID, iv_rd_crc_enable, iv_wr_crc_enable_lower_nibble, iv_wr_crc_enable_upper_nibble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR50. WR CRC error status: %u. WR CRC auto-disable enable: %u. WR CRC auto-disable status: %u.",
+                            TARGTID, iv_wr_crc_error_status, iv_wr_crc_autodisable_enable, iv_wr_crc_autodisable_status);
         }
 
 };

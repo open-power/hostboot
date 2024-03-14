@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -338,15 +338,15 @@ fapi2::ReturnCode control_word_engine(const fapi2::Target<fapi2::TARGET_TYPE_DIM
         // the last control word access, before further access to the DRAM can take place.
         l_inst.iv_idles = i_data.iv_delay;
 
-        FAPI_INF("F%d%s%02x%s value 0x%x (%d cycles) 0x%016llx:0x%016llx %s",
-                 uint8_t(i_data.iv_func_space),
-                 (TT::CW_ACCESS == 1 ? "BC" : "RC"),
-                 uint8_t(i_data.iv_number),
-                 (T == BCW_4BIT || T == RCW_4BIT ? "" : "X"),
-                 l_value,
-                 i_data.iv_delay,
-                 uint64_t(l_inst.arr0), uint64_t(l_inst.arr1),
-                 mss::c_str(i_target));
+        FAPI_INF_NO_SBE("F%d%s%02x%s value 0x%x (%d cycles) 0x%016llx:0x%016llx %s",
+                        uint8_t(i_data.iv_func_space),
+                        (TT::CW_ACCESS == 1 ? "BC" : "RC"),
+                        uint8_t(i_data.iv_number),
+                        (T == BCW_4BIT || T == RCW_4BIT ? "" : "X"),
+                        l_value,
+                        i_data.iv_delay,
+                        uint64_t(l_inst.arr0), uint64_t(l_inst.arr1),
+                        mss::c_str(i_target));
     }
 
     // All setup now, output it

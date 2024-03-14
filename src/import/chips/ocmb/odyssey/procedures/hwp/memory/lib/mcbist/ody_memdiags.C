@@ -124,8 +124,8 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr_simple()
         l_start_of_end_port.get_sim_end_address(iv_const.iv_end_address);
     }
 
-    FAPI_INF("last addr in start port 0x%016lx first addr in end port 0x%016lx for " TARGTIDFORMAT,
-             uint64_t(l_end_of_start_port), uint64_t(l_start_of_end_port), GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("last addr in start port 0x%016lx first addr in end port 0x%016lx for " TARGTIDFORMAT,
+                    uint64_t(l_end_of_start_port), uint64_t(l_start_of_end_port), GENTARGTID(iv_target));
 
     // We know we have three address configs: start address -> end of DIMM, 0 -> end of DIMM and 0 -> end address.
     FAPI_TRY( mss::mcbist::config_address_range0<mss::mc_type::ODYSSEY>(iv_target, iv_const.iv_start_address,
@@ -137,7 +137,7 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr_simple()
               iv_const.iv_end_address) );
 
     // Loop over all the DIMM on this MCBIST. Check the port/DIMM value for what to do.
-    FAPI_INF("Adding subtests for %d DIMMs on " TARGTIDFORMAT, l_dimms.size(), GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("Adding subtests for %d DIMMs on " TARGTIDFORMAT, l_dimms.size(), GENTARGTID(iv_target));
 
     for (const auto& l_dimm : l_dimms)
     {
@@ -150,14 +150,15 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr_simple()
         // The port and DIMM indexes are needed to set the addressing scheme below - compute them here
         const auto l_portdimm_this_dimm = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
 
-        FAPI_INF(TARGTIDFORMAT " port/dimm %d, port/dimm start: %d", GENTARGTID(iv_target), l_portdimm_this_dimm,
-                 l_portdimm_start_address);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " port/dimm %d, port/dimm start: %d", GENTARGTID(iv_target), l_portdimm_this_dimm,
+                        l_portdimm_start_address);
 
         // No need to process DIMM which are lower as they're not between the start and the end of the port.
         if (l_portdimm_this_dimm < l_portdimm_start_address)
         {
-            FAPI_INF(TARGTIDFORMAT " Skipping adding the subtest for this DIMM %lu < %lu", GENTARGTID(l_dimm), l_portdimm_this_dimm,
-                     l_portdimm_start_address);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " Skipping adding the subtest for this DIMM %lu < %lu", GENTARGTID(l_dimm),
+                            l_portdimm_this_dimm,
+                            l_portdimm_start_address);
             continue;
         }
 
@@ -185,10 +186,10 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr_simple()
         }
 
         iv_program.iv_subtests.push_back(l_subtest);
-        FAPI_INF("adding subtest for " TARGTIDFORMAT " (port: %d)", GENTARGTID(iv_target), l_portdimm_this_dimm);
+        FAPI_INF_NO_SBE("adding subtest for " TARGTIDFORMAT " (port: %d)", GENTARGTID(iv_target), l_portdimm_this_dimm);
     }
 
-    FAPI_INF("Total subtests added: %d for " TARGTIDFORMAT, iv_program.iv_subtests.size(), GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("Total subtests added: %d for " TARGTIDFORMAT, iv_program.iv_subtests.size(), GENTARGTID(iv_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -369,7 +370,7 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_addr()
         }
     }
 
-    FAPI_INF("Total subtests added: %d for " TARGTIDFORMAT, iv_program.iv_subtests.size(), GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("Total subtests added: %d for " TARGTIDFORMAT, iv_program.iv_subtests.size(), GENTARGTID(iv_target));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -397,7 +398,7 @@ void operation<mss::mc_type::ODYSSEY>::configure_multiport_subtests(
 template <>
 fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_init_internal()
 {
-    FAPI_INF("multi-port init internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("multi-port init internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
     using TT = mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
 
     // Let's assume we are going to send out all subtest unless we are in broadcast mode,
@@ -409,8 +410,8 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_init_internal()
     const uint64_t l_portdimm_start_address = iv_const.iv_start_address.get_port_dimm();
     const uint64_t l_portdimm_end_address = iv_const.iv_end_address.get_port_dimm();
 
-    FAPI_INF(TARGTIDFORMAT " start port/dimm: %d end port/dimm: %d", GENTARGTID(iv_target), l_portdimm_start_address,
-             l_portdimm_end_address);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " start port/dimm: %d end port/dimm: %d", GENTARGTID(iv_target), l_portdimm_start_address,
+                    l_portdimm_end_address);
 
     FAPI_ASSERT( iv_const.iv_start_address <= iv_const.iv_end_address,
                  fapi2::ODY_START_ADDR_BIGGER_THAN_END_ADDR()
@@ -467,7 +468,7 @@ fapi_try_exit:
 template <>
 fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_read_internal()
 {
-    FAPI_INF("multi-port read internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("multi-port read internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
     using TT = mss::mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
 
     // Let's assume we are going to send out all subtest unless we are in broadcast mode,
@@ -479,8 +480,8 @@ fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::multi_port_read_internal()
     const uint64_t l_portdimm_start_address = iv_const.iv_start_address.get_port_dimm();
     const uint64_t l_portdimm_end_address = iv_const.iv_end_address.get_port_dimm();
 
-    FAPI_INF(TARGTIDFORMAT " start port/dimm: %d end port/dimm: %d", GENTARGTID(iv_target), l_portdimm_start_address,
-             l_portdimm_end_address);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " start port/dimm: %d end port/dimm: %d", GENTARGTID(iv_target), l_portdimm_start_address,
+                    l_portdimm_end_address);
 
     uint8_t l_attr_num_lranks[mss::ody::MAX_DIMM_PER_PORT] = {};
 

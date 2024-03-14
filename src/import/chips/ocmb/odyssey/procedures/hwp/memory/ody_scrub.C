@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,14 +53,14 @@ extern "C"
     ///
     fapi2::ReturnCode ody_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
-        FAPI_INF("Start ody scrub for %s", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("Start ody scrub for %s", mss::c_str(i_target));
 
         // Kickoff background scrub and unmask firs
         // Note DDR5 requires use of the steer operation for running scrub
         FAPI_TRY(mss::memdiags::mss_background_steer_helper<mss::mc_type::ODYSSEY>(i_target));
 
     fapi_try_exit:
-        FAPI_INF("End ody scrub for %s", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("End ody scrub for %s", mss::c_str(i_target));
         return fapi2::current_err;
     }
 

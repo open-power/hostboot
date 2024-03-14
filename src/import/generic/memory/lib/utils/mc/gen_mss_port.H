@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -465,7 +465,7 @@ fapi2::ReturnCode read_recr_register( const fapi2::Target<T>& i_target, fapi2::b
 {
     FAPI_TRY( fapi2::getScom(i_target, TT::ECC_REG, o_buffer) );
 
-    FAPI_INF( "Read ECC Control register is 0x%016lx for " TARGTIDFORMAT, uint64_t(o_buffer), TARGTID );
+    FAPI_INF_NO_SBE( "Read ECC Control register is 0x%016lx for " TARGTIDFORMAT, uint64_t(o_buffer), TARGTID );
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -483,7 +483,7 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 fapi2::ReturnCode write_recr_register( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_buffer )
 {
-    FAPI_INF( "Change Read ECC Control register to 0x%016lx for " TARGTIDFORMAT,  i_buffer, TARGTID );
+    FAPI_INF_NO_SBE( "Change Read ECC Control register to 0x%016lx for " TARGTIDFORMAT,  i_buffer, TARGTID );
 
     FAPI_TRY( fapi2::putScom(i_target, TT::ECC_REG, i_buffer) );
 
@@ -503,7 +503,7 @@ void get_tce_correction( const fapi2::buffer<uint64_t>& i_data, mss::states& o_v
 {
     o_value = i_data.template getBit<TT::RECR_TCE_CORRECTION>() ? mss::states::ON : mss::states::OFF;
 
-    FAPI_INF( "TCE_CORRECTION_ENABLE: %lu", o_value );
+    FAPI_INF_NO_SBE( "TCE_CORRECTION_ENABLE: %lu", o_value );
 }
 
 ///
@@ -516,7 +516,7 @@ void get_tce_correction( const fapi2::buffer<uint64_t>& i_data, mss::states& o_v
 template< mss::mc_type MC, typename TT = portTraits<MC> >
 void set_tce_correction( fapi2::buffer<uint64_t>& io_data, const mss::states i_value )
 {
-    FAPI_INF( "Set TCE_CORRECTION_ENABLE to %lu", i_value);
+    FAPI_INF_NO_SBE( "Set TCE_CORRECTION_ENABLE to %lu", i_value);
 
     io_data.template writeBit<TT::RECR_TCE_CORRECTION>(i_value);
 }

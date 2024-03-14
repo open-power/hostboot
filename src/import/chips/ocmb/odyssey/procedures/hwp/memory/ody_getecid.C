@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,9 +62,9 @@ extern "C"
         fapi2::buffer<uint64_t> l_ecid_part2_data64;
         fapi2::buffer<uint64_t> l_ody_psro_data64;
 
-        FAPI_INF(TARGTIDFORMAT " ody_getecid : Entering ...", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_getecid : Entering ...", TARGTID);
 
-        FAPI_INF(TARGTIDFORMAT " ody_getecid : extract and manipulate ECID and PSRO data", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_getecid : extract and manipulate ECID and PSRO data", TARGTID);
 #ifdef __PPE__
         FAPI_TRY(ody_get_scom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG0, l_ecid_part0_data64));
         FAPI_TRY(ody_get_scom(i_target, CFAM_OTPROM_SINGLE_OTP_ROM_REG1, l_ecid_part1_data64));
@@ -84,15 +84,16 @@ extern "C"
         l_attr_data[1] = l_ecid_part1_data64();
         l_attr_ody_psro = l_ody_psro_data64();
 
-        FAPI_INF(TARGTIDFORMAT " ody_getecid : extracted ecid: 0x%016llX 0x%016llX", TARGTID, l_attr_data[0], l_attr_data[1]);
-        FAPI_INF(TARGTIDFORMAT " ody_getecid : push fuse string into attribute ...", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_getecid : extracted ecid: 0x%016llX 0x%016llX", TARGTID, l_attr_data[0],
+                        l_attr_data[1]);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_getecid : push fuse string into attribute ...", TARGTID);
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ECID, i_target, l_attr_data));
 
-        FAPI_INF(TARGTIDFORMAT " ody_getecid : extract the psro : 0x%016llX", TARGTID, l_attr_ody_psro);
-        FAPI_INF(TARGTIDFORMAT " ody_getecid : push psro into attribute ...", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_getecid : extract the psro : 0x%016llX", TARGTID, l_attr_ody_psro);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_getecid : push psro into attribute ...", TARGTID);
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_PSRO, i_target, l_attr_ody_psro));
 
-        FAPI_INF(TARGTIDFORMAT " ody_getecid : Exiting ...", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_getecid : Exiting ...", TARGTID);
 
     fapi_try_exit:
         return fapi2::current_err;

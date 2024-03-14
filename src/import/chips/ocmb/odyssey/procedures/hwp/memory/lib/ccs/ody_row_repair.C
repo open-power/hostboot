@@ -781,9 +781,9 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                     FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
                              GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
 #else
-                    FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d",
-                             GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank);
-                    FAPI_INF(" bg %d, bank %d, row 0x%05x", l_bg, BANK_POS, l_row);
+                    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d",
+                                    GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank);
+                    FAPI_INF_NO_SBE(" bg %d, bank %d, row 0x%05x", l_bg, BANK_POS, l_row);
 #endif
                     // Check if we have PPR resources available for the repair
                     // If we don't, assert out since this is manufacturing mode

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,7 +89,8 @@ extern "C"
         // If DRAM repairs are disabled (mfg flag), we're done (but need to callout DIMM if it has row repair data)
         if (l_no_rbs)
         {
-            FAPI_INF( GENTARGTIDFORMAT " DRAM repairs are disabled, so skipping row repair deployment", GENTARGTID(i_target_ocmb));
+            FAPI_INF_NO_SBE( GENTARGTIDFORMAT " DRAM repairs are disabled, so skipping row repair deployment",
+                             GENTARGTID(i_target_ocmb));
 
             // Iterate through DRAM repairs structure
             for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target_ocmb))
@@ -137,7 +138,8 @@ extern "C"
         // If DRAM repairs are disabled (mfg flag), we're done (but need to callout DIMM if it has row repair data)
         if (l_no_rbs)
         {
-            FAPI_INF( GENTARGTIDFORMAT" DRAM repairs are disabled, so skipping row repair deployment", GENTARGTID(i_target_ocmb));
+            FAPI_INF_NO_SBE( GENTARGTIDFORMAT" DRAM repairs are disabled, so skipping row repair deployment",
+                             GENTARGTID(i_target_ocmb));
 
             // Iterate through DRAM repairs structure
             for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target_ocmb))

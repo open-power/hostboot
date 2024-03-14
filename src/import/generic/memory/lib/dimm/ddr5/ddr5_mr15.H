@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -241,9 +241,10 @@ class mr15_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR15. ECS error threshold: %u. ECS in STR: %u", TARGTID, iv_ecs_err_threshold,
-                     iv_ecs_in_str);
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR15. ECS writeback: %u. ECS x4 writes: %u", TARGTID, iv_ecs_writeback, iv_x4_writes);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR15. ECS error threshold: %u. ECS in STR: %u", TARGTID, iv_ecs_err_threshold,
+                            iv_ecs_in_str);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR15. ECS writeback: %u. ECS x4 writes: %u", TARGTID, iv_ecs_writeback,
+                            iv_x4_writes);
         }
 
 };

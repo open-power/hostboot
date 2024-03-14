@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -206,8 +206,8 @@ class mr51_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR51. WR CRC auto-disable threshold: %u.",
-                     TARGTID, iv_wr_crc_autodisable_threshold);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR51. WR CRC auto-disable threshold: %u.",
+                            TARGTID, iv_wr_crc_autodisable_threshold);
         }
 
 };

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -191,7 +191,7 @@ fapi2::ReturnCode poll_for_dfi_init_complete( const fapi2::Target<fapi2::TARGET_
         FAPI_TRY(poll_for_dfi_init_complete(l_port));
     }
 
-    FAPI_INF(TARGTIDFORMAT " DFI polling completed successfully", TARGTID);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " DFI polling completed successfully", TARGTID);
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:

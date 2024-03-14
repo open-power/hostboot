@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ inline fapi2::ReturnCode read_rank( const fapi2::Target<T>& i_target, fapi2::buf
 {
     static_assert((R < TT::ECC_MAX_MRANK_PER_PORT), "Master rank index failed range check");
     FAPI_TRY( mss::getScom(i_target, (TT::HARDWARE_MS0_REG + R), o_data) );
-    FAPI_INF("read_rank<%d>: 0x%016lx", R, o_data);
+    FAPI_INF_NO_SBE("read_rank<%d>: 0x%016lx", R, o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -253,7 +253,7 @@ inline fapi2::ReturnCode write_rank( const fapi2::Target<T>& i_target, const fap
 {
     static_assert((R < TT::ECC_MAX_MRANK_PER_PORT), "Master rank index failed range check");
     FAPI_TRY( mss::putScom(i_target, (TT::HARDWARE_MS0_REG + R), i_data) );
-    FAPI_INF("write_rank<%d>: 0x%016lx", R, i_data);
+    FAPI_INF_NO_SBE("write_rank<%d>: 0x%016lx", R, i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -439,7 +439,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_chipmark( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::HARDWARE_MS_CHIPMARK, TT::HARDWARE_MS_CHIPMARK_LEN>(i_value);
-    FAPI_INF("set_chipmark: 0x%02lx", i_value);
+    FAPI_INF_NO_SBE("set_chipmark: 0x%02lx", i_value);
 }
 
 ///
@@ -455,7 +455,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_chipmark( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::HARDWARE_MS_CHIPMARK, TT::HARDWARE_MS_CHIPMARK_LEN>(o_value);
-    FAPI_INF("get_chipmark: 0x%02lx", o_value);
+    FAPI_INF_NO_SBE("get_chipmark: 0x%02lx", o_value);
 }
 
 ///
@@ -471,7 +471,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_confirmed( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
 {
     io_data.writeBit<TT::HARDWARE_MS_CONFIRMED>(i_state);
-    FAPI_INF("set_confirmed: 0x%01lx", i_state);
+    FAPI_INF_NO_SBE("set_confirmed: 0x%01lx", i_state);
 }
 
 ///
@@ -487,7 +487,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_confirmed( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
 {
     o_state = (i_data.getBit<TT::HARDWARE_MS_CONFIRMED>() == false) ? mss::NO : mss::YES;
-    FAPI_INF("get_confirmed: 0x%01lx", o_state);
+    FAPI_INF_NO_SBE("get_confirmed: 0x%01lx", o_state);
 }
 
 ///
@@ -504,7 +504,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_exit_1( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
 {
     io_data.writeBit<TT::HARDWARE_MS_EXIT1>(i_state);
-    FAPI_INF("set_exit_1: 0x%01lx", i_state);
+    FAPI_INF_NO_SBE("set_exit_1: 0x%01lx", i_state);
 }
 
 ///
@@ -521,7 +521,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_exit_1( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
 {
     o_state = (i_data.getBit<TT::HARDWARE_MS_EXIT1>() == false) ? mss::NO : mss::YES;
-    FAPI_INF("get_exit_1: 0x%01lx", o_state);
+    FAPI_INF_NO_SBE("get_exit_1: 0x%01lx", o_state);
 }
 
 } // close namespace hwms

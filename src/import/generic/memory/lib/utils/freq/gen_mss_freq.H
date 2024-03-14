@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,8 +148,8 @@ fapi2::ReturnCode is_vpd_config_supported( const fapi2::Target<TT::VPD_TARGET_TY
     // So, we'll use VPD access for the IBM specific product data (assuming the vendor of the OCMB's side as well)
     if( fapi2::getVPD(i_target, io_vpd_info, nullptr) != fapi2::FAPI2_RC_SUCCESS )
     {
-        FAPI_INF("Couldn't retrieve MR size from VPD for this config %s -- skipping freq %d MT/s",
-                 mss::c_str(i_target), i_proposed_freq );
+        FAPI_INF_NO_SBE("Couldn't retrieve MR size from VPD for this config %s -- skipping freq %d MT/s",
+                        mss::c_str(i_target), i_proposed_freq );
 
         return fapi2::FAPI2_RC_SUCCESS;
     }
@@ -172,8 +172,8 @@ fapi2::ReturnCode is_vpd_config_supported( const fapi2::Target<TT::VPD_TARGET_TY
     // Firmware doesn't do the VPD lookup in the size check so repeat the logic here
     if(  fapi2::getVPD(i_target, io_vpd_info, &(l_vpd_blob[0])) != fapi2::FAPI2_RC_SUCCESS )
     {
-        FAPI_INF("Couldn't retrieve %s data from VPD for this config %s -- skipping freq %d MT/s", TT::VPD_BLOB_NAME,
-                 mss::c_str(i_target), i_proposed_freq );
+        FAPI_INF_NO_SBE("Couldn't retrieve %s data from VPD for this config %s -- skipping freq %d MT/s", TT::VPD_BLOB_NAME,
+                        mss::c_str(i_target), i_proposed_freq );
 
         return fapi2::FAPI2_RC_SUCCESS;
     }
@@ -229,7 +229,7 @@ inline fapi2::ReturnCode set_freq_attrs(const fapi2::Target<TT::FREQ_DOMAIN_TARG
 
     FAPI_TRY(callout_bad_freq_calculated<P>(i_target, l_final_freq));
 
-    FAPI_INF( "Final Chosen Frequency: %d (%s)", l_final_freq, mss::c_str(i_target) );
+    FAPI_INF_NO_SBE( "Final Chosen Frequency: %d (%s)", l_final_freq, mss::c_str(i_target) );
 
     FAPI_TRY(set_freq<P>(i_target, l_final_freq), "%s Failed to set mss freq attribute", mss::c_str(i_target));
 
@@ -407,8 +407,8 @@ inline fapi2::ReturnCode find_min_dimm_freq(const fapi2::Target<TT::FREQ_DOMAIN_
         if(l_cas_latency.iv_dimm_list_empty)
         {
             // Cannot fail out for an empty DIMM configuration, so default values are set
-            FAPI_INF("%s. DIMM list is empty! Setting default values for CAS latency and DIMM speed.",
-                     mss::c_str(l_port) );
+            FAPI_INF_NO_SBE("%s. DIMM list is empty! Setting default values for CAS latency and DIMM speed.",
+                            mss::c_str(l_port) );
             l_desired_cl = 0;
         }
 
@@ -498,11 +498,11 @@ inline fapi2::ReturnCode supported_freqs(const fapi2::Target<TT::FREQ_DOMAIN_TAR
                l_deconfigured_targets,
                o_freqs)) );
 
-    FAPI_INF("%s supported freqs:", mss::c_str(i_target));
+    FAPI_INF_NO_SBE("%s supported freqs:", mss::c_str(i_target));
 
     for (const auto l_freq : o_freqs)
     {
-        FAPI_INF("%s            %d", mss::c_str(i_target), l_freq);
+        FAPI_INF_NO_SBE("%s            %d", mss::c_str(i_target), l_freq);
     }
 
 fapi_try_exit:

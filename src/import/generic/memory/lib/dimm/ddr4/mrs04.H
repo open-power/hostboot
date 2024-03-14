@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,7 +99,7 @@ fapi2::ReturnCode mrs04(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.template writeBit<TT::A12>(i_data.iv_wr_preamble);
     io_inst.arr0.template writeBit<TT::A13>(i_data.iv_ppr);
 
-    FAPI_INF("%s MR4: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
+    FAPI_INF_NO_SBE("%s MR4: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -177,12 +177,12 @@ fapi2::ReturnCode mrs04_decode_helper(const ccs::instruction_t<MC>& i_inst,
     o_wr_preamble = i_inst.arr0.template getBit<TT::A12>();
     o_ppr = i_inst.arr0.template getBit<TT::A13>();
 
-    FAPI_INF("MR4 rank %d decode: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
-             "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
-             "WR_PRE: 0x%x, PPR: 0x%x",
-             i_port_rank, o_max_pd_mode, o_temp_refresh_range, o_temp_ref_mode,
-             o_vref_mon, uint8_t(o_cs_cmd_latency_buffer), o_ref_abort,
-             o_rd_pre_train_mode, o_rd_preamble, o_wr_preamble, o_ppr);
+    FAPI_INF_NO_SBE("MR4 rank %d decode: MAX_PD: 0x%x, TEMP_REFRESH_RANGE: 0x%x, TEMP_REF_MODE: 0x%x "
+                    "VREF_MON: 0x%x, CSL: 0x%x, REF_ABORT: 0x%x, RD_PTM: 0x%x, RD_PRE: 0x%x, "
+                    "WR_PRE: 0x%x, PPR: 0x%x",
+                    i_port_rank, o_max_pd_mode, o_temp_refresh_range, o_temp_ref_mode,
+                    o_vref_mon, uint8_t(o_cs_cmd_latency_buffer), o_ref_abort,
+                    o_rd_pre_train_mode, o_rd_preamble, o_wr_preamble, o_ppr);
 
     return fapi2::FAPI2_RC_SUCCESS;
 }

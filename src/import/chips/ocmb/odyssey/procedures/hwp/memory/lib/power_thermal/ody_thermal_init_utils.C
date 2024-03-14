@@ -530,7 +530,7 @@ fapi2::ReturnCode get_desired_dts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     // Check if any ports found, if not just exit out of procedure
     if(l_ports.size() == 0)
     {
-        FAPI_INF(GENTARGTIDFORMAT " No ports found, exiting get_desired_dts", GENTARGTID(i_ocmb));
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " No ports found, exiting get_desired_dts", GENTARGTID(i_ocmb));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -625,7 +625,7 @@ fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
         {
             // If both are still null then no dts or ports were found
             // Either is still null should will not interfere in following code
-            FAPI_INF(GENTARGTIDFORMAT " No ports or DTS were found, exiting read_dts_sensors", GENTARGTID(i_ocmb));
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " No ports or DTS were found, exiting read_dts_sensors", GENTARGTID(i_ocmb));
             return fapi2::FAPI2_RC_SUCCESS;
         }
         else

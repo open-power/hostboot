@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,7 +77,7 @@ inline fapi2::ReturnCode read(
                 i_index);
 
     FAPI_TRY(mss::getScom(i_target, (TT::MODAL_SYM_COUNT0_REG + i_index), o_data));
-    FAPI_INF("%s read_index %lu: 0x%016lx", mss::c_str(i_target), i_index, o_data);
+    FAPI_INF_NO_SBE("%s read_index %lu: 0x%016lx", mss::c_str(i_target), i_index, o_data);
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -110,7 +110,7 @@ inline fapi2::ReturnCode write(
                 i_index);
 
     FAPI_TRY( mss::putScom(i_target, (TT::MODAL_SYM_COUNT0_REG + i_index), i_data) );
-    FAPI_INF("%s write_index %lu: 0x%016lx", mss::c_str(i_target), i_index, i_data);
+    FAPI_INF_NO_SBE("%s write_index %lu: 0x%016lx", mss::c_str(i_target), i_index, i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -177,7 +177,7 @@ inline void set_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_index,
             break;
     }
 
-    FAPI_INF("set_count(%d): 0x%02lx", l_field, i_value);
+    FAPI_INF_NO_SBE("set_count(%d): 0x%02lx", l_field, i_value);
 }
 
 ///
@@ -242,7 +242,7 @@ inline void get_count( const fapi2::buffer<uint64_t>& i_data, const uint64_t i_i
             break;
     }
 
-    FAPI_INF("get_count(%d): 0x%02lx", l_field, o_value);
+    FAPI_INF_NO_SBE("get_count(%d): 0x%02lx", l_field, o_value);
 }
 
 } // close namespace modal_symbol_count

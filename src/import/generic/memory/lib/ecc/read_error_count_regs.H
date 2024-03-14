@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::READ_ERROR_COUNT_REG0, o_data) );
-    FAPI_INF("%s read: 0x%016lx", mss::c_str(i_target), o_data);
+    FAPI_INF_NO_SBE("%s read: 0x%016lx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -83,7 +83,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::READ_ERROR_COUNT_REG0, i_data) );
-    FAPI_INF("%s write: 0x%016lx", mss::c_str(i_target), i_data);
+    FAPI_INF_NO_SBE("%s write: 0x%016lx", mss::c_str(i_target), i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -103,7 +103,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_intermittent_ce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::INTERMITTENT_CE_COUNT, TT::INTERMITTENT_CE_COUNT_LEN>(i_value);
-    FAPI_INF("set_intermittent_ce_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_intermittent_ce_count: 0x%03lx", i_value);
 }
 
 ///
@@ -121,7 +121,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_intermittent_ce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::INTERMITTENT_CE_COUNT, TT::INTERMITTENT_CE_COUNT_LEN>(o_value);
-    FAPI_INF("get_intermittent_ce_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_intermittent_ce_count: 0x%03lx", o_value);
 }
 
 ///
@@ -139,7 +139,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_soft_ce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SOFT_CE_COUNT, TT::SOFT_CE_COUNT_LEN>(i_value);
-    FAPI_INF("set_soft_ce_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_soft_ce_count: 0x%03lx", i_value);
 }
 
 ///
@@ -157,7 +157,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_soft_ce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SOFT_CE_COUNT, TT::SOFT_CE_COUNT_LEN>(o_value);
-    FAPI_INF("get_soft_ce_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_soft_ce_count: 0x%03lx", o_value);
 }
 
 ///
@@ -175,7 +175,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_hard_ce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::HARD_CE_COUNT, TT::HARD_CE_COUNT_LEN>(i_value);
-    FAPI_INF("set_hard_ce_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_hard_ce_count: 0x%03lx", i_value);
 }
 
 ///
@@ -193,7 +193,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_hard_ce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::HARD_CE_COUNT, TT::HARD_CE_COUNT_LEN>(o_value);
-    FAPI_INF("get_hard_ce_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_hard_ce_count: 0x%03lx", o_value);
 }
 
 ///
@@ -211,7 +211,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_intermittent_mce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::INTERMITTENT_MCE_COUNT, TT::INTERMITTENT_MCE_COUNT_LEN>(i_value);
-    FAPI_INF("set_intermittent_mce_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_intermittent_mce_count: 0x%03lx", i_value);
 }
 
 ///
@@ -229,7 +229,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_intermittent_mce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::INTERMITTENT_MCE_COUNT, TT::INTERMITTENT_MCE_COUNT_LEN>(o_value);
-    FAPI_INF("get_intermittent_mce_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_intermittent_mce_count: 0x%03lx", o_value);
 }
 
 ///
@@ -247,7 +247,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_soft_mce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SOFT_MCE_COUNT, TT::SOFT_MCE_COUNT_LEN>(i_value);
-    FAPI_INF("set_soft_mce_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_soft_mce_count: 0x%03lx", i_value);
 }
 
 ///
@@ -265,7 +265,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_soft_mce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SOFT_MCE_COUNT, TT::SOFT_MCE_COUNT_LEN>(o_value);
-    FAPI_INF("get_soft_mce_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_soft_mce_count: 0x%03lx", o_value);
 }
 
 } // close namespace read_error_count_reg0
@@ -286,7 +286,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::READ_ERROR_COUNT_REG1, o_data) );
-    FAPI_INF("%s read: 0x%016lx", mss::c_str(i_target), o_data);
+    FAPI_INF_NO_SBE("%s read: 0x%016lx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -304,7 +304,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::READ_ERROR_COUNT_REG1, i_data) );
-    FAPI_INF("%s write: 0x%016lx", mss::c_str(i_target), i_data);
+    FAPI_INF_NO_SBE("%s write: 0x%016lx", mss::c_str(i_target), i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -324,7 +324,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_hard_mce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::HARD_MCE_COUNT, TT::HARD_MCE_COUNT_LEN>(i_value);
-    FAPI_INF("set_hard_mce_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_hard_mce_count: 0x%03lx", i_value);
 }
 
 ///
@@ -342,7 +342,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_hard_mce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::HARD_MCE_COUNT, TT::HARD_MCE_COUNT_LEN>(o_value);
-    FAPI_INF("get_hard_mce_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_hard_mce_count: 0x%03lx", o_value);
 }
 
 ///
@@ -360,7 +360,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_ice_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::ICE_COUNT, TT::ICE_COUNT_LEN>(i_value);
-    FAPI_INF("set_ice_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_ice_count: 0x%03lx", i_value);
 }
 
 ///
@@ -378,7 +378,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_ice_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::ICE_COUNT, TT::ICE_COUNT_LEN>(o_value);
-    FAPI_INF("get_ice_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_ice_count: 0x%03lx", o_value);
 }
 
 ///
@@ -396,7 +396,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_ue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::UE_COUNT, TT::UE_COUNT_LEN>(i_value);
-    FAPI_INF("set_ue_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_ue_count: 0x%03lx", i_value);
 }
 
 ///
@@ -414,7 +414,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_ue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::UE_COUNT, TT::UE_COUNT_LEN>(o_value);
-    FAPI_INF("get_ue_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_ue_count: 0x%03lx", o_value);
 }
 
 ///
@@ -432,7 +432,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_aue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::AUE_COUNT, TT::AUE_COUNT_LEN>(i_value);
-    FAPI_INF("set_aue_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_aue_count: 0x%03lx", i_value);
 }
 
 ///
@@ -450,7 +450,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_aue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::AUE_COUNT, TT::AUE_COUNT_LEN>(o_value);
-    FAPI_INF("get_aue_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_aue_count: 0x%03lx", o_value);
 }
 
 ///
@@ -468,7 +468,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_rce_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::RCE_COUNT, TT::RCE_COUNT_LEN>(i_value);
-    FAPI_INF("set_rce_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_rce_count: 0x%03lx", i_value);
 }
 
 ///
@@ -486,7 +486,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_rce_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::RCE_COUNT, TT::RCE_COUNT_LEN>(o_value);
-    FAPI_INF("get_rce_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_rce_count: 0x%03lx", o_value);
 }
 
 ///
@@ -501,7 +501,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_iue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::IUE_COUNT, TT::IUE_COUNT_LEN>(o_value);
-    FAPI_INF("get_iue_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_iue_count: 0x%03lx", o_value);
 }
 
 
@@ -520,7 +520,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_iue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::IUE_COUNT, TT::IUE_COUNT_LEN>(i_value);
-    FAPI_INF("set_iue_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_iue_count: 0x%03lx", i_value);
 }
 
 } // close namespace read_error_count_reg1
@@ -541,7 +541,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::READ_ERROR_COUNT_REG2, o_data) );
-    FAPI_INF(TARGTIDFORMAT " read: 0x%016lx", TARGTID,  o_data);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " read: 0x%016lx", TARGTID,  o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -559,7 +559,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::READ_ERROR_COUNT_REG2, i_data) );
-    FAPI_INF(TARGTIDFORMAT " write: 0x%016lx", TARGTID, i_data);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " write: 0x%016lx", TARGTID, i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -579,7 +579,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_iaue_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::IAUE_COUNT, TT::IAUE_COUNT_LEN>(i_value);
-    FAPI_INF("set_iaue_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_iaue_count: 0x%03lx", i_value);
 }
 
 ///
@@ -597,7 +597,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_ircd_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::IRCD_COUNT, TT::IRCD_COUNT_LEN>(i_value);
-    FAPI_INF("set_ircd_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_ircd_count: 0x%03lx", i_value);
 }
 
 ///
@@ -612,7 +612,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_iaue_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::IAUE_COUNT, TT::IAUE_COUNT_LEN>(o_value);
-    FAPI_INF("get_iaue_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_iaue_count: 0x%03lx", o_value);
 }
 
 ///
@@ -627,7 +627,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_ircd_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::IRCD_COUNT, TT::IRCD_COUNT_LEN>(o_value);
-    FAPI_INF("get_iue_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_iue_count: 0x%03lx", o_value);
 }
 
 } // close namespace read_error_count_reg2
@@ -648,7 +648,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_data )
 {
     FAPI_TRY( mss::getScom(i_target, TT::MARK_SYMBOL_COUNT_REG, o_data) );
-    FAPI_INF("read: 0x%016lx", o_data);
+    FAPI_INF_NO_SBE("read: 0x%016lx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -666,7 +666,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = eccTraits<MC, T> >
 inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_data )
 {
     FAPI_TRY( mss::putScom(i_target, TT::MARK_SYMBOL_COUNT_REG, i_data) );
-    FAPI_INF("write: 0x%016lx", i_data);
+    FAPI_INF_NO_SBE("write: 0x%016lx", i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -686,7 +686,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_symbol0_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SYMBOL0_COUNT, TT::SYMBOL0_COUNT_LEN>(i_value);
-    FAPI_INF("set_symbol0_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_symbol0_count: 0x%03lx", i_value);
 }
 
 ///
@@ -704,7 +704,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_symbol0_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SYMBOL0_COUNT, TT::SYMBOL0_COUNT_LEN>(o_value);
-    FAPI_INF("get_symbol0_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_symbol0_count: 0x%03lx", o_value);
 }
 
 ///
@@ -722,7 +722,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_symbol1_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SYMBOL1_COUNT, TT::SYMBOL1_COUNT_LEN>(i_value);
-    FAPI_INF("set_symbol1_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_symbol1_count: 0x%03lx", i_value);
 }
 
 ///
@@ -740,7 +740,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_symbol1_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SYMBOL1_COUNT, TT::SYMBOL1_COUNT_LEN>(o_value);
-    FAPI_INF("get_symbol1_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_symbol1_count: 0x%03lx", o_value);
 }
 
 ///
@@ -758,7 +758,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_symbol2_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SYMBOL2_COUNT, TT::SYMBOL2_COUNT_LEN>(i_value);
-    FAPI_INF("set_symbol2_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_symbol2_count: 0x%03lx", i_value);
 }
 
 ///
@@ -776,7 +776,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_symbol2_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SYMBOL2_COUNT, TT::SYMBOL2_COUNT_LEN>(o_value);
-    FAPI_INF("get_symbol2_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_symbol2_count: 0x%03lx", o_value);
 }
 
 ///
@@ -794,7 +794,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void set_symbol3_count( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::SYMBOL3_COUNT, TT::SYMBOL3_COUNT_LEN>(i_value);
-    FAPI_INF("set_symbol3_count: 0x%03lx", i_value);
+    FAPI_INF_NO_SBE("set_symbol3_count: 0x%03lx", i_value);
 }
 
 ///
@@ -812,7 +812,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MC_TARGET_TYPE
 inline void get_symbol3_count( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::SYMBOL3_COUNT, TT::SYMBOL3_COUNT_LEN>(o_value);
-    FAPI_INF("get_symbol3_count: 0x%03lx", o_value);
+    FAPI_INF_NO_SBE("get_symbol3_count: 0x%03lx", o_value);
 }
 
 } // close namespace mark_symbol_count_reg

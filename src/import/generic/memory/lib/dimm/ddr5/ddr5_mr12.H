@@ -255,9 +255,9 @@ class mr12_data : public mr_base_data<MC>
             // As such, using pragmas to avoid the warning causing the error
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR12. rank%u, DRAM%u VREFCS: 0x%02lx",
-                     TARGTID, i_rank, i_dram_number, iv_vrefcs_value[i_rank][i_dram_number]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR12. rank%u, DRAM%u VREFCS: 0x%02lx",
+                            TARGTID, i_rank, i_dram_number, iv_vrefcs_value[i_rank][i_dram_number]);
 #pragma GCC diagnostic pop
         }
 

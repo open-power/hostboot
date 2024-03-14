@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -307,7 +307,7 @@ class mr6_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR6. WR recovery time %u. tRTP: %u", TARGTID, iv_wr_recovery, iv_trtp);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR6. WR recovery time %u. tRTP: %u", TARGTID, iv_wr_recovery, iv_trtp);
         }
 };
 

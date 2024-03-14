@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,8 +59,8 @@ extern "C"
     fapi2::ReturnCode ody_bulk_pwr_throttles( const std::vector< fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> >& i_targets,
             const mss::throttle_type i_throttle_type)
     {
-        FAPI_INF("Start ody_bulk_pwr_throttles for %s type throttling",
-                 (( i_throttle_type == mss::throttle_type::THERMAL) ? "THERMAL" : "POWER"));
+        FAPI_INF_NO_SBE("Start ody_bulk_pwr_throttles for %s type throttling",
+                        (( i_throttle_type == mss::throttle_type::THERMAL) ? "THERMAL" : "POWER"));
 
         for ( const auto& l_ocmb : i_targets)
         {
@@ -70,7 +70,7 @@ extern "C"
         // Equalizes the throttles to the lowest of runtime and the lowest slot-throttle value
         FAPI_TRY(mss::power_thermal::equalize_throttles<mss::mc_type::ODYSSEY>(i_targets, i_throttle_type));
 
-        FAPI_INF("End ody_bulk_pwr_throttles");
+        FAPI_INF_NO_SBE("End ody_bulk_pwr_throttles");
         return fapi2::current_err;
 
     fapi_try_exit:

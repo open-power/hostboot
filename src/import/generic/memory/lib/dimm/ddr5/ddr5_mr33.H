@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -404,12 +404,12 @@ class mr33_data : public mr_base_data<MC>
             // As such, using pragmas to avoid the warning causing the error
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR33 rank%u. strap%u. CA ODT:%u.", TARGTID, i_dimm_rank,
-                     i_strap, iv_ca_odt[i_dimm_rank][i_strap]);
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR33 rank%u. strap%u. DQS RTT park:%u.", TARGTID, i_dimm_rank,
-                     i_strap, iv_dqs_rtt_park[i_dimm_rank][i_strap]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR33 rank%u. strap%u. CA ODT:%u.", TARGTID, i_dimm_rank,
+                            i_strap, iv_ca_odt[i_dimm_rank][i_strap]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR33 rank%u. strap%u. DQS RTT park:%u.", TARGTID, i_dimm_rank,
+                            i_strap, iv_dqs_rtt_park[i_dimm_rank][i_strap]);
 #pragma GCC diagnostic pop
         }
 

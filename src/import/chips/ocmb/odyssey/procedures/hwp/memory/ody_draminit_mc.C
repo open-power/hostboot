@@ -59,12 +59,12 @@ extern "C"
     {
         mss::display_git_commit_info("ody_draminit_mc");
 
-        FAPI_INF( TARGTIDFORMAT " Start ody_draminit_mc", TARGTID );
+        FAPI_INF_NO_SBE( TARGTIDFORMAT " Start ody_draminit_mc", TARGTID );
 
         //skip this ocmb_chip if we have no DIMM's configured
         if(mss::count_dimm(i_target) == 0)
         {
-            FAPI_INF( "No DIMM's configured on " TARGTIDFORMAT " Skipping this OCMB_CHIP.", TARGTID ) ;
+            FAPI_INF_NO_SBE( "No DIMM's configured on " TARGTIDFORMAT " Skipping this OCMB_CHIP.", TARGTID ) ;
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -121,7 +121,7 @@ extern "C"
                   TARGTIDFORMAT " Failed unmask::after_draminit_mc",
                   TARGTID);
 
-        FAPI_INF( TARGTIDFORMAT " End ody_draminit MC", TARGTID );
+        FAPI_INF_NO_SBE( TARGTIDFORMAT " End ody_draminit MC", TARGTID );
         return fapi2::FAPI2_RC_SUCCESS;
 
     fapi_try_exit:

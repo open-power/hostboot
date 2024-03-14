@@ -84,7 +84,7 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     // 3. Configures and loads the message block onto Synopsys PHY
     if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_MSG_BLOCK, l_draminit_step_enable))
     {
-        FAPI_INF(TARGTIDFORMAT " ATTR_ODY_DRAMINIT_STEP_ENABLE set to skip message block loading...", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ATTR_ODY_DRAMINIT_STEP_ENABLE set to skip message block loading...", TARGTID);
         FAPI_TRY(mss::ody::phy::configure_dram_train_message_block(i_target, l_msg_block));
     }
     else
@@ -95,7 +95,7 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
 
     if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_RUN_TRAINING, l_draminit_step_enable))
     {
-        FAPI_INF(TARGTIDFORMAT " ATTR_ODY_DRAMINIT_STEP_ENABLE set to skip running DRAM training...", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ATTR_ODY_DRAMINIT_STEP_ENABLE set to skip running DRAM training...", TARGTID);
     }
     else
     {

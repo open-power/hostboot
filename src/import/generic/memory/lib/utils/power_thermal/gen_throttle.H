@@ -485,37 +485,37 @@ throttle<MC, TT>::throttle( const fapi2::Target<TT::PORT_TARGET_TYPE>& i_port, f
         iv_port_power_limit += l_dimm_limit;
     }
 
-    FAPI_INF("Setting up throttle for target " GENTARGTIDFORMAT ", Values are: max databus is %d, uplifts are %d %d",
-             GENTARGTID(iv_target),
-             iv_databus_port_max,
-             iv_power_uplift,
-             iv_power_uplift_idle);
-    FAPI_INF("Setting up throttle for target " GENTARGTIDFORMAT ", runtime throttles are %d %d",
-             GENTARGTID(iv_target),
-             iv_runtime_n_slot,
-             iv_runtime_n_port);
+    FAPI_INF_NO_SBE("Setting up throttle for target " GENTARGTIDFORMAT ", Values are: max databus is %d, uplifts are %d %d",
+                    GENTARGTID(iv_target),
+                    iv_databus_port_max,
+                    iv_power_uplift,
+                    iv_power_uplift_idle);
+    FAPI_INF_NO_SBE("Setting up throttle for target " GENTARGTIDFORMAT ", runtime throttles are %d %d",
+                    GENTARGTID(iv_target),
+                    iv_runtime_n_slot,
+                    iv_runtime_n_port);
 
-    FAPI_INF("Safemode util (min util allowed) is %d c (centi-percent) for target " GENTARGTIDFORMAT,
-             iv_min_util_port,
-             GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("Safemode util (min util allowed) is %d c (centi-percent) for target " GENTARGTIDFORMAT,
+                    iv_min_util_port,
+                    GENTARGTID(iv_target));
 
-    FAPI_INF("The dimm power limit is %d, dram clocks are %d for " GENTARGTIDFORMAT,
-             iv_port_power_limit,
-             iv_m_clocks,
-             GENTARGTID(iv_target));
-    FAPI_INF("dimm power curve slopes are %d %d for " GENTARGTIDFORMAT,
-             iv_pwr_slope[0],
-             iv_pwr_slope[1],
-             GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("The dimm power limit is %d, dram clocks are %d for " GENTARGTIDFORMAT,
+                    iv_port_power_limit,
+                    iv_m_clocks,
+                    GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("dimm power curve slopes are %d %d for " GENTARGTIDFORMAT,
+                    iv_pwr_slope[0],
+                    iv_pwr_slope[1],
+                    GENTARGTID(iv_target));
 
-    FAPI_INF("DIMM power curve intercepts are %d %d for " GENTARGTIDFORMAT,
-             iv_pwr_int[0],
-             iv_pwr_int[1],
-             GENTARGTID(iv_target));
-    FAPI_INF("DIMM power thermal limits are %d %d for " GENTARGTIDFORMAT,
-             iv_dimm_thermal_limit[0],
-             iv_dimm_thermal_limit[1],
-             GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("DIMM power curve intercepts are %d %d for " GENTARGTIDFORMAT,
+                    iv_pwr_int[0],
+                    iv_pwr_int[1],
+                    GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("DIMM power thermal limits are %d %d for " GENTARGTIDFORMAT,
+                    iv_dimm_thermal_limit[0],
+                    iv_dimm_thermal_limit[1],
+                    GENTARGTID(iv_target));
 
     FAPI_ASSERT( (iv_databus_port_max != 0),
                  fapi2::MSS_NO_DATABUS_UTILIZATION()
@@ -598,8 +598,8 @@ fapi2::ReturnCode throttle<MC, TT>::power_regulator_throttles()
               "Failed to calculate the max and idle power for port " GENTARGTIDFORMAT,
               GENTARGTID(iv_target));
 
-    FAPI_INF("POWER throttles: " GENTARGTIDFORMAT " max port power is %u", GENTARGTID(iv_target),
-             static_cast<uint32_t>(l_port_power_calc_max));
+    FAPI_INF_NO_SBE("POWER throttles: " GENTARGTIDFORMAT " max port power is %u", GENTARGTID(iv_target),
+                    static_cast<uint32_t>(l_port_power_calc_max));
 
     //Calculate the power curve slope and intercept using the port's min and max power values
     FAPI_TRY(calc_power_curve(l_port_power_calc_idle,
@@ -611,7 +611,7 @@ fapi2::ReturnCode throttle<MC, TT>::power_regulator_throttles()
              static_cast<uint32_t>(l_port_power_calc_max),
              static_cast<uint32_t>(l_port_power_calc_idle));
 
-    FAPI_INF(GENTARGTIDFORMAT " POWER Port power limit is %d", GENTARGTID(iv_target), iv_port_power_limit);
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " POWER Port power limit is %d", GENTARGTID(iv_target), iv_port_power_limit);
 
     //Calculate the port's utilization to get under watt target using the port's calculated slopes
     FAPI_TRY(calc_util_usage(l_port_power_slope,
@@ -619,8 +619,8 @@ fapi2::ReturnCode throttle<MC, TT>::power_regulator_throttles()
                              iv_port_power_limit,
                              l_calc_util_port), GENTARGTIDFORMAT " Error in calc_util_usage", GENTARGTID(iv_target));
 
-    FAPI_INF(GENTARGTIDFORMAT " POWER calc util port is %u",  GENTARGTID(iv_target),
-             static_cast<uint32_t>(l_calc_util_port));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " POWER calc util port is %u",  GENTARGTID(iv_target),
+                    static_cast<uint32_t>(l_calc_util_port));
 
     //Calculate the new slot values and the max power value for the port
     FAPI_TRY( calc_slots_and_power(l_calc_util_port),
@@ -710,8 +710,8 @@ fapi2::ReturnCode throttle<MC, TT>::thermal_throttles()
                                  iv_dimm_thermal_limit[l_pos],
                                  l_calc_util[l_pos]), "Failed calc_util_usage " GENTARGTIDFORMAT, GENTARGTID(l_dimm));
 
-        FAPI_INF("THERMAL throttles: " GENTARGTIDFORMAT " dram databus utilization is %u", GENTARGTID(l_dimm),
-                 static_cast<uint32_t>(l_calc_util[l_pos]));
+        FAPI_INF_NO_SBE("THERMAL throttles: " GENTARGTIDFORMAT " dram databus utilization is %u", GENTARGTID(l_dimm),
+                        static_cast<uint32_t>(l_calc_util[l_pos]));
 
         l_temp_n_slot = power_thermal::throttled_cmds (l_calc_util[l_pos], iv_m_clocks);
 
@@ -725,8 +725,9 @@ fapi2::ReturnCode throttle<MC, TT>::thermal_throttles()
     }
 
     //Set to lowest value between calculated and runtime
-    FAPI_INF("THERMAL throttles: runtime slot is %d, calc n slot is %d for " GENTARGTIDFORMAT, iv_runtime_n_slot, iv_n_slot,
-             GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("THERMAL throttles: runtime slot is %d, calc n slot is %d for " GENTARGTIDFORMAT, iv_runtime_n_slot,
+                    iv_n_slot,
+                    GENTARGTID(iv_target));
     //DDIMMs: Taking the min of the SLOT and the iv_runtime_port throttle value
     //ISDIMMs: Taking the min of the SLOT * (# of dimms on the port) and the iv_runtime_port throttle value
     //Thermal throttling happens after the POWER calculations. the iv_runtime_n_port value shouldn't be set to 0
@@ -783,11 +784,11 @@ fapi2::ReturnCode throttle<MC, TT>::calc_port_power(const double i_idle_util[TT:
         FAPI_TRY(update_max_util_by_dimm_type<MC>(l_dimm, l_max_util));
 
         //Printing as decimals because HB messes up floats
-        FAPI_INF(GENTARGTIDFORMAT " max dram databus for DIMM in pos %d is %u, databus for idle is %u",
-                 GENTARGTID(iv_target),
-                 l_pos,
-                 static_cast<uint32_t>(l_max_util),
-                 static_cast<uint32_t>(i_idle_util[l_pos]));
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " max dram databus for DIMM in pos %d is %u, databus for idle is %u",
+                        GENTARGTID(iv_target),
+                        l_pos,
+                        static_cast<uint32_t>(l_max_util),
+                        static_cast<uint32_t>(i_idle_util[l_pos]));
         //Sum up the dimm's power to calculate the port power curve
         o_port_power_idle += calc_power(i_idle_util[l_pos], l_pos, l_rc);
         FAPI_TRY(l_rc, "calc_power failed on " GENTARGTIDFORMAT, GENTARGTID(l_dimm));
@@ -863,21 +864,21 @@ fapi2::ReturnCode throttle<MC, TT>::calc_dimm_power(const double i_databus_idle,
         calc_power_uplift(iv_power_uplift_idle, o_dimm_power_idle[l_pos]);
         calc_power_uplift(iv_power_uplift, o_dimm_power_max[l_pos]);
 
-        FAPI_INF("Calc_dimm_power: dimm (%d) power max is %u for " GENTARGTIDFORMAT,
-                 l_pos,
-                 static_cast<uint32_t>(o_dimm_power_max[l_pos]),
-                 GENTARGTID(l_dimm));
-        FAPI_INF("Calc_dimm_power: dimm (%d) dimm slope %d, intercept %d for " GENTARGTIDFORMAT,
-                 l_pos,
-                 iv_pwr_slope[l_pos],
-                 iv_pwr_int[l_pos],
-                 GENTARGTID(l_dimm));
+        FAPI_INF_NO_SBE("Calc_dimm_power: dimm (%d) power max is %u for " GENTARGTIDFORMAT,
+                        l_pos,
+                        static_cast<uint32_t>(o_dimm_power_max[l_pos]),
+                        GENTARGTID(l_dimm));
+        FAPI_INF_NO_SBE("Calc_dimm_power: dimm (%d) dimm slope %d, intercept %d for " GENTARGTIDFORMAT,
+                        l_pos,
+                        iv_pwr_slope[l_pos],
+                        iv_pwr_int[l_pos],
+                        GENTARGTID(l_dimm));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    FAPI_INF("Error calculating mss::power_thermal::calc_dimm_power for " GENTARGTIDFORMAT, GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("Error calculating mss::power_thermal::calc_dimm_power for " GENTARGTIDFORMAT, GENTARGTID(iv_target));
     return fapi2::current_err;
 }
 
@@ -919,19 +920,19 @@ fapi2::ReturnCode throttle<MC, TT>::calc_power_curve(const double i_power_idle,
 
     o_slope = (i_power_max - i_power_idle) / l_divisor;
     o_int = i_power_idle - (o_slope * TT::IDLE_UTIL);
-    FAPI_INF("Calc_power_curve: power idle is %u, max is %u for " GENTARGTIDFORMAT,
-             static_cast<uint32_t>(i_power_idle),
-             static_cast<uint32_t>(i_power_max),
-             GENTARGTID(iv_target));
-    FAPI_INF("Calc_power_curve: slope is %d, int is %d for " GENTARGTIDFORMAT,
-             o_slope,
-             o_int,
-             GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("Calc_power_curve: power idle is %u, max is %u for " GENTARGTIDFORMAT,
+                    static_cast<uint32_t>(i_power_idle),
+                    static_cast<uint32_t>(i_power_max),
+                    GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("Calc_power_curve: slope is %d, int is %d for " GENTARGTIDFORMAT,
+                    o_slope,
+                    o_int,
+                    GENTARGTID(iv_target));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    FAPI_INF("Error calculating mss::power_thermal::calc_power_curve for " GENTARGTIDFORMAT, GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("Error calculating mss::power_thermal::calc_power_curve for " GENTARGTIDFORMAT, GENTARGTID(iv_target));
     return fapi2::current_err;
 
 }
@@ -966,10 +967,10 @@ fapi2::ReturnCode throttle<MC, TT>::calc_util_usage(const uint32_t i_slope,
     // Check for the minimum threshold and update if need be
     if(o_util < iv_min_util_port)
     {
-        FAPI_INF("Calculated utilization (%u) is less than the minimum utilization: %u. Setting to minimum value for "
-                 GENTARGTIDFORMAT,
-                 static_cast<uint32_t>(o_util),
-                 static_cast<uint32_t>(iv_min_util_port), GENTARGTID(iv_target));
+        FAPI_INF_NO_SBE("Calculated utilization (%u) is less than the minimum utilization: %u. Setting to minimum value for "
+                        GENTARGTIDFORMAT,
+                        static_cast<uint32_t>(o_util),
+                        static_cast<uint32_t>(iv_min_util_port), GENTARGTID(iv_target));
         o_util = iv_min_util_port;
     }
 
@@ -1024,13 +1025,13 @@ fapi2::ReturnCode throttle<MC, TT>::calc_util_from_throttles(const uint16_t i_n_
         // Check for the minimum
         if(o_calc_util < iv_min_util_port)
         {
-            FAPI_INF("Calculated utilization (%u) is less than the minimum utilization: %u. Setting to minimum value",
-                     static_cast<uint32_t>(o_calc_util), static_cast<uint32_t>(iv_min_util_port));
+            FAPI_INF_NO_SBE("Calculated utilization (%u) is less than the minimum utilization: %u. Setting to minimum value",
+                            static_cast<uint32_t>(o_calc_util), static_cast<uint32_t>(iv_min_util_port));
             o_calc_util = iv_min_util_port;
         }
 
-        FAPI_INF("In calc_util_from_throttles, calculated %u for output utilization from throttles:%d, dram_clocks %d",
-                 static_cast<uint32_t>(o_calc_util), i_n_throttles, i_num_dram_clocks);
+        FAPI_INF_NO_SBE("In calc_util_from_throttles, calculated %u for output utilization from throttles:%d, dram_clocks %d",
+                        static_cast<uint32_t>(o_calc_util), i_n_throttles, i_num_dram_clocks);
     }
 
 fapi_try_exit:
@@ -1195,11 +1196,11 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
     //assumptions slot <= port, l_count_dimms <=2
     if (i_util_slot * l_count_dimms > i_util_port)
     {
-        FAPI_INF("i_util_slot is %u, i_util_port is %u, l_count_dimms is %d for " GENTARGTIDFORMAT,
-                 static_cast<uint32_t>(i_util_slot),
-                 static_cast<uint32_t>(i_util_port),
-                 l_count_dimms,
-                 GENTARGTID(iv_target));
+        FAPI_INF_NO_SBE("i_util_slot is %u, i_util_port is %u, l_count_dimms is %d for " GENTARGTIDFORMAT,
+                        static_cast<uint32_t>(i_util_slot),
+                        static_cast<uint32_t>(i_util_port),
+                        l_count_dimms,
+                        GENTARGTID(iv_target));
 
         const uint8_t l_high_pos = (iv_pwr_slope[0] >= iv_pwr_slope[1]) ? 0 : 1;
 
@@ -1215,14 +1216,14 @@ fapi2::ReturnCode throttle<MC, TT>::calc_split_util(
                                           0
                                          );
 
-        FAPI_INF("Split utilization for target " GENTARGTIDFORMAT ", DIMM in %d gets %u",
-                 GENTARGTID(iv_target),
-                 l_high_pos,
-                 static_cast<uint32_t>(o_util_dimm_max[l_high_pos]));
-        FAPI_INF("Split utilization for target " GENTARGTIDFORMAT ", DIMM in %d gets %u",
-                 GENTARGTID(iv_target),
-                 !l_high_pos,
-                 static_cast<uint32_t>(o_util_dimm_max[!l_high_pos]));
+        FAPI_INF_NO_SBE("Split utilization for target " GENTARGTIDFORMAT ", DIMM in %d gets %u",
+                        GENTARGTID(iv_target),
+                        l_high_pos,
+                        static_cast<uint32_t>(o_util_dimm_max[l_high_pos]));
+        FAPI_INF_NO_SBE("Split utilization for target " GENTARGTIDFORMAT ", DIMM in %d gets %u",
+                        GENTARGTID(iv_target),
+                        !l_high_pos,
+                        static_cast<uint32_t>(o_util_dimm_max[!l_high_pos]));
     }
     else
     {
@@ -1273,9 +1274,9 @@ void calc_utilization(const fapi2::Target<T>& i_target,
     // Use MRW safemode throttle values if input utilization is zero
     if (i_input_databus_util == 0)
     {
-        FAPI_INF(GENTARGTIDFORMAT " Safemode throttles being used since input util is zero:  Using Utilization %d c%%",
-                 GENTARGTID(i_target),
-                 i_min_databus_util);
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Safemode throttles being used since input util is zero:  Using Utilization %d c%%",
+                        GENTARGTID(i_target),
+                        i_min_databus_util);
         o_safemode = true;
     }
     else if (i_input_databus_util < i_min_databus_util)
@@ -1287,9 +1288,9 @@ void calc_utilization(const fapi2::Target<T>& i_target,
     o_util = std::max(i_input_databus_util, i_min_databus_util);
     o_util = std::min(o_util, i_max_databus_util);
 
-    FAPI_INF(GENTARGTIDFORMAT " calc_utilization final databus utilization: %d",
-             GENTARGTID(i_target),
-             o_util);
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " calc_utilization final databus utilization: %d",
+                    GENTARGTID(i_target),
+                    o_util);
 
 }
 

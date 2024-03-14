@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -330,8 +330,8 @@ fapi2::ReturnCode calc_time_in_nck(
                   "Error in calculating %s (nCK) for target %s, with value of %d",
                   i_timing_name, spd::c_str(l_ocmb), l_timing_in_ps );
 
-        FAPI_INF("tCK (ps): %d, %s (ps): %d, %s (nck): %d",
-                 l_tck_in_ps, i_timing_name, l_timing_in_ps, i_timing_name, o_timing_in_nck);
+        FAPI_INF_NO_SBE("tCK (ps): %d, %s (ps): %d, %s (nck): %d",
+                        l_tck_in_ps, i_timing_name, l_timing_in_ps, i_timing_name, o_timing_in_nck);
     }
 
 fapi_try_exit:

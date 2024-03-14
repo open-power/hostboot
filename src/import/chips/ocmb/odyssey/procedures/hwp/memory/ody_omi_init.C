@@ -296,7 +296,7 @@ fapi2::ReturnCode omiCheckSupportedBit(const fapi2::buffer<uint32_t>& i_data,
     {
         // This feature is not supported by the hardware even though we requested it
         // We are still be fine to proceed, but we will print an informational message
-        FAPI_INF("%s", i_warn);
+        FAPI_INF_NO_SBE("%s", i_warn);
         o_val = 0;
     }
 
@@ -332,7 +332,7 @@ fapi2::ReturnCode omiCheckSupportedPacing(const fapi2::buffer<uint32_t>& i_data,
     {
         // This pacing is not supported by the hardware
         // We are still be fine to proceed, but we will print a warning.
-        FAPI_INF("%s", i_warn);
+        FAPI_INF_NO_SBE("%s", i_warn);
         o_val = l_supported;
     }
 

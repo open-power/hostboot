@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,7 +185,7 @@ inline bool poll(const fapi2::Target<T>& i_target,
             FAPI_DBG( TARGTIDFORMAT ": %s REG: " UINT64FORMAT, GENTARGTID(p.iv_target), p.iv_tag, UINT64_VALUE(p.iv_register));
             FAPI_DBG( TARGTIDFORMAT ": %s ADDR:" UINT64FORMAT, GENTARGTID(p.iv_target), p.iv_tag, UINT64_VALUE(l_data));
 #else
-            FAPI_INF( TARGTIDFORMAT ": %s 0x%016llx 0x%016llx", GENTARGTID(p.iv_target), p.iv_tag, p.iv_register, l_data);
+            FAPI_INF_NO_SBE( TARGTIDFORMAT ": %s 0x%016llx 0x%016llx", GENTARGTID(p.iv_target), p.iv_tag, p.iv_register, l_data);
 #endif
         }
 
@@ -201,7 +201,7 @@ inline bool poll(const fapi2::Target<T>& i_target,
     }
 
     // If we're here, we ran out of poll iterations
-    FAPI_INF(TARGTIDFORMAT " WARNING: Timeout on polling", TARGTID);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " WARNING: Timeout on polling", TARGTID);
     return false;
 
 fapi_try_exit:
@@ -252,7 +252,7 @@ inline bool poll(const fapi2::Target<T>& i_target,
     }
 
     // If we're here, we ran out of poll iterations
-    FAPI_INF(TARGTIDFORMAT " WARNING: Timeout on polling", TARGTID);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " WARNING: Timeout on polling", TARGTID);
     return false;
 
 fapi_try_exit:

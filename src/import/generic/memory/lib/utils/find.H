@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -475,7 +475,9 @@ bool find_key_from_value(const std::vector<std::pair<T, OT> >& i_vector_of_pairs
     if( (l_value_iterator == i_vector_of_pairs.end()) || (i_value != l_value_iterator->second) )
     {
         // Static cast ensures that the below print will not fail at compile time
+#ifndef __PPE__
         FAPI_INF("Did not find a mapping key to value: %d", static_cast<uint64_t>(i_value));
+#endif
         return false;
     }
 

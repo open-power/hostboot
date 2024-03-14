@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,7 +89,7 @@ inline fapi2::ReturnCode read_rank( const fapi2::Target<T>& i_target, fapi2::buf
 {
     static_assert((R < TT::ECC_MAX_MRANK_PER_PORT), "Master rank index failed range check");
     FAPI_TRY( mss::getScom(i_target, (TT::FIRMWARE_MS0_REG + R), o_data) );
-    FAPI_INF("read_rank<%d>: 0x%016lx", R, o_data);
+    FAPI_INF_NO_SBE("read_rank<%d>: 0x%016lx", R, o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -479,7 +479,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_mark( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::FIRMWARE_MS_MARK, TT::FIRMWARE_MS_MARK_LEN>(o_value);
-    FAPI_INF("get_mark: 0x%02lx", o_value);
+    FAPI_INF_NO_SBE("get_mark: 0x%02lx", o_value);
 }
 
 ///
@@ -498,7 +498,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_type( fapi2::buffer<uint64_t>& io_data, const mark_type i_value )
 {
     io_data.writeBit<TT::FIRMWARE_MS_TYPE>(i_value);
-    FAPI_INF("set_type: 0x%01lx", i_value);
+    FAPI_INF_NO_SBE("set_type: 0x%01lx", i_value);
 }
 
 ///
@@ -517,7 +517,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_type( const fapi2::buffer<uint64_t>& i_data, mark_type& o_value )
 {
     o_value = mark_type(i_data.getBit<TT::FIRMWARE_MS_TYPE>());
-    FAPI_INF("get_type: 0x%01lx", o_value);
+    FAPI_INF_NO_SBE("get_type: 0x%01lx", o_value);
 }
 
 ///
@@ -542,7 +542,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_region( fapi2::buffer<uint64_t>& io_data, const mark_region i_value )
 {
     io_data.insertFromRight<TT::FIRMWARE_MS_REGION, TT::FIRMWARE_MS_REGION_LEN>(i_value);
-    FAPI_INF("set_region: 0x%02lx", i_value);
+    FAPI_INF_NO_SBE("set_region: 0x%02lx", i_value);
 }
 
 ///
@@ -569,7 +569,7 @@ inline void get_region( const fapi2::buffer<uint64_t>& i_data, mark_region& o_va
     uint64_t l_temp = 0;
     i_data.extractToRight<TT::FIRMWARE_MS_REGION, TT::FIRMWARE_MS_REGION_LEN>(l_temp);
     o_value = mark_region(l_temp);
-    FAPI_INF("get_region: 0x%02lx", o_value);
+    FAPI_INF_NO_SBE("get_region: 0x%02lx", o_value);
 }
 
 ///
@@ -586,7 +586,7 @@ inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address
     // construct fwms::address from mcbist::address
     const auto l_addr = address<MC, T, TT>(i_address);
     io_data.insert<TT::FIRMWARE_MS_ADDRESS, TT::FIRMWARE_MS_ADDRESS_LEN, TT::FIRMWARE_MS_ADDRESS>(l_addr);
-    FAPI_INF("set_address: 0x%016lx", uint64_t(l_addr));
+    FAPI_INF_NO_SBE("set_address: 0x%016lx", uint64_t(l_addr));
 }
 
 ///
@@ -604,7 +604,7 @@ inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address<
     const auto l_addr = mss::ecc::fwms::address<MC, T, TT>(uint64_t(i_data));
     // construct mcbist::address from fwms::address
     o_address = l_addr.operator mss::mcbist::address<MC>();
-    FAPI_INF("get_address: 0x%016lx", uint64_t(l_addr));
+    FAPI_INF_NO_SBE("get_address: 0x%016lx", uint64_t(l_addr));
 }
 
 ///
@@ -620,7 +620,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_exit_1( fapi2::buffer<uint64_t>& io_data, const mss::states i_state )
 {
     io_data.writeBit<TT::FIRMWARE_MS_EXIT1>(i_state);
-    FAPI_INF("set_exit_1: 0x%01lx", i_state);
+    FAPI_INF_NO_SBE("set_exit_1: 0x%01lx", i_state);
 }
 
 ///
@@ -636,7 +636,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_exit_1( const fapi2::buffer<uint64_t>& i_data, mss::states& o_state )
 {
     o_state = (i_data.getBit<TT::FIRMWARE_MS_EXIT1>() == false) ? mss::NO : mss::YES;
-    FAPI_INF("get_exit_1: 0x%01lx", o_state);
+    FAPI_INF_NO_SBE("get_exit_1: 0x%01lx", o_state);
 }
 
 } // close namespace fwms

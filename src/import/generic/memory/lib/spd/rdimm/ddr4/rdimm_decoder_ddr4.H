@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -291,9 +291,9 @@ class decoder<DDR4, RDIMM_MODULE, R > : public dimm_module_decoder
 
                 o_output = l_buffer;
 
-                FAPI_INF("%s. Register Manufacturer ID Code: 0x%04x",
-                         spd::c_str(iv_target),
-                         o_output);
+                FAPI_INF_NO_SBE("%s. Register Manufacturer ID Code: 0x%04x",
+                                spd::c_str(iv_target),
+                                o_output);
             }
 
         fapi_try_exit:

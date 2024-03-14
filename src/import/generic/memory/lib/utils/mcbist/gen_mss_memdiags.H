@@ -108,7 +108,7 @@ namespace sim
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pattern )
 {
-    FAPI_INF("Start sim init for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("Start sim init for " TARGTIDFORMAT, TARGTID);
 
     // If we're running in the simulator, we want to only touch the addresses which training touched
 
@@ -125,7 +125,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
         // No point in bothering if we don't have any DIMM
         if (mss::count_dimm(p) == 0)
         {
-            FAPI_INF("No DIMM on " TARGTIDFORMAT ", not running sf_init", GENTARGTID(p));
+            FAPI_INF_NO_SBE("No DIMM on " TARGTIDFORMAT ", not running sf_init", GENTARGTID(p));
             continue;
         }
 
@@ -145,7 +145,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
 
         for (auto r = l_pr.begin(); r != l_pr.end(); ++l_rank_address_pair, ++r)
         {
-            FAPI_INF("sim init " TARGTIDFORMAT ", rank %d", GENTARGTID(p), *r);
+            FAPI_INF_NO_SBE("sim init " TARGTIDFORMAT ", rank %d", GENTARGTID(p), *r);
 
             // Setup l_start to represent this rank, and then make the end address from that.
             l_start.set_master_rank(*r);
@@ -216,7 +216,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    FAPI_INF("End sim init for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("End sim init for " TARGTIDFORMAT, TARGTID);
     return fapi2::current_err;
 }
 
@@ -640,7 +640,7 @@ inline fapi2::ReturnCode operation<MC, T, TT>::single_port_init()
     using ET = mcbistMCTraits<MC>;
     using AT = mcbistAddrTraits<MC>;
 
-    FAPI_INF("single port init for " TARGTIDFORMAT, GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("single port init for " TARGTIDFORMAT, GENTARGTID(iv_target));
 
     const uint64_t l_relative_port_number = iv_const.iv_start_address.get_port();
     const uint64_t l_dimm_number = iv_const.iv_start_address.get_dimm();
@@ -662,8 +662,8 @@ inline fapi2::ReturnCode operation<MC, T, TT>::single_port_init()
         l_subtest.enable_port(l_relative_port_number);
         l_subtest.enable_dimm(l_dimm_number);
         iv_program.iv_subtests.push_back(l_subtest);
-        FAPI_INF(TARGTIDFORMAT " adding subtest  0x%04x for port %d, DIMM %d",
-                 GENTARGTID(iv_target), l_subtest, l_relative_port_number, l_dimm_number);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " adding subtest  0x%04x for port %d, DIMM %d",
+                        GENTARGTID(iv_target), l_subtest, l_relative_port_number, l_dimm_number);
     }
 
     // The address should have the port and DIMM noted in it. All we need to do is calculate the
@@ -702,7 +702,7 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT >
 inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_init()
 {
-    FAPI_INF("multi-port init for " TARGTIDFORMAT, GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("multi-port init for " TARGTIDFORMAT, GENTARGTID(iv_target));
 
     const auto l_port = mss::find_targets<TT::PORT_TYPE>(iv_target);
 
@@ -710,7 +710,7 @@ inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_init()
     if(l_port.size() == 0)
     {
         // Cronus can have no ports under an MCBIST, FW deconfigures by association
-        FAPI_INF(TARGTIDFORMAT " has no attached ports skipping setup", GENTARGTID(iv_target));
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached ports skipping setup", GENTARGTID(iv_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -721,7 +721,7 @@ inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_init()
     if( l_dimms.size() == 0)
     {
         // Cronus can have no DIMMS under an MCBIST, FW deconfigures by association
-        FAPI_INF(TARGTIDFORMAT " has no attached DIMMs skipping setup", GENTARGTID(iv_target));
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached DIMMs skipping setup", GENTARGTID(iv_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -740,7 +740,7 @@ inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_init()
 template< mss::mc_type MC, fapi2::TargetType T, typename TT >
 inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_read()
 {
-    FAPI_INF("multi-port read for " TARGTIDFORMAT, GENTARGTID(iv_target));
+    FAPI_INF_NO_SBE("multi-port read for " TARGTIDFORMAT, GENTARGTID(iv_target));
 
     const auto l_port = mss::find_targets<TT::PORT_TYPE>(iv_target);
 
@@ -748,7 +748,7 @@ inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_read()
     if(l_port.size() == 0)
     {
         // Cronus can have no ports under an MCBIST, FW deconfigures by association
-        FAPI_INF(TARGTIDFORMAT " has no attached ports skipping setup", GENTARGTID(iv_target));
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached ports skipping setup", GENTARGTID(iv_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -759,7 +759,7 @@ inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_read()
     if( l_dimms.size() == 0)
     {
         // Cronus can have no DIMMS under an MCBIST, FW deconfigures by association
-        FAPI_INF(TARGTIDFORMAT " has no attached DIMMs skipping setup", GENTARGTID(iv_target));
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached DIMMs skipping setup", GENTARGTID(iv_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -902,7 +902,7 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
     mss::mcbist::address<MC> l_generic_start_address;
     mss::mcbist::address<MC> l_generic_end_address;
 
-    FAPI_INF("setting up for continuous scrub for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("setting up for continuous scrub for " TARGTIDFORMAT, TARGTID);
 
     // Scrub operations run 128B
     operation<MC>::iv_program.change_len64(mss::OFF);
@@ -942,7 +942,8 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
             l_subtest.enable_port(mss::relative_pos<MC, T>(p));
             l_subtest.enable_dimm(mss::index(d));
             operation<MC>::iv_program.iv_subtests.push_back(l_subtest);
-            FAPI_INF("adding scrub subtest for " TARGTIDFORMAT " (dimm %d) ( 0x%04x)", GENTARGTID(d), mss::index(d), l_subtest);
+            FAPI_INF_NO_SBE("adding scrub subtest for " TARGTIDFORMAT " (dimm %d) ( 0x%04x)", GENTARGTID(d), mss::index(d),
+                            l_subtest);
         }
     }
 
@@ -951,9 +952,9 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
     // This subtest will be marked the last when the MCBMR registers are filled in.
     //
     operation<MC>::iv_program.iv_subtests.push_back(mss::mcbist::goto_subtest<MC>(2));
-    FAPI_INF("last goto subtest (10) is going to subtest 2 ( 0x%04x) for " TARGTIDFORMAT,
-             operation<MC>::iv_program.iv_subtests[2],
-             GENTARGTID(operation<MC>::iv_target));
+    FAPI_INF_NO_SBE("last goto subtest (10) is going to subtest 2 ( 0x%04x) for " TARGTIDFORMAT,
+                    operation<MC>::iv_program.iv_subtests[2],
+                    GENTARGTID(operation<MC>::iv_target));
 
     // Ok, now we can go back in to fill in the first two subtests.
 
@@ -989,7 +990,8 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
         l_subtest.enable_dimm(l_dimm);
 
         operation<MC>::iv_program.iv_subtests[0] = l_subtest;
-        FAPI_INF("adding scrub subtest 0 for port %d dimm %d (0x%04x) for " TARGTIDFORMAT, l_port, l_dimm, l_subtest, TARGTID);
+        FAPI_INF_NO_SBE("adding scrub subtest 0 for port %d dimm %d (0x%04x) for " TARGTIDFORMAT, l_port, l_dimm, l_subtest,
+                        TARGTID);
 
         //
         // subtest 1
@@ -1014,11 +1016,11 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
 
         // Since we set l_goto_subtest up with a meaningful default, we can just make a subtest with the
         // l_goto_subtest subtest specified and pop that in to index 1.
-        FAPI_INF("adding scrub subtest 1 to goto subtest %d (port %d, dimm %d) " TARGTIDFORMAT, l_goto_subtest,
-                 operation<MC>::iv_program.iv_subtests[l_goto_subtest].get_port(),
-                 operation<MC>::iv_program.iv_subtests[l_goto_subtest].get_dimm(), TARGTID );
-        FAPI_INF("(test 0x%04x) for " TARGTIDFORMAT,
-                 operation<MC>::iv_program.iv_subtests[l_goto_subtest], TARGTID );
+        FAPI_INF_NO_SBE("adding scrub subtest 1 to goto subtest %d (port %d, dimm %d) " TARGTIDFORMAT, l_goto_subtest,
+                        operation<MC>::iv_program.iv_subtests[l_goto_subtest].get_port(),
+                        operation<MC>::iv_program.iv_subtests[l_goto_subtest].get_dimm(), TARGTID );
+        FAPI_INF_NO_SBE("(test 0x%04x) for " TARGTIDFORMAT,
+                        operation<MC>::iv_program.iv_subtests[l_goto_subtest], TARGTID );
 
         operation<MC>::iv_program.iv_subtests[1] = mss::mcbist::goto_subtest<MC>(l_goto_subtest);
     }
@@ -1297,7 +1299,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target,
                            const uint64_t i_pattern = PATTERN_0 )
 {
     using ET = mss::mcbistMCTraits<MC>;
-    FAPI_INF("superfast init start for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("superfast init start for " TARGTIDFORMAT, TARGTID);
 
     uint8_t l_sim = false;
     FAPI_TRY( mss::attr::get_is_simulation( l_sim) );
@@ -1307,7 +1309,7 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target,
         // Use some sort of pattern in sim in case the verification folks need to look for something
         // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
         // have a good pattern for verification defined.
-        FAPI_INF("running mss sim init in place of sf_init for " TARGTIDFORMAT, TARGTID);
+        FAPI_INF_NO_SBE("running mss sim init in place of sf_init for " TARGTIDFORMAT, TARGTID);
         return mss::mcbist::sim::sf_init<MC>(i_target, i_pattern);
     }
     else
@@ -1353,7 +1355,7 @@ fapi2::ReturnCode sf_read( const fapi2::Target<T>& i_target,
                            const mss::mcbist::address<MC>& i_end_address = mss::mcbist::address<MC>(TT::LARGEST_ADDRESS) )
 {
     using ET = mss::mcbistMCTraits<MC>;
-    FAPI_INF("superfast read - start for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("superfast read - start for " TARGTIDFORMAT, TARGTID);
 
     FAPI_TRY( pre_maint_read_settings<MC>(i_target) );
 
@@ -1392,7 +1394,7 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
                                     const mss::mcbist::address<MC>& i_address )
 {
     using ET = mss::mcbistMCTraits<MC>;
-    FAPI_INF("continuous (background) scrub for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("continuous (background) scrub for " TARGTIDFORMAT, TARGTID);
 
     FAPI_TRY( pre_scrub_settings<MC>(i_target) );
 
@@ -1428,7 +1430,7 @@ fapi2::ReturnCode background_fast_scrub( const fapi2::Target<T>& i_target,
 {
     const mss::mcbist::address<MC> l_start_address;
     using ET = mss::mcbistMCTraits<MC>;
-    FAPI_INF("Fast scrub for %s", mss::c_str(i_target));
+    FAPI_INF_NO_SBE("Fast scrub for %s", mss::c_str(i_target));
 
     FAPI_TRY( pre_scrub_settings<MC>(i_target) );
 
@@ -1511,7 +1513,7 @@ fapi2::ReturnCode targeted_scrub( const fapi2::Target<T>& i_target,
                                   const end_boundary i_end )
 {
     using ET = mss::mcbistMCTraits<MC>;
-    FAPI_INF("targeted scrub for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("targeted scrub for " TARGTIDFORMAT, TARGTID);
 
     FAPI_TRY( pre_scrub_settings<MC>(i_target) );
 
@@ -1553,7 +1555,7 @@ fapi2::ReturnCode targeted_steer( const fapi2::Target<T>& i_target,
                                   const end_boundary i_end )
 {
     using ET = mss::mcbistMCTraits<MC>;
-    FAPI_INF("targeted steer for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("targeted steer for " TARGTIDFORMAT, TARGTID);
 
     FAPI_TRY( pre_steer_settings<MC>(i_target) );
 
@@ -1599,7 +1601,7 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
     mss::mcbist::program<MC> l_program;
     fapi2::buffer<uint64_t> l_status;
 
-    FAPI_INF("continue_cmd for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("continue_cmd for " TARGTIDFORMAT, TARGTID);
 
     // TODO RTC:155518 Check for stop or in progress before allowing continue. Not critical
     // as the caller should know and can check the in-progress bit in the event they don't
@@ -1757,13 +1759,13 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
 {
-    FAPI_INF("Start mss_initialize_memory for " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("Start mss_initialize_memory for " TARGTIDFORMAT, TARGTID);
 
     // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
     // attributes for the PHY, etc.
     if (mss::count_dimm(i_target) == 0)
     {
-        FAPI_INF("... skipping scrub for " TARGTIDFORMAT " - no DIMM ...", TARGTID);
+        FAPI_INF_NO_SBE("... skipping scrub for " TARGTIDFORMAT " - no DIMM ...", TARGTID);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -1774,7 +1776,7 @@ fapi2::ReturnCode mss_initialize_memory(const fapi2::Target<T>& i_target )
 
     if (l_sim)
     {
-        FAPI_INF("running mss sim init in place of scrub for " TARGTIDFORMAT, TARGTID);
+        FAPI_INF_NO_SBE("running mss sim init in place of scrub for " TARGTIDFORMAT, TARGTID);
 
         // Use some sort of pattern in sim in case the verification folks need to look for something
         // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
@@ -1816,13 +1818,13 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_background_scrub_helper( const fapi2::Target<T>& i_target )
 {
-    FAPI_INF("Start mss_background_scrub_helper on: " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("Start mss_background_scrub_helper on: " TARGTIDFORMAT, TARGTID);
 
     // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
     // attributes for the PHY, etc.
     if (mss::count_dimm(i_target) == 0)
     {
-        FAPI_INF("... skipping background scrub for " TARGTIDFORMAT " - no DIMM ...", TARGTID);
+        FAPI_INF_NO_SBE("... skipping background scrub for " TARGTIDFORMAT " - no DIMM ...", TARGTID);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -1858,13 +1860,13 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mss_background_steer_helper( const fapi2::Target<T>& i_target )
 {
-    FAPI_INF("Start mss_background_steer_helper on: " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("Start mss_background_steer_helper on: " TARGTIDFORMAT, TARGTID);
 
     // If there are no DIMM we don't need to bother. In fact, we can't as we didn't setup
     // attributes for the PHY, etc.
     if (mss::count_dimm(i_target) == 0)
     {
-        FAPI_INF("... skipping background steer for " TARGTIDFORMAT " - no DIMM ...", TARGTID);
+        FAPI_INF_NO_SBE("... skipping background steer for " TARGTIDFORMAT " - no DIMM ...", TARGTID);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -1906,7 +1908,7 @@ fapi2::ReturnCode mss_firmware_background_scrub_helper( const fapi2::Target<T>& 
         const speed i_speed,
         const mss::mcbist::address<MC>& i_address )
 {
-    FAPI_INF("Start mss_firmware_background_scrub_helper on: " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("Start mss_firmware_background_scrub_helper on: " TARGTIDFORMAT, TARGTID);
 
     // Start background scrub
     FAPI_TRY ( mss::memdiags::background_scrub<MC>( i_target,
@@ -1968,7 +1970,7 @@ template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T
 fapi2::ReturnCode mnfg_fast_scrub( const fapi2::Target<T>& i_target,
                                    const stop_conditions<MC>& i_stop)
 {
-    FAPI_INF("Start mnfg_fast_scrub on: " TARGTIDFORMAT, TARGTID);
+    FAPI_INF_NO_SBE("Start mnfg_fast_scrub on: " TARGTIDFORMAT, TARGTID);
     // Start Fast scrub
     FAPI_TRY ( mss::memdiags::background_fast_scrub<MC>( i_target, i_stop));
 

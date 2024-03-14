@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -201,7 +201,7 @@ class cas_latency<mss::mc_type::EXPLORER>
 
             if (mss::count_dimm(i_target) == 0)
             {
-                FAPI_INF("cas latency ctor seeing no DIMMs on %s", mss::spd::c_str(i_target) );
+                FAPI_INF_NO_SBE("cas latency ctor seeing no DIMMs on %s", mss::spd::c_str(i_target) );
                 iv_dimm_list_empty = true;
                 return;
             }
@@ -229,8 +229,8 @@ class cas_latency<mss::mc_type::EXPLORER>
                         "%s. MC type: %s No common CAS latencies (CL bitmap = 0)",
                         mss::spd::c_str(iv_target), TT::MC_STR );
 
-            FAPI_INF("Largest tAAmin (ps): %d, tCKmin (ps): %d, and supported CL bitmap 0x%llX for all modules across %s",
-                     iv_largest_taamin, iv_proposed_tck, iv_common_cl_bitmap, mss::spd::c_str(iv_target));
+            FAPI_INF_NO_SBE("Largest tAAmin (ps): %d, tCKmin (ps): %d, and supported CL bitmap 0x%llX for all modules across %s",
+                            iv_largest_taamin, iv_proposed_tck, iv_common_cl_bitmap, mss::spd::c_str(iv_target));
 
             iv_common_cl = integral_bitmap_to_vector(iv_common_cl_bitmap);
 
@@ -268,7 +268,7 @@ class cas_latency<mss::mc_type::EXPLORER>
 
             if(l_dimm_list.empty())
             {
-                FAPI_INF("cas latency ctor seeing no DIMM on %s", mss::spd::c_str(iv_target));
+                FAPI_INF_NO_SBE("cas latency ctor seeing no DIMM on %s", mss::spd::c_str(iv_target));
                 iv_dimm_list_empty = true;
             }
 
@@ -417,7 +417,7 @@ class cas_latency<mss::mc_type::EXPLORER>
                 // If no such value exists, choose a higher tCKproposed value and repeat until a solution is found.
                 if(!l_is_cl_in_common)
                 {
-                    FAPI_INF("%s Desired CL isn't supported by all DIMMs, choosing a higher tCK", mss::spd::c_str(iv_target));
+                    FAPI_INF_NO_SBE("%s Desired CL isn't supported by all DIMMs, choosing a higher tCK", mss::spd::c_str(iv_target));
                     continue;
                 }
 
@@ -882,7 +882,7 @@ class cas_latency<mss::mc_type::ODYSSEY>
 
             if (mss::count_dimm(i_target) == 0)
             {
-                FAPI_INF("cas latency ctor seeing no DIMMs on %s", mss::spd::c_str(i_target) );
+                FAPI_INF_NO_SBE("cas latency ctor seeing no DIMMs on %s", mss::spd::c_str(i_target) );
                 iv_dimm_list_empty = true;
                 return;
             }
@@ -910,10 +910,10 @@ class cas_latency<mss::mc_type::ODYSSEY>
                         "%s. MC type: %s No common CAS latencies (CL bitmap = 0)",
                         mss::spd::c_str(iv_target), TT::MC_STR );
 
-            FAPI_INF("Largest tAAmin (ps): %d, largest tRCDmin (ps): %d, tCKmin (ps): %d,"
-                     "and supported CL bitmap 0x%010X for all modules across %s",
-                     iv_largest_taamin, iv_largest_trcdmin, iv_proposed_tck,
-                     iv_common_cl_bitmap, mss::spd::c_str(iv_target));
+            FAPI_INF_NO_SBE("Largest tAAmin (ps): %d, largest tRCDmin (ps): %d, tCKmin (ps): %d,"
+                            "and supported CL bitmap 0x%010X for all modules across %s",
+                            iv_largest_taamin, iv_largest_trcdmin, iv_proposed_tck,
+                            iv_common_cl_bitmap, mss::spd::c_str(iv_target));
 
             iv_common_cl = integral_bitmap_to_vector(iv_common_cl_bitmap);
 
@@ -952,7 +952,7 @@ class cas_latency<mss::mc_type::ODYSSEY>
 
             if(l_dimm_list.empty())
             {
-                FAPI_INF("cas latency ctor seeing no DIMM on %s", mss::spd::c_str(iv_target));
+                FAPI_INF_NO_SBE("cas latency ctor seeing no DIMM on %s", mss::spd::c_str(iv_target));
                 iv_dimm_list_empty = true;
             }
 
@@ -1113,8 +1113,8 @@ class cas_latency<mss::mc_type::ODYSSEY>
                 // If no such value exists, choose a higher tCKproposed value and repeat until a solution is found.
                 if(!l_is_cl_in_common)
                 {
-                    FAPI_INF("%s No supported CL found for tCK = %d ps, choosing a higher tCK", mss::spd::c_str(iv_target),
-                             iv_proposed_tck);
+                    FAPI_INF_NO_SBE("%s No supported CL found for tCK = %d ps, choosing a higher tCK", mss::spd::c_str(iv_target),
+                                    iv_proposed_tck);
                     continue;
                 }
 

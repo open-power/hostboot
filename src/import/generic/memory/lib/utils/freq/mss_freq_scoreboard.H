@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -367,8 +367,8 @@ class freq_scoreboard
                 }
             }
 
-            FAPI_INF("%s Max ports supporting a common frequency is %d", mss::c_str(i_target), l_common_ports);
-            FAPI_INF("%s Fastest common frequency is %d", mss::c_str(i_target), TT::SUPPORTED_FREQS[l_best_freq_index]);
+            FAPI_INF_NO_SBE("%s Max ports supporting a common frequency is %d", mss::c_str(i_target), l_common_ports);
+            FAPI_INF_NO_SBE("%s Fastest common frequency is %d", mss::c_str(i_target), TT::SUPPORTED_FREQS[l_best_freq_index]);
 
             // Assert if we don't have any frequencies supported by at least one configured port
             FAPI_TRY(callout_no_common_freq<P>(i_target, (l_common_ports > l_empty_port_count), l_port_count,
@@ -515,8 +515,8 @@ class freq_scoreboard
 
                 if (!iv_supported_port_freqs[l_pos][i_best_freq_index])
                 {
-                    FAPI_INF("Port %d (%s) does not support the common frequency (%d) so will be deconfigured",
-                             l_pos, mss::c_str(p), TT::SUPPORTED_FREQS[i_best_freq_index]);
+                    FAPI_INF_NO_SBE("Port %d (%s) does not support the common frequency (%d) so will be deconfigured",
+                                    l_pos, mss::c_str(p), TT::SUPPORTED_FREQS[i_best_freq_index]);
                     auto& l_port_supported_freqs = iv_supported_port_freqs[l_pos];
 
                     o_deconfigured.push_back(l_pos);
@@ -662,7 +662,7 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_DOMAIN_T
         // Remove any frequencies bigger than this port's max from the scoreboard
         io_scoreboard.remove_freqs_above_limit(l_port_pos, l_port_max_freq);
 
-        FAPI_INF("%s after processing MRW, max freq is %d", mss::c_str(p), l_port_max_freq);
+        FAPI_INF_NO_SBE("%s after processing MRW, max freq is %d", mss::c_str(p), l_port_max_freq);
     }// port
 
 fapi_try_exit:
@@ -717,7 +717,7 @@ fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_T
 
         uint32_t l_max_freq = 0;
         FAPI_TRY( io_scoreboard.max_supported_freq(l_port_pos, l_max_freq) );
-        FAPI_INF("%s after processing VPD, max freq is %d", mss::c_str(p), l_max_freq);
+        FAPI_INF_NO_SBE("%s after processing VPD, max freq is %d", mss::c_str(p), l_max_freq);
     }// port
 
 fapi_try_exit:
@@ -750,7 +750,7 @@ fapi2::ReturnCode limit_freq_by_spd(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_T
 
         uint32_t l_max_freq = 0;
         FAPI_TRY( io_scoreboard.max_supported_freq(l_port_pos, l_max_freq) );
-        FAPI_INF("%s after processing SPD, max freq is %d", mss::c_str(p), l_max_freq);
+        FAPI_INF_NO_SBE("%s after processing SPD, max freq is %d", mss::c_str(p), l_max_freq);
     }// port
 
     return fapi2::FAPI2_RC_SUCCESS;

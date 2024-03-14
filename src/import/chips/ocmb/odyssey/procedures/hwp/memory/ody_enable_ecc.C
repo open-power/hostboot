@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,12 +50,12 @@ extern "C"
     ///
     fapi2::ReturnCode ody_enable_ecc(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
     {
-        FAPI_INF(TARGTIDFORMAT " ody_enable_ecc: Entering...", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_enable_ecc: Entering...", TARGTID);
 
         // Enable ecc checking
         FAPI_TRY( mss::enable_read_ecc<mss::mc_type::ODYSSEY>(i_target), TARGTIDFORMAT "Failed enable_read_ecc", TARGTID );
 
-        FAPI_INF(TARGTIDFORMAT " ody_enable_ecc: Exiting...", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_enable_ecc: Exiting...", TARGTID);
 
     fapi_try_exit:
         return fapi2::current_err;

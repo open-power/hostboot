@@ -64,7 +64,7 @@ extern "C"
         // Start by assuming we do not have a FIR
         o_firactive = false;
 
-        FAPI_INF("Checking for FIRs on %s", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("Checking for FIRs on %s", mss::c_str(i_target));
 
         switch (i_substep)
         {

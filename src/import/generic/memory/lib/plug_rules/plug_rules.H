@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,7 +65,7 @@ fapi2::ReturnCode dimm_size_mixing_helper(const fapi2::Target<fapi2::TARGET_TYPE
 
     if(i_ignore_dimm_size_mix_plug_rule == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_DIMM_SIZE_MIX_YES)
     {
-        FAPI_INF("%s Attribute set to ignore DIMM size mixing plug rule checking", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("%s Attribute set to ignore DIMM size mixing plug rule checking", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -127,7 +127,8 @@ fapi2::ReturnCode dimm_size_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC>&
     // If there are one or fewer DIMM's, we can just get out.
     if (l_ocmbs.size() < CHECK_DIMM_PER_OMIC)
     {
-        FAPI_INF("Skipping DIMM size mixing plug rule check on %s because it doesn't have 2 DIMMS", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("Skipping DIMM size mixing plug rule check on %s because it doesn't have 2 DIMMS",
+                        mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -165,14 +166,14 @@ fapi2::ReturnCode dimm_height_mixing_helper(const fapi2::Target<fapi2::TARGET_TY
     // Check for the height plug rule
     if(i_ignore_dimm_height_mix_plug_rule == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_DIMM_HEIGHT_MIX_YES)
     {
-        FAPI_INF("%s Attribute set to ignore DIMM height mixing plug rule checking", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("%s Attribute set to ignore DIMM height mixing plug rule checking", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
     // Check for the mrw height plug rule
     if (i_mrw_height_plug_rule == fapi2::ENUM_ATTR_MSS_MRW_DIMM_HEIGHT_MIXING_POLICY_ALLOWED)
     {
-        FAPI_INF("%s System policy allows DIMM height mixing", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("%s System policy allows DIMM height mixing", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -230,7 +231,8 @@ fapi2::ReturnCode dimm_height_mixing(const fapi2::Target<fapi2::TARGET_TYPE_OMIC
     // If there are one or fewer DIMM's, we can just get out.
     if (i_kinds.size() < CHECK_DIMM_PER_OMIC)
     {
-        FAPI_INF("Skipping DIMM height mixing plug rule check on %s because it doesn't have 2 DIMMS", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("Skipping DIMM height mixing plug rule check on %s because it doesn't have 2 DIMMS",
+                        mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -270,7 +272,7 @@ fapi2::ReturnCode ddr5_allowed_helper(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     // Check for the DDR5 allowed plug rule
     if(i_mrw_allow_ddr5 == fapi2::ENUM_ATTR_MSS_MRW_ALLOW_DDR5_ALLOW)
     {
-        FAPI_INF("%s Attribute set to allow DDR5, skipping check", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("%s Attribute set to allow DDR5, skipping check", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -334,7 +336,7 @@ fapi2::ReturnCode dram_gen_mixing_helper(const std::vector<mss::dimm::kind<MC>>&
 
     if(i_kinds.size() < CHECK_REQUIRED)
     {
-        FAPI_INF("Fewer than 2 DIMM's found, no need to check for DRAM generation mixing");
+        FAPI_INF_NO_SBE("Fewer than 2 DIMM's found, no need to check for DRAM generation mixing");
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -415,7 +417,7 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const fapi2::Target<fapi2::TARG
     // Skip all plug rule checks if set to ignore (e.g. on Apollo)
     if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
     {
-        FAPI_INF("%s Attribute set to ignore plug rule checking", mss::c_str(i_target));
+        FAPI_INF_NO_SBE("%s Attribute set to ignore plug rule checking", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -466,13 +468,13 @@ fapi2::ReturnCode enforce_pre_eff_config_thermal(const std::vector<fapi2::Target
     // Skip all plug rule checks if set to ignore (e.g. on Apollo)
     if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
     {
-        FAPI_INF("Attribute set to ignore plug rule checking");
+        FAPI_INF_NO_SBE("Attribute set to ignore plug rule checking");
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
     for(const auto& l_ocmb : i_targets)
     {
-        FAPI_INF(GENTARGTIDFORMAT " Running enforce_pre_eff_config_thermal ", GENTARGTID(l_ocmb));
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Running enforce_pre_eff_config_thermal ", GENTARGTID(l_ocmb));
         FAPI_TRY(enforce_pre_eff_config_thermal<MC>(l_ocmb),
                  GENTARGTIDFORMAT " Fail encountered in enforce_pre_eff_config_thermal", GENTARGTID(l_ocmb));
     }

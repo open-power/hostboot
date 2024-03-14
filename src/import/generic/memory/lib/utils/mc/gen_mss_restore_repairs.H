@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -93,7 +93,7 @@ fapi2::ReturnCode place_chip_mark(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
 
     FAPI_TRY( mss::ecc::symbol_to_galois<MC>(l_symbol, l_galois) );
 
-    FAPI_INF(TARGTIDFORMAT " Setting hardware (chip) mark on rank:%d galois:0x%02x", TARGTID, i_port_rank, l_galois);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Setting hardware (chip) mark on rank:%d galois:0x%02x", TARGTID, i_port_rank, l_galois);
     FAPI_TRY( mss::ecc::set_hwms<MC>(l_port, i_port_rank, l_galois) );
 
 fapi_try_exit:
@@ -132,8 +132,8 @@ fapi2::ReturnCode place_symbol_mark(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
     // but this is ok here because set_dimm does nothing on Odyssey and there is only one mrank on Odyssey
     l_addr.set_dimm(l_dimm_idx).set_master_rank(l_rank_idx);
 
-    FAPI_INF(TARGTIDFORMAT " Setting firmware symbol mark on rank:%d dq:%d galois:0x%02x",
-             TARGTID, i_port_rank, i_dq, l_galois);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Setting firmware symbol mark on rank:%d dq:%d galois:0x%02x",
+                    TARGTID, i_port_rank, i_dq, l_galois);
     FAPI_TRY( mss::ecc::set_fwms<MC>(l_port, i_port_rank, l_galois,
                                      mss::ecc::fwms::mark_type::SYMBOL,
                                      mss::ecc::fwms::mark_region::MRANK,
@@ -260,8 +260,8 @@ class chip_and_symbol_mark : public repair_state<MC, T>
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
             const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
             FAPI_TRY( io_repairs_exceeded.setBit(l_rel_pos) );
-            FAPI_INF(TARGTIDFORMAT " Repairs exceeded (chip mark and symbol mark exist, plus one bad DQ) on rank:%d DQ:%d",
-                     TARGTID, i_port_rank, i_dq);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " Repairs exceeded (chip mark and symbol mark exist, plus one bad DQ) on rank:%d DQ:%d",
+                            TARGTID, i_port_rank, i_dq);
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
             return fapi2::current_err;
@@ -290,8 +290,9 @@ class chip_and_symbol_mark : public repair_state<MC, T>
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
             const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
             FAPI_TRY( io_repairs_exceeded.setBit(l_rel_pos) );
-            FAPI_INF(TARGTIDFORMAT " Repairs exceeded (chip mark and symbol mark exist, plus one bad nibble) on rank:%d DQ:%d",
-                     TARGTID, i_port_rank, i_dq);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " Repairs exceeded (chip mark and symbol mark exist, plus one bad nibble) on rank:%d DQ:%d",
+                            TARGTID, i_port_rank, i_dq);
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
             return fapi2::current_err;
@@ -340,8 +341,8 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<MC, T>
             const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
 
             // repairs exceeded
-            FAPI_INF(TARGTIDFORMAT " Repairs exceeded (symbol mark and unrepaired DQ exist, plus bad DQ) on rank:%d DQ:%d",
-                     TARGTID, i_port_rank, i_dq);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " Repairs exceeded (symbol mark and unrepaired DQ exist, plus bad DQ) on rank:%d DQ:%d",
+                            TARGTID, i_port_rank, i_dq);
             FAPI_TRY( io_repairs_exceeded.setBit(l_rel_pos));
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -374,8 +375,9 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<MC, T>
             FAPI_TRY( place_chip_mark<MC>(i_target, i_port_rank, i_dq, i_width) );
             FAPI_TRY( io_repairs_applied.setBit(i_port_rank) );
             FAPI_TRY( io_repairs_exceeded.setBit(l_rel_pos) );
-            FAPI_INF(TARGTIDFORMAT" Repairs exceeded (symbol mark and unrepaired DQ exist, plus bad nibble) on rank:%d DQ:%d",
-                     TARGTID, i_port_rank, i_dq);
+            FAPI_INF_NO_SBE(
+                TARGTIDFORMAT" Repairs exceeded (symbol mark and unrepaired DQ exist, plus bad nibble) on rank:%d DQ:%d",
+                TARGTID, i_port_rank, i_dq);
             {
                 const auto new_state = std::make_shared<chip_and_symbol_mark<MC, T>>();
                 mss::repair_state<MC, T>::set_state(io_machine, new_state);
@@ -440,8 +442,8 @@ class symbol_mark_only : public repair_state<MC, T>
             if (l_dimm_spare[i_port_rank % MAX_RANK_PER_DIMM_ATTR] != fapi2::ENUM_ATTR_MEM_EFF_DIMM_SPARE_NO_SPARE)
             {
                 FAPI_TRY( io_repairs_exceeded.setBit(l_rel_pos) );
-                FAPI_INF(TARGTIDFORMAT" Repairs exceeded (chip mark exists, plus bad nibble) on port rank:%d DQ:%d",
-                         TARGTID, i_port_rank, i_dq);
+                FAPI_INF_NO_SBE(TARGTIDFORMAT" Repairs exceeded (chip mark exists, plus bad nibble) on port rank:%d DQ:%d",
+                                TARGTID, i_port_rank, i_dq);
             }
 
         fapi_try_exit:
@@ -551,8 +553,8 @@ class chip_mark_only : public repair_state<MC, T>
             const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
             const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
             FAPI_TRY( io_repairs_exceeded.setBit(l_rel_pos) );
-            FAPI_INF(TARGTIDFORMAT " Repairs exceeded (chip mark exists, plus bad nibble) on rank:%d DQ:%d",
-                     TARGTID, i_port_rank, i_dq);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " Repairs exceeded (chip mark exists, plus bad nibble) on rank:%d DQ:%d",
+                            TARGTID, i_port_rank, i_dq);
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
             return fapi2::current_err;
@@ -802,7 +804,7 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
         fapi2::buffer<uint8_t>& io_repairs_applied,
         fapi2::buffer<uint8_t>& io_repairs_exceeded)
 {
-    FAPI_INF(TARGTIDFORMAT " Restore repair marks from bad DQ data", GENTARGTID(i_dimm));
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Restore repair marks from bad DQ data", GENTARGTID(i_dimm));
 
     constexpr bool IGNORE_BAD_BITS_ON_SPARES = true;
 
@@ -889,7 +891,7 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
             // if repairs have been exceeded, we're done
             if (io_repairs_exceeded.getBit(l_rel_pos))
             {
-                FAPI_INF("Repairs exceeded on DIMM " TARGTIDFORMAT, GENTARGTID(i_dimm));
+                FAPI_INF_NO_SBE("Repairs exceeded on DIMM " TARGTIDFORMAT, GENTARGTID(i_dimm));
                 return fapi2::FAPI2_RC_SUCCESS;
             }
         } // end loop through non spares
@@ -973,7 +975,7 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
             // if repairs have been exceeded, we're done
             if (io_repairs_exceeded.getBit(l_rel_pos))
             {
-                FAPI_INF("Repairs exceeded on DIMM " TARGTIDFORMAT, GENTARGTID(i_dimm));
+                FAPI_INF_NO_SBE("Repairs exceeded on DIMM " TARGTIDFORMAT, GENTARGTID(i_dimm));
                 return fapi2::FAPI2_RC_SUCCESS;
             }
         }

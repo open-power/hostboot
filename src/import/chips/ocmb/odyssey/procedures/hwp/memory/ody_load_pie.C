@@ -72,7 +72,7 @@ extern "C"
 
         if (mss::ody::skip_this_step(fapi2::ENUM_ATTR_ODY_DRAMINIT_STEP_ENABLE_LOAD_PIE, l_draminit_step_enable))
         {
-            FAPI_INF(TARGTIDFORMAT " ATTR_ODY_DRAMINIT_STEP_ENABLE set to skip ody_load_pie. Exiting...", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " ATTR_ODY_DRAMINIT_STEP_ENABLE set to skip ody_load_pie. Exiting...", TARGTID);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 

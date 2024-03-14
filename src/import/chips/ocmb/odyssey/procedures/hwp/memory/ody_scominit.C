@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,7 +70,7 @@ extern "C"
 
         if (l_port_targets.empty())
         {
-            FAPI_INF(TARGTIDFORMAT "... skipping mss_scominit no Ports ...", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "... skipping mss_scominit no Ports ...", TARGTID);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -78,15 +78,15 @@ extern "C"
         fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
         // Assuming RDF0/1 are the same across all kind traits will need to add plug rule to confirm this
-        FAPI_INF( TARGTIDFORMAT " running odyssey.scom.initfile", TARGTID);
+        FAPI_INF_NO_SBE( TARGTIDFORMAT " running odyssey.scom.initfile", TARGTID);
         FAPI_EXEC_HWP(l_rc, odyssey_scom, i_target, l_port_targets[0], FAPI_SYSTEM);
         FAPI_TRY(l_rc, TARGTIDFORMAT " error from odyssey.scom.initfile", TARGTID);
 
         for(const auto& l_port : l_port_targets)
         {
-            FAPI_INF(GENTARGTIDFORMAT " phy scominit for MEM_PORT type ATTRs on port", GENTARGTID(l_port));
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " phy scominit for MEM_PORT type ATTRs on port", GENTARGTID(l_port));
 
-            FAPI_INF( GENTARGTIDFORMAT " running odyssey.mp.scom.initfile", GENTARGTID(l_port));
+            FAPI_INF_NO_SBE( GENTARGTIDFORMAT " running odyssey.mp.scom.initfile", GENTARGTID(l_port));
             FAPI_EXEC_HWP(l_rc, odyssey_mp_scom, l_port);
             FAPI_TRY(l_rc, GENTARGTIDFORMAT " error from odyssey.mp.scom.initfile", GENTARGTID(l_port));
 
@@ -99,7 +99,7 @@ extern "C"
         FAPI_TRY(mss::unmask::after_scominit<mss::mc_type::ODYSSEY>(i_target));
 
     fapi_try_exit:
-        FAPI_INF("End MSS SCOM init");
+        FAPI_INF_NO_SBE("End MSS SCOM init");
         return fapi2::current_err;
     }
 }

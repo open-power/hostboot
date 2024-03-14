@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,7 +154,7 @@ inline ccs::instruction_t<MC> address_invert(const fapi2::Target<fapi2::TARGET_T
 
     if (i_is_a17)
     {
-        FAPI_INF("%s A17 is turned on, negating CCS bit A17", mss::c_str(i_target) );
+        FAPI_INF_NO_SBE("%s A17 is turned on, negating CCS bit A17", mss::c_str(i_target) );
         mss::template negate<TT::A17>(i_out.arr0);
     }
 
@@ -275,8 +275,8 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
     l_inst_b_side.iv_idles = i_delay_in_cycles;
 
 
-    FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d a-side", uint8_t(i_data.iv_mrs), i_delay_in_cycles,
-             l_inst_a_side.arr0, l_inst_a_side.arr1, mss::c_str(i_target), i_port_rank);
+    FAPI_INF_NO_SBE("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d a-side", uint8_t(i_data.iv_mrs), i_delay_in_cycles,
+                    l_inst_a_side.arr0, l_inst_a_side.arr1, mss::c_str(i_target), i_port_rank);
     io_inst.push_back(l_inst_a_side);
 
 
@@ -285,8 +285,8 @@ fapi2::ReturnCode mrs_engine( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_ta
 
     if(l_has_rcd)
     {
-        FAPI_INF("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d b-side", uint8_t(i_data.iv_mrs), i_delay_in_cycles,
-                 l_inst_b_side.arr0, l_inst_b_side.arr1, mss::c_str(i_target), i_port_rank);
+        FAPI_INF_NO_SBE("MRS%02d (%d) 0x%016llx:0x%016llx %s:rank %d b-side", uint8_t(i_data.iv_mrs), i_delay_in_cycles,
+                        l_inst_b_side.arr0, l_inst_b_side.arr1, mss::c_str(i_target), i_port_rank);
         io_inst.push_back(l_inst_b_side);
     }
 
@@ -1501,8 +1501,8 @@ inline fapi2::ReturnCode mpr_read( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
 
     l_inst.iv_idles = l_delay;
 
-    FAPI_INF("MPR Read CCS inst 0x%016llx:0x%016llx %s:rank %d, MPR location:%d, delay (in cycles) %d",
-             uint64_t(l_inst.arr0), uint64_t(l_inst.arr1), mss::c_str(i_target), i_port_rank, i_mpr_loc, l_delay);
+    FAPI_INF_NO_SBE("MPR Read CCS inst 0x%016llx:0x%016llx %s:rank %d, MPR location:%d, delay (in cycles) %d",
+                    uint64_t(l_inst.arr0), uint64_t(l_inst.arr1), mss::c_str(i_target), i_port_rank, i_mpr_loc, l_delay);
 
     io_inst.push_back(l_inst);
 
@@ -1533,8 +1533,8 @@ inline fapi2::ReturnCode precharge_all( const fapi2::Target<fapi2::TARGET_TYPE_D
 
     l_inst.iv_idles = l_delay;
 
-    FAPI_INF("precharge_all CCS inst 0x%016llx:0x%016llx %s:rank %d, delay (in cycles) %d",
-             uint64_t(l_inst.arr0), uint64_t(l_inst.arr1), mss::c_str(i_target), i_port_rank, l_delay);
+    FAPI_INF_NO_SBE("precharge_all CCS inst 0x%016llx:0x%016llx %s:rank %d, delay (in cycles) %d",
+                    uint64_t(l_inst.arr0), uint64_t(l_inst.arr1), mss::c_str(i_target), i_port_rank, l_delay);
 
     // Add to CCS program
     io_inst.push_back(l_inst);

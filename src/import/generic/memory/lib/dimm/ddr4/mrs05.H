@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,12 +99,12 @@ fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
     l_ca_parity_latency_buffer = ca_parity_latency_map[i_data.iv_ca_parity_latency];
 
-    FAPI_INF("%s MR5 rank %d attributes: CAPL: 0x%x(0x%x), CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "
-             "RTT_PARK: 0x%x, CAP: 0x%x, DM: 0x%x, WDBI: 0x%x, RDBI: 0x%x",
-             mss::c_str(i_target), i_port_rank, i_data.iv_ca_parity_latency, uint8_t(l_ca_parity_latency_buffer),
-             i_data.iv_crc_error_clear, i_data.iv_ca_parity_error_status, i_data.iv_odt_input_buffer,
-             uint8_t(l_rtt_park_buffer), i_data.iv_ca_parity,
-             i_data.iv_data_mask, i_data.iv_write_dbi, i_data.iv_read_dbi);
+    FAPI_INF_NO_SBE("%s MR5 rank %d attributes: CAPL: 0x%x(0x%x), CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "
+                    "RTT_PARK: 0x%x, CAP: 0x%x, DM: 0x%x, WDBI: 0x%x, RDBI: 0x%x",
+                    mss::c_str(i_target), i_port_rank, i_data.iv_ca_parity_latency, uint8_t(l_ca_parity_latency_buffer),
+                    i_data.iv_crc_error_clear, i_data.iv_ca_parity_error_status, i_data.iv_odt_input_buffer,
+                    uint8_t(l_rtt_park_buffer), i_data.iv_ca_parity,
+                    i_data.iv_data_mask, i_data.iv_write_dbi, i_data.iv_read_dbi);
 
     mss::swizzle<TT::A0, CA_PARITY_LATENCY_LENGTH, CA_PARITY_LATENCY_START>(l_ca_parity_latency_buffer, io_inst.arr0);
     io_inst.arr0.template writeBit<TT::A3>(i_data.iv_crc_error_clear);
@@ -116,7 +116,7 @@ fapi2::ReturnCode mrs05(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.template writeBit<TT::A11>(i_data.iv_write_dbi);
     io_inst.arr0.template writeBit<TT::A12>(i_data.iv_read_dbi);
 
-    FAPI_INF("%s MR5: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
+    FAPI_INF_NO_SBE("%s MR5: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -191,11 +191,11 @@ fapi2::ReturnCode mrs05_decode_helper(const ccs::instruction_t<MC>& i_inst,
     o_write_dbi = i_inst.arr0.template getBit<TT::A11>();
     o_read_dbi = i_inst.arr0.template getBit<TT::A12>();
 
-    FAPI_INF("MR5 rank %d decode: CAPL: 0x%x, CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "
-             "RTT_PARK: 0x%x, CAP: 0x%x, DM: 0x%x, WDBI: 0x%x, RDBI: 0x%x",
-             i_port_rank, uint8_t(o_ca_parity_latency_buffer), o_crc_error_clear, o_ca_parity_error_status,
-             o_odt_input_buffer, uint8_t(o_rtt_park_buffer), o_ca_parity, o_data_mask,
-             o_write_dbi, o_read_dbi);
+    FAPI_INF_NO_SBE("MR5 rank %d decode: CAPL: 0x%x, CRC_EC: 0x%x, CA_PES: 0x%x, ODT_IB: 0x%x "
+                    "RTT_PARK: 0x%x, CAP: 0x%x, DM: 0x%x, WDBI: 0x%x, RDBI: 0x%x",
+                    i_port_rank, uint8_t(o_ca_parity_latency_buffer), o_crc_error_clear, o_ca_parity_error_status,
+                    o_odt_input_buffer, uint8_t(o_rtt_park_buffer), o_ca_parity, o_data_mask,
+                    o_write_dbi, o_read_dbi);
 
     return fapi2::FAPI2_RC_SUCCESS;
 }

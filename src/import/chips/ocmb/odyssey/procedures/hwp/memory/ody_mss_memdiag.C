@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,7 @@ extern "C"
     {
         uint8_t l_post_memdiags_subtest = 0;
 
-        FAPI_INF("Start ody_mss_memdiag on: %s", mss::c_str( i_target ));
+        FAPI_INF_NO_SBE("Start ody_mss_memdiag on: %s", mss::c_str( i_target ));
 
         // Re-mask MCBIST_PROGRAM_COMPLETE
         // this avoids an unnecessary processor attention when the sf_init program completes since PRD is not running
@@ -89,7 +89,7 @@ extern "C"
         FAPI_TRY(mss::unmask::post_init_unmask_prog_complete(i_target));
 
     fapi_try_exit:
-        FAPI_INF("End ody_mss_memdiag on %s", mss::c_str( i_target ));
+        FAPI_INF_NO_SBE("End ody_mss_memdiag on %s", mss::c_str( i_target ));
         return fapi2::current_err;
     }
 }

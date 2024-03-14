@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 
 #include <fapi2.H>
 
+#include <generic/memory/lib/utils/c_str.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_address.H>
 #include <generic/memory/lib/utils/bit_count.H>
@@ -745,7 +746,7 @@ struct constraints
         constraints()
     {
         iv_pattern = i_pattern;
-        FAPI_INF("setting up constraints with pattern %d", i_pattern);
+        FAPI_INF_NO_SBE("setting up constraints with pattern %d", i_pattern);
     }
 
     ///
@@ -756,7 +757,7 @@ struct constraints
         constraints()
     {
         iv_stop = i_stop;
-        FAPI_INF("setting up constraints with stop 0x%016lx", uint64_t(i_stop));
+        FAPI_INF_NO_SBE("setting up constraints with stop 0x%016lx", uint64_t(i_stop));
     }
 
     ///
@@ -769,7 +770,7 @@ struct constraints
         constraints(i_stop)
     {
         iv_start_address = i_start_address;
-        FAPI_INF("setting up constraints with start address 0x%016lx", uint64_t(i_start_address));
+        FAPI_INF_NO_SBE("setting up constraints with start address 0x%016lx", uint64_t(i_start_address));
     }
 
     ///
@@ -791,7 +792,7 @@ struct constraints
         iv_speed = i_speed;
         iv_end_address = i_end_address;
 
-        FAPI_INF("setting up constraints with end boundary %d and speed 0x%x", i_end_boundary, i_speed);
+        FAPI_INF_NO_SBE("setting up constraints with end boundary %d and speed 0x%x", i_end_boundary, i_speed);
 
         // If our end address is 'before' our start address, make the end address the same as the start.
         if (iv_start_address > iv_end_address)

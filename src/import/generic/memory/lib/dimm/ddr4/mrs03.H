@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,7 +107,7 @@ fapi2::ReturnCode mrs03(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     mss::swizzle<TT::A11, READ_FORMAT_LENGTH, READ_FORMAT_START>(fapi2::buffer<uint8_t>(i_data.iv_read_format),
             io_inst.arr0);
 
-    FAPI_INF("%s MR3: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
+    FAPI_INF_NO_SBE("%s MR3: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -182,10 +182,10 @@ fapi2::ReturnCode mrs03_decode_helper(const ccs::instruction_t<MC>& i_inst,
     mss::swizzle<6, 2, TT::A10>(i_inst.arr0, o_crc_wr_latency_buffer);
     mss::swizzle<6, 2, TT::A12>(i_inst.arr0, o_read_format);
 
-    FAPI_INF("MR3 rank %d decode: MPR_MODE: 0x%x, MPR_PAGE: 0x%x, GD: 0x%x, PDA: 0x%x, "
-             "TEMP: 0x%x FR: 0x%x, CRC_WL: 0x%x, RF: 0x%x", i_port_rank,
-             uint8_t(o_mpr_mode), o_mpr_page, o_geardown, o_pda, uint8_t(o_temp_readout),
-             uint8_t(o_fine_refresh), uint8_t(o_crc_wr_latency_buffer), uint8_t(o_read_format));
+    FAPI_INF_NO_SBE("MR3 rank %d decode: MPR_MODE: 0x%x, MPR_PAGE: 0x%x, GD: 0x%x, PDA: 0x%x, "
+                    "TEMP: 0x%x FR: 0x%x, CRC_WL: 0x%x, RF: 0x%x", i_port_rank,
+                    uint8_t(o_mpr_mode), o_mpr_page, o_geardown, o_pda, uint8_t(o_temp_readout),
+                    uint8_t(o_fine_refresh), uint8_t(o_crc_wr_latency_buffer), uint8_t(o_read_format));
 
     return fapi2::FAPI2_RC_SUCCESS;
 }

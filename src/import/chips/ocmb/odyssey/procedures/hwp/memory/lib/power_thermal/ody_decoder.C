@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -253,7 +253,7 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::ODYSSEY> (const mss::throttle_ty
         // DDIMM DIMM size decoder key uses total DDIMM capacity/size so use that if this is a DDIMM
         // Odyssey has 2 ports so this will be a sum of virtual DIMMs on the ports if a DDIMM
         l_kind.iv_size = (l_ddimm_size > 0) ? l_ddimm_size : l_kind.iv_size;
-        FAPI_INF("In get_power_attrs:  %s DIMM size is %d", mss::c_str(l_dimm), l_kind.iv_size);
+        FAPI_INF_NO_SBE("In get_power_attrs:  %s DIMM size is %d", mss::c_str(l_dimm), l_kind.iv_size);
 
         mss::power_thermal::decoder<mss::mc_type::ODYSSEY> l_decoder(l_kind);
         fapi2::buffer<uint64_t> l_attr_value;
@@ -274,7 +274,7 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::ODYSSEY> (const mss::throttle_ty
 
         if (i_slope.empty() || !l_attr_value.getBit<TT::POWER_LIMIT_START, TT::POWER_LENGTH>())
         {
-            FAPI_INF("%s ATTR_MSS_MRW_OCMB_PWR_SLOPE not found or has zero values", mss::c_str(l_dimm));
+            FAPI_INF_NO_SBE("%s ATTR_MSS_MRW_OCMB_PWR_SLOPE not found or has zero values", mss::c_str(l_dimm));
 
             o_slope[l_dimm_pos] =
                 ((i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_SLOPE : TT::TOTAL_SLOPE) /
@@ -295,7 +295,7 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::ODYSSEY> (const mss::throttle_ty
 
         if (i_intercept.empty() || !l_attr_value.getBit<TT::POWER_LIMIT_START, TT::POWER_LENGTH>())
         {
-            FAPI_INF("%s ATTR_MSS_MRW_OCMB_PWR_INTERCEPT not found or has zero values", mss::c_str(l_dimm));
+            FAPI_INF_NO_SBE("%s ATTR_MSS_MRW_OCMB_PWR_INTERCEPT not found or has zero values", mss::c_str(l_dimm));
 
             o_intercept[l_dimm_pos] =
                 ((i_throttle_type == mss::throttle_type::POWER) ? TT::POWER_INT : TT::TOTAL_INT) /
@@ -317,7 +317,7 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::ODYSSEY> (const mss::throttle_ty
 
         if (i_thermal_power_limit.empty() || !l_attr_value.getBit<TT::THERMAL_START, TT::THERMAL_LENGTH>())
         {
-            FAPI_INF("%s ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT not found or has zero values", mss::c_str(l_dimm));
+            FAPI_INF_NO_SBE("%s ATTR_MSS_MRW_OCMB_THERMAL_MEMORY_POWER_LIMIT not found or has zero values", mss::c_str(l_dimm));
 
             // The unit of limit and intercept is cA but limit is dA in mss::throttle_type::POWER
             // So we need to transfer them to the same unit
@@ -344,7 +344,7 @@ fapi2::ReturnCode get_power_attrs<mss::mc_type::ODYSSEY> (const mss::throttle_ty
 
         if (i_safemode_throttles.empty() || !l_attr_value.getBit<TT::DIMM_COUNT_START, TT::DIMM_COUNT_LEN>())
         {
-            FAPI_INF("%s ATTR_MSS_MRW_OCMB_SAFEMODE_UTIL_ARRAY not found or has zero values", mss::c_str(l_dimm));
+            FAPI_INF_NO_SBE("%s ATTR_MSS_MRW_OCMB_SAFEMODE_UTIL_ARRAY not found or has zero values", mss::c_str(l_dimm));
             o_safemode = TT::SAFEMODE_THROTTLE_DEFAULT;
         }
         else

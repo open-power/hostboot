@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -319,15 +319,15 @@ class mr5_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank) const
         {
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR5 rank%u. data output disable %u. PU drive impedance %u.", TARGTID, i_dimm_rank,
-                     iv_data_output_disable, iv_pu_drv_imp[i_dimm_rank]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR5 rank%u. data output disable %u. PU drive impedance %u.", TARGTID, i_dimm_rank,
+                            iv_data_output_disable, iv_pu_drv_imp[i_dimm_rank]);
 
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR5 rank%u. drive test mode support (Read only): %u. tDQS enable %u.", TARGTID, i_dimm_rank,
-                     iv_drv_test_mode_supported_read_only, iv_tdqs_enable);
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR5 rank%u. DM enable %u. PD drive impedance %u.", TARGTID, i_dimm_rank,
-                     iv_dm_enable, iv_pd_drv_imp[i_dimm_rank]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR5 rank%u. drive test mode support (Read only): %u. tDQS enable %u.", TARGTID, i_dimm_rank,
+                            iv_drv_test_mode_supported_read_only, iv_tdqs_enable);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR5 rank%u. DM enable %u. PD drive impedance %u.", TARGTID, i_dimm_rank,
+                            iv_dm_enable, iv_pd_drv_imp[i_dimm_rank]);
         }
 };
 

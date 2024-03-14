@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,7 +137,7 @@ fapi2::ReturnCode mrs00(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
     io_inst.arr0.template writeBit<TT::A10>(l_wr.getBit<6>());
     io_inst.arr0.template writeBit<TT::A9>(l_wr.getBit<7>());
 
-    FAPI_INF("%s MR0: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
+    FAPI_INF_NO_SBE("%s MR0: 0x%016llx", mss::c_str(i_target), uint64_t(io_inst.arr0));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -214,9 +214,9 @@ fapi2::ReturnCode mrs00_decode_helper(const ccs::instruction_t<MC>& i_inst,
     o_wr_index.writeBit<6>(i_inst.arr0.template getBit<TT::A10>());
     o_wr_index.writeBit<7>(i_inst.arr0.template getBit<TT::A9>());
 
-    FAPI_INF("MR0 Decode BL: 0x%x, RBT: 0x%x, CL: 0x%x, TM: 0x%x, DLL_RESET: 0x%x, WR: (0x%x)0x%x",
-             o_burst_length, o_read_burst_type, uint8_t(o_cas_latency), o_test_mode, o_dll_reset,
-             wr_map[uint8_t(o_wr_index)], uint8_t(o_wr_index));
+    FAPI_INF_NO_SBE("MR0 Decode BL: 0x%x, RBT: 0x%x, CL: 0x%x, TM: 0x%x, DLL_RESET: 0x%x, WR: (0x%x)0x%x",
+                    o_burst_length, o_read_burst_type, uint8_t(o_cas_latency), o_test_mode, o_dll_reset,
+                    wr_map[uint8_t(o_wr_index)], uint8_t(o_wr_index));
 
     return fapi2::FAPI2_RC_SUCCESS;
 }

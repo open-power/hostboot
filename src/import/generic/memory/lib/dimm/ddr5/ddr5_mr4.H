@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -271,9 +271,9 @@ class mr4_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR4. min refresh rate %u. refresh interval rate %u. tRFC mode: %u", TARGTID,
-                     iv_min_refresh_rate_read_only, iv_refresh_interval_rate, iv_refresh_trfc_mode);
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR4. wide range %u. TUF %u", TARGTID, iv_wide_range_read_only, iv_tuf_read_only);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4. min refresh rate %u. refresh interval rate %u. tRFC mode: %u", TARGTID,
+                            iv_min_refresh_rate_read_only, iv_refresh_interval_rate, iv_refresh_trfc_mode);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4. wide range %u. TUF %u", TARGTID, iv_wide_range_read_only, iv_tuf_read_only);
         }
 };
 

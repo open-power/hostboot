@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,9 +107,9 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
 
         // Printed here as opposed to the ctor as it uses the rank information
-        FAPI_INF("%s MR2 rank %d attributes: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x(0x%x), WRITE_CRC: 0x%x",
-                 mss::c_str(i_target), i_port_rank, uint8_t(i_data.iv_lpasr), i_data.iv_cwl,
-                 uint8_t(l_cwl_buffer), uint8_t(l_rtt_wr_buffer), i_data.iv_write_crc);
+        FAPI_INF_NO_SBE("%s MR2 rank %d attributes: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x(0x%x), WRITE_CRC: 0x%x",
+                        mss::c_str(i_target), i_port_rank, uint8_t(i_data.iv_lpasr), i_data.iv_cwl,
+                        uint8_t(l_cwl_buffer), uint8_t(l_rtt_wr_buffer), i_data.iv_write_crc);
 
         mss::swizzle<TT::A3, CWL_LENGTH, CWL_START>(l_cwl_buffer, io_inst.arr0);
 
@@ -119,7 +119,7 @@ fapi2::ReturnCode mrs02(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
 
         io_inst.arr0.template writeBit<TT::A12>(i_data.iv_write_crc);
 
-        FAPI_INF("MR2: 0x%016llx", uint64_t(io_inst.arr0));
+        FAPI_INF_NO_SBE("MR2: 0x%016llx", uint64_t(io_inst.arr0));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -181,8 +181,8 @@ fapi2::ReturnCode mrs02_decode_helper(const ccs::instruction_t<MC>& i_inst,
     mss::swizzle<6, 2, TT::A7>(i_inst.arr0, o_lpasr);
     mss::swizzle<5, 3, TT::A11>(i_inst.arr0, o_rtt_wr);
 
-    FAPI_INF("MR2 rank %d deocode: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x, WRITE_CRC: 0x%x",
-             i_port_rank, uint8_t(o_lpasr), uint8_t(o_cwl), uint8_t(o_rtt_wr), o_write_crc);
+    FAPI_INF_NO_SBE("MR2 rank %d deocode: LPASR: 0x%x, CWL: 0x%x, RTT_WR: 0x%x, WRITE_CRC: 0x%x",
+                    i_port_rank, uint8_t(o_lpasr), uint8_t(o_cwl), uint8_t(o_rtt_wr), o_write_crc);
 
     return fapi2::FAPI2_RC_SUCCESS;
 }

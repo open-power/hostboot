@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -233,8 +233,8 @@ class mr14_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR14. ECS mode: %u. ECS reset counter: %u", TARGTID, iv_ecs_mode, iv_ecs_reset);
-            FAPI_INF(TARGTIDFORMAT " DDR5 MR14. ECS count mode: %u. ECS CID select: %u", TARGTID, iv_ecs_reset, iv_ecs_mode);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR14. ECS mode: %u. ECS reset counter: %u", TARGTID, iv_ecs_mode, iv_ecs_reset);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR14. ECS count mode: %u. ECS CID select: %u", TARGTID, iv_ecs_reset, iv_ecs_mode);
         }
 
 };

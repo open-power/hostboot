@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -316,13 +316,15 @@ class mr34_data : public mr_base_data<MC>
             // Get the channel number from the dram_num
             // Channel A goes to DRAM[0-9]
             // Channel B goes to DRAM[10-19]
+#ifndef __PPE__
             const uint8_t CHANNEL = mss::ddr5::get_channel_a_or_b(i_dram_number);
+#endif
 
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR34 rank%u. dram_num%u.", TARGTID, i_dimm_rank, i_dram_number);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR34 rank%u. dram_num%u.", TARGTID, i_dimm_rank, i_dram_number);
 
-            FAPI_INF(TARGTIDFORMAT
-                     " DDR5 MR34 RTT Park:%u. RTT WR:%u.", TARGTID, iv_rtt_park[i_dimm_rank][CHANNEL], iv_rtt_wr[i_dimm_rank][CHANNEL]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR34 RTT Park:%u. RTT WR:%u.", TARGTID, iv_rtt_park[i_dimm_rank][CHANNEL], iv_rtt_wr[i_dimm_rank][CHANNEL]);
         }
 
 };

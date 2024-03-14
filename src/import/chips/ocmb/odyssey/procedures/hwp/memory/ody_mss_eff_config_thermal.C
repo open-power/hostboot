@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ extern "C"
     {
         using TT = mss::power_thermal::throttle_traits<mss::mc_type::ODYSSEY>;
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-        FAPI_INF("Start ody_mss_eff_config_thermal");
+        FAPI_INF_NO_SBE("Start ody_mss_eff_config_thermal");
 
         // For regulator power/current throttling or thermal throttling
         // Do thermal throttling first since throttles are not optimized for thermal throttles and we want to
@@ -92,7 +92,7 @@ extern "C"
 
             //Restore runtime_throttles, using power optimized throttles
             //Sets throttles to max_databus_util value
-            FAPI_INF(GENTARGTIDFORMAT " Restoring throttles", GENTARGTID(l_ocmb) );
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Restoring throttles", GENTARGTID(l_ocmb) );
             FAPI_TRY( mss::power_thermal::restore_runtime_throttles<mss::mc_type::ODYSSEY>(l_ocmb, mss::throttle_type::POWER),
                       GENTARGTIDFORMAT " Fail encountered in restore runtime throttles", GENTARGTID(l_ocmb));
         }
@@ -106,7 +106,7 @@ extern "C"
                 //Not doing any work if there are no dimms installed
                 if ( l_dimm_count == 0)
                 {
-                    FAPI_INF(GENTARGTIDFORMAT " Skipping eff_config_thermal because no dimms found", GENTARGTID(l_ocmb));
+                    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Skipping eff_config_thermal because no dimms found", GENTARGTID(l_ocmb));
                     continue;
                 }
 
@@ -188,9 +188,9 @@ extern "C"
                     for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port) )
                     {
                         const uint8_t l_dimm_pos = mss::index(l_dimm);
-                        FAPI_INF( GENTARGTIDFORMAT " DIMM (%d) slope is %d, intercept is %d, limit is %d", GENTARGTID(l_port),
-                                  l_dimm_pos, l_slope[l_dimm_pos], l_intercept[l_dimm_pos],
-                                  l_limit[l_dimm_pos]);
+                        FAPI_INF_NO_SBE( GENTARGTIDFORMAT " DIMM (%d) slope is %d, intercept is %d, limit is %d", GENTARGTID(l_port),
+                                         l_dimm_pos, l_slope[l_dimm_pos], l_intercept[l_dimm_pos],
+                                         l_limit[l_dimm_pos]);
                     }
                 }
 
@@ -199,8 +199,8 @@ extern "C"
                 //   throttles again as that would not work correctly with the throttle optimization being done
                 if ((l_thermal_count == 0) || (l_throttle_type == mss::throttle_type::POWER))
                 {
-                    FAPI_INF(GENTARGTIDFORMAT " Starting pwr_throttles(%s)",
-                             GENTARGTID(l_ocmb), mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL");
+                    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Starting pwr_throttles(%s)",
+                                    GENTARGTID(l_ocmb), mss::throttle_type::POWER == l_throttle_type ? "POWER" : "THERMAL");
                     //get the power limits, done per dimm and set to worst case for the slot and port throttles
                     FAPI_TRY(mss::power_thermal::pwr_throttles<mss::mc_type::ODYSSEY>(l_ocmb, l_throttle_type),
                              GENTARGTIDFORMAT " Fail encountered in pwr_throttles", GENTARGTID(l_ocmb));

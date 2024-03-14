@@ -58,6 +58,7 @@ const uint32_t throttle_traits<mss::mc_type::ODYSSEY>::PORT_UTIL_MAP_3200[mss::o
 const uint32_t throttle_traits<mss::mc_type::ODYSSEY>::PORT_UTIL_MAP_4000[mss::ody::sizes::MAX_PORT_PER_OCMB] = {7600, 6400};
 const uint32_t throttle_traits<mss::mc_type::ODYSSEY>::PORT_UTIL_MAP_4800[mss::ody::sizes::MAX_PORT_PER_OCMB] = {7100, 5500};
 
+
 #ifndef __PPE__
 ///
 /// @brief Determine the optimized ocmb level throttle values
@@ -176,8 +177,8 @@ fapi2::ReturnCode combine_runtime_port_throttles( const fapi2::Target<fapi2::TAR
 
     FAPI_TRY(get_optimized_ocmb_throttles(i_target, i_throttle_type, l_port_count, l_min_slot, l_ocmb_slot, l_ocmb_port));
 
-    FAPI_INF("For OCMB target " GENTARGTIDFORMAT " throttle per slot is %d, throttle per port is %d",
-             GENTARGTID(i_target), l_ocmb_slot, l_ocmb_port);
+    FAPI_INF_NO_SBE("For OCMB target " GENTARGTIDFORMAT " throttle per slot is %d, throttle per port is %d",
+                    GENTARGTID(i_target), l_ocmb_slot, l_ocmb_port);
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, i_target, l_ocmb_slot));
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, i_target, l_ocmb_port));
@@ -264,10 +265,10 @@ fapi2::ReturnCode update_runtime_throttle<mss::mc_type::ODYSSEY>(const fapi2::Ta
         l_run_port = (l_calc_port != 0) ?
                      std::min(l_run_port, l_calc_port) : l_run_port;
 
-        FAPI_INF("New runtime throttles for " GENTARGTIDFORMAT " for slot are %d, port are %d",
-                 GENTARGTID(l_port),
-                 l_run_slot,
-                 l_run_port);
+        FAPI_INF_NO_SBE("New runtime throttles for " GENTARGTIDFORMAT " for slot are %d, port are %d",
+                        GENTARGTID(l_port),
+                        l_run_slot,
+                        l_run_port);
 
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, l_port, l_run_port) );
         FAPI_TRY( FAPI_ATTR_SET(fapi2::ATTR_EXP_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_port, l_run_slot) );
@@ -323,7 +324,7 @@ fapi2::ReturnCode write_runtime_throttles<mss::mc_type::ODYSSEY>(const fapi2::Ta
 {
     using TT = throttle_traits<mss::mc_type::ODYSSEY>;
 
-    FAPI_INF(GENTARGTIDFORMAT " Start write_runtime_throttles", GENTARGTID(i_target));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Start write_runtime_throttles", GENTARGTID(i_target));
 
     uint16_t l_runtime_port = 0;
     uint16_t l_runtime_slot = 0;
@@ -339,7 +340,7 @@ fapi2::ReturnCode write_runtime_throttles<mss::mc_type::ODYSSEY>(const fapi2::Ta
 
     FAPI_TRY( fapi2::putScom(i_target, TT::FARB3Q_REG, l_data) );
 
-    FAPI_INF(GENTARGTIDFORMAT " End write_runtime_throttles", GENTARGTID(i_target));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " End write_runtime_throttles", GENTARGTID(i_target));
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
@@ -385,8 +386,8 @@ fapi2::ReturnCode combine_port_throttles( const fapi2::Target<fapi2::TARGET_TYPE
 
     FAPI_TRY(get_optimized_ocmb_throttles(i_target, i_throttle_type, l_port_count, l_min_slot, l_ocmb_slot, l_ocmb_port));
 
-    FAPI_INF("For OCMB target " GENTARGTIDFORMAT " throttle per slot is %d, throttle per port is %d",
-             GENTARGTID(i_target), l_ocmb_slot, l_ocmb_port);
+    FAPI_INF_NO_SBE("For OCMB target " GENTARGTIDFORMAT " throttle per slot is %d, throttle per port is %d",
+                    GENTARGTID(i_target), l_ocmb_slot, l_ocmb_port);
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_SLOT, i_target, l_ocmb_slot));
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_MEM_THROTTLED_N_COMMANDS_PER_PORT, i_target, l_ocmb_port));
@@ -442,8 +443,9 @@ fapi2::ReturnCode pwr_throttles<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi
         l_n_port = l_pwr_struct.iv_n_port;
         l_power = l_pwr_struct.iv_calc_port_maxpower;
 
-        FAPI_INF("For target " GENTARGTIDFORMAT " Calculated power is %d, throttle per slot is %d, throttle per port is %d",
-                 GENTARGTID(l_port), l_power, l_n_slot, l_n_port);
+        FAPI_INF_NO_SBE("For target " GENTARGTIDFORMAT
+                        " Calculated power is %d, throttle per slot is %d, throttle per port is %d",
+                        GENTARGTID(l_port), l_power, l_n_slot, l_n_port);
 
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_EXP_PORT_MAXPOWER, l_port, l_power));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_EXP_MEM_THROTTLED_N_COMMANDS_PER_SLOT, l_port, l_n_slot));
@@ -527,15 +529,16 @@ fapi2::ReturnCode memory_power_adjustment<mss::mc_type::ODYSSEY>(const
     // then update the attribute with the calculated power value
     if( l_max_achievable_pwr < io_fin_power)
     {
-        FAPI_INF("Memory power adjustment was made because max achievable power: %d is less than final power: %d for target "
-                 GENTARGTIDFORMAT,
-                 l_max_achievable_pwr, io_fin_power, GENTARGTID(i_port_target));
+
+        FAPI_INF_NO_SBE("Memory power adjustment was made because max achievable power: %d is less than final power: %d for target "
+                        GENTARGTIDFORMAT,
+                        l_max_achievable_pwr, io_fin_power, GENTARGTID(i_port_target));
     }
     else
     {
-        FAPI_INF("Memory power adjustment was not made because max achievable power: %d is greater than final power: %d for target "
-                 GENTARGTIDFORMAT,
-                 l_max_achievable_pwr, io_fin_power, GENTARGTID(i_port_target));
+        FAPI_INF_NO_SBE("Memory power adjustment was not made because max achievable power: %d is greater than final power: %d for target "
+                        GENTARGTIDFORMAT,
+                        l_max_achievable_pwr, io_fin_power, GENTARGTID(i_port_target));
     }
 
     io_fin_power = std::min(io_fin_power, l_max_achievable_pwr);
@@ -593,7 +596,7 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::ODYSSEY>(const
 
             if (mss::count_dimm(l_mc) == 0)
             {
-                FAPI_INF("Seeing no DIMMs on " GENTARGTIDFORMAT " -- skipping", GENTARGTID(l_mc));
+                FAPI_INF_NO_SBE("Seeing no DIMMs on " GENTARGTIDFORMAT " -- skipping", GENTARGTID(l_mc));
                 continue;
             }
 
@@ -610,7 +613,7 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::ODYSSEY>(const
         }
     }
 
-    FAPI_INF("Calculated min slot is %d, min port is %d for the system", l_min_slot, l_min_port);
+    FAPI_INF_NO_SBE("Calculated min slot is %d, min port is %d for the system", l_min_slot, l_min_port);
 
     //Now set every MC to have those values
     {
@@ -626,7 +629,7 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::ODYSSEY>(const
 
                 if (mss::count_dimm(l_port) == 0)
                 {
-                    FAPI_INF("Seeing no DIMMs on " GENTARGTIDFORMAT " -- skipping", GENTARGTID(l_port));
+                    FAPI_INF_NO_SBE("Seeing no DIMMs on " GENTARGTIDFORMAT " -- skipping", GENTARGTID(l_port));
                     continue;
                 }
 
@@ -655,8 +658,8 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::ODYSSEY>(const
                 l_power_limit = (i_throttle_type == throttle_type::POWER) ?
                                 l_dummy.iv_port_power_limit : (l_dummy.iv_dimm_thermal_limit[0] + l_dummy.iv_dimm_thermal_limit[1]);
 
-                FAPI_INF(GENTARGTIDFORMAT " Calculated power is %d, limit is %d", GENTARGTID(l_port), l_fin_power,
-                         static_cast<uint32_t>(l_power_limit));
+                FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Calculated power is %d, limit is %d", GENTARGTID(l_port), l_fin_power,
+                                static_cast<uint32_t>(l_power_limit));
 
                 //If there's an error with calculating port power, the wrong watt target was passed in
                 //Returns an error but doesn't deconfigure anything. Calling function can log if it wants to
@@ -690,11 +693,11 @@ fapi2::ReturnCode equalize_throttles_helper<mss::mc_type::ODYSSEY>(const
                     o_exceeded_power.push_back(l_port);
                 }
 
-                FAPI_INF(GENTARGTIDFORMAT " Final throttle values for slot %d, for port %d, power value %d",
-                         GENTARGTID(l_port),
-                         l_fin_slot,
-                         l_fin_port,
-                         l_fin_power);
+                FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Final throttle values for slot %d, for port %d, power value %d",
+                                GENTARGTID(l_port),
+                                l_fin_slot,
+                                l_fin_port,
+                                l_fin_power);
 
                 //Even if there's an error, still calculate and set the throttles.
                 //OCC will set to safemode if there's an error
@@ -741,12 +744,12 @@ fapi2::ReturnCode set_nm_support<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi
     // runtime should be calculated in eff_config_thermal, which is called before scominit in ipl
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_PORT, i_target, l_run_port));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_RUNTIME_MEM_THROTTLED_N_COMMANDS_PER_SLOT, i_target, l_run_slot));
-    FAPI_INF("For target " GENTARGTIDFORMAT
-             " throttled n commands per port are %d, per slot are %d, and dram m clocks are %d",
-             GENTARGTID(i_target),
-             l_run_port,
-             l_run_slot,
-             l_throttle_denominator);
+    FAPI_INF_NO_SBE("For target " GENTARGTIDFORMAT
+                    " throttled n commands per port are %d, per slot are %d, and dram m clocks are %d",
+                    GENTARGTID(i_target),
+                    l_run_port,
+                    l_run_slot,
+                    l_throttle_denominator);
 
     l_data.insertFromRight<TT::RUNTIME_N_SLOT, TT::RUNTIME_N_SLOT_LEN>(l_run_slot);
     l_data.insertFromRight<TT::RUNTIME_N_PORT, TT::RUNTIME_N_PORT_LEN>(l_run_port);

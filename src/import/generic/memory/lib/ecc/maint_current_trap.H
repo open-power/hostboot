@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,7 +67,7 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<u
     using TT = eccTraits<MC, eccMCTraits<MC>::MC_TARGET_TYPE>;
 
     FAPI_TRY( mss::getScom(l_mc_target, TT::MPE_ADDR_TRAP_REG, o_data) );
-    FAPI_INF("read: 0x%016lx", o_data);
+    FAPI_INF_NO_SBE("read: 0x%016lx", o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -88,7 +88,7 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target,
     using TT = eccTraits<MC, eccMCTraits<MC>::MC_TARGET_TYPE>;
 
     FAPI_TRY( mss::putScom(l_mc_target, TT::MPE_ADDR_TRAP_REG, i_data) );
-    FAPI_INF("write: 0x%016lx", i_data);
+    FAPI_INF_NO_SBE("write: 0x%016lx", i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -105,7 +105,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_address( fapi2::buffer<uint64_t>& io_data, const mcbist::address<MC>& i_address)
 {
     io_data.insertFromRight<TT::CURRENT_ADDR_TRAP, TT::CURRENT_ADDR_TRAP_LEN>(uint64_t(i_address));
-    FAPI_INF("set_address: 0x%016lx", uint64_t(i_address));
+    FAPI_INF_NO_SBE("set_address: 0x%016lx", uint64_t(i_address));
 }
 
 ///
@@ -122,7 +122,7 @@ inline void get_address( const fapi2::buffer<uint64_t>& i_data, mcbist::address<
     uint64_t l_addr = 0;
     i_data.extractToRight<TT::CURRENT_ADDR_TRAP, TT::CURRENT_ADDR_TRAP_LEN>(l_addr);
     o_address = mcbist::address<MC>(l_addr);
-    FAPI_INF("get_address: 0x%016lx", uint64_t(l_addr));
+    FAPI_INF_NO_SBE("get_address: 0x%016lx", uint64_t(l_addr));
 }
 
 ///
@@ -139,7 +139,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_port( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.insertFromRight<TT::CURRENT_PORT, TT::CURRENT_PORT_LEN>(i_value);
-    FAPI_INF("set_port: 0x%01lx", i_value);
+    FAPI_INF_NO_SBE("set_port: 0x%01lx", i_value);
 }
 
 ///
@@ -156,7 +156,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_port( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     i_data.extractToRight<TT::CURRENT_PORT, TT::CURRENT_PORT_LEN>(o_value);
-    FAPI_INF("get_port: 0x%01lx", o_value);
+    FAPI_INF_NO_SBE("get_port: 0x%01lx", o_value);
 }
 
 ///
@@ -173,7 +173,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void set_dimm( fapi2::buffer<uint64_t>& io_data, const uint64_t i_value )
 {
     io_data.writeBit<TT::CURRENT_DIMM>(i_value);
-    FAPI_INF("set_dimm: 0x%01lx", i_value);
+    FAPI_INF_NO_SBE("set_dimm: 0x%01lx", i_value);
 }
 
 ///
@@ -190,7 +190,7 @@ template< mss::mc_type MC, fapi2::TargetType T = eccMCTraits<MC>::MEM_PORT_TARGE
 inline void get_dimm( const fapi2::buffer<uint64_t>& i_data, uint64_t& o_value )
 {
     o_value = i_data.getBit<TT::CURRENT_DIMM>();
-    FAPI_INF("get_dimm: 0x%01lx", o_value);
+    FAPI_INF_NO_SBE("get_dimm: 0x%01lx", o_value);
 }
 
 } // close namespace maint_current_trap
