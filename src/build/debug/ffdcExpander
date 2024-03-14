@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -375,75 +375,6 @@ function _getUserInputOptionsAndValidate_()
 }
 
 ###############################################################################
-# @brief Query caller for user name and password
-###############################################################################
-function _queryUserPassword_()
-{
-    if [ -n "${FFDC_DEFECT_NUM}" ]; then
-        read -p 'CQ Username: ' FFDC_CQ_USER
-        read -sp 'CQ Password: ' FFDC_CQ_PASS
-    fi
-
-    return 0;
-}
-
-###############################################################################
-# @brief Unzip the system dump file
-#
-# Example: unzip SYSDUMP.13020B8.20000001.20190725181300.raw67117184.gz  =>
-#                SYSDUMP.13020B8.20000001.20190725181300.raw67117184
-#
-# @return 0 if successful, not 0 if a failure occurred
-###############################################################################
-function _unzipSysDumpFile_()
-{
-    # Verify that we can get to the dumpparser script
-    if [[ ! -e "${FFDC_GUNZIP_TOOL}" ]]; then
-        echo ""
-        echo "    ERROR:  Could not find gunzip tool ${FFDC_GUNZIP_TOOL}"
-        echo ""
-        return 2;  # Return 'No such file or directory'
-    fi
-
-    ## Extrapolate the SYSDUMP file from the gzipped file
-    # Remove any directories and only get the file name
-    FFDC_SYSDUMP_FILE=$(echo ${FFDC_SYSDUMP_FILE_GZ} | awk -F / '{ print $NF }')
-    # Remove the '.gz' from the gzipped file
-    FFDC_SYSDUMP_FILE=$(echo ${FFDC_SYSDUMP_FILE} | sed "s/\.gz$//")
-    # Prepend the caller's directory
-    FFDC_SYSDUMP_FILE="${FFDC_DEST_DIR}${FFDC_SYSDUMP_FILE}"
-
-    # Check if the SYSDUMP file already exists, if so, ask caller if they wish
-    # to overwrite it
-    if [[ -e "${FFDC_SYSDUMP_FILE}" ]]; then
-        echo ""
-        echo "    SYSDUMP file (${FFDC_SYSDUMP_FILE}) already exists ..."
-        while true; do
-            echo ""
-            read -p "    Do you wish to override the file and continue [Y/N] ? " yn
-            case $yn in
-                [Yy] ) break;;
-                [Nn] ) echo "    Skipping call to ${FFDC_GUNZIP_TOOL} ..."; echo ""; return 0;;
-                * ) echo "    Please answer [Y]es or [N]o.";;
-            esac
-        done
-    fi
-
-    # Unzip the gzipped SYSDUMP file
-    echo ""
-    echo "    ${FFDC_GUNZIP_TOOL} -c ${FFDC_SYSDUMP_FILE_GZ} > ${FFDC_SYSDUMP_FILE}"
-    `${FFDC_GUNZIP_TOOL} -c ${FFDC_SYSDUMP_FILE_GZ} > ${FFDC_SYSDUMP_FILE}`
-    FFDC_RETURN_VALUE=$?
-    if [ "${FFDC_RETURN_VALUE}" != "0" ]; then
-        echo ""
-        return ${FFDC_RETURN_VALUE};  # Return failure
-    fi
-
-    return 0;  # Return success
-}
-
-
-###############################################################################
 # @brief Extract the HB system dump file from the SYSDUMP file
 #
 # Example: /esw/bin/dumpparser -extMem SYSDUMP.13020B8.20000001.20190725181300.raw67117184  =>
@@ -604,56 +535,6 @@ function _getInfoFromHBDump_()
     echo "    running: $1 --img-path=$2/ --tool=BlTrace --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}BLTRACE${FFDC_TIME_STAMP}" | tee -a ${FFDC_DEST_DIR}${FFDC_FSP_BUILD_TAG}
     $1 --img-path=$2/ --tool=BlTrace --file=${FFDC_HB_DUMP_FILE} > ${FFDC_DEST_DIR}BLTRACE${FFDC_TIME_STAMP}
 }
-
-###############################################################################
-# @brief Extract various HB dump info and post to defect, if caller wishes to
-###############################################################################
-function _getInfoFromHBDumpAndPost_()
-{
-    _setFSPTracePath_
-    FFDC_RETURN_VALUE=$?
-    # If call to _setFSPTracePath_ not successful, then propagate error back
-    if [ "$FFDC_RETURN_VALUE" != "0" ]; then
-        return $FFDC_RETURN_VALUE;
-    fi
-
-    HB_TOOLS_DIR=$FFDC_FSP_DRIVER_DIR/obj/x86.nfp/hbfw/simics
-    HB_DUMP_DEBUG=$HB_TOOLS_DIR/hb-dump-debug
-    _getInfoFromHBDump_ $HB_DUMP_DEBUG $HB_TOOLS_DIR
-
-    # If supplied a defect number, then post a comment to the defect and add
-    # the generated dump files as attachments
-    if [ -n "${FFDC_DEFECT_NUM}" ]; then
-        PATH=${FFDC_3RD_PARTY_SCRIPT_DIR}:$PATH
-        CQFILE=${FFDC_3RD_PARTY_SCRIPT_DIR}updatecq.pl
-
-        echo ""
-        echo -e "\n    Adding attachment TRACE${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
-        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}TRACE${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS -s "Hostboot dump files stored at $FFDC_DEST_DIR"
-
-        echo -e "\n    Adding attachment PRINTK${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
-        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}PRINTK${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
-
-        echo -e "\n    Adding attachment ERRL${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
-        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}ERRL${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
-
-        echo -e "\n    Adding attachment PS${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
-        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}PS${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
-
-        echo -e "\n    Adding attachment PS_BACKTRACE${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
-        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}PS_BACKTRACE${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
-
-        echo -e "\n    Adding attachment MEMSTATS${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
-        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}MEMSTATS${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
-
-        echo -e "\n    Adding attachment PAGEMGR${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
-        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}PAGEMGR${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
-
-        echo -e "\n    Adding attachment BLTRACE${FFDC_TIME_STAMP} to defect ${FFDC_DEFECT_NUM} ..."
-        perl $CQFILE -id $FFDC_DEFECT_NUM -a ${FFDC_DEST_DIR}BLTRACE${FFDC_TIME_STAMP} -u $FFDC_CQ_USER -p $FFDC_CQ_PASS
-    fi
-}
-
 
 ###############################################################################
 # @brief The main. The real starting place of this script
