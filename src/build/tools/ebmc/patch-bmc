@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022,2023
+# Contributors Listed Below - COPYRIGHT 2024
 # [+] International Business Machines Corp.
 #
 #
@@ -155,14 +155,25 @@ function REMOTE_SUDO () {
 
 function PATCH_HBI_HBB () {
     # Copy files and create symlinks
-    REMOTE_SUDO "mkdir -p $BMC_PATCH_DIRECTORY/hbdebug/"
     SSHPASS $COPY "$PATCHES_DIR/HBI.bin" "$PATCHES_DIR/HBB.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin HBB && ln -sf HBI.bin HBI"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin $HBB.lid && ln -sf HBI.bin $HBI.lid"
 
-    # Copy the symbol files over for debug
-    SSHPASS $COPY `find $IMG_DIR/hbotStringFile $IMG_DIR/*.list.bz2 $IMG_DIR/*.syms $IMG_DIR/*.bin.modinfo | grep -v _test` "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
-    REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf hbdebug/hbotStringFile $HBOTSTRINGFILE.lid"
+    if [ -z "$PATCH_BMC_NO_DEBUG" ]
+    then
+        echo '*********************************************************************************'
+        echo 'Copying the symbol files over for debug, set PATCH_BMC_NO_DEBUG=1 to skip copying.'
+        echo '*********************************************************************************'
+        REMOTE_SUDO "mkdir -p $BMC_PATCH_DIRECTORY/hbdebug/"
+        # Copy the symbol files over for debug
+        SSHPASS $COPY `find $IMG_DIR/hbotStringFile $IMG_DIR/*.list.bz2 $IMG_DIR/*.syms $IMG_DIR/*.bin.modinfo | grep -v _test` "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
+        REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf hbdebug/hbotStringFile $HBOTSTRINGFILE.lid"
+        REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf hbdebug/hbicore.syms $HBICORE_SYMS.lid"
+    else
+        echo '****************************************************************************************************************************'
+        echo 'PATCH_BMC_NO_DEBUG is set, so skip copying the symbol files over for debug, unset PATCH_BMC_NO_DEBUG to copy debug binaries.'
+        echo '****************************************************************************************************************************'
+    fi
 }
 
 function PATCH_HBD () {
@@ -196,6 +207,23 @@ function PATCH_HBBL () {
 
 function RESTART_PLDMD () {
     REMOTE_SUDO "systemctl restart pldmd"
+}
+
+function CHECK_STATE () {
+    QUERY_RESULT=$(REMOTE_SUDO "obmcutil state")
+    checkstatus "Checking state of BMC"
+    if echo $QUERY_RESULT | grep 'HostState.Off'; then
+        errlog '***************************************************************************'
+        errlog 'INFO - BMC is HostState.Off, valid state to have pldmd restart be effective'
+        errlog '***************************************************************************'
+    else
+        errlog '******************************************************************************************************'
+        errlog 'WARNING !! BMC is not in HostState.Off, you need to be powered off to have pldmd restart be effective.'
+        errlog '    obmcutil poweroff OR obmcutil chassisoff           '
+        errlog 'Make any changes and Press enter when ready to continue'
+        errlog '******************************************************************************************************'
+        read
+    fi
 }
 
 function FETCH_LID_IDS_FROM_BMC () {
@@ -397,14 +425,19 @@ else   # Apply the data to the BMC
    fi
 
    if [ ${MGP_FILES_EXIST} -eq 1 ]; then
-       SSHPASS $COPY "$COPYDIR"/* "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
-       rm $COPYDIR/*
+       REMOTE_SUDO "mkdir -p $BMC_PATCH_DIRECTORY/hbdebug/"
+       SSHPASS $COPY "$COPYDIR"/ "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
    fi
-   rmdir $COPYDIR
+
+   # Need slight delay for rsync to complete before rm
+   sleep 2
+   rm -rf $COPYDIR
 
    if [[ $RESTART_PLDMD = 1 ]] ; then
        RESTART_PLDMD
    fi
+
+   CHECK_STATE
 
    SHOW_PATCHES_ON_BMC
 fi
