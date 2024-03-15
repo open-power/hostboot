@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,10 @@
 
 //  HWP call support
 #include <p10_ocmb_enable.H>
+
+#include <isteps/hwpThreadHelper.H>
+#include <targeting/common/utilFilter.H>
+#include <pmic_check_and_clear_ddr5.H>
 
 using namespace ISTEPS_TRACE;
 using namespace ISTEP_ERROR;
@@ -115,6 +119,21 @@ void* call_proc_ocmb_enable (void *io_pArgs)
                       get_huid( *l_proc_iter ));
         }
     }
+
+    ISTEP::parallel_for_each(composable(getAllChips)(TYPE_OCMB_CHIP, true/*functional*/),
+                             l_StepError,
+                             "pmic_check_and_clear_ddr5",
+                             [&](Target* const i_ocmb) -> errlHndl_t
+    {
+        errlHndl_t l_errl = nullptr;
+        if(!UTIL::isOdysseyChip(i_ocmb))
+        {
+            return l_errl;
+        }
+
+        FAPI_INVOKE_HWP(l_errl, pmic_check_and_clear_ddr5, { i_ocmb });
+        return l_errl;
+    });
 
     TRACFCOMP(g_trac_isteps_trace, EXIT_MRK"call_proc_ocmb_enable");
     return l_StepError.getErrorHandle();
