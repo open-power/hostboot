@@ -562,13 +562,18 @@ fapi2::ReturnCode get_desired_dts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
             FAPI_TRY(mss::ody::thermal::get_therm_sensor_usage[l_sensor_pos](i_ocmb, l_usage));
             FAPI_TRY(mss::ody::thermal::get_therm_sensor_location[l_sensor_pos](i_ocmb, l_loc));
 
-            if(l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM && l_loc == l_desired_dts_loc)
+            if((l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM ||
+                l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM_AND_MEM_BUF_EXT)
+               && (l_loc == l_desired_dts_loc))
+
             {
                 // Pass desired sensor pos out to procedure
                 l_desired_dram_sensor_found = true;
                 o_desired_sensors_pos[DRAM_SENSOR_INDEX] = l_sensor_pos;
             }
-            else if(!l_desired_dram_sensor_found && l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM)
+            else if(!l_desired_dram_sensor_found &&
+                    (l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM ||
+                     l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM_AND_MEM_BUF_EXT ))
             {
                 // Pass any DRAM sensor pos found if desired location isn't found
                 // Same side of desired loc just upper corner but still prioritize lower corners if found
@@ -580,7 +585,8 @@ fapi2::ReturnCode get_desired_dts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
                 o_desired_sensors_pos[DRAM_SENSOR_INDEX] = l_sensor_pos;
 
             }
-            else if (l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_PMIC)
+            else if (l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_PMIC
+                     || l_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_MEM_BUF_EXT)
             {
                 // Pass pmic sensor pos for config
                 o_desired_sensors_pos[PMIC_SENSOR_INDEX] = l_sensor_pos;
@@ -626,7 +632,6 @@ fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
             // If both are still null then no dts or ports were found
             // Either is still null should will not interfere in following code
             FAPI_INF_NO_SBE(GENTARGTIDFORMAT " No ports or DTS were found, exiting read_dts_sensors", GENTARGTID(i_ocmb));
-            return fapi2::FAPI2_RC_SUCCESS;
         }
         else
         {
