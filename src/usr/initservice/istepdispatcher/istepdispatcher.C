@@ -75,7 +75,6 @@
 #include <arch/magic.H>
 #include <util/utiltime.H>
 #include <util/misc.H>
-#include <errl/errludstring.H>
 
 #ifdef CONFIG_PLDM
 #include <pldm/requests/pldm_pdr_requests.H>
@@ -2209,21 +2208,6 @@ void IStepDispatcher::shutdownDuringIpl()
 {
 
     TRACFCOMP(g_trac_initsvc, ENTER_MRK"IStepDispatcher::shutdownDuringIpl");
-
-    // Log any leaked logs since they might explain a strange failure
-    std::vector<ERRORLOG::ErrlEntry*> l_leakedLogs;
-    if (ERRORLOG::ErrlEntry::errlLeakedThisBoot(l_leakedLogs))
-    {
-        TRACFCOMP(g_trac_initsvc,
-                  ERR_MRK" %d error logs leaked during IPL.",
-                  l_leakedLogs.size());
-        for( auto l_err : l_leakedLogs )
-        {
-            ERRORLOG::ErrlUserDetailsString("Leaked Log").addToLog(l_err);
-            l_err->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-            errlCommit(l_err, INITSVC_COMP_ID);
-        }
-    }
 
     // Create and commit error log for FFDC and call doShutdown with the RC
     // to initiate a TI
