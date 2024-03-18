@@ -71,10 +71,8 @@ ReturnCode poz_sppe_check_for_ready(
 
         if(i_isHreset == true)
         {
-            // TODO: Need to remove check of 3 once HB and cronus team will be
-            // Stable to check with 6.
-            if (((l_check_for_runtime and SB_MSG.getBits<8, 4>() == 6) or
-                 ((l_check_for_runtime and SB_MSG.getBits<8, 4>() == 3))) or
+
+            if ((l_check_for_runtime and SB_MSG.getBits<8, 4>() == 6) or
                 (not l_check_for_runtime and SB_MSG.getBit<0>()))
             {
                 break;
