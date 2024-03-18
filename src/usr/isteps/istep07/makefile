@@ -63,6 +63,9 @@ OBJS += ody_throttle.o
 OBJS += ody_decoder.o
 OBJS += ody_kind.o
 OBJS += exp_kind.o
+OBJS += ody_temp_sensor_workarounds.o
+OBJS += ody_thermal_init_utils.o
+OBJS += ody_dts_read.o
 
 #Add all the extra include paths
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/plat
@@ -87,6 +90,7 @@ EXTRAINCDIR += ${EXP_COMMON_PATH}/procedures/hwp/pmic/lib/
 EXTRAINCDIR += $(ROOTPATH)/src/import/chips/ocmb/explorer/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/inband/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/utils/
@@ -114,6 +118,8 @@ VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/power_thermal/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/dimm/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/dimm/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/workarounds/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv/
 
 #Required include before all the procedure.mk are included
 include ${ROOTPATH}/procedure.rules.mk

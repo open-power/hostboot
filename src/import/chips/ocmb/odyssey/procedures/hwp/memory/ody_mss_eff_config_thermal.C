@@ -49,6 +49,8 @@
 #include <mss_generic_attribute_getters.H>
 #include <mss_generic_system_attribute_getters.H>
 #include <generic/memory/lib/plug_rules/plug_rules.H>
+#include <lib/workarounds/ody_temp_sensor_workarounds.H>
+
 
 extern "C"
 {
@@ -233,6 +235,12 @@ extern "C"
             {
                 l_thermal_count++;
             }
+        }
+
+        for ( const auto& l_ocmb : i_targets)
+        {
+            FAPI_TRY(mss::ody::workarounds::change_temp_sensor_usage(l_ocmb));
+            FAPI_TRY(mss::ody::workarounds::disable_unused_temp_sensor(l_ocmb));
         }
 
     fapi_try_exit:
