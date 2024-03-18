@@ -420,13 +420,6 @@ struct status_field
 ///
 fapi2::ReturnCode unlock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
-///
-/// @brief Lock PMIC registers R70 to RA3
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
-///
-fapi2::ReturnCode lock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target);
 
 ///
 /// @brief Clear PMIC status registers

@@ -113,13 +113,12 @@ fapi2::ReturnCode unlock_vendor_region(const fapi2::Target<fapi2::TargetType::TA
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
     // Unlock
-    const fapi2::buffer<uint8_t> l_password_low(CONSTS::VENDOR_PASSWORD_LOW);
-    const fapi2::buffer<uint8_t> l_password_high(CONSTS::VENDOR_PASSWORD_HIGH);
-    const fapi2::buffer<uint8_t> l_unlock_code(CONSTS::UNLOCK_VENDOR_REGION);
+    const fapi2::buffer<uint8_t> l_data[] __attribute__ ((aligned (4))) = {CONSTS::VENDOR_PASSWORD_LOW,
+                                                                           CONSTS::VENDOR_PASSWORD_HIGH,
+                                                                           CONSTS::UNLOCK_VENDOR_REGION
+                                                                          };
 
-    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R37_PASSWORD_LOWER_BYTE_0, l_password_low));
-    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R38_PASSWORD_UPPER_BYTE_1, l_password_high));
-    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, REGS::R39_COMMAND_CODES, l_unlock_code));
+    FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(i_pmic_target, REGS::R37_PASSWORD_LOWER_BYTE_0, l_data));
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
@@ -1370,7 +1369,7 @@ fapi2::ReturnCode unlock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
 
     // make sure it is locked to make sure unlock will work afterwards
-    FAPI_TRY(lock_pmic_r70_to_ra3(i_pmic_target));
+    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, TPS_REGS::RA2_REG_LOCK, 0x00));
 
     // unlock R78 to RA3 by writing RA2=0x95 followed by RA2=0x64
     FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, TPS_REGS::RA2_REG_LOCK, 0x95));
@@ -1380,22 +1379,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-///
-/// @brief Lock PMIC registers R70 to RA3
-///
-/// @param[in] i_pmic_target PMIC target
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error
-///
-fapi2::ReturnCode lock_pmic_r70_to_ra3(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target)
-{
-    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
-
-    // lock R78 to RA3 by writing RA2=0x00
-    FAPI_TRY(mss::pmic::i2c::reg_write(i_pmic_target, TPS_REGS::RA2_REG_LOCK, 0x00));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Checks that the PMIC is enabled via VR Enable bit

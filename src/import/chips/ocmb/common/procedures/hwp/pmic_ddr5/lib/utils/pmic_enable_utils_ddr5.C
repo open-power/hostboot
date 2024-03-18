@@ -557,6 +557,13 @@ fapi2::ReturnCode enable_2u(
         // Bias with SPD
         if (l_vendor_id == mss::pmic::vendor::TI)
         {
+            // Unlock DDIMM vendor region
+            // This step has been skipped here as the first step bias_with_spd_settings() does
+            // is to unlock vendor region. Per the power team, the order of unlocking does not matter here
+
+            // Write to reg lock reg
+            FAPI_TRY(mss::pmic::status::unlock_pmic_r70_to_ra3(l_pmic));
+
             FAPI_TRY(mss::pmic::bias_with_spd_settings<mss::pmic::vendor::TI>(l_pmic, i_ocmb_target,
                      static_cast<mss::pmic::id>(l_relative_pmic_id)));
         }
@@ -760,13 +767,10 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
                                   const target_info_redundancy_ddr5& i_target_info)
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
-    using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
     static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
     static const fapi2::buffer<uint8_t> l_pmic_data_to_write[NUM_BYTES_TO_WRITE] = { 0x3C, 0x60 };
-    static const uint8_t RA2_REG_LOCK_SEQ_LENGTH = 3;
-    static const uint8_t l_ra2_reg_lock_seq[RA2_REG_LOCK_SEQ_LENGTH] = { 0x00, 0x95, 0x64 };
 
     for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
     {
@@ -792,10 +796,7 @@ fapi2::ReturnCode initialize_pmic(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
             FAPI_TRY_LAMBDA(mss::pmic::unlock_vendor_region(i_pmic));
 
             // Write to reg lock reg
-            for (auto l_count_ra2_write = 0; l_count_ra2_write < RA2_REG_LOCK_SEQ_LENGTH; l_count_ra2_write++)
-            {
-                FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, TPS_REGS::RA2_REG_LOCK, l_ra2_reg_lock_seq[l_count_ra2_write]));
-            }
+            FAPI_TRY_LAMBDA(mss::pmic::status::unlock_pmic_r70_to_ra3(i_pmic));
 
             // Enable internal ADC and default to temp readings
             FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(i_pmic, REGS::R30, 0xD0));
