@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,8 @@ constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::DENSITY_PER
 #endif
 
 #ifndef __PPE__
+    constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BANK_ADDR_FLD;
+    constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::BANK_GROUP_FLD;
     constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::OPERABLE_VDDQ_FLD;
     constexpr mss::field_t<mss::endian::LITTLE> fields<DDR5, BASE_CNFG>::ENDURANT_VDDQ_FLD;
 #endif

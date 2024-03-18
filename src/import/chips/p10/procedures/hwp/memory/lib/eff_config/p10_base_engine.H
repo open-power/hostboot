@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -710,6 +710,67 @@ class base_0_3 : public base
                       "%s failed DRAM_DENSITY lookup check", spd::c_str(iv_dimm) );
 
             FAPI_TRY(mss::attr::set_dram_density(iv_dimm, l_sdram_density));
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Determines & sets dram bank address bits
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dram_bank_addr_bits(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+            uint8_t l_bank_addr_bits  = 0;
+
+            // Taken from byte 4 of the JEDEC SPD spec for DDR4
+            const std::vector< std::pair<uint8_t, uint8_t> > DRAM_BANK_ADDR_MAP =
+            {
+                {0b00, 2},
+                {0b01, 3},
+            };
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::BANKS_ADDR_BITS, i_spd, SET_BANK_ADDR_BITS, l_field));
+            FAPI_TRY(lookup_table_check(iv_dimm, DRAM_BANK_ADDR_MAP, SET_BANK_ADDR_BITS, l_field, l_bank_addr_bits));
+            FAPI_TRY(mss::attr::set_dram_bank_bits(iv_dimm, l_bank_addr_bits));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Checks the number of bank group bits
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
+        virtual bool check_bank_group_bits(const uint8_t i_field) const
+        {
+            return (i_field <= 0x2);
+        }
+
+        ///
+        /// @brief Determines & sets dram bank group bits
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::FAPI2_RC_SUCCESS if okay
+        ///
+        virtual fapi2::ReturnCode dram_bank_group_bits(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, F::BANK_GROUP_BITS, i_spd, SET_BANK_GROUP_BITS, l_field));
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_bank_group_bits(l_field),
+                                  F::BANK_GROUP_BITS.get_byte(i_spd),
+                                  l_field,
+                                  SET_BANK_GROUP_BITS,
+                                  "BANK_GROUP_BITS"));
+            FAPI_TRY(mss::attr::set_dram_bank_group_bits(iv_dimm, l_field));
+
         fapi_try_exit:
             return fapi2::current_err;
         }
@@ -2467,6 +2528,8 @@ class base_0_3 : public base
             // Base cnfg fields
             FAPI_TRY(set_sdram_density(i_spd));
             FAPI_TRY(set_col_addr_bits(i_spd));
+            FAPI_TRY(dram_bank_addr_bits(i_spd));
+            FAPI_TRY(dram_bank_group_bits(i_spd));
             FAPI_TRY(set_row_addr_bits(i_spd));
             FAPI_TRY(set_prim_die_count(i_spd));
             FAPI_TRY(set_sdram_width(i_spd));

@@ -418,6 +418,59 @@ class base_0_0 : public mss::spd::base
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Checks the number of bank group bits
+        ///
+        /// @param[in] i_field field value
+        /// @return true/false in specified range
+        ///
+        virtual bool check_bank_addr_bits(const uint8_t i_field) const
+        {
+            return (i_field <= 0x2);
+        }
+
+
+        ///
+        /// @brief Set the sdram bank address bits field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_bank_addr_bits(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::BANK_ADDR_FLD, i_spd, SET_BANK_ADDR_BITS, l_field));
+            FAPI_TRY_NO_TRACE(mss::check::invalid_value(
+                                  iv_ocmb,
+                                  check_bank_addr_bits(l_field),
+                                  FIELDS::BANK_ADDR_FLD.get_byte(i_spd),
+                                  l_field,
+                                  SET_BANK_ADDR_BITS,
+                                  "BANK_ADDR_BITS"));
+            FAPI_TRY(mss::attr::set_dram_bank_bits(iv_dimm, l_field));
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        ///
+        /// @brief Set the sdram bank address bits field
+        ///
+        /// @param[in] i_spd SPD binary
+        /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_bank_group_bits(const std::vector<uint8_t>& i_spd) const
+        {
+            uint8_t l_field = 0;
+
+            // Currently no checking needed.
+            // Updated the field to just be bits 1:2 so this can be a direct map
+            FAPI_TRY(get_field_spd(iv_ocmb, FIELDS::BANK_GROUP_FLD, i_spd, SET_BANK_GROUP_BITS, l_field));
+            FAPI_TRY(mss::attr::set_dram_bank_group_bits(iv_dimm, l_field));
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
         /// @brief Set the burst length field
         ///
         /// @param[in] i_spd SPD binary
@@ -1331,6 +1384,8 @@ class base_0_0 : public mss::spd::base
             // Base cnfg fields
             FAPI_TRY(set_sdram_density(i_spd));
             FAPI_TRY(set_col_addr_bits(i_spd));
+            FAPI_TRY(set_bank_addr_bits(i_spd));
+            FAPI_TRY(set_bank_group_bits(i_spd));
             FAPI_TRY(set_row_addr_bits(i_spd));
             FAPI_TRY(set_prim_stack_type(i_spd));
             FAPI_TRY(set_phy_per_ocmb(i_spd));

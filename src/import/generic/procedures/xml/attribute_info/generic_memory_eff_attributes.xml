@@ -183,6 +183,8 @@
     <valueType>uint8</valueType>
     <writeable/>
     <array>2</array>
+    <noSBEAccessor/>
+    <mssAccessorName>dram_bank_group_bits</mssAccessorName>
   </attribute>
 
   <attribute>
