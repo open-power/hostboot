@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -214,6 +214,22 @@ extern errlHndl_t main( ATTENTION_VALUE_TYPE i_attnType,
  *  @return Error log if error occurs
  */
 extern errlHndl_t refresh();
+
+#ifdef __HOSTBOOT_MODULE
+
+/**
+ * @brief Calls PRD 'main' to analyze an input OCMB for channel fail (UNIT_CS)
+ *        attentions. A PRD error log will be created and committed. Note: This
+ *        function should NOT be called anywhere within PRD itself, as calling
+ *        PRD's 'main' function recursively will cause problems. Currently
+ *        only intended for use in Hostboot.
+ * @param i_ocmb - input OCMB to analyze
+ * @return Error log if error occurs. Unless something unexpected occurs, PRD
+ *         should commit the error log itself and return nullptr.
+ */
+extern errlHndl_t analyzeOcmbChnlFail(TARGETING::TargetHandle_t i_ocmb);
+
+#endif
 
 } // End namespace PRDF
 

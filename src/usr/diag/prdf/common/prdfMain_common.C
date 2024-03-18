@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -441,6 +441,45 @@ errlHndl_t refresh()
 
     return l_errl;
 }
+
+//------------------------------------------------------------------------------
+
+#ifdef __HOSTBOOT_MODULE
+
+errlHndl_t analyzeOcmbChnlFail(TARGETING::TargetHandle_t i_ocmb)
+{
+    // Note: This function should NOT be called anywhere within PRD itself, as
+    // calling PRD's 'main' function recursively will cause problems.
+
+    // Confirm that the input target was an OCMB_CHIP
+    if ( TYPE_OCMB_CHIP != getTargetType(i_ocmb) )
+    {
+        PRDF_ERR("PRDF::analyzeOcmbChnlFail: Target passed in is not an OCMB. "
+                 "i_ocmb huid=0x%08x", getHuid(i_ocmb));
+
+        uint64_t userdata12 = PRDF_GET_UINT64_FROM_UINT32(getHuid(i_ocmb), 0);
+        uint64_t userdata34 = PRDF_GET_UINT64_FROM_UINT32(0, 0);
+
+        errlHndl_t o_errl = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_PREDICTIVE, ModuleId::PRDF_MAIN,
+            ReasonCode::PRDF_DETECTED_FAIL_SOFTWARE, userdata12, userdata34);
+
+        o_errl->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                    HWAS::SRCI_PRIORITY_HIGH);
+
+        o_errl->collectTrace(PRDF_COMP_NAME, 512);
+
+        return o_errl;
+    }
+
+    AttnData data = AttnData(i_ocmb, ATTENTION_VALUE_TYPE::UNIT_CS);
+    AttnList list;
+    list.push_back(data);
+
+    return PRDF::main(ATTENTION_VALUE_TYPE::UNIT_CS, list);
+}
+
+#endif
 
 //------------------------------------------------------------------------------
 
