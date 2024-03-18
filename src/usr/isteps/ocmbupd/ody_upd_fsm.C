@@ -792,7 +792,6 @@ errlOwner execute_actions(Target* const i_ocmb,
 
     bool manually_set_errl_sev = false;
     bool apply_gard_record = false;
-    bool force_sync_images = false;
 
     for (const auto& action : i_transition.actions)
     {
@@ -841,19 +840,40 @@ errlOwner execute_actions(Target* const i_ocmb,
                 */
                 if (i_state.ocmb_boot_side != GOLDEN)
                 {
-                    if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, false /* not forced */))
+                    errlOwner sync_err;
+                    if (sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, /*force_sync=*/false))
                     {
-                        TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest failed in perform_code_update: "
+                        TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest(normal) failed in perform_code_update "
+                              "(attempting forced sync)"
                               TRACE_ERR_FMT,
                               get_huid(i_ocmb),
                               TRACE_ERR_ARGS(sync_err));
 
-                        return ody_upd_process_event(i_ocmb,
-                                                     // this action is code update, so this is counted
-                                                     // as a CODE_UPDATE_CHIPOP_FAILURE
-                                                     CODE_UPDATE_CHIPOP_FAILURE,
-                                                     errlOwner(sync_err),
-                                                     o_restart_needed);
+                        if (!sync_err->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED))
+                        { // Only force a sync if the SPPE is not dead from the last op.
+                            if (errlOwner forced_sync_err { SBEIO::sendSyncCodeLevelsRequest(i_ocmb, /*force_sync=*/true) })
+                            {
+                                TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest(forced) failed in perform_code_update: "
+                                      TRACE_ERR_FMT,
+                                      get_huid(i_ocmb),
+                                      TRACE_ERR_ARGS(forced_sync_err));
+                                aggregate(sync_err, move(forced_sync_err), /*link_plids=*/true);
+                            }
+                            else
+                            {
+                                sync_err = nullptr;
+                            }
+                        }
+
+                        if (sync_err)
+                        {
+                            return ody_upd_process_event(i_ocmb,
+                                                         // this action is code update, so this is counted
+                                                         // as a CODE_UPDATE_CHIPOP_FAILURE
+                                                         CODE_UPDATE_CHIPOP_FAILURE,
+                                                         move(sync_err),
+                                                         o_restart_needed);
+                        }
                     }
                 }
 
@@ -934,21 +954,54 @@ errlOwner execute_actions(Target* const i_ocmb,
             case fail_boot_bad_firmware:
                 errl = create_boot_fail_bad_firmware_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event);
                 break;
-            case sync_images_forced:
+
             case sync_images_normal:
-                force_sync_images = (action == sync_images_forced) || i_ocmb->getAttr<ATTR_OCMB_FORCE_IMAGE_SYNC>();
-                if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, force_sync_images))
+                if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, /*force_sync=*/false))
                 {
-                    TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest failed: "
+                    TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest(normal) failed: "
                           TRACE_ERR_FMT,
                           get_huid(i_ocmb),
                           TRACE_ERR_ARGS(sync_err));
 
+                    aggregate(errl, sync_err);
+                }
+                else
+                {
+                    // Sync succeeded; done handling this action
+                    break;
+                }
+
+                // Fall through; if a normal image sync fails, perform a forced one.
+
+            case sync_images_forced:
+                if (!errl || !errl->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED))
+                { // Only force a sync if the SPPE isn't dead from the last operation.
+                    if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, /*force_sync=*/true))
+                    {
+                        TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest(forced) failed "
+                              "(attempting forced sync)"
+                              TRACE_ERR_FMT,
+                              get_huid(i_ocmb),
+                              TRACE_ERR_ARGS(sync_err));
+
+                        aggregate(errl, sync_err);
+                    }
+                    else
+                    {
+                        // If there was an error from a normal sync above,
+                        // delete it if the forced sync succeeded.
+                        errl = nullptr;
+                    }
+                }
+
+                if (errl)
+                {
                     return ody_upd_process_event(i_ocmb,
                                                  IMAGE_SYNC_CHIPOP_FAILURE,
-                                                 errlOwner(sync_err),
+                                                 move(errl),
                                                  o_restart_needed);
                 }
+
                 break;
             case retry_check_for_ready:
                 o_restart_needed = true;
