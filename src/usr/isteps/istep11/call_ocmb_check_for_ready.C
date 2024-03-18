@@ -612,9 +612,22 @@ errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
     }
 
     // Check whether the SBE is running or not.
-    if (!l_fsm_errl || !l_fsm_errl->hasUserData1(fapi2::RC_POZ_SPPE_NOT_READY_ERR))
+    bool async_ffdc = false;
+
+    // Check for async ffdc.
+    // Ignore any error from ody_has_async_ffdc; we don't care whether it fails.
+    // We are assuming here that if the async FFDC bit is set, then,
+    // regardless of whether check_for_ready determined that the SPPE did not
+    // reach the "runtime" state successfully, the SPPE can receive and
+    // respond to chipops.
+    // It may happen that the SPPE could encounter an error, set the async ffdc
+    // bit, and then crash before halting the boot, so that we see the async
+    // ffdc bit set, but the SPPE cannot respond to chipops. We have estimated
+    // that the likelihood of this happening is not high enough to counter
+    // the usefulness of trying to obtain FFDC on an async boot failure.
+    if (errlOwner l_errlLocal(ody_has_async_ffdc(i_ocmb, async_ffdc));
+        async_ffdc)
     {
-        // If the SPPE isn't halted, then we check for async ffdc.
         // Grab any async FFDC. If there is any async FFDC generated,
         // SPPE will by design attach all of the FFDC to the response to
         // NEXT chip-op that comes in, whatever it may be. So, we need to
@@ -623,41 +636,45 @@ errlOwner handle_ody_upd_hwps_done(Target* const i_ocmb,
         // aggregate them all into one error log and that will be
         // passed to the FSM to decide what to do with them.
 
-        bool async_ffdc = false;
-        if (errlOwner l_errlLocal(ody_has_async_ffdc(i_ocmb, async_ffdc)); async_ffdc)
-        { // ignore any error from ody_has_async_ffdc; we don't care whether it fails.
-            errlHndl_t async_ffdc_errls = nullptr;
-            errlOwner chipop_fail = genFifoSBEFFDCErrls(i_ocmb, async_ffdc_errls);
+        errlHndl_t async_ffdc_errls = nullptr;
+        errlOwner chipop_fail = genFifoSBEFFDCErrls(i_ocmb, async_ffdc_errls);
 
-            if (chipop_fail)
-            {
-                TRACISTEP("getFifoSBEFFDCErrls failed for chip 0x%08X: "
-                          TRACE_ERR_FMT,
-                          get_huid(i_ocmb),
-                          TRACE_ERR_ARGS(chipop_fail));
-                errlCommit(chipop_fail, ISTEP_COMP_ID);
+        if (chipop_fail)
+        {
+            if (chipop_fail->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED))
+            { // If the chipop timed out, we assume the SPPE is dead.
+                l_event = OCMB_BOOT_ERROR_NO_FFDC;
+                aggregate(l_fsm_errl, async_ffdc_errls, /*update_plids=*/true);
             }
 
-            if (async_ffdc_errls)
+            TRACISTEP("getFifoSBEFFDCErrls failed for chip 0x%08X: "
+                      TRACE_ERR_FMT,
+                      get_huid(i_ocmb),
+                      TRACE_ERR_ARGS(chipop_fail));
+            errlCommit(chipop_fail, ISTEP_COMP_ID);
+        }
+
+        if (async_ffdc_errls)
+        {
+            if (l_event == NO_EVENT)
             {
-                if (l_event == NO_EVENT)
-                {
-                    // if check_for_ready did not fail, then we don't
-                    // want the existence of async FFDC to cause the
-                    // boot to halt.
-                    errlCommit(async_ffdc_errls, ISTEP_COMP_ID);
-                }
-                else
-                {
-                    l_event = OCMB_BOOT_ERROR_WITH_FFDC;
-                    aggregate(l_fsm_errl, async_ffdc_errls);
-                }
+                // if check_for_ready did not fail, then we don't
+                // want the existence of async FFDC to cause the
+                // boot to halt.
+                errlCommit(async_ffdc_errls, ISTEP_COMP_ID);
+            }
+            else
+            {
+                l_event = OCMB_BOOT_ERROR_WITH_FFDC;
+                aggregate(l_fsm_errl, async_ffdc_errls, /*update_plids=*/true);
             }
         }
     }
-    else
+
+    //l_fsm_errl && l_fsm_errl->hasUserData1(fapi2::RC_POZ_SPPE_NOT_READY_ERR)
+    if (l_event == OCMB_BOOT_ERROR_NO_FFDC)
     {
-        TRACISTEP("handle_ody_upd_hwps_done(0x%08X): RC_POZ_SPPE_NOT_READY_ERR indicates "
+        TRACISTEP("handle_ody_upd_hwps_done(0x%08X): analysis indicates "
                   "that the SBE is not running",
                   get_huid(i_ocmb));
 
