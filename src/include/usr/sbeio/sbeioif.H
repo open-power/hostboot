@@ -40,6 +40,15 @@ namespace SBEIO
     {
         SBE_FIFO_EXEC_HWP_CLASS_IO     = 0x01,
         SBE_FIFO_EXEC_HWP_CLASS_MEMORY = 0x02,
+        SBE_FIFO_EXEC_HWP_CLASS_MISC   = 0xFF,
+    };
+
+    /**
+     * @brief enum for all valid MISC class type messages for Execute Hardware Procedure
+     */
+    enum fifoExecuteHardwareProcedureMisc
+    {
+        MISC_ODY_HWP_SEQUENCE_COMPLETE  = 0x01,
     };
 
     /**
@@ -803,10 +812,12 @@ namespace SBEIO
     * @return errlHndl_t Error log handle on failure.
     *
     */
-    errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
-                                  fifoExecuteHardwareProcedureIo i_hwpNumber);
-    errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
+    errlHndl_t sendExecHWPRequest(TARGETING::Target                 *i_chipTarget,
+                                  fifoExecuteHardwareProcedureIo     i_hwpNumber);
+    errlHndl_t sendExecHWPRequest(TARGETING::Target                 *i_chipTarget,
                                   fifoExecuteHardwareProcedureMemory i_hwpNumber);
+    errlHndl_t sendExecHWPRequest(TARGETING::Target                 *i_chipTarget,
+                                  fifoExecuteHardwareProcedureMisc   i_hwpNumber);
 
     /**
      * @brief Send the request to update the attributes on SPPE with the generated

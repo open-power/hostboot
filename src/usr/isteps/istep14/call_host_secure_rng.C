@@ -53,6 +53,7 @@
 //  targeting support
 #include <targeting/common/commontargeting.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/odyutil.H>
 
 //  MVPD
 #include <devicefw/userif.H>
@@ -69,10 +70,14 @@
 #include <i2c/i2c.H>
 #include <i2c/i2c_common.H>
 
+#include <sbeio/sbeioif.H>
+#include <chipids.H>
+
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 using namespace ERRORLOG;
 using namespace TARGETING;
+using namespace SBEIO;
 
 namespace ISTEP_14
 {
@@ -261,6 +266,37 @@ void* call_host_secure_rng(void* const io_pArgs)
         } // end SECUREBOOT::enabled
 #endif
     } // end of going through all processors
+
+    //--------------------------------------------------------------------------
+    // loop through the Odyssey OCMBs in the system
+    //   send a HWP to the Odyssey SBE to signal that no more HWP chipops should be sent
+    //   This is part of a security enforcement requirement for runtime use
+    //--------------------------------------------------------------------------
+    for (const auto l_ocmb : composable(getChipResources)(TYPE_OCMB_CHIP,
+                                                          UTIL_FILTER_FUNCTIONAL))
+    {
+        if (UTIL::isOdysseyChip(l_ocmb))
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "call_host_secure_rng: running OCMB "
+                "HWP poz_exec_hwp_sequence_complete on "
+                "huid=0x%08X ", get_huid(l_ocmb));
+            l_err = sendExecHWPRequest(l_ocmb, MISC_ODY_HWP_SEQUENCE_COMPLETE);
+            if (l_err)
+            {
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "call_host_secure_rng: Deconfiguring OCMB "
+                    "due to HWP poz_exec_hwp_sequence_complete failure: "
+                    "huid=0x%08X ", get_huid(l_ocmb));
+                l_err->addHwCallout(l_ocmb,
+                                    HWAS::SRCI_PRIORITY_MED,
+                                    HWAS::DECONFIG,
+                                    HWAS::GARD_NULL);
+                l_err->collectTrace(ISTEP_COMP_NAME);
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
+        }
+    }
 
     TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
               "call_host_secure_rng exit");

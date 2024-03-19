@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -129,6 +129,39 @@ namespace SBEIO
         SBE_TRACD(EXIT_MRK "sendExecHWPRequest");
         return errl;
     } // end sendExecHWPRequest
+
+
+    // Wrapper for an Odyssey MISC HWP
+    // See sbeioif.H for definition
+    errlHndl_t sendExecHWPRequest(TARGETING::Target               *i_chipTarget,
+                                  fifoExecuteHardwareProcedureMisc i_hwpNumber)
+    {
+        errlHndl_t errl = nullptr;
+
+        do
+        {
+            // Make sure the target is one of the supported types.
+            errl = sbeioInterfaceChecks(i_chipTarget,
+                                        SbeFifo::SBE_FIFO_CLASS_IPL_CONTROL,
+                                        SbeFifo::SBE_FIFO_CMD_EXECUTE_HWP);
+            if(errl)
+            {
+                break;
+            }
+
+            // Send the HWP request
+            errl = sendExecHWPRequest(i_chipTarget,
+                                      SBE_FIFO_EXEC_HWP_CLASS_MISC,
+                                      i_hwpNumber);
+            if(errl)
+            {
+                break;
+            }
+
+        } while(0);
+
+        return errl;
+    }
 
 
     // Wrapper for an Odyssey IO HWP
