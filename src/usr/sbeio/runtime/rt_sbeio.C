@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -794,6 +794,40 @@ namespace RT_SBEIO
         return l_err;
     }
 
+    /**
+     * @brief Function to process PMIC DDR5 health check pass-through command
+     *
+     * @param[in]  i_procTgt      HB processor target
+     * @param[in]  i_reqDataSize  Pass-through command request data size
+     * @param[in]  i_reqData      Pass-through command request data
+     * @param[out] o_rspStatus    Pass-through command response status
+     * @param[out] o_rspDataSize  Pass-through command response data size
+     * @param[out] o_rspData      Pass-through command response data
+     *
+     * @return errlHndl_t    Error log handle on failure.
+     */
+    errlHndl_t pmic_ddr5_health_check_wrapper(TARGETING::TargetHandle_t i_procTgt,
+                                              uint32_t i_reqDataSize,
+                                              uint8_t* i_reqData,
+                                              uint32_t* o_rspStatus,
+                                              uint32_t* o_rspDataSize,
+                                              uint8_t* o_rspData)
+    {
+        errlHndl_t l_err = nullptr;
+
+        *o_rspStatus = 0;
+        *o_rspDataSize = 0;
+        *o_rspData = 0;
+
+        l_err = SBEIO::getAllPmicHealthCheckData(true);
+
+        if (l_err)
+        {   // if error, return a bad status
+            *o_rspStatus = 0xFFFFFFFF; // -1
+        }
+
+        return l_err;
+    }
     //------------------------------------------------------------------------
 
     struct registerSbeio
@@ -833,6 +867,8 @@ namespace RT_SBEIO
             {
                 SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_PMIC_HLTH_CHK,
                                                pmic_health_check_wrapper);
+                SBE_MSG::setProcessCmdFunction(PASSTHRU_HBRT_PMIC_DDR5_HLTH_CHK,
+                                               pmic_ddr5_health_check_wrapper);
             }
        }
     };

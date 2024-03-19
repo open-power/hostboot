@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,7 +91,9 @@ namespace SBE_MSG
         PASSTHRU_HBRT_OVERRIDE_ATTR = 0x00E10002, // HBRT Apply Override
                                                   // attributes
         PASSTHRU_HBRT_OVERRIDE_VPD  = 0x00E10003, // HBRT Apply VPD Override
-        PASSTHRU_HBRT_PMIC_HLTH_CHK = 0x00E10004, // HBRT PMIC health check data
+
+        PASSTHRU_HBRT_PMIC_HLTH_CHK      = 0x00E10004, // HBRT PMIC health check data
+        PASSTHRU_HBRT_PMIC_DDR5_HLTH_CHK = 0x00E10005, // HBRT PMIC DDR5 health check data
     };
 
 
