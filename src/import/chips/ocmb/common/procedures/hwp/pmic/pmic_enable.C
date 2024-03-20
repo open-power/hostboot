@@ -60,22 +60,28 @@ extern "C"
         // Check if there are any DIMM targets
         if (mss::count_dimm(i_ocmb_target) == 0)
         {
-            FAPI_INF("Skipping " GENTARGTIDFORMAT " because it has no DIMM targets", GENTARGTID(i_ocmb_target));
+            FAPI_INF_NO_SBE("Skipping " GENTARGTIDFORMAT " because it has no DIMM targets", GENTARGTID(i_ocmb_target));
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
         // We need to run pmic_enable for ddr4 or ddr5 based on the DRAM gen attribute
         // We just need get dram gen of 1 dimm
         // This is ok because we do not allow mixing of DRAM generation
-        for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_ocmb_target))
+        for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_ocmb_target))
         {
-            FAPI_TRY(mss::attr::get_dram_gen(l_dimm, l_dram_gen));
+            uint8_t l_value[2] = {};
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_GEN, l_port, l_value) );
+            l_dram_gen = l_value[0];
             break;
         }
 
         if (l_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4)
         {
+#ifndef __PPE__
             FAPI_TRY(mss::pmic::ddr4::pmic_enable(i_ocmb_target, i_mode));
+#else
+            FAPI_INF_NO_SBE("l_dram_gen is found to be DDR4, exiting pmic_enable");
+#endif
         }
         else
         {

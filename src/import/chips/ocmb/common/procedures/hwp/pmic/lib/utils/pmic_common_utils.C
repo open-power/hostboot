@@ -1971,7 +1971,11 @@ fapi_try_exit:
 fapi2::ReturnCode reset_n_mode_attrs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb)
 {
     uint8_t l_n_mode = 0x00;
+#ifdef __PPE__
+    fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_PMIC_4U_N_MODE = l_n_mode;
+#else
     FAPI_TRY(mss::attr::set_pmic_n_mode(i_ocmb, l_n_mode));
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;

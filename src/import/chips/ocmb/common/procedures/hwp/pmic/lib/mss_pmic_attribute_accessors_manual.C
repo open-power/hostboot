@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,8 +60,12 @@ fapi2::ReturnCode get_n_mode_helper(
     fapi2::buffer<uint8_t> l_attr_buffer;
     uint8_t l_attr = 0;
 
+#ifdef __PPE__
+    l_attr = fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_PMIC_4U_N_MODE;
+#else
     // Get current state
     FAPI_TRY(mss::attr::get_pmic_n_mode(i_ocmb, l_attr));
+#endif
     l_attr_buffer = l_attr;
 
     // Grab matching bit
@@ -87,14 +91,22 @@ fapi2::ReturnCode set_n_mode_helper(
     fapi2::buffer<uint8_t> l_attr_buffer;
     uint8_t l_attr = 0;
 
+#ifdef __PPE__
+    l_attr = fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_PMIC_4U_N_MODE;
+#else
     // Get current state
     FAPI_TRY(mss::attr::get_pmic_n_mode(i_ocmb, l_attr));
+#endif
     l_attr_buffer = l_attr;
 
     FAPI_TRY(l_attr_buffer.writeBit(i_n_mode, i_pmic_id));
 
+#ifdef __PPE__
+    fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_PMIC_4U_N_MODE = l_attr_buffer;
+#else
     // Using () operator to grab buffer.iv_data
     FAPI_TRY(mss::attr::set_pmic_n_mode(i_ocmb, l_attr_buffer()));
+#endif
 
 fapi_try_exit:
     return fapi2::current_err;
