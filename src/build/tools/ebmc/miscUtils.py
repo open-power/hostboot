@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -41,10 +41,12 @@ import sys
 # Listed in order of priority, i.e. HOSTBOOT_TRACE_DIR takes highest priority if found, etc.
 LID_SEARCH_DIRS = [ os.getenv('HOSTBOOT_TRACE_DIR'),                    # ENV VAR OVERRIDE HOSTBOOT
                     os.getenv('SBE_TRACE_DIR'),                         # ENV VAR OVERRIDE SBE
-                    os.getenv('OCC_TRACE_DIR'),                         # ENV VAR OVERRIDE SBE
-                    os.getenv('HCODE_TRACE_DIR'),                       # ENV VAR OVERRIDE SBE
+                    os.getenv('ODY_SBE_TRACE_DIR'),                     # ENV VAR OVERRIDE ODY SBE
+                    os.getenv('OCC_TRACE_DIR'),                         # ENV VAR OVERRIDE OCC
+                    os.getenv('HCODE_TRACE_DIR'),                       # ENV VAR OVERRIDE HCODE
                     os.path.join(sys.prefix, 'hostboot_data'),          # data_files exported from Hostboot
                     os.path.join(sys.prefix, 'sbe_data'),               # data_files exported from SBE
+                    os.path.join(sys.prefix, 'ody_data'),               # data_files exported from ODY
                     os.path.join(sys.prefix, 'occ_data'),               # data_files exported from OCC
                     os.path.join(sys.prefix, 'hcode_data'),             # data_files exported from HCODE
                     "/usr/local/share/hostfw/running",                  # The BMC patch directory
@@ -61,6 +63,8 @@ lid_dict = {
     "81e0068f.lid" : "QMESTRINGFILE",
     "81e00690.lid" : "XGPESTRINGFILE",
     "81e00691.lid" : "PGPESTRINGFILE",
+    "81e006bd.lid" : "odysseySppeStringFile_DD1",
+    "81e006be.lid" : "ODYGLDNSTRINGFILE",
 }
 
 """ Searches the directories in the list 'LID_SEARCH_DIRS' for the given
