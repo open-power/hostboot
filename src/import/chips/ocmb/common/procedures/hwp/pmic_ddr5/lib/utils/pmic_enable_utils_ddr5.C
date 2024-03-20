@@ -1233,8 +1233,12 @@ fapi2::ReturnCode process_n_mode_results(const target_info_redundancy_ddr5& i_ta
     FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC2, l_n_mode_pmic[PMIC2]));
     FAPI_TRY(mss::attr::get_n_mode_helper(i_target_info.iv_ocmb, PMIC3, l_n_mode_pmic[PMIC3]));
 
+#ifdef __PPE__
+    l_force_n_mode = fapi2::ATTR::TARGET_TYPE_OCMB_CHIP::ATTR_MEM_PMIC_FORCE_N_MODE;
+#else
     // Overridden to an N mode configuration
     FAPI_TRY(mss::attr::get_pmic_force_n_mode(i_target_info.iv_ocmb, l_force_n_mode));
+#endif
     l_force_n_mode_buffer = l_force_n_mode;
 
     // Check N-mode override attribute states
