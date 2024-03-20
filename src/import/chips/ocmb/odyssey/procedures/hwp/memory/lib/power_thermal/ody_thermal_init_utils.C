@@ -401,11 +401,13 @@ fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
     // If the current error is not successful, mark it as recovered
     if(fapi2::current_err != fapi2::FAPI2_RC_SUCCESS)
     {
+        // Create a temporary error as fapi2::current_err is overwritten with the FAPI_TRY
+        auto l_rc = fapi2::current_err;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SENSOR_READ_FIRST_FAIL, i_ocmb, l_err_track));
 
         if(l_err_track[i_sensor_pos] == fapi2::ENUM_ATTR_ODY_SENSOR_READ_FIRST_FAIL_FALSE)
         {
-            fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
             l_err_track[i_sensor_pos] = fapi2::ENUM_ATTR_ODY_SENSOR_READ_FIRST_FAIL_TRUE;
             FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_SENSOR_READ_FIRST_FAIL, i_ocmb, l_err_track));
         }
@@ -415,7 +417,7 @@ fapi2::ReturnCode process_results(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
         // However, this code will be called within an asynchronous thread running on the SPPE
         // As such, fapi asserts and log errors will not work
         // The SPPE and hostboot teams agreed that discarding the error is the correct approach
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        l_rc = fapi2::FAPI2_RC_SUCCESS;
 
         // Note: the cache registers use the same API, using D0THERM for the enumerated bits
         i_data.setBit<scomt::ody::ODC_MMIO_SNSC_D0THERM_ERRORBIT>();
