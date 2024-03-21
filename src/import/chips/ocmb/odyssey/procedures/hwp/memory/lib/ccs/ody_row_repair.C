@@ -439,25 +439,25 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
                         fapi2::ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS().
                         set_DIMM_TARGET(i_target).
                         set_DRAM(l_entry.iv_dram).
-                        set_DRAM_MAX(l_num_dram).
+                        set_DRAM_MAX_INDEX(l_num_dram - 1).
                         set_MRANK(l_dimm_rank).
                         set_SRANK(l_logical_srank).
-                        set_SRANK_MAX(MAX_SRANK).
+                        set_SRANK_MAX_INDEX(MAX_SRANK - 1).
                         set_BANK_GROUP(l_logical_bg).
-                        set_BANK_GROUP_MAX(MAX_BANK_GROUP).
+                        set_BANK_GROUP_MAX_INDEX(MAX_BANK_GROUP - 1).
                         set_BANK(l_logical_bank).
-                        set_BANK_MAX(MAX_BANKS).
+                        set_BANK_MAX_INDEX(MAX_BANKS - 1).
                         set_ROW(l_logical_row).
-                        set_ROW_MAX(MAX_ROW),
+                        set_ROW_MAX_INDEX(MAX_ROW - 1),
 #ifndef __PPE__
-                        TARGTIDFORMAT " SPD contained out of bounds row repair entry: DRAM: %d MAX: %d mrank %d srank %d MAX: %d"
+                        TARGTIDFORMAT " SPD contained out of bounds indices for row repair entry: DRAM: %d MAX: %d mrank %d srank %d MAX: %d"
                         "bg %d MAX: %d bank %d MAX: %d row 0x%05x MAX: 0x%05x",
-                        TARGTID, l_entry.iv_dram, l_num_dram, l_dimm_rank, l_logical_srank, MAX_SRANK,
-                        l_logical_bg, MAX_BANK_GROUP, l_logical_bank, MAX_BANKS, l_logical_row, MAX_ROW
+                        TARGTID, l_entry.iv_dram, l_num_dram - 1, l_dimm_rank, l_logical_srank, MAX_SRANK - 1,
+                        l_logical_bg, MAX_BANK_GROUP - 1, l_logical_bank, MAX_BANKS - 1, l_logical_row, MAX_ROW - 1
 
 #else
-                        TARGTIDFORMAT " SPD contained out of bounds row repair entry: DRAM: %d MAX: %d mrank %d"
-                        TARGTID, l_entry.iv_dram, l_num_dram, l_dimm_rank
+                        TARGTIDFORMAT " SPD contained out of bounds indices for row repair entry: DRAM: %d MAX: %d mrank %d"
+                        TARGTID, l_entry.iv_dram, l_num_dram - 1, l_dimm_rank
 
 #endif
                        );

@@ -58,16 +58,16 @@
     </description>
     <ffdc>DIMM_TARGET</ffdc>
     <ffdc>DRAM</ffdc>
-    <ffdc>DRAM_MAX</ffdc>
+    <ffdc>DRAM_MAX_INDEX</ffdc>
     <ffdc>MRANK</ffdc>
     <ffdc>SRANK</ffdc>
-    <ffdc>SRANK_MAX</ffdc>
+    <ffdc>SRANK_MAX_INDEX</ffdc>
     <ffdc>BANK_GROUP</ffdc>
-    <ffdc>BANK_GROUP_MAX</ffdc>
+    <ffdc>BANK_GROUP_MAX_INDEX</ffdc>
     <ffdc>BANK</ffdc>
-    <ffdc>BANK_MAX</ffdc>
+    <ffdc>BANK_MAX_INDEX</ffdc>
     <ffdc>ROW</ffdc>
-    <ffdc>ROW_MAX</ffdc>
+    <ffdc>ROW_MAX_INDEX</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>

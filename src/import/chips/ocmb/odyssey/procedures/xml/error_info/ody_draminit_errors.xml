@@ -440,7 +440,7 @@
     <description>Bad rank index passed to swizzle function</description>
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>RANK</ffdc>
-    <ffdc>MAX_RANK</ffdc>
+    <ffdc>MAX_RANK_INDEX</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -460,7 +460,7 @@
     <description>Bad dbyte index passed to swizzle function</description>
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>DBYTE</ffdc>
-    <ffdc>MAX_DBYTE</ffdc>
+    <ffdc>MAX_DBYTE_INDEX</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

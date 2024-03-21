@@ -346,17 +346,17 @@ fapi2::ReturnCode swizzle_bad_bits_phy_to_mc(const fapi2::Target<fapi2::TARGET_T
                 fapi2::ODY_OUT_OF_BOUNDS_RANK_PASSED_TO_SWIZZLE().
                 set_PORT_TARGET(i_target).
                 set_RANK(i_phy_rank).
-                set_MAX_RANK(MAX_RANK_PER_PHY - 1),
-                TARGTIDFORMAT " bad rank (%d) passed to swizzle function (must be less than %d)",
-                TARGTID, i_phy_rank, MAX_RANK_PER_PHY);
+                set_MAX_RANK_INDEX(MAX_RANK_PER_PHY - 1),
+                TARGTIDFORMAT " bad rank (%d) passed to swizzle function (index must be less than or equal to %d)",
+                TARGTID, i_phy_rank, MAX_RANK_PER_PHY - 1);
 
     FAPI_ASSERT(i_dbyte < MAX_BYTES_PER_PORT,
                 fapi2::ODY_OUT_OF_BOUNDS_DBYTE_PASSED_TO_SWIZZLE().
                 set_PORT_TARGET(i_target).
                 set_DBYTE(i_dbyte).
-                set_MAX_DBYTE(MAX_BYTES_PER_PORT - 1),
-                TARGTIDFORMAT " bad dbyte (%d) passed to swizzle function (must be less than %d)",
-                TARGTID, i_dbyte, MAX_BYTES_PER_PORT);
+                set_MAX_DBYTE_INDEX(MAX_BYTES_PER_PORT - 1),
+                TARGTIDFORMAT " bad dbyte (%d) passed to swizzle function (index must be less than or equal to %d)",
+                TARGTID, i_dbyte, MAX_BYTES_PER_PORT - 1);
 
     for (uint8_t l_mc_dq = 0; l_mc_dq < BITS_PER_BYTE; l_mc_dq++)
     {
