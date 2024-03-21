@@ -469,8 +469,8 @@ function _setDebugPaths_()
             echo "ERROR: Could not find hostboot commit hash with given package name:'$build_tag'"
             return 1
         fi
-        sys_type=${pnor_release:3}
-        FFDC_DRIVER_DIR="/afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build_savedOutput/$sys_type/ship/hostboot-p10-$hb_commit_hash"
+
+        FFDC_DRIVER_DIR="/afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build_savedOutput/p10ebmc/ship/hostboot-p10-$hb_commit_hash"
         _writeLog_ "Driver Path: ${FFDC_DRIVER_DIR}"
 
         # Path to the images dir
