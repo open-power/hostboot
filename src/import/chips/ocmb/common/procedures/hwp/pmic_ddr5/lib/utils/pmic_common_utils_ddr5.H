@@ -427,8 +427,10 @@ struct __attribute__((__packed__)) health_check_telemetry_data
 {
     aggregate_state iv_aggregate_state = aggregate_state::N_PLUS_1;
 
-    uint8_t reserved = 0;
-    uint16_t reserved1 = 0;
+    // Revision of this struct formatting, to be updated
+    // when the structure changes
+    uint8_t iv_revision = 0x51;
+    uint16_t reserved   = 0;
 
     dt_health_check_telemetry iv_dt[CONSTS::NUM_DTS_4U];
 
@@ -542,6 +544,13 @@ struct __attribute__ ((__packed__)) adc_periodic_telemetry_data
 ///
 struct __attribute__ ((__packed__)) pmic_periodic_telemetry_data
 {
+    // Status register
+    // Direct read from 8 bit register
+    uint8_t iv_r08 = 0;
+    uint8_t iv_r09 = 0;
+    uint8_t iv_r0a = 0;
+    uint8_t iv_r0b = 0;
+
     // Values in mA
     uint16_t iv_swa_current_mA     = 0;
     uint16_t iv_swb_current_mA     = 0;
@@ -551,10 +560,14 @@ struct __attribute__ ((__packed__)) pmic_periodic_telemetry_data
     uint16_t iv_r31_sample_vin     = 0;
     uint16_t iv_r31_sample_temp    = 0;
 
+    uint8_t iv_r73_status_5       = 0;
     uint8_t iv_r7c_set_swa_offset = 0;
     uint8_t iv_r7d_set_swb_offset = 0;
     uint8_t iv_r7e_set_swc_offset = 0;
+
     uint8_t iv_r7f_set_swd_offset = 0;
+    uint8_t reserved              = 0;
+    uint16_t reserved1            = 0;
 };
 
 ///
@@ -594,20 +607,22 @@ struct __attribute__ ((__packed__)) dt_periodic_telemetry_data
 /// @brief Struct of periodic telemetry data collected once every 24 hours
 /// Revision history:
 ///     0x51: Initial revision supporting periodic data collection logic from
-///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
-///       document provided by the Power team
+///           "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
+///           document provided by the Power team
+///     0x52: Added aggregate PMIC state (byte 2) which is calculated by ORing
+///           0x08-0x0B and 0x73 of all PMICs
 ///
 struct __attribute__ ((__packed__)) periodic_telemetry_data
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision = 0x51;
-    uint8_t reserved = 0;
-    uint16_t reserved1 = 0;
+    uint8_t iv_revision             = 0x52;
+    uint8_t iv_aggregate_pmic_state = 0;
+    uint16_t reserved               = 0;
 
     uint8_t iv_serial_number[26] = {0};
-    uint8_t reserved2 = 0;
-    uint8_t reserved3 = 0;
+    uint8_t reserved1            = 0;
+    uint8_t reserved2            = 0;
 
     adc_periodic_telemetry_data iv_adc;
 
@@ -664,8 +679,12 @@ struct __attribute__ ((__packed__)) pmic_periodic_2u_telemetry_data
     uint16_t iv_swc_current_mA = 0;
     uint16_t iv_swd_current_mA = 0;
 
-    uint16_t iv_r31_sample_vin     = 0;
-    uint16_t iv_r31_sample_temp    = 0;
+    uint16_t iv_r31_sample_vin  = 0;
+    uint16_t iv_r31_sample_temp = 0;
+
+    uint8_t iv_r73_status_5     = 0;
+    uint8_t reserved            = 0;
+    uint16_t reserved1          = 0;
 };
 
 ///
@@ -674,18 +693,20 @@ struct __attribute__ ((__packed__)) pmic_periodic_2u_telemetry_data
 ///     0x21: Initial revision supporting periodic data collection logic from
 ///       "Non-Redundant PoD5 - Functional Specification dated 20230818 version 0.03"
 ///       document provided by the Power team
+///     0x22: Added aggregate PMIC state (byte 2) which is calculated by ORing
+///           0x08-0x0B and 0x73 of all PMICs
 ///
 struct __attribute__ ((__packed__)) periodic_2U_telemetry_data
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision = 0x21;
-    uint8_t reserved = 0;
-    uint16_t reserved1 = 0;
+    uint8_t iv_revision             = 0x22;
+    uint8_t iv_aggregate_pmic_state = 0;
+    uint16_t reserved               = 0;
 
     uint8_t iv_serial_number[26] = {0};
-    uint8_t reserved2 = 0;
-    uint8_t reserved3 = 0;
+    uint8_t reserved1            = 0;
+    uint8_t reserved2            = 0;
 
     pmic_periodic_2u_telemetry_data iv_pmic[CONSTS::NUM_PMICS_2U];
 };
