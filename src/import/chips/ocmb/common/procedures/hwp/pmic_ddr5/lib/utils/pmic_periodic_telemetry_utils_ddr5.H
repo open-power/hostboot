@@ -45,7 +45,7 @@ typedef fapi2::ReturnCode (*pmic_periodic_telemetry_ddr5_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     fapi2::hwp_data_ostream&);
 
-static constexpr uint8_t NUMBER_PMIC_REGS_READ_TELE = 4;
+static constexpr uint8_t NUMBER_PMIC_REGS_READ_TELE = 8;
 
 static constexpr uint8_t ADC_U16_MAP_LEN = 8;
 static constexpr uint8_t NUM_BYTES_TO_READ = 16;
@@ -53,11 +53,13 @@ static constexpr uint8_t NUMBER_PMIC_2U_REGS_READ = 12;
 static constexpr uint16_t ADC_VIN_BULK_STEP = 70;
 static constexpr uint16_t ADC_TEMP_STEP = 2;
 
+static constexpr uint8_t NUM_REG_TO_OR = 5;
+
 ///
 /// @brief Read and store serial number and CCIN number
 ///
 /// @param[in] i_ocmb_target OCMB target info struct
-/// @param[in,out] io_serial_number serail number array
+/// @param[in,out] io_serial_number serial number array
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 void read_serial_ccin_number(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
@@ -171,12 +173,12 @@ fapi2::ReturnCode pmic_periodic_telemetry_ddr5_helper(const fapi2::Target<fapi2:
 ///
 /// @brief Read and store PMIC data
 ///
-/// @param[in] i_pmic_target PMIC target
+/// @param[in] i_ocmb_target ocmb target
 /// @param[in,out] io_info 2U periodic telemetry struct
-/// None
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode collect_periodic_tele_data_2U(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic_target,
-        mss::pmic::ddr5::pmic_periodic_2u_telemetry_data& io_info);
+fapi2::ReturnCode collect_periodic_tele_data_2U(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        mss::pmic::ddr5::periodic_2U_telemetry_data& io_info);
 
 ///
 /// @brief Runtime periodic telemetry data collection helper for 2U parts
