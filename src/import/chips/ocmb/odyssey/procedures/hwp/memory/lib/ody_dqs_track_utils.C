@@ -61,6 +61,7 @@
 #include <ody_scom_mp_dbyte7_b0.H>
 #include <ody_scom_mp_dbyte8_b0.H>
 #include <ody_scom_mp_dbyte9_b0.H>
+#include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 
 namespace mss
 {
@@ -1050,8 +1051,14 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         FAPI_TRY(resume_bg_scrub(i_target, l_saved_mcbist_state));
     }
 
+    return fapi2::FAPI2_RC_SUCCESS;
+
 fapi_try_exit:
-    return fapi2::current_err;
+    // Log original error
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    // Unmask and set FIRs
+    fapi2::ReturnCode l_rc = mss::unmask::dqs_drift_track_error<mss::mc_type::ODYSSEY>(i_target);
+    return l_rc;
 }
 
 } // end ns ody

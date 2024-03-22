@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -125,6 +125,15 @@ fapi2::ReturnCode after_memdiags( const fapi2::Target<T>& i_target );
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode after_background_scrub( const fapi2::Target<T>& i_target );
+
+///
+/// @brief Set a FIR bit to recoverable, unmask and set it for DQS drift tracking error path
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::ODYSSEY specialization
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode dqs_drift_track_error( const fapi2::Target<T>& i_target );
 
 }
 }

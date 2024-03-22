@@ -623,5 +623,33 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+
+///
+/// @brief Set a FIR bit to recoverable, unmask and set it for DQS drift tracking error path
+/// @param[in] i_target the fapi2::Target
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
+/// @note mc_type::ODYSSEY specialization
+///
+template<>
+fapi2::ReturnCode dqs_drift_track_error<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
+        i_target )
+{
+    // Create registers and check success for SRQFIR
+    mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
+    fapi2::buffer<uint64_t> l_reg_data;
+
+    // Set to recoverable and unmask
+    FAPI_TRY(l_srq_reg.recoverable_error<scomt::ody::ODC_SRQ_LFIR_IN47>().write(),
+             "Failed to write SRQ FIR register for" GENTARGTIDFORMAT, GENTARGTID(i_target));
+
+    l_reg_data.setBit<scomt::ody::ODC_SRQ_LFIR_IN47>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_LFIR_WO_OR, l_reg_data));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 } // end unmask ns
 } // end mss ns
