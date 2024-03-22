@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -174,7 +174,7 @@ fapi2::ReturnCode ody_omi_hss_dccal_start(const fapi2::Target<fapi2::TARGET_TYPE
     {
         FAPI_DBG("ody_omi_hss_dccal_start calling ody_omi_sim_fast_mode");
         FAPI_TRY(ody_omi_sim_fast_mode(i_target));
-        FAPI_TRY(l_ppe_common.fast_mode(i_target, l_thread));
+        FAPI_TRY(l_ppe_common.fast_mode(i_target, l_thread, 0));
     }
 
     FAPI_DBG("ody_omi_hss_dccal_start calling l_ppe.ext_cmd_start");

@@ -176,12 +176,12 @@ fapi2::ReturnCode common_io_tdr(
              i_freq);
 
     const uint32_t c_pulse_width = 100;
+    const uint32_t c_fs_per_ui = 100000000 / i_freq;
 
     uint32_t min_offset = 0;
     uint32_t max_offset = 0;
     uint32_t tdr_offset_width = 0;
     uint32_t o_length_ui = 0;
-    uint32_t c_fs_per_ui = 0;
     int32_t base_point_y1 = 0;
     int32_t base_point_y2 = 0;
 
@@ -205,56 +205,6 @@ fapi2::ReturnCode common_io_tdr(
     // char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
 
     // fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
-
-    switch (i_freq)
-    {
-        case 38400:
-            {
-                c_fs_per_ui = 26041; // 38.4Gbps
-                break;
-            }
-
-        case 32500:
-            {
-                c_fs_per_ui = 30769; // 32.5Gbps
-                break;
-            }
-
-        case 32000:
-            {
-                c_fs_per_ui = 31250; // 32.0Gbps
-                break;
-            }
-
-        case 31875:
-            {
-                c_fs_per_ui = 31372; // 31.875Gbps
-                break;
-            }
-
-        case 28800:
-            {
-                c_fs_per_ui = 34722; // 28.8Gbps
-                break;
-            }
-
-        case 25781:
-            {
-                c_fs_per_ui = 38788; // 25.781Gbps
-                break;
-            }
-
-        case 25600:
-            {
-                c_fs_per_ui = 39063; // 25.6Gbps
-                break;
-            }
-
-        default:
-            {
-                break;
-            }
-    }
 
     FAPI_TRY(common_io_tdr_get_tdr_offsets(i_target, c_pulse_width, tdr_offset_width));
 

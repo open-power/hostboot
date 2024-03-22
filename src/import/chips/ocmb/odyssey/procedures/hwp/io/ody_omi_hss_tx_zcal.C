@@ -67,10 +67,7 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
         // Run TDR isolation
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, i_target, l_freq));
 
-        // Leave l_sev comments for future development to pass severity to error checking
-        //  SBE doesn't handle severity passing
-        //  Passing severity to FAPI_ASSERT_NOEXIT is not supported by SBE
-        // fapi2::errlSeverity_t l_sev;
+        fapi2::errlSeverity_t l_sev;
         fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags = {0};
         TdrResult l_status = TdrResult::None;
         uint32_t l_length = 0;
@@ -88,22 +85,19 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 
             if (l_status != TdrResult::NoIssues)
             {
-                // if (l_mfg_flags[fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / 32] & (1 << (31 -
-                //         (fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % 32))))
-                // {
-                //     l_sev = fapi2::FAPI2_ERRL_SEV_PREDICTIVE;
-                // }
-                // else
-                // {
-                //     l_sev = fapi2::FAPI2_ERRL_SEV_RECOVERED;
-                // }
+                if (l_mfg_flags[fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / 32] & (1 << (31 -
+                        (fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % 32))))
+                {
+                    l_sev = fapi2::FAPI2_ERRL_SEV_PREDICTIVE;
+                }
+                else
+                {
+                    l_sev = fapi2::FAPI2_ERRL_SEV_RECOVERED;
+                }
 
                 // note - FAPI_ASSERT_NOEXIT clears current_err on return
                 FAPI_ASSERT_NOEXIT(false,
-                                   // This is being left in for future-proofing.
-                                   //  The intent is to get this ability working in SBE.
-                                   //    fapi2::POZ_IO_TX_TDR_ERROR(l_sev)
-                                   fapi2::POZ_IO_TX_TDR_ERROR()
+                                   fapi2::POZ_IO_TX_TDR_ERROR(l_sev)
                                    .set_TARGET_CHIP(i_target)
                                    .set_LANE(l_lane)
                                    .set_STATUS(l_status)

@@ -109,6 +109,12 @@ enum IO_PPE_EXT_CMD_REQ_BITS
     BIST_START_CMD    = HW_REG_INIT_PG | DCCAL_PL | POWER_ON_PL | TX_BIST_TESTS_PL | TRAIN_PL | RECAL_PL | BIST_FINAL,
 };
 
+struct OVERRIDES
+{
+    uint16_t reg_offset;
+    uint16_t reg_data;
+};
+
 ///
 /// @brief Common PPE procedures bewteen POZ
 ///
@@ -487,7 +493,8 @@ class io_ppe_common
         ///
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success, else error code.
         fapi2::ReturnCode fast_mode(const fapi2::Target<K, M, V>& i_target,
-                                    const uint8_t i_thread);
+                                    const uint8_t i_thread,
+                                    const uint8_t i_pcie_mode = 0);
 
         ///
         /// @brief Gets the number of lanes from the mask
@@ -1238,6 +1245,9 @@ fapi2::ReturnCode io_ppe_common<K, M, V>::ext_cmd_start(const fapi2::Target<K, M
         FAPI_TRY(iv_regs->flushCache(i_target));
     }
 
+    FAPI_TRY(FW_REG_EXT_CMD_FAIL_00_31_PUT(iv_regs, i_target, i_thread, 0));
+    FAPI_TRY(iv_regs->flushCache(i_target));
+
     // RX / TX
     FAPI_TRY(FW_REG_EXT_CMD_LANES_RX_00_31_PUT(iv_regs, i_target, i_thread, i_rx_lanes_0_31));
     FAPI_TRY(FW_REG_EXT_CMD_LANES_TX_00_31_PUT(iv_regs, i_target, i_thread, i_tx_lanes_0_31));
@@ -1518,18 +1528,133 @@ fapi_try_exit:
 // ===============================================================
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_common<K, M, V>::fast_mode(const fapi2::Target<K, M, V>& i_target,
-        const uint8_t i_thread)
+        const uint8_t i_thread,
+        const uint8_t i_pcie_mode)
 {
     FAPI_DBG("Starting io_ppe_common::fast_mode");
+    FAPI_DBG("Super fast mode 2.3.2");
 
-    fapi2::buffer<uint64_t> l_data = 1;
-    FAPI_TRY(MEM_REG_LOFF_SETTING_OVR_ENB_PUT(iv_regs, i_target, i_thread, l_data));
-    FAPI_TRY(MEM_REG_AMP_SETTING_OVR_ENB_PUT(iv_regs, i_target, i_thread, l_data));
-    l_data = 0;
-    FAPI_TRY(MEM_REG_RX_EO_CONVERGED_END_COUNT_PUT(iv_regs, i_target, i_thread, l_data));
-    FAPI_TRY(MEM_REG_RX_MIN_RECAL_CNT_PUT(iv_regs, i_target, i_thread, l_data));
-    l_data = 4;
-    FAPI_TRY(MEM_REG_TX_DCC_MAIN_MIN_SAMPLES_PUT(iv_regs, i_target, i_thread, l_data));
+    static constexpr uint8_t c_num_overrides = 8;
+
+    static constexpr OVERRIDES l_overrides[c_num_overrides] =
+    {
+        /*
+         *  RX_PPE_MODE9_PG
+         *
+         *  RX_EO_STEP_CNTL_OPT_ALIAS = 0xFFFF
+         *  bit 0 - SET
+         *      RX_EO_ENABLE_VGA_CAL
+         *  bit 1 - SET
+         *      RX_EO_ENABLE_EDGE_OFFSET_CAL
+         *  bit 2 - SET
+         *      RX_EO_ENABLE_CTLE_PEAK_CAL
+         *  bit 3 - CLEAR
+         *      RX_EO_ENABLE_LTE_CAL
+         *  bit 4 - CLEAR
+         *      RX_EO_ENABLE_DFE_CAL
+         *  bit 5 - CLEAR
+         *      RX_EO_ENABLE_DDC
+         *  bit 6 - SET
+         *      RX_EO_ENABLE_BANK_SYNC
+         *  bit 7 - CLEAR
+         *      RX_EO_ENABLE_QUAD_PHASE_CAL
+         * */
+        {0x1890, 0xE080},
+        /*
+         *  RX_PPE_MODE10_PG
+         *
+         *  RX_RC_STEP_CNTL_OPT_ALIAS
+         *  bit 0 - SET
+         *      RX_RC_ENABLE_VGA_CAL
+         *  bit 1 - SET
+         *      RX_RC_ENABLE_EDGE_OFFSET_CAL
+         *  bit 2 - SET
+         *      RX_RC_ENABLE_CTLE_PEAK_CAL
+         *  bit 3 - CLEAR
+         *      RX_RC_ENABLE_LTE_CAL
+         *  bit 4 - CLEAR
+         *      RX_RC_ENABLE_DFE_CAL
+         *  bit 5 - CLEAR
+         *      RX_RC_ENABLE_DFE_FULL_CAL
+         *  bit 6 - CLEAR
+         *      RX_RC_ENABLE_DDC_CAL
+         *  bit 7 - CLEAR
+         *      RX_RC_ENABLE_DCC_CAL
+         *  bit 8 - SET
+         *      RX_RC_ENABLE_BANK_SYNC
+         *  bit 9 - CLEAR
+         *      RX_RC_ENABLE_QUAD_PHASE_CAL
+         * */
+        {0x18A0, 0xF040},
+        /*
+         *  RX_PPE_MODE13_PG
+         *
+         *  RX_DC_STEP_CNTL_OPT_ALIAS
+         *  bit 0 - SET
+         *      RX_DC_ENABLE_LATCH_OFFSET_CAL
+         *  bit 1 - CLEAR
+         *      RX_DC_ENABLE_TX_DC_ENABLE_DCC
+         * */
+        {0x18D0, 0x8000},
+        /*
+         *  RX_PPE_IMG_CNTL1_PB
+         *
+         *  bit 2 - SET
+         *      RX_DC_ENABLE_LATCH_OFFSET_CAL
+         * */
+        {0x0010, 0x2000},
+        /*
+         *  RX_CPLT_CNT20_PG
+         *
+         *  bits 0:5 - SET bit 5
+         *      RX_PSAVE_TIME
+         * */
+        {0x1881, 0xFFFF},
+        /*
+         *  TX_PPE_MODE7_PG
+         *
+         *  bits 0:15 - SET
+         *      TX_DETECTRX_OVR_VAL_0_15
+         * */
+        {0x1440, 0x0800},
+        /*
+         *  TX_PPE_MODE8_PG
+         *
+         *  bits 0:7 - SET
+         *      TX_DETECTRX_OVR_VAL_16_23
+         *  bits 8:15 - SET
+         *      TX_DETECTRX_OVR_EN_16_23
+         * */
+        {0x1921, 0xFFFF},
+        /*
+         *  TX_PPE_MODE9_PG
+         *
+         *  bits 0:15 - SET
+         *      TX_DETECTRX_OVR_EN_0_15
+         * */
+        {0x1931, 0xFFFF}
+    };
+
+    fapi2::buffer<uint64_t> l_addr = 0;
+    fapi2::buffer<uint64_t> l_data = 0;
+
+    // Set the overrides (last 3 regs don't need to be set if not PCIE )
+    for (uint8_t l_reg = 0; l_reg < c_num_overrides; l_reg++)
+    {
+        // The txdetectrx doesn't need to be set if not PCIE
+        if (l_reg > 4 && !i_pcie_mode)
+        {
+            break;
+        }
+
+        l_addr = buildAddr(iv_regs->base_addr, i_thread, 0, l_overrides[l_reg].reg_offset);
+        FAPI_TRY(fapi2::getScom(i_target, l_addr, l_data));
+        // Clear the disabled bits
+        l_data &= l_overrides[l_reg].reg_data;
+        // Set the enabled bits
+        l_data |= static_cast<uint64_t>(l_overrides[l_reg].reg_data);
+        FAPI_TRY(fapi2::putScom(i_target, l_addr, l_overrides[l_reg].reg_offset));
+    }
 
 fapi_try_exit:
     FAPI_DBG("Ending io_ppe_common::fast_mode");
