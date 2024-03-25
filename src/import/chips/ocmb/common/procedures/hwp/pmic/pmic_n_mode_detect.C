@@ -31,8 +31,7 @@
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
-// *HWP Consumed by: SBE
-// EKB-Mirror-To: hw/ppe
+// *HWP Consumed by: HB
 
 #include <fapi2.H>
 #include <pmic_n_mode_detect.H>
