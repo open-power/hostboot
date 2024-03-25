@@ -125,9 +125,20 @@ namespace SBEIO
 
         auto l_ffdcParser = std::make_shared<SbeFFDCParser>();
         l_ffdcParser->parseFFDCData(l_fifoResponse.data());
+
+        /*@
+         * @errortype
+         * @moduleid     SBEIO_FIFO_SBE_FFDC
+         * @reasoncode   SBEIO_FIFO_SBE_ASYNC_FFDC_REQUEST
+         * @userdata1[0:31]  HUID of OCMB chip
+         * @userdata2        Unused
+         * @devdesc      An async ffdc request to the SBE returned an error. Depending on context
+         *               this may not be an issue and is purely informational in nature.
+         * @custdesc     An internal firmware error occurred.
+         */
         o_errs = l_ffdcParser->generateSbeErrors(i_chipTarget,
                                                  SBEIO_FIFO_SBE_FFDC,
-                                                 SBEIO_FIFO_SBE_FFDC_INFORMATIONAL,
+                                                 SBEIO_FIFO_SBE_ASYNC_FFDC_REQUEST,
                                                  get_huid(i_chipTarget), // userdata1
                                                  0);                     // userdata2
 
