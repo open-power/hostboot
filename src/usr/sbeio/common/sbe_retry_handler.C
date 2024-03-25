@@ -1504,7 +1504,10 @@ void ProcSbeRetryHandler::sbe_get_ffdc_handler()
 
     if(l_reconfigRequired)
     {
-        INITSERVICE::doShutdown(INITSERVICE::SHUTDOWN_DO_RECONFIG_LOOP);
+        // The reboot message is for the benefit of the customer's understanding of what's going on.
+        INITSERVICE::requestReboot("Rebooting due to garding associated with SBE");
+        // after reboot request, an infinite loop prevents further SBE Pels.
+        do {} while (true);
     }
 
     SBE_TRACF(EXIT_MRK "sbe_get_ffdc_handler()");
