@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -455,6 +455,8 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
 {
     uint32_t l_rc = IMG_BUILD_SUCCESS;
     uint32_t hwImagSize = 0;
+    fapi2::ATTR_IS_SIMICS_Type l_simics;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     FAPI_INF(">> validateInputArguments ...");
 
@@ -493,6 +495,22 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
                  .set_SYS_PHASE(i_phase)
                  .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid value passed as build phase" );
+
+    FAPI_ASSERT( ( i_imgType.isBuildValid() ),
+                 fapi2::HCODE_INVALID_IMG_TYPE()
+                 .set_SYS_PHASE(i_phase)
+                 .set_IMAGE_TYPE(i_imgType.value_32),
+                 "Invalid image type passed for hcode image build" );
+
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IS_SIMICS,
+                        FAPI_SYSTEM,
+                        l_simics ),
+            "Error from FAPI_ATTR_GET for ATTR_IS_SIMICS" );
+
+    if( l_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS )
+    {
+        goto fapi_try_exit;
+    }
 
     FAPI_ASSERT( ( i_pBuf1 != NULL ),
                  fapi2::HCODE_INVALID_TEMP1_BUF()
@@ -550,11 +568,6 @@ fapi2::ReturnCode validateInputArguments( void* const i_pImageIn, void* i_pImage
                  .set_IMAGE_TYPE(i_imgType.value_32),
                  "Invalid size for temp buf4 passed for hcode image build" );
 
-    FAPI_ASSERT( ( i_imgType.isBuildValid() ),
-                 fapi2::HCODE_INVALID_IMG_TYPE()
-                 .set_SYS_PHASE(i_phase)
-                 .set_IMAGE_TYPE(i_imgType.value_32),
-                 "Invalid image type passed for hcode image build" );
     FAPI_INF("<< validateInputArguments ...");
 
 fapi_try_exit:
@@ -806,7 +819,7 @@ uint32_t copyPartialSectionToHomer( uint8_t* i_destPtr, uint8_t* i_srcPtr, Image
             break;
         }
 
-        memcpy( ( i_destPtr + i_offset ), ( i_srcPtr + o_ppeSection.iv_offset + i_offset ), 
+        memcpy( ( i_destPtr + i_offset ), ( i_srcPtr + o_ppeSection.iv_offset + i_offset ),
                 ( o_ppeSection.iv_size - i_offset ) );
     }
     while(0);
@@ -1247,7 +1260,7 @@ fapi2::ReturnCode initSelfRestoreRegion( Homerlayout_t* i_pChipHomer )
     uint32_t *l_threadLock   =   (uint32_t *)( (uint8_t *)&i_pChipHomer->iv_cpmrRegion + CPMR_MSG_SND_VECTOR_OFFSET ) ;
 
     for( size_t l_quadId = 0; l_quadId < MAX_QUADS_PER_CHIP; l_quadId++ )
-    {                
+    {
         *l_threadLock   =   htobe32( CPMR_MSG_SND_LOCK_VAL );
          l_threadLock  +=   ( CPMR_MSG_SND_VECTOR_LENGTH >> 2 );
          FAPI_INF( "Thread Lock Init 0x%08x", htobe32( *l_threadLock ));
@@ -1408,7 +1421,7 @@ fapi2::ReturnCode buildCoreRestoreImage( void* const i_pImageIn,
     FAPI_INF("Overlay CPMR Header at the beginning of CPMR");
 
     if( i_imgType.coreSprBuild )
-    {  
+    {
         rcTemp = copySectionToHomer( i_pChipHomer->iv_cpmrRegion.iv_selfRestoreRegion.iv_CPMR_SR.iv_region,
                                      pSelfRestImg,
                                      i_qmeBuildRecord,
@@ -1700,12 +1713,29 @@ fapi2::ReturnCode buildQmeRing( CONST_FAPI2_PROC& i_procTgt, void * const i_pIma
                                 ImageBuildRecord & i_qmeBuildRecord )
 {
     FAPI_INF( ">> buildQmeRing" );
-    uint32_t l_hwImgSize       =   0;
     ImgSectnSumm    l_qmeSectn;
-    p9_xip_image_size( i_pImageIn, &l_hwImgSize );
-
+    uint32_t l_hwImgSize       =   0;
     uint32_t  l_bootCoreMask   =   ENABLE_ALL_CORE;
     uint32_t  l_workBufSize    =   i_ringData.iv_sizeWorkBuf1;
+    fapi2::ATTR_IS_SIMICS_Type l_simics;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_IS_SIMICS,
+                        FAPI_SYSTEM,
+                        l_simics ),
+            "Error from FAPI_ATTR_GET for ATTR_IS_SIMICS" );
+
+    if( l_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS )
+    {
+        FAPI_INF( "SIMICS Environment Detected. Scan Ring Region Will Not Be Built" );
+        i_qmeBuildRecord.setSection( "QME Common Ring", 0, 0 );
+        i_qmeBuildRecord.setSection( "QME Override Ring", 0, 0 );
+        i_qmeBuildRecord.setSection( "QME Inst Sectn", 0, 0 );
+        goto fapi_try_exit;
+    }
+
+    p9_xip_image_size( i_pImageIn, &l_hwImgSize );
+
     FAPI_TRY( p10_ipl_customize( i_procTgt,
                                  i_pImageIn,
                                  i_pImageIn,
@@ -1802,8 +1832,16 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
 
     if( !i_qmeBuildRecord.getSection( "QME Common Ring", l_imgSectn ) )
     {
-        pImgHdr->g_qme_common_ring_offset   =   l_imgSectn.iv_sectnOffset - l_tempWord;
-        pImgHdr->g_qme_common_ring_length   =   l_imgSectn.iv_sectnLength;
+        if( l_imgSectn.iv_sectnOffset )
+        {
+            pImgHdr->g_qme_common_ring_offset   =   l_imgSectn.iv_sectnOffset - l_tempWord;
+            pImgHdr->g_qme_common_ring_length   =   l_imgSectn.iv_sectnLength;
+        }
+        else
+        {
+            pImgHdr->g_qme_common_ring_offset   =   pImgHdr->g_qme_hcode_length;
+            pImgHdr->g_qme_common_ring_length   =   0;
+        }
     }
 
     if( !i_qmeBuildRecord.getSection( "QME Override Ring", l_imgSectn ) )
@@ -1811,6 +1849,10 @@ fapi2::ReturnCode buildQmeHeader( CONST_FAPI2_PROC& i_procTgt, Homerlayout_t   *
         if( l_imgSectn.iv_sectnOffset )
         {
             pImgHdr->g_qme_cmn_ring_ovrd_offset =   l_imgSectn.iv_sectnOffset - l_tempWord;
+        }
+        else
+        {
+            pImgHdr->g_qme_cmn_ring_ovrd_offset = 0;
         }
     }
 
