@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -326,10 +326,25 @@
   <description>
     The frequency of a processor's PAU mesh clocks, in MHz.
     Determines pau and ppe frequency for a given processor.
-    Provided by the MRW.
+    Set by HWP code given dependency on chip EC level.
   </description>
   <valueType>uint32</valueType>
   <platInit/>
+  <writeable/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_INCREASED_PAU_FREQ</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Select alternative (higher) PAU frequency setpoint.
+  </description>
+  <valueType>uint8</valueType>
+  <initToZero/>
+  <enum>
+    DISABLE = 0,
+    ENABLE = 1
+  </enum>
   <writeable/>
 </attribute>
 <!-- ********************************************************************** -->

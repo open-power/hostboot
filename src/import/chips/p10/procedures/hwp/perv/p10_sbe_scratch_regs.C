@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -394,6 +394,7 @@ p10_sbe_scratch_regs_set_pau_freq(
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_FREQ_PAU_MHZ_Type l_attr_freq_pau_mhz = 0;
+    fapi2::ATTR_INCREASED_PAU_FREQ_Type l_attr_increased_pau_freq = fapi2::ENUM_ATTR_INCREASED_PAU_FREQ_DISABLE;
     uint8_t l_pau_dpll_io_margin = 0;
 
     if (fapi2::is_platform<fapi2::PLAT_HOSTBOOT>() ||
@@ -428,7 +429,18 @@ p10_sbe_scratch_regs_set_pau_freq(
     }
     else
     {
-        l_attr_freq_pau_mhz = 2250;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INCREASED_PAU_FREQ, FAPI_SYSTEM, l_attr_increased_pau_freq),
+                 "Error from FAPI_ATTR_GET (ATTR_INCREASED_PAU_FREQ)");
+
+        if (l_attr_increased_pau_freq == fapi2::ENUM_ATTR_INCREASED_PAU_FREQ_ENABLE)
+        {
+            l_attr_freq_pau_mhz = 2600;
+        }
+        else
+        {
+            l_attr_freq_pau_mhz = 2250;
+        }
+
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_PAU_MHZ, FAPI_SYSTEM, l_attr_freq_pau_mhz),
                  "Error from FAPI_ATTR_SET (ATTR_FREQ_PAU_MHZ)");
     }
