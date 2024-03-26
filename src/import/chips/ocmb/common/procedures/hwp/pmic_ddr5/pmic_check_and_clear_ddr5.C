@@ -57,7 +57,7 @@ extern "C"
     ///
     fapi2::ReturnCode pmic_check_and_clear_ddr5(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target)
     {
-        FAPI_INF(GENTARGTIDFORMAT " Running pmic_check_and_clear_ddr5 HWP", GENTARGTID(i_ocmb_target));
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Running pmic_check_and_clear_ddr5 HWP", GENTARGTID(i_ocmb_target));
 
         using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
