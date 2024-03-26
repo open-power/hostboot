@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2023
+# Contributors Listed Below - COPYRIGHT 2021,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -29,11 +29,7 @@ import sys
 import unittest
 from collections import OrderedDict
 
-# autopep8: off
-sys.path.append(os.path.join(os.path.dirname(sys.path[0]), "src/build/tools/ebmc/"))
 import udparsers.be500.be500
-
-# autopep8: on
 
 
 class TestUserDataParser(unittest.TestCase):
@@ -567,9 +563,13 @@ class TestUserDataParser(unittest.TestCase):
         l3 = "L3_LD_FFDC"
         self.assertEqual(jsonOut[cd][l3]["L3 LD Counts"], 1)
         self.assertEqual(jsonOut[cd][l3]["L3 LD Max Allowed"], 6)
-        self.assertEqual(jsonOut[cd][l3]["L3 Error Member"], "0x03 (or possibly 0x0b)")
+        self.assertEqual(
+            jsonOut[cd][l3]["L3 Error Member"], "0x03 (or possibly 0x0b)"
+        )
         self.assertEqual(jsonOut[cd][l3]["L3 Error DW"], "0x00")
-        self.assertEqual(jsonOut[cd][l3]["L3 Error Bank"], "0x01 (or possibly 0x03)")
+        self.assertEqual(
+            jsonOut[cd][l3]["L3 Error Bank"], "0x01 (or possibly 0x03)"
+        )
         self.assertEqual(jsonOut[cd][l3]["L3 Error CL Half"], "unknown")
         self.assertEqual(jsonOut[cd][l3]["L3 Error Syndrome Col"], "0x41")
         self.assertEqual(jsonOut[cd][l3]["L3 Error Address"], "0x0022")
