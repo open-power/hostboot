@@ -1490,18 +1490,18 @@ errlHndl_t ody_has_async_ffdc(Target* const i_ocmb,
     {
         struct
         {
-            uint64_t iv_sbeBooted : 1;
-            uint64_t iv_asyncFFDC : 1;
-            uint64_t iv_reserved1 : 1;
-            uint64_t iv_currImage : 1; // If 0->SROM , 1->Boot Loader/Runtime
-            uint64_t iv_prevState : 4;
-            uint64_t iv_currState : 4;
-            uint64_t iv_majorStep : 4;
-            uint64_t iv_minorStep : 6;
-            uint64_t iv_reserved2 : 4;
-            uint64_t iv_progressCode : 6;
+            uint32_t iv_sbeBooted : 1;
+            uint32_t iv_asyncFFDC : 1;
+            uint32_t iv_reserved1 : 1;
+            uint32_t iv_currImage : 1; // If 0->SROM , 1->Boot Loader/Runtime
+            uint32_t iv_prevState : 4;
+            uint32_t iv_currState : 4;
+            uint32_t iv_majorStep : 4;
+            uint32_t iv_minorStep : 6;
+            uint32_t iv_reserved2 : 4;
+            uint32_t iv_progressCode : 6;
         };
-        uint64_t iv_messagingReg;
+        uint32_t iv_messagingReg;
     } messagingReg_t;
 
     uint32_t l_data = 0;
@@ -1512,13 +1512,14 @@ errlHndl_t ody_has_async_ffdc(Target* const i_ocmb,
                         DEVICE_CFAM_ADDRESS(0x2809));
     if(l_errl)
     {
-        TRACF(ERR_MRK"ody_has_async_ffdc: Could not read SBE MSG register for OCMB 0x%x", get_huid(i_ocmb));
+        TRACF(ERR_MRK"ody_has_async_ffdc: Could not read SBE MSG register for OCMB 0x%.8X", get_huid(i_ocmb));
     }
     else
     {
         messagingReg_t l_msgReg;
         l_msgReg.iv_messagingReg = l_data;
         o_hasAsyncFfdc = l_msgReg.iv_asyncFFDC;
+        TRACF("Reg 2809=%.8X for OCMB 0x%.8X, o_hasAsyncFfdc=%d", l_data, get_huid(i_ocmb), o_hasAsyncFfdc);
     }
 
     return l_errl;
