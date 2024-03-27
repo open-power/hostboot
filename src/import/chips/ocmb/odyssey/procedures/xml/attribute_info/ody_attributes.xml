@@ -259,6 +259,41 @@
         <writeable/>
     </attribute>
 
+    <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_RECAL_COUNT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Count of DQS drift recalibrations since the last time this attribute was reset.
+            Updated in DQS tracking procedure.
+        </description>
+        <valueType>uint16</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_LOG</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Logging data of last 24 DQS drift recalibrations. Format (left to right):
+            bit      0 '1' if this is the most recently logged entry in array
+            bit      1 '1' if recal was triggered by temperature delta, '0' for any other reason
+            bits  2:17 count of drift tracking executions since previous recalibration occurred
+            bits 18:24 temperature reading at time of recalibration
+            bits 25:34 drift correction amount (4 bits, abs value), rank (1 bit), DRAM index (5 bits) of DRAM
+                       with most drift correction
+            bits 35:44 drift correction amount (4 bits, abs value), rank (1 bit), DRAM index (5 bits) of DRAM
+                       with second most drift correction
+            bits 45:54 drift correction amount (4 bits, abs value), rank (1 bit), DRAM index (5 bits) of DRAM
+                       with third most drift correction
+            Updated in DQS tracking procedure, reported and cleared by PMIC telemetry.
+        </description>
+        <valueType>uint64</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+        <array>24</array>
+    </attribute>
+
      <attribute>
         <id>ATTR_ODY_THERMAL_SENSOR_DIFF_PREVIOUS_VALUE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>

@@ -46,10 +46,21 @@
 #include <lib/mc/ody_port_traits.H>
 #include <lib/mcbist/ody_mcbist_traits.H>
 #include <lib/ccs/ody_ccs.H>
+#include <lib/phy/ody_phy_access.H>
 #include <generic/memory/lib/ccs/ccs_ddr5_commands.H>
 #include <lib/power_thermal/ody_thermal_init_utils.H>
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
+#include <ody_scom_mp_dbyte0_b0.H>
+#include <ody_scom_mp_dbyte1_b0.H>
+#include <ody_scom_mp_dbyte2_b0.H>
+#include <ody_scom_mp_dbyte3_b0.H>
+#include <ody_scom_mp_dbyte4_b0.H>
+#include <ody_scom_mp_dbyte5_b0.H>
+#include <ody_scom_mp_dbyte6_b0.H>
+#include <ody_scom_mp_dbyte7_b0.H>
+#include <ody_scom_mp_dbyte8_b0.H>
+#include <ody_scom_mp_dbyte9_b0.H>
 
 namespace mss
 {
@@ -475,11 +486,13 @@ void check_sensor_exists_and_get_index(const uint8_t i_thermal_sensor_usage,
 /// @param [in] i_target OCMB target
 /// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
 /// @param [out] o_current_temp_values vector of current temperature of all the sensors
+/// @param [out] o_chosen_sensor_index index of the sensor chosen for the delta calculation
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         int16_t& o_temp_delta,
-        int16_t (&o_current_temp_values)[mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::temp_sensor::NUM_SENSORS])
+        int16_t (&o_current_temp_values)[mss::temp_sensor_traits<mss::mc_type::ODYSSEY>::temp_sensor::NUM_SENSORS],
+        uint8_t& o_chosen_sensor_index)
 {
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
 
@@ -562,24 +575,127 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
         (o_current_temp_values[l_sensor_info.iv_dram_index] <= 125))
     {
         o_temp_delta = l_temp_delta_values[l_sensor_info.iv_dram_index];
+        o_chosen_sensor_index = l_sensor_info.iv_dram_index;
     }
     else if (l_sensor_info.iv_pmic_exists &&
              (o_current_temp_values[l_sensor_info.iv_pmic_index] >= 0) &&
              (o_current_temp_values[l_sensor_info.iv_pmic_index] <= 125))
     {
         o_temp_delta = l_temp_delta_values[l_sensor_info.iv_pmic_index];
+        o_chosen_sensor_index = l_sensor_info.iv_pmic_index;
     }
     else if (l_sensor_info.iv_mem_buf_ext_exists &&
              (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] >= 0) &&
              (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] <= 125))
     {
         o_temp_delta = l_temp_delta_values[l_sensor_info.iv_mem_buf_ext_index];
+        o_chosen_sensor_index = l_sensor_info.iv_mem_buf_ext_index;
     }
     // if none of the above sensors exist use the differential one
     else if ((o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] >= 0) &&
              (o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] <= 125))
     {
         o_temp_delta = l_temp_delta_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR];
+        o_chosen_sensor_index = mss::ody::sensor_types::DIFFERENTIAL_SENSOR;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Record DQS offsets or compute offset delta
+/// @param [in] i_target MEM_PORT target
+/// @param [in] i_compute_deltas FALSE if recording offsets prior to a recal, TRUE if computing delta after a recal
+/// @param [in,out] io_offsets the DQS offsets (signed integer)
+/// @param [out] o_deltas maximum computed deltas between io_offsets and current offsets (in log format)
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode ody_get_dqs_offsets(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                      const bool i_compute_deltas,
+                                      int16_t (&io_offsets)[HW_MAX_RANK_PER_DIMM][ODY_NUM_DRAM_X4],
+                                      fapi2::buffer<uint16_t> (&o_deltas)[ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT])
+{
+    // DQS drift registers, organized by [rank][nibble]
+    constexpr uint64_t TXTRKSTATES[HW_MAX_RANK_PER_DIMM][ODY_NUM_DRAM_X4] __attribute__ ((__aligned__(8))) =
+    {
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_TXTRKSTATES4_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_TXTRKSTATES4_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_TXTRKSTATES4_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_TXTRKSTATES4_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_TXTRKSTATES4_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_TXTRKSTATES4_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_TXTRKSTATES4_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_TXTRKSTATES4_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_TXTRKSTATES4_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_TXTRKSTATES0_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_TXTRKSTATES4_P0
+        },
+        {
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_TXTRKSTATES5_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE1_BASE0_TXTRKSTATES5_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE2_BASE0_TXTRKSTATES5_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE3_BASE0_TXTRKSTATES5_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE4_BASE0_TXTRKSTATES5_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE5_BASE0_TXTRKSTATES5_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE6_BASE0_TXTRKSTATES5_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE7_BASE0_TXTRKSTATES5_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE8_BASE0_TXTRKSTATES5_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_TXTRKSTATES1_P0,
+            scomt::mp::DWC_DDRPHYA_DBYTE9_BASE0_TXTRKSTATES5_P0
+        }
+    };
+
+    uint8_t l_num_mranks[MAX_DIMM_PER_PORT] = {0};
+    uint8_t l_dram_width[MAX_DIMM_PER_PORT] = {0};
+    uint8_t l_num_dram = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM, i_target, l_num_mranks));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, i_target, l_dram_width));
+
+    l_num_dram = (l_dram_width[0] == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4) ? ODY_NUM_DRAM_X4 : ODY_NUM_DRAM_X8;
+
+    FAPI_TRY(mss::ody::phy::configure_phy_scom_access(i_target, mss::states::ON_N));
+
+    for (uint8_t l_mrank = 0; l_mrank < l_num_mranks[0]; l_mrank++)
+    {
+        for (uint8_t l_dram = 0; l_dram < l_num_dram; l_dram++)
+        {
+            fapi2::buffer<uint64_t> l_offset_data;
+            FAPI_TRY(fapi2::getScom(i_target, TXTRKSTATES[l_mrank][l_dram], l_offset_data));
+
+            if (!i_compute_deltas)
+            {
+                io_offsets[l_mrank][l_dram] = convert_to_2s_complement(l_offset_data);
+            }
+            else
+            {
+                const auto l_delta = convert_to_2s_complement(l_offset_data) - io_offsets[l_mrank][l_dram];
+                const uint16_t l_delta_abs = (l_delta < 0) ? static_cast<uint16_t>(l_delta * -1) : static_cast<uint16_t>(l_delta);
+
+                // insert the new delta entry into the array if it's big enough
+                insert_delta(l_delta_abs, l_mrank, l_dram, o_deltas);
+            }
+        }
     }
 
 fapi_try_exit:
@@ -798,6 +914,11 @@ fapi_try_exit:
 fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
+
+    // Consts for readability
+    constexpr bool RECORD_OFFSETS = false;
+    constexpr bool COMPUTE_DELTAS = true;
+
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
     uint8_t l_threshold = 0;
     int16_t l_temp_delta = 0;
@@ -806,6 +927,8 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     uint16_t l_count_threshold = 0;
     bool l_steer = false;
     mcbist_state l_saved_mcbist_state;
+    uint8_t l_temp_trigger = 0;
+    uint8_t l_chosen_sensor_index = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_TEMP_THRESHOLD, i_target, l_threshold));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL, i_target, l_count));
@@ -814,15 +937,20 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     // Get the temperature delta and the current temperature values, both in centi-degrees
     if (l_count <= l_count_threshold)
     {
-        FAPI_TRY(ody_calc_temp_sensors_delta(i_target, l_temp_delta, l_curr_temp_values));
+        FAPI_TRY(ody_calc_temp_sensors_delta(i_target, l_temp_delta, l_curr_temp_values, l_chosen_sensor_index));
     }
 
     // Run DQS tracking only if the temp delta or count is more than the associated threshold
     // Threshold is in degrees-C so needs to be multiplied by 100
-    if ((l_temp_delta > static_cast<int16_t>(l_threshold) * 100) ||
+    l_temp_trigger = (l_temp_delta > static_cast<int16_t>(l_threshold) * 100) ? 1 : 0;
+
+    if (l_temp_trigger ||
         ((l_count >= l_count_threshold) &&
          (l_count_threshold != fapi2::ENUM_ATTR_ODY_DQS_TRACKING_COUNT_THRESHOLD_DISABLE)))
     {
+        uint16_t l_recal_count = 0;
+        fapi2::buffer<uint16_t> l_deltas[ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT] __attribute__ ((__aligned__(8))) = {0};
+
         // Check if steer is running
         FAPI_TRY(check_steer_subtest(i_target, l_steer));
 
@@ -863,15 +991,37 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         // If we made it here, it means the MCBIST engine should be unused at this point
         for(auto& l_port_target : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target) )
         {
+            int16_t l_offsets[HW_MAX_RANK_PER_DIMM][ODY_NUM_DRAM_X4] __attribute__ ((__aligned__(8))) = {0};
+
+            // Clear out deltas
+            for (uint8_t l_idx = 0; l_idx < ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT; l_idx++)
+            {
+                l_deltas[l_idx] = 0;
+            }
+
+            // Record the current DQS offsets
+            FAPI_TRY(ody_get_dqs_offsets(l_port_target, RECORD_OFFSETS, l_offsets, l_deltas));
+
             FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(l_port_target, l_rank_infos));
 
+            // Run DQS drift tracking
             for(auto l_rank_info : l_rank_infos)
             {
                 FAPI_TRY(dqs_recal(l_rank_info));
             }
+
+            // Compute the DQS offset deltas
+            FAPI_TRY(ody_get_dqs_offsets(l_port_target, COMPUTE_DELTAS, l_offsets, l_deltas));
         }
 
-        // Update the attr temp sensors with the delta values
+        // Log the tracking info
+        FAPI_TRY(ody_dqs_track_log(i_target,
+                                   l_temp_trigger,
+                                   l_count,
+                                   l_curr_temp_values[l_chosen_sensor_index],
+                                   l_deltas));
+
+        // Update the previous temperature value attrs
         for (uint8_t l_sensor_index = 0; l_sensor_index < TT::temp_sensor::NUM_SENSORS; l_sensor_index++)
         {
             FAPI_TRY(mss::ody::thermal::set_therm_sensor_prev_value[l_sensor_index](i_target, l_curr_temp_values[l_sensor_index]));
@@ -879,6 +1029,11 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
         // Reset the "count since last recal" value
         l_count = 0;
+
+        // Update the number of recals performed
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_RECAL_COUNT, i_target, l_recal_count));
+        l_recal_count += 1;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_DQS_TRACKING_RECAL_COUNT, i_target, l_recal_count));
     }
     else
     {

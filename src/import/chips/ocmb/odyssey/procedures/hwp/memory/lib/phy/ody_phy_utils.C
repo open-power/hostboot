@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,25 +49,6 @@ namespace ody
 {
 namespace phy
 {
-
-///
-/// @brief Configure the PHY to allow/disallow register accesses via scom
-/// @param[in] i_target the target on which to operate
-/// @param[in] i_state the state to set the PHY to - either mss::states::ON_N (scom access) or mss::states::OFF_N (training access)
-/// @return fapi2::FAPI2_RC_SUCCESS iff successful
-///
-fapi2::ReturnCode configure_phy_scom_access(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        const mss::states i_state)
-{
-    fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_data));
-
-    l_data.writeBit<scomt::mp::DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL>(i_state);
-    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_data));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
 
 ///
 /// @brief Loads two contiguous 8-bit fields into the DMEM register format

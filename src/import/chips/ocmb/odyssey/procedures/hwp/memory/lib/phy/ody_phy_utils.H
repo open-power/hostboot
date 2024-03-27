@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <fapi2.H>
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <lib/phy/ody_phy_access.H>
 #include <lib/shared/ody_consts.H>
 #include <ody_scom_mp_dbyte0_b0.H>
 #include <ody_scom_mp_dbyte1_b0.H>
@@ -515,15 +516,6 @@ constexpr const uint64_t PER_BIT_SWIZZLE_REGS[MAX_RANK_PER_PHY][MAX_BYTES_PER_PO
         },
     }
 };
-
-///
-/// @brief Configure the PHY to allow/disallow register accesses via scom
-/// @param[in] i_target the target on which to operate
-/// @param[in] i_state the state to set the PHY to - either mss::states::ON_N (scom access) or mss::states::OFF_N (training access)
-/// @return fapi2::FAPI2_RC_SUCCESS iff successful
-///
-fapi2::ReturnCode configure_phy_scom_access(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-        const mss::states i_state);
 
 ///
 /// @brief Converts from a Synopsys register address to an IBM register address
