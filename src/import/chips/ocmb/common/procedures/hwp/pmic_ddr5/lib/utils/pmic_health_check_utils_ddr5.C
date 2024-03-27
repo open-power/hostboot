@@ -190,7 +190,7 @@ void check_and_advance_breadcrumb_reg(mss::pmic::ddr5::target_info_pmic_dt_pair&
 /// @param[in,out] io_health_check_info health check struct
 /// @param[in] array of phase values
 /// @param[in] array of pmics to do phase comparison on
-/// @return none
+/// @return None
 ///
 template <size_t N, size_t M>
 void phase_comparison(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
@@ -208,15 +208,8 @@ void phase_comparison(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_in
     {
         if (i_phase_values[l_phase_max_index] > mss::pmic::ddr5::PHASE_MAX_MA)
         {
-            const auto l_index = i_pmic[l_phase_min_index];
-            mss::pmic::ddr5::run_if_present_dt(io_target_info, l_index,
-                                               [&io_target_info, l_index, &io_health_check_info]
-                                               (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
-            {
-                io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_CURRENT_IMBALANCE;
-                check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[l_index], io_health_check_info.iv_dt[l_index]);
-                return fapi2::FAPI2_RC_SUCCESS;
-            });
+            io_target_info.iv_pmic_dt_map[i_pmic[l_phase_min_index]].iv_pmic_state |=
+                mss::pmic::ddr5::pmic_state::PMIC_CURRENT_IMBALANCE;
         }
     }
 }
@@ -358,15 +351,19 @@ void read_ivdd(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
 }
 
 ///
-/// @brief Perform current imbalance to check PMIC faults
+/// @brief Check PMIC faults for all given PMICs
 ///
 /// @param[in,out] io_target_info  PMIC and DT target info struct
-/// @param[in,out] io_health_check_info health check struct for raw phase readings
-/// @return none
+/// @param[in,out] io_health_check_info health check struct
+/// @note As per the document provided by the Power team "Redundant PoD5 - Functional Specification
+///      dated 20230412 version 0.07", the only data needed from the PMICs for health determination
+///      are the rail currents to detect current imbalances and VIN_OK_Z bit fo R73. Other status
+///      faults are summed up into the DT IC “GPI_1” bit.
 ///
-void check_current_imbalance(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                             mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
+void check_pmic_faults(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
+    // Check current imbalance first
     // VDDQ
     FAPI_INF_NO_SBE("Checking voltage domain VDDQ");
     read_ivddq(io_target_info, io_health_check_info);
@@ -382,23 +379,8 @@ void check_current_imbalance(mss::pmic::ddr5::target_info_redundancy_ddr5& io_ta
     // VDD
     FAPI_INF_NO_SBE("Checking voltage domain VDD");
     read_ivdd(io_target_info, io_health_check_info);
-}
 
-///
-/// @brief Check PMIC faults for all given PMICs
-///
-/// @param[in,out] io_target_info  PMIC and DT target info struct
-/// @param[in,out] io_health_check_info health check struct
-/// @return None
-/// @note As per the document provided by the Power team "Redundant PoD5 - Functional Specification
-///      dated 20230412 version 0.07", the only data needed from the PMICs for health determination
-///      are the rail currents to detect current imbalances (other status faults are summed up into
-///      the DT IC “GPI_1” bit)
-///
-void check_pmic_faults(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
-{
-    check_current_imbalance(io_target_info, io_health_check_info);
+    set_pmic_states(io_target_info, io_health_check_info);
 }
 
 ///
@@ -520,6 +502,8 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
                                         (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
             using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+            using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+            using FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
             fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ];
 
             FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Raeding PMIC data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic));
@@ -542,6 +526,15 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
             mss::pmic::ddr5::CURRENT_MULTIPLIER;
             io_health_check_info.iv_pmic[l_pmic_count].iv_swd_current_mA = l_data_buffer[mss::pmic::ddr5::data_position::DATA_11] *
             mss::pmic::ddr5::CURRENT_MULTIPLIER;
+
+            mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R73, l_data_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+
+            if (l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].getBit<FIELDS::R73_VIN_OK_Z>())
+            {
+                io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic_state |= mss::pmic::ddr5::pmic_state::PMIC_VIN_OK_Z;
+            }
+
+            io_health_check_info.iv_pmic[l_pmic_count].iv_r73_status_5 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0].reverse();
 
             return fapi2::FAPI2_RC_SUCCESS;
         });
@@ -695,9 +688,6 @@ void collect_additional_pmic_data(mss::pmic::ddr5::target_info_redundancy_ddr5& 
             mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R32, l_pmic_buffer1);
             io_additional_info.iv_pmic[l_pmic_count].iv_r32_pmic_enable = l_pmic_buffer1[0];
             io_additional_info.iv_pmic[l_pmic_count].iv_r33_temp_status = l_pmic_buffer1[1];
-
-            mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R73, l_pmic_buffer);
-            io_additional_info.iv_pmic[l_pmic_count].iv_r73_status_5 = l_pmic_buffer;
 
             mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R9C_ON_OFF_CONFIG_GLOBAL, l_pmic_buffer);
             io_additional_info.iv_pmic[l_pmic_count].iv_r9c_on_off_config = l_pmic_buffer;
@@ -990,29 +980,6 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
 
 fapi_try_exit:
     return fapi2::current_err;
-}
-
-///
-/// @brief Check all the breadcrumbs and return aggregate state as N_MODE if any PMIC/DT
-///         pair has breadcrumb set to STILL_A_FAIL
-///
-/// @param[in,out] io_health_check_info health check struct
-/// @return Aggregate state
-///
-inline mss::pmic::ddr5::aggregate_state check_breadcrumbs_subsequent_n_modes(const
-        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
-{
-    using CONSTS = mss::dt::dt_i2c_devices;
-
-    if ((io_health_check_info.iv_dt[CONSTS::DT0].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
-        (io_health_check_info.iv_dt[CONSTS::DT1].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
-        (io_health_check_info.iv_dt[CONSTS::DT2].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
-        (io_health_check_info.iv_dt[CONSTS::DT3].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL))
-    {
-        return mss::pmic::ddr5::aggregate_state::N_MODE;
-    }
-
-    return mss::pmic::ddr5::aggregate_state::N_PLUS_1;
 }
 
 ///
