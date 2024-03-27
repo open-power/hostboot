@@ -117,12 +117,12 @@ void attempt_recovery(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_targ
 ///
 /// @brief Check bread crumbs for a specific DT/PMIC
 ///
-/// @param[in] i_target pmic target
+/// @param[in,out] io_pmic_dt_target_info PMIC and DT target info struct
 /// @param[in,out] io_dt_health_check struct which contains DT regs info
-/// @return FAPI2_RC_SUCCESS iff okay
+/// None
 ///
-void check_and_advance_breadcrumb_reg(const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_target,
-                                      mss::pmic::ddr5::pmic_health_check_telemetry& io_dt_health_check);
+void check_and_advance_breadcrumb_reg(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_target_info,
+                                      mss::pmic::ddr5::dt_health_check_telemetry& io_dt_health_check);
 
 ///
 /// @brief Compare 4 phases provided from 4 pmics, update pmic states if needed
@@ -190,24 +190,32 @@ void read_ivdd(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
 
 ///
-/// @brief Convert raw current values to readble hex values
-///
-/// @param[in,out] io_health_check_info health check struct for raw phase readings
-/// @return void
-/// @note This function should be called only once to convert the raw values else we will keep multiplying
-/// the values with 125 and get a wrong conversion.
-///
-void convert_raw_current_readable_values(mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
-
-///
-/// @brief Perform current imbalance to check PMIC faults
+/// @brief Check PMIC faults for all given PMICs
 ///
 /// @param[in,out] io_target_info  PMIC and DT target info struct
-/// @param[in,out] io_health_check_info health check struct for raw phase readings
-/// @return none
+/// @param[in,out] io_health_check_info health check struct
+/// @return None
 ///
-void check_current_imbalance(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                             mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
+inline void set_pmic_states(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                            mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
+{
+    for (auto l_index = 0; l_index < io_target_info.iv_number_of_target_infos_present; l_index++)
+    {
+        // Update breadcrumb if PMIC state is VIN_OK_Z or CURRENT_IMBALANCE or both
+        if (((io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_VIN_OK_Z) != 0) ||
+            ((io_target_info.iv_pmic_dt_map[l_index].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_CURRENT_IMBALANCE) !=
+             0))
+        {
+            mss::pmic::ddr5::run_if_present_dt(io_target_info, l_index,
+                                               [&io_target_info, l_index, &io_health_check_info]
+                                               (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
+            {
+                check_and_advance_breadcrumb_reg(io_target_info.iv_pmic_dt_map[l_index], io_health_check_info.iv_dt[l_index]);
+                return fapi2::FAPI2_RC_SUCCESS;
+            });
+        }
+    }
+}
 
 ///
 /// @brief Check PMIC faults for all given PMICs
@@ -383,7 +391,20 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
 /// @return Aggregate state
 ///
 inline mss::pmic::ddr5::aggregate_state check_breadcrumbs_subsequent_n_modes(const
-        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
+        mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
+{
+    using CONSTS = mss::dt::dt_i2c_devices;
+
+    if ((io_health_check_info.iv_dt[CONSTS::DT0].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
+        (io_health_check_info.iv_dt[CONSTS::DT1].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
+        (io_health_check_info.iv_dt[CONSTS::DT2].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL) ||
+        (io_health_check_info.iv_dt[CONSTS::DT3].iv_breadcrumb == mss::pmic::ddr5::bread_crumb::STILL_A_FAIL))
+    {
+        return mss::pmic::ddr5::aggregate_state::N_MODE;
+    }
+
+    return mss::pmic::ddr5::aggregate_state::N_PLUS_1;
+}
 
 ///
 /// @brief Runs the actual health check for 4U parts
