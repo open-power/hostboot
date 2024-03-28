@@ -224,6 +224,15 @@ inline void ody_upd_reset_state(TARGETING::Target* const i_ocmb)
 errlHndl_t ody_has_async_ffdc(TARGETING::Target* const i_ocmb,
                               bool& o_hasAsyncFfdc);
 
+/**
+ * @brief Initialize the Odyssey update system. This should be called
+ * before the check_for_ready process and not called during MPIPL.
+ *
+ * @return Error if any, otherwise nullptr. An error should halt the
+ * IPL.
+ */
+errlOwner ody_upd_init();
+
 }
 
 #endif

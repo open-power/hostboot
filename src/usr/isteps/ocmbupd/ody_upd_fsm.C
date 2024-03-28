@@ -60,6 +60,11 @@ using namespace ERRORLOG;
 using namespace errl_util;
 using namespace OCMBUPD;
 using namespace ocmbupd;
+using namespace SBEIO;
+
+using std::begin;
+using std::cbegin;
+using std::cend;
 
 namespace ocmbupd
 {
@@ -1524,4 +1529,119 @@ errlHndl_t ody_has_async_ffdc(Target* const i_ocmb,
 
     return l_errl;
 }
+
+/** @brief Combine two sha512 hashes and place the result in the
+ *  first.
+ */
+void combine_hashes(uint8_t* const io_hash1,
+                    const uint8_t* const i_hash2)
+{
+    std::transform(io_hash1, io_hash1 + sizeof(ocmbfw_hash_t),
+                   i_hash2,
+                   io_hash1,
+                   [](const uint8_t a, const uint8_t b) {
+                       return a ^ b;
+                   });
+}
+
+/** @brief Calculate the combined hash of all the firmware images in
+ *  PNOR that apply to the given OCMB, and place the hash in
+ *  o_image_hash.
+ */
+errlOwner pnor_combined_images_hash(Target* const i_ocmb,
+                                    ocmbfw_hash_t o_image_hash)
+{
+    errlOwner errl;
+
+    memset(o_image_hash, 0, sizeof(*o_image_hash));
+
+    const auto ec = i_ocmb->getAttr<ATTR_EC>();
+    const auto dd_level_major = (ec & 0xF0) >> 4,
+               dd_level_minor = (ec & 0x0F);
+
+    for (const auto img_type : { IMAGE_TYPE_BOOTLOADER,
+                                 IMAGE_TYPE_RUNTIME })
+    {
+        const ocmbfw_ext_image_info* img = nullptr;
+
+        errlOwner pnor_errl { find_ocmbfw_ext_image(img,
+                                                    OCMBFW_HANDLE.get(),
+                                                    OCMB_TYPE_ODYSSEY,
+                                                    img_type,
+                                                    dd_level_major,
+                                                    dd_level_minor) };
+
+        if (pnor_errl)
+        {
+            TRACF("pnor_combined_images_hash: find_ocmbfw_ext_image(img_type=%d, dd_major=%d, dd_minor=%d) "
+                  "for OCMB 0x%08X failed",
+                  img_type, dd_level_major, dd_level_minor,
+                  get_huid(i_ocmb));
+            aggregate(errl, move(pnor_errl));
+            continue;
+        }
+
+        combine_hashes(&o_image_hash[0], img->image_hash);
+    }
+
+    return errl;
+}
+
+/** @brief Initialize the Odyssey OCMB update system.
+ */
+errlOwner ody_upd_init()
+{
+    TRACF(ENTER_MRK"ody_upd_init");
+
+    errlOwner errl;
+
+    /* Check whether the Odyssey firmware in PNOR for any OCMB has
+       changed. If so, we reset the Odyssey FSM state for that OCMB so
+       that the code update procedure starts from scratch. (This
+       solves the potential problem where we update an OCMB, reboot on
+       the other side and check whether the update worked, but PNOR
+       has changed in the meanwhile, and we detect a hash mismatch
+       between PNOR and the firmware on the OCMB.) */
+
+    for (const auto ocmb : composable(getAllChips)(TYPE_OCMB_CHIP, /*functional=*/true))
+    {
+        if (!UTIL::isOdysseyChip(ocmb))
+        {
+            continue;
+        }
+
+        alignas(uint64_t) ocmbfw_hash_t combined_hash = { };
+        auto pnor_err = pnor_combined_images_hash(ocmb, combined_hash);
+
+        if (errl)
+        {
+            aggregate(errl, move(pnor_err));
+            continue;
+        }
+
+        alignas(uint64_t) auto previous_hash
+            = ocmb->getAttrAsStdArr<ATTR_ODY_PNOR_COMBINED_IMAGES_HASH>();
+
+        TRACF("ody_upd_init: OCMB 0x%08x New vs. old hashes: %016x[...] vs %016x[...]",
+              get_huid(ocmb),
+              *reinterpret_cast<uint64_t*>(combined_hash),
+              *reinterpret_cast<uint64_t*>(previous_hash.data()));
+
+        if (memcmp(previous_hash.data(), combined_hash, sizeof(ocmbfw_hash_t)))
+        {
+            TRACF("ody_upd_init: PNOR images for OCMB 0x%08X have changed; "
+                  "restarting update process",
+                  get_huid(ocmb));
+
+            ody_upd_reset_state(ocmb);
+            memcpy(previous_hash.data(), combined_hash, sizeof(ocmbfw_hash_t));
+            ocmb->setAttrFromStdArr<ATTR_ODY_PNOR_COMBINED_IMAGES_HASH>(previous_hash);
+        }
+    }
+
+    TRACF(EXIT_MRK"ody_upd_init = 0x%08X", ERRL_GETEID_SAFE(errl));
+
+    return errl;
+}
+
 } // namespace ocmbupd

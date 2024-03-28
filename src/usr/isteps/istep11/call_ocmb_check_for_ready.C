@@ -804,6 +804,17 @@ void* call_ocmb_check_for_ready (void *io_pArgs)
         nanosleep(ocmb_delay,0);
     }
 
+    l_errl = ody_upd_init().release();
+
+    if (l_errl)
+    {
+        TRACISTEP("call_ocmb_check_for_ready: ody_upd_init() failed: "
+                  TRACE_ERR_FMT,
+                  TRACE_ERR_ARGS(l_errl));
+        captureError(l_errl, l_StepError, ISTEP_COMP_ID);
+        break;
+    }
+
     TargetHandleList functionalProcChipList;
 
     getAllChips(functionalProcChipList, TYPE_PROC, true);

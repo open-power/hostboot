@@ -464,6 +464,9 @@
       <id>OCMB_GOLDEN_BOOT_ATTEMPTED</id>
     </attribute>
     <attribute>
+      <id>ODY_PNOR_COMBINED_IMAGES_HASH</id>
+    </attribute>
+    <attribute>
       <id>SBE_BOOTLOADER_CODELEVEL</id>
     </attribute>
     <attribute>

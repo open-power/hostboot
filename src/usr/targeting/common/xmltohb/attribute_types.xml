@@ -6298,6 +6298,25 @@
   </attribute>
 
   <attribute>
+    <id>ODY_PNOR_COMBINED_IMAGES_HASH</id>
+    <description>
+      A single hash that is a combination of the hashes of all Odyssey
+      firmwares in PNOR that pertain to this chip. This is used to
+      detect when Hostboot firmware is updated on the system, so that
+      the Odyssey firmware update process can be restarted if
+      necessary.
+    </description>
+    <simpleType>
+      <uint8_t/>
+      <array>64</array>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <description>
         Physical entity path an OMI's associated OMIC parent target
     </description>
