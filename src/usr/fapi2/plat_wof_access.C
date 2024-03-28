@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -744,7 +744,26 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
     // Core count (only present, non-eco cores used in WOF tables)
     TARGETING::TargetHandleList l_coreTargetList;
     getNonEcoCores(l_coreTargetList, i_procTarg, false);
-    const uint8_t l_coreCount = l_coreTargetList.size();
+    const uint8_t l_coreCount_NonEco = l_coreTargetList.size();
+
+    // spare Core count (only present, eco cores used in WOF tables)
+    const uint8_t  l_spareCoreCount = i_procTarg->getAttr<ATTR_SPARE_CORES>();
+
+    uint8_t l_coreCount = 0;
+    // cores are equal to Non ECO cores if it is greater than spares or spares are zero.
+    if (l_coreCount_NonEco < l_spareCoreCount)
+    {
+        // Subtrace spares from core count, NOTE subtracting 0 is ok.
+        FAPI_INF("getOverrideWofTable: Spare Core Count = %d", l_spareCoreCount);
+        l_coreCount = l_coreCount_NonEco - l_spareCoreCount;
+    }
+    else
+    {
+        // l_spareCoreCount is bigger or equal to cores in system Error Condition.
+        FAPI_ERR("getOverrideWofTable: Spare Core Count %d >= Non ECO core count %d",
+                    l_spareCoreCount, l_coreCount_NonEco);
+        l_coreCount = l_coreCount_NonEco;
+    }
 
     // Nominal power in Watts for Proc and WofBase Freq in Mhz for System
     const uint16_t l_nominalPowerWatts = i_procTarg->getAttr<TARGETING::ATTR_SOCKET_POWER_NOMINAL>();
