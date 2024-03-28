@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2017,2023
+# Contributors Listed Below - COPYRIGHT 2017,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -92,6 +92,7 @@ my $g_io_power_size;
 my $g_vcs_ceff_size;
 my $g_vdd_ceff_size;
 my $g_amb_cond_size;
+my $g_expand_freq_enable;
 
 my $G_MIN_FREQ_ENCODE = 108;
 my $G_MAX_FREQ_ENCODE = 255;
@@ -454,25 +455,38 @@ our $CSV_ATTR_fav_perf_freq_lim_mhz     = 'fav_perf_freq_lim_mhz';
 our $CSV_ATTR_fav_powr_freq_lim_mhz     = 'fav_powr_freq_lim_mhz';
 our $CSV_ATTR_non_det_freq_lim_mhz      = 'non_det_freq_lim_mhz';
 our $CSV_ATTR_max_pwr_min_freq          = 'max_pwr_min_freq';
+our $CSV_ATTR_cf0_boost_curr_scale_pct  = 'cf0_boost_curr_scale_pct';
+our $CSV_ATTR_cf1_boost_curr_scale_pct  = 'cf1_boost_curr_scale_pct';
+our $CSV_ATTR_cf2_boost_curr_scale_pct  = 'cf2_boost_curr_scale_pct';
+our $CSV_ATTR_cf3_boost_curr_scale_pct  = 'cf3_boost_curr_scale_pct';
+our $CSV_ATTR_cf4_boost_curr_scale_pct  = 'cf4_boost_curr_scale_pct';
+our $CSV_ATTR_cf5_boost_curr_scale_pct  = 'cf5_boost_curr_scale_pct';
+our $CSV_ATTR_cf6_boost_curr_scale_pct  = 'cf6_boost_curr_scale_pct';
+our $CSV_ATTR_cf7_boost_curr_scale_pct  = 'cf7_boost_curr_scale_pct';
+our $CSV_ATTR_dimm_dimension_enable     = 'dimm_dimension_enable';
+our $CSV_ATTR_system_type               = 'system_type';
 
 # columns of csv file scope in csv files.
 our @CSV_FILE_SCOPE_COLUMN_NAMES = (
-    $CSV_ATTR_sort,                  $CSV_ATTR_package,                   $CSV_ATTR_table_version,
-    $CSV_ATTR_table_date,            $CSV_ATTR_PN,                        $CSV_ATTR_ocs_mode,
-    $CSV_ATTR_socket_power,          $CSV_ATTR_rdp_current,               $CSV_ATTR_boost_current,
-    $CSV_ATTR_tdp_vcs_ceff_index,    $CSV_ATTR_tdp_vdd_ceff_index,        $CSV_ATTR_tdp_io_power_index,
-    $CSV_ATTR_tdp_amb_cond_index,    $CSV_ATTR_io_full_power,             $CSV_ATTR_io_disabled_power,
-    $CSV_ATTR_core_count,            $CSV_ATTR_pdv_sort_ultra_turbo_freq, $CSV_ATTR_pdv_sort_throttle_freq,
-    $CSV_ATTR_wov_credit_knob,       $CSV_ATTR_pdv_sort_power_save_freq,  $CSV_ATTR_pdv_sort_wof_base_freq,
-    $CSV_ATTR_vdd_ceff_start,        $CSV_ATTR_vdd_ceff_step,             $CSV_ATTR_vdd_ceff_size,
-    $CSV_ATTR_vcs_ceff_start,        $CSV_ATTR_vcs_ceff_step,             $CSV_ATTR_vcs_ceff_size,
-    $CSV_ATTR_io_power_start,        $CSV_ATTR_io_power_step,             $CSV_ATTR_io_power_size,
-    $CSV_ATTR_amb_cond_start,        $CSV_ATTR_amb_cond_step,             $CSV_ATTR_amb_cond_size,
-    $CSV_ATTR_vratio_start,          $CSV_ATTR_vratio_step,               $CSV_ATTR_override_match_freq,
-    $CSV_ATTR_override_match_power,  $CSV_ATTR_pdv_sort_fixed_freq,       $CSV_ATTR_bal_perf_ceff_adj_pct,
-    $CSV_ATTR_fav_perf_ceff_adj_pct, $CSV_ATTR_fav_powr_ceff_adj_pct,     $CSV_ATTR_non_det_ceff_adj_pct,
-    $CSV_ATTR_bal_perf_freq_lim_mhz, $CSV_ATTR_fav_perf_freq_lim_mhz,     $CSV_ATTR_fav_powr_freq_lim_mhz,
-    $CSV_ATTR_non_det_freq_lim_mhz,  $CSV_ATTR_max_pwr_min_freq,
+    $CSV_ATTR_sort,                     $CSV_ATTR_package,                   $CSV_ATTR_table_version,
+    $CSV_ATTR_table_date,               $CSV_ATTR_PN,                        $CSV_ATTR_ocs_mode,
+    $CSV_ATTR_socket_power,             $CSV_ATTR_rdp_current,               $CSV_ATTR_boost_current,
+    $CSV_ATTR_tdp_vcs_ceff_index,       $CSV_ATTR_tdp_vdd_ceff_index,        $CSV_ATTR_tdp_io_power_index,
+    $CSV_ATTR_tdp_amb_cond_index,       $CSV_ATTR_io_full_power,             $CSV_ATTR_io_disabled_power,
+    $CSV_ATTR_core_count,               $CSV_ATTR_pdv_sort_ultra_turbo_freq, $CSV_ATTR_pdv_sort_throttle_freq,
+    $CSV_ATTR_wov_credit_knob,          $CSV_ATTR_pdv_sort_power_save_freq,  $CSV_ATTR_pdv_sort_wof_base_freq,
+    $CSV_ATTR_vdd_ceff_start,           $CSV_ATTR_vdd_ceff_step,             $CSV_ATTR_vdd_ceff_size,
+    $CSV_ATTR_vcs_ceff_start,           $CSV_ATTR_vcs_ceff_step,             $CSV_ATTR_vcs_ceff_size,
+    $CSV_ATTR_io_power_start,           $CSV_ATTR_io_power_step,             $CSV_ATTR_io_power_size,
+    $CSV_ATTR_amb_cond_start,           $CSV_ATTR_amb_cond_step,             $CSV_ATTR_amb_cond_size,
+    $CSV_ATTR_vratio_start,             $CSV_ATTR_vratio_step,               $CSV_ATTR_override_match_freq,
+    $CSV_ATTR_override_match_power,     $CSV_ATTR_pdv_sort_fixed_freq,       $CSV_ATTR_bal_perf_ceff_adj_pct,
+    $CSV_ATTR_fav_perf_ceff_adj_pct,    $CSV_ATTR_fav_powr_ceff_adj_pct,     $CSV_ATTR_non_det_ceff_adj_pct,
+    $CSV_ATTR_bal_perf_freq_lim_mhz,    $CSV_ATTR_fav_perf_freq_lim_mhz,     $CSV_ATTR_fav_powr_freq_lim_mhz,
+    $CSV_ATTR_non_det_freq_lim_mhz,     $CSV_ATTR_max_pwr_min_freq,          $CSV_ATTR_cf0_boost_curr_scale_pct,
+    $CSV_ATTR_cf1_boost_curr_scale_pct, $CSV_ATTR_cf2_boost_curr_scale_pct,  $CSV_ATTR_cf3_boost_curr_scale_pct,
+    $CSV_ATTR_cf4_boost_curr_scale_pct, $CSV_ATTR_cf5_boost_curr_scale_pct,  $CSV_ATTR_cf6_boost_curr_scale_pct,
+    $CSV_ATTR_cf7_boost_curr_scale_pct, $CSV_ATTR_dimm_dimension_enable,     $CSV_ATTR_system_type,
 );
 
 # columns of csv vrt scope in csv files.
@@ -1571,15 +1585,30 @@ our $p_log_lvl = $LOG_LVL_0;
 
 # Constants representing expected field values
 our $WOF_TABLES_HEADER_MAGIC_VALUE           = 'WFTH';
-our $WOF_TABLES_HEADER_HEADER_VERSION        = 1;
+our $WOF_TABLES_HEADER_HEADER_VERSION_1      = 1;
+our $WOF_TABLES_HEADER_HEADER_VERSION_2      = 2;
 our $WOF_TABLES_HEADER_VRT_BLOCK_SIZE        = 16;
 our $WOF_TABLES_HEADER_VRT_BLOCK_HEADER_SIZE = 4;
 our $WOF_TABLES_HEADER_VRT_DATA_SIZE         = 1;
-our $WOF_TABLES_HEADER_OCS_MODE              = 1;
 our $WOF_TABLES_HEADER_VRATIO_SIZE           = $VRT_COLUMN_COUNT;
 our $WOF_TABLES_HEADER_SIZE                  = 128;
 our $CSV_WOF_CONV_MULTIPLIER_PERCENT         = 10000;
 our $CSV_WOF_CONV_MULTIPLIER_VALUE           = 1;
+our $CSV_SYSTEM_TYPE_DENALI                  = 0x00;
+our $CSV_SYSTEM_TYPE_MCKINLEY                = 0x10;
+our $CSV_SYSTEM_TYPE_EVEREST                 = 0x20;
+our $CSV_SYSTEM_TYPE_FUJI                    = 0x30;
+our $CSV_SYSTEM_TYPE_RAINIER_2U              = 0x40;
+our $CSV_SYSTEM_TYPE_BLUERIDGE_2U            = 0x50;
+our $CSV_SYSTEM_TYPE_RAINIER_4U              = 0x60;
+our $CSV_SYSTEM_TYPE_BLUERIDGE_4U            = 0x70;
+our $CSV_SYSTEM_TYPE_BONNEL                  = 0x80;
+our $CSV_DIMM_ADJ_ENABLE                     = 0x08;
+our $CSV_DIMM_ADJ_DISABLE                    = 0x00;
+our $CSV_EXP_FREQ_ENABLE                     = 0x04;
+our $CSV_EXP_FREQ_DISABLE                    = 0x00;
+our $CSV_OCS_ENABLE                          = 0x01;
+our $CSV_OCS_DISABLE                         = 0x00;
 
 # Attribute names in this class
 our $WOF_ATTR_magic_value               = 'magic_value';
@@ -1590,7 +1619,7 @@ our $WOF_ATTR_header_version            = 'header_version';
 our $WOF_ATTR_vrt_block_size            = 'vrt_block_size';
 our $WOF_ATTR_vrt_block_header_size     = 'vrt_block_header_size';
 our $WOF_ATTR_vrt_data_size             = 'vrt_data_size';
-our $WOF_ATTR_ocs_mode                  = 'ocs_mode';
+our $WOF_ATTR_sys_flags                 = 'sys_flags';
 our $WOF_ATTR_core_count                = 'core_count';
 our $WOF_ATTR_vcs_start                 = 'vcs_start';
 our $WOF_ATTR_vcs_step                  = 'vcs_step';
@@ -1635,6 +1664,14 @@ our $WOF_ATTR_fav_perf_freq_lim_mhz     = 'fav_perf_freq_lim_mhz';
 our $WOF_ATTR_fav_powr_freq_lim_mhz     = 'fav_powr_freq_lim_mhz';
 our $WOF_ATTR_non_det_freq_lim_mhz      = 'non_det_freq_lim_mhz';
 our $WOF_ATTR_max_pwr_min_freq          = 'max_pwr_min_freq';
+our $WOF_ATTR_cf0_boost_curr_scale_pct  = 'cf0_boost_curr_scale_pct';
+our $WOF_ATTR_cf1_boost_curr_scale_pct  = 'cf1_boost_curr_scale_pct';
+our $WOF_ATTR_cf2_boost_curr_scale_pct  = 'cf2_boost_curr_scale_pct';
+our $WOF_ATTR_cf3_boost_curr_scale_pct  = 'cf3_boost_curr_scale_pct';
+our $WOF_ATTR_cf4_boost_curr_scale_pct  = 'cf4_boost_curr_scale_pct';
+our $WOF_ATTR_cf5_boost_curr_scale_pct  = 'cf5_boost_curr_scale_pct';
+our $WOF_ATTR_cf6_boost_curr_scale_pct  = 'cf6_boost_curr_scale_pct';
+our $WOF_ATTR_cf7_boost_curr_scale_pct  = 'cf7_boost_curr_scale_pct';
 
 sub new
 {
@@ -1647,11 +1684,11 @@ sub new
         $WOF_ATTR_major_dd_level            => undef,
         $WOF_ATTR_minor_dd_level            => undef,
         $WOF_ATTR_wov_credit_knob           => undef,
-        $WOF_ATTR_header_version            => $WOF_TABLES_HEADER_HEADER_VERSION,
+        $WOF_ATTR_header_version            => $WOF_TABLES_HEADER_HEADER_VERSION_1,
         $WOF_ATTR_vrt_block_size            => $WOF_TABLES_HEADER_VRT_BLOCK_SIZE,
         $WOF_ATTR_vrt_block_header_size     => $WOF_TABLES_HEADER_VRT_BLOCK_HEADER_SIZE,
         $WOF_ATTR_vrt_data_size             => $WOF_TABLES_HEADER_VRT_DATA_SIZE,
-        $WOF_ATTR_ocs_mode                  => $WOF_TABLES_HEADER_OCS_MODE,
+        $WOF_ATTR_sys_flags                 => undef,
         $WOF_ATTR_core_count                => undef,
         $WOF_ATTR_vcs_start                 => undef,
         $WOF_ATTR_vcs_step                  => undef,
@@ -1696,6 +1733,15 @@ sub new
         $WOF_ATTR_fav_powr_freq_lim_mhz     => undef,
         $WOF_ATTR_non_det_freq_lim_mhz      => undef,
         $WOF_ATTR_max_pwr_min_freq          => undef,
+        $WOF_ATTR_cf0_boost_curr_scale_pct  => undef,
+        $WOF_ATTR_cf1_boost_curr_scale_pct  => undef,
+        $WOF_ATTR_cf2_boost_curr_scale_pct  => undef,
+        $WOF_ATTR_cf3_boost_curr_scale_pct  => undef,
+        $WOF_ATTR_cf4_boost_curr_scale_pct  => undef,
+        $WOF_ATTR_cf5_boost_curr_scale_pct  => undef,
+        $WOF_ATTR_cf6_boost_curr_scale_pct  => undef,
+        $WOF_ATTR_cf7_boost_curr_scale_pct  => undef,
+
     };
     bless($self);
     return $self;
@@ -1734,7 +1780,7 @@ sub read
     $self->access( $WOF_ATTR_vrt_block_size,            $file->read_uint16() );
     $self->access( $WOF_ATTR_vrt_block_header_size,     $file->read_uint16() );
     $self->access( $WOF_ATTR_vrt_data_size,             $file->read_uint16() );
-    $self->access( $WOF_ATTR_ocs_mode,                  $file->read_uint8() );
+    $self->access( $WOF_ATTR_sys_flags,                 $file->read_uint8() );
     $self->access( $WOF_ATTR_core_count,                $file->read_uint8() );
     $self->access( $WOF_ATTR_vcs_start,                 $file->read_uint16() );
     $self->access( $WOF_ATTR_vcs_step,                  $file->read_uint16() );
@@ -1766,19 +1812,39 @@ sub read
     $self->access( $WOF_ATTR_table_date_timestamp,      $file->read_uint32() );
     $self->access( $WOF_ATTR_override_match_freq,       $file->read_uint16() );
     $self->access( $WOF_ATTR_override_match_power,      $file->read_uint16() );
-    $self->access( $WOF_ATTR_table_version,             $file->read_ascii_text(16) );
-    $self->access( $WOF_ATTR_package_name,              $file->read_ascii_text(16) );
-    $self->access( $WOF_ATTR_sort_power_save_freq_mhz,  $file->read_uint16() );
-    $self->access( $WOF_ATTR_sort_fixed_freq_mhz,       $file->read_uint16() );
-    $self->access( $WOF_ATTR_bal_perf_ceff_adj_pct,     $file->read_uint8() );
-    $self->access( $WOF_ATTR_fav_perf_ceff_adj_pct,     $file->read_uint8() );
-    $self->access( $WOF_ATTR_fav_powr_ceff_adj_pct,     $file->read_uint8() );
-    $self->access( $WOF_ATTR_non_det_ceff_adj_pct,      $file->read_uint8() );
-    $self->access( $WOF_ATTR_bal_perf_freq_lim_mhz,     $file->read_uint16() );
-    $self->access( $WOF_ATTR_fav_perf_freq_lim_mhz,     $file->read_uint16() );
-    $self->access( $WOF_ATTR_fav_powr_freq_lim_mhz,     $file->read_uint16() );
-    $self->access( $WOF_ATTR_non_det_freq_lim_mhz,      $file->read_uint16() );
-    $self->access( $WOF_ATTR_max_pwr_min_freq,          $file->read_uint16() );
+
+    #In the version 2 table, table version and package name reduced to 8bytes
+    if ( $self->access($WOF_ATTR_header_version) == 2 )
+    {
+        $self->access( $WOF_ATTR_table_version,            $file->read_ascii_text(8) );
+        $self->access( $WOF_ATTR_cf0_boost_curr_scale_pct, $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf1_boost_curr_scale_pct, $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf2_boost_curr_scale_pct, $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf3_boost_curr_scale_pct, $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf4_boost_curr_scale_pct, $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf5_boost_curr_scale_pct, $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf6_boost_curr_scale_pct, $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf7_boost_curr_scale_pct, $file->read_uint8() );
+        $self->access( $WOF_ATTR_package_name,             $file->read_ascii_text(8) );
+        $file->skip_bytes(8);    # Reserved 8 bytes
+    }
+    else
+    {
+        $self->access( $WOF_ATTR_table_version, $file->read_ascii_text(16) );
+        $self->access( $WOF_ATTR_package_name,  $file->read_ascii_text(16) );
+    }
+
+    $self->access( $WOF_ATTR_sort_power_save_freq_mhz, $file->read_uint16() );
+    $self->access( $WOF_ATTR_sort_fixed_freq_mhz,      $file->read_uint16() );
+    $self->access( $WOF_ATTR_bal_perf_ceff_adj_pct,    $file->read_uint8() );
+    $self->access( $WOF_ATTR_fav_perf_ceff_adj_pct,    $file->read_uint8() );
+    $self->access( $WOF_ATTR_fav_powr_ceff_adj_pct,    $file->read_uint8() );
+    $self->access( $WOF_ATTR_non_det_ceff_adj_pct,     $file->read_uint8() );
+    $self->access( $WOF_ATTR_bal_perf_freq_lim_mhz,    $file->read_uint16() );
+    $self->access( $WOF_ATTR_fav_perf_freq_lim_mhz,    $file->read_uint16() );
+    $self->access( $WOF_ATTR_fav_powr_freq_lim_mhz,    $file->read_uint16() );
+    $self->access( $WOF_ATTR_non_det_freq_lim_mhz,     $file->read_uint16() );
+    $self->access( $WOF_ATTR_max_pwr_min_freq,         $file->read_uint16() );
 
     $file->skip_bytes(6);    # Reserved 6 bytes
 
@@ -1810,7 +1876,8 @@ sub read
         die "Error: Unexpected value in Magic Value field of WOF Tables Header: "
             . $self->access($WOF_ATTR_magic_value) . "\n";
     }
-    if ( $self->access($WOF_ATTR_header_version) ne $WOF_TABLES_HEADER_HEADER_VERSION )
+    if (   $self->access($WOF_ATTR_header_version) ne $WOF_TABLES_HEADER_HEADER_VERSION_1
+        && $self->access($WOF_ATTR_header_version) ne $WOF_TABLES_HEADER_HEADER_VERSION_2 )
     {
         die "Error: Unexpected value in Version field of WOF Tables Header: "
             . sprintf( "0x%02X", $self->access($WOF_ATTR_header_version) ) . "\n";
@@ -1835,7 +1902,7 @@ sub write
     $file->write_uint16( $self->access($WOF_ATTR_vrt_block_size) );
     $file->write_uint16( $self->access($WOF_ATTR_vrt_block_header_size) );
     $file->write_uint16( $self->access($WOF_ATTR_vrt_data_size) );
-    $file->write_uint8( $self->access($WOF_ATTR_ocs_mode) );
+    $file->write_uint8( $self->access($WOF_ATTR_sys_flags) );
     $file->write_uint8( $self->access($WOF_ATTR_core_count) );
     $file->write_uint16( $self->access($WOF_ATTR_vcs_start) );
     $file->write_uint16( $self->access($WOF_ATTR_vcs_step) );
@@ -1867,8 +1934,27 @@ sub write
     $file->write_uint32( $self->access($WOF_ATTR_table_date_timestamp) );
     $file->write_uint16( $self->access($WOF_ATTR_override_match_freq) );
     $file->write_uint16( $self->access($WOF_ATTR_override_match_power) );
-    $file->write_ascii_text( $self->access($WOF_ATTR_table_version), 16 );
-    $file->write_ascii_text( $self->access($WOF_ATTR_package_name),  16 );
+
+    #In the version 2 table, table version and package name reduced to 8bytes
+    if ( $self->access($WOF_ATTR_header_version) == 2 )
+    {
+        $file->write_ascii_text( $self->access($WOF_ATTR_table_version), 8 );
+        $file->write_uint8( $self->access($WOF_ATTR_cf0_boost_curr_scale_pct) );
+        $file->write_uint8( $self->access($WOF_ATTR_cf1_boost_curr_scale_pct) );
+        $file->write_uint8( $self->access($WOF_ATTR_cf2_boost_curr_scale_pct) );
+        $file->write_uint8( $self->access($WOF_ATTR_cf3_boost_curr_scale_pct) );
+        $file->write_uint8( $self->access($WOF_ATTR_cf4_boost_curr_scale_pct) );
+        $file->write_uint8( $self->access($WOF_ATTR_cf5_boost_curr_scale_pct) );
+        $file->write_uint8( $self->access($WOF_ATTR_cf6_boost_curr_scale_pct) );
+        $file->write_uint8( $self->access($WOF_ATTR_cf7_boost_curr_scale_pct) );
+        $file->write_ascii_text( $self->access($WOF_ATTR_package_name), 8 );
+        $file->fill_bytes( 8, 0x00 );    # Reserved 8 bytes
+    }
+    else
+    {
+        $file->write_ascii_text( $self->access($WOF_ATTR_table_version), 16 );
+        $file->write_ascii_text( $self->access($WOF_ATTR_package_name),  16 );
+    }
     $file->write_uint16( $self->access($WOF_ATTR_sort_power_save_freq_mhz) );
     $file->write_uint16( $self->access($WOF_ATTR_sort_fixed_freq_mhz) );
     $file->write_uint8( $self->access($WOF_ATTR_bal_perf_ceff_adj_pct) );
@@ -1920,7 +2006,7 @@ sub print
     printf( "  VRT Block Size                 : %u\n", $self->access($WOF_ATTR_vrt_block_size) );
     printf( "  VRT Block Header Size          : %u\n", $self->access($WOF_ATTR_vrt_block_header_size) );
     printf( "  VRT Data Size                  : %u\n", $self->access($WOF_ATTR_vrt_data_size) );
-    printf( "  Ocs Mode                       : %u\n", $self->access($WOF_ATTR_ocs_mode) );
+    printf( "  Sys Flags                      : %u\n", $self->access($WOF_ATTR_sys_flags) );
     printf( "  Core Count                     : %u\n", $self->access($WOF_ATTR_core_count) );
     printf( "  Vcs Start                      : %u\n", $self->access($WOF_ATTR_vcs_start) );
     printf( "  Vcs Step                       : %u\n", $self->access($WOF_ATTR_vcs_step) );
@@ -1952,6 +2038,17 @@ sub print
     printf( "  Table Date Timestamp           : %u\n", $self->access($WOF_ATTR_table_date_timestamp) );
     printf( "  Override Match Freq MHz        : %s\n", $self->access($WOF_ATTR_override_match_freq) );
     printf( "  Override Match Power           : %s\n", $self->access($WOF_ATTR_override_match_power) );
+    if ( $self->access($WOF_ATTR_header_version) == 2 )
+    {
+        printf( "  CF0 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf0_boost_curr_scale_pct) );
+        printf( "  CF1 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf1_boost_curr_scale_pct) );
+        printf( "  CF2 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf2_boost_curr_scale_pct) );
+        printf( "  CF3 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf3_boost_curr_scale_pct) );
+        printf( "  CF4 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf4_boost_curr_scale_pct) );
+        printf( "  CF5 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf5_boost_curr_scale_pct) );
+        printf( "  CF6 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf6_boost_curr_scale_pct) );
+        printf( "  CF7 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf7_boost_curr_scale_pct) );
+    }
     printf( "  Table Version                  : %s\n", $self->access($WOF_ATTR_table_version) );
     printf( "  Package Name                   : %s\n", $self->access($WOF_ATTR_package_name) );
     printf( "  Sort Power Save Frequency MHz  : %s\n", $self->access($WOF_ATTR_sort_power_save_freq_mhz) );
@@ -2695,6 +2792,8 @@ sub _set_wof_tables_header
     Log::log_print $p_log_lvl, "  $major_dd_level: $major_dd_level.\n";
     Log::log_print $p_log_lvl, "  $minor_dd_level: $minor_dd_level.\n";
 
+    my $sys_flag_value = 0x00;
+
     # Create WOF Tables header
     my $wof_tables_header = WOFTablesHeader->new();
 
@@ -2712,7 +2811,6 @@ sub _set_wof_tables_header
     # vrt_block_size hardcoded in WOF_HEADER class.
     # vrt_block_header_size hardcoded in WOF_HEADER class.
     # vrt_data_size hardcoded in WOF_HEADER class.
-    # ocs_mode hardcoded in WOF_HEADER class.
     $wof_tables_header->access( $WOF_ATTR_wov_credit_knob, $csv_file->access($CSV_ATTR_wov_credit_knob) );
     $wof_tables_header->access( $WOF_ATTR_core_count,      $csv_file->access($CSV_ATTR_core_count) );
     $wof_tables_header->access( $WOF_ATTR_vcs_start,
@@ -2776,6 +2874,85 @@ sub _set_wof_tables_header
     $wof_tables_header->access( $WOF_ATTR_fav_powr_freq_lim_mhz, $csv_file->access($CSV_ATTR_fav_powr_freq_lim_mhz) );
     $wof_tables_header->access( $WOF_ATTR_non_det_freq_lim_mhz,  $csv_file->access($CSV_ATTR_non_det_freq_lim_mhz) );
     $wof_tables_header->access( $WOF_ATTR_max_pwr_min_freq,      $csv_file->access($CSV_ATTR_max_pwr_min_freq) );
+    $wof_tables_header->access( $WOF_ATTR_cf0_boost_curr_scale_pct,
+        $csv_file->access($CSV_ATTR_cf0_boost_curr_scale_pct) );
+    $wof_tables_header->access( $WOF_ATTR_cf1_boost_curr_scale_pct,
+        $csv_file->access($CSV_ATTR_cf1_boost_curr_scale_pct) );
+    $wof_tables_header->access( $WOF_ATTR_cf2_boost_curr_scale_pct,
+        $csv_file->access($CSV_ATTR_cf2_boost_curr_scale_pct) );
+    $wof_tables_header->access( $WOF_ATTR_cf3_boost_curr_scale_pct,
+        $csv_file->access($CSV_ATTR_cf3_boost_curr_scale_pct) );
+    $wof_tables_header->access( $WOF_ATTR_cf4_boost_curr_scale_pct,
+        $csv_file->access($CSV_ATTR_cf4_boost_curr_scale_pct) );
+    $wof_tables_header->access( $WOF_ATTR_cf5_boost_curr_scale_pct,
+        $csv_file->access($CSV_ATTR_cf5_boost_curr_scale_pct) );
+    $wof_tables_header->access( $WOF_ATTR_cf6_boost_curr_scale_pct,
+        $csv_file->access($CSV_ATTR_cf6_boost_curr_scale_pct) );
+    $wof_tables_header->access( $WOF_ATTR_cf7_boost_curr_scale_pct,
+        $csv_file->access($CSV_ATTR_cf7_boost_curr_scale_pct) );
+
+    if ( defined( $csv_file->access($CSV_ATTR_dimm_dimension_enable) ) )
+    {
+        $sys_flag_value = $CSV_EXP_FREQ_ENABLE;
+    }
+
+    if ( defined( $csv_file->access($CSV_ATTR_ocs_mode) ) )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_OCS_ENABLE;
+    }
+
+    if ( $csv_file->access($CSV_ATTR_system_type) == "Denali" )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_DENALI;
+    }
+
+    if ( $csv_file->access($CSV_ATTR_system_type) == "McKinley" )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_MCKINLEY;
+    }
+    if ( $csv_file->access($CSV_ATTR_system_type) == "Everest" )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_EVEREST;
+    }
+    if ( $csv_file->access($CSV_ATTR_system_type) == "Fuji" )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_FUJI;
+    }
+    if ( $csv_file->access($CSV_ATTR_system_type) == "Rainier-2U" )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_RAINIER_2U;
+    }
+    if ( $csv_file->access($CSV_ATTR_system_type) == "BlueRidge-2U" )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_BLUERIDGE_2U;
+    }
+    if ( $csv_file->access($CSV_ATTR_system_type) == "Rainier-4U" )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_RAINIER_4U;
+    }
+    if ( $csv_file->access($CSV_ATTR_system_type) == "BlueRidge-4U" )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_BLUERIDGE_4U;
+    }
+    if ( $csv_file->access($CSV_ATTR_system_type) == "Bonnel" )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_BONNEL;
+    }
+
+    $wof_tables_header->access( $WOF_ATTR_sys_flags, $sys_flag_value );
+
+    #If cur scale are detected, then header version should be 2
+    if (   defined($WOF_ATTR_cf0_boost_curr_scale_pct)
+        && defined($WOF_ATTR_cf1_boost_curr_scale_pct)
+        && defined($WOF_ATTR_cf2_boost_curr_scale_pct)
+        && defined($WOF_ATTR_cf3_boost_curr_scale_pct)
+        && defined($WOF_ATTR_cf4_boost_curr_scale_pct)
+        && defined($WOF_ATTR_cf5_boost_curr_scale_pct)
+        && defined($WOF_ATTR_cf6_boost_curr_scale_pct)
+        && defined($WOF_ATTR_cf7_boost_curr_scale_pct) )
+    {
+        $wof_tables_header->access( $WOF_ATTR_header_version, $WOF_TABLES_HEADER_HEADER_VERSION_2 );
+    }
 
     # Write header to image file
     $wof_tables_header->write( $self->access($IMF_ATTR_binary_file_io) );
@@ -2910,11 +3087,28 @@ sub _calc_system_vre
     my ( $self, $column_index, $vrt, $csv_file, $wof_tables_header ) = @_;
     Log::log_print $p_log_lvl, "_calc_system_vre():\n";
     my $wof_ceff_ratio_overage = $vrt->wof_ceff_ratio_overage($column_index);
+
+    my $freq_max = 4250;
+    my $freq_min = 1800;
+    my $up_lift  = 60;
+
+    #PNEXT: max freq and max pstate is defined as below
+    if ( defined($g_expand_freq_enable) )
+    {
+        $freq_max          = 5050;
+        $freq_min          = 1600;
+        $G_MAX_FREQ_ENCODE = 255;
+        $G_MIN_FREQ_ENCODE = 48;
+        $up_lift           = 12;
+        $G_MIN_OVRG_ENCODE = 0;
+        $G_MAX_OVRG_ENCODE = 47;
+    }
+
     if ( $wof_ceff_ratio_overage == 0 )
     {
         # Get WOF frequency value in MHz.  Verify it is >= 1000.
         my $wof_freq_mhz = $vrt->wof_freq($column_index);
-        if ( ( $wof_freq_mhz < 1800 ) || ( $wof_freq_mhz > 4250 ) )
+        if ( ( $wof_freq_mhz < $freq_min ) || ( $wof_freq_mhz > $freq_max ) )
         {
             die "Error: Invalid WOF frequency $wof_freq_mhz in "
                 . $csv_file->file_name()
@@ -2925,7 +3119,7 @@ sub _calc_system_vre
         # Convert frequency from MHz to one-byte System VRT format using equation
         # System VRT value = Roundup((Freq(MHz) - 1000)/(16.667 (MHz)))+60
         # where 1800MHz <= Freq <= 4250MHz
-        my $system_vre_freq_encode = Util::round( ( $wof_freq_mhz - 1000 ) / 16.667 ) + 60;
+        my $system_vre_freq_encode = Util::round( ( $wof_freq_mhz - 1000 ) / 16.667 ) + $up_lift;
         Log::log_print $p_log_lvl, "  system_vre_freq_encode: $system_vre_freq_encode\n";
 
         # Make sure converted value fits in the range.
@@ -4614,6 +4808,7 @@ our $OPT_ATTR_list_ovr         = 'list_ovr';
 our $OPT_ATTR_split_ovr        = 'split_ovr';
 our $OPT_ATTR_help             = 'help';
 our $OPT_ATTR_debug            = 'debug';
+our $OPT_ATTR_EXPAND_FREQ      = 'expand_freq';
 our $OPT_ATTR_table_set_id     = 'tsi';
 our $OPT_ATTR_section_number   = 'section_number';
 our $OPT_ATTR_vrt_index        = 'vrt_index';
@@ -4682,7 +4877,7 @@ our @all_options = (
     $OPT_ATTR_amb_cond_index,  $OPT_ATTR_vratio_index,   $OPT_ATTR_vrt_index,      $OPT_ATTR_outrows,
     $OPT_ATTR_outcols,         $OPT_ATTR_freq_format,    $OPT_ATTR_section_number, $OPT_ATTR_table_set_id,
     $OPT_ATTR_wof_override_id, $OPT_ATTR_dd_level,       $OPT_ATTR_io_power_size,  $OPT_ATTR_vcs_ceff_size,
-    $OPT_ATTR_vdd_ceff_size,   $OPT_ATTR_amb_cond_size,
+    $OPT_ATTR_vdd_ceff_size,   $OPT_ATTR_amb_cond_size,  $OPT_ATTR_EXPAND_FREQ,
 );
 
 our @action_options = (
@@ -4711,6 +4906,7 @@ sub new
         $OPT_ATTR_table_set_id    => undef,
         $OPT_ATTR_wof_override_id => undef,
         $OPT_ATTR_dd_level        => undef,
+        $OPT_ATTR_EXPAND_FREQ     => undef,
         $OPT_ATTR_vcs_ceff_index  => undef,
         $OPT_ATTR_vdd_ceff_index  => undef,
         $OPT_ATTR_io_power_index  => undef,
@@ -4873,6 +5069,7 @@ sub parse
             $OPT_ATTR_split_ovr . '=s',
             $OPT_ATTR_help,
             $OPT_ATTR_debug,
+            $OPT_ATTR_EXPAND_FREQ,
             $OPT_ATTR_table_set_id . '=s',
             $OPT_ATTR_wof_override_id . '=s',
             $OPT_ATTR_dd_level . '=i',
@@ -4954,7 +5151,7 @@ sub print_usage
     my ($self) = @_;
     Log::log_print $p_log_lvl, "print_usage():\n";
     print STDERR "Usage:\n"
-        . "  wof_data_xlator.pl --create <image_file> <csv_file>/<csv_dir> [<csv_file> ...]\n"
+        . "  wof_data_xlator.pl --create <image_file> --expand_freq <csv_file>/<csv_dir> [<csv_file> ...]\n"
         . "  wof_data_xlator.pl --create <overrid_image_file> --combine <override_list_file>]\n"
         . "  wof_data_xlator.pl --list <image_file>\n"
         . "  wof_data_xlator.pl --view <image_file> --section_number <number>\n"
@@ -4978,6 +5175,7 @@ sub print_usage
         . "  --split_ovr    Split Override file into files for each Binary WTS.\n"
         . "  --help         Show brief description of command syntax.\n"
         . "Options:\n"
+        . "  --expand_freq                 Expand the frequency range up to 5050MHz with new VRT encodings\n"
         . "  --tsi                         Image Header Table Set ID (max length: 16).\n"
         . "  --section_number              WOF Tables section_number value.\n"
         . "  --woi                         WOF Override ID (max length: 16).\n"
@@ -5024,8 +5222,8 @@ sub _verify_create_options
 
     # valid options for combine action.
     my @valid_options = (
-        $OPT_ATTR_create,        $OPT_ATTR_table_set_id,  $OPT_ATTR_dd_level, $OPT_ATTR_io_power_size,
-        $OPT_ATTR_vcs_ceff_size, $OPT_ATTR_vdd_ceff_size, $OPT_ATTR_amb_cond_size,
+        $OPT_ATTR_create,        $OPT_ATTR_table_set_id,  $OPT_ATTR_dd_level,      $OPT_ATTR_io_power_size,
+        $OPT_ATTR_vcs_ceff_size, $OPT_ATTR_vdd_ceff_size, $OPT_ATTR_amb_cond_size, $OPT_ATTR_EXPAND_FREQ,
     );
 
     # Verify no invalid options were specified.
@@ -5058,6 +5256,8 @@ sub _verify_create_options
     $g_vcs_ceff_size = $self->access($OPT_ATTR_vcs_ceff_size);
     $g_vdd_ceff_size = $self->access($OPT_ATTR_vdd_ceff_size);
     $g_amb_cond_size = $self->access($OPT_ATTR_amb_cond_size);
+
+    $g_expand_freq_enable = $self->access($OPT_ATTR_EXPAND_FREQ);
 
     Log::log_print $p_log_lvl, "\$OPT_ATTR_amb_cond_size: $OPT_ATTR_amb_cond_size\n";
     Log::log_print $p_log_lvl, "\$OPT_ATTR_vcs_ceff_size: $OPT_ATTR_vcs_ceff_size\n";
