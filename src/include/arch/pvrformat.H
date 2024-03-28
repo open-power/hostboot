@@ -47,7 +47,7 @@ struct PVR_t
     enum chipFamily_t : uint16_t
     {
         P10    = 0x80,
-        PVR_82 = 0x82
+        P11    = 0x82
     };
 
     union
@@ -57,8 +57,7 @@ struct PVR_t
 
         struct
         {
-            chipFamily_t chipFamily: 16;/* Processor version number. POWER10
-                                           version is 0x0080. */
+            chipFamily_t chipFamily: 16;/* Processor version number, see chipFamily_t */
             uint32_t reserved1 : 3; // Zero.
             SMT_SCALING_t smt  : 1; /* POWER10 chip scaling factor (0 ->
                                        8-threaded cores, 1 -> 4-threaded
@@ -111,7 +110,7 @@ struct PVR_t
     bool isP10DD10() const
     {
         return ((chipFamily == P10) ||
-                (chipFamily == PVR_82))
+                (chipFamily == P11))
             && (getDDLevel() == DD10);
     }
 
@@ -123,7 +122,7 @@ struct PVR_t
     bool isP10DD20() const
     {
         return ((chipFamily == P10) ||
-                (chipFamily == PVR_82))
+                (chipFamily == P11))
             && (getDDLevel() == DD20);
     }
 };

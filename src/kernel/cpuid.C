@@ -38,7 +38,7 @@ namespace CpuID
         switch(l_pvr.chipFamily)
         {
             case PVR_t::P10:
-            case PVR_t::PVR_82:
+            case PVR_t::P11:
                return CORE_POWER10;
 
             default:

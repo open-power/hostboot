@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include "../errlud_hdat.H"
 #include <runtime/runtime_reasoncodes.H>
 #include <vfs/vfs.H>
+#include <arch/pvrformat.H> // for PVR_t
 
 extern trace_desc_t* g_trac_runtime;
 
@@ -102,9 +103,10 @@ class HdatServiceTest: public CxxTest::TestSuite
                     procmaster->getAttr<TARGETING::ATTR_MODEL>();
 
                 if( (model == TARGETING::MODEL_POWER10)
-                        && !((pvr & 0x00FF0000) == 0x00800000) )
+                    && (!((pvr & 0x00FF0000) == 0x00800000) )
+                    && (!((pvr & 0x00FF0000) == 0x00820000) ))
                 {
-                    TS_FAIL("testHdat> PVR model %.8X != 80 for P10",pvr);
+                    TS_FAIL("testHdat> PVR model %.8X Not supported ",pvr);
                 }
             }
         }
