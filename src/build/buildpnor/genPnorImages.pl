@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2023
+# Contributors Listed Below - COPYRIGHT 2016,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -1480,6 +1480,7 @@ print <<"ENDUSAGE";
                                      MURANO:HBD=simics_MURANO_targeting.bin
     --test              Output test-only sections.
     --secureboot        Indicates a secureboot build.
+    --secure-version    Indicates security version value to be built into the partition headers
     --corrupt           <Partition name>[= pro|unpro] (Note: requires '--secureboot')
                         Partition 'eyeCatch' name to corrupt a byte of.
                         Optional '= pro|unpro' to indicate which section of the secure container to corrupt.

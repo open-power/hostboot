@@ -325,6 +325,10 @@ RH_DIR:=$(shell sed "s/^.*release \([0-9]*\)\..*$//rh\1/" /etc/redhat-release)
 BR2_OPENPOWER_SECUREBOOT_SIGN_MODE?=development
 SIGN_MODE_ARG:=--sign-mode ${BR2_OPENPOWER_SECUREBOOT_SIGN_MODE}
 
+# Use Secureboot Security Version if not specified in the environment
+BR2_OPENPOWER_SIGNED_SECURITY_VERSION?=2
+SV_ARG:=--secure-version ${BR2_OPENPOWER_SIGNED_SECURITY_VERSION}
+
 # Concatenate the base path, Redhat specific dir, and tool subdir to form the
 # complete signing tools path
 export SIGNING_DIR:=${SIGNING_BASE_DIR}/${RH_DIR}/${SIGNING_UTILS_DIR}
@@ -386,7 +390,7 @@ OUTPUTPNOR: gen_system_specific_image
 
 gen_system_specific_image: ${GEN_BUILD}
     # Call script to generate final bin file for chip/system specific images
-	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL vesion(2):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS} ${SIGN_MODE_ARG}
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL vesion(2):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${SYSTEM_SPECIFIC_PARAMS} ${BUILD_TYPE_PARAMS} ${SIGN_MODE_ARG} ${SV_ARG}
 
 gen_default_images: copy_hb_bins build_standalone_payload
 	ecc --inject ${HBB_IMG} --output ${HBB_ECC_IMG} --p8
@@ -430,7 +434,7 @@ endif
 	echo "${USER}-`git rev-parse HEAD`" >> ${VERSION_IMG}
 
 # Call script to generate final bin files for default images
-	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS} ${KEY_TRANSITION_MODE_PARAMS} ${SIGN_MODE_ARG}
+	export LD_PRELOAD=${SIGNING_LIBS} && echo "Fetching OpenSSL version(1):" && openssl version && ${GEN_PNOR_IMAGE_SCRIPT} ${DEFAULT_PARAMS} ${BUILD_TYPE_PARAMS} ${KEY_TRANSITION_MODE_PARAMS} ${SIGN_MODE_ARG} ${SV_ARG}
 
 # Generate the standalone payload.bin
 build_standalone_payload:
@@ -502,6 +506,7 @@ Secure Boot Signing Config:\n\
 	Final signing dir    [${SIGNING_DIR}]\n\
 	Development key dir  [${DEV_KEY_DIR}]\n\
 	Signing mode         [${BR2_OPENPOWER_SECUREBOOT_SIGN_MODE}]\n\
+	Security Version     [${BR2_OPENPOWER_SIGNED_SECURITY_VERSION}]\n\
 	Compile secureboot?  [${CONFIG_SECUREBOOT}]\n\
 	Libs to preload      [${SIGNING_LIBS}]\n\
 	Path                 [${PATH}]\n\n"
