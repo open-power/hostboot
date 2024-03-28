@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -443,6 +443,18 @@
   <valueType>uint32</valueType>
   <default>0xFFFFFFFF</default>
   <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_PVR_82_MODE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>
+    Enable PVR 82
+  </description>
+  <valueType>uint8</valueType>
+  <enum>OFF = 0x0, ON = 0x1</enum>
+  <platInit/>
+  <default>ON</default>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>

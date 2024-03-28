@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -527,6 +527,19 @@ add_plat_features_sbe(
         }
     }
 
+    {
+        fapi2::ATTR_PVR_82_MODE_Type l_attr_pvr_82_mode;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PVR_82_MODE,
+                               i_target_sys,
+                               l_attr_pvr_82_mode));
+
+        if (l_attr_pvr_82_mode == fapi2::ENUM_ATTR_PVR_82_MODE_OFF)
+        {
+            FAPI_TRY(set_bit(i_bvec, P10_PVR_COMPAT_MODE, "P10_PVR_COMPAT_MODE"));
+        }
+    }
+
 fapi_try_exit:
     FAPI_DBG("End");
     return fapi2::current_err;
@@ -552,10 +565,15 @@ add_plat_features_sbe_contained(
     FAPI_DBG("Start");
 
     fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
+    fapi2::ATTR_PVR_82_MODE_Type l_attr_pvr_82_mode;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CONTAINED_IPL_TYPE,
                            i_target_sys,
                            l_attr_contained_ipl_type));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PVR_82_MODE,
+                           i_target_sys,
+                           l_attr_pvr_82_mode));
 
     FAPI_TRY(set_bit(i_bvec, COMMON_CONTAINED, "COMMON_CONTAINED"));
     FAPI_TRY(set_bit(i_bvec, CONTAINED_CLKOFFS, "CONTAINED_CLKOFFS"));
@@ -567,6 +585,11 @@ add_plat_features_sbe_contained(
     else
     {
         FAPI_TRY(set_bit(i_bvec, CHIP_CONTAINED, "CHIP_CONTAINED"));
+    }
+
+    if (l_attr_pvr_82_mode == fapi2::ENUM_ATTR_PVR_82_MODE_OFF)
+    {
+        FAPI_TRY(set_bit(i_bvec, P10_PVR_COMPAT_MODE, "P10_PVR_COMPAT_MODE"));
     }
 
 fapi_try_exit:
@@ -598,6 +621,7 @@ add_plat_features_rt(
     fapi2::ATTR_MRW_L2_INCREASE_JITTER_Type l_attr_mrw_l2_increase_jitter;
     fapi2::ATTR_CONTAINED_IPL_TYPE_Type l_attr_contained_ipl_type;
     fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_Type l_attr_proc_favor_aggressive_prefetch;
+    fapi2::ATTR_PVR_82_MODE_Type l_attr_pvr_82_mode;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SMF_CONFIG,
                            i_target_sys,
@@ -618,6 +642,11 @@ add_plat_features_rt(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH,
                            i_target_sys,
                            l_attr_proc_favor_aggressive_prefetch));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PVR_82_MODE,
+                           i_target_sys,
+                           l_attr_pvr_82_mode));
+
 
     if (l_attr_smf_config == fapi2::ENUM_ATTR_SMF_CONFIG_ENABLED)
     {
@@ -647,6 +676,11 @@ add_plat_features_rt(
         {
             FAPI_TRY(set_bit(i_bvec, CRONUS_CORE_TO_SYS_XSTOP, "CRONUS_CORE_TO_SYS_XSTOP"));
         }
+    }
+
+    if (l_attr_pvr_82_mode == fapi2::ENUM_ATTR_PVR_82_MODE_OFF)
+    {
+        FAPI_TRY(set_bit(i_bvec, P10_PVR_COMPAT_MODE, "P10_PVR_COMPAT_MODE"));
     }
 
     // ensure unwanted features are cleared (necessary based on
