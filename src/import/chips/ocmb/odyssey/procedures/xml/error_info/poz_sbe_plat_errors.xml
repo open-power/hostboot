@@ -144,6 +144,7 @@
     <ffdc>OPERATION_TYPE</ffdc>
 </hwpError>
 <hwpError>
+    <sbeError/>
     <rc>RC_POZ_STREAM_GET_FAILED</rc>
     <description>SBE stream get failed</description>
     <ffdc>WORDS_LEFT</ffdc>
