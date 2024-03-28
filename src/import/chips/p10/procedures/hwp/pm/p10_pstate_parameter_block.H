@@ -925,7 +925,7 @@ class PlatPmPPB
         PoundVOpPoint_t           iv_attr_mvpd_data[NUM_PV_POINTS];
         uint8_t                   iv_poundV_bucket_id;
 
-        PoundVBias_t              iv_bias;
+        PoundVBias_v1_t           iv_bias;
         voltageBucketData_t       iv_poundV_raw_data;
         PoundVStaticRails_t       iv_attr_mvpd_poundV_static_rails;
         PoundVOtherInfo_t         iv_attr_mvpd_poundV_other_info;

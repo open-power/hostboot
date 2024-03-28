@@ -660,7 +660,7 @@ void gppb_print(
         char _temp_buffer[64]; \
         sprintf(_buffer,  "  %-25s", xstr(_member)); \
         FAPI_INF("%s", _buffer); \
-        for (auto i = 0; i < NUM_VPD_PTS_SET; ++i) \
+        for (auto i = 0; i < NUM_VPD_PTS_SET_V1; ++i) \
         { \
             sprintf(_buffer, "  %20s (%s) : ", vpdSetStr[i], "hex"); \
             for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j) \
@@ -676,7 +676,7 @@ void gppb_print(
             FAPI_INF("%s", _buffer); \
         } \
         FAPI_INF(""); \
-        for (auto i = 0; i < NUM_VPD_PTS_SET; ++i) \
+        for (auto i = 0; i < NUM_VPD_PTS_SET_V1; ++i) \
         { \
             sprintf(_buffer, "  %20s (%s) : ", vpdSetStr[i], "dec"); \
             for (auto j = 0; j < VPD_NUM_SLOPES_REGION; ++j) \
@@ -1153,7 +1153,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         // -----------------------------------------------
         // populate VpdOperatingPoint with biased MVPD attributes
         // -----------------------------------------------
-        for (uint8_t i = 0; i < NUM_VPD_PTS_SET; i++)
+        for (uint8_t i = 0; i < NUM_VPD_PTS_SET_V1; i++)
         {
             for (uint8_t j = 0; j < NUM_OP_POINTS; j++)
             {
