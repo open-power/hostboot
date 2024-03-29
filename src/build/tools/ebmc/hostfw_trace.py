@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2023
+# Contributors Listed Below - COPYRIGHT 2021,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -223,6 +223,7 @@ def trexMyVsnprintf(bData, fstring, fsource, vparms_start, vparms_end):
     j = vparms_start #used to iterate through binary arg data
     unsupportedSubSpecifiers = 'hjzt'
     formatSubSpecifiers = "-+0123456789#lLw. 'Ihjzt"
+    bad_data = 0
 
     while i < len(fstring):
         if argnum > TRACE_MAX_ARGS:
@@ -327,7 +328,12 @@ def trexMyVsnprintf(bData, fstring, fsource, vparms_start, vparms_end):
             i += 1
         elif "xX".find(fstring[i]) != -1:
             if j >= vparms_end:
-                parsedArgs.append("[[NODATA]]")
+                # Need to use an integer when out of bounds, not a string, for unexpected conditions
+                # If we try to use a string to substitute we get Exception=%X format: an integer is required, not str
+                parsedArgs.append(0)
+                capture_warning("Warning: Out of Bounds, data may not be accurate, substituted zero for some bytes '" + fstring[i] + "' :")
+                capture_warning(fstring)
+                bad_data = 1
             else:
                 if longflag:
                     #Unpack unsigned long long (8 bytes) from bData
@@ -354,7 +360,10 @@ def trexMyVsnprintf(bData, fstring, fsource, vparms_start, vparms_end):
 
         argnum += 1
 
-    return fstring % tuple(parsedArgs)
+    if bad_data:
+        return ("<<<WARNING: Trace data may be malformed>>> {}".format(fstring % tuple(parsedArgs)))
+    else:
+        return fstring % tuple(parsedArgs)
 
 """ Gets the format string for the given hash string
 

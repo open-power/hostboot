@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -48,14 +48,9 @@ class errludP_sbeio:
                 else:
                     # o3500 parseUDToJson will return jsonStr in output
                     return output
-            except ImportError:
-                d["Data"] = "b2800.py caught Import Error from o3500 SBE_TRACE parser"
-                jsonStr = json.dumps(d)
-                return jsonStr
+            # exceptions are caught in the higher calling layers and dumped out
             except Exception as e:
-                d["Data"] = "b2800.py caught Exception={} from o3500 SBE_TRACE parser".format(e)
-                jsonStr = json.dumps(d)
-                return jsonStr
+                raise
 
     def SbeIoUserDetailsSPPECodeLevels(ver, data, subType):
         # 4 bytes  : OCMB HUID
