@@ -173,6 +173,8 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
             bool l_ddr5_run_health_check = isDDR5_Health_Check(i_ddr5_health_check, l_memType, l_memModType, l_memHeight);
             // Conditions below rely on the fact that ONLY DDR4 and DDR5 meet the above requirements, any modifications to the above check
             // need to re-evaluate the conditional logic below and any associated helper functions in the future.
+            TRACFCOMP(g_trac_sbeio, "getMultiPmicHealthCheckData OCMB HUID=0x%X l_ddr5_run_health_check=%d i_ddr5_heatlh_check=%d l_memHeight=0x%X (2U=0x20 4U=0x80)",
+                          get_huid(l_pOcmb), l_ddr5_run_health_check, i_ddr5_health_check, l_memHeight);
             if (l_err_log == nullptr)
             {
                 if (l_ddr5_run_health_check)
@@ -217,7 +219,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                 }
                 // HWP for DDR5 Health Check has already been caught in the first conditional logic check
                 // DDR4's are caught in above cases, so the ONLY case left is the DDR5 2U and 4U Telemetry check
-                else
+                else if (!i_ddr5_health_check) // if i_ddr5_health_check was set this is NOT Telemetry, so this is 2U and 4U Telemetry DDR5
                 {
                     /*@
                      * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
@@ -234,6 +236,13 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                     l_err_log = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                                                SBEIO_PSU_PMIC_HEALTH_CHECK,
                                                                SBEIO_PMIC_TELEMETRY_DATA_DDR5);
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_sbeio, "getMultiPmicHealthCheckData DDR5 2U Health Check not applicable ERRL=0x%X OCMB HUID=0x%X",
+                                   ERRL_GETEID_SAFE(l_err_log), get_huid(l_pOcmb));
+                    l_list_index++; // this is just used for output in the traces
+                    continue;
                 }
             } // nullptr check
             const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>l_fapi2_ocmb_target( l_pOcmb );
@@ -264,7 +273,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                 l_version_loc = DDR4_TELEMETRY_LOC_VERSION;
                 l_version_data = DDR4_TELEMETRY_FFDC_VERSION;
             }
-            else
+            else if (!i_ddr5_health_check) // DDR5 2U and 4U Telemetry
             {
                 FAPI_INVOKE_HWP(l_err,
                                 pmic_periodic_telemetry_ddr5,
@@ -504,11 +513,17 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                     l_InstanceId,
                     full_location_code.data());
 
+
         } // end if DDR4 4U DDIMM, DDR5 4U DDIMM and DDR5 2U DDIMM
         l_list_index++;
     } // end for loop on OCMBs
 
+    TRACFCOMP(g_trac_sbeio, "getMultiPmicHealthCheckData ERRL=0x%X l_logs_available=%d", ERRL_GETEID_SAFE(l_err_log), l_logs_available);
+    // when no l_err_log we have nothing to log so all good
+    // we skipped the 2U Health Checks because they were not applicable (only 4U runs the Health Check calls)
+    // l_logs_available is used to manage the DDR5 Health Check logging which is managed by size of the payload returned from HWP
     if (l_err_log && l_logs_available)
+
     {
         TRACFCOMP(g_trac_sbeio, "getMultiPmicHealthCheckData Logs Available ERRL=0x%X", ERRL_GETEID_SAFE(l_err_log));
         uint32_t l_hw_data_request = 0xFFFF0000 | (i_OCMBs.size()<<8) | l_pmic_combined_status;
@@ -612,7 +627,7 @@ errlHndl_t getAllPmicHealthCheckData(bool i_ddr5_health_check)
 {
     errlHndl_t l_err(nullptr);
 
-    TRACFCOMP(g_trac_sbeio, ENTER_MRK"getAllPmicHealthCheckData");
+    TRACFCOMP(g_trac_sbeio, ENTER_MRK"getAllPmicHealthCheckData i_ddr5_health_check=%d", i_ddr5_health_check);
 
     do
     {
