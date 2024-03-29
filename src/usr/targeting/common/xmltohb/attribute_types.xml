@@ -870,6 +870,51 @@
   </attribute>
 
   <attribute>
+    <description>Provide fine-grained control of the Odyssey SBE recovery process</description>
+    <hasStringConversion/>
+    <id>DEBUG_ODY_HRESET_CONTROL</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <!-- Use uint8 vs enumeration to allow for easier overrides -->
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <no_export/>
+  </attribute>
+
+  <enumerationType>
+    <description>Enumeration for DEBUG_ODY_HRESET_CONTROL</description>
+    <enumerator>
+      <name>DEFAULT</name>
+      <!-- default behavior, 2 attempts then dump -->
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>ONE_HRESET</name>
+      <!-- do a single hreset then give up -->
+      <value>1</value>
+    </enumerator>
+    <enumerator>
+      <name>NO_HRESET</name>
+      <!-- do no recovery at all -->
+      <value>2</value>
+    </enumerator>
+    <enumerator>
+      <name>NO_HRESET_CALL_DUMP</name>
+      <!-- no hreset attempt, call for dump -->
+      <value>3</value>
+    </enumerator>
+    <enumerator>
+      <name>CALL_DUMP_ON_FAIL</name>
+      <!-- call for dump on first hreset fail -->
+      <value>4</value>
+    </enumerator>
+    <id>DEBUG_ODY_HRESET_CONTROL</id>
+  </enumerationType>
+
+  <attribute>
     <description>If the Target is directly deconfigurable and GARDable; target
     may still be deconfigured in 'by association' processing.</description>
     <id>DECONFIG_GARDABLE</id>

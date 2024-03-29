@@ -2498,6 +2498,9 @@
       <id>CLEAR_DIMM_SPD_ENABLE</id>
     </attribute>
     <attribute>
+      <id>DEBUG_ODY_HRESET_CONTROL</id>
+    </attribute>
+    <attribute>
       <id>DIMM_POWER_UTIL</id>
     </attribute>
     <attribute>
