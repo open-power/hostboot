@@ -34,6 +34,7 @@
 #include "sbe_fifodd.H"
 #include <sbeio/sbeioif.H>
 #include <arch/magic.H>
+#include <i2c/i2c.H>
 
 #include <ody_extract_sbe_rc.H>
 #include <ody_sbe_hreset.H>
@@ -648,6 +649,16 @@ errlHndl_t OdySbeRetryHandler::dump(const uint32_t i_eid)
     bool       l_skip_dump = false;
 
     SBE_TRACF(ENTER_MRK"OdySbeRetryHandler::dump HUID=0x%X", get_huid(iv_ocmb));
+
+#ifndef __HOSTBOOT_RUNTIME
+    // The BMC/FSP dump code will use i2c to grab the data.  There is no
+    // handshake between that code and Hostboot.  Since Hostboot has other
+    // threads running that may attempt i2c operations on the same engine
+    // that is used for the dump, we need to block those to avoid any
+    // multimaster contention issues.
+    auto l_i2cmutex = I2C::getEngineMutex( iv_ocmb );
+    const auto l_lock = scoped_recursive_mutex_lock(*l_i2cmutex);
+#endif // not needed at runtime because HBRT is single-threaded
 
     // if SKIP_DUMP flag is set, then l_skip is set to true, and we exit the fcn
     CI_INJECT_HRESET_SKIP_DUMP(CxxTest::g_cxxTestInject,

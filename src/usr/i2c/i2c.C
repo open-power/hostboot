@@ -5961,4 +5961,33 @@ void addHwCalloutsI2c(errlHndl_t i_err,
 }
 
 
+mutex_t* getEngineMutex( TARGETING::Target* i_endpoint )
+{
+    mutex_t* o_mutex = nullptr;
+
+    // Grab the engine info to lock the right mutex
+    TARGETING::ATTR_FAPI_I2C_CONTROL_INFO_type l_i2cInfo;
+    if( !i_endpoint->tryGetAttr<TARGETING::ATTR_FAPI_I2C_CONTROL_INFO>(l_i2cInfo) )
+    {
+        TRACFCOMP(g_trac_i2c, EXIT_MRK"I2C::getEngineMutex> No I2C info for endpoint=0x%X", TARGETING::get_huid(i_endpoint));
+        return o_mutex;
+    }
+
+    I2C::misc_args_t l_i2cArgs;
+    l_i2cArgs.engine = l_i2cInfo.engine;
+    auto l_i2cMasterTarget = TARGETING::targetService().toTarget(l_i2cInfo.i2cMasterPath);
+
+    // Lock the mutex to prevent other threads from doing i2c ops
+    if( !I2C::i2cGetEngineMutex( l_i2cMasterTarget,
+                                 l_i2cArgs,
+                                 o_mutex ) )
+    {
+        TRACFCOMP(g_trac_i2c, EXIT_MRK"I2C::getEngineMutex> No lock for endpoint=0x%X, master=0x%.8X",
+                  TARGETING::get_huid(i_endpoint),
+                  TARGETING::get_huid(l_i2cMasterTarget));
+    }
+
+    return o_mutex;
+}
+
 } // end namespace I2C

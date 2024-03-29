@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -757,13 +757,23 @@ errlHndl_t i2cSetup ( TARGETING::Target * i_target,
  * @param[in] i_args - Structure containing arguments needed to determine
  *                     the correct engine mutex.
  *
- * @param[in/out] i_engineLock - The engine mutex.
+ * @param[in/out] i_engineLock - The engine mutex (use recursive lock functions).
  *
  * @return bool - True if valid mutex is found, False otherwise.
  */
 bool i2cGetEngineMutex( const TARGETING::Target * const i_target,
                         const misc_args_t &  i_args,
                               mutex_t *&     i_engineLock );
+
+/**
+ * @brief Gets the appropriate engine
+ * mutex associated with an I2C endpoint.
+ *
+ * @param[in] i_endpoint - The I2C endpoint target.
+ *
+ * @return mutex_t* - Engine mutex (use recursive lock functions).
+ */
+mutex_t* getEngineMutex( TARGETING::Target* i_endpoint );
 
 
 /**
