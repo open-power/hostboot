@@ -614,9 +614,9 @@
     <!-- Rc test perv target -->
     <hwpError>
         <sbeError/>
-        <rc>RC_TEST_PERV_TARGET0</rc>
+        <rc>RC_TEST_PERV_TARGET1</rc>
         <description>
-            Test sbe ffdc with bad target perv with instance 0
+            Test sbe ffdc with bad target perv with instance 1
         </description>
         <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
@@ -661,9 +661,9 @@
   <!-- Rc to callout perv target -->
     <hwpError>
         <sbeError/>
-        <rc>RC_TEST_CALLOUT_PERV_TARGET0</rc>
+        <rc>RC_TEST_CALLOUT_PERV_TARGET1</rc>
         <description>
-            Test sbe ffdc with bad target perv callout target instance 0
+            Test sbe ffdc with bad target perv callout target instance 1
         </description>
         <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
@@ -717,9 +717,9 @@
     <!-- Rc to callout perv target, deconfigure -->
     <hwpError>
         <sbeError/>
-        <rc>RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET0</rc>
+        <rc>RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1</rc>
         <description>
-            Test sbe ffdc with bad target with deconfigure with target instance 0
+            Test sbe ffdc with bad target with deconfigure with target instance 1
         </description>
         <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
@@ -778,9 +778,9 @@
     <!-- Rc to callout perv target, gard -->
     <hwpError>
         <sbeError/>
-        <rc>RC_TEST_CALLOUT_PERV_GARD_TARGET0</rc>
+        <rc>RC_TEST_CALLOUT_PERV_GARD_TARGET1</rc>
         <description>
-            Test sbe ffdc with bad target perv with gard with target instance 0
+            Test sbe ffdc with bad target perv with gard with target instance 1
         </description>
         <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
@@ -839,9 +839,9 @@
     <!-- Rc to callout perv target, deconfigure, gard -->
     <hwpError>
         <sbeError/>
-        <rc>RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET0</rc>
+        <rc>RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1</rc>
         <description>
-            Test sbe ffdc with bad target perv with deconfigure and gard with target instance 0
+            Test sbe ffdc with bad target perv with deconfigure and gard with target instance 1
         </description>
         <ffdc>TARGET_CHIP</ffdc>
         <ffdc>TARGET_PERV</ffdc>
