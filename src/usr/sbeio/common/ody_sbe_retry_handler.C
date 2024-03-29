@@ -340,15 +340,54 @@ errlHndl_t OdySbeRetryHandler::hreset()
 
     SBE_TRACF(ENTER_MRK"OdySbeRetryHandler::hreset HUID=0x%X", get_huid(iv_ocmb));
 
+    //Provide fine-grained control of the recovery process
+    auto l_debug_control = UTIL::assertGetToplevelTarget()->getAttr<ATTR_DEBUG_ODY_HRESET_CONTROL>();
+    SBE_TRACF("OdySbeRetryHandler::hreset() l_debug_control=%.8X",l_debug_control);
+
     /*--------------------------------------------------------------------------
      * CURRENT-SIDE - hreset
      *------------------------------------------------------------------------*/
+    if( (l_debug_control == DEBUG_ODY_HRESET_CONTROL_NO_HRESET)
+        || (l_debug_control == DEBUG_ODY_HRESET_CONTROL_NO_HRESET_CALL_DUMP) )
+    {
+        SBE_TRACF("OdySbeRetryHandler::hreset() skipping attempts");
+        iv_ocmb->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_DEAD);
+        if( l_debug_control == DEBUG_ODY_HRESET_CONTROL_NO_HRESET_CALL_DUMP )
+        {
+            l_errl = dump(get_huid(iv_ocmb));
+            if (l_errl)
+            {
+                l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_errl, SBEIO_COMP_ID);
+            }
+        }
+        break;
+    }
     l_errl = run_hreset_flow();
     if (!l_errl)
     {
         // SUCCESS
         SBE_TRACF("OdySbeRetryHandler::hreset success (current side) HUID=0x%X",
                   get_huid(iv_ocmb));
+        break;
+    }
+    else if( l_debug_control == DEBUG_ODY_HRESET_CONTROL_CALL_DUMP_ON_FAIL )
+    {
+        SBE_TRACF("OdySbeRetryHandler::hreset() calling dump after first fail");
+        iv_ocmb->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_DEAD);
+        l_errl = dump(get_huid(iv_ocmb));
+        if (l_errl)
+        {
+            l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, SBEIO_COMP_ID);
+        }
+        break;
+    }
+
+    if( l_debug_control == DEBUG_ODY_HRESET_CONTROL_ONE_HRESET )
+    {
+        SBE_TRACF("OdySbeRetryHandler::hreset() stopping at a single attempt");
+        iv_ocmb->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_DEAD);
         break;
     }
 
