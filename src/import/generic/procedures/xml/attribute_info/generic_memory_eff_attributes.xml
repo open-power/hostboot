@@ -411,9 +411,6 @@
     <valueType>uint8</valueType>
     <writeable/>
     <mssUnits> nck </mssUnits>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -1062,9 +1059,6 @@
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -1151,9 +1145,6 @@
       TRUE = 1
     </enum>
     <writeable/>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>

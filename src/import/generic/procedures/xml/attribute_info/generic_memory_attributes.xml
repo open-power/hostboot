@@ -175,9 +175,6 @@
     <mssBlobStart>0</mssBlobStart>
     <mssBlobLength>80</mssBlobLength>
     <array>80</array>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -448,9 +445,6 @@
     <valueType>uint8</valueType>
     <enum>EMPTY = 0, DDR3 = 1, DDR4 = 2</enum>
     <writeable/>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_DIMM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -468,9 +462,6 @@
     <valueType>uint8</valueType>
     <enum> EMPTY = 0, RDIMM = 1, UDIMM = 2, LRDIMM = 3, DDIMM = 4</enum>
     <writeable/>
-    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-      <targetTypes>TARGET_TYPE_DIMM</targetTypes>
-    </sbeAttrSync>
   </attribute>
 
   <attribute>
@@ -682,9 +673,6 @@
         <default>0x0</default>
         <platInit/>
         <mrwHide/>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -697,9 +685,6 @@
         <default>0x1</default>
         <platInit/>
         <mrwHide/>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -712,9 +697,6 @@
         <default>0x2</default>
         <platInit/>
         <mrwHide/>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>
@@ -727,9 +709,6 @@
         <default>0x3</default>
         <platInit/>
         <mrwHide/>
-        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-          <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
-        </sbeAttrSync>
     </attribute>
 
     <attribute>

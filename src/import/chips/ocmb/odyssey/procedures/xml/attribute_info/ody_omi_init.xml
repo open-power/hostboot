@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -50,9 +50,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -70,9 +67,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -90,9 +84,6 @@
   <default>ENABLED</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -127,9 +118,6 @@
   <default>DISABLED</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -142,9 +130,6 @@
   <default>0xF</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -157,9 +142,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -172,9 +154,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -187,9 +166,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -202,9 +178,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -217,9 +190,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -232,9 +202,6 @@
   <default>0x1</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -247,9 +214,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -262,9 +226,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -280,9 +241,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
@@ -298,9 +256,6 @@
   <default>0x0</default>
   <platInit/>
   <mrwHide/>
-  <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
-    <targetTypes>TARGET_TYPE_OCMB_CHIP</targetTypes>
-  </sbeAttrSync>
 </attribute>
 <!-- ********************************************************************** -->
 </attributes>
