@@ -35,7 +35,7 @@ class errludP_sbeio:
     def SbeIoUserDetailsParserFFDC(ver, data, subType):
         import importlib
         d = dict()
-        if ver == 0:
+        if ver >= 0:
             try:
                 # This is the SBE/BMC o3500 module for parsing SBE_TRACE
                 cls = importlib.import_module("udparsers.o3500.o3500")
@@ -47,6 +47,26 @@ class errludP_sbeio:
                     return jsonStr
                 else:
                     # o3500 parseUDToJson will return jsonStr in output
+                    return output
+            # exceptions are caught in the higher calling layers and dumped out
+            except Exception as e:
+                raise
+
+    def SbeIoUserDetailsParserSPPEFFDC(ver, data, subType):
+        import importlib
+        d = dict()
+        if ver >= 0:
+            try:
+                # This is the SPPE/BMC o4500 module for parsing SBE_TRACE
+                cls = importlib.import_module("udparsers.o4500.o4500")
+                mv = memoryview(data)
+                output = cls.parseUDToJson(subType, ver, mv)
+                if output == -1:
+                    d["Data"] = "PROBLEM with decoding the SBE_TRACE from o4500 parser"
+                    jsonStr = json.dumps(d)
+                    return jsonStr
+                else:
+                    # o4500 parseUDToJson will return jsonStr in output
                     return output
             # exceptions are caught in the higher calling layers and dumped out
             except Exception as e:
@@ -90,7 +110,8 @@ class errludP_sbeio:
 #in src/include/usr/sbeio/sbeioreasoncodes.H
 SbeIoUserDetailDataSubSection = { 0: "SbeIoUserDetailsParserNoFormat",
                                   1: "SbeIoUserDetailsParserFFDC",
-                                  2: "SbeIoUserDetailsSPPECodeLevels" }
+                                  2: "SbeIoUserDetailsSPPECodeLevels",
+                                  3: "SbeIoUserDetailsParserSPPEFFDC" }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data, subType)

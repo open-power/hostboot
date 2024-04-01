@@ -58,7 +58,7 @@ LID_SEARCH_DIRS = [ os.getenv('HOSTBOOT_TRACE_DIR'),                    # ENV VA
 lid_dict = {
     "81e00685.lid" : "hbotStringFile",
     "81e00686.lid" : "hbicore.syms",
-    "81e0068a.lid" : "sbeStringFile",
+    "81e0068a.lid" : "sbeStringFile_DD1",
     "81e00687.lid" : "occStringFile",
     "81e0068f.lid" : "QMESTRINGFILE",
     "81e00690.lid" : "XGPESTRINGFILE",

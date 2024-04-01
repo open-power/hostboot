@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,8 @@ namespace SBEIO
                   (SBEIO_UDT_PARAMETERS);
                 registerParser<SBEIO::UdParserSPPECodeLevels>
                   (SBEIO_UDT_SPPE_CODE_LEVELS);
+                registerParser<SBEIO::SbeIoOdyFfdcErrlParser>
+                  (SBEIO_UDT_SPPE_FORMAT);
             }
 
         private:
