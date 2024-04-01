@@ -159,16 +159,8 @@ void* call_update_omi_firmware (void *io_pArgs)
 
 #ifdef CONFIG_SECUREBOOT
 
-    // Run the secureboot checks if secureboot is enabled AND
-    // NOT manufacturing mode OR if secureboot checks are explicitly
-    // requested in manufacturing mode.
-    // Currently there is an issue with DIMMs not having the security
-    // bits fused correctly in MFG mode, which causes secureboot checks
-    // to fail. This workaround will allow secureboot checks to run normally
-    // or by request in MFG mode while the DIMMs are being fixed up.
-    bool l_doOdySecurebootVerification = (SECUREBOOT::enabled() &&
-                                          (!areAllSrcsTerminating() ||
-                                            UTIL::assertGetToplevelTarget()->getAttr<ATTR_FORCE_ODY_SB_CHK_IN_MFG>() == 1));
+    // Run the secureboot checks if secureboot is enabled
+    bool l_doOdySecurebootVerification = SECUREBOOT::enabled();
 
     // Do not perform the Odyssey secureboot verification in simics unless Ody
     // secureboot is explicitly enabled.
