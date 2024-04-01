@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -117,9 +117,10 @@ namespace DeviceFW
 
     /** Construct the device addressing parameters for I2CR device ops.
      *  @param[in] i_address - I2CR FSI/CFAM word address to operate on.
+     *  @param[in] i_flags - Operational flags.
      */
-    #define DEVICE_I2CR_CFAM_ADDRESS(i_address) \
-        DeviceFW::I2CR_CFAM, static_cast<uint64_t>((i_address))
+    #define DEVICE_I2CR_CFAM_ADDRESS(i_address, i_flags) \
+        DeviceFW::I2CR_CFAM, static_cast<uint64_t>((i_address)),static_cast<uint64_t>((i_flags))
 
     /** Construct the device addressing parameters for XSCOM device ops.
      *  @param[in] i_address - XSCom address to operate on.

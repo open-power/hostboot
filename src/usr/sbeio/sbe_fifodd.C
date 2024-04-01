@@ -56,6 +56,7 @@
 #include <util/misc.H>
 #include <cxxtest/TestInject.H>
 #include <arch/magic.H>
+#include <i2cr/i2cr.H>
 
 extern trace_desc_t* g_trac_sbeio;
 
@@ -285,6 +286,7 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target *i_target,
     int        l_i{};             // counter to fill the o_request_header
     bool       l_go       = true; // true if more data from the i_stream exists
     bool       l_max_tsfr = true; // false if i_target is an odyssey PIPE
+    uint8_t    l_fifoCount = UPFIFO_MAX_ENTRY;    // Entries currently in FIFO. Assume full at start
 
     SBE_TRACD(ENTER_MRK "writeRequest");
 
@@ -294,6 +296,7 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target *i_target,
         // do not set MAX_TSFR for an odyssey PIPE, it does not exist for a PIPE
         l_max_tsfr = false;
     }
+
 
     if (l_max_tsfr)
     {
@@ -315,20 +318,28 @@ errlHndl_t SbeFifo::writeRequest(TARGETING::Target *i_target,
         }
 
         // Wait for room to write into fifo
-        l_errl = waitUpFifoReady(i_target);
-        if (l_errl) {goto ERROR_EXIT;}
+        // If we have space in fifo free -- skip this
+        if(l_fifoCount >= UPFIFO_MAX_ENTRY)
+        {
+            l_errl = waitUpFifoReady(i_target, l_fifoCount);
+            if (l_errl) {goto ERROR_EXIT;}
+        }
 
         // Send data into fifo
-        l_errl = writeFifoReg(i_target, FIFO_UPFIFO_DATA_IN, &l_word);
+        l_errl = writeFifoReg(i_target, FIFO_UPFIFO_DATA_IN, &l_word, true);
         if (l_errl) {goto ERROR_EXIT;}
 
         ++l_i;
+        l_fifoCount++;
         l_go = read_at_least(i_stream, &l_word, sizeof(l_word));
     }
 
     // notify SBE that last word has been sent
-    l_errl = waitUpFifoReady(i_target);
-    if (l_errl) {goto ERROR_EXIT;}
+    if(l_fifoCount >= UPFIFO_MAX_ENTRY)
+    {
+        l_errl = waitUpFifoReady(i_target, l_fifoCount);
+        if (l_errl) {goto ERROR_EXIT;}
+    }
 
     l_data = FSB_UPFIFO_SIG_EOT;
     l_errl = writeFifoReg(i_target, FIFO_UPFIFO_SIG_EOT, &l_data);
@@ -451,19 +462,22 @@ errlHndl_t SbeFifo::upFifoTimeout(TARGETING::Target * i_target, uint32_t l_data)
 /**
  * @brief wait for room in upstream fifo to send data
  */
-errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
+errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target, uint8_t& o_fifoCount)
 {
     errlHndl_t errl = NULL;
 
     SBE_TRACU(ENTER_MRK "waitUpFifoReady");
 
     uint32_t l_data = 0;
+    o_fifoCount = 0;
 
     const bool timeout = hbstd::with_timeout(0, MAX_UP_FIFO_TIMEOUT_NS, 0, 10000, [&]()
     {
         // read upstream status to see if room for more data
         errl = readFifoReg(i_target, FIFO_UPFIFO_STATUS, &l_data);
         if (errl) {return hbstd::timeout_t::STOP;}
+
+        o_fifoCount = (l_data & UPFIFO_STATUS_FIFO_ENTRY_COUNT) >> UPFIFO_ENTRY_COUNT_SHIFT;
 
         if (! (l_data & UPFIFO_STATUS_FIFO_FULL)) {return hbstd::timeout_t::STOP;}
 
@@ -1322,7 +1336,8 @@ errlHndl_t SbeFifo::OdyResetWriteFifoReg(TARGETING::Target *i_target,
  */
 errlHndl_t SbeFifo::writeFifoReg(TARGETING::Target     *i_target,
                                             fifoRegAddr i_addrIdx,
-                                            uint32_t   *i_pData)
+                                            uint32_t   *i_pData,
+                                            bool        i_skipErrCheck)
 {
     size_t     l_32bitSize = sizeof(uint32_t);
     errlHndl_t l_errl      = NULL;
@@ -1355,7 +1370,8 @@ errlHndl_t SbeFifo::writeFifoReg(TARGETING::Target     *i_target,
                               i_target,
                               i_pData,
                               l_32bitSize,
-                              DEVICE_CFAM_ADDRESS(l_addr));
+                              DEVICE_I2CR_CFAM_ADDRESS(l_addr,
+                                                       i_skipErrCheck ? I2CR::I2CR_OP_FLAGS_NO_ERR_CHECK : I2CR::I2CR_OP_FLAGS_NONE));
         }
     }
     else

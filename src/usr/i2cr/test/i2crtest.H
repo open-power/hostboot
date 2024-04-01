@@ -132,7 +132,7 @@ public:
                     "target=0x%.8X", i_regaddr, i_op, i_accessType,
                     TARGETING::get_huid(i_tgt));
             l_err = DeviceFW::deviceOp(i_op, i_tgt, io_buffer, i_numbytes,
-                                       DEVICE_I2CR_CFAM_ADDRESS(i_regaddr));
+                                       DEVICE_I2CR_CFAM_ADDRESS(i_regaddr, I2CR_OP_FLAGS_NONE));
             break;
 
         case DIRECT_CFAM_ACCESS:

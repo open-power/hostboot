@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,12 @@ constexpr uint64_t  ALL_64_ONES    = 0xFFFFFFFFFFFFFFFFULL;
 constexpr uint64_t  ALL_32_ONES    = 0xFFFFFFFF;
 constexpr uint8_t   I2CR_SUCCESS   = 0;
 constexpr uint8_t   I2CR_ERROR     = 1;
+
+constexpr uint32_t  FIFO_UP_DATA_SHIFTED          = 0x00001200;
+
+constexpr uint64_t  I2CR_OP_FLAGS_NO_ERR_CHECK    = 0x8000000000000000ULL;
+constexpr uint64_t  I2CR_OP_FLAGS_NONE            = 0x0000000000000000ULL;
+
 
 struct i2cr_config_reg_t
 {

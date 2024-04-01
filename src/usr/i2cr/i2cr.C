@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -494,6 +494,7 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
 {
     // The input i2cr address is either a SCOM address or CFAM(FSI) word address
     uint64_t l_i2crAddr = va_arg(i_args,uint64_t);
+    uint64_t l_i2crFlags = 0x0;  // Only valid for I2CR_CFAM ops
     uint32_t l_shiftedI2crAddr = 0;
     ATTR_FAPI_I2C_CONTROL_INFO_type l_i2cInfo;
     errlHndl_t l_err = nullptr;
@@ -593,6 +594,12 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
             ERRORLOG::ErrlUserDetailsTarget(i_target,
                       "OCMBs I2CR SCOM/CFAM Target").addToLog(l_err);
             break;
+        }
+
+        //If I2CR_CFAM, then grab flags
+        if (i_accessType == DeviceFW::I2CR_CFAM)
+        {
+            l_i2crFlags = va_arg(i_args,uint64_t);  // Only valid for I2CR_CFAM ops
         }
 
          // Grab i2cr access information and also determine the associated HUB chip
@@ -696,7 +703,7 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
          }
          else if(i_opType == DeviceFW::WRITE)
          {
-             TRACDCOMP( g_trac_i2cr, "i2crPerformOp> Write(l_i2crAddr=0x%.8X shifted=0x%.8X",
+             TRACUCOMP( g_trac_i2cr, "i2crPerformOp> Write(l_i2crAddr=0x%.8X shifted=0x%.8X",
                         l_i2crAddr, l_shiftedI2crAddr);
              TRACDBIN(g_trac_i2cr, "io_buffer=", io_buffer, io_buflen);
 
@@ -726,7 +733,10 @@ errlHndl_t i2crPerformOp(DeviceFW::OperationType i_opType,
              // is no passive indication of a problem. If we have an error,
              // gather more info about the error and log it. Please note that the
              // i2crCheckErrors will also reset the regs to recover from any errors.
-             l_secondaryErr = I2CR::i2crCheckErrors(i_target, l_i2crAddr, l_shiftedI2crAddr);
+             if(!(l_i2crFlags & I2CR_OP_FLAGS_NO_ERR_CHECK))
+             {
+                 l_secondaryErr = I2CR::i2crCheckErrors(i_target, l_i2crAddr, l_shiftedI2crAddr);
+             }
 
              if (l_err || l_secondaryErr)
              {
@@ -1101,8 +1111,15 @@ errlHndl_t i2crCheckErrors( Target* i_target, uint64_t i_addr, uint32_t i_sftAdd
         // The status register shows only the 24 bits of address so compare only
         // the 24 bits of the shifted address with the address reported in the
         // status register. Also, check for a concurrent access error
-        if (((l_errorReg.badaddress) && (l_status.address != (l_sftAddr & 0xFFFFFF))) ||
-            (l_status.inprogress))
+
+        // For performance the SPPE UP FIFO (0x2400) is written without
+        // checking for errors.  The next write/read operation may detect the issue.
+        // Given that this is the ONLY time hostboot would detect a different address
+        // than what it wrote AND to to keep the code simple (I2CR is stateless) --
+        // exempt (0x2400 -> 0x1200 shifted) from falling into this path
+        if(((l_errorReg.badaddress) &&
+           (l_status.address != (l_sftAddr & 0xFFFFFF)) && (l_status.address != FIFO_UP_DATA_SHIFTED))
+           || (l_status.inprogress))
         {
             // We are in some kind of concurrent access from another task
             TRACFCOMP( g_trac_i2cr, ERR_MRK"i2crCheckErrors> Concurrent/Bad access error!"

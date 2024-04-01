@@ -1334,9 +1334,10 @@ private:
      * @brief poll until uplift Fifo has room to write into
      *
      * @param[in]  i_target         Target to access
+     * @param[out] o_fifoCount      Current entries in UP FIFO
      * @return errlHndl_t Error log handle on failure.
      */
-    errlHndl_t waitUpFifoReady(TARGETING::Target * i_target);
+    errlHndl_t waitUpFifoReady(TARGETING::Target * i_target, uint8_t & o_fifoCount);
 
     /**
      * @brief  Wait for data in downstream fifo to receive, hit EOT, or timeout.
@@ -1404,11 +1405,13 @@ private:
      * @param[in]  i_target         Target to access
      * @param[in]  i_addrIdx        FIFO address enum index
      * @param[in]  i_pData          Pointer to receive data
+     * @param[in]  i_skipErrCheck   Don't check for errors on writes (I2C)
      * @return errlHndl_t Error log handle on failure.
      */
     errlHndl_t writeFifoReg(TARGETING::Target   *i_target,
                                      fifoRegAddr i_addrIdx,
-                                       uint32_t *i_pData);
+                                     uint32_t *i_pData,
+                                     bool i_skipErrCheck = false);
 
     /**
      * @brief Collect appropriate registers for FFDC.
@@ -1446,6 +1449,10 @@ private:
         UPFIFO_STATUS_FIFO_VALID_FLAGS =0x0000FF00,
         // EOT flags of entries currently in FIFO
         UPFIFO_STATUS_FIFO_EOT_FLAGS =0x000000FF,
+        // Shift count for upstream entries
+        UPFIFO_ENTRY_COUNT_SHIFT = 16,
+        //Max entries in upfifo
+        UPFIFO_MAX_ENTRY = 8,
     };
 
     enum sbeUpstreamEot
