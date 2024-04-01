@@ -37,6 +37,7 @@
 #include <set_sbe_error.H>
 
 #include "sbe_fifodd.H"
+#include <targeting/odyutil.H>                 // isOdysseyChip
 
 /**
  * @file sbe_ffdc_parser.C
@@ -306,6 +307,11 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
     // we don't want to create an unnecessary log to be the main log.
     std::vector<errlHndl_t> sbeErrors;
     errlHndl_t slidErrl = nullptr;
+    uint8_t UDT_FORMAT_TYPE = SBEIO_UDT_PARAMETERS; // default to the SBE PROC format, uses the o3500.py parser style
+    if (TARGETING::UTIL::isOdysseyChip(i_target))
+    {
+        UDT_FORMAT_TYPE = SBEIO_UDT_SPPE_FORMAT; // Use the o4500.py parser style
+    }
 
     // Track when SLID groups change.
     size_t currentSlid = 0;
@@ -409,7 +415,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                               package->ffdcPtr,
                               package->size,
                               0, /* version */
-                              SBEIO_UDT_PARAMETERS,
+                              UDT_FORMAT_TYPE,
                               false /* Do not merge*/);
         }
         else // RC==0
