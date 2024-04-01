@@ -211,8 +211,9 @@ enum sbeioReasonCode
 enum UserDetailsTypes
 {
         SBEIO_UDT_NO_FORMAT        = 0x0,
-        SBEIO_UDT_PARAMETERS       = 0x1,
+        SBEIO_UDT_PARAMETERS       = 0x1, // SBE Proc format, calls o3500.py
         SBEIO_UDT_SPPE_CODE_LEVELS = 0x2,
+        SBEIO_UDT_SPPE_FORMAT      = 0x3, // SPPE Odyssey format, calls o4500.py
 };
 
 
