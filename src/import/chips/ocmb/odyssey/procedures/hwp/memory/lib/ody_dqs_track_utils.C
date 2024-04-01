@@ -456,7 +456,9 @@ void check_sensor_exists_and_get_index(const uint8_t i_thermal_sensor_usage,
 {
     // Checking against sensor0 enums since the enum values for all sensors are the same.
     // DRAM
-    if (i_thermal_sensor_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM &&
+    // if ATTR_MSS_MRW_OVERRIDE_THERM_SENSOR_USAGE is enabled then DRAM usage is overriden to ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM_AND_MEM_BUF_EXT
+    if ((i_thermal_sensor_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM
+         || i_thermal_sensor_usage == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_USAGE_DRAM_AND_MEM_BUF_EXT) &&
         i_thermal_sensor_avail == fapi2::ENUM_ATTR_MEM_EFF_THERM_SENSOR_0_AVAIL_AVAILABLE)
     {
         o_sensor_info.iv_dram_exists = true;
