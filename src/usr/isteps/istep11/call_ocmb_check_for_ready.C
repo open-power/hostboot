@@ -530,17 +530,40 @@ errlHndl_t boot_all_proc_ocmbs(Target* const i_proc, IStepError& io_iStepError)
                 }
 
                 l_ocmb_errl = doOcmbSpiFlashCheck(i_ocmb);
-                if(l_ocmb_errl)
-                {
-                    TRACISTEP("parallel_for_each OCMB 0x%x SPI Flash check failed", get_huid(i_ocmb));
-                    // In an error case, the FSM may chose to flip to side1/golden. We need to make
-                    // sure that the attributes are flushed out before proceeding with the shutdown
-                    // so that we can boot off of the correct side on the next boot (as indicated by
-                    // the OCMB_BOOT_SIDE attribute).
-                    AttrRP::syncAllAttributesToSP();
-                    // Commit the errl. FSM will handle shutdowns/reconfig loops.
-                    errlCommit(l_ocmb_errl, SBEIO_COMP_ID);
-                    goto EXIT_OCMBS;
+
+                if (l_ocmb_errl)
+                { // If the flash check chip-op fails, we have to assume that the flash
+                  // is bad, so treat this error like UE failure on the current side.
+
+                    TRACISTEP("parallel_for_each OCMB 0x%x SPI Flash check failed" TRACE_ERR_FMT,
+                              get_huid(i_ocmb),
+                              TRACE_ERR_ARGS(l_ocmb_errl));
+                    UdSPPECodeLevels(i_ocmb).addToLog(l_ocmb_errl);
+
+                    auto event = OCMB_FLASH_ERROR;
+
+                    if (l_ocmb_errl->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED))
+                    { // If the OCMB is dead, we treat this like a boot error so that
+                      // the FSM doesn't try to communicate with the OCMB and cause a
+                      // bunch of timeouts.
+                        event = OCMB_BOOT_ERROR_NO_FFDC;
+                    }
+
+                    l_ocmb_errl = ody_upd_process_event(i_ocmb,
+                                                        event,
+                                                        move(l_ocmb_errl),
+                                                        proc_reboot_odysseys);
+
+                    if (l_ocmb_errl)
+                    {
+                        TRACISTEP("parallel_for_each OCMB 0x%x Odyssey FSM OCMB_FLASH_ERROR failed"
+                                  TRACE_ERR_FMT,
+                                  get_huid(i_ocmb),
+                                  TRACE_ERR_ARGS(l_ocmb_errl));
+                        UdSPPECodeLevels(i_ocmb).addToLog(l_ocmb_errl);
+                        captureError(move(l_ocmb_errl), io_iStepError, HWPF_COMP_ID, i_ocmb);
+                        goto EXIT_OCMBS;
+                    }
                 }
             }
             else // EXPLORER
