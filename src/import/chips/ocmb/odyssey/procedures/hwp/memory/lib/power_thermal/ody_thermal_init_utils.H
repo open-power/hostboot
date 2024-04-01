@@ -94,7 +94,7 @@ typedef fapi2::ReturnCode (*thermal_sensor_prev_value_attr_setter_ptr)(const
 
 
 // Sensor Location
-static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_location[] =
+static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_location[] __attribute__ ((__aligned__(8))) =
 {
     mss::attr::get_therm_sensor_0_location,
     mss::attr::get_therm_sensor_1_location,
@@ -102,7 +102,7 @@ static constexpr thermal_sensor_attr_getter_ptr get_therm_sensor_location[] =
     mss::attr::get_therm_sensor_3_location,
 };
 
-static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_location[] =
+static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_location[] __attribute__ ((__aligned__(8))) =
 {
     mss::attr::set_therm_sensor_0_location,
     mss::attr::set_therm_sensor_1_location,
@@ -112,7 +112,7 @@ static constexpr thermal_sensor_attr_setter_ptr set_therm_sensor_location[] =
 
 // Sensor Availability
 static constexpr thermal_sensor_attr_getter_ptr
-get_therm_sensor_availability[] =
+get_therm_sensor_availability[] __attribute__ ((__aligned__(8))) =
 {
     mss::attr::get_therm_sensor_0_availability,
     mss::attr::get_therm_sensor_1_availability,
@@ -121,7 +121,7 @@ get_therm_sensor_availability[] =
 };
 
 static constexpr thermal_sensor_attr_setter_ptr
-set_therm_sensor_availability[] =
+set_therm_sensor_availability[] __attribute__ ((__aligned__(8))) =
 {
     mss::attr::set_therm_sensor_0_availability,
     mss::attr::set_therm_sensor_1_availability,
@@ -131,7 +131,7 @@ set_therm_sensor_availability[] =
 
 // Sensor Usage
 static constexpr thermal_sensor_attr_getter_ptr
-get_therm_sensor_usage[] =
+get_therm_sensor_usage[] __attribute__ ((__aligned__(8))) =
 {
     mss::attr::get_therm_sensor_0_usage,
     mss::attr::get_therm_sensor_1_usage,
@@ -140,7 +140,7 @@ get_therm_sensor_usage[] =
 };
 
 static constexpr thermal_sensor_attr_setter_ptr
-set_therm_sensor_usage[] =
+set_therm_sensor_usage[] __attribute__ ((__aligned__(8))) =
 {
     mss::attr::set_therm_sensor_0_usage,
     mss::attr::set_therm_sensor_1_usage,
@@ -150,7 +150,7 @@ set_therm_sensor_usage[] =
 
 // Sensor Previous value
 static constexpr thermal_sensor_prev_value_attr_getter_ptr
-get_therm_sensor_prev_value[] =
+get_therm_sensor_prev_value[] __attribute__ ((__aligned__(8))) =
 {
     mss::attr::get_therm_sensor_0_prev_value,
     mss::attr::get_therm_sensor_1_prev_value,
@@ -160,7 +160,7 @@ get_therm_sensor_prev_value[] =
 };
 
 static constexpr thermal_sensor_prev_value_attr_setter_ptr
-set_therm_sensor_prev_value[] =
+set_therm_sensor_prev_value[] __attribute__ ((__aligned__(8))) =
 {
     mss::attr::set_therm_sensor_0_prev_value,
     mss::attr::set_therm_sensor_1_prev_value,
