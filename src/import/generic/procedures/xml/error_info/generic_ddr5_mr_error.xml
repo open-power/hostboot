@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -159,7 +159,8 @@
   <hwpError>
     <rc>RC_MSS_DDR5_MR4_BAD_TRFC_MODE</rc>
     <description>
-       A bad TRFC mode was passed into MR4
+       A bad TRFC mode was passed into MR4. The value comes from an
+       MRW attribute, so a bad value will affect ALL DIMMs
     </description>
     <ffdc>VALUE</ffdc>
     <callout>

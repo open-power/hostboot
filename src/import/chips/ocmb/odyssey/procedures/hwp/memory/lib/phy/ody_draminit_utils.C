@@ -2759,7 +2759,7 @@ fapi2::ReturnCode load_mem_bin_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 
     FAPI_ASSERT(i_data_start != NULL,
                 fapi2::ODY_DRAMINIT_START_DATA_PTR_NULL().
-                set_TARGET(i_target),
+                set_OCMB_TARGET(i_target),
                 TARGTIDFORMAT  " The start address is NULL.", TARGTID);
 
     while(l_bytes_copied < i_mem_size)
@@ -3067,7 +3067,7 @@ fapi2::ReturnCode ody_load_dmem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OC
     // OFFSET check
     FAPI_ASSERT(!is_odd(i_dmem_offset),
                 fapi2::ODY_DRAMINIT_OFFSET_UNSUPPORTED()
-                .set_TARGET(i_target)
+                .set_OCMB_TARGET(i_target)
                 .set_MEM_TYPE(DMEM)
                 .set_START_ADDR(DMEM_ST_ADDR)
                 .set_END_ADDR(DMEM_END_ADDR)
@@ -3078,7 +3078,7 @@ fapi2::ReturnCode ody_load_dmem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OC
     // ADDR check
     FAPI_ASSERT(l_start_addr >= DMEM_ST_ADDR && l_end_addr < DMEM_END_ADDR,
                 fapi2::ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS()
-                .set_TARGET(i_target)
+                .set_OCMB_TARGET(i_target)
                 .set_MEM_TYPE(DMEM)
                 .set_START_ADDR(DMEM_ST_ADDR)
                 .set_END_ADDR(DMEM_END_ADDR)
@@ -3139,7 +3139,7 @@ fapi2::ReturnCode ody_load_imem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OC
     // OFFSET check
     FAPI_ASSERT(!is_odd(i_imem_offset),
                 fapi2::ODY_DRAMINIT_OFFSET_UNSUPPORTED()
-                .set_TARGET(i_target)
+                .set_OCMB_TARGET(i_target)
                 .set_MEM_TYPE(IMEM)
                 .set_START_ADDR(IMEM_ST_ADDR)
                 .set_END_ADDR(IMEM_END_ADDR)
@@ -3150,7 +3150,7 @@ fapi2::ReturnCode ody_load_imem_helper(const fapi2::Target<fapi2::TARGET_TYPE_OC
     // ADDR check
     FAPI_ASSERT(l_start_addr >= IMEM_ST_ADDR && l_end_addr < IMEM_END_ADDR,
                 fapi2::ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS()
-                .set_TARGET(i_target)
+                .set_OCMB_TARGET(i_target)
                 .set_MEM_TYPE(IMEM)
                 .set_START_ADDR(IMEM_ST_ADDR)
                 .set_END_ADDR(IMEM_END_ADDR)

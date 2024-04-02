@@ -49,6 +49,13 @@
     <description>Error resetting Odyssey I2C controller</description>
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>STATUS_DATA</ffdc>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
 
 </hwpErrors>

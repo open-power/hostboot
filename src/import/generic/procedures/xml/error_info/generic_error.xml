@@ -2198,6 +2198,10 @@
     <ffdc>MC_TARGET</ffdc>
     <ffdc>REQUESTED_INSTRUCTIONS</ffdc>
     <ffdc>MAX_INSTRUCTIONS</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
     <!-- No hardware callout due to being a runtime only error -->
   </hwpError>
 

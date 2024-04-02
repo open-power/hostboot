@@ -306,15 +306,18 @@
       Checks that the pointer to the starting location
       of a PHY firmware binary file is not null
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <callout>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
         <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -324,20 +327,23 @@
       Check to see if the imem/dmem start address and size
       will fit in the address boundaries
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <ffdc>MEM_TYPE</ffdc>
     <ffdc>START_ADDR</ffdc>
     <ffdc>END_ADDR</ffdc>
     <ffdc>IMAGE_ST_ADDR</ffdc>
     <ffdc>IMAGE_SIZE</ffdc>
     <callout>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
@@ -346,20 +352,23 @@
     <description>
      OFFSET in memory PHY FW image block must be even
     </description>
-    <ffdc>TARGET</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
     <ffdc>MEM_TYPE</ffdc>
     <ffdc>START_ADDR</ffdc>
     <ffdc>END_ADDR</ffdc>
     <ffdc>IMAGE_ST_ADDR</ffdc>
     <ffdc>IMAGE_SIZE</ffdc>
     <callout>
-      <target>TARGET</target>
+      <target>OCMB_TARGET</target>
       <priority>MEDIUM</priority>
     </callout>
     <callout>
         <procedure>CODE</procedure>
         <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
   </hwpError>
 
   <hwpError>
