@@ -456,9 +456,9 @@ errlHndl_t OdySbeRetryHandler::run_hreset_flow()
               get_huid(iv_ocmb));
 
     /*--------------------------------------------------------------------------
-     * ody_sppe_check_for_ready
+     * ody_sppe_check_for_ready (true -> bool i_isHreset)
      *------------------------------------------------------------------------*/
-    FAPI_INVOKE_HWP(l_errl, ody_sppe_check_for_ready, l_fapi_ocmb_target);
+    FAPI_INVOKE_HWP(l_errl, ody_sppe_check_for_ready, l_fapi_ocmb_target, true);
 
     CI_INJECT_HRESET_FAIL(CxxTest::g_cxxTestInject,
                           iv_ocmb,
