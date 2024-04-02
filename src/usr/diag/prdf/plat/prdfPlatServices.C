@@ -924,6 +924,17 @@ void getSbeScratchData(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid)
     SBEIO::handleGetScratchDataPrdRequest(i_ocmb, i_plid);
 }
 
+//------------------------------------------------------------------------------
+
+errlOwner getDqsDriftTrackFailFfdc(TARGETING::TargetHandle_t i_ocmb,
+                                   errlHndl_t& o_errs)
+{
+    PRDF_ASSERT(nullptr != i_ocmb);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == getTargetType(i_ocmb));
+    PRDF_ASSERT(isOdysseyOcmb(i_ocmb));
+    return SBEIO::genFifoSBEFFDCErrls(i_ocmb, o_errs);
+}
+
 //##############################################################################
 //##                OCMB Maintenance Command wrappers
 //##############################################################################

@@ -1007,6 +1007,60 @@ int32_t srqRecovParityError(ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( odyssey_ocmb, srqRecovParityError );
 
+
+/**
+ * @brief  SRQ_FIR[47] - DQS drift tracking failure
+ * @param  i_chip An Odyssey OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t dqsDriftTrackFail(ExtensibleChip * i_chip,
+                          STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #define PRDF_FUNC "[odyssey_ocmb::dqsDriftTrackFail] "
+
+    // This function will call a Hostboot interface to collect the SBE FFDC
+    // error logs to help with debug in the event of DQS drift tracking failing.
+    // If PRD commits an error log returned from that function, the PRD log
+    // itself will not be committed as it will not have any useful information.
+
+    #ifdef __HOSTBOOT_MODULE
+
+    errlHndl_t ffdcErrls = nullptr;
+    errlOwner errl = getDqsDriftTrackFailFfdc(i_chip->getTrgt(), ffdcErrls);
+
+    if (errl)
+    {
+        // Something failed in Hostboot's call to collect the SBE FFDC logs.
+        // Commit the returned failure log and don't commit PRD's log.
+        PRDF_ERR(PRDF_FUNC "Error returned from getDqsDriftTrackFailFfdc"
+                 "(0x%08x)", i_chip->getHuid());
+        ERRORLOG::errlCommit(errl, PRDF_COMP_ID);
+        io_sc.service_data->setDontCommitErrl();
+    }
+    else if (ffdcErrls)
+    {
+        // Hostboot's call to collect the SBE FFDC logs succeeded. Commit those
+        // logs and don't commit PRD's log.
+        ERRORLOG::errlCommit(ffdcErrls, PRDF_COMP_ID);
+        io_sc.service_data->setDontCommitErrl();
+    }
+    else
+    {
+        // Somehow no error logs of any kind were returned. Callout level2
+        // support and allow PRD's log to be committed.
+        PRDF_ERR(PRDF_FUNC "No error logs returned from "
+                 "getDqsDriftTrackFailFfdc(0x%08x)", i_chip->getHuid());
+        io_sc.service_data->SetCallout(LEVEL2_SUPPORT);
+    }
+
+    #endif
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+PRDF_PLUGIN_DEFINE( odyssey_ocmb, dqsDriftTrackFail );
 //##############################################################################
 //
 //                             ODP_FIR

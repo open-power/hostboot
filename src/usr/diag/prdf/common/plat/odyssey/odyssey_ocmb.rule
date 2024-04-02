@@ -1854,6 +1854,11 @@ group gSRQ_FIR
      *  Firmware initiated channel fail
      */
     (rSRQ_FIR, bit(46)) ? fwInitChnlFail;
+
+    /** SRQ_FIR[47]
+     *  DQS drift tracking failure
+     */
+    (rSRQ_FIR, bit(47)) ? dqsDriftTrackFail;
 };
 
 ################################################################################

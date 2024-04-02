@@ -221,6 +221,19 @@ void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid = 0);
  */
 void getSbeScratchData(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid = 0);
 
+
+/**
+ * @brief  Calls a Hostboot interface to collect FIFO SBE FFDC error logs. This
+ *         is used in the event of a DQS drift tracking fail.
+ * @param  i_target An Odyssey OCMB.
+ * @param  o_errls  FFDC error logs returned from the SBE.
+ * @return Non-nullptr error log if an internal function fails, otherwise a
+ *         nullptr error log.
+ */
+errlOwner getDqsDriftTrackFailFfdc(TARGETING::TargetHandle_t i_ocmb,
+                                   errlHndl_t& o_errls);
+
+
 //##############################################################################
 //##                    Maintenance Command wrappers
 //##############################################################################
