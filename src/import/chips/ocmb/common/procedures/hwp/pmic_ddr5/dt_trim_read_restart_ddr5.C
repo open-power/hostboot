@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,18 +78,18 @@ fapi2::ReturnCode dt_trim_read_restart_ddr5(const fapi2::Target<fapi2::TARGET_TY
     FAPI_TRY(mss::pmic::i2c::reg_write_default_dt(l_default_dt, DT_REGS::TRIM_LOCK, trim_data::TRIM_UNLOCK));
 
     // Enter Password
-    l_data_trim[0] = trim_data::TRIM_PASSWORD_0;
-    l_data_trim[1] = trim_data::TRIM_PASSWORD_1;
+    l_data_trim[0] = trim_data::TRIM_PASSWORD_1;
+    l_data_trim[1] = trim_data::TRIM_PASSWORD_0;
     FAPI_TRY(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::TRIM_TRY_PASSWORD, l_data_trim));
 
     // Enable extendable read pulse
-    l_data_trim[0] = trim_data::EXTENDABLE_RD_PULSE_EN_0;
-    l_data_trim[1] = trim_data::EXTENDABLE_RD_PULSE_EN_1;
+    l_data_trim[0] = trim_data::EXTENDABLE_RD_PULSE_EN_1;
+    l_data_trim[1] = trim_data::EXTENDABLE_RD_PULSE_EN_0;
     FAPI_TRY(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_TRIM_RP_MAX, l_data_trim));
 
     // Initiate Trim read
-    l_data_trim[0] = trim_data::TRIM_RD_INIT_0;
-    l_data_trim[1] = trim_data::TRIM_RD_INIT_1;
+    l_data_trim[0] = trim_data::TRIM_RD_INIT_1;
+    l_data_trim[1] = trim_data::TRIM_RD_INIT_0;
     FAPI_TRY(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_COMMAND, l_data_trim));
 
     // Delay before locking trims

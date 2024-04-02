@@ -758,7 +758,7 @@ enum regs
     TRIM_LOCK            = 0xD2,
     FAULTS_CLEAR_0       = 0xD4,
     FAULTS_CLEAR_1       = 0xD6,
-    NVM_COMMAND          = 0x3C,
+    NVM_COMMAND          = 0xDC,
     EN_REGISTER          = 0xDE,
     BREADCRUMB           = 0xE0,
     RECOVERY_COUNT       = 0xE1,
