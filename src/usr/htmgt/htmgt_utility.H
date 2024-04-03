@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,7 +157,7 @@ namespace HTMGT
         SUBSEC_OCC_RSP_DATA           = 0x0E,
         SUBSEC_ELOG_TYPE_HTMGT_DATA   = 0x10,
         //SUBSEC_ELOG_TYPE_OCC_RESET    = 0x11,
-        //SUBSEC_ELOG_TYPE_PCAP_DATA    = 0x12,
+        SUBSEC_ELOG_TYPE_PCAP_DATA    = 0x12,
         //SUBSEC_ELOG_TYPE_THERMAL_DATA = 0x13,
         //SUBSEC_PROC_SCOM_REGISTERS    = 0x14,
         //SUBSEC_ELOG_TYPE_OCC_TRACE    = 0x15,

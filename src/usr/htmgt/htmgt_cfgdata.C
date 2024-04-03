@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,6 +62,24 @@ void getMemPowerMessageData(Occ *i_occ,
 bool G_wofSupported = true;
 uint8_t G_system_type = 0;
 uint8_t G_memory_type = OCC_MEM_TYPE_EXPLORER;
+
+// Structure used to store power cap values for FFDC
+struct tmgt_pcap_summary_t
+{
+  // Component
+  uint16_t  countProc;
+  uint16_t  totalMinProcPwr;
+  uint16_t  totalFixed;
+  uint16_t  totalPCI;
+  uint16_t  totalMemPwr;
+  // Totals
+  uint16_t  pcapSoftMin;
+  uint16_t  pcapMin;
+  uint16_t  pcapMax;
+  uint16_t  pcapOversub;
+};
+
+tmgt_pcap_summary_t G_pcapSummary = {0};
 
 
 // Send config format data to all OCCs
@@ -1427,6 +1445,8 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     Target* sys = UTIL::assertGetToplevelTarget();
     assert(o_data != nullptr);
 
+    bzero(&G_pcapSummary, sizeof(tmgt_pcap_summary_t));
+
     o_data[index++] = OCC_CFGDATA_PCAP_CONFIG;
     o_data[index++] = 0x20; // version
 
@@ -1445,6 +1465,7 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     }
     else
     {
+        G_pcapSummary.totalFixed = l_misc_power_per_system;
         uint16_t l_min_proc_power_per_chip = 0;
         if ((!sys->tryGetAttr<ATTR_MIN_PROC_POWER_PER_CHIP>(l_min_proc_power_per_chip)) ||
             (l_min_proc_power_per_chip == 0))
@@ -1461,6 +1482,7 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
 
         // get the number of OCCs in system
         uint16_t l_num_of_occs = OccManager::getNumOccs();
+        G_pcapSummary.countProc = l_num_of_occs;
 
         // Get the memory power at min throttles from istep 18
         uint16_t l_mem_power_min_throttle = 0;
@@ -1470,6 +1492,7 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
             TMGT_ERR("getPowerCapMessageData: Failed to read MRW "
                     "ATTR_CURRENT_MEM_POWER_MIN_THROTTLE");
         }
+        G_pcapSummary.totalMemPwr = l_mem_power_min_throttle;
 
         // if we have valid data, do the calculation.
         // NOTE Number of OCCs not checked, has to be one or more.
@@ -1490,6 +1513,7 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
             min_pcap = (l_min_proc_power_per_chip * l_num_of_occs)
                                 + l_misc_power_per_system
                                 + l_mem_power_min_throttle;
+            G_pcapSummary.totalMinProcPwr = l_num_of_occs * l_min_proc_power_per_chip;
         }
         else
         {
@@ -1513,16 +1537,19 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     }
     UINT16_PUT(&o_data[index], soft_pcap);
     index += 2;
+    G_pcapSummary.pcapSoftMin = soft_pcap;
 
     // Minimum Hard Power Cap
     UINT16_PUT(&o_data[index], min_pcap);
     index += 2;
+    G_pcapSummary.pcapMin = min_pcap;
 
     // System Maximum Power Cap
     bool is_redundant;
     const uint16_t max_pcap = getMaxPowerCap(sys, is_redundant);
     UINT16_PUT(&o_data[index], max_pcap);
     index += 2;
+    G_pcapSummary.pcapMax = max_pcap;
 
     // Oversubscription Power Drop Power Cap
     ATTR_CURRENT_N_BULK_POWER_LIMIT_WATTS_type opl_pcap;
@@ -1534,10 +1561,28 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
     }
     UINT16_PUT(&o_data[index], opl_pcap);
     index += 2;
+    G_pcapSummary.pcapOversub = opl_pcap;
 
     TMGT_INF("getPowerCapMessageData: pcaps - soft min: %d, hard min: %d, max: %d,"
              " Oversubscription: %d (in Watts)",
              soft_pcap, min_pcap, max_pcap, opl_pcap);
+
+    /*@
+     * @errortype
+     * @subsys EPUB_FIRMWARE_SP
+     * @moduleid HTMGT_MOD_SEND_OCC_CONFIG
+     * @reasoncode HTMGT_RC_PCAP_CALC_COMPLETE
+     * @userdata1  None
+     * @devdesc Power cap calculations have completed
+     * @custdesc Power cap calculations have completed
+     */
+    errlHndl_t l_err = nullptr;
+    bldErrLog(l_err, HTMGT_MOD_SEND_OCC_CONFIG, HTMGT_RC_PCAP_CALC_COMPLETE,
+              0, 0, 0, 0, ERRORLOG::ERRL_SEV_INFORMATIONAL);
+    l_err->addFFDC(HTMGT_COMP_ID, &G_pcapSummary, sizeof(G_pcapSummary),
+                   1 /*version*/, SUBSEC_ELOG_TYPE_PCAP_DATA);
+    ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
+
     o_size = index;
 }
 

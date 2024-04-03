@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -231,12 +231,38 @@ class errludP_htmgt:
         return jsonStr
 
 
+    def UdParserPcapData(ver, data):
+        d = dict()
+        i = 0
+        powr = dict()
+        powr['Processor Count'], i=intConcat(data, i, i+2)
+        powr['Total Min Processor Power'], i=intConcat(data, i, i+2)
+        powr['Total Fixed Power'], i=intConcat(data, i, i+2)
+        pciPower, i = intConcat(data, i, i+2)
+        if pciPower > 0:
+            powr['Total PCI Power'] = pciPower
+        powr['Total Memory Power'], i=intConcat(data, i, i+2)
+        d['Power Allocation (Watts)']=powr
+
+        pcap = dict()
+        pcap['Soft Min Power Cap'], i=intConcat(data, i, i+2)
+        pcap['Hard Min Power Cap'], i=intConcat(data, i, i+2)
+        pcap['Max Power Cap'], i=intConcat(data, i, i+2)
+        pcap['Oversubscription Power Cap'], i=intConcat(data, i, i+2)
+        d['Power Cap Limits (Watts)']=pcap
+
+        jsonStr = json.dumps(d, indent = 2)
+        return jsonStr
+
+
+
 #Dictionary with parser functions for each subtype
 #Values are from tmgtElogSubsecTypes in src/usr/htmgt/htmgt_utility.H
 tmgtElogSubsecTypes = {
         13: "UdParserOCCCmd",
         14: "UdParserOCCRsp",
-        16: "UdParserHtmgtData"
+        16: "UdParserHtmgtData",
+        18: "UdParserPcapData"
         }
 
 def parseUDToJson(subType, ver, data):
