@@ -1187,6 +1187,11 @@ uint32_t __findChipMarks<TYPE_OCMB_CHIP>(
                               regName, chip->getHuid() );
                     break;
                 }
+                // Clear the register cache for the RDF_FIR since it's been
+                // written so the next time it's read, the new data will be
+                // read from hardware.
+                RegDataCache & cache = RegDataCache::getCachedRegisters();
+                cache.flush(chip, reg);
             }
             else
             {
