@@ -790,7 +790,10 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     }
                     // Not FSP and not in mfg mode,
                     // still want to do the reconfig
-                    else if (!iv_spBaseServicesEnabled && !l_manufacturingMode)
+                    // --OR--
+                    // If in manufacturing mode, but there is no error
+                    else if ((!iv_spBaseServicesEnabled && !l_manufacturingMode) ||
+                             (l_manufacturingMode && (errhdl == nullptr)))
                     {
                         // If there was a doIstep error then commit it
                         // before the reconfig loop
@@ -3095,7 +3098,7 @@ bool IStepDispatcher::checkReconfig(const uint8_t i_curIstep,
     }
 
     TRACDCOMP(g_trac_initsvc,
-              EXIT_MRK"IStepDispatcher::checkReconfig: new istep/substep: %d %d.%d",
+              EXIT_MRK"IStepDispatcher::checkReconfig: doReconfigure=%d, new istep/substep: %d.%d",
               doReconfigure, o_newIstep, o_newSubstep);
 
     return doReconfigure;
