@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ fapi2::ReturnCode setup_mc_cmn_config(const fapi2::Target<fapi2::TARGET_TYPE_OMI
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_SPARE(mss::states::OFF, l_val);
 
     scomt::omic::SET_CMN_CONFIG_CFG_CMN_PSAV_STS_ENABLE(mss::states::OFF, l_val);
-    scomt::omic::SET_CMN_CONFIG_CFG_CMN_RECAL_TIMER(mss::omi::recal_timer::RECAL_TIMER_400MS, l_val);
+    scomt::omic::SET_CMN_CONFIG_CFG_CMN_RECAL_TIMER(mss::omi::recal_timer::RECAL_TIMER_100MS, l_val);
     // Override to DD1 setting if needed
     mss::workarounds::omi::override_recal_timer(i_target, l_recal_timer_override, l_val);
 

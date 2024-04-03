@@ -315,7 +315,7 @@ extern "C"
             mss::exp::omi::setup_edpl_time_window(l_dlx_config1_data, !l_edpl_disable, l_mnfg_screen_test, l_mnfg_edpl_time);
 
             l_dlx_config1_data.insertFromRight<EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_THRESHOLD,
-                                               EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_THRESHOLD_LEN>(mss::omi::edpl_err_thres::EDPL_ERR_THRES_128);
+                                               EXPLR_DLX_DL0_CONFIG1_CFG_EDPL_THRESHOLD_LEN>(mss::omi::edpl_err_thres::EDPL_ERR_THRES_DISABLED);
             mss::exp::omi::setup_edpl_threshold(l_dlx_config1_data, !l_edpl_disable, l_mnfg_screen_test, l_mnfg_edpl_threshold);
 
             FAPI_TRY(mss::exp::omi::write_dlx_config1(i_target, l_dlx_config1_data));
