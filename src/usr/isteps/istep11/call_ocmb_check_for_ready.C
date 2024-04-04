@@ -172,14 +172,6 @@ errlHndl_t ody_attribute_setup(Target* const i_ocmb)
         if (boot_flags & BOOT_FLAGS_BIT11) {ocmb_boot_flags_new |= BOOT_FLAGS_BIT11;}
         if (boot_flags & BOOT_FLAGS_BIT12) {ocmb_boot_flags_new |= BOOT_FLAGS_BIT12;}
 
-        // check FFT ATTR override to allow scom security
-        if (!UTIL::assertGetToplevelTarget()->getAttr<ATTR_OCMB_IGNORE_SCOM_CHECK_DISABLE>())
-        {
-            // always turn on bit11, *temporary*
-            //   @TODO: JIRA: PFHB-664 Remove hardcode setting bit11
-            ocmb_boot_flags_new |= BOOT_FLAGS_BIT11;  // Disable SCOM Security
-        }
-
         // Do not turn on security in Simics because it is very slow,
         //  unless explicitly told to do it
         if( Util::isSimicsRunning() && security_enabled )
