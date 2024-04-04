@@ -496,7 +496,7 @@ errlHndl_t getSeepromWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData)
             "SectionTableOffset 0x%X SectionTableSize %d "
             "Version %d Mode %d Cores %d SocketPower 0x%X NomFreq 0x%X",
             l_tableEntry.offset, l_tableEntry.size,
-            l_tableHeader->header_version, l_tableHeader->ocs_mode,
+            l_tableHeader->header_version, l_tableHeader->sys_flags,
             l_tableHeader->core_count, l_tableHeader->socket_power_w,
             l_tableHeader->sort_power_freq_mhz);
 
@@ -1068,7 +1068,7 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
         FAPI_INF("getOverrideWofTable WOF Header Table Fields: magic: 0x%X "
             "Version %d Mode %d Cores %d SocketPower 0x%X NomFreq 0x%X",
             l_tableHeader->magic_number.value,
-            l_tableHeader->header_version, l_tableHeader->ocs_mode,
+            l_tableHeader->header_version, l_tableHeader->sys_flags,
             l_tableHeader->core_count, l_tableHeader->socket_power_w,
             l_tableHeader->sort_power_freq_mhz);
 

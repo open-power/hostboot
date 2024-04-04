@@ -405,7 +405,7 @@ typedef struct
 
     /// Over-Current Mode.
     /// 0: Table set assumes OCS is OFF; 1: Table set assumes OCS is ON
-    uint8_t ocs_mode;
+    uint8_t sys_flags;
 
     /// Core count
     uint8_t core_count;
@@ -536,12 +536,16 @@ typedef struct
 
     /// Up to 16 ASCII characters as a Table Version as established by the
     /// generation process.
-    char table_version[16];
+    char table_version[8];
+
+    uint8_t cur_scale_pct[8];
 
     ///  ---- Double word 11 and 12 -----
 
     /// Up to 16 ASCII characters as a Package designator
-    char package_name[16];
+    char package_name[8];
+
+    char rsvd[8];
 
     /// Core Sort Power Save Frequency (in MHz) (eg Fmin @ Vmin)
     uint16_t sort_power_save_freq_mhz;

@@ -266,8 +266,8 @@ fapi2::ReturnCode wof_get_tables(
             FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number.value));
 
             // Set some defaults into the header
-            strcpy(p_wfth->table_version, "Denali.20200125");
-            strcpy(p_wfth->package_name,  "DENALI_DCM");
+            strcpy(p_wfth->table_version, "v9.9.9");
+            strcpy(p_wfth->package_name,  "DCM");
 
             FAPI_INF("before l_vcs_start %d (0x%X) l_vdd_start %d (0x%X) l_io_start %d (0x%X) l_ac_start %d (0x%X) ",
                      revle16(p_wfth->vcs_start),
@@ -461,7 +461,7 @@ void wfth_print(
     WFTH_PRINT8_h4_d5 (vrt_block_size        );
     WFTH_PRINT8_h4_d5 (vrt_block_header_size );
     WFTH_PRINT8_h4_d5 (vrt_data_size         );
-    WFTH_PRINT8_h4_d1 (ocs_mode              );
+    WFTH_PRINT8_h4_d1 (sys_flags             );
     WFTH_PRINT8_h4_d2 (core_count            );
     WFTH_PRINT16_h4_d5(vcs_start             );
     WFTH_PRINT16_h4_d5(vcs_step              );
@@ -495,6 +495,14 @@ void wfth_print(
     WFTH_PRINT16_h4_d5(override_match_freq_mhz);
 //    WFTH_PRINTS       (table_version);  // Commented as contents can be terminating
 //    WFTH_PRINTS       (package_name);   // Commented as contents can be terminating
+    WFTH_PRINT8_h4_d1(cur_scale_pct[0]);
+    WFTH_PRINT8_h4_d1(cur_scale_pct[1]);
+    WFTH_PRINT8_h4_d1(cur_scale_pct[2]);
+    WFTH_PRINT8_h4_d1(cur_scale_pct[3]);
+    WFTH_PRINT8_h4_d1(cur_scale_pct[4]);
+    WFTH_PRINT8_h4_d1(cur_scale_pct[5]);
+    WFTH_PRINT8_h4_d1(cur_scale_pct[6]);
+    WFTH_PRINT8_h4_d1(cur_scale_pct[7]);
     WFTH_PRINT16_h4_d5(sort_power_save_freq_mhz);
     WFTH_PRINT16_h4_d5(sort_fixed_freq_mhz);
     WFTH_PRINT8_h4_d5 (bal_perf_ceff_pct     );

@@ -271,6 +271,16 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         }
 
         // ----------------
+        // WOF initialization
+        // ----------------
+        io_size = 0;
+        FAPI_TRY(l_pmPPB->wof_init(
+                 ppb::STORE_WOF_TABLE_ON,
+                 o_buf,
+                 io_size),
+                 "WOF initialization failure");
+
+        // ----------------
         // get VPD data (#V,#W,IQ)
         // ----------------
         FAPI_TRY(l_pmPPB->vpd_init(),"vpd_init function failed");
@@ -280,15 +290,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // ----------------
         FAPI_TRY(l_pmPPB->compute_vpd_pts());
 
-        // ----------------
-        // WOF initialization
-        // ----------------
-        io_size = 0;
-        FAPI_TRY(l_pmPPB->wof_init(
-                 ppb::STORE_WOF_TABLE_ON,
-                 o_buf,
-                 io_size),
-                 "WOF initialization failure");
 
         // ----------------
         // Safe mode freq and volt init
@@ -3255,6 +3256,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             }
         }
 
+
     }
     while(0);
 
@@ -4015,6 +4017,26 @@ fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
                     iv_attr_mvpd_poundV_biased[i].idd_tdp_dc_10ma,
                     iv_attr_mvpd_poundV_biased[i].vcs_mv,
                     iv_attr_mvpd_poundV_biased[i].ics_tdp_dc_10ma);
+
+            // If RDP scaling factor is true, then it means we have WOF table
+            // version 2, that current scale percentage, that needs to apply for RDP
+            if ( iv_rdp_scaling_factor )
+            {
+                for (int i = 0; i < NUM_PV_POINTS; i++)
+                {
+                    if (iv_curr_scale[i] )
+                    {
+                        iv_attr_mvpd_poundV_biased[i].idd_rdp_ac_10ma =
+                            (double)iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma +
+                            (((double)iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma * (double)iv_curr_scale[i])/100);
+
+                        iv_attr_mvpd_poundV_biased[i].idd_rdp_dc_10ma =
+                            (double)iv_attr_mvpd_poundV_raw[i].idd_rdp_dc_10ma +
+                            (((double)iv_attr_mvpd_poundV_raw[i].idd_rdp_dc_10ma * (double)iv_curr_scale[i])/100);
+                    }
+                }
+            }
+
         }
 
         //Validating Bias values
@@ -6662,6 +6684,18 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         FAPI_INF("Disabling WOF");
         disable_wof();
     }
+    else
+    {
+        WofTablesHeader_t* p_wfth;
+        p_wfth = reinterpret_cast<WofTablesHeader_t*>(l_wof_table_data);
+
+        if ( p_wfth->header_version == 2 )
+        {
+            iv_rdp_scaling_factor = true;
+            memcpy(&iv_curr_scale,&p_wfth->cur_scale_pct,sizeof(iv_curr_scale));
+        }
+    }
+
     if (l_wof_table_data)
     {
         delete[] l_wof_table_data;
