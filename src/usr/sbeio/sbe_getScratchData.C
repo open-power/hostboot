@@ -219,7 +219,7 @@ namespace SBEIO
                          i_scratchData.data(),
                          l_sizeAddedToErrl,
                          1, // Version
-                         SBEIO_UDT_NO_FORMAT,
+                         SBEIO_UDT_SCRATCH_DATA,
                          false, // Do not merge
                          // Do not propagate; the FFDC data needs to be unique per error log created here
                          propagation_t::NO_PROPAGATE);
@@ -247,7 +247,7 @@ namespace SBEIO
                                          l_dataToAddPtr,
                                          l_sizeAddedToErrl,
                                          1, // version
-                                         SBEIO_UDT_NO_FORMAT,
+                                         SBEIO_UDT_SCRATCH_DATA,
                                          false, // Do not merge
                                          // Do not propagate; the FFDC data needs to be unique per error log created here
                                          propagation_t::NO_PROPAGATE);

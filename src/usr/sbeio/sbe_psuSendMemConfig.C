@@ -460,7 +460,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                         full_location_code.data(),
                         0x10,                      // 16 bytes of location ex:ND:#-Pxx-Cyy
                         l_version_loc,             // Version
-                        SBEIO_UDT_NO_FORMAT,       // parser ignores data
+                        SBEIO_UDT_LOC,             // parser ignores data
                         false );                   // merge
 
                 // OCMB Health Check Data Log
@@ -468,7 +468,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                         &l_ocmb_pmic_data[0],
                         l_response_size,
                         l_version_data,              // Version
-                        SBEIO_UDT_NO_FORMAT,         // parser ignores data
+                        SBEIO_UDT_PMIC_HEALTH,       // parser ignores data
                         false );                     // merge
 
                 // Add to mfg log too
@@ -479,7 +479,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                         full_location_code.data(),
                         0x10,                      // 16 bytes of location ex:ND:#-Pxx-Cyy
                         l_version_loc,             // Version
-                        SBEIO_UDT_NO_FORMAT,       // parser ignores data
+                        SBEIO_UDT_LOC,             // parser ignores data
                         false );                   // merge
 
                     // OCMB Health Check Data Log
@@ -487,7 +487,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                         &l_ocmb_pmic_data[0],
                         l_response_size,
                         l_version_data,              // Version
-                        SBEIO_UDT_NO_FORMAT,         // parser ignores data
+                        SBEIO_UDT_PMIC_HEALTH,       // parser ignores data
                         false );                     // merge
                 }
             }
