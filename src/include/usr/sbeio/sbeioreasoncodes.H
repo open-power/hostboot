@@ -214,6 +214,9 @@ enum UserDetailsTypes
         SBEIO_UDT_PARAMETERS       = 0x1, // SBE Proc format, calls o3500.py
         SBEIO_UDT_SPPE_CODE_LEVELS = 0x2,
         SBEIO_UDT_SPPE_FORMAT      = 0x3, // SPPE Odyssey format, calls o4500.py
+        SBEIO_UDT_SCRATCH_DATA     = 0x4, //reserved for future/offline parsing
+        SBEIO_UDT_LOC              = 0x5, //reserved for future/offline parsing
+        SBEIO_UDT_PMIC_HEALTH      = 0x6, //reserved for future/offline parsing
 };
 
 
