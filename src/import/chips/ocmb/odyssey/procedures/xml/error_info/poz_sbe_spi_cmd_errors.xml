@@ -1,0 +1,120 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/error_info/poz_sbe_spi_cmd_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2024                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- EKB-Mirror-To: hostboot -->
+<hwpErrors>
+    <!-- *****************************************************************-->
+    <hwpError>
+        <sbeError/>
+        <rc>RC_SBE_SPI_OPR_COMPLETION_CHECK_ERROR</rc>
+        <description>
+            Procedure: Error calling poz_sbe_spi_cmd HWP
+            Error due to SPI operation failed to complete.
+        </description>
+        <ffdc>CHIP_TARGET</ffdc>
+        <ffdc>SPI_ENGINE</ffdc>
+        <ffdc>BASE_ADDRESS</ffdc>
+        <ffdc>STATUS_REGISTER</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+    <!-- *****************************************************************-->
+    <hwpError>
+        <sbeError/>
+        <rc>RC_SBE_SPI_INVALID_LENGTH</rc>
+        <description>
+            Procedure: Error calling poz_sbe_spi_cmd HWP
+            Error due to the given length is not in the required range.
+        </description>
+        <ffdc>CHIP_TARGET</ffdc>
+        <ffdc>SPI_ENGINE</ffdc>
+        <ffdc>LENGTH</ffdc>
+        <ffdc>MIN_LENGTH</ffdc>
+        <ffdc>MAX_LENGTH</ffdc>
+        <ffdc>ECC_STATUS</ffdc>
+        <ffdc>ADDRESS</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+    <!-- *****************************************************************-->
+    <hwpError>
+        <sbeError/>
+        <rc>RC_SBE_SPI_LENGTH_IS_NOT_ALIGNED</rc>
+        <description>
+            Procedure: Error calling poz_sbe_spi_cmd HWP
+            Error due to the given length is not aligned.
+        </description>
+        <ffdc>CHIP_TARGET</ffdc>
+        <ffdc>SPI_ENGINE</ffdc>
+        <ffdc>LENGTH</ffdc>
+        <ffdc>ECC_STATUS</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+    <!-- *****************************************************************-->
+    <hwpError>
+        <sbeError/>
+        <rc>RC_SBE_SPI_ADDRESS_IS_NOT_ALIGNED</rc>
+        <description>
+            Procedure: Error calling poz_sbe_spi_cmd HWP
+            Error due to the given address is not aligned.
+        </description>
+        <ffdc>CHIP_TARGET</ffdc>
+        <ffdc>SPI_ENGINE</ffdc>
+        <ffdc>ADDRESS</ffdc>
+        <ffdc>ECC_STATUS</ffdc>
+        <callout>
+            <procedure>CODE</procedure>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+    <!-- *****************************************************************-->
+    <hwpError>
+        <sbeError/>
+        <rc>RC_SBE_SPI_WRITTEN_DATA_MISMATCH</rc>
+        <description>
+            Procedure: Error calling poz_sbe_spi_cmd HWP
+            Error due to the verification of data after writing to
+            flash failed.
+        </description>
+        <ffdc>CHIP_TARGET</ffdc>
+        <ffdc>SPI_ENGINE</ffdc>
+        <ffdc>WRITTEN_DATA_ADDRESS</ffdc>
+        <ffdc>WRITTEN_DATA_LENGTH</ffdc>
+        <gard>
+            <target>CHIP_TARGET</target>
+        </gard>
+        <callout>
+            <target>CHIP_TARGET</target>
+            <priority>HIGH</priority>
+        </callout>
+    </hwpError>
+    <!-- *****************************************************************-->
+</hwpErrors>
