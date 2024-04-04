@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -105,5 +105,42 @@
     <sbeError/>
     <rc>RC_POZ_FILE_NOT_FOUND</rc>
     <description>SBE PLAT Error - File not found</description>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <!-- This RC is specifically used for indicating FFDC RE creation running out of memory. -->
+    <rc>RC_POZ_FFDC_SCRATCH_SPACE_FULL_ERROR</rc>
+    <description>FFDC Heap Error - Scratch space FULL FFDC</description>
+    <ffdc>FAILED_RC</ffdc>
+    <ffdc>REQUIRED_SPACE</ffdc>
+    <ffdc>AVAILABLE_SPACE</ffdc>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <rc>RC_POZ_PAK_OPERATION_FAILED</rc>
+    <description>SBE PLAT Error - Pak operation failed</description>
+    <ffdc>PAK_RC</ffdc>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <rc>RC_POZ_SCRATCH_ALLOC_FAILED</rc>
+    <description>Scratch allocation returned NULL pointer</description>
+    <ffdc>REQUIRED_SPACE</ffdc>
+    <ffdc>AVAILABLE_SPACE</ffdc>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <rc>RC_THRESHOLD_STACK_LIMIT_CROSSED</rc>
+    <description>Thread stack usage crossed threshold limit</description>
+    <ffdc>THREAD_ID</ffdc>
+    <ffdc>THRESHOLD_PERCENTAGE</ffdc>
+    <ffdc>UTILIZATION_PERCENTAGE</ffdc>
+</hwpError>
+<hwpError>
+    <sbeError/>
+    <rc>RC_POZ_SBEFIFO_OPERATION_FAILED</rc>
+    <description>SBE FIFO operation failed</description>
+    <ffdc>SBEFIFO_RC</ffdc>
+    <ffdc>OPERATION_TYPE</ffdc>
 </hwpError>
 </hwpErrors>
