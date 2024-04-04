@@ -112,6 +112,9 @@ SbeIoUserDetailDataSubSection = { 0: "SbeIoUserDetailsParserNoFormat",
                                   1: "SbeIoUserDetailsParserFFDC",
                                   2: "SbeIoUserDetailsSPPECodeLevels",
                                   3: "SbeIoUserDetailsParserSPPEFFDC" }
+                                  4: "SbeIoUserDetailsParserNoFormat",
+                                  5: "SbeIoUserDetailsParserNoFormat",
+                                  6: "SbeIoUserDetailsParserNoFormat" }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data, subType)
