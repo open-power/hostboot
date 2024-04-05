@@ -225,7 +225,8 @@ fapi2::ReturnCode prepost_config(const target_info_redundancy_ddr5& i_target_inf
     for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_target_infos_present; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the status checking
-        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [&i_is_preconfig, &i_value]
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [&i_is_preconfig, &i_value,
+                          &i_target_info, l_pmic_count]
                           (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
         {
             FAPI_INF_NO_SBE("%s-config PMIC " GENTARGTIDFORMAT, (i_is_preconfig) ? ("Pre") : ("Post"), GENTARGTID(i_pmic));
@@ -266,7 +267,7 @@ fapi2::ReturnCode prepost_config(const target_info_redundancy_ddr5& i_target_inf
             return fapi2::FAPI2_RC_SUCCESS;
 
         fapi_try_exit_lambda:
-            return fapi2::current_err;
+            return mss::pmic::declare_n_mode(i_target_info.iv_ocmb, l_pmic_count);
         }));
     }
 
