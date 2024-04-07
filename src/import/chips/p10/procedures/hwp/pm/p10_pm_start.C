@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -198,24 +198,44 @@ fapi2::ReturnCode p10_pm_start(
     FAPI_EXEC_HWP(l_rc, p10_check_proc_config, i_target, i_pHomerImage);
     FAPI_TRY(l_rc, "ERROR: Failed to initialize 24x7 configuration");
 
-    //  ************************************************************************
-    //  Start OCC PPC405
-    //  ************************************************************************
-    FAPI_DBG("Executing p10_pm_occ_control to start OCC PPC405");
-    FAPI_EXEC_HWP(l_rc, p10_pm_occ_control, i_target,
-                  occ_ctrl::PPC405_START,// Operation on PPC405
-                  occ_ctrl::PPC405_BOOT_MEM, // PPC405 boot location
-                  0 //Jump to 405 main instruction - not used here
-                 );
-    FAPI_TRY(l_rc, "ERROR: Failed to start OCC PPC405");
-    FAPI_TRY(p10_pm_glob_fir_trace(i_target, "After OCC PPC405 init"));
+#ifndef __HOSTBOOT_MODULE
+    fapi2::ATTR_OCC_START_DISABLE_Type l_occ_disable;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OCC_START_DISABLE,
+                           FAPI_SYSTEM,
+                           l_occ_disable),
+             "Error from FAPI_ATTR_GET for attribute ATTR_OCC_START_DISABLE");
 
+    if (l_occ_disable == fapi2::ENUM_ATTR_OCC_START_DISABLE_OFF)
+    {
+#endif
+        //  ************************************************************************
+        //  Start OCC PPC405
+        //  ************************************************************************
+        FAPI_DBG("Executing p10_pm_occ_control to start OCC PPC405");
+        FAPI_EXEC_HWP(l_rc, p10_pm_occ_control, i_target,
+                      occ_ctrl::PPC405_START,// Operation on PPC405
+                      occ_ctrl::PPC405_BOOT_MEM, // PPC405 boot location
+                      0 //Jump to 405 main instruction - not used here
+                     );
+        FAPI_TRY(l_rc, "ERROR: Failed to start OCC PPC405");
+        FAPI_TRY(p10_pm_glob_fir_trace(i_target, "After OCC PPC405 init"));
+#ifndef __HOSTBOOT_MODULE
+    }
+
+#endif
+
+#ifdef __HOSTBOOT_MODULE
+    // Only enable malfunction alert under Hostboot
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PM_MALF_ALERT_ENABLE,
                            FAPI_SYSTEM,
                            malfAlertEnable),
              "Error from FAPI_ATTR_GET for attribute ATTR_PM_MALF_ALERT_ENABLE");
     // Set the Malf Alert Enabled policy to OCCFLG2 reg bit 29
     l_data64.flush<0>().setBit<p10hcd::STOP_RECOVERY_TRIGGER_ENABLE>();
+#else
+    // Disable malfunction alert under Cronus
+    malfAlertEnable = fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_FALSE;
+#endif // malfunction alert
 
     if (malfAlertEnable ==
         fapi2::ENUM_ATTR_PM_MALF_ALERT_ENABLE_TRUE)
