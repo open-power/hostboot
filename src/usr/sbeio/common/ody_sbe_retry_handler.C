@@ -50,6 +50,9 @@
 #include <initservice/initserviceif.H>
 #include <mbox/mbox_queues.H>
 #include <mbox/mboxif.H>
+#include <runtime/generic_hbrt_fsp_message.H>
+#include <util/runtime/rt_fwreq_helper.H>
+#include <runtime/hbrt_utilities.H>
 
 #define SBE_TRACF(printf_string,args...) \
     TRACFCOMP(g_trac_sbeio,"ody_sbe_retry_handler: " printf_string,##args)
@@ -670,12 +673,80 @@ void OdySbeRetryHandler::side_switch()
     return;
 }
 
-errlHndl_t sendFspOdyDumpRequest(Target* const i_ocmb)
+errlHndl_t sendFspOdyDumpRequest(Target* const i_ocmb,
+                                 uint32_t i_eid)
 {
+    SBE_TRACF("sendFspOdyDumpRequest(huid=%.8X,eid=%.8X)",
+              get_huid(i_ocmb),
+              i_eid);
+
 #ifdef __HOSTBOOT_RUNTIME
-    return nullptr;
-#else
-    SBE_TRACF(ENTER_MRK"sendFspOdyDumpRequest(0x%08X)", get_huid(i_ocmb));
+    errlHndl_t l_err = nullptr;
+
+    // Create and initialize to zero a few needed variables
+
+    // Handles to the firmware messages
+    hostInterfaces::hbrt_fw_msg *l_req_fw_msg  = nullptr;
+    hostInterfaces::hbrt_fw_msg *l_resp_fw_msg = nullptr;
+    uint64_t l_req_fw_msg_size(0), l_resp_fw_msg_size(0);
+    uint32_t l_fsp_data_size = 0;
+    OdySbeDumpReqData_t* l_dumpreq = nullptr;
+
+    // Create the dynamic firmware messages
+    createGenericFspMsg(sizeof(OdySbeDumpReqData_t),
+                        l_fsp_data_size,
+                        l_req_fw_msg_size,
+                        l_req_fw_msg,
+                        l_resp_fw_msg_size,
+                        l_resp_fw_msg);
+ 
+    // If there was an issue with creating the messages,
+    // Create an Error Log entry and exit
+    if (!l_req_fw_msg || !l_resp_fw_msg)
+    {
+        SBE_TRACF("Unable to allocate firmware request messages");
+
+        /*@
+         * @errortype
+         * @severity         ERRL_SEV_INFORMATIONAL
+         * @moduleid         SBEIO_ODY_RECOVERY
+         * @reasoncode       SBEIO_NULL_FIRMWARE_MSG_PTR
+         * @userdata1        HUID of target
+         * @userdata2        Associated EID
+         * @devdesc          Could not allocate request for Ody SBE dump
+         * @custdesc         An internal firmware error occurred
+         */
+        l_err= new ErrlEntry(ERRL_SEV_INFORMATIONAL,
+                             SBEIO_ODY_RECOVERY,
+                             SBEIO_NULL_FIRMWARE_MSG_PTR,
+                             get_huid(i_ocmb),
+                             i_eid,
+                             ErrlEntry::ADD_SW_CALLOUT);
+        goto ERROR_EXIT;
+    }
+ 
+    // Populate the request message with given data
+    l_req_fw_msg->generic_msg.msgq = MBOX::FSP_SBE_SYNC_MSGQ_ID;
+    l_req_fw_msg->generic_msg.msgType =
+      GenericFspMboxMessage_t::MSG_ODY_SBE_DUMP_SBE_MSG_TYPE;
+    l_dumpreq =
+      reinterpret_cast<OdySbeDumpReqData_t*>(&(l_req_fw_msg->generic_msg.data));
+    l_dumpreq->huid = get_huid(i_ocmb);
+    l_dumpreq->eid = i_eid;
+ 
+    // Binary trace the request message
+    TRACFBIN(g_trac_sbeio,
+             "Sending firmware_request",
+             l_req_fw_msg,
+             l_req_fw_msg_size);
+
+    // Make the firmware_request call to request the dump
+    l_err = firmware_request_helper(l_req_fw_msg_size,
+                                    l_req_fw_msg,
+                                    &l_resp_fw_msg_size,
+                                    l_resp_fw_msg);
+
+#else // IPL
     const auto DO_ODY_SBE_DUMP = MBOX::FIRST_UNSECURE_MSG | 0x40;
 
     auto msg = hbstd::own(msg_allocate(), &msg_free);
@@ -683,15 +754,17 @@ errlHndl_t sendFspOdyDumpRequest(Target* const i_ocmb)
     msg->type = DO_ODY_SBE_DUMP;
     msg->data[0] = get_huid(i_ocmb);
 
-    const auto err = MBOX::sendrecv(MBOX::IPL_SERVICE_QUEUE, msg.get());
+    const auto l_err = MBOX::sendrecv(MBOX::IPL_SERVICE_QUEUE, msg.get());
+#endif
 
-    if (err)
+    if (l_err)
     {
         SBE_TRACF("sendFspOdyDumpRequest(0x%08X) failed"
                   TRACE_ERR_FMT,
                   get_huid(i_ocmb),
-                  TRACE_ERR_ARGS(err));
-        err->collectTrace(SBEIO_COMP_NAME);
+                  TRACE_ERR_ARGS(l_err));
+        l_err->collectTrace(SBEIO_COMP_NAME);
+        goto ERROR_EXIT;
     }
     else
     {
@@ -699,12 +772,19 @@ errlHndl_t sendFspOdyDumpRequest(Target* const i_ocmb)
                   get_huid(i_ocmb));
     }
 
+  ERROR_EXIT:
+#ifdef __HOSTBOOT_RUNTIME
+    // Release the firmware messages and set to NULL
+    delete [] l_req_fw_msg;
+    delete [] l_resp_fw_msg;
+    l_req_fw_msg = l_resp_fw_msg = nullptr;
+#endif
+
     SBE_TRACF(EXIT_MRK"sendFspOdyDumpRequest(0x%08X) = 0x%08X",
               get_huid(i_ocmb),
-              ERRL_GETEID_SAFE(err));
+              ERRL_GETEID_SAFE(l_err));
 
-    return err;
-#endif
+    return l_err;
 }
 
 /*******************************************************************************
@@ -741,12 +821,13 @@ errlHndl_t OdySbeRetryHandler::dump(const uint32_t i_eid)
 #else
         if (INITSERVICE::spBaseServicesEnabled())
         {
-            if (false)
-            { // @TODO JIRA: PHFB-760 Enable this code
-                l_errl = sendFspOdyDumpRequest(iv_ocmb);
-            }
+            l_errl = sendFspOdyDumpRequest(iv_ocmb,i_eid);
         }
 #endif
+        if( l_errl )
+        {
+            SBE_TRACF(ERR_MRK"Dump request failed on HUID=0x%X", get_huid(iv_ocmb));
+        }
     }
 
     iv_ocmb->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_DEAD);

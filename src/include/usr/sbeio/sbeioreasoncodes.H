@@ -209,6 +209,7 @@ enum sbeioReasonCode
     SBEIO_HRESET_CHECK_FOR_READY_FAIL  = SBEIO_COMP_ID | 0x78,
     SBEIO_ODY_SCRATCH_DATA             = SBEIO_COMP_ID | 0x79,
     SBEIO_ODY_CANNOT_RECOVER           = SBEIO_COMP_ID | 0x7A,
+    SBEIO_NULL_FIRMWARE_MSG_PTR        = SBEIO_COMP_ID | 0x7B,
 
     // Remove once we collect the FFDC ourselves - @todo-RTC:144313
     //termination_rc
