@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -185,6 +185,18 @@ struct HbrtAttrSyncData_t  // a firmware_notify call
 } PACKED ;
 
 /**
+ * Data payload for MSG_ODY_SBE_DUMP_SBE_MSG_TYPE to request a dump of
+ * the Odyssey SBE.  Matches sbeHBRTPayload in
+ * src/hwsv/server/services/hwco/hwcoSbeErrorRCHandler.H
+ *
+ */
+struct OdySbeDumpReqData_t
+{
+   uint32_t huid;
+   uint32_t eid;
+} PACKED ;
+
+/**
   * This struct sends/receives an MBox message to the FSP
   */
 struct GenericFspMboxMessage_t
@@ -241,6 +253,7 @@ struct GenericFspMboxMessage_t
         MSG_SBE_ERROR                    = 0x000000D4, // for SbeRetryReqData_t
         MSG_SBE_RECOVERY_SUCCESS         = 0x000000D5, // associated with SbeRetryReqData_t
         MSG_SBE_RECOVERY_FAILED          = 0x000000D6, // associated with SbeRetryReqData_t
+        MSG_ODY_SBE_DUMP_SBE_MSG_TYPE    = 0x000000D7, // uses OdySbeDumpReqData_t
     };
 
     /**
