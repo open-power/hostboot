@@ -305,18 +305,18 @@ fapi2::ReturnCode resume_bg_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CH
 
 ///
 /// @brief Convert DQS offset from 10-bit 2's complement to int16
-/// @param [in] i_value input value that needs to be converted
+/// @param [in,out] io_value input value that needs to be converted
 /// @return 2's complement value in dec
-/// @note modifies i_value in the process of conversion to save code space
+/// @note modifies io_value in the process of conversion to save code space
 ///
-inline int16_t convert_to_2s_complement(fapi2::buffer<uint64_t>& i_value)
+inline int16_t convert_to_2s_complement(fapi2::buffer<uint64_t>& io_value)
 {
     // Get the sign bit and write it to bits [0...53]
-    i_value.writeBit<0, scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_TXTRKSTATES0_P0_TXTRKSTATES0_P0>(
-        i_value.getBit<scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_TXTRKSTATES0_P0_TXTRKSTATES0_P0>());
+    io_value.writeBit<0, scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_TXTRKSTATES0_P0_TXTRKSTATES0_P0>(
+        io_value.getBit<scomt::mp::DWC_DDRPHYA_DBYTE0_BASE0_TXTRKSTATES0_P0_TXTRKSTATES0_P0>());
 
     // Converting to 2's complement
-    return static_cast<int16_t>(i_value);
+    return static_cast<int16_t>(io_value);
 }
 
 ///
@@ -382,11 +382,11 @@ fapi2::ReturnCode ody_get_dqs_offsets(const fapi2::Target<fapi2::TARGET_TYPE_MEM
 /// @param [in] i_new_log_entry log entry to insert into the array
 /// @param [in,out] io_log log array from ATTR_ODY_DQS_TRACKING_LOG
 ///
-inline void insert_log_entry(const fapi2::buffer<uint64_t> i_new_log_entry,
+inline void insert_log_entry(const fapi2::buffer<uint64_t>& i_new_log_entry,
                              uint64_t (&io_log)[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES])
 {
     constexpr uint64_t LAST_VALID_MASK  = 0x8000000000000000;
-    constexpr uint64_t LAST_VALID_CLEAR = 0x7FFFFFFFFFFFFFFF;
+    constexpr uint64_t LAST_VALID_CLEAR = ~(LAST_VALID_MASK);
 
     bool l_found_last_valid = false;
 
