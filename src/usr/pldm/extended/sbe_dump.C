@@ -41,6 +41,8 @@
 #include <pldm/pldm_util.H>
 #include <openbmc/pldm/libpldm/include/libpldm/platform.h>
 
+#include <initservice/istepdispatcherif.H>
+
 // Miscellaneous
 #include <sys/msg.h>
 #include <sys/time.h>
@@ -196,10 +198,16 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
         break;
     }
 
+    // Reset the watchdog timer
+    INITSERVICE::sendProgressCode();
+
     /* Wait on the BMC to set our effecter. */
 
     uint64_t sbe_dump_timeout_milliseconds = 180 * MS_PER_SEC; // 3 minutes
     const auto dump_done_msgs = msg_wait_timeout(msgQ.get(), sbe_dump_timeout_milliseconds);
+
+    // Reset the watchdog timer
+    INITSERVICE::sendProgressCode();
 
     // After waiting, we remove our queue from the PDR manager's callback list,
     // and we wait again for one second. This is to avoid a race condition where
