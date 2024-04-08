@@ -52,6 +52,7 @@
 
 #include <xscom/piberror.H>
 #include <initservice/initserviceif.H>
+#include <initservice/istepdispatcherif.H>
 #include <util/misc.H>
 #include <cxxtest/TestInject.H>
 #include <arch/magic.H>
@@ -343,6 +344,11 @@ errlHndl_t SbeFifo::upFifoTimeout(TARGETING::Target * i_target, uint32_t l_data)
 {
     errlHndl_t           errl         = NULL;
     magicGetSbeTraceType l_magic_type = MAGIC_GET_P10_SBE_TRACES;
+
+#ifndef __HOSTBOOT_RUNTIME
+    // Reset the watchdog timer
+    INITSERVICE::sendProgressCode();
+#endif
 
     if (TARGETING::UTIL::isOdysseyChip(i_target))
     {
@@ -851,6 +857,11 @@ errlHndl_t SbeFifo::dnFifoTimeout(TARGETING::Target * i_target, uint32_t l_statu
 {
     errlHndl_t           l_errl       = NULL;
     magicGetSbeTraceType l_magic_type = MAGIC_GET_P10_SBE_TRACES;
+
+#ifndef __HOSTBOOT_RUNTIME
+    // Reset the watchdog timer
+    INITSERVICE::sendProgressCode();
+#endif
 
     if (TARGETING::UTIL::isOdysseyChip(i_target))
     {
