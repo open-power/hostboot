@@ -27,6 +27,13 @@
 
   <hwpError>
     <sbeError/>
+    <rc>RC_ODY_DRAMINIT_MSGBLOCK</rc>
+    <description>Collect the Ody draminit message block for logging</description>
+    <ffdc>UNIT_FFDC_DRAMINIT_MSGBLOCK</ffdc>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_FIR_FOUND</rc>
     <description>Ody draminit found a FIR. Custom assert so the caller can handle it</description>
     <ffdc>PORT_TARGET</ffdc>
