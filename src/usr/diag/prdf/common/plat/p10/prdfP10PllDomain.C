@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2003,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2003,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -144,6 +144,41 @@ void __clearServiceCallForIntegratedSpare(STEP_CODE_DATA_STRUCT& io_sc,
     #endif
 }
 #endif
+
+//------------------------------------------------------------------------------
+
+bool __isOdyOcmbReportingAttns(ExtensibleChip* i_ocmb)
+{
+    bool o_ocmbReporting = false;
+
+    // This function is defined only for use with Odyssey OCMBs. Return and
+    // print an error if the input OCMB is not an Odyssey.
+    if (!isOdysseyOcmb(i_ocmb->getTrgt()))
+    {
+        PRDF_ERR("P10PllDomain::__isOdyOcmbReportingAttns i_ocmb=0x%08x is not "
+                 "an Odyssey OCMB.", i_ocmb->getHuid());
+        return o_ocmbReporting;
+    }
+
+    // There is a window early in the IPL where SCOMs to the OCMB will fail
+    // because the OCMBs have not been configured yet. We can assume that if
+    // the processor thinks there are active recoverable attentions coming
+    // from the connected OCMBs that it is safe to SCOM the OCMBs.
+    auto mccChip = getConnectedParent(i_ocmb, TYPE_MCC);
+    auto relPos = i_ocmb->getPos() % 2;
+    auto bit = 1 + relPos * 4;
+
+    auto fir = mccChip->getRegister("MC_DSTL_FIR");
+    auto msk = mccChip->getRegister("MC_DSTL_FIR_MASK");
+
+    if (SUCCESS == fir->Read() && SUCCESS == msk->Read() &&
+        (fir->IsBitSet(bit) && !msk->IsBitSet(bit)))
+    {
+        o_ocmbReporting = true;
+    }
+
+    return o_ocmbReporting;
+}
 
 //------------------------------------------------------------------------------
 
@@ -513,6 +548,17 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // clock is bad.
     __clearServiceCallForIntegratedSpare(io_sc, errorOnClock0 && errorOnClock1);
 
+    // At IPL time, check the ATTN_CHK_OCMBS attribute to help determine whether
+    // any Odyssey OCMB having PLL unlock attentions masked or cleared is
+    // accessible. At runtime, the OCMBs should be scommable, so they can be
+    // freely masked/cleared then.
+    bool checkOcmbs = false;
+#ifndef __HOSTBOOT_RUNTIME
+    checkOcmbs = (0 != getSystemTarget()->getAttr<ATTR_ATTN_CHK_OCMBS>());
+#else
+    checkOcmbs = true;
+#endif
+
     // The following plugins to mask/clear attentions follow all the rules for
     // masking/clearing attentions on a single chip. However, if there were ANY
     // active attentions we would want clear/mask PLL unlock attentions on all
@@ -520,6 +566,14 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
     // In addition, Odyssey PLL unlock attentions can be side effect attentions
     // of RCS OSC errors and P10 PLL unlocks. Therefore, they must be masked
     // and cleared as well.
+    // Note: Only Odyssey OCMBs that are scommable will be able to have their
+    // PLL unlock attentions masked/cleared. At IPL time, the only way to
+    // determine which OCMBs are accessible (beyond the small period of time
+    // when the ATTN_CHK_OCMBS attribute is set) is to check whether interrupts
+    // are being reporting to the MC_DSTL_FIR across the bus. This means, during
+    // the IPL (except when ATTN_CHK_OCMBS is set), only Odyssey OCMBs reporting
+    // PLL unlock attentions will be masked. This is acceptable as a predictive
+    // callout should be made triggering a reconfig loop anyway.
     if (!maskErrTypes.empty())
     {
         for (unsigned int index = 0; index < GetSize(); ++index)
@@ -529,13 +583,18 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             maskErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_1);
         }
 
-        // Mask PLL unlock attentions on all Odyssey chips. Note that this is
-        // the full system OCMB chip domain and not the PLL domains. 
+        // Mask PLL unlock attentions on all Odyssey chips. The Odyssey chip
+        // must be accessible, indicated by either the ATTN_CHK_OCMBS attribute
+        // being non-zero or by attentions reporting to the proc side
+        // MC_DSTL_FIR. Note that this is the full system OCMB chip domain and
+        // not the PLL domains.
+
         auto ocmbDomain = (OcmbChipDomain *)systemPtr->GetDomain(OCMB_DOMAIN);
         for (unsigned int index = 0; index < ocmbDomain->GetSize(); ++index)
         {
             auto chip = ocmbDomain->LookUp(index);
-            if (isOdysseyOcmb(chip->getTrgt()))
+            if (isOdysseyOcmb(chip->getTrgt()) &&
+                (checkOcmbs || __isOdyOcmbReportingAttns(chip)))
             {
                 auto func = chip->getExtensibleFunction("maskPllUnlock");
                 (*func)(chip, PluginDef::bindParm<void*>(nullptr));
@@ -551,13 +610,17 @@ int32_t P10PllDomain::Analyze(STEP_CODE_DATA_STRUCT& io_sc,
             clearErrTypes[chip].set(PllErrTypes::PLL_UNLOCK_1);
         }
 
-        // Clear PLL unlock attentions on all Odyssey chips. Note that this is
-        // the full system OCMB chip domain and not the PLL domains. 
+        // Clear PLL unlock attentions on all Odyssey chips. The Odyssey chip
+        // must be accessible, indicated by either the ATTN_CHK_OCMBS attribute
+        // being non-zero or by attentions reporting to the proc side
+        // MC_DSTL_FIR. Note that this is the full system OCMB chip domain and
+        // not the PLL domains.
         auto ocmbDomain = (OcmbChipDomain *)systemPtr->GetDomain(OCMB_DOMAIN);
         for (unsigned int index = 0; index < ocmbDomain->GetSize(); ++index)
         {
             auto chip = ocmbDomain->LookUp(index);
-            if (isOdysseyOcmb(chip->getTrgt()))
+            if (isOdysseyOcmb(chip->getTrgt()) &&
+                (checkOcmbs || __isOdyOcmbReportingAttns(chip)))
             {
                 auto func = chip->getExtensibleFunction("clearPllUnlock");
                 (*func)(chip, PluginDef::bindParm<void*>(nullptr));
