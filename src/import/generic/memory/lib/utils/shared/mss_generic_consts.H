@@ -1176,7 +1176,8 @@ enum rev
     RDIMM_MAX = V1_1,
     LRDIMM_MAX = V1_2,
     DDIMM_DDR4_MAX = V0_4,
-    DDIMM_DDR5_MAX = V0_7,
+    DDIMM_DDR5_CUTOFF = V0_7,
+    DDIMM_DDR5_MAX = V1_1,
 };
 
 ///
