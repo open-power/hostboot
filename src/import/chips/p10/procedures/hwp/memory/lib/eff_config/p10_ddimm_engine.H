@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -364,7 +364,10 @@ class ddimm_0_3 : public module_specific_base
         ///
         virtual bool check_pmic_rail_volt_off(const uint8_t i_field) const
         {
-            return (i_field <= 0x3F);
+            // The value of rail volt offset had been reduced by 1 as we have to increase the value
+            // by 1 in case of 3200 frequency and VDD rail. The value will never reach 0x7F but this
+            // is for precaution in case we reach the boundary after incrementing by 1.
+            return (i_field <= 0x3E);
         }
 
         ///
@@ -1436,6 +1439,7 @@ class ddimm_0_3 : public module_specific_base
         virtual fapi2::ReturnCode set_pmic0_swa_volt_set(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
+
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_SWA_VOLT_SET, i_spd, pmic::SET_PMIC0_SWA_VOLTAGE_SETTING, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -1461,6 +1465,7 @@ class ddimm_0_3 : public module_specific_base
         virtual fapi2::ReturnCode set_pmic0_swa_range_select(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
+
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_SWA_RANGE_SELECT, i_spd, pmic::SET_PMIC0_SWA_VOLTAGE_RANGE_SELECT, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -1487,6 +1492,8 @@ class ddimm_0_3 : public module_specific_base
         {
             uint8_t l_offset = 0;
             uint8_t l_direction = 0;
+            uint8_t l_module_height = 0;
+            uint64_t l_freq = 0;
 
             int8_t l_field = 0;
 
@@ -1510,6 +1517,20 @@ class ddimm_0_3 : public module_specific_base
                                   "PMIC0 SWA offset direction"));
 
             l_field = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, iv_port, l_freq));
+
+            // Grab the module-height attribute to determine 1U/2U vs 4U
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, iv_ocmb, l_module_height));
+
+            // Bump up Explorer VDD by 5mV for OMI degrade workaround
+            // PMIC0 SWA rail supports VDD for 2U
+            // The invalid_value() check has been decremented by 1 (i.e. set to 0x7E) now so that if the below
+            // criteria is met, we will still have the voltage setting at the maximum of 0x7F.
+            if ((l_module_height != fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U) && (l_freq == mss::DIMM_SPEED_3200))
+            {
+                l_field++;
+            }
 
             FAPI_TRY(mss::attr::set_pmic0_swa_voltage_offset(iv_ocmb, l_field));
 
@@ -1716,6 +1737,7 @@ class ddimm_0_3 : public module_specific_base
         virtual fapi2::ReturnCode set_pmic0_swc_volt_set(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
+
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC0_SWC_VOLT_SET, i_spd, pmic::SET_PMIC0_SWC_VOLTAGE_SETTING, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -2326,6 +2348,7 @@ class ddimm_0_3 : public module_specific_base
         virtual fapi2::ReturnCode set_pmic1_swc_volt_set(const std::vector<uint8_t>& i_spd) const
         {
             uint8_t l_field = 0;
+
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_SWC_VOLT_SET, i_spd, pmic::SET_PMIC1_SWC_VOLTAGE_SETTING, l_field));
 
             FAPI_TRY_NO_TRACE(mss::check::invalid_value(
@@ -2377,6 +2400,8 @@ class ddimm_0_3 : public module_specific_base
         {
             uint8_t l_offset = 0;
             uint8_t l_direction = 0;
+            uint8_t l_module_height = 0;
+            uint64_t l_freq = 0;
 
             int8_t l_field = 0;
 
@@ -2400,6 +2425,20 @@ class ddimm_0_3 : public module_specific_base
                                   "PMIC1 SWC offset direction"));
 
             l_field = mss::pmic::convert_to_signed_offset(l_offset, l_direction);
+
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, iv_port, l_freq));
+
+            // Grab the module-height attribute to determine 1U/2U vs 4U
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, iv_ocmb, l_module_height));
+
+            // Bump up Explorer VDD by 5mV for OMI degrade workaround
+            // PMIC1 SWC supports VDD for 4U
+            // The invalid_value() check has been decremented by 1 (i.e. set to 0x7E) now so that if the below
+            // criteria is met, we will still have the voltage setting at the maximum of 0x7F.
+            if ((l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U) && (l_freq == mss::DIMM_SPEED_3200))
+            {
+                l_field++;
+            }
 
             FAPI_TRY(mss::attr::set_pmic1_swc_voltage_offset(iv_ocmb, l_field));
 
