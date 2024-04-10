@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,7 +54,7 @@
 #ifndef HWP_DATA_STREAM_H_
 #define HWP_DATA_STREAM_H_
 
-#include <return_code_defs.H>
+#include <return_code.H>
 #include <algorithm>
 #include <endian.h>
 
@@ -107,7 +107,7 @@ class hwp_data_istream
          *    FAPI2_RC_FALSE   if the end of the stream has been reached
          *    any other RC     if an error occurred
          */
-        virtual ReturnCodes get(hwp_data_unit& o_data) = 0;
+        virtual ReturnCode get(hwp_data_unit& o_data) = 0;
 };
 
 /**
@@ -136,7 +136,7 @@ class hwp_data_ostream
          *    FAPI2_RC_SUCCESS if the data has successfully been written
          *    any other RC     if an error occurred and the data could not be written
          */
-        virtual ReturnCodes put(hwp_data_unit i_data) = 0;
+        virtual ReturnCode put(hwp_data_unit i_data) = 0;
 };
 
 /**
@@ -164,7 +164,7 @@ class hwp_array_istream : public hwp_data_istream
         hwp_array_istream(const hwp_data_unit* i_data, size_t i_length) :
             iv_data(i_data), iv_remaining(i_length) {};
 
-        virtual ReturnCodes get(hwp_data_unit& o_data)
+        virtual ReturnCode get(hwp_data_unit& o_data)
         {
             if (iv_remaining)
             {
@@ -195,7 +195,7 @@ class hwp_be_array_istream : public hwp_array_istream
         hwp_be_array_istream(const hwp_data_unit* i_data, size_t i_length) :
             hwp_array_istream(i_data, i_length) {};
 
-        virtual ReturnCodes get(hwp_data_unit& o_data)
+        virtual ReturnCode get(hwp_data_unit& o_data)
         {
             if (iv_remaining)
             {
@@ -231,7 +231,7 @@ class hwp_array_ostream : public hwp_data_ostream
         hwp_array_ostream(hwp_data_unit* i_buffer, size_t i_max_length) :
             iv_buffer(i_buffer), iv_length(0), iv_max_length(i_max_length) {};
 
-        virtual ReturnCodes put(hwp_data_unit i_data)
+        virtual ReturnCode put(hwp_data_unit i_data)
         {
             if (iv_length >= iv_max_length)
             {
@@ -271,7 +271,7 @@ class hwp_be_array_ostream : public hwp_array_ostream
         hwp_be_array_ostream(hwp_data_unit* i_buffer, size_t i_max_length) :
             hwp_array_ostream(i_buffer, i_max_length) {};
 
-        virtual ReturnCodes put(hwp_data_unit i_data)
+        virtual ReturnCode put(hwp_data_unit i_data)
         {
             if (iv_length >= iv_max_length)
             {
@@ -297,7 +297,7 @@ class hwp_be_array_ostream : public hwp_array_ostream
  * @brief Helper macro for the abort-on-error idiom
  */
 #define HWP_STREAM_TRY(cond) {     \
-        const ReturnCodes l_rc = cond; \
+        const ReturnCode l_rc = cond; \
         if (l_rc != FAPI2_RC_SUCCESS)  \
         {                              \
             return l_rc;               \
@@ -338,7 +338,7 @@ class hwp_bit_istream
          *    FAPI2_RC_FALSE   if the stream has ended
          *    anything else    if an error occurred
          */
-        ReturnCodes get(uint64_t& o_value, int i_nbits, bool i_left_aligned = false)
+        ReturnCode get(uint64_t& o_value, int i_nbits, bool i_left_aligned = false)
         {
             uint64_t l_value = 0;
             int l_nbits = i_nbits;
@@ -379,10 +379,10 @@ class hwp_bit_istream
          *    FAPI2_RC_FALSE   if the stream has ended
          *    anything else    if an error occurred
          */
-        ReturnCodes get8(uint8_t& o_value)
+        ReturnCode get8(uint8_t& o_value)
         {
             uint64_t l_tmp = 0;
-            const ReturnCodes l_rc = get(l_tmp, 8);
+            const ReturnCode l_rc = get(l_tmp, 8);
             o_value = l_tmp;
             return l_rc;
         }
@@ -395,10 +395,10 @@ class hwp_bit_istream
          *    FAPI2_RC_FALSE   if the stream has ended
          *    anything else    if an error occurred
          */
-        ReturnCodes get16(uint16_t& o_value)
+        ReturnCode get16(uint16_t& o_value)
         {
             uint64_t l_tmp = 0;
-            const ReturnCodes l_rc = get(l_tmp, 16);
+            const ReturnCode l_rc = get(l_tmp, 16);
             o_value = l_tmp;
             return l_rc;
         }
@@ -411,10 +411,10 @@ class hwp_bit_istream
          *    FAPI2_RC_FALSE   if the stream has ended
          *    anything else    if an error occurred
          */
-        ReturnCodes get32(uint32_t& o_value)
+        ReturnCode get32(uint32_t& o_value)
         {
             uint64_t l_tmp = 0;
-            const ReturnCodes l_rc = get(l_tmp, 32);
+            const ReturnCode l_rc = get(l_tmp, 32);
             o_value = l_tmp;
             return l_rc;
         }
@@ -427,7 +427,7 @@ class hwp_bit_istream
          *    FAPI2_RC_FALSE   if the stream has ended
          *    anything else    if an error occurred
          */
-        ReturnCodes get64(uint64_t& o_value)
+        ReturnCode get64(uint64_t& o_value)
         {
             return get(o_value, 64);
         }
@@ -446,7 +446,7 @@ class hwp_bit_istream
          *    FAPI2_RC_OVERFLOW if the value is malformed (no "last byte" after 5 bytes)
          *    anything else     if an error occurred
          */
-        ReturnCodes get_var_len_int(uint32_t& o_value)
+        ReturnCode get_var_len_int(uint32_t& o_value)
         {
             uint32_t l_result = 0;
             uint8_t  l_maxbytes = 5;
@@ -518,7 +518,7 @@ class hwp_bit_ostream
          * @param[in] i_left_aligned If true, i_value is considered left-aligned, otherwise right-aligned
          * @return FAPI2_RC_SUCCESS or an error code
          */
-        ReturnCodes put(uint64_t i_value, int i_nbits, bool i_left_aligned = false)
+        ReturnCode put(uint64_t i_value, int i_nbits, bool i_left_aligned = false)
         {
             // If the value is right aligned, we need to shift it so it's left-aligned
             if (!i_left_aligned)
@@ -560,7 +560,7 @@ class hwp_bit_ostream
          * @param[in] i_value The value to append
          * @return FAPI2_RC_SUCCESS or an error code
          */
-        ReturnCodes put8(uint8_t i_value)
+        ReturnCode put8(uint8_t i_value)
         {
             return put(i_value, 8);
         }
@@ -570,7 +570,7 @@ class hwp_bit_ostream
          * @param[in] i_value The value to append
          * @return FAPI2_RC_SUCCESS or an error code
          */
-        ReturnCodes put16(uint16_t i_value)
+        ReturnCode put16(uint16_t i_value)
         {
             return put(i_value, 16);
         }
@@ -580,7 +580,7 @@ class hwp_bit_ostream
          * @param[in] i_value The value to append
          * @return FAPI2_RC_SUCCESS or an error code
          */
-        ReturnCodes put32(uint32_t i_value)
+        ReturnCode put32(uint32_t i_value)
         {
             return put(i_value, 32);
         }
@@ -590,7 +590,7 @@ class hwp_bit_ostream
          * @param[in] i_value The value to append
          * @return FAPI2_RC_SUCCESS or an error code
          */
-        ReturnCodes put64(uint64_t i_value)
+        ReturnCode put64(uint64_t i_value)
         {
             return put(i_value, 64);
         }
@@ -605,7 +605,7 @@ class hwp_bit_ostream
          * @param[in] i_value The value to write
          * @return FAPI2_RC_SUCCESS or an error code
          */
-        ReturnCodes put_var_len_int(uint32_t i_value)
+        ReturnCode put_var_len_int(uint32_t i_value)
         {
             bool l_writing = false;
 
@@ -638,7 +638,7 @@ class hwp_bit_ostream
          *
          * @return FAPI2_RC_SUCCESS or an error code
          */
-        ReturnCodes flush()
+        ReturnCode flush()
         {
             if (iv_buf_ptr)
             {
