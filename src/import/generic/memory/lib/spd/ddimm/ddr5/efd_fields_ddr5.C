@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -156,7 +156,8 @@ constexpr field_t<mss::endian::LITTLE> FT::NT_ODT_WR_A0_B0_RANK1;
 constexpr field_t<mss::endian::LITTLE> FT::NT_ODT_RD_A1_B1_RANK1;
 constexpr field_t<mss::endian::LITTLE> FT::NT_ODT_WR_A1_B1_RANK1;
 #ifndef __PPE__
-    constexpr field_t<mss::endian::LITTLE> FT::DFIMRL_DDRCLK;
+    constexpr field_t<mss::endian::LITTLE> FT::DFIMRL_DDRCLK_P0;
+    constexpr field_t<mss::endian::LITTLE> FT::DFIMRL_DDRCLK_P1;
 #endif
 constexpr field_t<mss::endian::LITTLE> FT::ODT_CA_GRPA_CK_BYTE0;
 constexpr field_t<mss::endian::LITTLE> FT::ODT_CA_GRPA_CS_BYTE0;

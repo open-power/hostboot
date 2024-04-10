@@ -4155,9 +4155,6 @@ class ddimm_0_7 : public ddimm_0_0
 
         using F = mss::efd::fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>;
 
-    protected:
-        uint8_t iv_port_rel_pos;
-
     public:
 
         ///
@@ -4201,6 +4198,87 @@ class ddimm_0_7 : public ddimm_0_0
             FAPI_TRY(ddimm_0_0::process(i_efd));
 
             // DDIMM EFD Rev 0.7 new field processing goes here
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+};
+
+///
+/// @brief Class for base EFD section of SPD - specifically DDR5 SPD REV 1.1
+///
+class ddimm_1_1 : public ddimm_0_7
+{
+        using F = mss::efd::fields<mss::spd::device_type::DDR5, mss::efd::id::DDR5_CUSTOM_IBM>;
+
+    public:
+
+        ///
+        /// @brief Construct a new DDR5 DDIMM EFD rev 1.1 object
+        /// @param[in] i_dimm DIMM target
+        /// @param[in] i_dimm_rank the current DIMM rank to create rank info class
+        /// @param[out] o_rc return code
+        ///
+        ddimm_1_1(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                  const uint16_t i_dimm_rank,
+                  fapi2::ReturnCode& o_rc) :
+            ddimm_0_7(i_dimm,
+                      i_dimm_rank,
+                      o_rc)
+        {
+        }
+
+        ///
+        /// @brief Destroy the ddimm_1_1 object
+        ///
+        virtual ~ddimm_1_1() = default;
+
+        ///
+        /// @brief Get the spd revision
+        /// @return mss::spd::rev enum value
+        ///
+        virtual mss::spd::rev get_spd_revision() const override
+        {
+            return mss::spd::rev::V1_1;
+        }
+
+        ///
+        /// @brief Sets the DFIMRL magin attribute if needed
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dfirml_margin(const std::vector<uint8_t>& i_efd) const override
+        {
+            uint8_t l_dfimrl_margin = 0;
+
+            if (iv_port_rel_pos == 0) // Port 0
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DFIMRL_DDRCLK_P0, i_efd, SET_DFIMRL_DDRCLK, l_dfimrl_margin));
+            }
+            else // Port 1
+            {
+                FAPI_TRY(mss::spd::get_field_spd(iv_ocmb, F::DFIMRL_DDRCLK_P1, i_efd, SET_DFIMRL_DDRCLK, l_dfimrl_margin));
+            }
+
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_PHY_DFIMRL_MARGIN, iv_port, l_dfimrl_margin));
+
+        fapi_try_exit:
+            return fapi2::current_err;
+        }
+
+        /// @brief Process the fields for ddimm efd rev 1.1
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode process(const std::vector<uint8_t>& i_efd) const
+        {
+            // Only brand new fields for this revision should be explicitly
+            // called here below the call to this function
+            FAPI_TRY(ddimm_0_7::process(i_efd));
+
+            // DDIMM EFD Rev 1.1 new field processing goes here
 
         fapi_try_exit:
             return fapi2::current_err;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,11 +49,18 @@ namespace ddr5
 ///
 uint8_t get_fallback_rev(uint8_t i_rev)
 {
-    // Max unique version is 0.7.0
+    // Max unique version is 1.1.0
     if (i_rev >= mss::spd::rev::DDIMM_DDR5_MAX)
     {
         return mss::spd::rev::DDIMM_DDR5_MAX;
     }
+
+    // Otherwise, downgrade to 0.7.0
+    if (i_rev >= mss::spd::rev::DDIMM_DDR5_CUTOFF)
+    {
+        return mss::spd::rev::DDIMM_DDR5_CUTOFF;
+    }
+
 
     // All earlier revisions use the 0.0.0 decoder
     return mss::spd::rev::V0_0;
@@ -167,6 +174,14 @@ fapi2::ReturnCode factory(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target
 
                 switch (l_fallback_rev)
                 {
+                    case mss::spd::rev::V1_1:
+                        {
+
+                            o_efd_engine = std::make_shared<mss::efd::ddr5::ddimm_1_1>(i_target, i_dimm_rank, l_rc);
+                            return l_rc;
+                            break;
+                        }
+
                     case mss::spd::rev::V0_7:
                         {
 
@@ -290,6 +305,7 @@ fapi2::ReturnCode base_module_factory(const fapi2::Target<fapi2::TARGET_TYPE_DIM
 
             switch (l_fallback_rev)
             {
+                case mss::spd::rev::DDIMM_DDR5_MAX:
                 case mss::spd::rev::V0_7:
                     {
                         o_base_engine = std::make_shared<mss::spd::ddr5::base_0_7>(i_target);
@@ -467,6 +483,7 @@ fapi2::ReturnCode ddimm_module_specific_factory(const fapi2::Target<fapi2::TARGE
     // Then switch over the SPD revision
     switch (l_fallback_rev)
     {
+        case mss::spd::rev::DDIMM_DDR5_MAX:
         case mss::spd::rev::V0_7:
             {
                 o_module_specific_engine = std::make_shared<mss::spd::ddr5::ddimm_0_7>(i_target);
