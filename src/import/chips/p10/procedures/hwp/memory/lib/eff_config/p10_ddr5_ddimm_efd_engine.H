@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,7 @@
 #include <lib/eff_config/p10_ddimm_efd_engine.H>
 #include <generic/memory/lib/data_engine/data_engine.H>
 #include <lib/dimm/ody_rank.H>
+#include <lib/workarounds/p10_dfimrl_workarounds.H>
 
 
 namespace mss
@@ -4015,6 +4016,16 @@ class ddimm_0_0 : public mss::efd::base
             return fapi2::current_err;
         }
 
+        ///
+        /// @brief Sets the DFIMRL magin attribute if needed
+        ///
+        /// @param[in] i_efd EFD binary
+        /// @return fapi2::ReturnCode set_FAPI2_RC_SUCCESS iff success, else error code
+        ///
+        virtual fapi2::ReturnCode set_dfirml_margin(const std::vector<uint8_t>& i_efd) const
+        {
+            return mss::workarounds::eff_config::config_dfimrl(iv_port);
+        }
 
         /// @brief Process the fields for DDR5 DDIMM EFD
         ///
@@ -4103,6 +4114,7 @@ class ddimm_0_0 : public mss::efd::base
                 FAPI_TRY(set_pmic3_swb_current_warning(i_efd));
                 FAPI_TRY(set_pmic3_swc_current_warning(i_efd));
                 FAPI_TRY(set_pmic3_swd_current_warning(i_efd));
+                FAPI_TRY(set_dfirml_margin(i_efd));
             }
 
             // SI attrs
