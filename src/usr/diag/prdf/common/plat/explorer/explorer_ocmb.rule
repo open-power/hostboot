@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2023
+# Contributors Listed Below - COPYRIGHT 2018,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -1514,7 +1514,7 @@ group gOMIDLFIR
     /** OMIDLFIR[3]
      *  OMI-DL0 detected a CRC error
      */
-    (rOMIDLFIR, bit(3)) ? threshold_and_mask_omi_bus;
+    (rOMIDLFIR, bit(3)) ? omi_detected_crc_event;
 
     /** OMIDLFIR[4]
      *  OMI-DL0 received a nack

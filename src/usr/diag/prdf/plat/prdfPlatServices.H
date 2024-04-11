@@ -233,6 +233,11 @@ void getSbeScratchData(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid = 0);
 errlOwner getDqsDriftTrackFailFfdc(TARGETING::TargetHandle_t i_ocmb,
                                    errlHndl_t& o_errls);
 
+/**
+ * @brief  Calls a HWP interface to reenable OMI EDPL (error detection per lane)
+ * @param  i_target An Explorer OCMB.
+ */
+void expEnableEdpl(TARGETING::TargetHandle_t i_ocmb);
 
 //##############################################################################
 //##                    Maintenance Command wrappers
