@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2023
+# Contributors Listed Below - COPYRIGHT 2018,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -283,6 +283,12 @@ actionclass threshold_and_mask_self_th1
 {
     calloutSelfMed;
     threshold_and_mask_th1;
+};
+
+actionclass omi_detected_crc_event
+{
+    threshold_and_mask_omi_bus;
+    funccall("reenableEdplOnTh");
 };
 
 actionclass omi_degraded_mode
