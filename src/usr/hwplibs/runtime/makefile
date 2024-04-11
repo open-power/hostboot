@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022
+# Contributors Listed Below - COPYRIGHT 2022,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -35,9 +35,17 @@ PROCEDURES_PATH = ${ROOTPATH}/src/import/chips/p10/procedures
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/common/include/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/
 
 include ${ROOTPATH}/procedure.rules.mk
 
 OBJS += concurrent_inits.o
+
+VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/
+OBJS += p10_omi_ddr4_edpl.o
 
 include ${ROOTPATH}/config.mk
