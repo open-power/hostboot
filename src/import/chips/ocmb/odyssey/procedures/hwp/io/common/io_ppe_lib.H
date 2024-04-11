@@ -81,6 +81,7 @@ class io_ppe_regs
 #endif
         }
 
+        inline __attribute__((always_inline))
         fapi2::ReturnCode getData(const fapi2::Target<K, M, V>& i_target,
                                   const uint32_t i_section_addr,
                                   const uint32_t i_address,
@@ -89,8 +90,14 @@ class io_ppe_regs
                                   const uint32_t i_thread,
                                   const uint32_t i_thread_size,
                                   const uint32_t i_lane,
-                                  fapi2::buffer<uint64_t>& o_data);
+                                  fapi2::buffer<uint64_t>& o_data)
+        {
+            return getData(i_target,
+                           calcParm1(i_section_addr, i_address, i_thread, i_thread_size, i_lane, i_shift),
+                           i_mask, o_data);
+        }
 
+        inline __attribute__((always_inline))
         fapi2::ReturnCode putData(const fapi2::Target<K, M, V>& i_target,
                                   const uint32_t i_section_addr,
                                   const uint32_t i_address,
@@ -99,7 +106,12 @@ class io_ppe_regs
                                   const uint32_t i_thread,
                                   const uint32_t i_thread_size,
                                   const uint32_t i_lane,
-                                  fapi2::buffer<uint64_t> i_data);
+                                  fapi2::buffer<uint64_t> i_data)
+        {
+            return putData(i_target,
+                           calcParm1(i_section_addr, i_address, i_thread, i_thread_size, i_lane, i_shift),
+                           i_mask, i_data);
+        }
 
         fapi2::ReturnCode flushCache(const fapi2::Target<K, M, V>& i_target);
 
@@ -113,22 +125,81 @@ class io_ppe_regs
         fapi2::Target<K, M, V> last_target;
 #endif
 
-        uint64_t calcAddress(const uint32_t i_section_addr,
-                             const uint32_t i_address,
-                             const uint32_t i_thread,
-                             const uint32_t i_thread_size,
-                             const uint32_t i_lane);
+        constexpr  __attribute__((always_inline))
+        uint32_t calcParm1(const uint32_t i_section_addr,
+                           const uint32_t i_address,
+                           const uint32_t i_thread,
+                           const uint32_t i_thread_size,
+                           const uint32_t i_lane,
+                           const uint32_t i_shift)
+        {
+            /*
+
+                    See section 5.2.6 PPE SRAM in the paxo_workbook
+
+                    PPE SRAM size: 96K
+
+                    i_address is the address of a 16 bit register in the PPE SRAM.
+                    There are 4 registers covered by a 64 bit read/write of the sram,
+                    The max number of registers in a section is 512 (1024B mem_regs).
+                    Per-lane mem_reg registers are addressed as 0byyyyyxxxx (y = 5-
+                    bit lane number, x = 4-bit per-lane register offset)
+                    We mask out the 2 least significant bits of the register address
+                    and shift left 1 bit to get the byte address that starts the 64bit
+                    read/write the covers the register.
+
+                    i_section_addr is the byte address in the SRAM where the
+                    register section begins.
+
+                    Each register section can be divided into equal segments for each
+                    thread.  i_thread_size specifies the byte size for each thread.
+
+                    The least significant 2 bits of i_address are used to determine
+                    which 16 bits of a 64 bit access contains the register.
+
+                    A mask is applied to each 16 bit register and the resulting value
+                    is then shifted left by i_shift to obtain the final result.
+
+                    NOTE! There are some registers that span 32 bits.  This code
+                    supports those by allowing for a 32 bit mask value and
+                    checking for when it is larger than a 16 bit value.
+
+                    Parm1 is a combination of the final calculated byte address of the
+                    64 bits that contains the register, the i_shift value, and the
+                    least significant 2 bits of the address.
+
+                    Parm1 bits
+
+                       3         2         1         0
+                      10987654321098765432109876543210
+
+                      0         1         2         3
+                      01234567890123456789012345678901
+                      |      |  ||           |       |
+                      |      |  ||           |       \
+                      |      |  ||           \________byte address of 64 bit access
+                      |      |  |\
+                      |      |  \_i_address[30:31]
+                      |      \
+                      \_______i_shift
+
+
+             */
+
+            return ((i_address & 3) << 20) | (i_shift << 24) |
+                   ((i_section_addr & 0x000FFFFF) +
+                    ((((i_lane << 4) | i_address) & 0xFFC) << 1) +
+                    (i_thread * i_thread_size));
+        }
 
         uint64_t extractData(const uint64_t i_8b_data,
-                             const uint32_t i_address,
-                             const uint32_t i_mask,
-                             const uint32_t i_shift);
+                             const uint32_t i_parm1,
+                             const uint32_t i_parm2);
 
         uint64_t updateData(const uint64_t i_8b_data,
                             const uint32_t i_reg_data,
-                            const uint32_t i_address,
-                            const uint32_t i_mask,
-                            const uint32_t i_shift);
+                            const uint32_t i_parm1,
+                            const uint32_t i_parm2);
 
 #if IO_PPE_MAX_CACHE_SIZE > 0
         fapi2::ReturnCode cacheData(const fapi2::Target<K, M, V>& i_target,
@@ -136,6 +207,16 @@ class io_ppe_regs
                                     const fapi2::buffer<uint64_t> i_data,
                                     const uint8_t i_modified);
 #endif
+
+        fapi2::ReturnCode getData(const fapi2::Target<K, M, V>& i_target,
+                                  const uint32_t i_parm1,
+                                  const uint32_t i_parm2,
+                                  fapi2::buffer<uint64_t>& o_data);
+
+        fapi2::ReturnCode putData(const fapi2::Target<K, M, V>& i_target,
+                                  const uint32_t i_parm1,
+                                  const uint32_t i_parm2,
+                                  fapi2::buffer<uint64_t> i_data);
 
         fapi2::ReturnCode getData(const fapi2::Target<K, M, V>& i_target, const uint64_t i_addr,
                                   fapi2::buffer<uint64_t>& o_data);
@@ -147,16 +228,11 @@ class io_ppe_regs
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_regs<K, M, V>::getData(const fapi2::Target<K, M, V>& i_target,
-        const uint32_t i_section_addr,
-        const uint32_t i_address,
-        const uint32_t i_mask,
-        const uint32_t i_shift,
-        const uint32_t i_thread,
-        const uint32_t i_thread_size,
-        const uint32_t i_lane,
+        const uint32_t i_parm1,
+        const uint32_t i_parm2,
         fapi2::buffer<uint64_t>& o_data)
 {
-    uint64_t l_addr = calcAddress(i_section_addr, i_address, i_thread, i_thread_size, i_lane);
+    uint64_t l_addr = uint64_t(i_parm1 | 0xFFF00000) << 32;
     fapi2::buffer<uint64_t> l_data;
 
     // FAPI_DBG("io_ppe_regs::getData: calcAddress l_addr 0x%08X%08X",
@@ -182,7 +258,7 @@ fapi2::ReturnCode io_ppe_regs<K, M, V>::getData(const fapi2::Target<K, M, V>& i_
 
 #endif
 
-    o_data = extractData(l_data, i_address, i_mask, i_shift);
+    o_data = extractData(l_data, i_parm1, i_parm2);
     // FAPI_DBG("io_ppe_regs::getData: extractData - o_data 0x%08X%08X",
     //          (o_data >> 32) & 0xFFFFFFFF, o_data & 0xFFFFFFFF);
 
@@ -192,17 +268,11 @@ fapi_try_exit:
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 fapi2::ReturnCode io_ppe_regs<K, M, V>::putData(const fapi2::Target<K, M, V>& i_target,
-        const uint32_t i_section_addr,
-        const uint32_t i_address,
-        const uint32_t i_mask,
-        const uint32_t i_shift,
-        const uint32_t i_thread,
-        const uint32_t i_thread_size,
-        const uint32_t i_lane,
+        const uint32_t i_parm1,
+        const uint32_t i_parm2,
         fapi2::buffer<uint64_t> i_data)
 {
-
-    uint64_t l_addr = calcAddress(i_section_addr, i_address, i_thread, i_thread_size, i_lane);
+    uint64_t l_addr = uint64_t(i_parm1 | 0xFFF00000) << 32;
     fapi2::buffer<uint64_t> l_data;
 
 #if IO_PPE_MAX_CACHE_SIZE > 0
@@ -220,7 +290,7 @@ fapi2::ReturnCode io_ppe_regs<K, M, V>::putData(const fapi2::Target<K, M, V>& i_
 
 #endif
     // FAPI_DBG(">>updateData l_data: %llx, i_data: %llx", l_data, i_data);
-    l_data = updateData(l_data, i_data, i_address, i_mask, i_shift);
+    l_data = updateData(l_data, i_data, i_parm1, i_parm2);
     // FAPI_DBG("<<updateData l_data: %llx, i_data: %llx", l_data, i_data);
 
 #if IO_PPE_MAX_CACHE_SIZE > 0
@@ -290,11 +360,12 @@ fapi_try_exit:
 
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 uint64_t io_ppe_regs<K, M, V>::extractData(const uint64_t i_8b_data,
-        const uint32_t i_address,
-        const uint32_t i_mask,
-        const uint32_t i_shift)
+        const uint32_t i_parm1,
+        const uint32_t i_parm2)
 {
-    uint64_t l_reg16 = i_address & 0x03;
+    const uint64_t l_reg16 = (i_parm1 >> 20) & 3;
+    const uint32_t i_shift = (i_parm1 >> 24) & 0xFF;
+    const uint32_t i_mask = i_parm2;
     uint64_t l_data = i_8b_data;
 
     if (i_mask > 0xFFFF)
@@ -321,11 +392,12 @@ uint64_t io_ppe_regs<K, M, V>::extractData(const uint64_t i_8b_data,
 template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
 uint64_t io_ppe_regs<K, M, V>::updateData(const uint64_t i_8b_data,
         const uint32_t i_reg_data,
-        const uint32_t i_address,
-        const uint32_t i_mask,
-        const uint32_t i_shift)
+        const uint32_t i_parm1,
+        const uint32_t i_parm2)
 {
-    uint64_t l_reg16 = i_address & 0x03;
+    const uint64_t l_reg16 = (i_parm1 >> 20) & 3;
+    const uint32_t i_shift = (i_parm1 >> 24) & 0xFF;
+    const uint32_t i_mask = i_parm2;
     uint64_t l_update_8b = i_reg_data;
     l_update_8b <<= i_shift;
     l_update_8b &= i_mask;
@@ -359,22 +431,6 @@ uint64_t io_ppe_regs<K, M, V>::updateData(const uint64_t i_8b_data,
     //          l_update_8b, l_wrt_mask, i_8b_data);
     // FAPI_DBG(" l_data: %llx i_mask: %llx", l_data, i_mask);
     return l_data;
-}
-
-
-template<fapi2::TargetType K, fapi2::MulticastType M, typename V>
-uint64_t io_ppe_regs<K, M, V>::calcAddress(const uint32_t i_section_addr,
-        const uint32_t i_address,
-        const uint32_t i_thread,
-        const uint32_t i_thread_size,
-        const uint32_t i_lane)
-{
-    uint64_t l_reg_addr = ((i_lane << 4) | i_address) & 0xFFC;
-    l_reg_addr <<= 1; //input address is 16bit register address, shift left to get byte addr
-    uint64_t l_addr = i_section_addr + l_reg_addr;
-    l_addr += (i_thread * i_thread_size);
-    l_addr <<= 32;
-    return l_addr;
 }
 
 
