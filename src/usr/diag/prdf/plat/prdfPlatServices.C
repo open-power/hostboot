@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,6 +70,7 @@
 #include <p10_fbc_tdm_inject.H>
 #include <p10_io_quiesce_lane.H>
 #include <p10_rcs_transient_check.H>
+#include <p10_omi_ddr4_edpl.H>
 #include <p10_omi_degrade_dl_reconfig.H>
 
 #ifdef CONFIG_NVDIMM
@@ -839,6 +840,25 @@ void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid)
     PRDF_ASSERT(TYPE_OCMB_CHIP == getTargetType(i_ocmb));
 
     SBEIO::get4uDdimmPmicHealthCheckData(i_ocmb, i_plid);
+}
+
+//------------------------------------------------------------------------------
+
+void expEnableEdpl(TARGETING::TargetHandle_t i_ocmb)
+{
+    PRDF_ASSERT(nullptr != i_ocmb);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == getTargetType(i_ocmb));
+    PRDF_ASSERT(!isOdysseyOcmb(i_ocmb));
+
+    errlHndl_t errl = nullptr;
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(i_ocmb);
+
+    FAPI_INVOKE_HWP(errl, p10_omi_ddr4_edpl, fapiOcmb, true);
+    if (nullptr != errl)
+    {
+        PRDF_ERR("p10_omi_ddr4_edpl(0x%08x) failed", getHuid(i_ocmb));
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+    }
 }
 
 //##############################################################################

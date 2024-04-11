@@ -285,6 +285,12 @@ actionclass threshold_and_mask_self_th1
     threshold_and_mask_th1;
 };
 
+actionclass omi_detected_crc_event
+{
+    threshold_and_mask_omi_bus;
+    funccall("reenableEdplOnTh");
+};
+
 actionclass omi_degraded_mode
 {
     capture(kvco_fix);

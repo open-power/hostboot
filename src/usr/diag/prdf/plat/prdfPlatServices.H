@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -230,6 +230,12 @@ uint32_t omiDegradeDlReconfig(TARGETING::TargetHandle_t i_target);
  *               will not be linked.
  */
 void getPmicTelemetry(TARGETING::TargetHandle_t i_ocmb, uint32_t i_plid = 0);
+
+/**
+ * @brief  Calls a HWP interface to reenable OMI EDPL (error detection per lane)
+ * @param  i_target An Explorer OCMB.
+ */
+void expEnableEdpl(TARGETING::TargetHandle_t i_ocmb);
 
 //##############################################################################
 //##                    Maintenance Command wrappers
