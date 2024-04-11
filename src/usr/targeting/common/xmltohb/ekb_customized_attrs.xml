@@ -1027,6 +1027,12 @@
         <no_export/>
     </attribute>
 
+    <attribute>
+        <!-- Hide from MRW -->
+        <id>ATTR_PVR_82_MODE</id>
+        <no_export/>
+    </attribute>
+
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
