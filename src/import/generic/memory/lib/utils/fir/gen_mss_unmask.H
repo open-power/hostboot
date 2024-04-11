@@ -128,6 +128,8 @@ fapi2::ReturnCode after_background_scrub( const fapi2::Target<T>& i_target );
 
 ///
 /// @brief Set a FIR bit to recoverable, unmask and set it for DQS drift tracking error path
+/// @tparam MC the memory controller type
+/// @tparam T the fapi2::TargetType which hold the FIR bits
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
 /// @note mc_type::ODYSSEY specialization
