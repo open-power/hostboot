@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -101,6 +101,32 @@ int32_t omiDegradeRetrainWorkaround(ExtensibleChip* i_chip,
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE(explorer_ocmb, omiDegradeRetrainWorkaround);
+
+//##############################################################################
+//
+//                                 OMIDLFIR
+//
+//##############################################################################
+
+/**
+ * @brief  OMIDLFIR[3] - OMI-DL0 detected a CRC error. On threshold of these
+ *         errors, reenable EDPL.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t reenableEdplOnTh(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    // As part of a workaround to avoid OMI degrades for DDR4, EDPL (error
+    // detection per lane) was disabled. However, if a threshold of CRC events
+    // is hit, EDPL should be re-enabled to catch real bad lanes.
+    if (io_sc.service_data->IsAtThreshold())
+    {
+        expEnableEdpl(i_chip->getTrgt());
+    }
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(explorer_ocmb, reenableEdplOnTh);
 
 } // end namespace explorer_ocmb
 

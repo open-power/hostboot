@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2022
+# Contributors Listed Below - COPYRIGHT 2013,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -171,6 +171,7 @@ CLEAN_TARGETS += ${MFG_THRES_PATH}
 ################################################################################
 
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/io/
+prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
 prd_obj_no_sim += p10_io_lib.o
@@ -186,6 +187,7 @@ prd_obj_no_sim += p10_io_iohs_poll_recal.o
 prd_obj_no_sim += p10_iohs_reset.o
 prd_obj_no_sim += p10_smp_link_firs.o
 prd_obj_no_sim += p10_omi_degrade_dl_reconfig.o
+prd_obj_no_sim += p10_omi_ddr4_edpl.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
