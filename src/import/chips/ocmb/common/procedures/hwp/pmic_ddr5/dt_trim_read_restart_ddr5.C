@@ -53,7 +53,9 @@ fapi2::ReturnCode dt_trim_read_restart_ddr5(const fapi2::Target<fapi2::TARGET_TY
     static constexpr uint8_t NUM_BYTES_TO_WRITE = 2;
 
     fapi2::buffer<uint8_t> l_data_trim[NUM_BYTES_TO_WRITE];
-    FAPI_INF(GENTARGTIDFORMAT " Running dt_trim_read_restart_ddr5 HWP", GENTARGTID(i_ocmb_target));
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Running dt_trim_read_restart_ddr5 HWP", GENTARGTID(i_ocmb_target));
 
     // The Default DT i2c address is the same as the ADC's i2c address on ODY
     // For our case the ADC is unaffected by any of the commands needed for this sequence
@@ -72,25 +74,50 @@ fapi2::ReturnCode dt_trim_read_restart_ddr5(const fapi2::Target<fapi2::TARGET_TY
                 GENTARGTID(i_ocmb_target),
                 mss::generic_i2c_responder::NUM_TOTAL_DEVICES_I2C_DDR5,
                 l_adc.size());
+
     l_default_dt = l_adc[mss::generic_i2c_responder::ADC];
 
     // Unlock Trim section
-    FAPI_TRY(mss::pmic::i2c::reg_write_default_dt(l_default_dt, DT_REGS::TRIM_LOCK, trim_data::TRIM_UNLOCK));
+    l_rc = mss::pmic::i2c::reg_write_default_dt(l_default_dt, DT_REGS::TRIM_LOCK, trim_data::TRIM_UNLOCK);
+
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // Enter Password
     l_data_trim[0] = trim_data::TRIM_PASSWORD_1;
     l_data_trim[1] = trim_data::TRIM_PASSWORD_0;
-    FAPI_TRY(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::TRIM_TRY_PASSWORD, l_data_trim));
+    l_rc = mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::TRIM_TRY_PASSWORD, l_data_trim);
+
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // Enable extendable read pulse
     l_data_trim[0] = trim_data::EXTENDABLE_RD_PULSE_EN_1;
     l_data_trim[1] = trim_data::EXTENDABLE_RD_PULSE_EN_0;
-    FAPI_TRY(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_TRIM_RP_MAX, l_data_trim));
+    l_rc = mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_TRIM_RP_MAX, l_data_trim);
+
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // Initiate Trim read
     l_data_trim[0] = trim_data::TRIM_RD_INIT_1;
     l_data_trim[1] = trim_data::TRIM_RD_INIT_0;
-    FAPI_TRY(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_COMMAND, l_data_trim));
+    l_rc = mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_COMMAND, l_data_trim);
+
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // Delay before locking trims
     fapi2::delay(5 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
@@ -98,7 +125,13 @@ fapi2::ReturnCode dt_trim_read_restart_ddr5(const fapi2::Target<fapi2::TARGET_TY
     // Lock Trim section for each DT
     for(const auto& l_dt : mss::find_targets<fapi2::TARGET_TYPE_POWER_IC>(i_ocmb_target))
     {
-        FAPI_TRY(mss::pmic::i2c::reg_write(l_dt, DT_REGS::TRIM_LOCK, trim_data::TRIM_LOCK));
+        l_rc = mss::pmic::i2c::reg_write(l_dt, DT_REGS::TRIM_LOCK, trim_data::TRIM_LOCK);
+
+        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+        {
+            fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+        }
     }
 
     FAPI_INF(GENTARGTIDFORMAT " Finished dt_trim_read_restart_ddr5 HWP", GENTARGTID(i_ocmb_target));
