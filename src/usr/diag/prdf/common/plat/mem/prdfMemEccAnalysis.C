@@ -34,6 +34,7 @@
 #include <prdfOdyExtraSig.H>
 #include <prdfMemUtils.H>
 #include <prdfPlatServices.H>
+#include <prdfRegisterCache.H>
 
 #ifdef __HOSTBOOT_RUNTIME
     #include <prdfMemDynDealloc.H>
@@ -1079,6 +1080,48 @@ uint32_t analyzeFetchNceTce( ExtensibleChip * i_chip, uint8_t i_port,
                 PRDF_ERR( PRDF_FUNC "Write() failed on RDF_FIRs: i_chip=0x%08x",
                           i_chip->getHuid() );
             }
+
+            #ifdef __HOSTBOOT_RUNTIME
+            // Increment the threshold of invalid CE addresses that have been
+            // handled. If threshold has been hit, permanently mask mainline
+            // NCEs and TCEs.
+            OcmbDataBundle * ocmbdb = getOcmbDataBundle(i_chip);
+            if (ocmbdb->iv_ceInvAddrTh.inc(io_sc))
+            {
+                // Permanently mask NCE/TCEs on both ports
+                ocmbdb->iv_maskMainlineNceTce[0] = true;
+                ocmbdb->iv_maskMainlineNceTce[1] = true;
+
+                SCAN_COMM_REGISTER_CLASS * mask_or0 =
+                    i_chip->getRegister("RDF_FIR_MASK_OR_0");
+                SCAN_COMM_REGISTER_CLASS * mask_or1 =
+                    i_chip->getRegister("RDF_FIR_MASK_OR_1");
+
+                mask_or0->clearAllBits();
+                mask_or0->SetBit(9);  // Mainline read NCE
+                mask_or0->SetBit(10); // Mainline read TCE
+                mask_or1->clearAllBits();
+                mask_or1->SetBit(9);  // Mainline read NCE
+                mask_or1->SetBit(10); // Mainline read TCE
+
+                o_rc = (mask_or0->Write() | mask_or1->Write());
+                if (SUCCESS != o_rc)
+                {
+                    PRDF_ERR(PRDF_FUNC "Write() failed on RDF_FIR_MASK_OR");
+                }
+
+                // Clear the register cache for the RDF_FIR_MASKs so the new
+                // data will be read from hardware next time they are read.
+                SCAN_COMM_REGISTER_CLASS * mask0 =
+                    i_chip->getRegister("RDF_FIR_MASK_0");
+                SCAN_COMM_REGISTER_CLASS * mask1 =
+                    i_chip->getRegister("RDF_FIR_MASK_1");
+                RegDataCache & cache = RegDataCache::getCachedRegisters();
+                cache.flush(i_chip, mask0);
+                cache.flush(i_chip, mask1);
+
+            }
+            #endif
 
             // Adjust the signature
             io_sc.service_data->setSignature(i_chip->getHuid(),
