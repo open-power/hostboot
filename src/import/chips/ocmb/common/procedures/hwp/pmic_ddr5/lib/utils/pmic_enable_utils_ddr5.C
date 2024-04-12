@@ -113,7 +113,7 @@ fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info)
         {
             FAPI_INF_NO_SBE("Setting up DT " GENTARGTIDFORMAT, GENTARGTID(i_dt));
 
-            const dt::regs FAULTS_CLEAR[] = { DT_REGS::FAULTS_CLEAR_0, DT_REGS::FAULTS_CLEAR_1 };
+            static constexpr dt::regs FAULTS_CLEAR[] = { DT_REGS::FAULTS_CLEAR_0, DT_REGS::FAULTS_CLEAR_1 };
 
             for (auto l_dt_reg_count = 0; l_dt_reg_count < NUM_REGS_TO_WRITE; l_dt_reg_count++)
             {

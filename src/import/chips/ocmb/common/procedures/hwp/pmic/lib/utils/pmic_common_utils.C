@@ -890,7 +890,7 @@ fapi2::ReturnCode bias_with_spd_volt_ranges(
 
     for (uint8_t l_rail_index = mss::pmic::rail::SWA; l_rail_index <= mss::pmic::rail::SWD; ++l_rail_index)
     {
-        l_sw_range[l_rail_index] = SW_VOLT_RANGE_SELECT[i_id << 2 | l_rail_index];
+        l_sw_range[l_rail_index] = SW_VOLT_RANGE_SELECT[l_rail_index << 2 | i_id];
     }
 
 #else
