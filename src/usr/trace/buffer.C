@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,11 +22,11 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "buffer.H"
-#include "bufferpage.H"
-#include "entry.H"
-#include "compdesc.H"
-#include "daemonif.H"
+#include <trace/buffer.H>
+#include <trace/bufferpage.H>
+#include <trace/entry.H>
+#include <trace/compdesc.H>
+#include <trace/daemonif.H>
 
 #include <assert.h>
 #include <limits.h>
@@ -428,133 +428,6 @@ namespace TRACE
         // All done, release for daemon.
         _producerExit();
 
-    }
-
-    size_t Buffer::getTrace(ComponentDesc* i_comp, void* o_data, size_t i_size)
-    {
-        char* l_data = reinterpret_cast<char*>(o_data);
-        size_t l_size = 0;
-        size_t l_entries = 0;
-
-        // If either the pointer is null or the buffer is 0, we're just trying
-        // to determine the size of the buffer.
-        bool determineSize = ((o_data == NULL) || (i_size == 0));
-
-        if (determineSize)
-        {
-            i_size = UINT64_MAX;
-        }
-
-        trace_buf_head_t* header = NULL;
-
-        // If we're actually extracting, add the fsp-trace buffer header.
-        if(!determineSize)
-        {
-            if (i_size < sizeof(trace_buf_head_t))
-                return 0;
-
-            header = reinterpret_cast<trace_buf_head_t*>(&l_data[l_size]);
-            memset(header, '\0', sizeof(trace_buf_head_t));
-
-            header->ver = TRACE_BUF_VERSION;
-            header->hdr_len = sizeof(trace_buf_head_t);
-            header->time_flg = TRACE_TIME_REAL;
-            header->endian_flg = 'B'; // Big Endian.
-            memcpy(&header->comp[0], &i_comp->iv_compName, TRAC_COMP_SIZE);
-        }
-        l_size += sizeof(trace_buf_head_t);
-
-        // Prevent daemon from changing things while we're extracting.
-        _producerEnter();
-
-        size_t l_totalSize = l_size;
-        Entry* entry = i_comp->iv_first;
-        size_t l_entriesToExtract = 0;
-
-        do
-        {
-            if ((!entry) || (!entry->comp))
-            {
-                break;
-            }
-
-            // First walk the list backwards to find everything that will fit.
-            while(1)
-            {
-                // fsp-trace buffer entries have an extra word of size at the
-                // end.  That is where the sizeof(uint32_t) comes from...
-
-                if ((l_totalSize + entry->size + sizeof(uint32_t)) <= i_size)
-                {
-                    l_totalSize += entry->size + sizeof(uint32_t);
-                    l_entriesToExtract++;
-
-                    if ((entry->next) &&
-                        (entry->next->comp))
-                    {
-                        entry = entry->next;
-                        continue;
-                    }
-                }
-                else // This entry was too big to fit, so roll back one.
-                {
-                    entry = entry->prev;
-                }
-                break;
-            }
-
-            // If we didn't find anything that fit, leave.
-            if (l_totalSize == l_size)
-            {
-                break;
-            }
-
-            // If we're just trying to find the size, we're done.
-            if(determineSize)
-            {
-                l_size = l_totalSize;
-                break;
-            }
-
-            // Now we can actually copy all the entries...
-            while(entry != NULL)
-            {
-                // Copy entry data.
-                memcpy(&l_data[l_size], &entry->data[0],entry->size);
-                l_size += entry->size;
-
-                // Copy entry size.
-                uint32_t entry_size = entry->size + sizeof(uint32_t);
-                memcpy(&l_data[l_size], &entry_size, sizeof(uint32_t));
-                l_size += sizeof(uint32_t);
-
-                l_entries++;
-
-                if (l_entries == l_entriesToExtract)
-                {
-                    break;
-                }
-                else
-                {
-                    entry = entry->prev;
-                }
-            };
-
-        }
-        while(0);
-
-        // Unlock for daemon.
-        _producerExit();
-
-        // Update header.
-        if (header)
-        {
-            header->size = l_size;
-            header->next_free = l_size;
-            header->te_count = l_entries;
-        }
-
-        return l_size;
     }
 
     bool Buffer::consumerOp(Entry** i_condAddr, Entry* i_condVal,

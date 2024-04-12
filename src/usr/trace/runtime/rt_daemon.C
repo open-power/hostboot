@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,10 @@ namespace TRACEDAEMON
 
     Daemon::~Daemon()
     {
+        #ifndef CONFIG_COMPILE_CXXTEST_HOOKS
+        // When CXXTEST is active, allow a separate instance for testing
         assert(0, "No need to destruct the trace Daemon");
+        #endif
     }
 
     void Daemon::signal_trace_daemon(void)

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,10 +22,10 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "../service.H"
-#include "../compdesc.H"
-#include "../buffer.H"
-#include "../entry.H"
+#include <trace/compdesc.H>
+#include <trace/entry.H>
+#include <trace/service.H>
+#include <trace/buffer.H>
 #include <limits.h>
 #include <assert.h>
 #include <stdio.h>
@@ -38,7 +38,7 @@
 #include <util/align.H>
 #include <runtime/interface.h>
 #include <util/singleton.H>
-#include "rt_rsvdtracebufservice.H"
+#include <trace/runtime/rt_rsvdtracebufservice.H>
 
 namespace TRACE
 {
@@ -63,9 +63,10 @@ namespace TRACE
     {
         // No need to destruct the service.
 
-        #ifndef PROFILE_CODE
-        // When code coverage is active, unload all the runtime
-        // modules to recover the code coverage data
+        #if !defined(PROFILE_CODE) && !defined(CONFIG_COMPILE_CXXTEST_HOOKS)
+        // 1. When code coverage is active, unload all the runtime
+        //    modules to recover the code coverage data
+        // 2. When CXXTEST is active, allow a separate instance for testing
         assert(0, "No need to destruct the Service");
         #endif
     }
@@ -421,6 +422,15 @@ namespace TRACE
     {
         return
             iv_buffers[i_comp->iv_bufferType]->getTrace(i_comp,o_data,i_size);
+    }
+
+    size_t Service::getBuffer(ComponentDesc    *i_comp,
+                              std::list<tid_t> &i_tids,
+                              void             *o_data,
+                              size_t            i_size)
+    {
+        return
+            iv_buffers[i_comp->iv_bufferType]->getTrace(i_comp,i_tids,o_data,i_size);
     }
 
     void Service::flushBuffers()

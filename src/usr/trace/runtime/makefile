@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2019
+# Contributors Listed Below - COPYRIGHT 2013,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -28,6 +28,7 @@ MODULE = trace_rt
 
 EXTRAINCDIR +=${ROOTPATH}/src/usr
 
+OBJS += buffer_common.o
 OBJS += interface.o
 OBJS += assert.o
 OBJS += compdesc.o

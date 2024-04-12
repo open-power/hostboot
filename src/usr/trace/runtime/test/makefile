@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2020
+# Contributors Listed Below - COPYRIGHT 2013,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -30,5 +30,6 @@ MODULE = testtrace_rt
 EXTRAINCDIR +=${ROOTPATH}/src/usr
 
 TESTS = *.H
+TESTS += ${ROOTPATH}/src/usr/trace/test/testbuffer_common.H
 
 include ${ROOTPATH}/config.mk

@@ -459,7 +459,9 @@ def decode_binary_traces_to_ascii_list(bData, startingPosition):
     traces = []
     start = startingPosition
     end = 0
-    while start < len(bData) - 1:
+    # use start+24, since 24 bytes is the minimum size of the next trace entry
+    #  (see the comments at get_pipe_trace)
+    while (start+24) < len(bData) - 1:
         gpt = get_pipe_trace(bData, start)
         if gpt != -1:
             end = gpt[1]

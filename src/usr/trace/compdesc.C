@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2016                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,8 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "compdesc.H"
-#include "service.H"
+#include <trace/compdesc.H>
+#include <trace/service.H>
 #include <assert.h>
 #include <string.h>
 #include <string_ext.h>
@@ -58,6 +58,15 @@ namespace TRACE
     {
         mutex_destroy(&iv_mutex);
     };
+
+    bool ComponentDesc::operator==(const char *i_comp)
+    {
+        if (i_comp == nullptr)
+        {
+            return false;
+        }
+        return (strncmp(i_comp,iv_compName,COMP_SIZE) == 0);
+    }
 
     ComponentDesc* ComponentList::getDescriptor(const char* i_comp,
                                                 uint32_t i_size,

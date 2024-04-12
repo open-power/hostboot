@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -30,6 +32,8 @@
  */
 
 #include <trace/interface.H>
+#include <vector>
+#include <string.h>
 
 namespace TRACE
 {
@@ -61,16 +65,17 @@ namespace TRACE
         char data[0];           //< Start of 'fsp-trace' style structure.
     };
 
-    //----- Below are structures directly from FSP for fsp-trace ------//
-
-    const uint32_t TRACE_BUF_VERSION = 0x01;    // Trace buffer version
-    const uint32_t TRACE_COMP_TRACE  = 0x434F;  // Component Field Trace - "CO"
-    const uint32_t TRACE_FIELDTRACE  = 0x4654;  // Field Trace - "FT"
-    const uint32_t TRACE_FIELDBIN    = 0x4644;  // Binary Field Trace - "FD"
-    const uint32_t TRACE_TIME_REAL   = 0;       // upper 32 = secs,
-                                                // lower 32 = microsecs
-    const uint32_t TRACE_BUF_CONT    = 2;       // Trace buffer is continuous
-                                                // trace style.
+    // ---- Structures below are based on the implementation of the fsp-trace
+    //      and hostfw-trace.pl tools. The values must stay in sync.
+    const uint32_t TRACE_BUF_VERSION   = 0x01;    // Trace buffer version
+    const uint32_t TRACE_BUF_VERSION_2 = 0x02;    // Trace buffer version
+    const uint32_t TRACE_COMP_TRACE    = 0x434F;  // Component Field Trace - "CO"
+    const uint32_t TRACE_FIELDTRACE    = 0x4654;  // Field Trace - "FT"
+    const uint32_t TRACE_FIELDBIN      = 0x4644;  // Binary Field Trace - "FD"
+    const uint32_t TRACE_TIME_REAL     = 0;       // upper 32 = secs,
+                                                  // lower 32 = microsecs
+    const uint32_t TRACE_BUF_CONT      = 2;       // Trace buffer is continuous
+                                                  // trace style.
 
     /*!
      * @brief Timestamp and thread id for each trace entry.
@@ -100,10 +105,42 @@ namespace TRACE
         trace_entry_stamp_t stamp;
         trace_entry_head_t head;
         char data[0];
+
+        /**
+         *  @brief Get the size of this struct, including data
+         *  @return   size in bytes
+         */
+        size_t getSize();
     };
 
     /*
-     * @brief Structure is put at beginning of all trace buffers
+     * @brief Binary first writes header and time stamp - v2
+     */
+    struct trace_bin_entry_v2_t
+    {
+        char iv_comp[0];                  /*!< buffer name this trace is from */
+        // These vars follow iv_comp in this struct
+        //   -they cannot be defined because iv_comp is variable-length
+        // trace_entry_stamp_t stamp;
+        // trace_entry_head_t head;
+        // char data[];
+
+        /**
+         *  @brief   Get the size of this struct, including data[]
+         *  @return  size in bytes
+         */
+        size_t getSize();
+
+        /**
+         *  @brief   Get a pointer to the trace_bin_entry_t in this struct. This
+         *            comes right after iv_comp and its NULL-char.
+         *  @return  addr of the Entry
+         */
+        trace_bin_entry_t* getEntry();
+    };
+
+    /*
+     * @brief Structure is put at beginning of version 1 trace buffers
      */
     struct trace_buf_head_t {
         unsigned char ver;         /*!< version of this struct (1)          */
@@ -121,7 +158,83 @@ namespace TRACE
         uint32_t extracted;        /*!< Not currently used                  */
     };
 
+    /*
+     * @brief Structure is put at the beginning of each version 2 trace buffer
+     */
+    struct trace_buf_head_v2_t
+    {
+        // The data for a v2 trace starts at iv_ver. The vars before iv_ver are
+        // used to help manage the trace.
+        size_t   iv_max;           /*!< total space allocated                 */
+        size_t   iv_size;          /*!< size of the entries in iv_data        */
+        char    *iv_next;          /*!< next empty slot for a trace entry     */
+        uint8_t  iv_ver;           /*!< version of this struct (2)            */
+        char     iv_data[];        /*!< trace entries                         */
 
+        /**
+         *  @brief   Initialize this struct to empty, including a bzero
+         */
+        void init(size_t i_max);
+
+        /**
+         *  @brief   Calc the max size for the Entries in iv_data[]
+         *  @return  size in bytes
+         */
+        size_t getMaxDataSize();
+
+        /**
+         *  @brief   Get the size of the data in the v2 UserData buffer
+         *           This is sizeof(iv_ver) + size of the entries in iv_data[]
+         *  @return  size in bytes
+         */
+        size_t getUDSize();
+
+        /**
+         *  @brief   Calc the ending addr of this struct
+         *  @return  ptr to the last byte in this struct
+         */
+        char* getEndPtr();
+
+        /**
+         *  @brief   Get a pointer to the UD buffer data, which is iv_ver plus
+         *            all the Trace Entries in iv_data[]
+         *  @return  addr of iv_ver
+         */
+        char* getBufPtr();
+
+        /**
+         *  @brief  Append the traces in i_tbh to the traces in this struct.
+         *          Only the traces which fit are appended.
+         *
+         *  @param[in]  i_tbh   Trace Buffer Header of the traces to append
+         */
+        void append(trace_buf_head_v2_t *i_tbh);
+
+        /**
+         *  @brief  Save a ptr for each Trace Entry from this struct into o_vec.
+         *          These entries may then be processed and used to copy out a
+         *          subset of the traces according to some filter.
+         *
+         *  @param[in]  o_vec   vector of pointers to trace entries in this struct
+         *  @param[in]  i_max   max size of trace entries to save in o_vec
+         */
+        void extract(std::vector<trace_bin_entry_v2_t*> &o_vec, size_t i_max);
+
+        /**
+         *  @brief Sort the Trace Entries by timestamp and remove any duplicates
+         *
+         *  @param[in]  o_vec  vector of pointers to trace entries in this struct
+         */
+        void cleanup(std::vector<trace_bin_entry_v2_t*> &o_vec);
+
+        /**
+         *  @brief   Copy in all the entries from i_vec to this struct. Only those
+         *            entries that fit are saved.
+         *
+         *  @note   This does an init() of this struct before the copy in of traces
+         */
+        void output(std::vector<trace_bin_entry_v2_t*> &i_vec);
+    };
 
 }
 #endif

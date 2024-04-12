@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,8 @@
 
 #include <trace/interface.H>
 #include <stdarg.h>
+#include <vector>
+#include <kernel/types.h>
 
 namespace TRACEDAEMON { class Daemon; } // Forward declaration.
 
@@ -138,9 +140,23 @@ namespace TRACE
              *  of the buffer needed to save all of the data currently in the
              *  component's trace.
              */
-            size_t getBuffer(ComponentDesc* i_comp,
-                             void * o_data,
+            size_t getBuffer(ComponentDesc *i_comp,
+                             void  *o_data,
                              size_t i_size);
+
+            /** @brief Extract a component trace buffer and filter by Thread IDs.
+             *
+             *  @param[in]  i_comp - Component to extract
+             *  @param[in]  i_tids - List of Thread IDs to filter
+             *  @param[out] o_data - output buffer
+             *  @param[in]  i_size - Size of buffer data in bytes
+             *
+             *  @return Size of buffer extracted in bytes
+             */
+            size_t getBuffer(ComponentDesc    *i_comp,
+                             std::list<tid_t> &i_tids,
+                             void             *o_data,
+                             size_t            i_size);
 
             /** @brief Flushes the front-side buffers out to continuous trace.
              */

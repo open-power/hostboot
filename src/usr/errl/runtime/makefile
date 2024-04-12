@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2023
+# Contributors Listed Below - COPYRIGHT 2013,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -46,6 +46,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/isteps
 # Miscellaneous
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ocmbupd
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/
 
 # need find the source for this hwp in runtime env
 VPATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm

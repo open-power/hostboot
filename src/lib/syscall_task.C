@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,6 +66,20 @@ tid_t task_gettid()
     register task_t* task = NULL;
     asm volatile("mr %0, 13" : "=r"(task));
     return task->tid;
+}
+
+void task_gettids(std::list<tid_t> &o_tids)
+{
+    register task_t* l_task = NULL;
+    asm volatile("mr %0, 13" : "=r"(l_task));
+
+    task_tracking_t *l_tracker = l_task->tracker;
+    while (l_tracker)
+    {
+        o_tids.push_back(l_tracker->task->tid);
+        l_tracker = l_tracker->parent;
+    }
+    return;
 }
 
 cpuid_t task_getcpuid()

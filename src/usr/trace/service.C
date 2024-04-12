@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -23,12 +23,12 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "service.H"
-#include "buffer.H"
-#include "entry.H"
-#include "compdesc.H"
-#include "daemonif.H"
-#include "debug.H"
+#include <trace/service.H>
+#include <trace/buffer.H>
+#include <trace/entry.H>
+#include <trace/compdesc.H>
+#include <trace/daemonif.H>
+#include <trace/debug.H>
 
 #include <sys/time.h>
 #include <sys/task.h>
@@ -516,6 +516,15 @@ namespace TRACE
     {
         return
             iv_buffers[i_comp->iv_bufferType]->getTrace(i_comp,o_data,i_size);
+    }
+
+    size_t Service::getBuffer(ComponentDesc    *i_comp,
+                              std::list<tid_t> &i_tids,
+                              void             *o_data,
+                              size_t            i_size)
+    {
+        return
+            iv_buffers[i_comp->iv_bufferType]->getTrace(i_comp,i_tids,o_data,i_size);
     }
 
     void Service::flushBuffers()

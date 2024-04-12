@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,8 +30,10 @@
  */
 
 #include <trace/interface.H>
+#include <trace/entry.H>
 #include <sys/sync.h>
-#include "daemon/daemon.H"
+#include <trace/daemon/daemon.H>
+#include <vector>
 
 #ifndef __HOSTBOOT_RUNTIME
 namespace TRACEDAEMON { class Daemon; } // Forward declaration.
@@ -110,6 +112,16 @@ namespace TRACE
              *  needs.
              */
             size_t getTrace(ComponentDesc* i_comp, void* o_data, size_t i_size);
+
+            /** @brief Extract component trace for i_tids in the v2 format
+             *
+             *  See service::getBuffer.  Defined here due to lockless ordering
+             *  needs.
+             */
+            size_t getTrace(ComponentDesc    *i_comp,
+                            std::list<tid_t> &i_tids,
+                            void             *o_data,
+                            size_t            i_max);
 
         private:
             volatile uint64_t iv_pagesAlloc;   //< Number of pages allocated.

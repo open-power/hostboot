@@ -33,6 +33,16 @@
 #include <arch/magic.H>
 #include <limits.h>
 
+namespace CxxTest
+{
+enum ci_run_level_t
+{
+  CI_RUN_LEVEL_MIN = 1,  // HB_CI_RUN_LEVEL=MIN      - run only MIN
+  CI_RUN_LEVEL_MED,      // HB_CI_RUN_LEVEL=MED      - run levels MIN, MED
+  CI_RUN_LEVEL_MAX,      // HB_CI_RUN_LEVEL=MAX      - run levels MIN, MED, MAX
+};
+}
+
 // Set by code that wants to manually execute a testcase outside of the
 // normal CxxTest framework
 #ifdef MANUAL_CXXTEST
@@ -45,8 +55,14 @@ namespace CxxTest {
 // Empty class to satisfy the compiler
 class TestSuite
 {
+    ci_run_level_t iv_run_level;
+
 public:
   virtual ~TestSuite() {}
+
+  bool isRunLevelMed(void)   {return(CI_RUN_LEVEL_MED   == iv_run_level ||
+                                     CI_RUN_LEVEL_MAX   == iv_run_level);}
+  bool isRunLevelMax(void)   {return(CI_RUN_LEVEL_MAX   == iv_run_level);}
 };
 
 #define  TS_TRACE(...) { TRACFCOMP( g_trac_test, "TS_TRACE> " __VA_ARGS__ ); }
@@ -80,12 +96,6 @@ extern  trace_desc_t   *g_trac_test;
 
 namespace CxxTest
 {
-enum ci_run_level_t
-{
-  CI_RUN_LEVEL_MIN = 1,  // HB_CI_RUN_LEVEL=MIN      - run only MIN
-  CI_RUN_LEVEL_MED,      // HB_CI_RUN_LEVEL=MED      - run levels MIN, MED
-  CI_RUN_LEVEL_MAX,      // HB_CI_RUN_LEVEL=MAX      - run levels MIN, MED, MAX
-};
 
 /**
  * @note extern declarations - see lib/cxxtest_data.C

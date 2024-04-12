@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,8 @@
 
 #include <stdint.h>
 #include <trace/interface.H>
+#include <list>
+#include <kernel/types.h>
 
 const uint32_t TRACE_DEBUG_ON    = 1;       //< Set to this when debug trace on
 const uint32_t TRACE_DEBUG_OFF   = 0;       //< Set to this when debug trace off
@@ -188,6 +190,27 @@ namespace TRACE
     size_t getBuffer( const char * i_pName,
                       void *       o_data,
                       size_t     i_bufferSize );
+
+    /**
+     *  @brief   Retrieve the trace buffer named by the Components in i_comps.
+     *
+     *  Caller must allocate the memory for o_data.
+     *  The buffer o_data is filled with as many traces as are available or as
+     *   will fit.
+     *
+     *  @param [in]  i_comps      name of trace buffer
+     *  @param [in]  i_tids       TIDs to filter
+     *  @param [out] o_data       pointer to output buffer
+     *  @param [in]  i_bufferSize size of output buffer in bytes
+     *
+     *  @note  If no TIDs are specified, then no filtering by TID
+     *
+     *  @return  size of the data in o_data
+     */
+    size_t getBuffer(std::list<const char*> i_comps,
+                     std::list<tid_t>      &i_tids,
+                     void                  *o_data,
+                     size_t                 i_bufferSize);
 
     /**
      *  @brief  flush Continuous trace buffers

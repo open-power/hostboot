@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2024
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -26,6 +26,9 @@
 ROOTPATH = ../../..
 MODULE = trace
 
+EXTRAINCDIR += ${ROOTPATH}/src/usr/
+
+OBJS += buffer_common.o
 OBJS += interface.o
 OBJS += service.o
 OBJS += compdesc.o

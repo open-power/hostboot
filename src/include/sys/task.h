@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <builtins.h>
 #include <kernel/types.h>
+#include <list>
 
 #ifdef __cplusplus
 extern "C"
@@ -95,6 +96,14 @@ void task_end2(void* retval) NO_RETURN;
  *  See Linux gettid.
  */
 tid_t task_gettid();
+
+/** @fn task_gettids
+ *  @brief Get a list of task IDs for calling tasks.
+ *           (walk up the task tree to every parent of the current task
+ *            and return every tid it finds)
+ *  See Linux gettid.
+ */
+void task_gettids(std::list<tid_t> &o_tids);
 
 /** @fn task_getcpuid
  *  @brief Get the CPU ID of the CPU currently executing this task.

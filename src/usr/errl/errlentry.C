@@ -38,6 +38,7 @@
 #include <map>
 #include <algorithm>
 #include <hbotcompid.H>
+
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
 #include <errl/errludbacktrace.H>
@@ -48,11 +49,12 @@
 #include <errl/errludattribute.H>
 #include <errl/errludstate.H>
 #include <errl/errli2c.H>
+
 #include <trace/interface.H>
+#include <trace/entry.H>
+#include <trace/buffer.H>
 
-#include "../trace/entry.H"
 #include <util/align.H>
-
 #include <arch/ppc.H>
 #include <hwas/common/deconfigGard.H>
 #include <targeting/targplatutil.H>
@@ -420,10 +422,6 @@ bool ErrlEntry::collectTrace(const char i_name[],
     uint64_t l_cbOutput = 0;
     uint64_t l_cbBuffer = 0;
 
-    TRACFCOMP( g_trac_errl,
-               "Calling collectTrace on 0x%08x",
-               eid());
-
     do
     {
         // By passing nil arguments 2 and 3, obtain the size of the buffer.
@@ -490,6 +488,89 @@ bool ErrlEntry::collectTrace(const char i_name[],
     delete[] l_pBuffer;
 
     return l_rc;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::collectTrace(std::list<const char*>      &i_comps,
+                                      const uint64_t      i_max,
+                                      const propagation_t i_propagate)
+{
+    ErrlUD                     *l_udSection{nullptr};
+    TRACE::trace_buf_head_v2_t *l_tbh;
+    char                       *l_buf;
+    uint64_t                    l_size{0};
+    std::list<tid_t>            l_tids;    // empty, so no filtering
+
+    l_buf  = new char[i_max];
+    l_tbh  = reinterpret_cast<TRACE::trace_buf_head_v2_t*>(l_buf);
+
+    // get the traces for i_comps into l_buf
+    l_size = TRACE::getBuffer(i_comps, l_tids, l_buf, i_max);
+
+    // Save the trace buffer as a UD section on this.
+    l_udSection = new ErrlUD(l_tbh->getBufPtr(),
+                             l_size,
+                             FIPS_ERRL_COMP_ID,
+                             FIPS_ERRL_UDV_DEFAULT_VER_1,
+                             FIPS_ERRL_UDT_HB_TRACE);
+
+    // Add the trace section to the vector of sections for this error log.
+    iv_SectionVector.push_back(l_udSection);
+
+    if (i_propagate == propagation_t::PROPAGATE)
+    {
+        for (const auto err : iv_aggregate_errors)
+        {
+            err->collectTrace(i_comps, i_max, propagation_t::PROPAGATE);
+        }
+    }
+
+    delete[] l_buf;
+
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::collectThreadTrace(std::list<const char*> &i_comps,
+                                            const uint64_t i_max)
+{
+    ErrlUD                     *l_udSection{nullptr};
+    TRACE::trace_buf_head_v2_t *l_tbh;
+    char                       *l_buf;
+    uint64_t                    l_size{0};
+    std::list<tid_t>            l_tids;
+
+    l_buf  = new char[i_max];
+    l_tbh  = reinterpret_cast<TRACE::trace_buf_head_v2_t*>(l_buf);
+
+    task_gettids(l_tids);
+
+    // get the traces for i_comps into l_buf
+    l_size = TRACE::getBuffer(i_comps, l_tids, l_buf, i_max);
+
+    // Save the trace buffer as a UD section on this.
+    l_udSection = new ErrlUD(l_tbh->getBufPtr(),
+                             l_size,
+                             FIPS_ERRL_COMP_ID,
+                             FIPS_ERRL_UDV_DEFAULT_VER_1,
+                             FIPS_ERRL_UDT_HB_TRACE);
+
+    // Add the trace section to the vector of sections for this error log.
+    iv_SectionVector.push_back(l_udSection);
+
+    delete[] l_buf;
+
+    return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::collectThreadTrace(const uint64_t i_max)
+{
+    std::list<const char*> l_comps;
+
+    collectThreadTrace(l_comps, i_max);
+
+    return;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -3513,6 +3594,11 @@ void ErrlEntry::removeDuplicateTraces()
             TRACE::trace_buf_head_t* l_trace_buf_head =
                 reinterpret_cast<TRACE::trace_buf_head_t*>(l_dataPtr);
 
+            if (l_trace_buf_head->ver == 2)
+            {
+                continue;
+            }
+
             // Look for the component id in the map to insert trace entries
             // or insert a new component id into the map to insert trace entries
             const char* l_compName = l_trace_buf_head->comp;
@@ -3712,6 +3798,16 @@ void ErrlEntry::removeDuplicateTraces()
         if( (FIPS_ERRL_COMP_ID   == (*sectionVectorIt)->iv_header.iv_compId)
           && (FIPS_ERRL_UDT_HB_TRACE == (*sectionVectorIt)->iv_header.iv_sst))
         {
+            char* l_dataPtr = static_cast<char*>((*sectionVectorIt)->data());
+
+            TRACE::trace_buf_head_t* l_trace_buf_head =
+                reinterpret_cast<TRACE::trace_buf_head_t*>(l_dataPtr);
+
+            if (l_trace_buf_head->ver == 2)
+            {
+                ++sectionVectorIt;
+                continue;
+            }
             // Remove the ErrlUD* at this position
             delete (*sectionVectorIt);
             // Erase this entry from the vector

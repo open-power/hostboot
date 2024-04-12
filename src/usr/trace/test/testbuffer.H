@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -20,11 +22,11 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-#include "../buffer.H"
-#include "../bufferpage.H"
-#include "../compdesc.H"
-#include "../entry.H"
-#include "../daemonif.H"
+#include <trace/buffer.H>
+#include <trace/bufferpage.H>
+#include <trace/compdesc.H>
+#include <trace/entry.H>
+#include <trace/daemonif.H>
 
 #include <cxxtest/TestSuite.H>
 #include <limits.h>

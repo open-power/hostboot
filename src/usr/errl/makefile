@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2011,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -24,6 +24,8 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../..
 MODULE = errl
+
+EXTRAINCDIR += ${ROOTPATH}/src/usr/
 
 #include common ojects between hostboot and runtime hostboot
 include errl.mk
