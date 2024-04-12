@@ -245,6 +245,15 @@ class OcmbDataBundle : public DataBundle
     TimeBasedThreshold iv_ceStopCounter =
         TimeBasedThreshold( 16, ThresholdResolution::SEVEN_HOURS );
 
+    // Mainline NCEs and TCEs reporting on Odyssey OCMBs can potentially
+    // have invalid address information stored in the mainline address trap
+    // register if there is an NCE/TCE reporting on both ports at the same time.
+    // To avoid a flooding corner case where continual NCE/TCEs are reporting
+    // on both ports, a threshold will be kept of times invalid addresses from
+    // NCE/TCEs have reported. The threshold will be 32 in 5 minutes.
+    TimeBasedThreshold iv_ceInvAddrTh =
+        TimeBasedThreshold( 32, 5*ThresholdResolution::ONE_MIN );
+
     // If we stop on a UE or a CE, we will need to store the port and rank that
     // the error is on so that we can clear our respective thresholds if the
     // next error we stop on is on a different port/rank.
