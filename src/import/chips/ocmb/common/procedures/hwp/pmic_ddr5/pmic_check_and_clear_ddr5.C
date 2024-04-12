@@ -82,12 +82,44 @@ extern "C"
 
             // Clearing status regs of only PMIC0, 1 and 3 as this HWP is only for clearing VDD status warnings and PMIC2
             // does not support VDD
-            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_target_info.iv_pmic_dt_map[mss::pmic::id::PMIC0].iv_pmic, REGS::R10,
-                     l_data_to_write));
-            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_target_info.iv_pmic_dt_map[mss::pmic::id::PMIC1].iv_pmic, REGS::R10,
-                     l_data_to_write));
-            FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_target_info.iv_pmic_dt_map[mss::pmic::id::PMIC3].iv_pmic, REGS::R10,
-                     l_data_to_write));
+            FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC0, [&l_data_to_write]
+                              (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+            {
+                FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_contiguous(i_pmic, REGS::R10, l_data_to_write));
+
+                return fapi2::FAPI2_RC_SUCCESS;
+
+            fapi_try_exit_lambda:
+                fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                return fapi2::FAPI2_RC_SUCCESS;
+            }));
+
+            FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC1, [&l_data_to_write]
+                              (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+            {
+                FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_contiguous(i_pmic, REGS::R10, l_data_to_write));
+
+                return fapi2::FAPI2_RC_SUCCESS;
+
+            fapi_try_exit_lambda:
+                fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                return fapi2::FAPI2_RC_SUCCESS;
+            }));
+
+            FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(l_target_info, mss::pmic::id::PMIC3, [&l_data_to_write]
+                              (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+            {
+                FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_contiguous(i_pmic, REGS::R10, l_data_to_write));
+
+                return fapi2::FAPI2_RC_SUCCESS;
+
+            fapi_try_exit_lambda:
+                fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                return fapi2::FAPI2_RC_SUCCESS;
+            }));
         }
 
 #ifndef __PPE__
@@ -98,7 +130,13 @@ extern "C"
 
             for (const auto& l_pmic : l_pmics)
             {
-                FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_pmic, REGS::R10, l_data_to_write));
+                l_rc = mss::pmic::i2c::reg_write_contiguous(l_pmic, REGS::R10, l_data_to_write);
+
+                if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                }
             }
         }
 
