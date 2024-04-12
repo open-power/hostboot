@@ -46,7 +46,7 @@
 ///
 /// @param[in] i_ocmb_target OCMB target info struct
 /// @param[in,out] io_serial_number serial number array
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @return None
 ///
 void read_serial_ccin_number(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                              uint8_t io_serial_number[])
@@ -60,6 +60,85 @@ void read_serial_ccin_number(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
 #endif
 
     memcpy(io_serial_number, l_serial_number, sizeof(l_serial_number));
+}
+
+///
+/// @brief Read and store DQS drift tracking data
+///
+/// @param[in] i_ocmb_target OCMB target info struct
+/// @param[in,out] io_dqs_tracking_log DQS drift track log array
+/// @return DQS tracking recal count
+///
+uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                                     uint64_t io_dqs_tracking_log[])
+{
+    using CONSTS = mss::ddr5::dqs_track_logging_consts;
+    static constexpr uint16_t ERROR = 0xFFFF;
+    static constexpr uint64_t SCOM_ADDRESS = 0x800000000801303flu;
+    static constexpr uint8_t INSERT_16 = 16;
+    static constexpr uint8_t INSERT_AT_32_BIT = 32;
+    static constexpr uint8_t INSERT_AT_48_BIT = 48;
+    fapi2::buffer<uint64_t> l_data;
+    uint64_t l_syn_addr = 0;
+    uint64_t l_address = 0;
+    uint8_t l_dqs_period = 0;
+    uint16_t l_log_16[CONSTS::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES * CONSTS::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY] = {0};
+
+    for(auto& l_port_target : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_ocmb_target) )
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_PERIOD_INIT,
+                               i_ocmb_target,
+                               l_dqs_period));
+
+        if(l_dqs_period)
+        {
+            FAPI_TRY(configure_phy_scom_access(l_port_target, mss::states::ON_N, true));
+
+            // Get the log
+            for (uint8_t l_idx = 0;
+                 l_idx < CONSTS::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES * CONSTS::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY; l_idx++)
+            {
+                l_syn_addr = CONSTS::ODY_DQS_TRACKING_LOG_START_ADDRESS + l_idx;
+                l_address = (l_syn_addr << INSERT_AT_32_BIT) | SCOM_ADDRESS;
+                FAPI_TRY(fapi2::getScom(l_port_target, l_address, l_data));
+                l_log_16[l_idx] = l_data;
+            }
+
+            // Copy the log to the tele struct
+            for (uint8_t l_idx = 0; l_idx < CONSTS::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES; l_idx++)
+            {
+                l_data.insertFromRight<0, INSERT_16>(l_log_16[l_idx * CONSTS::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY]);
+                l_data.insertFromRight<INSERT_16, INSERT_16>(l_log_16[l_idx * CONSTS::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY + 1]);
+                l_data.insertFromRight<INSERT_AT_32_BIT, INSERT_16>(l_log_16[l_idx * CONSTS::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY
+                        + 2]);
+                l_data.insertFromRight<INSERT_AT_48_BIT, INSERT_16>(l_log_16[l_idx * CONSTS::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY
+                        + 3]);
+                io_dqs_tracking_log[l_idx] = l_data;
+            }
+
+            // Read the recal count
+            l_syn_addr = CONSTS::ODY_DQS_TRACKING_COUNT_START_ADDRESS;
+            l_address = (l_syn_addr << INSERT_AT_32_BIT) | SCOM_ADDRESS;
+            FAPI_TRY(fapi2::getScom(l_port_target, l_address, l_data));
+            // Reset the recal count
+            FAPI_TRY(fapi2::putScom(l_port_target, l_address, 0));
+            // Required to write even+odd addresses on PHY imem
+            l_address = ((l_syn_addr + 1) << INSERT_AT_32_BIT) | SCOM_ADDRESS;
+            FAPI_TRY(fapi2::putScom(l_port_target, l_address, 0));
+            FAPI_TRY(configure_phy_scom_access(l_port_target, mss::states::OFF_N, true));
+        }
+
+        // Only need to do this on the first port
+        break;
+    }
+
+    return l_data;
+fapi_try_exit:
+    // We dont want to exit out of the HWP so we are just clearing error here.
+    // We also dont want any hidden logs generated.
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    // Returning 0xFFFF to indicate an error
+    return ERROR;
 }
 
 ///
@@ -497,6 +576,10 @@ void collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
     // Read and store serial number and CCIN number
     read_serial_ccin_number(io_target_info.iv_ocmb, io_periodic_tele_info.iv_serial_number);
 
+    // Read DQS drift tracking log
+    io_periodic_tele_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(io_target_info.iv_ocmb,
+            io_periodic_tele_info.iv_dqs_tracking_log);
+
     // Read and store ADC regs
     read_adc_regs(io_target_info, io_periodic_tele_info);
 
@@ -699,6 +782,8 @@ fapi2::ReturnCode pmic_periodic_telemetry_ddr5_2U_helper(const fapi2::Target<fap
         mss::pmic::ddr5::periodic_2U_telemetry_data& io_info)
 {
     read_serial_ccin_number(i_ocmb_target, io_info.iv_serial_number);
+
+    io_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(i_ocmb_target, io_info.iv_dqs_tracking_log);
 
     FAPI_TRY(collect_periodic_tele_data_2U(i_ocmb_target, io_info));
 
