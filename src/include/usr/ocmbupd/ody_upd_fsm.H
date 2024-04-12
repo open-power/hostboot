@@ -174,13 +174,9 @@ inline void clear_ody_code_levels_state(TARGETING::Target* const i_ocmb)
         ATTR_SBE_BOOTLOADER_CODELEVEL_type hash_boot{};
         ATTR_SBE_RUNTIME_CODELEVEL_type    hash_runtime{};
         ATTR_SBE_RELEASE_TAG_type          releaseTag{};
-        ATTR_SBE_BUILD_TAG_type            buildTag{};
-        ATTR_SBE_EKB_BUILD_TAG_type        ekbBuildTag{};
         i_ocmb->setAttr<ATTR_SBE_BOOTLOADER_CODELEVEL>(hash_boot);
         i_ocmb->setAttr<ATTR_SBE_RUNTIME_CODELEVEL>(hash_runtime);
         i_ocmb->setAttr<ATTR_SBE_RELEASE_TAG>(releaseTag);
-        i_ocmb->setAttr<ATTR_SBE_BUILD_TAG>(buildTag);
-        i_ocmb->setAttr<ATTR_SBE_EKB_BUILD_TAG>(ekbBuildTag);
 
         ATTR_OCMB_CODE_LEVEL_SUMMARY_type vsn_string = { };
         strcpy(vsn_string, "unknown");
