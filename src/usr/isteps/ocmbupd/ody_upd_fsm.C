@@ -255,13 +255,13 @@ state_transitions_t ody_fsm_transitions[] =
                                                                          { ANY_EVENT                   , {internal_error                                                }} } },  // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
 
     { { no            , no                     , SIDE0  , no          },{{ UPDATE_OMI_FIRMWARE_REACHED
-                                                                           | OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | ATTRS_INCOMPATIBLE
                                                                            | OCMB_HWP_FAIL_OTHER // An OCMB HWP fail includes both FIFO timeouts (SBE crashes) and non-crash HWP fails. We always attempt a code update in either case, because in the former
                                                                                                  // case the timeout handler will catch the problem, and in the latter case the code update could fix the issue.
-                                                                           | OTHER_HW_HWP_FAIL
-                                                                           | OCMB_FLASH_ERROR          , {perform_code_update, switch_to_side_1, retry_check_for_ready  }},
-                                                                         { OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_1, retry_check_for_ready                       }},
+                                                                           | OTHER_HW_HWP_FAIL         , {perform_code_update, switch_to_side_1, retry_check_for_ready  }},
+                                                                         { OCMB_BOOT_ERROR_WITH_FFDC
+                                                                           | OCMB_FLASH_ERROR          
+                                                                           | OCMB_HWP_FAIL_HASH_FAIL   , {switch_to_side_1, retry_check_for_ready                       }},
                                                                          { CODE_UPDATE_CHIPOP_FAILURE  , {switch_to_side_golden, retry_check_for_ready                  }} } },
 
     { { no            , no                     , SIDE0  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_golden,  retry_check_for_ready                 }},
