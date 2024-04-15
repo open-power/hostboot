@@ -3644,18 +3644,21 @@
   <attribute>
     <id>ATTR_OCC_START_DISABLE</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Disables the starting of the OCC PPC405.  This is typically used
-    in lab environments under Cronus.
+    <description>
+    Only applicable under Cronus
+    If ON, the starting of the PPC405 is skipped during PM Complex start.
+    Producer:Override
+    Consumers: p10_pm_start.C
     </description>
     <valueType>uint8</valueType>
-    <enum>
-        OFF=0,
-        ON=1
-    </enum>
     <platInit/>
-    <overrideOnly/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
     <default>OFF</default>
-    <group>istep21</group>
+    <overrideOnly/>
+    <group>enablement</group>
   </attribute>
   <!-- *********************************************************************-->
 </attributes>
