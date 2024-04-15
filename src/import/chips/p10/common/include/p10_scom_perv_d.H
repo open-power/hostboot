@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -347,6 +347,14 @@ static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_CLEAR_DESKEW_SEL_B_LEN = 
 static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_CLEAR_RCS_CONTROL_7_0 = 24; // p10:20,
 static const uint32_t P10_20_FSXCOMP_FSXLOG_ROOT_CTRL6_CLEAR_RCS_CONTROL_7_0_LEN = 8;
 //<< [FSXCOMP_FSXLOG_ROOT_CTRL6_CLEAR]
+// perv/reg00026.H
+
+//>> [SINGLE_OTP_ROM_OTPROM_REG3]
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG3 = 0x00018003ull;
+
+static const uint32_t SINGLE_OTP_ROM_OTPROM_REG3_REGISTER3 = 0;
+static const uint32_t SINGLE_OTP_ROM_OTPROM_REG3_REGISTER3_LEN = 64;
+//<< [SINGLE_OTP_ROM_OTPROM_REG3]
 // perv/reg00026.H
 
 //>>THE END<<
