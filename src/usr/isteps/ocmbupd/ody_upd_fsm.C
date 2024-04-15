@@ -832,6 +832,14 @@ errlOwner execute_actions(Target* const i_ocmb,
                 manually_set_errl_sev = true;
                 break;
             case perform_code_update:
+                /* The fact that we're doing a code update means that any errors we hit prior
+                   to this are from a downlevel version. Therefore none of these logs should
+                   show up as visible errors.
+                */
+                if (i_errlog && !manually_set_errl_sev)
+                {
+                    i_errlog->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+                }
                 /*
                    Before performing a code update, we sync the code levels from the current side to
                    the other side. This is to handle the scenario where the other side has a code
