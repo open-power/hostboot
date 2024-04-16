@@ -30,7 +30,7 @@
 // *HWP HWP Owner: David J. Chung <dj.chung@ibm.com>
 // *HWP HWP Backup: Sneha Kadam <sneha.kadam1@ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HBRT
 // EKB-Mirror-To: hostboot
 

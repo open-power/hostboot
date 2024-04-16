@@ -31,7 +31,7 @@
 // *HWP HWP Owner: Adithi Ganapathi <adithi.t.ganapathi@ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 
 #include <fapi2.H>

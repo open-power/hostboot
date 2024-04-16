@@ -30,7 +30,7 @@
 ///
 // *HWP Owner: Hostboot Team
 // *HWP Backup: SBE Team
-// *HWP Level: 1
+// *HWP Level: 3
 // *HWP Consumed by: HB:Cronus
 
 #ifndef _ODY_CHIPOP_TSNS_DQS_PERIOD_

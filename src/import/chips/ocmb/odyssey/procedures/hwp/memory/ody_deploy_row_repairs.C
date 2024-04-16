@@ -29,7 +29,7 @@
 // *HWP HWP Owner: Sneha Kadam <Sneha.Kadam1@ibm.com>
 // *HWP HWP Backup: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: FSP:HB
 // EKB-Mirror-To: hostboot
 
