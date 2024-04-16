@@ -30,7 +30,7 @@
 // *HWP HWP Owner: Geetha Pisapati <Geetha.Pisapati@ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB, FSP, SBE
 // EKB-Mirror-To: hostboot
 

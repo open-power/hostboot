@@ -31,7 +31,7 @@
 // *HWP HWP Owner: Stephen Glancy <sglancy@us.ibm.com>
 // *HWP HWP Backup: Geetha Pisapati <Geetha.Pisapati@ibm.com>
 // *HWP Team: Memory
-// *HWP Level: 2
+// *HWP Level: 3
 // *HWP Consumed by: HB:FSP
 
 #include <fapi2.H>
