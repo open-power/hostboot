@@ -642,30 +642,37 @@ PIB::PibError  SbeFFDCParser::getPibRc(const size_t i_index)
     switch(l_fapiRc)
     {
         case fapi2::RC_SBE_PIB_XSCOM_ERROR:
+        case fapi2::RC_POZ_PIB_XSCOM_ERROR:
             l_pibRc = PIB::PIB_RESOURCE_OCCUPIED;
             break;
 
         case fapi2::RC_SBE_PIB_OFFLINE_ERROR:
+        case fapi2::RC_POZ_PIB_OFFLINE_ERROR:
             l_pibRc = PIB::PIB_CHIPLET_OFFLINE;
             break;
 
         case fapi2::RC_SBE_PIB_PARTIAL_ERROR:
+        case fapi2::RC_POZ_PIB_PARTIAL_ERROR:
             l_pibRc = PIB::PIB_PARTIAL_GOOD;
             break;
 
         case fapi2::RC_SBE_PIB_ADDRESS_ERROR:
+        case fapi2::RC_POZ_PIB_ADDRESS_ERROR:
             l_pibRc = PIB::PIB_INVALID_ADDRESS;
             break;
 
         case fapi2::RC_SBE_PIB_CLOCK_ERROR:
+        case fapi2::RC_POZ_PIB_CLOCK_ERROR:
             l_pibRc = PIB::PIB_CLOCK_ERROR;
             break;
 
         case fapi2::RC_SBE_PIB_PARITY_ERROR:
+        case fapi2::RC_POZ_PIB_PARITY_ERROR:
             l_pibRc = PIB::PIB_PARITY_ERROR;
             break;
 
         case fapi2::RC_SBE_PIB_TIMEOUT_ERROR:
+        case fapi2::RC_POZ_PIB_TIMEOUT_ERROR:
             l_pibRc = PIB::PIB_TIMEOUT;
             break;
 
