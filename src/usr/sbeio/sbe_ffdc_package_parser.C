@@ -43,6 +43,7 @@ FfdcParsedPackage::rcToParsedType(uint32_t fapiRc)
 
     switch(fapiRc)
     {
+            //P10 SBE
         case fapi2::RC_SBE_SCOM_FAILURE:
         case fapi2::RC_SBE_PIB_XSCOM_ERROR:
         case fapi2::RC_SBE_PIB_OFFLINE_ERROR:
@@ -51,6 +52,16 @@ FfdcParsedPackage::rcToParsedType(uint32_t fapiRc)
         case fapi2::RC_SBE_PIB_CLOCK_ERROR:
         case fapi2::RC_SBE_PIB_PARITY_ERROR:
         case fapi2::RC_SBE_PIB_TIMEOUT_ERROR:
+            //P11 SBE
+        case fapi2::RC_POZ_SCOM_FAILURE:
+        case fapi2::RC_POZ_CFAM_FAILURE:
+        case fapi2::RC_POZ_PIB_XSCOM_ERROR:
+        case fapi2::RC_POZ_PIB_OFFLINE_ERROR:
+        case fapi2::RC_POZ_PIB_PARTIAL_ERROR:
+        case fapi2::RC_POZ_PIB_ADDRESS_ERROR:
+        case fapi2::RC_POZ_PIB_CLOCK_ERROR:
+        case fapi2::RC_POZ_PIB_PARITY_ERROR:
+        case fapi2::RC_POZ_PIB_TIMEOUT_ERROR:
         {
             retval = ParsedType::SBE_SCOM_PIB_ERROR;
             break;
