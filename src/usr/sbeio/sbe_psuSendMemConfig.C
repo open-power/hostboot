@@ -304,18 +304,18 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
             {
                 l_pmic_revision = l_pmic_health_data.iv_revision;
                 l_pmic_status = l_pmic_health_data.iv_aggregate_error;
-                l_response_size = l_pmic_data.getLength() * 4; // data size
+                l_response_size = l_pmic_data.getLength() * sizeof(fapi2::hwp_data_unit); // fapi2 ostream requires the unit size multiplication
             }
             else // DDR5_TYPE
             {
                 // For DDR5 the consolidated_health_check_data struct is required which
                 // is retrieved by calling the HWP pmic_health_check_ddr5
                 l_pmic_revision = l_pmic_health_data_ddr5.iv_revision; // use ONLY on periodic_telemetry_data struct
-                l_response_size = l_pmic_data_ddr5.getLength(); // data size, from o_stream HWP
+                l_response_size = l_pmic_data_ddr5.getLength() * sizeof(fapi2::hwp_data_unit); // fapi2 ostream requires the unit size multiplication
                 if (l_ddr5_run_health_check)
                 {
                     l_pmic_status = l_pmic_health_data_ddr5_consolidated.iv_health_check.iv_aggregate_state; // use ONLY on consolidated_health_check_data struct
-                    l_pmic_revision = l_pmic_health_data_ddr5_consolidated.iv_periodic_telemetry_data.iv_revision; // use ONLY on consolidated_health_check_data struct
+                    l_pmic_revision = l_pmic_health_data_ddr5_consolidated.iv_health_check.iv_revision; // use ONLY on consolidated_health_check_data struct
                     // If the response size is one byte, then the DDR5 Health Check HWP is indicating for Hostboot not to log anything
                     // For DDR5 Health Check the only logs produced will be if the payload from the HWP comes back greater than one byte
                     if (l_response_size > 1) // We have something to log from DDR5 Health Check
