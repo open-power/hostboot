@@ -39,12 +39,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -63,12 +63,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -87,12 +87,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -114,12 +114,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -142,12 +142,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -172,12 +172,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -203,12 +203,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -233,12 +233,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -264,12 +264,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -297,12 +297,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -332,12 +332,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -355,12 +355,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -379,12 +379,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -406,12 +406,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -434,12 +434,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -465,12 +465,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -496,12 +496,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -526,12 +526,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -557,12 +557,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -590,12 +590,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -625,12 +625,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -648,12 +648,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -672,12 +672,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -699,12 +699,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -728,12 +728,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -758,12 +758,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -789,12 +789,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -819,12 +819,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -850,12 +850,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -883,12 +883,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -917,12 +917,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -950,12 +950,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -984,12 +984,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -1007,12 +1007,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -1030,12 +1030,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
@@ -1057,12 +1057,12 @@
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
         <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+            <id>ROOT_CTRL_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
         <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
+            <id>SCRATCH_REGS_SCOM</id>
             <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
             <target>TARGET_CHIP</target>
         </collectRegisterFfdc>
