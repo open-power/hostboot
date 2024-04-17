@@ -42,10 +42,10 @@
     SBE engine is in running state, but an error was raised by external FW code.
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_PERV_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_SCOM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>PERV_CTRL_REGS_SCOM</id>        <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_SCOM</id>  <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -59,8 +59,8 @@
     Program interrupt promoted
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -83,8 +83,8 @@
     Instruction storage interrupt
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -107,8 +107,8 @@
     Alignment interrupt
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -131,8 +131,8 @@
     Data storage interrupt
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -155,9 +155,9 @@
     Uncorrectable error detected in OTPROM memory read
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -177,9 +177,9 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -199,9 +199,9 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -221,9 +221,9 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -242,7 +242,7 @@
     Address scope out of range
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -262,9 +262,9 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -284,9 +284,9 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -306,9 +306,9 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
@@ -328,9 +328,9 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -354,9 +354,9 @@
     </description>
     <ffdc>OCCURRENCE</ffdc>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
@@ -396,9 +396,9 @@
     Error detected during pibmem access
     </description>
     <ffdc>TARGET_CHIP</ffdc>
-    <collectRegisterFfdc><id>ODY_CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
-    <collectRegisterFfdc><id>ODY_SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>CBS_STATUS_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>ROOT_CTRL_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
+    <collectRegisterFfdc><id>SCRATCH_REGS_CFAM</id>       <targetType>TARGET_TYPE_OCMB_CHIP</targetType><target>TARGET_CHIP</target></collectRegisterFfdc>
     <callout>
       <target>TARGET_CHIP</target>
       <targetType>TARGET_TYPE_OCMB_CHIP</targetType>

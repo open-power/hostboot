@@ -28,7 +28,7 @@
 <hwpErrors>
    <!-- ******************************************************************** -->
     <registerFfdc>
-       <id>ODY_CBS_STATUS_REGS_CFAM</id>
+       <id>CBS_STATUS_REGS_CFAM</id>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_CS_FSI</cfamRegister>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_TR_FSI</cfamRegister>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_EL_FSI</cfamRegister>
@@ -40,7 +40,7 @@
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_STAT_FSI</cfamRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>ODY_CBS_STATUS_REGS_SCOM</id>
+       <id>CBS_STATUS_REGS_SCOM</id>
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_CS</scomRegister>
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_TR_RO</scomRegister>
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_EL</scomRegister>
@@ -52,7 +52,7 @@
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_CBS_STAT_RO</scomRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>ODY_ROOT_CTRL_REGS_CFAM</id>
+       <id>ROOT_CTRL_REGS_CFAM</id>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL0_FSI</cfamRegister>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL1_FSI</cfamRegister>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL2_FSI</cfamRegister>
@@ -65,7 +65,7 @@
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL9_FSI</cfamRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>ODY_ROOT_CTRL_REGS_SCOM</id>
+       <id>ROOT_CTRL_REGS_SCOM</id>
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL0_RW</scomRegister>
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL1_RW</scomRegister>
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL2_RW</scomRegister>
@@ -78,17 +78,17 @@
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL9_RW</scomRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>ODY_PERV_CTRL_REGS_CFAM</id>
+       <id>PERV_CTRL_REGS_CFAM</id>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL0_FSI</cfamRegister>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL1_FSI</cfamRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>ODY_PERV_CTRL_REGS_SCOM</id>
+       <id>PERV_CTRL_REGS_SCOM</id>
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL0_RW</scomRegister>
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL1_RW</scomRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>ODY_SCRATCH_REGS_CFAM</id>
+       <id>SCRATCH_REGS_CFAM</id>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_FSI</cfamRegister>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_FSI</cfamRegister>
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI</cfamRegister>
@@ -107,7 +107,7 @@
        <cfamRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_FSI</cfamRegister>
     </registerFfdc>
     <registerFfdc>
-        <id>ODY_SCRATCH_REGS_SCOM</id>
+        <id>SCRATCH_REGS_SCOM</id>
         <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_RW</scomRegister>
         <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW</scomRegister>
         <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW</scomRegister>
@@ -126,7 +126,7 @@
         <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_RW</scomRegister>
     </registerFfdc>
     <registerFfdc>
-       <id>ODY_OSC_SWITCH_SENSE_REG_SCOM</id>
+       <id>OSC_SWITCH_SENSE_REG_SCOM</id>
        <scomRegister>scomt::poz::FSXCOMP_FSXLOG_SNS1LTH_RO</scomRegister>
     </registerFfdc>
    <!-- ******************************************************************** -->
