@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2023
+# Contributors Listed Below - COPYRIGHT 2012,2024
 # [+] International Business Machines Corp.
 # [+] YADRO
 #
@@ -3303,6 +3303,7 @@ sub writeAttrErrlCFile {
          "ECID",
          "HUID",
          "BOOT_PAU_DPLL_BYPASS",
+         "MEM_EFF_DRAM_MFG_ID",
          "MASTER_MBOX_SCRATCH"
     );
 

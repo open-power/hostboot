@@ -1105,6 +1105,69 @@ void ErrlEntry::addPartIdInfoToErrLog
         l_targetPrev = l_target;
     }
 
+    // If Memory type add ATTR_MEM_EFF_DRAM_MFG_ID to the error log.
+    l_target = i_target;
+    TARGETING::TYPE l_chip_type;
+    l_target->tryGetAttr<TARGETING::ATTR_TYPE>(l_chip_type);
+    if ( (l_chip_type == TARGETING::TYPE_DIMM) ||
+         (l_chip_type == TARGETING::TYPE_OCMB_CHIP) ||
+         (l_chip_type == TARGETING::TYPE_MEM_PORT) )
+    {
+        // If we can read ATTR_MEM_EFF_DRAM_MFG_ID it is of type TYPE_MEM_PORT.
+        //     we will go directly to the add to log.
+        // NOTE: only TYPE_MEM_PORT has ATTR_MEM_EFF_DRAM_MFG_ID
+        TargetHandleList l_target_list;
+        l_target_list.push_back( const_cast<TARGETING::Target *>(l_target) );
+
+        TARGETING::ATTR_MEM_EFF_DRAM_MFG_ID_type l_MEM_EFF_DRAM_MFG_ID = {};
+        if( !l_target->tryGetAttr<TARGETING::ATTR_MEM_EFF_DRAM_MFG_ID>(l_MEM_EFF_DRAM_MFG_ID) )
+        {
+            // If we can not read ATTR_MEM_EFF_DRAM_MFG_ID we are TYPE_OCMB_CHIP or TYPE_DIMM
+            l_target_list.clear();
+
+            // if TYPE_DIMM get its Memory Port.
+            if(l_chip_type == TARGETING::TYPE_DIMM)
+            {
+                // Get list of functional port above the DIMM.
+                getParentAffinityTargets(l_target_list, l_target, CLASS_UNIT, TYPE_MEM_PORT);
+            }
+            // if TYPE_OCMB_CHIP get its Memory Ports.
+            else if(l_chip_type == TARGETING::TYPE_OCMB_CHIP)
+            {
+                // Get list of functional memory ports associated with this OCMB_CHIP target
+                getChildAffinityTargets(l_target_list, l_target, CLASS_UNIT, TYPE_MEM_PORT);
+            }
+        } // end if
+        if (l_target_list.size() != 0)
+        {
+            for (const auto target : l_target_list)
+            {
+                // Memory subsystem to get ATTR_MEM_EFF_DRAM_MFG_ID is
+                //     different target than used normally in above sections
+                //     this will add to log so we can post add ATTR_MEM_EFF_DRAM_MFG_ID.
+                if( l_attrdata && (l_targetPrev != target) )
+                {
+                    // got a new target, commit the previous data and start over
+                    l_attrdata->addToLog(this);
+                    delete l_attrdata;
+                    l_attrdata = nullptr;
+                }
+                if( !l_attrdata )
+                {
+                    l_attrdata = new ErrlUserDetailsAttribute(target);
+                }
+
+                l_attrdata->addData(TARGETING::ATTR_MEM_EFF_DRAM_MFG_ID);
+                l_targetPrev = target;
+            }
+        }// end if targets to add to log.
+        else
+        {
+            TRACFCOMP(g_trac_errl,"addPartIdInfoToErrLog failed to get memory port target[s]");
+        }
+
+    } // End if Memory TYPE
+
     if( l_attrdata )
     {
         l_attrdata->addToLog(this);
