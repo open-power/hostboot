@@ -34,6 +34,7 @@
     <ffdc>POLL_COUNT</ffdc>
     <ffdc>POLL_DELAY</ffdc>
     <ffdc>SB_CS</ffdc>
+    <ffdc>SDB</ffdc>
     <ffdc>SB_MSG</ffdc>
     <callout>
       <target>TARGET</target>
@@ -54,6 +55,7 @@
     <ffdc>POLL_COUNT</ffdc>
     <ffdc>POLL_DELAY</ffdc>
     <ffdc>SB_CS</ffdc>
+    <ffdc>SDB</ffdc>
     <ffdc>SB_MSG</ffdc>
     <callout>
       <target>TARGET</target>

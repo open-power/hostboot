@@ -35,7 +35,6 @@
 
 using namespace scomt::poz;
 
-
 SCOMT_PERV_USE_FSXCOMP_FSXLOG_SB_CS;
 SCOMT_PERV_USE_FSXCOMP_FSXLOG_SB_MSG;
 
@@ -82,6 +81,10 @@ ReturnCode poz_sbe_hreset(
             FAPI_INF("SBE is in NOT Runtime State");
         }
 
+        FAPI_INF("Clearing boot status in SB_MSG register before doing HRESET");
+        SB_MSG.clearBit<0>();
+        FAPI_TRY(SB_MSG.putCfam(i_target));
+
         FAPI_INF("Resetting restart vector0 and vector1 ...");
         FAPI_TRY(SB_CS.getCfam(i_target));
         SB_CS.set_START_RESTART_VECTOR0(0);
@@ -110,6 +113,16 @@ ReturnCode poz_sbe_hreset(
             // bump count
             l_poll++;
 
+            if (!(l_poll <= i_boot_parms.max_polls))
+            {
+                FAPI_TRY(SB_CS.getCfam(i_target));
+
+                if (SB_CS.get_SECURE_DEBUG_MODE())
+                {
+                    FAPI_ERR("SBE Boot failed since SDB is set");
+                }
+            }
+
             // test for timeout
             FAPI_ASSERT((l_poll <= i_boot_parms.max_polls),
                         fapi2::SBE_BOOT_CHECK_ERR_CFAM_PATH()
@@ -117,6 +130,7 @@ ReturnCode poz_sbe_hreset(
                         .set_POLL_COUNT(i_boot_parms.max_polls)
                         .set_POLL_DELAY(i_boot_parms.poll_delay_ns)
                         .set_SB_CS(SB_CS)
+                        .set_SDB(SB_CS.get_SECURE_DEBUG_MODE())
                         .set_SB_MSG(SB_MSG),
                         //.set_BOOT_TYPE(l_check_for_runtime),
                         "SBE did not Boot up prior to timeout!");
@@ -149,6 +163,10 @@ ReturnCode poz_sbe_hreset(
             FAPI_INF("SBE is in NOT Runtime State");
         }
 
+        FAPI_INF("Clearing boot status in SB_MSG register before doing HRESET");
+        SB_MSG.clearBit<0>();
+        FAPI_TRY(SB_MSG.putScom(i_target));
+
         FAPI_INF("Resetting restart vector1 ...");
         FAPI_TRY(SB_CS.getScom(i_target));
         SB_CS.set_START_RESTART_VECTOR1(0);
@@ -176,6 +194,16 @@ ReturnCode poz_sbe_hreset(
             // bump count
             l_poll++;
 
+            if (!(l_poll <= i_boot_parms.max_polls))
+            {
+                FAPI_TRY(SB_CS.getScom(i_target));
+
+                if (SB_CS.get_SECURE_DEBUG_MODE())
+                {
+                    FAPI_ERR("SBE Boot failed since SDB is set");
+                }
+            }
+
             // test for timeout
             FAPI_ASSERT((l_poll <= i_boot_parms.max_polls),
                         fapi2::SBE_BOOT_CHECK_ERR_SCOM_PATH()
@@ -183,6 +211,7 @@ ReturnCode poz_sbe_hreset(
                         .set_POLL_COUNT(i_boot_parms.max_polls)
                         .set_POLL_DELAY(i_boot_parms.poll_delay_ns)
                         .set_SB_CS(SB_CS)
+                        .set_SDB(SB_CS.get_SECURE_DEBUG_MODE())
                         .set_SB_MSG(SB_MSG),
                         //.set_BOOT_TYPE(l_check_for_runtime),
                         "SBE did not Boot up prior to timeout!");
