@@ -26,6 +26,7 @@
 #ifndef prdfMemDbUtils_H
 #define prdfMemDbUtils_H
 
+#include <prdfMemUtils.H>
 #include <prdfOcmbDataBundle.H>
 #include <prdfTargetServices.H>
 

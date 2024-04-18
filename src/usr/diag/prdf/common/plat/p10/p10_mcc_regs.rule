@@ -120,3 +120,14 @@
         scomaddr    0x0C010E16;
         capture     group mc_ustl_fir_ffdc;
     };
+
+    ###########################################################################
+    # P10 target Hardware Force Mirror (HWFM)
+    ###########################################################################
+
+    register USTLMCHWFM
+    {
+        name        "P10 USTL Memory Controller Hardware Force Mirror Register";
+        scomaddr    0x0C010E0F;
+        capture     group default;
+    };

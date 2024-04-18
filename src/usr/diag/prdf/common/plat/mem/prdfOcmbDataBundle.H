@@ -232,6 +232,11 @@ class OcmbDataBundle : public DataBundle
     // next error we stop on is on a different rank.
     MemRank iv_ceUeRank;
 
+    // Hardware Force Mirror (HWFM) workaround. Whether this OCMB has
+    // hit a mainline UE needs to be tracked to help determine whether HWFM will
+    // need to be cleared or not after other certain errors.
+    bool iv_hwfmMainlineUe = false;
+
     #else // IPL only
 
     /** MNFG IPL CE statistics. */

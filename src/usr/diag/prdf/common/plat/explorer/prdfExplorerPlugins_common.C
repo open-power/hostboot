@@ -658,6 +658,16 @@ int32_t AnalyzeFetchUe( ExtensibleChip * i_chip,
                         STEP_CODE_DATA_STRUCT & io_sc )
 {
     MemEcc::analyzeFetchUe<TYPE_OCMB_CHIP>( i_chip, io_sc );
+
+    // Each OCMB needs to keep track of whether it has hit a mainline UE. This
+    // is needed for a workaround for clearing Hardware Force Mirror (HWFM) when
+    // certain errors are hit, however if an OCMB has hit a mainline UE, then
+    // HWFM will not be cleared.
+    #ifdef __HOSTBOOT_RUNTIME
+    OcmbDataBundle * db = getOcmbDataBundle(i_chip);
+    db->iv_hwfmMainlineUe = true;
+    #endif
+
     return SUCCESS; // nothing to return to rule code
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchUe );
@@ -673,6 +683,8 @@ PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeFetchUe );
 int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
                             STEP_CODE_DATA_STRUCT & io_sc )
 {
+    #define PRDF_FUNC "[explorer_ocmb::AnalyzeMainlineIue] "
+
     int32_t rc = SUCCESS;
     MemEcc::analyzeMainlineIue<TYPE_OCMB_CHIP>( i_chip, io_sc );
 
@@ -683,7 +695,21 @@ int32_t AnalyzeMainlineIue( ExtensibleChip * i_chip,
 
     #endif
 
+    // Hardware Force Mirror workaround: manually clear the FIR bit and HWFM.
+    // If IUE threshold was reached, a channel fail will be triggered anyway so
+    // don't bother clearing HWFM.
+    if (PRD_NO_CLEAR_FIR_BITS != rc)
+    {
+        if (SUCCESS != MemUtils::clearFirAndHwfm(i_chip, "RDFFIR_AND", 17))
+        {
+            PRDF_ERR(PRDF_FUNC "Error from clearFirAndHwfm(0x%08x,RDFFIR_AND,"
+                     "17)", i_chip->getHuid());
+        }
+    }
+
     return rc; // nothing to return to rule code
+
+    #undef PRDF_FUNC
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeMainlineIue );
 
@@ -793,6 +819,48 @@ int32_t AnalyzeMaintAue( ExtensibleChip * i_chip,
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, AnalyzeMaintAue );
 
+/**
+ * @brief  Workaround to manually clear the indicated FIR bit and Hardware
+ *         Force Mirror (HWFM) after handling an error.
+ * @param  i_chip OCMB chip.
+ * @param  i_bit Target bit to clear.
+ * @return SUCCESS
+ */
+int32_t __hwfmWorkaround(ExtensibleChip * i_chip, uint8_t i_bit)
+{
+    #define PRDF_FUNC "[explorer_ocmb::__hwfmWorkaround] "
+
+    // Hardware Force Mirror workaround: manually clear the FIR bit and HWFM.
+    if (SUCCESS != MemUtils::clearFirAndHwfm(i_chip, "RDFFIR_AND", i_bit))
+    {
+        PRDF_ERR(PRDF_FUNC "Error from clearFirAndHwfm(0x%08x,RDFFIR_AND,%d)",
+                 i_chip->getHuid(), i_bit);
+    }
+
+    return SUCCESS; // nothing to return to rule code
+
+    #undef PRDF_FUNC
+}
+
+#define HWFM_WORKAROUND_IMPE_PLUGIN(BIT) \
+int32_t hwfmWorkaround_bit##BIT(ExtensibleChip * i_chip, \
+                                STEP_CODE_DATA_STRUCT & io_sc) \
+{ \
+    return __hwfmWorkaround(i_chip, BIT); \
+} \
+PRDF_PLUGIN_DEFINE( explorer_ocmb, hwfmWorkaround_bit##BIT );
+
+HWFM_WORKAROUND_IMPE_PLUGIN(0);  // mainline MPE rank 0
+HWFM_WORKAROUND_IMPE_PLUGIN(1);  // mainline MPE rank 1
+HWFM_WORKAROUND_IMPE_PLUGIN(2);  // mainline MPE rank 2
+HWFM_WORKAROUND_IMPE_PLUGIN(3);  // mainline MPE rank 3
+HWFM_WORKAROUND_IMPE_PLUGIN(4);  // mainline MPE rank 4
+HWFM_WORKAROUND_IMPE_PLUGIN(5);  // mainline MPE rank 5
+HWFM_WORKAROUND_IMPE_PLUGIN(6);  // mainline MPE rank 6
+HWFM_WORKAROUND_IMPE_PLUGIN(7);  // mainline MPE rank 7
+HWFM_WORKAROUND_IMPE_PLUGIN(9);  // mainline TCE
+HWFM_WORKAROUND_IMPE_PLUGIN(18); // mainline IRCD
+HWFM_WORKAROUND_IMPE_PLUGIN(19); // mainline IMPE
 
 //##############################################################################
 //
