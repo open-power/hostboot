@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,16 +49,26 @@ fapi2::ReturnCode p10_io_dynamic_vio(
     const uint8_t& i_version,
     uint32_t& o_vio_mv)
 {
-    const uint32_t C_MIN_VIO_MV = 930;
-    const uint32_t C_MAX_VIO_MV = 1040;
     const uint32_t C_MIN_CONFIG_DIMMS = 8;
-    const uint32_t C_BASE_VIO_UV = 1020000; // 1020mv
     const uint32_t C_DIMM_UPLIFT = 900; // 900uV
     const uint32_t C_ABUS_UPLIFT = 2666; // 2.666mV
+
+    uint32_t C_BASE_VIO_UV = 1020000; // 1020mv
+    uint32_t C_MIN_VIO_MV = 930;
+    uint32_t C_MAX_VIO_MV = 1040;
+
     uint32_t l_uplift = 0;
     uint32_t l_num_dimms = 0;
 
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+
+    // Update base voltage & max/min if in DD2.04+
+    if (i_version >= 4)
+    {
+        C_BASE_VIO_UV = 930000; // 930mv
+        C_MIN_VIO_MV = 900;
+        C_MAX_VIO_MV = 960;
+    }
 
     for (auto l_pauc_target : l_pauc_targets)
     {
