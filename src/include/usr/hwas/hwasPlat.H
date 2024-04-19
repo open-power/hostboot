@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,15 +140,6 @@ void crosscheck_sp_presence();
  * @return errlHndl_t Error if any, otherwise nullptr.
  */
 errlHndl_t crosscheck_sp_presence_target(TARGETING::Target * i_target);
-
-/**
- * @brief Checks paired (PMIC-POWER_IC) siblings have the same
- *        functional status for DDR5 OCMBs. Will deconfigure the functional
- *        sibling if its paired sibling is not functional.
- *
- * @return errlHndl_t Error if unable to get memory type, otherwise nullptr.
- */
-errlHndl_t deconfigureUnmatchedPairsOnDDIMM();
 
 } // namespace HWAS
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -589,24 +589,6 @@ void* host_discover_targets( void *io_pArgs )
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           ERR_MRK"host_discover_targets: l_HWASDiscovery.discoverTargets() Failed");
-
-                captureError(l_err, l_stepError, ISTEP_COMP_ID);
-
-                // set bool to skip some functions below
-                skip_functions_due_to_previous_error = true;
-            }
-        }
-
-        if (skip_functions_due_to_previous_error == false)
-        {
-            // PMIC and POWER_IC targets have been marked functional
-            // now check that their pairing status matches
-            l_err = HWAS::deconfigureUnmatchedPairsOnDDIMM();
-
-            if (l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,ERR_MRK
-                          "host_discover_targets: deconfigureUnmatchedPairsOnDDIMM() Failed");
 
                 captureError(l_err, l_stepError, ISTEP_COMP_ID);
 
