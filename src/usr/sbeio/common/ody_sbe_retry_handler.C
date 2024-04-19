@@ -162,8 +162,8 @@ void OdySbeRetryHandler::main_sbe_handler(errlHndl_t& io_errl, const bool i_sbeH
     // Use the ODY_RECOVERY_STATE (a per-target attribute) to prevent any re-entrant callers.
     // If an OCMB target has already entered this function, then we are prohibiting any recursive
     // callers.  During HBRT we are single threaded, so not an issue, however during IPL, in theory,
-    // multi-threaded callers *could*  attempt.
-    // @TODO - need a lock??
+    // multi-threaded callers *could*  attempt.  However, higher-level logic should ensure
+    // that we're not interacting with the same OCMB from multiple threads.
     if ((iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>()) == ODY_RECOVERY_STATUS_VIABLE)
     {
         iv_ocmb->setAttr<ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_IN_PROGRESS);
