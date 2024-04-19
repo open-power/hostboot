@@ -99,6 +99,56 @@ enum InitServiceUserDetailDataSubSection
     INIT_SVC_UDT_ISTEP_STATS = 0x02,
 };
 
+
+// Since the reasoncodes defined in InitServiceReasonCode above can be used in calls to
+// doShutdown() without an actual error log being created, the BMC can create a TI error
+// log without a custdesc (which also creates a service action for HMC).  To create the
+// the proper callout for the PEL parsing put dummy errorlog doxygen comments here using
+// the common moduleid BASE_INITSVC_MOD_ID which is used in InitService::_doShutdown().
+
+/*@
+ * @errortype
+ * @moduleid        BASE_INITSVC_MOD_ID
+ * @reasoncode      SBE_EXTRACT_RC_REQUEST_REIPL
+ * @userdata1       UNDEFINED
+ * @userdata2       UNDEFINED
+ * @devdesc         Hostboot code called doShutdown() directly
+ * @custdesc        Firmware requested a re-IPL/reboot
+ */
+
+/*@
+ * @errortype
+ * @moduleid        BASE_INITSVC_MOD_ID
+ * @reasoncode      SHUTDOWN_DO_RECONFIG_LOOP
+ * @userdata1       UNDEFINED
+ * @userdata2       UNDEFINED
+ * @devdesc         Hostboot code called doShutdown() directly to request a reconfig loop
+ * @custdesc        Firmware requested part of the IPL to be done again
+ */
+
+/*@
+ * @errortype
+ * @moduleid        BASE_INITSVC_MOD_ID
+ * @reasoncode      SHUTDOWN_MFG_TERM
+ * @userdata1       UNDEFINED
+ * @userdata2       UNDEFINED
+ * @devdesc         Hostboot code called doShutdown() directly because an error was committed
+ *                  in manufacturing mode
+ * @custdesc        Firmware shutdown the system due to an error log being commited while the system
+ *                  was running in manufacturing mode
+ */
+
+/*@
+ * @errortype
+ * @moduleid        BASE_INITSVC_MOD_ID
+ * @reasoncode      SHUTDOWN_KEY_TRANSITION
+ * @userdata1       UNDEFINED
+ * @userdata2       UNDEFINED
+ * @devdesc         Hostboot code called doShutdown() directly after a SBE Update where the
+ *                  security keys were updated
+ * @custdesc        Firmware shutdown the system after some security settings were updated
+ */
+
 };  // namespace    INITSERVICE
 
 #endif
