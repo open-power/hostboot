@@ -97,7 +97,7 @@ void* call_mss_draminit (void *io_pArgs)
                 fapi2::hwp_array_ostream ostream(writebuf, std::size(writebuf));
 
                 /*
-                 * @todo JIRA:PFHB-434 Support for local file access
+                 * Requires local file access that Hostboot doesn't support.
                  *
                  RUN_ODY_HWP(CONTEXT, l_err, i_ocmb, ody_load_imem, l_fapi_target, ...);
                  RUN_ODY_HWP(CONTEXT, l_err, i_ocmb, ody_load_dmem, l_fapi_target, ...);
@@ -107,7 +107,7 @@ void* call_mss_draminit (void *io_pArgs)
                 RUN_ODY_HWP(CONTEXT, l_stepError, l_err, i_ocmb, ody_host_draminit, l_fapi_target);
 
                 /*
-                 * @todo JIRA:PFHB-434 Support for local file access
+                 * Requires local file access that Hostboot doesn't support.
                  *
                 RUN_ODY_HWP(CONTEXT, l_stepError, l_err, i_ocmb, ody_load_pie, l_fapi_target, ...);
                 */

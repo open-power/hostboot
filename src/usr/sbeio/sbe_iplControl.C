@@ -51,7 +51,7 @@ namespace SBEIO
 {
 
     /**
-    * @brief @TODO JIRA PFHB-302
+    * @brief Send Istep command to the SBE.
     *
     * @param[in] i_chipTarget The chip you would like to perform the chipop on
     *                       NOTE: HB should only be sending this to non-boot procs or Odyssey chips
@@ -84,7 +84,7 @@ namespace SBEIO
 
 
     /**
-     * @Brief Send the IO or MEMORY HWP request to the SBE.  This function
+     * @brief Send the IO or MEMORY HWP request to the SBE.  This function
      *        is called by one of two wrapper functions which perform initial
      *        checking of the parameters and then call this function to send
      *        the HWP request.
