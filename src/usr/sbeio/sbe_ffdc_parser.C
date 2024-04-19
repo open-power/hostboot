@@ -444,12 +444,8 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
             slidErrl->addProcedureCallout(HWAS::EPUB_PRC_SBE_CODE,
                                           HWAS::SRCI_PRIORITY_HIGH);
 
-            // @TODO PFHB-551 Stop deleteing when SBE stops sending RC=0 logs back on success. It's causing CI fails for
-            //                us.
-            SBE_TRACF(ERR_MRK"ERROR: SBE sent RC=0. This is a code bug on their part, deleting ERRL %.8x",
+            SBE_TRACF(ERR_MRK"ERROR: SBE sent RC=0. This is a code bug on their part. ERRL %.8x",
                       ERRL_GETEID_SAFE(slidErrl));
-            delete slidErrl;
-            slidErrl = nullptr;
 
         }
 
