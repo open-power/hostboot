@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,7 +103,7 @@ errlHndl_t run_ocmb_omi_scominit( istep_12_4_ody_omi_hss_hwp i_hwpNumber )
             if (l_runOdyHwpFromHost)
             {
                 /*
-                 * @TODO JIRA: PFHB-418 This requires additional parameters to the hwp
+                 * This requires additional parameters to the hwp that HB doesn't support.              
                  *
                  if (i_hwpNumber & ODY_OMI_HSS_LOAD_PPE)
                  {
