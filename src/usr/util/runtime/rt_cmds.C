@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,7 +81,7 @@ namespace HTMGT
 
 // A flag, that when defined, will include interfaces: writevpd, getscom and putscom
 // Comment out to exclude said interfaces
-#define INCLUDE_LAB_ONLY_INTERFACES 1
+//#define INCLUDE_LAB_ONLY_INTERFACES 1
 
 extern char hbi_ImageId;
 
