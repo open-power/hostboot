@@ -6372,26 +6372,28 @@ fapi2::ReturnCode handle_address_errors_internal(const mss::rank::info<mss::mc_t
     // If the whole nibble is bad, continue
     const auto i_dram_bad_bits = io_start_bad_bits[i_rank_info.get_phy_rank()][l_byte] & l_mask_off;
 
-    if(i_dram_bad_bits == l_inject)
+    if(i_dram_bad_bits == l_mask_off)
     {
         ++io_bad_dram_on_rank;
-        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u disabled due to bad bits, setting as bad and continuing", GENTARGTID(l_port),
-                 i_rank_info.get_port_rank());
+        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u disabled due to bad bits, setting as bad and continuing",
+                 GENTARGTID(l_port), i_rank_info.get_port_rank(), i_dram);
         return fapi2::FAPI2_RC_SUCCESS;
     }
     else
     {
         uint16_t l_temp = 0;
-        // First up, clears all training steps EXCEPT for the swizzle detect and address ones
+        // First up, clears all training steps EXCEPT for the address and DQS training ones
         // The chance of us getting a fatal error is very rare from the steps after this point and this has signifcant time savings
-        // Swizzle detect could go bad if DQ0 is bad within this nibble
-        // Up to write leveling needs to be run to ensure swizzle detect is run
-        FAPI_TRY(SequenceCtrl_helper(l_port, 0xC00F, l_temp));
+        // Note: does not run the swizzle detect despite the fact that this can cause fatal errors
+        //    Swizzle detect was observed to cause false failures, limiting the chances of recovering otherwise good cards
+        FAPI_TRY(SequenceCtrl_helper(l_port, 0xC005, l_temp));
         io_struct.SequenceCtrl = l_temp;
-        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u already has bad bits, so using an extended test. bad bits:0x%02x",
-                 GENTARGTID(l_port),
-                 i_rank_info.get_port_rank(), i_dram, i_dram_bad_bits);
+        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u being tested with bad bits:0x%02x",
+                 GENTARGTID(l_port), i_rank_info.get_port_rank(), i_dram, i_dram_bad_bits);
     }
+
+    // Clears the per-DRAM address ODT settings. It will be reset after the address recovery is completed
+    io_struct.ReservedF6 = 0;
 
     // Configure the dram to test
     l_bad_bits[i_rank_info.get_phy_rank()][l_byte] = l_inject | io_start_bad_bits[i_rank_info.get_phy_rank()][l_byte];
@@ -6476,7 +6478,8 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
     FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_nibbles_enables));
     l_nibble_enables = iv_nibbles_enables[0];
     io_struct.MsgMisc &= 0x7f;
-
+    // Clears the per-DRAM address ODT settings. It will be reset after the address recovery is completed
+    io_struct.ReservedF6 = 0;
 
     // Loops through DRAM by DRAM disabling all other DRAM's
     for(const auto& l_rank_info : l_rank_infos)
