@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2012,2014              */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -33,7 +35,7 @@ namespace PRDF
 {
     tracDesc_t traceDesc = 0;
 #ifdef __HOSTBOOT_MODULE
-    TRAC_INIT( &traceDesc, PRDF_COMP_NAME, KILOBYTE );
+    TRAC_INIT( &traceDesc, PRDF_COMP_NAME, 2 * KILOBYTE );
 #else
     TRAC_INIT( &traceDesc, PRDF_COMP_NAME, 4096 );
 #endif
