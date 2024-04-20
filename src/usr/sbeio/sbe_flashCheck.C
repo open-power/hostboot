@@ -100,12 +100,20 @@ errlHndl_t makeFlashErrl(Target* i_ocmb,
     {
         for(const auto l_error : *l_errorVector)
         {
+            // Flash side values as defined with enum flashCheckSide are not the normal boot
+            // side0, side1, side2 (golden) values.  The messages below include both values to
+            // avoid any confusion.
+            uint8_t aka_side = 0;
+            if (l_error.side == SIDE_0) {aka_side = 0;}
+            else if (l_error.side == SIDE_1) {aka_side = 1;}
+            else if (l_error.side == SIDE_GOLDEN) {aka_side = 2;}
+
             char errorString[256] = {};
             snprintf(errorString, sizeof(errorString),
-                     "Side %d DeviceID: 0x%x; number of Correctable Errors: 0x%x; Unrecoverable Errors: 0x%x",
-                     l_error.side, l_error.deviceId, l_error.numCe, l_error.numUe);
-            SBE_TRACF(INFO_MRK"processSpiFlashCheckResponse: Side %d DeviceID 0x%x; number of CEs: 0x%x; UEs: 0x%x",
-                      l_error.side, l_error.deviceId, l_error.numCe, l_error.numUe);
+                     "Flash Check Side %d (aka boot side %d) DeviceID: 0x%x; number of Correctable Errors: 0x%x; Unrecoverable Errors: 0x%x",
+                     l_error.side, aka_side, l_error.deviceId, l_error.numCe, l_error.numUe);
+            SBE_TRACF(INFO_MRK"processSpiFlashCheckResponse: Flash Check Side %d (aka boot side %d) DeviceID 0x%x; number of CEs: 0x%x; UEs: 0x%x",
+                      l_error.side, aka_side, l_error.deviceId, l_error.numCe, l_error.numUe);
             ErrlUserDetailsString(errorString).addToLog(l_errl);
         }
     }
@@ -244,7 +252,8 @@ ERROR_EXIT:
 
 errlHndl_t sendSpiFlashCheckRequest(Target* i_ocmb, uint8_t i_scope, uint8_t i_side, uint8_t i_deviceId)
 {
-    SBE_TRACF(ENTER_MRK"sendSpiFlashCheckRequest");
+    SBE_TRACF(ENTER_MRK"sendSpiFlashCheckRequest: i_ocmb = 0x%08X, scope=%d, side=0x%X, devId=%d",
+              get_huid(i_ocmb), i_scope, i_side, i_deviceId);
     errlHndl_t l_errl = nullptr;
 
     // SPPE will send back a scrub status entry per side requested per device, so
@@ -287,7 +296,7 @@ errlHndl_t sendSpiFlashCheckRequest(Target* i_ocmb, uint8_t i_scope, uint8_t i_s
     }
 
 ERROR_EXIT:
-    SBE_TRACF(EXIT_MRK"sendSpiFlashCheckRequest");
+    SBE_TRACF(EXIT_MRK"sendSpiFlashCheckRequest: i_ocmb = 0x%08X", get_huid(i_ocmb));
     return l_errl;
 }
 
