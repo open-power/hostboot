@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,6 +49,7 @@
 #include <chipids.H>
 #include <kind.H>
 #include <hwp_wrappers.H>
+#include <ody_ecs.H>
 #include <pldm/extended/pldm_watchdog.H>
 
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
@@ -764,7 +765,17 @@ bool StateMachine::scheduleWorkItem(WorkFlowProperties & i_wfp)
         if(!iv_tp)
         {
             //create same number of tasks in the pool as there are cpu threads
-            const size_t l_num_tasks = cpu_thread_count();
+            size_t l_num_tasks = cpu_thread_count();
+
+            if (isMfgFlagSet(MFG_FLAGS_MNFG_DDR5_ECS_TEST))
+            {
+                // Use one thread per OCMB
+                TargetHandleList ocmbList;
+                getAllChips(ocmbList, TYPE_OCMB_CHIP);
+
+                l_num_tasks = ocmbList.size();
+            }
+
             Util::ThreadPoolManager::setThreadCount(l_num_tasks);
             MDIA_FAST("Starting threadPool with %u tasks...", l_num_tasks);
             iv_tp = new Util::ThreadPool<WorkItem>();
@@ -797,6 +808,7 @@ bool StateMachine::workItemIsAsync(WorkFlowProperties & i_wfp)
         case CLEAR_HW_CHANGED_STATE:
         case ANALYZE_IPL_MNFG_CE_STATS:
         case POST_MEMDIAGS_HWPS:
+        case ODY_MNFG_DRAM_SCRUB:
 
             // no attention associated with these so
             // schedule the next work item now
@@ -896,6 +908,43 @@ errlHndl_t __runPostMemdiagsHwps( TargetHandle_t i_trgt )
     return err;
 }
 
+/**
+ * @brief Run Odyssey manufacturing dram scrub procedure
+ *
+ * @param[in] i_trgt input ocmb target
+ * @return nullptr on success; non-nullptr on error
+ *
+ */
+errlHndl_t __runOdyMnfgDramScrub(TargetHandle_t i_trgt)
+{
+    errlHndl_t o_err = nullptr;
+
+    // Since DDR5 DRAMs have on DIE ECC the only way to have visibility to see
+    // how many single bit errors the DRAMs are correcting is by running the
+    // ECS (error correct and scrub) command on the DRAMs.
+
+    if (!isOdysseyOcmb(i_trgt))
+    {
+        // This function should be run on Odyssey OCMBs only. Just exit quietly
+        // if the input target is not an Odyssey OCMB.
+        return o_err;
+    }
+
+    MDIA_FAST("Running ody_ecs on OCMB 0x%08x", get_huid(i_trgt));
+
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiTrgt(i_trgt);
+    FAPI_INVOKE_HWP(o_err, ody_ecs, fapiTrgt);
+
+    MDIA_FAST("ody_ecs on OCMB 0x%08x completed", get_huid(i_trgt));
+
+    if (o_err)
+    {
+        MDIA_FAST("ERROR: ody_ecs HWP on OCMB 0x%08x failed", get_huid(i_trgt));
+    }
+
+    return o_err;
+}
+
 bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
 {
     bool dispatched = false;
@@ -989,6 +1038,10 @@ bool StateMachine::executeWorkItem(WorkFlowProperties * i_wfp)
                 mutex_unlock(&iv_mutex);
 
                 break;
+
+            case ODY_MNFG_DRAM_SCRUB:
+
+                err = __runOdyMnfgDramScrub(getTarget(*i_wfp));
 
             default:
                 break;

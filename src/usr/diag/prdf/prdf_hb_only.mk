@@ -273,6 +273,12 @@ prd_obj_no_sim += ody_thermal_init_utils.o
 prd_obj_no_sim += ody_dqs_track_host_utils.o
 prd_obj_no_sim += ody_tsns_dqs_period.o
 
+# Needed for the ody_ecs procedure
+prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/ffdc/
+prd_obj_no_sim += ody_ecs.o
+prd_obj_no_sim += ody_error_check_scrub.o
+prd_obj_no_sim += ody_pack_ecs_data.o
+
 # Needed for the exp_deploy_row_repairs procedure
 prd_obj_no_sim += exp_deploy_row_repairs.o
 prd_obj_no_sim += exp_row_repair.o

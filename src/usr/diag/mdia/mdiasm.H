@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -63,6 +63,7 @@ enum WorkFlowPhase
     CLEAR_HW_CHANGED_STATE,
     ANALYZE_IPL_MNFG_CE_STATS,
     POST_MEMDIAGS_HWPS,
+    ODY_MNFG_DRAM_SCRUB,
 };
 
 /**

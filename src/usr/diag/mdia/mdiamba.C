@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,11 +64,14 @@ errlHndl_t getWorkFlow(
                 WorkFlow & o_wf,
                 const Globals & i_globals)
 {
-    // add the correct sequences for the mba based
-    // on the mode
+    // add the correct sequences for the ocmb based on the mode
 
-    // every mba does restore dram repairs
+    if (isMfgFlagSet(MFG_FLAGS_MNFG_DDR5_ECS_TEST))
+    {
+        o_wf.push_back(ODY_MNFG_DRAM_SCRUB);
+    }
 
+    // every ocmb does restore dram repairs
     o_wf.push_back(RESTORE_DRAM_REPAIRS);
 
     switch (i_mode)
