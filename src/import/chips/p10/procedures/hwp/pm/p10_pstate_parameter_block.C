@@ -3504,7 +3504,7 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
             FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
                     pv_op_str[i - 1], pv_op_str[i]);
 
-            if ( (iv_attrs.attr_extended_freq_mode) &&
+            if ( (iv_attrs.attr_extended_freq_mode) && 
                  POUNDV_POINTS_INCREASE_PNEXT_CHECK(i))
             {
                 l_cf_point_check_fail = 1;
