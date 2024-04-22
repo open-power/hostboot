@@ -29,6 +29,8 @@
 ///-----------------------------------------------------------------------------
 /// *HW HW Maintainer: Josh Chica <Josh.Chica@ibm.com>
 /// *HW FW Maintainer:
+/// *HW Team: IO
+/// *HW Level: 3
 /// *HW Consumed by  : SBE
 ///-----------------------------------------------------------------------------
 #pragma once
