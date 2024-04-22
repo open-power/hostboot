@@ -93,6 +93,8 @@ typedef uint8_t Pstate;
 #define PSTATE_LT_PSTATE_MIN 0x00778a03
 #define PSTATE_GT_PSTATE_MAX 0x00778a04
 
+static const uint32_t TGTSTR_LEN                    = 64;
+
 //Pstate SuperStructure
 typedef struct
 {
@@ -272,8 +274,14 @@ class PlatPmPPB
             iv_wts_vddPsavFreq(0), iv_wts_vddWofBaseFreq(0), iv_wts_vddUTFreq(0), iv_wts_vddFixedFreq(0)
 
         {
+            // Initialize the attribute structure
             attr_init();
 
+            // Create a target string for the chip being processed
+            fapi2::toString(i_target, iv_tgtstr, TGTSTR_LEN);
+            FAPI_INF("Target string: %s", iv_tgtstr);
+
+            // Get a core vector for all functional cores
             auto l_coreList  =
                 i_target.getChildren< fapi2::TARGET_TYPE_CORE >( fapi2::TARGET_STATE_FUNCTIONAL );
             iv_core_count = (uint32_t)l_coreList.size();
@@ -883,6 +891,7 @@ class PlatPmPPB
 
     private:
         fapi2::Target< fapi2::TARGET_TYPE_PROC_CHIP > iv_procChip;  // processor chip target
+        char                      iv_tgtstr[TGTSTR_LEN];
         AttributeList             iv_attrs;
         bool                      iv_boot_mode;
         uint8_t                   iv_pstates_enabled;

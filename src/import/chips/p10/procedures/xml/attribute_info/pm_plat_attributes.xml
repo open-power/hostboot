@@ -128,7 +128,7 @@
   <attribute>
     <id>ATTR_DDR5_VDN_UPLIFT_MV</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
-    <description>Defines the VDN rail uplift (in mV) if DDR5 DIMMs are installed in the node
+    <description>This attribute has no effect.
     </description>
     <valueType>uint16</valueType>
     <platInit/>
@@ -2850,9 +2850,7 @@
     <id>ATTR_VDN_UPLIFT_MV</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
-    Voltage (in mV) to uplift the VDN rail if the #V PAU frequency is 205OMHz.
-    This value is present in early sorted parts where extra voltage margin is
-    needed.
+    Voltage (in mV) to uplift the VDN rail for P10 systems
 
     Consumer: p10_setup_evid.C
 
@@ -2860,7 +2858,7 @@
     </description>
     <valueType>uint32</valueType>
     <platInit>mrw</platInit>
-    <default>25</default>
+    <default>125</default>
     <group>mrw</group>
   </attribute>
 
