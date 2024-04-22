@@ -41,6 +41,7 @@
 #include <lib/dimm/ody_rank.H>
 #include <lib/power_thermal/ody_temp_sensor_traits.H>
 #include <lib/ccs/ody_ccs.H>
+#include <lib/phy/ody_phy_access.H>
 #include <ody_scom_mp_dbyte0_b0.H>
 
 namespace mss
@@ -109,17 +110,6 @@ struct mcbist_state
     // starting address for when we resume the test
     fapi2::buffer<uint64_t> iv_current_addr;
 } __attribute__ ((__aligned__(8)));
-
-///
-/// @brief Constants related to ATTR_ODY_DQS_TRACKING_LOG
-///
-enum logging_consts
-{
-    // Number of log entries in ATTR_ODY_DQS_TRACKING_LOG
-    ATTR_ODY_DQS_TRACKING_LOG_ENTRIES = 24,
-    // Number of DQS drift delta entries in a ATTR_ODY_DQS_TRACKING_LOG entry
-    ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT = 3,
-};
 
 ///
 /// @brief Maps DQS interval timer value to MR value encoding
@@ -200,10 +190,10 @@ fapi2::ReturnCode dqs_recal(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank
 ///
 /// @brief Helper function to calculate the temperature delta of the ocmb sensor
 /// @param [in] i_target OCMB target
-/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor
+/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor (units: centi-degrees C)
 /// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
-/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
-/// @param [out] o_current_temp_values vector of current temperature of all the sensors
+/// @param [out] o_temp_delta delta of the previous value and the current value (units: centi-degrees C)
+/// @param [out] o_current_temp_values vector of current temperature of all the sensors (units: centi-degrees C)
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode calc_ocmb_sensor_temp_delta_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
@@ -215,10 +205,10 @@ fapi2::ReturnCode calc_ocmb_sensor_temp_delta_helper(const fapi2::Target<fapi2::
 
 ///
 /// @brief Helper function calculate the temperature delta of the DDIMM sensor
-/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor
+/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor (units: centi-degrees C)
 /// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
-/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
-/// @return int16_t current temperature value
+/// @param [out] o_temp_delta delta of the previous value and the current value (units: centi-degrees C)
+/// @return int16_t current temperature value (units: centi-degrees C)
 ///
 int16_t calc_thermal_sensor_temp_delta_helper(const int16_t i_thermal_sensor_prev_attr,
         const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
@@ -240,8 +230,9 @@ void check_sensor_exists_and_get_index(const uint8_t i_thermal_sensor_usage,
 ///
 /// @brief Calculate the temperature delta of the sensor
 /// @param [in] i_target OCMB target
-/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
-/// @param [out] o_current_temp_values vector of current temperature of all the sensors
+/// @param [out] o_temp_delta delta of the previous value and the current value (units: centi-degrees C)
+/// @param [out] o_current_temp_values vector of current temperature of all the sensors (units: centi-degrees C)
+/// @param [out] o_chosen_sensor_index index of the sensor chosen for the delta calculation
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
@@ -331,7 +322,7 @@ inline int16_t convert_to_2s_complement(fapi2::buffer<uint64_t>& i_value)
 inline void insert_delta(const uint16_t i_delta,
                          const uint8_t i_mrank,
                          const uint8_t i_dram,
-                         fapi2::buffer<uint16_t> (&io_deltas)[ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT])
+                         fapi2::buffer<uint16_t> (&io_deltas)[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT])
 {
     // Bit indexes within a drift delta entry
     constexpr uint8_t DELTA_VAL = 6;
@@ -340,7 +331,7 @@ inline void insert_delta(const uint16_t i_delta,
     constexpr uint8_t DRAM = 11;
     constexpr uint8_t DRAM_LEN = 5;
 
-    for (uint8_t l_idx = 0; l_idx < ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT; l_idx++)
+    for (uint8_t l_idx = 0; l_idx < mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT; l_idx++)
     {
         int16_t l_compare_delta = 0;
         io_deltas[l_idx].extractToRight<DELTA_VAL, DELTA_VAL_LEN>(l_compare_delta);
@@ -354,7 +345,7 @@ inline void insert_delta(const uint16_t i_delta,
             .insertFromRight<DELTA_VAL, DELTA_VAL_LEN>(i_delta);
 
             // shift the other delta entries later in the array, since they are smaller
-            for (uint8_t l_shift_idx = ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT - 1; l_shift_idx > l_idx; l_shift_idx--)
+            for (uint8_t l_shift_idx = mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT - 1; l_shift_idx > l_idx; l_shift_idx--)
             {
                 io_deltas[l_shift_idx] = io_deltas[l_shift_idx - 1];
             }
@@ -377,7 +368,7 @@ inline void insert_delta(const uint16_t i_delta,
 fapi2::ReturnCode ody_get_dqs_offsets(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                       const bool i_compute_deltas,
                                       int16_t (&io_offsets)[HW_MAX_RANK_PER_DIMM][ODY_NUM_DRAM_X4],
-                                      fapi2::buffer<uint16_t> (&o_deltas)[ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT]);
+                                      fapi2::buffer<uint16_t> (&o_deltas)[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT]);
 
 ///
 /// @brief Insert a new DQS track log entry into the attribute array
@@ -385,7 +376,7 @@ fapi2::ReturnCode ody_get_dqs_offsets(const fapi2::Target<fapi2::TARGET_TYPE_MEM
 /// @param [in,out] io_log log array from ATTR_ODY_DQS_TRACKING_LOG
 ///
 inline void insert_log_entry(const fapi2::buffer<uint64_t> i_new_log_entry,
-                             uint64_t (&io_log)[ATTR_ODY_DQS_TRACKING_LOG_ENTRIES])
+                             uint64_t (&io_log)[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES])
 {
     constexpr uint64_t LAST_VALID_MASK  = 0x8000000000000000;
     constexpr uint64_t LAST_VALID_CLEAR = 0x7FFFFFFFFFFFFFFF;
@@ -395,12 +386,12 @@ inline void insert_log_entry(const fapi2::buffer<uint64_t> i_new_log_entry,
     // ATTR_ODY_DQS_TRACKING_LOG is a circular buffer with bit0 as its "last valid" bit
     // so we have to store the new entry in the slot after the one with "last valid" set
     // and clear the previous entry's "last valid" bit
-    for (uint8_t l_idx = 0; l_idx < ATTR_ODY_DQS_TRACKING_LOG_ENTRIES; l_idx++)
+    for (uint8_t l_idx = 0; l_idx < mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES; l_idx++)
     {
         if ((io_log[l_idx] & LAST_VALID_MASK) != 0)
         {
             io_log[l_idx] &= LAST_VALID_CLEAR;
-            io_log[(l_idx + 1) % ATTR_ODY_DQS_TRACKING_LOG_ENTRIES] = i_new_log_entry;
+            io_log[(l_idx + 1) % mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES] = i_new_log_entry;
             l_found_last_valid = true;
             break;
         }
@@ -426,7 +417,7 @@ inline fapi2::ReturnCode ody_dqs_track_log(const fapi2::Target<fapi2::TARGET_TYP
         const bool i_trigger,
         const uint16_t i_counter,
         const int16_t i_temperature,
-        fapi2::buffer<uint16_t> (&i_deltas)[ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT])
+        fapi2::buffer<uint16_t> (&i_deltas)[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT])
 {
     // Bit indexes within ATTR_ODY_DQS_TRACKING_LOG
     constexpr uint8_t LAST_VALID = 0;
@@ -440,7 +431,7 @@ inline fapi2::ReturnCode ody_dqs_track_log(const fapi2::Target<fapi2::TARGET_TYP
     constexpr uint8_t DELTA2 = 45;
     constexpr uint8_t DELTA_LEN = 10;
 
-    uint64_t l_log[ATTR_ODY_DQS_TRACKING_LOG_ENTRIES] __attribute__ ((__aligned__(8))) = {0};
+    uint64_t l_log[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES] __attribute__ ((__aligned__(8))) = {0};
     fapi2::buffer<uint64_t> l_new_log_entry;
 
     // Read the log attribute
@@ -450,7 +441,7 @@ inline fapi2::ReturnCode ody_dqs_track_log(const fapi2::Target<fapi2::TARGET_TYP
     l_new_log_entry.setBit<LAST_VALID>()
     .writeBit<TRIGGER_REASON>(i_trigger)
     .insertFromRight<COUNTER, COUNTER_LEN>(i_counter)
-    .insertFromRight<TEMPERATURE, TEMPERATURE_LEN>(i_temperature)
+    .insertFromRight<TEMPERATURE, TEMPERATURE_LEN>(i_temperature / 100)
     .insertFromRight<DELTA0, DELTA_LEN>(i_deltas[0])
     .insertFromRight<DELTA1, DELTA_LEN>(i_deltas[1])
     .insertFromRight<DELTA2, DELTA_LEN>(i_deltas[2]);
@@ -460,6 +451,59 @@ inline fapi2::ReturnCode ody_dqs_track_log(const fapi2::Target<fapi2::TARGET_TYP
 
     // Write the log attribute
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_DQS_TRACKING_LOG, i_target, l_log));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Log data from a DQS recalibration from attributes into PHY SRAM storage
+/// @param [in] i_target MEM_PORT target
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+inline fapi2::ReturnCode ody_putscom_dqs_track_log(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+    uint64_t l_log[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES] = {0};
+    uint16_t l_recal_count = 0;
+
+    // The 'true' below is so we turn on UCCLK to access the PHY SRAM
+    FAPI_TRY(mss::ody::phy::configure_phy_scom_access(i_target, mss::states::ON_N, true));
+
+    // Write the log to the imem area
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_LOG, l_ocmb, l_log));
+
+    for (uint64_t l_log_idx = 0; l_log_idx < mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES; l_log_idx++)
+    {
+        fapi2::buffer<uint64_t> l_buf(l_log[l_log_idx]);
+
+        for (uint8_t l_hword = 0; l_hword < mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY; l_hword++)
+        {
+            const uint64_t l_syn_addr = mss::ddr5::ODY_DQS_TRACKING_LOG_START_ADDRESS +
+                                        l_log_idx * mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY + l_hword;
+            const uint64_t l_address = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(l_syn_addr);
+
+            uint64_t l_data = 0;
+            FAPI_TRY(l_buf.extractToRight(l_data, l_hword * BITS_PER_HWORD, BITS_PER_HWORD));
+
+            FAPI_TRY(fapi2::putScom(i_target, l_address, l_data));
+        }
+    }
+
+    // Write the recal count to the imem area
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_RECAL_COUNT, l_ocmb, l_recal_count));
+    {
+        const uint64_t l_address = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(
+                                       static_cast<uint64_t>(mss::ddr5::ODY_DQS_TRACKING_COUNT_START_ADDRESS));
+        const uint64_t l_address_odd = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(
+                                           static_cast<uint64_t>(mss::ddr5::ODY_DQS_TRACKING_COUNT_START_ADDRESS + 1));
+
+        FAPI_TRY(fapi2::putScom(i_target, l_address, l_recal_count));
+        // Required to write even+odd addresses on PHY imem
+        FAPI_TRY(fapi2::putScom(i_target, l_address_odd, 0));
+    }
+
+    FAPI_TRY(mss::ody::phy::configure_phy_scom_access(i_target, mss::states::OFF_N, true));
 
 fapi_try_exit:
     return fapi2::current_err;

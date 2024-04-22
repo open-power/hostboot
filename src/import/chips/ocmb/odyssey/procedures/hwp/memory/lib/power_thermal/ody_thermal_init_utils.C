@@ -71,15 +71,16 @@ int16_t calc_dimm_temp_X100<mss::mc_type::ODYSSEY>(const fapi2::buffer<uint64_t>
     bool l_sign_negative;
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
 
-    static constexpr uint16_t MIN_NEGATIVE_TEMP_VALUE = (TT::SENSOR_TEMP_MSB_INT_LENGTH + TT::SENSOR_TEMP_LSB_INT_LENGTH)
-            * (TT::SENSOR_TEMP_MSB_INT_LENGTH + TT::SENSOR_TEMP_LSB_INT_LENGTH);
+    // Minimum negative temp value is '1' in all 8 of the whole number bits plus one
+    // but multiplied by 100 since we're centi-degrees
+    static constexpr uint16_t MIN_NEGATIVE_TEMP_VALUE = 25600;
 
     l_sign_negative = i_scom_data.getBit<TT::SENSOR_SIGN_BIT>();
     i_scom_data.extractToRight<TT::SENSOR_TEMP_MSB_INT_START, TT::SENSOR_TEMP_MSB_INT_LENGTH>(l_sensor_temp_msb);
     i_scom_data.extractToRight<TT::SENSOR_TEMP_LSB_INT_START, TT::SENSOR_TEMP_LSB_INT_LENGTH>(l_sensor_temp_lsb);
 
     // calculate temperature (integer value, precision values will be added on later)
-    l_temperature_value = (l_sensor_temp_msb * TT::SENSOR_TEMP_MSB_START_VALUE) + l_sensor_temp_lsb;
+    l_temperature_value = ((l_sensor_temp_msb * TT::SENSOR_TEMP_MSB_START_VALUE) + l_sensor_temp_lsb) * 100;
 
     if (l_sign_negative)
     {
@@ -90,6 +91,7 @@ int16_t calc_dimm_temp_X100<mss::mc_type::ODYSSEY>(const fapi2::buffer<uint64_t>
         l_temperature_value = MIN_NEGATIVE_TEMP_VALUE - l_temperature_value;
         l_temperature_value = (i_scom_data.getBit<TT::SENSOR_TEMP_LSB_BIT3_BIT>()) ?
                               (l_temperature_value - TT::SENSOR_TEMP_BIT3_VALUE_X100) : l_temperature_value;
+        l_temperature_value *= -1;
     }
     else
     {

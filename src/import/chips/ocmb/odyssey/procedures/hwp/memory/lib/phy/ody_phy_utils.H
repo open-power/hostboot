@@ -518,16 +518,6 @@ constexpr const uint64_t PER_BIT_SWIZZLE_REGS[MAX_RANK_PER_PHY][MAX_BYTES_PER_PO
 };
 
 ///
-/// @brief Converts from a Synopsys register address to an IBM register address
-/// @param[in] i_synopsys_addr the Synopsys register address to convert
-/// @return The IBM register address converted from
-///
-constexpr uint64_t convert_synopsys_to_ibm_reg_addr( const uint64_t i_synopsys_addr)
-{
-    return static_cast<uint64_t>((i_synopsys_addr << 32) | 0x800000000801303f);
-}
-
-///
 /// @brief Loads two contiguous 8-bit fields into the DMEM register format
 /// @param[in] i_even_field field at the even byte offset
 /// @param[in] i_odd_field field at the odd byte offset

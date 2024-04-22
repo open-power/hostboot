@@ -260,6 +260,7 @@ fapi2::ReturnCode execute_concurrent_ccs(
 {
     fapi2::buffer<uint64_t> l_modeq_reg;
     fapi2::buffer<uint64_t> l_farb0q;
+    fapi2::buffer<uint64_t> l_fir_mask_save;
 
     const auto& l_port = i_rank_info.get_port_target();
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
@@ -274,8 +275,14 @@ fapi2::ReturnCode execute_concurrent_ccs(
     // Backup FARB0Q value before running Concurrent CCS
     FAPI_TRY( mss::ccs::pre_execute_via_mcbist<mss::mc_type::ODYSSEY>(l_ocmb, l_farb0q) );
 
+    // Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] to avoid unnecessary attentions
+    FAPI_TRY( mss::memdiags::mask_program_complete<mss::mc_type::ODYSSEY>(l_ocmb, l_fir_mask_save) );
+
     // Run CCS via MCBIST for Concurrent CCS
     FAPI_TRY( mss::ccs::execute_via_mcbist<mss::mc_type::ODYSSEY>(l_ocmb, io_program, l_port) );
+
+    // Clear MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and restore the mask
+    FAPI_TRY( mss::memdiags::clear_and_restore_program_complete<mss::mc_type::ODYSSEY>(l_ocmb, l_fir_mask_save) );
 
     // Restore FARB0Q value after running Concurrent CCS
     FAPI_TRY( mss::ccs::post_execute_via_mcbist<mss::mc_type::ODYSSEY>(l_ocmb, l_farb0q) );
@@ -340,18 +347,17 @@ fapi_try_exit:
 ///
 /// @brief Helper function to calculate the temperature delta of the ocmb sensor
 /// @param [in] i_target OCMB target
-/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor
+/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor (units: centi-degrees C)
 /// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
-/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
-/// @param [out] o_current_temp_values vector of current temperature of all the sensors
+/// @param [out] o_temp_delta delta of the previous value and the current value (units: centi-degrees C)
+/// @param [out] o_current_temp_values vector of current temperature of all the sensors (units: centi-degrees C)
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode calc_ocmb_sensor_temp_delta_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const int16_t i_thermal_sensor_prev_attr,
         const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
         int16_t& o_temp_delta_value,
-        int16_t& o_current_temp_value
-                                                    )
+        int16_t& o_current_temp_value)
 {
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
 
@@ -393,15 +399,14 @@ fapi_try_exit:
 
 ///
 /// @brief Helper function calculate the temperature delta of the DDIMM sensor
-/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor
+/// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor (units: centi-degrees C)
 /// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
-/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
-/// @return int16_t current temperature value
+/// @param [out] o_temp_delta delta of the previous value and the current value (units: centi-degrees C)
+/// @return int16_t current temperature value (units: centi-degrees C)
 ///
 int16_t calc_thermal_sensor_temp_delta_helper(const int16_t i_thermal_sensor_prev_attr,
         const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
-        int16_t& o_temp_delta_value
-                                             )
+        int16_t& o_temp_delta_value)
 {
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
 
@@ -486,8 +491,8 @@ void check_sensor_exists_and_get_index(const uint8_t i_thermal_sensor_usage,
 ///
 /// @brief Calculate the temperature delta of the sensor
 /// @param [in] i_target OCMB target
-/// @param [out] o_temp_delta delta of the previous value and the current value of the available sensor
-/// @param [out] o_current_temp_values vector of current temperature of all the sensors
+/// @param [out] o_temp_delta delta of the previous value and the current value (units: centi-degrees C)
+/// @param [out] o_current_temp_values vector of current temperature of all the sensors (units: centi-degrees C)
 /// @param [out] o_chosen_sensor_index index of the sensor chosen for the delta calculation
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
@@ -497,6 +502,10 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
         uint8_t& o_chosen_sensor_index)
 {
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
+
+    // Below are used to filter out bogus temperature readings (< 0C and >125C in centi-degrees)
+    constexpr int16_t MIN_TEMP_FILTER = 0;
+    constexpr int16_t MAX_TEMP_FILTER = 12500;
 
     // Various arrays to store the usage, availability, previous, reg scom data
     uint8_t l_thermal_sensor_usage[TT::temp_sensor::NUM_SENSORS] = {0};
@@ -573,29 +582,29 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
     o_temp_delta = 0;
 
     if (l_sensor_info.iv_dram_exists &&
-        (o_current_temp_values[l_sensor_info.iv_dram_index] >= 0) &&
-        (o_current_temp_values[l_sensor_info.iv_dram_index] <= 125))
+        (o_current_temp_values[l_sensor_info.iv_dram_index] >= MIN_TEMP_FILTER) &&
+        (o_current_temp_values[l_sensor_info.iv_dram_index] <= MAX_TEMP_FILTER))
     {
         o_temp_delta = l_temp_delta_values[l_sensor_info.iv_dram_index];
         o_chosen_sensor_index = l_sensor_info.iv_dram_index;
     }
     else if (l_sensor_info.iv_pmic_exists &&
-             (o_current_temp_values[l_sensor_info.iv_pmic_index] >= 0) &&
-             (o_current_temp_values[l_sensor_info.iv_pmic_index] <= 125))
+             (o_current_temp_values[l_sensor_info.iv_pmic_index] >= MIN_TEMP_FILTER) &&
+             (o_current_temp_values[l_sensor_info.iv_pmic_index] <= MAX_TEMP_FILTER))
     {
         o_temp_delta = l_temp_delta_values[l_sensor_info.iv_pmic_index];
         o_chosen_sensor_index = l_sensor_info.iv_pmic_index;
     }
     else if (l_sensor_info.iv_mem_buf_ext_exists &&
-             (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] >= 0) &&
-             (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] <= 125))
+             (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] >= MIN_TEMP_FILTER) &&
+             (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] <= MAX_TEMP_FILTER))
     {
         o_temp_delta = l_temp_delta_values[l_sensor_info.iv_mem_buf_ext_index];
         o_chosen_sensor_index = l_sensor_info.iv_mem_buf_ext_index;
     }
     // if none of the above sensors exist use the differential one
-    else if ((o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] >= 0) &&
-             (o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] <= 125))
+    else if ((o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] >= MIN_TEMP_FILTER) &&
+             (o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] <= MAX_TEMP_FILTER))
     {
         o_temp_delta = l_temp_delta_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR];
         o_chosen_sensor_index = mss::ody::sensor_types::DIFFERENTIAL_SENSOR;
@@ -616,7 +625,7 @@ fapi_try_exit:
 fapi2::ReturnCode ody_get_dqs_offsets(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                                       const bool i_compute_deltas,
                                       int16_t (&io_offsets)[HW_MAX_RANK_PER_DIMM][ODY_NUM_DRAM_X4],
-                                      fapi2::buffer<uint16_t> (&o_deltas)[ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT])
+                                      fapi2::buffer<uint16_t> (&o_deltas)[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT])
 {
     // DQS drift registers, organized by [rank][nibble]
     constexpr uint64_t TXTRKSTATES[HW_MAX_RANK_PER_DIMM][ODY_NUM_DRAM_X4] __attribute__ ((__aligned__(8))) =
@@ -870,7 +879,8 @@ fapi2::ReturnCode suspend_bg_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     FAPI_INF_NO_SBE(GENTARGTIDFORMAT " suspending current MCBIST test", GENTARGTID(i_target));
 
     // Mask MCBIST_PROGRAM_COMPLETE and force MCBIST stop
-    FAPI_TRY( mss::memdiags::stop<mss::mc_type::ODYSSEY>(i_target),
+    // override MCBIST_IN_PROGRESS polling parameters because we've slowed down the steer test
+    FAPI_TRY( mss::memdiags::stop<mss::mc_type::ODYSSEY>(i_target, 0, mss::DELAY_1MS, 50),
               "MCBIST engine failed to stop on "
               GENTARGTIDFORMAT, GENTARGTID(i_target) );
 
@@ -891,7 +901,13 @@ fapi_try_exit:
 fapi2::ReturnCode resume_bg_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                   const mcbist_state& i_saved_mcbist_state)
 {
-    const mss::mcbist::address<mss::mc_type::ODYSSEY> l_address(i_saved_mcbist_state.iv_current_addr);
+    mss::mcbist::address<mss::mc_type::ODYSSEY> l_address(i_saved_mcbist_state.iv_current_addr);
+
+    // Set the port bit if CURRENT_DIMM_TRAP is set
+    if (i_saved_mcbist_state.iv_current_addr.getBit<scomt::ody::ODC_MCBIST_SCOM_MCBMCATQ_DIMM_TRAP>())
+    {
+        l_address.set_port(1);
+    }
 
     FAPI_INF_NO_SBE(GENTARGTIDFORMAT " resuming suspended MCBIST test", GENTARGTID(i_target));
 
@@ -937,10 +953,7 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_THRESHOLD, i_target, l_count_threshold));
 
     // Get the temperature delta and the current temperature values, both in centi-degrees
-    if (l_count <= l_count_threshold)
-    {
-        FAPI_TRY(ody_calc_temp_sensors_delta(i_target, l_temp_delta, l_curr_temp_values, l_chosen_sensor_index));
-    }
+    FAPI_TRY(ody_calc_temp_sensors_delta(i_target, l_temp_delta, l_curr_temp_values, l_chosen_sensor_index));
 
     // Run DQS tracking only if the temp delta or count is more than the associated threshold
     // Threshold is in degrees-C so needs to be multiplied by 100
@@ -951,7 +964,7 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
          (l_count_threshold != fapi2::ENUM_ATTR_ODY_DQS_TRACKING_COUNT_THRESHOLD_DISABLE)))
     {
         uint16_t l_recal_count = 0;
-        fapi2::buffer<uint16_t> l_deltas[ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT] __attribute__ ((__aligned__(8))) = {0};
+        fapi2::buffer<uint16_t> l_deltas[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT] __attribute__ ((__aligned__(8))) = {0};
 
         // Check if steer is running
         FAPI_TRY(check_steer_subtest(i_target, l_steer));
@@ -996,7 +1009,7 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
             int16_t l_offsets[HW_MAX_RANK_PER_DIMM][ODY_NUM_DRAM_X4] __attribute__ ((__aligned__(8))) = {0};
 
             // Clear out deltas
-            for (uint8_t l_idx = 0; l_idx < ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT; l_idx++)
+            for (uint8_t l_idx = 0; l_idx < mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT; l_idx++)
             {
                 l_deltas[l_idx] = 0;
             }
@@ -1036,6 +1049,13 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_RECAL_COUNT, i_target, l_recal_count));
         l_recal_count += 1;
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_DQS_TRACKING_RECAL_COUNT, i_target, l_recal_count));
+
+        // Write the log and count into a port's imem area
+        for(auto& l_port_target : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target) )
+        {
+            FAPI_TRY(ody_putscom_dqs_track_log(l_port_target));
+            break;
+        }
     }
     else
     {
