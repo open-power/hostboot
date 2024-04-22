@@ -62,17 +62,8 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
     </hwpError>
+
     <!-- RC with callout to Dimm Target -->
     <hwpError>
         <sbeError/>
@@ -86,16 +77,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_DIMM</target>
             <priority>MEDIUM</priority>
@@ -113,21 +94,12 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_DIMM</target>
             <priority>MEDIUM</priority>
         </callout>
     </hwpError>
+
     <!-- RC with callout to Dimm Target, deconfig -->
     <hwpError>
         <sbeError/>
@@ -141,16 +113,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_DIMM</target>
             <priority>MEDIUM</priority>
@@ -171,16 +133,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_DIMM</target>
             <priority>MEDIUM</priority>
@@ -189,6 +141,7 @@
             <target>TARGET_DIMM</target>
         </deconfigure>
     </hwpError>
+
     <!-- RC with callout to Dimm Target, deconfig -->
     <hwpError>
         <sbeError/>
@@ -202,16 +155,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_DIMM</target>
             <priority>MEDIUM</priority>
@@ -232,16 +175,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_DIMM</target>
             <priority>MEDIUM</priority>
@@ -250,6 +183,7 @@
             <target>TARGET_DIMM</target>
         </gard>
     </hwpError>
+
     <!-- RC with callout to Dimm Target, deconfig, gard -->
     <hwpError>
         <sbeError/>
@@ -263,16 +197,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_DIMM</target>
             <priority>MEDIUM</priority>
@@ -296,16 +220,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_DIMM</target>
             <priority>MEDIUM</priority>
@@ -317,6 +231,7 @@
             <target>TARGET_DIMM</target>
         </gard>
     </hwpError>
+
 <!-- *********************************************************************** -->
     <!-- RC test port target -->
     <hwpError>
@@ -331,16 +246,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
     </hwpError>
     <hwpError>
         <sbeError/>
@@ -354,17 +259,8 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
     </hwpError>
+
     <!-- RC test callout port target -->
     <hwpError>
         <sbeError/>
@@ -378,21 +274,12 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PORT</target>
             <priority>HIGH</priority>
         </callout>
     </hwpError>
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_CALLOUT_MEMPORT_TARGET1</rc>
@@ -405,16 +292,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PORT</target>
             <priority>HIGH</priority>
@@ -433,16 +310,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PORT</target>
             <priority>HIGH</priority>
@@ -464,16 +331,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PORT</target>
             <priority>HIGH</priority>
@@ -482,6 +339,7 @@
             <target>TARGET_PORT</target>
         </deconfigure>
     </hwpError>
+
     <!-- RC test callout port target gard -->
     <hwpError>
         <sbeError/>
@@ -495,16 +353,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PORT</target>
             <priority>HIGH</priority>
@@ -525,16 +373,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PORT</target>
             <priority>HIGH</priority>
@@ -543,6 +381,7 @@
             <target>TARGET_PORT</target>
         </gard>
     </hwpError>
+
     <!-- RC test callout port target deconfigure, gard -->
     <hwpError>
         <sbeError/>
@@ -556,16 +395,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PORT</target>
             <priority>HIGH</priority>
@@ -589,16 +418,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PORT</target>
             <priority>HIGH</priority>
@@ -610,6 +429,7 @@
             <target>TARGET_PORT</target>
         </gard>
     </hwpError>
+
 <!-- *********************************************************************** -->
     <!-- Rc test perv target -->
     <hwpError>
@@ -624,17 +444,8 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
     </hwpError>
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_PERV_TARGET8</rc>
@@ -647,17 +458,8 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
     </hwpError>
+
   <!-- Rc to callout perv target -->
     <hwpError>
         <sbeError/>
@@ -671,21 +473,12 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PERV</target>
             <priority>HIGH</priority>
         </callout>
     </hwpError>
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_CALLOUT_PERV_TARGET8</rc>
@@ -698,16 +491,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PERV</target>
             <priority>HIGH</priority>
@@ -727,16 +510,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PERV</target>
             <priority>HIGH</priority>
@@ -745,6 +518,7 @@
           <target>TARGET_PERV</target>
         </deconfigure>
     </hwpError>
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET8</rc>
@@ -757,16 +531,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PERV</target>
             <priority>HIGH</priority>
@@ -775,6 +539,7 @@
           <target>TARGET_PERV</target>
         </deconfigure>
     </hwpError>
+
     <!-- Rc to callout perv target, gard -->
     <hwpError>
         <sbeError/>
@@ -788,16 +553,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PERV</target>
             <priority>HIGH</priority>
@@ -806,6 +561,7 @@
         <target>TARGET_PERV</target>
       </gard>
     </hwpError>
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_CALLOUT_PERV_GARD_TARGET8</rc>
@@ -818,16 +574,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PERV</target>
             <priority>HIGH</priority>
@@ -836,6 +582,7 @@
           <target>TARGET_PERV</target>
         </gard>
     </hwpError>
+
     <!-- Rc to callout perv target, deconfigure, gard -->
     <hwpError>
         <sbeError/>
@@ -849,16 +596,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PERV</target>
             <priority>HIGH</priority>
@@ -870,6 +607,7 @@
           <target>TARGET_PERV</target>
         </gard>
     </hwpError>
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET8</rc>
@@ -882,16 +620,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
             <target>TARGET_PERV</target>
             <priority>HIGH</priority>
@@ -904,6 +632,7 @@
         </gard>
     </hwpError>
 <!-- *********************************************************************** -->
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_CALLOUT_OCMB_DECONFIGURE_GARD_TARGET0</rc>
@@ -916,16 +645,6 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
           <target>TARGET_CHIP</target>
           <priority>MEDIUM</priority>
@@ -970,6 +689,7 @@
           <target>TARGET_CHIP</target>
         </gard>
     </hwpError>
+
 <!-- *********************************************************************** -->
     <hwpError>
         <sbeError/>
@@ -983,17 +703,8 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
     </hwpError>
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_TEMPSENSOR_TARGET1</rc>
@@ -1006,17 +717,8 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
     </hwpError>
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_CALLOUT_TEMPSENSOR_TARGET0</rc>
@@ -1029,21 +731,12 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
           <target>TARGET_TEMP_SENSOR</target>
           <priority>MEDIUM</priority>
         </callout>
     </hwpError>
+
     <hwpError>
         <sbeError/>
         <rc>RC_TEST_CALLOUT_TEMPSENSOR_TARGET1</rc>
@@ -1056,19 +749,10 @@
         <ffdc>MY_TEST_UINT16</ffdc>
         <ffdc>MY_TEST_UINT32</ffdc>
         <ffdc>MY_TEST_UINT64</ffdc>
-        <collectRegisterFfdc>
-            <id>ODY_ROOT_CTRL_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
-        <collectRegisterFfdc>
-            <id>ODY_SCRATCH_REGS_SCOM</id>
-            <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
-            <target>TARGET_CHIP</target>
-        </collectRegisterFfdc>
         <callout>
           <target>TARGET_TEMP_SENSOR</target>
           <priority>MEDIUM</priority>
         </callout>
     </hwpError>
+
 </hwpErrors>
