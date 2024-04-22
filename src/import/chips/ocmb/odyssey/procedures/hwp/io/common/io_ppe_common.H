@@ -31,6 +31,8 @@
 ///
 /// *HWP HW Maintainer: Josh Chica <Josh.Chica@ibm.com>
 /// *HWP FW Maintainer:
+/// *HW Team: IO
+/// *HW Level: 3
 /// *HWP Consumed by: SBE
 ///
 
