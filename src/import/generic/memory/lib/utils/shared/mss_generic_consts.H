@@ -116,6 +116,7 @@ enum conversions
     NIBBLES_PER_BYTE = 2,
     BITS_PER_NIBBLE = 4,
     BITS_PER_BYTE = 8,
+    BITS_PER_HWORD = 16,
     BIT_POS_FOR_BYTE0 = BITS_PER_BYTE * 0,
     BIT_POS_FOR_BYTE1 = BITS_PER_BYTE * 1,
     BIT_POS_FOR_BYTE2 = BITS_PER_BYTE * 2,
@@ -1364,6 +1365,24 @@ enum mr
 enum pmic_consts
 {
     SEQ_ORDER_RESERVED_VALUE = 15,
+};
+
+///
+/// @brief Constants related to ATTR_ODY_DQS_TRACKING_LOG
+///
+enum dqs_track_logging_consts
+{
+    // Number of log entries in ATTR_ODY_DQS_TRACKING_LOG
+    ATTR_ODY_DQS_TRACKING_LOG_ENTRIES = 24,
+    // Number of DQS drift delta entries in a ATTR_ODY_DQS_TRACKING_LOG entry
+    ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT = 3,
+    // Number of half-words in a ATTR_ODY_DQS_TRACKING_LOG entry
+    ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY = 4,
+    // Starting address for log space in Synopsys imem area (in Synopsys address format)
+    ODY_DQS_TRACKING_LOG_START_ADDRESS = 0x57F00,
+    // Starting address for recal count in Synopsys imem area (in Synopsys address format)
+    ODY_DQS_TRACKING_COUNT_START_ADDRESS = ODY_DQS_TRACKING_LOG_START_ADDRESS +
+                                           ATTR_ODY_DQS_TRACKING_LOG_ENTRIES * ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY,
 };
 
 }//ddr5

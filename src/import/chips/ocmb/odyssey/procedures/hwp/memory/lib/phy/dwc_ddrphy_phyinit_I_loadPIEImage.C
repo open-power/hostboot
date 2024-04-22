@@ -131,11 +131,13 @@ fapi2::ReturnCode dwc_ddrphy_phyinit_I_loadPIEImage( const fapi2::Target<fapi2::
 
     if (l_data_source == fapi2::ENUM_ATTR_ODY_MSG_BLOCK_DATA_SOURCE_USE_HARDCODES)
     {
+#ifndef __PPE__
         FAPI_TRY(init_phy_structs_hardcodes(i_target,
                                             l_user_input_basic,
                                             l_user_input_advanced,
                                             l_dram_config),
                  TARGTIDFORMAT "failed init_phy_structs", TARGTID);
+#endif
     }
     else
     {

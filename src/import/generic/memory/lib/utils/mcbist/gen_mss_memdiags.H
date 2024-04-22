@@ -376,18 +376,24 @@ fapi2::ReturnCode clear_and_restore_program_complete(
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType of the target
 /// @param[in] i_target the target
+/// @param[in] i_initial_delay the initial delay for MCBIST_IN_PROGRESS polling (default 10ns)
+/// @param[in] i_delay the polling delay for MCBIST_IN_PROGRESS polling (default 10ns)
+/// @param[in] i_poll_count the poll count limit for MCBIST_IN_PROGRESS polling (default DEFAULT_POLL_LIMIT)
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T>
-fapi2::ReturnCode stop( const fapi2::Target<T>& i_target )
+fapi2::ReturnCode stop( const fapi2::Target<T>& i_target,
+                        const uint64_t i_initial_delay = DELAY_10NS,
+                        const uint64_t i_delay = DELAY_10NS,
+                        const uint64_t i_poll_count = mss::DEFAULT_POLL_LIMIT )
 {
     // Too long, make shorter
     using TT = mss::mcbistTraits<MC, T>;
     using ET = mss::mcbistMCTraits<MC>;
 
-    // Poll parameters are defined as TK so that we wait a nice time for operations
-    // For now use the defaults
-    mss::poll_parameters l_poll_parameters;
+    // Poll parameter defaults provided in this function are suitable for normal memdiags programs
+    // but these can be overridden for certain situations (like when running a slowed down test)
+    mss::poll_parameters l_poll_parameters(i_initial_delay, 200, i_delay, 200, i_poll_count);
     fapi2::buffer<uint64_t> l_status;
     fapi2::buffer<uint64_t> l_last_address;
     fapi2::buffer<uint64_t> l_fir_mask_save;
