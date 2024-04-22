@@ -2208,8 +2208,6 @@ fapi2::ReturnCode PlatPmPPB::compute_vdn_setpoint()
 {
     fapi2::ReturnCode l_rc;
 
-    static const uint32_t PAU_UPLIFT_FREQ_MHZ = 2050;           // PAU frequency for VDN adjustments
-    static const uint32_t DDR5_VDN_UPLIFT_OMI_FREQ_MHZ = 32000; // OMI frequency indicating DDR5
     uint32_t l_int_vdn_mv = 0;
     uint32_t l_idn_ma = 0;
     uint32_t l_ext_vdn_mv = 0;
@@ -2218,7 +2216,7 @@ fapi2::ReturnCode PlatPmPPB::compute_vdn_setpoint()
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    FAPI_INF("Using VDN #V VPD value and correcting for applicable system parameters");
+    FAPI_INF("%s : Using VDN #V VPD value and correcting for applicable system parameters", iv_tgtstr);
 
     fapi2::ATTR_CHIP_EC_FEATURE_HW543384_Type l_hw543384;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW543384,
@@ -2231,41 +2229,20 @@ fapi2::ReturnCode PlatPmPPB::compute_vdn_setpoint()
         b_vdn_allow_uplift = false;
     }
 
+    FAPI_DBG("Checking #V model flags");
     if (((iv_pdv_model_data & PDV_MODEL_DATA_MODELED) != PDV_MODEL_DATA_MODELED) && b_vdn_allow_uplift)
     {
-        fapi2::ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT_Type b_pau_vdn_uplift;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT,
-                               iv_procChip, b_pau_vdn_uplift),
-                "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT)");
-
-        FAPI_INF("PAU freq: %d (0x%X)",
-            iv_attr_mvpd_poundV_other_info.pau_frequency_mhz,
-            iv_attr_mvpd_poundV_other_info.pau_frequency_mhz);
-        if (b_pau_vdn_uplift && (iv_attr_mvpd_poundV_other_info.pau_frequency_mhz == PAU_UPLIFT_FREQ_MHZ))
-        {
-            fapi2::ATTR_VDN_UPLIFT_MV_Type l_pau_vdn_uplift_mv;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDN_UPLIFT_MV,
-                               FAPI_SYSTEM, l_pau_vdn_uplift_mv),
-                "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_PAU_VDN_UPLIFT)");
-            FAPI_INF("VDN #V adjust for parts having PAU frequency = %d.  Uplifting by %d mV",
-                PAU_UPLIFT_FREQ_MHZ, l_pau_vdn_uplift_mv);
-            l_vdn_adjust_mv = l_pau_vdn_uplift_mv;
-        }
-
-        // Allow for DDR5 VDN uplift if not PNext
         if ((iv_pdv_model_data & PDV_MODEL_DATA_PNEXT) != PDV_MODEL_DATA_PNEXT)
         {
-            fapi2::ATTR_FREQ_OMI_MHZ_Type l_freq_omi_mhz;
-            fapi2::ATTR_DDR5_VDN_UPLIFT_MV_Type l_ddr5_vdn_uplift_mv;
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_OMI_MHZ, iv_procChip, l_freq_omi_mhz));
-            if (l_freq_omi_mhz >= DDR5_VDN_UPLIFT_OMI_FREQ_MHZ)
-            {
-                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DDR5_VDN_UPLIFT_MV, FAPI_SYSTEM, l_ddr5_vdn_uplift_mv));
-                l_vdn_adjust_mv += l_ddr5_vdn_uplift_mv;
-                FAPI_INF("DDR5 memory detected.  Adding to VDN adjustment by %u mV for a total adjustment of %u mV",
-                            l_ddr5_vdn_uplift_mv, l_vdn_adjust_mv);
-            }
+            fapi2::ATTR_VDN_UPLIFT_MV_Type l_vdn_uplift_mv;
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_VDN_UPLIFT_MV, FAPI_SYSTEM, l_vdn_uplift_mv));
+            l_vdn_adjust_mv += l_vdn_uplift_mv;
+            FAPI_INF("%s : VDN uplift being performed on P10 systems: %u mV (uplift) to %u mV (running adjustment)", iv_tgtstr,
+                    l_vdn_uplift_mv, l_vdn_adjust_mv);
+        }
+        else
+        {
+            FAPI_INF("%s : No VDN uplift being performed on P11 systems: %u mV", iv_tgtstr, l_vdn_adjust_mv);
         }
     }
 
@@ -2284,7 +2261,8 @@ fapi2::ReturnCode PlatPmPPB::compute_vdn_setpoint()
             iv_vdn_sysparam.distoffset_uv);
     }
 
-    FAPI_INF("VDN values: VPD %d (0x%X) mV; Adjusted %d mV; Set point: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+    FAPI_INF("%s : VDN values: VPD %d (0x%X) mV; Adjusted %d mV; Set point: %d mV; IDN: %d mA; LoadLine: %d uOhm; DistLoss: %d uOhm;  Offst: %d uOhm",
+            iv_tgtstr,
             iv_attr_mvpd_poundV_static_rails.vdn_mv,
             revle16(iv_attr_mvpd_poundV_static_rails.vdn_mv),
             l_int_vdn_mv,
@@ -2295,12 +2273,12 @@ fapi2::ReturnCode PlatPmPPB::compute_vdn_setpoint()
             iv_vdn_sysparam.distoffset_uv);
 
     iv_attrs.attr_boot_voltage_mv[VDN] = (l_ext_vdn_mv);
-    FAPI_INF("VDN AW voltage: %d mV (0x%X)",
+    FAPI_INF("%s : VDN AW voltage: %d mV (0x%X)", iv_tgtstr,
             revle16(iv_array_vdn_mv),
             revle16(iv_array_vdn_mv));
     if (iv_array_vdn_mv && iv_attrs.attr_boot_voltage_mv[VDN] >= iv_array_vdn_mv)
     {
-        FAPI_INF("Setting array write assist flag");
+        FAPI_INF("%s : Setting array write assist flag", iv_tgtstr);
         iv_attrs.attr_array_write_assist_set = 1;
     }
 
