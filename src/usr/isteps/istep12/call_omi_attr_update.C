@@ -81,8 +81,11 @@ void* call_omi_attr_update (void *io_pArgs)
             if(l_errl)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"call_omi_attr_update: could not sync attributes");
-                captureError(l_errl, l_StepError, ISTEP_COMP_ID, l_ocmb);
-                // TODO JIRA: PFHB-443 check for code update on error
+                HANDLE_ODY_HWP_ERROR(call_omi_attr_update,
+                                     sendAttrUpdateRequest,
+                                     l_StepError,
+                                     l_ocmb,
+                                     l_errl);
             }
         }
 
