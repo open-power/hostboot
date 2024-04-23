@@ -83,6 +83,8 @@ namespace SBEIO
                 break;
             }
 
+            SBE_TRACF(ENTER_MRK "sendPurgeScratchDataRequest for Target 0x%08X", get_huid(i_chipTarget));
+
             SbeFifo::fifoGetSbeScratchDataRequest l_fifoRequest;
             l_fifoRequest.operation = SbeFifo::FIFO_PURGE_SCRATCH_DATA;
 
@@ -91,9 +93,13 @@ namespace SBEIO
                                                                o_pFifoResponse,
                                                                i_responseSize);
 
+            // Regardless if there is an error, set the attribute to prevent getting the scratch
+            // data again.  The data gets purged on any read, so any subsequent read/purge will fail
+            i_chipTarget->setAttr<ATTR_COLLECT_SBE_SCRATCH_DATA>(0);
+
         } while(0);
 
-        SBE_TRACD(EXIT_MRK "sendPurgeScratchDataRequest");
+        SBE_TRACF(EXIT_MRK "sendPurgeScratchDataRequest for Target 0x%08X", get_huid(i_chipTarget));
         return errl;
     };
 
@@ -113,6 +119,16 @@ namespace SBEIO
                 return l_errl;
             }
 
+            // If the scratch data was already read or purged, a subsequent purge will fail as the
+            // initial scratch data read or purge will have already purged the data.
+            uint8_t l_collect_sbe_scratch_data = i_ocmb->getAttr<ATTR_COLLECT_SBE_SCRATCH_DATA>();
+            if (l_collect_sbe_scratch_data == 0)
+            {
+                SBE_TRACF(INFO_MRK "purgeAllSbeScratchData: skipped purge for Target 0x%08X since data already collected (0x%X)",
+                          get_huid(i_ocmb), l_collect_sbe_scratch_data);
+                return l_errl;
+            }
+
             // No scratch data is returned by the SBE if we request to purge, so
             // the standard response will work here.
             SBEIO::SbeFifo::fifoStandardResponse l_resp;
@@ -122,7 +138,8 @@ namespace SBEIO
                                                  l_responseSize);
             if(l_errl)
             {
-                SBE_TRACF(ERR_MRK"sendPurgeScratchDataRequest failed");
+                SBE_TRACF(ERR_MRK"purgeAllSbeScratchData: sendPurgeScratchDataRequest failed for Target 0X%X",
+                          get_huid(i_ocmb));
                 errlCommit(l_errl, SBEIO_COMP_ID);
             }
 
@@ -163,6 +180,8 @@ namespace SBEIO
                 break;
             }
 
+            SBE_TRACF(ENTER_MRK "sendGetScratchDataRequest for Target 0x%08X", get_huid(i_chipTarget));
+
             SbeFifo::fifoGetSbeScratchDataRequest l_fifoRequest;
 
             // The response from the chip-op is larger than Hostboot's stack size so the buffer needs to be allocated on
@@ -180,9 +199,15 @@ namespace SBEIO
                                                                MAX_SBE_SCRATCH_DATA_WORDS,
                                                                o_actualSize);
 
+            // Regardless if there is an error, set the attribute to prevent getting the scratch
+            // data again.  The data gets purged on any read, so any subsequent read/purge will fail
+            i_chipTarget->setAttr<ATTR_COLLECT_SBE_SCRATCH_DATA>(0);
+
+
         }while(0);
 
-        SBE_TRACD(EXIT_MRK "sendGetScratchDataRequest");
+        SBE_TRACF(EXIT_MRK "sendGetScratchDataRequest for Target 0x%08X", get_huid(i_chipTarget));
+
         return errl;
     };
 
@@ -259,10 +284,11 @@ namespace SBEIO
 
     errlHndl_t getAndProcessScratchData(Target* i_chipTarget, errlHndl_t& o_errls)
     {
-        SBE_TRACF(ENTER_MRK"getAndProcessScratchData");
+        SBE_TRACF(ENTER_MRK"getAndProcessScratchData: Target 0x%08X", get_huid(i_chipTarget));
         errlHndl_t l_returnErrl = nullptr;
         std::vector<uint8_t>l_scratchData;
         uint32_t l_returnedDataSize = 0;
+        uint8_t l_collect_sbe_scratch_data = 0;
 
         sbeScratchDataResponse_t l_scratchDataResponse;
 
@@ -274,6 +300,17 @@ namespace SBEIO
             goto ERROR_EXIT;
         }
 
+        // If the scratch data was already read or purged, a subsequent read will fail as the
+        // initial scratch data read or purge will have already purged the data.
+        l_collect_sbe_scratch_data = i_chipTarget->getAttr<ATTR_COLLECT_SBE_SCRATCH_DATA>();
+        if (l_collect_sbe_scratch_data == 0)
+        {
+            SBE_TRACF(INFO_MRK "getAndProcessScratchData: skipped for Target 0x%08X since data already collected (0x%X)",
+                      get_huid(i_chipTarget), l_collect_sbe_scratch_data);
+            goto ERROR_EXIT;
+        }
+
+
         l_returnErrl = sendGetScratchDataRequest(i_chipTarget,
                                                  l_scratchDataResponse,
                                                  l_returnedDataSize);
@@ -282,26 +319,34 @@ namespace SBEIO
             goto ERROR_EXIT;
         }
 
-        // Grab only the relevant data out of the respose;
-        // Skip the standard response header, the distance to 0xC0DE,
-        // and the EOT flag that are attached at the end of the data we're
-        // interested in.
-        l_returnedDataSize = l_returnedDataSize -
-                             sizeof(SbeFifo::statusHeader) -
-                             sizeof(uint32_t) - // distance to 0xC0DE magic word
-                             sizeof(uint32_t);  // EOT flag
-        l_scratchData.resize(l_returnedDataSize);
-        memcpy(l_scratchData.data(), l_scratchDataResponse.get(), l_returnedDataSize);
-        makeScratchDataErrls(i_chipTarget, l_scratchData, o_errls);
+
+        // Only grab data if it looks like enough data was returned
+        if (l_returnedDataSize >= (sizeof(SbeFifo::statusHeader) +
+                                   sizeof(uint32_t) + // distance to 0xC0DE magic word
+                                   sizeof(uint32_t)))  // EOT flag
+        {
+            // Grab only the relevant data out of the respose;
+            // Skip the standard response header, the distance to 0xC0DE,
+            // and the EOT flag that are attached at the end of the data we're
+            // interested in.
+            l_returnedDataSize = l_returnedDataSize -
+                                 sizeof(SbeFifo::statusHeader) -
+                                 sizeof(uint32_t) - // distance to 0xC0DE magic word
+                                 sizeof(uint32_t);  // EOT flag
+            l_scratchData.resize(l_returnedDataSize);
+            memcpy(l_scratchData.data(), l_scratchDataResponse.get(), l_returnedDataSize);
+            makeScratchDataErrls(i_chipTarget, l_scratchData, o_errls);
+        }
 
         ERROR_EXIT:
-        SBE_TRACF(EXIT_MRK"getAndProcessScratchData");
+        SBE_TRACF(EXIT_MRK"getAndProcessScratchData: Target 0x%08X", get_huid(i_chipTarget));
         return l_returnErrl;
     }
 
     void handleGetScratchDataPrdRequest(Target* i_chipTarget, uint32_t i_plid)
     {
-        SBE_TRACF(ENTER_MRK"handleGetScratchDataPrdRequest");
+        SBE_TRACF(ENTER_MRK"handleGetScratchDataPrdRequest: Target 0x%08X, i_plid = 0x%08X",
+                  get_huid(i_chipTarget), i_plid);
         errlHndl_t l_scratchDataErrls = nullptr;
 
         errlHndl_t l_chipOpErrl = getAndProcessScratchData(i_chipTarget, l_scratchDataErrls);
@@ -326,8 +371,7 @@ namespace SBEIO
                 errlCommit(l_scratchDataErrls, SBEIO_COMP_ID);
             }
         }
-
-        SBE_TRACF(EXIT_MRK"handleGetScratchDataPrdRequest");
+        SBE_TRACF(EXIT_MRK"handleGetScratchDataPrdRequest: Target 0x%08X", get_huid(i_chipTarget));
     }
 
 };

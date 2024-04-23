@@ -711,9 +711,11 @@
 
   <attribute>
     <description>This attribute controls whether the
-        SBE scratch data should be collected on SBE HWP
-        errors. This is set after the draminit istep runs
-        on SBE.
+        SBE scratch data should be collected. This
+        data can only be collected (aka read) or purged once per
+        IPL. This is set to 1 at the start of draminit step
+        and set to 0 once the data has been collected (aka read)
+        or purged the first time in the IPL.
     </description>
     <id>COLLECT_SBE_SCRATCH_DATA</id>
     <persistency>volatile-zeroed</persistency>
@@ -722,6 +724,7 @@
     <simpleType>
       <uint8_t/>
     </simpleType>
+    <no_export/>
   </attribute>
 
   <attribute>

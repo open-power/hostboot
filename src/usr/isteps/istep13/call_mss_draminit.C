@@ -128,18 +128,15 @@ void* call_mss_draminit (void *io_pArgs)
                 if(UTIL::assertGetToplevelTarget()->
                     getAttr<ATTR_FORCE_SBE_SCRATCH_DATA_COLLECTION>() == 1)
                 {
+
                     errlHndl_t l_scratchErrls = nullptr;
                     l_err = getAndProcessScratchData(i_ocmb, l_scratchErrls);
                     if(l_err)
                     {
                         errlCommit(l_err, SBEIO_COMP_ID);
                     }
-                    else
+                    else if (l_scratchErrls)
                     {
-                        // Need to reset the attr here because repeated calls
-                        // to the Scratch data chip-op will fail if there is
-                        // no scratch data available.
-                        i_ocmb->setAttr<ATTR_COLLECT_SBE_SCRATCH_DATA>(0);
                         errlCommit(l_scratchErrls, SBEIO_COMP_ID);
                     }
                 }
