@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022,2023
+# Contributors Listed Below - COPYRIGHT 2022,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -186,6 +186,7 @@ function PATCH_HBRT () {
     /afs/rch/usr5/dcrowell/public/bin/makelids $HBRT_PATCH_DIR
     checkstatus "makelids"
     SSHPASS $COPY $HBRT_PATCH_DIR/lids_to_patch/*.lid "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+    rm -rf $HBRT_PATCH_DIR
 }
 
 function PATCH_HBBL () {
@@ -397,10 +398,11 @@ else   # Apply the data to the BMC
    fi
 
    if [ ${MGP_FILES_EXIST} -eq 1 ]; then
-       SSHPASS $COPY "$COPYDIR"/* "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
-       rm $COPYDIR/*
+       SSHPASS $COPY "$COPYDIR"/ "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
+       rm -rf $COPYDIR
    fi
-   rmdir $COPYDIR
+
+   rm -rf $COPYDIR
 
    if [[ $RESTART_PLDMD = 1 ]] ; then
        RESTART_PLDMD
