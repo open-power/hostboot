@@ -52,10 +52,9 @@
                     {                                                   \
                         errlCommit(l_errl, SBEIO_COMP_ID);              \
                     }                                                   \
-                    else                                                \
+                    else if (l_scratchErrls)                            \
                     {                                                   \
                         errlCommit(l_scratchErrls, SBEIO_COMP_ID);      \
-                        M_ocmb->setAttr<TARGETING::ATTR_COLLECT_SBE_SCRATCH_DATA>(0); \
                     }                                                   \
                 }                                                       \
                 ocmbupd::ody_upd_event_t M_update_event = ocmbupd::OCMB_HWP_FAIL_OTHER; \
