@@ -30,6 +30,7 @@
 #include <targeting/targplatutil.H>
 #include <targeting/odyutil.H>
 #include <sbeio/sbeioreasoncodes.H>
+#include <sbeio/errlud_sbeio.H>
 #include <errl/errlreasoncodes.H>
 #include "sbe_fifodd.H"
 #include <sbeio/sbeioif.H>
@@ -398,6 +399,8 @@ errlHndl_t OdySbeRetryHandler::hreset()
               "(current side) HUID=0x%X ERRL=0x%X (committing)",
               get_huid(iv_ocmb), ERRL_GETEID_SAFE(l_errl));
     l_errl->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL); // keep some history
+    l_errl->collectTrace(SBEIO_COMP_NAME);
+    auto l_first_eid = l_errl->eid();
     errlCommit(l_errl, SBEIO_COMP_ID);
 
     // switch from CURRENT to ALTERNATE SIDE
@@ -426,12 +429,35 @@ errlHndl_t OdySbeRetryHandler::hreset()
 
     const uint32_t l_dump_eid = ERRL_GETEID_SAFE(l_errl);
 
+    l_errl->collectTrace(SBEIO_COMP_NAME);
     errlCommit(l_errl, SBEIO_COMP_ID);
 
     SBE_TRACF("OdySbeRetryHandler::hreset: ODY_RECOVERY_STATE=0x%X",
               iv_ocmb->getAttr<ATTR_ODY_RECOVERY_STATE>());
 
-    // @TODO -  need some kind of SEV_PREDICTIVE log if we aren't able to recover
+    SBE_TRACF("OdySbeRetryHandler::hreset recovery failed for HUID=0x%X",
+              get_huid(iv_ocmb));
+    /*@
+     * @errortype
+     * @moduleid   SBEIO_ODY_RECOVERY
+     * @reasoncode SBEIO_ODY_CANNOT_RECOVER
+     * @userdata1  HUID of Odyssey OCMB
+     * @userdata2[00:31]  EID of first hreset attempt failure
+     * @userdata2[32:63]  EID of second hreset attempt failure
+     * @devdesc    All attempts to recover the Odyssey SBE have failed.
+     * @custdesc   Unable to recover from OCMB error
+     */
+    l_errl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                     SBEIO_ODY_RECOVERY,
+                                     SBEIO_ODY_CANNOT_RECOVER,
+                                     get_huid(iv_ocmb),
+                                     TWO_UINT32_TO_UINT64(l_first_eid,
+                                                          l_dump_eid));
+    l_errl->addProcedureCallout(HWAS::EPUB_PRC_LVL_SUPP,
+                                HWAS::SRCI_PRIORITY_HIGH);
+    l_errl->collectTrace(SBEIO_COMP_NAME);
+    SBEIO::UdSPPECodeLevels(iv_ocmb).addToLog(l_errl);
+    errlCommit(l_errl, SBEIO_COMP_ID);
 
     /*--------------------------------------------------------------------------
      * ALTERNATE-SIDE - DUMP
@@ -490,6 +516,7 @@ errlHndl_t OdySbeRetryHandler::run_hreset_flow()
         SBE_TRACF("OdySbeRetryHandler::run_hreset_flow: ody_sbe_hreset failed "
                   "HUID=0x%X ERRL=0x%X",
                   get_huid(iv_ocmb), ERRL_GETEID_SAFE(l_errl));
+        SBEIO::UdSPPECodeLevels(iv_ocmb).addToLog(l_errl);
         goto ERROR_EXIT;
     }
     SBE_TRACF("OdySbeRetryHandler::run_hreset_flow: ody_sbe_hreset success HUID=0x%X",
@@ -523,6 +550,7 @@ errlHndl_t OdySbeRetryHandler::run_hreset_flow()
         SBE_TRACF("OdySbeRetryHandler::run_hreset_flow: ody_sppe_check_for_ready failed "
                   "HUID=0x%X ERRL=0x%X",
                   get_huid(iv_ocmb), ERRL_GETEID_SAFE(l_errl));
+        SBEIO::UdSPPECodeLevels(iv_ocmb).addToLog(l_errl);
         goto ERROR_EXIT;
     }
 
