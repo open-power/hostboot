@@ -197,6 +197,7 @@ function PATCH_HBRT () {
     /afs/rch/usr5/dcrowell/public/bin/makelids $HBRT_PATCH_DIR
     checkstatus "makelids"
     SSHPASS $COPY $HBRT_PATCH_DIR/lids_to_patch/*.lid "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+    rm -rf $HBRT_PATCH_DIR
 }
 
 function PATCH_HBBL () {
@@ -431,6 +432,7 @@ else   # Apply the data to the BMC
 
    # Need slight delay for rsync to complete before rm
    sleep 2
+
    rm -rf $COPYDIR
 
    if [[ $RESTART_PLDMD = 1 ]] ; then
