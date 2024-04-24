@@ -6379,6 +6379,16 @@ fapi2::ReturnCode handle_address_errors_internal(const mss::rank::info<mss::mc_t
                  GENTARGTID(l_port), i_rank_info.get_port_rank(), i_dram);
         return fapi2::FAPI2_RC_SUCCESS;
     }
+    // If part of the nibble is bad, then disable the whole nibble
+    // The algorithm can have issues detecting DQ0 failures so it's safer to disable the whole DRAM
+    else if(i_dram_bad_bits != 0x00)
+    {
+        ++io_bad_dram_on_rank;
+        io_start_bad_bits[i_rank_info.get_phy_rank()][l_byte] |= l_mask_off;
+        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u already has bad bits, masking it off! bad bits:0x%02x",
+                 GENTARGTID(l_port), i_rank_info.get_port_rank(), i_dram, i_dram_bad_bits);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
     else
     {
         uint16_t l_temp = 0;
