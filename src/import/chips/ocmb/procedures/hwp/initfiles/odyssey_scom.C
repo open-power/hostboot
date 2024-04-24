@@ -44,6 +44,7 @@ constexpr uint64_t literal_16 = 16;
 constexpr uint64_t literal_4 = 4;
 constexpr uint64_t literal_2 = 2;
 constexpr uint64_t literal_8 = 8;
+constexpr uint64_t literal_9 = 9;
 constexpr uint64_t literal_6 = 6;
 constexpr uint64_t literal_27 = 27;
 constexpr uint64_t literal_33 = 33;
@@ -61,7 +62,6 @@ constexpr uint64_t literal_13 = 13;
 constexpr uint64_t literal_15 = 15;
 constexpr uint64_t literal_17 = 17;
 constexpr uint64_t literal_19 = 19;
-constexpr uint64_t literal_9 = 9;
 constexpr uint64_t literal_11 = 11;
 constexpr uint64_t literal_48 = 48;
 constexpr uint64_t literal_0x0 = 0x0;
@@ -205,9 +205,34 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
             l_scom_buffer.insert<20, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<24, 4, 60, uint64_t>(literal_4 );
             l_scom_buffer.insert<28, 5, 59, uint64_t>(((l_TGT1_ATTR_MEM_EFF_DRAM_TCCD_L_WR + literal_1) / literal_2) );
-            l_scom_buffer.insert<33, 4, 60, uint64_t>(literal_8 );
-            l_scom_buffer.insert<37, 5, 59, uint64_t>(literal_8 );
-            l_scom_buffer.insert<42, 5, 59, uint64_t>(literal_8 );
+
+            if ((l_def_MEM_EFF_FREQ_EQ_4800 != literal_1))
+            {
+                l_scom_buffer.insert<33, 4, 60, uint64_t>(literal_8 );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_4800 == literal_1))
+            {
+                l_scom_buffer.insert<33, 4, 60, uint64_t>(literal_9 );
+            }
+
+            if ((l_def_MEM_EFF_FREQ_EQ_4800 != literal_1))
+            {
+                l_scom_buffer.insert<37, 5, 59, uint64_t>(literal_8 );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_4800 == literal_1))
+            {
+                l_scom_buffer.insert<37, 5, 59, uint64_t>(literal_9 );
+            }
+
+            if ((l_def_MEM_EFF_FREQ_EQ_4800 != literal_1))
+            {
+                l_scom_buffer.insert<42, 5, 59, uint64_t>(literal_8 );
+            }
+            else if ((l_def_MEM_EFF_FREQ_EQ_4800 == literal_1))
+            {
+                l_scom_buffer.insert<42, 5, 59, uint64_t>(literal_9 );
+            }
+
             l_scom_buffer.insert<47, 4, 60, uint64_t>(literal_6 );
             l_scom_buffer.insert<51, 6, 58, uint64_t>(((((l_TGT1_ATTR_MEM_DRAM_CWL + literal_8) + l_TGT1_ATTR_MEM_EFF_DRAM_TWTR_S) +
                     literal_1) / literal_2) );
