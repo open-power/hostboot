@@ -63,12 +63,10 @@ static constexpr uint8_t POST_CONFIG = false;
 ///
 /// @brief Updates VDD domain during dt enable sequence
 /// @param[in] i_target_info target info struct
-/// @param[in] i_pmic_id PMIC being addressed in sorted array
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 fapi2::ReturnCode inline __attribute__((always_inline)) update_vdd_ov_threshold(const target_info_redundancy_ddr5&
-        i_target_info,
-        const uint8_t i_pmic_id);
+        i_target_info);
 
 ///
 /// @brief Setup and enable DT

@@ -54,8 +54,9 @@ void reset_breadcrumb(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_in
                       mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
     using DT_REGS  = mss::dt::regs;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
-    for (auto l_dt_count = 0; l_dt_count < io_target_info.iv_number_of_target_infos_present; l_dt_count++)
+    for (auto l_dt_count = 0; l_dt_count < CONSTS::NUM_PMICS_4U; l_dt_count++)
     {
         // If the pmic is not overridden to disabled, run the below code
         mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, l_dt_count]
@@ -496,7 +497,9 @@ mss::pmic::ddr5::dt_state check_dt_faults(mss::pmic::ddr5::target_info_redundanc
 void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                     mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
-    for (auto l_pmic_count = 0; l_pmic_count < io_target_info.iv_number_of_target_infos_present; l_pmic_count++)
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the below code
         mss::pmic::ddr5::run_if_present(io_target_info, l_pmic_count, [&io_target_info, l_pmic_count, &io_health_check_info]
@@ -552,7 +555,9 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
 void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                   mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
-    for (auto l_dt_count = 0; l_dt_count < io_target_info.iv_number_of_target_infos_present; l_dt_count++)
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    for (auto l_dt_count = 0; l_dt_count < CONSTS::NUM_PMICS_4U; l_dt_count++)
     {
         // If the pmic is not overridden to disabled, run the below code
         mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, l_dt_count, &io_health_check_info]
@@ -672,9 +677,10 @@ void collect_additional_pmic_data(mss::pmic::ddr5::target_info_redundancy_ddr5& 
 {
     using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     static constexpr uint8_t NUM_BYTES_TO_READ = 2;
 
-    for (auto l_pmic_count = 0; l_pmic_count < io_target_info.iv_number_of_target_infos_present; l_pmic_count++)
+    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the below code
         mss::pmic::ddr5::run_if_present(io_target_info, l_pmic_count, [&io_target_info, &io_additional_info, l_pmic_count]
@@ -709,10 +715,11 @@ void collect_additional_dt_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
                                 mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info)
 {
     using DT_REGS  = mss::dt::regs;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     static constexpr uint8_t NUM_BYTES_TO_READ = 2;
     static constexpr uint8_t BITS_PER_BYTE = 8;
 
-    for (auto l_dt_count = 0; l_dt_count < io_target_info.iv_number_of_target_infos_present; l_dt_count++)
+    for (auto l_dt_count = 0; l_dt_count < CONSTS::NUM_PMICS_4U; l_dt_count++)
     {
         // If the corresponding PMIC in the PMIC/DT pair is not overridden to disabled, run the enable
         mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, &io_additional_info, l_dt_count]

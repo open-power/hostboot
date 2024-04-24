@@ -292,9 +292,10 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                   mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
 {
     using DT_REGS  = mss::dt::regs;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     static constexpr uint8_t NUM_BYTES_TO_READ = 2;
 
-    for (auto l_dt_count = 0; l_dt_count < io_target_info.iv_number_of_target_infos_present; l_dt_count++)
+    for (auto l_dt_count = 0; l_dt_count < CONSTS::NUM_PMICS_4U; l_dt_count++)
     {
         // If the corresponding PMIC in the PMIC/DT pair is not overridden to disabled, run the enable
         mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, &io_periodic_tele_info, l_dt_count]
@@ -365,8 +366,9 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
                     mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
 {
     uint8_t l_pmic_aggregate_state = 0;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
-    for (auto l_pmic_count = 0; l_pmic_count < io_target_info.iv_number_of_target_infos_present; l_pmic_count++)
+    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the below code
         mss::pmic::ddr5::run_if_present(io_target_info, l_pmic_count, [&io_target_info, l_pmic_count, &io_periodic_tele_info,

@@ -219,7 +219,9 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode set_pmic_dt_states(target_info_redundancy_ddr5& io_target_info)
 {
-    for (auto l_count = 0; l_count < io_target_info.iv_number_of_target_infos_present; l_count++)
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    for (auto l_count = 0; l_count < CONSTS::NUM_PMICS_4U; l_count++)
     {
         FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(io_target_info, l_count, [l_count, &io_target_info]
                           (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode

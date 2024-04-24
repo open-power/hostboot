@@ -62,25 +62,61 @@ namespace ddr5
 ///
 /// @brief Updates VDD domain during dt enable sequence
 /// @param[in] i_target_info target info struct
-/// @param[in] i_pmic_id PMIC being addressed in sorted array
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
 fapi2::ReturnCode inline __attribute__((always_inline)) update_vdd_ov_threshold(const target_info_redundancy_ddr5&
-        i_target_info,
-        const uint8_t i_pmic_id)
+        i_target_info)
 {
-    uint32_t l_nominal_voltage = 0;
-    // Get nominal ddr5 voltage
-    FAPI_TRY(mss::pmic::ddr5::get_nominal_voltage_ddr5(
-                 i_target_info,
-                 i_pmic_id,
-                 mss::pmic::rail::SWC,
-                 l_nominal_voltage));
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    bool l_pmic_present = 0;
 
-    // Update VDD OV threshold
-    FAPI_TRY(mss::pmic::ddr5::update_ov_threshold(i_target_info.iv_ocmb,
-             mss::pmic::volt_domains::VDD,
-             l_nominal_voltage));
+    // We need to get nominal voltage from just 1 PMIC. This loop has been added so as to skip to next PMIC if
+    // the first PMIC returns error
+    // VDD is support by SWC from PMIC0,1 and 3
+    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
+    {
+        l_pmic_present = 0;
+
+        FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [l_pmic_count, i_target_info,
+                          &l_pmic_present]
+                          (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
+        {
+            uint32_t l_nominal_voltage = 0;
+            // Get nominal ddr5 voltage
+            FAPI_TRY_LAMBDA(mss::pmic::ddr5::get_nominal_voltage_ddr5(
+                i_target_info,
+                l_pmic_count,
+                mss::pmic::rail::SWC,
+                l_nominal_voltage));
+
+            // Update VDD OV threshold
+            FAPI_TRY_LAMBDA(mss::pmic::ddr5::update_ov_threshold(i_target_info.iv_ocmb,
+            mss::pmic::volt_domains::VDD,
+            l_nominal_voltage));
+
+            l_pmic_present = true;
+
+            return fapi2::FAPI2_RC_SUCCESS;
+
+        fapi_try_exit_lambda:
+            return mss::pmic::declare_n_mode(i_target_info.iv_ocmb, l_pmic_count);
+        }));
+
+        // If true, means that we could calculate nominal voltage from the previous PMIC.
+        // Skip the rest
+        if(l_pmic_present)
+        {
+            break;
+        }
+
+        // If PMIC 0 and 1 have returned error, skip PMIC 2 as it does not support VDD and go to PMIC3
+        if(l_pmic_count == mss::pmic::id::PMIC1)
+        {
+            l_pmic_count++;
+        }
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -221,8 +257,9 @@ fapi2::ReturnCode prepost_config(const target_info_redundancy_ddr5& i_target_inf
     using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
     using FIELDS = pmicFields<mss::pmic::product::JEDEC_COMPLIANT>;
     using TPS_FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
-    for (auto l_pmic_count = 0; l_pmic_count < i_target_info.iv_number_of_target_infos_present; l_pmic_count++)
+    for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
     {
         // If the pmic is not overridden to disabled, run the status checking
         FAPI_TRY_NO_TRACE(mss::pmic::ddr5::run_if_present(i_target_info, l_pmic_count, [&i_is_preconfig, &i_value,
@@ -1189,7 +1226,7 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(mss::pmic::ddr5::prepost_config(l_target_info, PRE_CONFIG, CONSTS::ENABLE));
 
     // Update dynamic VDD Overvoltage Threshold
-    FAPI_TRY(update_vdd_ov_threshold(l_target_info, mss::pmic::id::PMIC0));
+    FAPI_TRY(update_vdd_ov_threshold(l_target_info));
 
     // 3b, Enable PMIC
     FAPI_TRY(mss::pmic::ddr5::enable_disable_pmic(l_target_info.iv_adc, CONSTS::SET_PMIC_EN));
