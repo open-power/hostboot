@@ -291,6 +291,7 @@ fapi2::ReturnCode io_ppe_firs<K, M, V>::mc_omi_fir_set(const fapi2::Target<K, M,
     // Unmask FIRs
     l_buffer.setBit<DL0_FATAL_ERROR>();
     l_buffer.setBit<DL0_DATA_UE>();
+    l_buffer.setBit<DL0_CRC_ERROR>();
     l_buffer.setBit<DL0_NACK>();
     l_buffer.setBit<DL0_X4_MODE>();
     l_buffer.setBit<DL0_TIMEOUT>();
@@ -302,12 +303,12 @@ fapi2::ReturnCode io_ppe_firs<K, M, V>::mc_omi_fir_set(const fapi2::Target<K, M,
     l_buffer.flush<0>();
 
     // Mask FIRs
-    l_buffer.setBit<DL0_CRC_ERROR>();
     l_buffer.setBit<DL0_EDPL>();
     FAPI_TRY(fapi2::putScom(i_target, l_mc_omi_w0x_or_mask, l_buffer));
     l_buffer.flush<0>();
 
     // Set the recoverable FIRs
+    l_buffer.setBit<DL0_CRC_ERROR>();
     l_buffer.setBit<DL0_X4_MODE>();
     l_buffer.setBit<DL0_TIMEOUT>();
     l_buffer.setBit<DL0_ERROR_RETRAIN>();

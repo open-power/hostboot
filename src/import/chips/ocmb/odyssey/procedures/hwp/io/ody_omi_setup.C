@@ -81,6 +81,9 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_Type l_half_dimm_mode;
 
+    fapi2::ATTR_OMI_EDPL_Type l_edpl_enabled;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_EDPL, i_target, l_edpl_enabled));
+
     FAPI_TRY(ody_io::get_functional_margin_mfg_mode(l_mfg_mode));
 
     //Clear mask to all training done FIR
@@ -116,16 +119,20 @@ fapi2::ReturnCode ody_omi_setup(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
     FAPI_TRY(l_dl0_config1.getScom(i_target));
     l_dl0_config1.set_PREIPL_PRBS_TIME(1);
+    l_dl0_config1.set_EDPL_TIME(6);      // 6: 128mS
 
     if (l_mfg_mode)
     {
         l_dl0_config1.set_EDPL_TIME(10);     // 10: 512s
         l_dl0_config1.set_EDPL_THRESHOLD(3); // 3: 8 Errors
     }
+    else if (l_edpl_enabled)
+    {
+        l_dl0_config1.set_EDPL_THRESHOLD(7); // 7: 128 Errors
+    }
     else
     {
-        l_dl0_config1.set_EDPL_TIME(6);      // 6: 128mS
-        l_dl0_config1.set_EDPL_THRESHOLD(7); // 7: 128 Errors
+        l_dl0_config1.set_EDPL_THRESHOLD(0); // 0: 0 Errors
     }
 
     l_dl0_config1.set_EDPL_ENA(1);
