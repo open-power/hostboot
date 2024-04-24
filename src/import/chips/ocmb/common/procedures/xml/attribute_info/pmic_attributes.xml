@@ -76,4 +76,16 @@
         <mssAccessorName>pmic_force_n_mode</mssAccessorName>
     </attribute>
 
+    <attribute>
+        <id>ATTR_I2C_FAIL_COUNT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            In case of P systems, this attribute gets incremented 3 times if GI2C_FAIL encountered
+            in health check HWP. After 3 increments, the attribute stays the same until the issue is fixed
+            after which it gets reset.
+        </description>
+        <default>0</default>
+        <valueType>uint8</valueType>
+        <writeable/>
+    </attribute>
 </attributes>

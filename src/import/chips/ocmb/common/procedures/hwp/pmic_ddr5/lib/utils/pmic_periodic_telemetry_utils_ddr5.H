@@ -55,6 +55,8 @@ static constexpr uint16_t ADC_TEMP_STEP = 2;
 
 static constexpr uint8_t NUM_REG_TO_OR = 5;
 
+static constexpr uint8_t NUM_BITS_IN_BYTE = 8;
+
 ///
 /// @brief Read and store serial number and CCIN number
 ///
@@ -135,6 +137,16 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
 ///
 void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                     mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
+
+///
+/// @brief Set ADC/PMIC/DT I2C error states if any
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_periodic_tele_info periodic telemetry struct
+/// None
+///
+void set_i2c_error_states(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                          mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
 
 ///
 /// @brief Read and store ADC/PMIC/DT

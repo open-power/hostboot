@@ -111,14 +111,6 @@ void read_adc_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
 
     fapi2::buffer<uint8_t> l_reg_contents[NUM_BYTES_TO_READ] = {0};
 
-    mss::pmic::i2c::reg_read_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
-                                            l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]);
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    l_reg_contents[mss::pmic::ddr5::data_position::DATA_0].clearBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
-    mss::pmic::i2c::reg_write_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
-            l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]);
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-
     // Fields that map a LSB register to the uint16_t destination in io_periodic_tele_info.iv_adc.
     uint16_t* l_adc_fill_array_max[ADC_U16_MAP_LEN] =
     {
@@ -131,9 +123,6 @@ void read_adc_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         &io_periodic_tele_info.iv_adc.iv_max_ch6_mV,
         &io_periodic_tele_info.iv_adc.iv_max_ch7_mV
     };
-    // First read the LSB reg. Then the MSB reg is the next one
-    mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, mss::adc::regs::MAX_CH0_LSB, l_reg_contents);
-    scale_adc_readings(l_adc_fill_array_max, l_reg_contents);
 
     uint16_t* l_adc_fill_array_min[ADC_U16_MAP_LEN] =
     {
@@ -146,9 +135,6 @@ void read_adc_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         &io_periodic_tele_info.iv_adc.iv_min_ch6_mV,
         &io_periodic_tele_info.iv_adc.iv_min_ch7_mV
     };
-    // First read the LSB reg. Then the MSB reg is the next one
-    mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, mss::adc::regs::MIN_CH0_LSB, l_reg_contents);
-    scale_adc_readings(l_adc_fill_array_min, l_reg_contents);
 
     uint16_t* l_adc_fill_array_recent[ADC_U16_MAP_LEN] =
     {
@@ -161,17 +147,39 @@ void read_adc_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         &io_periodic_tele_info.iv_adc.iv_recent_ch6_mV,
         &io_periodic_tele_info.iv_adc.iv_recent_ch7_mV
     };
+
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
+             l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]));
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    l_reg_contents[mss::pmic::ddr5::data_position::DATA_0].clearBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
+             l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]));
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
     // First read the LSB reg. Then the MSB reg is the next one
-    mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, mss::adc::regs::RECENT_CH0_LSB, l_reg_contents);
+    FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, mss::adc::regs::MAX_CH0_LSB, l_reg_contents));
+    scale_adc_readings(l_adc_fill_array_max, l_reg_contents);
+
+    // First read the LSB reg. Then the MSB reg is the next one
+    FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, mss::adc::regs::MIN_CH0_LSB, l_reg_contents));
+    scale_adc_readings(l_adc_fill_array_min, l_reg_contents);
+
+    // First read the LSB reg. Then the MSB reg is the next one
+    FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, mss::adc::regs::RECENT_CH0_LSB, l_reg_contents));
     scale_adc_readings(l_adc_fill_array_recent, l_reg_contents);
 
-    mss::pmic::i2c::reg_read_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
-                                            l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]);
+    FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
+             l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]));
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     l_reg_contents[mss::pmic::ddr5::data_position::DATA_0].setBit<mss::adc::fields::GENERAL_CFG_STATUS_ENABLE>();
-    mss::pmic::i2c::reg_write_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
-            l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]);
+    FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(io_target_info.iv_adc, mss::adc::regs::GENERAL_CFG,
+             l_reg_contents[mss::pmic::ddr5::data_position::DATA_0]));
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    return;
+
+fapi_try_exit:
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    io_target_info.iv_adc_state = mss::pmic::ddr5::adc_state::ADC_I2C_FAIL;
     return;
 }
 
@@ -445,6 +453,38 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
 }
 
 ///
+/// @brief Set ADC/PMIC/DT I2C error states if any
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_periodic_tele_info periodic telemetry struct
+/// None
+///
+void set_i2c_error_states(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                          mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+    static constexpr uint8_t l_temp_value = 1;
+    static constexpr uint8_t NIBBLE_POSITION = 4;
+    fapi2::buffer<uint8_t> l_i2c_state = 0;
+
+    for (auto l_count = 0; l_count < CONSTS::NUM_PMICS_4U; l_count++)
+    {
+        if(io_target_info.iv_pmic_dt_map[l_count].iv_pmic_state == mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL)
+        {
+            l_i2c_state |= (l_temp_value << l_count);
+        }
+
+        if(io_target_info.iv_pmic_dt_map[l_count].iv_dt_state == mss::pmic::ddr5::dt_state::DT_I2C_FAIL)
+        {
+            l_i2c_state |= (l_temp_value << (l_count + NIBBLE_POSITION));
+        }
+    }
+
+    io_periodic_tele_info.iv_pmic_dt_i2c_state = l_i2c_state;
+    io_periodic_tele_info.iv_adc_i2c_state = io_target_info.iv_adc_state;
+}
+
+///
 /// @brief Read and store ADC/PMIC/DT
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
@@ -465,6 +505,8 @@ void collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
 
     // Read and store PMIC regs
     read_pmic_regs(io_target_info, io_periodic_tele_info);
+
+    set_i2c_error_states(io_target_info, io_periodic_tele_info);
 }
 
 ///
@@ -535,6 +577,8 @@ fapi_try_exit:
 fapi2::ReturnCode collect_periodic_tele_data_2U(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
         mss::pmic::ddr5::periodic_2U_telemetry_data& io_info)
 {
+    static constexpr uint8_t LSB = 7;
+
     fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_2U_REGS_READ];
     const auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target,
                          fapi2::TARGET_STATE_PRESENT);
@@ -549,9 +593,11 @@ fapi2::ReturnCode collect_periodic_tele_data_2U(const fapi2::Target<fapi2::TARGE
 
         // PMIC position/ID under OCMB target
         uint8_t l_relative_pmic_id = 0;
+        fapi2::buffer<uint8_t> l_pmic_i2c_state = 0;
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_pmic, l_relative_pmic_id));
 
-        FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_pmic, REGS::R04, l_data_buffer));
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read_contiguous(l_pmic, REGS::R04, l_data_buffer));
 
         io_info.iv_pmic[l_relative_pmic_id].iv_r04 = l_data_buffer[DATA_POS::DATA_0];
         io_info.iv_pmic[l_relative_pmic_id].iv_r05 = l_data_buffer[DATA_POS::DATA_1];
@@ -579,46 +625,58 @@ fapi2::ReturnCode collect_periodic_tele_data_2U(const fapi2::Target<fapi2::TARGE
         io_info.iv_pmic[l_relative_pmic_id].iv_swd_current_mA = l_data_buffer[DATA_POS::DATA_11] *
                 mss::pmic::ddr5::CURRENT_MULTIPLIER;
 
-        FAPI_TRY(mss::pmic::i2c::reg_read(l_pmic, TPS_REGS::R73, l_data_buffer[DATA_POS::DATA_0]));
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read(l_pmic, TPS_REGS::R73, l_data_buffer[DATA_POS::DATA_0]));
         io_info.iv_pmic[l_relative_pmic_id].iv_r73_status_5 = l_data_buffer[DATA_POS::DATA_0];
         l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_0];
 
         // Set PMIC internal ADC to sample VIN
-        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R30,
-                 l_data_buffer[DATA_POS::DATA_0]));
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R30,
+                        l_data_buffer[DATA_POS::DATA_0]));
         l_data_buffer[DATA_POS::DATA_0].clearBit<6>();
         l_data_buffer[DATA_POS::DATA_0].setBit<5>();
         l_data_buffer[DATA_POS::DATA_0].clearBit<4>();
         l_data_buffer[DATA_POS::DATA_0].setBit<3>();
-        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R30,
-                 l_data_buffer[DATA_POS::DATA_0]));
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R30,
+                        l_data_buffer[DATA_POS::DATA_0]));
 
         // Delay
         fapi2::delay(2 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
         // VIN
-        FAPI_TRY(mss::pmic::i2c::reg_read(l_pmic, REGS::R31, l_data_buffer[DATA_POS::DATA_0]));
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read(l_pmic, REGS::R31, l_data_buffer[DATA_POS::DATA_0]));
         io_info.iv_pmic[l_relative_pmic_id].iv_r31_sample_vin = static_cast<uint16_t>(l_data_buffer[DATA_POS::DATA_0]()) *
                 ADC_VIN_BULK_STEP;
 
         // Set PMIC internal ADC to sample temp
-        FAPI_TRY(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R30, l_data_buffer[DATA_POS::DATA_0]));
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read_reverse_buffer(l_pmic, REGS::R30, l_data_buffer[DATA_POS::DATA_0]));
         l_data_buffer[DATA_POS::DATA_0].setBit<6>();
         l_data_buffer[DATA_POS::DATA_0].clearBit<5>();
         l_data_buffer[DATA_POS::DATA_0].setBit<4>();
         l_data_buffer[DATA_POS::DATA_0].clearBit<3>();
-        FAPI_TRY(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R30, l_data_buffer[DATA_POS::DATA_0]));
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write_reverse_buffer(l_pmic, REGS::R30, l_data_buffer[DATA_POS::DATA_0]));
 
         // Delay
         fapi2::delay(2 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 
         // Temp
-        FAPI_TRY(mss::pmic::i2c::reg_read(l_pmic, REGS::R31, l_data_buffer[DATA_POS::DATA_0]));
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_read(l_pmic, REGS::R31, l_data_buffer[DATA_POS::DATA_0]));
         io_info.iv_pmic[l_relative_pmic_id].iv_r31_sample_temp = static_cast<uint16_t>(l_data_buffer[DATA_POS::DATA_0]()) *
                 ADC_TEMP_STEP;
 
         // GLOBAL_CLEAR_STATUS
-        FAPI_TRY(mss::pmic::i2c::reg_write(l_pmic, REGS::R14, 0x01));
+        FAPI_TRY_LAMBDA(mss::pmic::i2c::reg_write(l_pmic, REGS::R14, 0x01));
+
+        continue;
+
+    fapi_try_exit_lambda:
+
+        // We will never go above 1 for 2U PMIC telemetry so need to check boundary condition here. Its safe to mod
+        // The byte has been defined as [7:0]
+        l_pmic_i2c_state.setBit((LSB - l_relative_pmic_id) % NUM_BITS_IN_BYTE);
+
+        io_info.iv_pmic_i2c_state |= l_pmic_i2c_state;
+
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     }
 
     // OR PMIC status registers 0x08-0x0B and 0x73 of all PMICs

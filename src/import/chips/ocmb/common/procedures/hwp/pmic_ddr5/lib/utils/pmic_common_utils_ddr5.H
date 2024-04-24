@@ -153,6 +153,15 @@ enum dt_state : uint8_t
 };
 
 ///
+/// @brief States for the adc to be returned in a uint8_t bitmap
+///
+enum adc_state : uint8_t
+{
+    ADC_I2C_FAIL      = 0b00000001,
+    ADC_ALL_GOOD      = 0b00000000,
+};
+
+///
 /// @brief Struct for a pair of PMIC and DT target
 /// @note PMIC and DTs have to be considered as a pair. If 1 PMIC is not available (for any reason),
 ///       the corresponding DT should be considered as not accessible too and vice-versa.
@@ -183,8 +192,11 @@ struct target_info_redundancy_ddr5
 
     uint8_t iv_number_of_target_infos_present = 0;
 
-    uint8_t reserved = 0;
-    uint16_t reserved0 = 0;
+    // The below 'adc state' member will be used to keep track of the adc state
+    // This adc state will not be populated or used by pmic_enable but will be used by
+    // health check and periodic telemetry tools
+    uint8_t iv_adc_state = 0;
+    uint16_t reserved = 0;
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
 
@@ -422,6 +434,11 @@ struct __attribute__((__packed__)) pmic_health_check_telemetry
 
 ///
 /// @brief Struct of health check telemetry data
+/// Revision history:
+///     0x51: Initial revision supporting health check logic from
+///           "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
+///           document provided by the Power team
+///     0x52: Added ADC i2c error state to consolidated structure
 ///
 struct __attribute__((__packed__)) health_check_telemetry_data
 {
@@ -429,7 +446,7 @@ struct __attribute__((__packed__)) health_check_telemetry_data
 
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision = 0x51;
+    uint8_t iv_revision = 0x52;
     uint16_t reserved   = 0;
 
     dt_health_check_telemetry iv_dt[CONSTS::NUM_DTS_4U];
@@ -611,18 +628,21 @@ struct __attribute__ ((__packed__)) dt_periodic_telemetry_data
 ///           document provided by the Power team
 ///     0x52: Added aggregate PMIC state (byte 2) which is calculated by ORing
 ///           0x08-0x0B and 0x73 of all PMICs
+///     0x53: Added PMIC/DT/ADC I2C fail logs. Each bit in iv_pmic_dt_i2c_state represents
+///           a PMIC/DT target state. PMIC0 is bit0 .. PMIC3 is bit3, DT0 is bit4 .. DT3 is bit7
+///           iv_adc_i2c_state represents ADC i2c state
 ///
 struct __attribute__ ((__packed__)) periodic_telemetry_data
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision             = 0x52;
+    uint8_t iv_revision             = 0x53;
     uint8_t iv_aggregate_pmic_state = 0;
     uint16_t reserved               = 0;
 
     uint8_t iv_serial_number[26] = {0};
-    uint8_t reserved1            = 0;
-    uint8_t reserved2            = 0;
+    uint8_t iv_pmic_dt_i2c_state = 0;
+    uint8_t iv_adc_i2c_state     = 0;
 
     adc_periodic_telemetry_data iv_adc;
 
@@ -652,6 +672,10 @@ struct __attribute__ ((__packed__)) consolidated_health_check_data
     uint8_t iv_dt1_errors = 0;
     uint8_t iv_dt2_errors = 0;
     uint8_t iv_dt3_errors = 0;
+
+    uint8_t iv_adc_errors = 0;
+    uint8_t reserved      = 0;
+    uint16_t reserved1    = 0;
 };
 
 ///
@@ -695,20 +719,48 @@ struct __attribute__ ((__packed__)) pmic_periodic_2u_telemetry_data
 ///       document provided by the Power team
 ///     0x22: Added aggregate PMIC state (byte 2) which is calculated by ORing
 ///           0x08-0x0B and 0x73 of all PMICs
+///     0x23: Added PMIC I2C fail logs. Each bit in iv_pmic_i2c_state represents
+///           a PMIC target state. PMIC0 is bit0 and PMIC1 is bit1
 ///
 struct __attribute__ ((__packed__)) periodic_2U_telemetry_data
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision             = 0x22;
+    uint8_t iv_revision             = 0x23;
     uint8_t iv_aggregate_pmic_state = 0;
     uint16_t reserved               = 0;
 
     uint8_t iv_serial_number[26] = {0};
-    uint8_t reserved1            = 0;
-    uint8_t reserved2            = 0;
+    uint8_t iv_pmic_i2c_state    = 0;
+    uint8_t reserved0            = 0;
 
     pmic_periodic_2u_telemetry_data iv_pmic[CONSTS::NUM_PMICS_2U];
+};
+
+
+///
+/// @brief Struct of data to be sent in case aggregate state is GI2C_FAIL
+/// @note: The revision is set to 0 here as this revision will mimic health check
+///        revision when called in health check HWP. The PMIC/DT/ADC errors and the
+///        aggregate state will also reflect from the health check HWP. This sturcture
+///        is just a place holder
+///
+struct __attribute__ ((__packed__)) gi2c_fail_state_data
+{
+    aggregate_state iv_aggregate_state = aggregate_state::N_PLUS_1;
+    uint8_t iv_revision                = 0;
+    uint8_t iv_pmic0_errors            = 0;
+    uint8_t iv_pmic1_errors            = 0;
+
+    uint8_t iv_pmic2_errors = 0;
+    uint8_t iv_pmic3_errors = 0;
+    uint8_t iv_dt0_errors   = 0;
+    uint8_t iv_dt1_errors   = 0;
+
+    uint8_t iv_dt2_errors   = 0;
+    uint8_t iv_dt3_errors   = 0;
+    uint8_t iv_adc_errors   = 0;
+    uint8_t reserved0       = 0;
 };
 
 ///
