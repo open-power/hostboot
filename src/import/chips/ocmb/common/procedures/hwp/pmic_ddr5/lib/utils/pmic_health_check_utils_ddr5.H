@@ -45,6 +45,8 @@ static constexpr uint8_t NUMBER_ADDITIONAL_DT_REGS_READ = 2;
 static constexpr uint8_t NUMBER_DT_REGS_READ = 2;
 static constexpr uint8_t NUMBER_PMIC_REGS_READ = 12;
 static constexpr uint8_t SIZEOF_AGGREGATE_STATE = 1;
+static constexpr uint8_t SIZEOF_GI2C_FAIL_DATA = 11;
+static constexpr uint8_t GI2C_FAIL_MAX_COUNT   = 3;
 
 typedef fapi2::ReturnCode (*pmic_health_check_ddr5_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
@@ -295,11 +297,11 @@ mss::pmic::ddr5::aggregate_state check_n_mode(mss::pmic::ddr5::health_check_tele
 ///
 /// @brief Collect additional ADC data in case of N_MODE detected
 ///
-/// @param[in] i_target_info PMIC and DT target info struct
+/// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_additional_info additional health check data
 /// @return None
 ///
-void collect_additional_adc_data(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info,
+void collect_additional_adc_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                                  mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info);
 
 ///
@@ -336,11 +338,13 @@ void collect_additional_n_mode_data(mss::pmic::ddr5::target_info_redundancy_ddr5
 /// @brief Send the consolidated_health_check_data struct in case of n-mode
 ///
 /// @param[in] i_info consolidated_health_check_data struct
+/// @param[in] i_gi2c_fail_state_data data struct
 /// @oaram[in] i_length_of_data number of bytes to be trasmitted
 /// @param[out] o_data hwp_data_ostream data stream
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode send_struct(mss::pmic::ddr5::consolidated_health_check_data& i_info,
+                              mss::pmic::ddr5::gi2c_fail_state_data& i_gi2c_fail_state_data,
                               const uint16_t i_length_of_data,
                               fapi2::hwp_data_ostream& o_data);
 
@@ -405,6 +409,18 @@ inline mss::pmic::ddr5::aggregate_state check_breadcrumbs_subsequent_n_modes(con
 
     return mss::pmic::ddr5::aggregate_state::N_PLUS_1;
 }
+
+///
+/// @brief Check if any of the ADC/PMI/DT show I2C error
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @param[in,out] io_number_bytes_to_send number of bytes to send as log
+/// @return None
+///
+void check_gi2c_fail_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                           mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+                           uint8_t& io_number_bytes_to_send);
 
 ///
 /// @brief Runs the actual health check for 4U parts

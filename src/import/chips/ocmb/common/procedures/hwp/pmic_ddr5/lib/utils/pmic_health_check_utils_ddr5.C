@@ -510,7 +510,7 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
             using FIELDS = pmicFields<mss::pmic::product::TPS5383X>;
             fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ];
 
-            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Raeding PMIC data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic));
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Reading PMIC data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic));
 
             mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R04, l_data_buffer);
 
@@ -632,11 +632,11 @@ mss::pmic::ddr5::aggregate_state check_n_mode(mss::pmic::ddr5::health_check_tele
 ///
 /// @brief Collect additional ADC data in case of N_MODE detected
 ///
-/// @param[in] i_target_info PMIC and DT target info struct
+/// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_additional_info additional health check data
 /// @return None
 ///
-void collect_additional_adc_data(const mss::pmic::ddr5::target_info_redundancy_ddr5& i_target_info,
+void collect_additional_adc_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                                  mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info)
 {
     using ADC_REGS = mss::adc::regs;
@@ -644,8 +644,7 @@ void collect_additional_adc_data(const mss::pmic::ddr5::target_info_redundancy_d
 
     fapi2::buffer<uint8_t> l_data_adc[NUM_BYTES_TO_READ];
 
-    mss::pmic::i2c::reg_read_contiguous(i_target_info.iv_adc, ADC_REGS::SYSTEM_STATUS, l_data_adc);
-    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(io_target_info.iv_adc, ADC_REGS::SYSTEM_STATUS, l_data_adc));
 
     io_additional_info.iv_adc.iv_system_status = l_data_adc[mss::pmic::ddr5::data_position::DATA_0];
     io_additional_info.iv_adc.iv_general_cfg   = l_data_adc[mss::pmic::ddr5::data_position::DATA_1];
@@ -663,6 +662,13 @@ void collect_additional_adc_data(const mss::pmic::ddr5::target_info_redundancy_d
     io_additional_info.iv_adc.iv_gpi_value     = l_data_adc[mss::pmic::ddr5::data_position::DATA_13];
     io_additional_info.iv_adc.iv_dummy_4       = l_data_adc[mss::pmic::ddr5::data_position::DATA_14];
     io_additional_info.iv_adc.iv_dummy_5       = l_data_adc[mss::pmic::ddr5::data_position::DATA_15];
+
+    return;
+
+fapi_try_exit:
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    io_target_info.iv_adc_state = mss::pmic::ddr5::adc_state::ADC_I2C_FAIL;
+    return;
 }
 
 ///
@@ -775,16 +781,30 @@ void collect_additional_n_mode_data(mss::pmic::ddr5::target_info_redundancy_ddr5
 /// @brief Send the consolidated_health_check_data struct in case of n-mode
 ///
 /// @param[in] i_info consolidated_health_check_data struct
+/// @param[in] i_gi2c_fail_state_data data struct
 /// @oaram[in] i_length_of_data number of bytes to be trasmitted
 /// @param[out] o_data hwp_data_ostream data stream
 /// @return fapi2::ReturnCode
 ///
 fapi2::ReturnCode send_struct(mss::pmic::ddr5::consolidated_health_check_data& i_info,
+                              mss::pmic::ddr5::gi2c_fail_state_data& i_gi2c_fail_state_data,
                               const uint16_t i_length_of_data,
                               fapi2::hwp_data_ostream& o_data)
 {
     // Casted to char pointer so we can increment in single bytes
-    char* i_info_casted  = reinterpret_cast<char*>(&i_info);
+    char* i_info_casted = reinterpret_cast<char*>(&i_info);
+    uint64_t l_sizeof_data_array = 0;
+
+    // If data to be sent is I2C then re-cast the pointer
+    if(i_length_of_data == SIZEOF_GI2C_FAIL_DATA)
+    {
+        i_info_casted  = reinterpret_cast<char*>(&i_gi2c_fail_state_data);
+        l_sizeof_data_array = sizeof(i_gi2c_fail_state_data);
+    }
+    else
+    {
+        l_sizeof_data_array = sizeof(i_info);
+    }
 
     // Loop through in increments of hwp_data_unit size (currently uint32_t)
     // Until we have copied the entire structure
@@ -795,7 +815,8 @@ fapi2::ReturnCode send_struct(mss::pmic::ddr5::consolidated_health_check_data& i
         // The number of bytes to copy is either always 4 (size of hwp_data_unit),
         // OR less if we have fewer than 4 bytes left in the struct, in which case we copy
         // that amount.
-        const size_t l_bytes_to_copy = std::min(sizeof(fapi2::hwp_data_unit), sizeof(i_info) - l_byte);
+        const size_t l_bytes_to_copy = std::min(static_cast<uint16_t>(sizeof(fapi2::hwp_data_unit)),
+                                                static_cast<uint16_t>(l_sizeof_data_array - l_byte));
 
         memcpy(&l_data_unit, i_info_casted + l_byte, l_bytes_to_copy);
         FAPI_TRY(o_data.put(l_data_unit));
@@ -829,10 +850,41 @@ fapi2::ReturnCode generate_and_send_response(const mss::pmic::ddr5::target_info_
     using CONSTS_DT = mss::dt::dt_i2c_devices;
 
     io_consolidated_data.iv_health_check = i_health_check_info;
+    mss::pmic::ddr5::gi2c_fail_state_data l_gi2c_fail_state_data;
 
     if(i_number_bytes_to_send == SIZEOF_AGGREGATE_STATE)
     {
-        FAPI_TRY(send_struct(io_consolidated_data, SIZEOF_AGGREGATE_STATE, o_data));
+        FAPI_TRY(send_struct(io_consolidated_data, l_gi2c_fail_state_data, SIZEOF_AGGREGATE_STATE, o_data));
+    }
+    else if (i_number_bytes_to_send == SIZEOF_GI2C_FAIL_DATA)
+    {
+        l_gi2c_fail_state_data.iv_aggregate_state = i_health_check_info.iv_aggregate_state;
+        l_gi2c_fail_state_data.iv_revision = i_health_check_info.iv_revision;
+
+        // io_consolidated_data.iv_pmicx_errors is populated for the lab wrapper to print these in case of I2C error in the lab
+        io_consolidated_data.iv_pmic0_errors = l_gi2c_fail_state_data.iv_pmic0_errors =
+                i_target_info.iv_pmic_dt_map[CONSTS::PMIC0].iv_pmic_state;
+        io_consolidated_data.iv_pmic1_errors = l_gi2c_fail_state_data.iv_pmic1_errors =
+                i_target_info.iv_pmic_dt_map[CONSTS::PMIC1].iv_pmic_state;
+        io_consolidated_data.iv_pmic2_errors = l_gi2c_fail_state_data.iv_pmic2_errors =
+                i_target_info.iv_pmic_dt_map[CONSTS::PMIC2].iv_pmic_state;
+        io_consolidated_data.iv_pmic3_errors = l_gi2c_fail_state_data.iv_pmic3_errors =
+                i_target_info.iv_pmic_dt_map[CONSTS::PMIC3].iv_pmic_state;
+
+        // io_consolidated_data.iv_dtx_errors is populated for the lab wrapper to print these in case of I2C error in the lab
+        io_consolidated_data.iv_dt0_errors = l_gi2c_fail_state_data.iv_dt0_errors =
+                i_target_info.iv_pmic_dt_map[CONSTS_DT::DT0].iv_dt_state;
+        io_consolidated_data.iv_dt1_errors = l_gi2c_fail_state_data.iv_dt1_errors =
+                i_target_info.iv_pmic_dt_map[CONSTS_DT::DT1].iv_dt_state;
+        io_consolidated_data.iv_dt2_errors = l_gi2c_fail_state_data.iv_dt2_errors =
+                i_target_info.iv_pmic_dt_map[CONSTS_DT::DT2].iv_dt_state;
+        io_consolidated_data.iv_dt3_errors = l_gi2c_fail_state_data.iv_dt3_errors =
+                i_target_info.iv_pmic_dt_map[CONSTS_DT::DT3].iv_dt_state;
+
+        // io_consolidated_data.iv_adc_errors is populated for the lab wrapper to print these in case of I2C error in the lab
+        io_consolidated_data.iv_adc_errors = l_gi2c_fail_state_data.iv_adc_errors = i_target_info.iv_adc_state;
+
+        FAPI_TRY(send_struct(io_consolidated_data, l_gi2c_fail_state_data, SIZEOF_GI2C_FAIL_DATA, o_data));
     }
     else
     {
@@ -849,7 +901,9 @@ fapi2::ReturnCode generate_and_send_response(const mss::pmic::ddr5::target_info_
         io_consolidated_data.iv_dt2_errors = i_target_info.iv_pmic_dt_map[CONSTS_DT::DT2].iv_dt_state;
         io_consolidated_data.iv_dt3_errors = i_target_info.iv_pmic_dt_map[CONSTS_DT::DT3].iv_dt_state;
 
-        FAPI_TRY(send_struct(io_consolidated_data, sizeof(io_consolidated_data), o_data));
+        io_consolidated_data.iv_adc_errors = i_target_info.iv_adc_state;
+
+        FAPI_TRY(send_struct(io_consolidated_data, l_gi2c_fail_state_data, sizeof(io_consolidated_data), o_data));
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -991,6 +1045,66 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Check if any of the ADC/PMI/DT show I2C error
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @param[in,out] io_number_bytes_to_send number of bytes to send as log
+/// @return None
+///
+void check_gi2c_fail_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                           mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+                           uint8_t& io_number_bytes_to_send)
+{
+    using CONSTS  = mss::pmic::id;
+    using CONSTS_DT = mss::dt::dt_i2c_devices;
+
+    uint8_t l_gi2c_fail_count = 0;
+
+    // Get the I2C fail attribute
+#ifndef __PPE__
+    FAPI_ATTR_GET(fapi2::ATTR_I2C_FAIL_COUNT, io_target_info.iv_ocmb, l_gi2c_fail_count);
+#endif
+
+    if ((io_target_info.iv_pmic_dt_map[CONSTS::PMIC0].iv_pmic_state == mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS::PMIC1].iv_pmic_state == mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS::PMIC2].iv_pmic_state == mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS::PMIC3].iv_pmic_state == mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT0].iv_dt_state == mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT1].iv_dt_state == mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT2].iv_dt_state == mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT3].iv_dt_state == mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
+        (io_target_info.iv_adc_state == mss::pmic::ddr5::adc_state::ADC_I2C_FAIL))
+    {
+        io_health_check_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL;
+
+#ifndef __PPE__
+
+        if(l_gi2c_fail_count >= GI2C_FAIL_MAX_COUNT)
+        {
+            io_number_bytes_to_send = SIZEOF_AGGREGATE_STATE;
+        }
+        else
+        {
+            l_gi2c_fail_count++;
+            FAPI_ATTR_SET(fapi2::ATTR_I2C_FAIL_COUNT, io_target_info.iv_ocmb, l_gi2c_fail_count);
+            io_number_bytes_to_send = SIZEOF_GI2C_FAIL_DATA;
+        }
+
+#else
+        io_number_bytes_to_send = SIZEOF_GI2C_FAIL_DATA;
+#endif
+    }
+    else
+    {
+        l_gi2c_fail_count = 0;
+#ifndef __PPE__
+        FAPI_ATTR_SET(fapi2::ATTR_I2C_FAIL_COUNT, io_target_info.iv_ocmb, l_gi2c_fail_count);
+#endif
+    }
+}
+
+///
 /// @brief Runs the actual health check for 4U parts
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
@@ -1032,6 +1146,14 @@ fapi2::ReturnCode health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5
     // Read and store PMIC regs for fault calculations
     read_pmic_regs(io_target_info, io_health_check_info);
 
+    // Check for I2C fails
+    check_gi2c_fail_state(io_target_info, io_health_check_info, io_number_bytes_to_send);
+
+    if (io_health_check_info.iv_aggregate_state == mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     // Check DT faults and set aggregate state
     l_dt_state = check_dt_faults(io_target_info, io_health_check_info);
 
@@ -1056,6 +1178,9 @@ fapi2::ReturnCode health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5
     {
         io_number_bytes_to_send = SIZEOF_AGGREGATE_STATE;
     }
+
+    // Check for I2C fails
+    check_gi2c_fail_state(io_target_info, io_health_check_info, io_number_bytes_to_send);
 
     return fapi2::FAPI2_RC_SUCCESS;
 
