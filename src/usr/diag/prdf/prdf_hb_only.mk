@@ -99,6 +99,8 @@ prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memor
 prd_incpath += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/fir/
 prd_incpath += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/io/
+prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/io/common/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv/
 prd_incpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
@@ -186,6 +188,7 @@ prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/io/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/memory/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest/
 prd_vpath += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv/
+prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/io/
 prd_obj_no_sim += p10_io_lib.o
 prd_obj_no_sim += p10_io_ppe_lib.o
 prd_obj_no_sim += p10_io_ppe_regs.o
@@ -200,6 +203,7 @@ prd_obj_no_sim += p10_iohs_reset.o
 prd_obj_no_sim += p10_smp_link_firs.o
 prd_obj_no_sim += p10_omi_degrade_dl_reconfig.o
 prd_obj_no_sim += p10_omi_ddr4_edpl.o
+prd_obj_no_sim += ody_omi_edpl.o
 
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/
 prd_vpath += ${ROOTPATH}/src/import/chips/ocmb/explorer/procedures/hwp/memory/lib/
