@@ -239,6 +239,12 @@ errlOwner getDqsDriftTrackFailFfdc(TARGETING::TargetHandle_t i_ocmb,
  */
 void expEnableEdpl(TARGETING::TargetHandle_t i_ocmb);
 
+/**
+ * @brief  Calls a HWP interface to reenable OMI EDPL (error detection per lane)
+ * @param  i_target An Odyssey OCMB.
+ */
+void odyEnableEdpl(TARGETING::TargetHandle_t i_ocmb);
+
 //##############################################################################
 //##                    Maintenance Command wrappers
 //##############################################################################

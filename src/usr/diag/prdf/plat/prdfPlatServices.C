@@ -73,6 +73,7 @@
 #include <p10_rcs_transient_check.H>
 #include <p10_omi_ddr4_edpl.H>
 #include <p10_omi_degrade_dl_reconfig.H>
+#include <ody_omi_edpl.H>
 
 using namespace TARGETING;
 
@@ -951,6 +952,25 @@ void expEnableEdpl(TARGETING::TargetHandle_t i_ocmb)
     if (nullptr != errl)
     {
         PRDF_ERR("p10_omi_ddr4_edpl(0x%08x) failed", getHuid(i_ocmb));
+        PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void odyEnableEdpl(TARGETING::TargetHandle_t i_ocmb)
+{
+    PRDF_ASSERT(nullptr != i_ocmb);
+    PRDF_ASSERT(TYPE_OCMB_CHIP == getTargetType(i_ocmb));
+    PRDF_ASSERT(isOdysseyOcmb(i_ocmb));
+
+    errlHndl_t errl = nullptr;
+    fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(i_ocmb);
+
+    FAPI_INVOKE_HWP(errl, ody_omi_edpl, fapiOcmb, true);
+    if (nullptr != errl)
+    {
+        PRDF_ERR("ody_omi_edpl(0x%08x) failed", getHuid(i_ocmb));
         PRDF_COMMIT_ERRL(errl, ERRL_ACTION_REPORT);
     }
 }

@@ -359,6 +359,12 @@ actionclass omi_degraded_mode
     threshold1;
 };
 
+actionclass omi_detected_crc_event
+{
+    omi_bus_info_only;
+    funccall("reenableEdplOnTh");
+};
+
 actionclass info_only_mnfgInfo_th1
 {
     threshold1;

@@ -512,6 +512,28 @@ int32_t omiDegradeRetrainWorkaround(ExtensibleChip* i_chip,
 }
 PRDF_PLUGIN_DEFINE(odyssey_ocmb, omiDegradeRetrainWorkaround);
 
+/**
+ * @brief  DLX_FIR[4] - DL0 detected a CRC error. On threshold of these errors,
+ *         reenable EDPL.
+ * @param  i_chip An OCMB chip.
+ * @param  io_sc  The step code data struct.
+ * @return SUCCESS
+ */
+int32_t reenableEdplOnTh(ExtensibleChip * i_chip, STEP_CODE_DATA_STRUCT & io_sc)
+{
+    #ifdef __HOSTBOOT_MODULE
+    // As part of a workaround to avoid OMI degrades for DDR5, EDPL (error
+    // detection per lane) was disabled. However, if a threshold of CRC events
+    // is hit, EDPL should be re-enabled to catch real bad lanes.
+    if (io_sc.service_data->IsAtThreshold())
+    {
+        odyEnableEdpl(i_chip->getTrgt());
+    }
+    #endif
+    return SUCCESS;
+}
+PRDF_PLUGIN_DEFINE(odyssey_ocmb, reenableEdplOnTh);
+
 //##############################################################################
 //
 //                               RDF_FIR

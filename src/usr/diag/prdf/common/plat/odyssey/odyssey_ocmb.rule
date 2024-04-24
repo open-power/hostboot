@@ -2750,7 +2750,7 @@ group gDLX_FIR
     /** DLX_FIR[4]
      *  DL0 detected a CRC error
      */
-    (rDLX_FIR, bit(4)) ? defaultMaskedError;
+    (rDLX_FIR, bit(4)) ? omi_detected_crc_event;
 
     /** DLX_FIR[5]
      *  DL0 received a nack
