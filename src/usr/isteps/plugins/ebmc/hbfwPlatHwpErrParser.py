@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2023,2024
+# Contributors Listed Below - COPYRIGHT 2024
 # [+] International Business Machines Corp.
 #
 #
@@ -34,7 +34,7 @@
 # openbmc project's meta-openpower/recipes-phosphor/logging/hostboot-pel-parsers_git.bb
 # file to reference the Hostboot commit with the change.
 
-# Last generated: Mon Apr  1 15:34:26 2024 GMT
+# Last generated: Thu Apr 25 16:32:30 2024 GMT
 
 import json
 from udparsers.helpers.errludP_Helpers import intConcat
@@ -521,6 +521,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "The MCBIST engine failed to start its program" ],
             0x2c95b3: [ "RC_TOR_TRAVERSAL_ERROR",
                         "TOR Traversal led to incorrect ring" ],
+            0x2cbf95: [ "RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1",
+                        "Test sbe ffdc with bad target perv with deconfigure and gard with target instance 1" ],
             0x2ce66b: [ "RC_MSS_NO_POWER_THERMAL_ATTR_FOUND",
                         "There was no match or value found in decoding the power thermal attributes" ],
             0x2d5d3d: [ "RC_PSTATE_PB_RESCLK_TABLE_ERROR",
@@ -529,6 +531,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "Error checking TOD Status" ],
             0x2dc504: [ "RC_ODY_DQS_DRIFT_TRACK_DID_NOT_STOP",
                         "DQS drift track failed to exit in the time allowed" ],
+            0x2dd7de: [ "RC_TEST_CALLOUT_PERV_GARD_TARGET1",
+                        "Test sbe ffdc with bad target perv with gard with target instance 1" ],
             0x2deaaf: [ "RC_P10_SBE_EXIT_CACHE_CONTAINED_NO_MASTER_ERR",
                         "Master core was not found in set of active cores" ],
             0x2e016b: [ "RC_XIPC_RING_IS_REDUNDANT",
@@ -607,8 +611,6 @@ def hbfwErrLookupHwpRc(ver, data):
                         "RCS pll not locked" ],
             0x37ae7a: [ "RC_TEST_CALLOUT_PERV_GARD_TARGET8",
                         "Test sbe ffdc with bad target perv with gard with target instance 8" ],
-            0x380aae: [ "RC_TEST_CALLOUT_PERV_TARGET0",
-                        "Test sbe ffdc with bad target perv callout target instance 0" ],
             0x383ff8: [ "RC_P10_IO_TDR_EDGE_ERROR",
                         "No horizontal edge was found within the TDR pattern" ],
             0x38aa7e: [ "RC_MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ",
@@ -655,6 +657,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "Invalid data detected in the SBE FFDC buffer" ],
             0x3d05f8: [ "RC_PMSR_SHIFT_INACTIVE_TIMEOUT",
                         "poll for drop of PMSR_SHIFT_INACTIVE Timeout." ],
+            0x3d4879: [ "RC_TEST_CALLOUT_PERV_TARGET1",
+                        "Test sbe ffdc with bad target perv callout target instance 1" ],
             0x3d7eb6: [ "RC_P10_ADU_UTILS_INVALID_FLAG",
                         "There was an invalid argument passed in when building flag. It could be either Transaction size or Operation type. Check error trace. Procedure: p10_adu_utils" ],
             0x3db24e: [ "RC_POZ_IO_TX_TDR_MULTI_GROUP_ERROR",
@@ -885,8 +889,6 @@ def hbfwErrLookupHwpRc(ver, data):
                         "Invalid relationship between ceiling/floor core frequency attributes." ],
             0x528041: [ "RC_MSS_MDS_I2C_CMD_FAIL",
                         "Received non-SUCCESS status for MDS I2C scoms." ],
-            0x52865a: [ "RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET0",
-                        "Test sbe ffdc with bad target perv with deconfigure and gard with target instance 0" ],
             0x52d218: [ "RC_PROC_GETTRACEARRAY_TRACE_RUNNING",
                         "An attempt was made to dump a trace array while it was still running." ],
             0x5303e7: [ "RC_MSS_EXP_CCS_UE_SUE",
@@ -1145,8 +1147,6 @@ def hbfwErrLookupHwpRc(ver, data):
                         "pba_init timed out waiting for the PBA slave to reset." ],
             0x6dd2d3: [ "RC_ODY_MCBIST_UNKNOWN_FAILURE",
                         "MCBIST program reported a failure but no error status was found" ],
-            0x6e1d95: [ "RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET0",
-                        "Test sbe ffdc with bad target with deconfigure with target instance 0" ],
             0x6e44f7: [ "RC_MSS_EFF_GROUPING_M_REGION_MAP_ERROR",
                         "Memory grouping is not able to find a region to map current mirrored group. This could be because the mirror region has exceeded the max mirror regions allowed, or the mirror region size left does not fit the size of the group." ],
             0x6e8e6e: [ "RC_QME_PUTRING_PARALLEL_SCAN_ERR",
@@ -1308,7 +1308,7 @@ def hbfwErrLookupHwpRc(ver, data):
             0x8068d3: [ "RC_DIMM_RUNNING_IN_N_MODE",
                         "One of the 4 PMICs had errors which caused the DIMM to drop into N-Mode. Should be logged as recoverable unless the thresholds policy setting overrides this." ],
             0x80826d: [ "RC_MSS_DDR5_MR4_BAD_TRFC_MODE",
-                        "A bad TRFC mode was passed into MR4" ],
+                        "A bad TRFC mode was passed into MR4. The value comes from an MRW attribute, so a bad value will affect ALL DIMMs" ],
             0x8115bb: [ "RC_EXP_OMI_TRAIN_ERR",
                         "exp_omi_train_check did not see expected trained status from OCMB DL0 status register" ],
             0x815e4a: [ "RC_ODY_DRAM_INDEX_OUT_OF_BOUNDS",
@@ -1897,6 +1897,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "XGPE failed to suspend power management" ],
             0xc44e2c: [ "RC_PROC_DOES_NOT_SUPPORT_US_B",
                         "Procedure: exp_omi_init.C Upstream tempate B was requested, but the connected processor does not support it." ],
+            0xc48c45: [ "RC_LINK_TRAINING_DONE_POLL_FAILED",
+                        "Link training done poll fail" ],
             0xc4bc2a: [ "RC_MSS_DDR5_MR0_BAD_CAS_LATENCY",
                         "A bad CAS latency was passed to MR0" ],
             0xc53526: [ "RC_UNEXPECTED_DATA_SIZE",
@@ -1913,8 +1915,6 @@ def hbfwErrLookupHwpRc(ver, data):
                         "pba BAR must be on a 1MB boundary" ],
             0xc68341: [ "RC_ODY_PHYINIT_PIE_INVALID_NUM_RANKS",
                         "Invalid number of ranks on a given DFI (channel)" ],
-            0xc6af8d: [ "RC_TEST_CALLOUT_PERV_GARD_TARGET0",
-                        "Test sbe ffdc with bad target perv with gard with target instance 0" ],
             0xc70bcd: [ "RC_ODY_MEMDIAGS_COMPARE_ERROR_IN_LAST_PATTERN",
                         "A miscompare error was caused by the last MCBIST pattern" ],
             0xc749d8: [ "RC_INVALID_RING_IMAGE",
@@ -1951,6 +1951,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "Invalid cast or calculation for corrected_ps_per_jedec" ],
             0xcae1b5: [ "RC_P10_IOP_XRAM_ACCESS_SIZE_ERROR",
                         "Invalid IOP XRAM access size. Must access full 32K bytes." ],
+            0xcb1dc4: [ "RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U",
+                        "A DDR5 4U PMIC had aggregate state other than N_PLUS_1 when running health check in manufacturing mode." ],
             0xcb640b: [ "RC_P10_SBE_CORE_SPR_SETUP_NOT_MASTER_CHIP",
                         "Procedure: p10_sbe_core_spr_setup HWP called on SBE which is not designated as drawer master chip" ],
             0xcb796d: [ "RC_DONE_HALT_NOT_SET",
@@ -2073,6 +2075,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "Code bug: Image size would exceed max image size" ],
             0xd7bc0c: [ "RC_STATIC_POWER_GATING_PFET_CNFG_ERR",
                         "Procedure: p10_sbe_tp_chiplet_reset Check that the PFETs we configure earlier actually switched as expected" ],
+            0xd7ced7: [ "RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1",
+                        "Test sbe ffdc with bad target with deconfigure with target instance 1" ],
             0xd7f608: [ "RC_PMIC_MISMATCHING_REVISIONS_DDR5",
                         "The PMIC revision value did not match TI REV 23. Exiting to avoid applying DDR5 only procedures." ],
             0xd7fb81: [ "RC_MSS_PLUG_RULES_DRAM_GENERATION_MIXING_NOT_SUPPORTED",
@@ -2437,8 +2441,6 @@ def hbfwErrLookupHwpRc(ver, data):
                         "core change done on resclk entry timed out." ],
             0xfc87ff: [ "RC_MVPD_RING_NOT_FOUND",
                         "Specified MVPD ring was not found (Not a bug. Info to caller.)" ],
-            0xfc9a92: [ "RC_OMI_TRAINING_DONE_POLL_FAILED",
-                        "OMI training done poll time-out" ],
             0xfca400: [ "RC_MSS_DDR5_MR13_BAD_TCCD_L",
                         "A bad TCCD_L was passed to MR13" ],
             0xfcd512: [ "RC_GETTRACEARRAY_CLOCKS_OFF",
@@ -2447,8 +2449,6 @@ def hbfwErrLookupHwpRc(ver, data):
                         "Chiplet HEARTBEAT not running" ],
             0xfd2042: [ "RC_P10_BOOT_MODE_FEATURE_LOOKUP_ERROR",
                         "Inconsistent input type in bitvecs supplied to HW image feature lookup function" ],
-            0xfd3737: [ "RC_TEST_PERV_TARGET0",
-                        "Test sbe ffdc with bad target perv with instance 0" ],
             0xfd79d9: [ "RC_ODY_ROW_REPAIR_MCBIST_STUCK_IN_PROGRESS",
                         "MCBIST is failed to exit scrub or is in use and not available for repair." ],
             0xfd971d: [ "RC_MVPD_CODE_BUG",
@@ -2465,6 +2465,8 @@ def hbfwErrLookupHwpRc(ver, data):
                         "Out of bounds PMIC index encountered in pmic_enable target loop. Expected max 4 PMICs." ],
             0xff1625: [ "RC_MSS_EXP_DRAMINIT_TRAINING_TIMEOUT_FAIL",
                         "Phy Init command encountered a training timeout fail. These can usually be solved by retrying training As we are not able to retrigger training, we deconfigure the part" ],
+            0xff851b: [ "RC_TEST_PERV_TARGET1",
+                        "Test sbe ffdc with bad target perv with instance 1" ],
             }
 
     rc, i=intConcat(data, i, i+4)

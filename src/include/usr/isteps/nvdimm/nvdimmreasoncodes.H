@@ -351,6 +351,16 @@ enum UserDetailsTypes
 
 /*@
  *@errortype
+ *@moduleid         VALIDATE_FW_HEADER
+ *@reasoncode       NVDIMM_FW_OPS_NOT_SUCCESSFUL
+ *@userdata1        NVDIMM Target Huid
+ *@userdata2        Operation command being verified
+ *@devdesc          Firmware Operation not successful
+ *@custdesc         NVDIMM not updated
+ */
+
+/*@
+ *@errortype
  *@moduleid         COMMIT_FW_REGION
  *@reasoncode       NVDIMM_FW_OPS_NOT_SUCCESSFUL
  *@userdata1        NVDIMM Target Huid

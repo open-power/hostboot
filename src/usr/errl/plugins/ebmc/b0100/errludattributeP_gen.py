@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2023,2024
+# Contributors Listed Below - COPYRIGHT 2024
 # [+] International Business Machines Corp.
 #
 #
@@ -1703,12 +1703,6 @@ def ErrlUserDetailsParserAttribute(ver, data):
         elif attrEnum == 0x1fe3e53:
             #simpleType:uint
             label = "MEM_EFF_EFD_PMIC3_SWD_VOLTAGE_OFFSET"
-            for x in range(1):
-                traceEntry.append(hexConcat(data, i, i+1)[0])
-                i += 1
-        elif attrEnum == 0x1fe9602:
-            #simpleType:uint
-            label = "FORCE_ODY_SB_CHK_IN_MFG"
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
@@ -9634,6 +9628,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+4)[0])
                 i += 4
+        elif attrEnum == 0xaa4ce6c:
+            #simpleType:uint
+            label = "ODY_PNOR_COMBINED_IMAGES_HASH"
+            traceEntry.append("[64]:")
+            for x in range(64):
+                traceEntry.append(hexConcat(data, i, i+1)[0])
+                i += 1
         elif attrEnum == 0xaa54450:
             #simpleType:uint
             label = "MSS_EXP_RESP_DRAM_AL"
@@ -10004,6 +10005,12 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xaf60522:
+            #simpleType:uint
+            label = "ODY_DQS_TRACKING_RECAL_COUNT"
+            for x in range(1):
+                traceEntry.append(hexConcat(data, i, i+2)[0])
+                i += 2
         elif attrEnum == 0xaf6e256:
             #simpleType:uint
             label = "INITIATED_PM_HALT"
@@ -12912,6 +12919,13 @@ def ErrlUserDetailsParserAttribute(ver, data):
             for x in range(1):
                 traceEntry.append(hexConcat(data, i, i+1)[0])
                 i += 1
+        elif attrEnum == 0xe0cbfed:
+            #simpleType:uint
+            label = "ODY_DQS_TRACKING_LOG"
+            traceEntry.append("[24]:")
+            for x in range(24):
+                traceEntry.append(hexConcat(data, i, i+8)[0])
+                i += 8
         elif attrEnum == 0xe0f5735:
             #simpleType:uint
             label = "MC_EXT_THROTTLE_TEMP_DEG_C"
