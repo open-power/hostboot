@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,6 +57,30 @@ fapi2::ReturnCode check_mds(const fapi2::Target<fapi2::TARGET_TYPE_MCC>& i_targe
 /// @return fapi2::FAPI2_RC_SUCCESS if okay
 ///
 fapi2::ReturnCode check_mds_media_controller(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+//
+/// @brief Helper function to check if the dimm's SPD rev is less than min SPD rev
+/// @param[in] i_dimm dimm target
+/// @param[in] i_spd_min_rev supported minimun spd revision
+/// @param[in] i_spd_rev attr value of the spd revision of the DIMM
+/// @param[in] i_dram_gen attr value of the dram generation
+/// @param[in] i_pvr_82_sys attr value of system
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note need this to run only on p11 systems
+///
+fapi2::ReturnCode check_ddimm_spd_revision_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        const uint8_t i_spd_min_rev,
+        uint8_t i_spd_rev,
+        uint8_t i_dram_gen,
+        uint8_t i_pvr_82_sys);
+
+///
+/// @brief Check if the dimm's SPD rev is less than min SPD rev
+/// @param[in] i_target port target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note need this to run only on p11 systems
+///
+fapi2::ReturnCode check_ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
 
 ///
 /// @brief Enforce the plug-rules for planar system

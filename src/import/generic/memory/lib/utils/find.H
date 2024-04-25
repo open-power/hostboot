@@ -189,6 +189,18 @@ inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target(const fapi2::Targ
 }
 
 ///
+/// @brief find the PROC_CHIP given a MEM_PORT
+/// @param[in] i_target the fapi2 target MEM_PORT
+/// @return a PROC_CHIP target.
+///
+template<>
+inline fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> find_target(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target)
+{
+    return find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target.getParent<fapi2::TARGET_TYPE_OCMB_CHIP>());
+}
+
+///
 /// @brief find the MCC given a OCMB_CHIP
 /// @param[in] i_target the fapi2 target OCMB_CHIP
 /// @return a MCC target.

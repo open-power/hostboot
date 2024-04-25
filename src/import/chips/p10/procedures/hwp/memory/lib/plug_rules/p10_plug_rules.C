@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -147,6 +147,116 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function to check if the dimm's SPD rev is less than min SPD rev
+/// @param[in] i_dimm dimm target
+/// @param[in] i_spd_min_rev supported minimun spd revision
+/// @param[in] i_spd_rev attr value of the spd revision of the DIMM
+/// @param[in] i_dram_gen attr value of the dram generation
+/// @param[in] i_pvr_82_sys attr value of system
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note need this to run only on p11 systems
+///
+fapi2::ReturnCode check_ddimm_spd_revision_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        const uint8_t i_spd_min_rev,
+        uint8_t i_spd_rev,
+        uint8_t i_dram_gen,
+        uint8_t i_pvr_82_sys)
+{
+
+    // No SPD rev check needed for DDR4 DIMMs or for DIMMs on p10 systems
+    if(i_dram_gen == fapi2::ENUM_ATTR_MEM_EFF_DRAM_GEN_DDR4 || i_pvr_82_sys == fapi2::ENUM_ATTR_PVR_82_MODE_OFF)
+    {
+        FAPI_INF("%s SPD minimum revision check not necessary due to system type: %d or DIMM type: %d ",
+                 mss::c_str(i_dimm), i_pvr_82_sys, i_dram_gen );
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_ASSERT( (i_spd_rev >= i_spd_min_rev),
+                 fapi2::MSS_PLUG_RULES_DDR5_DIMM_SPD_REV_NOT_CURRENT()
+                 .set_DIMM_TARGET(i_dimm)
+                 .set_SPD_REV(i_spd_rev)
+                 .set_MIN_SPD_REV(i_spd_min_rev)
+                 .set_DRAM_GEN(i_dram_gen),
+                 "%s dimm has unsupported SPD rev and should be updated to be above min spd rev (0x%02x < 0x%02x) for dram gen:%d",
+                 mss::c_str(i_dimm), i_spd_rev, i_spd_min_rev, i_dram_gen);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Check if the dimm's SPD rev is less than min SPD rev
+/// @param[in] i_target port target
+/// @return fapi2::FAPI2_RC_SUCCESS if okay
+/// @note need this to run only on p11 systems
+///
+fapi2::ReturnCode check_ddimm_spd_revision(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    FAPI_DBG("%s Checking the spd rev check plug rule checking", mss::c_str(i_target));
+    fapi2::ReturnCode l_worst_rc = fapi2::FAPI2_RC_SUCCESS;
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    const auto l_proc = mss::find_target<fapi2::TARGET_TYPE_PROC_CHIP>(i_target);
+    uint8_t l_spd_rev_check_tested = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_DDR5_PLUG_RULES_SPD_REV_TESTED, l_proc, l_spd_rev_check_tested));
+
+    if (l_spd_rev_check_tested == fapi2::ENUM_ATTR_MEM_DDR5_PLUG_RULES_SPD_REV_TESTED_YES)
+    {
+        FAPI_INF("%s skipping testing because DDR5 SPD min rev check is already tested", mss::c_str(l_proc));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Get all the memports under that proc chip
+    for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_proc))
+    {
+        uint8_t l_dram_gen = 0;
+        uint8_t l_pvr_82_sys = 0;
+        uint8_t l_spd_rev = 0;
+        uint8_t l_spd_min_rev = 0;
+
+        // Get the necessary attributes
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PVR_82_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_pvr_82_sys) );
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_MIN_SUPPORTED_SPD_REVISION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                               l_spd_min_rev));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_SPD_REVISION, l_port, l_spd_rev) );
+
+        for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
+        {
+            // Get the dram generation attribute value
+            FAPI_TRY( mss::attr::get_dram_gen(l_dimm, l_dram_gen) );
+
+            l_rc = check_ddimm_spd_revision_helper(l_dimm, l_spd_min_rev, l_spd_rev, l_dram_gen, l_pvr_82_sys);
+
+            // Overwrite the return code only when not successful
+            if(l_rc != fapi2::FAPI2_RC_SUCCESS)
+            {
+                // l_worst_rc is always one error behind so
+                // log the previous error before l_worst_rc
+                // gets updated to the next error
+                if(l_worst_rc != fapi2::FAPI2_RC_SUCCESS)
+                {
+                    fapi2::logError(l_worst_rc);
+                }
+
+                // Update the l_worst_rc to the next error
+                l_worst_rc = l_rc;
+            }
+        }
+    }
+
+    // Set the attr so we can prevent duplicate testing
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MEM_DDR5_PLUG_RULES_SPD_REV_TESTED, l_proc,
+                                 fapi2::ENUM_ATTR_MEM_DDR5_PLUG_RULES_SPD_REV_TESTED_YES));
+
+    return l_worst_rc;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Enforce the plug-rules for planar system
 /// @param[in] i_target FAPI2 target (mem port)
 /// @param[in] i_is_planar a uint8_t ATTR_MEM_MRW_IS_PLANAR attr
@@ -275,6 +385,7 @@ fapi2::ReturnCode enforce_post_eff_config(const fapi2::Target<fapi2::TARGET_TYPE
 {
     uint8_t l_ignore_plug_rules = 0;
     uint8_t l_is_planar = 0;
+    uint8_t l_ignore_plug_rules_spd_rev_check = 0;
 
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
@@ -288,11 +399,21 @@ fapi2::ReturnCode enforce_post_eff_config(const fapi2::Target<fapi2::TARGET_TYPE
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_IGNORE_PLUG_RULES, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                             l_ignore_plug_rules) );
 
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_IGNORE_PLUG_RULES_SPD_REV_CHECK, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_ignore_plug_rules_spd_rev_check) );
+
     // Skip plug rule checks if set to ignore (e.g. on Apollo)
     if (l_ignore_plug_rules == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_YES)
     {
         FAPI_INF("%s Attribute set to ignore plug rule checking", mss::c_str(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Check the SPD rev only when the attr is not set to ignore
+    if (l_ignore_plug_rules_spd_rev_check == fapi2::ENUM_ATTR_MEM_IGNORE_PLUG_RULES_SPD_REV_CHECK_NO)
+    {
+        // Call the SPD revision check
+        FAPI_TRY(check_ddimm_spd_revision(i_target));
     }
 
     // Enforce planar system plug rules

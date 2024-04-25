@@ -536,6 +536,44 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MEM_IGNORE_PLUG_RULES_SPD_REV_CHECK</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Set to YES if you want to ignore the plug rule checking of DDR5 DIMM's
+      SPD minimum revision requirement. Sometimes this maybe required for
+      characterization testing or on a test board.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>NO = 0, YES = 1</enum>
+  </attribute>
+
+   <attribute>
+    <id>ATTR_MEM_EFF_DDR5_MIN_SUPPORTED_SPD_REVISION</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Supported DDR5 minimum SPD revision
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_DDR5_PLUG_RULES_SPD_REV_TESTED</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+      This attribute is used to avoid duplicate SPD revision
+      plug rule testing. Set internally by HWP code.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>NO = 0, YES = 1</enum>
+  </attribute>
+
+  <attribute>
     <id>ATTR_OMI_X4_DEGRADE_ACTION</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>

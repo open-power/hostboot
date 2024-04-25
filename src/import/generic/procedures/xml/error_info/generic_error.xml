@@ -2400,4 +2400,33 @@
     </deconfig>
   </hwpError>
 
+  <hwpError>
+    <sbeError/>
+    <rc>RC_MSS_PLUG_RULES_DDR5_DIMM_SPD_REV_NOT_CURRENT</rc>
+    <description>
+        Detected an older version of SPD than the minimum supported DDR5 revision.
+        This check can be skipped by setting the
+        ATTR_MEM_IGNORE_PLUG_RULES_SPD_REV_CHECK to YES.
+        Refer to ATTR_MEM_EFF_MIN_SUPPORTED_SPD_REVISION for the min version
+    </description>
+    <ffdc>DIMM_TARGET</ffdc>
+    <ffdc>SPD_REV</ffdc>
+    <ffdc>MIN_SPD_REV</ffdc>
+    <ffdc>DRAM_GEN</ffdc>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>DIMM_TARGET</refTarget>
+      </hw>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>
