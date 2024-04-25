@@ -143,4 +143,10 @@
     <ffdc>SBEFIFO_RC</ffdc>
     <ffdc>OPERATION_TYPE</ffdc>
 </hwpError>
+<hwpError>
+    <rc>RC_POZ_STREAM_GET_FAILED</rc>
+    <description>SBE stream get failed</description>
+    <ffdc>WORDS_LEFT</ffdc>
+    <ffdc>DATA_IS_NULL</ffdc>
+</hwpError>
 </hwpErrors>
