@@ -394,10 +394,11 @@ void get_dt_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
                   mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
     using DT_FIELDS  = mss::dt::fields;
-    mss::pmic::ddr5::dt_state l_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
 
     for (auto l_dt_count = 0; l_dt_count < io_target_info.iv_number_of_target_infos_present; l_dt_count++)
     {
+        mss::pmic::ddr5::dt_state l_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
+
         fapi2::buffer<uint16_t> l_reg0 = io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_0;
         fapi2::buffer<uint16_t> l_reg1 = io_health_check_info.iv_dt[l_dt_count].iv_ro_inputs_1;
 
@@ -422,7 +423,7 @@ void get_dt_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
             l_state = mss::pmic::ddr5::dt_state::DT_SWIN_FAULT_D;
         }
 
-        io_target_info.iv_pmic_dt_map[l_dt_count].iv_dt_state = l_state;
+        io_target_info.iv_pmic_dt_map[l_dt_count].iv_dt_state |= l_state;
     }
 }
 
