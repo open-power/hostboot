@@ -130,6 +130,8 @@ void attempt_recovery(mss::pmic::ddr5::target_info_pmic_dt_pair& io_pmic_dt_targ
     mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_pmic_dt_target_info, REGS::R32, l_pmic_buffer);
     l_pmic_buffer.setBit<FIELDS::R32_VR_ENABLE>();
     mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_pmic_dt_target_info, REGS::R32, l_pmic_buffer);
+
+    fapi2::delay(60 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
 }
 
 ///
