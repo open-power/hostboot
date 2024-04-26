@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -488,6 +488,21 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
 
             FAPI_DBG("Setting IOHS data rate variable(%d) based on freq(%d)", l_ppe_data_rate, l_iohs_freq);
 
+            // Set tx_fifo_l2u_dly = 1
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL,
+                                             IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY,
+                                             IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY_LEN,
+                                             l_num_lanes,
+                                             1));
+
+            // Set tx_unload_sel = 0
+            FAPI_TRY(p10_io_iohs_put_pl_regs(l_iohs_target,
+                                             IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL,
+                                             IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL,
+                                             IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL_LEN,
+                                             l_num_lanes,
+                                             0));
 
             if (l_ppe_data_rate <= 1)
             {
@@ -755,6 +770,21 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                                                     RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN,
                                                     l_num_lanes,
                                                     4));
+                    // Set tx_fifo_l2u_dly = 1
+                    FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY_LEN,
+                                                    l_num_lanes,
+                                                    1));
+
+                    // Set tx_unload_sel = 0
+                    FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL,
+                                                    TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL_LEN,
+                                                    l_num_lanes,
+                                                    0));
                 }
                 else
                 {
@@ -784,13 +814,13 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
                                                     l_num_lanes,
                                                     0));
 
-                    // TODO Set tx_unload_sel = 1
+                    // Set tx_unload_sel = 2
                     FAPI_TRY(p10_io_omi_put_pl_regs(l_omi_target,
                                                     TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL,
                                                     TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL,
                                                     TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL_LEN,
                                                     l_num_lanes,
-                                                    1));
+                                                    2));
                 }
 
 

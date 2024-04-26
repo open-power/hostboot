@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,19 @@ static const uint32_t DLP_CONTROL_1_COMMAND = 60;
 static const uint32_t DLP_CONTROL_1_COMMAND_LEN = 4;
 //<< [DLP_CONTROL]
 // iohs/reg00053.H
+
+//>> [IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL]
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL = 0x8004240010012c3full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY = 48;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_FIFO_L2U_DLY_LEN = 3;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_CLK_DISABLE = 56;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_RXCAL = 57;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL = 58;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_UNLOAD_SEL_LEN = 3;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL_FIFO_HOLD = 61;
+//<< [IOO_TX0_0_DD_TX_BIT_REGS_MODE2_PL]
+// iohs/reg00056.H
 
 //>>THE END<<
 
