@@ -550,7 +550,7 @@ fapi2::ReturnCode after_phy_reset<mss::mc_type::ODYSSEY>( const fapi2::Target<fa
         FAPI_TRY(fapi2::getScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE, l_reg_data));
         l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYD5ACSM0PARITYEN>();
         l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYD5ACSM1PARITYEN>();
-        l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYRXFIFOCHECKEN>();
+        l_reg_data.clearBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYRXFIFOCHECKEN>();
         l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYTXPPTEN>();
         l_reg_data.setBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE_PHYECCEN>();
         FAPI_TRY(fapi2::putScom(l_port, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_PHYINTERRUPTENABLE, l_reg_data));
