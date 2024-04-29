@@ -42,6 +42,7 @@
 #include <generic/memory/lib/utils/fir/gen_mss_fir.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic_attribute_accessors_manual.H>
+#include <lib/fir/ody_fir_traits.H>
 
 namespace mss
 {
@@ -147,6 +148,16 @@ fapi2::ReturnCode pre_init_mask_prog_complete( const fapi2::Target<fapi2::TARGET
 /// @note this avoids an unnecessary processor attention when the sf_init program completes in memdiags
 ///
 fapi2::ReturnCode post_init_unmask_prog_complete( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
+
+///
+/// @brief Function handling the MC_OMI_FIR CRC FIR settings
+/// @param[in] i_target the OCMB_CHIP target of the MC_OMI fir
+/// @param[in] i_mnfg_screen_test value of MNFG_OMI_CRC_EDPL_SCREEN
+/// @param[in,out] io_ody_dlx_omi_fir_reg the MC_OMI_FIR register instance
+///
+void ody_omi_crc_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const bool i_mnfg_screen_test,
+                                 mss::fir::reg2<scomt::omi::D_REG_MC_OMI_FIR_RW_WCLEAR>& io_ody_dlx_omi_fir_reg );
 
 } // end unmask ns
 } // end mss ns

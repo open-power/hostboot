@@ -242,6 +242,30 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Function handling the MC_OMI_FIR CRC FIR settings
+/// @param[in] i_target the OCMB_CHIP target of the MC_OMI fir
+/// @param[in] i_mnfg_screen_test value of MNFG_OMI_CRC_EDPL_SCREEN
+/// @param[in,out] io_ody_dlx_omi_fir_reg the MC_OMI_FIR register instance
+///
+void ody_omi_crc_after_omi_init( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const bool i_mnfg_screen_test,
+                                 mss::fir::reg2<scomt::omi::D_REG_MC_OMI_FIR_RW_WCLEAR>& io_ody_dlx_omi_fir_reg )
+{
+    // Set up MNFG OMI screen settings
+    if (i_mnfg_screen_test)
+    {
+        FAPI_DBG("Setting MC_OMI_FIR CRC FIR to masked for MFG test for " GENTARGTIDFORMAT, GENTARGTID(i_target));
+        io_ody_dlx_omi_fir_reg.remask<scomt::omi::D_REG_MC_OMI_FIR_DL0_CRC_ERROR>();
+    }
+    else
+    {
+        FAPI_DBG("Setting MC_OMI_FIR CRC FIR to recoverable and unmask for ", GENTARGTIDFORMAT, GENTARGTID(i_target));
+        io_ody_dlx_omi_fir_reg.recoverable_error<scomt::omi::D_REG_MC_OMI_FIR_DL0_CRC_ERROR>();
+    }
+}
+
+
+///
 /// @brief Unmask and setup actions performed after omi_init - specialization for Odyssey
 /// @param[in] i_target the fapi2::Target
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
@@ -251,6 +275,7 @@ template<>
 fapi2::ReturnCode after_mc_omi_init<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     fapi2::buffer<uint64_t> l_reg_data;
+    bool l_mnfg_screen_test = false;
 
     // Create registers and check success for SRQFIR
     mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
@@ -292,6 +317,13 @@ fapi2::ReturnCode after_mc_omi_init<mss::mc_type::ODYSSEY>(const fapi2::Target<f
     .clearBit<scomt::omi::D_REG_DL0_ERROR_MASK_15>()
     .clearBit<scomt::omi::D_REG_DL0_ERROR_MASK_16>();
     FAPI_TRY(fapi2::putScom(i_target, scomt::omi::D_REG_DL0_ERROR_MASK, l_reg_data));
+
+    // Check for mnfg OMI screen setting
+    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN,
+                                 l_mnfg_screen_test));
+
+    // Set up MNFG OMI screen for CRC FIRs
+    ody_omi_crc_after_omi_init(i_target, l_mnfg_screen_test, l_mc_omi_fir_reg);
 
     // Unmask MC_OMI_FIR
     FAPI_TRY(l_mc_omi_fir_reg.recoverable_error<scomt::omi::D_REG_MC_OMI_FIR_DL0_FLIT_CE>()
