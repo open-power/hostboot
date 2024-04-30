@@ -55,19 +55,17 @@ namespace memdiags
 /// @return FAPI2_RC_SUCCESS iff everything ok
 ///
 template <>
-fapi2::ReturnCode operation<mss::mc_type::EXPLORER>::multi_port_init_internal()
+fapi2::ReturnCode sf_init_operation<mss::mc_type::EXPLORER>::multi_port_init_internal()
 {
     return single_port_init();
 }
 
 ///
-/// @brief memdiags multi-port read for specific chip - Explorer specialization
-/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
-/// in subclassed constructors more easily.
+/// @brief memdiags multi-port init helper function for specific chip - Explorer specialization
 /// @return FAPI2_RC_SUCCESS iff everything ok
 ///
 template <>
-fapi2::ReturnCode operation<mss::mc_type::EXPLORER>::multi_port_read_internal()
+fapi2::ReturnCode sf_read_operation<mss::mc_type::EXPLORER>::multi_port_init_internal()
 {
     return single_port_init();
 }

@@ -52,7 +52,7 @@ namespace memdiags
 {
 
 ///
-/// @brief Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and return the original mask value - specialization for Odyssey
+/// @brief Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and return the original mask value - ODYSSEY specialization
 /// @param[in] i_target the target
 /// @param[out] o_fir_mask_save the original mask value to be restored later
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -63,7 +63,7 @@ fapi2::ReturnCode mask_program_complete<mss::mc_type::ODYSSEY>(
     fapi2::buffer<uint64_t>& o_fir_mask_save );
 
 ///
-/// @brief Restore MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] mask value and clear the FIR - specialization for Odyssey
+/// @brief Restore MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] mask value and clear the FIR - ODYSSEY specialization
 /// @param[in] i_target the target
 /// @param[in] i_fir_mask_save the original mask value to be restored
 /// @return FAPI2_RC_SUCCESS iff ok

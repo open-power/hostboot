@@ -708,6 +708,20 @@
 
   <hwpError>
     <sbeError/>
+    <rc>RC_MSS_IRRELEVANT_FUNC_CALL</rc>
+    <description>
+        An invalid/irrelevant function call is made
+    </description>
+    <ffdc>FUNCTION</ffdc>
+    <ffdc>DIMM_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_FREQUENCY</rc>
     <description>
       An invalid frequency was passed to frequency to clock period

@@ -68,6 +68,19 @@ template< mss::mc_type MC >
 fapi2::ReturnCode update_bad_bits( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target );
 
 ///
+/// @brief Enums for ffdc error callout so we know which function had the error for invalid function getting called
+///
+enum memdiags_operations_irrelevant_function_ffdc_codes
+{
+    SF_INIT_PER_SRANK_OPERATION = 0,
+    SF_READ_EOP_OPERATION = 1,
+    CONTINUOUS_SCRUB_OPERATION = 2,
+    CONTINUOUS_STEER_OPERATION = 3,
+    TARGETED_SCRUB_OPERATION = 4,
+    TARGETED_STEER_OPERATION = 5
+};
+
+///
 /// @brief Determine if a thing is functional
 /// @tparam MC mss::mc_type memory controller type
 /// @tparam I, the type of the item we want to check for
@@ -505,20 +518,22 @@ class operation
         void configure_multiport_subtests(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_DIMM>>& i_dimms);
 
         ///
-        /// @brief memdiags multi-port init helper
+        /// @brief memdiags multi-port init for specific chip
         /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
         /// in subclassed constructors more easily.
+        /// Does common assertion before calling helper function multi_port_init_internal.
         /// @return FAPI2_RC_SUCCESS iff everything ok
         ///
         fapi2::ReturnCode multi_port_init();
 
         ///
-        /// @brief memdiags multi-port init for specific chip
+        /// @brief memdiags multi-port init helper
         /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
         /// in subclassed constructors more easily.
+        /// Must be overriden by child classes with their specific implementation.
         /// @return FAPI2_RC_SUCCESS iff everything ok
         ///
-        fapi2::ReturnCode multi_port_init_internal();
+        fapi2::ReturnCode virtual multi_port_init_internal() = 0;
 
         ///
         /// @brief memdiags single-rank init for specific chip
@@ -531,22 +546,6 @@ class operation
         ///
         fapi2::ReturnCode single_srank_init_internal(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
                 const uint8_t i_mrank, const uint8_t i_srank);
-
-        ///
-        /// @brief memdiags multi-port read helper
-        /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
-        /// in subclassed constructors more easily.
-        /// @return FAPI2_RC_SUCCESS iff everything ok
-        ///
-        fapi2::ReturnCode multi_port_read();
-
-        ///
-        /// @brief memdiags multi-port read for specific chip
-        /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
-        /// in subclassed constructors more easily.
-        /// @return FAPI2_RC_SUCCESS iff everything ok
-        ///
-        fapi2::ReturnCode multi_port_read_internal();
 
         ///
         /// @brief memdiags multi-port address config helper for "simple" one subtest per port setup
@@ -617,8 +616,6 @@ class operation
         uint8_t                   iv_sim;
 };
 
-
-
 ///
 /// @brief memdiags init helper
 /// @tparam MC the mc type of the T
@@ -661,6 +658,44 @@ inline fapi2::ReturnCode operation<MC, T, TT>::base_init()
 
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief memdiags multi-port init
+/// Does common assertion before calling helper function multi_port_init_internal.
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT >
+fapi2::ReturnCode operation<MC, T, TT>::multi_port_init()
+{
+    FAPI_INF_NO_SBE("multi_port_init base impl " TARGTIDFORMAT, GENTARGTID(this->iv_target));
+    const auto l_port = mss::find_targets<TT::PORT_TYPE>(this->iv_target);
+
+    // Make sure we have ports, if we don't then exit out
+    if(l_port.size() == 0)
+    {
+        // Cronus can have no ports under an MCBIST, FW deconfigures by association
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached ports skipping setup", GENTARGTID(this->iv_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Let's assume we are going to send out all subtest unless we are in broadcast mode,
+    // where we only send up to 2 subtests under an port ( 1 for each DIMM) which is why no const
+    auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(this->iv_target);
+
+    if( l_dimms.size() == 0)
+    {
+        // Cronus can have no DIMMS under an MCBIST, FW deconfigures by association
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached DIMMs skipping setup", GENTARGTID(this->iv_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    return this->multi_port_init_internal();
 }
 
 #ifndef __PPE__
@@ -727,84 +762,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-
-
-///
-/// @brief memdiags multi-port init helper
-/// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T
-/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
-/// in subclassed constructors more easily.
-/// @return FAPI2_RC_SUCCESS iff everything ok
-///
-template< mss::mc_type MC, fapi2::TargetType T, typename TT >
-inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_init()
-{
-    FAPI_INF_NO_SBE("multi-port init for " TARGTIDFORMAT, GENTARGTID(iv_target));
-
-    const auto l_port = mss::find_targets<TT::PORT_TYPE>(iv_target);
-
-    // Make sure we have ports, if we don't then exit out
-    if(l_port.size() == 0)
-    {
-        // Cronus can have no ports under an MCBIST, FW deconfigures by association
-        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached ports skipping setup", GENTARGTID(iv_target));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    // Let's assume we are going to send out all subtest unless we are in broadcast mode,
-    // where we only send up to 2 subtests under an port ( 1 for each DIMM) which is why no const
-    auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target);
-
-    if( l_dimms.size() == 0)
-    {
-        // Cronus can have no DIMMS under an MCBIST, FW deconfigures by association
-        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached DIMMs skipping setup", GENTARGTID(iv_target));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    return multi_port_init_internal();
-}
-
-///
-/// @brief memdiags multi-port read helper
-/// @tparam MC the mc type of the T
-/// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T
-/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
-/// in subclassed constructors more easily.
-/// @return FAPI2_RC_SUCCESS iff everything ok
-///
-template< mss::mc_type MC, fapi2::TargetType T, typename TT >
-inline fapi2::ReturnCode operation<MC, T, TT>::multi_port_read()
-{
-    FAPI_INF_NO_SBE("multi-port read for " TARGTIDFORMAT, GENTARGTID(iv_target));
-
-    const auto l_port = mss::find_targets<TT::PORT_TYPE>(iv_target);
-
-    // Make sure we have ports, if we don't then exit out
-    if(l_port.size() == 0)
-    {
-        // Cronus can have no ports under an MCBIST, FW deconfigures by association
-        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached ports skipping setup", GENTARGTID(iv_target));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    // Let's assume we are going to send out all subtest unless we are in broadcast mode,
-    // where we only send up to 2 subtests under an port ( 1 for each DIMM) which is why no const
-    auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target);
-
-    if( l_dimms.size() == 0)
-    {
-        // Cronus can have no DIMMS under an MCBIST, FW deconfigures by association
-        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached DIMMs skipping setup", GENTARGTID(iv_target));
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
-    return multi_port_read_internal();
-}
-
 ///
 /// @class Class for memdiags' super-fast init
 /// @tparam MC the mc type of the T
@@ -833,10 +790,20 @@ struct sf_init_operation : public operation<MC>
         }
 
         // We're a multi-port operation
+        FAPI_INF_NO_SBE("::sf_init_operation trace MC - %d " TARGTIDFORMAT, MC , GENTARGTID(this->iv_target));
         o_rc = this->multi_port_init();
     }
 
     sf_init_operation() = delete;
+
+    ///
+    /// @brief memdiags multi-port init helper for sf_init_operation
+    /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+    /// in subclassed constructors more easily.
+    /// Overrides the base class with its own specific chip implementation.
+    /// @return FAPI2_RC_SUCCESS iff everything ok
+    ///
+    fapi2::ReturnCode multi_port_init_internal() override;
 };
 
 ///
@@ -877,8 +844,42 @@ struct sf_init_per_srank_operation : public operation<MC>
     }
 
     sf_init_per_srank_operation() = delete;
+
+    ///
+    /// @brief memdiags multi-port init helper for sf_init_per_srank_operation
+    /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+    /// in subclassed constructors more easily.
+    /// provided for compilation since multi_port_init_internal is pure virtual in operation class
+    /// @return FAPI2_RC_SUCCESS iff everything ok
+    ///
+    fapi2::ReturnCode multi_port_init_internal() override;
 };
 
+///
+/// @brief memdiags multi-port init helper function
+/// Dummy implementation required to create child classes from operation.
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType T1, typename TT >
+fapi2::ReturnCode sf_init_per_srank_operation<MC, T, T1, TT>::multi_port_init_internal()
+{
+    FAPI_ASSERT( false,
+                 fapi2::MSS_IRRELEVANT_FUNC_CALL()
+                 .set_FUNCTION(SF_INIT_PER_SRANK_OPERATION)
+                 .set_DIMM_TARGET(this->iv_target),
+                 "irrelevant func call sf_init_per_srank_operation::multi_port_init_internal " TARGTIDFORMAT ,
+                 GENTARGTID(this->iv_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @class Class for memdiags' super-fast read
@@ -902,12 +903,19 @@ struct sf_read_operation : public operation<MC>
         operation<MC>(i_target, mss::mcbist::read_subtest<MC>(), i_const)
     {
         // We're a multi-port operation
-        o_rc = this->multi_port_read();
+        o_rc = this->multi_port_init();
     }
 
     sf_read_operation() = delete;
-};
 
+    ///
+    /// @brief memdiags multi-port read for specific chip
+    /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+    /// in subclassed constructors more easily.
+    /// Overrides the base class impl for chip spicific specialization.
+    /// @return FAPI2_RC_SUCCESS iff everything ok
+    fapi2::ReturnCode multi_port_init_internal() override;
+};
 
 ///
 /// @class Class for memdiags' super-fast read to end of port
@@ -934,7 +942,41 @@ struct sf_read_eop_operation : public operation<MC>
     }
 
     sf_read_eop_operation() = delete;
+
+    ///
+    /// @brief memdiags multi-port init helper for sf_read_eop_operation
+    /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+    /// in subclassed constructors more easily.
+    /// provided for compilation since multi_port_init_internal is pure virtual in operation class
+    /// @return FAPI2_RC_SUCCESS iff everything ok
+    ///
+    fapi2::ReturnCode multi_port_init_internal() override;
 };
+
+///
+/// @brief memdiags multi-port init helper function
+/// Dummy implementation required to create child classes from operation.
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT >
+fapi2::ReturnCode sf_read_eop_operation<MC, T, TT>::multi_port_init_internal()
+{
+    FAPI_ASSERT( false,
+                 fapi2::MSS_IRRELEVANT_FUNC_CALL()
+                 .set_FUNCTION(SF_READ_EOP_OPERATION)
+                 .set_DIMM_TARGET(this->iv_target),
+                 "irrelevant func call sf_read_eop_operation::multi_port_init_internal " TARGTIDFORMAT , GENTARGTID(this->iv_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @class Class for memdiags' continuous scrub
@@ -957,7 +999,42 @@ struct continuous_scrub_operation : public operation<MC>
                                 fapi2::ReturnCode& o_rc );
 
     continuous_scrub_operation() = delete;
+
+    ///
+    /// @brief memdiags multi-port init helper for continuous_scrub_operation
+    /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+    /// in subclassed constructors more easily.
+    /// provided for compilation since multi_port_init_internal is pure virtual in operation class
+    /// @return FAPI2_RC_SUCCESS iff everything ok
+    ///
+    fapi2::ReturnCode multi_port_init_internal() override;
 };
+
+///
+/// @brief memdiags multi-port init helper function
+/// Dummy implementation required to create child classes from operation.
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT >
+fapi2::ReturnCode continuous_scrub_operation<MC, T, TT>::multi_port_init_internal()
+{
+    FAPI_ASSERT( false,
+                 fapi2::MSS_IRRELEVANT_FUNC_CALL()
+                 .set_FUNCTION(CONTINUOUS_SCRUB_OPERATION)
+                 .set_DIMM_TARGET(this->iv_target),
+                 "irrelevant func call continuous_scrub_operation::multi_port_init_internal " TARGTIDFORMAT ,
+                 GENTARGTID(this->iv_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief memdiags::continuous_scrub_operation constructor
@@ -1135,7 +1212,43 @@ struct continuous_steer_operation : public operation<MC>
 #ifndef __PPE__
     continuous_steer_operation() = delete;
 #endif
+
+    ///
+    /// @brief memdiags multi-port init helper for continuous_steer_operation
+    /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+    /// in subclassed constructors more easily.
+    /// provided for compilation since multi_port_init_internal is pure virtual in operation class
+    /// @return FAPI2_RC_SUCCESS iff everything ok
+    ///
+    fapi2::ReturnCode multi_port_init_internal() override;
+
 };
+
+///
+/// @brief memdiags multi-port init helper function
+/// Dummy implementation required to create child classes from operation.
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT >
+fapi2::ReturnCode continuous_steer_operation<MC, T, TT>::multi_port_init_internal()
+{
+    FAPI_ASSERT( false,
+                 fapi2::MSS_IRRELEVANT_FUNC_CALL()
+                 .set_FUNCTION(CONTINUOUS_STEER_OPERATION)
+                 .set_DIMM_TARGET(this->iv_target),
+                 "irrelevant func call continuous_steer_operation::multi_port_init_internal " TARGTIDFORMAT ,
+                 GENTARGTID(this->iv_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief memdiags::continuous_steer_operation constructor
@@ -1324,7 +1437,41 @@ struct targeted_scrub_operation : public operation<MC>
     }
 
     targeted_scrub_operation() = delete;
+
+    ///
+    /// @brief memdiags multi-port init helper for targeted_scrub_operation
+    /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+    /// in subclassed constructors more easily.
+    /// provided for compilation since multi_port_init_internal is pure virtual in operation class
+    /// @return FAPI2_RC_SUCCESS iff everything ok
+    ///
+    fapi2::ReturnCode multi_port_init_internal() override;
 };
+
+///
+/// @brief memdiags multi-port init helper function
+/// Dummy implementation required to create child classes from operation.
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT >
+fapi2::ReturnCode targeted_scrub_operation<MC, T, TT>::multi_port_init_internal()
+{
+    FAPI_ASSERT( false,
+                 fapi2::MSS_IRRELEVANT_FUNC_CALL()
+                 .set_FUNCTION(TARGETED_SCRUB_OPERATION)
+                 .set_DIMM_TARGET(this->iv_target),
+                 "irrelevant func call targeted_scrub_operation::multi_port_init_internal " TARGTIDFORMAT , GENTARGTID(this->iv_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @class Class for memdiags' targeted steer
@@ -1360,7 +1507,41 @@ struct targeted_steer_operation : public operation<MC>
     }
 
     targeted_steer_operation() = delete;
+
+    ///
+    /// @brief memdiags multi-port init helper for targeted_steer_operation
+    /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+    /// in subclassed constructors more easily.
+    /// provided for compilation since multi_port_init_internal is pure virtual in operation class
+    /// @return FAPI2_RC_SUCCESS iff everything ok
+    ///
+    fapi2::ReturnCode multi_port_init_internal() override;
 };
+
+///
+/// @brief memdiags multi-port init helper function
+/// Dummy implementation required to create child classes from operation.
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
+/// in subclassed constructors more easily.
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT >
+fapi2::ReturnCode targeted_steer_operation<MC, T, TT>::multi_port_init_internal()
+{
+    FAPI_ASSERT( false,
+                 fapi2::MSS_IRRELEVANT_FUNC_CALL()
+                 .set_FUNCTION(TARGETED_STEER_OPERATION)
+                 .set_DIMM_TARGET(this->iv_target),
+                 "irrelevant func call targeted_steer_operation::multi_port_init_internal " TARGTIDFORMAT , GENTARGTID(this->iv_target));
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Super Fast Init - used to init all memory behind a target with a given pattern
