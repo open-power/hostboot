@@ -86,7 +86,7 @@ PSPD_BUILD_SCRIPT := ${BUILDPNOR}/buildSPDImages.pl
 BUILD_OCMBFW_IMAGE := 1
 ifdef HB_FAST_PRIME
 ifndef HB_FORCE_REBUILD_ODY
-	SBE_CACHE_DIR := ${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/${SBE_SUBREPO_TOP_COMMIT}
+	SBE_CACHE_DIR := ${HOSTBOOT_ENVIRONMENT}/prime/sbe/release-fw1060/${SBE_SUBREPO_TOP_COMMIT}
 	SBE_CACHE_EXISTS := $(shell ls ${SBE_CACHE_DIR})
 	# The cache doesn't exist, we will need to build OCMBFW partition
 	ifneq ($(SBE_CACHE_EXISTS),)
@@ -100,7 +100,7 @@ SBE_TOOL        := ${PPE_DIR}/images/ipl_image_tool
 SBE_SEEPROM_IMAGE_DD1 := ${PPE_DIR}/images/sbe_seeprom_DD1.bin
 
 # Needed to sign SBE Image (which will add .sb_settings section to it)
-PPE_CACHE_DIR := ${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}
+PPE_CACHE_DIR := ${HOSTBOOT_ENVIRONMENT}/prime/ppe/release-fw1060/${PPE_SUBREPO_TOP_COMMIT}
 PPE_CACHE_EXISTS := $(shell ls ${PPE_CACHE_DIR})
 ifdef HB_FAST_PRIME
 ifndef HB_FORCE_REBUILD_SBE
@@ -413,7 +413,7 @@ ifeq (${BUILD_OCMBFW_IMAGE},1)
 	    ${PKG_OCMBFW_SCRIPT} --layout ocmbfw-layout.json --output ${OCMBFW_IMG}
 else
 # Grab the pre-built image
-	cp ${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/${SBE_SUBREPO_TOP_COMMIT}/fwhdr.ocmbfw.bin ${OCMBFW_IMG}
+	cp ${HOSTBOOT_ENVIRONMENT}/prime/sbe/release-fw1060/${SBE_SUBREPO_TOP_COMMIT}/fwhdr.ocmbfw.bin ${OCMBFW_IMG}
 endif
 
 # Remove offset from start of Bootloader image for HBBL partition

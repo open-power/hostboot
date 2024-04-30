@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2023
+# Contributors Listed Below - COPYRIGHT 2021,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -52,7 +52,7 @@ function usage()
 }
 
 PUSH_COMMITS="0"
-PUSH_BRANCH="master-p10"
+PUSH_BRANCH="release-fw1060"
 SUPPORTED_SUBTREES="pldm,libpldm,libmctp"
 REVIEWER=""
 SUBTREE="wrong"

@@ -47,7 +47,7 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     export PATH=${STANDALONE_SIMICS}:${PATH}
 
     PPE_SUBREPO_TOP_COMMIT=$(git submodule status src/build/tools/extern/ppe | awk '{print $1}' | sed 's/^-//')
-    PPE_CACHE_DIR=${HOSTBOOT_ENVIRONMENT}/prime/ppe/master-p10/${PPE_SUBREPO_TOP_COMMIT}
+    PPE_CACHE_DIR=${HOSTBOOT_ENVIRONMENT}/prime/ppe/release-fw1060/${PPE_SUBREPO_TOP_COMMIT}
     if [[ "$HB_FAST_PRIME" ]] && [[ -d ${PPE_CACHE_DIR} ]]; then
         # Pick up pre-built SBE images
         SBE_STANDALONE_IMG=${PPE_CACHE_DIR}/sbe_seeprom_p10.bin.ecc
@@ -70,7 +70,7 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
     then
         # Pick up pre-built images
         export SBE_SUBREPO_TOP_COMMIT=$(git submodule status $SBE_DIR | awk '{print $1}' | sed 's/^-//')
-        export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/$SBE_SUBREPO_TOP_COMMIT/
+        export ODYSSEY_SBE_IMAGES=${HOSTBOOT_ENVIRONMENT}/prime/sbe/release-fw1060/$SBE_SUBREPO_TOP_COMMIT/
         # Check if the cached images exist; rebuild the SBE submodule if they don't
         if [ -d ${ODYSSEY_SBE_IMAGES} ]; then
             echo "\n***Using default pre-built SBE Odyssey images from ${ODYSSEY_SBE_IMAGES}\n"
@@ -87,7 +87,7 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         if [ ! -d ${ODY_SBE_DEBUG_DIR} ]; then
             ODY_SBE_DEBUG_DIR=${STANDALONE_SIMICS}/odyssey_debug_files_tools/
             if [ ! -d ${ODY_SBE_DEBUG_DIR} ]; then
-                ODY_SBE_DEBUG_DIR=${HOSTBOOT_ENVIRONMENT}/prime/sbe/main/latest/odyssey_debug_files_tools/
+                ODY_SBE_DEBUG_DIR=${HOSTBOOT_ENVIRONMENT}/prime/sbe/release-fw1060/latest/odyssey_debug_files_tools/
             fi
         fi
     fi
