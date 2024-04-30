@@ -252,7 +252,7 @@ state_transitions_t ody_fsm_transitions[] =
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
     //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
     { { no            , no                     , SIDE0  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_1, retry_check_for_ready                       }},
-                                                                         { ANY_EVENT                   , {internal_error                                                }} } },  // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
+                                                                         { ANY_EVENT                   , {internal_error                                                }} } },
 
     { { no            , no                     , SIDE0  , no          },{{ UPDATE_OMI_FIRMWARE_REACHED
                                                                            | ATTRS_INCOMPATIBLE
@@ -260,7 +260,8 @@ state_transitions_t ody_fsm_transitions[] =
                                                                                                  // case the timeout handler will catch the problem, and in the latter case the code update could fix the issue.
                                                                            | OTHER_HW_HWP_FAIL         , {perform_code_update, switch_to_side_1, retry_check_for_ready  }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
-                                                                           | OCMB_FLASH_ERROR          
+                                                                           | OCMB_BOOT_ERROR_NO_FFDC
+                                                                           | OCMB_FLASH_ERROR
                                                                            | OCMB_HWP_FAIL_HASH_FAIL   , {switch_to_side_1, retry_check_for_ready                       }},
                                                                          { CODE_UPDATE_CHIPOP_FAILURE  , {switch_to_side_golden, retry_check_for_ready                  }} } },
 
@@ -268,6 +269,7 @@ state_transitions_t ody_fsm_transitions[] =
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
                                                                          { IMAGE_SYNC_CHIPOP_FAILURE
                                                                            | MEAS_REGS_MISMATCH
+                                                                           | OCMB_BOOT_ERROR_NO_FFDC
                                                                            | OCMB_FLASH_ERROR          , {switch_to_side_1, retry_check_for_ready                       }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_HWP_FAIL_OTHER       , {deconfigure_ocmb                                              }},
@@ -277,10 +279,11 @@ state_transitions_t ody_fsm_transitions[] =
     //  Code updated? | Golden boot performed? | Side   | Fw up to date? |  Event                      | Action
     //----------------+------------------------+--------+----------------+-----------------------------|------------------------------------------------------------------------
     { { no            , no                     , SIDE1  , unknown     },{{ OCMB_BOOT_ERROR_NO_FFDC     , {switch_to_side_golden, retry_check_for_ready                  }},
-                                                                         { ANY_EVENT                   , {internal_error                                                }} } }, // only OCMB_BOOT_ERROR_NO_FFDC can happen when we don't know the fw version
+                                                                         { ANY_EVENT                   , {internal_error                                                }} } },
 
     { { no            , no                     , SIDE1  , no          },{{ OCMB_HWP_FAIL_OTHER
                                                                            | OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_BOOT_ERROR_NO_FFDC
                                                                            | OCMB_FLASH_ERROR          , {switch_to_side_golden, retry_check_for_ready                  }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | UPDATE_OMI_FIRMWARE_REACHED
@@ -289,6 +292,7 @@ state_transitions_t ody_fsm_transitions[] =
                                                                          { CODE_UPDATE_CHIPOP_FAILURE  , {switch_to_side_golden, retry_check_for_ready                  }} } },
 
     { { no            , no                     , SIDE1  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_BOOT_ERROR_NO_FFDC
                                                                            | OCMB_FLASH_ERROR          , {switch_to_side_golden, retry_check_for_ready                  }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_HWP_FAIL_OTHER
