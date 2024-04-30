@@ -30,8 +30,13 @@
  *
  *  @NOTE: This file integrates the contents of the file in the FSP repo,
  *         $SANDBOXBASE/obj/ppc/sbei/sbfw/parserplugins/odySbeUserDataParser.C
- *         These files must be kept in sync. Any modification to this file
- *         must be reflected in the file odySbeUserDataParser.C and vice versa.
+ *         These files should be kept in sync. Any modification to this file
+ *         should be reflected in the file odySbeUserDataParser.C and vice versa.
+ *
+ *         However, minor changes to parsing may not be. For instance,
+ *         FAPI2_RC_PLAT_ERR_SEE_DATA is a hardcoded RC that leads to this parser in
+ *         Hostboot and Hostboot does not send that RC as part of the blob to the parser.
+ *         So, instead it's hardcoded.
  *
  *  Defines the ErrlUserDetailsParser classes that parse SBEIO FFDC
  */
@@ -48,6 +53,8 @@
 
 #include "sbeIoFfdcType.H"
 #include "sbeffdctypecommon.H"
+
+#include <return_code_defs.H>
 
 #define ODY_SBE_TEMP_DUMP_FILE              "/tmp/ody_trace_dump.bin"
 #define ODY_SBE_TRACE_BIN                   "/tmp/ody_sbe_trace.bin"
@@ -133,7 +140,7 @@ public:
                        const uint32_t i_buflen) const
     {
     int l_rc = 0;
-    uint32_t fapiRc = 0;
+    uint32_t fapiRc = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
     sbePlatHeader_t l_pData = {0};
     char l_buffer[ODY_SBE_PARSER_MAX_LOCAL_BUFFER] = {0};
     char *l_pBuffer = (char*)i_pBuffer;
@@ -156,10 +163,9 @@ public:
             i_parser.PrintHexDump(l_pBuffer, l_buflen);
             break;
         }
-        l_buflen -= sizeof(fapiRc);
-        l_pBuffer += sizeof(fapiRc);
-        l_mem >> fapiRc;
-        i_parser.PrintNumber("FAPI RC ", "0x%08X", ntohl(fapiRc));
+        // Hostboot does not send the RC as part of the buffer to this parser
+        // since the RC does not vary. Hence the hardcoded value here.
+        i_parser.PrintNumber("FAPI RC ", "0x%08X", fapiRc);
 
         if(l_buflen < sizeof(l_pData))
         {
@@ -396,7 +402,7 @@ public:
                        const uint32_t i_buflen) const
     {
         int l_rc = 0;
-        uint32_t fapiRc = 0;
+        uint32_t fapiRc = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
         sbeFFDCDataHeader_t l_pData = {0};
         char l_buffer[SBE_PARSER_MAX_LOCAL_BUFFER] = {0};
         char *l_pBuffer = (char*)i_pBuffer;
@@ -420,10 +426,9 @@ public:
                 i_parser.PrintHexDump(l_pBuffer, l_buflen);
                 break;
             }
-            l_buflen -= sizeof(fapiRc);
-            l_pBuffer += sizeof(fapiRc);
-            l_mem >> fapiRc;
-            i_parser.PrintNumber("FAPI RC ", "0x%08X", ntohl(fapiRc));
+            // Hostboot does not send the RC as part of the buffer to this parser
+            // since the RC does not vary. Hence the hardcoded value here.
+            i_parser.PrintNumber("FAPI RC ", "0x%08X", fapiRc);
 
             if(l_buflen < sizeof(l_pData))
             {
