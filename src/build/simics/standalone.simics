@@ -182,23 +182,6 @@ foreach $proc in (get-component-list -all proc_p10_pib) {
     }
 }
 
-###############################
-#Initialize Explorer Registers
-###############################
-
-# Loop over all explorer chips
-foreach $obj in (list-objects ocmb -all){
-
-    # Allow for testing MMIO HW failures
-    # Forces write access to (0x80109999) to fail
-    # in src/usr/mmio/test/mmiotest.H
-    # NOTE: address is left shifted 3 and has MMIO
-    #       offset (0x100000000) added.
-    # @TODO PFHB-530 Fix Explorer MMIO Error Path Testcases
-    $obj->mmio_regs_mmioerr = 0x0000000140084CC8
-
-}
-
 ### Enable the second processor - @TODO-RTC:254475
 
 # Connect up the missing cfams
