@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -652,8 +652,10 @@ namespace HTMGT
                 }
 
                 if((i_reason == HTMGT::OCC_RESET_REASON_CODE_UPDATE) ||
-                        (i_reason == HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE))
+                   (i_reason == HTMGT::OCC_RESET_REASON_CANCEL_CODE_UPDATE))
                 {
+                    TMGT_INF("_resetOCCs: reset due to Code Update (reason=0x%02X)",
+                             i_reason);
                     i_skipCountIncrement = true;
                 }
 
@@ -744,7 +746,6 @@ namespace HTMGT
                     // Don't restart OCC's on CODE UPDATE
                     if(i_reason != HTMGT::OCC_RESET_REASON_CODE_UPDATE )
                     {
-
                         //get parent proc chip.
                         TARGETING::Target* l_proc_target = NULL;
 
@@ -773,13 +774,34 @@ namespace HTMGT
                             occ->iv_state = OCC_STATE_RESET;
                         }
                         iv_state = OCC_STATE_RESET;
+
+                        /*@
+                         * @errortype
+                         * @subsys EPUB_FIRMWARE_SP
+                         * @moduleid HTMGT_MOD_OCC_RESET
+                         * @reasoncode HTMGT_RC_CODE_UPDATE_STATUS
+                         * @userdata1  None
+                         * @devdesc PM Complex has been put in reset for code update
+                         * @custdesc Code update in progress
+                         */
+                        bldErrLog(err, HTMGT_MOD_OCC_RESET, HTMGT_RC_CODE_UPDATE_STATUS,
+                                  0, 0, 0, 0, ERRORLOG::ERRL_SEV_INFORMATIONAL);
+                        ERRORLOG::errlCommit(err, HTMGT_COMP_ID);
                     }
                 }
                 else if (!err) // Reset Threshold reached and no other err
                 {
                     // Create threshold error
-                    TMGT_ERR("_resetOCCs: Retry Threshold reached. "
-                             "Leaving OCCs in reset state");
+                    if (i_reason == HTMGT::OCC_RESET_REASON_CODE_UPDATE)
+                    {
+                        TMGT_ERR("_resetOCCs: Retry Threshold reached during code update. "
+                                 "Leaving OCCs in reset state");
+                    }
+                    else
+                    {
+                        TMGT_ERR("_resetOCCs: Retry Threshold reached. "
+                                 "Leaving OCCs in reset state");
+                    }
                     /*@
                      * @errortype
                      * @moduleid HTMGT_MOD_OCC_RESET
