@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,6 +75,9 @@ TargStrToType CHIP_TYPE_TARG_STR_TO_TYPE [] =
     {"p10"        , fapi2::TARGET_TYPE_PROC_CHIP   , TARGETING::TYPE_PROC},
     {"ocmb"       , fapi2::TARGET_TYPE_OCMB_CHIP   , TARGETING::TYPE_OCMB_CHIP},
     {"tpm"        , 0                              , TARGETING::TYPE_TPM},
+    {"temp_sensor", fapi2::TARGET_TYPE_TEMP_SENSOR , TARGETING::TYPE_TEMP_SENSOR},
+    {"power_ic"   , fapi2::TARGET_TYPE_POWER_IC    , TARGETING::TYPE_POWER_IC},
+    {"pmic"     , fapi2::TARGET_TYPE_PMIC       , TARGETING::TYPE_PMIC},
     {"LAST"       , 0                              , 0}
 };
 
@@ -98,7 +101,6 @@ TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
     {"nmmu"     , fapi2::TARGET_TYPE_NMMU       , TARGETING::TYPE_NMMU},
     {"pau"      , fapi2::TARGET_TYPE_PAU        , TARGETING::TYPE_PAU},
     {"pauc"     , fapi2::TARGET_TYPE_PAUC       , TARGETING::TYPE_PAUC},
-    {"pmic"     , fapi2::TARGET_TYPE_PMIC       , TARGETING::TYPE_PMIC},
     {"LAST"     , 0                             , 0}
 };
 
