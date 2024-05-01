@@ -969,7 +969,11 @@ errlOwner execute_actions(Target* const i_ocmb,
                 break;
 
             case sync_images_normal:
-                if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb, /*force_sync=*/false))
+                if( i_ocmb->getAttr<ATTR_OCMB_FORCE_IMAGE_SYNC>() )
+                {
+                    // Fall through to the sync_images_forced case
+                }
+                else if (auto sync_err = SBEIO::sendSyncCodeLevelsRequest(i_ocmb,/*force_sync=*/false))
                 {
                     TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): sendSyncCodeLevelsRequest(normal) failed: "
                           TRACE_ERR_FMT,
