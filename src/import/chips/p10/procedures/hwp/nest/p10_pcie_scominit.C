@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -162,6 +162,14 @@ const uint64_t  SUP_DIG_ANA_MPLLA_OVRD_OUT0[NUM_OF_INSTANCES] =
     0x800100800801113F,
     0x800000800801153F,
     0x800100800801153F,
+};
+
+const uint64_t RAWLANEAONN_DIG_ADPT_CTL_9[NUM_OF_INSTANCES] =
+{
+    0x800070490801113F,
+    0x800170490801113F,
+    0x800070490801153F,
+    0x800170490801153F,
 };
 
 ///-----------------------------------------------------------------------------
@@ -412,6 +420,12 @@ fapi2::ReturnCode p10_load_iop_override(
                      "Error from putScom 0x%.16llX", TX_VREG_GAIN[i]);
 
             FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
+
+            // 613951, set bits 0/3 in DIG_ADAPT_CTL_9
+            FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_9[i], l_data));
+            l_data.setBit<60>();
+            l_data.setBit<63>();
+            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_9[i], l_data));
         }
     }
 
