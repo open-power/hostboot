@@ -360,13 +360,7 @@ errlHndl_t doOcmbSpiFlashCheck(Target* const i_ocmb)
         // Check full SPI flash on all devices in MFG mode
         if(areAllSrcsTerminating())
         {
-            // FIXME JIRA: PFHB-730 SPI flash check currently returns UEs if performed
-            // in FULL (in MFG mode). Until the DIMMs on MFG systems are fixed up,
-            // we can't run FULL flash check (unless explicitly requested).
-            if(UTIL::assertGetToplevelTarget()->getAttr<ATTR_FORCE_MFG_SPI_FLASH_CHECK>() == 1)
-            {
-                l_errl = SBEIO::sendSpiFlashCheckRequest(i_ocmb, FULL, ALL_SIDES, DEVICE_0);
-            }
+            l_errl = SBEIO::sendSpiFlashCheckRequest(i_ocmb, FULL, ALL_SIDES, DEVICE_0);
         }
         else
         {

@@ -2528,9 +2528,6 @@
       <id>FIELD_TH_L3_LINE_DELETES</id>
     </attribute>
     <attribute>
-      <id>FORCE_MFG_SPI_FLASH_CHECK</id>
-    </attribute>
-    <attribute>
       <id>FORCE_SBE_SCRATCH_DATA_COLLECTION</id>
     </attribute>
     <attribute>
