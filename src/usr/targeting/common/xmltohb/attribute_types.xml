@@ -2138,27 +2138,6 @@
   </attribute>
 
   <attribute>
-    <!-- TODO JIRA: PFHB-730 remove this attr -->
-    <description>
-        This flag is used to force SPI flash check to run
-        in MFG mode (on the entire flash image) in istep12.12.
-        Currently this will cause unrecoverable errors to be
-        returned and IPL to fail, so the check is only done
-        on-demand by doing an attr override to this attribute.
-    </description>
-    <id>FORCE_MFG_SPI_FLASH_CHECK</id>
-    <persistency>volatile</persistency>
-    <readable/>
-    <writeable/>
-    <simpleType>
-      <uint8_t>
-        <default>0</default>
-      </uint8_t>
-    </simpleType>
-    <no_export/>
-  </attribute>
-
-  <attribute>
     <description> Force the SBE scratch data to be collected
         after draminit istep (with or without HWP failure).
     </description>
