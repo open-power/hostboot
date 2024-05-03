@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,9 @@
 // Odyssey HWPs
 #include <ody_code_getlevels.H>
 #include <ody_code_update.H>
+
+// sendProgressCode
+#include <initservice/istepdispatcherif.H>
 
 using namespace TARGETING;
 
@@ -142,7 +145,7 @@ fapi2::ReturnCode ody_chipop_codeupdate(const fapi2::Target<fapi2::TARGET_TYPE_O
 
     if (errl)
     {
-        SBE_TRACF("ody_chipop_getcodelevels failed: " TRACE_ERR_FMT,
+        SBE_TRACF("ody_chipop_codeupdate failed: " TRACE_ERR_FMT,
                   TRACE_ERR_ARGS(errl));
         addErrlPtrToReturnCode(rc, errl);
     }
@@ -243,6 +246,9 @@ namespace SBEIO
                 break;
             }
 
+            // Watchdog refresh
+            INITSERVICE::sendProgressCode();
+
             sppeCLIP_t clip { };
 
             static_assert(sizeof(clip.hash) == sizeof(i_clip.hash));
@@ -308,6 +314,9 @@ namespace SBEIO
             {
                 break;
             }
+
+            // Watchdog refresh
+            INITSERVICE::sendProgressCode();
 
             SbeFifo::fifoSyncCodeLevelsRequest request(i_force_sync);
 
