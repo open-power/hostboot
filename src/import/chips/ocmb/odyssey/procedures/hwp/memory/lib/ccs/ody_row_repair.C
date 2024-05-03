@@ -773,7 +773,6 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                 // Note: DIMM can only support one repair per BG, so we loop on BG and use BA=0
                 for (uint8_t l_bg = 0; l_bg < mss::ody::MAX_BG_PER_DIMM; ++l_bg)
                 {
-                    bool l_resource_available = true;
                     mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair(REPAIR_VALID, l_dimm_rank, DRAM_POS, l_srank, l_bg,
                             BANK_POS,
                             l_row);
@@ -785,8 +784,12 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                                     GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank);
                     FAPI_INF_NO_SBE(" bg %d, bank %d, row 0x%05x", l_bg, BANK_POS, l_row);
 #endif
+
+                    // TODO:ZEN:MST-2622 Fix CCS read and PPR resource unavailable code when fix is available
+#if 0
                     // Check if we have PPR resources available for the repair
                     // If we don't, assert out since this is manufacturing mode
+                    bool l_resource_available = true;
                     FAPI_TRY(get_ppr_available(l_rank_info, l_repair, false, l_resource_available));
                     FAPI_ASSERT(l_resource_available,
                                 fapi2::ODY_PPR_RESOURCE_UNAVAILABLE().
@@ -807,6 +810,7 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                                 GENTARGTID(l_dimm), DRAM_POS, l_dimm_rank
 #endif
                                );
+#endif
 
                     FAPI_TRY( standalone_row_repair(l_rank_info, l_repair),
                               "Failed standalone_row_repair on " GENTARGTIDFORMAT " rank %d",
@@ -1055,7 +1059,6 @@ fapi2::ReturnCode deploy_mapped_repairs(
                 // First (un)swizzle our repair entry to get the fields in the logical orientation
                 mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair_printable = l_repair;
                 swizzle_repair_entry(l_repair_printable);
-                bool l_resource_available = true;
 
                 // Deploy row repair and clear bad DQs
                 FAPI_INF_NO_SBE(
@@ -1063,8 +1066,11 @@ fapi2::ReturnCode deploy_mapped_repairs(
                     GENTARGTID(l_dimm), l_repair.iv_dram, l_dimm_rank, l_repair.iv_srank, l_repair.iv_bg, l_repair.iv_bank,
                     l_repair.iv_row);
 
+                // TODO:ZEN:MST-2622 Fix CCS read and PPR resource unavailable code when fix is available
+#if 0
                 // Check if we have PPR resources available for the repair
                 // If we don't, log the error as RECOVERED and continue to the next repair
+                bool l_resource_available = true;
                 FAPI_TRY(get_ppr_available(l_rank_info, l_repair, i_runtime, l_resource_available));
 
                 if (!l_resource_available)
@@ -1091,6 +1097,8 @@ fapi2::ReturnCode deploy_mapped_repairs(
                     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
                     continue;
                 }
+
+#endif
 
                 // Check if at runtime for dynamic vs standalone
                 if (i_runtime)
