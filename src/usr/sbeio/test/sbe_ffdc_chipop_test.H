@@ -80,10 +80,164 @@ struct sbeFfdcTest
 
 typedef std::vector<SbeFifo::fifoTestFfdcErrorRecord> errorRecords_t;
 
-
 class SbeFfdcChipOpTest : public CxxTest::TestSuite
 {
 private:
+
+    std::array<char, 64> exp_to_str(uint8_t i_expectation)
+    {
+        std::array<char, 64> str = { };
+
+        do {
+            if (i_expectation == ErrlEntry::NO_MATCH)
+            {
+                strcpy(&str[0], "NO_MATCH");
+                break;
+            }
+
+            fapi2::each_1bit_mask(i_expectation, [&](const uint64_t bit)
+            {
+                const auto expectation = static_cast<ErrlEntry::callout_search_criteria>(bit);
+                switch (expectation)
+                {
+                    case ErrlEntry::TARGET_MATCH:
+                        strcat(&str[0], "TARGET_MATCH|");
+                        break;
+                    case ErrlEntry::DECONFIG_FOUND:
+                        strcat(&str[0], "DECONFIG_FOUND|");
+                        break;
+                    case ErrlEntry::GARD_FOUND:
+                        strcat(&str[0], "GARD_FOUND|");
+                        break;
+                    case ErrlEntry::NO_MATCH:
+                        break;
+                }
+                return true; // continue to end
+            });
+            if (strlen(&str[0]))
+            {
+                str[strlen(&str[0]) - 1] = '\0'; // chop off the last |
+            }
+        } while (0);
+        return str;
+    }
+
+    std::array<char, 64> rc_to_str(uint32_t i_rc)
+    {
+        std::array<char, 64> str = { };
+        switch(i_rc)
+        {
+            case RC_TEST_DIMM_TARGET0:
+                strcpy(&str[0], "RC_TEST_DIMM_TARGET0");
+                break;
+            case RC_TEST_DIMM_TARGET2:
+                strcpy(&str[0], "RC_TEST_DIMM_TARGET2");
+                break;
+            case RC_TEST_CALLOUT_DIMM_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_DIMM_TARGET0");
+                break;
+            case RC_TEST_CALLOUT_DIMM_TARGET2:
+                strcpy(&str[0], "RC_TEST_CALLOUT_DIMM_TARGET2");
+                break;
+            case RC_TEST_CALLOUT_DIMM_DECONFIG_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_DIMM_DECONFIG_TARGET0");
+                break;
+            case RC_TEST_CALLOUT_DIMM_DECONFIG_TARGET2:
+                strcpy(&str[0], "RC_TEST_CALLOUT_DIMM_DECONFIG_TARGET2");
+                break;
+            case RC_TEST_CALLOUT_DIMM_GARD_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_DIMM_GARD_TARGET0");
+                break;
+            case RC_TEST_CALLOUT_DIMM_GARD_TARGET2:
+                strcpy(&str[0], "RC_TEST_CALLOUT_DIMM_GARD_TARGET2");
+                break;
+            case RC_TEST_CALLOUT_DIMM_DECONFIG_GARD_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_DIMM_DECONFIG_GARD_TARGET0");
+                break;
+            case RC_TEST_CALLOUT_DIMM_DECONFIG_GARD_TARGET2:
+                strcpy(&str[0], "RC_TEST_CALLOUT_DIMM_DECONFIG_GARD_TARGET2");
+                break;
+            case RC_TEST_MEMPORT_TARGET0:
+                strcpy(&str[0], "RC_TEST_MEMPORT_TARGET0");
+                break;
+            case RC_TEST_MEMPORT_TARGET1:
+                strcpy(&str[0], "RC_TEST_MEMPORT_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_MEMPORT_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_MEMPORT_TARGET0");
+                break;
+            case RC_TEST_CALLOUT_MEMPORT_TARGET1:
+                strcpy(&str[0], "RC_TEST_CALLOUT_MEMPORT_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_TARGET0");
+                break;
+            case RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_TARGET1:
+                strcpy(&str[0], "RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_MEMPORT_GARD_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_MEMPORT_GARD_TARGET0");
+                break;
+            case RC_TEST_CALLOUT_MEMPORT_GARD_TARGET1:
+                strcpy(&str[0], "RC_TEST_CALLOUT_MEMPORT_GARD_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_GARD_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_GARD_TARGET0");
+                break;
+            case RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_GARD_TARGET1:
+                strcpy(&str[0], "RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_GARD_TARGET1");
+                break;
+            case RC_TEST_PERV_TARGET1:
+                strcpy(&str[0], "RC_TEST_PERV_TARGET1");
+                break;
+            case RC_TEST_PERV_TARGET8:
+                strcpy(&str[0], "RC_TEST_PERV_TARGET8");
+                break;
+            case RC_TEST_CALLOUT_PERV_TARGET1:
+                strcpy(&str[0], "RC_TEST_CALLOUT_PERV_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_PERV_TARGET8:
+                strcpy(&str[0], "RC_TEST_CALLOUT_PERV_TARGET8");
+                break;
+            case RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1:
+                strcpy(&str[0], "RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET8:
+                strcpy(&str[0], "RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET8");
+                break;
+            case RC_TEST_CALLOUT_PERV_GARD_TARGET1:
+                strcpy(&str[0], "RC_TEST_CALLOUT_PERV_GARD_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_PERV_GARD_TARGET8:
+                strcpy(&str[0], "RC_TEST_CALLOUT_PERV_GARD_TARGET8");
+                break;
+            case RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1:
+                strcpy(&str[0], "RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET8:
+                strcpy(&str[0], "RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET8");
+                break;
+            case RC_TEST_TEMPSENSOR_TARGET0:
+                strcpy(&str[0], "RC_TEST_TEMPSENSOR_TARGET0");
+                break;
+            case RC_TEST_TEMPSENSOR_TARGET1:
+                strcpy(&str[0], "RC_TEST_TEMPSENSOR_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_TEMPSENSOR_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_TEMPSENSOR_TARGET0");
+                break;
+            case RC_TEST_CALLOUT_TEMPSENSOR_TARGET1:
+                strcpy(&str[0], "RC_TEST_CALLOUT_TEMPSENSOR_TARGET1");
+                break;
+            case RC_TEST_CALLOUT_OCMB_DECONFIGURE_GARD_TARGET0:
+                strcpy(&str[0], "RC_TEST_CALLOUT_OCMB_DECONFIGURE_GARD_TARGET0");
+                break;
+            default:
+                assert(false, "Unsupported RC=0x%08X", i_rc);
+                break;
+        }
+        return str;
+    }
 
     static std::vector<errlHndl_t> flattenAggregate(const errlHndl_t errl)
     {
@@ -124,7 +278,10 @@ private:
         {
             if ( !i_error->hasErrorType(record.returnCode) )
             {
-                TS_FAIL("%s> Expected error PLID=0x%X to have error type = 0x%.8X", i_testName, i_error->plid(), record.returnCode);
+                TS_FAIL("%s> Expected error PLID=0x%X to have error type %s",
+                        i_testName,
+                        i_error->plid(),
+                        rc_to_str(record.returnCode).data());
                 retVal = false;
             }
         }
@@ -134,11 +291,11 @@ private:
     void send_and_check_callouts(const sbeFfdcTest & i_test, TargetHandle_t i_chip)
     {
 #define TEST_FUNC "send_and_check_callouts: "
-        TS_INFO(TEST_FUNC"OCMB[0x%X], test target[0x%X] w/ RC=0x%X and expectations=0x%X executing test...",
+        TS_INFO(TEST_FUNC"OCMB[0x%X], test target[0x%X] w/ %s and expectations=%s executing test...",
                 get_huid(i_chip),
                 get_huid(i_test.target),
-                i_test.rc,
-                i_test.expectations);
+                rc_to_str(i_test.rc).data(),
+                exp_to_str(i_test.expectations).data());
         // Make error record for RC
         SbeFifo::fifoTestFfdcErrorRecord errRecord(i_test.rc, FAPI2_ERRL_SEV_UNRECOVERABLE, 1/* count */);
 
@@ -159,27 +316,27 @@ private:
             }
             else
             {
-                TS_FAIL_FN("Callouts for target[0x%X] 0x%X didn't match expectations 0x%X",
+                TS_FAIL_FN("Callouts for target[0x%X]: %s  didn't match expectations %s",
                         get_huid(i_test.target),
-                        query_results,
-                        i_test.expectations);
+                        exp_to_str(query_results).data(),
+                        exp_to_str(i_test.expectations).data());
                 goto TEST_FAIL_EXIT;
             }
             delete err;
             err = nullptr;
-            TS_INFO(TEST_FUNC"OCMB[0x%X], test target[0x%X] w/ RC=0x%X and expectations=0x%X Passed",
+            TS_INFO(TEST_FUNC"OCMB[0x%X], test target[0x%X] w/ %s and expectations=%s PASSED",
                     get_huid(i_chip),
                     get_huid(i_test.target),
-                    i_test.rc,
-                    i_test.expectations);
+                    rc_to_str(i_test.rc).data(),
+                    exp_to_str(i_test.expectations).data());
         }
         else
         {
             TS_FAIL_FN("Did not get an error log back from sendTestFfdcRequest for "
-                        "chip[0x%X], RC[0x%X], test target[0x%X]!",
+                        "chip[0x%X], test target[0x%X], %s!",
                         get_huid(i_chip),
-                        i_test.rc,
-                        get_huid(i_test.target));
+                        get_huid(i_test.target),
+                        rc_to_str(i_test.rc).data());
             goto TEST_FAIL_EXIT;
         }
 
@@ -494,7 +651,6 @@ public:
                 dimms[0], ErrlEntry::TARGET_MATCH },
             { RC_TEST_CALLOUT_DIMM_TARGET2,
                 dimms[1], ErrlEntry::TARGET_MATCH },
-/* @TODO PFHB-602 SBE Team didn't implement these yet
             { RC_TEST_CALLOUT_DIMM_DECONFIG_TARGET0,
                 dimms[0], ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND },
             { RC_TEST_CALLOUT_DIMM_DECONFIG_TARGET2,
@@ -507,7 +663,7 @@ public:
                 dimms[0], ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND | ErrlEntry::GARD_FOUND },
             { RC_TEST_CALLOUT_DIMM_DECONFIG_GARD_TARGET2,
                 dimms[1], ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND | ErrlEntry::GARD_FOUND },
-*/
+
             { RC_TEST_MEMPORT_TARGET0,
                 memports[0], ErrlEntry::NO_MATCH },
             { RC_TEST_MEMPORT_TARGET1,
@@ -516,7 +672,6 @@ public:
                 memports[0], ErrlEntry::TARGET_MATCH },
             { RC_TEST_CALLOUT_MEMPORT_TARGET1,
                 memports[1], ErrlEntry::TARGET_MATCH },
-/* @TODO PFHB-602 SBE Team didn't implement these yet
             { RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_TARGET0,
                 memports[0], ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND },
             { RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_TARGET1,
@@ -529,17 +684,15 @@ public:
                 memports[0], ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND | ErrlEntry::GARD_FOUND },
             { RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_GARD_TARGET1,
                 memports[1], ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND | ErrlEntry::GARD_FOUND },
-*/
-// @TODO PFHB-602 SBE team isn't handling PERV1 targets correctly right now.
-//            { RC_TEST_PERV_TARGET1,
-//                pervasives[0], ErrlEntry::NO_MATCH },
+
+            { RC_TEST_PERV_TARGET1,
+                pervasives[0], ErrlEntry::NO_MATCH },
             { RC_TEST_PERV_TARGET8,
                 pervasives[1], ErrlEntry::NO_MATCH },
-//            { RC_TEST_CALLOUT_PERV_TARGET1,
-//                pervasives[0], ErrlEntry::TARGET_MATCH },
+            { RC_TEST_CALLOUT_PERV_TARGET1,
+                pervasives[0], ErrlEntry::TARGET_MATCH },
             { RC_TEST_CALLOUT_PERV_TARGET8,
                 pervasives[1], ErrlEntry::TARGET_MATCH },
-/* @TODO PFHB-602 SBE Team didn't implement these yet
             { RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1,
                 pervasives[0], ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND },
             { RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET8,
@@ -552,7 +705,7 @@ public:
                 pervasives[0], ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND | ErrlEntry::GARD_FOUND },
             { RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET8,
                 pervasives[1], ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND | ErrlEntry::GARD_FOUND },
-*/
+
             { RC_TEST_TEMPSENSOR_TARGET0,
                 temp_sensors[0], ErrlEntry::NO_MATCH },
             { RC_TEST_TEMPSENSOR_TARGET1,
@@ -562,12 +715,9 @@ public:
             { RC_TEST_CALLOUT_TEMPSENSOR_TARGET1,
                 temp_sensors[1], ErrlEntry::TARGET_MATCH },
 
-/* @TODO PFHB-602 SBE Team didn't implement these yet.
             { RC_TEST_CALLOUT_OCMB_DECONFIGURE_GARD_TARGET0,
-                TYPE_OCMB_CHIP, 0, ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND | ErrlEntry::GARD_FOUND },
-            { RC_TEST_CALLOUT_OCMB_DECONFIGURE_GARD_TARGET1,
-                TYPE_OCMB_CHIP, 0, ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND | ErrlEntry::GARD_FOUND },
- */
+                OdyOcmb, ErrlEntry::TARGET_MATCH | ErrlEntry::DECONFIG_FOUND | ErrlEntry::GARD_FOUND },
+
         };
 
         for (const auto test : tests)
