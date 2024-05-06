@@ -1061,10 +1061,9 @@ void check_gi2c_fail_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_targ
     using CONSTS  = mss::pmic::id;
     using CONSTS_DT = mss::dt::dt_i2c_devices;
 
-    uint8_t l_gi2c_fail_count = 0;
-
     // Get the I2C fail attribute
 #ifndef __PPE__
+    uint8_t l_gi2c_fail_count = 0;
     FAPI_ATTR_GET(fapi2::ATTR_I2C_FAIL_COUNT, io_target_info.iv_ocmb, l_gi2c_fail_count);
 #endif
 
@@ -1099,8 +1098,8 @@ void check_gi2c_fail_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_targ
     }
     else
     {
-        l_gi2c_fail_count = 0;
 #ifndef __PPE__
+        l_gi2c_fail_count = 0;
         FAPI_ATTR_SET(fapi2::ATTR_I2C_FAIL_COUNT, io_target_info.iv_ocmb, l_gi2c_fail_count);
 #endif
     }
