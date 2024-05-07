@@ -27,8 +27,8 @@
 /// @file dt_trim_read_restart_ddr5.H
 /// @brief To be run when a DT is unreachable
 ///
-// *HWP HWP Owner: David J. Chung <dj.chung@ibm.com>
-// *HWP HWP Backup: Sneha Kadam <sneha.kadam1@ibm.com>
+// *HWP HWP Owner: Sneha Kadam <sneha.kadam1@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HBRT

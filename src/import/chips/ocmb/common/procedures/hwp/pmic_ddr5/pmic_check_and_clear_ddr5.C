@@ -126,7 +126,8 @@ extern "C"
         else
         {
             // We're guaranteed to have at least one PMIC here due to the check in pmic_enable
-            auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target, fapi2::TARGET_STATE_PRESENT);
+            const auto l_pmics = mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_PMIC>(i_ocmb_target,
+                                 fapi2::TARGET_STATE_PRESENT);
 
             for (const auto& l_pmic : l_pmics)
             {

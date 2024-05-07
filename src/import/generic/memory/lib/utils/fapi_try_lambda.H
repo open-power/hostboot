@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,6 +43,16 @@
     if ((fapi2::current_err = (__operation__)) != fapi2::FAPI2_RC_SUCCESS) \
     {                                                                      \
         goto fapi_try_exit_lambda;                                         \
+    }
+
+///
+/// @brief FAPI_TRY for logging error and clearing the error
+///
+#define FAPI_LOG_AND_CONTINUE( __operation__ )                                \
+    if ((fapi2::current_err = (__operation__)) != fapi2::FAPI2_RC_SUCCESS)    \
+    {                                                                         \
+        fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED); \
+        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;                         \
     }
 
 #endif

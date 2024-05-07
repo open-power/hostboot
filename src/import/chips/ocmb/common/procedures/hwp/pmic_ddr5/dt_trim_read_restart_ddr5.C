@@ -27,8 +27,8 @@
 /// @file dt_trim_read_restart_ddr5.C
 /// @brief To be run when a DT is unreachable
 ///
-// *HWP HWP Owner: David J. Chung <dj.chung@ibm.com>
-// *HWP HWP Backup: Sneha Kadam <sneha.kadam1@ibm.com>
+// *HWP HWP Owner: Sneha Kadam <sneha.kadam1@ibm.com>
+// *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HBRT
@@ -78,49 +78,27 @@ fapi2::ReturnCode dt_trim_read_restart_ddr5(const fapi2::Target<fapi2::TARGET_TY
     l_default_dt = l_adc[mss::generic_i2c_responder::ADC];
 
     // Unlock Trim section
-    l_rc = mss::pmic::i2c::reg_write_default_dt(l_default_dt, DT_REGS::TRIM_LOCK, trim_data::TRIM_UNLOCK);
-
-    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-    {
-        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    }
+    FAPI_LOG_AND_CONTINUE(mss::pmic::i2c::reg_write_default_dt(l_default_dt, DT_REGS::TRIM_LOCK, trim_data::TRIM_UNLOCK));
 
     // Enter Password
     // The power document had the bytes swapped (0xA55A instead of 0x5AA5)
     l_data_trim[0] = trim_data::TRIM_PASSWORD_1;
     l_data_trim[1] = trim_data::TRIM_PASSWORD_0;
-    l_rc = mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::TRIM_TRY_PASSWORD, l_data_trim);
-
-    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-    {
-        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    }
+    FAPI_LOG_AND_CONTINUE(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::TRIM_TRY_PASSWORD,
+                          l_data_trim));
 
     // Enable extendable read pulse
     // The power document had the bytes swapped (0x4080 instead of 0x8040)
     l_data_trim[0] = trim_data::EXTENDABLE_RD_PULSE_EN_1;
     l_data_trim[1] = trim_data::EXTENDABLE_RD_PULSE_EN_0;
-    l_rc = mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_TRIM_RP_MAX, l_data_trim);
-
-    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-    {
-        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    }
+    FAPI_LOG_AND_CONTINUE(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_TRIM_RP_MAX,
+                          l_data_trim));
 
     // Initiate Trim read
     // The power document had the bytes swapped (0x3F21 instead of 0x213F)
     l_data_trim[0] = trim_data::TRIM_RD_INIT_1;
     l_data_trim[1] = trim_data::TRIM_RD_INIT_0;
-    l_rc = mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_COMMAND, l_data_trim);
-
-    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-    {
-        fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-        fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-    }
+    FAPI_LOG_AND_CONTINUE(mss::pmic::i2c::reg_write_default_dt_contiguous(l_default_dt, DT_REGS::NVM_COMMAND, l_data_trim));
 
     // Delay before locking trims
     fapi2::delay(5 * mss::common_timings::DELAY_1MS, mss::common_timings::DELAY_1MS);
@@ -128,13 +106,7 @@ fapi2::ReturnCode dt_trim_read_restart_ddr5(const fapi2::Target<fapi2::TARGET_TY
     // Lock Trim section for each DT
     for(const auto& l_dt : mss::find_targets<fapi2::TARGET_TYPE_POWER_IC>(i_ocmb_target))
     {
-        l_rc = mss::pmic::i2c::reg_write(l_dt, DT_REGS::TRIM_LOCK, trim_data::TRIM_LOCK);
-
-        if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-        {
-            fapi2::logError(l_rc, fapi2::FAPI2_ERRL_SEV_RECOVERED);
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-        }
+        FAPI_LOG_AND_CONTINUE(mss::pmic::i2c::reg_write(l_dt, DT_REGS::TRIM_LOCK, trim_data::TRIM_LOCK));
     }
 
     FAPI_INF(GENTARGTIDFORMAT " Finished dt_trim_read_restart_ddr5 HWP", GENTARGTID(i_ocmb_target));
