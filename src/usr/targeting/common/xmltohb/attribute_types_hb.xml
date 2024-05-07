@@ -1518,6 +1518,24 @@
   </attribute>
 
   <attribute>
+    <id>SBE_DUMP_EFFECTER_ID</id>
+    <description>
+        Contains the PDR retrieved effecter id for a given dump.
+        This value is stored in the attribute since during HBRT
+        the active PDR Repository is not resident (value is stored
+        during the IPL time PDR exchange).
+    </description>
+    <readable/>
+    <writeable/>
+    <persistency>volatile-zeroed</persistency>
+    <simpleType>
+      <uint16_t/>
+    </simpleType>
+    <hbOnly/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <id>SBE_FFDC_ADDR</id>
     <description>
         Virtual address where SBE FFDC is placed in mainstore.

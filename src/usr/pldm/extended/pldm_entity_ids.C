@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,7 @@
 // Targeting
 #include <targeting/common/targetservice.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/odyutil.H>                 // isOdysseyChip
 
 // PLDM
 #include <pldm/pldm_trace.H>
@@ -292,6 +293,11 @@ void updateConnectorInfoAttr(Target* const i_child_target,
 /* @brief Update the given target's PLDM_ENTITY_ID_INFO attribute
  *        with a PLDM entity ID
  *
+ *        If the target is a DIMM, the sbe_dump_effecter ID will
+ *        also be retrieved and stored during this function so that
+ *        the DIMM may be updated with the effecter ID which will be
+ *        used later in the IPL and Runtime.
+ *
  * @param[in] i_target  The target to update
  * @param[in] i_rsid    FRU Record Set ID to use for Entity ID info
  * @return errlHndl_t   Error if any, otherwise nullptr
@@ -376,6 +382,23 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
             i_target->setAttr<ATTR_CHASSIS_PLDM_ENTITY_ID_INFO>(entity_info.chassis);
             break;
         default:
+            // PLDM local definition which should be coming from state_set_oem_ibm.h
+            // when PLDM subtree updates occur
+            const uint16_t PLDM_OEM_IBM_SBE_SEMANTIC_ID = 32775;
+            if ((ent.entity_type == ENTITY_TYPE_DIMM) && (UTIL::isOdysseyChip( getAffinityParent(i_target, TYPE_OCMB_CHIP)   )  ))
+            {
+                uint16_t sbe_dump_effecter = thePdrManager().findNumericEffecterId(ent,
+                               [](pldm_numeric_effecter_value_pdr const * const numeric_effecter)
+                               {
+                                   return (le16toh(numeric_effecter->effecter_semantic_id) == PLDM_OEM_IBM_SBE_SEMANTIC_ID);
+                               });
+                PLDM_INF("updateTargetEntityIdAttribute setAttr DIMM HUID=0x%X sbe_dump_effecter=0x%X (%d)",
+                         get_huid(i_target), sbe_dump_effecter, sbe_dump_effecter);
+                // We only use this value when performing an Odyssey dump
+                // This value is populated in PDRs for both Explorer and Odyssey systems
+                i_target->setAttr<TARGETING::ATTR_SBE_DUMP_EFFECTER_ID>(sbe_dump_effecter);
+            }
+
             i_target->setAttr<ATTR_PLDM_ENTITY_ID_INFO>(entity_info.generic);
             if (UTIL::assertGetToplevelTarget()->getAttr<ATTR_PLDM_CONNECTOR_PDRS_ENABLED>() &&
                 i_target->tryGetAttr<ATTR_CONNECTOR_PLDM_ENTITY_ID_INFO>(connectorInfo))
