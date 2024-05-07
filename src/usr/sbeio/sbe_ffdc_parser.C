@@ -380,7 +380,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
 
             if (slidErrl != nullptr)
             {
-                slidErrl->setErrorType(package->rc);
+                slidErrl->setErrorType(SBEIO_ERROR_TYPE_FFDC_PACKAGE);
                 slidErrl->collectTrace(FAPI_TRACE_NAME);
             }
         }
@@ -395,7 +395,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                                                    i_reasonCode,
                                                    i_userdata1,
                                                    i_userdata2);
-
+                slidErrl->setErrorType(SBEIO_ERROR_TYPE_FFDC_PACKAGE);
             }
             else
             {
@@ -428,6 +428,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                                                    i_reasonCode,
                                                    i_userdata1,
                                                    i_userdata2);
+                slidErrl->setErrorType(SBEIO_ERROR_TYPE_FFDC_PACKAGE);
 
             }
             // For now, rc == 0 will have its data stuffed into a log as unformatted data. SBE team has said that RC=0

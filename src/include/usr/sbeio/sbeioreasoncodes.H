@@ -86,7 +86,13 @@ enum sbeioErrorType
 {
     // Errors will have this error type if they caused an HRESET to be
     // performed on the hardware involved.
-    SBEIO_ERROR_TYPE_HRESET_PERFORMED   = SBEIO_COMP_ID | 1
+    SBEIO_ERROR_TYPE_HRESET_PERFORMED   = SBEIO_COMP_ID | 1,
+
+    // Added to the log that results when a chipop returns failure status
+    SBEIO_ERROR_TYPE_CHIPOP_FAILURE     = SBEIO_COMP_ID | 2,
+
+    // Added to all logs that result from SBE FFDC packages
+    SBEIO_ERROR_TYPE_FFDC_PACKAGE       = SBEIO_COMP_ID | 3,
 };
 
 /**
