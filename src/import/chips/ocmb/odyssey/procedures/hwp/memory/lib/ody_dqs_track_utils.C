@@ -163,13 +163,12 @@ fapi2::ReturnCode prepare_mrr_ccs(
     const drift_track_mr i_mr_number,
     mss::ccs::program<mss::mc_type::ODYSSEY>& io_program)
 {
-    // Idling until the data is returned by the DRAM to ensure it's logged by the PHY
-    constexpr uint64_t IDLES = 128;
     const auto& l_port_rank = i_rank_info.get_port_rank();
     // Create local mrr instruction for LSB/MSB snoop
     mss::ccs::instruction_t<mss::mc_type::ODYSSEY> l_inst;
 
-    l_inst = mss::ccs::ddr5::mrr_command<mss::mc_type::ODYSSEY>(l_port_rank, uint64_t(i_mr_number), IDLES);
+    l_inst = mss::ccs::ddr5::mrr_command<mss::mc_type::ODYSSEY>(l_port_rank, uint64_t(i_mr_number),
+             ccsTraits<mss::mc_type::ODYSSEY>::MRR_SAFE_IDLE);
     io_program.iv_instructions.push_back(l_inst);
 
     return fapi2::FAPI2_RC_SUCCESS;

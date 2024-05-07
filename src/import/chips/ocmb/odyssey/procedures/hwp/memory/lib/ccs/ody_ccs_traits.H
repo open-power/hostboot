@@ -74,6 +74,9 @@ class ccsTraits<mss::mc_type::ODYSSEY>
         static constexpr uint64_t NTTM_READ_DELAY = 0x40;
         static constexpr uint64_t NTTM_MODE_FORCE_READ = 21;
 
+        // A safe amount of time to wait after an MRR
+        static constexpr uint16_t MRR_SAFE_IDLE = 128;
+
         // Command Pass Disable Delay Time for Explorer - really a JEDEC timing
         // Note using the max value here (4800's delay)
         static constexpr uint64_t TIMING_TCPDED = 13;
