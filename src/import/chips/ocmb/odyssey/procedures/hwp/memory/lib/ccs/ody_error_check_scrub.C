@@ -574,7 +574,7 @@ fapi2::ReturnCode read_mr_error_regs(const mss::rank::info<mss::mc_type::ODYSSEY
     mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
 
     l_program.iv_instructions.push_back(mss::ccs::ddr5::mrr_command<mss::mc_type::ODYSSEY>
-                                        (i_rank_info.get_port_rank(), i_mrs));
+                                        (i_rank_info.get_port_rank(), i_mrs, ccsTraits<mss::mc_type::ODYSSEY>::MRR_SAFE_IDLE));
 
     const auto& l_port = i_rank_info.get_port_target();
 

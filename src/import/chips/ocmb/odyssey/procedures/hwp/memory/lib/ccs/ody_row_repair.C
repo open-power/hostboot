@@ -168,7 +168,7 @@ fapi2::ReturnCode get_ppr_resources(
     const uint8_t l_mr = get_ppr_resource_mr(l_repair.iv_bg);
 
     l_program.iv_instructions.push_back(mss::ccs::ddr5::mrr_command<mss::mc_type::ODYSSEY>
-                                        (i_rank_info.get_port_rank(), l_mr));
+                                        (i_rank_info.get_port_rank(), l_mr, ccsTraits<mss::mc_type::ODYSSEY>::MRR_SAFE_IDLE));
 
     const auto& l_port = i_rank_info.get_port_target();
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
