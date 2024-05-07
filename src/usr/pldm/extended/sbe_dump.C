@@ -40,6 +40,7 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_util.H>
 #include <openbmc/pldm/libpldm/include/libpldm/platform.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/state_set_oem_ibm.h>
 
 #include <initservice/istepdispatcherif.H>
 
@@ -51,20 +52,19 @@ using namespace PLDM;
 using namespace ERRORLOG;
 using namespace TARGETING;
 
-// @TODO RTC 247294: Delete these constants and use the ones from libpldm
-const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
+// PLDM local definition which should be coming from state_set_oem_ibm.h
+// when PLDM subtree updates occur
 const uint16_t PLDM_OEM_IBM_SBE_SEMANTIC_ID = 32775;
-const uint16_t PLDM_OEM_IBM_SBE_HRESET_STATE = 32776;
-
-#ifndef __HOSTBOOT_RUNTIME
 
 /* @brief Get the BMC's SBE Dump effecter ID for the given target. Returns 0 if not found.
  *
  * @param[in] i_target    The target to search for.
  * @return effecter_id_t  The BMC's SBE dump effecter ID, or 0 if not found.
+ * Note: HBRT cannot access the PDR repository, so this is a restricted function
  */
 effecter_id_t getSbeDumpEffecterId(const Target* const i_target)
 {
+#ifndef __HOSTBOOT_RUNTIME
     pldm_entity entity_info = targeting_to_pldm_entity_id(i_target->getAttr<ATTR_PLDM_ENTITY_ID_INFO>());
 
     return thePdrManager()
@@ -73,32 +73,64 @@ effecter_id_t getSbeDumpEffecterId(const Target* const i_target)
                                {
                                    return (le16toh(numeric_effecter->effecter_semantic_id) == PLDM_OEM_IBM_SBE_SEMANTIC_ID);
                                });
+#else
+    TARGETING::ATTR_SBE_DUMP_EFFECTER_ID_type sbe_dump_effecter = 0;
+    if (i_target->tryGetAttr<TARGETING::ATTR_SBE_DUMP_EFFECTER_ID>(sbe_dump_effecter))
+    {
+        PLDM_INF("getSbeDumpEffecterId i_target=0x%X sbe_dump_effecter=0x%X (%d)", get_huid(i_target), sbe_dump_effecter, sbe_dump_effecter);
+    }
+    return sbe_dump_effecter;
+#endif
 }
 
 /** @brief Get the target related to the given target that contains
  *  the info for the SBE dump sensors/effecters for the given
  *  target. E.g. for OCMBs, get the child DIMM that the effecters are
  *  attached to.
+ *
+ * @param[in] i_target       The target to retrieve its appropriate effecter id for later
+ * @return target or nullptr If not found a nullptr, otherwise the appropriate target
  */
 Target* getDumpTarget(Target* const i_target)
 {
     switch (i_target->getAttr<ATTR_TYPE>())
     {
     case TYPE_PROC:
+        // HBRT does NOT support dumping the PROC SBE at this time
+#ifdef __HOSTBOOT_RUNTIME
+        return nullptr;
+#else
         return i_target;
+#endif
     case TYPE_OCMB_CHIP: {
         const auto dimms = composable(getChildAffinityTargets)(i_target, CLASS_NA, TYPE_DIMM, true);
 
+        TARGETING::ATTR_SBE_DUMP_EFFECTER_ID_type sbe_dump_effecter = 0;
         for (const auto dimm : dimms)
         {
-            if (getSbeDumpEffecterId(dimm) != 0)
+            // HBRT cannot access the PDR repository, so the SBE_DUMP_EFFECTER_ID is
+            // stored on an attribute per DIMM
+            // For HBRT we need to validate that the OCMB dimm does have a non-zero SBE_DUMP_EFFECTER_ID
+            // The effecter id on each dimm under an OCMB will provide the proper (same) effecter id
+            // The same effecter id is used during IPL and Runtime (stored on its proper target)
+            // The usage of the SBE_DUMP_EFFECTER_ID cannot be leveraged until such time in the IPL
+            // where the proper Odyssey handlers would be available to drive any dump and recovery
+            // operations.
+            if (dimm->tryGetAttr<TARGETING::ATTR_SBE_DUMP_EFFECTER_ID>(sbe_dump_effecter))
             {
-                return dimm;
+                if (sbe_dump_effecter != 0)
+                {
+                    PLDM_INF("getDumpTarget OCMB HUID=0x%X DIMM HUID=0x%X sbe_dump_effecter=0x%X (%d)",
+                             get_huid(i_target), get_huid(dimm), sbe_dump_effecter, sbe_dump_effecter);
+                    return dimm;
+                }
             }
         }
         break;
     }
     default:
+        // the nullptr return will cause the dump to log an informational log and skip dumping
+        PLDM_INF("getDumpTarget DEFAULT HUID=0x%X returning nullptr", get_huid(i_target));
         break;
     }
     return nullptr;
@@ -106,7 +138,7 @@ Target* getDumpTarget(Target* const i_target)
 
 errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
 {
-    PLDM_ENTER("dumpSbe(0x%08x, 0x%08x)", get_huid(i_target), i_plid);
+    PLDM_ENTER("dumpSbe i_target=0x%X i_plid=0x%08x", get_huid(i_target), i_plid);
 
     errlHndl_t errl = nullptr;
 
@@ -131,14 +163,14 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
                              0,
                              ErrlEntry::ADD_SW_CALLOUT);
 
-        PLDM_ERR("dumpSbe: No dump target exists for input target 0x%08X",
+        PLDM_ERR("dumpSbe: No dump target exists for i_target=0x%08X",
                  get_huid(i_target));
         errl->collectTrace(PLDM_COMP_NAME);
         break;
     }
 
-    PLDM_INF("dumpSbe: Using target 0x%08X for SBE dump request",
-             get_huid(dump_target));
+    PLDM_INF("dumpSbe: Using dump_target=0x%X i_target=0x%X",
+             get_huid(dump_target), get_huid(i_target));
 
     /* Search for the effecter IDs (one from the BMC, to ask it to dump the SBE,
      * and one from Hostboot, which the BMC will use to signal HB that it's done. */
@@ -150,9 +182,11 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
                                                          PLDM_OEM_IBM_SBE_MAINTENANCE_STATE,
                                                          dump_target);
 
+    PLDM_INF("dumpSbe dump_target=0x%X i_target=0x%X sbe_dump_effecter=0x%X (%d) dump_complete_effecter=0x%X (%d)",
+                get_huid(dump_target), get_huid(i_target), sbe_dump_effecter, sbe_dump_effecter, dump_complete_effecter, dump_complete_effecter);
     if (sbe_dump_effecter == 0 || dump_complete_effecter == 0)
     {
-        PLDM_ERR("dumpSbe: Can't find either SBE dump effecter or dump complete effecter on target 0x%08x (%d, %d)",
+        PLDM_ERR("dumpSbe: Can't find either SBE dump effecter or dump complete effecter on dump_target=0x%X sbe_dump_effecter=%d dump_complete_effecter=%d",
                  get_huid(dump_target),
                  sbe_dump_effecter,
                  dump_complete_effecter);
@@ -182,29 +216,57 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
 
     /* Set the effecter on the BMC, which will cause it to dump the SBE under
      * the target that the effecter is attached to. */
-
+#ifndef __HOSTBOOT_RUNTIME
     std::unique_ptr<void, decltype(&msg_q_destroy)> msgQ { msg_q_create(), msg_q_destroy };
 
     // Register our message queue before we send the numeric effecter set-request
     const uint32_t MSG = 0xd05be;
     thePdrManager().registerStateEffecterCallbackMsgQ(dump_complete_effecter, 0, msgQ.get(), MSG);
+#endif
 
     errl = sendSetNumericEffecterValueRequest(sbe_dump_effecter, i_plid, sizeof(i_plid));
 
     if (errl)
     {
-        PLDM_ERR("dumpSbe: Failed to send numeric effecter value set request for target 0x%08x (err = 0x%08x)",
+        PLDM_ERR("dumpSbe: Failed to send numeric effecter value set request for dump_target=0x%X ERRL=0x%X",
                  get_huid(dump_target), ERRL_GETPLID_SAFE(errl));
         break;
     }
 
-    // Reset the watchdog timer
-    INITSERVICE::sendProgressCode();
+    bool dump_completed = true; // HBRT will not use msgQ's so set to complete
+
+    // During IPL time msgQ's are used and if the message is received prior to the
+    // timeout then things will proceed, so the upper bound of 10 minutes is used
+    // for worse case scenario when things are not performing under normal constraints.
+    // During HBRT, a simple timeout of 10 minutes will be issued and HBRT will block
+    // until the time has elapsed.  HBRT needs to block to disallow any bus contention
+    // that may be introduced by the BMC pulling the Odyssey dump via i2c.
+    // However, during HBRT, PHYP is running and performance is not impacted.
+    // HBRT use case is expected to be a rare occurrence.
+    uint64_t DUMP_TIMEOUT_INTERVAL_SECONDS = 60; // seconds to wait per interval
+    uint64_t DUMP_TIMEOUT_RETRIES = 10; // 10 times
+#ifndef __HOSTBOOT_RUNTIME
 
     /* Wait on the BMC to set our effecter. */
 
-    uint64_t sbe_dump_timeout_milliseconds = 180 * MS_PER_SEC; // 3 minutes
-    const auto dump_done_msgs = msg_wait_timeout(msgQ.get(), sbe_dump_timeout_milliseconds);
+    uint64_t sbe_dump_timeout_milliseconds = DUMP_TIMEOUT_INTERVAL_SECONDS * MS_PER_SEC; // 1 minute
+
+    size_t retryCount = 0;
+    std::vector<msg_t*> dump_done_msgs;
+    while (retryCount++ < DUMP_TIMEOUT_RETRIES)
+    {
+        // Reset the watchdog timer
+        INITSERVICE::sendProgressCode();
+        dump_done_msgs = msg_wait_timeout(msgQ.get(), sbe_dump_timeout_milliseconds);
+        if (!dump_done_msgs.empty())
+        {
+            PLDM_INF("dumpSbe: i_target=0x%X dump_target=0x%X total_seconds_waited=%d", get_huid(i_target), get_huid(dump_target),
+                       (((retryCount-1)*DUMP_TIMEOUT_INTERVAL_SECONDS) + (DUMP_TIMEOUT_INTERVAL_SECONDS - (sbe_dump_timeout_milliseconds/MS_PER_SEC))) );
+            break;
+        }
+        // Need to reset the milliseconds since the msg_wait_timeout sends back the remainder
+        sbe_dump_timeout_milliseconds = DUMP_TIMEOUT_INTERVAL_SECONDS * MS_PER_SEC;
+    }
 
     // Reset the watchdog timer
     INITSERVICE::sendProgressCode();
@@ -222,11 +284,30 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
     sbe_dump_timeout_milliseconds = MS_PER_SEC; // 1 second for stragglers
     const auto stragglers = msg_wait_timeout(msgQ.get(), sbe_dump_timeout_milliseconds);
 
-    const bool dump_completed = !dump_done_msgs.empty() || !stragglers.empty();
+    dump_completed = !dump_done_msgs.empty() || !stragglers.empty();
+#else
+    // HBRT does NOT have access to all of the PLDM semantics, so just do a simple timeout
+    // The dump should complete 2-3 minutes, so double the time (we need to block the
+    // transaction to disallow any i2c bus contentions that may propagate by the BMC pulling
+    // the dump).
+    //
+    // **NOTE** Currently due to BMC FSI driver issues the timeout window is 10 minutes
+    // to address the worse case scenarios.
+    //
+    // The BMC hub master is running slower (at local bus frequency as opposed to Aspeed FSI frequency)
+    // and then the remote slave is even slower due to another local bus clock div.  The BMC
+    // just hardcodes the I2C clock div which slows down the I2C bus speed.
+
+    uint64_t sbe_dump_window = (DUMP_TIMEOUT_INTERVAL_SECONDS * DUMP_TIMEOUT_RETRIES) * NS_PER_SEC; // 10 minutes
+    nanosleep(0, sbe_dump_window);
+    // HBRT does not need to reset the watchdog timer
+#endif
+
+    PLDM_INF("dumpSbe: dump_target HUID=0x%X dump_completed=%d", get_huid(dump_target), dump_completed);
 
     if (!dump_completed)
     {
-        PLDM_ERR("dumpSbe: Request for SBE dump on target 0x%08x (effecter IDs %d, %d) timed out",
+        PLDM_ERR("dumpSbe: Request for SBE dump on dump_target=0x%X sbe_dump_effecter=%d dump_complete_effecter=%d timed out",
                  get_huid(dump_target),
                  sbe_dump_effecter,
                  dump_complete_effecter);
@@ -252,6 +333,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
         break;
     }
 
+#ifndef __HOSTBOOT_RUNTIME
     const auto respond_to_msg =
         [&](const bool prev_completed, msg_t* const msg)
         {
@@ -274,7 +356,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
             const int rc = msg_respond(msgQ.get(), msg);
 
             assert(rc == 0,
-                   "dumpSbe: msg_respond failed: rc = %d, plid = 0x%08x, target huid = 0x%08x, "
+                   "dumpSbe: msg_respond failed: rc = %d, plid = 0x%08x, dump_target huid = 0x%08x, "
                    "dump_complete_effecter = %d",
                    rc, i_plid, get_huid(dump_target), dump_complete_effecter);
 
@@ -294,7 +376,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
 
     if (!dump_succeeded)
     {
-        PLDM_ERR("dumpSbe: Request for SBE dump on target 0x%08x (effecter IDs %d, %d) failed",
+        PLDM_ERR("dumpSbe: Request for SBE dump on dump_target=0x%X sbe_dump_effecter=%d dump_complete_effecter=%d failed",
                  get_huid(dump_target),
                  sbe_dump_effecter,
                  dump_complete_effecter);
@@ -319,19 +401,17 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
         addBmcErrorCallouts(errl);
         break;
     }
-
+#endif
     } while (false);
 
     // checks for PLDM error and adds flight recorder data to log
     addPldmFrData(errl);
 
-    PLDM_EXIT("dumpSbe(0x%08x, 0x%08x) = 0x%08x",
+    PLDM_EXIT("dumpSbe i_target=0x%X i_plid=0x%X ERRL=0x%X",
               get_huid(i_target), i_plid, ERRL_GETEID_SAFE(errl));
 
     return errl;
 }
-
-#endif
 
 void updateSbeHresetStatus(Target* const i_proc, const ATTR_CURRENT_SBE_HRESET_STATUS_type i_state)
 {

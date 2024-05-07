@@ -309,6 +309,9 @@
       <id>PART_NUMBER</id>
     </attribute>
     <attribute>
+      <id>SBE_DUMP_EFFECTER_ID</id>
+    </attribute>
+    <attribute>
       <id>SERIAL_NUMBER</id>
     </attribute>
     <attribute>

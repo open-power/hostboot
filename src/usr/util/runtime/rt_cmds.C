@@ -47,6 +47,17 @@
 #include <util/utillidmgr.H>
 #include <util/runtime/rt_fwreq_helper.H>
 
+#ifdef CONFIG_PLDM
+#include <pldm/extended/pdr_manager.H>     // PLDM::thePdrManager()
+#include <pldm/extended/sbe_dump.H>
+//#include <sbeio/sbe_retry_handler.H>     // only needed if testing odyssey_recovery_handler
+using namespace PLDM;
+using namespace SBEIO;
+#include <targeting/odyutil.H>                 // isOdysseyChip
+#endif
+
+using namespace TARGETING;
+
 //See rt_sbeio.C
 namespace RT_SBEIO
 {
@@ -400,6 +411,97 @@ void cmd_loopChipop(char  *& o_output,
     }
 
     sprintf(o_output, "cmd_loopChipop> SUCCESS");
+    return;
+}
+
+/**
+ * @brief Send a dumpSbe request for HUID
+ * @param[out] o_output    if error, then msg; else empty
+ * @param[in]  i_huid      HUID associated with PROC or OCMB Target to dump the SBE
+ */
+void cmd_dumpSbe(char  *& o_output,
+                    uint32_t i_huid)
+{
+    UTIL_FT("cmd_dumpSbe> STARTED TARGET=0x%X", i_huid);
+    o_output = new char[100]();
+#ifdef CONFIG_PLDM
+    errlHndl_t l_errl = nullptr;
+    TARGETING::Target* i_target{};
+    i_target = getTargetFromHUID(i_huid);
+
+    // PLDM local definition which should be coming from state_set_oem_ibm.h
+    // when PLDM subtree updates occur
+    const uint16_t PLDM_OEM_IBM_SBE_MAINTENANCE_STATE = 32772;
+
+    TARGETING::ATTR_SBE_DUMP_EFFECTER_ID_type sbe_dump_effecter = 0;
+    uint16_t dump_complete_effecter = 0;
+
+    if (i_target == NULL)
+    {
+        sprintf(o_output, "cmd_dumpSbe> TARGET=0x%X not found", i_huid);
+        return;
+    }
+
+    switch (i_target->getAttr<ATTR_TYPE>())
+    {
+        case TYPE_OCMB_CHIP:
+        {
+            if (!TARGETING::UTIL::isOdysseyChip(i_target))
+            {
+                UTIL_FT("cmd_dumpSbe OCMB is not an Odyssey HUID=0x%X", get_huid(i_target));
+                break;
+            }
+            const auto dimms = composable(getChildAffinityTargets)(i_target, CLASS_NA, TYPE_DIMM, true);
+            for (const auto dump_target : dimms)
+            {
+                UTIL_FT("cmd_dumpSbe DIMM HUID=0x%X", get_huid(dump_target));
+                // The information on the effecters is retrieved here only to reconcile during IPL and Runtime
+                // with PLDM PDRs when debug and cross checks are required during tests
+                if (dump_target->tryGetAttr<TARGETING::ATTR_SBE_DUMP_EFFECTER_ID>(sbe_dump_effecter))
+                {
+                    i_target->setAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>(ODY_RECOVERY_STATUS_DEAD); // mark the OCMB DEAD so OCC doesn't try to restart
+                    UTIL_FT("cmd_dumpSbe OCMB HUID=0x%X MARKED DEAD=0x%X to prevent OCC restarting the OCMB", get_huid(i_target), ODY_RECOVERY_STATUS_DEAD);
+                    dump_complete_effecter = thePdrManager().getHostStateQueryIdForStateSet(PdrManager::STATE_QUERY_EFFECTER,
+                                                         PLDM_OEM_IBM_SBE_MAINTENANCE_STATE,
+                                                         dump_target);
+                    UTIL_FT("cmd_dumpSbe DIMM HUID=0x%X sbe_dump_effecter=0x%X (%d) dump_complete_effecter=0x%X (%d)",
+                              get_huid(dump_target), sbe_dump_effecter, sbe_dump_effecter, dump_complete_effecter, dump_complete_effecter);
+                    break;
+                }
+            }
+            UTIL_FT("cmd_dumpSbe ODYSSEY HUID=0x%X calling PLDM::dumpSbe", get_huid(i_target));
+            // PLDM::dumpSbe is not the true logic flow during a normal HBRT recovery flow, this is for test purposes only
+            // Normal Odyssey dumpSbe would be performed by the odyssey_recovery_handler (see below how to hack)
+            const uint32_t DUMMY_PLID = 0x32;
+            l_errl = PLDM::dumpSbe(i_target, DUMMY_PLID);
+            if (l_errl)
+            {
+                l_errl->collectTrace("UTIL", 1024);
+                errlCommit(l_errl, UTIL_COMP_ID);
+            }
+            UTIL_FT("cmd_dumpSbe ODYSSEY HUID=0x%X back calling PLDM::dumpSbe", get_huid(i_target));
+
+            // In order to test out dump from the odyssey_recovery_handler flow here some other hacks would
+            // need to be placed in the odyssey_recovery_handler to force the failure to not recover the odyssey
+            // In normal conditions the call to odyssey_recovery_handler would NOT produce a dump since the reset would recover
+            // UTIL_FT("cmd_dumpSbe ODYSSEY HUID=0x%X calling OdySbeRetryHandler.odyssey_recovery_handler", get_huid(i_target));
+            // bool l_recovered = false;
+            // OdySbeRetryHandler l_SBEobj = OdySbeRetryHandler(i_target);
+            // l_recovered = l_SBEobj.odyssey_recovery_handler();
+            // UTIL_FT("cmd_dumpSbe ODYSSEY HUID=0x%X back calling OdySbeRetryHandler.odyssey_recovery_handler l_recovered=0x%X",
+            //          get_huid(i_target), l_recovered);
+
+            break;
+        }
+        default:
+        {
+            UTIL_FT("cmd_dumpSbe DEFAULT HUID=0x%X No Action Performed, only supported for ODYSSEY", get_huid(i_target));
+            break;
+        }
+    } // end switch
+#endif
+    sprintf(o_output, "cmd_dumpSbe> PROCESSED TARGET=0x%X for dumpSbe", i_huid);
+    UTIL_FT("cmd_dumpSbe COMPLETED TARGET=0x%X", i_huid);
     return;
 }
 
@@ -1163,6 +1265,7 @@ void cmd_switchToSbeScomAccess( char*& o_output, uint32_t i_huid)
     sprintf( o_output, "switchToSbeScomAccess executed");
 }
 
+
 /**
  * @brief Send a scom operation (read/write) to the FSP
  * @param[out] o_output     Output display buffer, memory allocated here
@@ -1750,7 +1853,22 @@ int hbrtCommand( int argc,
         }
     }
 #endif
-
+#ifdef INCLUDE_LAB_ONLY_INTERFACES
+    else if (strcmp(argv[0], "dumpSbe")==0)
+    {
+        // dumpSbe <huid>
+        *l_output = new char[100]();
+        if (argc == 2)
+        {
+            cmd_dumpSbe(*l_output,
+                            strtou64( argv[1], NULL, 16));
+        }
+        else
+        {
+            sprintf(*l_output, "ERROR: dumpSbe <huid>\n");
+        }
+    }
+#endif
     else
     {
         *l_output = new char[50+100*12];
@@ -1805,12 +1923,18 @@ int hbrtCommand( int argc,
         sprintf(l_tmpstr, "loopChipop <huid> <num loops>\n");
         strcat( *l_output, l_tmpstr );
 #endif
+#ifdef INCLUDE_LAB_ONLY_INTERFACES
+        sprintf(l_tmpstr, "dumpSbe <huid> \n");
+        strcat( *l_output, l_tmpstr );
+#endif
     }
 
     if( l_traceOut && (*l_output != NULL) )
     {
         UTIL_FT("Output::%s",*l_output);
-        delete *l_output;
+        // properly cleanup the local usages for new
+        delete[] *l_output;
+        *l_output = nullptr;
     }
 
     return rc;
