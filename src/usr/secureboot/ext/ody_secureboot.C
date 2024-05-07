@@ -98,6 +98,10 @@ errlHndl_t verifyOdySecuritySettings(Target* i_ocmb,
                                            bits{13}, 1,
                                            bits{14}, i_odySecurebootReg.fields.bootComplete),
                                 ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->addHwCallout(i_ocmb,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::DECONFIG,
+                             HWAS::GARD_NULL);
     }
     return l_errl;
 }
