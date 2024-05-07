@@ -704,6 +704,9 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                    bits{32,47},l_statusHeader.primaryStatus,
                                    bits{48,63},l_statusHeader.secondaryStatus));
 
+            // Mark that this log indicates the chipop has failed
+            errl->setErrorType(SBEIO_ERROR_TYPE_CHIPOP_FAILURE);
+
             collectRegFFDC(i_target,errl);
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,

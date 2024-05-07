@@ -1079,10 +1079,32 @@ public:
      * @note: This function is an aggregate function (i.e. may be called
      *        recursively on all sub-logs).
      *
-     * @return uint32_t the tyoe of error this error log is
+     * @return uint32_t the type of error this error log is
      */
     bool hasErrorType(uint32_t i_type,
                       propagation_t i_behavior = propagation_t::PROPAGATE) const;
+
+    /**
+     * @brief return whether the type of error this error log (or any
+     *        log in the aggregate if i_behavior = PROPAGATE) is anything
+     *        other than the given type. The error type is not a return code -
+     *        it is the generic type of the error that occurred.
+     *        Note that this is not the same as !hasErrorType(), but would
+     *        be more similar to the XOR result.
+     *          logs=A+B, type=A :: true
+     *          logs=A+A, type=A :: false
+     *
+     * @param[in]  i_type          The type to check.
+     * @param[in]  i_behavior      Whether to propagate this call to the
+     *                             other logs in the aggregate below.
+     *
+     * @note: This function is an aggregate function (i.e. may be called
+     *        recursively on all sub-logs).
+     *
+     * @return uint32_t the tyoe of error this error log is
+     */
+    bool hasErrorTypeOtherThan(uint32_t i_type,
+                               propagation_t i_behavior = propagation_t::PROPAGATE) const;
 
     /* @brief Structure to hold a callout and priority pair.
      */
@@ -1854,6 +1876,27 @@ inline bool ErrlEntry::hasErrorType(const uint32_t i_type,
                                 return log->hasErrorType(i_type,
                                                          propagation_t::PROPAGATE);
                             })));
+}
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline bool ErrlEntry::hasErrorTypeOtherThan(const uint32_t i_type,
+                                             const propagation_t i_behavior) const
+{
+    if(iv_errorType != i_type)
+    {
+        return true;
+    }
+    else if(i_behavior == propagation_t::PROPAGATE)
+    {
+        return std::any_of(cbegin(iv_aggregate_errors),
+                           cend(iv_aggregate_errors),
+                           [=](const errlHndl_t log) {
+                           return log->hasErrorTypeOtherThan(i_type,
+                                                             propagation_t::PROPAGATE);
+                           });
+    }
+    return false;
 }
 
 template<typename T>

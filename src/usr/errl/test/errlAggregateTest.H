@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -880,6 +880,48 @@ public:
 
         TS_ASSERT(errl_parent->hasErrorType(CHILD_TYPE, propagation_t::PROPAGATE),
                   "Parent log doesn't have child error type with propagation");
+
+        delete errl_parent;
+
+#undef TEST_FUNC
+    }
+
+    void testHasErrorTypeOtherThan()
+    {
+#define TEST_FUNC "testHasErrorTypeOtherThan"
+
+        const int PARENT_TYPE = 1, CHILD_TYPE = 2, COMMON_TYPE = 3;
+
+        auto errl_parent = errlog();
+        auto errl_child_orig = errlog();
+        auto errl_child = errl_child_orig;
+
+        errl_parent->setErrorType(PARENT_TYPE);
+        errl_child->setErrorType(CHILD_TYPE);
+
+        errl_parent->aggregate(errl_child_orig);
+
+        TS_ASSERT(!errl_parent->hasErrorTypeOtherThan(PARENT_TYPE, propagation_t::NO_PROPAGATE),
+                  "Parent log has parent error type");
+        TS_ASSERT(!errl_child->hasErrorTypeOtherThan(CHILD_TYPE, propagation_t::NO_PROPAGATE),
+                  "Child log has child error type");
+
+        TS_ASSERT(errl_parent->hasErrorTypeOtherThan(CHILD_TYPE, propagation_t::NO_PROPAGATE),
+                  "Parent has extra error type");
+        TS_ASSERT(errl_child->hasErrorTypeOtherThan(PARENT_TYPE, propagation_t::NO_PROPAGATE),
+                  "Child log has extra error type");
+
+        TS_ASSERT(errl_parent->hasErrorTypeOtherThan(CHILD_TYPE, propagation_t::PROPAGATE),
+                  "Parent log doesn't have extra error type with propagation CHILD");
+        TS_ASSERT(errl_parent->hasErrorTypeOtherThan(PARENT_TYPE, propagation_t::PROPAGATE),
+                  "Parent log doesn't have extra error type with propagation PARENT");
+        TS_ASSERT(errl_parent->hasErrorTypeOtherThan(COMMON_TYPE, propagation_t::PROPAGATE),
+                  "Parent log doesn't have extra error type with propagation COMMON");
+
+        errl_parent->setErrorType(COMMON_TYPE);
+        errl_child->setErrorType(COMMON_TYPE);
+        TS_ASSERT(!errl_parent->hasErrorTypeOtherThan(COMMON_TYPE, propagation_t::PROPAGATE),
+                  "Parent log has extra error type with propagation");
 
         delete errl_parent;
 

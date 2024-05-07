@@ -30,7 +30,51 @@
 #include <hwp_return_codes.H>
 #include <sbeio/sbeioif.H>
 #include <sbeio/sbeioreasoncodes.H>
+#include <errl/errlmanager.H>
 
+
+/**
+ * @brief Collect the Odyssey scratch data if appropriate to do so
+ *
+ * @param[in] i_ocmb  Target OCMB chip/sbe
+ * @param[in] i_errhdl  Associated log from chipop
+ */
+inline void collectOdyScratchData( TARGETING::Target* i_ocmb,
+                                   errlHndl_t i_errhdl )
+{
+    if( (i_ocmb->getAttr<TARGETING::ATTR_COLLECT_SBE_SCRATCH_DATA>() == 1) &&
+        ((i_errhdl == nullptr) ||
+         !i_errhdl->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED)) )
+    {
+        errlHndl_t l_scratchErrls = nullptr;
+        auto l_errl = SBEIO::getAndProcessScratchData(i_ocmb,
+                                                      l_scratchErrls);
+        if(l_errl)
+        {
+            ERRORLOG::errlCommit(l_errl, SBEIO_COMP_ID);
+            if(l_scratchErrls)
+            {
+                TRACISTEP(ERR_MRK" Unexpected scratch data logs from failure");
+            }
+        }
+        // Regardless of the chipop result, commit any extra logs
+        if(l_scratchErrls)
+        {
+            ERRORLOG::errlCommit(l_scratchErrls, SBEIO_COMP_ID);
+        }
+    }
+};
+
+/**
+ * @brief Macro that encapsulates common error handling logic for Odyssey
+ *        HWP and chipop failures.
+ * @param[in] ISTEP_NAME  human-readable name of istep, a token not a string
+ * @param[in] HWP  human-readable hwp name, a token not a string
+ * @param[in] STEP_ERR  instance of ISTEP_ERROR::IStepError variable
+ * @param[in] OCMB  Odyssey target pointer
+ * @param[inout] ERRL  errlHndl_t with HWP fail
+ *
+ */
 #define HANDLE_ODY_HWP_ERROR(ISTEP_NAME, HWP, STEP_ERR, OCMB, ERRL)     \
     ({                                                                  \
         ISTEP_ERROR::IStepError& M_steperr = STEP_ERR;                  \
@@ -38,25 +82,12 @@
         errlOwner M_errl(M_errl_ptr);                                   \
         M_errl_ptr = nullptr;                                           \
         TARGETING::Target* const M_ocmb = OCMB;                         \
+        TRACISTEP(ERR_MRK "> HANDLE_ODY_HWP_ERROR :: " #ISTEP_NAME " :: " #HWP )   \
         if (M_errl)                                                     \
         {                                                               \
             if (TARGETING::UTIL::isOdysseyChip(M_ocmb))                 \
             {                                                           \
-                if(M_ocmb->getAttr<TARGETING::ATTR_COLLECT_SBE_SCRATCH_DATA>() == 1 && \
-                   !M_errl->hasErrorType(SBEIO::SBEIO_ERROR_TYPE_HRESET_PERFORMED)) \
-                {                                                       \
-                    errlHndl_t l_scratchErrls;                          \
-                    auto l_errl = SBEIO::getAndProcessScratchData(M_ocmb,\
-                                                       l_scratchErrls); \
-                    if(l_errl)                                          \
-                    {                                                   \
-                        errlCommit(l_errl, SBEIO_COMP_ID);              \
-                    }                                                   \
-                    else if (l_scratchErrls)                            \
-                    {                                                   \
-                        errlCommit(l_scratchErrls, SBEIO_COMP_ID);      \
-                    }                                                   \
-                }                                                       \
+                collectOdyScratchData(M_ocmb,M_errl.get());             \
                 ocmbupd::ody_upd_event_t M_update_event = ocmbupd::OCMB_HWP_FAIL_OTHER; \
                 if (M_errl->hasUserData1(fapi2::RC_UNSUPPORTED_ATTR_LEVEL)) \
                 {                                                       \

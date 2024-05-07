@@ -59,6 +59,7 @@
 #include <ody_load_pie.H>
 
 #include <sbeio/sbeioif.H>
+#include <arch/magic.H>
 
 using namespace ERRORLOG;
 using namespace ISTEP;
@@ -83,7 +84,7 @@ void* call_mss_draminit (void *io_pArgs)
 
     parallel_for_each<HwpWorkItem_OCMBUpdateCheck>(composable(getAllChips)(TYPE_OCMB_CHIP, true),
                                                    l_stepError,
-                                                   "exp/ody_draminit_mc",
+                                                   "exp/ody_draminit",
                                                    [&](Target* const i_ocmb)
     {
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> l_fapi_target(i_ocmb);
@@ -148,6 +149,11 @@ void* call_mss_draminit (void *io_pArgs)
         }
 
     ERROR_EXIT: // label is required by RUN_ODY_* above
+        if (l_err)
+        {
+            TRACISTEP(ERR_MRK"call_mss_draminit");
+        }
+
         return l_err;
     });
 

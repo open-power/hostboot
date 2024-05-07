@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,8 +89,22 @@
         errlHndl_t& RUN_ODY_CHIPOP_errl = ERRL;                         \
         TRACISTEP(#CALLER ": run " #OP " on target HUID 0x%.8X (chipop)", get_huid(TARGET)); \
         RUN_ODY_CHIPOP_errl = sendExecHWPRequest(TARGET, OP);           \
-        if (RUN_ODY_CHIPOP_errl)                                        \
+        /* A chipop response may include logs orthogonal to the
+           chipop's success, those should not cause a failure. */       \
+        if (RUN_ODY_CHIPOP_errl                                         \
+            && !(RUN_ODY_CHIPOP_errl->hasErrorTypeOtherThan(SBEIO_ERROR_TYPE_FFDC_PACKAGE))) \
         {                                                               \
+            TRACISTEP(#CALLER ": PARTIAL SUCCESS running " #OP " chipop on target HUID 0x%.8X", \
+                      get_huid(TARGET));                                \
+            /* @TODO-JIRA:PFHB-776 - Go through FSM here? */            \
+            errlCommit(RUN_ODY_CHIPOP_errl, ISTEP_COMP_ID);             \
+            collectOdyScratchData(TARGET,RUN_ODY_CHIPOP_errl);          \
+        }                                                               \
+        /* A chipop execution failure. */                               \
+        else if (RUN_ODY_CHIPOP_errl)                                   \
+        {                                                               \
+            TRACISTEP(#CALLER ": FAILURE running " #OP " chipop on target HUID 0x%.8X", \
+                      get_huid(TARGET));                                \
             goto ERROR_EXIT;                                            \
         }                                                               \
         else                                                            \

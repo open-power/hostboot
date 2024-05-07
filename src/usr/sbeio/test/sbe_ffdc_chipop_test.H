@@ -269,16 +269,16 @@ private:
         return count;
     }
 
-    bool hasErrorType(const char * i_testName,
-                        errorRecords_t i_records,
-                        errlHndl_t i_error)
+    bool hasReturnCode(const char * i_testName,
+                       errorRecords_t i_records,
+                       errlHndl_t i_error)
     {
         bool retVal = true;
         for (const auto & record : i_records)
         {
-            if ( !i_error->hasErrorType(record.returnCode) )
+            if ( !i_error->hasUserData1(record.returnCode) )
             {
-                TS_FAIL("%s> Expected error PLID=0x%X to have error type %s",
+                TS_FAIL("%s> Expected error PLID=0x%X to have return code %s",
                         i_testName,
                         i_error->plid(),
                         rc_to_str(record.returnCode).data());
@@ -309,7 +309,7 @@ private:
             uint8_t query_results = err->queryCallouts(i_test.target);
             if (query_results == i_test.expectations)
             {
-                if (!hasErrorType(TEST_FUNC, { errRecord }, err))
+                if (!hasReturnCode(TEST_FUNC, { errRecord }, err))
                 {
                     goto TEST_FAIL_EXIT;
                 }
@@ -378,8 +378,8 @@ TEST_FAIL_EXIT:
 
         if (errl_count > 0)
         {
-            // This test expected some number of chip-op error logs. Ensure the error type(s) match expectations.
-            if (!hasErrorType(i_testName, i_errorRecords, chipopErr))
+            // This test expected some number of chip-op error logs. Ensure the returncode(s) match expectations.
+            if (!hasReturnCode(i_testName, i_errorRecords, chipopErr))
             {
                 goto TEST_FAIL_EXIT;
             }
@@ -413,8 +413,8 @@ TEST_FAIL_EXIT:
 
             if (errl_count > 0)
             {
-                // This test expected some number of chip-op error logs. Ensure the error type(s) match expectations.
-                if( !hasErrorType(i_testName, i_errorRecords, async_errls))
+                // This test expected some number of chip-op error logs. Ensure the returncode(s) match expectations.
+                if( !hasReturnCode(i_testName, i_errorRecords, async_errls))
                 {
                     goto TEST_FAIL_EXIT;
                 }
