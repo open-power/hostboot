@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -893,13 +893,15 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
         {
             // put out warning trace
             TRACFCOMP(g_trac_errl, ERR_MRK "commitErrLog() - nullptr pointer");
+            MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
             break;
         }
 
         assert(io_err->iv_aggregate_parent == nullptr,
-               "commitErrLog(0x%08X, %d) called on a log which is a member of an aggregate",
+               "commitErrLog(0x%08X, %.4X) called on a log which is a member of an aggregate (%.8X)",
                io_err->eid(),
-               i_committerComp);
+               i_committerComp,
+               io_err->iv_aggregate_parent->eid());
 
         commitErrLogAggregate(io_err, i_committerComp);
    } while( 0 );

@@ -225,9 +225,9 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
     const char* l_sevString = errl_sev_str_map.at(i_sev);
     mutex_unlock(&g_sevMapMutex);
     #ifdef CONFIG_ERRL_ENTRY_TRACE
-    TRACFCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, l_sevString );
+    TRACFCOMP( g_trac_errl, ERR_MRK"Error %p created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", this, plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, l_sevString );
     #else
-    TRACDCOMP( g_trac_errl, ERR_MRK"Error created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, l_sevString );
+    TRACDCOMP( g_trac_errl, ERR_MRK"Error %p created : PLID=%.8X, EID=%.8X, RC=%.4X, Mod=%.2X, Userdata=%.16llX %.16llX, Sev=%s", this, plid(), eid(), i_reasonCode, i_modId, i_user1, i_user2, l_sevString );
     #endif
     // Collect the Backtrace and add it to the error log
     iv_pBackTrace = new ErrlUserDetailsBackTrace();
@@ -251,11 +251,13 @@ ErrlEntry::ErrlEntry(const errlSeverity_t i_sev,
 ///////////////////////////////////////////////////////////////////////////////
 ErrlEntry::~ErrlEntry()
 {
+    TRACDCOMP( g_trac_errl,"Deleting %p",this);
     // Clean up aggregate errors.
     // This class isn't copyable/movable so we don't have to worry
     // about that anywhere.
     for (auto& log : iv_aggregate_errors)
     {
+        TRACDCOMP( g_trac_errl,"log=%p",log);
         if (log)
         {
             assert(log->iv_aggregate_parent == this,

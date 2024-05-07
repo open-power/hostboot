@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -164,7 +164,11 @@ void* _enforceSmallFence(
 {
     void* pOrigAddr = addToVoid(i_pAddr,-offsetof(fence_t,data));
     auto * const pFence=reinterpret_cast<fence_t*>(pOrigAddr);
-    crit_assert(pFence->begin == CHECK::BEGIN);
+    if( pFence->begin != CHECK::BEGIN )
+    {
+        printk("i=%p,o=%p\n",i_pAddr,pOrigAddr);
+        crit_assert(pFence->begin == CHECK::BEGIN);
+    }
     uint32_t endVal=0;
     memcpy(&endVal,&pFence->data[0]+pFence->size,sizeof(endVal));
     crit_assert(endVal==CHECK::END);
