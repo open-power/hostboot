@@ -1099,6 +1099,12 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
 
     do
     {
+        // Start a timeout monitor
+        mutex_lock(&iv_mutex);
+        monitorId = getMonitor().addMonitor(maintCmdTO);
+        i_wfp.timer = monitorId;
+        mutex_unlock(&iv_mutex);
+
         // new command...use the full range
 
         fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> fapiOcmb(target);
@@ -1200,16 +1206,10 @@ errlHndl_t StateMachine::doMaintCommand(WorkFlowProperties & i_wfp)
         {
             MDIA_FAST( "sm: Running Maint Cmd failed" );
             i_wfp.data = nullptr;
-        }
 
-        if ( nullptr == err )
-        {
-            // Start a timeout monitor
+            // Remove the timeout monitor
             mutex_lock(&iv_mutex);
-
-            monitorId = getMonitor().addMonitor(maintCmdTO);
-            i_wfp.timer = monitorId;
-
+            getMonitor().removeMonitor(monitorId);
             mutex_unlock(&iv_mutex);
         }
 
