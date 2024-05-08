@@ -31,6 +31,7 @@
 #define __CXXTEST_TESTSUITE_H
 
 #include <arch/magic.H>
+#include <limits.h>
 
 // Set by code that wants to manually execute a testcase outside of the
 // normal CxxTest framework
