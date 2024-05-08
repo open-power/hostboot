@@ -357,15 +357,7 @@ errlHndl_t doOcmbSpiFlashCheck(Target* const i_ocmb)
     if(SPPE_BOOT_SIDE_GOLDEN != i_ocmb->getAttr<ATTR_OCMB_BOOT_SIDE>() &&
        SBEIO::sbeSpiFlashCheckSupported(i_ocmb))
     {
-        // Check full SPI flash on all devices in MFG mode
-        if(areAllSrcsTerminating())
-        {
-            l_errl = SBEIO::sendSpiFlashCheckRequest(i_ocmb, FULL, ALL_SIDES, DEVICE_0);
-        }
-        else
-        {
-            l_errl = SBEIO::sendSpiFlashCheckRequest(i_ocmb, IMAGE, SIDE_0 | SIDE_1, DEVICE_0);
-        }
+        l_errl = SBEIO::sendSpiFlashCheckRequest(i_ocmb, IMAGE, SIDE_0 | SIDE_1, DEVICE_0);
     }
     else
     {
