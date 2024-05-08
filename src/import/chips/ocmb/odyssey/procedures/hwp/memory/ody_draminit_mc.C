@@ -96,9 +96,6 @@ extern "C"
         FAPI_TRY( mss::ody::workarounds::deassert_resetn( i_target ), TARGTIDFORMAT " Failed to deassert reset_n",
                   TARGTID );
 
-        // Deploy any necessary row repairs
-        FAPI_TRY(ody_deploy_row_repairs(i_target), TARGTIDFORMAT " Failed ody_deploy_row_repairs", TARGTID);
-
         // Start the refresh engines by setting MBAREF0Q(0) = 1. Note that the remaining bits in
         // MBAREF0Q should retain their initialization values.
         FAPI_TRY( mss::change_refresh_enable<mss::mc_type::ODYSSEY>(i_target, mss::HIGH),
@@ -108,6 +105,9 @@ extern "C"
         // Trigger the MC to take the DRAMs out of self refresh
         FAPI_TRY( mss::change_force_str<mss::mc_type::ODYSSEY>(i_target, mss::LOW), TARGTIDFORMAT " Failed change_force_str",
                   TARGTID );
+
+        // Deploy any necessary row repairs
+        FAPI_TRY(ody_deploy_row_repairs(i_target), TARGTIDFORMAT " Failed ody_deploy_row_repairs", TARGTID);
 
         // Enable periodic short zq cal
         FAPI_TRY( mss::enable_zq_cal<mss::mc_type::ODYSSEY>(i_target), TARGTIDFORMAT " Failed enable_zq_cal", TARGTID );
