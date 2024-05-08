@@ -93,6 +93,13 @@
     <procedure>CODE</procedure>
     <priority>HIGH</priority>
   </callout>
+  <callout>
+    <target>TARGET_CHIP</target>
+    <priority>MEDIUM</priority>
+  </callout>
+  <deconfigure>
+    <target>TARGET_CHIP</target>
+  </deconfigure>
 </hwpError>
 <!-- ******************************************************************** -->
 </hwpErrors>
