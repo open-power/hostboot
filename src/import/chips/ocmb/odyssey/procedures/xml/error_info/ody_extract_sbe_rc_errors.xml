@@ -376,7 +376,7 @@
     <sbeError/>
     <rc>RC_SECURE_BOOT_FAIL</rc>
     <description>
-    Secure boot failed (any error code starting with 0x1-0x5)
+    Secure boot failed (any error code starting with 0x1-0x5) 
     </description>
     <ffdc>TARGET_CHIP</ffdc>
     <ffdc>ERROR_CODE</ffdc>

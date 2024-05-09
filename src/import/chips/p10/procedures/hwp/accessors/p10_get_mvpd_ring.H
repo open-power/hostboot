@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,8 +33,6 @@
 #define    _HWP_GETMVPDRING_
 
 #include   <fapi2.H>
-
-#define MVPD_MAGIC (uint32_t)0x000F17BA
 
 namespace fapi2
 {

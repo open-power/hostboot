@@ -34,8 +34,8 @@
 /// *HWP Consumed by: HB:CI
 ///
 
-#ifndef _MSS_MAINT_CMDS_H
-#define _MSS_MAINT_CMDS_H
+#ifndef _EXP_MAINT_CMDS_H
+#define _EXP_MAINT_CMDS_H
 
 //------------------------------------------------------------------------------
 //    Includes
