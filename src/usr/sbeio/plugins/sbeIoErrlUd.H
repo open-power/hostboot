@@ -54,7 +54,12 @@
 #include "sbeIoFfdcType.H"
 #include "sbeffdctypecommon.H"
 
+static constexpr uint32_t PLAT_ERROR_SEE_DATA = 0x02000001;
+#ifdef __HOSTBOOT_MODULE
 #include <return_code_defs.H>
+static_assert(PLAT_ERROR_SEE_DATA == fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA,
+              "FAPI2_RC_PLAT_ERR_SEE_DATA changed, PLAT_ERROR_SEE_DATA needs updating.");
+#endif
 
 #define ODY_SBE_TEMP_DUMP_FILE              "/tmp/ody_trace_dump.bin"
 #define ODY_SBE_TRACE_BIN                   "/tmp/ody_sbe_trace.bin"
@@ -140,7 +145,7 @@ public:
                        const uint32_t i_buflen) const
     {
     int l_rc = 0;
-    uint32_t fapiRc = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
+    uint32_t fapiRc = PLAT_ERROR_SEE_DATA;
     sbePlatHeader_t l_pData = {0};
     char l_buffer[ODY_SBE_PARSER_MAX_LOCAL_BUFFER] = {0};
     char *l_pBuffer = (char*)i_pBuffer;
@@ -402,7 +407,7 @@ public:
                        const uint32_t i_buflen) const
     {
         int l_rc = 0;
-        uint32_t fapiRc = fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA;
+        uint32_t fapiRc = PLAT_ERROR_SEE_DATA;
         sbeFFDCDataHeader_t l_pData = {0};
         char l_buffer[SBE_PARSER_MAX_LOCAL_BUFFER] = {0};
         char *l_pBuffer = (char*)i_pBuffer;
