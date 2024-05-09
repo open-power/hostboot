@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2023
+# Contributors Listed Below - COPYRIGHT 2021,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -61,6 +61,7 @@ function usage ()
 
 function copy_targeting_xml ()
 {
+    sim_file=simics_P10.system.xml
     echo ""
     if [ -z "${sys_type}" ]; then
         echo "Copying system MRWs into $PROJECT_ROOT/src/usr/targeting/common/xmltohb/ ..."
@@ -71,7 +72,7 @@ function copy_targeting_xml ()
         fi
         echo ""
         echo "Done."
-        echo "Remember to replace simics_P10.system.xml with your system's XML if you want to patch targeting."
+        echo "Remember to replace $sim_file with your system's XML if you want to patch targeting."
     else
         echo "Copying $sys_type MRW into $PROJECT_ROOT/src/usr/targeting/common/xmltohb/ ..."
         cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/host/powerpc64le-buildroot-linux-gnu/sysroot/openpower_mrw_scratch/$sys_type*_hb.mrw.xml $PROJECT_ROOT/src/usr/targeting/common/xmltohb/
@@ -80,8 +81,8 @@ function copy_targeting_xml ()
             return ${rc}
         fi
         echo ""
-        echo "Replacing $PROJECT_ROOT/src/usr/targeting/common/xmltohb/simics_P10.system.xml with $sys_type"
-        cp -v $PROJECT_ROOT/src/usr/targeting/common/xmltohb/$sys_type*_hb.mrw.xml $PROJECT_ROOT/src/usr/targeting/common/xmltohb/simics_P10.system.xml
+        echo "Replacing $PROJECT_ROOT/src/usr/targeting/common/xmltohb/$sim_file with $sys_type"
+        cp -v $PROJECT_ROOT/src/usr/targeting/common/xmltohb/$sys_type*_hb.mrw.xml $PROJECT_ROOT/src/usr/targeting/common/xmltohb/$sim_file
         rc=$?
         if [ ${rc} -ne 0 ]; then
             return ${rc}
@@ -97,110 +98,33 @@ function checkout_hostboot_level ()
     return $?
 }
 
-# Gets the change id for the required standalone commit
-function get_standalone_changes ()
-{
-    ssh -p 29418 hostboot.gerrit gerrit query "(intopic:bmc_standalone_patching_release-${build_release}) project:hostboot" --current-patch-set | grep -E 'change I|subject:'
-    return $?
-}
-
-# Uses a change id to query for the current patch set for that change. For example "refs/changes/06/152106/4"
-function gerrit_refs ()
-{
-    # $1 the change id for the commit
-    ssh -p 29418 hostboot.gerrit gerrit query --current-patch-set "(intopic:bmc_standalone_patching_release-${build_release}) project:hostboot $1" | grep ref: | awk '{print $2}'
-    rc=$?
-    if [ ${rc} -ne 0 ]; then
-        return ${rc}
-    fi
-}
-
-function gerrit_pick ()
-{
-    # $1 input is a commit or search string
-    git fetch gerrit $(gerrit_refs $1) && git cherry-pick --strategy=recursive -X theirs FETCH_HEAD
-    return $?
-}
-
-function cherrypick_standalone_patch ()
-{
-    echo ""
-    echo "Applying standalone changes necessary for full-system eBMC patching ..."
-    standalone_patch_changes=$(get_standalone_changes)
-    if [ -z "$standalone_patch_changes" ]; then
-        # Couldn't find the standalone patch commit
-        return 1
-    fi
-    # Separate the change ids from the subject lines
-    changeIds=()
-    subjects=()
-
-    i=0
-    # Internal Field Seperator needs to be updated.
-    IFS=$'\n'
-    for line in $standalone_patch_changes ; do
-        if ! ((i % 2)); then
-            changeIds+=($( echo $line | awk '{print $2}'))
-        else
-            subjects+=($( echo $line | sed "s/.*subject: //g"))
-        fi
-
-        ((i=i+1))
-    done
-
-    # Put the current git log into a private file so that its easier to grep through the current stack of commits
-    # to find if needed changes are already in the branch.
-    git log > .gitlog
-
-    i=0
-    for CHANGEID in ${changeIds[@]} ; do
-
-        if ! grep -q $CHANGEID .gitlog ; then
-            echo "PICK $CHANGEID ${subjects[$i]} for ${build_release}"
-
-            gerrit_pick $CHANGEID
-            rc=$?
-            if [ ${rc} -ne 0 ]; then
-                \rm .gitlog
-                return ${rc}
-            fi
-        else
-            echo "HAVE $CHANGEID ${subjects[$i]}"
-        fi
-        ((i=i+1))
-    done
-
-    \rm .gitlog
-
-}
-
 function pull_pnor_xml ()
 {
-    echo "Getting the OP-BUILD PNOR defaultPnorLayout_64.xml to replace the STANDALONE pnorLayoutP10.xml to properly build patches for BMC"
-    cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/build/openpower-pnor-p10*/p10Layouts/defaultPnorLayout_64.xml $PROJECT_ROOT/src/build/buildpnor/pnorLayoutP10.xml
+    file=pnorLayoutP10.xml
+    echo "Getting the OP-BUILD PNOR defaultPnorLayout_64.xml to replace the STANDALONE $file to properly build patches for BMC"
+    cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/build/openpower-pnor-p11*/p11Layouts/defaultPnorLayout_64.xml $PROJECT_ROOT/src/build/buildpnor/$file
     return $?
 }
 
 function verify_config_file ()
 {
     config=$(env | grep CONFIG_FILE | cut -d"=" -f2)
-
     # See if the environment variable exists
     if [ -z "$config" ]; then
         echo ""
         echo "User environment variable for CONFIG_FILE not found... fixing."
-        cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/p10ebmc.config $PROJECT_ROOT/
+        cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/$config_name $PROJECT_ROOT/
         rc=$?
         if [ ${rc} -ne 0 ]; then
             return ${rc}
         fi
-        export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config
+        export CONFIG_FILE=$PROJECT_ROOT/$config_name
         echo "Environment variable for config now set to:"
         echo $(env | grep CONFIG_FILE)
     else
         # Get the md5sums of each config file to see if they are the same. If not, we want to take the one from the build.
         config_md5sum=$(md5sum $config | cut -d" " -f1)
-        build_config_md5sum=$(md5sum /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/p10ebmc.config | cut -d" " -f1)
+        build_config_md5sum=$(md5sum /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/$config_name | cut -d" " -f1)
 
         if [ $config_md5sum = $build_config_md5sum ]; then
             echo ""
@@ -208,12 +132,12 @@ function verify_config_file ()
         else
             echo ""
             echo "User config file $config DOES NOT match the build config file. Replacing with the one from the build."
-            cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/p10ebmc.config $PROJECT_ROOT/
+            cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/openpower/configs/hostboot/$config_name $PROJECT_ROOT/
             rc=$?
             if [ ${rc} -ne 0 ]; then
                 return ${rc}
             fi
-            export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config
+            export CONFIG_FILE=$PROJECT_ROOT/$config_name
             echo "Environment variable for config now set to:"
             echo $(env | grep CONFIG_FILE)
         fi
@@ -222,6 +146,7 @@ function verify_config_file ()
 
 function update_customrc()
 {
+    generation=P11
     while true; do
         read -p "It is recommended that this script update your customrc with CONFIG_FILE and BMC_STANDALONE_PATCHING defaults to prevent issues re-entering the hostboot workon in the future. Do that now [Y/N]? " yn
         case $yn in
@@ -243,22 +168,22 @@ function update_customrc()
             esac
     done
     # Get the line the header starts on
-    customrcHeader=$(grep -in "P10 STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
+    customrcHeader=$(grep -in "$generation STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
     if [ -z "${customrcHeader}"  ]; then
         # Make a backup in case the user needs it
         \cp $PROJECT_ROOT/customrc $PROJECT_ROOT/customrc.backup
         # Write the standalone patching section in the user's custom rc
         $(echo "" >> $PROJECT_ROOT/customrc)
         $(echo "###########################################################" >> $PROJECT_ROOT/customrc)
-        $(echo "########### P10 STANDALONE PATCHING"                         >> $PROJECT_ROOT/customrc)
+        $(echo "########### $generation STANDALONE PATCHING"                 >> $PROJECT_ROOT/customrc)
         $(echo "###########################################################" >> $PROJECT_ROOT/customrc)
-        $(echo "export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config"             >> $PROJECT_ROOT/customrc)
+        $(echo "export CONFIG_FILE=$PROJECT_ROOT/$config_name"               >> $PROJECT_ROOT/customrc)
         $(echo "export BMC_STANDALONE_PATCHING=1"                            >> $PROJECT_ROOT/customrc)
         # Try again
-        customrcHeader=$(grep -in "P10 STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
+        customrcHeader=$(grep -in "$generation STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
         if [ -z "${customrcHeader}" ]; then
             # Just give up
-            echo "Can't find the P10 STANDALONE PATCHING header in $PROJECT_ROOT/customrc."
+            echo "Can't find the $generation STANDALONE PATCHING header in $PROJECT_ROOT/customrc."
             return 1
         fi
     else
@@ -270,7 +195,7 @@ function update_customrc()
             # we want to modify
             if [ $((${CONFIG_LINE} - 2)) -eq ${customrcHeader} ]; then
                 # Replace the line with the proper export
-                $(sed -i "${CONFIG_LINE}s,.*,export CONFIG_FILE=${PROJECT_ROOT}/p10ebmc.config," $PROJECT_ROOT/customrc)
+                $(sed -i "${CONFIG_LINE}s,.*,export CONFIG_FILE=${PROJECT_ROOT}/$config_name," $PROJECT_ROOT/customrc)
                 foundConfigLine=1
             elif [ $((${CONFIG_LINE})) -gt $((${customrcHeader} + 2)) ]; then
                 # Comment out lines after the target CONFIG_FILE line so they aren't the last to be sourced by the
@@ -290,9 +215,9 @@ function update_customrc()
             # to be
             expectedLine=$((${customrcHeader} + 2))
             if [ $(wc -l $PROJECT_ROOT/customrc | cut -f1 -d" ") -lt $expectedLine ]; then
-                $(echo "export CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config" >> $PROJECT_ROOT/customrc)
+                $(echo "export CONFIG_FILE=$PROJECT_ROOT/$config_name" >> $PROJECT_ROOT/customrc)
             else
-                $(sed -i "${expectedLine}iexport CONFIG_FILE=$PROJECT_ROOT/p10ebmc.config" $PROJECT_ROOT/customrc)
+                $(sed -i "${expectedLine}iexport CONFIG_FILE=$PROJECT_ROOT/$config_name" $PROJECT_ROOT/customrc)
             fi
         fi
 
@@ -306,7 +231,7 @@ function update_customrc()
             if [ $(wc -l $PROJECT_ROOT/customrc | cut -f1 -d" ") -lt $expectedLine ]; then
                 $(echo "export BMC_STANDALONE_PATCHING=1" >> $PROJECT_ROOT/customrc)
             else
-                $(sed -i "${expectedLine}iexport BMC_STANDALONE_PATCHING=1" $PROJECT_ROOT/customrc)
+                $(sed -i "${expectedLine}export BMC_STANDALONE_PATCHING=1" $PROJECT_ROOT/customrc)
             fi
         fi
     fi
@@ -378,7 +303,7 @@ function main ()
         return 1
     fi
 
-    export HOSTBOOT_COMMIT_HASH=$(sed -n -e 's/^.*hostboot-p10-//p' < /afs/rchland.ibm.com/projects/esw/$pnor_release/Builds/$pnor_build/logs/status.html | cut -c 1-7 | head -n1)
+    export HOSTBOOT_COMMIT_HASH=$(sed -n -e 's/^.*hostboot-p11-//p' < /afs/rchland.ibm.com/projects/esw/$pnor_release/Builds/$pnor_build/logs/status.html | cut -c 1-7 | head -n1)
     echo "Hostboot commit for PNOR build: $HOSTBOOT_COMMIT_HASH"
     if [ -z "$HOSTBOOT_COMMIT_HASH" ]; then
         echo "ERROR: Could not find hostboot commit hash with given package name:'$package_name'"
@@ -474,15 +399,6 @@ function main ()
             echo "ERROR: Couldn't checkout the hostboot level. See above messages for more info."
             return ${rc};
         fi
-        # Attempt to cherry pick the needed changes onto the new release level. In some releases the commit
-        # will be missing and picked over. In recent builds it will present already and this function will be
-        # a no-op.
-        cherrypick_standalone_patch
-        rc=$?
-        if [ ${rc} -ne 0 ]; then
-            echo "ERROR: Couldn't cherry pick the required patch. See above messages for more info."
-            return ${rc}
-        fi
     fi
 
     if [ "$no_xml" == false ]; then
@@ -542,6 +458,8 @@ function main ()
 
 }
 
+# global for CONFIG_FILE
+config_name=p11ebmc.config
 
 # The user must source this script
 # otherwise it can't update the environment variable for the CONFIG_FILE
@@ -555,6 +473,7 @@ else
 fi
 
 # Cleanup the script variables
+unset config_name
 unset package_name
 unset pnor_release
 unset pnor_build
