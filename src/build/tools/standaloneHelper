@@ -182,7 +182,7 @@ generate_sbe_odyssey_images()
         # path is set in SBE, however, it goes down the path we don't want for Odyssey standalone
         # and tries to find keys that don't exist. We need to unset SIGNING_BASE_DIR var in the
         # new shell that SBE workon spawns to prevent SBE going down the wrong signing path.
-        ./sbe workon odysseylab pnor <<< 'unset SIGNING_BASE_DIR && ./sbe build && ./sbe prime && exit'
+        ./sbe workon odysseylab pnor <<< 'unset SIGNING_BASE_DIR && ./sbe build && ./sbe prime skip-sim-install && exit'
         cd ${PROJECT_ROOT}
         STANDALONE_SIMICS=${PROJECT_ROOT}/standalone/simics
         tar -xzvf ${ODYSSEY_DEBUG_TAR_IMG} -C ${STANDALONE_SIMICS}/ || exit 1
