@@ -911,12 +911,8 @@ fapi2::ReturnCode setup_execute_restore<mss::mc_type::ODYSSEY>(
         // Backup ODC_SRQ_MBA_FARB0Q value before running Concurrent CCS
         FAPI_TRY( pre_execute_via_mcbist<mss::mc_type::ODYSSEY>(i_target, l_farb0_reg) );
 
-        FAPI_TRY( disable_recr_data_inversion<mss::mc_type::ODYSSEY>(i_target, l_recr_reg) );
-
         // Run CCS via MCBIST for Concurrent CCS
         FAPI_TRY( execute_via_mcbist<mss::mc_type::ODYSSEY>(i_target, io_program, i_port) );
-
-        FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_WDF_REGS_RECR, l_recr_reg));
 
         // Restore ODC_SRQ_MBA_FARB0Q value after running Concurrent CCS
         FAPI_TRY( post_execute_via_mcbist<mss::mc_type::ODYSSEY>(i_target, l_farb0_reg) );
