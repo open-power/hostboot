@@ -925,14 +925,15 @@ errlHndl_t copyArchitectedRegs(void)
 
             auto hwDataMemCapturedSize = metadata->hwDataMemCapturedSize;
 
-            if (getOcmbChipTypesInSystem(UTIL_FILTER_FUNCTIONAL) == UTIL_ODYSSEY_FOUND)
-            {
-                hwDataMemCapturedSize
-                    = collectOdysseyHwDumps(procChips[procNum],
-                                            metadata->hwDataMemoryAddr,
-                                            metadata->hwDataMemAllocSize,
-                                            metadata->hwDataMemCapturedSize);
-            }
+            // TODO: STGD:613392 Inconsistent data in the MPIPL dump.
+            // if (getOcmbChipTypesInSystem(UTIL_FILTER_FUNCTIONAL) == UTIL_ODYSSEY_FOUND)
+            // {
+            //     hwDataMemCapturedSize
+            //         = collectOdysseyHwDumps(procChips[procNum],
+            //                                 metadata->hwDataMemoryAddr,
+            //                                 metadata->hwDataMemAllocSize,
+            //                                 metadata->hwDataMemCapturedSize);
+            // }
 
             hwDumpTable->procHwRegDataToc[procId].dataOffset = metadata->hwDataMemoryAddr;
             hwDumpTable->procHwRegDataToc[procId].dataSize = hwDataMemCapturedSize;
