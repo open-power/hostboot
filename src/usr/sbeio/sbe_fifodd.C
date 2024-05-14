@@ -86,6 +86,7 @@ extern trace_desc_t* g_trac_sbeio;
 
 using namespace ERRORLOG;
 using namespace TARGETING;
+using namespace BUFFER;
 
 namespace SBEIO
 {
@@ -133,43 +134,51 @@ SbeFifo::~SbeFifo()
 
 errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   * i_target,
                                                  uint32_t * i_pFifoRequest,
-                                                 uint32_t * i_pFifoResponse,
+                                                 uint32_t * o_pFifoResponse,
                                                  uint32_t   i_responseSize)
 {
-    memory_stream stream { i_pFifoRequest, *i_pFifoRequest * sizeof(uint32_t) };
+    uint32_t          l_actual_response_size = 0;
+    memory_stream     l_stream { i_pFifoRequest, *i_pFifoRequest * sizeof(uint32_t) };
+    SbeFifoRespBuffer l_responseBuffer;
 
-    return performFifoChipOp(i_target, std::move(stream), i_pFifoResponse, i_responseSize);
-}
+    errlHndl_t l_errl = performFifoChipOp(i_target,
+                                          std::move(l_stream),
+                                          l_responseBuffer,
+                                          i_responseSize?true:false);
 
-errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   * i_target,
-                                                 uint32_t * i_pFifoRequest,
-                                                 uint32_t * i_pFifoResponse,
-                                                 uint32_t   i_responseSize,
-                                                 uint32_t & o_actualResponseSize)
-{
-    memory_stream stream { i_pFifoRequest, *i_pFifoRequest * sizeof(uint32_t) };
+    l_actual_response_size = l_responseBuffer.getDataByteSize();
 
-    return performFifoChipOp(i_target, std::move(stream), i_pFifoResponse, i_responseSize, o_actualResponseSize);
+    l_responseBuffer.memcpy(o_pFifoResponse,
+                            0,
+                            std::min(l_actual_response_size, i_responseSize));
+    return l_errl;
 }
 
 errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
                                  fifo_chipop_data_stream&& i_requestStream,
-                                                 uint32_t *i_pFifoResponse,
+                                                 uint32_t *o_pFifoResponse,
                                                  uint32_t  i_responseSize)
 {
-    uint32_t actual_response_size = 0;
-    return performFifoChipOp(i_target,
-                             std::move(i_requestStream),
-                             i_pFifoResponse,
-                             i_responseSize,
-                             actual_response_size);
+    uint32_t          l_actual_response_size = 0;
+    SbeFifoRespBuffer l_responseBuffer;
+
+    errlHndl_t l_errl = performFifoChipOp(i_target,
+                                          std::move(i_requestStream),
+                                          l_responseBuffer,
+                                          i_responseSize?true:false);
+
+    l_actual_response_size = l_responseBuffer.getDataByteSize();
+
+    l_responseBuffer.memcpy(o_pFifoResponse,
+                            0,
+                            std::min(l_actual_response_size, i_responseSize));
+    return l_errl;
 }
 
 errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
-                                 fifo_chipop_data_stream&& i_requestStream,
-                                                 uint32_t *i_pFifoResponse,
-                                                 uint32_t  i_responseSize,
-                                                 uint32_t &o_actualResponseSize)
+                                 fifo_chipop_data_stream &&i_requestStream,
+                                        SbeFifoRespBuffer &o_responseBuffer,
+                                                     bool  i_responseExpected)
 {
     errlHndl_t errl = nullptr;
 
@@ -179,19 +188,18 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
     mutex_t *l_mutex = i_target->getHbMutexAttr<TARGETING::ATTR_SBE_FIFO_MUTEX>();
     const auto lock  = scoped_recursive_mutex_lock(*l_mutex);
 
-    std::array<uint32_t, 2> request_header = { };
-    errl = writeRequest(i_target, i_requestStream, request_header);
+    std::array<uint32_t, 2> l_request_header = { };
+    errl = writeRequest(i_target, i_requestStream, l_request_header);
     if (errl) {goto ERROR_EXIT;}
 
-    // skip reading a response for commands that don't have one
-    if ((i_pFifoResponse != nullptr) && (i_responseSize > 0))
+    o_responseBuffer.setFfdcFmt(l_request_header.data());
+
+    if (i_responseExpected)
     {
         errl = readResponse(i_target,
-                            &request_header[0],
-                            i_pFifoResponse,
-                            i_responseSize);
+                            &l_request_header[0],
+                            o_responseBuffer);
         if (errl) {goto ERROR_EXIT;}
-        o_actualResponseSize = i_responseSize; // i_responseSize was modified by readResponse
     }
     else
     {
@@ -483,21 +491,11 @@ errlHndl_t SbeFifo::waitUpFifoReady(TARGETING::Target * i_target)
 /**
  * @brief Read FIFO response messages
  */
-errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
-                                            uint32_t *i_pFifoRequest,
-                                            uint32_t *o_pFifoResponse,
-                                            uint32_t &io_responseSize)
+errlHndl_t SbeFifo::readResponse(TARGETING::Target    *i_target,
+                                            uint32_t  *i_pFifoRequest,
+                                    SbeFifoRespBuffer &o_fifoBuffer)
 {
     errlHndl_t errl = NULL;
-    SbeFifo::fifoGetSbeFfdcRequest *l_pFifoRequest =
-        reinterpret_cast<SbeFifo::fifoGetSbeFfdcRequest *>(i_pFifoRequest);
-    bool l_getSbeFfdcReq =
-        ((l_pFifoRequest->commandClass == SBE_FIFO_CLASS_GENERIC_MESSAGE) &&
-         (l_pFifoRequest->command == SBE_FIFO_CMD_GET_SBE_FFDC))
-        ? true : false;
-    SbeFifoRespBuffer l_fifoBuffer{o_pFifoResponse,
-                                   io_responseSize/sizeof(uint32_t),
-                                   l_getSbeFfdcReq};
 
     SBE_TRACD(ENTER_MRK "readResponse");
 
@@ -513,10 +511,10 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
 
         bool l_EOT = false;
 
-        while(l_fifoBuffer) //keep reading data until an error or until the
+        while(o_fifoBuffer) //keep reading data until an error or until the
                             //message is completely read.
         {
-            errl = waitDnFifoReady(i_target, l_fifoBuffer, l_EOT);
+            errl = waitDnFifoReady(i_target, o_fifoBuffer, l_EOT);
             if (errl) {break;}
         }
 
@@ -525,9 +523,12 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
         // EOT is expected before running out of response buffer
         if (!l_EOT)
         {
-            SBE_TRACF(ERR_MRK "readResponse: no EOT cmd=0x%08x size=%d",
-                      i_pFifoRequest[1],io_responseSize);
+            // any data in the response buffer is only partial data,
+            //  but save it anyway for debug
+            size_t l_partial_size = o_fifoBuffer.getDataByteSize();
 
+            SBE_TRACF(ERR_MRK "readResponse: no EOT cmd=0x%08x partial_bytes:%d",
+                              i_pFifoRequest[1], l_partial_size);
             /*@
              * @errortype
              * @moduleid     SBEIO_FIFO
@@ -543,50 +544,62 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                  SrcUserData(
                                    bits{0,31},TARGETING::get_huid(i_target),
                                    bits{32,63},i_pFifoRequest[1]),
-                                 io_responseSize);
-
+                                 l_partial_size);
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
-            errl->addHwCallout(  i_target,
-                                 HWAS::SRCI_PRIORITY_LOW,
-                                 HWAS::NO_DECONFIG,
-                                 HWAS::GARD_NULL );
+            errl->addHwCallout(i_target,
+                               HWAS::SRCI_PRIORITY_LOW,
+                               HWAS::NO_DECONFIG,
+                               HWAS::GARD_NULL);
             errl->collectTrace(SBEIO_COMP_NAME);
 
-            // Log the response buffer that we have
-            errl->addFFDC( SBEIO_COMP_ID,
-                           o_pFifoResponse,
-                           io_responseSize,
-                           1,
-                           ERRL_UDT_NOFORMAT,//raw data
-                           false );
-            // Log the beginning the data buffer that we have
-            //  16 words fits most normal responses
-            size_t l_numwords = std::min( (size_t)16,
-                                          l_fifoBuffer.index() );
-            std::vector<uint8_t> buffer(l_numwords * sizeof(uint32_t));
-            l_fifoBuffer.memcpy(buffer.data(), 0, buffer.size());
-            errl->addFFDC( SBEIO_COMP_ID,
-                           buffer.data(),
-                           buffer.size(),
-                           2,
-                           ERRL_UDT_NOFORMAT,//raw data
-                           false );
-            // Log the end of the data buffer that we have
-            l_numwords = std::min( (size_t)16, //last 16 words
-                                   l_fifoBuffer.index() );
-
-            if( l_numwords )
+            size_t l_min_bytes = 16 * sizeof(uint32_t);
+            size_t l_num_bytes = std::min(l_min_bytes, l_partial_size);
+            if (l_num_bytes)
             {
-                buffer.resize(l_numwords * sizeof(uint32_t));
-                l_fifoBuffer.memcpy(buffer.data(),
-                                    (l_fifoBuffer.index() - l_numwords) * sizeof(uint32_t),
-                                    buffer.size());
+                // Log the beginning 16 words of the Response buffer,
+                //  16 words fits most normal responses
+                std::vector<uint8_t> l_buffer(l_num_bytes);
+                o_fifoBuffer.memcpy(l_buffer.data(), 0, l_num_bytes);
                 errl->addFFDC( SBEIO_COMP_ID,
-                               buffer.data(),
-                               buffer.size(),
+                               l_buffer.data(),
+                               l_buffer.size(),
+                               2,
+                               ERRL_UDT_NOFORMAT,//raw data
+                               false );
+
+                // Log the end of the Response data,
+                //  16 words fits most normal responses
+                o_fifoBuffer.memcpy(l_buffer.data(),
+                                    (l_partial_size - l_num_bytes),
+                                    l_num_bytes);
+                errl->addFFDC( SBEIO_COMP_ID,
+                               l_buffer.data(),
+                               l_buffer.size(),
                                3,
+                               ERRL_UDT_NOFORMAT,//raw data
+                               false );
+
+                // Log all of the Response Buffer data, as much as will fit.
+                uint32_t l_max_errl_size{0}; // max size that fits in the errl
+                uint32_t l_cur_errl_size{0}; // current size of data in errl
+                size_t   l_rem_errl_size{0}; // remaining size in the errl
+
+                errl->getErrlSize(l_cur_errl_size, l_max_errl_size);
+                // add a 1k buffer to the max errl size, to prevent an overflow
+                // at errl commit time, which would purge some FFDC data
+                l_max_errl_size -= 1024; // leave extra room for commit data
+
+                l_rem_errl_size = l_max_errl_size - l_cur_errl_size;
+                l_num_bytes     = std::min(l_partial_size, l_rem_errl_size);
+                l_buffer.resize(l_num_bytes);
+                o_fifoBuffer.memcpy(l_buffer.data(), 0, l_num_bytes);
+
+                errl->addFFDC( SBEIO_COMP_ID,
+                               l_buffer.data(),
+                               l_num_bytes,
+                               1,
                                ERRL_UDT_NOFORMAT,//raw data
                                false );
             }
@@ -609,23 +622,23 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
         if (errl) {break;}
 
         //Determine if successful.
-        if (!l_fifoBuffer.getStatus())
+        if (!o_fifoBuffer.getStatus())
         {
-            // DO NOT USE l_fifoBuffer.offset() may be invalid, i.e. MSG_SHORT_READ
-            SBE_TRACF(ERR_MRK "readResponse: invalid data "
-                      "cmd=0x%08x allocated response size=%d "
-                      "received word size=%d" ,
-                      i_pFifoRequest[1],
-                      io_responseSize,
-                      l_fifoBuffer.index());
+            size_t l_tot_size = o_fifoBuffer.getDataByteSize();
 
-            std::vector<uint8_t> data(l_fifoBuffer.index() * sizeof(uint32_t));
-
-            l_fifoBuffer.memcpy(data.data(), 0, data.size());
-
+            // binary trace the partial response data, up to a limit of 128 bytes
+            size_t l_dump_max_size = 128;
+            size_t l_dump_size     = std::min(l_tot_size, l_dump_max_size);
+            std::vector<uint8_t> l_data(l_dump_size);
+            o_fifoBuffer.memcpy(l_data.data(), 0, l_data.size());
             SBE_TRACFBIN("Invalid Response from SBE",
-                         data.data(),
-                         data.size());
+                         l_data.data(),
+                         l_data.size());
+
+            // DO NOT USE o_fifoBuffer.offset() may be invalid, i.e. MSG_SHORT_READ
+            SBE_TRACF(ERR_MRK "readResponse: invalid data, cmd=0x%08x"
+                              "responseSize=%d",
+                      i_pFifoRequest[1], l_tot_size);
 
             /*@
              * @errortype
@@ -633,9 +646,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
              * @reasoncode   SBEIO_FIFO_INVALID_STATUS_DISTANCE
              * @userdata1[00:31]  HUID of SBE that failed
              * @userdata1[32:63]  FIFO command class and command
-             * @userdata2[00:15]  l_fifoBuffer.getState() indicates unexpected condition
+             * @userdata2[00:15]  o_fifoBuffer.getState() indicates unexpected condition
              * @userdata2[16:31]  Bytes received
-             * @userdata2[32:63]  Response buffer size
              * @devdesc      Invalid data, may be short read, etc.
              * @custdesc     Firmware error communicating with a chip
              */
@@ -646,9 +658,8 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                    bits{0,31},TARGETING::get_huid(i_target),
                                    bits{32,63},i_pFifoRequest[1]),
                                  SrcUserData(
-                                   bits{0,15},l_fifoBuffer.getState(),
-                                   bits{16,31},l_fifoBuffer.index()*sizeof(uint32_t),
-                                   bits{32,63},io_responseSize));
+                                   bits{0,15},o_fifoBuffer.getState(),
+                                   bits{16,31},l_tot_size));
 
             errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
                                       HWAS::SRCI_PRIORITY_HIGH);
@@ -657,12 +668,40 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
                                  HWAS::NO_DECONFIG,
                                  HWAS::GARD_NULL );
             errl->collectTrace(SBEIO_COMP_NAME);
+
+            size_t l_min_bytes = 16 * sizeof(uint32_t);
+            size_t l_num_bytes = std::min(l_min_bytes, l_tot_size);
+            if (l_num_bytes)
+            {
+                // Log the beginning 16 words of the Response buffer,
+                //  16 words fits most normal responses
+                std::vector<uint8_t> l_buffer(l_num_bytes);
+                o_fifoBuffer.memcpy(l_buffer.data(), 0, l_num_bytes);
+                errl->addFFDC( SBEIO_COMP_ID,
+                               l_buffer.data(),
+                               l_buffer.size(),
+                               2,
+                               ERRL_UDT_NOFORMAT,//raw data
+                               false );
+
+                // Log the end of the Response data,
+                //  16 words fits most normal responses
+                o_fifoBuffer.memcpy(l_buffer.data(),
+                                    (l_tot_size - l_num_bytes),
+                                    l_num_bytes);
+                errl->addFFDC( SBEIO_COMP_ID,
+                               l_buffer.data(),
+                               l_buffer.size(),
+                               3,
+                               ERRL_UDT_NOFORMAT,//raw data
+                               false );
+            }
             collectRegFFDC(i_target,errl);
             break;
         }
 
         // Check status for success.
-        const statusHeader l_statusHeader = l_fifoBuffer.getStatusHeader();
+        const statusHeader l_statusHeader = o_fifoBuffer.getStatusHeader();
 
         if ((FIFO_STATUS_MAGIC != l_statusHeader.magic) ||
             (SBE_PRI_OPERATION_SUCCESSFUL != l_statusHeader.primaryStatus) ||
@@ -723,11 +762,13 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
         // Only parse FFDC from the fifo buffer if the message contains FFDC and this is not a get FFDC chip-op request,
         // unless the chip-op request failed. This way, the caller can distinguish between the getFFDC chip-op request
         // failing and it returning the expected data.
-        if ( l_fifoBuffer.msgContainsFFDC() && (!l_getSbeFfdcReq || errl))
+        if ( o_fifoBuffer.msgContainsFFDC() && (!o_fifoBuffer.isFfdcFmt() || errl))
         {
-            SbeFFDCParser l_ffdc_parser;
-            auto ffdc = l_fifoBuffer.getFFDCData();
-            l_ffdc_parser.parseFFDCData(ffdc.data());
+            SbeFFDCParser        l_ffdc_parser;
+            std::vector<uint8_t> l_ffdc;
+
+            o_fifoBuffer.getFFDCData(l_ffdc);
+            l_ffdc_parser.parseFFDCData(l_ffdc.data());
 
             /*@
              * @errortype
@@ -763,13 +804,6 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target   *i_target,
             }
 
             ERRORLOG::aggregate(errl, sbeErrors);
-
-            io_responseSize = ((l_fifoBuffer.index() * sizeof(uint32_t))
-                               - l_fifoBuffer.getFFDCByteSize());
-        }
-        else
-        {
-            io_responseSize = l_fifoBuffer.index() * sizeof(uint32_t);
         }
     }
     while (0);
@@ -969,9 +1003,9 @@ errlHndl_t SbeFifo::dnFifoTimeout(TARGETING::Target * i_target, uint32_t l_statu
  *         completeMessage upon receiving EOT.
  *
  */
-errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target   *i_target,
-                               SBEIO::SbeFifoRespBuffer &o_fifoBuffer,
-                                               bool     &o_EOT)
+errlHndl_t SbeFifo::waitDnFifoReady(TARGETING::Target * i_target,
+                                    SbeFifoRespBuffer & o_fifoBuffer,
+                                               bool   & o_EOT)
 {
     errlHndl_t l_errl = NULL;
     bool       l_EMPTY{};

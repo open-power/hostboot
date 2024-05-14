@@ -26,6 +26,7 @@
 #include <trace/interface.H>
 #include <errl/errlmanager.H>
 #include "sbe_fifodd.H"
+#include "sbe_fifo_buffer.H"
 #include <sbeio/sbeioif.H>
 #include <targeting/common/targetservice.H>
 
@@ -57,29 +58,30 @@ errlOwner SBEIO::getOdysseyHardwareDump(Target* const i_ocmb,
                                         uint8_t* const i_buffer,
                                         uint32_t& io_buffer_size)
 {
-    SBE_TRACF(ENTER_MRK"getOdysseyHardwareDump(0x%08X)",
-              get_huid(i_ocmb));
+    SBE_TRACF(ENTER_MRK"getOdysseyHardwareDump(0x%08X)", get_huid(i_ocmb));
 
-    uint32_t buffer_size = io_buffer_size;
-    io_buffer_size = 0;
+    SbeFifo::fifoGetDumpRequest l_req;
+    SBEIO::SbeFifoRespBuffer    l_response;
+    size_t                      l_buffer_size = io_buffer_size;
+    errlHndl_t                  l_errl;
 
-    SbeFifo::fifoGetDumpRequest req;
-    req.collectFastArray = 0;
-    req.clockState = fifoGetDumpClockState::CLOCKS_ON;
-    req.dumpType = fifoGetDumpType::MPIPL_DUMP;
+    l_req.collectFastArray = 0;
+    l_req.clockState       = fifoGetDumpClockState::CLOCKS_ON;
+    l_req.dumpType         = fifoGetDumpType::MPIPL_DUMP;
 
-    errlHndl_t errl
-        = SbeFifo::getTheInstance()
-            .performFifoChipOp(i_ocmb,
-                               reinterpret_cast<uint32_t*>(&req),
-                               reinterpret_cast<uint32_t*>(i_buffer),
-                               buffer_size,
-                               io_buffer_size);
+    memory_stream l_stream { &l_req, l_req.wordCnt * sizeof(uint32_t) };
 
+    // Call performFifoChipOp, tell SBE where to write FFDC and messages
+    l_errl = SbeFifo::getTheInstance().performFifoChipOp(i_ocmb,
+                                                        std::move(l_stream),
+                                                        l_response,
+                                                        true);
+    io_buffer_size = std::min(l_buffer_size, l_response.getReturnDataByteSize());
+    l_response.memcpy(i_buffer, 0, io_buffer_size);
 
     SBE_TRACF(EXIT_MRK"getOdysseyHardwareDump(0x%08X) = 0x%08X",
               get_huid(i_ocmb),
-              ERRL_GETEID_SAFE(errl));
+              ERRL_GETEID_SAFE(l_errl));
 
-    return errlOwner { errl };
+    return errlOwner { l_errl };
 }

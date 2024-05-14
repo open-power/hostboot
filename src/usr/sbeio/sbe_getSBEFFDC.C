@@ -48,19 +48,8 @@ TRACFCOMP(g_trac_sbeio,"getFifoSBEFFDC: " printf_string,##args)
 namespace SBEIO
 {
 
-    /**
-    * @brief Get the SBE FFDC.  Request that SBE retrieve the SBE FFDC
-    *
-    * @param[in]     i_chipTarget    The chip from which to get the SBE FFDC
-    * @param[out]    o_pFifoResponse Pointer to response
-    * @param[in]     i_responseSize  Size of response in bytes
-    *
-    * @return errlHndl_t Error log handle on failure.
-    *
-    */
-    errlHndl_t getFifoSBEFFDC(TARGETING::Target *i_chipTarget,
-                              uint32_t *o_pFifoResponse,
-                              uint32_t &i_responseSize)
+    errlHndl_t getFifoSBEFFDC(TARGETING::Target * i_chipTarget,
+                              SbeFifoRespBuffer & o_pFifoResponse)
     {
         errlHndl_t l_errl = NULL;
 
@@ -75,13 +64,14 @@ namespace SBEIO
         l_fifoRequest.commandClass = SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE;
         l_fifoRequest.command = SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC;
 
-        // Call performFifoChipOp, tell SBE where to write FFDC and messages
-        l_errl =
-            SbeFifo::getTheInstance().performFifoChipOp(i_chipTarget,
-                                   reinterpret_cast<uint32_t *>(&l_fifoRequest),
-                                   o_pFifoResponse,
-                                   i_responseSize);
+        memory_stream l_stream { &l_fifoRequest,
+                                  l_fifoRequest.wordCnt * sizeof(uint32_t) };
 
+        // Call performFifoChipOp, tell SBE where to write FFDC and messages
+        l_errl = SbeFifo::getTheInstance().performFifoChipOp(i_chipTarget,
+                                                             std::move(l_stream),
+                                                             o_pFifoResponse,
+                                                             true);
         SBE_TRACD(EXIT_MRK "getFifoSBEFFDC");
 
         return l_errl;
@@ -89,32 +79,12 @@ namespace SBEIO
 
     errlOwner genFifoSBEFFDCErrls(TARGETING::Target* i_chipTarget, errlHndl_t & o_errs)
     {
-        errlOwner errl { nullptr };
-
-        // Use the appropriate MSG_BUFFER_SIZE_WORDS_* depending on the target
-        uint32_t l_responseSize = 0;
-        if (i_chipTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_PROC)
-        {
-            l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_P10;
-        }
-        else if (i_chipTarget->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
-        {
-            l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_POZ;
-        }
-        else
-        {
-            assert(false,"genFifoSBEFFDCErrls: Unknown tgt 0x%X of type 0x%X",
-                   TARGETING::get_huid(i_chipTarget),
-                   i_chipTarget->getAttr<TARGETING::ATTR_TYPE>());
-        }
-
-        std::vector<uint32_t> l_fifoResponse(l_responseSize);
+        errlOwner         errl { nullptr };
+        SbeFifoRespBuffer l_fifoResponse;
 
         do {
 
-        errl = getFifoSBEFFDC(i_chipTarget,
-                              l_fifoResponse.data(),
-                              l_responseSize);
+        errl = getFifoSBEFFDC(i_chipTarget, l_fifoResponse);
 
         if (errl)
         {
@@ -122,9 +92,11 @@ namespace SBEIO
                              "chip op ERRL=0x%X", ERRL_GETEID_SAFE(errl));
             break;
         }
+        std::vector<uint8_t> l_ffdc;
+        l_fifoResponse.getFFDCData(l_ffdc);
 
         auto l_ffdcParser = std::make_shared<SbeFFDCParser>();
-        l_ffdcParser->parseFFDCData(l_fifoResponse.data());
+        l_ffdcParser->parseFFDCData(l_ffdc.data());
 
         /*@
          * @errortype

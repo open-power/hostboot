@@ -34,189 +34,38 @@
 #include <kernel/pagemgr.H>
 #endif
 
+#include <discontiguous.H>
+
 namespace SBEIO
 {
 
-/*
- * @brief A buffer backed by discontiguous physical pages.
- */
-class discontiguous_buffer
-{
-public:
-    /** @brief Append a byte to the buffer. */
-    void append(const uint8_t i_byte)
-    {
-        *get_ptr(iv_bytes_contained++) = i_byte;
-    }
-
-    /** @brief Append data to this buffer. */
-    void append(const void* i_data, size_t i_amt)
-    {
-        const uint8_t* data_bytes = static_cast<const uint8_t*>(i_data);
-
-        while (i_amt > 0)
-        {
-            append(*data_bytes);
-            --i_amt;
-            ++data_bytes;
-        }
-    }
-
-    /** @brief Retrieve the 32-bit value at a given offset in the
-     *  buffer.
-     *
-     *  Asserts on out-of-bounds accesses.
-     */
-    uint32_t word_at(const size_t i_word_offset) const
-    {
-        uint32_t word = 0;
-        const size_t begin_copy = i_word_offset * sizeof(uint32_t);
-
-        this->memcpy(&word, begin_copy, sizeof(uint32_t));
-        return word;
-    }
-
-    /** @brief Retrieve the size of the buffer in bytes.
-     */
-    size_t size() const
-    {
-        return iv_bytes_contained;
-    }
-
-    /**
-     * @brief Copy data out of the buffer at the given offset.
-     *
-     * @param[in] i_dest    The destination buffer.
-     * @param[in] i_offset  The offset in the source buffer to copy from.
-     * @param[in] i_count   The number of bytes to copy.
-     *
-     * @note Asserts on out-of-bounds access in the source buffer.
-     */
-    void memcpy(void* const i_dest, size_t i_offset, size_t i_count) const
-    {
-        if (i_offset + i_count < i_offset
-            || i_offset > iv_bytes_contained
-            || i_offset + i_count > iv_bytes_contained)
-        {
-            assert(false,
-                   "discontiguous_buffer::memcpy index %ld + count %ld out of bounds %ld",
-                   i_offset, i_count, iv_bytes_contained);
-        }
-
-        uint8_t* dest_bytes = static_cast<uint8_t*>(i_dest);
-
-        while (i_offset < iv_bytes_contained && i_count > 0)
-        {
-            *dest_bytes = *get_ptr(i_offset);
-            ++dest_bytes;
-            ++i_offset;
-            --i_count;
-        }
-    }
-
-private:
-    /** @brief Deleter class for a page. */
-    struct free_page
-    {
-        void operator()(uint8_t* const i_page) const {
-#ifdef __HOSTBOOT_RUNTIME
-            free(i_page);
-#else
-            return PageManager::freePage(i_page);
-#endif
-        }
-    };
-
-    using page_ptr = std::unique_ptr<uint8_t, free_page>;
-    std::vector<page_ptr> iv_pages;
-
-    // The number of bytes actually used.
-    size_t iv_bytes_contained = 0;
-
-    /** @brief Allocate a single page of data. */
-    static uint8_t* allocate_page()
-    {
-#ifdef __HOSTBOOT_RUNTIME
-        return static_cast<uint8_t*>(malloc(PAGE_SIZE));
-#else
-        return static_cast<uint8_t*>(PageManager::allocatePage(1, /*userspace=*/true));
-#endif
-    }
-
-    /**
-     * @brief Retrieve a pointer to the byte at the given index in the
-     * buffer.
-     *
-     * @note Automatically resizes when the index is out-of-bounds.
-     */
-    uint8_t* get_ptr(const size_t i_idx)
-    {
-        const size_t page = i_idx / PAGE_SIZE;
-        const size_t offset = i_idx % PAGE_SIZE;
-
-        while (iv_pages.size() <= page)
-        {
-            iv_pages.push_back(page_ptr(allocate_page(), free_page { }));
-        }
-
-        return iv_pages[page].get() + offset;
-    }
-
-    /**
-     * @brief Retrieve a pointer to the byte at the given index in the
-     * buffer.
-     *
-     * @note Asserts when the index is out-of-bounds.
-     */
-    const uint8_t* get_ptr(const size_t i_idx) const
-    {
-        const size_t page = i_idx / PAGE_SIZE;
-        const size_t offset = i_idx % PAGE_SIZE;
-
-        if (page >= iv_pages.size())
-        {
-            assert(false, "discontiguous_buffer::get_ptr() const: Index %ld out of bounds (pages = %ld)",
-                   i_idx, iv_pages.size());
-        }
-
-        return iv_pages[page].get() + offset;
-    }
-};
 
 /**
- * @brief A class for managing dual input buffers for sbeio fifo response
- *        messaging.
+ * @brief A class for managing the sbeio fifo response messaging.
  *
- * Sbeio messaging uses a pair of buffers for parsing fifo response
- * messages. The first buffer is a caller supplied buffer that must be large
- * enough to hold required data for a given message response. For example,
- * a read command will have a response that will contain the data read and a
- * status header. A write command will have a response that will contain
+ * Sbeio messaging uses a discontiguous buffer for parsing fifo response
+ * messages. The buffer will hold the required data for a given message response.
+ * For example, a read command will have a response that will contain the data
+ * read and a status header. A write command will have a response that will contain
  * only a status header detailing the result of the command. In addition,
- * response data can include FFDC data upon an error. The user supplied
- * buffer does not need to be big enough to hold the extra data since this
+ * response data can include FFDC data upon an error. The extra data
  * information is processed by the messaging code before returning to the
- * caller. As a result, a second buffer which should be large enough to
- * to contain any FFDC information is processed in parallel with the caller
- * supplied buffer in order to capture a full response.
+ * caller.
  */
 class SbeFifoRespBuffer
 {
     // The SbeFifo should have access to protected members for error logging purposes.
     friend class SbeFifo;
+
 public:
 
     /**
      * @brief Constructor.
      *
-     * @param[in] i_fifoBuffer -   The caller supplied buffer.
-     * @param[in] bufferWordSize - The size of the caller supplied buffer in
-     *                             uint32_t units.
      * @param[in] i_getSbeFfdcFmt - A bool indicating if this is for a get SBE
      *                              FFDC request with a special buffer format.
      */
-    explicit SbeFifoRespBuffer(uint32_t * i_fifoBuffer, size_t bufferWordSize,
-                               bool i_getSbeFfdcFmt = false);
+    explicit SbeFifoRespBuffer(bool i_getSbeFfdcFmt = false);
 
     //This is a helper class intended for local use only.
     SbeFifoRespBuffer(const SbeFifoRespBuffer&) = delete;
@@ -263,7 +112,6 @@ public:
      *
      */
     enum State{
-                INVALID_CALLER_BUFFER = 0, /**< enum Caller buffer too short */
                 OVERRUN = 1,               /**< enum message larger than local
                                               buffer */
                 MSG_SHORT_READ = 2,        /**< enum Message is shorter that
@@ -320,11 +168,12 @@ public:
     size_t getFFDCByteSize();
 
     /**
-     * @brief Return a copy of the FFDC data in the message, if any.
+     * @brief Copy the FFDC data in the message to o_ffdc, if the message is
+     *        complete and contains FFDC data. The vector is empty otherwise.
      *
-     * @note Return vector will be empty if there is no FFDC data in the message.
+     * @param[out] o_ffdc  The destination buffer
      */
-    std::vector<uint8_t> getFFDCData();
+    void getFFDCData(std::vector<uint8_t> &o_ffdc);
 
     /**
      * @brief Copy data out of the SbeFifoRespBuffer and into the
@@ -373,12 +222,13 @@ public:
     bool msgContainsReturnData();
 
     /**
-     * @brief Obtain a copy of return data
+     * @brief Copy the return data in the message to o_data, if the message is
+     *        complete and contains return data. No status bytes are included.
+     *        The vector is empty otherwise.
      *
-     * @return A copy of the return data if the message is complete and
-     *         contains return data. Empty vector is returned otherwise.
+     * @param[out] o_data  The destination buffer
      */
-    std::vector<uint8_t> getReturnData();
+    void getReturnData(std::vector<uint8_t> &o_data);
 
     /**
      * @brief Obtain the return data size in bytes.
@@ -395,6 +245,25 @@ public:
      *         contains return data, 0 is returned otherwise.
      */
     size_t getReturnDataWordSize();
+
+    /**
+     * @brief Obtain the total buffer size in bytes
+     *
+     * @return The length of whatever data was read from the fifo
+     */
+    size_t getDataByteSize();
+
+    /**
+     * @brief set iv_getSbeFfdcFmt to true if cmd is GET_SBE_FFDC
+     */
+    void setFfdcFmt(void *i_hdr);
+
+    /**
+     * @brief Query if buffer is for a get SBE FFDC request
+     *
+     * @return iv_getSbeFfdcFmt
+     */
+    bool isFfdcFmt() {return iv_getSbeFfdcFmt;}
 
     /*
      * @brief Obtain the current index for debugging
@@ -418,7 +287,7 @@ public:
      * @return - The offset to the status header.
      *
      */
-    size_t offset() const { return iv_buffer.word_at(iv_offsetIndex);}
+    size_t offset() const { return iv_buffer.word32_at(iv_offsetIndex);}
 
     //=========================
     // Class Constants
@@ -434,8 +303,6 @@ protected:
    //=====================
    // Unit Test Access
    //=====================
-   const uint32_t * callerBuffer() const {return iv_callerBufferPtr;}
-   size_t callerWordSize() const {return iv_callerWordSize;}
 
    size_t statusIndex() const {return iv_statusIndex;}
    size_t ffdcIndex() const {return iv_ffdcIndex;}
@@ -450,13 +317,7 @@ private:
    // Buffers
    //====================
 
-   discontiguous_buffer iv_buffer;
-
-   uint32_t * const iv_callerBufferPtr{}; /**< caller supplied buffer should
-                                             be large enough to hold at least
-                                             return data and status */
-
-   const size_t iv_callerWordSize; /**< caller buffer size in uint32_t units */
+   BUFFER::discontiguous_t iv_buffer;
 
    bool iv_getSbeFfdcFmt; /**< indicates if buffer is for a get SBE FFDC request
                              and has a special format where the return data is

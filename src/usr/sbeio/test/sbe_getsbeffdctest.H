@@ -54,7 +54,7 @@ extern trace_desc_t* g_trac_sbeio;
 
 class GetSBEFFDCTest : public CxxTest::TestSuite
 {
-    public:
+  public:
 
     /**
      *  @brief Test with zero data
@@ -63,21 +63,14 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
     {
         TS_TRACE("getSBEFFDCTest entry");
 
-        errlHndl_t l_errl = nullptr;
-        // Since this test only uses procs, use smaller size MSG_BUFFER_SIZE_WORDS_P10
-        uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_P10 * sizeof(uint32_t);
-        uint32_t *l_pFifoResponse =
-            reinterpret_cast<uint32_t *>(malloc(l_responseSize));
+        SbeFifoRespBuffer l_pFifoResponse(true);
+        errlHndl_t        l_errl = nullptr;
 
-        //
         //  get a list of all functional procs in the system
         //
         TARGETING::TargetHandleList l_cpuTargetList;
         getAllChips(l_cpuTargetList,
                     TARGETING::TYPE_PROC);
-
-        SBEFFDC_TRACF("%d proc(s) in the system.",
-                      l_cpuTargetList.size() );
 
         //
         //  get the master procs for the system
@@ -91,121 +84,120 @@ class GetSBEFFDCTest : public CxxTest::TestSuite
                     l_errl->reasonCode());
 
             errlCommit( l_errl, CXXTEST_COMP_ID );
-
+            return;
         }
-        else
+
+        // loop thru all the cpu's
+        for (const auto & l_cpu_target: l_cpuTargetList)
         {
-            // loop thru all the cpu's
-            for (const auto & l_cpu_target: l_cpuTargetList)
+            // Can't do FSI with SBE for master proc
+            if(l_cpu_target == masterProcChipTargetHandle)
             {
-                // Can't do FSI with SBE for master proc
-                if(l_cpu_target == masterProcChipTargetHandle)
-                {
-                    TS_TRACE("getSBEFFDCTest: Skipping testing for master "
-                             "proc 0x%.8X",
-                             TARGETING::get_huid(l_cpu_target));
+                continue;
+            }
 
-                    continue;
-                }
+            TS_TRACE("getSBEFFDCTest: testing proc 0x%.8X",
+                     TARGETING::get_huid(l_cpu_target));
 
-                l_errl = getFifoSBEFFDC(l_cpu_target,
-                                        l_pFifoResponse,
-                                        l_responseSize);
+            l_errl = getFifoSBEFFDC(l_cpu_target,
+                                    l_pFifoResponse);
 
-                // Check that no error log was returned
-                if(l_errl != nullptr)
-                {
-                    TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X, RC 0x%.8X",
-                            TARGETING::get_huid(l_cpu_target),
-                            l_errl->reasonCode());
-                    errlCommit( l_errl, CXXTEST_COMP_ID );
-                    break;
-                }
+            // Check that no error log was returned
+            if (l_errl)
+            {
+                TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X, RC 0x%.8X",
+                        TARGETING::get_huid(l_cpu_target),
+                        l_errl->reasonCode());
+                errlCommit( l_errl, CXXTEST_COMP_ID );
+                continue;
+            }
 
-                uint32_t dumpsize = std::min( l_responseSize, (uint32_t)256 );
-                TRACFCOMP(g_trac_sbeio,"response size=%d bytes long",l_responseSize);
-                TRACFBIN(g_trac_sbeio,"response",l_pFifoResponse, dumpsize);
+            if (!l_pFifoResponse.msgContainsFFDC())
+            {
+                TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X contains no FFDC",
+                        TARGETING::get_huid(l_cpu_target));
+                continue;
+            }
 
-                // Find the status header after the return data, ie, FFDC
-                uint32_t l_size = 0;
-                SbeFifo::ffdcHeader *l_pFfdcHeader =
-                    reinterpret_cast<SbeFifo::ffdcHeader *>(l_pFifoResponse);
-                uint64_t l_firstFfdcHeaderAddr =
-                        reinterpret_cast<uint64_t>(l_pFfdcHeader);
+            uint32_t l_ffdcSize = l_pFifoResponse.getFFDCByteSize();
 
-                while(l_pFfdcHeader->magic == SbeFifo::FIFO_FFDC_MAGIC)
-                {
-                    l_size += l_pFfdcHeader->lengthWords * sizeof(uint32_t);
-                    l_pFfdcHeader = reinterpret_cast<SbeFifo::ffdcHeader *>
-                        (l_firstFfdcHeaderAddr + l_size);
-                };
+            if (!l_ffdcSize)
+            {
+                TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X l_ffdcSize is zero",
+                        TARGETING::get_huid(l_cpu_target));
+                continue;
+            }
 
-                SbeFifo::statusHeader *l_pStatusHeader = reinterpret_cast<
-                    SbeFifo::statusHeader *>(l_firstFfdcHeaderAddr + l_size);
+            std::vector<uint8_t> l_ffdc;
+            l_pFifoResponse.getFFDCData(l_ffdc);
 
-                // Check that status header has expected magic value
-                if(l_pStatusHeader->magic != SbeFifo::FIFO_STATUS_MAGIC)
-                {
-                    TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X with status "
-                            "magic 0x%.4X, but expected 0x%.4X",
-                            TARGETING::get_huid(l_cpu_target),
-                            l_pStatusHeader->magic,
-                            SbeFifo::FIFO_STATUS_MAGIC);
-                    break;
-                }
+            SbeFifo::ffdcHeader *l_pFfdcHeader =
+                reinterpret_cast<SbeFifo::ffdcHeader *>(l_ffdc.data());
 
-                // Check status header has expected command class and command
-                if((l_pStatusHeader->commandClass !=
-                    SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE) ||
-                   (l_pStatusHeader->command !=
-                    SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC))
-                {
-                    TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X with status "
-                            "command 0x%.2x%.2x, but expected 0x%.2x%.2x",
-                            TARGETING::get_huid(l_cpu_target),
-                            l_pStatusHeader->commandClass,
-                            l_pStatusHeader->command,
-                            SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
-                            SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC);
+            if (l_pFfdcHeader->magic != SbeFifo::FIFO_FFDC_MAGIC)
+            {
+                TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X no FIFO_FFDC_MAGIC found",
+                        TARGETING::get_huid(l_cpu_target));
+            }
 
-                    break;
-                }
+            SbeFifo::statusHeader l_pStatusHeader = l_pFifoResponse.getStatusHeader();
 
-                // Check if status header has allowed unsupported status
-                if((l_pStatusHeader->primaryStatus == SBE_PRI_INVALID_COMMAND)
-                   && (l_pStatusHeader->secondaryStatus ==
-                    SBE_SEC_COMMAND_NOT_SUPPORTED))
-                {
-                    TS_TRACE("getSBEFFDCTest: proc 0x%.8X got response with "
-                             "not supported status 0x%.4x / 0x%.4x",
-                             TARGETING::get_huid(l_cpu_target),
-                             l_pStatusHeader->primaryStatus,
-                             l_pStatusHeader->secondaryStatus);
+            // Check that status header has expected magic value
+            if(l_pStatusHeader.magic != SbeFifo::FIFO_STATUS_MAGIC)
+            {
+                TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X with status "
+                        "magic 0x%.4X, but expected 0x%.4X",
+                        TARGETING::get_huid(l_cpu_target),
+                        l_pStatusHeader.magic,
+                        SbeFifo::FIFO_STATUS_MAGIC);
+                continue;
+            }
 
-                    break;
-                }
+            // Check status header has expected command class and command
+            if((l_pStatusHeader.commandClass !=
+                SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE) ||
+               (l_pStatusHeader.command !=
+                SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC))
+            {
+                TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X with status "
+                        "command 0x%.2x%.2x, but expected 0x%.2x%.2x",
+                        TARGETING::get_huid(l_cpu_target),
+                        l_pStatusHeader.commandClass,
+                        l_pStatusHeader.command,
+                        SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE,
+                        SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC);
+                continue;
+            }
 
-                // Check that status header has expected successful status
-                if((l_pStatusHeader->primaryStatus !=
-                    SBE_PRI_OPERATION_SUCCESSFUL) ||
-                   (l_pStatusHeader->secondaryStatus !=
-                    SBE_SEC_OPERATION_SUCCESSFUL))
-                {
-                    TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X with status "
-                            "0x%.4x / 0x%.4x, but expected 0x%.4x / 0x%.4x",
-                            TARGETING::get_huid(l_cpu_target),
-                            l_pStatusHeader->primaryStatus,
-                            l_pStatusHeader->secondaryStatus,
-                            SBE_PRI_OPERATION_SUCCESSFUL,
-                            SBE_SEC_OPERATION_SUCCESSFUL);
+            // Check if status header has allowed unsupported status
+            if((l_pStatusHeader.primaryStatus == SBE_PRI_INVALID_COMMAND)
+               && (l_pStatusHeader.secondaryStatus ==
+                SBE_SEC_COMMAND_NOT_SUPPORTED))
+            {
+                TS_TRACE("getSBEFFDCTest: proc 0x%.8X got response with "
+                         "not supported status 0x%.4x / 0x%.4x",
+                         TARGETING::get_huid(l_cpu_target),
+                         l_pStatusHeader.primaryStatus,
+                         l_pStatusHeader.secondaryStatus);
+                continue;
+            }
 
-                    break;
-                }
+            // Check that status header has expected successful status
+            if((l_pStatusHeader.primaryStatus !=
+                SBE_PRI_OPERATION_SUCCESSFUL) ||
+               (l_pStatusHeader.secondaryStatus !=
+                SBE_SEC_OPERATION_SUCCESSFUL))
+            {
+                TS_FAIL("getSBEFFDCTest FAILED: proc 0x%.8X with status "
+                        "0x%.4x / 0x%.4x, but expected 0x%.4x / 0x%.4x",
+                        TARGETING::get_huid(l_cpu_target),
+                        l_pStatusHeader.primaryStatus,
+                        l_pStatusHeader.secondaryStatus,
+                        SBE_PRI_OPERATION_SUCCESSFUL,
+                        SBE_SEC_OPERATION_SUCCESSFUL);
+                continue;
             }
         }
-
-        free(l_pFifoResponse);
-        l_pFifoResponse = nullptr;
 
         TS_TRACE("getSBEFFDCTest exit");
     }

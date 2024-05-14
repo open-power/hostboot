@@ -1143,32 +1143,15 @@ public:
      *
      * @param[in]  i_target        Target to access
      * @param[in]  i_pFifoRequest  Pointer to request
-     * @param[in]  i_pFifoResponse Pointer to response
+     * @param[out] o_pFifoResponse Pointer to response
      * @param[in]  i_responseSize  Size of response in bytes
      *
      * @return errlHndl_t Error log handle on failure.
      */
     errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
             uint32_t * i_pFifoRequest,
-            uint32_t * i_pFifoResponse,
+            uint32_t * o_pFifoResponse,
             uint32_t   i_responseSize);
-
-    /**
-     * @Brief perform SBE FIFO chip-op
-     *
-     * @param[in]  i_target        Target to access
-     * @param[in]  i_pFifoRequest  Pointer to request
-     * @param[in]  i_pFifoResponse Pointer to response
-     * @param[in]  i_responseSize  Size of response buffer in bytes
-     * @param[out] o_actualResponseSize  Actual size of response in bytes
-     *
-     * @return errlHndl_t Error log handle on failure.
-     */
-    errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
-            uint32_t * i_pFifoRequest,
-            uint32_t * i_pFifoResponse,
-            uint32_t   i_responseSize,
-            uint32_t & o_actualResponseSize);
 
     /**
      * @brief A structure that provides a stream of data for writing
@@ -1208,21 +1191,31 @@ public:
      * @param[in]  i_target         Target to access
      * @param[in]  i_requestStream  Request stream. Ownership is
      *                              taken by this function.
-     * @param[in]  i_pFifoResponse  Pointer to response
+     * @param[out] o_pFifoResponse  Pointer to response buffer
      * @param[in]  i_responseSize   Size of response in bytes
      *
      * @return errlHndl_t Error log handle on failure.
      */
-    errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
-            fifo_chipop_data_stream&& i_requestStream,
-            uint32_t * i_pFifoResponse,
-            uint32_t   i_responseSize);
+    errlHndl_t performFifoChipOp(TARGETING::Target  * i_target,
+                           fifo_chipop_data_stream && i_requestStream,
+                                          uint32_t  * o_pFifoResponse,
+                                          uint32_t    i_responseSize);
 
-    errlHndl_t performFifoChipOp(TARGETING::Target * i_target,
-            fifo_chipop_data_stream&& i_requestStream,
-            uint32_t * i_pFifoResponse,
-            uint32_t   i_responseSize,
-            uint32_t & o_actualResponseSize);
+    /**
+     * @Brief perform SBE FIFO chip-op and stream the request data.
+     *
+     * @param[in]  i_target            Target to access
+     * @param[in]  i_requestStream     Request stream. Ownership is
+     *                                 taken by this function.
+     * @param[out] o_pFifoResponse     class for the response data
+     * @param[in]  i_responseExpected  true if response data is expected
+     *
+     * @return errlHndl_t Error log handle on failure
+     */
+    errlHndl_t performFifoChipOp(TARGETING::Target   * i_target,
+                           fifo_chipop_data_stream  && i_requestStream,
+                                   SbeFifoRespBuffer & o_responseBuffer,
+                                                bool   i_responseExpected);
 
     /**
      * @Brief perform SBE FIFO reset
@@ -1310,18 +1303,16 @@ private:
     /**
      * @brief read the response via SBE FIFO
      *
-     * @param[in]  i_target             Target to access
-     * @param[in]  i_pFifoRequest       Pointer to FIFO request.
-     * @param[out] o_pFifoResponse      Pointer to FIFO response.
-     * @param[in/out] io_responseSize   Size of response buffer in bytes. On return,
-     *                                  set to number of bytes in the response.
-     *                                  (Has no meaning if an error is returned.)
+     * @param[in]  i_target         Target to access
+     * @param[in]  i_pFifoRequest   Pointer to FIFO request.
+     * @param[out] o_pFifoResponse  class for response data
+     * @param[out] o_responseSize   Number of bytes in the response.
+     *                                 (Has no meaning if an error is returned.)
      * @return errlHndl_t Error log handle on failure.
      */
-    errlHndl_t readResponse(TARGETING::Target * i_target,
-            uint32_t * i_pFifoRequest,
-            uint32_t * o_pFifoResponse,
-            uint32_t & io_responseSize);
+    errlHndl_t readResponse(TARGETING::Target  * i_target,
+                                     uint32_t  * i_pFifoRequest,
+                             SbeFifoRespBuffer & o_pFifoResponse);
 
     /**
      * @brief handle an up Fifo timeout
