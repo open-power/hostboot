@@ -145,15 +145,17 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::IO_TRAIN>(
         Check:
             MC.OMI.FIR.REG: 1,2,6,8,10,11,21,22
     */
-    //const auto c_omic_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>().getParent<faip2::TARGET_TYPE_OMIC>();
-    //const auto c_mcc_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>().getParent<faip2::TARGET_TYPE_MCC>();
     const auto c_omic_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>().getParent<fapi2::TARGET_TYPE_OMIC>();
     const auto c_mcc_target = i_target.getParent<fapi2::TARGET_TYPE_OMI>().getParent<fapi2::TARGET_TYPE_MCC>();
-    //const auto c_omic_target = i_target.getParent<faip2::TARGET_TYPE_OMIC>();
-    //const auto c_mcc_target = i_target.getParent<faip2::TARGET_TYPE_MCC>();
+
+    fapi2::ATTR_FAPI_POS_Type l_ocmb_pos = 0;
+
     fapi2::buffer<uint64_t> l_check_mask(0xFFFFFFFFFFFFFFFF);
     // Start by assuming we do not have a FIR; if true at any point, skip other checks to preserve error
     o_fir_error = false;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FAPI_POS, i_target, l_ocmb_pos));
+    l_ocmb_pos = l_ocmb_pos % 2;
 
     // Check MC.OMI.FIR.REG: bits [1,2,6,8,10,11,21,22]
     if (o_fir_error != true)
@@ -179,15 +181,28 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::IO_TRAIN>(
     if (o_fir_error != true)
     {
         // Check MC.OMI.FIR.REG: bits [0,1,5,7,10]
-        l_check_mask.flush<1>()
-        .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
-        .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_DATA_UE>()
-        .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_X4_MODE>()
-        .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_TIMEOUT>()
-        .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>();
+        if (!l_ocmb_pos)
+        {
+            l_check_mask.flush<1>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_FATAL_ERROR>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_DATA_UE>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_X4_MODE>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_TIMEOUT>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL0_EDPL_RETRAIN>();
+        }
+        else
+        {
+            l_check_mask.flush<1>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL1_FATAL_ERROR>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL1_DATA_UE>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL1_X4_MODE>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL1_TIMEOUT>()
+            .clearBit<scomt::omic::MC_OMI_FIR_REG_DL1_EDPL_RETRAIN>();
+        }
+
         FAPI_TRY(bad_fir_bits_helper_with_mask(c_omic_target,
-                                               scomt::omic::MC_OMI_FIR_REG_WO_AND,
-                                               scomt::omic::MC_OMI_FIR_MASK_REG_WO_AND,
+                                               scomt::omic::MC_OMI_FIR_REG_RW,
+                                               scomt::omic::MC_OMI_FIR_MASK_REG_RW,
                                                l_check_mask,
                                                io_rc,
                                                o_fir_error));
@@ -199,18 +214,28 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::IO_TRAIN>(
             .clearBit<scomt::mcc::DSTL_DSTLFIR_MCS_DSTL_CMD_PARITY_ERROR>()
             .clearBit<scomt::mcc::DSTL_DSTLFIR_RESET_CREDITS_RD_WDF_BUFFER_NONZERO>()
             .clearBit<scomt::mcc::DSTL_DSTLFIR_CONFIG_REG_RECOVERABLE_PARITY_ERROR>()
-            .clearBit<scomt::mcc::DSTL_DSTLFIR_CONFIG_REG_FATAL_PARITY_ERROR>()
-            .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_COUNTER_ERROR>()
-            .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_COUNTER_ERROR>()
-            .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_BUFFER_OVERUSE_ERROR>()
-            .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_BUFFER_OVERUSE_ERROR>()
-            .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
-            .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>()
-            .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR>()
-            .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR>();
+            .clearBit<scomt::mcc::DSTL_DSTLFIR_CONFIG_REG_FATAL_PARITY_ERROR>();
+
+            // Check if OMI0
+            if (!l_ocmb_pos)
+            {
+                l_check_mask.clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_COUNTER_ERROR>()
+                .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_BUFFER_OVERUSE_ERROR>()
+                .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_CHANNEL_TIMEOUT>()
+                .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_A_PARITY_ERROR>();
+            }
+            // OMI1
+            else
+            {
+                l_check_mask.clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_COUNTER_ERROR>()
+                .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_BUFFER_OVERUSE_ERROR>()
+                .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_CHANNEL_TIMEOUT>()
+                .clearBit<scomt::mcc::DSTL_DSTLFIR_SUBCHANNEL_B_PARITY_ERROR>();
+            }
+
             FAPI_TRY(bad_fir_bits_helper_with_mask(c_mcc_target,
-                                                   scomt::mcc::DSTL_DSTLFIR_WO_AND,
-                                                   scomt::mcc::DSTL_DSTLFIRMASK_WO_AND,
+                                                   scomt::mcc::DSTL_DSTLFIR_RW,
+                                                   scomt::mcc::DSTL_DSTLFIRMASK_RW,
                                                    l_check_mask,
                                                    io_rc,
                                                    o_fir_error));
