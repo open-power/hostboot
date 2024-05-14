@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -47,6 +47,45 @@
       <ffdc>CLOCK_B_OK</ffdc>
       <!-- Duplicate of the callout's CLOCK_POS parameter for platforms that don't infer the CLOCK_POS parameter -->
       <ffdc>CLOCK_POS</ffdc>
+   </hwpError>
+  <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
+      <rc>RC_POZ_PLL_LOCK_ERROR</rc>
+      <description>Chiplet PLL lock error</description>
+      <ffdc>PROC_TARGET</ffdc>
+      <ffdc>FAILED_CHIPLETS</ffdc>
+      <ffdc>FAILED_PLLS</ffdc>
+   </hwpError>
+  <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
+      <rc>RC_POZ_RCS_ERROR</rc>
+      <description>
+        The redundant clock switch detected a problem.  The root cause may be the processor or the
+        incoming clock(s).
+      </description>
+      <ffdc>PROC_TARGET</ffdc>
+   </hwpError>
+  <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
+      <rc>RC_POZ_PPM_ERROR</rc>
+      <description>
+        The redundant clock switch detected a problem with the PPM Watchdog.  The root cause may be the processor or the
+        incoming clock(s).
+      </description>
+      <ffdc>PROC_TARGET</ffdc>
+   </hwpError>
+  <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
+      <rc>RC_POZ_RCS_FPLL_NOT_LOCKED</rc>
+      <description>
+        The redundant clock switch Filter PLLs are not locking.  The root cause may be the processor or the
+        incoming clock(s).
+      </description>
+      <ffdc>PROC_TARGET</ffdc>
    </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>

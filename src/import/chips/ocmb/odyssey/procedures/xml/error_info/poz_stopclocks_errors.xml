@@ -1,7 +1,7 @@
 <!-- IBM_PROLOG_BEGIN_TAG                                                   -->
 <!-- This is an automatically generated prolog.                             -->
 <!--                                                                        -->
-<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/error_info/poz_perv_mod_misc_errors.xml $ -->
+<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/error_info/poz_stopclocks_errors.xml $ -->
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
@@ -22,62 +22,48 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-<!-- File: poz_perv_mod_misc_errors.xml. -->
-<!-- Halt codes for poz_perv_mod_misc -->
+<!-- File: poz_stopclocks_errors.xml. -->
+<!-- Halt codes for stopclocks -->
 
 <hwpErrors>
-  <format>poz</format>
   <!-- ******************************************************************** -->
-    <hwpError>
-      <sbeError/>
-      <rc>RC_POZ_CBS_NOT_IN_IDLE_STATE</rc>
-      <description>CBS did not complete (did not arrive in IDLE state) within timeout</description>
-      <ffdc>CBS_CS_READ</ffdc>
-      <ffdc>CBS_CS_IDLE_VALUE</ffdc>
-      <ffdc>LOOP_COUNT</ffdc>
-      <ffdc>HW_DELAY</ffdc>
-      <ffdc>PROC_TARGET</ffdc>
-    </hwpError>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_POZ_TP_VITL_CLK_OFF_ERR</rc>
+    <description>Perv vital clocks are off, stopclocks cant go ahead</description>
+    <ffdc>TARGET_CHIP</ffdc>
+    <ffdc>PERV_CTRL0_READ_DATA</ffdc>
+  </hwpError>
   <!-- ******************************************************************** -->
-    <hwpError>
-      <sbeError/>
-      <rc>RC_POZ_VDN_POWER_NOT_ON</rc>
-      <description>Nest power VDN is not on.(VDD_NEST_OBSERVE not set)</description>
-      <!-- <ffdc>CBS_ENVSTAT_READ</ffdc> -->
-      <ffdc>FSI2PIB_STATUS_READ</ffdc>
-      <ffdc>PROC_TARGET</ffdc>
-    </hwpError>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_POZ_CBS_ACK_NOT_SEEN_ERR</rc>
+    <description>
+      CBS_ACK did not reach expected value within poll time
+    </description>
+    <ffdc>TARGET_CHIP</ffdc>
+    <ffdc>EXPECTED_ACK_VALUE</ffdc>
+    <ffdc>CBS_STAT_READ_DATA</ffdc>
+    <ffdc>TIMEOUT</ffdc>
+    <ffdc>DELAY</ffdc>
+  </hwpError>
   <!-- ******************************************************************** -->
-   <hwpError>
-      <sbeError/>
-      <rc>RC_POZ_INVALID_GROUP_ID</rc>
-      <description>Invalid group id passed to module multicast setup</description>
-      <ffdc>GROUP_ID_VALUE</ffdc>
-      <ffdc>PROC_TARGET</ffdc>
-   </hwpError>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_POZ_TP_STOPCLOCKS_ERR</rc>
+    <description>
+      Error occured while stopping clocks for all regions of TP except SBE
+    </description>
+    <ffdc>TARGET_CHIP</ffdc>
+  </hwpError>
   <!-- ******************************************************************** -->
-   <hwpError>
-      <sbeError/>
-      <rc>RC_POZ_CHIPLET_NOT_FOUND</rc>
-      <description>Provided chiplet number does not match anything in provided target</description>
-      <ffdc>CHIPLET_NUMBER</ffdc>
-      <ffdc>PROC_TARGET</ffdc>
-   </hwpError>
-   <!-- ******************************************************************** -->
-   <hwpError>
-      <sbeError/>
-      <rc>RC_POZ_ARBSEMA_RESERVE_TIMEOUT</rc>
-      <description>Couldn't reserve semaphore on a side</description>
-      <ffdc>SEMAPHORE</ffdc>
-      <ffdc>SIDE</ffdc>
-   </hwpError>
-   <!-- ******************************************************************** -->
-   <hwpError>
-      <sbeError/>
-      <rc>RC_POZ_ARBSEMA_RELEASE_ERROR</rc>
-      <description>Couldn't release semaphore on a side</description>
-      <ffdc>SEMAPHORE</ffdc>
-      <ffdc>SIDE</ffdc>
-   </hwpError>
+  <hwpError>
+    <sbeError/>
+    <rc>RC_POZ_SBE_STOPCLOCKS_ERR</rc>
+    <description>
+      Error occured while stopping clocks for SBE
+    </description>
+    <ffdc>TARGET_CHIP</ffdc>
+  </hwpError>
   <!-- ******************************************************************** -->
 </hwpErrors>
