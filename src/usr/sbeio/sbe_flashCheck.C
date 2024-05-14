@@ -200,17 +200,29 @@ errlHndl_t processSpiFlashCheckResponse(Target* i_ocmb, uint8_t i_numStatusEntri
                              HWAS::SRCI_PRIORITY_HIGH,
                              HWAS::DECONFIG,
                              HWAS::GARD_NULL);
-        goto ERROR_EXIT;
-    }
 
+        // Let the FSM decide if there is any way to recover from this failure
+        auto l_fsmErrl = ody_upd_process_event(i_ocmb,
+                                               OCMB_FLASH_ERROR_MFG,
+                                               errlOwner(l_errl));
+        l_errl = nullptr;
+        if(l_fsmErrl)
+        {
+            SBE_TRACF("processSpiFlashCheckResponse: could not process Ody event");
+            l_errl = l_fsmErrl.release();
+        }
+
+        // We can't just return the log because the FSM will end up trying to
+        // recover from the error as it doesn't understand manufacturing mode.
+    }
     // If there is a flash check failure on the side we're currently running on,
     // then pass that failure to the code update FSM, and it will handle side-switching
     // and/or reboot correctly. If the failure is on the "opposite" side, then set
     // the force image sync flag. Always handle errors on golden side. If only CE
     // (correctable errors) are found, commit a recovered log.
-    if((i_ocmb->getAttr<ATTR_OCMB_BOOT_SIDE>() == 0 && l_side0Fail) ||
-       (i_ocmb->getAttr<ATTR_OCMB_BOOT_SIDE>() == 1 && l_side1Fail) ||
-       l_goldenFail)
+    else if((i_ocmb->getAttr<ATTR_OCMB_BOOT_SIDE>() == 0 && l_side0Fail) ||
+            (i_ocmb->getAttr<ATTR_OCMB_BOOT_SIDE>() == 1 && l_side1Fail) ||
+            l_goldenFail)
     {
         SBE_TRACF(ERR_MRK"processSpiFlashCheckResponse: Failure on currently running side or golden side detected");
 
@@ -244,8 +256,6 @@ errlHndl_t processSpiFlashCheckResponse(Target* i_ocmb, uint8_t i_numStatusEntri
         l_errl->setSev(ERRL_SEV_RECOVERED);
         errlCommit(l_errl, SBEIO_COMP_ID);
     }
-
-ERROR_EXIT:
 
     return l_errl;
 }

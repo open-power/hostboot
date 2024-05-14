@@ -262,6 +262,7 @@ state_transitions_t ody_fsm_transitions[] =
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_BOOT_ERROR_NO_FFDC
                                                                            | OCMB_FLASH_ERROR
+                                                                           | OCMB_FLASH_ERROR_MFG
                                                                            | OCMB_HWP_FAIL_HASH_FAIL   , {switch_to_side_1, retry_check_for_ready                       }},
                                                                          { CODE_UPDATE_CHIPOP_FAILURE  , {switch_to_side_golden, retry_check_for_ready                  }} } },
 
@@ -284,6 +285,7 @@ state_transitions_t ody_fsm_transitions[] =
     { { no            , no                     , SIDE1  , no          },{{ OCMB_HWP_FAIL_OTHER
                                                                            | OCMB_HWP_FAIL_HASH_FAIL
                                                                            | OCMB_BOOT_ERROR_NO_FFDC
+                                                                           | OCMB_FLASH_ERROR_MFG
                                                                            | OCMB_FLASH_ERROR          , {switch_to_side_golden, retry_check_for_ready                  }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | UPDATE_OMI_FIRMWARE_REACHED
@@ -426,6 +428,8 @@ std::array<char, 256> event_to_str(const ody_upd_event_t i_event)
             strcat(&str[0], "IPL_COMPLETE|"); break;
         case OCMB_FLASH_ERROR:
             strcat(&str[0], "OCMB_FLASH_ERROR|"); break;
+        case OCMB_FLASH_ERROR_MFG:
+            strcat(&str[0], "OCMB_FLASH_ERROR_MFG|"); break;
         case NO_EVENT: // just to satisfy the compiler
         case ANY_EVENT:
             break;
