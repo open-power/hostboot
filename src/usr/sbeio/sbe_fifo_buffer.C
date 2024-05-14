@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include "sbe_fifodd.H"
 #include "sbe_fifo_buffer.H"
 #include <trace/interface.H>
 
@@ -43,7 +44,6 @@ const size_t SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_POZ;
 
 //------------------------------------------------------------------------
 const char* SbeFifoRespBuffer::cv_stateStrings[] = {
-                                            "INVALID_CALLER_BUFFER",
                                             "OVERRUN",
                                             "MSG_SHORT_READ",
                                             "MSG_INVALID_OFFSET",
@@ -52,25 +52,9 @@ const char* SbeFifoRespBuffer::cv_stateStrings[] = {
                                           };
 
 //-------------------------------------------------------------------------
-SbeFifoRespBuffer::SbeFifoRespBuffer(uint32_t* i_fifoBuffer,
-                                     size_t bufferWordSize,
-                                     bool i_getSbeFfdcFmt)
-                        : iv_callerBufferPtr(i_fifoBuffer),
-                        // Use the larger of the MSG_BUFFER_SIZE_WORDS_* values to be safe
-                        iv_callerWordSize( std::min(bufferWordSize, MSG_BUFFER_SIZE_WORDS_POZ) ),
-                          iv_getSbeFfdcFmt(i_getSbeFfdcFmt)
+SbeFifoRespBuffer::SbeFifoRespBuffer(bool i_getSbeFfdcFmt)
+                       : iv_getSbeFfdcFmt(i_getSbeFfdcFmt)
 {
-    do {
-        if(not i_fifoBuffer || iv_callerWordSize < STATUS_WORD_SIZE)
-        {
-            SBE_TRACF(ERR_MRK"SbeFifoRespBuffer CTOR: Caller buffer invalid.");
-            iv_state = INVALID_CALLER_BUFFER;
-            break;
-        }
-
-        memset(iv_callerBufferPtr, 0, iv_callerWordSize*sizeof(uint32_t));
-    }
-    while(0);
 }
 
 //---------------------------------------------------------------------
@@ -80,11 +64,6 @@ bool SbeFifoRespBuffer::append(uint32_t i_value)
 
     if(iv_state == MSG_INCOMPLETE)
     {
-        if(iv_index < iv_callerWordSize)
-        {
-            iv_callerBufferPtr[iv_index] = i_value;
-        }
-
         // Use the larger of the MSG_BUFFER_SIZE_WORDS_* values to be safe
         if(iv_index < MSG_BUFFER_SIZE_WORDS_POZ)
         {
@@ -138,7 +117,7 @@ void SbeFifoRespBuffer::completeMessage()
             // to get the index of the Status Header.
             iv_offsetIndex = (iv_index - 2);
 
-            const uint32_t ffdc_header_offset = iv_buffer.word_at(iv_offsetIndex);
+            const uint32_t ffdc_header_offset = iv_buffer.word32_at(iv_offsetIndex);
 
             //Validate that the offset to the status header is in range
             if((ffdc_header_offset - 1) > iv_offsetIndex)
@@ -210,19 +189,20 @@ bool SbeFifoRespBuffer::msgContainsFFDC()
 }
 
 //------------------------------------------------------------------------
-std::vector<uint8_t> SbeFifoRespBuffer::getFFDCData()
+void SbeFifoRespBuffer::getFFDCData(std::vector<uint8_t> &o_ffdc)
 {
-    std::vector<uint8_t> data;
-
     if(msgContainsFFDC())
     {
         const size_t data_begin = iv_ffdcIndex * sizeof(uint32_t);
-        const size_t data_len = iv_buffer.size() - data_begin;
-        data.resize(data_len);
-        iv_buffer.memcpy(data.data(), data_begin, data_len);
+        const size_t data_len   = (iv_offsetIndex * sizeof(uint32_t)) - data_begin;
+        o_ffdc.resize(data_len);
+        iv_buffer.memcpy(o_ffdc.data(), data_begin, data_len);
     }
-
-    return data;
+    else
+    {
+        o_ffdc.resize(0);
+    }
+    return;
 }
 
 //--------------------------------------------------------------------------
@@ -278,17 +258,19 @@ bool SbeFifoRespBuffer::msgContainsReturnData()
 }
 
 //---------------------------------------------------------------------------
-std::vector<uint8_t> SbeFifoRespBuffer::getReturnData()
+void SbeFifoRespBuffer::getReturnData(std::vector<uint8_t> &o_data)
 {
-    std::vector<uint8_t> retval{};
-
     if(msgContainsReturnData())
     {
-        retval.resize(iv_buffer.size());
-        iv_buffer.memcpy(retval.data(), 0, iv_buffer.size());
+        o_data.resize(iv_buffer.size());
+        iv_buffer.memcpy(o_data.data(), 0, iv_buffer.size());
+    }
+    else
+    {
+        o_data.resize(0);
     }
 
-    return retval;
+    return;
 }
 
 //----------------------------------------------------------------------------
@@ -304,6 +286,12 @@ size_t SbeFifoRespBuffer::getReturnDataByteSize()
     return retval;
 }
 
+//----------------------------------------------------------------------------
+size_t SbeFifoRespBuffer::getDataByteSize()
+{
+    return iv_index * sizeof(uint32_t);
+}
+
 //---------------------------------------------------------------------------
 size_t SbeFifoRespBuffer::getReturnDataWordSize()
 {
@@ -315,6 +303,19 @@ size_t SbeFifoRespBuffer::getReturnDataWordSize()
     }
 
     return retval;
+}
+
+//------------------------------------------------------------------------------
+void SbeFifoRespBuffer::setFfdcFmt(void *i_hdr)
+{
+    SbeFifo::fifoGetSbeFfdcRequest *l_request =
+            reinterpret_cast<SbeFifo::fifoGetSbeFfdcRequest *>(i_hdr);
+
+    iv_getSbeFfdcFmt =
+            ((l_request->commandClass == SbeFifo::SBE_FIFO_CLASS_GENERIC_MESSAGE) &&
+             (l_request->command      == SbeFifo::SBE_FIFO_CMD_GET_SBE_FFDC))
+             ? true : false;
+    return;
 }
 
 } //End Namespace SBEIO

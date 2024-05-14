@@ -42,22 +42,16 @@ extern trace_desc_t* g_trac_sbeio;
 
 using namespace SBEIO;
 
-class SbeFifoRespBufferTestFixture:public SbeFifoRespBuffer
+class SbeFifoRespBufferTestFixture : public SbeFifoRespBuffer
 {
 public:
 
-    explicit SbeFifoRespBufferTestFixture(uint32_t * i_fifoBuffer,
-                                          size_t bufferWordSize,
-                                          bool i_getSbeFfdcFmt = false):
-                                               SbeFifoRespBuffer(i_fifoBuffer,
-                                                               bufferWordSize,
-                                                               i_getSbeFfdcFmt)
+    explicit SbeFifoRespBufferTestFixture(bool i_getSbeFfdcFmt = false):
+                                SbeFifoRespBuffer(i_getSbeFfdcFmt)
     {
     }
 
     //expose data for testing
-    using SbeFifoRespBuffer::callerBuffer;
-    using SbeFifoRespBuffer::callerWordSize;
     using SbeFifoRespBuffer::index;
     using SbeFifoRespBuffer::offsetIndex;
     using SbeFifoRespBuffer::statusIndex;
@@ -188,9 +182,9 @@ public:
 
     void testDiscontiguousBuffer()
     {
-        TS_INFO(ENTER_MRK"testDiscontiguousBuffer");
+        TS_INFO("SbeFifoBufferTest: TC_testDiscontiguousBuffer");
 
-        discontiguous_buffer buf;
+        BUFFER::discontiguous_t buf;
 
         for (int i = 0; i < 1024; ++i)
         {
@@ -212,24 +206,24 @@ public:
         unsigned int i = 0;
         for (; i < 1024 / 4; ++i)
         {
-            if (buf.word_at(i) != 0xabababab)
+            if (buf.word32_at(i) != 0xabababab)
             {
                 TS_FAIL("testDiscontiguousBuffer: Word at index %d "
                         "is 0x%08X, expected 0xabababab",
                         i,
-                        buf.word_at(i));
+                        buf.word32_at(i));
                 return;
             }
         }
 
         while (i < buf.size() / 4)
         {
-            if (buf.word_at(i) != 0xdcdcdcdc)
+            if (buf.word32_at(i) != 0xdcdcdcdc)
             {
                 TS_FAIL("testDiscontiguousBuffer: Word at index %d "
                         "is 0x%08X, expected 0xdcdcdcdc",
                         i,
-                        buf.word_at(i));
+                        buf.word32_at(i));
                 return;
             }
             ++i;
@@ -247,13 +241,13 @@ public:
             return;
         }
 
-        TS_INFO(EXIT_MRK"testDiscontiguousBuffer");
+        SBE_BUFFER_TRACD(EXIT_MRK"testDiscontiguousBuffer");
     }
 
     //------------------------------------------------
     void testState()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testState");
+        TS_INFO("sbeFifoBufferTest: TC_testState");
 
         bool result{true};
 
@@ -276,9 +270,7 @@ public:
 
         do
         {
-            uint32_t callerBuffer[4] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                       sizeof(callerBuffer)/sizeof(uint32_t));
+            SbeFifoRespBufferTestFixture fifoBuffer;
 
             if(not fifoBuffer)
             {
@@ -289,32 +281,6 @@ public:
                        );
 
                 result = false;
-                break;
-            }
-
-            fifoBuffer.setBufferState(
-                                SbeFifoRespBuffer::INVALID_CALLER_BUFFER);
-
-            if(fifoBuffer)
-            {
-                TS_FAIL("sbeFifoBufferTest testState: "
-                        "The operator bool unexpectedly returned true "
-                        "after setting the state to INVALID_CALLER_BUFFER"
-                       );
-
-                result = false;
-                break;
-            }
-
-            if(fifoBuffer.getStatus())
-            {
-                TS_FAIL("sbeFifoBufferTest testState: "
-                        "getStatus unexpectedly returned true "
-                        "after setting the state to INVALID_CALLER_BUFFER"
-                       );
-
-                result = false;
-                break;
             }
 
             fifoBuffer.setBufferState(SbeFifoRespBuffer::OVERRUN);
@@ -327,7 +293,6 @@ public:
                        );
 
                 result = false;
-                break;
             }
 
             if(fifoBuffer.getStatus())
@@ -338,7 +303,6 @@ public:
                        );
 
                 result = false;
-                break;
             }
 
             fifoBuffer.setBufferState(SbeFifoRespBuffer::MSG_SHORT_READ);
@@ -351,7 +315,6 @@ public:
                        );
 
                 result = false;
-                break;
             }
 
             if(fifoBuffer.getStatus())
@@ -362,7 +325,6 @@ public:
                        );
 
                 result = false;
-                break;
             }
 
             fifoBuffer.setBufferState(SbeFifoRespBuffer::MSG_INVALID_OFFSET);
@@ -375,7 +337,6 @@ public:
                        );
 
                 result = false;
-                break;
             }
 
             if(fifoBuffer.getStatus())
@@ -386,7 +347,6 @@ public:
                        );
 
                 result = false;
-                break;
             }
 
             fifoBuffer.setBufferState(SbeFifoRespBuffer::MSG_COMPLETE);
@@ -399,7 +359,6 @@ public:
                        );
 
                 result = false;
-                break;
             }
 
             if(not fifoBuffer.getStatus())
@@ -410,7 +369,6 @@ public:
                        );
 
                 result = false;
-                break;
             }
 
             fifoBuffer.setBufferState(SbeFifoRespBuffer::MSG_INCOMPLETE);
@@ -423,7 +381,6 @@ public:
                        );
 
                 result = false;
-                break;
             }
 
             if(not fifoBuffer.getStatus())
@@ -434,90 +391,6 @@ public:
                        );
 
                 result = false;
-                break;
-            }
-
-            SbeFifoRespBufferTestFixture fifoBuffer_null(nullptr,
-                                       sizeof(callerBuffer)/sizeof(uint32_t));
-
-            if(fifoBuffer_null)
-            {
-                TS_FAIL("sbeFifoBufferTest testState: "
-                        "The FIFO buffer unexpectedly indicates a good state "
-                        "after passing a null pointer to the CTOR. "
-                        "Buffer state: %s",
-                         fifoBuffer_null.getStateString()
-                       );
-
-                result = false;
-                break;
-            }
-
-            if(fifoBuffer_null.getStatus())
-            {
-                TS_FAIL("sbeFifoBufferTest testState: "
-                        "getStatus unexpectedly returned true "
-                        "after passing a null pointer to the CTOR. "
-                        "Buffer state: %s",
-                         fifoBuffer_null.getStateString()
-                       );
-
-                result = false;
-                break;
-            }
-
-            if(SbeFifoRespBuffer::INVALID_CALLER_BUFFER !=
-                                                   fifoBuffer_null.getState())
-            {
-                TS_FAIL("sbeFifoBufferTest testState: "
-                        "Buffer in unexpected state after calling CTOR "
-                        "w/nullptr. Buffer State: %s",
-                        fifoBuffer_null.getStateString()
-                       );
-
-                result = false;
-                break;
-            }
-
-            SbeFifoRespBufferTestFixture fifoBuffer_short(callerBuffer, 1);
-
-            if(fifoBuffer_short)
-            {
-                TS_FAIL("sbeFifoBufferTest testState: "
-                        "The FIFO buffer unexpectedly indicates a good state "
-                        "after passing a small buffer to the CTOR. "
-                        "Buffer state: %s",
-                         fifoBuffer_short.getStateString()
-                       );
-
-                result = false;
-                break;
-            }
-
-            if(fifoBuffer_short.getStatus())
-            {
-                TS_FAIL("sbeFifoBufferTest testState: "
-                        "getStatus unexpectedly returned true "
-                        "after passing a small buffer to the CTOR. "
-                        "Buffer state: %s",
-                         fifoBuffer_short.getStateString()
-                       );
-
-                result = false;
-                break;
-            }
-
-            if(SbeFifoRespBuffer::INVALID_CALLER_BUFFER !=
-                                                  fifoBuffer_short.getState())
-            {
-                TS_FAIL("sbeFifoBufferTest testState: "
-                        "Buffer in unexpected state after calling CTOR "
-                        "with a small buffer. Buffer State: %s",
-                        fifoBuffer_short.getStateString()
-                       );
-
-                result = false;
-                break;
             }
         }
         while(0);
@@ -535,7 +408,7 @@ public:
     //------------------------------------------------
     void testNoReturnNoFFDC()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testNoReturnNoFFDC");
+        TS_INFO("sbeFifoBufferTest: TC_testNoReturnNoFFDC");
 
         //Test with buffer data that has No Return data and No FFDC
         //A successful write message will have this format.
@@ -544,9 +417,7 @@ public:
 
         do
         {
-            uint32_t callerBuffer[2] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                       sizeof(callerBuffer)/sizeof(uint32_t));
+            SbeFifoRespBufferTestFixture fifoBuffer;
 
             if(not fifoBuffer)
             {
@@ -665,7 +536,7 @@ public:
     //-----------------------------------------------------
     void testReturnNoFFDC()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testReturnNoFFDC");
+        TS_INFO("sbeFifoBufferTest: TC_testReturnNoFFDC");
 
         //Test with buffer data that has Return data and No FFDC
         //A successful read message will have this format.
@@ -674,9 +545,7 @@ public:
 
         do
         {
-            uint32_t callerBuffer[4] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                       sizeof(callerBuffer)/sizeof(uint32_t));
+            SbeFifoRespBufferTestFixture fifoBuffer;
 
             if(not fifoBuffer)
             {
@@ -798,7 +667,7 @@ public:
     //--------------------------------------------------------------------
     void testNoReturnFFDC()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testNoReturnFFDC");
+        TS_INFO("sbeFifoBufferTest: TC_testNoReturnFFDC");
 
         //Test with buffer data that has No Return data and FFDC data
         //An unsuccessful write message will have this format.
@@ -807,9 +676,7 @@ public:
 
         do
         {
-            uint32_t callerBuffer[2] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                       sizeof(callerBuffer)/sizeof(uint32_t));
+            SbeFifoRespBufferTestFixture fifoBuffer;
 
             if(not fifoBuffer)
             {
@@ -931,7 +798,7 @@ public:
     //-----------------------------------------------------------------------
     void testReturnFFDC()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testReturnFFDC");
+        TS_INFO("sbeFifoBufferTest: TC_testReturnFFDC");
 
         //Test with buffer data that has both Return data and FFDC data
 
@@ -939,9 +806,7 @@ public:
 
         do
         {
-            uint32_t callerBuffer[5] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                       sizeof(callerBuffer)/sizeof(uint32_t));
+            SbeFifoRespBufferTestFixture fifoBuffer;
 
             if(not fifoBuffer)
             {
@@ -1064,7 +929,7 @@ public:
     //------------------------------------------------------------------------
     void testBadOffsetLong()
     {
-        SBE_BUFFER_TRACD("sbeFifoBufferTest Enter testBadOffsetLong");
+        TS_INFO("sbeFifoBufferTest: TC_testBadOffsetLong");
 
         //Test with an offset that points to beyond that start of the buffer
 
@@ -1072,9 +937,7 @@ public:
 
         do
         {
-            uint32_t callerBuffer[2] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                       sizeof(callerBuffer)/sizeof(uint32_t));
+            SbeFifoRespBufferTestFixture fifoBuffer;
 
             if(not fifoBuffer)
             {
@@ -1159,7 +1022,7 @@ public:
     //----------------------------------------------------------------------
     void testBadOffsetShort()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testBadOffsetShort");
+        TS_INFO("sbeFifoBufferTest: TC_testBadOffsetShort");
 
         //Test with an offset that is too short to reach the Status Header
 
@@ -1167,9 +1030,7 @@ public:
 
         do
         {
-            uint32_t callerBuffer[2] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                       sizeof(callerBuffer)/sizeof(uint32_t));
+            SbeFifoRespBufferTestFixture fifoBuffer;
 
             if(not fifoBuffer)
             {
@@ -1254,16 +1115,14 @@ public:
     //------------------------------------------------------------------------
     void testShortRead()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testShortRead");
+        TS_INFO("sbeFifoBufferTest: TC_testShortRead");
         //Test case where message is completed prematurely
 
         bool result{true};
 
         do
         {
-            uint32_t callerBuffer[2] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                        sizeof(callerBuffer)/sizeof(uint32_t));
+            SbeFifoRespBufferTestFixture fifoBuffer;
 
             if(not fifoBuffer)
             {
@@ -1346,7 +1205,7 @@ public:
     //-----------------------------------------------------------
     void testOverrun()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testOverrun");
+        TS_INFO("sbeFifoBufferTest: TC_testOverrun");
 
         //Test the case where the message is not completed and
         //overruns the local buffer.
@@ -1354,9 +1213,8 @@ public:
         bool result{true};
         do
         {
-            uint32_t callerBuffer[2] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                       sizeof(callerBuffer)/sizeof(uint32_t));
+            SbeFifoRespBufferTestFixture fifoBuffer;
+
             if(not fifoBuffer)
             {
                 TS_FAIL("sbeFifoBufferTest testOverrun: "
@@ -1439,7 +1297,7 @@ public:
     //-----------------------------------------------------------------------
     void testGetSbeFFDC()
     {
-        SBE_BUFFER_TRACD("Enter sbeFifoBufferTest testGetSbeFFDC");
+        TS_INFO("sbeFifoBufferTest: TC_testGetSbeFFDC");
 
         //Test with buffer data that has FFDC data in get SBE FFDC format
 
@@ -1447,10 +1305,7 @@ public:
 
         do
         {
-            uint32_t callerBuffer[10] = {0};
-            SbeFifoRespBufferTestFixture fifoBuffer(callerBuffer,
-                                       sizeof(callerBuffer)/sizeof(uint32_t),
-                                       true);
+            SbeFifoRespBufferTestFixture fifoBuffer(true);
 
             if(not fifoBuffer)
             {
@@ -1736,7 +1591,10 @@ private:
                     break;
                 }
 
-                if(fifoBuffer.getFFDCData().empty())
+                std::vector<uint8_t> ffdc;
+                fifoBuffer.getFFDCData(ffdc);
+
+                if(ffdc.empty())
                 {
                     snprintf(expData.strMessage,
                              sizeof(expData.strMessage),
@@ -1779,8 +1637,6 @@ private:
                     result = false;
                     break;
                 }
-
-                const auto ffdc = fifoBuffer.getFFDCData();
 
                 if(memcmp(ffdc.data(),
                        expData.expected_ffdc_data, expData.ffdcByteSize) != 0)
@@ -1841,7 +1697,9 @@ private:
                     break;
                 }
 
-                const auto ffdc = fifoBuffer.getFFDCData();
+                std::vector<uint8_t> ffdc;
+                fifoBuffer.getFFDCData(ffdc);
+
                 if(!ffdc.empty())
                 {
                     snprintf(expData.strMessage,
@@ -1901,7 +1759,10 @@ private:
                     break;
                 }
 
-                if(not fifoBuffer.getReturnData().data())
+                std::vector<uint8_t> return_data;
+                fifoBuffer.getReturnData(return_data);
+
+                if(not return_data.data())
                 {
                     snprintf(expData.strMessage,
                              sizeof(expData.strMessage),
@@ -1945,7 +1806,6 @@ private:
                     break;
                 }
 
-                auto return_data = fifoBuffer.getReturnData();
                 if(memcmp(return_data.data(),
                           expData.expected_data, expData.dataByteSize) != 0)
                 {
@@ -1990,7 +1850,8 @@ private:
                     break;
                 }
 
-                auto return_data = fifoBuffer.getReturnData();
+                std::vector<uint8_t> return_data;
+                fifoBuffer.getReturnData(return_data);
 
                 if(return_data.data())
                 {
@@ -2034,39 +1895,6 @@ private:
                     result = false;
                     break;
                 }
-            }
-
-            //test that the caller buffer was populated
-            if(memcmp(fifoBuffer.callerBuffer(),
-                      &((*iv_testData)[0]),
-                      fifoBuffer.callerWordSize()*sizeof(uint32_t)) != 0)
-            {
-               char expected_xxd[128];
-               char caller_xxd[128];
-
-               size_t data_size = fifoBuffer.callerWordSize()*sizeof(uint32_t);
-
-                xxdPrint(fifoBuffer.callerBuffer(),
-                         data_size,
-                         caller_xxd);
-
-                xxdPrint(&((*iv_testData)[0]),
-                         data_size,
-                         expected_xxd);
-
-                snprintf(expData.strMessage,
-                         sizeof(expData.strMessage),
-                         "%s: "
-                         "Caller buffer not as expected.\n"
-                         "Caller Buffer: \n%s\n"
-                         "Expected data: \n%s",
-                         expData.test_name,
-                         caller_xxd,
-                         expected_xxd
-                        );
-
-                result = false;
-                break;
             }
         }
         while(0);

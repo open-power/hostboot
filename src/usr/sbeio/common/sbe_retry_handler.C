@@ -1340,10 +1340,6 @@ void ProcSbeRetryHandler::handleFspIplTimeFail()
 void ProcSbeRetryHandler::sbe_get_ffdc_handler()
 {
     SBE_TRACF(ENTER_MRK "sbe_get_ffdc_handler()");
-    // Use the MSG_BUFFER_SIZE_WORDS_P10 since this is for a P10 processor
-    uint32_t l_responseSize = SbeFifoRespBuffer::MSG_BUFFER_SIZE_WORDS_P10;
-    uint32_t *l_pFifoResponse =
-        reinterpret_cast<uint32_t *>(malloc(l_responseSize*sizeof(uint32_t)));
 
     // For OpenPower systems if a piece of HW is garded then we will
     // need to force a reconfigure loop and avoid the rest of the
@@ -1353,10 +1349,10 @@ void ProcSbeRetryHandler::sbe_get_ffdc_handler()
     bool l_reconfigRequired = false;
 
 #ifndef __HOSTBOOT_RUNTIME
-    errlHndl_t l_errl = nullptr;
-    l_errl = getFifoSBEFFDC(iv_proc,
-                            l_pFifoResponse,
-                            l_responseSize);
+    errlHndl_t        l_errl = nullptr;
+    SbeFifoRespBuffer l_pFifoResponse;
+
+    l_errl = getFifoSBEFFDC(iv_proc, l_pFifoResponse);
 
     // Check if there was an error log created
     if(l_errl)
@@ -1373,7 +1369,9 @@ void ProcSbeRetryHandler::sbe_get_ffdc_handler()
     {
         // Parse the FFDC package(s) in the response
         auto l_ffdc_parser = std::make_shared<SbeFFDCParser>();
-        l_ffdc_parser->parseFFDCData(reinterpret_cast<void *>(l_pFifoResponse));
+        std::vector<uint8_t> l_ffdc;
+        l_pFifoResponse.getFFDCData(l_ffdc);
+        l_ffdc_parser->parseFFDCData(l_ffdc.data());
 
         uint8_t l_pkgs = l_ffdc_parser->getTotalPackages();
 
@@ -1498,9 +1496,6 @@ void ProcSbeRetryHandler::sbe_get_ffdc_handler()
         }
     }
 #endif
-
-    free(l_pFifoResponse);
-    l_pFifoResponse = nullptr;
 
     if(l_reconfigRequired)
     {
