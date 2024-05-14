@@ -64,6 +64,7 @@ enum ody_upd_event_t : uint32_t
     IPL_COMPLETE = 1 << 11,               // host_ipl_complete istep reached
 
     OCMB_FLASH_ERROR = 1 << 12,           // OCMB reported flash error(s)
+    OCMB_FLASH_ERROR_MFG = 1 << 13,       // OCMB reported flash error(s) in mfg-mode
 
     NO_EVENT = 0,
     ANY_EVENT = 0xFFFFFFFF
