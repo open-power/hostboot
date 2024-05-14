@@ -72,6 +72,15 @@
       <ffdc>VERSION_REQUIRED</ffdc>
     </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+      <sbeError/>
+      <rc>RC_UNTRUSTED_RING_IMAGE</rc>
+      <description>Untrusted scan image for scan types FUNC/REGF/LBST/CMSK</description>
+      <ffdc>RS4_HEADER</ffdc>
+      <ffdc>OFFSET</ffdc>
+      <ffdc>MAGIC</ffdc>
+    </hwpError>
+  <!-- ******************************************************************** -->
   <!-- template
     <hwpError>
       <rc>RC_</rc>

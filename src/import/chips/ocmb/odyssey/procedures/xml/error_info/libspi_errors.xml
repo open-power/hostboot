@@ -1,0 +1,281 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/import/chips/ocmb/odyssey/procedures/xml/error_info/libspi_errors.xml $ -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2024                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- File: libspi_errors.xml. -->
+<!-- Halt codes for SPI support code -->
+
+<hwpErrors>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_INVALID_TRANSACTION_PARMS</rc>
+    <description>An attempt to initiate a SPI transaction used invalid parameters</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BASE_ADDRESS</ffdc>
+    <ffdc>COMMAND</ffdc>
+    <ffdc>CMD_LENGTH</ffdc>
+    <ffdc>REQ_LENGTH</ffdc>
+    <ffdc>RSP_LENGTH</ffdc>
+    <ffdc>TPM_MODE</ffdc>
+    <ffdc>ECC_MODE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_POLL_TIMEOUT</rc>
+    <description>Polling for a status change timed out</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BASE_ADDRESS</ffdc>
+    <ffdc>POLL_BITRANGE</ffdc>
+    <ffdc>POLL_VALUE</ffdc>
+    <ffdc>SEQUENCE_REG</ffdc>
+    <ffdc>COUNTER_REG</ffdc>
+    <ffdc>CLOCK_CONFIG_REG</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_ERROR_STATUS</rc>
+    <description>The SPI controller logic signaled an error</description>
+    <ffdc>TARGET</ffdc>
+    <ffdc>BASE_ADDRESS</ffdc>
+    <ffdc>STATUS_REG</ffdc>
+    <ffdc>SEQUENCE_REG</ffdc>
+    <ffdc>COUNTER_REG</ffdc>
+    <ffdc>CLOCK_CONFIG_REG</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_MEMORY_WRITE_TIMEOUT</rc>
+    <description>A write/erase command to SPI memory did not complete in time</description>
+    <ffdc>OPERATION</ffdc>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_MEMORY_INVALID_ADDR_LEN</rc>
+    <description>Invalid address/length: Must be divisible by 8 in ECC mode</description>
+    <ffdc>START</ffdc>
+    <ffdc>LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_MEMORY_ADDRESS_OVERRUN</rc>
+    <description>Invalid address/length: The request exceeds the size of the memory device</description>
+    <ffdc>START</ffdc>
+    <ffdc>LENGTH</ffdc>
+    <ffdc>RAW_START</ffdc>
+    <ffdc>RAW_LENGTH</ffdc>
+    <ffdc>RAW_DEVICE_SIZE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_MEMORY_INCOMPLETE_WRITE</rc>
+    <description>A write operation did not write the intended amount of data</description>
+    <ffdc>ECC_MODE</ffdc>
+    <ffdc>START_ADDRESS</ffdc>
+    <ffdc>END_ADDRESS</ffdc>
+    <ffdc>FINAL_WRITE_POINTER</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_MEMORY_ERASE_MISMATCH</rc>
+    <description>A Flash write operation ended with the erase sequence not stopping at the expected final address</description>
+    <ffdc>ECC_MODE</ffdc>
+    <ffdc>START_ADDRESS</ffdc>
+    <ffdc>END_ADDRESS</ffdc>
+    <ffdc>FINAL_ERASE_POINTER</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_MEMORY_INVALID_WRITE_SEQUENCE</rc>
+    <description>A write operation was not properly called in the begin-data[-data...]-end sequence</description>
+    <ffdc>OPERATION</ffdc>
+    <ffdc>WRITE_ACTIVE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_FLASH_UNKNOWN_DEVICE</rc>
+    <description>The type of an attached Flash device could not be determined</description>
+    <ffdc>DEVICE_ID</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_FLASH_NO_DEVICE</rc>
+    <description>Got an all-zero response to a "get device ID" command, indicating that no SPI device might be attached</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_FLASH_ERASE_BUFFER_NEEDED</rc>
+    <description>
+      The requested write operation needs an erase buffer to save partial erase block data
+      but no buffer was provided at driver initialization.
+    </description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_FLASH_WRITE_PROTECTED</rc>
+    <description>Flash is write protected</description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_FLASH_WRITE_FAIL</rc>
+    <description>A flash page write operation failed</description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_FLASH_ERASE_FAIL</rc>
+    <description>A flash sector erase operation failed</description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_FLASH_ERASE_INSUFFICIENT</rc>
+    <description>Code should have erased far enough for new data to be written but didn't</description>
+    <ffdc>PAGE_ADDRESS</ffdc>
+    <ffdc>ERASE_START</ffdc>
+    <ffdc>ERASE_POS</ffdc>
+    <ffdc>ERASE_END</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_MEMORY_VERIFY_FAIL</rc>
+    <description>The data read back from memory after a write operation did not match the write data</description>
+    <ffdc>ADDRESS</ffdc>
+    <ffdc>LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_ZERO_LENGTH_RW</rc>
+    <description>Low-level read or write with zero length</description>
+    <ffdc>READ_NOT_WRITE</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_FIFO_TIMEOUT</rc>
+    <description>Timed out while waiting for the TPM FIFO to have space/data available</description>
+    <ffdc>TOTAL_LENGTH</ffdc>
+    <ffdc>REMAINING_LENGTH</ffdc>
+    <ffdc>STATUS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_ACCESS_TIMEOUT</rc>
+    <description>Timed out while waiting for locality access to be granted</description>
+    <ffdc>LOCALITY</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_READ_ABORT</rc>
+    <description>A TPM read resulted in the TPM aborting the cycle and returning all-F data</description>
+    <ffdc>LOCALITY</ffdc>
+    <ffdc>ADDRESS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_READY_TIMEOUT</rc>
+    <description>Timed out while waiting for the TPM to become ready to accept commands</description>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_COMMAND_TIMEOUT</rc>
+    <description>Timed out while waiting for the TPM to complete a command</description>
+    <ffdc>TIMEOUT_MS</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_REQUEST_TOO_SHORT</rc>
+    <description>The TPM indicated it was still expecting data after the request got sent</description>
+    <ffdc>REQUEST_LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_REQUEST_TOO_LONG</rc>
+    <description>The TPM indicated it was no longer expecting data before the full request got sent</description>
+    <ffdc>REQUEST_LENGTH</ffdc>
+    <ffdc>REMAINING_LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_RESPONSE_BUF_TOO_SHORT</rc>
+    <description>The response buffer for a TPM transaction is too small to fit the response length</description>
+    <ffdc>MAX_LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_RESPONSE_TOO_SHORT</rc>
+    <description>The response returned by the TPM is too short to contain a length field</description>
+    <ffdc>RESPONSE_LENGTH</ffdc>
+    <ffdc>MAX_LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_RESPONSE_TOO_LONG</rc>
+    <description>The response returned by the TPM does not fit the receive buffer</description>
+    <ffdc>RESPONSE_LENGTH</ffdc>
+    <ffdc>MAX_LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+  <hwpError>
+    <sbeError/>
+    <rc>RC_SPI_TPM_RESPONSE_SIZE_MISMATCH</rc>
+    <description>The size of the received TPM response does not match the length field in the response header</description>
+    <ffdc>RECEIVED_LENGTH</ffdc>
+    <ffdc>HEADER_LENGTH</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
+</hwpErrors>
