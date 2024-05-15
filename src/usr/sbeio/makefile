@@ -31,8 +31,10 @@ include common/common.mk
 
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/perv
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/usr/
+EXTRAINCDIR += ${ROOTPATH}/src/usr/errldisplay/
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ocmbupd/
 
 # sbeio's unique objects
@@ -67,11 +69,13 @@ OBJS += errlud_sbeio.o
 OBJS += sbe_flashCheck.o
 OBJS += sbe_testFfdc.o
 OBJS += sbe_ody_hw_dump.o
+OBJS += sbe_iplControl.o
 
 # sbeio's sub directories
 SUBDIRS += test.d
 SUBDIRS += runtime.d
 
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory
 
 include ${ROOTPATH}/config.mk

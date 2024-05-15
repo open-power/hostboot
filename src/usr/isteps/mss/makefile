@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2023
+# Contributors Listed Below - COPYRIGHT 2016,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -36,6 +36,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/utils/imageProcs/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include/
 EXTRAINCDIR += ${IMPORT_PATH}/chips/ocmb/explorer/common/include/
@@ -43,12 +44,17 @@ EXTRAINCDIR += ${IMPORT_PATH}/chips/ocmb/odyssey/common/include/
 EXTRAINCDIR += ${EXPLORER_PROCEDURES_PATH}
 EXTRAINCDIR += ${ODYSSEY_PROCEDURES_PATH}
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/common/procedures/hwp/pmic/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/explorer/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe/
+EXTRAINCDIR += ${ROOTPATH}/src/build/tools/extern/ekb/chips/ocmb/odyssey/procedures/hwp/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/scomt/
 EXTRAINCDIR += ${PMIC_PROCEDURES_PATH}/hwp/pmic/
@@ -56,6 +62,9 @@ EXTRAINCDIR += ${PMIC_PROCEDURES_PATH}/hwp/pmic/lib/
 EXTRAINCDIR += ${ROOTPATH}/src/import/generic/memory/lib/
 EXTRAINCDIR += ${ODYSSEY_PROCEDURES_PATH}/hwp/perv/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/lib/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/procedures/hwp/initfiles/
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/sbe_utils/include
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/attr
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/sbe_utils/include/
@@ -119,6 +128,13 @@ MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/inband/
 MSS_LIB += ${EXPLORER_PROCEDURES_PATH}/hwp/memory/lib/workarounds/
 MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/
 MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/ccs/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/dimm/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/ecc/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/eff_config/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/mc/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/phy/
+MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/utils/
 MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/workarounds/
 MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/mcbist/
 MSS_LIB += ${ODYSSEY_PROCEDURES_PATH}/hwp/memory/lib/fir/
@@ -338,7 +354,7 @@ $(call BUILD_GENERATED)
 # Add targets from 'BUILD_GENERATED' into the Hostboot 'GEN_PASS'.
 GEN_PASS_BODY += $(GEN_TARGETS)
 CLEAN_TARGETS += $(GEN_TARGETS)
- 
+
 # Add common and generated parts to object list.
 
 MSS_PATH := $(PROCEDURES_PATH)/hwp/memory/lib
@@ -357,9 +373,16 @@ MSS_PATH_ODYSSEY := $(ODYSSEY_PROCEDURES_PATH)/hwp/memory/lib/workarounds
 MSS_ODYSSEY_SOURCE := $(shell find $(MSS_PATH_ODYSSEY) -name '*.C' -exec basename {} \;)
 MSS_MODULE_OBJS += $(patsubst %.C,%.o,$(MSS_ODYSSEY_SOURCE))
 
+MSS_MODULE_OBJS += ody_blame_firs.o
+MSS_MODULE_OBJS += ody_fir.o
+MSS_MODULE_OBJS += ody_draminit_utils.o
+MSS_MODULE_OBJS += ody_proc_specific_fir.o
+
 MODULE = isteps_mss
 
+VPATH += ${ROOTPATH}/src/import/generic/memory/lib/utils/
 VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/utils/
+VPATH += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/memory/
 VPATH += ${ROOTPATH}/src/import/hwpf/sbe_utils/src/
 VPATH += ${ROOTPATH}/obj/genfiles/attr/
 

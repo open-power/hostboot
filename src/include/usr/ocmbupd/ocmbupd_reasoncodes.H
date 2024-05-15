@@ -62,6 +62,7 @@ namespace OCMBUPD
         ODY_UPD_BAD_FIRMWARE                      = OCMBUPD_COMP_ID | 0x11,
         ODY_UPD_FIRMWARE_UPDATED                  = OCMBUPD_COMP_ID | 0x12,
         ODY_UPD_UNKNOWN_STATE                     = OCMBUPD_COMP_ID | 0x13,
+        ODY_UPD_DELAYED_DECONFIGURE_OCMB          = OCMBUPD_COMP_ID | 0x14,
     };
 
 }; // namespace OCMBUPD

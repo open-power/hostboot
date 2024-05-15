@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1118,10 +1118,10 @@ errlHndl_t ocmbMmioPerformOp(DeviceFW::OperationType i_opType,
                     // Calling it here will cause a potential deadlock
                     // because we could recursively call PRD and they are locking
                     // a mutex
-                    TARGETING::Target* sys = TARGETING::UTIL::assertGetToplevelTarget();
 
-                    // 0 = false, 1 = true
-                    sys->setAttr<ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>(1);
+                    // 0 = DEFAULT (PRD will be invoked), 1 = NO (PRD will not be invoked)
+                    UTIL::assertGetToplevelTarget()->setAttr<ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>
+                                              (TARGETING::CHECK_ATTN_AFTER_ISTEP_FAIL_DEFAULT);
 #endif
 
                     break;

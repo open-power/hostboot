@@ -124,6 +124,11 @@ enum update_action_t : uint8_t
 
     deconfig_gard_ocmb       = 0xE,
 
+    // DELAYED_DECONFIG actions allow PRD to be called to check for attentions before
+    // the deconfig is applied at the end of the istep.
+    delayed_deconfigure_ocmb = 0xF,
+    delayed_deconfig_gard_ocmb = 0x10,
+
     // This means that an invalid state/event combination has happened.
     internal_error           = 0xFF
 };
@@ -226,8 +231,8 @@ struct state_transition_t
 struct state_transitions_t
 {
     // This array may need to be expanded in the future if
-    // we need to handle more than 4 transitions.
-    static const int MAX_TRANSITIONS = 5;
+    // we need to handle more than 6 transitions.
+    static const int MAX_TRANSITIONS = 6;
 
     state_t state;
     state_transition_t transitions[MAX_TRANSITIONS];
@@ -272,8 +277,8 @@ state_transitions_t ody_fsm_transitions[] =
                                                                            | MEAS_REGS_MISMATCH
                                                                            | OCMB_BOOT_ERROR_NO_FFDC
                                                                            | OCMB_FLASH_ERROR          , {switch_to_side_1, retry_check_for_ready                       }},
-                                                                         { OCMB_BOOT_ERROR_WITH_FFDC
-                                                                           | OCMB_HWP_FAIL_OTHER       , {deconfigure_ocmb                                              }},
+                                                                         { OCMB_BOOT_ERROR_WITH_FFDC   , {deconfigure_ocmb                                              }},
+                                                                         { OCMB_HWP_FAIL_OTHER         , {delayed_deconfigure_ocmb                                      }},
                                                                          { IPL_COMPLETE                , {sync_images_normal, reset_ocmb_upd_state                      }} } },
 
     //                |                        | Active |                |                             |
@@ -297,9 +302,9 @@ state_transitions_t ody_fsm_transitions[] =
                                                                            | OCMB_BOOT_ERROR_NO_FFDC
                                                                            | OCMB_FLASH_ERROR          , {switch_to_side_golden, retry_check_for_ready                  }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
-                                                                           | OCMB_HWP_FAIL_OTHER
                                                                            | IMAGE_SYNC_CHIPOP_FAILURE
                                                                            | MEAS_REGS_MISMATCH        , {deconfigure_ocmb                                              }},
+                                                                         { OCMB_HWP_FAIL_OTHER         , {delayed_deconfigure_ocmb                                      }},
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
                                                                          { IPL_COMPLETE                , {sync_images_forced, reset_ocmb_upd_state                      }} } },
 
@@ -311,12 +316,12 @@ state_transitions_t ody_fsm_transitions[] =
 
     { { yes           , no                     , SIDE0  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap
 
-    { { yes           , no                     , SIDE0  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL
-                                                                           | OCMB_HWP_FAIL_OTHER       , {switch_to_side_golden,  retry_check_for_ready                 }},
+    { { yes           , no                     , SIDE0  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_golden,  retry_check_for_ready                 }},
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | IMAGE_SYNC_CHIPOP_FAILURE
                                                                            | MEAS_REGS_MISMATCH        , {deconfigure_ocmb                                              }},
+                                                                         { OCMB_HWP_FAIL_OTHER         , {delayed_deconfigure_ocmb                                      }},
                                                                          { IPL_COMPLETE                , {sync_images_normal, reset_ocmb_upd_state                      }} } },
 
     //                |                        | Active |                |                             |
@@ -327,11 +332,11 @@ state_transitions_t ody_fsm_transitions[] =
 
     { { yes           , no                     , SIDE1  , no          },{{ CHECK_FOR_READY_COMPLETED   , {deconfigure_ocmb                                              }} } }, // if code updated and fw not up to date, deconfigure ocmb asap
 
-    { { yes           , no                     , SIDE1  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL
-                                                                           | OCMB_HWP_FAIL_OTHER       , {switch_to_side_golden, retry_check_for_ready                  }},
+    { { yes           , no                     , SIDE1  , yes         },{{ OCMB_HWP_FAIL_HASH_FAIL     , {switch_to_side_golden, retry_check_for_ready                  }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | IMAGE_SYNC_CHIPOP_FAILURE
                                                                            | MEAS_REGS_MISMATCH        , {deconfigure_ocmb                                              }},
+                                                                         { OCMB_HWP_FAIL_OTHER         , {delayed_deconfigure_ocmb                                      }},
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
                                                                          { IPL_COMPLETE                , {sync_images_normal, reset_ocmb_upd_state                      }} } },
 
@@ -360,8 +365,8 @@ state_transitions_t ody_fsm_transitions[] =
 
     { { yes           , yes                    , SIDE1  , yes         },{{ OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | OCMB_HWP_FAIL_HASH_FAIL
-                                                                           | OCMB_HWP_FAIL_OTHER
                                                                            | OCMB_FLASH_ERROR          , {deconfig_gard_ocmb                                            }},
+                                                                         { OCMB_HWP_FAIL_OTHER         , {delayed_deconfig_gard_ocmb                                    }},
                                                                          { ATTRS_INCOMPATIBLE          , {fail_boot_bad_firmware                                        }},
                                                                          { IPL_COMPLETE                , {reset_ocmb_upd_state                                          }} } },
 
@@ -374,8 +379,8 @@ state_transitions_t ody_fsm_transitions[] =
                                                           // golden side
                                                           // is never
                                                           // up to date
-    { { yes | no      , no                     , GOLDEN , no          },{{ OCMB_HWP_FAIL_OTHER
-                                                                           | OCMB_HWP_FAIL_HASH_FAIL
+    { { yes | no      , no                     , GOLDEN , no          },{{ OCMB_HWP_FAIL_HASH_FAIL
+                                                                           | OCMB_HWP_FAIL_OTHER
                                                                            | CODE_UPDATE_CHIPOP_FAILURE, {deconfigure_ocmb                                              }},
                                                                          { OCMB_BOOT_ERROR_WITH_FFDC
                                                                            | CHECK_FOR_READY_COMPLETED , {perform_code_update, switch_to_side_0, retry_check_for_ready  }} } },
@@ -571,6 +576,8 @@ std::array<char, 128> action_to_str(const update_action_t i_action)
     case perform_code_update: strcpy(&str[0], "perform code update"); break;
     case deconfigure_ocmb: strcpy(&str[0], "deconfigure ocmb"); break;
     case deconfig_gard_ocmb: strcpy(&str[0], "deconfigure & guard ocmb"); break;
+    case delayed_deconfigure_ocmb: strcpy(&str[0], "delayed deconfigure ocmb"); break;
+    case delayed_deconfig_gard_ocmb: strcpy(&str[0], "delayed deconfigure & guard ocmb"); break;
     case fail_boot_bad_firmware: strcpy(&str[0], "fail boot; bad firmware"); break;
     case reset_ocmb_upd_state: strcpy(&str[0], "reset ocmb update state"); break;
     case sync_images_normal: strcpy(&str[0], "sync images (normal)"); break;
@@ -690,6 +697,58 @@ errlOwner create_and_commit_ocmb_deconfigure_log(Target* const i_ocmb,
     errlCommit(errl, OCMBUPD_COMP_ID);
 
     return errlOwner(deconfig_errl);
+}
+
+/** @brief Create and commit an error log that will delayed deconfigure the given
+ *  OCMB.
+ *
+ *  @param[in] i_ocmb           The OCMB to delayed deconfigure.
+ *  @param[in] i_state          The state of the FSM for this OCMB.
+ *  @param[in] i_state_pattern  The state pattern in the FSM table that the state matched.
+ *  @param[in] i_transition     The transition that is being executed.
+ *  @param[in] i_event          The event that caused i_transition.
+ *  @param[in] i_errlog         The error log that caused this event, if any.
+ *  @param[in] i_apply_gard_record Whether a gard record should be created for this OCMB
+ *
+ */
+void create_and_commit_ocmb_delayed_deconfigure_log(Target* const i_ocmb,
+                                                    const state_t& i_state,
+                                                    const state_transitions_t& i_state_pattern,
+                                                    const state_transition_t& i_transition,
+                                                    const ody_upd_event_t i_event,
+                                                    const errlHndl_t i_errlog,
+                                                    const bool i_apply_gard_record)
+{
+    /*@
+     *@moduleid         MOD_ODY_UPD_FSM
+     *@reasoncode       ODY_UPD_DELAYED_DECONFIGURE_OCMB
+     *@userdata1[0:31]  The OCMB's HUID
+     *@userdata1[32:39] OCMB state.update_performed
+     *@userdata1[40:47] OCMB state.golden_boot_performed
+     *@userdata1[48:55] OCMB state.ocmb_boot_side
+     *@userdata1[56:63] OCMB state.ocmb_fw_up_to_date
+     *@userdata2[0:15]  The OCMB event that caused this transition
+     *@userdata2[16:31] The OCMB event pattern that the event matched
+     *@userdata2[32:39] The state pattern in the FSM table that the state matched (State.update_performed)
+     *@userdata2[40:47] Matching state pattern's State.golden_boot_performed
+     *@userdata2[48:55] Matching state pattern's State.ocmb_boot_side
+     *@userdata2[56:63] Matching state pattern's ocmb_fw_up_to_date
+     *@devdesc          The Odyssey code update FSM requested to delayed deconfigure this OCMB.
+     *@custdesc         A software error occurred during system boot
+     */
+    auto errl = capture_state_in_errlog(ERRL_SEV_UNRECOVERABLE, MOD_ODY_UPD_FSM, ODY_UPD_DELAYED_DECONFIGURE_OCMB,
+                                        ErrlEntry::NO_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
+
+    auto l_gard_action = i_apply_gard_record ? HWAS::GARD_Unrecoverable : HWAS::GARD_NULL;
+
+    errl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_HIGH, HWAS::DELAYED_DECONFIG, l_gard_action);
+
+    if (i_errlog)
+    { // Link the deconfig log with the originating error log.
+        errl->plid(i_errlog->plid());
+    }
+
+    errlCommit(errl, OCMBUPD_COMP_ID);
 }
 
 /** @brief Create a log for an internal error in the code update FSM. This should halt the boot.
@@ -970,6 +1029,18 @@ errlOwner execute_actions(Target* const i_ocmb,
                           get_huid(i_ocmb),
                           TRACE_ERR_ARGS(errl));
                 }
+
+                break;
+            case delayed_deconfig_gard_ocmb:
+                apply_gard_record = true;
+                // fall through
+            case delayed_deconfigure_ocmb:
+                if (i_errlog && !manually_set_errl_sev)
+                {
+                    i_errlog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                }
+
+                create_and_commit_ocmb_delayed_deconfigure_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event, i_errlog, apply_gard_record);
 
                 break;
             case fail_boot_bad_firmware:

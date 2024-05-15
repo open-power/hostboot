@@ -32,6 +32,8 @@
 
 #include <targeting/common/target.H>
 #include <targeting/common/targetservice.H>
+#include <targeting/common/utilFilter.H>
+#include <utils/chipids.H>
 
 namespace err_test
 {
@@ -991,6 +993,211 @@ public:
 
         delete parent;
         delete not_in_aggregate;
+
+#undef TEST_FUNC
+    }
+
+    void testHasReasonCode()
+    {
+#define TEST_FUNC "testHasReasonCode"
+
+        const uint16_t PARENT_REASON_CODE = 1, CHILD_REASON_CODE = 2;
+
+        auto errl_parent = errlog();
+        auto errl_child_orig = errlog();
+        auto errl_child = errl_child_orig;
+
+        errl_parent->setReasonCode(PARENT_REASON_CODE);
+        errl_child->setReasonCode(CHILD_REASON_CODE);
+
+        errl_parent->aggregate(errl_child_orig);
+
+        TS_ASSERT(errl_parent->hasReasonCode(PARENT_REASON_CODE, propagation_t::NO_PROPAGATE),
+                  "Parent log doesn't have parent reason code");
+        TS_ASSERT(errl_child->hasReasonCode(CHILD_REASON_CODE, propagation_t::NO_PROPAGATE),
+                  "Child log doesn't have child reason code");
+
+        TS_ASSERT(!errl_parent->hasReasonCode(CHILD_REASON_CODE, propagation_t::NO_PROPAGATE),
+                  "Parent log has child reason code");
+        TS_ASSERT(!errl_child->hasReasonCode(PARENT_REASON_CODE, propagation_t::NO_PROPAGATE),
+                  "Child log has parent reason code");
+
+        TS_ASSERT(errl_parent->hasReasonCode(CHILD_REASON_CODE, propagation_t::PROPAGATE),
+                  "Parent log doesn't have child reason code with propagation");
+
+        delete errl_parent;
+
+#undef TEST_FUNC
+    }
+
+    void testGetAllErrlOfType()
+    {
+#define TEST_FUNC "testGetAllErrlOfType"
+
+     const int PARENT_TYPE = 1, CHILD_TYPE = 2, INVALID_TYPE = 3;
+     auto errl_parent = errlog();
+     auto errl_child = errlog();
+     auto errl_child2 = errlog();
+     std::vector<errlHndl_t> errlList;
+
+     errl_parent->setErrorType(PARENT_TYPE);
+     errl_child->setErrorType(CHILD_TYPE);
+     errl_child2->setErrorType(CHILD_TYPE);
+     errl_child->aggregate(errl_child2);
+     errl_parent->aggregate(errl_child);
+
+     errlList.clear();
+     errl_parent->getAllErrlOfType(PARENT_TYPE, errlList);
+     TS_INFO("Got %d entries that match type : %d", errlList.size(), PARENT_TYPE);
+     TS_ASSERT(errlList.size(), "Expecting to find entries that match type : %d", PARENT_TYPE);
+
+     errlList.clear();
+     errl_parent->getAllErrlOfType(CHILD_TYPE, errlList);
+     TS_INFO("Got %d entries that match type : %d", errlList.size(), CHILD_TYPE);
+     TS_ASSERT(errlList.size(), "Expecting to find entries that match type : %d", CHILD_TYPE);
+
+     errlList.clear();
+     errl_parent->getAllErrlOfType(INVALID_TYPE, errlList);
+     TS_INFO("Got %d entries that match type : %d", errlList.size(), INVALID_TYPE);
+     TS_ASSERT((errlList.size() == 0), "Expecting to find entries that match type : %d", INVALID_TYPE);
+
+     delete errl_parent;
+
+#undef TEST_FUNC
+    }
+
+    void testQueryHwCalloutsOfType()
+    {
+    #define TEST_FUNC "testQueryHwCallouts"
+
+        int l_count = 3; // pick three OCMB chips for the test
+        size_t l_ocmbRecords = 0;
+        size_t l_memportRecords = 0;
+        size_t l_dimmRecords = 0;
+        auto errl_parent = errlog();
+
+        // Get all the OCMB chips and pick the first one to test with
+        TARGETING::TargetHandleList allchips;
+        TARGETING::getAllChips( allchips, TARGETING::TYPE_OCMB_CHIP);
+
+        for( TARGETING::TargetHandleList::iterator tgt = allchips.begin();
+             (tgt != allchips.end()) && (l_count>0);
+              ++tgt )
+        {
+            auto errl_child = errlog();
+            errl_child->addHwCallout(*tgt,
+                                     HWAS::SRCI_PRIORITY_HIGH,
+                                     HWAS::DELAYED_DECONFIG,
+                                     HWAS::GARD_NULL);
+
+            auto errl_child2 = errlog();
+            errl_child2->addHwCallout(*tgt,
+                                      HWAS::SRCI_PRIORITY_HIGH,
+                                      HWAS::NO_DECONFIG,
+                                      HWAS::GARD_Fatal);
+
+            errl_child->aggregate(errl_child2);
+
+            // We aggregated the two records for this OCMB
+            l_ocmbRecords++;
+
+            // Now get the mem ports of this OCMB chip
+            TARGETING::TargetHandleList l_memPorts;
+            getChildAffinityTargets(l_memPorts, *tgt, CLASS_UNIT, TYPE_MEM_PORT);
+
+            for (const auto & l_p : l_memPorts)
+            {
+                  auto errl_new_child = errlog();
+
+                  errl_new_child->addHwCallout(l_p,
+                                               HWAS::SRCI_PRIORITY_HIGH,
+                                               HWAS::DELAYED_DECONFIG,
+                                               HWAS::GARD_NULL);
+                  errl_child->aggregate(errl_new_child);
+                  l_memportRecords++;
+
+                  // Now get dimms for the first memport and add error logs for it
+                  if (l_memportRecords == 1)
+                  {
+                      TARGETING::TargetHandleList l_dimms;
+                      getChildAffinityTargets(l_dimms, l_p, CLASS_UNIT, TYPE_MEM_PORT);
+                      for (const auto & l_d : l_dimms)
+                      {
+                          auto errl_dimm_child = errlog();
+
+                          errl_dimm_child->addHwCallout(l_d,
+                                                        HWAS::SRCI_PRIORITY_HIGH,
+                                                        HWAS::DELAYED_DECONFIG,
+                                                        HWAS::GARD_NULL);
+                         errl_child->aggregate(errl_dimm_child);
+                         l_dimmRecords++;
+                      }
+                  }
+            }
+
+            --l_count; // Decrement the target count
+
+            // Aggregate all the records
+            errl_parent->aggregate(errl_child);
+
+        } // end of for loop
+
+        // Now query based on type and see if we find any targets
+        TARGETING::TargetHandleList l_ocmbList;
+        TARGETING::TargetHandleList l_memPortList;
+        TARGETING::TargetHandleList l_dimmList;
+        TARGETING::TargetHandleList l_procList;
+        auto l_ocmbFound = errl_parent->queryHwCalloutsOfType(TYPE_OCMB_CHIP, l_ocmbList,
+                                                         propagation_t::PROPAGATE);
+        auto l_memportsFound = errl_parent->queryHwCalloutsOfType(TYPE_MEM_PORT, l_memPortList,
+                                                         propagation_t::PROPAGATE);
+        auto l_dimmsFound = errl_parent->queryHwCalloutsOfType(TYPE_DIMM, l_dimmList,
+                                                         propagation_t::PROPAGATE);
+        auto l_procsFound = errl_parent->queryHwCalloutsOfType(TYPE_PROC, l_procList,
+                                                         propagation_t::PROPAGATE);
+
+        TS_INFO("testQueryHwCalloutsOfType: found=%d (Exp=%d Got=%d)",
+                 l_ocmbFound, l_ocmbRecords, l_ocmbList.size());
+        TS_INFO("testQueryHwCalloutsOfType: found=%d (Exp=%d Got=%d)",
+                 l_memportsFound, l_memPortList.size(), l_memportRecords);
+        TS_INFO("testQueryHwCalloutsOfType: found=%d (Exp=%d Got=%d)",
+                 l_dimmsFound, l_dimmList.size(), l_dimmList.size());
+        TS_INFO("testQueryHwCalloutsOfType: found=%d (Exp=%d Got=%d)",
+                 l_procsFound, l_procList.size(), l_procList.size());
+
+        if (!l_ocmbFound && l_ocmbRecords)
+        {
+            TS_FAIL("testQueryHwCalloutsOfType: we did not find the OCMB entry!");
+        }
+        if (!l_memportsFound && l_memportRecords)
+        {
+            TS_FAIL("testQueryHwCalloutsOfType: we did not find the Mem port entry!");
+        }
+        if (!l_dimmsFound && l_dimmRecords)
+        {
+            TS_FAIL("testQueryHwCalloutsOfType: we did not find the Dimm entry!");
+        }
+        if (l_procsFound)
+        {
+            TS_FAIL("testQueryHwCalloutsOfType: we found some proc(s)!");
+        }
+
+        TS_ASSERT((l_ocmbList.size() == l_ocmbRecords),
+                  "Number of records for OCMB don't match (expected %d, got %d)",
+                  l_ocmbRecords, l_ocmbList.size());
+
+        TS_ASSERT((l_memPortList.size() == l_memportRecords),
+                  "Number of records for Mem ports don't match (expected %d, got %d)",
+                  l_memportRecords, l_memPortList.size());
+
+        TS_ASSERT((l_dimmList.size() == l_dimmRecords),
+                  "Number of records for DIMMs don't match (expected %d, got %d)",
+                  l_dimmRecords, l_dimmList.size());
+
+        TS_ASSERT(!l_procsFound,
+                  "Found proc entries (expected 0, got %d)", l_procList.size());
+
+        delete errl_parent;
 
 #undef TEST_FUNC
     }

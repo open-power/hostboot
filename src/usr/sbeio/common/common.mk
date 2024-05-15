@@ -95,7 +95,6 @@ OBJS += sbe_targets.o
 OBJS += sbe_attribute_utils.o
 OBJS += ody_apply_sbe_attribute_data.o
 OBJS += ody_analyze_sbe_attr_response.o
-OBJS += sbe_iplControl.o
 OBJS += sbe_telemetry.o
 OBJS += sbe_getScratchData.o
 
