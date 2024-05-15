@@ -573,12 +573,33 @@
     </description>
     <persistency>volatile-zeroed</persistency>
     <simpleType>
-      <uint8_t/>
+      <enumeration>
+        <id>CHECK_ATTN_AFTER_ISTEP_FAIL</id>
+        <default>DEFAULT</default>
+      </enumeration>
     </simpleType>
     <writeable/>
     <readable/>
     <no_export/>
   </attribute>
+
+  <enumerationType>
+    <default>DEFAULT</default>
+    <description>
+        Enumeration specifying the CHECK_ATTN_AFTER_ISTEP_FAIL values
+        0 DEFAULT : Initial value and indicates FIR bits set if Ody HWP failed
+        1 NO      : If Ody HWP Failed, indicates FIR bits NOT set
+    </description>
+    <enumerator>
+      <name>DEFAULT</name>
+      <value>0</value>
+    </enumerator>
+    <enumerator>
+      <name>NO</name>
+      <value>1</value>
+    </enumerator>
+    <id>CHECK_ATTN_AFTER_ISTEP_FAIL</id>
+  </enumerationType>
 
   <attribute>
     <description>The address offset which each Chiplet types pervasive

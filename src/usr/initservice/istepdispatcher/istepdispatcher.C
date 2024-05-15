@@ -790,6 +790,7 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                     }
                     // Not FSP and not in mfg mode,
                     // still want to do the reconfig
+
                     // --OR--
                     // If in manufacturing mode, but there is no error
                     else if ((!iv_spBaseServicesEnabled && !l_manufacturingMode) ||
@@ -1247,25 +1248,63 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         // short-circuit it.
         o_doReconfig = process_deferred_deconfig_and_check_reconfig() || o_doReconfig;
 
-        // Run check attention if system attribute is set
-        bool runCheckAttn = l_pTopLevel->getAttr<TARGETING::ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>();
+        // Get the current value of the reconfig loop attr
+        bool l_reconfigLoopAttr = l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
 
-        // Check for any attentions and invoke PRD for analysis
-        // if not in MPIPL mode and no istep error
-        if (true == iv_mpiplMode)
+        // Get the system attribute
+        uint8_t l_checkAttnAttr = l_pTopLevel->getAttr<TARGETING::ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>();
+
+        // Initialize the variable used to check if we need to run PRD and check for IPL attentions.
+        bool l_runCheckAttn = false;
+
+
+        // When there are HWP errors, especially Odyssey related,
+        // leverage PRD to do the analysis of the FIR bits if set.
+        //
+        // Different Scenarios to consider here are:
+        // ================================================================================
+        // A] 12.12 Code Update (reconfig_loop set)  ===> NO PRD
+        // B] regular istep fail (check_attn_after_istep_fail=DEFAULT) ===> NO PRD
+        // C] Ody HWP fail with no FIR (check_attn_after_istep_fail=NO) ===> NO PRD
+        // D] Ody HWP fail with FIR (check_attn_after_istep_fail=DEFAULT) ===> PRD
+        // E] 1 real HWP fail, 1 HWP FIR fail, 1 do-a-code-update fail, 1 pass
+        //    ===> NO PRD
+        // (should see 1 deconfig, 1 HWP FIR fail, 2 passes on reboot; reconfig_loop set)
+        // F] 1 real HWP fail (ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL=NO), 1 HWP FIR fail, 1 pass
+        //    ===> NO PRD
+        // (should see 1 deconfig, 1 HWP FIR fail, 2 passes on reboot; reconfig_loop set)
+        // G] boot failure (has immediate deconfig) ===> NO PRD
+        // H] clean istep post-prd ===> PRD
+        // I] clean istep pre-prd ===> NO PRD
+        // NOTE: MPIPL overrides everything, never call PRD
+        // ================================================================================
+
+        TRACFCOMP(g_trac_initsvc,
+                  INFO_MRK":doIstep: reconfig=%d mpipl=%d err=%p FailOrAttnAttr=%d"
+                  " taskFlagsChkAtn=%d", l_reconfigLoopAttr, iv_mpiplMode, err,
+                  l_checkAttnAttr, theStep->taskflags.check_attn);
+
+        if ((!l_reconfigLoopAttr) && (!iv_mpiplMode) && (!err)) // NOT A, B, E, G & mpipl
         {
-            runCheckAttn = false;
-        }
-        else if ((true == theStep->taskflags.check_attn) && !err)
-        {
-            runCheckAttn = true;
+            if (l_checkAttnAttr != TARGETING::CHECK_ATTN_AFTER_ISTEP_FAIL_NO) // NOT C & F
+            {
+                if (true == theStep->taskflags.check_attn) // Either D or H
+                {
+                    // Run PRD
+                    l_runCheckAttn = true;
+                    TRACFCOMP(g_trac_initsvc,
+                              INFO_MRK"doIstep: reconfig=%d mpipl=%d err=%p "
+                              "AttnAttr=%d taskChkAttn=%d RUN-PRD=%d",
+                              l_reconfigLoopAttr, iv_mpiplMode, err, l_checkAttnAttr,
+                              theStep->taskflags.check_attn, l_runCheckAttn);
+                }
+            }
         }
 
-        // Run check attention if flag is set, and if we're not going
-        // to just do a reconfig loop anyway.
-        if (runCheckAttn && !o_doReconfig)
+        // Run check attention if flag is set
+        if (l_runCheckAttn)
         {
-            TRACDCOMP(g_trac_initsvc,
+            TRACFCOMP(g_trac_initsvc,
                       INFO_MRK"Check for attentions and invoke PRD" );
 
             errlHndl_t l_errl = ATTN::checkForIplAttentions();
@@ -1287,9 +1326,10 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
                 }
             }
 
-            // Zero out attribute to handle reconfig loops
-            l_pTopLevel->setAttr<TARGETING::ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>(0);
         }
+        // Set the attribute to the default value (zero) to handle reconfig loops
+        l_pTopLevel->setAttr<TARGETING::ATTR_CHECK_ATTN_AFTER_ISTEP_FAIL>
+                     (TARGETING::CHECK_ATTN_AFTER_ISTEP_FAIL_DEFAULT);
 
 #ifdef CONFIG_RECONFIG_LOOP_TESTS_ENABLE
         // Read ATTR_RECONFIG_LOOP_TESTS_ENABLE attribute
@@ -3099,11 +3139,13 @@ bool IStepDispatcher::checkReconfig(const uint8_t i_curIstep,
             auto l_noReconfig = l_sys->getAttr<TARGETING::ATTR_NO_RECONFIG_ON_DECONFIG>();
             if( l_noReconfig )
             {
-                TRACFCOMP(g_trac_initsvc,"checkReconfig(): Blocking reconfig loop for deconfig due to ATTR_NO_RECONFIG_ON_DECONFIG");
+                TRACFCOMP(g_trac_initsvc,"checkReconfig(): Blocking reconfig loop for "
+                          "deconfig due to ATTR_NO_RECONFIG_ON_DECONFIG");
                 doReconfigure = false;
             }
         }
     }
+
 
     TRACDCOMP(g_trac_initsvc,
               EXIT_MRK"IStepDispatcher::checkReconfig: doReconfigure=%d, new istep/substep: %d.%d",

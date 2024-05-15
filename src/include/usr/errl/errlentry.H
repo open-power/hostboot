@@ -645,6 +645,28 @@ public:
      */
     uint64_t getUserData2() const;
 
+    /**
+     * @brief Whether any log in the aggregate has reasoncode matching
+     * the given value.
+     *
+     * @param[in] i_rc         return code value
+     * @param[in] i_behavior   Whether to propagate this call to the rest of
+     *                         the logs in the aggregate.
+     * @return boolean info if we found a match or not
+     *
+     */
+    bool hasReasonCode(uint16_t i_rc,
+                       propagation_t i_behavior = propagation_t::PROPAGATE) const;
+
+    /**
+     * @brief  Get all error logs matching the specified type
+     * @param[in] i_rc            error type value
+     * @param[in/out] io_errlList vector of error log handlers that match the
+     *                            specified error type.
+     * @return vector of such error log entries
+     */
+    void getAllErrlOfType(uint32_t i_rc,
+                          std::vector<errlHndl_t>& io_errlList);
 
    /**
      * @brief Allows the caller to add a chunk of FFDC data in a log
@@ -799,6 +821,29 @@ public:
                           deconfig_and_gard_records * o_accumulatedRecords = nullptr,
                           propagation_t i_behavior = propagation_t::PROPAGATE,
                           bool i_toplevel = true);
+
+    /**
+     *  @brief Search through UD details sections for HW
+     *  callouts associated with a given target type
+     *
+     *  @param[in]  i_targetType    The hardware target type to search for
+     *  @param[in/out] io_targets   All the targets in the callout that match
+     *                              the specified type
+     *  @param[in]  i_behavior      Whether to propagate this call to the
+     *                              other logs in the aggregate below.
+     *  @param[in]  i_toplevel      Whether this is the toplevel call to
+     *                              queryCallouts (internal use only).
+     *
+     *  @note: This function is an aggregate function (i.e. may be called
+     *         recursively on all sub-logs).
+     *
+     *  @return bit-wise mask of matched callout_search_criteria
+     */
+    uint8_t queryHwCalloutsOfType(
+                        TARGETING::TYPE i_targetType,
+                        std::vector<TARGETING::Target*> & io_targets,
+                        propagation_t i_behavior = propagation_t::NO_PROPAGATE,
+                        bool i_toplevel = true);
 
     /**
     *  @brief Search through UD details sections for HW, clock, and part
@@ -1353,7 +1398,7 @@ private:
     void deferredDeconfigure();
 
 
-    /**
+    /*
      * @brief Compute the flattened size of an error log.  It is typical
      * to call this function for the size of buffer required, then
      * allocate a buffer, then call flatten().
@@ -1363,6 +1408,13 @@ private:
      */
     uint64_t flattenedSize();
 
+    /**
+     * @brief Expand the aggregated error logs as a vector of error logs.
+     *        There is no change in the ownership of the logs.
+     *
+     * @return vector of errlogs
+     */
+    std::vector<errlHndl_t> flattenAggregate();
 
     /**
      * @brief sort compare function, to be used when flattening an
@@ -1804,6 +1856,21 @@ inline uint16_t ErrlEntry::reasonCode() const
 }
 
 ////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+inline bool ErrlEntry::hasReasonCode(const uint16_t i_rc,
+                                     const propagation_t i_behavior) const
+{
+    return
+        ((iv_Src.iv_reasonCode == i_rc)
+         || (i_behavior == propagation_t::PROPAGATE
+             && std::any_of(cbegin(iv_aggregate_errors),
+                            cend(iv_aggregate_errors),
+                            [=](const errlHndl_t log) {
+                                return log->hasReasonCode(i_rc,
+                                                 propagation_t::PROPAGATE);
+                            })));
+}
+
 ////////////////////////////////////////////////////////////////////////////
 inline srcType_t ErrlEntry::srcType() const
 {

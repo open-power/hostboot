@@ -2866,6 +2866,39 @@ uint64_t ErrlEntry::flatten( void * o_pBuffer,
     return (l_flatSize == 0) ? 0 : (i_bufsize - l_sizeRemaining);
 } // flatten
 
+/////////////////////////////////////////////////////////////////////////////
+// Flatten the aggregated error log.
+std::vector<errlHndl_t> ErrlEntry::flattenAggregate()
+{
+    auto agg = this->aggregated();
+    return { begin(agg), end(agg) };
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+// Check for the specified error type in the agrregated errorlog list
+// and return a vector of error logs that match the error type.
+// Please Note: The caller does not own the error logs and hence
+//              may not delete them.
+void ErrlEntry::getAllErrlOfType(uint32_t i_rc,
+                                 std::vector<errlHndl_t> & io_errlList)
+{
+    for (auto l_err : flattenAggregate())
+    {
+       if (l_err->hasErrorType(i_rc, propagation_t::NO_PROPAGATE))
+       {
+          io_errlList.push_back(l_err);
+          TRACDCOMP( g_trac_errl, INFO_MRK"getAllErrlOfType: 0x%x size=%d",
+               l_err->plid(), io_errlList.size());
+       }
+    }
+
+    TRACDCOMP( g_trac_errl, INFO_MRK"getAllErrlOfType: Matched %d entries",
+               io_errlList.size());
+}
+
 
 uint64_t ErrlEntry::unflatten( const void * i_buffer,  uint64_t i_len )
 {
@@ -3130,6 +3163,79 @@ uint8_t ErrlEntry::queryCallouts(TARGETING::Target         * const i_target,
         }
     }
 
+    return criteria_matched;
+}
+
+
+/**
+ *  @brief Search through UD details sections for HW
+ *  callouts associated with a given target type
+ *
+ *  @param[in]  i_targetType : The hardware target type to search for
+ *  @param[in/out]  io_targets return targets from the callout that
+ *                   match the specified type
+ *  @param[in]  i_behavior      Whether to propagate this call to the
+ *                              other logs in the aggregate below.
+ *  @param[in]  i_toplevel      Whether this is the toplevel call to
+ *                              queryHwCallouts (internal use only).
+ *  @returns    criteria_matched  Flag to indicate if we found targets
+ */
+uint8_t
+ErrlEntry::queryHwCalloutsOfType(TARGETING::TYPE i_targetType,
+                                 TARGETING::TargetHandleList & io_targets,
+                                 const propagation_t i_behavior,
+                                 const bool i_toplevel)
+{
+    uint8_t criteria_matched = NO_MATCH;
+
+    TRACDCOMP(g_trac_errl, ENTER_MRK"queryHwCalloutsOfType targetType=%d", i_targetType);
+
+    //Loop through each section of the errorlog
+    for(auto & section : iv_SectionVector)
+    {
+        if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
+        {
+            const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
+            // Review hwasCallout.H for callouts which will have a target
+            // entry that follows the UDT callout entry
+            if (callout_ud->type == HWAS::HW_CALLOUT)
+            {
+                TARGETING::Target * l_targetFound = nullptr;
+                uint8_t * target_ptr = section->iv_pData + sizeof(HWAS::callout_ud_t);
+
+                if (! retrieveTarget(target_ptr, l_targetFound, this) )
+                {
+                    auto l_targetType = l_targetFound->getAttr<ATTR_TYPE>();
+
+                    if (l_targetType == i_targetType)
+                    {
+                        // Matched the callout target type.
+                        if (std::find(io_targets.begin(), io_targets.end(),
+                                      l_targetFound) == io_targets.end())
+                        {
+                           // Add the target as its not already present in the list
+                           io_targets.push_back(l_targetFound);
+                        }
+                        criteria_matched |= TARGET_MATCH;
+                    }
+                }
+            } // if (callout_ud...
+        } // if (section...
+    } // end of for loop
+
+    if (i_behavior == propagation_t::PROPAGATE)
+    {
+        for (const auto err : iv_aggregate_errors)
+        {
+            criteria_matched |=
+                    err->queryHwCalloutsOfType(i_targetType, io_targets,
+                                               propagation_t::PROPAGATE,
+                                               false /* not the toplevel call */);
+        }
+    }
+
+    TRACFCOMP(g_trac_errl, EXIT_MRK"queryHwCalloutsOfType Found:%d targets of %d type",
+                                    criteria_matched, i_targetType);
     return criteria_matched;
 }
 
