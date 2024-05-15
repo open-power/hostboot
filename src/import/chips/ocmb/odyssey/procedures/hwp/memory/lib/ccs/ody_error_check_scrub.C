@@ -346,6 +346,66 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Mask the refresh overrun errors
+/// @param[in] i_target OCMB target
+/// @param[out] o_ref_overrun_reg_fir_mask_save buffer to return the
+///             original value of refresh overrun register
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode mask_refresh_overrun(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       fapi2::buffer<uint64_t>& o_ref_overrun_reg_fir_mask_save)
+{
+    fapi2::buffer<uint64_t> l_ref_overrun_reg_fir_mask;
+
+    // Save the original mask value
+    FAPI_TRY( mss::getScom(i_target, scomt::ody::ODC_SRQ_MASK_RW_WCLEAR, o_ref_overrun_reg_fir_mask_save) );
+
+    // Mask the fir bits ref0_overrun_err and ref1_overrun_err
+    l_ref_overrun_reg_fir_mask.setBit<scomt::ody::ODC_SRQ_LFIR_IN02>();
+    l_ref_overrun_reg_fir_mask.setBit<scomt::ody::ODC_SRQ_LFIR_IN32>();
+    FAPI_TRY( mss::putScom(i_target, scomt::ody::ODC_SRQ_MASK_WO_OR, l_ref_overrun_reg_fir_mask) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Restore the ref0 and ref1 overrun errors
+/// @brief Mask the refresh overrun errors
+/// @param[in] i_target OCMB target
+/// @param[in] i_ref_overrun_reg_fir_mask_save buffer to check the in02 and in32 bits
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode clear_and_restore_refresh_overrun(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const fapi2::buffer<uint64_t>& i_ref_overrun_reg_fir_mask_save )
+{
+    fapi2::buffer<uint64_t> l_ref_overrun_reg_fir;
+    fapi2::buffer<uint64_t> l_ref_overrun_reg_fir_mask;
+
+    // Clear the refresh bits and write to fir register
+    l_ref_overrun_reg_fir.setBit<scomt::ody::ODC_SRQ_LFIR_IN02>();
+    l_ref_overrun_reg_fir.setBit<scomt::ody::ODC_SRQ_LFIR_IN32>();
+    FAPI_TRY( mss::putScom(i_target, scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR, l_ref_overrun_reg_fir) );
+
+    // Check the fir reg's refresh overrun bits and clear the mask only if the errors are 0
+    if (i_ref_overrun_reg_fir_mask_save.getBit<scomt::ody::ODC_SRQ_LFIR_IN02>() == 0)
+    {
+        l_ref_overrun_reg_fir_mask.setBit<scomt::ody::ODC_SRQ_LFIR_IN02>();
+    }
+
+    if ( i_ref_overrun_reg_fir_mask_save.getBit<scomt::ody::ODC_SRQ_LFIR_IN32>() == 0)
+    {
+        l_ref_overrun_reg_fir_mask.setBit<scomt::ody::ODC_SRQ_LFIR_IN32>();
+    }
+
+    FAPI_TRY( mss::putScom(i_target, scomt::ody::ODC_SRQ_MASK_RW_WCLEAR, l_ref_overrun_reg_fir_mask) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Setup to execute CCS
 /// @param[in] i_rank_info Rank info of the target
 /// @param[in] i_srank the srank that needs to be executed
@@ -355,6 +415,7 @@ fapi2::ReturnCode setup_to_execute_ecs(const mss::rank::info<mss::mc_type::ODYSS
                                        const uint8_t i_srank)
 {
     fapi2::buffer<uint64_t> l_modeq_reg;
+    fapi2::buffer<uint64_t> l_ref_overrun_reg_fir_mask;
 
     // Get port rank and target
     const auto& l_port_target = i_rank_info.get_port_target();
@@ -374,6 +435,10 @@ fapi2::ReturnCode setup_to_execute_ecs(const mss::rank::info<mss::mc_type::ODYSS
     // have nested loop in the CCS instruction otherwise the CCS will timeout
     FAPI_TRY( mss::ccs::config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg, NTTM_MODE_OFF,
               NESTED_LOOP_ON ) );
+
+    // Mask the refresh overrun FIR's while we run the ECS program
+    FAPI_TRY(mask_refresh_overrun(l_ocmb_target, l_ref_overrun_reg_fir_mask));
+
     // Adjust the polling delays because ECS takes atleast couple of minutes to run
     // Set initial delay(ns) to be couple of minutes which is 120 sec
     l_program.iv_poll.iv_initial_delay = uint64_t(120) * mss::common_timings::DELAY_1S;
@@ -386,6 +451,9 @@ fapi2::ReturnCode setup_to_execute_ecs(const mss::rank::info<mss::mc_type::ODYSS
 
     // Revert CCS regs after execution
     FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg) );
+
+    // Restore the refresh overrun FIR's while we run the ECS program
+    FAPI_TRY(clear_and_restore_refresh_overrun(l_ocmb_target, l_ref_overrun_reg_fir_mask));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -543,15 +611,22 @@ fapi2::ReturnCode memory_init_via_memdiags(const mss::rank::info<mss::mc_type::O
 {
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_rank_info.get_port_target());
     fapi2::buffer<uint64_t> l_ecc_data;
+    fapi2::buffer<uint64_t> l_fir_mask_save;
 
     // Disable the ecc mode
     FAPI_TRY(disable_ecc_mode(l_ocmb, l_ecc_data));
+
+    // Mask the mcbist program complete
+    FAPI_TRY( mss::memdiags::mask_program_complete<mss::mc_type::ODYSSEY>(l_ocmb, l_fir_mask_save) );
 
     // Call the memdiags to initialize the memory
     FAPI_TRY( mss::memdiags::sf_init<mss::mc_type::ODYSSEY>(l_ocmb, i_pattern) );
 
     // Polls for completion
     FAPI_TRY(mss::memdiags::mss_async_polling_loop<mss::mc_type::ODYSSEY>(l_ocmb));
+
+    // Clear the mcbist program complete
+    FAPI_TRY( mss::memdiags::clear_and_restore_program_complete<mss::mc_type::ODYSSEY>(l_ocmb, l_fir_mask_save) );
 
 fapi_try_exit:
     return fapi2::current_err;

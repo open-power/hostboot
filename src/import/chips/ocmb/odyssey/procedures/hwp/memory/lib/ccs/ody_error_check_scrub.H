@@ -74,6 +74,29 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const mss::rank::info<mss:
         const uint8_t i_srank,
         mss::ccs::program<mss::mc_type::ODYSSEY>& io_program );
 
+
+///
+/// @brief Mask the refresh overrun errors
+/// @param[in] i_target OCMB target
+/// @param[out] o_ref_overrun_reg_fir_mask_save buffer to return the
+///             original value of refresh overrun register
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode mask_refresh_overrun(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                       fapi2::buffer<uint64_t>& o_ref_overrun_reg_fir_mask_save);
+
+
+///
+/// @brief Restore the ref0 and ref1 overrun errors
+/// @brief Mask the refresh overrun errors
+/// @param[in] i_target OCMB target
+/// @param[in] i_ref_overrun_reg_fir_mask_save buffer to check the in02 and in32 bits
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode clear_and_restore_refresh_overrun(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const fapi2::buffer<uint64_t>& i_ref_overrun_reg_fir_mask_save );
+
 ///
 /// @brief Setup the CCS instructions for performing ECS test
 /// @param[in] i_rank_info Rank info of the target
