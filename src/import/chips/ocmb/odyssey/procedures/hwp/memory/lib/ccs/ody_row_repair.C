@@ -773,9 +773,13 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                 // Note: DIMM can only support one repair per BG, so we loop on BG and use BA=0
                 for (uint8_t l_bg = 0; l_bg < mss::ody::MAX_BG_PER_DIMM; ++l_bg)
                 {
+                    // Note: the row repair entry is in terms of 0:n for all of its instance variables
+                    // The code here needs to pass variables in from n:0
+                    // Adding in the swizzle_repair_entry should move everything to be n:0 for the insert (underlying code swizzles again)
                     mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair(REPAIR_VALID, l_dimm_rank, DRAM_POS, l_srank, l_bg,
                             BANK_POS,
                             l_row);
+                    swizzle_repair_entry(l_repair);
 #ifndef __PPE__
                     FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
                              GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
