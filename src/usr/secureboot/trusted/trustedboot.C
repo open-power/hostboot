@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -656,20 +656,25 @@ bool functionalPrimaryTpmExists()
     TARGETING::PredicateAttrVal<TARGETING::ATTR_TPM_ROLE>
                     isPrimaryTpm(TARGETING::TPM_ROLE_TPM_PRIMARY);
 
+    // Trace if it's poisoned
+    TARGETING::PredicateAttrVal<TARGETING::ATTR_TPM_POISONED>
+        poisoned(true);
+
     auto itr = std::find_if(tpmList.begin(),tpmList.end(),
-        [&present,&functional, &initialized, &isPrimaryTpm](
+        [&present,&functional, &initialized, &isPrimaryTpm, &poisoned](
             const TARGETING::Target* const i_pTpm)
         {
             const auto isPresent = present(i_pTpm);
             const auto isFunctional = functional(i_pTpm);
             const auto isInitialized = initialized(i_pTpm);
             const auto isPrimary = isPrimaryTpm(i_pTpm);
+            const auto isPoisoned = poisoned(i_pTpm);
 
             TRACFCOMP(g_trac_trustedboot,INFO_MRK
                 "functionalPrimaryTpmExists(): TPM HUID 0x%08X's state = "
-                "{present=%d,functional=%d,initialized=%d,primary=%d}",
+                "{present=%d,functional=%d,initialized=%d,primary=%d,poisoned=%d}",
                 TARGETING::get_huid(i_pTpm),
-                isPresent,isFunctional,isInitialized,isPrimary);
+                isPresent,isFunctional,isInitialized,isPrimary,isPoisoned);
 
             return (   isPrimaryTpm(i_pTpm)
                     && (   (present(i_pTpm) && functional(i_pTpm))
@@ -679,6 +684,68 @@ bool functionalPrimaryTpmExists()
     exists = (itr!=tpmList.end()) ? true : false;
 #endif
     return exists;
+}
+
+/**
+ * @brief Checks if a TPM is connected to the boot processor
+ *
+ * @param[in] i_pTpm the TPM target to check
+ *
+ * @return true if TPM is connected to the boot proc; otherwise, return false
+ */
+bool isTpmConnectedToBootProc(TARGETING::Target* i_pTpm)
+{
+    // Default to true because most systems only have a single TPM
+    bool retval = true;
+    TPMDD::tpm_info_t tpmData;
+    errlHndl_t err = nullptr;
+
+    do
+    {
+        TARGETING::Target* bootProcTarget = nullptr;
+        err = TARGETING::targetService().queryMasterProcChipTargetHandle(bootProcTarget);
+        if (nullptr != err)
+        {
+            TRACFCOMP(g_trac_trustedboot,ERR_MRK
+                "isTpmConnectedToBootProc: Failed to find master processor target");
+
+            // Break here and log error below
+            break;
+        }
+
+        err = tpmReadAttributes(i_pTpm,
+                                tpmData,
+                                TPM_LOCALITY_0);
+        if (nullptr != err)
+        {
+            TRACFCOMP(g_trac_trustedboot,ERR_MRK
+                "isTpmConnectedToBootProc: Failed to read TPM attributes");
+
+            // Break here and log error below
+            break;
+        }
+        else
+        {
+            // Check if the TPM is connected to the boot proc
+            if (tpmData.spiTarget != bootProcTarget)
+            {
+                retval = false;
+            }
+        }
+    } while ( 0 );
+
+    // Log any errors found above
+    if (err)
+    {
+        ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(err);
+        err->collectTrace(SECURE_COMP_NAME);
+        err->collectTrace(TRBOOT_COMP_NAME);
+
+        // commit this error log
+        errlCommit(err, TRBOOT_COMP_ID);
+    }
+
+    return retval;
 }
 
 void* host_update_primary_tpm( void *io_pArgs )
@@ -711,8 +778,8 @@ void* host_update_primary_tpm( void *io_pArgs )
 
         TARGETING::TargetService& tS = TARGETING::targetService();
 
-        TARGETING::Target* procTarget = nullptr;
-        err = tS.queryMasterProcChipTargetHandle( procTarget );
+        TARGETING::Target* bootProcTarget = nullptr;
+        err = tS.queryMasterProcChipTargetHandle( bootProcTarget );
         if (nullptr != err)
         {
             TRACFCOMP(g_trac_trustedboot,ERR_MRK
@@ -726,40 +793,82 @@ void* host_update_primary_tpm( void *io_pArgs )
         }
         unlock = true;
 
-        // Loop through the TPMs and figure out if they are attached
-        //  to the master or alternate master processor
-        TPMDD::tpm_info_t tpmData;
+        // Loop through the TPMs and score them to determine which TPM would be
+        // best to use as the Primary TPM based on this criteria:
+        // Best  Score 4: connected to master proc (+2) and not poisoned (+2)
+        //       Score 3: connected to alternate master proc (+1) and not poisoned (+2)
+        //       Score 2: connected to master proc (+2) and poisoned (+0)
+        //       Score 1: connected to alternate master proc (+1) and poisoned (+0)
+        // Worst Score 0: default
+        uint8_t score = 0;
+        std::pair <TARGETING::Target*, uint8_t> master_pair (nullptr,0);
+        std::pair <TARGETING::Target*, uint8_t> alternate_pair (nullptr,0);
         for (auto tpm : tpmList)
         {
-            memset(&tpmData, 0, sizeof(tpmData));
-            errlHndl_t readErr = tpmReadAttributes(tpm,
-                                                   tpmData,
-                                                   TPM_LOCALITY_0);
-            if (nullptr != readErr)
+            score = 0;
+
+            // Add 2 to the score if the TPM has not been poisoned
+            if (!(tpm->getAttr<TARGETING::ATTR_TPM_POISONED>()))
             {
-                // We are just looking for configured TPMs here
-                //  so we ignore any errors
-                delete readErr;
-                readErr = nullptr;
+                score += 2;
+            }
+
+            // Check if the TPM is connected to the boot proc
+            if (isTpmConnectedToBootProc(tpm))
+            {
+                score += 2; // +2 since connected to boot proc
+                master_pair.first = tpm;
+                master_pair.second = score;
             }
             else
             {
-                const auto originalTpmRole =
-                    tpm->getAttr<TARGETING::ATTR_TPM_ROLE>();
-
-                // If TPM connected to acting master processor, it is
-                // primary; otherwise it is backup
-                TARGETING::TPM_ROLE tpmRole =
-                    (tpmData.spiTarget == procTarget) ?
-                          TARGETING::TPM_ROLE_TPM_PRIMARY
-                        : TARGETING::TPM_ROLE_TPM_BACKUP;
-                tpm->setAttr<TARGETING::ATTR_TPM_ROLE>(tpmRole);
-
-                TRACFCOMP(g_trac_trustedboot,INFO_MRK
-                    "TPM HUID 0x%08X's original role: %d, new role: %d",
-                    TARGETING::get_huid(tpm),
-                    originalTpmRole,tpmRole);
+                score++; // +1 since connected to alternate boot proc
+                alternate_pair.first = tpm;
+                alternate_pair.second = score;
             }
+        }
+
+        // Now based on score, set Primary and Backup TPM
+        if (master_pair.first != nullptr)
+        {
+           const auto originalTpmRole = master_pair.first->getAttr<TARGETING::ATTR_TPM_ROLE>();
+           auto newTpmRole = TARGETING::TPM_ROLE_INVALID;
+
+           // if has the highest score then make it the primary tpm
+           if (master_pair.second >= alternate_pair.second)
+           {
+               newTpmRole = TARGETING::TPM_ROLE_TPM_PRIMARY;
+           }
+           else // make it the backup tpm
+           {
+               newTpmRole = TARGETING::TPM_ROLE_TPM_BACKUP;
+           }
+           master_pair.first->setAttr<TARGETING::ATTR_TPM_ROLE>(newTpmRole);
+           TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                     "TPM HUID 0x%08X's original role: %d, new role: %d (score: %d)",
+                     TARGETING::get_huid(master_pair.first),
+                     originalTpmRole, newTpmRole, master_pair.second);
+        }
+
+        if (alternate_pair.first != nullptr)
+        {
+           const auto originalTpmRole = alternate_pair.first->getAttr<TARGETING::ATTR_TPM_ROLE>();
+           auto newTpmRole = TARGETING::TPM_ROLE_INVALID;
+
+           // if has the highest score then make it the primary tpm
+           if (alternate_pair.second > master_pair.second)
+           {
+               newTpmRole = TARGETING::TPM_ROLE_TPM_PRIMARY;
+           }
+           else // make it the backup tpm
+           {
+               newTpmRole = TARGETING::TPM_ROLE_TPM_BACKUP;
+           }
+           alternate_pair.first->setAttr<TARGETING::ATTR_TPM_ROLE>(newTpmRole);
+           TRACFCOMP(g_trac_trustedboot,INFO_MRK
+                     "TPM HUID 0x%08X's original role: %d, new role: %d (score: %d)",
+                     TARGETING::get_huid(alternate_pair.first),
+                     originalTpmRole, newTpmRole, alternate_pair.second);
         }
 
         // Initialize primary TPM
@@ -1293,6 +1402,57 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
     return l_err;
 }
 
+/**
+ * @brief Look for special situation where on a MPIPL the Hostboot Bootloader (HBBL)
+ *        measured the Hostboot Base Image (HBB) to the wrong TPM.  Specifically, since
+ *        the HBBL only extends to the boot proc, this function looks for the MPIPL case
+ *        where the TPM the HBB is using is actually connected to the alternate boot proc.
+ *        In this case, if the PCR operation is for the HBB to log this incorrect extension
+ *        of the HBBL, then it returns TRUE.
+ *
+ * @param[in] i_pTpm -       The TPM that the HBB is using
+ * @param[in] i_pcr -        The PCR the extend operation is targeting
+ * @param[in] i_logMsg -     The message to be sent to the TPM log
+ * @param[in] i_logMsgSize - Size of the message to be sent to the TPM log
+ *
+ * @return true, if the special condition described above is found; else, false.
+ */
+// @TODO 620212 - Remove this workaround when/if the HBBL can extend to the correct TPM
+// in this special case
+bool pcrExtendSpecialCaseException(TpmTarget* const i_pTpm,
+                                   const TPM_Pcr i_pcr,
+                                   const uint8_t* i_logMsg,
+                                   const size_t i_logMsgSize)
+{
+    bool retval = false;
+
+    auto isMpipl = TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
+
+    TRACUCOMP(g_trac_trustedboot, "pcrExtendSpecialCaseException: TPM 0x%08X, isMpipl=%d, "
+              "i_pcr=%d, i_logMsgSize=%d",
+              TARGETING::get_huid(i_pTpm), isMpipl, i_pcr, i_logMsgSize);
+
+    // Evaluate the quick conditions first
+    if ((isMpipl == false) ||       // MPIPL check
+        (i_pcr != PCR_0) ||         // HBB only gets measured to PCR_0
+        (i_logMsgSize != 4) ||      // Make sure that it's just "HBB" and not "HBBL"
+        (i_logMsg == nullptr) ||    // Make sure there's some log message
+        ((i_logMsg != nullptr) &&   // Make sure it's "HBB"
+         (strncmp(reinterpret_cast<const char*>(i_logMsg), "HBB", 4))))
+    {
+        retval = false;
+    }
+    // Look if HBBL extended to wrong TPM (see this function header for details)
+    else if (!isTpmConnectedToBootProc(i_pTpm))
+    {
+        retval = true;
+    }
+
+    TRACUCOMP(g_trac_trustedboot, "pcrExtendSpecialCaseException: retval=%d", retval);
+
+    return retval;
+}
+
 void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                         const TPM_Pcr i_pcr,
                         const EventTypes i_eventType,
@@ -1333,6 +1493,19 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
         mutex_lock( i_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>() ) ;
         unlock = true;
 
+        // Check for special case where HBB should get measured, rather than just getting logged
+        // - see function description for details
+        // @TODO 620212 - Remove this workaround when/if the HBBL can extend to the correct TPM
+        // in this special case
+        bool l_extendToTpm = i_extendToTpm;
+        if ((l_extendToTpm == false) &&
+            pcrExtendSpecialCaseException(i_pTpm, i_pcr,  i_logMsg, i_logMsgSize))
+        {
+            TRACFCOMP(g_trac_trustedboot, INFO_MRK
+                "pcrExtendSingleTpm: Overriding inputs to measure HBB because pcrExtendSpecialCaseException is true");
+            l_extendToTpm = true;
+        }
+
         auto hwasState = i_pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
         // Log the event
@@ -1362,7 +1535,7 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                 }
             }
 
-            if (i_extendToTpm == true)
+            if (l_extendToTpm == true)
             {
                 // Perform the requested extension
                 err = tpmCmdPcrExtend2Hash(i_pTpm,
