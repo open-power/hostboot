@@ -827,11 +827,19 @@ errlHndl_t IStepDispatcher::executeAllISteps()
                                           reconfig_reason);
                         CONSOLE::flush();
 #endif
+                        // We need this outside the CONFIG_CONSOLE
+                        const auto l_mfg_reconfigAttr = l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
 
-                        TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending reboot request");
-                        // Request BMC to do power cycle that sends shutdown
-                        // and reset the host
-                        requestReboot("reconfig loop");
+                        // If mfg mode and we are attempting to deconfigure we need to skip
+                        // performing the deconfig reconfig and fall out to allow the manufacturing
+                        // handling to be performed in the next logical section of code handling below
+                        if (! ((l_mfg_reconfigAttr & TARGETING::RECONFIGURE_LOOP_DECONFIGURE) && l_manufacturingMode) )
+                        {
+                            TRACFCOMP(g_trac_initsvc, INFO_MRK"executeAllISteps: sending reboot request");
+                            // Request BMC to do power cycle that sends shutdown
+                            // and reset the host
+                            requestReboot("reconfig loop");
+                        }
                     }
                 }
             }
