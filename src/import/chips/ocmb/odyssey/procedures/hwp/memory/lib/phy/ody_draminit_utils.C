@@ -6658,23 +6658,28 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                                                io_start_bad_bits[0][2] << 8 | io_start_bad_bits[0][3];
         uint32_t l_start_bad_bits_r0_byte4_7 = io_start_bad_bits[0][4] << 24 | io_start_bad_bits[0][5] << 16 |
                                                io_start_bad_bits[0][6] << 8 | io_start_bad_bits[0][7];
-        uint16_t l_start_bad_bits_r0_byte8_9 = io_start_bad_bits[0][8] << 24 | io_start_bad_bits[0][9] << 16;
+        uint16_t l_start_bad_bits_r0_byte8_9 = io_start_bad_bits[0][8] << 8 | io_start_bad_bits[0][9];
         uint32_t l_start_bad_bits_r1_byte0_3 = io_start_bad_bits[1][0] << 24 | io_start_bad_bits[1][1] << 16 |
                                                io_start_bad_bits[1][2] << 8 | io_start_bad_bits[1][3];
         uint32_t l_start_bad_bits_r1_byte4_7 = io_start_bad_bits[1][4] << 24 | io_start_bad_bits[1][5] << 16 |
                                                io_start_bad_bits[1][6] << 8 | io_start_bad_bits[1][7];
-        uint16_t l_start_bad_bits_r1_byte8_9 = io_start_bad_bits[1][8] << 24 | io_start_bad_bits[1][9] << 16;
-        // Get the bytes into uint32_t for rank0 and rank1 for new bad bits
+        uint16_t l_start_bad_bits_r1_byte8_9 = io_start_bad_bits[1][8] << 8 | io_start_bad_bits[1][9];
+
+        // Note: Synopsys uses R2 when the chips are in redundant CS mode
+        // Pushing this up as is due to program timelines and will fix it up to incorporate redundant CS mode in a future commit
+        // R1 is ok for the IBM side as IBM uses R0 and R1
+        // Get the bytes into uint32_t for rank0 and rank1 (IBM perpsective) for new bad bits
         uint32_t l_new_bad_bits_r0_byte0_3 = io_struct.DisabledDB0LaneR0 << 24 | io_struct.DisabledDB1LaneR0 << 16 |
                                              io_struct.DisabledDB2LaneR0 << 8 | io_struct.DisabledDB3LaneR0;
         uint32_t l_new_bad_bits_r0_byte4_7 = io_struct.DisabledDB4LaneR0 << 24 | io_struct.DisabledDB5LaneR0 << 16 |
                                              io_struct.DisabledDB6LaneR0 << 8 | io_struct.DisabledDB7LaneR0;
-        uint16_t l_new_bad_bits_r0_byte8_9 = io_struct.DisabledDB8LaneR0 << 24 | io_struct.DisabledDB9LaneR0 << 16;
-        uint32_t l_new_bad_bits_r1_byte0_3 = io_struct.DisabledDB0LaneR1 << 24 | io_struct.DisabledDB1LaneR1 << 16 |
-                                             io_struct.DisabledDB2LaneR1 << 8 | io_struct.DisabledDB3LaneR1;
-        uint32_t l_new_bad_bits_r1_byte4_7 = io_struct.DisabledDB4LaneR1 << 24 | io_struct.DisabledDB5LaneR1 << 16 |
-                                             io_struct.DisabledDB6LaneR1 << 8 | io_struct.DisabledDB7LaneR1;
-        uint16_t l_new_bad_bits_r1_byte8_9 = io_struct.DisabledDB8LaneR1 << 24 | io_struct.DisabledDB9LaneR1 << 16;
+        uint16_t l_new_bad_bits_r0_byte8_9 = io_struct.DisabledDB8LaneR0 << 8 | io_struct.DisabledDB9LaneR0;
+
+        uint32_t l_new_bad_bits_r1_byte0_3 = io_struct.DisabledDB0LaneR2 << 24 | io_struct.DisabledDB1LaneR2 << 16 |
+                                             io_struct.DisabledDB2LaneR2 << 8 | io_struct.DisabledDB3LaneR2;
+        uint32_t l_new_bad_bits_r1_byte4_7 = io_struct.DisabledDB4LaneR2 << 24 | io_struct.DisabledDB5LaneR2 << 16 |
+                                             io_struct.DisabledDB6LaneR2 << 8 | io_struct.DisabledDB7LaneR2;
+        uint16_t l_new_bad_bits_r1_byte8_9 = io_struct.DisabledDB8LaneR2 << 8 | io_struct.DisabledDB9LaneR2;
 
 
         // When running training with all options, new bad_bit disables found
