@@ -230,4 +230,25 @@
   <denyForSecurityUpdate/>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_RTG_SCAN_ORDER</id>
+  <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>
+    Permits customization of the order in which RTG (repair, time, gptr) scan ring images will be
+    applied.
+
+    CUST_BEFORE_EKB        CUST pak settings apply prior to EKB specified inits
+    EKB_BEFORE_CUST        EKB specified inits apply prior to CUST pak settings
+  </description>
+  <valueType>uint8</valueType>
+  <enum>
+    CUST_BEFORE_EKB = 0,
+    EKB_BEFORE_CUST = 1
+  </enum>
+  <platInit/>
+  <writeable/>
+  <default>CUST_BEFORE_EKB</default>
+  <mrwHide/>
+</attribute>
+<!-- ******************************************************************** -->
 </attributes>
