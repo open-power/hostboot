@@ -1451,12 +1451,40 @@ void ProcSbeRetryHandler::sbe_get_ffdc_handler()
                                 l_clock_failure_type = l_ud->clockType;
                             }
 
-                            // IF the callout has a gard associated with it we need to do a reconfig loop
-                            if((l_ud->type == HWAS::HW_CALLOUT && l_ud->gardErrorType != HWAS::GARD_NULL) ||
-                               (l_ud->type == HWAS::CLOCK_CALLOUT && l_ud->clkGardErrorType != HWAS::GARD_NULL) ||
-                               (l_ud->type == HWAS::PART_CALLOUT && l_ud->partGardErrorType != HWAS::GARD_NULL))
+                            // HWSV will apply gards to the respective targets,
+                            // however BMC systems will not perform any actions (i.e. no targets modeled),
+                            // for BMC systems we filter the callouts and allow the non-HW_CALLOUTs
+                            // (i.e. CLOCK and PART callouts) to iterate thru the recovery steps
+                            // and then finally exhaust all possibilities which will then surface
+                            // to fail the istep
+                            //
+                            // For BMC we will allow the reconfig flag to be set if a HW_CALLOUT
+                            // with DECONFIG or GARD is present which will allow the re-IPL with
+                            // some state change, i.e. the deconfig or the gard, to take affect and
+                            // hopefully resolve the problem
+                            if(INITSERVICE::spBaseServicesEnabled())
                             {
-                                l_reconfigRequired = true;
+                                // IF the callout has a gard associated with it we need to do a reconfig loop
+                                if((l_ud->type == HWAS::HW_CALLOUT && l_ud->gardErrorType != HWAS::GARD_NULL) ||
+                                   (l_ud->type == HWAS::CLOCK_CALLOUT && l_ud->clkGardErrorType != HWAS::GARD_NULL) ||
+                                   (l_ud->type == HWAS::PART_CALLOUT && l_ud->partGardErrorType != HWAS::GARD_NULL))
+                                {
+                                    SBE_TRACF("sbe_get_ffdc_handler: setting l_reconfigRequired FSP");
+                                    l_reconfigRequired = true;
+                                }
+                            }
+                            else // BMC systems
+                            {
+                                // Only allow the reconfig for BMC if a prospective HW_CALLOUT will alter
+                                // the results on a re-IPL attempt, i.e. GARD
+                                // DECONFIGs will be handled implicitly to trigger reconfig loops
+                                if(l_ud->type == HWAS::HW_CALLOUT && l_ud->gardErrorType != HWAS::GARD_NULL)
+                                {
+                                    SBE_TRACF("sbe_get_ffdc_handler: setting l_reconfigRequired BMC");
+                                    l_reconfigRequired = true;
+                                }
+                                // CLOCK and PART callouts will continue to iterate thru the recovery steps
+                                // and if recovery is exhausted ultimately fail the IPL
                             }
                         }
 
