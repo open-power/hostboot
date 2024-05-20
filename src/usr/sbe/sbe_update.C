@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -130,9 +130,13 @@ P9_XIP_SECTION_NAMES_SBE(g_sectionNamesSbe);
 
 // Minimum memory (MB) needed for an SBE update space
 // Since update process reserves a 4MB space per thread, it was decided that
-// for every 8MB of cache available we'll do a new thread.
+// for every 10MB of cache available we'll do a new thread.
 // This way we should have enough cache available for background processes
-constexpr uint8_t MIN_MB_PER_SBE_IMAGE_SPACE = 8;
+//
+// Increasing the minimum size to assure enough space for
+// increases in various footprints (i.e. attributes and other demands
+// placed on the memory in current and future releases)
+constexpr uint8_t MIN_MB_PER_SBE_IMAGE_SPACE = 10;
 
 
 using namespace ERRORLOG;
