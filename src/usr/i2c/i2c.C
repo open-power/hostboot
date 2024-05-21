@@ -4614,12 +4614,22 @@ enum i2cProcessOperation
     I2C_OP_RESET   = 1,
     I2C_OP_SETUP   = 2,
 };
-errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
-                                     i2cProcessOperation i_processOperation,
-                                     uint64_t            i_busSpeed,
-                                     bool                i_functional,
-                                     i2cEngineSelect     i_engineSelect )
+
+//******************************************************************************
+// i2cProcessActiveMasters_worker function
+//******************************************************************************
+typedef struct {
+    TARGETING::Target*  target;
+    i2cProcessType      processType;
+    i2cProcessOperation processOperation;
+    uint64_t            busSpeed;
+    i2cEngineSelect     engineSelect;
+    tid_t               tid;
+} i2cProcessWork_t;
+
+void* i2cProcessActiveMasters_worker(void * io_pArgs)
 {
+    i2cProcessWork_t * l_work = static_cast<i2cProcessWork_t*>(io_pArgs);
     errlHndl_t err = nullptr;
     bool error_found = false;
     bool mutex_success = false;
@@ -4630,6 +4640,378 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
 
     // I2C Bus Speed Array
     TARGETING::ATTR_I2C_BUS_SPEED_ARRAY_type speed_array;
+    TARGETING::Target* tgt =                    l_work->target;
+    i2cProcessType      i_processType =         l_work->processType;
+    i2cProcessOperation i_processOperation =    l_work->processOperation;
+    uint64_t            i_busSpeed =            l_work->busSpeed;
+    i2cEngineSelect     i_engineSelect =        l_work->engineSelect;
+
+    TRACFCOMP( g_trac_i2c,
+               ENTER_MRK"i2cProcessActiveMasters_worker: Target=0x%X",
+               TARGETING::get_huid(tgt));
+    do
+    {
+        // Look up I2C Mode for the target
+        io_args.switches.useHostI2C = 0;
+        io_args.switches.useFsiI2C  = 0;
+        i2cSetSwitches( tgt, io_args );
+
+        // Get I2C Bus Speed Array attribute.  It will be used to
+        // determine which engines have devices on them
+        if ( !(tgt->tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>
+               (speed_array) ) )
+        {
+            TRACFCOMP( g_trac_i2c,
+                       ERR_MRK"i2cProcessActiveMasters: - Cannot find "
+                       "ATTR_I2C_BUS_SPEED_ARRAY needed for operation");
+
+            /*@
+             * @errortype
+             * @reasoncode     I2C_ATTRIBUTE_NOT_FOUND
+             * @severity       ERRORLOG_SEV_UNRECOVERABLE
+             * @moduleid       I2C_PROCESS_ACTIVE_MASTERS
+             * @userdata1      Target for the attribute
+             * @userdata2[0:31]  Operation
+             * @userdata2[32:64] Type
+             * @devdesc        ATTR_I2C_BUS_SPEED_ARRAY not found
+             * @custdesc       I2C configuration data missing
+             */
+            err = new ERRORLOG::ErrlEntry(
+                                          ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          I2C_PROCESS_ACTIVE_MASTERS,
+                                          I2C_ATTRIBUTE_NOT_FOUND,
+                                          TARGETING::get_huid(tgt),
+                                          TWO_UINT32_TO_UINT64(
+                                                               i_processOperation,
+                                                               i_processType),
+                                          ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
+
+            err->collectTrace( I2C_COMP_NAME, 256);
+
+            // We still need to reset the other I2C engines
+            errlCommit( err, I2C_COMP_ID );
+            err = nullptr;
+            break;
+        }
+
+        for( uint8_t engine = 0;
+             engine < I2C_BUS_ATTR_MAX_ENGINE;
+             engine++ )
+        {
+            io_args.engine = engine;
+
+            // Only reset engine 0 for FSI
+            if ( (i_processOperation & I2C_OP_RESET ) &&
+                 ( engine != FSI_ENGINE_A ) &&
+                 (io_args.switches.useFsiI2C == 1) )
+            {
+                TRACUCOMP( g_trac_i2c,INFO_MRK
+                           "Only reset engine 0 for FSI");
+                continue;
+            }
+
+            // Only operate on selected engines
+            if ( ! ( i2cEngineToEngineSelect(engine) & i_engineSelect ) )
+            {
+                TRACFCOMP( g_trac_i2c,INFO_MRK
+                           "Skipping engine %d because i_engineSelect=0x%.2X",
+                           engine, i_engineSelect );
+                continue;
+            }
+
+
+            // Look for any device on this engine based on speed_array
+            bool skip = true;
+            size_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
+            if (io_args.switches.useFsiI2C == 1)
+            {
+                TRACUCOMP( g_trac_i2c,INFO_MRK
+                           "Using FSI I2c, use numports: %d", FSI_MODE_MAX_PORT);
+                l_numPorts = FSI_MODE_MAX_PORT;
+            }
+            for ( size_t j = 0; j < l_numPorts; j++ )
+            {
+                size_t logical_engine = engine;
+                size_t logical_port = j;
+                if (io_args.switches.useFsiI2C == 1)
+                {
+                    setLogicalFsiEnginePort(logical_engine, logical_port);
+                }
+
+                if ( speed_array[logical_engine][logical_port] != 0 )
+                {
+                    skip = false;
+                    io_args.port = j; // use this port
+                    break;
+                }
+            }
+
+            // PHYP wants all of the engines set regardless if hostboot
+            // believes there is a device on the bus.
+            if ( i_processOperation == I2C_OP_SETUP )
+            {
+                skip = false;
+                io_args.port = 0;
+            }
+
+            if ( skip == true )
+            {
+                TRACUCOMP( g_trac_i2c,INFO_MRK
+                           "i2cProcessActiveMasters: no devices found on "
+                           "tgt=0x%X engine=%d",
+                           TARGETING::get_huid(tgt), engine );
+                continue;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_i2c,INFO_MRK
+                           "i2cProcessActiveMasters: Reset/Setup tgt=0x%X "
+                           "engine=%d",
+                           TARGETING::get_huid(tgt), engine );
+            }
+
+            error_found = false;
+            mutex_needs_unlock = false;
+
+            // Get the mutex for the requested engine
+            mutex_success = i2cGetEngineMutex( tgt,
+                                               io_args,
+                                               engineLock );
+
+
+            if( !mutex_success )
+            {
+                TRACUCOMP( g_trac_i2c,
+                           ERR_MRK"Error in i2cProcessActiveMasters: "
+                           "i2cGetEngineMutex() failed to get mutex. "
+                           "skipping reset on tgt=0x%X engine =%d",
+                           TARGETING::get_huid(tgt), engine );
+                continue;
+            }
+
+            // Lock on this engine
+            TRACUCOMP( g_trac_i2c,
+                       INFO_MRK"i2cProcessActiveMasters: Obtaining lock for "
+                       "engine: %d", engine );
+            recursive_mutex_lock( engineLock );
+            mutex_needs_unlock = true;
+            TRACUCOMP( g_trac_i2c,INFO_MRK
+                       "i2cProcessActiveMasters: Locked on engine: %d",
+                       engine );
+
+            TRACUCOMP( g_trac_i2c,INFO_MRK
+                       "i2cProcessActiveMasters: Setup/Reset "
+                       "0x%X engine = %d",
+                       TARGETING::get_huid(tgt), engine );
+
+            // Setup Bus Speed
+            err = i2cSetBusVariables ( tgt,
+                                       i_busSpeed,
+                                       io_args );
+            if( err )
+            {
+                error_found = true;
+
+                TRACFCOMP( g_trac_i2c,ERR_MRK
+                           "i2cProcessActiveMasters: Error Setting Bus "
+                           "Variables: tgt=0x%X engine=%d",
+                           TARGETING::get_huid(tgt), engine );
+
+                // If we get error skip resetting this target, but still
+                // need to reset other I2C engines
+                errlCommit( err,
+                            I2C_COMP_ID );
+
+                // Don't continue or break - need mutex unlock
+            }
+
+            // Now reset or setup the engine/bus
+            if ( error_found == false )
+            {
+                switch (i_processOperation)
+                {
+                case I2C_OP_RESET:
+                    {
+                        // Before reseting the engine, clear any atomic locks
+                        err = forceClearAtomicLock( tgt,
+                                                    i2cEngineToEngineSelect(engine));
+                        if( err )
+                        {
+                            TRACFCOMP( g_trac_i2c,ERR_MRK
+                                       "i2cProcessActiveMasters: Error back from forceClearAtomicLock "
+                                       TRACE_ERR_FMT
+                                       "tgt=0x%X, engine=%d",
+                                       TRACE_ERR_ARGS(err),
+                                       TARGETING::get_huid(tgt), engine);
+
+                            // If we get errors on the call, we still need
+                            // to reset the other I2C engines
+                            err->collectTrace( I2C_COMP_NAME, 256);
+                            errlCommit( err,
+                                        I2C_COMP_ID );
+
+                            // Don't continue or break - need mutex unlock
+                        }
+
+                        const i2c_reset_level reset_level = FORCE_UNLOCK_RESET;
+
+                        TRACFCOMP( g_trac_i2c,INFO_MRK
+                                   "i2cProcessActiveMasters: reset engine: %d, "
+                                   "reset_level=%d",
+                                   engine, reset_level );
+
+                        err = i2cReset ( tgt, io_args,
+                                         reset_level );
+                        if( err )
+                        {
+                            TRACFCOMP( g_trac_i2c,ERR_MRK
+                                       "i2cProcessActiveMasters: Error reseting "
+                                       "tgt=0x%X, engine=%d",
+                                       TARGETING::get_huid(tgt), engine);
+
+                            // If we get errors on the reset, we still need
+                            // to reset the other I2C engines
+                            err->collectTrace( I2C_COMP_NAME, 256);
+                            errlCommit( err,
+                                        I2C_COMP_ID );
+
+                            // Don't continue or break - need mutex unlock
+                        }
+                        break;
+                    } // end of case I2C_OP_RESET
+
+                case I2C_OP_SETUP:
+                    {
+                        // Check that engine is in a good state - this
+                        // function looks for errors and that all previous
+                        // commands are complete
+                        err = i2cWaitForCmdComp(tgt,
+                                                io_args );
+
+                        if( err )
+                        {
+                            TRACFCOMP(g_trac_i2c, ERR_MRK
+                                      "i2cProcessActiveMasters: Error from "
+                                      "i2cWaitForCmdComp tgt=0x%X, engine=%d. "
+                                      "Will reset",
+                                      TARGETING::get_huid(tgt), engine);
+
+                            // Reset to recover the engine
+                            errlHndl_t err_reset = nullptr;
+                            err_reset = i2cReset ( tgt, io_args,
+                                                   FORCE_UNLOCK_RESET);
+
+                            if( err_reset )
+                            {
+                                TRACFCOMP( g_trac_i2c,ERR_MRK
+                                           "i2cProcessActiveMasters: Error reseting"
+                                           " tgt=0x%X, engine=%d",
+                                           TARGETING::get_huid(tgt), engine);
+
+
+                                // commit reset error and previous error
+                                // with the same plid
+                                err_reset->plid(err->plid());
+                                TRACFCOMP(g_trac_i2c,
+                                          "i2cProcessActiveMasters: comitting err"
+                                          "(eid=0x%X) and err_reset(eid=0x%X) "
+                                          "with plid 0x%X",
+                                          err->eid(), err_reset->eid(),
+                                          err->plid());
+
+                                err_reset->collectTrace( I2C_COMP_NAME, 256);
+                                err->collectTrace( I2C_COMP_NAME, 256);
+
+                                errlCommit( err_reset,
+                                            I2C_COMP_ID );
+
+                                errlCommit( err,
+                                            I2C_COMP_ID );
+
+                                // Don't continue or break-need mutex unlock
+                            }
+                            else
+                            {
+                                // The reset recovered the engine, so
+                                // just delete the original error log
+                                TRACFCOMP(g_trac_i2c,
+                                          "i2cProcessActiveMasters: Reset worked "
+                                          "so deleting previous err "
+                                          "eid=0x%X and plid=0x%X",
+                                          err->eid(), err->plid());
+                                delete err;
+                                err = nullptr;
+                            }
+                        }
+
+                        // Set Mode Register
+                        mode_reg_t mode;
+                        mode.value = 0x0;
+
+                        TRACFCOMP( g_trac_i2c,INFO_MRK
+                                   "i2cProcessActiveMasters: setup engine: %d",
+                                   engine );
+
+                        mode.bit_rate_div = io_args.bit_rate_divisor;
+
+                        err = i2cRegisterOp( DeviceFW::WRITE,
+                                             tgt,
+                                             &mode.value,
+                                             I2C_REG_MODE,
+                                             io_args );
+                        if( err )
+                        {
+                            TRACFCOMP( g_trac_i2c,
+                                       ERR_MRK"i2cProcessActiveMasters:"
+                                       " Error setting mode for"
+                                       " Processor, engine: %d",
+                                       engine );
+
+                            // If we get errors on these reads,
+                            // we still need to continue
+                            // to program the I2C Bus Divisor for the rest
+                            err->collectTrace( I2C_COMP_NAME, 256);
+                            errlCommit( err,
+                                        I2C_COMP_ID );
+                        }
+                        break;
+                    } // end of case I2C_OP_SETUP
+
+                default:
+                    assert (0,"i2cProcessActiveMasters: "
+                            "invalid operation");
+
+                } // end of i_processOperation switch statement
+            } // end of reset or setup the engine/bus
+
+            // Check if we need to unlock the mutex
+            if ( mutex_needs_unlock == true )
+            {
+                // Unlock
+                recursive_mutex_unlock( engineLock );
+                TRACUCOMP( g_trac_i2c,INFO_MRK
+                           "i2cProcessActiveMasters: Unlocked engine: %d",
+                           engine );
+            }
+        } // end for-loop engine
+    } while( 0 );
+
+    TRACFCOMP( g_trac_i2c,
+               EXIT_MRK"i2cProcessActiveMasters_worker: Target=0x%X err rc=0x%X, plid=0x%X",
+               TARGETING::get_huid(tgt), ERRL_GETRC_SAFE(err), ERRL_GETPLID_SAFE(err));
+
+    return NULL;
+}
+
+errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
+                                     i2cProcessOperation i_processOperation,
+                                     uint64_t            i_busSpeed,
+                                     bool                i_functional,
+                                     i2cEngineSelect     i_engineSelect )
+{
+    errlHndl_t err = nullptr;
+    std::list<i2cProcessWork_t*> l_worker_data;
+    misc_args_t io_args;
 
     TRACFCOMP( g_trac_i2c,
                ENTER_MRK"i2cProcessActiveMasters(): Type=0x%X "
@@ -4711,44 +5093,6 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 continue;
             }
 
-
-            // Get I2C Bus Speed Array attribute.  It will be used to
-            // determine which engines have devices on them
-            if ( !(tgt->tryGetAttr<TARGETING::ATTR_I2C_BUS_SPEED_ARRAY>
-                                           (speed_array) ) )
-            {
-                TRACFCOMP( g_trac_i2c,
-                           ERR_MRK"i2cProcessActiveMasters: - Cannot find "
-                           "ATTR_I2C_BUS_SPEED_ARRAY needed for operation");
-
-                /*@
-                 * @errortype
-                 * @reasoncode     I2C_ATTRIBUTE_NOT_FOUND
-                 * @severity       ERRORLOG_SEV_UNRECOVERABLE
-                 * @moduleid       I2C_PROCESS_ACTIVE_MASTERS
-                 * @userdata1      Target for the attribute
-                 * @userdata2[0:31]  Operation
-                 * @userdata2[32:64] Type
-                 * @devdesc        ATTR_I2C_BUS_SPEED_ARRAY not found
-                 * @custdesc       I2C configuration data missing
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                        I2C_PROCESS_ACTIVE_MASTERS,
-                                        I2C_ATTRIBUTE_NOT_FOUND,
-                                        TARGETING::get_huid(tgt),
-                                        TWO_UINT32_TO_UINT64(
-                                            i_processOperation,
-                                            i_processType),
-                                        ERRORLOG::ErrlEntry::ADD_SW_CALLOUT );
-
-                err->collectTrace( I2C_COMP_NAME, 256);
-
-                // We still need to reset the other I2C engines
-                errlCommit( err, I2C_COMP_ID );
-                continue;
-            }
-
             // if i_functional == false then all possible returned in chipList,
             // so need to check if each target is present
             // -- master target defaulted to present
@@ -4776,311 +5120,38 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
                 }
             }
 
-            for( uint8_t engine = 0;
-                 engine < I2C_BUS_ATTR_MAX_ENGINE;
-                 engine++ )
-            {
-                io_args.engine = engine;
+            //Kick off a worker thread to actually do the reset
+            i2cProcessWork_t* l_pWorkData =
+                        static_cast<i2cProcessWork_t*>(malloc(sizeof(i2cProcessWork_t)));
+            l_pWorkData->target         = tgt;
+            l_pWorkData->processType    = i_processType;
+            l_pWorkData->processOperation = i_processOperation;
+            l_pWorkData->busSpeed       = i_busSpeed;
+            l_pWorkData->engineSelect   = i_engineSelect;
+            l_worker_data.push_back(l_pWorkData);
 
-                // Only reset engine 0 for FSI
-                if ( (i_processOperation & I2C_OP_RESET ) &&
-                     ( engine != FSI_ENGINE_A ) &&
-                     (io_args.switches.useFsiI2C == 1) )
-                {
-                    TRACUCOMP( g_trac_i2c,INFO_MRK
-                        "Only reset engine 0 for FSI");
-                    continue;
-                }
-
-                // Only operate on selected engines
-                if ( ! ( i2cEngineToEngineSelect(engine) & i_engineSelect ) )
-                {
-                    TRACFCOMP( g_trac_i2c,INFO_MRK
-                        "Skipping engine %d because i_engineSelect=0x%.2X",
-                        engine, i_engineSelect );
-                    continue;
-                }
-
-
-                // Look for any device on this engine based on speed_array
-                bool skip = true;
-                size_t l_numPorts = I2C_BUS_ATTR_MAX_PORT;
-                if (io_args.switches.useFsiI2C == 1)
-                {
-                    TRACUCOMP( g_trac_i2c,INFO_MRK
-                      "Using FSI I2c, use numports: %d", FSI_MODE_MAX_PORT);
-                    l_numPorts = FSI_MODE_MAX_PORT;
-                }
-                for ( size_t j = 0; j < l_numPorts; j++ )
-                {
-                    size_t logical_engine = engine;
-                    size_t logical_port = j;
-                    if (io_args.switches.useFsiI2C == 1)
-                    {
-                        setLogicalFsiEnginePort(logical_engine, logical_port);
-                    }
-
-                    if ( speed_array[logical_engine][logical_port] != 0 )
-                    {
-                        skip = false;
-                        io_args.port = j; // use this port
-                        break;
-                    }
-                }
-
-                // PHYP wants all of the engines set regardless if hostboot
-                // believes there is a device on the bus.
-                if ( i_processOperation == I2C_OP_SETUP )
-                {
-                    skip = false;
-                    io_args.port = 0;
-                }
-
-                if ( skip == true )
-                {
-                    TRACUCOMP( g_trac_i2c,INFO_MRK
-                              "i2cProcessActiveMasters: no devices found on "
-                              "tgt=0x%X engine=%d",
-                              TARGETING::get_huid(tgt), engine );
-                    continue;
-                }
-                else
-                {
-                    TRACFCOMP( g_trac_i2c,INFO_MRK
-                             "i2cProcessActiveMasters: Reset/Setup tgt=0x%X "
-                             "engine=%d",
-                             TARGETING::get_huid(tgt), engine );
-                }
-
-                error_found = false;
-                mutex_needs_unlock = false;
-
-                // Get the mutex for the requested engine
-                mutex_success = i2cGetEngineMutex( tgt,
-                                                   io_args,
-                                                   engineLock );
-
-
-                if( !mutex_success )
-                {
-                    TRACUCOMP( g_trac_i2c,
-                               ERR_MRK"Error in i2cProcessActiveMasters: "
-                               "i2cGetEngineMutex() failed to get mutex. "
-                               "skipping reset on tgt=0x%X engine =%d",
-                               TARGETING::get_huid(tgt), engine );
-                    continue;
-                }
-
-                // Lock on this engine
-                TRACUCOMP( g_trac_i2c,
-                       INFO_MRK"i2cProcessActiveMasters: Obtaining lock for "
-                       "engine: %d", engine );
-                recursive_mutex_lock( engineLock );
-                mutex_needs_unlock = true;
-                TRACUCOMP( g_trac_i2c,INFO_MRK
-                           "i2cProcessActiveMasters: Locked on engine: %d",
-                           engine );
-
-                TRACUCOMP( g_trac_i2c,INFO_MRK
-                           "i2cProcessActiveMasters: Setup/Reset "
-                           "0x%X engine = %d",
-                           TARGETING::get_huid(tgt), engine );
-
-                // Setup Bus Speed
-                err = i2cSetBusVariables ( tgt,
-                                           i_busSpeed,
-                                           io_args );
-                if( err )
-                {
-                    error_found = true;
-
-                    TRACFCOMP( g_trac_i2c,ERR_MRK
-                               "i2cProcessActiveMasters: Error Setting Bus "
-                               "Variables: tgt=0x%X engine=%d",
-                               TARGETING::get_huid(tgt), engine );
-
-                    // If we get error skip resetting this target, but still
-                    // need to reset other I2C engines
-                    errlCommit( err,
-                                I2C_COMP_ID );
-
-                    // Don't continue or break - need mutex unlock
-                }
-
-                // Now reset or setup the engine/bus
-                if ( error_found == false )
-                {
-                    switch (i_processOperation)
-                    {
-                        case I2C_OP_RESET:
-                        {
-                            // Before reseting the engine, clear any atomic locks
-                            err = forceClearAtomicLock( tgt,
-                                                        i2cEngineToEngineSelect(engine));
-                            if( err )
-                            {
-                                TRACFCOMP( g_trac_i2c,ERR_MRK
-                                   "i2cProcessActiveMasters: Error back from forceClearAtomicLock "
-                                   TRACE_ERR_FMT
-                                   "tgt=0x%X, engine=%d",
-                                   TRACE_ERR_ARGS(err),
-                                   TARGETING::get_huid(tgt), engine);
-
-                                // If we get errors on the call, we still need
-                                // to reset the other I2C engines
-                                err->collectTrace( I2C_COMP_NAME, 256);
-                                errlCommit( err,
-                                    I2C_COMP_ID );
-
-                                // Don't continue or break - need mutex unlock
-                            }
-
-                            const i2c_reset_level reset_level = FORCE_UNLOCK_RESET;
-
-                            TRACFCOMP( g_trac_i2c,INFO_MRK
-                                  "i2cProcessActiveMasters: reset engine: %d, "
-                                  "reset_level=%d",
-                                  engine, reset_level );
-
-                            err = i2cReset ( tgt, io_args,
-                                             reset_level );
-                            if( err )
-                            {
-                                TRACFCOMP( g_trac_i2c,ERR_MRK
-                                   "i2cProcessActiveMasters: Error reseting "
-                                   "tgt=0x%X, engine=%d",
-                                   TARGETING::get_huid(tgt), engine);
-
-                                // If we get errors on the reset, we still need
-                                // to reset the other I2C engines
-                                err->collectTrace( I2C_COMP_NAME, 256);
-                                errlCommit( err,
-                                    I2C_COMP_ID );
-
-                                // Don't continue or break - need mutex unlock
-                            }
-                            break;
-                        } // end of case I2C_OP_RESET
-
-                        case I2C_OP_SETUP:
-                        {
-                            // Check that engine is in a good state - this
-                            // function looks for errors and that all previous
-                            // commands are complete
-                            err = i2cWaitForCmdComp(tgt,
-                                                    io_args );
-
-                            if( err )
-                            {
-                                TRACFCOMP(g_trac_i2c, ERR_MRK
-                                    "i2cProcessActiveMasters: Error from "
-                                    "i2cWaitForCmdComp tgt=0x%X, engine=%d. "
-                                    "Will reset",
-                                    TARGETING::get_huid(tgt), engine);
-
-                                // Reset to recover the engine
-                                errlHndl_t err_reset = nullptr;
-                                err_reset = i2cReset ( tgt, io_args,
-                                            FORCE_UNLOCK_RESET);
-
-                                if( err_reset )
-                                {
-                                    TRACFCOMP( g_trac_i2c,ERR_MRK
-                                       "i2cProcessActiveMasters: Error reseting"
-                                       " tgt=0x%X, engine=%d",
-                                       TARGETING::get_huid(tgt), engine);
-
-
-                                    // commit reset error and previous error
-                                    // with the same plid
-                                    err_reset->plid(err->plid());
-                                    TRACFCOMP(g_trac_i2c,
-                                        "i2cProcessActiveMasters: comitting err"
-                                        "(eid=0x%X) and err_reset(eid=0x%X) "
-                                        "with plid 0x%X",
-                                        err->eid(), err_reset->eid(),
-                                        err->plid());
-
-                                    err_reset->collectTrace( I2C_COMP_NAME, 256);
-                                    err->collectTrace( I2C_COMP_NAME, 256);
-
-                                    errlCommit( err_reset,
-                                        I2C_COMP_ID );
-
-                                    errlCommit( err,
-                                        I2C_COMP_ID );
-
-                                    // Don't continue or break-need mutex unlock
-                                }
-                                else
-                                {
-                                    // The reset recovered the engine, so
-                                    // just delete the original error log
-                                   TRACFCOMP(g_trac_i2c,
-                                        "i2cProcessActiveMasters: Reset worked "
-                                        "so deleting previous err "
-                                        "eid=0x%X and plid=0x%X",
-                                        err->eid(), err->plid());
-                                    delete err;
-                                    err = nullptr;
-                                }
-                            }
-
-                            // Set Mode Register
-                            mode_reg_t mode;
-                            mode.value = 0x0;
-
-                            TRACFCOMP( g_trac_i2c,INFO_MRK
-                              "i2cProcessActiveMasters: setup engine: %d",
-                              engine );
-
-                            mode.bit_rate_div = io_args.bit_rate_divisor;
-
-                            err = i2cRegisterOp( DeviceFW::WRITE,
-                                                 tgt,
-                                                 &mode.value,
-                                                 I2C_REG_MODE,
-                                                 io_args );
-                            if( err )
-                            {
-                                TRACFCOMP( g_trac_i2c,
-                                   ERR_MRK"i2cProcessActiveMasters:"
-                                          " Error setting mode for"
-                                          " Processor, engine: %d",
-                                          engine );
-
-                                // If we get errors on these reads,
-                                // we still need to continue
-                                // to program the I2C Bus Divisor for the rest
-                                err->collectTrace( I2C_COMP_NAME, 256);
-                                errlCommit( err,
-                                        I2C_COMP_ID );
-                            }
-                            break;
-                        } // end of case I2C_OP_SETUP
-
-                        default:
-                            assert (0,"i2cProcessActiveMasters: "
-                                      "invalid operation");
-
-                     } // end of i_processOperation switch statement
-                } // end of reset or setup the engine/bus
-
-                // Check if we need to unlock the mutex
-                if ( mutex_needs_unlock == true )
-                {
-                    // Unlock
-                    recursive_mutex_unlock( engineLock );
-                    TRACUCOMP( g_trac_i2c,INFO_MRK
-                              "i2cProcessActiveMasters: Unlocked engine: %d",
-                              engine );
-                }
-
-            } // end for-loop engine
-
+            // Create child thread to do the I2C Op per proc
+            tid_t l_progTid = task_create(&i2cProcessActiveMasters_worker, l_pWorkData);
+            assert(( l_progTid > 0 ), "i2cProcessActiveMasters task_create failed");
+            l_pWorkData->tid = l_progTid; //safe to touch as never accessed by worker thread
         } // end for-loop chip
 
     } while( 0 );
+
+
+    //Clean up from worker threads
+    for(i2cProcessWork_t* l_pWorkData : l_worker_data)
+    {
+        //Wait for task to complete
+        int l_childsts    = 0;
+        void *l_childrc = NULL;
+        task_wait_tid( l_pWorkData->tid, &l_childsts, &l_childrc );
+
+        //free worker data allocated in main loop
+        free(l_pWorkData);
+        l_pWorkData = nullptr;
+    }
+
 
     TRACFCOMP( g_trac_i2c,
                EXIT_MRK"i2cProcessActiveMasters(): err rc=0x%X, plid=0x%X",
