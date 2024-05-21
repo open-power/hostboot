@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -155,6 +155,14 @@ namespace fapi
 
     /**
      * @brief Defines the HWPF error log user detail data sections
+     *   These values need to be kept in sync with hwpf_fapi2_reasoncodes.H
+     *   NOTE: No additions should be made to this range without explicit
+     *   review of the BMC and FSP parsers respectively (i.e. b0900.py and
+     *   hwpfUdParserFactory.H)
+     *
+     *   These UserDetail sections will leverage the already existing
+     *   automatic generated parsers, i.e. HbfwPlatUserDetailsParserHwpRcValue,
+     *   HbfwPlatUserDetailsParserHwpFfdc and HwpUserDetailsParserIstep.
      */
     enum hwpfUserDetailDataSubSection
     {

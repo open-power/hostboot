@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -40,11 +40,31 @@ class errludP_hwpistep:
         jsonStr = json.dumps(d)
         return jsonStr
 
+    # The following are basic hex dumps for BAD DQ UserDetail Sections
+    # see hwpf_fapi2_reasoncodes.H
+
+    def HwpUserDetailsParserSpecialOneByte(ver, data):
+        # 1 byte   :  ONE BYTE OF DATA
+        d = dict()
+        i = 0
+        d['ONE_BYTE'], i=hexConcat(data, i, i+1)
+
+        jsonStr = json.dumps(d)
+        return jsonStr
+
 #Dictionary with parser functions for each subtype
 #Values are from hwpfUserDetailDataSubSection enum in src/include/usr/isteps/hwpf_reasoncodes.H
 hwpfUserDetailDataSubSection = { 1: "hbfwErrLookupHwpRc", #Generated
                                  2: "hbfwParseHwpFfdc",  #Generated
-                                 3: "HwpUserDetailsParserIstep" }
+                                 3: "HwpUserDetailsParserIstep",
+                                 10: "HwpUserDetailsParserSpecialOneByte",
+                                 11: "HwpUserDetailsParserSpecialOneByte",
+                                 12: "HwpUserDetailsParserSpecialOneByte",
+                                 13: "HwpUserDetailsParserSpecialOneByte",
+                                 14: "HwpUserDetailsParserSpecialOneByte",
+                                 15: "HwpUserDetailsParserSpecialOneByte",
+                                 16: "HwpUserDetailsParserSpecialOneByte",
+                                 17: "HwpUserDetailsParserSpecialOneByte" }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data)
