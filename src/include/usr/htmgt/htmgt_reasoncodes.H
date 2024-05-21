@@ -51,6 +51,7 @@ namespace HTMGT
         HTMGT_MOD_MEM_THROTTLE_OVERSUB  = 0x25,
         HTMGT_MOD_MEM_PREHEAT           = 0x26,
         HTMGT_MOD_UPDATE_DIMM_POWER_UTIL = 0x27,
+        HTMGT_MOD_WRITE_MEM_CONFIG      = 0x28,
         HTMGT_MOD_MRW_POWER_LIMIT       = 0x40,
         HTMGT_MOD_PS_CONFIG_POWER_LIMIT = 0x41,
         HTMGT_MOD_OCC_POLL              = 0x76,

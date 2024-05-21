@@ -377,12 +377,15 @@ void writeMemConfigData( uint8_t *& o_data,
         TargetHandleList port_list;
         getChildAffinityTargets(port_list, i_target, CLASS_UNIT, TYPE_MEM_PORT);
         size_t port = 0;
+        bool invalidData = false;
         for(const auto & portTarget : port_list)
         {
-            if (!portTarget->tryGetAttr<ATTR_MEM_EFF_FREQ>(clockFreq[port]))
+            if ((!portTarget->tryGetAttr<ATTR_MEM_EFF_FREQ>(clockFreq[port])) ||
+                (clockFreq[port] == 0))
             {
                 TMGT_ERR("writeMemConfigData: Failed to get MEM_EFF_FREQ for port[%d]",
                          port);
+                invalidData = true;
             }
             if (G_memory_type == OCC_MEM_TYPE_ODYSSEY)
             {
@@ -396,13 +399,17 @@ void writeMemConfigData( uint8_t *& o_data,
                              (burst == MEM_BURST_LENGTH_BL32_OTF))
                         burstLen[port] = 32;
                     else
+                    {
                         TMGT_ERR("writeMemConfigData: Unsuppored MEM_BURST_LENGTH of %d "
                                  "for port[%d]", burst, port);
+                        invalidData = true;
+                    }
                 }
                 else
                 {
                     TMGT_ERR("writeMemConfigData: Failed to get MEM_BURST_LENGTH for "
                              "port[%d]", port);
+                    invalidData = true;
                 }
             }
             else // Explorer (DDR4)
@@ -410,6 +417,27 @@ void writeMemConfigData( uint8_t *& o_data,
                 burstLen[port] = 8;
             }
             if (++port == 2) break;
+        }
+        if (invalidData)
+        {
+            /*@
+             * @errortype
+             * @subsys EPUB_FIRMWARE_SP
+             * @reasoncode HTMGT_RC_INVALID_DATA
+             * @moduleid HTMGT_MOD_WRITE_MEM_CONFIG
+             * @userdata1 memory type
+             * @userdata2 burst 0/1
+             * @userdata3 clock freq 0
+             * @userdata4 clock freq 1
+             * @devdesc Invalid OCMB port burst/clock data
+             * @custdesc An internal firmware error occurred
+             */
+            errlHndl_t l_err = nullptr;
+            bldErrLog(l_err, HTMGT_MOD_WRITE_MEM_CONFIG,
+                      HTMGT_RC_INVALID_DATA,
+                      G_memory_type, (burstLen[0]<<16)|burstLen[1], clockFreq[0], clockFreq[1],
+                      ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+            ERRORLOG::errlCommit(l_err, HTMGT_COMP_ID);
         }
         o_data[io_index++] = (clockFreq[0] >> 8) & 0xFF;
         o_data[io_index++] = clockFreq[0] & 0xFF;
@@ -869,18 +897,23 @@ uint8_t ocmbInit(Occ *i_occ,
                 continue;
             }
 
-            // Get list of functional memory ports associated with this OCMB_CHIP
+            // Add OCMB DTSs
+            numSets += addOcmbInternalDts(o_data, ocmb, l_ocmb_num, l_memType, io_index);
+            // G_memory_type gets set in addOcmbInternalDts()
             uint8_t max_ports_per_ocmb = HTMGT_MAX_PORT_PER_OCMB_CHIP;
+            if (G_memory_type == OCC_MEM_TYPE_ODYSSEY)
+            {
+                max_ports_per_ocmb = HTMGT_MAX_PORT_PER_OCMB_CHIP_ODYSSEY;
+            }
+            if (!isDIMMs)
+            {
+                numSets += addOcmbExternalDts(o_data, ocmb, l_memType, io_index);
+            }
+
+            // Get list of functional memory ports associated with this OCMB_CHIP
             getChildAffinityTargets(port_list, ocmb, CLASS_UNIT, TYPE_MEM_PORT);
             for(const auto & port_target : port_list)
             {
-                numSets += addOcmbInternalDts(o_data, ocmb, l_ocmb_num, l_memType, io_index);
-                // G_memory_type gets set in addOcmbInternalDts()
-                if (G_memory_type == OCC_MEM_TYPE_ODYSSEY)
-                {
-                    max_ports_per_ocmb = HTMGT_MAX_PORT_PER_OCMB_CHIP_ODYSSEY;
-                }
-
                 // unit identifies unique Port under an OCMB
                 const uint8_t port_unit = port_target->getAttr<TARGETING::ATTR_CHIP_UNIT>();
                 if (port_unit > max_ports_per_ocmb)
@@ -888,11 +921,6 @@ uint8_t ocmbInit(Occ *i_occ,
                     TMGT_ERR("ocmbInit: OCMB%d / Port%d - Ignored due to invalid port (max=%d)",
                              l_ocmb_num, port_unit, max_ports_per_ocmb);
                     continue;
-                }
-
-                if (!isDIMMs)
-                {
-                    numSets += addOcmbExternalDts(o_data, ocmb, l_memType, io_index);
                 }
 
                 // Get list of functional DIMMs associated with this port
@@ -1019,8 +1047,8 @@ void getMemConfigMessageData(Occ *i_occ,
 /*                                                                              */
 /* End Function Specification ***************************************************/
 uint8_t ocmbPowerData(Occ *i_occ,
-                 uint8_t* o_data,
-                 uint32_t & io_index)
+                      uint8_t* o_data,
+                      uint32_t & io_index)
 {
     TargetHandleList ocmb_list;
     uint8_t numOcmbs = 0;
@@ -1034,7 +1062,8 @@ uint8_t ocmbPowerData(Occ *i_occ,
     ATTR_MODEL_type l_procModel = proc->getAttr<ATTR_MODEL>();
     if( l_procModel == TARGETING::MODEL_POWER10 )
     {
-        ATTR_DIMM_POWER_type dimmPower;
+        ATTR_DIMM_POWER_type dimmFullPower;
+        ATTR_DIMM_PREHEAT_POWER_type dimmPreheatPower;
         ATTR_DIMM_POWER_UTIL_type utilPoints;
         Target* sys = UTIL::assertGetToplevelTarget();
         if (!sys->tryGetAttr<ATTR_DIMM_POWER_UTIL>(utilPoints))
@@ -1044,10 +1073,16 @@ uint8_t ocmbPowerData(Occ *i_occ,
         }
 
         const uint8_t numUtilPoints = sizeof(utilPoints);
-        if ((sizeof(dimmPower)/4) < numUtilPoints)
+        if ((sizeof(dimmFullPower)/4) < numUtilPoints)
         {
             TMGT_ERR("ocmbPowerData: Missing DIMM_POWER points (%d, but expected %d)",
-                     sizeof(dimmPower)/4, numUtilPoints);
+                     sizeof(dimmFullPower)/4, numUtilPoints);
+            return 0;
+        }
+        if ((sizeof(dimmPreheatPower)/4) < numUtilPoints)
+        {
+            TMGT_ERR("ocmbPowerData: Missing DIMM_PREHEAT_POWER points (%d, but expected %d)",
+                     sizeof(dimmPreheatPower)/4, numUtilPoints);
             return 0;
         }
         if (numUtilPoints > 1)
@@ -1076,15 +1111,21 @@ uint8_t ocmbPowerData(Occ *i_occ,
                     continue;
                 }
 
-                if (!ocmb->tryGetAttr<ATTR_DIMM_POWER>(dimmPower))
+                if (!ocmb->tryGetAttr<ATTR_DIMM_POWER>(dimmFullPower))
                 {
                     TMGT_ERR("ocmbPowerData: Failed to read DIMM_POWER for OCMB%d target",
                              l_ocmb_num);
                     break;
                 }
+                if (!ocmb->tryGetAttr<ATTR_DIMM_PREHEAT_POWER>(dimmPreheatPower))
+                {
+                    TMGT_ERR("ocmbPowerData: Failed to read DIMM_PREHEAT_POWER for OCMB%d target",
+                             l_ocmb_num);
+                    break;
+                }
                 const size_t entryStartIndex = io_index;
                 o_data[io_index++] = l_ocmb_num;
-                bzero(&o_data[io_index], 6);
+                bzero(&o_data[io_index], 6); // reserved
                 io_index += 6;
                 const size_t offsetNumPoints = io_index++;
 
@@ -1092,23 +1133,27 @@ uint8_t ocmbPowerData(Occ *i_occ,
                 uint16_t lastUtil = 0;
                 for (size_t pointIndex = 0; pointIndex < numUtilPoints; ++pointIndex)
                 {
-                    if ((utilPoints[pointIndex] == 0) ||
-                        (utilPoints[pointIndex] <= lastUtil))
+                    if ((pointIndex > 0) && (utilPoints[pointIndex] <= lastUtil))
                     {
                         // ignore invalid entries
-                        continue;
+                        break;
                     }
                     const uint16_t utilCpercent = utilPoints[pointIndex] * 100;
-                    TMGT_INF("ocmbPowerData: adding OCMB%d / %3d c percent / %dcW",
-                             l_ocmb_num, utilCpercent, dimmPower[pointIndex]);
+                    TMGT_INF("ocmbPowerData: OCMB%d util: %3d percent, preheat: %4dcW, full: %4dcW",
+                             l_ocmb_num, utilPoints[pointIndex],
+                             dimmPreheatPower[pointIndex], dimmFullPower[pointIndex]);
                     o_data[io_index++] = utilCpercent >> 8;
                     o_data[io_index++] = utilCpercent & 0xFF;
+                    o_data[io_index++] = 0; // reserved
                     o_data[io_index++] = 0;
-                    o_data[io_index++] = 0;
-                    o_data[io_index++] = (dimmPower[pointIndex] >> 24) & 0xFF;
-                    o_data[io_index++] = (dimmPower[pointIndex] >> 16) & 0xFF;
-                    o_data[io_index++] = (dimmPower[pointIndex] >>  8) & 0xFF;
-                    o_data[io_index++] = dimmPower[pointIndex] & 0xFF;
+                    o_data[io_index++] = (dimmPreheatPower[pointIndex] >> 24) & 0xFF;
+                    o_data[io_index++] = (dimmPreheatPower[pointIndex] >> 16) & 0xFF;
+                    o_data[io_index++] = (dimmPreheatPower[pointIndex] >>  8) & 0xFF;
+                    o_data[io_index++] = dimmPreheatPower[pointIndex] & 0xFF;
+                    o_data[io_index++] = (dimmFullPower[pointIndex] >> 24) & 0xFF;
+                    o_data[io_index++] = (dimmFullPower[pointIndex] >> 16) & 0xFF;
+                    o_data[io_index++] = (dimmFullPower[pointIndex] >>  8) & 0xFF;
+                    o_data[io_index++] = dimmFullPower[pointIndex] & 0xFF;
                     lastUtil = utilPoints[pointIndex];
                     ++numPoints;
                 }
@@ -1151,7 +1196,7 @@ void getMemPowerMessageData(Occ *i_occ,
     assert(o_data != nullptr);
 
     o_data[index++] = OCC_CFGDATA_MEM_POWER;
-    o_data[index++] = 0x01; // version
+    o_data[index++] = 0x02; // version
 
     Target* sys = UTIL::assertGetToplevelTarget();
     ConstTargetHandle_t proc = getParentChip(i_occ->getTarget());
@@ -1163,23 +1208,56 @@ void getMemPowerMessageData(Occ *i_occ,
     {
         thermalCredit = 1.8 / chipFanCfm * 10000;
     }
-    TMGT_INF("getMemPowerMessageData: thermalCreditFactor=%d (CFM=%d)",
-             thermalCredit, chipFanCfm);
+    TMGT_INF("getMemPowerMessageData: thermalCreditFactor=%d (CFM=%d, maxDIMMpower=%dcW)",
+             thermalCredit, chipFanCfm, maxDimmPower);
 
-    // Get list of potential DIMMs associated with this processor
-    auto procTarget = TARGETING::getImmediateParentByAffinity(i_occ->getTarget());
-    TargetHandleList dimm_list;
-    getChildAffinityTargets(dimm_list, procTarget, CLASS_LOGICAL_CARD, TYPE_DIMM, false);
-    auto maxDimmPreheatPower = 0;
-    for(const auto & dimmTarget : dimm_list)
+    // Get list of potential OCMBs associated with this processor
+    TargetHandleList ocmb_list;
+    getChildAffinityTargets(ocmb_list, proc, CLASS_CHIP, TYPE_OCMB_CHIP);
+    TMGT_INF("getMemPowerMessageData: p%d has %d functional OCMBs",
+             i_occ->getInstance(), ocmb_list.size());
+    uint32_t maxProcPreheatPower = 0;
+    for(const auto & ocmb_target : ocmb_list)
     {
-        // Read the preheat percent for this DIMM (PREHEAT in 0.01%)
-        double dimmPreheatPercent = dimmTarget->getAttr<ATTR_PREHEAT_PERCENT>() / 10000.0;
-        // add the perheat power power for this DIMM
-        maxDimmPreheatPower += maxDimmPower * dimmPreheatPercent;
+        // OCMB instance comes from the parent (OMI target)
+        uint8_t l_ocmb_pos = 0xFF;
+        TARGETING::Target * omi_target = getImmediateParentByAffinity(ocmb_target);
+        if (omi_target != nullptr)
+        {
+            // get relative OCMB per processor
+            l_ocmb_pos = omi_target->getAttr<ATTR_CHIP_UNIT>();
+        }
+        else
+        {
+            uint32_t ocmb_huid = get_huid(ocmb_target);
+            TMGT_ERR("getMemPowerMessageData: Unable to determine OCMB parent"
+                     " for HUID 0x%04X", ocmb_huid);
+            continue;
+        }
+        // Read the preheat percent for DIMMs uner this OCMB (PREHEAT in 0.01%)
+        double dimmPreheatPercent = ocmb_target->getAttr<ATTR_PREHEAT_PERCENT>() / 10000.0;
+
+        // Get list of potential DIMMs associated with this OCMB
+        TargetHandleList dimm_list;
+        getChildAffinityTargets(dimm_list, ocmb_target, CLASS_LOGICAL_CARD, TYPE_DIMM, false);
+        TMGT_INF("getMemPowerMessageData: OCMB%d preheat: %.2f percent (and %d possible DIMMs)",
+                 l_ocmb_pos, dimmPreheatPercent*100, dimm_list.size());
+        uint32_t maxOcmbPreheatPower = 0;
+        for(const auto & dimmTarget : dimm_list)
+        {
+            uint32_t dimm_huid = get_huid(dimmTarget); // DEBUG
+            auto dimmPreheatPower = maxDimmPower * dimmPreheatPercent;
+            TMGT_INF("getMemPowerMessageData:   OCMB%d/DIMM 0x%08X : preheat power: %dcW",
+                     l_ocmb_pos, dimm_huid, uint32_t(dimmPreheatPower));
+            // add the perheat power power for this DIMM
+            maxOcmbPreheatPower += dimmPreheatPower;
+        }
+        TMGT_INF("getMemPowerMessageData:   OCMB%d max preheat: %dcW",
+                 l_ocmb_pos, maxOcmbPreheatPower);
+        maxProcPreheatPower += maxOcmbPreheatPower;
     }
-    TMGT_INF("getMemPowerMessageData: proc has %d possible DIMMs (max preheat: %dcW)",
-             dimm_list.size(), maxDimmPreheatPower);
+    TMGT_INF("getMemPowerMessageData: proc%d has max preheat: %dcW)",
+             i_occ->getInstance(), maxProcPreheatPower);
 
     o_data[index++] = thermalCredit >> 8;
     o_data[index++] = thermalCredit & 0xFF;
@@ -1187,16 +1265,16 @@ void getMemPowerMessageData(Occ *i_occ,
     o_data[index++] = (maxDimmPower >> 16) & 0xFF;
     o_data[index++] = (maxDimmPower >>  8) & 0xFF;
     o_data[index++] = maxDimmPower & 0xFF;
-    o_data[index++] = (maxDimmPreheatPower >> 24) & 0xFF;
-    o_data[index++] = (maxDimmPreheatPower >> 16) & 0xFF;
-    o_data[index++] = (maxDimmPreheatPower >>  8) & 0xFF;
-    o_data[index++] = maxDimmPreheatPower & 0xFF;
+    o_data[index++] = (maxProcPreheatPower >> 24) & 0xFF;
+    o_data[index++] = (maxProcPreheatPower >> 16) & 0xFF;
+    o_data[index++] = (maxProcPreheatPower >>  8) & 0xFF;
+    o_data[index++] = maxProcPreheatPower & 0xFF;
     bzero(&o_data[index], 3);
     index += 3;
     size_t offsetNumOcmbs = index++; // fill in at end
 
     size_t numOcmbs = 0;
-    if ((chipFanCfm > 0) && (maxDimmPower > 0) && (maxDimmPreheatPower > 0))
+    if ((chipFanCfm > 0) && (maxDimmPower > 0) && (maxProcPreheatPower > 0))
     {
         // fill in details of the memory config
         numOcmbs = ocmbPowerData(i_occ, o_data, index);
@@ -1205,7 +1283,7 @@ void getMemPowerMessageData(Occ *i_occ,
     {
         TMGT_INF("getMemPowerMessageData: CHIP_FAN_CFM=%d, MAX_DIMM_POWER=%d "
                  "MAX_PREHEAT_POWER=%d (WOF Memory power credit disabled)",
-                 chipFanCfm, maxDimmPower, maxDimmPreheatPower);
+                 chipFanCfm, maxDimmPower, maxProcPreheatPower);
     }
 
     o_data[offsetNumOcmbs] = numOcmbs;

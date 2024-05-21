@@ -523,6 +523,9 @@
       <id>DIMM_POWER</id>
     </attribute>
     <attribute>
+      <id>DIMM_PREHEAT_POWER</id>
+    </attribute>
+    <attribute>
       <id>FAPI_I2C_CONTROL_INFO</id>
     </attribute>
     <attribute>
@@ -560,6 +563,9 @@
         </field>
       </default>
       <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
+      <id>PREHEAT_PERCENT</id>
     </attribute>
     <attribute>
       <default>

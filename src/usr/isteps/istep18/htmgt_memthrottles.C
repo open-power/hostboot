@@ -401,9 +401,6 @@ void updateDimmPowerUtil(Target *sys)
 {
     size_t numPoints = 0;
 
-    // Read the minimum utilization (and convert from c% to percent)
-    const auto minUtil = sys->getAttr<ATTR_MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL>() / 100;
-
     ATTR_DIMM_POWER_UTIL_type utilPoints = {0};
     const uint8_t maxUtilPoints = sizeof(utilPoints);
     if ((maxUtilPoints >= 2) && (maxUtilPoints <= (sizeof(ATTR_DIMM_POWER_type)/4)))
@@ -414,10 +411,10 @@ void updateDimmPowerUtil(Target *sys)
         {
             TMGT_ERR("updateDimmPowerUtil: Failed to read DIMM_POWER_UTIL_INTERMEDIATE_POINTS");
         }
-        // First point is always the minimum utilization
-        utilPoints[numPoints++] = minUtil;
+        // First point is always 0% utilization
+        utilPoints[numPoints++] = 0;
         // Add any valid intermediate points
-        uint8_t lastPoint = minUtil;
+        uint8_t lastPoint = 0;
         for (const auto & utilValue : utilPointsIntermediate)
         {
             if (numPoints == maxUtilPoints-1)
@@ -472,26 +469,27 @@ void updateDimmPowerUtil(Target *sys)
          * @reasoncode HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL
          * @userdata1 num points
          * @userdata2 minimum utilization point
-         * @devdesc Software problem, Failed to DIMM power utilization points
+         * @devdesc Software problem, Failed to set DIMM power utilization points
          * @custdesc An internal firmware error occurred
          */
         errlHndl_t err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                  HTMGT_MOD_UPDATE_DIMM_POWER_UTIL,
                                                  HTMGT_RC_SAVE_TO_ATTRIBUTE_FAIL,
                                                  numPoints,
-                                                 minUtil,
+                                                 0,
                                                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
         err->collectTrace(HTMGT_COMP_NAME);
         errlCommit(err, HTMGT_COMP_ID);
     }
 } // end updateDimmPowerUtil()
 
-// Calculate preheat power for a single OCMB
+// Calculate preheat power (and full power) for a single OCMB
 uint32_t calculatePreheatPower(fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmbFapiTarget,
-                               bool detailedTrace)
+                               bool detailedTrace,
+                               uint32_t & ocmb_full_power)
 {
-    uint32_t ocmb_total_power = 0;
-    uint32_t l_power[HTMGT_MAX_PORT_PER_OCMB_CHIP_ODYSSEY] = {0};
+    uint32_t ocmb_preheat_power = 0;
+    ocmb_full_power = 0;
 
     // OCMB instance/position comes from the parents OMI target
     TARGETING::Target * ocmb_target = i_ocmbFapiTarget.get();
@@ -507,6 +505,13 @@ uint32_t calculatePreheatPower(fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP> i_oc
         TMGT_ERR("calculatePreheatPower: Unable to find OCMB's parent for HUID 0x%08X",
                  get_huid(ocmb_target));
         // Only used for tracing (so ignore error)
+    }
+    // Read the preheat percent for this OCMB
+    auto l_preheat = ocmb_target->getAttr<ATTR_PREHEAT_PERCENT>();
+    if (l_preheat > 10000)
+    {
+        TMGT_ERR("calculatePreheatPower: Invalid PREHEAT_PERCENT (%d) for OCMB", l_preheat);
+        l_preheat = 10000;
     }
 
     // Get list of functional memory ports associated with this OCMB_CHIP
@@ -524,49 +529,32 @@ uint32_t calculatePreheatPower(fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP> i_oc
         }
 
         // Read HWP output:
-        l_power[l_port_unit] = l_portTarget->getAttr<ATTR_EXP_PORT_MAXPOWER>();
+        const uint32_t maxPower = l_portTarget->getAttr<ATTR_EXP_PORT_MAXPOWER>();
 
-        // Get list of functional DIMMs associated with this MEM_PORT
-        TargetHandleList dimm_list;
-        getChildAffinityTargets(dimm_list, l_portTarget, CLASS_LOGICAL_CARD, TYPE_DIMM);
-
-        bool l_foundDimm = false;
-        for(const auto & l_dimmTarget : dimm_list)
+        // Calculate the preheat power for this DIMM (PREHEAT is in c% (0.01%))
+        const uint32_t l_preheatPower = maxPower * l_preheat/10000.0;
+        if (detailedTrace)
         {
-            // Calculate preheat power for this DIMM
-            auto l_preheat = l_dimmTarget->getAttr<ATTR_PREHEAT_PERCENT>();
-            if (l_preheat > 10000)
-            {
-                TMGT_ERR("calculatePreheatPower: Invalid PREHEAT_PERCENT (%d) for DIMM", l_preheat);
-                l_preheat = 10000;
-            }
+            // Get list of functional DIMMs associated with this MEM_PORT
+            TargetHandleList dimm_list;
+            getChildAffinityTargets(dimm_list, l_portTarget, CLASS_LOGICAL_CARD, TYPE_DIMM);
 
-            // Calculate the preheat power (PREHEAT is in c% (0.01%))
-            const uint32_t l_preheatPower = l_power[l_port_unit] * l_preheat/10000.0;
-            l_power[l_port_unit] = l_preheatPower;
-            if (detailedTrace)
-            {
-                TMGT_INF("memPowerPreheat:   OCMB%d/DIMM%d HUID: 0x%08X, " // DEBUG
-                         "PREHEAT: %dc%%, power: %dcW (position:%d)",
-                         l_ocmb_pos, l_port_unit, get_huid(l_dimmTarget), l_preheat,
-                         l_power[l_port_unit], l_dimmTarget->getAttr<TARGETING::ATTR_POSITION>());
-            }
-            l_foundDimm = true;
-        }
-        if (!l_foundDimm)
-        {
-            TMGT_ERR("calculatePreheatPower: Failed to find a DIMM for OCMB port %d (%d DIMMs)",
-                     l_port_unit, dimm_list.size());
+            TMGT_INF("memPowerPreheat:   OCMB%d/port%d HUID: 0x%08X, "
+                 "preheat: %d cPercent, power: %dcW (%d dimms)",
+                 l_ocmb_pos, l_port_unit, get_huid(l_portTarget), l_preheat,
+                 l_preheatPower, dimm_list.size());
         }
 
-        // Add each DIMM's power for the OCMB
-        ocmb_total_power += l_power[l_port_unit];
+        // Add the full power for the port (no preheat)
+        ocmb_full_power += maxPower;
+        // Add each Port/DIMM's power to the OCMB total
+        ocmb_preheat_power += l_preheatPower;
     } // for each port
 
-    TMGT_INF("memPowerPreheat:   OCMB%d total preheat power: %4dcW (output)",
-             l_ocmb_pos, ocmb_total_power);
+    TMGT_INF("memPowerPreheat:   OCMB%d total preheat power: %4dcW, full power: %4dcW (output)",
+             l_ocmb_pos, ocmb_preheat_power, ocmb_full_power);
 
-    return ocmb_total_power;
+    return ocmb_preheat_power;
 }
 
 /**
@@ -582,7 +570,8 @@ errlHndl_t memPowerPreheat(Target *sys,
     TMGT_INF("memPowerPreheat: Calculating preheat power");
 
     size_t ocmbCount = i_fapi_target_list.size();
-    ATTR_DIMM_POWER_type dimmPower[ocmbCount] = {0};
+    ATTR_DIMM_POWER_type dimmFullPower[ocmbCount] = {0};
+    ATTR_DIMM_PREHEAT_POWER_type dimmPreheatPower[ocmbCount] = {0};
     ATTR_DIMM_POWER_UTIL_typeStdArr utilPoints;
     if (!sys->tryGetAttr<ATTR_DIMM_POWER_UTIL>(utilPoints))
     {
@@ -594,26 +583,29 @@ errlHndl_t memPowerPreheat(Target *sys,
     for (size_t point = 0; point < utilPoints.size(); ++point)
     {
         const uint8_t utilValue = utilPoints[point];
-        if (utilValue > 0)
+        // First point can be 0
+        if ((point == 0) || (utilValue > 0))
         {
             err = call_utils_to_throttle(i_fapi_target_list, utilValue);
             if (nullptr == err)
             {
                 size_t ocmbIndex = 0;
-                TMGT_INF("memPowerPreheat: Utilization %d%%", utilValue);
+                TMGT_INF("memPowerPreheat: Utilization %d percent", utilValue);
                 for(const auto & ocmb_fapi_target : i_fapi_target_list)
                 {
-                    // Save total DIMM power to ATTR_DIMM_POWER on the OCMB
-                    // (only trace DIMM details on first utilization point)
-                    dimmPower[ocmbIndex][point] = calculatePreheatPower(ocmb_fapi_target,
-                                                                        (point == 0));
+                    // Calculate preheat and full DIMM power
+                    // (only trace DIMM details of the first utilization point)
+                    dimmPreheatPower[ocmbIndex][point] =
+                        calculatePreheatPower(ocmb_fapi_target,
+                                              (point == 0),
+                                              dimmFullPower[ocmbIndex][point]);
                     ++ocmbIndex;
                 } // for each ocmb
             }
             else
             {
-                TMGT_ERR("memPowerPreheat: Failed to calculate power at %d c%% utilization "
-                         "(rc=0x%04X)", utilValue, err->reasonCode());
+                TMGT_ERR("memPowerPreheat: Failed to calculate power at %.2f percent utilization "
+                         "(rc=0x%04X)", utilValue/100.0, err->reasonCode());
                 // HTMGT traces added to err later
                 // Stop parsing any further utilizations (since power would even be higher)
                 break;
@@ -628,12 +620,13 @@ errlHndl_t memPowerPreheat(Target *sys,
 
     // Write final DIMM_POWER attributes to each OCMB target
     size_t ocmbIndex = 0;
-    TMGT_INF("memPowerPreheat: Setting DIMM_POWER for %d OCMBs", i_fapi_target_list.size());
+    TMGT_INF("memPowerPreheat: Setting DIMM_POWER/DIMM_PREHEAT_POWER for %d OCMBs",
+             i_fapi_target_list.size());
     for(const auto & ocmb_fapi_target : i_fapi_target_list)
     {
         TARGETING::Target * ocmb_target = ocmb_fapi_target.get();
-        TMGT_INF("memPowerPreheat: Setting DIMM_POWER for OCMB[%d]", ocmbIndex);
-        ocmb_target->setAttr<ATTR_DIMM_POWER>(dimmPower[ocmbIndex]);
+        ocmb_target->setAttr<ATTR_DIMM_POWER>(dimmFullPower[ocmbIndex]);
+        ocmb_target->setAttr<ATTR_DIMM_PREHEAT_POWER>(dimmPreheatPower[ocmbIndex]);
         ++ocmbIndex;
     }
 
@@ -1575,7 +1568,7 @@ errlHndl_t calcMemThrottles()
         // Not able to calculate preheat for at least one proc or overtemp calc failed,
         // disable preheat for all procs.
         TMGT_ERR("calcMemThrottles: Clearing DIMM_POWER for all OCMBs on all Procs");
-        const ATTR_DIMM_POWER_type dimmPower = {0};
+        const ATTR_DIMM_PREHEAT_POWER_type dimmPreheatPower = {0};
         for(const auto & proc_target : proc_list)
         {
             // Get functional OCMBs associated with this processor
@@ -1583,8 +1576,8 @@ errlHndl_t calcMemThrottles()
             getChildAffinityTargets(ocmb_list, proc_target, CLASS_CHIP, TYPE_OCMB_CHIP);
             for(const auto & ocmb_target : ocmb_list)
             {
-                // Clear all DIMM_POWER attributes for each OCMB target
-                ocmb_target->setAttr<ATTR_DIMM_POWER>(dimmPower);
+                // Clear all DIMM_PREHEAT_POWER attributes for each OCMB target
+                ocmb_target->setAttr<ATTR_DIMM_PREHEAT_POWER>(dimmPreheatPower);
             }
         }
         if (preheatErr)

@@ -945,8 +945,8 @@
   <attribute>
     <id>DIMM_POWER</id>
     <description>
-        The power to allocate to the DIMMs under this OCMB for a given
-        utilization (specified by DIMM_POWER_UTIL).
+        The full power to allocate to the Ports/DIMMs under this OCMB for a
+        given utilization (specified by DIMM_POWER_UTIL) with no preheat applied.
         Written during power cap calculation and sent to the OCC via TMGT/HTMGT.
         The array size must match the DIMM_POWER_UTIL array and must be less
         than or equal to 12 (values are in cW)
@@ -963,7 +963,8 @@
   <attribute>
     <id>DIMM_POWER_UTIL</id>
     <description>
-        The utilization value for each element of the DIMM_POWER attribute.
+        The utilization value for each element of the DIMM_POWER and
+        DIMM_PREHEAT_POWER attribute arrays.
         Written during power cap calculation and sent to the OCC via TMGT/HTMGT.
         Values will be listed in increasing order and the array size must
         match the DIMM_POWER array. The array size will be up to 12 points.
@@ -985,20 +986,37 @@
     <description>
         The intermediate utilization values that should be used to determine
         the power to allocate to the DIMMs under an OCMB.
-        The minimum (MSS_MRW_SAFEMODE_DRAM_DATABUS_UTIL) and the maximum (100%)
-        are always used, so they do not need to be specified here.  Any values
-        less than the minimum or greater than the maximum will be ignored.
-        Values must be listed in increasing order and the array size must be
-        less than or equal to 10.
+        The minimum (0%) and the maximum (100%) are always used, so they must
+        not be specified here.  Any values less than the minimum or greater
+        than the maximum will be ignored.  Values must be listed in increasing
+        order and the array size must be less than or equal to 10.
     </description>
     <simpleType>
       <array>10</array>
       <uint8_t>
-        <default>50,75,0,0,0,0,0,0,0,0</default>
+        <default>25,50,75,0,0,0,0,0,0,0</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+  </attribute>
+
+  <attribute>
+    <id>DIMM_PREHEAT_POWER</id>
+    <description>
+        The preheat power for all Ports/DIMMs under this OCMB for a given
+        utilization (specified by DIMM_POWER_UTIL).
+        Written during power cap calculation and sent to the OCC via TMGT/HTMGT.
+        The array size must match the DIMM_POWER_UTIL array and must be less
+        than or equal to 12 (values are in cW)
+    </description>
+    <simpleType>
+      <array>12</array>
+      <uint32_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
   </attribute>
 
   <attribute>
@@ -7268,7 +7286,7 @@
   <attribute>
     <id>PREHEAT_PERCENT</id>
     <description>
-        The percentage of this DIMM's preheat that affects the associated processor
+        The percentage of this OCMB's preheat that affects the associated processor
         socket. (value in 0.01%)
     </description>
     <simpleType>
