@@ -1041,10 +1041,16 @@
         <no_export/>
     </attribute>
 
+    <attribute>
+        <!-- Hide from MRW -->
+        <id>ATTR_IS_IOSCM</id>
+        <no_export/>
+        <writeable/>
+        <default>0x0</default>
+    </attribute>
+
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->
-
-
 
 </attributes>

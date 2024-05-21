@@ -635,6 +635,56 @@ void* host_discover_targets( void *io_pArgs )
     CONSOLE::displayf(CONSOLE::DEFAULT, "HWAS", "---------------------------------");
 #endif
 
+    // Identify ioSCMs, as chips with zero cores, and set the ATTR_IS_IOSCM to true
+
+    TARGETING::TargetHandleList l_procChips;
+    TARGETING::getAllChips(l_procChips, TARGETING::TYPE_PROC, true);
+
+    for(const auto & l_proc : l_procChips)
+    {
+      auto l_procTargetHuid = get_huid(l_proc);
+      // Find the number of present cores for the PROC
+      TARGETING::TargetHandleList l_coreList;
+      getCoreChiplets(l_coreList, TARGETING::UTIL_FILTER_CORE_ALL,
+                      TARGETING::UTIL_FILTER_PRESENT, l_proc);
+
+      if(!l_coreList.size() && !l_proc->getAttr<TARGETING::ATTR_IS_IOSCM>())
+      {
+        l_proc->setAttr<TARGETING::ATTR_IS_IOSCM>(true);
+          TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+          INFO_MRK"host_discover_targets: found  %d cores on chip HUID 0x%.8x and set ATTR_IS_IOSCM to 0x%.8x",
+          l_coreList.size(), l_procTargetHuid, l_proc->getAttr<TARGETING::ATTR_IS_IOSCM>());
+
+        auto l_procTargetLocationCode =
+          l_proc->getAttrAsStdArr<TARGETING::ATTR_STATIC_ABS_LOCATION_CODE>();
+
+        // Additionally chips with the same location code should also be marked as ioSCMs
+        for(const auto & l_proc_2 : l_procChips)
+        {
+          auto l_procTargetLocationCode_2 =
+            l_proc_2->getAttrAsStdArr<TARGETING::ATTR_STATIC_ABS_LOCATION_CODE>();
+          if(l_procTargetLocationCode == l_procTargetLocationCode_2)
+          {
+            auto l_procTargetHuid_2 = get_huid(l_proc_2);
+            if(l_procTargetHuid != l_procTargetHuid_2)
+            {
+                l_proc_2->setAttr<TARGETING::ATTR_IS_IOSCM>(true);
+                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  INFO_MRK"host_discover_targets: chip HUID 0x%.8x shares a location with IOSCM HUID 0x%.8x and is also set ATTR_IS_IOSCM to 0x%.8x",
+                  l_procTargetHuid_2, l_procTargetHuid,  l_proc_2->getAttr<TARGETING::ATTR_IS_IOSCM>());
+            }
+          }
+        }
+      }
+      else
+      {
+
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+          INFO_MRK"host_discover_targets: found  %d cores on chip HUID 0x%.8x and ATTR_IS_IOSCM is to 0x%.8x",
+          l_coreList.size(), l_procTargetHuid, l_proc->getAttr<TARGETING::ATTR_IS_IOSCM>());
+      }
+    }
+
     // Force a sync to the BMC if there were any new parts
     //  This will give the BMC a more accurate view of things in case
     //  anyone looks before we do the full sync at the end of step16
