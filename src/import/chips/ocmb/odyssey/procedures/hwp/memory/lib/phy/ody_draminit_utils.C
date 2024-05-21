@@ -660,6 +660,7 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
     fapi2::buffer<uint64_t> l_mail;
     uint32_t l_string_index = 0;
     uint16_t l_num_data = 0;
+    uint16_t l_swizzle_detect_fail = 0;
 
     // Streaming messages use the 32-bit mode
     FAPI_TRY(mss::ody::phy::get_mail(i_target, STREAMING_SMBUS_MSG_MODE, LOOP_COUNT, l_mail));
@@ -681,6 +682,9 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
                     l_string_index,
                     l_num_data);
 
+    // Check if this is a swizzle detect failure
+    l_swizzle_detect_fail = check_if_msg_is_swizzle_detect_failure(l_mail);
+
     // Print out the data pieces that are included in the string index
     // Each piece of data is another 32-bit mode mailbox interaction
     for(uint16_t l_num = 0; l_num < l_num_data; ++l_num)
@@ -690,6 +694,9 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
 
         // Grab the data
         l_mail.extractToRight<DATA, DATA_LEN>(l_data);
+
+        // Append swizzle detect failure data if needed
+        append_swizzle_data(l_mail, l_swizzle_detect_fail);
 
         // Put the data piece into the output stream
         // Ignoring return code to avoiding the HWP failing because of an overshoot of ostream log space
@@ -702,6 +709,9 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
     }
 
     FAPI_INF_NO_SBE(TARGTIDFORMAT " End of message", TARGTID);
+
+    // Set the swizzle detect failure attribute only if the swizzle detect failed
+    FAPI_TRY(set_swizzle_fail_attr(i_target, l_swizzle_detect_fail));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -4571,13 +4581,23 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    io_status = mss::ody::phy::mailbox_consts::FAILED_COMPLETION;
-
     // An address error occurred... now the fun begins
     uint32_t iv_nibbles_enables[mss::ody::MAX_DIMM_PER_PORT] = {0};
     fapi2::buffer<uint32_t> l_nibble_enables;
 
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+
+    uint16_t l_swizzle_detect_fail = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE, i_target, l_swizzle_detect_fail));
+
+    // If there is a swizzle detect failure, just exit out
+    if(fapi2::ENUM_ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE_NO_VALUE != l_swizzle_detect_fail)
+    {
+        FAPI_INF(TARGTIDFORMAT " another swizzle detect failure is present. Skipping the address algorithm", TARGTID);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    io_status = mss::ody::phy::mailbox_consts::FAILED_COMPLETION;
 
     // Do not allow the address algorithm to run multiple times
     // The algorithm is time consuming
@@ -4647,6 +4667,100 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
     o_log_data.put(static_cast<fapi2::hwp_data_unit>(PER_DRAM_RECOVERY_FINAL_RUN));
 
     // Cleans up as the Synopsys firmware could have returned a fatal error
+    FAPI_TRY(mss::ody::phy::workarounds::cleanup_from_draminit_fatal(i_target));
+
+    // Does another training run here
+    FAPI_TRY(run_training_helper(i_target, io_status, io_start_bad_bits, io_struct, o_log_data));
+    mss::ody::phy::display_msg_block(i_target, io_struct);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Updates the bad bits for swizzle detect errors
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_swizzle_detect_fail the swizzle detect fail attribute value
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+///
+fapi2::ReturnCode update_bad_bits_for_swizzle_detect(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint16_t i_swizzle_detect_fail,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
+{
+    constexpr uint16_t PHY_RANK_START = BITS_PER_NIBBLE;
+    constexpr uint16_t DBYTE_START = PHY_RANK_START + BITS_PER_NIBBLE;
+    constexpr uint16_t BIT_START = DBYTE_START + BITS_PER_NIBBLE;
+    const fapi2::buffer<uint16_t> l_buffer(i_swizzle_detect_fail);
+    uint8_t l_phy_rank = 0;
+    uint8_t l_dbyte = 0;
+    uint8_t l_bit = 0;
+
+    l_buffer.extractToRight<PHY_RANK_START, BITS_PER_NIBBLE>(l_phy_rank)
+    .extractToRight<DBYTE_START, BITS_PER_NIBBLE>(l_dbyte)
+    .extractToRight<BIT_START, BITS_PER_NIBBLE>(l_bit);
+    FAPI_INF(TARGTIDFORMAT " has a swizzle detect failure with PHY_rank%u DBYTE%u and bit%u", TARGTID, l_phy_rank, l_dbyte,
+             l_bit);
+
+
+    constexpr uint8_t DRAM0 = 0x0f;
+    constexpr uint8_t DRAM1 = 0xf0;
+
+    FAPI_ASSERT(l_phy_rank < BAD_BITS_RANKS,
+                fapi2::ODY_DRAMINIT_SWIZZLE_INVALID_RANK()
+                .set_PORT_TARGET(i_target)
+                .set_PHY_RANK(l_phy_rank)
+                .set_MAX_PHY_RANK(BAD_BITS_RANKS),
+                TARGTIDFORMAT " has an invalid rank: (phy rank < MAX) (%u < %u)", TARGTID, l_phy_rank, BAD_BITS_RANKS);
+    FAPI_ASSERT(l_dbyte < BAD_DQ_BYTE_COUNT,
+                fapi2::ODY_DRAMINIT_SWIZZLE_INVALID_DBYTE()
+                .set_PORT_TARGET(i_target)
+                .set_DBYTE(l_dbyte)
+                .set_MAX_DBYTE(BAD_DQ_BYTE_COUNT),
+                TARGTIDFORMAT " has an invalid rank: (DBYTE < MAX) (%u < %u)", TARGTID, l_dbyte, BAD_DQ_BYTE_COUNT);
+
+    // Sets the bad bits
+    // The index is the DBYTE while the element is the MC BYTE
+    io_start_bad_bits[l_phy_rank][PHY_TO_MC_BYTE[l_dbyte]] |= l_bit >= BITS_PER_NIBBLE ? DRAM1 : DRAM0;
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, io_start_bad_bits));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Handles any swizzle detect errors found in prior runs
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_swizzle_detect_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint64_t& io_status,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct,
+        fapi2::hwp_data_ostream& o_log_data)
+{
+    uint16_t l_swizzle_detect_fail = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE, i_target, l_swizzle_detect_fail));
+
+    // If there is no swizzle detect failure, just exit out
+    if(fapi2::ENUM_ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE_NO_VALUE == l_swizzle_detect_fail)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Updates the bad bits for the detected swizzle information
+    FAPI_TRY(update_bad_bits_for_swizzle_detect(i_target, l_swizzle_detect_fail, io_start_bad_bits));
+
+    // Updates the bad bits structure for the newly updated bad bits
+    FAPI_TRY(update_struct_for_bad_bits( i_target, io_start_bad_bits, io_struct));
+
+    // Reruns training with the new bad bits
+    FAPI_TRY(load_msg_block(i_target, io_struct));
+
+    // Cleans up as the Synopsys firmware returns a fatal error when a swizzle detect error is discovered
     FAPI_TRY(mss::ody::phy::workarounds::cleanup_from_draminit_fatal(i_target));
 
     // Does another training run here
@@ -5106,6 +5220,18 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                           );
     }
 
+    // If there is a swizzle detect failure, just exit out
+    {
+        uint16_t l_swizzle_detect_fail = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE, i_target, l_swizzle_detect_fail));
+
+        if(fapi2::ENUM_ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE_NO_VALUE != l_swizzle_detect_fail)
+        {
+            FAPI_INF(TARGTIDFORMAT " another swizzle detect failure is present. Skipping the DQ error handling", TARGTID);
+            return fapi2::FAPI2_RC_SUCCESS;
+        }
+    }
+
     // If we have address fails, do not run regardless of new bad bits
     // If this card has new bad bits, then run the recovery
     if(!has_new_bad_bits(io_start_bad_bits, io_struct) || has_address_fails(io_status, io_struct))
@@ -5234,6 +5360,11 @@ fapi2::ReturnCode handle_draminit_recovery(const fapi2::Target<fapi2::TARGET_TYP
             FAPI_INF(TARGTIDFORMAT " handle recovery loop num%u address_fails:%u new_bad_bits:%u",
                      TARGTID, l_num_loop, mss::ody::phy::has_address_fails(io_status, io_struct),
                      mss::ody::phy::has_new_bad_bits(io_start_bad_bits, io_struct));
+
+
+            // Handle swizzle errors first as they can be false reported as address fails
+            FAPI_TRY(handle_swizzle_detect_errors(i_target, io_status, io_start_bad_bits, io_struct,
+                                                  o_log_data));
 
             // Runs handle address errors first as if we took a fatal error the bad bits cannot be trusted
             // Additionally, these fails are probably due to a CS/address calibration step

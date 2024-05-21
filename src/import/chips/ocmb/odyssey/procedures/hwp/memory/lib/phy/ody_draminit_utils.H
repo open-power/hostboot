@@ -3767,6 +3767,85 @@ void compute_bad_bit_flag(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_ta
                           const uint8_t i_bad_bit_attr, bool& io_bad_bit_flag);
 
 ///
+/// @brief Updates the bad bits for swizzle detect errors
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_swizzle_detect_fail the swizzle detect fail attribute value
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+///
+fapi2::ReturnCode update_bad_bits_for_swizzle_detect(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint16_t i_swizzle_detect_fail,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]);
+
+///
+/// @brief Sets the value accordingly if the message is noting a swizzle detect failure
+/// @param[in] i_msg the streaming message to check
+/// @return 1 if this is a swizzle detect failure, otherwise 0
+///
+inline uint16_t check_if_msg_is_swizzle_detect_failure(const uint64_t i_msg)
+{
+    // Note: this depends upon the Synopsys FW revision and will need to be updated if the image changes
+    constexpr uint32_t SWIZZLE_DETECT_MESSAGE1 = 0x01fa0003;
+    constexpr uint32_t SWIZZLE_DETECT_MESSAGE2 = 0x01fd0003;
+
+    if(SWIZZLE_DETECT_MESSAGE1 == i_msg || SWIZZLE_DETECT_MESSAGE2 == i_msg)
+    {
+        // The first nibble in the attribute indicates if the data is valid
+        // The data will be shifted and assembled accordingly
+        return 1;
+    }
+
+    return 0;
+}
+
+///
+/// @brief Appends swizzle detect information if needed
+/// @param[in] i_msg the streaming message to check
+/// @param[in,out] io_swizzle_detect_info the swizzle detect info attribute
+///
+inline void append_swizzle_data(const uint64_t i_msg, uint16_t& io_swizzle_detect_info)
+{
+    // Only assemble this data if the swizzle detect has failed
+    if(io_swizzle_detect_info)
+    {
+        io_swizzle_detect_info <<= BITS_PER_NIBBLE;
+        io_swizzle_detect_info |= i_msg;
+    }
+}
+
+///
+/// @brief Sets the swizzle detect failure attribute if needed
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_swizzle_detect_info the swizzle detect info attribute
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+inline fapi2::ReturnCode set_swizzle_fail_attr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint16_t i_swizzle_detect_info)
+{
+    // Only assemble this data if the swizzle detect has failed
+    if(i_swizzle_detect_info)
+    {
+        return FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE, i_target, i_swizzle_detect_info);
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
+///
+/// @brief Handles any swizzle detect errors found in prior runs
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_status the status of the last training run
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @param[out] o_log_data the ostream object containing streaming messages
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_swizzle_detect_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint64_t& io_status,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct,
+        fapi2::hwp_data_ostream& o_log_data);
+
+///
 /// @brief Handles any DQ errors found in the prior run
 /// @param[in] i_target the memory port on which to operate
 /// @param[in,out] io_status the status of the last training run
@@ -3856,15 +3935,19 @@ fapi2::ReturnCode check_for_dq_repairs_exceeded(const fapi2::Target<fapi2::TARGE
         const uint64_t i_status,
         const PMU_SMB_DDR5U_1D_t& i_struct);
 
+
 ///
-/// @brief Resets per training run attributes before training starts
-/// @param[in] i_target the memory port on which to operate
+/// @brief Resets any needed attributes before a run of training
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 inline fapi2::ReturnCode reset_attrs_pretraining(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
-    return FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT, i_target,
-                               fapi2::ENUM_ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT_NOT_RUN);
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE, i_target,
+                                 fapi2::ENUM_ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE_NO_VALUE));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT, i_target,
+                                 fapi2::ENUM_ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT_NOT_RUN));
+fapi_try_exit:
+    return fapi2::current_err;
 }
 ///
 /// @brief Runs training and processes some of the results

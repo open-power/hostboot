@@ -648,4 +648,44 @@
     </gard>
   </hwpError>
 
+  <hwpError>
+    <sbeError/>
+    <rc>RC_ODY_DRAMINIT_SWIZZLE_INVALID_RANK</rc>
+    <description>DRAMINIT swizzle detect recovery found an invalid PHY rank</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>PHY_RANK</ffdc>
+    <ffdc>MAX_PHY_RANK</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
+    <rc>RC_ODY_DRAMINIT_SWIZZLE_INVALID_DBYTE</rc>
+    <description>DRAMINIT swizzle detect recovery found an invalid dbyte</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>DBYTE</ffdc>
+    <ffdc>MAX_DBYTE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
 </hwpErrors>

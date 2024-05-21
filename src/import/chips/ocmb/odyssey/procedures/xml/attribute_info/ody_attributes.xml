@@ -120,6 +120,26 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            Attribute to track values from the swizzle detect failure streaming message
+            The attribute has the following format:
+               0xWXYZ
+               W: if 0, this no failure. If 1, this attribute contains a failure
+               X: TG aka the rank
+               Y: DBYTE the byte in question from the PHY perspective
+               Z: DQ, which bit failed (used to ID the failing nibble)
+        </description>
+        <valueType>uint16</valueType>
+        <enum>
+            NO_VALUE = 0
+        </enum>
+        <default>NO_VALUE</default>
+        <writeable/>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
         <description>Attribute to enable or disable draminit's specialized FIR error code</description>
