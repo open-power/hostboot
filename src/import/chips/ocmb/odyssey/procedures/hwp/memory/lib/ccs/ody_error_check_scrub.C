@@ -714,7 +714,7 @@ fapi2::ReturnCode run_ecs_helper(const mss::rank::info<mss::mc_type::ODYSSEY>& i
         // Do mem init for each srank
         FAPI_TRY(memory_init_via_memdiags(i_rank_info, l_srank, i_pattern));
 
-        // Disable periodic calibration, refresh, and ecc mode
+        // Disable periodic calibration
         FAPI_TRY(disable_periodic_cal(l_ocmb, l_periodic_calib_data));
 
         // Setup the ecs to execute
@@ -843,13 +843,13 @@ fapi2::ReturnCode run_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSE
                            .set_PORT_TARGET(l_rank_info.get_port_target())
                            .set_THRESHOLD(l_ecs_threshold)
                            .set_MRANK(l_rank_info.get_port_rank())
-                           .set_MR20_PAT0(&l_mr20_arr_pat0)
+                           .set_MR20_PAT0((void*)l_mr20_arr_pat0)
                            .set_MR20_PAT0_SIZE(sizeof(l_mr20_arr_pat0))
-                           .set_MR16_TO_19_PAT0(&l_mr16_19_arr_pat0)
+                           .set_MR16_TO_19_PAT0((void*)l_mr16_19_arr_pat0)
                            .set_MR16_TO_19_PAT0_SIZE(sizeof(l_mr16_19_arr_pat0))
-                           .set_MR20_PAT1(&l_mr20_arr_pat1)
+                           .set_MR20_PAT1((void*)l_mr20_arr_pat1)
                            .set_MR20_PAT1_SIZE(sizeof(l_mr20_arr_pat1))
-                           .set_MR16_TO_19_PAT1(&l_mr16_19_arr_pat1)
+                           .set_MR16_TO_19_PAT1((void*)l_mr16_19_arr_pat1)
                            .set_MR16_TO_19_PAT1_SIZE(sizeof(l_mr16_19_arr_pat1)),
                            "Error counts MR20 and MR16 to MR19 in port: " GENTARGTIDFORMAT " ecs_threshold: %d",
                            GENTARGTID(l_rank_info.get_port_target()), l_ecs_threshold);
