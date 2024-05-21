@@ -61,24 +61,25 @@ extern "C"
         const fapi2::ffdc_t& i_MR20_pat1_size,
         fapi2::ReturnCode& io_rc)
     {
+
         fapi2::ffdc_t UNIT_FFDC_MR20_PAT0;
-        UNIT_FFDC_MR20_PAT0.ptr() = i_MR20_pat0;
-        UNIT_FFDC_MR20_PAT0.size() = i_MR20_pat0_size;
+        UNIT_FFDC_MR20_PAT0.ptr() = (uint8_t*) * (reinterpret_cast<const size_t*>(i_MR20_pat0.ptr()));
+        UNIT_FFDC_MR20_PAT0.size() = *(reinterpret_cast<const size_t*>(i_MR20_pat0_size.ptr()));
         FAPI_ADD_INFO_TO_HWP_ERROR(io_rc, RC_ODY_ECS_MR20_PAT0);
 
         fapi2::ffdc_t UNIT_FFDC_MR16_TO_19_PAT0;
-        UNIT_FFDC_MR16_TO_19_PAT0.ptr() = i_MR16_to_19_pat0;
-        UNIT_FFDC_MR16_TO_19_PAT0.size() = i_MR16_to_19_pat0_size;
+        UNIT_FFDC_MR16_TO_19_PAT0.ptr() = (uint8_t*) * (reinterpret_cast<const size_t*>(i_MR16_to_19_pat0.ptr()));
+        UNIT_FFDC_MR16_TO_19_PAT0.size() = *(reinterpret_cast<const size_t*>(i_MR16_to_19_pat0_size.ptr()));
         FAPI_ADD_INFO_TO_HWP_ERROR(io_rc, RC_ODY_ECS_MR16_TO_19_PAT0);
 
         fapi2::ffdc_t UNIT_FFDC_MR20_PAT1;
-        UNIT_FFDC_MR20_PAT1.ptr() = i_MR20_pat1;
-        UNIT_FFDC_MR20_PAT1.size() = i_MR20_pat1_size;
+        UNIT_FFDC_MR20_PAT1.ptr() = (uint8_t*) * (reinterpret_cast<const size_t*>(i_MR20_pat1.ptr()));
+        UNIT_FFDC_MR20_PAT1.size() = *(reinterpret_cast<const size_t*>(i_MR20_pat1_size.ptr()));
         FAPI_ADD_INFO_TO_HWP_ERROR(io_rc, RC_ODY_ECS_MR20_PAT1);
 
         fapi2::ffdc_t UNIT_FFDC_MR16_TO_19_PAT1;
-        UNIT_FFDC_MR16_TO_19_PAT1.ptr() = i_MR16_to_19_pat1;
-        UNIT_FFDC_MR16_TO_19_PAT1.size() = i_MR16_to_19_pat1_size;
+        UNIT_FFDC_MR16_TO_19_PAT1.ptr() =  (uint8_t*) * (reinterpret_cast<const size_t*>(i_MR16_to_19_pat1.ptr()));
+        UNIT_FFDC_MR16_TO_19_PAT1.size() = *(reinterpret_cast<const size_t*>(i_MR16_to_19_pat1_size.ptr()));
         FAPI_ADD_INFO_TO_HWP_ERROR(io_rc, RC_ODY_ECS_MR16_TO_19_PAT1);
 
         return fapi2::FAPI2_RC_SUCCESS;
