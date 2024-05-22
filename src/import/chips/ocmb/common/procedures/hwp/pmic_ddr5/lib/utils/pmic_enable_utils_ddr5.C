@@ -953,6 +953,7 @@ fapi_try_exit:
 fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmics(target_info_redundancy_ddr5&
         io_target_info)
 {
+    static const uint8_t HEALTH_CHECK_CYCLE = 3;
     mss::pmic::ddr5::health_check_telemetry_data l_health_check_info;
     mss::pmic::ddr5::additional_n_mode_telemetry_data l_additional_info;
     mss::pmic::ddr5::periodic_telemetry_data l_periodic_telemetry_data;
@@ -964,12 +965,16 @@ fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmi
     // Calling health check 3 times here to ensure if any PMICs had any issue during IPL, they would be
     // attempted to recover here and would not be in n_mode if not for major issues
     // The number of bytes to send here is 0 as we are not going to send any data to HB. This is just a place holder
-    FAPI_TRY(health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
-                               l_number_bytes_to_send));
-    FAPI_TRY(health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
-                               l_number_bytes_to_send));
-    FAPI_TRY(health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
-                               l_number_bytes_to_send));
+    for (auto l_count = 0; l_count < HEALTH_CHECK_CYCLE; l_count++)
+    {
+        // Clear all the PMIC/DT and aggregate states to start afresh
+        mss::pmic::ddr5::clear_health_check_states(io_target_info, l_health_check_info);
+
+        l_number_bytes_to_send = 0;
+
+        FAPI_TRY(health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
+                                   l_number_bytes_to_send));
+    }
 
     // Check all bread crumbs. If any PMIC has bread crumb not set to ALL_GOOD, report those errors
     FAPI_TRY(check_all_breadcrumbs(io_target_info, l_health_check_info));
