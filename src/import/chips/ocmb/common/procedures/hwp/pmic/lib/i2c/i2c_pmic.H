@@ -61,12 +61,19 @@ namespace pmic
 namespace i2c
 {
 
+/// @note This file is not be ported to ekb-src as there are system specific changes
+/// in the respective repos.
+
 ///
 /// @brief Add provided opcode if the Target is an ADC
 ///
 /// @param[in] i_target GENERICI2CRESPONDER target
 /// @param[in] i_opcode opcode to add
 /// @param[in,out] io_command command vector
+/// @note This function is different from P code for the below reason:
+///  There were issues with the ADC setup, mss::index gave absolute pos instead of relative pos
+///  so that if statement was only being met on the DIMM in channel 0, and the other 7 DIMMs under a processor
+///  didn't get their ADCs initialized
 ///
 inline void add_adc_opcode(const fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>& i_target,
                            const mss::adc::i2c::opcode i_opcode,
