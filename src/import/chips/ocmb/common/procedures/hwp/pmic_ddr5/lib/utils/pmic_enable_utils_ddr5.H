@@ -274,6 +274,30 @@ fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_tar
                                         const mss::pmic::ddr5::health_check_telemetry_data& i_health_check_info);
 
 ///
+/// @brief clear all the PMIC/DT and aggregate states to start afresh for pmic_enable()
+///
+/// @param[in,out] io_target_info target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @return None
+///
+void inline clear_health_check_states(target_info_redundancy_ddr5& io_target_info,
+                                      mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
+{
+    using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
+
+    io_health_check_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::N_PLUS_1;
+
+    for(auto l_count = 0; l_count < CONSTS::NUM_PMICS_4U; l_count++)
+    {
+        io_target_info.iv_pmic_dt_map[l_count].iv_pmic_state = mss::pmic::ddr5::pmic_state::PMIC_ALL_GOOD;
+        io_target_info.iv_pmic_dt_map[l_count].iv_dt_state = mss::pmic::ddr5::dt_state::DT_ALL_GOOD;
+    }
+
+    io_target_info.iv_adc_state = mss::pmic::ddr5::adc_state::ADC_ALL_GOOD;
+}
+
+
+///
 /// @brief Check the statuses of all PMICs present on the given OCMB chip
 ///
 /// @param[in,out] io_target_info target info struct
