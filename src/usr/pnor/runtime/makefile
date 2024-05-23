@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2023
+# Contributors Listed Below - COPYRIGHT 2014,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -30,9 +30,9 @@ MODULE = pnor_rt
 PLDM_DEPS = pnor_pldmdd.o pnor_pldm_utils.o
 
 OBJS += rt_pnor.o
-OBJS += pnor_utils.o
+#OBJS += pnor_utils.o
 OBJS += pnor_common.o
-OBJS += ecc.o
+#OBJS += ecc.o  Pulled in by fapi2_rt
 OBJS += $(if $(CONFIG_FILE_XFER_VIA_PLDM),$(PLDM_DEPS))
 
 SUBDIRS += test.d
