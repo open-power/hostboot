@@ -57,28 +57,25 @@ namespace SBEIO
 {
 using namespace TARGETING;
 
-/** @brief Determine if the DDR5 OCMB target should run the Telemetry Check
- *         or run the Health Check.
+/** @brief Determine if the OCMB target should run the Health Check.
  *
- *  @param[in] i_ddr5_health_check A flag set from the registered
- *             callback which indicates if this is for a HWP Health
- *             Check or HWP Telemetry Check
+ *  @param[in] i_ddr5_health_not_telemetry_check A flag set from the registered
+ *             callback which indicates if this is for a DDR5 HWP Health Check
  *  @param[in] i_memType     The memory type
  *  @param[in] i_memModType  The memory module type
  *  @param[in] i_memHeight   The memory height
  *
- *  @return    bool to indicate which HWP to invoke, DDR5 Health Check HWP or
- *             DDR5 4U and 2U Telemetry check.
+ *  @return    bool to indicate to run DDR5 Health Check HWPs
  *
  *  Caller must pre-check the context of where this helper can be called.
  *
- *  This helper only validates the conditions for a DDR5 OCMB target.
+ *  This helper only validates the conditions for an OCMB target.
  */
 
-bool isDDR5_Health_Check(bool i_ddr5_health_check, SPD::spdMemType_t i_memType, SPD::spdModType_t i_memModType, SPD::dimmModHeight_t i_memHeight)
+bool isDDR5_Health_Check(bool i_ddr5_health_not_telemetry_check, SPD::spdMemType_t i_memType, SPD::spdModType_t i_memModType, SPD::dimmModHeight_t i_memHeight)
 {
-    bool l_evaluation = false; // Default to the HWP for DDR5 OCMB Telemetry check
-    if ((i_ddr5_health_check) && ((SPD::DDR5_TYPE == i_memType) && (SPD::MOD_TYPE_DDIMM == i_memModType) && (SPD::DDIMM_MOD_HEIGHT_4U == i_memHeight)))
+    bool l_evaluation = false; // Default to not run DDR5 HWP Health Check
+    if ((i_ddr5_health_not_telemetry_check) && ((SPD::DDR5_TYPE == i_memType) && (SPD::MOD_TYPE_DDIMM == i_memModType) && (SPD::DDIMM_MOD_HEIGHT_4U == i_memHeight)))
     {
         // DDR5 OCMB should run the HWP for Health Check
         l_evaluation = true;
@@ -96,15 +93,15 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
 /** @brief Get PMIC Health Check Data from the HWP
  *
  *  @param[in] i_proc   The PROC to query for the related OCMBs.
- *  @param[in] i_ddr5_health_check
+ *  @param[in] i_ddr5_health_not_telemetry_check
  *                      A flag set from the registered callback which indicates
- *                      if this is for a HWP Health Check or HWP Telemtry Check
+ *                      if this is for a HWP Health Check or HWP Telemetry Check
  *  @param[in] i_OCMBs  List of OCMBs
     @param[in] i_plid   PLID to associate error logs
  *  @return nullptr if no error else an error log
  */
 errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
-                                       bool i_ddr5_health_check,
+                                       bool i_ddr5_health_not_telemetry_check,
                                        const TARGETING::TargetHandleList& i_OCMBs,
                                        const uint32_t i_plid = 0)
 {
@@ -115,8 +112,8 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
     // for HMC managed systems.
     errlHndl_t l_err_log(nullptr);
 
-    // DDR4 and DDR5 will always log Telemetry data, DDR5 uses this flag to properly manage logging
-    // DDR5 Health Check will only create a log if the payload response size is greater than one byte
+    // DDR4 4U and DDR5 2U and 4U will always log Telemetry data, DDR5 uses this flag to properly manage logging
+    // DDR5 Health Check will only create a log if the payload response size is greater than one data unit
     bool l_logs_available = true;
 
     static constexpr uint8_t DDR4_TELEMETRY_LOC_VERSION = 101;
@@ -148,13 +145,50 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
     // Loop through OCMB list to collect PMIC telemetry data.
     for (const auto l_pOcmb: i_OCMBs)
     {
-        TRACFCOMP( g_trac_sbeio, "getMultiPmicHealthCheckData OCMB HUID=0x%X OCMB_CHIP targets : %d of %d found ERRL=0x%X",
-                get_huid(l_pOcmb), l_list_index+1, i_OCMBs.size(), ERRL_GETEID_SAFE(l_err_log));
-
         SPD::spdMemType_t l_memType = SPD::MEM_TYPE_INVALID;
         SPD::spdModType_t l_memModType = SPD::MOD_TYPE_INVALID;
         SPD::dimmModHeight_t l_memHeight = SPD::DDIMM_MOD_HEIGHT_INVALID;
         errlHndl_t l_err = SPD::getMemInfo(l_pOcmb,l_memType,l_memModType,l_memHeight);
+        TRACFCOMP( g_trac_sbeio, "getMultiPmicHealthCheckData OCMB HUID=0x%X OCMB_CHIP targets : %d of %d found ERRL=0x%X",
+                get_huid(l_pOcmb), l_list_index+1, i_OCMBs.size(), ERRL_GETEID_SAFE(l_err_log));
+        TRACFCOMP( g_trac_sbeio, "getMultiPmicHealthCheckData"
+                " l_memType=0x%X (DDR4=0x%X DDR5=0x%X) l_memModType=0x%X l_memHeight=0x%X (4U=0x%X)",
+                l_memType, SPD::DDR4_TYPE, SPD::DDR5_TYPE, l_memModType, l_memHeight, SPD::DDIMM_MOD_HEIGHT_4U);
+
+        bool l_ddr5_run_health_check = isDDR5_Health_Check(i_ddr5_health_not_telemetry_check, l_memType, l_memModType, l_memHeight);
+        TRACFCOMP(g_trac_sbeio, "getMultiPmicHealthCheckData l_ddr5_run_health_check=0x%X i_ddr5_health_not_telemetry_check=0x%X",
+                   l_ddr5_run_health_check, i_ddr5_health_not_telemetry_check);
+        //  GATE KEEPING STEPS
+        // If the input parm says we are performing the "Health Check" HWPs and we are not DDR5 4U we want to bail now
+        // We do not disable the timers since on a multi-node system, i.e. Denali, we can have both Explorer nodes and/or Odyssey nodes
+        //
+        // The i_ddr5_health_not_telemetry_check is checking the entry point from the callback,
+        // and the l_ddr5_run_health_check is checking if the OCMB qualifies to have the DDR5 Health Check HWPs run.
+        //
+        // The pair, l_ddr5_run_health_check and i_ddr5_health_not_telemetry_check, together compose the switches
+        // to decide on characteristics of running which HWPs, or to bail.
+        //
+        // If the OCMB is a viable candidate to run the health check, but this is not the health check entry point bail.
+        // Only when the DDR5 Telemetry call is requested do we want to proceed if the entry point is the health check.
+        // This check qualifies the validity of the entry point in order to proceed.
+        //     Entry Point             Type    isDDR5_Health_Check
+        //      Telemetry            DDR4 2U            false           <== Will get filtered out later not to run Telemetry
+        //      Telemetry            DDR4 4U            false
+        //      Telemetry            DDR5 2U            false
+        //      Telemetry            DDR5 4U            false
+        //      Health Check         DDR4 2U            false
+        //      Health Check         DDR4 4U            false
+        //      Health Check         DDR5 2U            true
+        //      Health Check         DDR5 4U            true
+        //
+        //  If the OCMB cannot run the health check bail, this kicks out the telemetry timer call for DDR5
+        //  If the OCMB can run the health check and this is the health check timer then its allowed to proceed
+        //  If we only looked at the qualification for isDDR5_Health_Check we would not allow the Telemetry calls to pass
+        //  First clause is saying "its telemetry or not DDR5", second clause is saying "you are asking to come in the health check door"
+        if ( (!l_ddr5_run_health_check) && i_ddr5_health_not_telemetry_check )
+        {
+            return nullptr; // No DDR5 Health Check so bail
+        }
         if (l_err)
         {
             // This function is collecting additional "nice to have" data.
@@ -169,12 +203,10 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
         else if (((SPD::DDR4_TYPE == l_memType) && (SPD::MOD_TYPE_DDIMM == l_memModType) && (SPD::DDIMM_MOD_HEIGHT_4U == l_memHeight))
                  || ((SPD::DDR5_TYPE == l_memType) && (SPD::MOD_TYPE_DDIMM == l_memModType)))
         {
-
-            bool l_ddr5_run_health_check = isDDR5_Health_Check(i_ddr5_health_check, l_memType, l_memModType, l_memHeight);
             // Conditions below rely on the fact that ONLY DDR4 and DDR5 meet the above requirements, any modifications to the above check
             // need to re-evaluate the conditional logic below and any associated helper functions in the future.
-            TRACFCOMP(g_trac_sbeio, "getMultiPmicHealthCheckData OCMB HUID=0x%X l_ddr5_run_health_check=%d i_ddr5_heatlh_check=%d l_memHeight=0x%X (2U=0x20 4U=0x80)",
-                          get_huid(l_pOcmb), l_ddr5_run_health_check, i_ddr5_health_check, l_memHeight);
+            TRACFCOMP(g_trac_sbeio, "getMultiPmicHealthCheckData OCMB HUID=0x%X l_ddr5_run_health_check=%d i_ddr5_heatlh_not_telemetry_check=%d l_memHeight=0x%X (2U=0x20 4U=0x80)",
+                          get_huid(l_pOcmb), l_ddr5_run_health_check, i_ddr5_health_not_telemetry_check, l_memHeight);
             if (l_err_log == nullptr)
             {
                 if (l_ddr5_run_health_check)
@@ -219,7 +251,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                 }
                 // HWP for DDR5 Health Check has already been caught in the first conditional logic check
                 // DDR4's are caught in above cases, so the ONLY case left is the DDR5 2U and 4U Telemetry check
-                else if (!i_ddr5_health_check) // if i_ddr5_health_check was set this is NOT Telemetry, so this is 2U and 4U Telemetry DDR5
+                else if (!i_ddr5_health_not_telemetry_check) // if i_ddr5_health_not_telemetry check was set this is NOT Telemetry, so this is 2U and 4U Telemetry DDR5
                 {
                     /*@
                      * @moduleid         SBEIO_PSU_PMIC_HEALTH_CHECK
@@ -273,7 +305,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                 l_version_loc = DDR4_TELEMETRY_LOC_VERSION;
                 l_version_data = DDR4_TELEMETRY_FFDC_VERSION;
             }
-            else if (!i_ddr5_health_check) // DDR5 2U and 4U Telemetry
+            else if (!i_ddr5_health_not_telemetry_check) // DDR5 2U and 4U Telemetry
             {
                 FAPI_INVOKE_HWP(l_err,
                                 pmic_periodic_telemetry_ddr5,
@@ -318,7 +350,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                 {
                     l_pmic_status = l_pmic_health_data_ddr5_consolidated.iv_health_check.iv_aggregate_state; // use ONLY on consolidated_health_check_data struct
                     l_pmic_revision = l_pmic_health_data_ddr5_consolidated.iv_health_check.iv_revision; // use ONLY on consolidated_health_check_data struct
-                    // If the response size is one byte, then the DDR5 Health Check HWP is indicating for Hostboot not to log anything
+                    // If the response size is one data unit, then the DDR5 Health Check HWP is indicating for Hostboot not to log anything
                     // For DDR5 Health Check the only logs produced will be if the payload from the HWP comes back greater than one unit (hwp_data_unit)
                     if ( l_response_size > (1 * sizeof(fapi2::hwp_data_unit)) ) // We have something to log from DDR5 Health Check
                     {
@@ -622,17 +654,17 @@ void get4uDdimmPmicHealthCheckData(Target * i_ocmb, const uint32_t i_plid)
 
  /** @brief Get PMIC Health Check Data from the SBE
  *
- *   @param[in] i_ddr5_health_check A flag set from the registered
+ *   @param[in] i_ddr5_health_not_telemetry_check A flag set from the registered
  *              callback which indicates if this is for a HWP Health
  *              Check or HWP Telemetry Check
  *
  *   @return nullptr if no error else an error log
  */
-errlHndl_t getAllPmicHealthCheckData(bool i_ddr5_health_check)
+errlHndl_t getAllPmicHealthCheckData(bool i_ddr5_health_not_telemetry_check)
 {
     errlHndl_t l_err(nullptr);
 
-    TRACFCOMP(g_trac_sbeio, ENTER_MRK"getAllPmicHealthCheckData i_ddr5_health_check=%d", i_ddr5_health_check);
+    TRACFCOMP(g_trac_sbeio, ENTER_MRK"getAllPmicHealthCheckData i_ddr5_health_not_telemetry_check=%d", i_ddr5_health_not_telemetry_check);
 
     do
     {
@@ -673,7 +705,7 @@ errlHndl_t getAllPmicHealthCheckData(bool i_ddr5_health_check)
                 // else we have a list with less than l_ocmb_dump_count_max
 
                 // Call this with list beginning until the end. count.
-                getMultiPmicHealthCheckData(l_pProc, i_ddr5_health_check, { l_TargetList.begin(), end_chunk });
+                getMultiPmicHealthCheckData(l_pProc, i_ddr5_health_not_telemetry_check, { l_TargetList.begin(), end_chunk });
 
                 // Set target list to end to get out of loop.
                 //     or to the end of the last OCMB for next pass
