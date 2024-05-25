@@ -1095,7 +1095,7 @@ errlHndl_t createPmicHealthCheckCallback(bool i_firstCall)
 
         // Generate a new host callback (in milliseconds)
         TRACFCOMP(g_trac_hbrt,
-            "createPmicHealthCheckCallback: Create host_callback for PMIC health check in %d milliseconds",
+            "createPmicHealthCheckCallback: Create host_callback for PMIC Telemetry in %d milliseconds",
             l_host_callback_timer);
 
         size_t l_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE;
@@ -1206,7 +1206,7 @@ errlHndl_t createPmicHealthCheckDDR5Callback(bool i_firstCall)
 
         // Generate a new host callback (in milliseconds)
         TRACFCOMP(g_trac_hbrt,
-            "createPmicHealthCheckDDR5Callback: Create host_callback for PMIC health check DDR5 in %d milliseconds",
+            "createPmicHealthCheckDDR5Callback: Create host_callback for PMIC Health Check in %d milliseconds",
             l_host_callback_timer);
 
         size_t l_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE;
@@ -1664,7 +1664,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
             case hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK:
             {
                 TRACFCOMP(g_trac_runtime,
-                          "firmware_notify: PMIC health check callback");
+                          "firmware_notify: PMIC Telemetry callback");
 
                 handlePmicHealthCheckCallback();
             }
@@ -1673,7 +1673,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
             case hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK_DDR5:
             {
                 TRACFCOMP(g_trac_runtime,
-                          "firmware_notify: PMIC health check DDR5 callback");
+                          "firmware_notify: PMIC Health Check callback");
 
                 handlePmicHealthCheckDDR5Callback();
             }
