@@ -28,7 +28,6 @@
   <format>poz</format>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_PROC_DOES_NOT_SUPPORT_US_B</rc>
     <description>
       Procedure: exp_omi_init.C
@@ -57,7 +56,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_PROC_DOES_NOT_SUPPORT_DS_A</rc>
     <description>
       Procedure: exp_omi_init.C
@@ -86,7 +84,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_METADATA_ENABLE_REQUIRES_TEMPLATE_5_OR_9</rc>
     <description>
       Procedure: exp_omi_init.C
@@ -110,7 +107,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_ACTAG_PASID_CONFIG_INVALID</rc>
     <description>
       MFIR_ACTAG_PASID_CFG_ERR has been lit due to unsupported configuration in number of acTAGs and PASIDs

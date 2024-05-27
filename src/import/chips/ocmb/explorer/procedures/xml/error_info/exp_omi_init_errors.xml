@@ -27,7 +27,6 @@
 
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_OCMB_IS_NOT_EXPLORER</rc>
     <description>
       Procedure: exp_omi_init.C
