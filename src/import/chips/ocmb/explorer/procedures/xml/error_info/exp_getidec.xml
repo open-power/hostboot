@@ -27,7 +27,6 @@
 
 
     <hwpError>
-        <sbeError/>
         <rc>RC_EXP_UNKNOWN_REVISION</rc>
         <description>
             The Explorer revision does not match a known DD level.

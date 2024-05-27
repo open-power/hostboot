@@ -32,7 +32,6 @@
 
 
   <hwpError>
-    <sbeError/>
     <rc>RC_I2C_PMIC_INVALID_READ_SIZE</rc>
     <description>
        The number of bytes returned from the read did not match
@@ -49,7 +48,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_CHIP_NOT_RECOGNIZED</rc>
     <description>
        The PMIC identifier register contents did not match any known chip.
@@ -71,7 +69,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_VOLTAGE_OUT_OF_RANGE</rc>
     <description>
        The voltage from the SPD and offset combination or bias operation was out of range for the PMIC.
@@ -97,7 +94,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_RANGE_CONVERSION_OVERFLOW</rc>
     <description>
        Converting voltage between PMIC switch node range 1 to 0 caused an overflow
@@ -113,7 +109,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_ORDER_OUT_OF_RANGE</rc>
     <description>
        The sequence order specified by the SPD was out of range for the PMIC (max 4)
@@ -136,7 +131,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_DELAY_OUT_OF_RANGE</rc>
     <description>
        The sequence delay specified by the SPD was out of range for the PMIC (max bitmap: 0b111)
@@ -159,7 +153,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_GPIO_INPUT_PORT_TIMEOUT</rc>
     <description>
        Polling timeout for the GPIO input port while attempting initial communication
@@ -175,7 +168,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_NOT_ENABLED</rc>
     <description>
        After running pmic_enable, the PMIC VR Enable bit did not remain set.
@@ -200,7 +192,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_STATUS_ERRORS</rc>
     <description>
        After running pmic_enable, one or more error status bits were set on the PMICs of this OCMB.
@@ -233,7 +224,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_MISMATCHING_VENDOR_IDS</rc>
     <description>
        The PMIC vendor ID defined in the SPD did not match the ID of the PMIC.
@@ -257,7 +247,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_MISMATCHING_REVISIONS</rc>
     <description>
        The PMIC revision register value did not match the SPD value.
@@ -281,7 +270,6 @@
   </hwpError>
 
    <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_NOT_DDR5_REVISION</rc>
     <description>
        The PMIC revision value did not match TI REV 23 or greater.
@@ -296,7 +284,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_MISMATCHING_REVISIONS_DDR5</rc>
     <description>
        The PMIC revision value did not match TI REV 23.
@@ -320,7 +307,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_VIN_BULK_BELOW_TOLERANCE</rc>
     <description>
        The VIN_BULK read by the PMIC ADC was below the minimum tolerance.
@@ -336,7 +322,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_EFUSE_BLOWN</rc>
     <description>
        PMIC EFUSE data shows VIN to be out of valid range,
@@ -355,7 +340,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_INVALID_PMIC_TARGET_CONFIG</rc>
     <description>
        Expected to see 2 PMICs on the provided OCMB_TARGET in order to
@@ -374,7 +358,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_INVALID_PMIC_GI2C_TARGET_CONFIG</rc>
     <description>
        Expected 4 GENERICI2CRESPONDER targets and at least 2 PMICs in order to
@@ -395,7 +378,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_ENABLE_FAIL</rc>
     <description>
        A PMIC had errors during pmic_enable. See previous recoverable errors to further diagnose.
@@ -427,7 +409,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_ENABLE_FAIL_DDR5_2U</rc>
     <description>
        A DDR5 2U PMIC had errors during pmic_enable. See previous recoverable errors to further diagnose.
@@ -459,7 +440,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_ENABLE_FAIL_DDR5_4U</rc>
     <description>
        A DDR5 4U PMIC had errors during pmic_health_check_ddr5.
@@ -490,7 +470,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U</rc>
     <description>
        A DDR5 4U PMIC had aggregate state other than N_PLUS_1 when running health check in manufacturing mode.
@@ -548,7 +527,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_REDUNDANCY_FAIL</rc>
     <description>
        Both PMICs in a redundant pair had errors which caused each to drop into N-Mode.
@@ -576,7 +554,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_DROPPED_INTO_N_MODE</rc>
     <description>
        The provided PMIC_ID on OCMB_TARGET had errors which has caused a drop into N-Mode.
@@ -596,7 +573,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_DIMM_RUNNING_IN_N_MODE</rc>
     <description>
        One of the 4 PMICs had errors which caused the DIMM to drop into N-Mode.
@@ -618,7 +594,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_INVALID_2U_PMIC_TARGET_CONFIG</rc>
     <description>
        Expected to see 2 PMICs for 2U on the provided OCMB_TARGET in order to
@@ -641,7 +616,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_INVALID_PMIC_DT_DDR5_TARGET_CONFIG</rc>
     <description>
        Expected at least 3 PMICs and 3 DTs in order to properly perform DDR5 4U pmic_enable.
@@ -661,7 +635,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_INVALID_GI2C_DDR5_TARGET_CONFIG</rc>
     <description>
        Expected at least 1 ADC in order to properly perform DDR5 4U pmic_enable.
@@ -679,7 +652,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_INVALID_PMIC_INDEX_RECEIVED</rc>
     <description>
        Out of bounds PMIC index encountered in pmic_enable target loop.
@@ -699,7 +671,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_INVALID_DT_INDEX_RECEIVED</rc>
     <description>
        Out of bounds DT index encountered in pmic_enable target loop.
@@ -719,7 +690,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_NO_PMIC_DT_DDR5_TARGETS_FOUND</rc>
     <description>
        No PMIC DT Targets were found when running the health check tool
@@ -739,7 +709,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_DROPPED_INTO_N_MODE_DDR5</rc>
     <description>
        The provided PMIC_ID on OCMB_TARGET had errors which has caused a drop into N-Mode.
@@ -759,7 +728,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_DIMM_RUNNING_IN_N_MODE_DDR5</rc>
     <description>
        One of the 4 PMICs had errors which caused the DIMM to drop into N-Mode.
@@ -781,7 +749,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_PMIC_REDUNDANCY_FAIL_DDR5</rc>
     <description>
        Two or more PMICs had errors which caused them to drop into N-Mode.
