@@ -49,8 +49,8 @@
     // QME local table in QME SRAM .. logs downloaded by XGPE
     #define MAX_ELOG_ENTRIES        1
 #else
-    // OCC global table in OCC SRAM .. (8 QMEs + 2 PGPE + 1 XPGE)
-    #define MAX_ELOG_ENTRIES        11
+    // OCC global table in OCC SRAM .. (8 QMEs + 2 PGPE + 2 XPGE)
+    #define MAX_ELOG_ENTRIES        12
 #endif
 
 // Structure of an individual error log entry in the table
