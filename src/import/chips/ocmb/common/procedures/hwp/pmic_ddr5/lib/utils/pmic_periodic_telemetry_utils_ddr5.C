@@ -568,17 +568,26 @@ void set_i2c_error_states(mss::pmic::ddr5::target_info_redundancy_ddr5& io_targe
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_periodic_tele_info periodic telemetry struct
-/// None
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-void collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                                mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
+fapi2::ReturnCode collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+        mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
 {
+    uint8_t l_thermal_init_complete = 0;
+
     // Read and store serial number and CCIN number
     read_serial_ccin_number(io_target_info.iv_ocmb, io_periodic_tele_info.iv_serial_number);
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_THERMAL_INIT_COMPLETE,
+                           io_target_info.iv_ocmb,
+                           l_thermal_init_complete));
+
     // Read DQS drift tracking log
-    io_periodic_tele_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(io_target_info.iv_ocmb,
-            io_periodic_tele_info.iv_dqs_tracking_log);
+    if (l_thermal_init_complete == fapi2::ENUM_ATTR_MEM_THERMAL_INIT_COMPLETE_YES)
+    {
+        io_periodic_tele_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(io_target_info.iv_ocmb,
+                io_periodic_tele_info.iv_dqs_tracking_log);
+    }
 
     // Read and store ADC regs
     read_adc_regs(io_target_info, io_periodic_tele_info);
@@ -590,6 +599,9 @@ void collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
     read_pmic_regs(io_target_info, io_periodic_tele_info);
 
     set_i2c_error_states(io_target_info, io_periodic_tele_info);
+
+fapi_try_exit:
+    return fapi2::current_err;
 }
 
 ///
@@ -643,7 +655,7 @@ fapi2::ReturnCode pmic_periodic_telemetry_ddr5_helper(const fapi2::Target<fapi2:
              l_aggregate_state_not_used));
 
     // Read and store ADC/DT/PMIC regs
-    collect_periodic_tele_data(io_target_info, io_periodic_tele_info);
+    FAPI_TRY(collect_periodic_tele_data(io_target_info, io_periodic_tele_info));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -781,9 +793,18 @@ fapi2::ReturnCode pmic_periodic_telemetry_ddr5_2U_helper(const fapi2::Target<fap
         i_ocmb_target,
         mss::pmic::ddr5::periodic_2U_telemetry_data& io_info)
 {
+    uint8_t l_thermal_init_complete = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_THERMAL_INIT_COMPLETE,
+                           i_ocmb_target,
+                           l_thermal_init_complete));
+
     read_serial_ccin_number(i_ocmb_target, io_info.iv_serial_number);
 
-    io_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(i_ocmb_target, io_info.iv_dqs_tracking_log);
+    if (l_thermal_init_complete == fapi2::ENUM_ATTR_MEM_THERMAL_INIT_COMPLETE_YES)
+    {
+        io_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(i_ocmb_target, io_info.iv_dqs_tracking_log);
+    }
 
     FAPI_TRY(collect_periodic_tele_data_2U(i_ocmb_target, io_info));
 

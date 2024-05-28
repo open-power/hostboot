@@ -36,6 +36,8 @@
 #include <fapi2.H>
 #include <ody_host_draminit.H>
 #include <generic/memory/mss_git_data_helper.H>
+#include <generic/memory/lib/utils/find.H>
+#include <lib/phy/ody_phy_access.H>
 
 extern "C"
 {
@@ -48,7 +50,42 @@ extern "C"
     {
         mss::display_git_commit_info("ody_host_draminit");
 
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
+        // Initialize address range in PHY imem that's used for DQS drift recal logs
+        for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
+        {
+            FAPI_TRY(mss::ody::phy::configure_phy_scom_access(l_port, mss::states::ON_N));
 
+            // Log area
+            for (uint64_t l_log_idx = 0; l_log_idx < mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES; l_log_idx++)
+            {
+                fapi2::buffer<uint64_t> l_buf;
+
+                for (uint8_t l_hword = 0; l_hword < mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY; l_hword++)
+                {
+                    const uint64_t l_syn_addr = mss::ddr5::ODY_DQS_TRACKING_LOG_START_ADDRESS +
+                                                l_log_idx * mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY + l_hword;
+                    const uint64_t l_address = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(l_syn_addr);
+
+                    FAPI_TRY(fapi2::putScom(l_port, l_address, l_buf));
+                }
+            }
+
+            // And the recal count
+            {
+                const uint64_t l_address = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(
+                                               static_cast<uint64_t>(mss::ddr5::ODY_DQS_TRACKING_COUNT_START_ADDRESS));
+                const uint64_t l_address_odd = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(
+                                                   static_cast<uint64_t>(mss::ddr5::ODY_DQS_TRACKING_COUNT_START_ADDRESS + 1));
+
+                FAPI_TRY(fapi2::putScom(l_port, l_address, 0));
+                // Required to write even+odd addresses on PHY imem
+                FAPI_TRY(fapi2::putScom(l_port, l_address_odd, 0));
+            }
+
+            FAPI_TRY(mss::ody::phy::configure_phy_scom_access(l_port, mss::states::OFF_N));
+        }
+
+    fapi_try_exit:
+        return fapi2::current_err;
+    }
 }// extern C
