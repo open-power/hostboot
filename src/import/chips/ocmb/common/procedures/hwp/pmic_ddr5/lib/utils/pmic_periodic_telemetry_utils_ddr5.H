@@ -208,10 +208,10 @@ void set_i2c_error_states(mss::pmic::ddr5::target_info_redundancy_ddr5& io_targe
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_periodic_tele_info periodic telemetry struct
-/// None
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-void collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                                mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
+fapi2::ReturnCode collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+        mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
 
 ///
 /// @brief Send the periodic_telemetry_data struct

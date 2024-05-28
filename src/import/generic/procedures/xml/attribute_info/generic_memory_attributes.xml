@@ -137,6 +137,23 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MEM_THERMAL_INIT_COMPLETE</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>
+        Set to '1' after the ody_thermal_init HWP/chip-op has completed.
+        Used to suppress certain behavior (mainly SBE chip-op) that should
+        not be run before this IPL step.
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        NO = 0,
+        YES = 1
+    </enum>
+    <initToZero></initToZero>
+    <platInit/>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MEM_2N_MODE</id>
     <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
     <description>

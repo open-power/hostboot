@@ -1028,6 +1028,14 @@
     </attribute>
 
     <attribute>
+        <!-- Convert to a value HB dynamically controls -->
+        <id>ATTR_MEM_THERMAL_INIT_COMPLETE</id>
+        <writeable/>
+        <no_export/>
+        <persistency>volatile</persistency>
+    </attribute>
+
+    <attribute>
         <!-- Hide from MRW -->
         <id>ATTR_PVR_82_MODE</id>
         <no_export/>
