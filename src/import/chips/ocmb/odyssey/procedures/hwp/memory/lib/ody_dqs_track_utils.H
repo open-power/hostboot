@@ -43,6 +43,7 @@
 #include <lib/ccs/ody_ccs.H>
 #include <lib/phy/ody_phy_access.H>
 #include <ody_scom_mp_dbyte0_b0.H>
+#include <ody_scom_mp_apbonly0.H>
 
 namespace mss
 {
@@ -466,6 +467,17 @@ inline fapi2::ReturnCode ody_putscom_dqs_track_log(const fapi2::Target<fapi2::TA
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
     uint64_t l_log[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES] = {0};
     uint16_t l_recal_count = 0;
+    fapi2::buffer<uint64_t> l_muxsel;
+
+    // First check MUXSEL to make sure we're not colliding with anybody reading out the logs
+    // ON_N means it's in use, so just return if that's the case
+    // Since the logs are also kept in attributes, we'll catch up later if we can't access now
+    FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_muxsel));
+
+    if (!l_muxsel.getBit<scomt::mp::DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL>())
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // The 'true' below is so we turn on UCCLK to access the PHY SRAM
     FAPI_TRY(mss::ody::phy::configure_phy_scom_access(i_target, mss::states::ON_N, true));
