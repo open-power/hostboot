@@ -54,7 +54,6 @@
 
 //  HWP call support
 #include <p10_ocmb_enable.H>
-
 #include <isteps/hwpThreadHelper.H>
 #include <targeting/common/utilFilter.H>
 #include <pmic_check_and_clear_ddr5.H>
@@ -77,48 +76,44 @@ void* call_proc_ocmb_enable (void *io_pArgs)
     PLDM::sendProgressStateChangeEvent(PLDM_STATE_SET_BOOT_PROG_STATE_MEM_INITIALIZATION);
 #endif
 
-    TargetHandleList functionalProcChipList;
+    //  Paralleize a thread per proc
+    ISTEP::parallel_for_each(composable(getAllChips)(TYPE_PROC, true),
+                                                   l_StepError,
+                                                   "do_all_proc_ocmb_enable",
+                                                   [&](Target* const l_procChip)
+   {
+       const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
+         l_fapi2_proc_target (l_procChip);
 
-    getAllChips(functionalProcChipList, TYPE_PROC, true);
+       TRACFCOMP(g_trac_isteps_trace,
+                 "START : p10_ocmb_enable "
+                 "starting on 0x%.08X", get_huid( l_procChip ));
 
-    // loop thru the list of processors
-    for (TargetHandleList::const_iterator
-            l_proc_iter = functionalProcChipList.begin();
-            l_proc_iter != functionalProcChipList.end();
-            ++l_proc_iter)
-    {
-        TRACFCOMP(g_trac_isteps_trace,
-                    "START : p10_ocmb_enable "
-                    "starting on 0x%.08X", get_huid( *l_proc_iter ));
+       // Invoke the HWP passing in the proc target
+       // HWP loops on child OCMB targets
+       FAPI_INVOKE_HWP(l_errl,
+                       p10_ocmb_enable,
+                       l_fapi2_proc_target);
 
-        // Invoke the HWP passing in the proc target
-        // HWP loops on child OCMB targets
-        fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
-                                l_fapiProcTarget( *l_proc_iter );
-        FAPI_INVOKE_HWP(l_errl,
-                        p10_ocmb_enable,
-                        l_fapiProcTarget);
-
-        if (l_errl)
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      "ERROR : call_proc_ocmb_enable HWP(): "
-                      "p10_ocmb_enable failed on target 0x%08X."
-                      TRACE_ERR_FMT,
-                      get_huid(*l_proc_iter),
-                      TRACE_ERR_ARGS(l_errl));
-
-            // Capture error and continue to next proc
-            captureError(l_errl, l_StepError, HWPF_COMP_ID, *l_proc_iter);
+       if (l_errl)
+       {
+           TRACFCOMP(g_trac_isteps_trace,
+                     "ERROR : call_proc_ocmb_enable HWP(): "
+                     "p10_ocmb_enable failed on target 0x%08X."
+                     TRACE_ERR_FMT,
+                     get_huid(l_procChip),
+                     TRACE_ERR_ARGS(l_errl));
+       }
+       else
+       {
+           TRACFCOMP(g_trac_isteps_trace,
+                     "SUCCESS : p10_ocmb_enable "
+                     "completed ok on 0x%.08X",
+                     get_huid( l_procChip ));
         }
-        else
-        {
-            TRACFCOMP(g_trac_isteps_trace,
-                      "SUCCESS : p10_ocmb_enable "
-                      "completed ok on 0x%.08X",
-                      get_huid( *l_proc_iter ));
-        }
-    }
+
+        return l_errl;
+    });
 
     ISTEP::parallel_for_each(composable(getAllChips)(TYPE_OCMB_CHIP, true/*functional*/),
                              l_StepError,
