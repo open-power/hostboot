@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -44,6 +44,7 @@
 #include "common/ffs_hb.H"//Hostboot definition of user data in ffs_entry struct
 #include <pnor/ecc.H>
 #include <kernel/console.H>
+#include <arch/magic.H>
 #include <endian.h>
 #include <util/align.H>
 #include <pnor/pnorif.H>
@@ -1611,6 +1612,9 @@ errlHndl_t PnorRP::readFromDevice( uint64_t i_offset,
         }
     } while(0);
 
+    // Future improvement - add i_offset as parameter
+    MAGIC_INSTRUCTION(MAGIC_PRINT_PNOR_LD_PAGE); // magic trigger that we loaded a page from PNOR
+
     TRACUCOMP(g_trac_pnor, "< PnorRP::readFromDevice" );
     return l_errhdl;
 }
@@ -1658,6 +1662,9 @@ errlHndl_t PnorRP::writeToDevice( uint64_t i_offset,
             break;
         }
     } while(0);
+
+    // Future improvement - add i_offset as parameter
+    MAGIC_INSTRUCTION(MAGIC_PRINT_PNOR_WR_PAGE);
 
     TRACUCOMP(g_trac_pnor, "< PnorRP::writeToDevice" );
     return l_errhdl;

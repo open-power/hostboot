@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,8 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include "arch/magic.H"
+#include "sys/mm.h"
 #include <limits.h>
 #include <assert.h>
 #include <string.h>
@@ -43,7 +45,6 @@
 
 #include <usr/vmmconst.h>
 
-#include <new>
 #include <usr/debugpointers.H>
 #include <kernel/bltohbdatamgr.H>
 
@@ -402,15 +403,36 @@ void Block::castOutPages(uint64_t i_type)
     if((iv_baseAddr != VMM_ADDR_BASE_BLOCK) && // Skip base area
        (iv_baseAddr != (VMM_ADDR_BASE_BLOCK + g_BlToHbDataManager.getHbCacheSizeBytes()))) // Skip extended memory
     {
-        // NOTE: All LRU constraints must be < 7, since getLRU() only reports
-        // 3 bits worth of size (despite the uint8_t return type).
+        /*
+        
+        Declare LRU-based eviction minimums for read-write pages and read-only pages.
+        These constraints determine (along with some other checks) if we should kick
+        out a page or not.
+
+        If not using aggressive LRU (99% of the time), the expressions for rw_constraint
+        and ro_constraint can be toyed with to see if you get any performance improvements.
+        The current constant values are defined in spte.H - the math works out to roughly match
+        the following:
+                        RW limit / RO limit
+        3 bits of LRU:      2       3       (pretty aggressive)
+        4 bits of LRU:      6       7
+        5 bits of LRU:      14      15
+
+        These values are a little under half of the maximum LRU counter value. You can modify
+        it to be 3/4, 1/3, 2/3, etc. Currently, 1/2 is a nice number that provides good results.
+
+        */
 #ifdef CONFIG_AGGRESSIVE_LRU
         size_t rw_constraint = 2;
         size_t ro_constraint = 1;
 #else
-        size_t rw_constraint = 5;
-        size_t ro_constraint = 6;
+        size_t rw_constraint = ShadowPTE::LRU_RW_LIMIT/2;
+        size_t ro_constraint = ShadowPTE::LRU_RO_LIMIT/2;
 #endif
+
+        // Counter for how many times we're requesting to throw out an
+        // executable page
+        static uint64_t executablePageCount = 0;
 
         if(i_type == VmmManager::CRITICAL)
         {
@@ -425,11 +447,6 @@ void Block::castOutPages(uint64_t i_type)
             ShadowPTE* pte = getPTE(page);
             if (pte->isPresent() && (0 != pte->getPageAddr()))
             {
-                //if(pte->isExecutable()) printk("x");
-                //else if(pte->isWritable()) printk("w");
-                //else printk("r");
-                //printk("%d",(int)pte->getLRU());
-
                 if(pte->isWritable())
                 {
                     if(pte->getLRU() > rw_constraint && pte->isWriteTracked())
@@ -438,7 +455,6 @@ void Block::castOutPages(uint64_t i_type)
                         l_vaddr = reinterpret_cast<void*>(page);
                         this->removePages(VmmManager::EVICT,l_vaddr,
                                           PAGESIZE,NULL);
-                        //printk("+");
                         ++cv_rw_evict_req;
                     }
                 }
@@ -446,13 +462,48 @@ void Block::castOutPages(uint64_t i_type)
                 {
                     if(pte->getLRU() > ro_constraint)
                     {
-                        //'EVICT' single page
-                        l_vaddr = reinterpret_cast<void*>(page);
-                        this->removePages(VmmManager::EVICT,l_vaddr,
-                                          PAGESIZE,NULL);
-                        ++cv_ro_evict_req;
+                        bool isCode = pte->isExecutable();
+                        constexpr uint32_t BOUNDARY = 20;
+                        /*
+                        If the page is executable, we don't want to try and cast it out immediately.
+                        Keep a counter of how many times we've tried to throw out a code page -
+                        once the counter reaches a threshold, start throwing code pages out.
+                        Until then, we can throw out data pages, that's okay.
+                        If we DO end up throwing code pages out, keep doing so until
+                        we receive a request to remove a data page, then reset our counter.
+
+                        The boundary value of 20 was determined through some trial and error testing,
+                        stepping between the values 5...50 in steps of 5. It's a nice number in the middle
+                        that provides lower eviction rates than extreme ends of the spectrum for the value.
+
+                        This boundary value can likely be modified to be dynamic with regards to time,
+                        possibly through the current istep time (if we can read that data) and updating
+                        the boundary based on how many eviction reqs we're getting in a certain timestep.
+                        */
+                        if (isCode && executablePageCount < BOUNDARY) {
+                            executablePageCount++;
+                        } else {
+                            if (pte->isReadable() && isCode) {
+                                executablePageCount = 0;
+                            }
+                            //'EVICT' single page
+                            l_vaddr = reinterpret_cast<void*>(page);
+                            this->removePages(VmmManager::EVICT,l_vaddr,
+                                            PAGESIZE,NULL);
+                            ++cv_ro_evict_req;
+
+                            // =================================================
+                            // Simics debugging information (noop'd in hardware)
+                            if (isCode) {
+                                MAGIC_INSTRUCTION(MAGIC_PRINT_EVICT_CODE);
+                            }
+                            // =================================================
+                        }
                     }
                 }
+                // Simics debug for how many evictions per istep
+                // Future improvement - include page as extra data to track
+                MAGIC_INSTRUCTION(MAGIC_PRINT_PAGE_EVICTIONS);
             }
         }
     }
@@ -712,8 +763,7 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                 //'Release' page entry
                 releaseSPTE(pte);
                 PageManager::freePage(reinterpret_cast<void*>(pageAddr));
-
-	    }
+            }
         }
     }
     return 0;

@@ -630,11 +630,21 @@ def simple_find_memory_object(addr):
 
     return res
 
+# MAGIC INSTRUCTION trackers for VM
+pnorLoadedPageCounter = 0
+pnorWrotePageCounter = 0
+pageEvictionCounter = 0
+pageRemovalCounter = 0
+pageEvictRO = 0
+summedLoads = 0
+prevStep = (0, 0)
+
 # MAGIC_INSTRUCTION hap handler
 # arg contains the integer parameter n passed to MAGIC_INSTRUCTION(n)
 # See src/include/arch/ppc.H for the definitions of the magic args.
 # Hostboot magic args should range 7000..7999.
 def magic_instruction_callback(user_arg, cpu, arg):
+    global pnorLoadedPageCounter, prevStep, pnorWrotePageCounter, pageEvictionCounter, pageEvictRO, summedLoads
     # Disable our handler if someone tells us to
     if( ('HB_DISABLE_MAGIC' in os.environ)
         and (os.environ['HB_DISABLE_MAGIC'] == '1') ):
@@ -650,6 +660,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
     if arg == 7006:   # MAGIC_SHUTDOWN
         # KernelMisc::shutdown()
         print("KernelMisc::shutdown() called.")
+        print("Total PNOR Loads: " + str(summedLoads))
 
     if arg == 7007:   # MAGIC_BREAK
         # Stop the simulation, much like a hard-coded breakpoint
@@ -745,7 +756,21 @@ def magic_instruction_callback(user_arg, cpu, arg):
         # Print current istep out to simics console
         major_istep = cpu.r4
         minor_istep = cpu.r5
+        """
+        # This prints memory/page information per istep and was used for debugging during some
+        # LRU improvements. Leaving it here just in case.
+
+        print(f"\n\t** PNOR Page LOADS on ISTEP {prevStep[0]}.{prevStep[1]}: {pnorLoadedPageCounter}")
+        print(f"\t** PNOR Page WRITES on ISTEP {prevStep[0]}.{prevStep[1]}: {pnorWrotePageCounter}")
+        print(f"\t** Total page evictions on ISTEP {prevStep[0]}.{prevStep[1]}: {pageEvictionCounter}")
+        print(f"\t\t** Executable page evictions on ISTEP {prevStep[0]}.{prevStep[1]}: {pageEvictRO}\n")
+        pnorWrotePageCounter = 0
+        pnorLoadedPageCounter = 0
+        pageEvictionCounter = 0
+        pageEvictRO = 0
+        """
         print("%d > ISTEP %d.%d" % (int(time.time()), major_istep, minor_istep))
+        prevStep = (major_istep, minor_istep)
 
     if arg == 7021:  # MAGIC_PRINT_TWO_REGS
         first_num = cpu.r4
@@ -1131,6 +1156,17 @@ def magic_instruction_callback(user_arg, cpu, arg):
         else:
             run_level = 1
         cpu.r3 = run_level
+
+    if arg == 7103: # MAGIC_PRINT_PNOR_LD_PAGE
+        pnorLoadedPageCounter += 1
+        summedLoads += 1
+    if arg == 7104: # MAGIC_PRINT_PNOR_WR_PAGE
+        pnorWrotePageCounter += 1
+    if arg == 7105: # MAGIC_PRINT_PAGE_EVICTIONS
+        pageEvictionCounter += 1
+    if arg == 7107: # MAGIC_PRINT_EVICT_RO
+        pageEvictRO += 1
+
 
 # Continuous trace: Clear these files.
 rc = os.system( "rm -f hbTracMERG" )

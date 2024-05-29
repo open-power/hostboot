@@ -143,6 +143,13 @@ enum
     MAGIC_SAVE_PEL            =  7060, // save a single PEL
     MAGIC_GET_CI_RUN_LEVEL    =  7061, // extract HB CI Run Level
 
+    MAGIC_PRINT_PNOR_LD_PAGE  =  7103, // loaded pnor page
+    MAGIC_PRINT_PNOR_WR_PAGE  =  7104, // wrote a pnor page
+    MAGIC_PRINT_PAGE_EVICTIONS=  7105, // evicted a page
+    MAGIC_PRINT_REMOVE_PAGES  =  7106, // removed page (unused for now)
+    MAGIC_PRINT_EVICT_CODE    =  7107, // evicted a *code* page
+    MAGIC_PRINT_DROP_HWPTE    =  7108, // pte dropped from hardware page table
+
     MAGIC_CHECK_BONITO_CONFIG =  7777, // check if MACHINE=bonito is set in the ENV
 
     // 8000-8999 are defined by the Simics CEC team
@@ -173,6 +180,19 @@ enum
                  :: "r" (HUID), "r" (ATTR_ID), "r" (ATTR_SIZE), "r" (BYTE_OFFSET), "r" (BYTES) \
                  : "4", "5", "6", "7", "8");                            \
     MAGIC_INSTRUCTION(MAGIC_SAVE_ATTR_VALUE);                           \
+
+/**
+ * @brief     Writes three values to r4-r6, and magic-calls with specified param
+ * @param[in] Val1
+ * @param[in] Val2
+ * @param[in] Val3
+ * @param[in] Magic code
+ */
+#define MAGIC_INST_WRITE3(_v1, _v2, _v3, _code) \
+    asm volatile("mr 4, %0; mr 5, %1; mr 6, %2;"    \
+                 :: "r" (_v1), "r" (_v2), "r" (_v3)  \
+                 : "4", "5", "6");                            \
+    MAGIC_INSTRUCTION(_code);
 
 /**
  * @brief  Specify the type of SBE traces to collect

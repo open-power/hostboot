@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -26,8 +28,15 @@
 #ifndef __KERNEL_SPTE_H
 #define __KERNEL_SPTE_H
 
+#include <cstdint>
 #include <stdint.h>
 #include <builtins.h>
+
+// LRU_BITS can be 3, 4, or 5.
+// The total amount of bits the "last_access" and "reserved"
+// fields can take up inside the SPTE struct (see below) is 5,
+// as such, the sum of LRU bits + reserved must be 5.
+#define SPTE_LRU_BITS 4
 
 /** @class ShadowPTE
  *  @brief Stores information needed in a shadow page table for virtual to
@@ -44,6 +53,9 @@
 class ShadowPTE
 {
     protected:
+        // Bit information and values for LRU usage
+        static constexpr uint32_t RESERVED_REMAINING = (5-(SPTE_LRU_BITS));
+        static constexpr uint32_t LRU_MAX_COUNTER = ((1 << (SPTE_LRU_BITS)) - 1);
         union
         {
             uint32_t word;
@@ -67,13 +79,21 @@ class ShadowPTE
                     /** Allocate from a zero'd page. */
                 uint32_t allocate_from_zero:1;
                     /** LRU value - lower means it was accessed more recently. */
-                uint32_t last_access:3;
+                uint32_t last_access:SPTE_LRU_BITS;
+#if LRU_BITS < 5    // Needed to maintain struct alignment and data width requirements for the compiler
                     /** Reserved for future use. */
-                uint32_t reserved:2;
+                uint32_t reserved:RESERVED_REMAINING;
+#else
+                #error Shadow Page Table Entry struct cannot exceed size of 4 bytes - fix your data!
+#endif
             } PACKED;
         };
 
     public:
+        // These set the minimum LRU value constraints for which a page
+        // is allowed to be evicted
+        static constexpr uint8_t LRU_RW_LIMIT = LRU_MAX_COUNTER - 2;
+        static constexpr uint8_t LRU_RO_LIMIT = LRU_MAX_COUNTER - 1;
             /** Initialize PTE */
         ShadowPTE() : word(0) {};
             /** Cast-construct from integer directly to the data union. */
@@ -121,7 +141,7 @@ class ShadowPTE
         uint8_t getLRU() const { return last_access; };
             /** Increment the LRU bits. */
         void incLRU() {
-	    if( last_access < 0b111 )
+	    if( last_access < LRU_MAX_COUNTER )
 	    {
 		last_access++;
 	    }
