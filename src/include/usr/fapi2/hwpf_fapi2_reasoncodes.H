@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -167,6 +167,19 @@ namespace fapi2
 
     /**
      * @brief Defines the HWPF error log user detail data sections
+     *
+     *  These values need to be kept in sync with hwpf_reasoncodes.H
+     *  The HWPF_FAPI2_UDT_ sections will leverage the already existing
+     *  automatic generated parsers, i.e. HbfwPlatUserDetailsParserHwpRcValue,
+     *  HbfwPlatUserDetailsParserHwpFfdc and HwpUserDetailsParserIstep.
+     *
+     * NOTE: These MUST remain as their own enum for automated
+     *       building.
+     *
+     *       enums from fapi2UserDetailDataSubSection and
+     *       fapi2BadDqBitmapDataSection are not allowed to overlap,
+     *       so careful review of the related code is needed when modifying,
+     *       i.e. parsers need to map to unique section numbers.
      */
     enum fapi2UserDetailDataSubSection
     {
