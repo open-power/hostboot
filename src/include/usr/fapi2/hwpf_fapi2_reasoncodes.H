@@ -181,6 +181,11 @@ namespace fapi2
      *
      * NOTE: These MUST remain as their own enum for automated
      *       building.
+     *
+     *       enums from fapi2UserDetailDataSubSection and
+     *       fapi2BadDqBitmapDataSection are not allowed to overlap,
+     *       so careful review of the related code is needed when modifying,
+     *       i.e. parsers need to map to unique section numbers.
      */
     enum fapi2UserDetailDataSubSection
     {

@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 import json
 from udparsers.helpers.errludP_Helpers import hexConcat, intConcat
+from pel.hexdump import hexdump
 
 class errludP_hwpistep:
     #Generated Parser Functions
@@ -52,6 +53,15 @@ class errludP_hwpistep:
         jsonStr = json.dumps(d)
         return jsonStr
 
+    def HwpUserDetailsParserDefaultDump(ver, data):
+        d = dict()
+        d["Data subType Unknown"] = ("Did not find a user data subsection type, defaulting to dumping hex")
+        if data:
+            mv = memoryview(data)
+            d['Data Hex Dump'] = hexdump(mv)
+        jsonStr = json.dumps(d)
+        return jsonStr
+
 #Dictionary with parser functions for each subtype
 #Values are from hwpfUserDetailDataSubSection enum in src/include/usr/isteps/hwpf_reasoncodes.H
 hwpfUserDetailDataSubSection = { 1: "hbfwErrLookupHwpRc", #Generated
@@ -64,8 +74,10 @@ hwpfUserDetailDataSubSection = { 1: "hbfwErrLookupHwpRc", #Generated
                                  14: "HwpUserDetailsParserSpecialOneByte",
                                  15: "HwpUserDetailsParserSpecialOneByte",
                                  16: "HwpUserDetailsParserSpecialOneByte",
-                                 17: "HwpUserDetailsParserSpecialOneByte" }
+                                 17: "HwpUserDetailsParserSpecialOneByte",
+                                 99: "HwpUserDetailsParserDefaultDump"}
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data)
-    return getattr(errludP_hwpistep, hwpfUserDetailDataSubSection[subType])(*args)
+    # provide a default subsection type to just hex dump if nothing in the dictionary specifically
+    return getattr(errludP_hwpistep, hwpfUserDetailDataSubSection.get(subType, "HwpUserDetailsParserDefaultDump"))(*args)
