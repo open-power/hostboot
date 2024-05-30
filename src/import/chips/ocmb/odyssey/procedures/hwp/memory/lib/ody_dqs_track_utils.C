@@ -947,10 +947,20 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     mcbist_state l_saved_mcbist_state;
     uint8_t l_temp_trigger = 0;
     uint8_t l_chosen_sensor_index = 0;
+    uint8_t l_has_failed = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_TEMP_THRESHOLD, i_target, l_threshold));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL, i_target, l_count));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_THRESHOLD, i_target, l_count_threshold));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_FAILED, i_target, l_has_failed));
+
+    // Exit right away if this function returned a fail previously
+    if (l_has_failed == fapi2::ENUM_ATTR_ODY_DQS_TRACKING_FAILED_YES)
+    {
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Skipping DQS drift tracking due to previous fail state",
+                        GENTARGTID(i_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     // Get the temperature delta and the current temperature values, both in centi-degrees
     FAPI_TRY(ody_calc_temp_sensors_delta(i_target, l_temp_delta, l_curr_temp_values, l_chosen_sensor_index));
@@ -1079,6 +1089,9 @@ fapi_try_exit:
     fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
     // Unmask and set FIRs
     fapi2::ReturnCode l_rc = mss::unmask::dqs_drift_track_error<mss::mc_type::ODYSSEY>(i_target);
+    // Set the attribute to the fail state so we don't run anymore
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_FAILED, i_target,
+                                 fapi2::ENUM_ATTR_ODY_DQS_TRACKING_FAILED_YES));
     return l_rc;
 }
 
