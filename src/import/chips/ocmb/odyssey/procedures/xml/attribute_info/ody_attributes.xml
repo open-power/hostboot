@@ -325,6 +325,23 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_FAILED</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Status attribute to tell if the DDR5 DQS tracking algorithm has
+            encountered a fail. Value is updated automatically by HWP code
+            so this attribute should not be written manually.
+        </description>
+        <enum>
+            YES  = 0x01,
+            NO = 0x00
+        </enum>
+        <default>NO</default>
+        <writeable/>
+        <valueType>uint8</valueType>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_THERMAL_SENSOR_0_PREVIOUS_VALUE</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
