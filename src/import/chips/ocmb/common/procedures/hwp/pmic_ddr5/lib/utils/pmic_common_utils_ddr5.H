@@ -196,7 +196,22 @@ struct target_info_redundancy_ddr5
     // This adc state will not be populated or used by pmic_enable but will be used by
     // health check and periodic telemetry tools
     uint8_t iv_adc_state = 0;
-    uint16_t reserved = 0;
+
+    // Set the corresponding bits if the targets are present
+    // These have been numbered from right to left (reverse of FAPI style)
+    // Bit 0 - PMIC0
+    // Bit 1 - PMIC1
+    // Bit 2 - PMIC2
+    // Bit 3 - PMIC3
+    // Bit 4 - DT1
+    // Bit 5 - DT2
+    // Bit 6 - DT3
+    // Bit 7 - DT4
+    fapi2::buffer<uint8_t> iv_pmic_dt_present;
+
+    // Set the corresponding bit if the targets are present
+    // BIT 0 - ADC
+    fapi2::buffer<uint8_t> iv_adc_present;
 
     fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP> iv_ocmb;
 

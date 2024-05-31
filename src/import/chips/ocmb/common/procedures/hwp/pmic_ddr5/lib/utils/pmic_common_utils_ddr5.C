@@ -79,6 +79,8 @@ target_info_redundancy_ddr5::target_info_redundancy_ddr5(const std::vector<fapi2
     {
         uint8_t l_relative_pmic_id = 0;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_pmic, l_relative_pmic_id));
+        // Set the corresponding PMIC bit as present
+        FAPI_TRY(iv_pmic_dt_present.setBit(l_relative_pmic_id));
 
         for (const auto& l_dt : i_dts)
         {
@@ -98,29 +100,52 @@ target_info_redundancy_ddr5::target_info_redundancy_ddr5(const std::vector<fapi2
         }
     }
 
+    for (const auto& l_dt : i_dts)
+    {
+        uint8_t l_relative_dt_id = 0;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_REL_POS, l_dt, l_relative_dt_id));
+
+        // Set the corresponding DT bit as present
+        FAPI_TRY(iv_pmic_dt_present.setBit(CONSTS::NUM_PMICS_4U + l_relative_dt_id));
+    }
+
+    // Set ADC bit if ADC target is present
+    if(NUM_GENERIC_I2C_DEV)
+    {
+        iv_adc_present.setBit<0>();
+    }
+
+    // Reverse from fapi style
+    iv_pmic_dt_present.reverse();
+    iv_adc_present.reverse();
+
     // If we are given a guaranteed failing list of targets (< 3 PMICs) exit now
     FAPI_ASSERT((iv_number_of_target_infos_present >= NUM_PRIMARY_PMICS) ,
                 fapi2::INVALID_PMIC_DT_DDR5_TARGET_CONFIG()
                 .set_OCMB_TARGET(l_ocmb)
                 .set_NUM_PMICS(iv_number_of_target_infos_present)
-                .set_EXPECTED_MIN_PMICS(NUM_PRIMARY_PMICS),
+                .set_EXPECTED_MIN_PMICS(NUM_PRIMARY_PMICS)
+                .set_PRESENT_PMIC_DT_TARGETS(iv_pmic_dt_present),
                 GENTARGTIDFORMAT " pmic_enable requires at least %u PMICs and DTs. "
-                "Given %u PMICs and DTs",
+                "Given %u PMICs and DTs. Present PMIC/DT targets 0x%02X",
                 GENTARGTID(l_ocmb),
                 NUM_PRIMARY_PMICS,
-                iv_number_of_target_infos_present);
+                iv_number_of_target_infos_present,
+                iv_pmic_dt_present);
 
     // If we are given < 1 ADC, exit now
     FAPI_ASSERT((NUM_GENERIC_I2C_DEV == mss::generic_i2c_responder::NUM_TOTAL_DEVICES_I2C_DDR5),
                 fapi2::INVALID_GI2C_DDR5_TARGET_CONFIG()
                 .set_OCMB_TARGET(l_ocmb)
                 .set_NUM_GI2CS(NUM_GENERIC_I2C_DEV)
-                .set_EXPECTED_GI2CS(mss::generic_i2c_responder::NUM_TOTAL_DEVICES_I2C_DDR5),
+                .set_EXPECTED_GI2CS(mss::generic_i2c_responder::NUM_TOTAL_DEVICES_I2C_DDR5)
+                .set_PRESENT_ADC_TARGETS(iv_adc_present),
                 GENTARGTIDFORMAT " pmic_enable requires exactly %u GI2C responder. "
-                "Given %u GI2C",
+                "Given %u GI2C. Present ADC target 0x%02X",
                 GENTARGTID(l_ocmb),
                 mss::generic_i2c_responder::NUM_TOTAL_DEVICES_I2C_DDR5,
-                NUM_GENERIC_I2C_DEV);
+                NUM_GENERIC_I2C_DEV,
+                iv_adc_present);
 
     iv_adc = i_adc[mss::generic_i2c_responder::ADC];
 

@@ -361,65 +361,92 @@ struct target_info_redundancy
 
     bool iv_pmic_redundancy[CONSTS::NUM_PRIMARY_PMICS];
 
+    // Set the corresponding bits if the targets are present
+    // These have been numbered from right to left (reverse of FAPI style)
+    // Bit 0 - PMIC0
+    // Bit 1 - PMIC1
+    // Bit 2 - PMIC2
+    // Bit 3 - PMIC3
+    // Bit 4 - ADC1
+    // Bit 5 - ADC2
+    // Bit 6 - GPIO1
+    // Bit 7 - GPIO2
+    fapi2::buffer<uint8_t> iv_pmic_adc_gpio_present = 0;
+
     target_info_redundancy() = delete;
 
     ///
-    /// @brief Construct a new target_info_redundancy object
-    ///
-    /// @param[in] i_ocmb OCMB target
+    /// @brief Construct a new target_info_redundancy object with the passed in targets
+    /// @param[in] i_pmics Vector of PMIC targets
+    /// @param[in] i_i2c_devices ADC/GPIO target
     /// @param[out] o_rc ReturnCode in case of construction error
-    /// @note pmic_enable.C plug rules ensures that a valid number of I2C and PMIC children targets exist
     ///
-    target_info_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb, fapi2::ReturnCode& o_rc)
+    target_info_redundancy(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_PMIC>>& i_pmics,
+                           const std::vector<fapi2::Target<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>>& i_i2c_devices,
+                           fapi2::ReturnCode& o_rc)
     {
         o_rc = fapi2::FAPI2_RC_SUCCESS;
 
         uint8_t l_attr = 0;
+        uint8_t l_num_pmics = 0;
+        uint8_t l_num_generici2cresponder = 0;
+        uint8_t l_num_primary_pmics = 0;
 
-        const auto I2C_DEVICES =
-            mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(i_ocmb);
+        const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_pmics[0]);
 
         // The ATTR_REL_POS (mss::index) numbering is how PMIC HWP's have numbered the PMICs and how platform
         // provides them. This varies from the "Redundant Power on DIMM – Functional Specification" numbering
-        for (const auto& l_pmic : mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb, fapi2::TARGET_STATE_PRESENT))
+        for (const auto& l_pmic : i_pmics)
         {
             // mss::index grabs ATTR_REL_POS, returning 0-3 for these PMIC targets
             iv_pmic_map.insert(std::make_pair(mss::index(l_pmic), l_pmic));
             FAPI_DBG("Found present PMIC: %s", mss::c_str(l_pmic));
+            // Set the first nibble of iv_pmic_adc_gpio_present if the corresponding PMICs are present
+            FAPI_TRY(iv_pmic_adc_gpio_present.setBit(mss::index(l_pmic)));
         }
 
-        const uint8_t NUM_PMICS = iv_pmic_map.size();
-        const uint8_t NUM_GENERICI2CRESPONDER = I2C_DEVICES.size();
-        const auto NUM_PRIMARY_PMICS = CONSTS::NUM_PRIMARY_PMICS;
+        l_num_pmics = iv_pmic_map.size();
+        l_num_generici2cresponder = i_i2c_devices.size();
+        l_num_primary_pmics = CONSTS::NUM_PRIMARY_PMICS;
+
+        // Set the second nibble of iv_pmic_adc_gpio_present if ADC and GPIO targets are present
+        for(auto l_count = 0; l_count < l_num_generici2cresponder; l_count++)
+        {
+            FAPI_TRY(iv_pmic_adc_gpio_present.setBit(CONSTS::NUM_PMICS_4U + mss::index(i_i2c_devices[l_count])));
+        }
+
+        iv_pmic_adc_gpio_present.reverse();
 
         // If we are given a guaranteed failing list of targets (< 2 PMICs or < 4 GI2CS), exit now
-        FAPI_ASSERT((NUM_PMICS >= NUM_PRIMARY_PMICS) &&
-                    (NUM_GENERICI2CRESPONDER == mss::generic_i2c_responder_ddr4::NUM_TOTAL_DEVICES),
+        FAPI_ASSERT((l_num_pmics >= l_num_primary_pmics) &&
+                    (l_num_generici2cresponder == mss::generic_i2c_responder_ddr4::NUM_TOTAL_DEVICES),
                     fapi2::INVALID_PMIC_GI2C_TARGET_CONFIG()
-                    .set_OCMB_TARGET(i_ocmb)
-                    .set_NUM_PMICS(NUM_PMICS)
-                    .set_NUM_GI2CS(NUM_GENERICI2CRESPONDER)
-                    .set_EXPECTED_MIN_PMICS(NUM_PRIMARY_PMICS)
-                    .set_EXPECTED_GI2CS(mss::generic_i2c_responder_ddr4::NUM_TOTAL_DEVICES),
+                    .set_OCMB_TARGET(l_ocmb)
+                    .set_NUM_PMICS(l_num_pmics)
+                    .set_NUM_GI2CS(l_num_generici2cresponder)
+                    .set_EXPECTED_MIN_PMICS(l_num_primary_pmics)
+                    .set_EXPECTED_GI2CS(mss::generic_i2c_responder_ddr4::NUM_TOTAL_DEVICES)
+                    .set_PRESENT_PMIC_ADC_GPIO_TARGETS(iv_pmic_adc_gpio_present),
                     "%s pmic_enable requires at least %u PMICs and exactly %u GI2C targets. "
-                    "Given %u PMICs, %u GI2C",
-                    mss::c_str(i_ocmb),
-                    NUM_PRIMARY_PMICS,
+                    "Given %u PMICs, %u GI2C. Present I2C targets 0x%02X",
+                    mss::c_str(l_ocmb),
+                    l_num_primary_pmics,
                     mss::generic_i2c_responder_ddr4::NUM_TOTAL_DEVICES,
-                    NUM_PMICS,
-                    NUM_GENERICI2CRESPONDER);
+                    l_num_pmics,
+                    l_num_generici2cresponder,
+                    iv_pmic_adc_gpio_present);
 
         // Since we have all 4 and they are sorted, we already know what is where
-        iv_adc1 = I2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC1];
-        iv_adc2 = I2C_DEVICES[mss::generic_i2c_responder_ddr4::ADC2];
-        iv_gpio1 = I2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO1];
-        iv_gpio2 = I2C_DEVICES[mss::generic_i2c_responder_ddr4::GPIO2];
+        iv_adc1 = i_i2c_devices[mss::generic_i2c_responder_ddr4::ADC1];
+        iv_adc2 = i_i2c_devices[mss::generic_i2c_responder_ddr4::ADC2];
+        iv_gpio1 = i_i2c_devices[mss::generic_i2c_responder_ddr4::GPIO1];
+        iv_gpio2 = i_i2c_devices[mss::generic_i2c_responder_ddr4::GPIO2];
 
-        iv_ocmb = i_ocmb;
+        iv_ocmb = l_ocmb;
 
-        FAPI_TRY(mss::attr::get_pmic0_redundancy(i_ocmb, l_attr));
+        FAPI_TRY(mss::attr::get_pmic0_redundancy(l_ocmb, l_attr));
         iv_pmic_redundancy[0] = (l_attr == fapi2::ENUM_ATTR_MEM_EFF_PMIC0_REDUNDANCY_ENABLED);
-        FAPI_TRY(mss::attr::get_pmic1_redundancy(i_ocmb, l_attr));
+        FAPI_TRY(mss::attr::get_pmic1_redundancy(l_ocmb, l_attr));
         iv_pmic_redundancy[1] = (l_attr == fapi2::ENUM_ATTR_MEM_EFF_PMIC1_REDUNDANCY_ENABLED);
 
         return;
@@ -428,6 +455,19 @@ struct target_info_redundancy
         o_rc = fapi2::current_err;
     }
 
+    ///
+    /// @brief Construct a new target_info_redundancy object
+    ///
+    /// @param[in] i_ocmb OCMB target
+    /// @param[out] o_rc ReturnCode in case of construction error
+    /// @note pmic_enable.C plug rules ensures that a valid number of I2C and PMIC children targets exist
+    ///
+    target_info_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb, fapi2::ReturnCode& o_rc) :
+        target_info_redundancy::target_info_redundancy(
+            mss::find_targets<fapi2::TARGET_TYPE_PMIC>(i_ocmb, fapi2::TARGET_STATE_PRESENT),
+            mss::find_targets_sorted_by_pos<fapi2::TARGET_TYPE_GENERICI2CRESPONDER>(i_ocmb),
+            o_rc)
+    {}
 
 };
 
