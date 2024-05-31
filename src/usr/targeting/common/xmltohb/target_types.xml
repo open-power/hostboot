@@ -3046,6 +3046,9 @@
       <id>CDM_DOMAIN</id>
     </attribute>
     <attribute>
+      <id>CORE_IS_SPARE</id>
+    </attribute>
+    <attribute>
       <default>1</default>
       <id>DECONFIG_GARDABLE</id>
     </attribute>
@@ -3151,6 +3154,9 @@
     <attribute>
       <default>CPU</default>
       <id>CDM_DOMAIN</id>
+    </attribute>
+    <attribute>
+      <id>CORE_IS_SPARE</id>
     </attribute>
     <attribute>
       <default>1</default>

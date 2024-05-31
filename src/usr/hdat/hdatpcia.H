@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,7 @@ const uint32_t HDAT_PROC_STAT_MASK  = 0xC0000000;
 const uint8_t  HDAT_DEAD_CORE_MODE_ENABLED = 1;
 
 // Bits in the proc/exist flags for PCIA data
- #define HDAT_EXIST_FLAGS_MASK_FOR_PCIA  0xD0FF0000
+ #define HDAT_EXIST_FLAGS_MASK_FOR_PCIA  0xF0FF0000
 
 /** @enum hdatDataPtrs
  * Enumeration which defines the data sections of the PCIA

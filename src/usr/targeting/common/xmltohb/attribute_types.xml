@@ -728,6 +728,17 @@
   </attribute>
 
   <attribute>
+    <description>Whether or not the core is marked as a spare. 0=Not spare 1=spare</description>
+    <id>CORE_IS_SPARE</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <description>CPU Attribute</description>
     <id>CPU_ATTR</id>
     <persistency>non-volatile</persistency>

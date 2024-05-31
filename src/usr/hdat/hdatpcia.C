@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,29 +183,30 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
         {
              l_enabledThreads = 2;
         }
-        uint32_t l_procStatus;
+        uint32_t defaultProcStatus;
         HDAT_DBG("Core Thread Count[%d], Enabled[%d]",
                  l_coreThreadCount, l_enabledThreads);
 
-        if ( l_enabledThreads == HDAT_MAX_EIGHT_THREADS_SUPPORTED )
+        if ((l_enabledThreads == HDAT_MAX_EIGHT_THREADS_SUPPORTED)
+            || l_fused_core_support)
         {
-            l_procStatus =
-                HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD | HDAT_EIGHT_THREAD;
+            defaultProcStatus =
+                HDAT_PROC_USABLE | HDAT_PRIM_THREAD | HDAT_EIGHT_THREAD;
         }
         else if ( l_enabledThreads == HDAT_MAX_FOUR_THREADS_SUPPORTED )
         {
-            l_procStatus =
-                HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD | HDAT_FOUR_THREAD;
+            defaultProcStatus =
+                HDAT_PROC_USABLE | HDAT_PRIM_THREAD | HDAT_FOUR_THREAD;
         }
         else if ( l_enabledThreads == HDAT_MAX_TWO_THREADS_SUPPORTED )
         {
-            l_procStatus =
-                HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD | HDAT_TWO_THREAD;
+            defaultProcStatus =
+                HDAT_PROC_USABLE | HDAT_PRIM_THREAD | HDAT_TWO_THREAD;
         }
         else // Single threaded
         {
-            l_procStatus =
-                HDAT_PROC_NOT_INSTALLED | HDAT_PRIM_THREAD;
+            defaultProcStatus =
+                HDAT_PROC_USABLE | HDAT_PRIM_THREAD;
         }
         l_coreThreadCount = is_fused_mode() ? l_coreThreadCount*2 : l_coreThreadCount;
         HDAT_DBG("THREAD_COUNT is 0x%x",l_coreThreadCount);
@@ -230,7 +231,6 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
             for (;l_filter;++l_filter)
             {
                 TARGETING::Target* l_pProcTarget = *l_filter;
-                uint32_t Procstatus = 0;
 
                 const uint8_t l_procTopologyId =
                     l_pProcTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
@@ -260,6 +260,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
 
                 for (uint32_t l_idx = 0; l_idx < l_coreList.size(); ++l_idx)
                 {
+                    uint32_t l_procStatus = defaultProcStatus;
                     HDAT_DBG("Core list size %d PCIA offset 0x%016llX",
                         l_coreList.size(),(uint64_t) &this->iv_spPcia[index]);
                     TARGETING::Target* l_pTarget = l_coreList[l_idx];
@@ -276,7 +277,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                               TARGETING::ATTR_DEAD_CORE_MODE>() ==
                               HDAT_DEAD_CORE_MODE_ENABLED)
                         {
-                            l_procStatus = HDAT_PROC_NOT_USABLE;
+                            l_procStatus |= HDAT_PROC_NOT_USABLE;
                         }
                     }
 
@@ -317,8 +318,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                             l_threadProcIdReg);
 
                         hdatSetPciaHdrs(&this->iv_spPcia[index]);
-                        this->iv_spPcia[index].hdatCoreData.pciaProcStatus
-                            = l_procStatus;
+
                         this->iv_spPcia[index].hdatThreadData.
                         pciaThreadData[l_threadIndex].pciaProcIdReg =
                         l_threadProcIdReg;
@@ -327,15 +327,13 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                         this->iv_spPcia[index].hdatThreadData.
                         pciaThreadData[l_threadIndex].pciaInterruptLine = 0;
 
-                        Procstatus = isFunctional(l_pTarget) ?
-                                           HDAT_PROC_USABLE :
-                                           HDAT_PROC_NOT_USABLE;
+                        uint32_t Procstatus = isFunctional(l_pTarget) ?
+                                              HDAT_PROC_USABLE :
+                                              HDAT_PROC_NOT_USABLE;
                         l_procStatus &= ~HDAT_PROC_STAT_MASK;
                         l_procStatus |= Procstatus;
 
-                        this->iv_spPcia[index].hdatCoreData.pciaProcStatus =
-                        (static_cast<hdatProcStatus> (l_procStatus)
-                        ) & HDAT_EXIST_FLAGS_MASK_FOR_PCIA;
+                        this->iv_spPcia[index].hdatCoreData.pciaProcStatus |= l_procStatus;
 
                         // This field is deprecated starting with P9
                         this->iv_spPcia[index].hdatThreadData.
@@ -407,6 +405,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                     break;
                 }
             }
+
         }
         else
         {
@@ -414,7 +413,6 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
             for (;l_filter;++l_filter)
             {
                 TARGETING::Target* l_pProcTarget = *l_filter;
-                uint32_t l_procStatus = HDAT_PROC_USABLE;
 
                 const uint8_t l_procTopologyId =
                     l_pProcTarget->getAttr<TARGETING::ATTR_PROC_FABRIC_TOPOLOGY_ID>();
@@ -481,7 +479,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                             l_pFcTarget->getAttr<TARGETING::ATTR_CHIP_UNIT>();
 
                         //Resetting the proc status
-                        l_procStatus = HDAT_PROC_USABLE;
+                        uint32_t l_procStatus = defaultProcStatus;
 
                         //Get the the core targets
                         TARGETING::TargetHandleList l_coreList;
@@ -540,7 +538,7 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                             // that FC as unusable
                             if (l_core1_dead == true || l_core2_dead == true)
                             {
-                                l_procStatus = HDAT_PROC_NOT_USABLE;
+                                l_procStatus |= HDAT_PROC_NOT_USABLE;
                             }
 
                         }
@@ -596,20 +594,12 @@ errlHndl_t HdatPcia::hdatLoadPcia(uint32_t &o_size, uint32_t &o_count)
                         if (l_pFcTarget->getAttr<TARGETING::ATTR_HWAS_STATE>
                             ().functional == false)
                         {
-                            l_procStatus = HDAT_PROC_NOT_USABLE;
+                            l_procStatus |= HDAT_PROC_NOT_USABLE;
                         }
 
                         hdatSetPciaHdrs(&this->iv_spPcia[index]);
-                            this->iv_spPcia[index].hdatCoreData.pciaProcStatus
-                            = l_procStatus;
 
-                        l_procStatus |= HDAT_EIGHT_THREAD;
-
-                        uint32_t l_stat = this->iv_spPcia[index].hdatCoreData.
-                            pciaProcStatus & HDAT_PROC_STAT_MASK;
-                        this->iv_spPcia[index].hdatCoreData.pciaProcStatus =
-                           (static_cast<hdatProcStatus> (l_procStatus)
-                           | l_stat ) & HDAT_EXIST_FLAGS_MASK_FOR_PCIA;
+                        this->iv_spPcia[index].hdatCoreData.pciaProcStatus |= l_procStatus;
 
                         if(HDAT_PROC_NOT_INSTALLED == (HDAT_PROC_STAT_BITS &
                         this->iv_spPcia[index].hdatCoreData.pciaProcStatus))
@@ -811,6 +801,13 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
 
         //Ordinal ID of the core
         this->iv_spPcia[i_index].hdatCoreData.pciaHdwProcId = l_coreOrdId;
+
+        // Depending on is_fused_mode, i_pCoreTarget could be a fused core target or a core target.
+        // @TODO PFHB-667 Do not set spare core attr if mfg flag for no spare is set.
+        if (i_pCoreTarget->getAttr<ATTR_CORE_IS_SPARE>())
+        {
+            this->iv_spPcia[i_index].hdatCoreData.pciaProcStatus |= HDAT_CORE_IS_SPARE;
+        }
 
         uint32_t l_eclevel = 0;
         uint32_t l_chipId = 0;
