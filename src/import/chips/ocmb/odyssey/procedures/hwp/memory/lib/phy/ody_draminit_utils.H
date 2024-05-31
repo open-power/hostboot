@@ -3602,6 +3602,17 @@ fapi2::ReturnCode update_struct_for_bad_bits(const fapi2::Target<fapi2::TARGET_T
 
 ///
 /// @brief Handles any address errors found in the prior run
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[out] o_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_msg_blk_for_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t (&i_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& o_struct);
+
+///
+/// @brief Handles any address errors found in the prior run
 /// @param[in] i_rank_info the rank info class under test
 /// @param[in] i_dram the DRAM under test
 /// @param[in] i_nibble_enables the nibbles enabled for this port
@@ -3637,6 +3648,17 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
                                         PMU_SMB_DDR5U_1D_t& io_struct,
                                         bool& io_is_first_addr_run,
                                         fapi2::hwp_data_ostream& o_log_data);
+
+///
+/// @brief Configures the message block for any DQ errors recovery
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_msg_block_for_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct);
 
 ///
 /// @brief Handles any DQ errors found in the prior run
