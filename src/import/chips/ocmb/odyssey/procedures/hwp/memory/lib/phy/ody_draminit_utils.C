@@ -6315,6 +6315,37 @@ void display_disable_bits(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_i
 
 ///
 /// @brief Handles any address errors found in the prior run
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[out] o_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_msg_blk_for_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t (&i_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& o_struct)
+{
+    uint16_t l_temp = 0;
+    FAPI_TRY(mss::ody::phy::configure_dram_train_message_block(i_target, o_struct));
+
+    o_struct.MsgMisc &= 0x7f;
+    // Clears the per-DRAM address ODT settings. It will be reset after the address recovery is completed
+    o_struct.ReservedF6 = 0;
+
+    // First up, clears all training steps EXCEPT for the address and DQS training ones
+    // The chance of us getting a fatal error is very rare from the steps after this point and this has signifcant time savings
+    // Note: does not run the swizzle detect despite the fact that this can cause fatal errors
+    //    Swizzle detect was observed to cause false failures, limiting the chances of recovering otherwise good cards
+    FAPI_TRY(SequenceCtrl_helper(i_target, 0xC005, l_temp));
+    o_struct.SequenceCtrl = l_temp;
+
+    FAPI_TRY(update_struct_for_bad_bits( i_target, i_bad_bits, o_struct));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Handles any address errors found in the prior run
 /// @param[in] i_rank_info the rank info class under test
 /// @param[in] i_dram the DRAM under test
 /// @param[in] i_nibble_enables the nibbles enabled for this port
@@ -6389,28 +6420,18 @@ fapi2::ReturnCode handle_address_errors_internal(const mss::rank::info<mss::mc_t
                  GENTARGTID(l_port), i_rank_info.get_port_rank(), i_dram, i_dram_bad_bits);
         return fapi2::FAPI2_RC_SUCCESS;
     }
-    else
-    {
-        uint16_t l_temp = 0;
-        // First up, clears all training steps EXCEPT for the address and DQS training ones
-        // The chance of us getting a fatal error is very rare from the steps after this point and this has signifcant time savings
-        // Note: does not run the swizzle detect despite the fact that this can cause fatal errors
-        //    Swizzle detect was observed to cause false failures, limiting the chances of recovering otherwise good cards
-        FAPI_TRY(SequenceCtrl_helper(l_port, 0xC005, l_temp));
-        io_struct.SequenceCtrl = l_temp;
-        FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u being tested with bad bits:0x%02x",
-                 GENTARGTID(l_port), i_rank_info.get_port_rank(), i_dram, i_dram_bad_bits);
-    }
 
-    // Clears the per-DRAM address ODT settings. It will be reset after the address recovery is completed
-    io_struct.ReservedF6 = 0;
+    FAPI_INF(TARGTIDFORMAT " Rank%u DRAM%u being tested with bad bits:0x%02x",
+             GENTARGTID(l_port), i_rank_info.get_port_rank(), i_dram, i_dram_bad_bits);
 
     // Configure the dram to test
     l_bad_bits[i_rank_info.get_phy_rank()][l_byte] = l_inject | io_start_bad_bits[i_rank_info.get_phy_rank()][l_byte];
     FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(l_port, l_bad_bits));
     FAPI_INF(TARGTIDFORMAT " DRAM%u has byte%u bad_bits inject:0x%02x", GENTARGTID(l_port), i_dram, l_byte,
              l_bad_bits[i_rank_info.get_phy_rank()][l_byte]);
-    FAPI_TRY(update_struct_for_bad_bits( l_port, l_bad_bits, io_struct));
+
+    // Setup the message block for this run
+    FAPI_TRY(configure_msg_blk_for_address_errors(i_rank_info.get_port_target(), l_bad_bits, io_struct));
 
     // Configure the bad bits
     FAPI_TRY(load_msg_block(l_port, io_struct));
@@ -6487,9 +6508,6 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
     FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(i_target, l_rank_infos));
     FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_nibbles_enables));
     l_nibble_enables = iv_nibbles_enables[0];
-    io_struct.MsgMisc &= 0x7f;
-    // Clears the per-DRAM address ODT settings. It will be reset after the address recovery is completed
-    io_struct.ReservedF6 = 0;
 
     // Loops through DRAM by DRAM disabling all other DRAM's
     for(const auto& l_rank_info : l_rank_infos)
@@ -6637,6 +6655,31 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Configures the message block for any DQ errors recovery
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode configure_msg_block_for_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct)
+{
+    // This is a three step proccess
+    // 1. Get the new bad bits to preserve them (so they are not lost in step 2)
+    // 2. Reconfigure the message block
+    // 3. Re-add the bad bits back into the message block
+    // This way, we have the bad bits and good data in the message block
+    extract_disable_bits(io_struct, io_start_bad_bits);
+    FAPI_TRY(mss::ody::phy::configure_dram_train_message_block(i_target, io_struct));
+    FAPI_TRY(update_struct_for_bad_bits( i_target, io_start_bad_bits, io_struct));
+    FAPI_TRY(load_msg_block(i_target, io_struct));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Handles any DQ errors found in the prior run
 /// @param[in] i_target the memory port on which to operate
 /// @param[in,out] io_status the status of the last training run
@@ -6711,6 +6754,9 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     }
 
     FAPI_INF(TARGTIDFORMAT " Attempting per-DQ draminit training recovery", TARGTID);
+
+    // Reinitialize the message block
+    FAPI_TRY(configure_msg_block_for_dq_errors(i_target, io_start_bad_bits, io_struct));
 
     // Just run the training here
     FAPI_TRY(run_training_helper(i_target, io_status, io_start_bad_bits, io_struct, o_log_data));
