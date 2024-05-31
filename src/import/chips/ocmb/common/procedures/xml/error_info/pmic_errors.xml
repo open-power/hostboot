@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -321,6 +321,7 @@
     <ffdc>NUM_PMICS</ffdc>
     <ffdc>EXPECTED_GI2CS</ffdc>
     <ffdc>EXPECTED_MIN_PMICS</ffdc>
+    <ffdc>PRESENT_PMIC_ADC_GPIO_TARGETS</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
@@ -469,6 +470,7 @@
     <ffdc>NUM_DT</ffdc>
     <ffdc>EXPECTED_MIN_PMICS</ffdc>
     <ffdc>EXPECTED_MIN_DT</ffdc>
+    <ffdc>PRESENT_PMIC_DT_TARGETS</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
@@ -486,6 +488,7 @@
     <ffdc>OCMB_TARGET</ffdc>
     <ffdc>NUM_GI2CS</ffdc>
     <ffdc>EXPECTED_GI2CS</ffdc>
+    <ffdc>PRESENT_ADC_TARGETS</ffdc>
     <callout>
       <target>OCMB_TARGET</target>
       <priority>HIGH</priority>
