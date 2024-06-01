@@ -530,21 +530,26 @@ print SBFILE "// XML.\n\n";
 print SBFILE "#ifndef FAPI2_SETSBEERROR_H_\n";
 print SBFILE "#define FAPI2_SETSBEERROR_H_\n\n";
 print SBFILE "#include <set_sbe_error_funcs.H>\n\n";
-print SBFILE "#define FAPI_SET_SBE_ERROR_IMPL(RC, ERRVAL, FFDC_BUFFER, SBE_INSTANCE, CHIP_TYPE)\\\n";
-print SBFILE "{\\\n";
-print SBFILE "bool invalid_data = false;\\\n";
-print SBFILE "fapi2::sbeFfdc_t* HWPLOCALFFDC_BUFFER;\\\n";
-print SBFILE "if(CHIP_TYPE == fapi2::TARGET_TYPE_OCMB_CHIP)\\\n";
-print SBFILE "{\\\n";
-print SBFILE "    uint32_t *ffdcblob = reinterpret_cast<uint32_t * >(FFDC_BUFFER);\\\n";
-print SBFILE "    HWPLOCALFFDC_BUFFER = reinterpret_cast<fapi2::sbeFfdc_t * >(ffdcblob + 2);\\\n";
-print SBFILE "}\\\n";
-print SBFILE "else\\\n";
-print SBFILE "{\\\n";
-print SBFILE "    HWPLOCALFFDC_BUFFER = reinterpret_cast<fapi2::sbeFfdc_t * >(FFDC_BUFFER);\\\n";
-print SBFILE "}\\\n";
-print SBFILE "switch (ERRVAL)\\\n";
-print SBFILE "{\\\n";
+print SBFILE "inline void setSbeErrorWrap(
+fapi2::ReturnCode &i_fapiRC,
+uint32_t i_rc,
+fapi2::sbeFfdc_t * i_ffdcBuf,
+uint8_t i_chipInstance,
+const fapi2::TargetType i_chipType)
+{
+    bool invalid_data = false;
+    fapi2::sbeFfdc_t* HWPLOCALFFDC_BUFFER;
+    if(i_chipType == fapi2::TARGET_TYPE_OCMB_CHIP)
+    {
+        uint32_t *ffdcblob = reinterpret_cast<uint32_t * >(i_ffdcBuf);
+        HWPLOCALFFDC_BUFFER = reinterpret_cast<fapi2::sbeFfdc_t * >(ffdcblob + 2);
+    }
+    else
+    {
+        HWPLOCALFFDC_BUFFER = reinterpret_cast<fapi2::sbeFfdc_t * >(i_ffdcBuf);
+    }
+    switch (i_rc)
+    {\n";
 
 print SBFUNFILE "#ifndef FAPI2_SETSBEERRORFUNCS_H_\n";
 print SBFUNFILE "#define FAPI2_SETSBEERRORFUNCS_H_\n\n";
@@ -1739,16 +1744,17 @@ foreach my $argnum ( 0 .. $#ARGV )
         #----------------------------------------------------------------------
         if ( exists $err->{sbeError} )
         {
-            print SBFILE "    case fapi2::$err->{rc}: \\\n";
-            print SBFILE "    { \\\n";
-            print SBFILE "       invalid_data = setSbeError(hwpRcToType<fapi2::$err->{rc}>(),\\\n";
-            print SBFILE "                      RC,HWPLOCALFFDC_BUFFER,SBE_INSTANCE, CHIP_TYPE);\\\n";
+            print SBFILE "        case fapi2::$err->{rc}: \n";
+            print SBFILE "        { \n";
+            print SBFILE "            invalid_data = setSbeError(hwpRcToType<fapi2::$err->{rc}>(),\n";
+            print SBFILE "                           i_fapiRC,HWPLOCALFFDC_BUFFER,i_chipInstance, i_chipType);\n";
 
-            print SBFILE "       std::vector<std::shared_ptr<fapi2::ErrorInfoFfdc>> ffdc;\\\n";
-            print SBFILE "       collectHWRegister((uint32_t*)FFDC_BUFFER, CHIP_TYPE, ffdc);\\\n";
-            print SBFILE "       RC.addErrorInfo(ffdc);\\\n";
+            print SBFILE "            std::vector<std::shared_ptr<fapi2::ErrorInfoFfdc>> ffdc;\n";
+            print SBFILE "            collectHWRegister((uint32_t*)i_ffdcBuf, i_chipType, ffdc);\n";
+            print SBFILE "            i_fapiRC.addErrorInfo(ffdc);\n";
 
-            print SBFILE "       break;\\\n    }\\\n";
+            print SBFILE "            break;\n";
+            print SBFILE "        }\n";
 
             # update the sbe set error functions file with the new template function
             # create a unique overloaded function for the return code value
@@ -1897,26 +1903,29 @@ print ECFILE "\n\n#endif\n";
 #------------------------------------------------------------------------------
 # Print end of file information to set_sbe_error.H
 #------------------------------------------------------------------------------
-print SBFILE "    default:\\\n";
-print SBFILE "  /* Create a new rc and capture unknown ffdc buffer */\\\n";
-print SBFILE "  /* When this occurs it's very likely a code bug in the xml (e.g. omitting <sbeError/> tag) */\\\n";
-print SBFILE "        const uint32_t size_bytes = (sizeof(fapi2::sbeFfdc_t)*20);\\\n";
-print SBFILE "        fapi2::variable_buffer l_buffer((uint32_t*)FFDC_BUFFER, size_bytes/4, size_bytes*8);\\\n";
-print SBFILE "        fapi2::ERROR_UNSUPPORTED_BY_SBE(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,RC).";
-print SBFILE "set_FFDC_BUFFER(l_buffer).set_INVALID_ERRVAL(ERRVAL).execute();\\\n";
-print SBFILE "        break;\\\n";
-print SBFILE "}\\\n";
-print SBFILE "if(invalid_data)\\\n";
-print SBFILE "{\\\n";
-print SBFILE "  /* create a new rc and capture invalid ffdc buffer */\\\n";
-print SBFILE "  /* FFDC buffer size is 20 sbeFfdc_t entries */\\\n";
-print SBFILE "  /* variable buffer needs size in uint32_t, and the resulting bit count  */\\\n";
-print SBFILE "   const uint32_t size_bytes = (sizeof(fapi2::sbeFfdc_t)*20);\\\n";
-print SBFILE "   fapi2::variable_buffer l_buffer((uint32_t*)FFDC_BUFFER, size_bytes/4, size_bytes*8);\\\n";
-print SBFILE "   fapi2::INVALID_SBE_FFDC_PACKET(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,RC).";
-print SBFILE "set_FFDC_BUFFER(l_buffer).set_INVALID_ERRVAL(ERRVAL).execute();\\\n";
-print SBFILE "}\\\n";
-print SBFILE "}\n\n";
+print SBFILE "        default:\n";
+print SBFILE "        /* Create a new rc and capture unknown ffdc buffer */\n";
+print SBFILE "        /* When this occurs it's very likely a code bug in the xml (e.g. omitting <sbeError/> tag) */\n";
+print SBFILE "            const uint32_t size_bytes = (sizeof(fapi2::sbeFfdc_t)*20);\n";
+print SBFILE "            fapi2::variable_buffer l_buffer((uint32_t*)i_ffdcBuf, size_bytes/4, size_bytes*8);\n";
+print SBFILE "            fapi2::ERROR_UNSUPPORTED_BY_SBE(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,i_fapiRC).
+                          set_FFDC_BUFFER(l_buffer).set_INVALID_ERRVAL(i_rc).execute();\n";
+print SBFILE "            break;\n";
+print SBFILE "    }\n";
+print SBFILE "    if(invalid_data)\n";
+print SBFILE "    {\n";
+print SBFILE "        /* create a new rc and capture invalid ffdc buffer */\n";
+print SBFILE "        /* FFDC buffer size is 20 sbeFfdc_t entries */\n";
+print SBFILE "        /* variable buffer needs size in uint32_t, and the resulting bit count  */\n";
+print SBFILE "        const uint32_t size_bytes = (sizeof(fapi2::sbeFfdc_t)*20);\n";
+print SBFILE "        fapi2::variable_buffer l_buffer((uint32_t*)i_ffdcBuf, size_bytes/4, size_bytes*8);\n";
+print SBFILE "        fapi2::INVALID_SBE_FFDC_PACKET(fapi2::FAPI2_ERRL_SEV_UNRECOVERABLE,i_fapiRC).
+                      set_FFDC_BUFFER(l_buffer).set_INVALID_ERRVAL(i_rc).execute();\n";
+print SBFILE "    }\n";
+print SBFILE "}\n";
+
+print SBFILE
+    "#define FAPI_SET_SBE_ERROR_IMPL(RC, ERRVAL, FFDC_BUFFER, SBE_INSTANCE, CHIP_TYPE) setSbeErrorWrap(RC, ERRVAL, FFDC_BUFFER, SBE_INSTANCE, CHIP_TYPE)\n";
 
 print SBFILE "#define FAPI_SET_SBE_ERROR_VA_NARGS_IMPL(_1, _2, _3, _4, _5, N, ...) N\n";
 print SBFILE "#define FAPI_SET_SBE_ERROR_VA_NARGS(...) FAPI_SET_SBE_ERROR_VA_NARGS_IMPL(__VA_ARGS__, 5, 4, 3, 2, 1)\n";
