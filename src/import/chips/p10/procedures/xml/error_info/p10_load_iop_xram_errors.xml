@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,7 +25,6 @@
 <hwpErrors>
 <!-- ******************************************************************** -->
 <hwpError>
-  <sbeError/>
   <rc>RC_P10_LOAD_IOP_XRAM_HW_IMG_ERROR</rc>
   <description>
     Invalid NULL pointer to HW reference image passed to p10_load_iop_xram HWP
@@ -39,7 +38,6 @@
 </hwpError>
 <!-- ******************************************************************** -->
 <hwpError>
-  <sbeError/>
   <rc>RC_P10_LOAD_IOP_XRAM_IMG_ERROR</rc>
   <description>
     Null pointer or zero size section encountered when searching

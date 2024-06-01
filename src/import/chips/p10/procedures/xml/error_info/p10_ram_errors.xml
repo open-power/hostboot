@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -53,7 +53,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_P10_SPR_NAME_MAP_INIT_ERR</rc>
     <description>
       SPR name map is not empty while try to initialize.
@@ -65,7 +64,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_P10_SPR_NAME_MAP_ACCESS_ERR</rc>
     <description>
       Illegal SPR name or read/write mode access
@@ -317,7 +315,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_P10_RAM_TEST_ECMD_ERROR</rc>
     <description>
       ECMD error during RAM test
@@ -330,7 +327,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_P10_RAM_TEST_GENERAL_ERROR</rc>
     <description>
       General error during RAM test
@@ -343,7 +339,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_P10_RAM_RANDOM_SPR_NAME_ERROR</rc>
     <description>
       An error occurred while attempting to generate a random SPR name

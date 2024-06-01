@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -109,7 +109,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <sbeError/>
     <rc>RC_TIMEFAC_FROM_PC_XFER_RECEIVE_DONE_TIMEOUT</rc>
     <description>
         Shadow Disable Xfer Receive Done Timeout.
@@ -130,7 +129,6 @@
   </hwpError>
   <!-- ********************************************************************* -->
   <hwpError>
-    <sbeError/>
     <rc>RC_TIMEFAC_FROM_PC_TFCSR_ERROR_CHECK_FAILED</rc>
     <description>
         Shadow Disable TFCSR Error Check Failed.

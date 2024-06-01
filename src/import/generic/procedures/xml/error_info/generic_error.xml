@@ -39,7 +39,6 @@
 
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH_RANK0</rc>
     <description>
        Mirroring settings mismatch between channels in DDR5 SPD byte 365
@@ -64,7 +63,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_CHANNEL_MIRROR_SETTINGS_MISMATCH_RANK1</rc>
     <description>
        Mirroring settings mismatch between channels in DDR5 SPD byte 365
@@ -89,7 +87,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_DDR5_DRAM_WR_PREAMBLE</rc>
     <description>
        An invalid value was detected in ATTR_DDR5_DRAM_WR_PREAMBLE
@@ -110,7 +107,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_NEGATIVE_VPD_SIZE</rc>
     <description>
        A negative size was found while reading the VPD
@@ -135,7 +131,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_BAD_MR_PARAMETER</rc>
     <description>
        A bad parameter was passed to MR processing
@@ -163,7 +158,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_DIVIDE_BY_ZERO</rc>
     <description>
       Attempt to divide by zero
@@ -178,7 +172,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_EMPTY_VECTOR</rc>
     <description>
       Empty vector conditional failed.
@@ -197,7 +190,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_FAILED_TO_FIND_TRFC</rc>
     <description>
         Unable to find tRFC (ps) from map with SDRAM density key
@@ -225,7 +217,6 @@
  </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_FREQ_CL_EXCEEDS_TAA_MAX</rc>
     <description>
         Calculated Cas Latency exceeds JEDEC value for TAA Max
@@ -262,7 +253,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_FREQ_FAILED_TO_FIND_SUPPORTED_CL</rc>
     <description>
       Desired CAS latency isn't supported in the common CAS latency bin retrieved from SPD.
@@ -305,7 +295,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_FREQ_DDR5_FAILED_TO_FIND_SUPPORTED_CL</rc>
     <description>
       Desired CAS latency isn't supported in the common CAS latency bin retrieved from SPD.
@@ -349,7 +338,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_FREQ_DDR5_COMPUTED_ZERO_TCK_STD</rc>
     <description>
       Dutring CAS latency computation, tCKstd value of zero was computed, likely due to a problem with the SPD.
@@ -414,7 +402,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_FREQ_INVALID_CALCULATED_TCK</rc>
     <description>
         Invalid value clock period (less than equal 0).
@@ -450,7 +437,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_CW_ENCODING</rc>
     <description>
       Set if a controlword is invalid
@@ -465,7 +451,6 @@
   </hwpError>
 
    <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_RTT_WR_ENCODING</rc>
     <description>
       An invalid/unsupported RTT_WR encoding was received
@@ -479,7 +464,6 @@
    </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_FREQ_NO_COMMON_SUPPORTED_CL</rc>
     <description>
         Current Configuration has no common supported CL values.
@@ -511,7 +495,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_FREQ_SELECTED_FREQ_NOT_SUPPORTED</rc>
     <description>Selected freq based on calculations from the DIMM and VPD is not supported</description>
     <ffdc>SUPPORTED_FREQ_0</ffdc>
@@ -545,7 +528,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_CAST_WHEN_ROUNDING</rc>
     <description>Invalid cast or calculation for corrected_ps_per_jedec</description>
     <ffdc>TIMING_PS</ffdc>
@@ -558,7 +540,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_CAST_CALC_NCK</rc>
     <description>Invalid cast or calculation for calc_nck</description>
     <ffdc>TIMING_PS</ffdc>
@@ -572,7 +553,6 @@
   </hwpError>
 
 <hwpError>
-  <sbeError/>
   <rc>RC_MSS_INVALID_CLOCK_PERIOD</rc>
   <description>
     An invalid clock period was passed to clock period to frequency
@@ -585,7 +565,6 @@
 </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_DB_MDQ_DRIVE_STRENGTH</rc>
     <description>
         Bad SPD data for bytes 145 - 147.
@@ -607,7 +586,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_DIMM_SPEED</rc>
     <description>
       Invalid DIMM speed received. Possibly a programming error.
@@ -627,7 +605,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_DIMM_TYPE</rc>
     <description>
       Received a DIMM type unsupported by the SPD decoder factory
@@ -659,7 +636,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_DRAM_GEN</rc>
     <description>
       Received a DRAM gen unsupported by the SPD decoder factory
@@ -692,7 +668,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_FREQ_PASSED_IN</rc>
     <description>
         An invalid Freq value has been set
@@ -734,7 +709,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_FREQ_LIST_PASSED</rc>
     <description>
        Wrong size vector passed into frequency scoreboard function
@@ -748,7 +722,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_FINE_REFRESH_MODE</rc>
     <description>
       Invalid fine refresh mode received from the mrw
@@ -761,7 +734,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_PORT_INDEX_PASSED</rc>
     <description>An invalid port index was passed into an MSS function</description>
     <ffdc>INDEX</ffdc>
@@ -773,7 +745,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_RANK</rc>
     <description>
       Invalid rank passed into function
@@ -788,7 +759,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_REFRESH_RATE_REQUEST</rc>
     <description>
       Invalid refresh request rate received.
@@ -803,7 +773,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_NONHYBRID_MDS</rc>
     <description>
         Conflict in SPD fields: HYBRID_MEDIA_TYPE (byte 3, bits 1:3) cannot be MDS
@@ -832,7 +801,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_REVISION</rc>
     <description>
       Unable to fall back SPD decoder to the highest decoded
@@ -863,7 +831,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_REVISION_FOR_MODULE_SPECIFC</rc>
     <description>
       Unable to fall back SPD decoder to the highest decoded
@@ -895,7 +862,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_RANK</rc>
     <description>
       Invalid rank passed into attribute engine.
@@ -923,7 +889,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_SPD_RESERVED_BITS</rc>
     <description>
         Invalid SPD reserved bits received.
@@ -953,7 +918,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_TIMING_VALUE</rc>
     <description>Invalid value calculated for timing value based on MTB and FTB from SPD.</description>
     <ffdc>VALUE</ffdc>
@@ -979,7 +943,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_VPD_FREQ_LIST_PASSED</rc>
     <description>
        Wrong size vector passed into limit_freq_by_vpd function
@@ -993,7 +956,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_INVALID_VPD_KEYWORD_MAX</rc>
     <description>
       VPD keyword is too big for space allocated for it.
@@ -1014,7 +976,6 @@
   </hwpError>
 
 <hwpError>
-  <sbeError/>
   <rc>RC_MSS_LOOKUP_FAILED</rc>
   <description>
     Conditional that tests whether a certain key value is located in a map.
@@ -1037,7 +998,6 @@
 </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_MEMDIAGS_NO_MCBIST_SUBTESTS</rc>
     <description>Attempt to run an MCBIST program with no subtests</description>
     <ffdc>MC_TARGET</ffdc>
@@ -1048,7 +1008,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_MCBIST_EXCEEDED_MAX_SUBTESTS</rc>
     <description>Attempt to run an MCBIST program exceeding the max number of subtests (32)</description>
     <ffdc>MC_TARGET</ffdc>
@@ -1060,7 +1019,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_MCBIST_INCORRECT_PATTERN_LENGTH</rc>
     <description>MCBIST pattern has an incorrect length</description>
     <ffdc>TARGET</ffdc>
@@ -1073,7 +1031,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES</rc>
     <description>Incorrect number of voltages supplied to set_voltage_attributes function</description>
     <ffdc>VOLT_TARGET</ffdc>
@@ -1086,7 +1043,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_VOLT_DDR4_TYPE_REQUIRED_VOLTAGE</rc>
     <description>One or more DIMMs do not support required voltage for DDR4.</description>
     <ffdc>EXPECTED_OPERABLE</ffdc>
@@ -1107,7 +1063,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_VOLT_DDR5_TYPE_REQUIRED_VOLTAGE</rc>
     <description>One or more DIMMs do not support required voltage for DDR5.</description>
     <ffdc>EXPECTED_OPERABLE</ffdc>
@@ -1132,7 +1087,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_VOLT_INVALID_DRAM_GEN</rc>
     <description>Invalid DRAM generation at p10_mss_volt</description>
     <ffdc>DRAM_GEN</ffdc>
@@ -1147,7 +1101,6 @@
   </hwpError>
 
   <hwpError>
-    <sbeError/>
     <rc>RC_MSS_UNSUPPORTED_DRAM_GEN</rc>
     <description>Unsupported DRAM generation</description>
     <ffdc>DRAM_GEN</ffdc>

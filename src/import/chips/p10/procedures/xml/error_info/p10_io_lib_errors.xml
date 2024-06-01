@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2022                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -25,7 +25,6 @@
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_P10_IO_OMI_POLL_INIT_DONE_TIMEOUT_ERROR</rc>
     <description>
       Timed out waiting for PHY PPE to complete io init
@@ -40,7 +39,6 @@
   </hwpError>
   <!-- ******************************************************************** -->
   <hwpError>
-    <sbeError/>
     <rc>RC_P10_IOHS_POLL_ACTION_STATE_ERROR</rc>
     <description>
       Timed out waiting for PHY Action to complete
