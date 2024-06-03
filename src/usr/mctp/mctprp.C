@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,7 @@
 #include <initservice/taskargs.H>
 #include <intr/interrupt.H>
 #include <lpc/lpcif.H>
+#include <util/misc.H>
 #include <lpc/lpc_const.H>
 #include <targeting/common/targetservice.H>
 #include <trace/interface.H>
@@ -174,7 +175,7 @@ void MctpRP::poll_kcs_status(void)
             printk("BMC stopped responding for LPC requests! RC from mctp_astlpc_poll = %d \n", rc);
             crit_assert(0);
         }
-        nanosleep(0, 1 * NS_PER_MSEC);
+        nanosleep(0, iv_poll_interval_ns);
     }
 }
 
@@ -462,6 +463,12 @@ void MctpRP::_init(void)
 {
     TRACFCOMP(g_trac_mctp, "MctpRP::_init entry");
 
+    //If running in Simulation, optimize polling time
+    if( Util::isSimicsRunning() )
+    {
+        iv_poll_interval_ns = (1 * NS_PER_MSEC); //poll every 100usec on HW
+    }
+
 #ifdef CONFIG_MCTP
     // Setup the trace hook to point at mctp_log_fn
     mctp_set_log_custom(mctp_log_fn);
@@ -498,7 +505,8 @@ void MctpRP::_init(void)
 MctpRP::MctpRP(void):
     iv_astlpc(nullptr),
     iv_mctp(mctp_init()),
-    iv_mutex(MUTEX_INITIALIZER)
+    iv_mutex(MUTEX_INITIALIZER),
+    iv_poll_interval_ns((1 * NS_PER_MSEC)/10) //poll every 100usec on HW
 {
 }
 

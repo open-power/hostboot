@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -88,6 +88,7 @@ class MctpRP
       struct mctp *iv_mctp;                       // ptr to struct that has business logic.
       mutex_t iv_mutex;                           // Mutex to protect calls to functions that access.
                                                   // the tx_queue and/or write the IDR register.
+      uint64_t iv_poll_interval_ns;               // How often to poll the KCS buffer in nanoseconds
 };
 
 #endif //MCTP_H
