@@ -709,6 +709,8 @@ fapi2::ReturnCode ody_get_dqs_offsets(const fapi2::Target<fapi2::TARGET_TYPE_MEM
         }
     }
 
+    FAPI_TRY(mss::ody::phy::configure_phy_scom_access(i_target, mss::states::OFF_N));
+
 fapi_try_exit:
     return fapi2::current_err;
 }
