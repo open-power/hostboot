@@ -834,5 +834,33 @@ void parse_hb_prealloc_for_drawer_attach(std::vector<uint8_t>& io_string_table,
     return;
 }
 
+void parse_hb_cdm_policies(std::vector<uint8_t>& io_string_table,
+                           std::vector<uint8_t>& io_attr_table,
+                           ISTEP_ERROR::IStepError & io_stepError)
+{
+    TARGETING::ATTR_CDM_POLICIES_type l_policies = 0;
+
+    errlHndl_t l_errl = PLDM::getCdmPolicies(io_string_table, io_attr_table, l_policies);
+    const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "parse_hb_cdm_policies: "
+                "An error occurred getting CDM POLICIES from the BMC BIOS. "
+                "Leaving CDM_POLICIES as %d.", l_sys->getAttr<ATTR_CDM_POLICIES>());
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+    else
+    {
+        // Need to just set the system policies attr
+        l_sys->setAttr<ATTR_CDM_POLICIES>(l_policies);
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                INFO_MRK"Successfully set ATTR_CDM_POLICIES to %d.", l_policies);
+    }
+    return;
+}
+
 
 } // end of namespace ISTEP

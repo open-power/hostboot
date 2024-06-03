@@ -32,7 +32,8 @@
 #include <util/comptime_util.H>
 #include <algorithm>
 #include <stdlib.h>
-
+#include <stdint.h>
+#include <vector>
 
 #include <map>
 
@@ -76,6 +77,7 @@ const char PLDM_BIOS_HB_EFFECTIVE_SECURE_VERSION_STRING[]  = "hb_effective_secur
 const char PLDM_BIOS_HB_LATERAL_CAST_OUT_MODE_STRING[]     = "hb_lateral_cast_out_mode_current";
 const char PLDM_BIOS_HB_PROC_FAVOR_AGGRESSIVE_PREFETCH_STRING[] = "hb_proc_favor_aggressive_prefetch_current";
 const char PLDM_BIOS_HB_STORAGE_PREALLOCATION_FOR_DRAWER_ATTACH[] = "hb_storage_preallocation_for_drawer_attach_current";
+const char PLDM_BIOS_HB_CDM_POLICIES[]                     = "hb_cdm_policies";
 
 
 // When power limit values change, the effect on the OCCs is immediate, so we
@@ -2811,6 +2813,31 @@ errlHndl_t getInhibitBmcResetValue(std::vector<uint8_t>& io_string_table,
 
     PLDM_INF(EXIT_MRK"PLDM::getInhibitBmcResetValue: returning %s",
              o_inhibitResets ? "true" : "false");
+
+    return errl;
+}
+
+errlHndl_t getCdmPolicies(std::vector<uint8_t>& io_string_table,
+                        std::vector<uint8_t>& io_attr_table,
+                        uint8_t& o_cdm_policies)
+{
+    errlHndl_t errl = nullptr;
+
+    PLDM_INF(ENTER_MRK"PLDM::getCdmPolicy");
+
+    uint64_t policy_val = 0; // default to 0
+    errl = systemIntAttrLookup(io_string_table, 
+                               io_attr_table, 
+                               PLDM_BIOS_HB_CDM_POLICIES, 
+                               policy_val);
+    
+    if (errl) {
+        PLDM_ERR("PLDM::getCdmPolicy failed to get policy value. Error=%d", errl->reasonCode());
+    }
+    o_cdm_policies = static_cast<uint8_t>(policy_val);
+
+    PLDM_INF(EXIT_MRK"PLDM::getCdmPolicies: returning %.2X and %s",
+             o_cdm_policies, errl ? "Error" : "No Error");
 
     return errl;
 }

@@ -323,5 +323,19 @@ void parse_hb_prealloc_for_drawer_attach(std::vector<uint8_t>& io_string_table,
                                          std::vector<uint8_t>& io_attr_table,
                                          ISTEP_ERROR::IStepError & io_stepError);
 
+/**
+ * @brief Retrive the CEC Degraded Mode Policy flags from the BMC BIOS and set the
+ *        system's policies accordingly. If an error occurs, the system policies are left
+ *        as is.
+ * 
+ * @param[in,out] io_string_table       See brief in file hb_bios_attrs.H
+ * @param[in,out] io_attr_table         See brief in file hb_bios_attrs.H
+ * @param[in,out] io_stepError          If an error occurs which require a TI it can be attached
+ *                                      to this IstepError log.
+ */
+void parse_hb_cdm_policies(std::vector<uint8_t>& io_string_table,
+                           std::vector<uint8_t>& io_attr_table,
+                           ISTEP_ERROR::IStepError & io_stepError);
+
 } // end of namespace ISTEP
 

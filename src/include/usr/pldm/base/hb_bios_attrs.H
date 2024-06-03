@@ -54,6 +54,7 @@
 #include <pnor/pnor_const.H>
 #include <attributetraits.H>
 #include <attributeenums.H>
+#include <vector>
 
 namespace PLDM
 {
@@ -521,6 +522,19 @@ namespace PLDM
                                         std::vector<uint8_t>& io_attr_table,
                                         TARGETING::ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT_type &
                                             o_dynamic_io_drawer_attach);
+
+    /**
+     * @brief Retrieve the current value of the hb_cdm_policies PLDM bios attribute and return
+     * if no error.
+     * 
+     * @param[in,out] io_string_table     See brief at the top of this file.
+     * @param[in,out] io_attr_table       See brief at the top of this file.
+     * @param[out]    o_cdm_policy        If no error occurs will contain the value
+     *                                    for HB_CDM_POLICY
+     */
+    errlHndl_t getCdmPolicies(std::vector<uint8_t>& io_string_table,
+                            std::vector<uint8_t>& io_attr_table,
+                            uint8_t& o_cdm_policies);
 
 }
 
