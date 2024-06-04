@@ -349,6 +349,7 @@ fapi_try_exit:
 /// @param [in] i_target OCMB target
 /// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor (units: centi-degrees C)
 /// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
+/// @param [out] o_error set to true if sensor cache error bit was on
 /// @param [out] o_temp_delta delta of the previous value and the current value (units: centi-degrees C)
 /// @param [out] o_current_temp_values vector of current temperature of all the sensors (units: centi-degrees C)
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -356,6 +357,7 @@ fapi_try_exit:
 fapi2::ReturnCode calc_ocmb_sensor_temp_delta_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const int16_t i_thermal_sensor_prev_attr,
         const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
+        bool& o_error,
         int16_t& o_temp_delta_value,
         int16_t& o_current_temp_value)
 {
@@ -367,6 +369,7 @@ fapi2::ReturnCode calc_ocmb_sensor_temp_delta_helper(const fapi2::Target<fapi2::
     // Get the present bit and the error bit for OCMB temp sensor
     l_thermal_present = i_snsc_thermal_scom_data.getBit<TT::SENSOR_PRESENT_BIT>();
     l_thermal_error = i_snsc_thermal_scom_data.getBit<TT::SENSOR_ERROR_BIT>();
+    o_error = l_thermal_error;
 
     // Get the decoding for OCMB temp sensor in centigrade
     if(l_thermal_present && !(l_thermal_error))
@@ -401,11 +404,13 @@ fapi_try_exit:
 /// @brief Helper function calculate the temperature delta of the DDIMM sensor
 /// @param [in] i_thermal_sensor_prev_attr attribute value of previous value for diff sensor (units: centi-degrees C)
 /// @param [in] i_snsc_thermal_scom_data scom data of the sensor cache on-chip register
+/// @param [out] o_error set to true if sensor cache error bit was on
 /// @param [out] o_temp_delta delta of the previous value and the current value (units: centi-degrees C)
 /// @return int16_t current temperature value (units: centi-degrees C)
 ///
 int16_t calc_thermal_sensor_temp_delta_helper(const int16_t i_thermal_sensor_prev_attr,
         const fapi2::buffer<uint64_t>& i_snsc_thermal_scom_data,
+        bool& o_error,
         int16_t& o_temp_delta_value)
 {
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
@@ -417,6 +422,7 @@ int16_t calc_thermal_sensor_temp_delta_helper(const int16_t i_thermal_sensor_pre
     // Get the present bit and the error bit for OCMB temp sensor
     l_thermal_present = i_snsc_thermal_scom_data.getBit<TT::SENSOR_PRESENT_BIT>();
     l_thermal_error = i_snsc_thermal_scom_data.getBit<TT::SENSOR_ERROR_BIT>();
+    o_error = l_thermal_error;
 
     // Get the decoding for OCMB temp sensor in centigrade
     if(l_thermal_present && !(l_thermal_error))
@@ -510,6 +516,7 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
     // Various arrays to store the usage, availability, previous, reg scom data
     uint8_t l_thermal_sensor_usage[TT::temp_sensor::NUM_SENSORS] = {0};
     uint8_t l_thermal_sensor_avail[TT::temp_sensor::NUM_SENSORS] = {0};
+    bool l_thermal_sensor_error[TT::temp_sensor::NUM_SENSORS] __attribute__ ((__aligned__(8))) = {false};
     int16_t l_thermal_sensor_prev_attr[TT::temp_sensor::NUM_SENSORS] __attribute__ ((__aligned__(8))) = {0};
     const uint64_t l_thermal_sensors_scom_regs[TT::temp_sensor::NUM_SENSORS] = {scomt::ody::ODC_MMIO_SNSC_D0THERM,
                                                                                 scomt::ody::ODC_MMIO_SNSC_D1THERM,
@@ -555,6 +562,7 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
             FAPI_TRY(calc_ocmb_sensor_temp_delta_helper(i_target,
                      l_thermal_sensor_prev_attr[l_sensor_index],
                      l_snsc_therm_data[l_sensor_index],
+                     l_thermal_sensor_error[l_sensor_index],
                      l_temp_delta_values[l_sensor_index],
                      o_current_temp_values[l_sensor_index]));
         }
@@ -563,6 +571,7 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
             o_current_temp_values[l_sensor_index] = calc_thermal_sensor_temp_delta_helper(
                     l_thermal_sensor_prev_attr[l_sensor_index],
                     l_snsc_therm_data[l_sensor_index],
+                    l_thermal_sensor_error[l_sensor_index],
                     l_temp_delta_values[l_sensor_index]);
         }
 
@@ -579,9 +588,11 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
 
     // Now check which index exists and choose that temp delta
     // but only if temperature is within reasonable range (0-125C)
+    // and the error indicator is not set
     o_temp_delta = 0;
 
     if (l_sensor_info.iv_dram_exists &&
+        !l_thermal_sensor_error[l_sensor_info.iv_dram_index] &&
         (o_current_temp_values[l_sensor_info.iv_dram_index] >= MIN_TEMP_FILTER) &&
         (o_current_temp_values[l_sensor_info.iv_dram_index] <= MAX_TEMP_FILTER))
     {
@@ -589,6 +600,7 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
         o_chosen_sensor_index = l_sensor_info.iv_dram_index;
     }
     else if (l_sensor_info.iv_pmic_exists &&
+             !l_thermal_sensor_error[l_sensor_info.iv_pmic_index] &&
              (o_current_temp_values[l_sensor_info.iv_pmic_index] >= MIN_TEMP_FILTER) &&
              (o_current_temp_values[l_sensor_info.iv_pmic_index] <= MAX_TEMP_FILTER))
     {
@@ -596,6 +608,7 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
         o_chosen_sensor_index = l_sensor_info.iv_pmic_index;
     }
     else if (l_sensor_info.iv_mem_buf_ext_exists &&
+             !l_thermal_sensor_error[l_sensor_info.iv_mem_buf_ext_index] &&
              (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] >= MIN_TEMP_FILTER) &&
              (o_current_temp_values[l_sensor_info.iv_mem_buf_ext_index] <= MAX_TEMP_FILTER))
     {
@@ -603,7 +616,8 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
         o_chosen_sensor_index = l_sensor_info.iv_mem_buf_ext_index;
     }
     // if none of the above sensors exist use the differential one
-    else if ((o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] >= MIN_TEMP_FILTER) &&
+    else if (!l_thermal_sensor_error[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] &&
+             (o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] >= MIN_TEMP_FILTER) &&
              (o_current_temp_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR] <= MAX_TEMP_FILTER))
     {
         o_temp_delta = l_temp_delta_values[mss::ody::sensor_types::DIFFERENTIAL_SENSOR];
