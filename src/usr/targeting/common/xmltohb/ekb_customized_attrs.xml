@@ -1027,6 +1027,14 @@
         <no_export/>
     </attribute>
 
+    <attribute>
+        <!-- Convert to a value HB dynamically controls -->
+        <id>ATTR_MEM_THERMAL_INIT_COMPLETE</id>
+        <writeable/>
+        <no_export/>
+        <persistency>volatile</persistency>
+    </attribute>
+
     <!-- =====================================================================
      End of customizations definitions
      ================================================================= -->

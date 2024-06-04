@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -201,6 +201,7 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
                            get_huid(l_ocmbTarget),
                            l_chipId,
                            TRACE_ERR_ARGS(l_err) );
+
             }
             else
             {
@@ -231,6 +232,11 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
                            "chip, target HUID 0x%.8X, chipId 0x%.8X",
                            TARGETING::get_huid(l_ocmbTarget),
                            l_chipId );
+
+                // Set a flag for later memory HWPs to know the temp
+                // sensors are enabled
+                l_ocmbTarget->setAttr<ATTR_MEM_THERMAL_INIT_COMPLETE>
+                  (MEM_THERMAL_INIT_COMPLETE_YES);
             }
         } // end if (l_chipId == POWER_CHIPID::ODYSSEY_16)
         else
