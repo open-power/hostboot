@@ -7508,8 +7508,10 @@
   <enumerationType>
     <description>
         Enumeration for processor module type that come from HDAT spec
-        0x50 = DCM
-        0x51 = SCM
+        0x0050 – P10 with Godel bus mapping
+        0x0051 – P10 with Blaise bus mapping
+        0x0052 – P11 with Godel bus mapping
+        0x0053 – P11 with Blaise bus mapping
     </description>
     <enumerator>
       <name>GODEL</name>
@@ -7518,6 +7520,14 @@
     <enumerator>
       <name>BLAISE</name>
       <value>0x51</value>
+    </enumerator>
+    <enumerator>
+      <name>P11_GODEL</name>
+      <value>0x52</value>
+    </enumerator>
+    <enumerator>
+      <name>P11_BLAISE</name>
+      <value>0x53</value>
     </enumerator>
     <id>PROC_MODULE_TYPE</id>
   </enumerationType>
