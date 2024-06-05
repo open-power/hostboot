@@ -278,6 +278,35 @@ static void unmapVirtAddr(void* i_addr)
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+// Returns the physical address corresponding to a PHYP MDST/MDRT entry
+void* getPhysAddr( uint64_t i_phypAddr )
+{
+    uint64_t phys_addr = 0;
+
+    // Physical Address
+    if( VmmManager::FORCE_PHYS_ADDR & i_phypAddr )
+    {
+        // lop off the top bit so our vmm code works
+        phys_addr = (i_phypAddr & ~VmmManager::FORCE_PHYS_ADDR);
+    }
+    // Relative to PHYP HRMOR
+    else
+    {
+        TARGETING::Target * sys = NULL;
+        TARGETING::targetService().getTopLevelTarget( sys );
+        assert(sys != NULL);
+
+        // add the hrmor/payload_base to the value in the table
+        TARGETING::ATTR_PAYLOAD_BASE_type payload_base
+          = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
+        phys_addr = payload_base*MEGABYTE + i_phypAddr;
+    }
+
+    return reinterpret_cast<void*>(ALIGN_PAGE_DOWN(phys_addr));
+}
+
 /**
  * @brief Collect HW dumps for all the Odyssey OCMBs under the given
  * processor and store them in the dump section allocated by PHYP at
@@ -327,8 +356,9 @@ uint64_t collectOdysseyHwDumps(Target* const i_proc,
     }
 
     hw_dump_vaddr
-        = static_cast<uint8_t*>(mm_block_map(reinterpret_cast<void*>(i_hwDataMemoryAddr),
-                                             i_hwDataMemAllocSize));
+        = (static_cast<uint8_t*>(mm_block_map(
+                            getPhysAddr(i_hwDataMemoryAddr),
+                            i_hwDataMemAllocSize)));
 
     for (const auto ocmb : composable(getChildAffinityTargets)(i_proc, CLASS_NA, TYPE_OCMB_CHIP, true /* functional only */))
     {
@@ -338,6 +368,20 @@ uint64_t collectOdysseyHwDumps(Target* const i_proc,
         }
 
         using namespace SBEIO;
+
+        uint8_t* tmp_write_pntr = hw_dump_vaddr + i_hwDataMemCapturedSize;
+        tmp_write_pntr[0] = 0x4F;//OCMB  xy
+        tmp_write_pntr[1] = 0x43;
+        tmp_write_pntr[2] = 0x4D;
+        tmp_write_pntr[3] = 0x42;
+        tmp_write_pntr[4] = 0x20;
+        tmp_write_pntr[5] = 0x20;
+        // Current interface with makedump tooling is to have 2 hex bytes for ID
+        uint32_t ocmb_position = ocmb->getAttr<ATTR_FAPI_POS>();
+        tmp_write_pntr[6] = (ocmb_position >> 8) & 0xFF;
+        tmp_write_pntr[7] = (ocmb_position) & 0xFF;
+        tmp_write_pntr = nullptr;
+        i_hwDataMemCapturedSize += 8;
 
         uint8_t* const dump_dest = hw_dump_vaddr + i_hwDataMemCapturedSize;
         uint32_t buffer_size = i_hwDataMemAllocSize - i_hwDataMemCapturedSize;
@@ -459,36 +503,6 @@ void replaceRegNumWithName( hostArchRegDataEntry *hostRegData )
     }
     //else unknown type... leave as number for debug
 
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-// Returns the physical address corresponding to a PHYP MDST/MDRT entry
-void* getPhysAddr( uint64_t i_phypAddr )
-{
-    uint64_t phys_addr = 0;
-
-    // Physical Address
-    if( VmmManager::FORCE_PHYS_ADDR & i_phypAddr )
-    {
-        // lop off the top bit so our vmm code works
-        phys_addr = (i_phypAddr & ~VmmManager::FORCE_PHYS_ADDR);
-    }
-    // Relative to PHYP HRMOR
-    else
-    {
-        TARGETING::Target * sys = NULL;
-        TARGETING::targetService().getTopLevelTarget( sys );
-        assert(sys != NULL);
-
-        // add the hrmor/payload_base to the value in the table
-        TARGETING::ATTR_PAYLOAD_BASE_type payload_base
-          = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
-        phys_addr = payload_base*MEGABYTE + i_phypAddr;
-    }
-
-    return reinterpret_cast<void*>(ALIGN_PAGE_DOWN(phys_addr));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -925,15 +939,14 @@ errlHndl_t copyArchitectedRegs(void)
 
             auto hwDataMemCapturedSize = metadata->hwDataMemCapturedSize;
 
-            // TODO: STGD:613392 Inconsistent data in the MPIPL dump.
-            // if (getOcmbChipTypesInSystem(UTIL_FILTER_FUNCTIONAL) == UTIL_ODYSSEY_FOUND)
-            // {
-            //     hwDataMemCapturedSize
-            //         = collectOdysseyHwDumps(procChips[procNum],
-            //                                 metadata->hwDataMemoryAddr,
-            //                                 metadata->hwDataMemAllocSize,
-            //                                 metadata->hwDataMemCapturedSize);
-            // }
+            if (getOcmbChipTypesInSystem(UTIL_FILTER_FUNCTIONAL) == UTIL_ODYSSEY_FOUND)
+            {
+                hwDataMemCapturedSize
+                    = collectOdysseyHwDumps(procChips[procNum],
+                                            metadata->hwDataMemoryAddr,
+                                            metadata->hwDataMemAllocSize,
+                                            metadata->hwDataMemCapturedSize);
+            }
 
             hwDumpTable->procHwRegDataToc[procId].dataOffset = metadata->hwDataMemoryAddr;
             hwDumpTable->procHwRegDataToc[procId].dataSize = hwDataMemCapturedSize;
