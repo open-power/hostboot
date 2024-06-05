@@ -516,5 +516,20 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Checks the channel selects before executing the CCS instance - Explorer specialization
+/// @param[in] i_ports the ports under test
+/// @param[in] i_program the MCBIST ccs program - to get the polling parameters
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<>
+fapi2::ReturnCode check_channel_selects<mss::mc_type::EXPLORER>( const
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
+        const ccs::program<mss::mc_type::EXPLORER>& i_program)
+{
+    // Nothing to do here for Explorer
+    return fapi2::FAPI2_RC_SUCCESS;
+}
+
 } // namespace ccs
 } // namespace mss

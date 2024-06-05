@@ -145,6 +145,15 @@ template<>
 fapi2::ReturnCode get_rank_config<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         rank_configuration& o_rank_config);
 
+///
+/// @brief Gets the channels on which to operate
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_channels the channels on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful, fapi2 error code otherwise
+///
+fapi2::ReturnCode get_channels(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                               std::vector<mss::ccs::channel_select>& o_channels);
+
 
 namespace workarounds
 {

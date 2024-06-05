@@ -491,9 +491,6 @@ fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
     fapi2::buffer<uint64_t> l_data;
     fapi2::buffer<uint64_t> l_pwr_cntl_reg_data;
 
-    // Check for read/write commands, and set up workaround bits if needed
-    FAPI_TRY(workarounds::setup_ccs_rdwr(i_ports, i_program));
-
     // Per the design team, periodics needs to be disabled for CCS to function properly
     FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB9Q, o_periodics_reg));
 
@@ -940,6 +937,48 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Checks the channel selects before executing the CCS instance - Odyssey specialization
+/// @param[in] i_ports the ports under test
+/// @param[in] i_program the MCBIST ccs program - to get the polling parameters
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template<>
+fapi2::ReturnCode check_channel_selects<mss::mc_type::ODYSSEY>( const
+        std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
+        const ccs::program<mss::mc_type::ODYSSEY>& i_program)
+{
+    return workarounds::setup_ccs_rdwr(i_ports, i_program);
+}
+
+///
+/// @brief Gets the channels on which to operate
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_channels the channels on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful, fapi2 error code otherwise
+///
+fapi2::ReturnCode get_channels(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                               std::vector<mss::ccs::channel_select>& o_channels)
+{
+    o_channels.clear();
+    bool l_is_half_dimm_mode = false;
+    FAPI_TRY(mss::ody::half_dimm_mode(i_target, l_is_half_dimm_mode));
+
+    // Full dimm mode? just all the channels
+    if(!l_is_half_dimm_mode)
+    {
+        o_channels.push_back(mss::ccs::channel_select::ALL);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Half DIMM mode? a vector of both channels
+    o_channels.push_back(mss::ccs::channel_select::CHA);
+    o_channels.push_back(mss::ccs::channel_select::CHB);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 namespace workarounds
 {
 
@@ -1029,7 +1068,7 @@ fapi2::ReturnCode setup_ccs_rdwr(
                     .set_MC_TARGET(l_mc)
                     .set_PORT_SEL(l_port_sel),
                     TARGTIDFORMAT
-                    " PORT_SEL bits select both halves in CCS MODEQ (%d). Only one half can be selected at a time in XMETA mode",
+                    " PORT_SEL bits select both halves in CCS MODEQ (0x%0x). Only one half can be selected at a time in XMETA mode",
                     GENTARGTID(l_mc), l_port_sel);
 
         l_farb2.writeBit<scomt::ody::ODC_SRQ_MBA_FARB2Q_CFG_CCS_RDWR_SET_M0>(l_port_sel & CHB);

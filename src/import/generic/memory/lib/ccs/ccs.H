@@ -432,6 +432,19 @@ fapi2::ReturnCode fail_type( const fapi2::Target<T>& i_target,
                              const fapi2::Target<P>& i_port );
 
 ///
+/// @brief Checks the channel selects before executing the CCS instance
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam P the target of the CCS instruction (the port)
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_ports the ports under test
+/// @param[in] i_program the MCBIST ccs program - to get the polling parameters
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType P, typename TT = ccsTraits<MC> >
+fapi2::ReturnCode check_channel_selects( const std::vector< fapi2::Target<P> >& i_ports,
+        const ccs::program<MC>& i_program);
+
+///
 /// @brief Execute a CCS array already loaded in to the engine
 /// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
@@ -738,13 +751,15 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
         {
             const auto l_port_index = mss::relative_pos<MC, T>(p);
 
-            // Run ccs instruction setup
-            FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
-                      "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID);
-
             FAPI_INF_NO_SBE("executing CCS array for port %d " TARGTIDFORMAT, l_port_index, GENTARGTID(p));
             FAPI_TRY( select_ports<MC>( i_target, l_port_index, io_program.iv_channel_select),
                       "Error in port select for " TARGTIDFORMAT, TARGTID);
+            FAPI_TRY(check_channel_selects<MC>( i_ports, io_program),
+                     "Error in check_channel_selects for " TARGTIDFORMAT, TARGTID);
+
+            // Run ccs instruction setup
+            FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
+                      "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID);
             FAPI_TRY( execute_inst_array<MC>(i_target, io_program, p),
                       "Error in executing ccs array for " TARGTIDFORMAT, TARGTID);
         }
@@ -952,14 +967,16 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     {
         const auto l_port_index = mss::relative_pos<MC, T>(p);
 
-        // Run ccs instruction setup
-        FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
-                  "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID );
-
         FAPI_INF_NO_SBE("executing CCS via MCBIST for port %d " TARGTIDFORMAT, l_port_index, GENTARGTID(p));
 
         FAPI_TRY( select_ports<MC>( i_target, l_port_index, io_program.iv_channel_select),
                   "Error in port select for ccs::execute_via_mcbist on " TARGTIDFORMAT, TARGTID );
+        FAPI_TRY(check_channel_selects<MC>( i_ports, io_program),
+                 "Error in port select for ccs::check_channel_selects on " TARGTIDFORMAT, TARGTID);
+
+        // Run ccs instruction setup
+        FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, p),
+                  "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID );
         FAPI_TRY( execute_inst_via_mcbist<MC>(i_target), "Error in ccs::execute_inst_via_mcbist on " TARGTIDFORMAT, TARGTID );
     }
 
