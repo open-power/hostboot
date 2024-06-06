@@ -190,6 +190,7 @@ namespace PLDM
         RC_FILE_IO_PROBLEM            = PLDM_COMP_ID | 0x43,
         RC_DUMP_TARGET_NOT_FOUND      = PLDM_COMP_ID | 0x44,
         RC_SBE_DUMP_FAILED            = PLDM_COMP_ID | 0x45,
+        RC_READ_TOO_BIG               = PLDM_COMP_ID | 0x46,
     };
 
     /**

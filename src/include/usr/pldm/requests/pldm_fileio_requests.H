@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,11 +66,13 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table);
  *                will keep reading the data until BMC indicates that there is
  *                no more data to read.
  * @param[out] o_file the pointer to memory where the file is to be written
+ * @param[in]  i_size the size of the callers buffer
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t getLidFile(uint32_t i_fileHandle,
                       uint32_t& io_numBytesToRead,
-                      uint8_t* o_file);
+                      uint8_t* o_file,
+                      size_t i_size = 0);
 
 /**
  * @brief Requests a lid file starting with the specified offset from the BMC.
@@ -85,6 +87,7 @@ errlHndl_t getLidFile(uint32_t i_fileHandle,
  * @param[out] o_file the pointer to memory where the file is to be written
  * @param[out] o_eof whether an eof condition was encountered
  * @param[in]  i_pound_keyword_type file i/o special type for PLDM to retrieve
+ * @param[in]  i_size the size of the callers buffer
  * @return nullptr on success; non-nullptr on error
  */
 errlHndl_t getLidFileFromOffset(uint32_t i_fileHandle,
@@ -92,7 +95,8 @@ errlHndl_t getLidFileFromOffset(uint32_t i_fileHandle,
                                 uint32_t& io_numBytesToRead,
                                 uint8_t* o_file,
                                 bool* o_eof = nullptr,
-                                pldm_fileio_file_type i_pound_keyword_type = PLDM_FILE_TYPE_INVALID);
+                                pldm_fileio_file_type i_pound_keyword_type = PLDM_FILE_TYPE_INVALID,
+                                size_t i_size = 0);
 
 /**
  * @brief Requests to write to a lid file starting with the specified offset
