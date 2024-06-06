@@ -457,4 +457,15 @@
   <default>ON</default>
 </attribute>
 <!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_IS_IOSCM</id>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+  <description>
+    Set to true if the processor chip is part of an ioSCM.
+  </description>
+  <valueType>uint8</valueType>
+  <enum>FALSE = 0x0, TRUE = 0x1</enum>
+  <platInit/>
+</attribute>
+<!-- ********************************************************************** -->
 </attributes>
