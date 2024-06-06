@@ -45,12 +45,14 @@
 #include <ody_scom_mp_apbonly0.H>
 #include <ody_scom_mp_mastr_b0.H>
 #include <ody_scom_mp_drtub0.H>
+#include <ody_scom_mp_odp.H>
 #include <lib/phy/ody_draminit_utils.H>
 #include <lib/phy/ody_phy_utils.H>
 #include <lib/shared/ody_consts.H>
 #include <generic/memory/lib/utils/num.H>
 #include <lib/dimm/ody_rank.H>
 #include <lib/fir/ody_fir.H>
+#include <lib/fir/ody_fir_traits.H>
 #include <generic/memory/lib/utils/fapi_try_lambda.H>
 
 #include <generic/memory/lib/dimm/ddr5/ddr5_mr3.H>
@@ -6830,6 +6832,18 @@ void extract_disable_bits(const PMU_SMB_DDR5U_1D_t& i_struct,
 }
 
 ///
+/// @brief Masks off PhyRxTxPPTerr
+/// @param[in] i_target the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note PhyRxTxPPTerr triggers if any DRAM failed to train and therefore is masked off in the case of training recovery was run
+///
+fapi2::ReturnCode mask_PhyRxTxPPTerr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    mss::fir::reg2<scomt::mp::S_LFIR_RW_WCLEAR> l_fir(i_target);
+    return l_fir.masked<scomt::mp::S_LFIR_PHYRXTXPPTERR>();
+}
+
+///
 /// @brief Attempts to recover from any errors found during draminit - will not run if no errors occured
 /// @param[in] i_target the memory port on which to operate
 /// @param[in,out] io_status the status of the last training run
@@ -6883,6 +6897,9 @@ fapi2::ReturnCode handle_draminit_recovery(const fapi2::Target<fapi2::TARGET_TYP
                     .set_MAX_ATTEMPTS(MAX_RECOVERY_LOOPS),
                     TARGTIDFORMAT " total recovery attempts exceeded. Attempts:%u Max attempts:%u", TARGTID, l_num_loop,
                     MAX_RECOVERY_LOOPS);
+
+        // As training recovery was run, mask off PhyRxTxPPTerr
+        FAPI_TRY(mask_PhyRxTxPPTerr(i_target));
     }
     else
     {

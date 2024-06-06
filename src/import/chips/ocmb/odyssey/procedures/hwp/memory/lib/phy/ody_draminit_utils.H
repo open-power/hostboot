@@ -3768,6 +3768,14 @@ fapi2::ReturnCode run_training_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM
                                       const bool i_update_bad_bits = true);
 
 ///
+/// @brief Masks off PhyRxTxPPTerr
+/// @param[in] i_target the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note PhyRxTxPPTerr triggers if any DRAM failed to train and therefore is masked off in the case of training recovery was run
+///
+fapi2::ReturnCode mask_PhyRxTxPPTerr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
 /// @brief Attempts to recover from any errors found during draminit - will not run if no errors occured
 /// @param[in] i_target the memory port on which to operate
 /// @param[in,out] io_status the status of the last training run
