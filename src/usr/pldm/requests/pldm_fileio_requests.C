@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -183,12 +183,16 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
 
 errlHndl_t getLidFile(const uint32_t i_fileHandle,
                       uint32_t& io_numBytesToRead,
-                      uint8_t* o_file)
+                      uint8_t* o_file,
+                      size_t i_size)
 {
     errlHndl_t l_errl = getLidFileFromOffset(i_fileHandle,
                                              0, // Start at offset 0
                                              io_numBytesToRead,
-                                             o_file);
+                                             o_file,
+                                             nullptr,
+                                             PLDM_FILE_TYPE_INVALID,
+                                             i_size);
 
     return l_errl;
 }
@@ -198,7 +202,8 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
                                 uint32_t& io_numBytesToRead,
                                 uint8_t* o_file,
                                 bool* const o_eof,
-                                pldm_fileio_file_type i_pound_keyword_type)
+                                pldm_fileio_file_type i_pound_keyword_type,
+                                size_t i_size)
 {
     PLDM_DBG("getLidFileFromOffset: File handle 0x%08x, Input size 0x%08x, Offset 0x%08x i_pound_keyword_type=0x%X",
                i_fileHandle, io_numBytesToRead, i_offset, i_pound_keyword_type);
@@ -206,6 +211,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
 
     size_t l_numTransfers = 1;
     uint32_t l_totalRead = 0;
+    uint32_t read_counter = 0;
     uint8_t* l_currPtr = o_file;
     do {
 
@@ -275,6 +281,39 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
         }
 
         struct pldm_read_write_file_by_type_resp l_resp {};
+
+        // First map the response, then next we will pull the
+        // payload out to find out how much was read
+        pldm_msg* const pldm_response = const_cast<pldm_msg* >(
+            reinterpret_cast<const pldm_msg*>(l_responseBytes.data()));
+
+        pldm_read_write_file_by_type_resp* const read_response = const_cast<pldm_read_write_file_by_type_resp* >(
+            reinterpret_cast<const pldm_read_write_file_by_type_resp*>( pldm_response->payload  ));
+
+        read_counter += le32toh(read_response->length);
+        if ((read_counter >= i_size) && (i_size != 0))
+        {
+            PLDM_ERR("getLidFileFromOffset: Size read (read_counter=%d) exceeds the callers buffer (i_size)=%d", read_counter, i_size);
+            /*@
+             * @errortype  ERRL_SEV_UNRECOVERABLE
+             * @moduleid   MOD_GET_LID_FILE
+             * @reasoncode RC_READ_TOO_BIG
+             * @userdata1  read_counter how many bytes read
+             * @userdata2  i_size the size of the callers buffer
+             * @devdesc    Software problem, insufficient buffer allocated
+             * @custdesc   A software error occurred during system boot
+             */
+            l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                                 MOD_GET_LID_FILE,
+                                 RC_READ_TOO_BIG,
+                                 read_counter,
+                                 i_size,
+                                 ErrlEntry::NO_SW_CALLOUT);
+            break;
+        }
+        // Above check for the read_counter needs to occur prior to the call to the decode
+        // logic, the decode logic will attempt to memcpy the payload content to the callers
+        // buffer, if the callers buffer is not large enough the memcpy will eventually fail
 
         l_errl = decode_pldm_response(decode_rw_file_by_type_resp,
                                       l_responseBytes,

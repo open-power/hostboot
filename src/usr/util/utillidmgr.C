@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -711,7 +711,7 @@ errlHndl_t UtilLidMgr::getLidFromBMC(size_t i_size, void* o_dest,
 
     do {
     uint8_t* l_dest = reinterpret_cast<uint8_t*>(o_dest);
-    l_errl = PLDM::getLidFile(iv_lidId, l_lidSize, l_dest);
+    l_errl = PLDM::getLidFile(iv_lidId, l_lidSize, l_dest, i_size);
     if(l_errl)
     {
         UTIL_FT(ERR_MRK"getLidFromBMC: Could not get lid 0x%08x from BMC!",
