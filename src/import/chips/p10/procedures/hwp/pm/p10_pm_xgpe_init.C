@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1139,13 +1139,22 @@ fapi2::ReturnCode omi_iodlr_static_config(
                 l_sub_speed_type = OMI_25G_VIO_1V;
             }
         }
-        else
+        else if (l_omi_freq < 32000)
         {
             l_sub_speed_type = OMI_32G_VIO_PT_9V;
 
             if (l_attr_vio_boot_vlt >= 1000)
             {
                 l_sub_speed_type = OMI_32G_VIO_1V;
+            }
+        }
+        else
+        {
+            l_sub_speed_type = OMI_38G_VIO_PT_9V;
+
+            if (l_attr_vio_boot_vlt >= 1000)
+            {
+                l_sub_speed_type = OMI_38G_VIO_1V;
             }
         }
 

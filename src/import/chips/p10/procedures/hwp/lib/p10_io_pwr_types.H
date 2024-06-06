@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,8 +61,10 @@ typedef enum
 {
     OMI_25G_VIO_PT_9V,
     OMI_32G_VIO_PT_9V,
+    OMI_38G_VIO_PT_9V,
     OMI_25G_VIO_1V,
     OMI_32G_VIO_1V,
+    OMI_38G_VIO_1V,
     AX_25G_VIO_PT_9V,
     AX_32G_VIO_PT_9V,
     AX_25G_VIO_1V,
@@ -91,7 +93,8 @@ typedef enum
 typedef enum
 {
     S_25G,
-    S_32G
+    S_32G,
+    S_38G,
 } io_speed_t;
 
 char io_types_strings[][9] =
