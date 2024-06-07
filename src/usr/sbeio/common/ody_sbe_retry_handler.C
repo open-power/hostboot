@@ -816,7 +816,7 @@ errlHndl_t OdySbeRetryHandler::dump(const uint32_t i_eid)
 
     if (!l_skip_dump)
     {
-#if !defined(__HOSTBOOT_RUNTIME) && defined(CONFIG_PLDM)
+#if defined(CONFIG_PLDM)
         l_errl = PLDM::dumpSbe(iv_ocmb, i_eid);
 #else
         if (INITSERVICE::spBaseServicesEnabled())
