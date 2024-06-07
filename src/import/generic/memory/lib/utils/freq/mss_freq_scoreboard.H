@@ -555,6 +555,18 @@ fapi2::ReturnCode limit_freq_by_processor(const fapi2::Target<TT::FREQ_DOMAIN_TA
         freq_scoreboard& io_scoreboard);
 
 ///
+/// @brief Returns min frequency between MRW and the max port frequency
+/// @param[in] i_mrw_max_ddr_freq_per_slot max ocmb mrw frequency
+/// @param[in] i_port_max_freq max port frequency
+/// @return uint32_t minimum of max mrw freq and max port freq
+///
+inline uint32_t get_min_freq_between_mrw_and_port(const uint16_t i_mrw_max_ddr_freq_per_slot,
+        const uint32_t i_port_max_freq)
+{
+    return std::min(static_cast<uint32_t>(i_mrw_max_ddr_freq_per_slot), i_port_max_freq);
+}
+
+///
 /// @brief Update supported frequency scoreboard according to MRW/config limits
 /// @tparam MC mss::mc_type memory controller type
 /// @tparam P mss::proc_type on which to operate
@@ -603,6 +615,8 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_DOMAIN_T
         const auto l_port_pos = mss::relative_pos<MC, TT::FREQ_DOMAIN_TARGET_TYPE>(p);
         const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(p);
         const uint64_t l_dimms_on_port = l_dimms.size();
+        const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(p);
+        uint16_t l_mrw_max_ddr_freq_per_slot = 0;
 
         // Holds the max freq allowed for this port. This is the minimum of maximum
         // frequencies allowed by the DIMM. So, we start way off the charts so std::min can do the lifting for us.
@@ -658,6 +672,11 @@ inline fapi2::ReturnCode limit_freq_by_mrw(const fapi2::Target<TT::FREQ_DOMAIN_T
 
             l_port_max_freq = std::min(l_port_max_freq, i_max_mrw_freqs[l_index]);
         }// dimm
+
+        // Get the attribute that gives max frequency per slot
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_MAX_DDR_FREQ_PER_SLOT, l_ocmb, l_mrw_max_ddr_freq_per_slot));
+
+        l_port_max_freq = get_min_freq_between_mrw_and_port(l_mrw_max_ddr_freq_per_slot, l_port_max_freq);
 
         // Remove any frequencies bigger than this port's max from the scoreboard
         io_scoreboard.remove_freqs_above_limit(l_port_pos, l_port_max_freq);

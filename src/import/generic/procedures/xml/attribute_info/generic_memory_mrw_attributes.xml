@@ -890,4 +890,18 @@
     <default>ALLOW</default>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MRW_MAX_DDR_FREQ_PER_SLOT</id>
+    <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+    <description>Used for setting maximum system frequency based on each OCMB.</description>
+    <valueType>uint16</valueType>
+    <enum>
+      FREQ_3200 = 3200,
+      FREQ_4000 = 4000,
+      FREQ_4800 = 4800
+    </enum>
+    <platInit/>
+    <default>FREQ_4800</default>
+  </attribute>
+
 </attributes>

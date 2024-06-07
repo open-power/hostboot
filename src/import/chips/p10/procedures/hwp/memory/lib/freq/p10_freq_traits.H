@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,6 +87,7 @@ class frequency_traits<mss::proc_type::PROC_P10>
         static constexpr uint64_t SUPPORTED_FREQ2 = DIMM_SPEED_3200;
         static constexpr uint64_t SUPPORTED_FREQ3 = DIMM_SPEED_4000;
         static constexpr uint64_t SUPPORTED_FREQ4 = DIMM_SPEED_4800;
+
 };
 
 
