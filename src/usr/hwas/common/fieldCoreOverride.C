@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,6 @@
 
 #include <hwas/common/fieldCoreOverride.H>
 #include <hwas/common/deconfigGard.H> // DECONFIGURED_BY_FIELD_CORE_OVERRIDE
-#include <hwas/common/hwas.H>
 #include <hwas/hwasPlatTrace.H>
 
 #include <targeting/common/utilFilter.H> // getChildChiplets()
@@ -48,7 +47,7 @@ namespace FCO
 // CORE that ends up being will get the highest numerical value for its priority so that the FCO algorithm leaves it
 // alone.
 static_assert((P10_MAX_EC_PER_PROC == NUM_CORE_PER_CHIP) && (NUM_CORE_PER_CHIP == 32), "CORE_FCO_PRIORITY_DECONFIG_LIST only accounts for 32 cores. Must be updated with new priorities from the chip team.");
-static constexpr std::array<coreDeconfigPriority_t, NUM_CORE_PER_CHIP> CORE_FCO_PRIORITY_DECONFIG_LIST
+constexpr std::array<coreDeconfigPriority_t, NUM_CORE_PER_CHIP> CORE_FCO_PRIORITY_DECONFIG_LIST
 {
     31,
     32,

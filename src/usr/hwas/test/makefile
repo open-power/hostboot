@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2022
+# Contributors Listed Below - COPYRIGHT 2011,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -38,7 +38,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 
 
 MODULE = testhwas
-TESTS = hwas1test.H hwasGardTest.H hwasPlatErrorTest.H hwasSysAvailSvcTest.H
+TESTS = hwas1test.H hwasGardTest.H hwasPlatErrorTest.H hwasSysAvailSvcTest.H fieldCoreOverrideTest.H
 TESTS += ${COMMON_TESTCASE_REL_PATHS}
 
 OBJS += attributestrings.o

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -27,6 +27,7 @@
 #define __FIELD_CORE_OVERRIDE_H
 #include <targeting/common/commontargeting.H>
 #include <vector>
+#include <hwas/common/hwas.H>
 
 #ifdef FSP_BUILD
     #include <tr1/memory>
@@ -42,6 +43,8 @@ typedef uint8_t coreDeconfigPriority_t;
 // The boot core cannot be deconfigured by FCO this const will make sure the boot core is placed last
 // for deconfig consideration.
 constexpr coreDeconfigPriority_t BOOT_CORE_PRIORITY = UINT8_MAX;
+
+extern const std::array<coreDeconfigPriority_t, NUM_CORE_PER_CHIP> CORE_FCO_PRIORITY_DECONFIG_LIST;
 
 // ============================
 // Metadata structs
