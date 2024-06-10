@@ -98,6 +98,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/lib/utils/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic/lib/i2c/
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/ocmb/odyssey/procedures/hwp/sppe/
 EXTRAINCDIR += $(PROCEDURES_PATH)/hwp/perv
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/generic/memory/lib/
 EXTRAINCDIR += ${ROOTPATH}/obj/genfiles/chips/p10/procedures/hwp/memory/lib/

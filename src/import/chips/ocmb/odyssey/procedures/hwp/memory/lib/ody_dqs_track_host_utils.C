@@ -83,8 +83,8 @@ fapi2::ReturnCode suspend_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
                   0);
     FAPI_TRY(l_rc);
 
-    // Wait one polling cycle to ensure any currently-running recal is complete
-    fapi2::delay(l_tsns_period_ms * l_dqs_period * mss::DELAY_1MS, 200);
+    // Wait two polling cycles to ensure any currently-running recal is complete
+    fapi2::delay(l_tsns_period_ms * l_dqs_period * mss::DELAY_1MS * 2, 200);
 
 fapi_try_exit:
     return fapi2::current_err;
