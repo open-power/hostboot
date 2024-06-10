@@ -92,6 +92,7 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
 
         if(l_dqs_period)
         {
+            FAPI_TRY(suspend_dqs_track(i_ocmb_target));
             FAPI_TRY(configure_phy_scom_access(l_port_target, mss::states::ON_N, true));
 
             // Get the log
@@ -126,6 +127,7 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
             l_address = ((l_syn_addr + 1) << INSERT_AT_32_BIT) | SCOM_ADDRESS;
             FAPI_TRY(fapi2::putScom(l_port_target, l_address, 0));
             FAPI_TRY(configure_phy_scom_access(l_port_target, mss::states::OFF_N, true));
+            FAPI_TRY(resume_dqs_track(i_ocmb_target));
         }
 
         // Only need to do this on the first port
