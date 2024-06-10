@@ -730,13 +730,15 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Check if a steer test is in the MCBIST
+/// @brief Check if a steer or scrub test is in the MCBIST
 /// @param [in] i_target OCMB target
 /// @param [out] o_is_steer will be set to true if steer test present, false otherwise
+/// @param [out] o_is_scrub will be set to true if scrub test present, false otherwise
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode check_steer_subtest(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                      bool& o_is_steer)
+fapi2::ReturnCode check_subtest(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                bool& o_is_steer,
+                                bool& o_is_scrub)
 {
     using TT = mcbistTraits<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>;
 
@@ -745,12 +747,14 @@ fapi2::ReturnCode check_steer_subtest(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 
     // Return false by default
     o_is_steer = false;
+    o_is_scrub = false;
 
     // Check in first MCBIST subtest register
     FAPI_TRY(fapi2::getScom(i_target, TT::MCBMR0_REG, l_mcbmr));
     l_mcbmr.extractToRight<TT::OP_TYPE, TT::OP_TYPE_LEN>(l_operation);
 
     o_is_steer = (l_operation == mss::mcbist::op_type::STEER_RW);
+    o_is_scrub = (l_operation == mss::mcbist::op_type::SCRUB_RRWR);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -960,6 +964,7 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     uint16_t l_count = 0;
     uint16_t l_count_threshold = 0;
     bool l_steer = false;
+    bool l_scrub = false;
     mcbist_state l_saved_mcbist_state;
     uint8_t l_temp_trigger = 0;
     uint8_t l_chosen_sensor_index = 0;
@@ -992,8 +997,8 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         uint16_t l_recal_count = 0;
         fapi2::buffer<uint16_t> l_deltas[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT] __attribute__ ((__aligned__(8))) = {0};
 
-        // Check if steer is running
-        FAPI_TRY(check_steer_subtest(i_target, l_steer));
+        // Check if steer or scrub is running
+        FAPI_TRY(check_subtest(i_target, l_steer, l_scrub));
 
         if (l_steer)
         {
@@ -1027,6 +1032,20 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                 FAPI_INF_NO_SBE(GENTARGTIDFORMAT " could not suspend current MCBIST test", GENTARGTID(i_target));
                 return fapi2::FAPI2_RC_SUCCESS;
             }
+        }
+
+        if (l_scrub)
+        {
+            // We should not get here, since this HWP should be suspended before running scrub
+            // (MFG fast scrub or targeted scrub) so light a (masked) FIR and return
+            fapi2::buffer<uint64_t> l_srq_fir48;
+
+            l_srq_fir48.setBit<scomt::ody::ODC_SRQ_LFIR_IN48>();
+            FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_CFG_RECOV, l_srq_fir48));
+            FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_LFIR_WO_OR, l_srq_fir48));
+
+            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " MCBIST scrub test present", GENTARGTID(i_target));
+            return fapi2::FAPI2_RC_SUCCESS;
         }
 
         // If we made it here, it means the MCBIST engine should be unused at this point
@@ -1106,9 +1125,16 @@ fapi_try_exit:
     // Unmask and set FIRs
     fapi2::ReturnCode l_rc = mss::unmask::dqs_drift_track_error<mss::mc_type::ODYSSEY>(i_target);
     // Set the attribute to the fail state so we don't run anymore
-    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_FAILED, i_target,
-                                 fapi2::ENUM_ATTR_ODY_DQS_TRACKING_FAILED_YES));
-    return l_rc;
+    fapi2::ReturnCode l_rc_attr = FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_FAILED, i_target,
+                                  fapi2::ENUM_ATTR_ODY_DQS_TRACKING_FAILED_YES);
+
+    // Return the scom's RC if it's bad, else return the attr set's RC
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        return l_rc;
+    }
+
+    return l_rc_attr;
 }
 
 } // end ns ody
