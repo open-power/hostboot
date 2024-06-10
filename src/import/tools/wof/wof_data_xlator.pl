@@ -394,99 +394,117 @@ my %CSV_COLUMN_NAME_TO_INDEX;
 our %CSV_COLUMN_INDEX_TO_NAME;
 
 # Attribute names in this class
-our $CSV_ATTR_file_name                 = 'file_name';
-our $CSV_ATTR_sort                      = 'sort';
-our $CSV_ATTR_vrts                      = 'vrts';
-our $CSV_ATTR_package                   = 'package';
-our $CSV_ATTR_table_version             = 'table_version';
-our $CSV_ATTR_table_date                = 'table_date';
-our $CSV_ATTR_PN                        = 'PN';
-our $CSV_ATTR_ocs_mode                  = 'ocs_mode';
-our $CSV_ATTR_socket_power              = 'socket_power';
-our $CSV_ATTR_rdp_current               = 'rdp_current';
-our $CSV_ATTR_boost_current             = 'boost_current';
-our $CSV_ATTR_tdp_vcs_ceff_index        = 'tdp_vcs_ceff_index';
-our $CSV_ATTR_tdp_vdd_ceff_index        = 'tdp_vdd_ceff_index';
-our $CSV_ATTR_tdp_io_power_index        = 'tdp_io_power_index';
-our $CSV_ATTR_tdp_amb_cond_index        = 'tdp_amb_cond_index';
-our $CSV_ATTR_io_full_power             = 'io_full_power';
-our $CSV_ATTR_io_disabled_power         = 'io_disabled_power';
-our $CSV_ATTR_core_count                = 'core_count';
-our $CSV_ATTR_wov_credit_knob           = 'wov_credit_knob';
-our $CSV_ATTR_pdv_sort_power_save_freq  = 'pdv_sort_power_save_freq';
-our $CSV_ATTR_pdv_sort_wof_base_freq    = 'pdv_sort_wof_base_freq';
-our $CSV_ATTR_pdv_sort_ultra_turbo_freq = 'pdv_sort_ultra_turbo_freq';
-our $CSV_ATTR_pdv_sort_throttle_freq    = 'pdv_sort_throttle_freq';
-our $CSV_ATTR_vdd_ceff_start            = 'vdd_ceff_start';
-our $CSV_ATTR_vdd_ceff_step             = 'vdd_ceff_step';
-our $CSV_ATTR_vdd_ceff_size             = 'vdd_ceff_size';
-our $CSV_ATTR_vcs_ceff_start            = 'vcs_ceff_start';
-our $CSV_ATTR_vcs_ceff_step             = 'vcs_ceff_step';
-our $CSV_ATTR_vcs_ceff_size             = 'vcs_ceff_size';
-our $CSV_ATTR_io_power_start            = 'io_power_start';
-our $CSV_ATTR_io_power_step             = 'io_power_step';
-our $CSV_ATTR_io_power_size             = 'io_power_size';
-our $CSV_ATTR_amb_cond_start            = 'amb_cond_start';
-our $CSV_ATTR_amb_cond_step             = 'amb_cond_step';
-our $CSV_ATTR_amb_cond_size             = 'amb_cond_size';
-our $CSV_ATTR_vratio_start              = 'vratio_start';
-our $CSV_ATTR_vratio_step               = 'vratio_step';
-our $CSV_ATTR_vdd_ceff                  = 'vdd_ceff';
-our $CSV_ATTR_vdd_ceff_index            = 'vdd_ceff_index';
-our $CSV_ATTR_vcs_ceff                  = 'vcs_ceff';
-our $CSV_ATTR_vcs_ceff_index            = 'vcs_ceff_index';
-our $CSV_ATTR_io_power                  = 'io_power';
-our $CSV_ATTR_io_power_index            = 'io_power_index';
-our $CSV_ATTR_amb_cond                  = 'amb_cond';
-our $CSV_ATTR_amb_cond_index            = 'amb_cond_index';
-our $CSV_ATTR_vratio                    = 'vratio';
-our $CSV_ATTR_vratio_index              = 'vratio_index';
-our $CSV_ATTR_wof_freq                  = 'wof_freq';
-our $CSV_ATTR_wof_ceff_ratio_overage    = 'wof_ceff_ratio_overage';
-our $CSV_ATTR_override_match_freq       = 'override_match_freq';
-our $CSV_ATTR_override_match_power      = 'override_match_power';
-our $CSV_ATTR_pdv_sort_fixed_freq       = 'pdv_sort_fixed_freq';
-our $CSV_ATTR_bal_perf_ceff_adj_pct     = 'bal_perf_ceff_adj_pct';
-our $CSV_ATTR_fav_perf_ceff_adj_pct     = 'fav_perf_ceff_adj_pct';
-our $CSV_ATTR_fav_powr_ceff_adj_pct     = 'fav_powr_ceff_adj_pct';
-our $CSV_ATTR_non_det_ceff_adj_pct      = 'non_det_ceff_adj_pct';
-our $CSV_ATTR_bal_perf_freq_lim_mhz     = 'bal_perf_freq_lim_mhz';
-our $CSV_ATTR_fav_perf_freq_lim_mhz     = 'fav_perf_freq_lim_mhz';
-our $CSV_ATTR_fav_powr_freq_lim_mhz     = 'fav_powr_freq_lim_mhz';
-our $CSV_ATTR_non_det_freq_lim_mhz      = 'non_det_freq_lim_mhz';
-our $CSV_ATTR_max_pwr_min_freq          = 'max_pwr_min_freq';
-our $CSV_ATTR_cf0_boost_curr_scale_pct  = 'cf0_boost_curr_scale_pct';
-our $CSV_ATTR_cf1_boost_curr_scale_pct  = 'cf1_boost_curr_scale_pct';
-our $CSV_ATTR_cf2_boost_curr_scale_pct  = 'cf2_boost_curr_scale_pct';
-our $CSV_ATTR_cf3_boost_curr_scale_pct  = 'cf3_boost_curr_scale_pct';
-our $CSV_ATTR_cf4_boost_curr_scale_pct  = 'cf4_boost_curr_scale_pct';
-our $CSV_ATTR_cf5_boost_curr_scale_pct  = 'cf5_boost_curr_scale_pct';
-our $CSV_ATTR_cf6_boost_curr_scale_pct  = 'cf6_boost_curr_scale_pct';
-our $CSV_ATTR_cf7_boost_curr_scale_pct  = 'cf7_boost_curr_scale_pct';
-our $CSV_ATTR_dimm_dimension_enable     = 'dimm_dimension_enable';
-our $CSV_ATTR_system_type               = 'system_type';
+our $CSV_ATTR_file_name                       = 'file_name';
+our $CSV_ATTR_sort                            = 'sort';
+our $CSV_ATTR_vrts                            = 'vrts';
+our $CSV_ATTR_package                         = 'package';
+our $CSV_ATTR_table_version                   = 'table_version';
+our $CSV_ATTR_table_date                      = 'table_date';
+our $CSV_ATTR_PN                              = 'PN';
+our $CSV_ATTR_ocs_mode                        = 'ocs_mode';
+our $CSV_ATTR_socket_power                    = 'socket_power';
+our $CSV_ATTR_rdp_current                     = 'rdp_current';
+our $CSV_ATTR_boost_current                   = 'boost_current';
+our $CSV_ATTR_tdp_vcs_ceff_index              = 'tdp_vcs_ceff_index';
+our $CSV_ATTR_tdp_vdd_ceff_index              = 'tdp_vdd_ceff_index';
+our $CSV_ATTR_tdp_io_power_index              = 'tdp_io_power_index';
+our $CSV_ATTR_tdp_amb_cond_index              = 'tdp_amb_cond_index';
+our $CSV_ATTR_io_full_power                   = 'io_full_power';
+our $CSV_ATTR_io_disabled_power               = 'io_disabled_power';
+our $CSV_ATTR_core_count                      = 'core_count';
+our $CSV_ATTR_wov_credit_knob                 = 'wov_credit_knob';
+our $CSV_ATTR_pdv_sort_power_save_freq        = 'pdv_sort_power_save_freq';
+our $CSV_ATTR_pdv_sort_wof_base_freq          = 'pdv_sort_wof_base_freq';
+our $CSV_ATTR_pdv_sort_ultra_turbo_freq       = 'pdv_sort_ultra_turbo_freq';
+our $CSV_ATTR_pdv_sort_throttle_freq          = 'pdv_sort_throttle_freq';
+our $CSV_ATTR_vdd_ceff_start                  = 'vdd_ceff_start';
+our $CSV_ATTR_vdd_ceff_step                   = 'vdd_ceff_step';
+our $CSV_ATTR_vdd_ceff_size                   = 'vdd_ceff_size';
+our $CSV_ATTR_vcs_ceff_start                  = 'vcs_ceff_start';
+our $CSV_ATTR_vcs_ceff_step                   = 'vcs_ceff_step';
+our $CSV_ATTR_vcs_ceff_size                   = 'vcs_ceff_size';
+our $CSV_ATTR_io_power_start                  = 'io_power_start';
+our $CSV_ATTR_io_power_step                   = 'io_power_step';
+our $CSV_ATTR_io_power_size                   = 'io_power_size';
+our $CSV_ATTR_amb_cond_start                  = 'amb_cond_start';
+our $CSV_ATTR_amb_cond_step                   = 'amb_cond_step';
+our $CSV_ATTR_amb_cond_size                   = 'amb_cond_size';
+our $CSV_ATTR_vratio_start                    = 'vratio_start';
+our $CSV_ATTR_vratio_step                     = 'vratio_step';
+our $CSV_ATTR_vdd_ceff                        = 'vdd_ceff';
+our $CSV_ATTR_vdd_ceff_index                  = 'vdd_ceff_index';
+our $CSV_ATTR_vcs_ceff                        = 'vcs_ceff';
+our $CSV_ATTR_vcs_ceff_index                  = 'vcs_ceff_index';
+our $CSV_ATTR_io_power                        = 'io_power';
+our $CSV_ATTR_io_power_index                  = 'io_power_index';
+our $CSV_ATTR_amb_cond                        = 'amb_cond';
+our $CSV_ATTR_amb_cond_index                  = 'amb_cond_index';
+our $CSV_ATTR_vratio                          = 'vratio';
+our $CSV_ATTR_vratio_index                    = 'vratio_index';
+our $CSV_ATTR_wof_freq                        = 'wof_freq';
+our $CSV_ATTR_wof_ceff_ratio_overage          = 'wof_ceff_ratio_overage';
+our $CSV_ATTR_override_match_freq             = 'override_match_freq';
+our $CSV_ATTR_override_match_power            = 'override_match_power';
+our $CSV_ATTR_pdv_sort_fixed_freq             = 'pdv_sort_fixed_freq';
+our $CSV_ATTR_bal_perf_ceff_adj_pct           = 'bal_perf_ceff_adj_pct';
+our $CSV_ATTR_fav_perf_ceff_adj_pct           = 'fav_perf_ceff_adj_pct';
+our $CSV_ATTR_fav_powr_ceff_adj_pct           = 'fav_powr_ceff_adj_pct';
+our $CSV_ATTR_non_det_ceff_adj_pct            = 'non_det_ceff_adj_pct';
+our $CSV_ATTR_bal_perf_freq_lim_mhz           = 'bal_perf_freq_lim_mhz';
+our $CSV_ATTR_fav_perf_freq_lim_mhz           = 'fav_perf_freq_lim_mhz';
+our $CSV_ATTR_fav_powr_freq_lim_mhz           = 'fav_powr_freq_lim_mhz';
+our $CSV_ATTR_non_det_freq_lim_mhz            = 'non_det_freq_lim_mhz';
+our $CSV_ATTR_max_pwr_min_freq                = 'max_pwr_min_freq';
+our $CSV_ATTR_cf0_boost_curr_scale_pct        = 'cf0_boost_curr_scale_pct';
+our $CSV_ATTR_cf1_boost_curr_scale_pct        = 'cf1_boost_curr_scale_pct';
+our $CSV_ATTR_cf2_boost_curr_scale_pct        = 'cf2_boost_curr_scale_pct';
+our $CSV_ATTR_cf3_boost_curr_scale_pct        = 'cf3_boost_curr_scale_pct';
+our $CSV_ATTR_cf4_boost_curr_scale_pct        = 'cf4_boost_curr_scale_pct';
+our $CSV_ATTR_cf5_boost_curr_scale_pct        = 'cf5_boost_curr_scale_pct';
+our $CSV_ATTR_cf6_boost_curr_scale_pct        = 'cf6_boost_curr_scale_pct';
+our $CSV_ATTR_cf7_boost_curr_scale_pct        = 'cf7_boost_curr_scale_pct';
+our $CSV_ATTR_dimm_dimension_enable           = 'dimm_dimension_enable';
+our $CSV_ATTR_system_type                     = 'system_type';
+our $CSV_ATTR_eff_mode_idle_chip_entry_time   = 'eff_mode_idle_chip_entry_time';
+our $CSV_ATTR_eff_mode_idle_chip_exit_time    = 'eff_mode_idle_chip_exit_time';
+our $CSV_ATTR_eff_mode_idle_chip_entry_thresh = 'eff_mode_idle_chip_entry_thresh';
+our $CSV_ATTR_eff_mode_idle_chip_exit_thresh  = 'eff_mode_idle_chip_exit_thresh';
+our $CSV_ATTR_io_power_base_w                 = 'io_power_base_w';
 
 # columns of csv file scope in csv files.
 our @CSV_FILE_SCOPE_COLUMN_NAMES = (
-    $CSV_ATTR_sort,                     $CSV_ATTR_package,                   $CSV_ATTR_table_version,
-    $CSV_ATTR_table_date,               $CSV_ATTR_PN,                        $CSV_ATTR_ocs_mode,
-    $CSV_ATTR_socket_power,             $CSV_ATTR_rdp_current,               $CSV_ATTR_boost_current,
-    $CSV_ATTR_tdp_vcs_ceff_index,       $CSV_ATTR_tdp_vdd_ceff_index,        $CSV_ATTR_tdp_io_power_index,
-    $CSV_ATTR_tdp_amb_cond_index,       $CSV_ATTR_io_full_power,             $CSV_ATTR_io_disabled_power,
-    $CSV_ATTR_core_count,               $CSV_ATTR_pdv_sort_ultra_turbo_freq, $CSV_ATTR_pdv_sort_throttle_freq,
-    $CSV_ATTR_wov_credit_knob,          $CSV_ATTR_pdv_sort_power_save_freq,  $CSV_ATTR_pdv_sort_wof_base_freq,
-    $CSV_ATTR_vdd_ceff_start,           $CSV_ATTR_vdd_ceff_step,             $CSV_ATTR_vdd_ceff_size,
-    $CSV_ATTR_vcs_ceff_start,           $CSV_ATTR_vcs_ceff_step,             $CSV_ATTR_vcs_ceff_size,
-    $CSV_ATTR_io_power_start,           $CSV_ATTR_io_power_step,             $CSV_ATTR_io_power_size,
-    $CSV_ATTR_amb_cond_start,           $CSV_ATTR_amb_cond_step,             $CSV_ATTR_amb_cond_size,
-    $CSV_ATTR_vratio_start,             $CSV_ATTR_vratio_step,               $CSV_ATTR_override_match_freq,
-    $CSV_ATTR_override_match_power,     $CSV_ATTR_pdv_sort_fixed_freq,       $CSV_ATTR_bal_perf_ceff_adj_pct,
-    $CSV_ATTR_fav_perf_ceff_adj_pct,    $CSV_ATTR_fav_powr_ceff_adj_pct,     $CSV_ATTR_non_det_ceff_adj_pct,
-    $CSV_ATTR_bal_perf_freq_lim_mhz,    $CSV_ATTR_fav_perf_freq_lim_mhz,     $CSV_ATTR_fav_powr_freq_lim_mhz,
-    $CSV_ATTR_non_det_freq_lim_mhz,     $CSV_ATTR_max_pwr_min_freq,          $CSV_ATTR_cf0_boost_curr_scale_pct,
-    $CSV_ATTR_cf1_boost_curr_scale_pct, $CSV_ATTR_cf2_boost_curr_scale_pct,  $CSV_ATTR_cf3_boost_curr_scale_pct,
-    $CSV_ATTR_cf4_boost_curr_scale_pct, $CSV_ATTR_cf5_boost_curr_scale_pct,  $CSV_ATTR_cf6_boost_curr_scale_pct,
-    $CSV_ATTR_cf7_boost_curr_scale_pct, $CSV_ATTR_dimm_dimension_enable,     $CSV_ATTR_system_type,
+    $CSV_ATTR_sort,                         $CSV_ATTR_package,
+    $CSV_ATTR_table_version,                $CSV_ATTR_table_date,
+    $CSV_ATTR_PN,                           $CSV_ATTR_ocs_mode,
+    $CSV_ATTR_socket_power,                 $CSV_ATTR_rdp_current,
+    $CSV_ATTR_boost_current,                $CSV_ATTR_tdp_vcs_ceff_index,
+    $CSV_ATTR_tdp_vdd_ceff_index,           $CSV_ATTR_tdp_io_power_index,
+    $CSV_ATTR_tdp_amb_cond_index,           $CSV_ATTR_io_full_power,
+    $CSV_ATTR_io_disabled_power,            $CSV_ATTR_core_count,
+    $CSV_ATTR_pdv_sort_ultra_turbo_freq,    $CSV_ATTR_pdv_sort_throttle_freq,
+    $CSV_ATTR_wov_credit_knob,              $CSV_ATTR_pdv_sort_power_save_freq,
+    $CSV_ATTR_pdv_sort_wof_base_freq,       $CSV_ATTR_vdd_ceff_start,
+    $CSV_ATTR_vdd_ceff_step,                $CSV_ATTR_vdd_ceff_size,
+    $CSV_ATTR_vcs_ceff_start,               $CSV_ATTR_vcs_ceff_step,
+    $CSV_ATTR_vcs_ceff_size,                $CSV_ATTR_io_power_start,
+    $CSV_ATTR_io_power_step,                $CSV_ATTR_io_power_size,
+    $CSV_ATTR_amb_cond_start,               $CSV_ATTR_amb_cond_step,
+    $CSV_ATTR_amb_cond_size,                $CSV_ATTR_vratio_start,
+    $CSV_ATTR_vratio_step,                  $CSV_ATTR_override_match_freq,
+    $CSV_ATTR_override_match_power,         $CSV_ATTR_pdv_sort_fixed_freq,
+    $CSV_ATTR_bal_perf_ceff_adj_pct,        $CSV_ATTR_fav_perf_ceff_adj_pct,
+    $CSV_ATTR_fav_powr_ceff_adj_pct,        $CSV_ATTR_non_det_ceff_adj_pct,
+    $CSV_ATTR_bal_perf_freq_lim_mhz,        $CSV_ATTR_fav_perf_freq_lim_mhz,
+    $CSV_ATTR_fav_powr_freq_lim_mhz,        $CSV_ATTR_non_det_freq_lim_mhz,
+    $CSV_ATTR_max_pwr_min_freq,             $CSV_ATTR_cf0_boost_curr_scale_pct,
+    $CSV_ATTR_cf1_boost_curr_scale_pct,     $CSV_ATTR_cf2_boost_curr_scale_pct,
+    $CSV_ATTR_cf3_boost_curr_scale_pct,     $CSV_ATTR_cf4_boost_curr_scale_pct,
+    $CSV_ATTR_cf5_boost_curr_scale_pct,     $CSV_ATTR_cf6_boost_curr_scale_pct,
+    $CSV_ATTR_cf7_boost_curr_scale_pct,     $CSV_ATTR_dimm_dimension_enable,
+    $CSV_ATTR_system_type,                  $CSV_ATTR_eff_mode_idle_chip_entry_time,
+    $CSV_ATTR_eff_mode_idle_chip_exit_time, $CSV_ATTR_eff_mode_idle_chip_entry_thresh,
+    ,                                       $CSV_ATTR_eff_mode_idle_chip_exit_thresh,
+    $CSV_ATTR_io_power_base_w,
 );
 
 # columns of csv vrt scope in csv files.
@@ -1594,15 +1612,15 @@ our $WOF_TABLES_HEADER_VRATIO_SIZE           = $VRT_COLUMN_COUNT;
 our $WOF_TABLES_HEADER_SIZE                  = 128;
 our $CSV_WOF_CONV_MULTIPLIER_PERCENT         = 10000;
 our $CSV_WOF_CONV_MULTIPLIER_VALUE           = 1;
-our $CSV_SYSTEM_TYPE_DENALI                  = 0x00;
-our $CSV_SYSTEM_TYPE_MCKINLEY                = 0x10;
-our $CSV_SYSTEM_TYPE_EVEREST                 = 0x20;
-our $CSV_SYSTEM_TYPE_FUJI                    = 0x30;
-our $CSV_SYSTEM_TYPE_RAINIER_2U              = 0x40;
-our $CSV_SYSTEM_TYPE_BLUERIDGE_2U            = 0x50;
-our $CSV_SYSTEM_TYPE_RAINIER_4U              = 0x60;
-our $CSV_SYSTEM_TYPE_BLUERIDGE_4U            = 0x70;
-our $CSV_SYSTEM_TYPE_BONNEL                  = 0x80;
+our $WOF_SYSTEM_TYPE_DENALI                  = 0x00;
+our $WOF_SYSTEM_TYPE_MCKINLEY                = 0x10;
+our $WOF_SYSTEM_TYPE_EVEREST                 = 0x20;
+our $WOF_SYSTEM_TYPE_FUJI                    = 0x30;
+our $WOF_SYSTEM_TYPE_RAINIER_2U              = 0x40;
+our $WOF_SYSTEM_TYPE_BLUERIDGE_2U            = 0x50;
+our $WOF_SYSTEM_TYPE_RAINIER_4U              = 0x60;
+our $WOF_SYSTEM_TYPE_BLUERIDGE_4U            = 0x70;
+our $WOF_SYSTEM_TYPE_BONNEL                  = 0x80;
 our $CSV_DIMM_ADJ_ENABLE                     = 0x08;
 our $CSV_DIMM_ADJ_DISABLE                    = 0x00;
 our $CSV_EXP_FREQ_ENABLE                     = 0x04;
@@ -1611,67 +1629,71 @@ our $CSV_OCS_ENABLE                          = 0x01;
 our $CSV_OCS_DISABLE                         = 0x00;
 
 # Attribute names in this class
-our $WOF_ATTR_magic_value               = 'magic_value';
-our $WOF_ATTR_major_dd_level            = 'major_dd_level';
-our $WOF_ATTR_minor_dd_level            = 'minor_dd_level';
-our $WOF_ATTR_wov_credit_knob           = 'wov_credit_knob';
-our $WOF_ATTR_header_version            = 'header_version';
-our $WOF_ATTR_vrt_block_size            = 'vrt_block_size';
-our $WOF_ATTR_vrt_block_header_size     = 'vrt_block_header_size';
-our $WOF_ATTR_vrt_data_size             = 'vrt_data_size';
-our $WOF_ATTR_sys_flags                 = 'sys_flags';
-our $WOF_ATTR_core_count                = 'core_count';
-our $WOF_ATTR_vcs_start                 = 'vcs_start';
-our $WOF_ATTR_vcs_step                  = 'vcs_step';
-our $WOF_ATTR_vcs_size                  = 'vcs_size';
-our $WOF_ATTR_vdd_start                 = 'vdd_start';
-our $WOF_ATTR_vdd_step                  = 'vdd_step';
-our $WOF_ATTR_vdd_size                  = 'vdd_size';
-our $WOF_ATTR_vratio_start              = 'vratio_start';
-our $WOF_ATTR_vratio_step               = 'vratio_step';
-our $WOF_ATTR_vratio_size               = 'vratio_size';
-our $WOF_ATTR_io_power_start            = 'io_power_start';
-our $WOF_ATTR_io_power_step             = 'io_power_step';
-our $WOF_ATTR_io_power_size             = 'io_power_size';
-our $WOF_ATTR_amb_cond_start            = 'amb_cond_start';
-our $WOF_ATTR_amb_cond_step             = 'amb_cond_step';
-our $WOF_ATTR_amb_cond_size             = 'amb_cond_size';
-our $WOF_ATTR_sort_throttl_freq_mhz     = 'sort_pwr_throttl_freq_mhz';
-our $WOF_ATTR_socket_power_w            = 'socket_power_w';
-our $WOF_ATTR_sort_pwr_tgt_freq_mhz     = 'sort_pwr_tgt_freq_mhz';
-our $WOF_ATTR_rdp_current               = 'rdp_current';
-our $WOF_ATTR_boost_current             = 'boost_current';
-our $WOF_ATTR_tdp_vcs_ceff_index        = 'tdp_vcs_ceff_index';
-our $WOF_ATTR_tdp_vdd_ceff_index        = 'tdp_vdd_ceff_index';
-our $WOF_ATTR_tdp_io_power_index        = 'tdp_io_power_index';
-our $WOF_ATTR_tdp_amb_cond_index        = 'tdp_amb_cond_index';
-our $WOF_ATTR_io_full_power             = 'io_full_power';
-our $WOF_ATTR_io_disabled_power         = 'io_diabled_power';
-our $WOF_ATTR_sort_ultra_turbo_freq_mhz = 'sort_ultra_turbo_tgt_freq_mhz';
-our $WOF_ATTR_table_date_timestamp      = 'table_date_timestamp';
-our $WOF_ATTR_override_match_freq       = 'override_match_freq';
-our $WOF_ATTR_override_match_power      = 'override_match_power';
-our $WOF_ATTR_table_version             = 'table_version';
-our $WOF_ATTR_package_name              = 'package_name';
-our $WOF_ATTR_sort_power_save_freq_mhz  = 'sort_power_save_freq_mhz';
-our $WOF_ATTR_sort_fixed_freq_mhz       = 'sort_fixed_freq_mhz';
-our $WOF_ATTR_bal_perf_ceff_adj_pct     = 'bal_perf_ceff_adj_pct';
-our $WOF_ATTR_fav_perf_ceff_adj_pct     = 'fav_perf_ceff_adj_pct';
-our $WOF_ATTR_fav_powr_ceff_adj_pct     = 'fav_powr_ceff_adj_pct';
-our $WOF_ATTR_non_det_ceff_adj_pct      = 'non_det_ceff_adj_pct';
-our $WOF_ATTR_bal_perf_freq_lim_mhz     = 'bal_perf_freq_lim_mhz';
-our $WOF_ATTR_fav_perf_freq_lim_mhz     = 'fav_perf_freq_lim_mhz';
-our $WOF_ATTR_fav_powr_freq_lim_mhz     = 'fav_powr_freq_lim_mhz';
-our $WOF_ATTR_non_det_freq_lim_mhz      = 'non_det_freq_lim_mhz';
-our $WOF_ATTR_max_pwr_min_freq          = 'max_pwr_min_freq';
-our $WOF_ATTR_cf0_boost_curr_scale_pct  = 'cf0_boost_curr_scale_pct';
-our $WOF_ATTR_cf1_boost_curr_scale_pct  = 'cf1_boost_curr_scale_pct';
-our $WOF_ATTR_cf2_boost_curr_scale_pct  = 'cf2_boost_curr_scale_pct';
-our $WOF_ATTR_cf3_boost_curr_scale_pct  = 'cf3_boost_curr_scale_pct';
-our $WOF_ATTR_cf4_boost_curr_scale_pct  = 'cf4_boost_curr_scale_pct';
-our $WOF_ATTR_cf5_boost_curr_scale_pct  = 'cf5_boost_curr_scale_pct';
-our $WOF_ATTR_cf6_boost_curr_scale_pct  = 'cf6_boost_curr_scale_pct';
-our $WOF_ATTR_cf7_boost_curr_scale_pct  = 'cf7_boost_curr_scale_pct';
+our $WOF_ATTR_magic_value                     = 'magic_value';
+our $WOF_ATTR_major_dd_level                  = 'major_dd_level';
+our $WOF_ATTR_minor_dd_level                  = 'minor_dd_level';
+our $WOF_ATTR_wov_credit_knob                 = 'wov_credit_knob';
+our $WOF_ATTR_header_version                  = 'header_version';
+our $WOF_ATTR_vrt_block_size                  = 'vrt_block_size';
+our $WOF_ATTR_vrt_block_header_size           = 'vrt_block_header_size';
+our $WOF_ATTR_vrt_data_size                   = 'vrt_data_size';
+our $WOF_ATTR_sys_flags                       = 'sys_flags';
+our $WOF_ATTR_core_count                      = 'core_count';
+our $WOF_ATTR_vcs_start                       = 'vcs_start';
+our $WOF_ATTR_vcs_step                        = 'vcs_step';
+our $WOF_ATTR_vcs_size                        = 'vcs_size';
+our $WOF_ATTR_vdd_start                       = 'vdd_start';
+our $WOF_ATTR_vdd_step                        = 'vdd_step';
+our $WOF_ATTR_vdd_size                        = 'vdd_size';
+our $WOF_ATTR_vratio_start                    = 'vratio_start';
+our $WOF_ATTR_vratio_step                     = 'vratio_step';
+our $WOF_ATTR_vratio_size                     = 'vratio_size';
+our $WOF_ATTR_io_power_start                  = 'io_power_start';
+our $WOF_ATTR_io_power_step                   = 'io_power_step';
+our $WOF_ATTR_io_power_size                   = 'io_power_size';
+our $WOF_ATTR_amb_cond_start                  = 'amb_cond_start';
+our $WOF_ATTR_amb_cond_step                   = 'amb_cond_step';
+our $WOF_ATTR_amb_cond_size                   = 'amb_cond_size';
+our $WOF_ATTR_sort_throttl_freq_mhz           = 'sort_pwr_throttl_freq_mhz';
+our $WOF_ATTR_socket_power_w                  = 'socket_power_w';
+our $WOF_ATTR_sort_pwr_tgt_freq_mhz           = 'sort_pwr_tgt_freq_mhz';
+our $WOF_ATTR_rdp_current                     = 'rdp_current';
+our $WOF_ATTR_boost_current                   = 'boost_current';
+our $WOF_ATTR_tdp_vcs_ceff_index              = 'tdp_vcs_ceff_index';
+our $WOF_ATTR_tdp_vdd_ceff_index              = 'tdp_vdd_ceff_index';
+our $WOF_ATTR_tdp_io_power_index              = 'tdp_io_power_index';
+our $WOF_ATTR_tdp_amb_cond_index              = 'tdp_amb_cond_index';
+our $WOF_ATTR_io_full_power                   = 'io_full_power';
+our $WOF_ATTR_io_power_base_w                 = 'io_power_base_w';
+our $WOF_ATTR_sort_ultra_turbo_freq_mhz       = 'sort_ultra_turbo_tgt_freq_mhz';
+our $WOF_ATTR_table_date_timestamp            = 'table_date_timestamp';
+our $WOF_ATTR_override_match_freq             = 'override_match_freq';
+our $WOF_ATTR_override_match_power            = 'override_match_power';
+our $WOF_ATTR_table_version                   = 'table_version';
+our $WOF_ATTR_package_name                    = 'package_name';
+our $WOF_ATTR_sort_power_save_freq_mhz        = 'sort_power_save_freq_mhz';
+our $WOF_ATTR_sort_fixed_freq_mhz             = 'sort_fixed_freq_mhz';
+our $WOF_ATTR_bal_perf_ceff_adj_pct           = 'bal_perf_ceff_adj_pct';
+our $WOF_ATTR_fav_perf_ceff_adj_pct           = 'fav_perf_ceff_adj_pct';
+our $WOF_ATTR_fav_powr_ceff_adj_pct           = 'fav_powr_ceff_adj_pct';
+our $WOF_ATTR_non_det_ceff_adj_pct            = 'non_det_ceff_adj_pct';
+our $WOF_ATTR_bal_perf_freq_lim_mhz           = 'bal_perf_freq_lim_mhz';
+our $WOF_ATTR_fav_perf_freq_lim_mhz           = 'fav_perf_freq_lim_mhz';
+our $WOF_ATTR_fav_powr_freq_lim_mhz           = 'fav_powr_freq_lim_mhz';
+our $WOF_ATTR_non_det_freq_lim_mhz            = 'non_det_freq_lim_mhz';
+our $WOF_ATTR_max_pwr_min_freq                = 'max_pwr_min_freq';
+our $WOF_ATTR_cf0_boost_curr_scale_pct        = 'cf0_boost_curr_scale_pct';
+our $WOF_ATTR_cf1_boost_curr_scale_pct        = 'cf1_boost_curr_scale_pct';
+our $WOF_ATTR_cf2_boost_curr_scale_pct        = 'cf2_boost_curr_scale_pct';
+our $WOF_ATTR_cf3_boost_curr_scale_pct        = 'cf3_boost_curr_scale_pct';
+our $WOF_ATTR_cf4_boost_curr_scale_pct        = 'cf4_boost_curr_scale_pct';
+our $WOF_ATTR_cf5_boost_curr_scale_pct        = 'cf5_boost_curr_scale_pct';
+our $WOF_ATTR_cf6_boost_curr_scale_pct        = 'cf6_boost_curr_scale_pct';
+our $WOF_ATTR_cf7_boost_curr_scale_pct        = 'cf7_boost_curr_scale_pct';
+our $WOF_ATTR_eff_mode_idle_chip_entry_time   = 'eff_mode_idle_chip_entry_time';
+our $WOF_ATTR_eff_mode_idle_chip_exit_time    = 'eff_mode_idle_chip_exit_time';
+our $WOF_ATTR_eff_mode_idle_chip_entry_thresh = 'eff_mode_idle_chip_entry_thresh';
+our $WOF_ATTR_eff_mode_idle_chip_exit_thresh  = 'eff_mode_idle_chip_exit_thresh';
 
 sub new
 {
@@ -1680,68 +1702,71 @@ sub new
     # check to use global logging level.
     $p_log_lvl = $g_log_lvl if ( $g_use_global_log_lvl == 1 );
     my $self = {
-        $WOF_ATTR_magic_value               => $WOF_TABLES_HEADER_MAGIC_VALUE,
-        $WOF_ATTR_major_dd_level            => undef,
-        $WOF_ATTR_minor_dd_level            => undef,
-        $WOF_ATTR_wov_credit_knob           => undef,
-        $WOF_ATTR_header_version            => $WOF_TABLES_HEADER_HEADER_VERSION_1,
-        $WOF_ATTR_vrt_block_size            => $WOF_TABLES_HEADER_VRT_BLOCK_SIZE,
-        $WOF_ATTR_vrt_block_header_size     => $WOF_TABLES_HEADER_VRT_BLOCK_HEADER_SIZE,
-        $WOF_ATTR_vrt_data_size             => $WOF_TABLES_HEADER_VRT_DATA_SIZE,
-        $WOF_ATTR_sys_flags                 => undef,
-        $WOF_ATTR_core_count                => undef,
-        $WOF_ATTR_vcs_start                 => undef,
-        $WOF_ATTR_vcs_step                  => undef,
-        $WOF_ATTR_vcs_size                  => undef,
-        $WOF_ATTR_vdd_start                 => undef,
-        $WOF_ATTR_vdd_step                  => undef,
-        $WOF_ATTR_vdd_size                  => undef,
-        $WOF_ATTR_vratio_start              => undef,
-        $WOF_ATTR_vratio_step               => undef,
-        $WOF_ATTR_vratio_size               => $WOF_TABLES_HEADER_VRATIO_SIZE,
-        $WOF_ATTR_io_power_start            => undef,
-        $WOF_ATTR_io_power_step             => undef,
-        $WOF_ATTR_io_power_size             => undef,
-        $WOF_ATTR_amb_cond_start            => undef,
-        $WOF_ATTR_amb_cond_step             => undef,
-        $WOF_ATTR_amb_cond_size             => undef,
-        $WOF_ATTR_sort_throttl_freq_mhz     => undef,
-        $WOF_ATTR_socket_power_w            => undef,
-        $WOF_ATTR_sort_pwr_tgt_freq_mhz     => undef,
-        $WOF_ATTR_rdp_current               => undef,
-        $WOF_ATTR_boost_current             => undef,
-        $WOF_ATTR_tdp_vcs_ceff_index        => undef,
-        $WOF_ATTR_tdp_vdd_ceff_index        => undef,
-        $WOF_ATTR_tdp_io_power_index        => undef,
-        $WOF_ATTR_tdp_amb_cond_index        => undef,
-        $WOF_ATTR_io_full_power             => undef,
-        $WOF_ATTR_io_disabled_power         => undef,
-        $WOF_ATTR_sort_ultra_turbo_freq_mhz => undef,
-        $WOF_ATTR_table_date_timestamp      => undef,
-        $WOF_ATTR_override_match_freq       => undef,
-        $WOF_ATTR_override_match_power      => undef,
-        $WOF_ATTR_table_version             => undef,
-        $WOF_ATTR_package_name              => undef,
-        $WOF_ATTR_sort_power_save_freq_mhz  => undef,
-        $WOF_ATTR_sort_fixed_freq_mhz       => undef,
-        $WOF_ATTR_bal_perf_ceff_adj_pct     => undef,
-        $WOF_ATTR_fav_perf_ceff_adj_pct     => undef,
-        $WOF_ATTR_fav_powr_ceff_adj_pct     => undef,
-        $WOF_ATTR_non_det_ceff_adj_pct      => undef,
-        $WOF_ATTR_bal_perf_freq_lim_mhz     => undef,
-        $WOF_ATTR_fav_perf_freq_lim_mhz     => undef,
-        $WOF_ATTR_fav_powr_freq_lim_mhz     => undef,
-        $WOF_ATTR_non_det_freq_lim_mhz      => undef,
-        $WOF_ATTR_max_pwr_min_freq          => undef,
-        $WOF_ATTR_cf0_boost_curr_scale_pct  => undef,
-        $WOF_ATTR_cf1_boost_curr_scale_pct  => undef,
-        $WOF_ATTR_cf2_boost_curr_scale_pct  => undef,
-        $WOF_ATTR_cf3_boost_curr_scale_pct  => undef,
-        $WOF_ATTR_cf4_boost_curr_scale_pct  => undef,
-        $WOF_ATTR_cf5_boost_curr_scale_pct  => undef,
-        $WOF_ATTR_cf6_boost_curr_scale_pct  => undef,
-        $WOF_ATTR_cf7_boost_curr_scale_pct  => undef,
-
+        $WOF_ATTR_magic_value                     => $WOF_TABLES_HEADER_MAGIC_VALUE,
+        $WOF_ATTR_major_dd_level                  => undef,
+        $WOF_ATTR_minor_dd_level                  => undef,
+        $WOF_ATTR_wov_credit_knob                 => undef,
+        $WOF_ATTR_header_version                  => $WOF_TABLES_HEADER_HEADER_VERSION_1,
+        $WOF_ATTR_vrt_block_size                  => $WOF_TABLES_HEADER_VRT_BLOCK_SIZE,
+        $WOF_ATTR_vrt_block_header_size           => $WOF_TABLES_HEADER_VRT_BLOCK_HEADER_SIZE,
+        $WOF_ATTR_vrt_data_size                   => $WOF_TABLES_HEADER_VRT_DATA_SIZE,
+        $WOF_ATTR_sys_flags                       => undef,
+        $WOF_ATTR_core_count                      => undef,
+        $WOF_ATTR_vcs_start                       => undef,
+        $WOF_ATTR_vcs_step                        => undef,
+        $WOF_ATTR_vcs_size                        => undef,
+        $WOF_ATTR_vdd_start                       => undef,
+        $WOF_ATTR_vdd_step                        => undef,
+        $WOF_ATTR_vdd_size                        => undef,
+        $WOF_ATTR_vratio_start                    => undef,
+        $WOF_ATTR_vratio_step                     => undef,
+        $WOF_ATTR_vratio_size                     => $WOF_TABLES_HEADER_VRATIO_SIZE,
+        $WOF_ATTR_io_power_start                  => undef,
+        $WOF_ATTR_io_power_step                   => undef,
+        $WOF_ATTR_io_power_size                   => undef,
+        $WOF_ATTR_amb_cond_start                  => undef,
+        $WOF_ATTR_amb_cond_step                   => undef,
+        $WOF_ATTR_amb_cond_size                   => undef,
+        $WOF_ATTR_sort_throttl_freq_mhz           => undef,
+        $WOF_ATTR_socket_power_w                  => undef,
+        $WOF_ATTR_sort_pwr_tgt_freq_mhz           => undef,
+        $WOF_ATTR_rdp_current                     => undef,
+        $WOF_ATTR_boost_current                   => undef,
+        $WOF_ATTR_tdp_vcs_ceff_index              => undef,
+        $WOF_ATTR_tdp_vdd_ceff_index              => undef,
+        $WOF_ATTR_tdp_io_power_index              => undef,
+        $WOF_ATTR_tdp_amb_cond_index              => undef,
+        $WOF_ATTR_io_full_power                   => undef,
+        $WOF_ATTR_io_power_base_w                 => undef,
+        $WOF_ATTR_sort_ultra_turbo_freq_mhz       => undef,
+        $WOF_ATTR_table_date_timestamp            => undef,
+        $WOF_ATTR_override_match_freq             => undef,
+        $WOF_ATTR_override_match_power            => undef,
+        $WOF_ATTR_table_version                   => undef,
+        $WOF_ATTR_package_name                    => undef,
+        $WOF_ATTR_sort_power_save_freq_mhz        => undef,
+        $WOF_ATTR_sort_fixed_freq_mhz             => undef,
+        $WOF_ATTR_bal_perf_ceff_adj_pct           => undef,
+        $WOF_ATTR_fav_perf_ceff_adj_pct           => undef,
+        $WOF_ATTR_fav_powr_ceff_adj_pct           => undef,
+        $WOF_ATTR_non_det_ceff_adj_pct            => undef,
+        $WOF_ATTR_bal_perf_freq_lim_mhz           => undef,
+        $WOF_ATTR_fav_perf_freq_lim_mhz           => undef,
+        $WOF_ATTR_fav_powr_freq_lim_mhz           => undef,
+        $WOF_ATTR_non_det_freq_lim_mhz            => undef,
+        $WOF_ATTR_max_pwr_min_freq                => undef,
+        $WOF_ATTR_cf0_boost_curr_scale_pct        => undef,
+        $WOF_ATTR_cf1_boost_curr_scale_pct        => undef,
+        $WOF_ATTR_cf2_boost_curr_scale_pct        => undef,
+        $WOF_ATTR_cf3_boost_curr_scale_pct        => undef,
+        $WOF_ATTR_cf4_boost_curr_scale_pct        => undef,
+        $WOF_ATTR_cf5_boost_curr_scale_pct        => undef,
+        $WOF_ATTR_cf6_boost_curr_scale_pct        => undef,
+        $WOF_ATTR_cf7_boost_curr_scale_pct        => undef,
+        $WOF_ATTR_eff_mode_idle_chip_entry_time   => undef,
+        $WOF_ATTR_eff_mode_idle_chip_exit_time    => undef,
+        $WOF_ATTR_eff_mode_idle_chip_entry_thresh => undef,
+        $WOF_ATTR_eff_mode_idle_chip_exit_thresh  => undef,
     };
     bless($self);
     return $self;
@@ -1807,7 +1832,7 @@ sub read
     $self->access( $WOF_ATTR_tdp_io_power_index,        $file->read_uint8() );
     $self->access( $WOF_ATTR_tdp_amb_cond_index,        $file->read_uint8() );
     $self->access( $WOF_ATTR_io_full_power,             $file->read_uint8() );
-    $self->access( $WOF_ATTR_io_disabled_power,         $file->read_uint8() );
+    $self->access( $WOF_ATTR_io_power_base_w,           $file->read_uint8() );
     $self->access( $WOF_ATTR_sort_ultra_turbo_freq_mhz, $file->read_uint16() );
     $self->access( $WOF_ATTR_table_date_timestamp,      $file->read_uint32() );
     $self->access( $WOF_ATTR_override_match_freq,       $file->read_uint16() );
@@ -1816,17 +1841,20 @@ sub read
     #In the version 2 table, table version and package name reduced to 8bytes
     if ( $self->access($WOF_ATTR_header_version) == 2 )
     {
-        $self->access( $WOF_ATTR_table_version,            $file->read_ascii_text(8) );
-        $self->access( $WOF_ATTR_cf0_boost_curr_scale_pct, $file->read_uint8() );
-        $self->access( $WOF_ATTR_cf1_boost_curr_scale_pct, $file->read_uint8() );
-        $self->access( $WOF_ATTR_cf2_boost_curr_scale_pct, $file->read_uint8() );
-        $self->access( $WOF_ATTR_cf3_boost_curr_scale_pct, $file->read_uint8() );
-        $self->access( $WOF_ATTR_cf4_boost_curr_scale_pct, $file->read_uint8() );
-        $self->access( $WOF_ATTR_cf5_boost_curr_scale_pct, $file->read_uint8() );
-        $self->access( $WOF_ATTR_cf6_boost_curr_scale_pct, $file->read_uint8() );
-        $self->access( $WOF_ATTR_cf7_boost_curr_scale_pct, $file->read_uint8() );
-        $self->access( $WOF_ATTR_package_name,             $file->read_ascii_text(8) );
-        $file->skip_bytes(8);    # Reserved 8 bytes
+        $self->access( $WOF_ATTR_table_version,                   $file->read_ascii_text(8) );
+        $self->access( $WOF_ATTR_cf0_boost_curr_scale_pct,        $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf1_boost_curr_scale_pct,        $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf2_boost_curr_scale_pct,        $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf3_boost_curr_scale_pct,        $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf4_boost_curr_scale_pct,        $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf5_boost_curr_scale_pct,        $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf6_boost_curr_scale_pct,        $file->read_uint8() );
+        $self->access( $WOF_ATTR_cf7_boost_curr_scale_pct,        $file->read_uint8() );
+        $self->access( $WOF_ATTR_package_name,                    $file->read_ascii_text(8) );
+        $self->access( $WOF_ATTR_eff_mode_idle_chip_entry_time,   $file->read_uint16() );
+        $self->access( $WOF_ATTR_eff_mode_idle_chip_exit_time,    $file->read_uint16() );
+        $self->access( $WOF_ATTR_eff_mode_idle_chip_entry_thresh, $file->read_uint16() );
+        $self->access( $WOF_ATTR_eff_mode_idle_chip_exit_thresh,  $file->read_uint16() );
     }
     else
     {
@@ -1929,7 +1957,7 @@ sub write
     $file->write_uint8( $self->access($WOF_ATTR_tdp_io_power_index) );
     $file->write_uint8( $self->access($WOF_ATTR_tdp_amb_cond_index) );
     $file->write_uint8( $self->access($WOF_ATTR_io_full_power) );
-    $file->write_uint8( $self->access($WOF_ATTR_io_disabled_power) );
+    $file->write_uint8( $self->access($WOF_ATTR_io_power_base_w) );
     $file->write_uint16( $self->access($WOF_ATTR_sort_ultra_turbo_freq_mhz) );
     $file->write_uint32( $self->access($WOF_ATTR_table_date_timestamp) );
     $file->write_uint16( $self->access($WOF_ATTR_override_match_freq) );
@@ -1948,7 +1976,10 @@ sub write
         $file->write_uint8( $self->access($WOF_ATTR_cf6_boost_curr_scale_pct) );
         $file->write_uint8( $self->access($WOF_ATTR_cf7_boost_curr_scale_pct) );
         $file->write_ascii_text( $self->access($WOF_ATTR_package_name), 8 );
-        $file->fill_bytes( 8, 0x00 );    # Reserved 8 bytes
+        $file->write_uint16( $self->access($WOF_ATTR_eff_mode_idle_chip_entry_time) );
+        $file->write_uint16( $self->access($WOF_ATTR_eff_mode_idle_chip_exit_time) );
+        $file->write_uint16( $self->access($WOF_ATTR_eff_mode_idle_chip_entry_thresh) );
+        $file->write_uint16( $self->access($WOF_ATTR_eff_mode_idle_chip_exit_thresh) );
     }
     else
     {
@@ -2033,7 +2064,7 @@ sub print
     printf( "  Tdp Io Power Index             : %u\n", $self->access($WOF_ATTR_tdp_io_power_index) );
     printf( "  Tdp Amb Cond Index             : %u\n", $self->access($WOF_ATTR_tdp_amb_cond_index) );
     printf( "  Io Full Power                  : %u\n", $self->access($WOF_ATTR_io_full_power) );
-    printf( "  Io Disabled Power              : %u\n", $self->access($WOF_ATTR_io_disabled_power) );
+    printf( "  Io Power Base in Watts         : %u\n", $self->access($WOF_ATTR_io_power_base_w) );
     printf( "  Sort Ultra Turbo Frequency MHz : %u\n", $self->access($WOF_ATTR_sort_ultra_turbo_freq_mhz) );
     printf( "  Table Date Timestamp           : %u\n", $self->access($WOF_ATTR_table_date_timestamp) );
     printf( "  Override Match Freq MHz        : %s\n", $self->access($WOF_ATTR_override_match_freq) );
@@ -2048,6 +2079,10 @@ sub print
         printf( "  CF5 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf5_boost_curr_scale_pct) );
         printf( "  CF6 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf6_boost_curr_scale_pct) );
         printf( "  CF7 Boost Curr Scale Pct       : %s\n", $self->access($WOF_ATTR_cf7_boost_curr_scale_pct) );
+        printf( "  Eff Mode Idle Chip Entry Time  : %s\n", $self->access($WOF_ATTR_eff_mode_idle_chip_entry_time) );
+        printf( "  Eff Mode Idle Chip Exit Time   : %s\n", $self->access($WOF_ATTR_eff_mode_idle_chip_exit_time) );
+        printf( "  Eff Mode Idle Chip Entry Thresh: %s\n", $self->access($WOF_ATTR_eff_mode_idle_chip_entry_thresh) );
+        printf( "  Eff Mode Idle Chip Exit  Thresh: %s\n", $self->access($WOF_ATTR_eff_mode_idle_chip_exit_thresh) );
     }
     printf( "  Table Version                  : %s\n", $self->access($WOF_ATTR_table_version) );
     printf( "  Package Name                   : %s\n", $self->access($WOF_ATTR_package_name) );
@@ -2793,6 +2828,7 @@ sub _set_wof_tables_header
     Log::log_print $p_log_lvl, "  $minor_dd_level: $minor_dd_level.\n";
 
     my $sys_flag_value = 0x00;
+    our $sys_type = $csv_file->access($CSV_ATTR_system_type);
 
     # Create WOF Tables header
     my $wof_tables_header = WOFTablesHeader->new();
@@ -2854,7 +2890,7 @@ sub _set_wof_tables_header
     $wof_tables_header->access( $WOF_ATTR_tdp_io_power_index,    $csv_file->access($CSV_ATTR_tdp_io_power_index) );
     $wof_tables_header->access( $WOF_ATTR_tdp_amb_cond_index,    $csv_file->access($CSV_ATTR_tdp_amb_cond_index) );
     $wof_tables_header->access( $WOF_ATTR_io_full_power,         $csv_file->access($CSV_ATTR_io_full_power) );
-    $wof_tables_header->access( $WOF_ATTR_io_disabled_power,     $csv_file->access($CSV_ATTR_io_disabled_power) );
+    $wof_tables_header->access( $WOF_ATTR_io_power_base_w,       $csv_file->access($CSV_ATTR_io_power_base_w) );
     $wof_tables_header->access( $WOF_ATTR_sort_ultra_turbo_freq_mhz,
         $csv_file->access($CSV_ATTR_pdv_sort_ultra_turbo_freq) );
     $wof_tables_header->access( $WOF_ATTR_table_date_timestamp, $csv_file->access($CSV_ATTR_table_date) );
@@ -2890,6 +2926,14 @@ sub _set_wof_tables_header
         $csv_file->access($CSV_ATTR_cf6_boost_curr_scale_pct) );
     $wof_tables_header->access( $WOF_ATTR_cf7_boost_curr_scale_pct,
         $csv_file->access($CSV_ATTR_cf7_boost_curr_scale_pct) );
+    $wof_tables_header->access( $WOF_ATTR_eff_mode_idle_chip_entry_time,
+        $csv_file->access($CSV_ATTR_eff_mode_idle_chip_entry_time) );
+    $wof_tables_header->access( $WOF_ATTR_eff_mode_idle_chip_exit_time,
+        $csv_file->access($CSV_ATTR_eff_mode_idle_chip_exit_time) );
+    $wof_tables_header->access( $WOF_ATTR_eff_mode_idle_chip_entry_thresh,
+        $csv_file->access($CSV_ATTR_eff_mode_idle_chip_entry_thresh) );
+    $wof_tables_header->access( $WOF_ATTR_eff_mode_idle_chip_exit_thresh,
+        $csv_file->access($CSV_ATTR_eff_mode_idle_chip_exit_thresh) );
 
     if ( defined( $csv_file->access($CSV_ATTR_dimm_dimension_enable) ) )
     {
@@ -2901,42 +2945,43 @@ sub _set_wof_tables_header
         $sys_flag_value = $sys_flag_value | $CSV_OCS_ENABLE;
     }
 
-    if ( $csv_file->access($CSV_ATTR_system_type) == "Denali" )
+    if ( $sys_type eq "Denali" )
     {
-        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_DENALI;
+        $sys_flag_value = $sys_flag_value | $WOF_SYSTEM_TYPE_DENALI;
     }
 
-    if ( $csv_file->access($CSV_ATTR_system_type) == "McKinley" )
+    #    if ( "$csv_file->access($CSV_ATTR_system_type)" eq "McKinley" )
+    if ( $sys_type eq "McKinley" )
     {
-        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_MCKINLEY;
+        $sys_flag_value = $sys_flag_value | $WOF_SYSTEM_TYPE_MCKINLEY;
     }
-    if ( $csv_file->access($CSV_ATTR_system_type) == "Everest" )
+    if ( $sys_type eq "Everest" )
     {
-        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_EVEREST;
+        $sys_flag_value = $sys_flag_value | $WOF_SYSTEM_TYPE_EVEREST;
     }
-    if ( $csv_file->access($CSV_ATTR_system_type) == "Fuji" )
+    if ( $sys_type eq "Fuji" )
     {
-        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_FUJI;
+        $sys_flag_value = $sys_flag_value | $WOF_SYSTEM_TYPE_FUJI;
     }
-    if ( $csv_file->access($CSV_ATTR_system_type) == "Rainier-2U" )
+    if ( $sys_type eq "Rainier-2U" )
     {
-        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_RAINIER_2U;
+        $sys_flag_value = $sys_flag_value | $WOF_SYSTEM_TYPE_RAINIER_2U;
     }
-    if ( $csv_file->access($CSV_ATTR_system_type) == "BlueRidge-2U" )
+    if ( $sys_type eq "BlueRidge-2U" )
     {
-        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_BLUERIDGE_2U;
+        $sys_flag_value = $sys_flag_value | $WOF_SYSTEM_TYPE_BLUERIDGE_2U;
     }
-    if ( $csv_file->access($CSV_ATTR_system_type) == "Rainier-4U" )
+    if ( $sys_type eq "Rainier-4U" )
     {
-        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_RAINIER_4U;
+        $sys_flag_value = $sys_flag_value | $WOF_SYSTEM_TYPE_RAINIER_4U;
     }
-    if ( $csv_file->access($CSV_ATTR_system_type) == "BlueRidge-4U" )
+    if ( $sys_type eq "BlueRidge-4U" )
     {
-        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_BLUERIDGE_4U;
+        $sys_flag_value = $sys_flag_value | $WOF_SYSTEM_TYPE_BLUERIDGE_4U;
     }
-    if ( $csv_file->access($CSV_ATTR_system_type) == "Bonnel" )
+    if ( $sys_type eq "Bonnel" )
     {
-        $sys_flag_value = $sys_flag_value | $CSV_SYSTEM_TYPE_BONNEL;
+        $sys_flag_value = $sys_flag_value | $WOF_SYSTEM_TYPE_BONNEL;
     }
 
     $wof_tables_header->access( $WOF_ATTR_sys_flags, $sys_flag_value );
@@ -3006,7 +3051,7 @@ sub _print_wof_tables_header
         "  WOF_ATTR_tdp_amb_cond_index:" . $wof_tables_header->access($WOF_ATTR_tdp_amb_cond_index) . "\n";
     Log::log_print $p_log_lvl, "  WOF_ATTR_io_full_power:" . $wof_tables_header->access($WOF_ATTR_io_full_power) . "\n";
     Log::log_print $p_log_lvl,
-        "  WOF_ATTR_io_disabled_power:" . $wof_tables_header->access($WOF_ATTR_io_disabled_power) . "\n";
+        "  WOF_ATTR_io_power_base_w" . $wof_tables_header->access($WOF_ATTR_io_power_base_w) . "\n";
     Log::log_print $p_log_lvl,
         "  WOF_ATTR_sort_ultra_turbo_freq_mhz:"
         . $wof_tables_header->access($WOF_ATTR_sort_ultra_turbo_freq_mhz) . "\n";
@@ -3040,6 +3085,34 @@ sub _print_wof_tables_header
         "  WOF_ATTR_non_det_freq_lim_mhz:" . $wof_tables_header->access($WOF_ATTR_non_det_freq_lim_mhz) . "\n";
     Log::log_print $p_log_lvl,
         "  WOF_ATTR_max_pwr_min_freq" . $wof_tables_header->access($WOF_ATTR_max_pwr_min_freq) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_cf0_boost_curr_scale_pct" . $wof_tables_header->access($WOF_ATTR_cf0_boost_curr_scale_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_cf1_boost_curr_scale_pct" . $wof_tables_header->access($WOF_ATTR_cf1_boost_curr_scale_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_cf2_boost_curr_scale_pct" . $wof_tables_header->access($WOF_ATTR_cf2_boost_curr_scale_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_cf3_boost_curr_scale_pct" . $wof_tables_header->access($WOF_ATTR_cf3_boost_curr_scale_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_cf4_boost_curr_scale_pct" . $wof_tables_header->access($WOF_ATTR_cf4_boost_curr_scale_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_cf5_boost_curr_scale_pct" . $wof_tables_header->access($WOF_ATTR_cf5_boost_curr_scale_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_cf6_boost_curr_scale_pct" . $wof_tables_header->access($WOF_ATTR_cf6_boost_curr_scale_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_cf7_boost_curr_scale_pct" . $wof_tables_header->access($WOF_ATTR_cf7_boost_curr_scale_pct) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_eff_mode_idle_chip_entry_time"
+        . $wof_tables_header->access($WOF_ATTR_eff_mode_idle_chip_entry_time) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_eff_mode_idle_chip_exit_time"
+        . $wof_tables_header->access($WOF_ATTR_eff_mode_idle_chip_exit_time) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_eff_mode_idle_chip_entry_thresh"
+        . $wof_tables_header->access($WOF_ATTR_eff_mode_idle_chip_entry_thresh) . "\n";
+    Log::log_print $p_log_lvl,
+        "  WOF_ATTR_eff_mode_idle_chip_exit_thresh"
+        . $wof_tables_header->access($WOF_ATTR_eff_mode_idle_chip_exit_thresh) . "\n";
 }
 
 sub _write_tables_vrts
@@ -3108,11 +3181,23 @@ sub _calc_system_vre
     {
         # Get WOF frequency value in MHz.  Verify it is >= 1000.
         my $wof_freq_mhz = $vrt->wof_freq($column_index);
-        if ( ( $wof_freq_mhz < $freq_min ) || ( $wof_freq_mhz > $freq_max ) )
+        if ( $wof_freq_mhz < $freq_min )
         {
             die "Error: Invalid WOF frequency $wof_freq_mhz in "
-                . $csv_file->file_name()
-                . ".\nFrequency must be >= 1000.\n";
+                . $csv_file->access($CSV_ATTR_file_name)
+                . ".\n Fequency is lesser than min_freq $freq_min\n";
+        }
+        if ( $wof_freq_mhz > $freq_max )
+        {
+            die "Error: Invalid WOF frequency $wof_freq_mhz in "
+                . $csv_file->access($CSV_ATTR_file_name)
+                . ".\nUse \"--expand_freq\" option to enable higher frequency upto 5050MHz \n";
+        }
+        if ( $wof_freq_mhz > $freq_max && defined($g_expand_freq_enable) )
+        {
+            die "Error: Invalid WOF frequency $wof_freq_mhz in "
+                . $csv_file->access($CSV_ATTR_file_name)
+                . ".\nFrequency is greater than max_freq $freq_max\n";
         }
         Log::log_print $p_log_lvl, "  wof_freq_mhz: $wof_freq_mhz\n";
 
@@ -3127,7 +3212,7 @@ sub _calc_system_vre
             || ( $system_vre_freq_encode > $G_MAX_FREQ_ENCODE ) )
         {
             die "Error: Invalid WOF frequency $wof_freq_mhz in "
-                . $csv_file->file_name()
+                . $csv_file->access($CSV_ATTR_file_name)
                 . ".\nDoes not fit in System VRT format.\n";
         }
         return $system_vre_freq_encode;
