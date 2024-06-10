@@ -962,11 +962,25 @@ fapi2::ReturnCode setIOAttr(CONST_FAPI2_PROC& i_procTgt,
     FAPI_TRY( FAPI_ATTR_GET( fapi2::ATTR_WOF_IO_BASE_POWER_0P01W, i_procTgt, attrArrayTemp),
               "Error from FAPI_ATTR_GET for ATTR_WOF_IO_BASE_POWER_0P01W" );
 
-    pXgpeHeader->g_xgpe_wofIoBase =  attrArrayTemp[0];
-    if ( attrTemp32 < 1000 )
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_TABLE_IO_POWER_BASE_W,
+                i_procTgt,
+                attrTemp8),
+            "Error from FAPI_ATTR_GET for ATTR_WOF_TABLE_IO_POWER_BASE_W" );
+
+    if ( attrTemp8 )
     {
-        pXgpeHeader->g_xgpe_wofIoBase =  attrArrayTemp[1];
+        //Conversion from unit of W to 0.01W
+        pXgpeHeader->g_xgpe_wofIoBase =  attrTemp8 * 100;
     }
+    else
+    {
+        pXgpeHeader->g_xgpe_wofIoBase =  attrArrayTemp[0];
+        if ( attrTemp32 < 1000 )
+        {
+            pXgpeHeader->g_xgpe_wofIoBase =  attrArrayTemp[1];
+        }
+    }
+
 
 #ifndef __HOSTBOOT_MODULE
     pXgpeHeader->g_xgpe_ioStart             =  htobe16(pXgpeHeader->g_xgpe_ioStart);

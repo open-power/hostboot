@@ -404,8 +404,26 @@ typedef struct
     ///    Length, in bytes, of the data field.
     uint16_t vrt_data_size;
 
-    /// Over-Current Mode.
-    /// 0: Table set assumes OCS is OFF; 1: Table set assumes OCS is ON
+    //sys[0:3]: System type -
+    //0x0: Denali
+    //0x1: McKinley
+    //0x2: Everest
+    //0x3: Fuji
+    //0x4: Rainier-2U
+    //0x5: BlueRidge-2U
+    //0x6: Rainier-4U
+    //0x7: BlueRidge-4U
+    //0x8: Bonnel
+
+    //flags[4:7]
+    //[0] DIMM adjustment enablement
+    //   0: DIMM adjustment disabled
+    //   1: DIMM adjustment enabled
+    //[1] Expanded Frequency Encoding
+    //[2] Efficiency Mode Algorithm (0=Core Utilization based; 1=Ceff based)
+    //[3] Over Current Sensor Mode
+    //   0: OCS disabled
+    //   1: OCS enabled
     uint8_t sys_flags;
 
     /// Core count
@@ -513,11 +531,11 @@ typedef struct
     /// TDP Amb Cond index
     uint8_t  amb_cond_tdp_indx;
 
-    /// Thermal Design Point (TDP) IO Wattage (Watts)
-    uint8_t  io_tdp_w;
+    /// Reserved
+    uint8_t  resvd;
 
-    /// IO Minumum wattage
-    uint8_t  io_min_w;
+    /// IO Power Base (in W)
+    uint8_t   io_pwr_base_w;
 
     /// Core Sort UltraTurbo Frequency (in MHz)
     uint16_t sort_ultraturbo_freq_mhz;
@@ -546,7 +564,17 @@ typedef struct
     /// Up to 16 ASCII characters as a Package designator
     char package_name[8];
 
-    char rsvd[8];
+    // Efficiency Mode to enter idle chip freq
+    uint16_t eff_mode_idle_chip_entry_time;
+
+    // Efficiency Mode to exit idle chip freq
+    uint16_t eff_mode_idle_chip_exit_time;
+
+    //Threshold to enter idle chip freq
+    uint16_t eff_mode_idle_chip_entry_thld;
+
+    //Threshold to exit idle chip freq
+    uint16_t eff_mode_idle_chip_exit_thld;
 
     /// Core Sort Power Save Frequency (in MHz) (eg Fmin @ Vmin)
     uint16_t sort_power_save_freq_mhz;

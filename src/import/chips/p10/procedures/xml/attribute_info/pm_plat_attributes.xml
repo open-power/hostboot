@@ -2375,7 +2375,19 @@
     <overrideOnly/>
     <group>wof</group>
   </attribute>
-
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WOF_TABLE_IO_POWER_BASE_W</id>
+    <targetType>TARGET_TYPE_PROC_CHIP</targetType>
+    <description>
+    This will have I/O Base Power value that is read from
+    WOF header variable io_power_base_adj_w.
+    </description>
+    <valueType>uint8</valueType>
+    <initToZero/>
+    <writeable/>
+    <group>wof</group>
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_WOF_IO_BASE_POWER_0P01W</id>

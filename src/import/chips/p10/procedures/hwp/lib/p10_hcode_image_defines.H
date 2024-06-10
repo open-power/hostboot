@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -298,7 +298,8 @@ HCD_HDR_UINT32( g_xgpe_sharedSramLength,         0 );
 HCD_HDR_UINT32( g_xgpe_buildDate,                0 );
 HCD_HDR_UINT32( g_xgpe_buildVer,                 0 );
 HCD_HDR_UINT16( g_xgpe_xgpeFlags,                0 );
-HCD_HDR_UINT16( g_xgpe_reserve1,                 0 );
+HCD_HDR_UINT8 ( g_xgpe_ioPowrBaseAdj,            0 );
+HCD_HDR_UINT8 ( g_xgpe_reserve1,                 0 );
 HCD_HDR_UINT32( g_xgpe_timeBaseHz,               0 );
 HCD_HDR_UINT32( g_xgpe_gpspbSramAddress,         0 );
 HCD_HDR_UINT32( g_xgpe_hcodeLength,              0 );
