@@ -246,13 +246,15 @@ fapi2::ReturnCode ody_calc_temp_sensors_delta(const fapi2::Target<fapi2::TARGET_
         uint8_t& o_chosen_sensor_index);
 
 ///
-/// @brief Check if a steer test is in the MCBIST
+/// @brief Check if a steer or scrub test is in the MCBIST
 /// @param [in] i_target OCMB target
 /// @param [out] o_is_steer will be set to true if steer test present, false otherwise
+/// @param [out] o_is_scrub will be set to true if scrub test present, false otherwise
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode check_steer_subtest(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                      bool& o_is_steer);
+fapi2::ReturnCode check_subtest(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                bool& o_is_steer,
+                                bool& o_is_scrub);
 
 ///
 /// @brief Check if MCBIST_PROGRAM_COMPLETE FIR is set
