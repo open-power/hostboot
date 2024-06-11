@@ -63,6 +63,12 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::IO_GENERAL>(
     fapi2::ReturnCode& io_rc,
     bool& o_fir_error)
 {
+    // Note: these addresses don't have the leading '8' or '1' in the reg headers, so define them here
+    constexpr uint64_t TCMC_LFIR_RW_WCLEAR = 0x8040100ull;
+    constexpr uint64_t TCMC_EPS_MASK_RW_WCLEAR = 0x8040102ull;
+    constexpr uint64_t TPCHIP_TPC_LFIR_RW_WCLEAR = 0x1040100ull;
+    constexpr uint64_t TPCHIP_TPC_EPS_MASK_RW_WCLEAR = 0x1040102ull;
+
     /*
         Check:
             TCP.LFIR: 3,18
@@ -80,8 +86,8 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::IO_GENERAL>(
         .clearBit<scomt::perv::TPCHIP_TPC_LFIR_CC_OTHERS>()
         .clearBit<scomt::perv::TPCHIP_TPC_LFIR_IN18>();
         FAPI_TRY(bad_fir_bits_helper_with_mask(i_target,
-                                               scomt::perv::TPCHIP_TPC_LFIR_RW_WCLEAR,
-                                               scomt::perv::TPCHIP_TPC_EPS_MASK_RW_WCLEAR,
+                                               TPCHIP_TPC_LFIR_RW_WCLEAR,
+                                               TPCHIP_TPC_EPS_MASK_RW_WCLEAR,
                                                l_check_mask,
                                                io_rc,
                                                o_fir_error));
@@ -93,8 +99,8 @@ fapi2::ReturnCode bad_fir_bits<mss::mc_type::ODYSSEY, firChecklist::IO_GENERAL>(
         l_check_mask.flush<1>()
         .clearBit<scomt::perv::TCMC_LFIR_CC_OTHERS>();
         FAPI_TRY(bad_fir_bits_helper_with_mask(i_target,
-                                               scomt::perv::TCMC_LFIR_RW_WCLEAR,
-                                               scomt::perv::TCMC_EPS_MASK_RW_WCLEAR,
+                                               TCMC_LFIR_RW_WCLEAR,
+                                               TCMC_EPS_MASK_RW_WCLEAR,
                                                l_check_mask,
                                                io_rc,
                                                o_fir_error));
