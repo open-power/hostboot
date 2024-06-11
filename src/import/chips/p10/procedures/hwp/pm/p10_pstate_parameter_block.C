@@ -6100,18 +6100,19 @@ void PlatPmPPB::compute_dds_slopes(
                     iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely)
                 {
 
-                            COMPUTE_V_I_SLOPES(o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region],
-                                NORMAL,iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
+                    o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
+                            revle16(compute_slope_4_12(iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_operating_points[pt_set][region].pstate,
-                                iv_operating_points[pt_set][region + 1].pstate);
-
+                                iv_operating_points[pt_set][region + 1].pstate)
+                           );
                 } else {
-                           COMPUTE_V_I_SLOPES(o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region],
-                                NORMAL,iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
+                    o_gppb->poundw_slopes.ps_dds_delay_slopes[pt_set][cores][region] =
+                           revle16(compute_slope_4_12(iv_poundW_data.entry[region].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_poundW_data.entry[region+1].entry[cores].ddsc.fields.insrtn_dely,
                                 iv_operating_points[pt_set][region].pstate,
-                                iv_operating_points[pt_set][region + 1].pstate);
+                                iv_operating_points[pt_set][region + 1].pstate)
+                           );
                 }
 
                 FAPI_DBG("ps_dds_delay_slopes: [%s][%s][%u] 0x%04x %u 0x%04x %u delay[r]=%u delay[r+1]=%u",
