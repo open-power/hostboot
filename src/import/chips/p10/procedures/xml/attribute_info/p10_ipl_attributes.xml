@@ -465,6 +465,7 @@
   </description>
   <valueType>uint8</valueType>
   <enum>FALSE = 0x0, TRUE = 0x1</enum>
+  <default>FALSE</default>
   <platInit/>
 </attribute>
 <!-- ********************************************************************** -->
