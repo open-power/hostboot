@@ -55,6 +55,21 @@
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
+  <id>ATTR_IPL_TYPE</id>
+  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <description>Indicate if performing SQUBA or LEGACY IPL flow.</description>
+  <valueType>uint8</valueType>
+  <enum>
+      HP_IPL = 0x1,
+      CRO_SQUBA = 0x2,
+      CRO_LEGACY = 0x4
+  </enum>
+  <default>CRO_SQUBA</default>
+  <writeable/>
+  <mrwHide/>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
   <id>ATTR_CONTAINED_IPL_TYPE</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>Indicate if performing a contained system IPL and if so the type

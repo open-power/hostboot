@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,7 +74,7 @@ p10_query_core_stop_state(
     const fapi2::Target<fapi2::TARGET_TYPE_CORE>& i_target,
     const uint32_t i_expected_stop_level)
 {
-    FAPI_IMP("> p10_query_core_stop_state[Expected STOP Level: %d]", i_expected_stop_level);
+    FAPI_DBG("> p10_query_core_stop_state[Expected STOP Level: %d]", i_expected_stop_level);
 
     fapi2::buffer<uint64_t> l_data64;
     uint32_t l_stop_gated           = 0;
@@ -133,7 +133,7 @@ p10_query_core_stop_state(
     FAPI_INF("SUCCESS!! Valid STOP level[%d] has been achieved.", l_stop_actual_level);
 
 fapi_try_exit:
-    FAPI_INF("< p10_query_core_stop_state");
+    FAPI_DBG("< p10_query_core_stop_state");
 
     return fapi2::current_err;
 }

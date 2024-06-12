@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -57,9 +57,10 @@ OBJS += call_host_ipl_complete.o
 #HWP object file needed to run istep 16
 OBJS += p10_query_core_stop_state.o
 OBJS += p10_core_special_wakeup.o
+OBJS += p10_block_wakeup_intr.o
 
 include ${ROOTPATH}/procedure.rules.mk
-include ${PROCEDURES_PATH}/hwp/pm/p10_block_wakeup_intr.mk
+#include ${PROCEDURES_PATH}/hwp/pm/p10_block_wakeup_intr.mk
 include ${PROCEDURES_PATH}/hwp/nest/p10_gen_fbc_rt_settings.mk
 #include  ${PROCEDURES_PATH}/hwp/perv/p10_switch_cfsim.mk
 #include  ${PROCEDURES_PATH}/hwp/perv/p10_switch_rec_attn.mk

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2023
+# Contributors Listed Below - COPYRIGHT 2016,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -69,13 +69,14 @@ OBJS += ody_bulk_pwr_throttles.o
 OBJS += ody_throttle.o
 OBJS += ody_kind.o
 OBJS += exp_kind.o
+OBJS += p10_block_wakeup_intr.o
 
 # Include the makefiles to compile the HWPs needed by the sub steps
 include ${ROOTPATH}/procedure.rules.mk
 include ${P10_PROCEDURES_PATH}/nest/p10_tod_init.mk
 include ${P10_PROCEDURES_PATH}/nest/p10_tod_setup.mk
 include ${P10_PROCEDURES_PATH}/nest/p10_tod_save_config.mk
-include ${P10_PROCEDURES_PATH}/pm/p10_block_wakeup_intr.mk
+#include ${P10_PROCEDURES_PATH}/pm/p10_block_wakeup_intr.mk
 
 # Add the path where HWPs object files are located
 VPATH += ${P10_PROCEDURES_PATH}/nest
