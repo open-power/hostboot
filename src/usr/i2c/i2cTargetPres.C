@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -403,16 +403,36 @@ errlHndl_t ddimmDynamicI2CPresence(DeviceFW::OperationType i_opType,
         // Remember the value we determined
         i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_devAddr);
 
-        // Do some i2c ops to physically detect the part
-        l_errl = genericI2CTargetPresenceDetect(i_target,
-                                                l_devPresent);
-
-        if (l_errl)
+        // Sometimes the parts don't show up on the first try, we don't
+        // really know why so we'll just retry a few times.
+        for( auto attempt = 0; attempt < 10; attempt++ )
         {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"ddimmDynamicI2CPresence() "
-                        "Error detecting target 0x%.08X",
-                        TARGETING::get_huid(i_target));
-            break;
+            // Do some i2c ops to physically detect the part
+            l_errl = genericI2CTargetPresenceDetect(i_target,
+                                                    l_devPresent);
+
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_i2c, ERR_MRK"ddimmDynamicI2CPresence() "
+                           "Error detecting target 0x%.08X",
+                           TARGETING::get_huid(i_target));
+                break;
+            }
+            else if( l_devPresent )
+            {
+                // found it, stop looping
+                break;
+            }
+
+            // Only trace once to avoid spamming the buffer
+            if( attempt == 0 )
+            {
+                TRACFCOMP(g_trac_i2c,"Retrying presence detection of %.8X",
+                          TARGETING::get_huid(i_target));
+            }
+
+            // Wait 1ms before trying again
+            nanosleep( 0, 1*NS_PER_MSEC );
         }
 
     }while(0);
@@ -705,7 +725,7 @@ errlHndl_t powerICPresence(DeviceFW::OperationType i_opType,
             break;
         }
 
-        // If the parent chip is not present, then neither is the temperature sensor
+        // If the parent chip is not present, then neither is the doubletop
         // so just break out and return not present
         TARGETING::Target* l_parentOcmb = TARGETING::getImmediateParentByAffinity(i_target);
         auto l_parentHwasState = l_parentOcmb->getAttr<TARGETING::ATTR_HWAS_STATE>();
