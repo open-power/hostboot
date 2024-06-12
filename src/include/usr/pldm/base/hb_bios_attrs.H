@@ -522,6 +522,18 @@ namespace PLDM
                                         TARGETING::ATTR_DYNAMIC_IO_DRAWER_ATTACHMENT_type &
                                             o_dynamic_io_drawer_attach);
 
+    /**
+     * @brief Retrieve the current value of the hb_disable_predictive_mem_guard PLDM bios attribute and return
+     * if no error.
+     *
+     * @param[in,out] io_string_table         See brief at the top of this file.
+     * @param[in,out] io_attr_table           See brief at the top of this file.
+     * @param[out]    o_disable_guards        If no error occurs will contain the value
+     *                                        for HB_DISABLE_PREDICTIVE_MEM_GUARD
+     */
+    errlHndl_t getDisablePredictiveMemGuard(std::vector<uint8_t>& io_string_table,
+                            std::vector<uint8_t>& io_attr_table,
+                            uint8_t& o_disable_guards);
 }
 
 #endif

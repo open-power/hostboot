@@ -834,5 +834,33 @@ void parse_hb_prealloc_for_drawer_attach(std::vector<uint8_t>& io_string_table,
     return;
 }
 
+void parse_hb_disable_predictive_mem_guard(std::vector<uint8_t>& io_string_table,
+                           std::vector<uint8_t>& io_attr_table,
+                           ISTEP_ERROR::IStepError & io_stepError)
+{
+    TARGETING::ATTR_DISABLE_PREDICTIVE_MEM_GUARD_type l_disable = 0;
+
+    errlHndl_t l_errl = PLDM::getDisablePredictiveMemGuard(io_string_table, io_attr_table, l_disable);
+    const auto l_sys = TARGETING::UTIL::assertGetToplevelTarget();
+
+    if (l_errl)
+    {
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                "parse_hb_disable_predictive_mem_guard: "
+                "An error occurred getting DISABLE_PREDICTIVE_MEM_GUARD from the BMC BIOS. "
+                "Enabling guard creation.");
+        l_errl->collectTrace("ISTEPS_TRACE",256);
+        errlCommit( l_errl, ISTEP_COMP_ID );
+    }
+    else
+    {
+        // If there is an error this value will be set to 0 (see the get function up above)
+        // and guards will be created by default.
+        l_sys->setAttr<ATTR_DISABLE_PREDICTIVE_MEM_GUARD>(l_disable);
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
+                INFO_MRK"Successfully set ATTR_DISABLE_PREDICTIVE_MEM_GUARD to %d.", l_disable);
+    }
+    return;
+}
 
 } // end of namespace ISTEP
