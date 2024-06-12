@@ -324,16 +324,30 @@ void parse_hb_prealloc_for_drawer_attach(std::vector<uint8_t>& io_string_table,
                                          ISTEP_ERROR::IStepError & io_stepError);
 
 /**
- * @brief Retrive the CEC Degraded Mode Policy flags from the BMC BIOS and set the
+ * @brief Retrieve the CEC Degraded Mode Policy flags from the BMC BIOS and set the
  *        system's policies accordingly. If an error occurs, the system policies are left
  *        as is.
- * 
+ *
  * @param[in,out] io_string_table       See brief in file hb_bios_attrs.H
  * @param[in,out] io_attr_table         See brief in file hb_bios_attrs.H
  * @param[in,out] io_stepError          If an error occurs which require a TI it can be attached
  *                                      to this IstepError log.
  */
 void parse_hb_cdm_policies(std::vector<uint8_t>& io_string_table,
+                           std::vector<uint8_t>& io_attr_table,
+                           ISTEP_ERROR::IStepError & io_stepError);
+
+/**
+ * @brief Retrieve the value for disabling predictive memory error guards from the
+ *        BMC BIOS and set the system attribute ATTR_DISABLE_PREDICTIVE_MEM_GUARD.
+ *        If there is an error, guard creation will be enabled by default.
+ *
+ * @param[in,out] io_string_table       See brief in file hb_bios_attrs.H
+ * @param[in,out] io_attr_table         See brief in file hb_bios_attrs.H
+ * @param[in,out] io_stepError          If an error occurs which require a TI it can be attached
+ *                                      to this IstepError log.
+ */
+void parse_hb_disable_predictive_mem_guard(std::vector<uint8_t>& io_string_table,
                            std::vector<uint8_t>& io_attr_table,
                            ISTEP_ERROR::IStepError & io_stepError);
 
