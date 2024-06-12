@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <fapiwrap/fapiWrapif.H>
 #include "../eeprom/eepromCache.H"
 #include <attributeenums.H>
+#include <sys/time.h>
 
 extern trace_desc_t* g_trac_i2c;
 
@@ -364,15 +365,36 @@ errlHndl_t pmicI2CPresencePerformOp(DeviceFW::OperationType i_opType,
 
         i_target->setAttr<TARGETING::ATTR_DYNAMIC_I2C_DEVICE_ADDRESS>(l_devAddr);
 
-        l_errl = genericI2CTargetPresenceDetect(i_target,
-                                                l_pmicPresent);
-
-        if (l_errl)
+        // Sometimes the parts don't show up on the first try, we don't
+        // really know why so we'll just retry a few times.
+        for( auto attempt = 0; attempt < 10; attempt++ )
         {
-            TRACFCOMP( g_trac_i2c, ERR_MRK"pmicI2CPresencePerformOp() "
-                        "Error detecting target 0x%.08X",
-                        TARGETING::get_huid(i_target));
-            break;
+            // Do some i2c ops to physically detect the part
+            l_errl = genericI2CTargetPresenceDetect(i_target,
+                                                    l_pmicPresent);
+
+            if (l_errl)
+            {
+                TRACFCOMP( g_trac_i2c, ERR_MRK"ddimmDynamicI2CPresence() "
+                           "Error detecting target 0x%.08X",
+                           TARGETING::get_huid(i_target));
+                break;
+            }
+            else if( l_pmicPresent )
+            {
+                // found it, stop looping
+                break;
+            }
+
+            // Only trace once to avoid spamming the buffer
+            if( attempt == 0 )
+            {
+                TRACFCOMP(g_trac_i2c,"Retrying presence detection of %.8X",
+                          TARGETING::get_huid(i_target));
+            }
+
+            // Wait 1ms before trying again
+            nanosleep( 0, 1*NS_PER_MSEC );
         }
 
     }while(0);
