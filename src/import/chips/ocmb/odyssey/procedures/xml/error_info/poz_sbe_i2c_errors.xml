@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2023                             -->
+<!-- Contributors Listed Below - COPYRIGHT 2023,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -24,74 +24,91 @@
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- EKB-Mirror-To: hostboot                                                -->
 <hwpErrors>
-  <format>poz</format>
-<!-- ******************************************************************** -->
-    <hwpError>
-        <sbeError/>
-        <rc>RC_POZ_I2C_STATUS_ERROR</rc>
-        <description>I2C status error - one of the error bits set</description>
-        <ffdc>VALUE</ffdc>
-        <ffdc>PORT</ffdc>
-        <ffdc>ENGINE</ffdc>
-        <ffdc>DEVICEADDR</ffdc>
-        <ffdc>RETRYCOUNT</ffdc>
-    </hwpError>
-    <hwpError>
-        <sbeError/>
-        <rc>RC_POZ_I2C_STATUS_INTR_ERROR</rc>
-        <description>I2C status error - one of the i2c interrupt hit</description>
-        <ffdc>STATUS</ffdc>
-        <ffdc>VALUE</ffdc>
-        <ffdc>PORT</ffdc>
-        <ffdc>ENGINE</ffdc>
-        <ffdc>DEVICEADDR</ffdc>
-        <ffdc>RETRYCOUNT</ffdc>
-    </hwpError>
-    <hwpError>
-        <sbeError/>
-        <rc>RC_POZ_I2C_FIFO_TIMEOUT_ERROR</rc>
-        <description>I2C fifo condition error - timedout waiting for a condition</description>
-        <ffdc>STATUS</ffdc>
-        <ffdc>PORT</ffdc>
-        <ffdc>ENGINE</ffdc>
-        <ffdc>DEVICEADDR</ffdc>
-        <ffdc>POLLINGINT</ffdc>
-        <ffdc>TIMEOUTCOUNT</ffdc>
-        <ffdc>RETRYCOUNT</ffdc>
-    </hwpError>
-    <hwpError>
-        <sbeError/>
-        <rc>RC_POZ_I2C_WAIT_FOR_CMD_COMP_TIMEOUT_ERROR</rc>
-        <description>I2C wait for command completion error - Timeout error</description>
-        <ffdc>STATUS</ffdc>
-        <ffdc>PORT</ffdc>
-        <ffdc>ENGINE</ffdc>
-        <ffdc>DEVICEADDR</ffdc>
-        <ffdc>POLLINGINT</ffdc>
-        <ffdc>TIMEOUTCOUNT</ffdc>
-        <ffdc>RETRYCOUNT</ffdc>
-    </hwpError>
-    <hwpError>
-        <sbeError/>
-        <rc>RC_POZ_I2C_FAILED_TO_LOCK_ENGINE_TIMEOUT_ERROR</rc>
-        <description>I2C failed to lock i2c engine - Timeout error</description>
-        <ffdc>ATOMICLOCKREG</ffdc>
-        <ffdc>PORT</ffdc>
-        <ffdc>ENGINE</ffdc>
-        <ffdc>DEVICEADDR</ffdc>
-        <ffdc>POLLINGINT</ffdc>
-        <ffdc>TIMEOUTCOUNT</ffdc>
-        <ffdc>RETRYCOUNT</ffdc>
-    </hwpError>
-    <hwpError>
-        <sbeError/>
-        <rc>RC_POZ_I2CC_RESET_ERROR</rc>
-        <description>Error resetting Odyssey I2C controller</description>
-        <ffdc>STATUS</ffdc>
-        <ffdc>PORT</ffdc>
-        <ffdc>ENGINE</ffdc>
-        <ffdc>DEVICEADDR</ffdc>
-        <ffdc>RETRYCOUNT</ffdc>
-    </hwpError>
+    <format>poz</format>
+  <!-- ******************************************************************** -->
+      <hwpError>
+          <sbeError/>
+          <rc>RC_POZ_I2C_STATUS_ERROR</rc>
+          <description>I2C status error - one of the error bits set</description>
+          <ffdc>STATUS_REG_VAL</ffdc>
+          <ffdc>CMD_REG_VAL</ffdc>
+          <ffdc>MODE_REG_VAL</ffdc>
+          <ffdc>INTR_REG_VAL</ffdc>
+          <ffdc>PORT</ffdc>
+          <ffdc>ENGINE</ffdc>
+          <ffdc>DEVICEADDR</ffdc>
+          <ffdc>RETRYCOUNT</ffdc>
+          <ffdc>BIT_RATE_DIVISOR</ffdc>
+      </hwpError>
+      <hwpError>
+          <sbeError/>
+          <rc>RC_POZ_I2C_STATUS_INTR_ERROR</rc>
+          <description>I2C status error - one of the i2c interrupt hit</description>
+          <ffdc>STATUS_REG_VAL</ffdc>
+          <ffdc>CMD_REG_VAL</ffdc>
+          <ffdc>MODE_REG_VAL</ffdc>
+          <ffdc>INTR_REG_VAL</ffdc>
+          <ffdc>PORT</ffdc>
+          <ffdc>ENGINE</ffdc>
+          <ffdc>DEVICEADDR</ffdc>
+          <ffdc>RETRYCOUNT</ffdc>
+          <ffdc>BIT_RATE_DIVISOR</ffdc>
+      </hwpError>
+      <hwpError>
+          <sbeError/>
+          <rc>RC_POZ_I2C_FIFO_TIMEOUT_ERROR</rc>
+          <description>I2C fifo condition error - timedout waiting for a condition</description>
+          <ffdc>STATUS_REG_VAL</ffdc>
+          <ffdc>CMD_REG_VAL</ffdc>
+          <ffdc>MODE_REG_VAL</ffdc>
+          <ffdc>INTR_REG_VAL</ffdc>
+          <ffdc>PORT</ffdc>
+          <ffdc>ENGINE</ffdc>
+          <ffdc>DEVICEADDR</ffdc>
+          <ffdc>POLLINGINT</ffdc>
+          <ffdc>TIMEOUTCOUNT</ffdc>
+          <ffdc>RETRYCOUNT</ffdc>
+          <ffdc>BIT_RATE_DIVISOR</ffdc>
+      </hwpError>
+      <hwpError>
+          <sbeError/>
+          <rc>RC_POZ_I2C_WAIT_FOR_CMD_COMP_TIMEOUT_ERROR</rc>
+          <description>I2C wait for command completion error - Timeout error</description>
+          <ffdc>STATUS_REG_VAL</ffdc>
+          <ffdc>CMD_REG_VAL</ffdc>
+          <ffdc>MODE_REG_VAL</ffdc>
+          <ffdc>INTR_REG_VAL</ffdc>
+          <ffdc>PORT</ffdc>
+          <ffdc>ENGINE</ffdc>
+          <ffdc>DEVICEADDR</ffdc>
+          <ffdc>POLLINGINT</ffdc>
+          <ffdc>TIMEOUTCOUNT</ffdc>
+          <ffdc>RETRYCOUNT</ffdc>
+          <ffdc>BIT_RATE_DIVISOR</ffdc>
+      </hwpError>
+      <hwpError>
+          <sbeError/>
+          <rc>RC_POZ_I2C_FAILED_TO_LOCK_ENGINE_TIMEOUT_ERROR</rc>
+          <description>I2C failed to lock i2c engine - Timeout error</description>
+          <ffdc>ATOMIC_LOCK_REG_VAL</ffdc>
+          <ffdc>PORT</ffdc>
+          <ffdc>ENGINE</ffdc>
+          <ffdc>DEVICEADDR</ffdc>
+          <ffdc>POLLINGINT</ffdc>
+          <ffdc>TIMEOUTCOUNT</ffdc>
+          <ffdc>RETRYCOUNT</ffdc>
+          <ffdc>BIT_RATE_DIVISOR</ffdc>
+      </hwpError>
+      <hwpError>
+          <sbeError/>
+          <rc>RC_POZ_I2CC_RESET_ERROR</rc>
+          <description>Error resetting Odyssey I2C controller</description>
+          <ffdc>STATUS_REG_VAL</ffdc>
+          <ffdc>PORT</ffdc>
+          <ffdc>ENGINE</ffdc>
+          <ffdc>DEVICEADDR</ffdc>
+          <ffdc>RETRYCOUNT</ffdc>
+          <ffdc>BIT_RATE_DIVISOR</ffdc>
+      </hwpError>
 
-</hwpErrors>
+  </hwpErrors>
