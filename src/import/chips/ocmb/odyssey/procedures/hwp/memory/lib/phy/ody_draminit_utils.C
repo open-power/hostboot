@@ -321,6 +321,8 @@ fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TAR
 
         case END_OF_FINE_WRITE_LEVELING:
             FAPI_INF(TARGTIDFORMAT" End of fine write leveling, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
+            FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT, i_target,
+                                         fapi2::ENUM_ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT_PASSED));
             break;
 
         case END_OF_READ_ENABLE_TRAINING:
@@ -6154,64 +6156,53 @@ fapi2::ReturnCode update_struct_for_bad_bits(const fapi2::Target<fapi2::TARGET_T
         const uint8_t (&iv_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
         PMU_SMB_DDR5U_1D_t& io_struct)
 {
-    constexpr uint8_t PHY_TO_MC_BYTE0 = 0;
-    constexpr uint8_t PHY_TO_MC_BYTE1 = 1;
-    constexpr uint8_t PHY_TO_MC_BYTE2 = 2;
-    constexpr uint8_t PHY_TO_MC_BYTE3 = 3;
-    constexpr uint8_t PHY_TO_MC_BYTE4 = 5;
-    constexpr uint8_t PHY_TO_MC_BYTE5 = 6;
-    constexpr uint8_t PHY_TO_MC_BYTE6 = 7;
-    constexpr uint8_t PHY_TO_MC_BYTE7 = 8;
-    constexpr uint8_t PHY_TO_MC_BYTE8 = 4;
-    constexpr uint8_t PHY_TO_MC_BYTE9 = 9;
-
     // Assign the results to the bad bits internal structure
     // Swizzle for DBytes is handled by above constants
     // Swizzle of bits within a DByte is handled by swizzle_bad_bits_phy_to_mc
     // Note that the rank indexes used below are PHY perspective
-    io_struct.DisabledDB0LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE0];
-    io_struct.DisabledDB1LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE1];
-    io_struct.DisabledDB2LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE2];
-    io_struct.DisabledDB3LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE3];
-    io_struct.DisabledDB4LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE4];
-    io_struct.DisabledDB5LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE5];
-    io_struct.DisabledDB6LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE6];
-    io_struct.DisabledDB7LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE7];
-    io_struct.DisabledDB8LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE8];
-    io_struct.DisabledDB9LaneR0 = iv_bad_bits[0][PHY_TO_MC_BYTE9];
+    io_struct.DisabledDB0LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE0];
+    io_struct.DisabledDB1LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE1];
+    io_struct.DisabledDB2LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE2];
+    io_struct.DisabledDB3LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE3];
+    io_struct.DisabledDB4LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE4];
+    io_struct.DisabledDB5LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE5];
+    io_struct.DisabledDB6LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE6];
+    io_struct.DisabledDB7LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE7];
+    io_struct.DisabledDB8LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE8];
+    io_struct.DisabledDB9LaneR0 = iv_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE9];
 
-    io_struct.DisabledDB0LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE0];
-    io_struct.DisabledDB1LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE1];
-    io_struct.DisabledDB2LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE2];
-    io_struct.DisabledDB3LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE3];
-    io_struct.DisabledDB4LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE4];
-    io_struct.DisabledDB5LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE5];
-    io_struct.DisabledDB6LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE6];
-    io_struct.DisabledDB7LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE7];
-    io_struct.DisabledDB8LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE8];
-    io_struct.DisabledDB9LaneR1 = iv_bad_bits[1][PHY_TO_MC_BYTE9];
+    io_struct.DisabledDB0LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE0];
+    io_struct.DisabledDB1LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE1];
+    io_struct.DisabledDB2LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE2];
+    io_struct.DisabledDB3LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE3];
+    io_struct.DisabledDB4LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE4];
+    io_struct.DisabledDB5LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE5];
+    io_struct.DisabledDB6LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE6];
+    io_struct.DisabledDB7LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE7];
+    io_struct.DisabledDB8LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE8];
+    io_struct.DisabledDB9LaneR1 = iv_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE9];
 
-    io_struct.DisabledDB0LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE0];
-    io_struct.DisabledDB1LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE1];
-    io_struct.DisabledDB2LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE2];
-    io_struct.DisabledDB3LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE3];
-    io_struct.DisabledDB4LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE4];
-    io_struct.DisabledDB5LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE5];
-    io_struct.DisabledDB6LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE6];
-    io_struct.DisabledDB7LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE7];
-    io_struct.DisabledDB8LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE8];
-    io_struct.DisabledDB9LaneR2 = iv_bad_bits[2][PHY_TO_MC_BYTE9];
+    io_struct.DisabledDB0LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE0];
+    io_struct.DisabledDB1LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE1];
+    io_struct.DisabledDB2LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE2];
+    io_struct.DisabledDB3LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE3];
+    io_struct.DisabledDB4LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE4];
+    io_struct.DisabledDB5LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE5];
+    io_struct.DisabledDB6LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE6];
+    io_struct.DisabledDB7LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE7];
+    io_struct.DisabledDB8LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE8];
+    io_struct.DisabledDB9LaneR2 = iv_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE9];
 
-    io_struct.DisabledDB0LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE0];
-    io_struct.DisabledDB1LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE1];
-    io_struct.DisabledDB2LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE2];
-    io_struct.DisabledDB3LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE3];
-    io_struct.DisabledDB4LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE4];
-    io_struct.DisabledDB5LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE5];
-    io_struct.DisabledDB6LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE6];
-    io_struct.DisabledDB7LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE7];
-    io_struct.DisabledDB8LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE8];
-    io_struct.DisabledDB9LaneR3 = iv_bad_bits[3][PHY_TO_MC_BYTE9];
+    io_struct.DisabledDB0LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE0];
+    io_struct.DisabledDB1LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE1];
+    io_struct.DisabledDB2LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE2];
+    io_struct.DisabledDB3LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE3];
+    io_struct.DisabledDB4LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE4];
+    io_struct.DisabledDB5LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE5];
+    io_struct.DisabledDB6LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE6];
+    io_struct.DisabledDB7LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE7];
+    io_struct.DisabledDB8LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE8];
+    io_struct.DisabledDB9LaneR3 = iv_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE9];
 
     return fapi2::current_err;
 }
@@ -6241,6 +6232,9 @@ fapi2::ReturnCode run_training_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM
     fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
     uint8_t l_fir_check_enable;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT, i_target, l_poll_count));
+
+    // Resets any per-training run attributes before training starts
+    FAPI_TRY(reset_attrs_pretraining(i_target));
 
     // 4. Initialize mailbox protocol and start training
     FAPI_TRY(mss::ody::phy::init_mailbox_protocol(i_target));
@@ -6496,6 +6490,16 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
 
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
 
+    // Checks if this configuration supports the address recovery algorithm
+    // Cards with 2 ranks and redundant CS are taking CEs at runtimes after taking a fatal error or address error
+    // Rather than running with constant CEs at runtime, the RAS team has elected to deconfigure and gard out these parts
+    // A fatal error or address will trigger the per DRAM address recovery algorithm, so checking and asserting out here is ok to do
+    bool l_is_address_algorithm_fatal = false;
+    FAPI_TRY(mss::ody::phy::workarounds::is_2r_redundant_cs(i_target, l_is_address_algorithm_fatal));
+    FAPI_ASSERT(!l_is_address_algorithm_fatal,
+                fapi2::ODY_DRAMINIT_PERDRAM_RECOVERY_NOT_SUPPORTED()
+                .set_PORT_TARGET(i_target), TARGTIDFORMAT " per DRAM algorithm not supported on this DIMM config. Exiting", TARGTID);
+
     // Do not allow the address algorithm to run multiple times
     // The algorithm is time consuming
     FAPI_ASSERT(io_is_first_addr_run,
@@ -6657,6 +6661,99 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Disables any nibbles that have DQ0 deconfigured
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode disable_dram_with_bad_dq0(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct)
+{
+    static constexpr uint8_t PHY_TO_MC_BYTE[mss::ody::MAX_BYTES_PER_PORT]__attribute__ ((aligned (8))) =
+    {
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE0,
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE1,
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE2,
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE3,
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE4,
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE5,
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE6,
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE7,
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE8,
+        mss::ody::phy_swizzle::PHY_TO_MC_BYTE9
+    };
+
+    // Note: the bits are from the IBM perspective (0 on the left), while the masks are from the Synopsys perspective (0 on the right)
+    // The PHY treats the DRAM's bit 0 as the necessary bit to receive feedback. If the DRAM's bit 0 is disabled but the rest of the DRAM is good,
+    //    training will fail with a fatal error
+    // To avoid hitting a fatal error and running the address algorithm, we simply disable the whole DRAM if the DRAM's bit 0 is disabled
+    // As this is from the DRAM perspective, we need to use the swizzle information to correctly identify the DRAM's bit 0
+    // The swizzle provided by Synopsys forces the DRAM perspective onto the DFI, so the DRAM and IBM perspective will match
+    // The bad bits are kept in the Synopsys perspective to avoid unneccessary swizzling and unswizzling
+    static constexpr uint8_t DRAM0_BIT = 0;
+    static constexpr uint8_t DRAM1_BIT = 4;
+    static constexpr uint8_t DRAM0_MASK = 0x0f;
+    static constexpr uint8_t DRAM1_MASK = 0xf0;
+
+    std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+
+    uint8_t l_has_swizzle_detect_passed = 0;
+    // If swizzle detect has passed, knock out DRAM with a bad DQ0
+    // No need to count these as bad at this time, the algorithm will do that below
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT, i_target, l_has_swizzle_detect_passed));
+
+    if(l_has_swizzle_detect_passed == fapi2::ENUM_ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT_NOT_RUN)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Grabs the disable bits out of the structure as it's easier to operate on them this way
+    extract_disable_bits(io_struct, io_start_bad_bits);
+
+    // Loops over all of the configured ranks
+    FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(i_target, l_rank_infos));
+
+    for(const auto& l_rank_info : l_rank_infos)
+    {
+        for(uint8_t l_phy_byte = 0; l_phy_byte < mss::ody::MAX_BYTES_PER_PORT; ++l_phy_byte)
+        {
+            const auto l_mc_byte = PHY_TO_MC_BYTE[l_phy_byte];
+            uint8_t l_disables_mc = 0;
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_target,
+                                                l_rank_info.get_phy_rank(),
+                                                l_phy_byte,
+                                                io_start_bad_bits[l_rank_info.get_phy_rank()][l_mc_byte],
+                                                l_disables_mc));
+            fapi2::buffer<uint8_t> l_temp(l_disables_mc);
+
+            // DRAM0
+            if(l_temp.getBit<DRAM0_BIT>())
+            {
+                io_start_bad_bits[l_rank_info.get_phy_rank()][l_mc_byte] |= DRAM0_MASK;
+            }
+
+            // DRAM1
+            if(l_temp.getBit<DRAM1_BIT>())
+            {
+                io_start_bad_bits[l_rank_info.get_phy_rank()][l_mc_byte] |= DRAM1_MASK;
+            }
+
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " rank:%u MC byte:%u swizzled bad bits before:0x%02x after:0x%02x", TARGTID,
+                            l_rank_info.get_port_rank(), l_mc_byte, l_temp, io_start_bad_bits[l_rank_info.get_phy_rank()][l_mc_byte]);
+        }
+    }
+
+    // Clones redundant CS information and copies the bad bits back into the structure
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, io_start_bad_bits));
+    FAPI_TRY(update_struct_for_bad_bits( i_target, io_start_bad_bits, io_struct));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Configures the message block for any DQ errors recovery
 /// @param[in] i_target the memory port on which to operate
 /// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
@@ -6757,6 +6854,9 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 
     FAPI_INF(TARGTIDFORMAT " Attempting per-DQ draminit training recovery", TARGTID);
 
+    // Disables nibbles that have DQ0 disabled. This should help speed up training and avoid fatal errors on certain cards
+    FAPI_TRY(disable_dram_with_bad_dq0(i_target, io_start_bad_bits, io_struct));
+
     // Reinitialize the message block
     FAPI_TRY(configure_msg_block_for_dq_errors(i_target, io_start_bad_bits, io_struct));
 
@@ -6779,56 +6879,46 @@ fapi_try_exit:
 void extract_disable_bits(const PMU_SMB_DDR5U_1D_t& i_struct,
                           uint8_t (&o_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT])
 {
-    constexpr uint8_t PHY_TO_MC_BYTE0 = 0;
-    constexpr uint8_t PHY_TO_MC_BYTE1 = 1;
-    constexpr uint8_t PHY_TO_MC_BYTE2 = 2;
-    constexpr uint8_t PHY_TO_MC_BYTE3 = 3;
-    constexpr uint8_t PHY_TO_MC_BYTE4 = 5;
-    constexpr uint8_t PHY_TO_MC_BYTE5 = 6;
-    constexpr uint8_t PHY_TO_MC_BYTE6 = 7;
-    constexpr uint8_t PHY_TO_MC_BYTE7 = 8;
-    constexpr uint8_t PHY_TO_MC_BYTE8 = 4;
-    constexpr uint8_t PHY_TO_MC_BYTE9 = 9;
-    o_bad_bits[0][PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR0;
-    o_bad_bits[0][PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR0;
-    o_bad_bits[0][PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR0;
-    o_bad_bits[0][PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR0;
-    o_bad_bits[0][PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR0;
-    o_bad_bits[0][PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR0;
-    o_bad_bits[0][PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR0;
-    o_bad_bits[0][PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR0;
-    o_bad_bits[0][PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR0;
-    o_bad_bits[0][PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR0;
-    o_bad_bits[1][PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR1;
-    o_bad_bits[1][PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR1;
-    o_bad_bits[1][PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR1;
-    o_bad_bits[1][PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR1;
-    o_bad_bits[1][PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR1;
-    o_bad_bits[1][PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR1;
-    o_bad_bits[1][PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR1;
-    o_bad_bits[1][PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR1;
-    o_bad_bits[1][PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR1;
-    o_bad_bits[1][PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR1;
-    o_bad_bits[2][PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR2;
-    o_bad_bits[2][PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR2;
-    o_bad_bits[2][PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR2;
-    o_bad_bits[2][PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR2;
-    o_bad_bits[2][PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR2;
-    o_bad_bits[2][PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR2;
-    o_bad_bits[2][PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR2;
-    o_bad_bits[2][PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR2;
-    o_bad_bits[2][PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR2;
-    o_bad_bits[2][PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR2;
-    o_bad_bits[3][PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR3;
-    o_bad_bits[3][PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR3;
-    o_bad_bits[3][PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR3;
-    o_bad_bits[3][PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR3;
-    o_bad_bits[3][PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR3;
-    o_bad_bits[3][PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR3;
-    o_bad_bits[3][PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR3;
-    o_bad_bits[3][PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR3;
-    o_bad_bits[3][PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR3;
-    o_bad_bits[3][PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR3;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR0;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR0;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR0;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR0;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR0;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR0;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR0;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR0;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR0;
+    o_bad_bits[0][mss::ody::phy_swizzle::PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR0;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR1;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR1;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR1;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR1;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR1;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR1;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR1;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR1;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR1;
+    o_bad_bits[1][mss::ody::phy_swizzle::PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR1;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR2;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR2;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR2;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR2;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR2;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR2;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR2;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR2;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR2;
+    o_bad_bits[2][mss::ody::phy_swizzle::PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR2;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE0] = i_struct.DisabledDB0LaneR3;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE1] = i_struct.DisabledDB1LaneR3;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE2] = i_struct.DisabledDB2LaneR3;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE3] = i_struct.DisabledDB3LaneR3;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE4] = i_struct.DisabledDB4LaneR3;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE5] = i_struct.DisabledDB5LaneR3;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE6] = i_struct.DisabledDB6LaneR3;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE7] = i_struct.DisabledDB7LaneR3;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE8] = i_struct.DisabledDB8LaneR3;
+    o_bad_bits[3][mss::ody::phy_swizzle::PHY_TO_MC_BYTE9] = i_struct.DisabledDB9LaneR3;
 }
 
 ///

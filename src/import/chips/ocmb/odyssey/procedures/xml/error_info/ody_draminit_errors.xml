@@ -63,6 +63,27 @@
 
   <hwpError>
     <sbeError/>
+    <rc>RC_ODY_DRAMINIT_PERDRAM_RECOVERY_NOT_SUPPORTED</rc>
+    <description>This DIMM does not support the per DRAM address recovery algorithm.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>PORT_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_PERDRAM_RECOVERY_ATTEMPTS_EXCEEDED</rc>
     <description>Ody draminit's per DRAM recovery algorithm exceeded recovery attempts.</description>
     <ffdc>PORT_TARGET</ffdc>

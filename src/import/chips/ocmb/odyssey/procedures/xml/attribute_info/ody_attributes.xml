@@ -54,6 +54,21 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+           1 if this port passed swizzle detect, otherwise 0
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            NOT_RUN = 0,
+            PASSED = 1
+        </enum>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+    <attribute>
         <id>ATTR_MSS_ODY_PHY_IMAGE_SELECT</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>

@@ -272,6 +272,23 @@ enum phy_mem_types
     IMEM = 1,
 };
 
+///
+/// @brief phy mem_types
+///
+enum phy_swizzle
+{
+    PHY_TO_MC_BYTE0 = 0,
+    PHY_TO_MC_BYTE1 = 1,
+    PHY_TO_MC_BYTE2 = 2,
+    PHY_TO_MC_BYTE3 = 3,
+    PHY_TO_MC_BYTE4 = 5,
+    PHY_TO_MC_BYTE5 = 6,
+    PHY_TO_MC_BYTE6 = 7,
+    PHY_TO_MC_BYTE7 = 8,
+    PHY_TO_MC_BYTE8 = 4,
+    PHY_TO_MC_BYTE9 = 9,
+};
+
 } // namespace ody
 
 } // namespace mss
