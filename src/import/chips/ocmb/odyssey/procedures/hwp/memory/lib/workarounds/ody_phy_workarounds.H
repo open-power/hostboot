@@ -62,6 +62,7 @@ fapi2::ReturnCode clone_redundant_cs_data_tdqstracking( const fapi2::Target<fapi
 
 ///
 /// @brief Clones data between redundant CS
+/// @tparam T the type of the data to update
 /// @param[in] i_target the target on which to operate
 /// @param[in,out] io_array the array on which to operate with ranks indexed in the PHY rank perspective
 /// @return FAPI2_RC_SUCCSS iff ok
@@ -113,6 +114,16 @@ fapi2::ReturnCode clone_redundant_cs_data( const fapi2::Target<fapi2::TARGET_TYP
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Checks if the Odyssey 2R redundant CS workaround is needed
+/// @tparam T the target type under test
+/// @param[in] i_target the target on which to operate
+/// @param[out] o_is_workaround_needed true if the workaround is needed, otherwise false
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+template <fapi2::TargetType T>
+fapi2::ReturnCode is_2r_redundant_cs( const fapi2::Target<T>& i_target, bool& o_is_workaround_needed );
 
 } // ns workarounds
 } // ns phy

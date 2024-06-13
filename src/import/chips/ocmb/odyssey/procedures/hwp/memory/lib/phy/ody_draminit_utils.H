@@ -3661,6 +3661,17 @@ fapi2::ReturnCode configure_msg_block_for_dq_errors(const fapi2::Target<fapi2::T
         PMU_SMB_DDR5U_1D_t& io_struct);
 
 ///
+/// @brief Disables any nibbles that have DQ0 deconfigured
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in,out] io_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode disable_dram_with_bad_dq0(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        PMU_SMB_DDR5U_1D_t& io_struct);
+
+///
 /// @brief Handles any DQ errors found in the prior run
 /// @param[in] i_target the memory port on which to operate
 /// @param[in,out] io_status the status of the last training run
@@ -3750,6 +3761,16 @@ fapi2::ReturnCode check_for_dq_repairs_exceeded(const fapi2::Target<fapi2::TARGE
         const uint64_t i_status,
         const PMU_SMB_DDR5U_1D_t& i_struct);
 
+///
+/// @brief Resets per training run attributes before training starts
+/// @param[in] i_target the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+inline fapi2::ReturnCode reset_attrs_pretraining(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+{
+    return FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT, i_target,
+                               fapi2::ENUM_ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT_NOT_RUN);
+}
 ///
 /// @brief Runs training and processes some of the results
 /// @param[in] i_target the memory port on which to operate
