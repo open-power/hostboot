@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -976,6 +976,7 @@ public:
      */
     void testHWASrestrictECunits()
     {
+        TS_INFO( "testHWASrestrictECunits enter" );
         using namespace HWAS;
         using namespace TARGETING;
 
@@ -1035,6 +1036,63 @@ public:
                 TS_FAIL("testHWASrestrictECunits> Expected %d cores, but saw %d",
                         l_numCores, l_funcCores.size() );
             }
+
+            // Confirm we saw the spare core that set in MVPD
+            // See standalone.simics for details
+            auto procnum = l_proc->getAttr<ATTR_ORDINAL_ID>();
+            auto spares = l_proc->getAttr<ATTR_SPARE_CORES>();
+            if( (procnum == 0) && (spares != 0) )
+            {
+                TS_FAIL("testHWASrestrictECunits> Found unexpected spares (act=%d,exp=0) on proc %.8X",
+                        spares, get_huid(l_proc));
+            }
+            else if( (procnum == 1) && (spares != 2) )
+            {
+                TS_FAIL("testHWASrestrictECunits> Found unexpected spares (act=%d,exp=2) on proc %.8X",
+                        spares, get_huid(l_proc));
+            }
+
+            // Now make sure we chose the right cores p1:c2,3
+            TargetHandleList l_allCores;
+            getChildChiplets( l_allCores, l_proc, TYPE_CORE, false );
+            for( auto core : l_allCores )
+            {
+                auto corenum = core->getAttr<ATTR_CHIP_UNIT>();
+                auto isspare = core->getAttr<ATTR_CORE_IS_SPARE>();
+                if( ((procnum == 0) && isspare)
+                    || ((procnum == 1) && isspare && (corenum != 2) && (corenum != 3)) )
+                {
+                    TS_FAIL("testHWASrestrictECunits> Found unexpected spare core %.8X",
+                            get_huid(core));
+                }
+                else if( (procnum == 1) && !isspare && ((corenum == 2) || (corenum == 3)) )
+                {
+                    TS_FAIL("testHWASrestrictECunits> Missing spare core %.8X",
+                            get_huid(core));
+                }
+            }
+
+            // Check for the right fused core p1:fc1
+            TargetHandleList l_allFCores;
+            getChildChiplets( l_allFCores, l_proc, TYPE_FC, false );
+            for( auto core : l_allFCores )
+            {
+                auto corenum = core->getAttr<ATTR_CHIP_UNIT>();
+                auto isspare = core->getAttr<ATTR_CORE_IS_SPARE>();
+                if( ((procnum == 0) && isspare)
+                    || ((procnum == 1) && isspare && (corenum != 1)) )
+                {
+                    TS_FAIL("testHWASrestrictECunits> Found unexpected spare core %.8X",
+                            get_huid(core));
+                }
+                else if( (procnum == 1) && !isspare && (corenum == 1) )
+                {
+                    TS_FAIL("testHWASrestrictECunits> Missing spare core %.8X",
+                            get_huid(core));
+                }
+            }
+            
+
         }
 
         TS_INFO( "testHWASrestrictECunits exit" );

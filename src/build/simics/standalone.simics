@@ -173,6 +173,39 @@ if ($hostboot_profile == FALSE) {
 
 ###################################
 
+###################################
+# Add some spare core bits
+###################################
+
+# We are going to, for the second processor:
+# 1. Save the MVPD SEEPROM contents to a file
+# 2. Use a python function (get_eq_pg_records) to parse out the EQ PG rows.
+# 3. Modify some of the EQ entries to add spare cores in the file.
+# 4. Save the modified file over the original.
+
+if( $hb_nospares == "0" ) {
+  # Standalone has 1 DCM
+  foreach $dcm in [0] {
+    # Always 2 procs per DCM, only modify the second one
+    foreach $procnum in [1] {
+      # Read out the processor's measurement/mvpd/keystore SEEPROM (512Kb)
+      (get-seeprom $dcm $procnum 2).save-file "tempforspares.bin" 0 512*1024 -overwrite
+
+      echo "Setting 2 spares on proc "+$dcm+":"+$procnum
+      @set_spares("tempforspares.bin",2)
+
+      # Write the results into the live copy
+      (get-seeprom $dcm $procnum 2).load-file "tempforspares.bin" 0
+
+      # Also update the redundant copy
+      (get-seeprom $dcm $procnum 3).load-file "tempforspares.bin" 0
+    }
+  }
+}
+
+###################################
+
+
 #################################
 # Turn on all processor cec-chips
 #################################

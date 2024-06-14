@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,7 +75,7 @@ const TARGETING::Target *   getBootCore( bool i_functional )
                       TYPE_CORE,
                       i_functional );
 
-    TRACFCOMP( g_trac_targeting,
+    TRACDCOMP( g_trac_targeting,
                "getBootCore: found %d cores on boot proc,"
                "l_bootCore PIR:0x%X",
                l_cores.size(),l_bootPIR.word );
@@ -93,13 +93,13 @@ const TARGETING::Target *   getBootCore( bool i_functional )
         PIR_t l_corePIR = PIR_t(l_topologyId, l_coreId);
 
         if (l_corePIR == l_bootPIR){
-            TRACFCOMP( g_trac_targeting,
+            TRACDCOMP( g_trac_targeting,
                        "found boot core: 0x%x, PIR=0x%x :",
                        l_coreId,
                        l_corePIR.word  );
-            EntityPath l_path;
-            l_path  =   l_core->getAttr<ATTR_PHYS_PATH>();
-            l_path.dump();
+            //EntityPath l_path;
+            //l_path  =   l_core->getAttr<ATTR_PHYS_PATH>();
+            //l_path.dump();
 
             l_bootCore    =   l_core ;
             break;

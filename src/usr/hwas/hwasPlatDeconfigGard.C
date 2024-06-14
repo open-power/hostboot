@@ -1588,6 +1588,244 @@ void performFcoDeconfigs(const FCO::fcoRestrictMetadata_t & i_fcoData)
         }
     }
 }
+
+void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
+{
+    HWAS_INF(ENTER_MRK"selectSpareCores");
+    using namespace FCO;
+
+    bool isFusedCoreMode = is_fused_mode();
+    bool fcoEnabled = io_fcoData.fcoValue != 0; // 0 indicates FCO mode not enabled
+    const Target * bootCore = getBootCore(false /* dont care about functional state */);
+
+    // in fused-mode treat the sibling of the boot core as the boot core too
+    const Target * bootCore2 = nullptr;
+    if( isFusedCoreMode )
+    {
+        TargetHandle_t fcParent = getParent(bootCore, TYPE_FC);
+        TARGETING::TargetHandleList fcChildren;
+        getChildChiplets(fcChildren, fcParent, TARGETING::TYPE_CORE, false);
+        assert(fcChildren.size() == 2,
+               "selectSpareCores: A fused core (%.8X) had an unexpected number of children=%d",
+               get_huid(fcParent),
+               fcChildren.size());
+        if( fcChildren[0] == bootCore )
+        {
+            bootCore2 = fcChildren[1];
+        }
+        else if( fcChildren[1] == bootCore )
+        {
+            bootCore2 = fcChildren[0];
+        }
+    }
+
+
+    // Spares need to be selected on all chips, so operate on all present chips regardless of functional state.
+    for (const auto chip : composable(getAllChips)(TYPE_PROC, false))
+    {
+        // Note - ATTR_SPARE_CORES is in small-core numbers regardless of fused-mode
+        if (auto numSpareCores = chip->getAttr<ATTR_SPARE_CORES>())
+        {
+            // This chip has spare cores. Get all present cores to select some as spare.
+            TargetHandleList cores;
+            getNonEcoCores(cores, chip, false);
+
+            // Find the chip in the FCO metadata.
+            auto procIterator = std::find_if(io_fcoData.procFcoMetadataList.begin(),
+                                             io_fcoData.procFcoMetadataList.end(),
+                                             [chip](const auto & i_procMetadata)
+                                             {
+                                                return (i_procMetadata->procId == get_huid(chip));
+                                             });
+
+            // It should be impossible if module vpd is valid, but if there
+            // are more spares than cores then we need to adjust.
+            // Note that there are some testcases that erroneously cause this.
+            if( numSpareCores > cores.size() )
+            {
+                HWAS_INF("Not enough cores present (%d) to satisfy requested spares (%d)",
+                         cores.size(),
+                         numSpareCores);
+                // downgrade the number to how many cores we have
+                numSpareCores = cores.size();
+                // if there are no cores, then we can't have any spares
+                if( numSpareCores == 0 )
+                {
+                    continue;
+                }
+            }
+
+            /*
+               Selection Priorities
+               1. Choose a present non-functional core, mark as spare. (Always worst)
+               2. Save a core/fc deconfigByFco, mark as spare. (Best of worst)
+               3. Choose a functional core, mark as spare. (Always worst)
+
+               Sort by
+                P/NF Cores
+                    * Ties: Sorted by deconfig priority
+                P/F/FCO Deconfig
+                    * Ties: Sorted by reverse deconfig priority
+                P/F
+                    * Ties: Sorted by deconfig priority
+            */
+            std::sort(cores.begin(), cores.end(),
+                    [&](Target * coreA, Target * coreB)
+                    {
+                        if ( ! (coreA->getAttr<ATTR_HWAS_STATE>().functional) )
+                        {
+                            if ( ! (coreB->getAttr<ATTR_HWAS_STATE>().functional) )
+                            {
+                                // Neither A or B are functional. Use deconfig priority
+                                // Note: Boot Cores/FCs cannot be nonfunctional so
+                                //       neither of these cores are the boot core/fc.
+                                return getCoreFcoPriority(coreA, (bootCore == coreA)||(bootCore2 == coreA)) <
+                                       getCoreFcoPriority(coreB, (bootCore == coreB)||(bootCore2 == coreB));
+                            }
+                            else
+                            {
+                                // A non-functional, B functional. A is before B.
+                                return true;
+                            }
+                        }
+                        else if ( ! (coreB->getAttr<ATTR_HWAS_STATE>().functional) )
+                        {
+                            // A functional, B non-functional. B is before A.
+                            return false;
+                        }
+                        else if (fcoEnabled)
+                        {
+                            assert(procIterator != io_fcoData.procFcoMetadataList.end(),
+                                    "FCO Metadata missing for chip[0x%X] which has functional cores.",
+                                    procIterator->get()->procId);
+
+                            auto coreAIt = std::find_if(procIterator->get()->coreCandidateList.begin(),
+                                                             procIterator->get()->coreCandidateList.end(),
+                                                             [coreA](const auto & i_coreMetadata)
+                                                             {
+                                                                return (i_coreMetadata->chipUnit ==
+                                                                        coreA->getAttr<ATTR_CHIP_UNIT>());
+                                                             });
+
+                            auto coreBIt = std::find_if(procIterator->get()->coreCandidateList.begin(),
+                                                             procIterator->get()->coreCandidateList.end(),
+                                                             [coreB](const auto & i_coreMetadata)
+                                                             {
+                                                                return (i_coreMetadata->chipUnit ==
+                                                                        coreB->getAttr<ATTR_CHIP_UNIT>());
+                                                             });
+
+                            FCO::coreFcoMetadata_t & fcoCoreA = *(coreAIt->get());
+                            FCO::coreFcoMetadata_t & fcoCoreB = *(coreBIt->get());
+                            if (fcoCoreA.markedForFcoDeconfig)
+                            {
+                                if (fcoCoreB.markedForFcoDeconfig)
+                                {
+                                    // Both cores were marked for FCO deconfig. Use best of worst deconfig priority
+                                    // (inverse deconfig priority) so that the spare is selected to be the next best
+                                    // candidate for FCO in the event of a failure. Note, the boot core cannot be a
+                                    // spare and if both cores have already been marked for FCO deconfig then neither
+                                    // are the boot core.
+                                    return getCoreFcoPriority(fcoCoreA) > getCoreFcoPriority(fcoCoreB);
+                                }
+                                else
+                                {
+                                    // Both A and B are functional but only A is marked for FCO deconfig. A is before B
+                                    // since we want to prioritize configuring FCO deconfiged cores as spare before we
+                                    // start taking cores away from FCO to mark as spare.
+                                    return true;
+                                }
+                            } else if (fcoCoreB.markedForFcoDeconfig)
+                            {
+                                // Both A and B are functional but only B is marked for FCO deconfig. B is before A
+                                // since we want to prioritize configuring FCO deconfiged cores as spare before we start
+                                // taking cores away from FCO to mark as spare.
+                                return false;
+                            }
+                            else
+                            {
+                                // Both A and B are functional and not marked for FCO deconfig. Use deconfig priority
+                                return getCoreFcoPriority(fcoCoreA) < getCoreFcoPriority(fcoCoreB);
+                            }
+                        }
+                        else
+                        {
+                            // A and B are functional. Use deconfig priority
+                            return getCoreFcoPriority(coreA, (bootCore == coreA)||(bootCore2 == coreA)) <
+                                   getCoreFcoPriority(coreB, (bootCore == coreB)||(bootCore2 == coreB));
+                        }
+                    });
+
+            // This loop will process COREs and assign spares from that granularity.
+            for (int i = 0; i < numSpareCores; ++i)
+            {
+                TargetHandle_t core = cores[i];
+
+                // Always set the attribute on the CORE target
+                core->setAttr<ATTR_CORE_IS_SPARE>(1);
+                HWAS_INF("CORE[%X] w/ CU=%d chosen as SPARE",
+                         get_huid(core),
+                         core->getAttr<ATTR_CHIP_UNIT>());
+
+                if (isFusedCoreMode)
+                {
+                    // HDAT deals directly with fused core targets when
+                    // eporting spares so need to set the attribute on
+                    // the FC parent.
+                    TargetHandle_t fcParent = getParent(core, TYPE_FC);
+                    if (fcParent->getAttr<ATTR_CORE_IS_SPARE>())
+                    {
+                        // Attribute was set when sibling core was processed. Move on.
+                        continue;
+                    }
+                    fcParent->setAttr<ATTR_CORE_IS_SPARE>(1);
+                    HWAS_INF("FC[%X] w/ CU=%d chosen as SPARE",
+                            get_huid(fcParent),
+                            fcParent->getAttr<ATTR_CHIP_UNIT>());
+                }
+
+                if (fcoEnabled && core->getAttr<ATTR_HWAS_STATE>().functional)
+                {
+                    // The core was functional which means FCO would have considered it a candidate for deconfig to
+                    // fulfill FCO number. Need to find the core and unset the deconfig flag if it was set since this
+                    // core was chosen as spare.
+                    HWAS_INF("selectSpareCores: FCO enabled checking for FCO deconfig of chosen SPARE");
+                    if (procIterator != io_fcoData.procFcoMetadataList.end())
+                    {
+                        // Find the core in the proc's metadata list.
+                        auto coreIterator = std::find_if(procIterator->get()->coreCandidateList.begin(),
+                                                         procIterator->get()->coreCandidateList.end(),
+                                                         [core](const auto & i_coreMetadata)
+                                                         {
+                                                            return (i_coreMetadata->chipUnit ==
+                                                                    core->getAttr<ATTR_CHIP_UNIT>());
+                                                         });
+
+                        if (coreIterator != procIterator->get()->coreCandidateList.end())
+                        {
+                            // Check deconfig
+                            FCO::coreFcoMetadata_t & fcoCore = *(coreIterator->get());
+                            if (fcoCore.markedForFcoDeconfig)
+                            {
+                                HWAS_INF("selectSpareCores: SPARE was marked for FCO deconfig, reclaiming...");
+                                // Reclaim the deconfiged core as a spare.
+                                fcoCore.markedForFcoDeconfig = false;
+                                if (isFusedCoreMode)
+                                {
+                                    // Reclaim the sibling core as well since fused cores cannot be broken up by
+                                    // deconfigs.
+                                    fcoCore.fcSiblingCore->markedForFcoDeconfig = false;
+                                    HWAS_INF("selectSpareCores: fused_mode detected, reclaiming sibling core...");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    HWAS_INF(EXIT_MRK"selectSpareCores");
+}
 #endif
 /******************************************************************************/
 // platProcessFieldCoreOverride
@@ -1649,16 +1887,10 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
             // the applyFieldCoreOverrides() algorithm.
             fcoData.fcoValue = fco;
 
-            // FCO of 0 means no overrides for this node
-            if (fco == 0)
+            if (is_fused_mode())
             {
-                HWAS_INF("FCO: node %.8X: no overrides, done.",
-                        get_huid(pNode));
-                continue; // next node
-            }
-            else if (is_fused_mode())
-            {
-                HWAS_INF("FCO: node %.8X: fused_mode detected, FCO value %d will be doubled during processing.", get_huid(pNode), fco);
+                HWAS_INF("FCO: node %.8X: fused_mode detected, FCO value %d will be doubled during processing.",
+                         get_huid(pNode), fco);
             }
             else
             {
@@ -1726,7 +1958,7 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
                     getNonEcoCores(coreList, pProc);
                     for (const auto & pCore : coreList)
                     {
-                        // Create the shared resource pointer.
+                        // Create the pointer.
                         std::unique_ptr<FCO::coreFcoMetadata_t> core = std::make_unique<FCO::coreFcoMetadata_t>();
 
                         // Fill in the struct data
@@ -1752,6 +1984,10 @@ errlHndl_t DeconfigGard::platProcessFieldCoreOverride()
             HWAS_INF("FCO: calling applyFieldCoreOverrides() with %d entries",
                     fcoData.procFcoMetadataList.size());
             FCO::applyFieldCoreOverrides(fcoData);
+
+            // Select cores as spare per chip. Needs to update FCO deconfig settings as necessary before
+            // the real deconfigs occur below.
+            selectSpareCores(fcoData);
 
             // Perform the actual deconfigs. Units turned off are marked present=true, functional=false, and marked with
             // the appropriate deconfigure code.

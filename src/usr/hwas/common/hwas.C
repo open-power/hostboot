@@ -933,6 +933,7 @@ uint8_t countSpareCores(partialGoodVector i_pgData, Target * i_chip)
     const uint32_t EQ_PG_SPARE_BIT_MASK = 0x00000010;
     for (const auto index : VPD_CP00_PG_EQ_INDEX)
     {
+        HWAS_DBG("EQ[%d]=%.8X", index, i_pgData[index]);
         // In the partial good vector a bit being zero means it's set. To count the number of spares,
         // count the number of zero bits.
         if (!(i_pgData[index] & EQ_PG_SPARE_BIT_MASK))
@@ -941,14 +942,14 @@ uint8_t countSpareCores(partialGoodVector i_pgData, Target * i_chip)
         }
     }
 
-    if (spareCount % 2)
+    if( (spareCount % 2) && is_fused_mode() )
     {
         /*@
           * @errortype
           * @severity           ERRL_SEV_UNRECOVERABLE
           * @moduleid           MOD_COUNT_SPARE_CORES
           * @reasoncode         RC_UNEVEN_SPARE_CORE_COUNT
-          * @devdesc            An uneven number of spare core bits were set in the partial good for a chip.
+          * @devdesc            An uneven number of spare core bits were set in the partial good for a chip in fused mode.
           * @custdesc           An internal firmware error occurred.
           * @userdata1          HUID of the chip
           * @userdata2          Number of spare bits set
@@ -966,11 +967,6 @@ uint8_t countSpareCores(partialGoodVector i_pgData, Target * i_chip)
 
         // Commit the error so that manufacturing can replace the part.
         errlCommit(error, HWAS_COMP_ID);
-    }
-
-    if (is_fused_mode())
-    {
-        spareCount /= 2;
     }
 
     return spareCount;
@@ -1200,6 +1196,9 @@ errlHndl_t HWASDiscovery::discoverTargets()
                         // Count the number of spare cores for this chip and set the attribute
                         auto count = countSpareCores(pgData_expanded, pTarget);
                         pTarget->setAttr<ATTR_SPARE_CORES>(count);
+                        HWAS_INF("Found %d spare cores for %.8X",
+                                 count,
+                                 get_huid(pTarget));
 
                         if(!chipFunctional)
                         {

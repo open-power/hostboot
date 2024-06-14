@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2021
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -359,3 +359,75 @@ def setMinFileSize(io_filename, i_min_size):
     if pad_size > 0:
         with open( io_filename, 'ab') as p:
             p.write(bytes([255]) * pad_size)
+
+
+###########################################################################
+# Turn on spare core bits in PG keyword
+# @param vpd_path - Path to file containing the meas/mvpd/ks SEEPROM data
+# @param num_spares - Number of spare cores to enable
+###########################################################################
+def set_spares(vpd_path,num_spares):
+    with open(vpd_path, 'r+b') as vpd_file:
+
+        vpd_bytes = vpd_file.read()
+        pg_key = 'CP00VD\x0201PG'
+        pg_idx = vpd_bytes.find(pg_key.encode())
+
+        if num_spares > 8:
+            raise Exception('Cannot set more than 8 spares')
+
+        if pg_idx == -1:
+            raise Exception('Cannot find PG keyword in file ' + vpd_path)
+
+        # Skip to the PG section contents
+        pg_idx += 13
+
+        # The 8 EQ records start at byte 96 and are 3 bytes wide (see
+        # PG VPD spreadsheet)
+        pg_idx += 96
+
+        # Loop through the number of spares requested
+        for i in range(num_spares):
+            # spare is bit 19 of each EQ record
+            #print('seeking to' , (pg_idx+2))
+            vpd_file.seek(pg_idx+2,0)
+            spare = int.from_bytes(vpd_file.read(1),"big")
+            #print('oldspare=',spare)
+            spare &= 0xEF
+            #print('newspare=',spare)
+            vpd_file.seek(pg_idx+2,0)
+            vpd_file.write(spare.to_bytes(1,"big"))
+
+            # move to the next EQ entry
+            pg_idx += 3
+
+    vpd_file.close()
+
+#    # read it back
+#    with open(vpd_path, 'r+b') as vpd_file:
+#
+#        vpd_bytes = vpd_file.read()
+#        pg_key = 'CP00VD\x0201PG'
+#        pg_idx = vpd_bytes.find(pg_key.encode())
+#
+#        if pg_idx == -1:
+#            raise Exception('Cannot find PG keyword in file ' + vpd_path)
+#
+#        # Skip to the PG section contents
+#        pg_idx += 13
+#
+#        # The 8 EQ records start at byte 96 and are 3 bytes wide (see
+#        # PG VPD spreadsheet)
+#        pg_idx += 96
+#
+#        # Loop through the number of spares requested
+#        for i in range(8):
+#            # spare is bit 19 of each EQ record
+#            print('seeking to' , (pg_idx+2))
+#            vpd_file.seek(pg_idx+2,0)
+#            spare = int.from_bytes(vpd_file.read(1),"big")
+#            print('newspare2=',spare)
+#
+#            # move to the next EQ entry
+#            pg_idx += 3
+

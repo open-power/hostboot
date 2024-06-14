@@ -8857,7 +8857,10 @@
   </attribute>
 
   <attribute>
-    <description>The number of spare cores on this proc chip read from partial good on EQ chiplets</description>
+    <description>
+       The number of spare cores on this proc chip read from partial good on EQ chiplets.
+       Value is in terms of SMT4 (small) cores regardless of fused mode.
+    </description>
     <id>SPARE_CORES</id>
     <persistency>volatile-zeroed</persistency>
     <readable/>

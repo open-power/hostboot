@@ -113,6 +113,19 @@ coreDeconfigPriority_t getCoreFcoPriority(coreFcoMetadata_t const & i_core)
     return priority;
 }
 
+// Used to sort the child COREs of a PROC target.
+coreDeconfigPriority_t getCoreFcoPriority(const TARGETING::Target * i_core, const bool i_isBootCore)
+{
+    assert(i_core->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_CORE,
+           "getCoreFcoPriority target was not core!");
+
+    coreFcoMetadata_t fcoCore;
+    fcoCore.chipUnit = i_core->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+    fcoCore.isBootCore = i_isBootCore;
+
+    return getCoreFcoPriority(fcoCore);
+}
+
 void setHwasStateForFcoDeconfig(TARGETING::Target & i_target)
 {
     TARGETING::HwasState hwasState = i_target.getAttr<TARGETING::ATTR_HWAS_STATE>();

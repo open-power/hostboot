@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2014,2022
+# Contributors Listed Below - COPYRIGHT 2014,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -72,6 +72,8 @@ else
     EECACHE_PREBUILT_DD1=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt)`
     # EECACHE to be used for DD2 Standalone builds
     EECACHE_PREBUILT_DD2=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt_dd2)`
+    # EECACHE to be used for Bonito Standalone builds
+    EECACHE_PREBUILT_BONITO=`eval echo $(cat ${PROJECT_ROOT}/src/build/citest/etc/eecache_prebuilt_bonito)`
 fi
 
 if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
@@ -104,6 +106,9 @@ if [[ $SETUP_FOR_STANDALONE -eq 1 ]];then
         # EECACHE to be used for DD2 Standalone builds
         echo cp ${EECACHE_PREBUILT_DD2} ${STANDALONE_SIMICS}/eecache_prebuilt_dd2.bin.ecc
         cp ${EECACHE_PREBUILT_DD2} ${STANDALONE_SIMICS}/eecache_prebuilt_dd2.bin.ecc
+        # EECACHE to be used for Bonito Standalone builds
+        echo cp ${EECACHE_PREBUILT_BONITO} ${STANDALONE_SIMICS}/eecache_prebuilt_bonito.bin.ecc
+        cp ${EECACHE_PREBUILT_BONITO} ${STANDALONE_SIMICS}/eecache_prebuilt_bonito.bin.ecc
     fi
 
 else

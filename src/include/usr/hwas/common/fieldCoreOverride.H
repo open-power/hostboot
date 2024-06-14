@@ -44,6 +44,7 @@ typedef uint8_t coreDeconfigPriority_t;
 // for deconfig consideration.
 constexpr coreDeconfigPriority_t BOOT_CORE_PRIORITY = UINT8_MAX;
 
+// The list of core deconfig priorities provided by the chip team.
 extern const std::array<coreDeconfigPriority_t, NUM_CORE_PER_CHIP> CORE_FCO_PRIORITY_DECONFIG_LIST;
 
 // ============================
@@ -175,6 +176,25 @@ void deconfigCoreByFco(coreFcoMetadata_t & i_core);
  *                               pointers.
  */
 void deconfigFcByFco(coreFcoMetadata_t & i_core);
+
+
+/* @brief Determine the relative priority of the given FCO core entry.
+ *
+ * @param[in] i_core  A reference to the metadata structure which must have valid target and fcSiblingCore
+ *                    pointers.
+ * @return coreDeconfigPriority_t  Priority (lower means more likely to be deconfigured)
+ */
+coreDeconfigPriority_t getCoreFcoPriority(coreFcoMetadata_t const & i_core);
+
+
+/* @brief Determine the relative priority of the given FCO core entry.
+ *
+ * @param[in] i_core  CORE target
+ * @param[in] i_isBootCore  true: this core is the boot core
+ *
+ * @return coreDeconfigPriority_t  Priority (lower means more likely to be deconfigured)
+ */
+coreDeconfigPriority_t getCoreFcoPriority(const TARGETING::Target * i_core, const bool i_isBootCore);
 
 }
 #endif

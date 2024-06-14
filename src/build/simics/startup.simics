@@ -315,6 +315,17 @@ try {
     $hb_odysecurity = 0
 }
 
+# Enable Odyssey support
+$use_odyssey = "0"
+@if 'HB_USE_ODYSSEY' in os.environ: simenv.use_odyssey = "1"
+
+# Disable the setting of a spare core
+$hb_nospares = "0"
+@if 'HB_NO_SPARES' in os.environ: simenv.hb_nospares = "1"
+if( (hb_skip_eecache == 1) and (hb_nospares == 0) ) {
+    echo "WARNING: HB_SKIP_EECACHE=1 without HB_NO_SPARES=1 may produce VPD ECC errors"
+}
+
 # Handle the SIMICS_MORECACHE environment variable, if set, and enable more
 # backing caches
 run-command-file (lookup-file -query ($hb_script_location + "/morecache.simics"))
@@ -328,5 +339,3 @@ if($machine_name == "p10_standalone" or $machine_name == "bonito") {
     run-command-file (lookup-file -query ($hb_script_location + "/combined.simics"))
 }
 
-$use_odyssey = "0"
-@if 'HB_USE_ODYSSEY' in os.environ: simenv.use_odyssey = "1"

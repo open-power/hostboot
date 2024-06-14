@@ -752,9 +752,9 @@ errlHndl_t getOverrideWofTable(TARGETING::Target* i_procTarg, uint8_t* o_wofData
 
     uint8_t l_coreCount = 0;
     // cores are equal to Non ECO cores if it is greater than spares or spares are zero.
-    if (l_coreCount_NonEco < l_spareCoreCount)
+    if (l_coreCount_NonEco >= l_spareCoreCount)
     {
-        // Subtrace spares from core count, NOTE subtracting 0 is ok.
+        // Subtract spares from core count, NOTE subtracting 0 is ok.
         FAPI_INF("getOverrideWofTable: Spare Core Count = %d", l_spareCoreCount);
         l_coreCount = l_coreCount_NonEco - l_spareCoreCount;
     }

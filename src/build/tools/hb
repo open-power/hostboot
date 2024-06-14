@@ -967,6 +967,7 @@ hb_flags()
     echo "= Simics Options ="
     echo "HB_BREAK_ON_ERROR (='"$HB_BREAK_ON_ERROR"'): Halts simics if HB hits an exception"
     echo "HB_FORCE_1PROC (='"$HB_FORCE_1PROC"'): Force single-processor mode"
+    echo "HB_NO_SPARES (='"$HB_NO_SPARES"'): Do not enable a spare core in proc1"
     echo "HB_SKIP_EECACHE (='"$HB_SKIP_EECACHE"'): Do not preload PNOR with prebuilt eecache contents"
     echo "HB_SIMICS_CHECKPOINT (='"$HB_SIMICS_CHECKPOINT"'): Loads standalone simics with the supplied checkpoint."
     echo "HB_USE_ODYSSEY (='"$HB_USE_ODYSSEY"'): Use DDR5/Odyssey DDIMMs"
