@@ -40,6 +40,7 @@
 #include <lib/utils/pmic_consts.H>
 #include <pmic_regs.H>
 #include <pmic_regs_fld.H>
+#include <ody_scom_ody_odc.H>
 
 ///
 /// @brief Read and store serial number and CCIN number
@@ -146,6 +147,38 @@ fapi_try_exit:
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
     // Returning 0xFFFF to indicate an error
     return ERROR;
+}
+
+///
+/// @brief Read and store DTS data
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in,out] io_dts_data DTS data array
+/// @return none
+///
+void read_dts_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                   uint64_t io_dts_data[])
+{
+    static const uint64_t DTS_ADDRESS_MAP[] = {scomt::ody::ODC_MMIO_SNSC_OCTHERM,
+                                               scomt::ody::ODC_MMIO_SNSC_D0THERM,
+                                               scomt::ody::ODC_MMIO_SNSC_D1THERM,
+                                               scomt::ody::ODC_MMIO_SNSC_D2THERM,
+                                               scomt::ody::ODC_MMIO_SNSC_D3THERM
+                                              };
+
+    fapi2::buffer<uint64_t> l_data;
+
+    // Read DTS registers and store value in tele structure
+    for (uint8_t l_idx = 0; l_idx < NUM_DTS_LOG_ENTRIES; l_idx++)
+    {
+        FAPI_TRY(fapi2::getScom(i_ocmb_target, DTS_ADDRESS_MAP[l_idx], l_data));
+        io_dts_data[l_idx] = l_data;
+    }
+
+fapi_try_exit:
+    // We dont want to exit out of the HWP so we are just clearing error here.
+    // We also dont want any hidden logs generated.
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 }
 
 ///
@@ -611,6 +644,8 @@ fapi2::ReturnCode collect_periodic_tele_data(mss::pmic::ddr5::target_info_redund
     {
         io_periodic_tele_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(io_target_info.iv_ocmb,
                 io_periodic_tele_info.iv_dqs_tracking_log);
+
+        read_dts_data(io_target_info.iv_ocmb, io_periodic_tele_info.iv_dts_data);
     }
 
     // Read and store ADC regs
@@ -828,6 +863,8 @@ fapi2::ReturnCode pmic_periodic_telemetry_ddr5_2U_helper(const fapi2::Target<fap
     if (l_thermal_init_complete == fapi2::ENUM_ATTR_MEM_THERMAL_INIT_COMPLETE_YES)
     {
         io_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(i_ocmb_target, io_info.iv_dqs_tracking_log);
+
+        read_dts_data(i_ocmb_target, io_info.iv_dts_data);
     }
 
     FAPI_TRY(collect_periodic_tele_data_2U(i_ocmb_target, io_info));

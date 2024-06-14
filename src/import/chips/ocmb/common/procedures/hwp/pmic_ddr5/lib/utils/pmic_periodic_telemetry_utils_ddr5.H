@@ -63,6 +63,8 @@ static constexpr uint8_t NUM_REG_TO_OR = 5;
 
 static constexpr uint8_t NUM_BITS_IN_BYTE = 8;
 
+static constexpr uint8_t NUM_DTS_LOG_ENTRIES = 5;
+
 ///
 /// @brief Read and store serial number and CCIN number
 ///
@@ -226,6 +228,16 @@ fapi_try_exit:
 ///
 uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                      uint64_t io_dqs_tracking_log[]);
+
+///
+/// @brief Read and store DTS data
+///
+/// @param[in] i_ocmb_target OCMB target
+/// @param[in,out] io_dts_data DTS data array
+/// @return none
+///
+void read_dts_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                   uint64_t io_dts_data[]);
 
 ///
 /// @brief Scale the ADC regs (value * 38147) / 1000000 to get the value in mV

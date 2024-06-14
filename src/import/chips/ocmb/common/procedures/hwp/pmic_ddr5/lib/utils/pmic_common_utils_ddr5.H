@@ -655,12 +655,13 @@ struct __attribute__ ((__packed__)) dt_periodic_telemetry_data
 ///           a PMIC/DT target state. PMIC0 is bit0 .. PMIC3 is bit3, DT0 is bit4 .. DT3 is bit7
 ///           iv_adc_i2c_state represents ADC i2c state
 ///     0x54: Added DQS drift tracking data
+///     0x55: Added DTS data
 ///
 struct __attribute__ ((__packed__)) periodic_telemetry_data
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision             = 0x54;
+    uint8_t iv_revision             = 0x55;
     uint8_t iv_aggregate_pmic_state = 0;
     uint16_t reserved               = 0;
 
@@ -672,6 +673,8 @@ struct __attribute__ ((__packed__)) periodic_telemetry_data
     uint16_t reserved1                   = 0;
 
     uint64_t iv_dqs_tracking_log[24]     = {0};
+
+    uint64_t iv_dts_data[5]              = {0};
 
     adc_periodic_telemetry_data iv_adc;
 
@@ -751,12 +754,13 @@ struct __attribute__ ((__packed__)) pmic_periodic_2u_telemetry_data
 ///     0x23: Added PMIC I2C fail logs. Each bit in iv_pmic_i2c_state represents
 ///           a PMIC target state. PMIC0 is bit0 and PMIC1 is bit1
 ///     0x24: Added DQS drift tracking data
+///     0x25: Added DTS data
 ///
 struct __attribute__ ((__packed__)) periodic_2U_telemetry_data
 {
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision             = 0x24;
+    uint8_t iv_revision             = 0x25;
     uint8_t iv_aggregate_pmic_state = 0;
     uint16_t reserved               = 0;
 
@@ -768,6 +772,8 @@ struct __attribute__ ((__packed__)) periodic_2U_telemetry_data
     uint16_t reserved1                   = 0;
 
     uint64_t iv_dqs_tracking_log[24]     = {0};
+
+    uint64_t iv_dts_data[5]              = {0};
 
     pmic_periodic_2u_telemetry_data iv_pmic[CONSTS::NUM_PMICS_2U];
 };
