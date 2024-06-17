@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021                             */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include "mdsI2cScomdd.H"         // mdsI2cScomPerformOp
 #include "mdsAccessTrace.H"       // g_trac_mdsaccess
 #include "mdsAccessUtils.H"       // MDS_ACCESS::validateMdsI2cScomInputs
+#include "targeting/common/util.H"
 #include <errl/errlmanager.H>     // errlCommit
 #include <lib/i2c/mds_i2c_scom.H> // i2c_get_scom/i2c_put_scom for target MDS_CTRL
 #include <devicefw/driverif.H>    // DeviceFW::WILDCARD, DeviceFW::MDS_I2C
@@ -124,7 +125,7 @@ errlHndl_t mdsI2cScomPerformOp(DeviceFW::OperationType i_opType,
             // Make the get SCOM call
             FAPI_EXEC_HWP(l_rc , mss::mds::i2c::i2c_get_scom, l_fapi2Target,
                           static_cast<uint32_t>(l_scomAddr),  l_fapi2Buffer32);
-            l_err = fapi2::rcToErrl(l_rc);
+            l_err = fapi2::rcToErrl(l_rc, TARGETING::get_huid(i_target));
 
             if ( unlikely(nullptr != l_err) )
             {
@@ -142,7 +143,7 @@ errlHndl_t mdsI2cScomPerformOp(DeviceFW::OperationType i_opType,
             // Make the put SCOM call
             FAPI_EXEC_HWP(l_rc , mss::mds::i2c::i2c_put_scom, l_fapi2Target,
                           static_cast<uint32_t>(l_scomAddr),  l_fapi2Buffer32);
-            l_err = fapi2::rcToErrl(l_rc);
+            l_err = fapi2::rcToErrl(l_rc, TARGETING::get_huid(i_target));
 
             if ( unlikely(nullptr != l_err) )
             {

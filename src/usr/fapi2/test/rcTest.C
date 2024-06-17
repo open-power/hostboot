@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1492,7 +1492,7 @@ uint32_t rcTestRcToErrl()
         }
 
         // fapiRcToErrl is implicitly calling processEICDGs
-        errlHndl_t pError = fapi2::rcToErrl(l_rc);
+        errlHndl_t pError = fapi2::rcToErrl(l_rc, TARGETING::get_huid(l_pConstTarget));
         if(pError == nullptr)
         {
             FAPI_ERR("rcTestRcToErrl:fapiRcToErrl returnd No Errorlog handle");

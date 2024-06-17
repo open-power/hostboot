@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -70,7 +70,7 @@ void hwpResetGlobals(void);
         fapi2::hwpResetGlobals(); \
         fapi2::ReturnCode invoke_rc; \
         FAPI_EXEC_HWP(invoke_rc, FUNC, ##_args_); \
-        ERRHNDL = fapi2::rcToErrl(invoke_rc);\
+        ERRHNDL = fapi2::rcToErrl(invoke_rc, 0);\
         if( ERRHNDL ) {\
             ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
             ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\
@@ -97,7 +97,7 @@ void hwpResetGlobals(void);
     {\
         fapi2::hwpResetGlobals(); \
         FAPI_EXEC_HWP(_RC, FUNC, ##_args_); \
-        ERRHNDL = fapi2::rcToErrl(_RC);\
+        ERRHNDL = fapi2::rcToErrl(_RC, 0);\
         if( ERRHNDL ) {\
             ERRHNDL->collectTrace(FAPI_IMP_TRACE_NAME,256);\
             ERRHNDL->collectTrace(FAPI_TRACE_NAME,384);\

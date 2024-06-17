@@ -85,7 +85,7 @@ TS_FAIL(STRING , \
         l_testEntry.data, \
         l_testEntry.addr, \
         get_huid(TARGET)); \
-l_err = fapi2::rcToErrl(l_rc); \
+l_err = fapi2::rcToErrl(l_rc, get_huid(TARGET)); \
 errlCommit(l_err, CXXTEST_COMP_ID);
 
 #define FAIL_TEST_ERRL(TARGET, STRING) \
@@ -677,7 +677,7 @@ public:
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_firstExpChip));
-                    l_err = fapi2::rcToErrl(l_rc);
+                    l_err = fapi2::rcToErrl(l_rc, get_huid(l_firstExpChip));
                     errlCommit(l_err, CXXTEST_COMP_ID);
                 }
 
@@ -694,7 +694,7 @@ public:
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_lastExpChip));
-                    l_err = fapi2::rcToErrl(l_rc);
+                    l_err = fapi2::rcToErrl(l_rc, get_huid(l_lastExpChip));
                     errlCommit(l_err, CXXTEST_COMP_ID);
                 }
 
@@ -714,7 +714,7 @@ public:
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_firstExpChip));
-                    l_err = fapi2::rcToErrl(l_rc);
+                    l_err = fapi2::rcToErrl(l_rc, get_huid(l_firstExpChip));
                     errlCommit(l_err, CXXTEST_COMP_ID);
                 }
 
@@ -745,7 +745,7 @@ public:
                             l_testEntry.data,
                             l_testEntry.addr,
                             get_huid(l_lastExpChip));
-                    l_err = fapi2::rcToErrl(l_rc);
+                    l_err = fapi2::rcToErrl(l_rc, get_huid(l_lastExpChip));
                     errlCommit(l_err, CXXTEST_COMP_ID);
                 }
 

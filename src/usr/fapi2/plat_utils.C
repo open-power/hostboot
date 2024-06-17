@@ -1024,7 +1024,7 @@ errlHndl_t makeHwpError(const ERRORLOG::errlSeverity_t i_sev,
          * @moduleid     MOD_FAPI2_RC_TO_ERRL
          * @reasoncode   RC_HWP_GENERATED_ERROR
          * @userdata1    RC value from HWP
-         * @userdata2    <unused>
+         * @userdata2    HUID of related target (may be zero)
          * @devdesc      HW Procedure generated error. Check User Data.
          * @custdesc     Error initializing processor/memory subsystem
          *               during boot. Check FRU list for repair actions
@@ -1034,7 +1034,7 @@ errlHndl_t makeHwpError(const ERRORLOG::errlSeverity_t i_sev,
          * @moduleid     MOD_FAPI2_RC_TO_ERRL
          * @reasoncode   RC_HWP_GENERATED_SBE_ERROR
          * @userdata1    RC value from the SBE HWP
-         * @userdata2    <unused>
+         * @userdata2    Chip HUID for SBE that generated this error
          * @devdesc      SBE HW Procedure generated error. Check User Data.
          * @custdesc     Error initializing processor/memory subsystem
          *               during boot. Check FRU list for repair actions
@@ -1059,6 +1059,7 @@ errlHndl_t makeHwpError(const ERRORLOG::errlSeverity_t i_sev,
 /// See doxygen in plat_utils.H
 ///
 errlHndl_t rcToErrl(ReturnCode & io_rc,
+                    uint64_t i_huid,
                     ERRORLOG::errlSeverity_t i_sev,
                     const fapi2::fapi2ReasonCode   i_rc)
 {
@@ -1088,7 +1089,7 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
             if (l_creator == ReturnCode::CREATOR_HWP)
             {
                 // HWP Error. Create an error log
-                FAPI_ERR("rcToErrl: HWP error: 0x%08x", l_rcValue);
+                FAPI_ERR("rcToErrl: HWP error: 0x%08x, HUID: 0x%08x", l_rcValue, i_huid);
 
                 l_pError = makeHwpError(i_sev, i_rc, l_rcValue);
                 // Note - If location of RC value changes, must update
@@ -1109,6 +1110,9 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
                     processEICDGs(*l_pErrorInfo, l_pError);
                     processEIChildrenCDGs(*l_pErrorInfo, l_pError);
                     processEIHwCallouts(*l_pErrorInfo, l_pError);
+                    // User Data 1 is commonly used so put HUID information into
+                    // User Data 2.
+                    l_pError->addUserData2(i_huid);
                 }
                 else
                 {
@@ -1118,7 +1122,7 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
             else
             {
                 // FAPI error. Create an error log
-                FAPI_ERR("rcToErrl: FAPI error: 0x%08x", l_rcValue);
+                FAPI_ERR("rcToErrl: FAPI error: 0x%08x, HUID: 0x%08x", l_rcValue, i_huid);
 
                 // The errlog reason code is the HWPF compID and the rcValue LSB
                 uint16_t l_reasonCode = l_rcValue;
@@ -1141,6 +1145,9 @@ errlHndl_t rcToErrl(ReturnCode & io_rc,
                     processEICDGs(*l_pErrorInfo, l_pError);
                     processEIChildrenCDGs(*l_pErrorInfo, l_pError);
                     processEIHwCallouts(*l_pErrorInfo, l_pError);
+                    // User Data 1 is commonly used so put HUID information into
+                    // User Data 2.
+                    l_pError->addUserData2(i_huid);
                 }
             }
         } // else if no elog yet
@@ -1231,7 +1238,7 @@ void createPlatLog(
     // Convert the return code to an error log.
     // This will set the return code to FAPI2_RC_SUCCESS and clear any
     // PLAT Data, HWP FFDC data, and Error Target associated with it.
-    l_pError = rcToErrl(io_rc, l_sev);
+    l_pError = rcToErrl(io_rc, 0, l_sev);
 
     // Add the error log pointer as data to the ReturnCode
     addErrlPtrToReturnCode(io_rc, l_pError);

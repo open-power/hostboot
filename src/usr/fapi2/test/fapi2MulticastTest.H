@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+#include "targeting/common/util.H"
 #include <cxxtest/TestSuite.H>
 #include <target.H>
 #include <fapi2.H>
@@ -232,7 +233,7 @@ void testMulticastReadOr()
     if(l_fapiRc)
     {
         TS_FAIL("testMulticastReadOr: Multicast getScom returned RC: %d",static_cast<uint64_t>(l_fapiRc));
-        l_errl = fapi2::rcToErrl(l_fapiRc);
+        l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_proc));
         break;
     }
 
@@ -270,7 +271,7 @@ void testMulticastReadOr()
     if(l_fapiRc)
     {
         TS_FAIL("testMulticastReadOr: Multicast getScom returned RC: %d",static_cast<uint64_t>(l_fapiRc));
-        l_errl = fapi2::rcToErrl(l_fapiRc);
+        l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_proc));
         break;
     }
 
@@ -423,7 +424,7 @@ void testMulticastWriteOp()
     {
          TS_FAIL("testMulticastWriteOp: could not write multicast SCOM via"
                  " fapi2 layer to addr 0x%.08x", l_multicastScom);
-         l_errl = fapi2::rcToErrl(l_fapiRc);
+         l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_eqTarget));
     }
     if(l_errl)
     {
@@ -549,7 +550,7 @@ void testMulticastWriteOpBadParam()
      {
          TS_FAIL("testMulticastWriteOpBadParam: could not write multicast SCOM "
                  "via fapi2 layer to addr 0x%.08x", l_multicastScom);
-         l_errl = fapi2::rcToErrl(l_fapiRc);
+         l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_eqTarget));
      }
     if(l_errl)
     {
@@ -653,7 +654,7 @@ void testMulticastReadAnd()
     {
         TS_FAIL("testMulticastReadAnd: could not multicast write; FAPI RC: %d",
                 static_cast<uint64_t>(l_fapiRc));
-        l_errl = fapi2::rcToErrl(l_fapiRc);
+        l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_proc));
         break;
     }
 
@@ -684,7 +685,7 @@ void testMulticastReadAnd()
     {
         TS_FAIL("testMulticastReadAnd: could not read multicast SCOM via fapi2 layer from addr 0x%.08x; FAPI RC: %d",
                 l_multicastScom, static_cast<uint64_t>(l_fapiRc));
-        l_errl = fapi2::rcToErrl(l_fapiRc);
+        l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_proc));
         break;
     }
 
@@ -794,7 +795,7 @@ void testMulticastCoreSelect()
     {
         TS_FAIL("testMulticastCoreSelect: could not write multicast SCOM via"
                 " fapi2 layer to addr 0x%.08x", l_multicastScomAddr);
-        l_errl = fapi2::rcToErrl(l_rc);
+        l_errl = fapi2::rcToErrl(l_rc, TARGETING::get_huid(l_coreTarget));
     }
 
     if(l_errl)
@@ -854,7 +855,7 @@ void testMulticastCoreSelect()
     {
         TS_FAIL("testMulticastCoreSelect: could not read multicast SCOM via"
                 " fapi2 layer from addr 0x%.08x", l_multicastScomAddr);
-        l_errl = fapi2::rcToErrl(l_rc);
+        l_errl = fapi2::rcToErrl(l_rc, TARGETING::get_huid(l_coreTarget));
     }
     if(l_errl)
     {
@@ -929,7 +930,7 @@ void testMulticastCompare()
         {
             TS_FAIL("testMulticastCompare: could not write to SCOM 0x%.08x "
                     "for MC HUID 0x%.08x", TEST_SCOM_WRITE_ADDR,
-                    TARGETING::get_huid(l_mc));
+                    TARGETING::get_huid(l_proc));
             break;
         }
     }
@@ -1007,12 +1008,12 @@ void testMulticastCompare()
                     "multicsat miscompare. Expected 0x%x; actual 0x%x",
                     fapi2::FAPI2_RC_PLAT_MISCOMPARE,
                     static_cast<uint64_t>(l_fapiRc));
-            l_errl = fapi2::rcToErrl(l_fapiRc);
+            l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_proc));
             break;
         }
         else
         {
-            l_errl = fapi2::rcToErrl(l_fapiRc);
+            l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_proc));
             if(!l_errl)
             {
                 TS_FAIL("testMulticastCompare: no HB errl is created for FAPI"
@@ -1041,7 +1042,7 @@ void testMulticastCompare()
     {
         TS_FAIL("testMulticastCompare: could not write multicast SCOM via"
                 " fapi2 layer to addr 0x%.08x", l_multicastScomAddr);
-        l_errl = fapi2::rcToErrl(l_fapiRc);
+        l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_proc));
     }
     if(l_errl)
     {
@@ -1056,7 +1057,7 @@ void testMulticastCompare()
     {
         TS_FAIL("testMulticastCompare: could not read multicast SCOM via"
                 " fapi2 layer from addr 0x%.08x", l_multicastScomAddr);
-        l_errl = fapi2::rcToErrl(l_fapiRc);
+        l_errl = fapi2::rcToErrl(l_fapiRc, TARGETING::get_huid(l_proc));
     }
     if(l_errl)
     {
