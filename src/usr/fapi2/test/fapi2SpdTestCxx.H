@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,7 @@
  *
  *  @brief Test cases for SPD code
  */
+#include "targeting/common/util.H"
 #include <sys/time.h>
 
 #include <cxxtest/TestSuite.H>
@@ -91,7 +92,7 @@ class SPDTest: public CxxTest::TestSuite
                   FAPI_ERR("fapi2::getSPD(l_fDim, NULL, l_spdSize) returned %d",
                            static_cast<uint64_t>(l_rc));
 
-                  auto errl = fapi2::rcToErrl(l_rc);
+                  auto errl = fapi2::rcToErrl(l_rc, get_huid(l_tDimm));
                   errlCommit(errl, CXXTEST_COMP_ID);
                   TS_FAIL("testGetSPD: Failed getting the size of the mem buffer - Dimm %.8X", TARGETING::get_huid(l_tDimm));
                   continue;
@@ -107,7 +108,7 @@ class SPDTest: public CxxTest::TestSuite
                   FAPI_ERR("fapi2::getSPD(l_fDim, l_blobData, l_spdSize) returned %d",
                            static_cast<uint64_t>(l_rc));
 
-                  auto errl = fapi2::rcToErrl(l_rc);
+                  auto errl = fapi2::rcToErrl(l_rc, get_huid(l_tDimm));
                   errlCommit(errl, CXXTEST_COMP_ID);
                   TS_FAIL( "testGetSPD- Failed to read data from DIMM with HUID= 0x%x",
                            TARGETING::get_huid(l_tDimm));

@@ -32,6 +32,7 @@
  */
 
 // Framework includes
+#include "targeting/common/util.H"
 #include <prdfErrlUtil.H>
 #include <prdfTrace.H>
 
@@ -604,7 +605,7 @@ bool queryEcoMode(TARGETING::TargetHandle_t i_trgt)
 
     fapi2::ReturnCode rc = FAPI_ATTR_GET(fapi2::ATTR_ECO_MODE, fapiTrgt, attr);
 
-    errlHndl_t errl = fapi2::rcToErrl(rc);
+    errlHndl_t errl = fapi2::rcToErrl(rc, TARGETING::get_huid(i_trgt));
     if (nullptr != errl)
     {
         PRDF_ERR("[PlatServices::queryEcoMode] Failed to get ATTR_ECO_MODE: "

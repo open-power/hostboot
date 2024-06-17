@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 //******************************************************************************
 // Includes
 //******************************************************************************
+#include "targeting/common/util.H"
 #include <sys/msg.h>
 #include <limits.h>
 #include <string.h>
@@ -802,7 +803,7 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
                         l_fapiTarget, &l_buf[0]);
 
             // Write the attribute to the SyncAttributeTank to sync to Cronus
-            errlHndl_t l_pErr = fapi2::rcToErrl(l_rc);
+            errlHndl_t l_pErr = fapi2::rcToErrl(l_rc, TARGETING::get_huid(l_pTarget));
             if(!l_pErr)
             {
                 iv_syncTank.setAttribute(l_attrs[i].iv_attrId, l_fTypeBitPos,

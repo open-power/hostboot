@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include "i2cscomdd.H" //i2cScomPerformOp
 #include "expscom_trace.H" //g_trac_expscom
 #include "expscom_utils.H" //validateInputs
+#include "targeting/common/util.H"
 
 namespace I2CSCOMDD
 {
@@ -115,7 +116,7 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
                               l_fapi_target, static_cast<uint32_t>(l_scomAddr),
                               l_fapi2Buffer64);
 
-                l_err = fapi2::rcToErrl(l_rc);
+                l_err = fapi2::rcToErrl(l_rc, TARGETING::get_huid(i_target));
                 if(l_err)
                 {
                     // Sizes stolen from plat_hwp_invoker.H
@@ -138,7 +139,7 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
             {
                 FAPI_EXEC_HWP(l_rc , mss::exp::i2c::i2c_put_scom, l_fapi_target,
                      static_cast<uint32_t>(l_scomAddr), l_fapi2Buffer64);
-                l_err = fapi2::rcToErrl(l_rc);
+                l_err = fapi2::rcToErrl(l_rc, TARGETING::get_huid(i_target));
                 if(l_err)
                 {
                     // Sizes stolen from plat_hwp_invoker.H
@@ -160,7 +161,7 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
             {
                 FAPI_EXEC_HWP(l_rc , mss::exp::i2c::i2c_get_scom, l_fapi_target,
                      static_cast<uint32_t>(l_scomAddr), l_fapi2Buffer32);
-                l_err = fapi2::rcToErrl(l_rc);
+                l_err = fapi2::rcToErrl(l_rc, TARGETING::get_huid(i_target));
                 if(l_err)
                 {
                     // Sizes stolen from plat_hwp_invoker.H
@@ -187,7 +188,7 @@ errlHndl_t i2cScomPerformOp(DeviceFW::OperationType i_opType,
             {
                 FAPI_EXEC_HWP(l_rc , mss::exp::i2c::i2c_put_scom, l_fapi_target,
                     static_cast<uint32_t>(l_scomAddr), l_fapi2Buffer32);
-                l_err = fapi2::rcToErrl(l_rc);
+                l_err = fapi2::rcToErrl(l_rc, TARGETING::get_huid(i_target));
                 if(l_err)
                 {
                     // Sizes stolen from plat_hwp_invoker.H

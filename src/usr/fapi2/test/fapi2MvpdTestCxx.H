@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -87,7 +87,7 @@ public:
 
           if ( l_rc )
           {
-              errlHndl_t l_errl = fapi2::rcToErrl(l_rc);
+              errlHndl_t l_errl = fapi2::rcToErrl(l_rc, 0);
               if(l_errl->reasonCode() != fapi2::RC_INVALID_RECORD)
               {
                   TS_FAIL("testMvpdRecordCheck: Exceeded max index while searching for record MVPDRecord::0x%x", l_fapi2Index);
@@ -134,7 +134,7 @@ public:
 
           if ( l_rc )
           {
-              errlHndl_t l_errl = fapi2::rcToErrl(l_rc);
+              errlHndl_t l_errl = fapi2::rcToErrl(l_rc, 0);
               if(l_errl->reasonCode() != fapi2::RC_INVALID_KEYWORD)
               {
                   TS_FAIL("testMvpdKeywordCheck: Exceeded max index while searching for MVPDKeyword::0x%x", l_fapi2Index);

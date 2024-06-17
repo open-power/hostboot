@@ -37,6 +37,8 @@
 #include <set_sbe_error.H>
 
 #include "sbe_fifodd.H"
+#include "targeting/common/util.H"
+#include "trace/interface.H"
 #include <targeting/odyutil.H>                 // isOdysseyChip
 
 /**
@@ -383,6 +385,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                                convertTargetingTypeToFapi2(i_target->getAttr<TARGETING::ATTR_TYPE>()));
 
             slidErrl = rcToErrl(fapiRC,
+                                TARGETING::get_huid(i_target),
                                 package->severity,
                                 RC_HWP_GENERATED_SBE_ERROR);
 

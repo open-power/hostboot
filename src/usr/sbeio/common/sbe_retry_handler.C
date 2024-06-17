@@ -35,6 +35,7 @@
 /*****************************************************************************/
 
 // System
+#include "targeting/common/util.H"
 #include <stdint.h>
 
 // Hostboot userspace
@@ -1213,6 +1214,7 @@ errlHndl_t ProcSbeRetryHandler::sbe_poll_status_reg()
                         l_fapi2_proc_target, this->iv_sbeRegister);
 
         l_errl = rcToErrl(l_rc,
+                          TARGETING::get_huid(iv_proc),
                           ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                           fapi2::RC_HWP_GENERATED_SBE_ERROR);
         if (l_errl)
@@ -1421,6 +1423,7 @@ void ProcSbeRetryHandler::sbe_get_ffdc_handler()
                     FAPI_SET_SBE_ERROR(l_fapiRc, l_rc, l_sbeFfdc, l_pos, fapiTargetType);
 
                     errlHndl_t l_sbeHwpfErr = rcToErrl(l_fapiRc,
+                                                       TARGETING::get_huid(iv_proc),
                                                        ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                                        fapi2::RC_HWP_GENERATED_SBE_ERROR);
 

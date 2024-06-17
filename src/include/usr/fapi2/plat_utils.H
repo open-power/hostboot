@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,7 @@
 #ifndef PLAT_UTILS_H_
 #define PLAT_UTILS_H_
 
+#include <cstdint>
 #include <return_code.H>
 #include <common_ringId.H>
 #include <plat_types.H>
@@ -69,13 +70,15 @@ bool platIsScanTraceEnabled();
 /// @brief Converts a fapi2::ReturnCode to a HostBoot PLAT error log
 ///
 /// @param[io] io_rc Reference to ReturnCode (set to success after function)
-/// @param[in] i_sev Error log severity defaulted to unrecoverable
-/// @param[in] i_rc  Return Code of the error. Should be left defaulted to RC_HWP_GENERATED_ERROR in most cases.
-///                  However, it can be provided to differentiate an error from the generic hardware procedure error.
+/// @param[in] i_huid HUID for an SBE error. Only used in a few specific contexts.
+/// @param[in] i_sev  Error log severity defaulted to unrecoverable
+/// @param[in] i_rc   Return Code of the error. Should be left defaulted to RC_HWP_GENERATED_ERROR in most cases.
+///                   However, it can be provided to differentiate an error from the generic hardware procedure error.
 ///
 /// @return errlHndl_t (NULL if Return Code contained success)
 ///
 errlHndl_t rcToErrl(ReturnCode             & io_rc,
+                    uint64_t                 i_huid,
                     ERRORLOG::errlSeverity_t i_sev = ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                     fapi2ReasonCode          i_rc = RC_HWP_GENERATED_ERROR);
 

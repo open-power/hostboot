@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 /******************************************************************************/
 
 // Standard library
+#include "targeting/common/util.H"
 #include <stdint.h>
 #include <arch/magic.H>
 
@@ -144,7 +145,7 @@ void* call_proc_fabric_iovalid(void* const io_pArgs)
             //Something bad happened during the hwp run
             for (auto l_rc : l_fapiRcs)
             {
-                errlHndl_t l_tempErr = rcToErrl(l_rc);
+                errlHndl_t l_tempErr = rcToErrl(l_rc, get_huid(l_cpu_target));
                 if (l_tempErr)
                 {
                     l_tempErr->plid(l_errl->plid());

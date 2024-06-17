@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -396,7 +396,7 @@ int32_t getDimmSpareConfig<TYPE_MEM_PORT>( TargetHandle_t i_memPort,
         fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> fapiPort(i_memPort);
         ReturnCode l_rc = FAPI_ATTR_GET( fapi2::ATTR_MEM_EFF_DIMM_SPARE,
                                          fapiPort, attr );
-        errlHndl_t errl = fapi2::rcToErrl(l_rc);
+        errlHndl_t errl = fapi2::rcToErrl(l_rc, TARGETING::get_huid(i_memPort));
         if ( nullptr != errl )
         {
             PRDF_ERR( PRDF_FUNC "Failed to get ATTR_MEM_EFF_DIMM_SPARE for "
