@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2023
+# Contributors Listed Below - COPYRIGHT 2011,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -68,7 +68,8 @@ my ($collect) = 0;
 my ($INCLUDE, $Arg, $file, $dir, $string_file, $collision_file);
 my $args = "";
 
-my $fail_on_collision = 0; # 1 = exit with error if hash collision occurs
+my $fail_on_collision = 1; # Set this to 1 if you WANT the build to fail on trace collisions.
+my $had_collisions = 0; # track if we have trace collisions or not
 my $hash_filename_too = 0; # 1 = hash is calculated over format string + filename
 
 print "sourcebase = $sourcebase\n" if $debug;
@@ -695,9 +696,7 @@ sub assimilate_file($) {
 			  "    String 2: $newstring\n";
                     print $msg;
                     print CFH $msg;
-		    if ($fail_on_collision) {
-		    	exit(1);
-		    }
+		    $had_collisions = 1;
 		}
 	    }
 	    $hash_strings_array{$l_hash} = $newstring;
@@ -790,9 +789,7 @@ sub hash_strings() {
 		      "    String 2: $printf_string (file $l_file_name)\n";
                 print $msg;
                 print CFH $msg;
-		if ($fail_on_collision) {
-		    exit(1);
-		}
+		$had_collisions = 1;
 	    }
 	}
 	# this will overwrite an old string with a new one if a collision occurred
@@ -835,10 +832,8 @@ sub write_string_file() {
 		      "    String 2: $string_file_array{$l_key}\n";
                 print $msg;
                 print CFH $msg;
-		if ($fail_on_collision) {
-		    exit(1);
-		}
-		# don't fail, write new one
+		$had_collisions = 1;
+
             }
 	}
 	if($version > 0)
@@ -851,7 +846,12 @@ sub write_string_file() {
 	    # old version so only write out format string (not file name to)
 	    $string_file_array{$l_key} = $l_tmp;
 	}
-    }
+	}
+
+	if($had_collisions && $fail_on_collision)
+	{
+		exit(-99); # kill the build if there were any trace collisions
+	}
 
     # Write out the updated string file.
     print STDOUT "\nWriting updated hash||string file ($string_file)...\n\n";

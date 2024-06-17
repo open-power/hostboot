@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2023
+# Contributors Listed Below - COPYRIGHT 2010,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -125,4 +125,4 @@ fi
 fi
 
 # Enable temporary workaround for linker crashes related to tracehash
-export COMPILETIME_TRACEHASH=1
+# export COMPILETIME_TRACEHASH=1

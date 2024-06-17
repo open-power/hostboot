@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2023
+# Contributors Listed Below - COPYRIGHT 2013,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -104,6 +104,9 @@ else
 	C_CPPCHECK_COMMAND=
 endif
 
+# Compiling *.C files
+# Trace Hashing will fail the build and exit with
+# (-99) if it detects any trace collisions.
 $(OBJDIR)/%.o : %.C
 	@mkdir -p $(OBJDIR)
 	$(C2) "    CXX        $(notdir $<)"
