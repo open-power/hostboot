@@ -1615,6 +1615,7 @@
     <ffdc>MFGID</ffdc>
     <ffdc>MODULE_HEIGHT</ffdc>
     <ffdc>ROUNDED_OFF_DIMM_COUNT</ffdc>
+    <ffdc>DIMM_DATA_RATE</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>HIGH</priority>

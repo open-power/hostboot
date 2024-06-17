@@ -179,6 +179,10 @@ class throttle_traits<mss::mc_type::EXPLORER>
             // Invalid for Explorer but compile will fail without them
             DIMM_ATTACHED_START = 26,
             DIMM_ATTACHED_LEN = 2,
+
+            // DIMM's data rate
+            DIMM_DATA_RATE_START = 28,
+            DIMM_DATA_RATE_LEN = 3,
         };
 
         // Max achievable utilization value based on frequency per port in c% units

@@ -348,9 +348,9 @@
       ZZ uses normal mode.
       From JEDEC DDR4 Spec 1716.78C from 07-2016
       Page 47 Table 4.9.1
-      
+
       Note: DDR5 will use either the NORMAL or DDR5_FINE enum values
-      For DDR5, MR4's settings are set based upon the values of this attribute 
+      For DDR5, MR4's settings are set based upon the values of this attribute
     </description>
     <valueType>uint8</valueType>
     <enum>
@@ -577,7 +577,8 @@
         DIMM_HEIGHT = 20-21,
         DIMM_COUNT = 22-25,
         DIMM_ATTACHED = 26-27,
-        Bits 28-31: Not used
+        DIMM_DATA_RATE = 28-30,
+        Bit 31: Not used
         VALUE (bits 32-47) in cW: thermal power limit
           DDIMM: Total OCMB+DRAM power limit per DDIMM
           non-DDIMM: VMEM+VPP power limit per DIMM
@@ -607,7 +608,8 @@
         DIMM_HEIGHT = 20-21,
         DIMM_COUNT = Bits 22-25,
         DIMM_ATTACHED = 26-27,
-        Bits 28-31: Not used
+        DIMM_DATA_RATE = 28-30,
+        Bit 31: Not used
         VALUE (bits 32-47) in cW/utilization: DIMM power slope
           DDIMM: Total OCMB+DRAM power slope per DDIMM
           non-DDIMM: VMEM+VPP power slope per DIMM
@@ -635,7 +637,7 @@
         DIMM_STACK_TYPE = 15-16,
         DRAM_MFGID = 17-19,
         DIMM_HEIGHT = 20-21,
-        DIMM_COUNT = Bits 22-25 (Number of configured DIMMs under processor (supported values are 2,4,6,8,16,32)
+        DIMM_COUNT = Bits 22-25 (Number of configured DIMMs under processor (supported values are 2,4,6,8,16,32))
           0b0000 = 2 DIMMs
           0b0001 = 4 DIMMs
           0b0010 = 6 DIMMs
@@ -644,7 +646,8 @@
           0b0101 = 32 DIMMs
           0b1111 = wildcard,
         DIMM_ATTACHED = 26-27,
-        Bits 28-31: Not used
+        DIMM_DATA_RATE = 28-30,
+        Bit 31: Not used
         VALUE (bits 32-47) in cW/utilization: DIMM power intercept
           DDIMM: Total OCMB+DRAM power intercept per DDIMM
           non-DDIMM: VMEM+VPP power intercept per DIMM
@@ -675,7 +678,8 @@
         DIMM_HEIGHT = 20-21,
         DIMM_COUNT = Bits 22-25,
         DIMM_ATTACHED = 26-27,
-        Bits 28-31: Not used
+        DIMM_DATA_RATE = 28-30,
+        Bit 31: Not used
         VALUE (bits 32-39): Current limit (dA)
           DDIMM: PMIC output current limit per DDIMM
           non-DDIMM: VMEM regulator current limit per DIMM
@@ -871,7 +875,8 @@
           0b0101 = 32 DIMMs
           0b1111 = wildcard,
         DIMM_ATTACHED = 26-27,
-        Bits 28-31: Not used
+        DIMM_DATA_RATE = 28-30,
+        Bits 31: Not used
         VALUE (bits 32-47) safemode dram data bus utilization in c%
     </description>
     <valueType>uint64</valueType>

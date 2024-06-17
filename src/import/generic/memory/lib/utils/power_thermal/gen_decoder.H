@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@ constexpr uint8_t  ANY_HEIGHT = 0xFF;
 constexpr uint8_t  ANY_PORT = 0xFF;
 constexpr uint8_t  ANY_COUNT = 0xFF;
 constexpr uint8_t  ANY_ATTACHED = 0xFF;
+constexpr uint64_t  ANY_DATA_RATE = 0x0000000000000000;
 
 //Currently needs to be in sorted order for lookup to work
 static const std::vector< std::pair<uint32_t , uint8_t> > DIMM_SIZE_MAP =
@@ -138,6 +139,16 @@ static const std::vector< std::pair<uint8_t , uint8_t> > DIMM_MODULE_HEIGHT_MAP 
     {fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_2U, 0b01},
     {fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U, 0b10},
     {ANY_HEIGHT, 0b11}
+};
+
+static const std::vector< std::pair<uint64_t , uint8_t> > DIMM_DATA_RATE_MAP =
+{
+    {ANY_DATA_RATE, 0b000},
+    {mss::ddr_dimm_speeds::DIMM_SPEED_2666, 0b001},
+    {mss::ddr_dimm_speeds::DIMM_SPEED_2933, 0b010},
+    {mss::ddr_dimm_speeds::DIMM_SPEED_3200, 0b011},
+    {mss::ddr_dimm_speeds::DIMM_SPEED_4000, 0b100},
+    {mss::ddr_dimm_speeds::DIMM_SPEED_4800, 0b101}
 };
 
 static const std::vector < std::pair< uint8_t, uint8_t> > DIMMS_PORT_MAP =
@@ -228,6 +239,7 @@ inline fapi2::ReturnCode encode ( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& 
                  .set_ATTR(i_attr)
                  .set_DIMM_TARGET(i_target),
                  "Couldn't find encoding for power thermal encode for value: %x target: %s", i_attr, mss::c_str(i_target));
+
     o_buf.insertFromRight<S, L>(l_encoding);
 
 fapi_try_exit:
@@ -284,6 +296,7 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, const uint8_t i_
     uint8_t l_uint8_buf = 0;
     uint16_t l_uint16_buf = 0;
     uint32_t l_uint32_buf = 0;
+    uint64_t l_uint64_buf = 0;
 
     //DIMM_SIZE wildcard
     FAPI_TRY(( decode<TT::DIMM_SIZE_START, TT::DIMM_SIZE_LEN>
@@ -398,6 +411,17 @@ fapi2::ReturnCode generate_wildcard_mask(const uint32_t i_hash, const uint8_t i_
         if(ANY_ATTACHED == l_uint8_buf)
         {
             l_mask.setBit<TT::DIMM_ATTACHED_START, TT::DIMM_ATTACHED_LEN>();
+        }
+
+        //DIMM_DATA_RATE wildcard
+        FAPI_TRY(( decode<TT::DIMM_DATA_RATE_START, TT::DIMM_DATA_RATE_LEN>
+                   (DIMM_DATA_RATE_MAP, l_hash, l_uint64_buf)),
+                 "Failed to generate power thermal decoding for %s val %d",
+                 "DIMM_DATA_RATE", l_hash );
+
+        if(ANY_DATA_RATE == l_uint64_buf)
+        {
+            l_mask.setBit<TT::DIMM_DATA_RATE_START, TT::DIMM_DATA_RATE_LEN>();
         }
 
         // If reading safemode throttles, check for dimm count
@@ -560,6 +584,10 @@ class decoder
 template<mss::mc_type MC, typename TT>
 fapi2::ReturnCode decoder<MC, TT>::generate_encoding(const uint8_t i_safemode_throttles)
 {
+    uint64_t l_dimm_data_rate;
+    const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(iv_kind.iv_target);
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, l_port, l_dimm_data_rate));
+
     //DIMM_SIZE
     FAPI_TRY(( encode<TT::DIMM_SIZE_START, TT::DIMM_SIZE_LEN>
                (iv_kind.iv_target, iv_kind.iv_size, DIMM_SIZE_MAP, iv_gen_key)),
@@ -606,6 +634,11 @@ fapi2::ReturnCode decoder<MC, TT>::generate_encoding(const uint8_t i_safemode_th
              "Failed to generate power thermal encoding for %s val %d on target: %s",
              "DIMM_ATTACHED", iv_kind.iv_attached_dimm_count, mss::c_str(iv_kind.iv_target) );
 
+    // DATA_RATE
+    FAPI_TRY(( encode<TT::DIMM_DATA_RATE_START, TT::DIMM_DATA_RATE_LEN>
+               (iv_kind.iv_target, l_dimm_data_rate, DIMM_DATA_RATE_MAP, iv_gen_key)),
+             "Failed to generate power thermal encoding for %s val %d on target: %s",
+             "DIMM_DATA_RATE", l_dimm_data_rate, mss::c_str(iv_kind.iv_target) );
 
     if (TT::MC_TARGET_TYPE == fapi2::TARGET_TYPE_MCS)
     {
@@ -634,6 +667,9 @@ fapi2::ReturnCode decoder<MC, TT>::generate_encoding(const uint8_t i_safemode_th
                  "DIMM_COUNT", iv_kind.iv_rounded_off_dimm_count, mss::c_str(iv_kind.iv_target) );
     }
 
+    FAPI_DBG("Generated iv_gen_key: 0x%08x for data_rate: %d on target: %s", iv_gen_key, l_dimm_data_rate,
+             mss::c_str(iv_kind.iv_target));
+
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -655,10 +691,17 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
         OT& o_value)
 {
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+    uint64_t l_dimm_data_rate;
+    const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(iv_kind.iv_target);
+
     // Find iterator to matching key (if it exists)
     auto l_value_iterator  =  std::find_if(i_array.begin(),
                                            i_array.end(),
                                            is_match<MC>(iv_gen_key, i_safemode_throttles));
+
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, l_port, l_dimm_data_rate));
 
     FAPI_ASSERT(l_value_iterator != i_array.end(),
                 fapi2::MSS_NO_POWER_THERMAL_ATTR_FOUND()
@@ -673,10 +716,11 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
                 .set_STACK_TYPE(iv_kind.iv_stack_type)
                 .set_MFGID(iv_kind.iv_mfgid)
                 .set_MODULE_HEIGHT(iv_kind.iv_module_height)
-                .set_ROUNDED_OFF_DIMM_COUNT(iv_kind.iv_rounded_off_dimm_count),
+                .set_ROUNDED_OFF_DIMM_COUNT(iv_kind.iv_rounded_off_dimm_count)
+                .set_DIMM_DATA_RATE(l_dimm_data_rate),
                 "Couldn't find %s value for generated key:0x%08lx, for target %s. "
                 "DIMM values for generated key are "
-                "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d, height %d rounded dimm count is %d, attached dimm is %d",
+                "size is %d, gen is %d, type is %d, width is %d, density %d, stack %d, mfgid %d, dimms %d, height %d rounded dimm count is %d, attached dimm is %d, dimm data rate is %d",
                 i_attr_description,
                 iv_gen_key,
                 mss::c_str(iv_kind.iv_target),
@@ -690,7 +734,8 @@ fapi2::ReturnCode decoder<MC, TT>::get_power_thermal_value(const std::vector<uin
                 iv_dimms_per_port,
                 iv_kind.iv_module_height,
                 iv_kind.iv_rounded_off_dimm_count,
-                iv_kind.iv_attached_dimm_count
+                iv_kind.iv_attached_dimm_count,
+                l_dimm_data_rate
                );
     {
         const fapi2::buffer<uint64_t> l_temp(*l_value_iterator);
