@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,7 @@
 #define SCRATCH_3_REG_RUNTIME_MODE_BIT   1
 #define SCRATCH_4_REG_VALID_BIT   3
 #define SB_MSG_REG_VIRTUAL_HALT_STATE_BIT 2
+#define SB_MSG_REG_BOOT_STATUS_BIT 1
 
 // See doxygen in header file
 fapi2::ReturnCode p10_sbe_hreset(
@@ -149,6 +150,10 @@ fapi2::ReturnCode p10_sbe_hreset(
             }
         }
 
+        FAPI_DBG("Clearing SBE boot status bit before triggering HRESET/INTERRUPT_S1");
+        l_data64_sb_msg.clearBit<SB_MSG_REG_BOOT_STATUS_BIT>();
+        FAPI_TRY(PUT_FSXCOMP_FSXLOG_SB_MSG(i_target, l_data64_sb_msg));
+
         FAPI_TRY(PUT_FSXCOMP_FSXLOG_SB_CS(i_target, l_data64));
 
     }
@@ -219,6 +224,11 @@ fapi2::ReturnCode p10_sbe_hreset(
                 FAPI_TRY(l_data32.setBit(FSXCOMP_FSXLOG_SB_CS_START_RESTART_VECTOR0));
             }
         }
+
+        FAPI_DBG("Clearing SBE boot status bit before triggering HRESET/INTERRUPT_S1");
+        l_data32_sb_msg.clearBit<SB_MSG_REG_BOOT_STATUS_BIT>();
+        FAPI_TRY(fapi2::putCfamRegister(i_target, FSXCOMP_FSXLOG_SB_MSG_FSI, l_data32_sb_msg),
+                 "Error from putCfamRegister to FSXCOMP_FSXLOG_SB_MSG_FSI");
 
         FAPI_TRY(fapi2::putCfamRegister(i_target, FSXCOMP_FSXLOG_SB_CS_FSI, l_data32),
                  "Error from putCfamRegister to FSXCOMP_FSXLOG_SB_CS_FSI");
