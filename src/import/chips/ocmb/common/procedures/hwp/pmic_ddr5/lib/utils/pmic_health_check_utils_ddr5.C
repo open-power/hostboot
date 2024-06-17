@@ -1134,6 +1134,14 @@ fapi2::ReturnCode health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5
     // Read and store DT regs for fault calculations
     read_dt_regs(io_target_info, io_health_check_info);
 
+    // Check for I2C fails
+    check_gi2c_fail_state(io_target_info, io_health_check_info, io_number_bytes_to_send);
+
+    if (io_health_check_info.iv_aggregate_state == mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL)
+    {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     l_n_mode = check_breadcrumbs_subsequent_n_modes(io_health_check_info);
 
     // If subsequent n-mode detected, then no need to perform any calculations.

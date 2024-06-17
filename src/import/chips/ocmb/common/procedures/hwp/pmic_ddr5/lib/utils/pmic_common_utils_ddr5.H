@@ -394,7 +394,15 @@ fapi2::ReturnCode get_minimum_vin_bulk_threshold(
 ///
 struct __attribute__((__packed__)) dt_health_check_telemetry
 {
-    uint8_t  iv_breadcrumb  = 0;
+    // Run time Health check was returning N_MODE_POSSIBLE state after
+    // host_set_mem_volt put the dimm into N_MODE. As per the flow,
+    // once, dimm has been declared as n_mode, the only data reported
+    // by health check should be aggregate state as N_MODE. But health
+    // check was setting the state to be N_MODE_POSSIBLE and the dimm state
+    // was not reaching N_MODE at all. It was stuck at N_MODE_POSSIBLE.
+    // Hence setting the default state of breadcrumb to the max so that
+    // comparison in check_breadcrumbs_subsequent_n_modes() will work
+    uint8_t  iv_breadcrumb  = bread_crumb::STILL_A_FAIL;
     uint8_t  reserved0      = 0;
     uint16_t iv_ro_inputs_1 = 0;
 
