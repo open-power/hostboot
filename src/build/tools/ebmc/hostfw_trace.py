@@ -1049,10 +1049,18 @@ def parse_data_trace_entries_v1(binaryData, headerData):
     while endOffset >  startOffset:
         # Get the offset to the trace entry size which is 4 bytes above the endOffset
         traceEntrySizeOffset = endOffset - traceEntryByteSize
-        # Get the size of the trace entry
-        traceEntrySize = struct.unpack_from(endian + 'I', binaryData, traceEntrySizeOffset)
-        # Get the offset to the start of the trace entry via the trace entry size
-        traceEntryStart = endOffset - traceEntrySize[0]
+        if endOffset <= len(binaryData):
+            # Get the size of the trace entry
+            traceEntrySize = struct.unpack_from(endian + 'I', binaryData, traceEntrySizeOffset)
+            # Get the offset to the start of the trace entry via the trace entry size
+            traceEntryStart = endOffset - traceEntrySize[0]
+        else:
+            # Use the endOffset from the trace header
+            traceHeaderEndOffset = struct.unpack_from(endian + 'I', binaryData, 28)
+            traceEntryStart = traceHeaderEndOffset[0]
+            capture_warning("Warning: end offset ("+str(endOffset)+ \
+                    ") > length of binary trace data ("+str(len(binaryData))+")")
+            capture_warning("Using trace end offset from trace header ("+str(traceEntryStart)+")")
 
         # Verify that the start of the entry is *not* before the start offset
         if startOffset > traceEntryStart:

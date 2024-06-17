@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -471,15 +471,17 @@ class errludP_occ:
                 i,details = errludP_occ.parseCallhome(data, i)
                 errud[j]['CALLHOME'] = details
                 if i < chStart + udSize:
-                    chend = dict()
-                    chend['Extra data length']=hex(udSize-(i-chStart))
-                    while i < chStart + udSize:
-                        chend['0x%0*X'%(4,i-chStart)], i=hexConcat(data, i, i+16)
-                    errud[j]['CALLHOME Extra data']=chend
+                    extraDataLen = chStart+udSize-i
+                    endDataOffset = i + extraDataLen + 1
+                    errud[j]['CALLHOME Extra User Data (starting offset ' + \
+                            str(hex(i))+", "+str(hex(extraDataLen))+" bytes)"] = \
+                            data_to_hexstring(data, i, endDataOffset)
+                    i = endDataOffset
 
             if endUd > len(data):
                 errud[j]['DATA TRUNCATED']=hex(endUd-len(data))
                 endUd = len(data)
+
             k = 0
             while i < endUd:
                 errud[j]['0x%0*X'%(4,k)], i=hexConcat(data, i, i+16)
@@ -489,24 +491,51 @@ class errludP_occ:
 
         # Dump remaining unparsed data (if any)
         if i < len(data):
-            errend = dict()
-            errend['remaining length']=len(data)
-            while i < len(data):
-                errend['0x%0*X'%(4,i)], i=hexConcat(data, i, i+16)
-            d['OCC Error Extra']=errend
+            d['OCC Extra Data (starting offset '+str(hex(i))+")"] = \
+                    data_to_hexstring(data, i, len(data))
 
         jsonStr = json.dumps(d, indent = 2)
         return jsonStr
 
 
+    # Parse OCC Trace
+    def UdParserOccTrace(ver, data):
+        traced = dict()
+
+        i = 0
+        to = 0
+        tracedata = data
+        traceresults,to = errludP_occ.parseTrace(tracedata, to)
+        if to > 0:
+            i += to
+        traced["OCC Trace"] = traceresults
+
+        # Dump remaining unparsed data (if any)
+        if i < len(data):
+            traced['Extra Data (starting offset '+str(hex(i))+")"] = \
+                    data_to_hexstring(data, i, len(data))
+
+        jsonStr = json.dumps(traced, indent = 1)
+        return jsonStr
+
+
 #Dictionary with parser functions for each subtype
 occElogSubsecTypes = {
-        0: "UdParserOccFfdc"
+        0: "UdParserOccFfdc", # OCC Full FFDC
+        2: "UdParserOccTrace" # OCC Trace Collected by HTMGT
         }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data)
-    return getattr(errludP_occ, occElogSubsecTypes[subType])(*args)
+    if subType in occElogSubsecTypes:
+        return getattr(errludP_occ, occElogSubsecTypes[subType])(*args)
+    else:
+        d = dict()
+        d['Error']="b2a00.py: Unsupported Sub-section type of "+str(subType)
+        # Dump binary data
+        d['Binary Data'] = data_to_hexstring(data, 0, len(data))
+        jsonStr = json.dumps(d, indent = 0)
+        return jsonStr
 
 if __name__ == "__main__":
     f = open("test2/htmgtUD", "rb").read()
