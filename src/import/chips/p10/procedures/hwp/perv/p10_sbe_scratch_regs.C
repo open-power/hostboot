@@ -394,8 +394,11 @@ p10_sbe_scratch_regs_set_pau_freq(
 
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_FREQ_PAU_MHZ_Type l_attr_freq_pau_mhz = 0;
-    fapi2::ATTR_INCREASED_PAU_FREQ_Type l_attr_increased_pau_freq = fapi2::ENUM_ATTR_INCREASED_PAU_FREQ_DISABLE;
+    fapi2::ATTR_FREQ_PAU_VPD_MHZ_Type l_attr_pau_vpd_freq = 0;
     uint8_t l_pau_dpll_io_margin = 0;
+
+    const uint32_t BASE_PAU_FREQ_MHZ = 2250;
+    const uint32_t INCR_PAU_FREQ_MHZ = 2600;
 
     if (fapi2::is_platform<fapi2::PLAT_HOSTBOOT>() ||
         fapi2::is_platform<fapi2::PLAT_HWSV>())
@@ -429,16 +432,16 @@ p10_sbe_scratch_regs_set_pau_freq(
     }
     else
     {
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INCREASED_PAU_FREQ, FAPI_SYSTEM, l_attr_increased_pau_freq),
-                 "Error from FAPI_ATTR_GET (ATTR_INCREASED_PAU_FREQ)");
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_PAU_VPD_MHZ, FAPI_SYSTEM, l_attr_pau_vpd_freq),
+                 "Error from FAPI_ATTR_GET (ATTR_FREQ_PAU_VPD_MHZ)");
 
-        if (l_attr_increased_pau_freq == fapi2::ENUM_ATTR_INCREASED_PAU_FREQ_ENABLE)
+        if (l_attr_pau_vpd_freq == INCR_PAU_FREQ_MHZ)
         {
-            l_attr_freq_pau_mhz = 2600;
+            l_attr_freq_pau_mhz = INCR_PAU_FREQ_MHZ;
         }
         else
         {
-            l_attr_freq_pau_mhz = 2250;
+            l_attr_freq_pau_mhz = BASE_PAU_FREQ_MHZ;
         }
 
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_PAU_MHZ, FAPI_SYSTEM, l_attr_freq_pau_mhz),

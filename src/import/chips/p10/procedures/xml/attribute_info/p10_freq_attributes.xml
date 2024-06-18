@@ -462,7 +462,7 @@
   <id>ATTR_FREQ_PAU_VPD_MHZ</id>
   <targetType>TARGET_TYPE_SYSTEM</targetType>
   <description>
-      The PAU frequency from MVPD #V.of all processors.  All processors
+      The PAU frequency from MVPD #V of all processors.  All processors
       in the system must have the same value or IPL will fail.
   </description>
   <valueType>uint32</valueType>
