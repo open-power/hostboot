@@ -276,7 +276,7 @@ void copy_cke_to_spare_cke( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in,out] io_buffer the buffer representing the mode register
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline fapi2::ReturnCode read_mode( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& io_buffer)
@@ -291,7 +291,7 @@ inline fapi2::ReturnCode read_mode( const fapi2::Target<T>& i_target, fapi2::buf
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
 /// @param[in] i_buffer the buffer representing the mode register
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 inline fapi2::ReturnCode write_mode( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_buffer)
@@ -360,7 +360,7 @@ fapi_try_exit:
 /// @param[in] i_program the vector of instructions
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @param[out] o_power_cntl_reg the register used for power control
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 /// @note Code location for pre CCS execute workarounds
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P>
@@ -380,7 +380,7 @@ fapi2::ReturnCode setup_to_execute(const fapi2::Target<T>& i_target,
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_periodics_reg the register used to enable periodic calibrations
 /// @param[in] i_power_cntl_reg the register used for power control
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 /// @note Code location for post CCS execute workarounds
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P>
@@ -440,7 +440,7 @@ fapi2::ReturnCode fail_type( const fapi2::Target<T>& i_target,
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the MCBIST ccs program - to get the polling parameters
 /// @param[in] i_port the port associated with the MCBIST array
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode execute_inst_array(const fapi2::Target<T>& i_target,
@@ -481,7 +481,7 @@ fapi_try_exit:
 /// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @param[in] i_target the target to effect
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode execute_inst_via_mcbist(const fapi2::Target<T>& i_target)
@@ -519,7 +519,7 @@ fapi_try_exit:
 /// @param[in] i_target the target type on which to operate
 /// @param[in] i_delay the calculated delays from CCS
 /// @param[in,out] io_program the program for which to update the delays
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T  >
 fapi2::ReturnCode update_initial_delays( const fapi2::Target<T>& i_target,
@@ -558,7 +558,7 @@ fapi_try_exit:
 /// @param[in] i_ports the vector of ports
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @param[out] o_power_cntl_reg the register used for power control
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_target,
@@ -601,7 +601,7 @@ fapi_try_exit:
 /// @param[in, out] io_inst_iter the iterator for the ccs instructions
 /// @param[in, out] io_program the vector of instructions
 /// @param[in] i_port the port target to effect
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC>, typename IT = typename std::vector< mss::ccs::instruction_t<MC> >::iterator >
 static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& i_target,
@@ -680,7 +680,7 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
 
         l_total_delay += l_delay * (l_repeat + 1);
 
-        FAPI_INF_NO_SBE("css inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) " TARGTIDFORMAT,
+        FAPI_INF_NO_SBE("ccs inst %d: 0x%016lX 0x%016lX (0x%lx, 0x%lx) delay: 0x%x (0x%x) " TARGTIDFORMAT,
                         l_inst_count, io_inst_iter->arr0, io_inst_iter->arr1,
                         CCS_ARR0_ZERO + l_inst_count, CCS_ARR1_ZERO + l_inst_count,
                         l_delay, l_total_delay, TARGTID);
@@ -712,7 +712,7 @@ fapi_try_exit:
 /// @param[in] i_target the target to effect
 /// @param[in, out] io_program the vector of instructions
 /// @param[in] i_ports the vector of ports
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
@@ -767,7 +767,7 @@ fapi_try_exit:
 /// @param[in, out] io_program the vector of instructions
 /// @param[in] i_port the port to execute on
 /// @param[in] i_runtime true if at runtime requiring dynamic
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P >
 fapi2::ReturnCode setup_execute_restore( const fapi2::Target<T>& i_target,
@@ -782,7 +782,7 @@ fapi2::ReturnCode setup_execute_restore( const fapi2::Target<T>& i_target,
 /// @tparam TT the CCS traits of the memory controller which executes the CCS instruction
 /// @tparam MT the MCBIST traits of the memory controller which executes the CCS instruction
 /// @param[in] i_target the memory controller target
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC>, typename MT = mcbistTraits<MC, T>>
 fapi2::ReturnCode stop_ccs_and_mcbist(const fapi2::Target<T>& i_target)
@@ -846,7 +846,7 @@ fapi_try_exit:
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @param[in] i_target the ocmb chip target
 /// @param[out] o_value returns the original value of FARB0Q
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode pre_execute_via_mcbist(const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_value);
@@ -857,7 +857,7 @@ fapi2::ReturnCode pre_execute_via_mcbist(const fapi2::Target<T>& i_target, fapi2
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @param[in] i_target the ocmb chip target
 /// @param[in] i_value value of FARB0Q to be restored
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode post_execute_via_mcbist(const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_value);
@@ -908,7 +908,7 @@ fapi_try_exit:
 /// @param[in] i_target the target to effect
 /// @param[in, out] io_program the vector of instructions
 /// @param[in] i_ports the vector of ports
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_target,
@@ -980,7 +980,7 @@ fapi_try_exit:
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the vector of instructions
 /// @param[in] i_port The target that's being programmed by the array
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
@@ -1002,7 +1002,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
 /// @param[in] i_target the target to effect
 /// @param[in, out] io_program the vector of instructions
 /// @param[in] i_port The target that's being programmed by the array
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_target,

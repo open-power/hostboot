@@ -180,6 +180,18 @@ fapi2::ReturnCode read_mr_error_regs(const mss::rank::info<mss::mc_type::ODYSSEY
                                      const uint64_t i_mrs,
                                      uint8_t (&o_data)[mss::ody::ODY_NUM_DRAM_X4]);
 
+
+///
+/// @brief Run the workaround for Hynix DIMMS
+/// @param[in] i_rank_info rank info
+/// @param[in] i_srank the srank that currently being executed
+/// @param[in] i_pattern data pattern to test
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode run_hynix_workaround(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                                       const uint8_t i_srank,
+                                       const uint64_t i_pattern);
+
 ///
 /// @brief Run the ecs test
 /// @param[in] i_rank_info rank info

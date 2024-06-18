@@ -109,12 +109,12 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const mss::rank::info<mss:
         // Resets counters (MR16-20) and initialize:
         // Manual ECS mode enable: MR14 OP[7] set to 1 for Manual ECS mode
         //                         MR14 OP[6] set to 1 then 0
-        // Row vs Code word count: MR14 OP[5] set to 1 for Code Word
+        // Row vs Code word count: MR14 OP[5] set to 1 for Code word
         // (use Code Word for finer granularity of counts)
         //             [CID/SRANK]
         // 7  6  5  4  3  2  1  0
-        // 1  1  1  0  0  0  0  0 (0xE0)
-        // 1  0  1  0  0  0  0  0 (0xA0)
+        // 1  1  0  0  0  0  0  0 (0xE0)
+        // 1  0  0  0  0  0  0  0 (0xA0)
         // MR OP are in reversed order so we need to reverse the CID bits
 
         l_mr14_value0 |= i_srank;
@@ -483,7 +483,7 @@ fapi2::ReturnCode reset_error_counters(const mss::rank::info<mss::mc_type::ODYSS
     // Resets counters (MR16-20) and initialize:
     // Manual ECS mode enable: MR14 OP[7] set to 1 for Manual ECS mode
     //                         MR14 OP[6] set to 1 then 0
-    // Row vs Code word count: MR14 OP[5] set to 1 for Code Word
+    // Row vs Code word count: MR14 OP[5] set to 1 for Code word
     // (use Code Word for finer granularity of counts)
     //             [CID/SRANK]
     // 7  6  5  4  3  2  1  0
@@ -669,6 +669,64 @@ fapi_try_exit:
 
 
 ///
+/// @brief Run the workaround for Hynix DIMMS
+/// @param[in] i_rank_info rank info
+/// @param[in] i_srank the srank that currently being executed
+/// @param[in] i_pattern data pattern to test
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode run_hynix_workaround(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+                                       const uint8_t i_srank,
+                                       const uint64_t i_pattern)
+{
+
+    uint16_t l_dram_mfg_id = 0;
+    fapi2::buffer<uint64_t> l_ecc_reg_data;
+    fapi2::buffer<uint64_t> l_periodic_calib_data;
+    const auto& l_port = i_rank_info.get_port_target();
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+
+    // Get the dram mfg id
+    FAPI_TRY( mss::attr::get_dram_mfg_id(i_rank_info.get_dimm_target(), l_dram_mfg_id));
+
+    // Workaround for Hynx fails, run an extra pattern
+    // to get a clean MR20 for the later patterns
+    if(l_dram_mfg_id == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MFG_ID_HYNIX &&
+       i_pattern == mss::mcbist::PATTERN_0)
+    {
+        FAPI_INF_NO_SBE("Starting workaround for Hynix dimms running on port:  "
+                        GENTARGTIDFORMAT
+                        ", mrank: %u, srank: %u for pattern: %u",
+                        GENTARGTID(l_port),
+                        i_rank_info.get_port_rank(), i_srank, i_pattern);
+        // Do mem init for each srank
+        FAPI_TRY(memory_init_via_memdiags(i_rank_info, i_srank, mss::mcbist::PATTERN_0));
+
+        // Disable periodic calibration
+        FAPI_TRY(disable_periodic_cal(l_ocmb, l_periodic_calib_data));
+
+        // Setup the ecs to execute
+        FAPI_TRY(setup_to_execute_ecs(i_rank_info, i_srank));
+
+        // Reset the error counters MR16-MR20 for the next run
+        FAPI_TRY(reset_error_counters(i_rank_info, i_srank));
+
+        // Enable periodic calibration and ecc mode
+        FAPI_TRY(enable_periodic_cal_ecc_modes(l_ocmb, l_ecc_reg_data, l_periodic_calib_data));
+
+        FAPI_INF_NO_SBE("Ending workaround for Hynix dimms running on port:  "
+                        GENTARGTIDFORMAT
+                        ", mrank: %u, srank: %u for pattern: %u",
+                        GENTARGTID(l_port),
+                        i_rank_info.get_port_rank(), i_srank, i_pattern);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+
+}
+
+///
 /// @brief Run the ecs test
 /// @param[in] i_rank_info rank info
 /// @param[in] i_pattern data pattern to test
@@ -711,6 +769,9 @@ fapi2::ReturnCode run_ecs_helper(const mss::rank::info<mss::mc_type::ODYSSEY>& i
     // Run this for each SRANK
     for(uint8_t l_srank = 0; l_srank < l_num_sranks; l_srank++)
     {
+        // Workaround for HYNIX DIMM
+        FAPI_TRY(run_hynix_workaround(i_rank_info, l_srank, i_pattern));
+
         // Do mem init for each srank
         FAPI_TRY(memory_init_via_memdiags(i_rank_info, l_srank, i_pattern));
 
