@@ -1362,6 +1362,13 @@ ReturnCode delay(uint64_t i_nanoSeconds,
     // We don't need to waste time for hardware delays if we're running in Simics
     if( !Util::isSimicsRunning() )
     {
+#ifdef CONFIG_FSP_BUILD
+        // The timebase calculation on Denali is incorrect by 1.625x so
+        // we need to bump up the requested time to ensure we satisfy
+        // any hard limits in the hardware.
+        //@FIXME-STGD:604420-Fix timebase itself
+        i_nanoSeconds *= 2;
+#endif
         nanosleep( 0, i_nanoSeconds );
     }
     return FAPI2_RC_SUCCESS;
