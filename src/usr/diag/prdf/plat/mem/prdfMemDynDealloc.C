@@ -52,7 +52,7 @@ using namespace MemUtils;
 namespace MemDealloc
 {
 
-bool isEnabled()
+bool isSupported()
 {
     return ( isHyprRunning() && (isHyprConfigPhyp() || isHyprConfigOpal()) &&
              !isMfgAvpEnabled() && !isMfgHdatAvpEnabled() );
@@ -1248,7 +1248,7 @@ int32_t page( ExtensibleChip * i_chip, MemAddr i_addr )
     int32_t o_rc = SUCCESS;
     do
     {
-        if ( !isEnabled() ) break; // nothing to do
+        if ( !isSupported() ) break; // nothing to do
         PRDF_TRAC( PRDF_FUNC "i_addr=0x%016llx",
                    i_addr.toMaintAddr<T>(i_chip->getTrgt()) );
 
@@ -1281,7 +1281,7 @@ int32_t rank( ExtensibleChip * i_chip, MemRank i_rank, const uint8_t& i_port )
 
     do
     {
-        if ( !isEnabled() ) break; // nothing to do
+        if ( !isSupported() ) break; // nothing to do
 
         // Get the address range of i_rank.
         MemAddr startAddr, endAddr;
@@ -1335,7 +1335,7 @@ int32_t port( ExtensibleChip * i_chip, const uint8_t& i_port )
 
     do
     {
-        if ( !isEnabled() ) break; // nothing to do
+        if ( !isSupported() ) break; // nothing to do
 
         // Get the address range of i_chip.
         MemAddr startAddr, endAddr;
@@ -1441,7 +1441,7 @@ int32_t dimmSlct( TargetHandle_t i_dimm )
 
     do
     {
-        if ( !isEnabled() ) break; // nothing to do
+        if ( !isSupported() ) break; // nothing to do
 
         // Get the system addresses.
         uint64_t ssAddr = 0, seAddr = 0;
