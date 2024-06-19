@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,7 +41,7 @@ namespace MemDealloc
 /**
  * @return True, if Dynamic Memory Deallocation is enabled. False, otherwise.
  */
-bool isEnabled();
+bool isSupported();
 
 /**
  * @brief  Sends message to hypervisor for page dealloc
