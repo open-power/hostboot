@@ -40,6 +40,47 @@
   </attribute>
 
   <attribute>
+    <id>ATTR_MSS_MRW_CONFIG_FREQ_LIMIT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+        Machine Readable Workbook attribute to limit
+        Attribute that contains a key to limit the frequency based upon the memory config
+        0xABCD
+        A = capacity 1
+        B = capacity 2
+        C = number of plugged DIMM
+        D = the maximum frequency
+
+        Capacity 1 must be greater than capacity 2
+        A value of 0x0000 indicates that this is unused
+
+        DIMM size decodes:
+            0x1 32GB capacity_1
+            0x2 64GB capacity_1
+            0x3 128GB capacity_1
+            0x4 256GB capacity_1
+            0x5 512GB capacity_1
+
+        Number of plugged DIMM decodes
+            0x1 >16 DDIMMs
+            0x2 >24 DDIMMs
+            0x3 >32 DDIMMs
+            0x4 >40 DDIMMs
+            0x5 >48 DDIMMs
+            0x6 >56 DDIMMs
+
+        Limiting frequency decodes
+            0x1 = 3200 Mbps
+            0x2 = 4000 Mbps
+            0x3 = 4800 Mbps
+    </description>
+    <valueType>uint16</valueType>
+    <array>8</array>
+    <platInit/>
+    <initToZero/>
+  </attribute>
+
+  <attribute>
     <id>ATTR_MSS_MRW_SAFEMODE_MEM_THROTTLED_N_COMMANDS_PER_PORT</id>
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>

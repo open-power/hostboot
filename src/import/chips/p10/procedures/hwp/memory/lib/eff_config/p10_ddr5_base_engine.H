@@ -976,6 +976,8 @@ class base_0_0 : public mss::spd::base
         ///
         /// @param[in] i_spd SPD binary
         /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+        /// @note This function is called in process_data_init_fields but utilizes several other attributes
+        ///       If this function updates, please move around attribute calls as needed
         ///
         virtual fapi2::ReturnCode set_mem_dimm_size(const std::vector<uint8_t>& i_spd) const
         {
@@ -1361,6 +1363,13 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY(set_hybrid_media(i_spd));
             FAPI_TRY(set_dimm_type(i_spd));
 
+            // Used in frequency, so this needs to be setup a tad early
+            FAPI_TRY(set_channel_bus_width(i_spd));
+            FAPI_TRY(set_sdram_width(i_spd));
+            FAPI_TRY(set_prim_die_count(i_spd));
+            FAPI_TRY(set_sdram_density(i_spd));
+            FAPI_TRY(set_mem_dimm_size(i_spd));
+
             // Generic_metadata_fields
             FAPI_TRY(set_dimm_pos_metadata(i_spd));
             FAPI_TRY(set_dram_gen_metadata(i_spd));
@@ -1382,16 +1391,12 @@ class base_0_0 : public mss::spd::base
             FAPI_TRY(process_data_init_fields(i_spd));
 
             // Base cnfg fields
-            FAPI_TRY(set_sdram_density(i_spd));
             FAPI_TRY(set_col_addr_bits(i_spd));
             FAPI_TRY(set_bank_addr_bits(i_spd));
             FAPI_TRY(set_bank_group_bits(i_spd));
             FAPI_TRY(set_row_addr_bits(i_spd));
             FAPI_TRY(set_prim_stack_type(i_spd));
             FAPI_TRY(set_phy_per_ocmb(i_spd));
-            FAPI_TRY(set_prim_die_count(i_spd));
-            FAPI_TRY(set_sdram_width(i_spd));
-            FAPI_TRY(set_channel_bus_width(i_spd));
             FAPI_TRY(set_supported_cas_latencies(i_spd));
 
             // Timing fields
@@ -1440,7 +1445,6 @@ class base_0_0 : public mss::spd::base
         {
             FAPI_TRY(set_logical_ranks(i_spd));
             FAPI_TRY(set_height_3ds(i_spd));
-            FAPI_TRY(set_mem_dimm_size(i_spd));
             FAPI_TRY(set_trfc_dlr(i_spd));
             FAPI_TRY(set_dimm_ranks_cnfgd(i_spd));
 

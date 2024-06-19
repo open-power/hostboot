@@ -42,6 +42,7 @@
 #include <generic/memory/lib/spd/spd_utils.H>
 #include <generic/memory/lib/utils/freq/cas_latency.H>
 #include <generic/memory/lib/utils/freq/mss_freq_scoreboard.H>
+#include <generic/memory/lib/utils/freq/mss_limit_freq_by_config.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <vpd_access.H>
 
@@ -484,6 +485,9 @@ inline fapi2::ReturnCode supported_freqs(const fapi2::Target<TT::FREQ_DOMAIN_TAR
 
     // Limit frequency scoreboard according to MRW constraints
     FAPI_TRY( (limit_freq_by_mrw<MC, P>(i_target, l_max_mrw_freqs, l_scoreboard)) );
+
+    // Limits frequency scoreboard based upon the memory configuration in the system
+    FAPI_TRY( (limit_freq_by_config<MC, P>(i_target, l_scoreboard)) );
 
     // Limit frequency scoreboard according to VPD constraints
     FAPI_TRY( (limit_freq_by_vpd<MC, P>(i_target, l_vpd_supported_freqs, l_scoreboard)) );

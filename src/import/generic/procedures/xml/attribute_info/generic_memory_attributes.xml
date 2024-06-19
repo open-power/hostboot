@@ -794,4 +794,24 @@
         <writeable/>
         <noSBEAccessor/>
     </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_CONFIG_FREQ_LIMIT</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            Limits the frequency based upon the plugged in DIMM configuration
+            This is set after the code is run to limit the frequency is run to avoid running the algorithm multiple times
+            Initialized to NOT_RUN
+            Set to NO_LIMIT if there is no limit
+            Otherwise, set to the frequency limit by the algorithm
+        </description>
+        <enum>
+            NOT_RUN = 0,
+            NO_LIMIT = 0xffffffff
+        </enum>
+        <default>NOT_RUN</default>
+        <valueType>uint32</valueType>
+        <writeable/>
+        <noSBEAccessor/>
+    </attribute>
 </attributes>

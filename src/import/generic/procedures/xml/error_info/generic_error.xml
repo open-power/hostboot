@@ -497,6 +497,27 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
+    <rc>RC_MSS_FREQ_INVALID_SIZE_ENCODE</rc>
+    <description>
+        MSS frequency limiting algorithm was unable to encode a provided DIMM size
+    </description>
+    <ffdc>SIZE</ffdc>
+    <callout>
+        <procedure>CODE</procedure>
+        <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>LOW</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_FREQ_SELECTED_FREQ_NOT_SUPPORTED</rc>
     <description>Selected freq based on calculations from the DIMM and VPD is not supported</description>
     <ffdc>SUPPORTED_FREQ_0</ffdc>
@@ -2401,6 +2422,19 @@
     <deconfigure>
       <target>DIMM_TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_INVALID_MRW_FREQ_LIMIT_BY_CONFIG_ATTR</rc>
+    <description>
+       An invalid value was provided by ATTR_MSS_MRW_CONFIG_FREQ_LIMIT
+    </description>
+    <ffdc>INDEX</ffdc>
+    <ffdc>VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
   </hwpError>
 
 </hwpErrors>

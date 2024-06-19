@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,6 +51,8 @@
 #include <lib/eff_config/p10_common_engine.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <generic/memory/lib/utils/count_dimm.H>
+#include <lib/eff_config/p10_base_engine.H>
+#include <lib/eff_config/p10_factory.H>
 ///
 /// @brief Calculate and save off rail voltages
 /// @param[in] i_targets vector of ports (e.g., MEM_PORT)
@@ -70,13 +72,20 @@ fapi2::ReturnCode p10_mss_volt( const std::vector< fapi2::Target<fapi2::TARGET_T
             continue;
         }
 
+        const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+
         // setup_voltage_rail_values called based on DRAM generation.
         for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
         {
             std::vector<uint8_t> l_spd;
             uint8_t l_dram_gen;
+            uint8_t l_spd_rev = 0;
+            uint8_t l_is_planar = 0;
+
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_ocmb, l_is_planar) );
             FAPI_TRY(mss::spd_common_process(l_dimm, l_spd));
             FAPI_TRY(mss::attr::get_dram_gen(l_dimm, l_dram_gen));
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_SPD_REVISION, l_port, l_spd_rev) );
 
             switch(l_dram_gen)
             {
@@ -99,8 +108,26 @@ fapi2::ReturnCode p10_mss_volt( const std::vector< fapi2::Target<fapi2::TARGET_T
                                 l_dram_gen,
                                 mss::c_str(l_port));
             }
+
+            // Conducts the data init fields here as they are needed for freq
+            {
+                std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg;
+
+                FAPI_TRY(mss::spd::base_module_factory(l_dimm, l_spd_rev, l_dram_gen, l_base_cfg));
+                FAPI_TRY(l_base_cfg->process_data_init_fields(l_spd));
+            }
         }
     } // port
+
+    // Disabling the frequency config limiting code in cronus
+    // The frequency is hardcoded in cronus, so the limiting code was causing a lot of boot failures if it was updated
+    // Hostboot will reboot if the frequency mismatch occurs
+    // If a user wants to test the code, they can either hardcode this attribute OR set the attribute back to NOT_RUN after mss_volt
+#ifndef __HOSTBOOT__
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_CONFIG_FREQ_LIMIT,
+                                 fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                                 fapi2::ENUM_ATTR_MSS_CONFIG_FREQ_LIMIT_NO_LIMIT));
+#endif
 
     FAPI_INF("End mss volt");
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -64,32 +64,15 @@ fapi2::ReturnCode p10_mss_freq( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // DRAM gen declared outside of loop because it will be reused later
-    // This is ok since we prohibit DRAM gen mixing
+    // Grabs DRAM gen because it will be used later
+    // Grabbing a single value is ok since we prohibit DRAM gen mixing
     uint8_t l_dram_gen = 0;
 
-    // We will first set pre-eff_config attributes
-    // Note that we have to go through the MEM_PORT to get to the DIMM targets because of the
-    // target hierarchy on P10
     for(const auto& p : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         for(const auto& d : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(p))
         {
-            const auto l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(d);
-            std::vector<uint8_t> l_raw_spd;
-            uint8_t l_spd_rev = 0;
-            uint8_t l_is_planar = 0;
-
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_MRW_IS_PLANAR, l_ocmb, l_is_planar) );
-            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_SPD_REVISION, p, l_spd_rev) );
             FAPI_TRY( mss::attr::get_dram_gen(d, l_dram_gen) );
-            FAPI_TRY(mss::spd::get_raw_data(d, l_is_planar, l_raw_spd));
-            {
-                std::shared_ptr<mss::spd::base_cnfg_base> l_base_cfg;
-
-                FAPI_TRY(mss::spd::base_module_factory(d, l_spd_rev, l_dram_gen, l_base_cfg));
-                FAPI_TRY(l_base_cfg->process_data_init_fields(l_raw_spd));
-            }
         }
     }
 
