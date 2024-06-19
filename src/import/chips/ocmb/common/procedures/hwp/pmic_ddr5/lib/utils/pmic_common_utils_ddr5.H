@@ -56,6 +56,355 @@ namespace pmic
 {
 namespace ddr5
 {
+
+#ifndef __PPE__
+///
+/// @brief periodic_2U_telemetry_data struct meta data
+/// @note The first element of the pair holds number of struct members which has same data type
+///       The second element of the pair is number which denotes number of bytes that struct member can hold. Mapping is mentioned below.
+///       uint8_t => 1, uint16_t => 2, uint32_t => 4, uint64_t => 8,
+///
+const std::vector<std::pair<uint16_t, uint8_t>> periodic_2U_telemetry_data_struct_meta_data =
+{
+    // uint8_t iv_revision
+    // uint8_t iv_aggregate_pmic_state
+    { 2, 1},
+    // uint16_t reserved
+    { 1, 2},
+    // uint8_t iv_serial_number[26]
+    // uint8_t iv_pmic_i2c_state
+    // uint8_t reserved0
+    { 28, 1},
+    // uint16_t iv_dqs_tracking_recal_count
+    // uint16_t reserved1
+    { 2, 2},
+    // uint64_t iv_dqs_tracking_log[24]
+    // uint64_t iv_dts_data[5]
+    { 29, 8},
+
+    //pmic_periodic_2u_telemetry_data iv_pmic[CONSTS::NUM_PMICS_2U]
+    // uint8_t iv_pmic0_iv_r04
+    // uint8_t iv_pmic0_iv_r05
+    // uint8_t iv_pmic0_iv_r06
+    // uint8_t iv_pmic0_iv_r07
+    // uint8_t iv_pmic0_iv_r08
+    // uint8_t iv_pmic0_iv_r09
+    // uint8_t iv_pmic0_iv_r0a
+    // uint8_t iv_pmic0_iv_r0b
+    // uint16_t iv_pmic0_iv_swa_current_mA
+    // uint16_t iv_pmic0_iv_swb_current_mA
+    // uint16_t iv_pmic0_iv_swc_current_mA
+    // uint16_t iv_pmic0_iv_swd_current_mA
+    // uint16_t iv_pmic0_iv_r31_sample_vin
+    // uint16_t iv_pmic0_iv_r31_sample_temp
+    // uint8_t iv_pmic0_iv_r73_status_5
+    // uint8_t iv_pmic0_reserved
+    // {uint16_t iv_pmic0_reserved1
+    { 8, 1}, { 6, 2}, { 2, 1}, { 1, 2}, //PMIC0
+    { 8, 1}, { 6, 2}, { 2, 1}, { 1, 2}, //PMIC1
+};
+
+
+///
+/// @brief periodic_telemetry_data struct meta data
+/// @note The first element of the pair holds number of struct members which has same data type
+///       The second element of the pair is number which denotes number of bytes that struct member can hold. Mapping is mentioned below.
+///       uint8_t => 1, uint16_t => 2, uint32_t => 4, uint64_t => 8,
+///
+const std::vector<std::pair<uint16_t, uint8_t>> periodic_telemetry_data_struct_meta_data =
+{
+    // uint8_t iv_revision
+    // uint8_t iv_aggregate_pmic_state
+    { 2, 1},
+    // uint16_t reserved
+    { 1, 2},
+    // uint8_t iv_serial_number[26]
+    // uint8_t iv_pmic_dt_i2c_state
+    // uint8_t iv_adc_i2c_state
+    { 28, 1},
+    // uint16_t iv_dqs_tracking_recal_count
+    // uint16_t reserved1
+    { 2, 2},
+    // uint64_t iv_dqs_tracking_log[24]
+    // uint64_t iv_dts_data[5]
+    { 29, 8},
+
+    //adc_periodic_telemetry_data iv_adc
+    // uint16_t iv_max_ch0_mV
+    // uint16_t iv_max_ch1_mV
+    // uint16_t iv_max_ch2_mV
+    // uint16_t iv_max_ch3_mV
+    // uint16_t iv_max_ch4_mV
+    // uint16_t iv_max_ch5_mV
+    // uint16_t iv_max_ch6_mV
+    // uint16_t iv_max_ch7_mV
+    // uint16_t iv_min_ch0_mV
+    // uint16_t iv_min_ch1_mV
+    // uint16_t iv_min_ch2_mV
+    // uint16_t iv_min_ch3_mV
+    // uint16_t iv_min_ch4_mV
+    // uint16_t iv_min_ch5_mV
+    // uint16_t iv_min_ch6_mV
+    // uint16_t iv_min_ch7_mV
+    // uint16_t iv_recent_ch0_mV
+    // uint16_t iv_recent_ch1_mV
+    // uint16_t iv_recent_ch2_mV
+    // uint16_t iv_recent_ch3_mV
+    // uint16_t iv_recent_ch4_mV
+    // uint16_t iv_recent_ch5_mV
+    // uint16_t iv_recent_ch6_mV
+    // uint16_t iv_recent_ch7_mV
+    { 24, 2},
+
+    //pmic_periodic_telemetry_data iv_pmic[CONSTS::NUM_PMICS_4U]
+    // uint8_t iv_r08
+    // uint8_t iv_r09
+    // uint8_t iv_r0a
+    // uint8_t iv_r0b
+    // uint16_t iv_swa_current_mA
+    // uint16_t iv_swb_current_mA
+    // uint16_t iv_swc_current_mA
+    // uint16_t iv_swd_current_mA
+    // uint16_t iv_r31_sample_vin
+    // uint16_t iv_r31_sample_temp
+    // uint8_t iv_r73_status_5
+    // uint8_t iv_r7c_set_swa_offset
+    // uint8_t iv_r7d_set_swb_offset
+    // uint8_t iv_r7e_set_swc_offset
+    // uint8_t iv_r7f_set_swd_offset
+    // uint8_t reserved
+    // uint16_t reserved1
+    { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC0
+    { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC1
+    { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC2
+    { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC3
+
+    //dt_periodic_telemetry_data iv_dt[CONSTS::NUM_DTS_4U]
+    // uint16_t iv_r9a_iin
+    // uint16_t iv_r9b_vcc
+    // uint16_t iv_r9c_vinp
+    // uint16_t iv_r9d_vin
+    // uint16_t iv_r9e_vaux_b
+    // uint16_t iv_r9f_vaux_a
+    // uint16_t iv_ra0_vaux_d
+    // uint16_t iv_ra1_vaux_c
+    // uint16_t iv_ra2_vinp_min
+    // uint16_t iv_ra3_vinp_max
+    // uint16_t iv_ra4_iin_min
+    // uint16_t iv_ra5_iin_max
+    // uint8_t iv_breadcrumb
+    // uint8_t iv_recovery_count
+    // uint8_t iv_neg_orfet_cnt_swa
+    // uint8_t iv_neg_orfet_cnt_swc
+    // uint8_t iv_neg_orfet_cnt_swd
+    // uint8_t iv_reserved0
+    // uint16_t iv_reserved1
+    { 12, 2}, { 6, 1}, { 1, 2}, //PMIC0
+    { 12, 2}, { 6, 1}, { 1, 2}, //PMIC1
+    { 12, 2}, { 6, 1}, { 1, 2}, //PMIC2
+    { 12, 2}, { 6, 1}, { 1, 2}, //PMIC3
+};
+
+///
+/// @brief consolidated_health_check_data struct meta data
+/// @note The first element of the pair holds number of struct members which has same data type
+///       The second element of the pair is number which denotes number of bytes that struct member can hold. Mapping is mentioned below.
+///       uint8_t => 1, uint16_t => 2, uint32_t => 4, uint64_t => 8,
+///
+const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_struct_meta_data =
+{
+    //health_check_telemetry_data iv_health_check
+    // uinit8_t => aggregate_state iv_aggregate_state = aggregate_state::N_PLUS_1
+    // uint8_t iv_revision
+    { 2, 1},
+    // uint16_t reserved
+    { 1, 2},
+
+    // dt_health_check_telemetry iv_dt[CONSTS::NUM_DTS_4U]
+    // uint8_t  iv_breadcrumb
+    // uint8_t  reserved0
+    // uint16_t iv_ro_inputs_1
+    // uint16_t iv_ro_inputs_0
+    // uint16_t reserved1
+    { 2, 1}, { 3, 2},  //PMIC0
+    { 2, 1}, { 3, 2},  //PMIC1
+    { 2, 1}, { 3, 2},  //PMIC2
+    { 2, 1}, { 3, 2},  //PMIC3
+
+    // pmic_health_check_telemetry iv_pmic[CONSTS::NUM_PMICS_4U]
+    // uint8_t iv_r04
+    // uint8_t iv_r05
+    // uint8_t iv_r06
+    // uint8_t iv_r07
+    // uint8_t iv_r08
+    // uint8_t iv_r09
+    // uint8_t iv_r0a
+    // uint8_t iv_r0b
+    // uint16_t iv_swa_current_mA
+    // uint16_t iv_swb_current_mA
+    // uint16_t iv_swc_current_mA
+    // uint16_t iv_swd_current_mA
+    // uint8_t iv_r73_status_5
+    // uint8_t reserved
+    // uint16_t reserved1
+    { 8, 1}, { 4, 2}, { 2, 1}, { 1, 2}, //PMIC0
+    { 8, 1}, { 4, 2}, { 2, 1}, { 1, 2}, //PMIC1
+    { 8, 1}, { 4, 2}, { 2, 1}, { 1, 2}, //PMIC2
+    { 8, 1}, { 4, 2}, { 2, 1}, { 1, 2}, //PMIC3
+
+    //additional_n_mode_telemetry_data iv_additional_data
+    // adc_additional_n_mode_telemetry_data iv_adc
+    // uint8_t iv_system_status
+    // uint8_t iv_general_cfg
+    // uint8_t iv_data_cfg
+    // uint8_t iv_osr_cfg
+    // uint8_t iv_opmode_cfg
+    // uint8_t iv_pin_cfg
+    // uint8_t iv_dummy_0
+    // uint8_t iv_gpio_cfg
+    // uint8_t iv_dummy_1
+    // uint8_t iv_gpo_drive_cfg
+    // uint8_t iv_dummy_2
+    // uint8_t iv_gpo_value_cfg
+    // uint8_t iv_dummy_3
+    // uint8_t iv_gpi_value
+    // uint8_t iv_dummy_4
+    // uint8_t iv_dummy_5
+    { 16, 1},
+
+    // pmic_additional_n_mode_telemetry_data iv_pmic[CONSTS::NUM_PMICS_4U];
+    // uint8_t iv_r2f_pmic_config
+    // uint8_t iv_r32_pmic_enable
+    // uint8_t iv_r33_temp_status
+    // uint8_t iv_r9c_on_off_config
+    { 4, 1}, //PMIC0
+    { 4, 1}, //PMIC1
+    { 4, 1}, //PMIC2
+    { 4, 1}, //PMIC3
+
+
+    // dt_additional_n_mode_telemetry_data iv_dt[CONSTS::NUM_DTS_4U];
+    // uint16_t iv_r90_ops_state
+    // uint16_t iv_r92_faults_status_0
+    // uint16_t iv_r94_faults_status_1
+    // uint16_t iv_r96_first_faults_status_0
+    // uint16_t iv_r98_first_faults_status_1
+    // uint16_t iv_ra6_infet_mpt_addr
+    // uint16_t iv_ra8_nvm_data
+    // uint16_t iv_rb4_vcc_vin_vinp
+    { 8, 2}, //PMIC0
+    { 8, 2}, //PMIC1
+    { 8, 2}, //PMIC2
+    { 8, 2}, //PMIC3
+
+    //periodic_telemetry_data iv_periodic_telemetry_data;
+    // uint8_t iv_revision
+    // uint8_t iv_aggregate_pmic_state
+    { 2, 1},
+    // uint16_t reserved
+    { 1, 2},
+    // uint8_t iv_serial_number[26]
+    // uint8_t iv_pmic_dt_i2c_state
+    // uint8_t iv_adc_i2c_state
+    { 28, 1},
+    // uint16_t iv_dqs_tracking_recal_count
+    // uint16_t reserved1
+    { 2, 2},
+    // uint64_t iv_dqs_tracking_log[24]
+    // uint64_t iv_dts_data[5]
+    { 29, 8},
+
+    // adc_periodic_telemetry_data iv_adc
+    // uint16_t iv_max_ch0_mV
+    // uint16_t iv_max_ch1_mV
+    // uint16_t iv_max_ch2_mV
+    // uint16_t iv_max_ch3_mV
+    // uint16_t iv_max_ch4_mV
+    // uint16_t iv_max_ch5_mV
+    // uint16_t iv_max_ch6_mV
+    // uint16_t iv_max_ch7_mV
+    // uint16_t iv_min_ch0_mV
+    // uint16_t iv_min_ch1_mV
+    // uint16_t iv_min_ch2_mV
+    // uint16_t iv_min_ch3_mV
+    // uint16_t iv_min_ch4_mV
+    // uint16_t iv_min_ch5_mV
+    // uint16_t iv_min_ch6_mV
+    // uint16_t iv_min_ch7_mV
+    // uint16_t iv_recent_ch0_mV
+    // uint16_t iv_recent_ch1_mV
+    // uint16_t iv_recent_ch2_mV
+    // uint16_t iv_recent_ch3_mV
+    // uint16_t iv_recent_ch4_mV
+    // uint16_t iv_recent_ch5_mV
+    // uint16_t iv_recent_ch6_mV
+    // uint16_t iv_recent_ch7_mV
+    { 24, 2},
+
+    // pmic_periodic_telemetry_data iv_pmic[CONSTS::NUM_PMICS_4U]
+    // uint8_t iv_r08
+    // uint8_t iv_r09
+    // uint8_t iv_r0a
+    // uint8_t iv_r0b
+    // uint16_t iv_swa_current_mA
+    // uint16_t iv_swb_current_mA
+    // uint16_t iv_swc_current_mA
+    // uint16_t iv_swd_current_mA
+    // uint16_t iv_r31_sample_vin
+    // uint16_t iv_r31_sample_temp
+    // uint8_t iv_r73_status_5
+    // uint8_t iv_r7c_set_swa_offset
+    // uint8_t iv_r7d_set_swb_offset
+    // uint8_t iv_r7e_set_swc_offset
+    // uint8_t iv_r7f_set_swd_offset
+    // uint8_t reserved
+    // uint16_t reserved1
+    { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC0
+    { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC1
+    { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC2
+    { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC3
+
+    // dt_periodic_telemetry_data iv_dt[CONSTS::NUM_DTS_4U]
+    // uint16_t iv_r9a_iin
+    // uint16_t iv_r9b_vcc
+    // uint16_t iv_r9c_vinp
+    // uint16_t iv_r9d_vin
+    // uint16_t iv_r9e_vaux_b
+    // uint16_t iv_r9f_vaux_a
+    // uint16_t iv_ra0_vaux_d
+    // uint16_t iv_ra1_vaux_c
+    // uint16_t iv_ra2_vinp_min
+    // uint16_t iv_ra3_vinp_max
+    // uint16_t iv_ra4_iin_min
+    // uint16_t iv_ra5_iin_max
+    // uint8_t iv_breadcrumb
+    // uint8_t iv_recovery_count
+    // uint8_t iv_neg_orfet_cnt_swa
+    // uint8_t iv_neg_orfet_cnt_swc
+    // uint8_t iv_neg_orfet_cnt_swd
+    // uint8_t iv_reserved0
+    // uint16_t iv_reserved1
+    { 12, 2}, { 6, 1}, { 1, 2}, //PMIC0
+    { 12, 2}, { 6, 1}, { 1, 2}, //PMIC1
+    { 12, 2}, { 6, 1}, { 1, 2}, //PMIC2
+    { 12, 2}, { 6, 1}, { 1, 2}, //PMIC3
+
+    // uint8_t iv_pmic0_errors
+    // uint8_t iv_pmic1_errors
+    // uint8_t iv_pmic2_errors
+    // uint8_t iv_pmic3_errors
+    // uint8_t iv_dt0_errors
+    // uint8_t iv_dt1_errors
+    // uint8_t iv_dt2_errors
+    // uint8_t iv_dt3_errors
+    // uint8_t iv_adc_errors
+    // uint8_t reserved
+    { 10, 1},
+    // uint16_t reserved1
+    { 1, 2},
+};
+#endif
+
 using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
 
 // Extra constants
