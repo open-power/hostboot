@@ -916,10 +916,13 @@ fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_tar
                 // are throwing errors and entering n-mode which is cauing the HWP to crash at the end.
                 // This check has been skipped for now.
                 // TODO: ZEN:MST-2454 Get simics support for DT, PMIC and ADC regs for health_check
+
+                // PMIC_ENABLE_FAIL_DDR5_4U error needs to be recovered as we don't want customer to act on this error.
+                // Subsequent functions will take care of marking the errors as un-recoverable if needed
                 if (!l_simics)
                 {
                     FAPI_ASSERT_NOEXIT(false,
-                    fapi2::PMIC_ENABLE_FAIL_DDR5_4U()
+                    fapi2::PMIC_ENABLE_FAIL_DDR5_4U(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                     .set_OCMB_TARGET(i_target_info.iv_ocmb)
                     .set_PMIC_TARGET(i_target_info.iv_pmic_dt_map[l_dt_count].iv_pmic)
                     .set_RETURN_CODE(static_cast<uint32_t>(fapi2::current_err)),

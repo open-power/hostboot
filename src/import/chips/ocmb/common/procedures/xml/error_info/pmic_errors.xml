@@ -455,18 +455,6 @@
       <target>PMIC_TARGET</target>
       <priority>HIGH</priority>
     </callout>
-    <deconfigure>
-      <target>OCMB_TARGET</target>
-    </deconfigure>
-    <gard>
-      <target>OCMB_TARGET</target>
-    </gard>
-    <deconfigure>
-      <target>PMIC_TARGET</target>
-    </deconfigure>
-    <gard>
-      <target>PMIC_TARGET</target>
-    </gard>
   </hwpError>
 
   <hwpError>
