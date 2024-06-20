@@ -96,7 +96,7 @@ fapi2::ReturnCode ody_omi_hss_bist_cleanup(const fapi2::Target<fapi2::TARGET_TYP
                            fapi2::IO_PPE_DONE_CLEANUP_FAILED(l_sev)
                            .set_POS(l_pos)
                            .set_FAIL(l_fail)
-                           .set_DONE(l_done)
+                           .set_NOT_DONE(!l_done)
                            .set_TARGET(i_target),
                            "IO PPE Bist Cleanup Done Fail on %d :: Done(%d), Fail(0x%04X)",
                            l_pos, l_done, l_fail);
