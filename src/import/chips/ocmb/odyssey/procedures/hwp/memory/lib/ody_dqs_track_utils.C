@@ -1121,7 +1121,7 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
 fapi_try_exit:
     // Log original error
-    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_RECOVERED);
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
     // Unmask and set FIRs
     fapi2::ReturnCode l_rc = mss::unmask::dqs_drift_track_error<mss::mc_type::ODYSSEY>(i_target);
     // Set the attribute to the fail state so we don't run anymore
