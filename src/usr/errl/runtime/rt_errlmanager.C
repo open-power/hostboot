@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -378,6 +378,76 @@ void ErrlManager::sendMboxMsg ( errlHndl_t& io_err )
     return;
 }
 
+void ErrlManager::commitErrLogAggregate(errlHndl_t& io_err, const compId_t i_committerComp)
+{
+    const char* l_sevString = errl_sev_str_map.at(io_err->sev());
+
+    TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s",
+              i_committerComp, io_err->eid(), io_err->reasonCode(), l_sevString );
+
+    // Take ownership of the log's sub-logs, which means that we are
+    // responsible for freeing them (which is done by sendMboxMsg)
+    auto aggregate_errors = move(io_err->iv_aggregate_errors);
+
+    // Increment our persistent counter so we don't reuse EIDs
+    //  after reboots or mpipl
+    // ATTR_HOSTSVC_PLID = largest committed log id (usually last committed log)
+    // Note: next log will add 1 to this value
+    TARGETING::Target * sys = NULL;
+    if( TARGETING::targetService().isInitialized() )
+    {
+        TARGETING::targetService().getTopLevelTarget( sys );
+
+        uint64_t prevID = sys->getAttr<TARGETING::ATTR_HOSTSVC_PLID>();
+        // incase errors are committed out of order, keep largest EID
+        if (prevID < io_err->eid())
+        {
+            sys->setAttr<TARGETING::ATTR_HOSTSVC_PLID>(io_err->eid());
+            TRACFCOMP(g_trac_errl, "Updated ATTR_HOSTSVC_PLID to 0x%08X", io_err->eid());
+        }
+
+        // update instance variable in case target service was not
+        // available when errlmanager's constructor was called.
+        iv_pldWaitEnable &= !sys->getAttr<TARGETING::ATTR_DISABLE_PLD_WAIT>();
+    }
+
+    // If this is not an FSP and this log has a callout that
+    // could trigger a maintenance request,we have to allow
+    // time for the BMC to detect possible Power Line
+    // Disturbances before we process the log
+    auto do_pld_wait = iv_pldWaitEnable && io_err->hasMaintenanceCallout();
+    TRACFCOMP(g_trac_errl,
+              "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s %s waiting for BMC to determine if Power Line Disturbance (PLD) occurred",
+              i_committerComp, io_err->eid(), io_err->reasonCode(), errl_sev_str_map.at(io_err->sev()), do_pld_wait ? "" : "not"  );
+
+    if(do_pld_wait)
+    {
+        nanosleep(MIN_PLD_WAIT_TIME_SEC, 0);
+        //remember that we already waited so we don't waste our time again
+        iv_pldWaitEnable = false;
+    }
+
+    // Deferred callouts not allowed at runtime - this call will check,
+    // flag and change any that are found.
+    io_err->deferredDeconfigure();
+
+    TRACFCOMP( g_trac_errl, INFO_MRK
+               "Send an error log to hypervisor to commit. plid=0x%X",
+               io_err->plid() );
+
+    io_err->commit(i_committerComp);
+    sendMboxMsg(io_err);
+    io_err = NULL;
+
+    // Commit the rest of the error logs in the aggregate
+    for (auto log : aggregate_errors)
+    {
+        commitErrLogAggregate(log, i_committerComp);
+    }
+
+    io_err = nullptr;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //  Handling commit error log.
 ///////////////////////////////////////////////////////////////////////////////
@@ -393,53 +463,18 @@ void ErrlManager::commitErrLog(errlHndl_t& io_err, compId_t i_committerComp )
             break;
         }
 
-        // Increment our persistent counter so we don't reuse EIDs
-        //  after reboots or mpipl
-        // ATTR_HOSTSVC_PLID = largest committed log id (usually last committed log)
-        // Note: next log will add 1 to this value
-        TARGETING::Target * sys = NULL;
-        if( TARGETING::targetService().isInitialized() )
-        {
-            TARGETING::targetService().getTopLevelTarget( sys );
+        // need to save/restore this value because it will be
+        // modified by commitErrLogAggregate()
+        auto initial_pld_wait = iv_pldWaitEnable;
 
-            uint64_t prevID = sys->getAttr<TARGETING::ATTR_HOSTSVC_PLID>();
-            // incase errors are committed out of order, keep largest EID
-            if (prevID < io_err->eid())
-            {
-                sys->setAttr<TARGETING::ATTR_HOSTSVC_PLID>(io_err->eid());
-                TRACFCOMP(g_trac_errl, "Updated ATTR_HOSTSVC_PLID to 0x%08X", io_err->eid());
-            }
+        assert(io_err->iv_aggregate_parent == nullptr,
+               "commitErrLog(0x%08X, %d) called on a log which is a member of an aggregate",
+               io_err->eid(),
+               i_committerComp);
 
-            // update instance variable in case target service was not
-            // avaible when errlmanager's constructor was called.
-            iv_pldWaitEnable &= !sys->getAttr<TARGETING::ATTR_DISABLE_PLD_WAIT>();
-        }
+        commitErrLogAggregate(io_err, i_committerComp);
 
-        // If this is not an FSP and this log has a callout that
-        // could trigger a maintenance request,we have to allow
-        // time for the BMC to detect possible Power Line
-        // Disturbances before we process the log
-        auto do_pld_wait = iv_pldWaitEnable && io_err->hasMaintenanceCallout();
-        TRACFCOMP(g_trac_errl,
-                  "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s %s waiting for BMC to determine if Power Line Disturbance (PLD) occurred",
-                  i_committerComp, io_err->eid(), io_err->reasonCode(), errl_sev_str_map.at(io_err->sev()), do_pld_wait ? "" : "not"  );
-
-        if(do_pld_wait)
-        {
-            nanosleep(MIN_PLD_WAIT_TIME_SEC, 0);
-        }
-
-        // Deferred callouts not allowed at runtime - this call will check,
-        // flag and change any that are found.
-        io_err->deferredDeconfigure();
-
-        TRACFCOMP( g_trac_errl, INFO_MRK
-                   "Send an error log to hypervisor to commit. plid=0x%X",
-                   io_err->plid() );
-
-        io_err->commit(i_committerComp);
-        sendMboxMsg(io_err);
-        io_err = NULL;
+        iv_pldWaitEnable = initial_pld_wait;
 
     } while( 0 );
 

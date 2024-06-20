@@ -141,6 +141,7 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                 slid = UtilByte::bufferTo16uint(ffdcPackageBuffer
                                                + i
                                                + SLID_OFFSET);
+                SBE_TRACF("parseFFDCData> Found odyssey slid %d",slid);
 
                 // Get the log severity by advancing past the SLID. They are in the same word.
                 severity = *(ffdcPackageBuffer
@@ -224,6 +225,7 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                                     + i
                                     + HDR_SIZE_IN_BYTES;
 
+                SBE_TRACF("parseFFDCData> Add package for slid %d",slid);
                 addFFDCPackage(l_wordBuffer, FFDC_RETURN_CODE, FFDC_BUFFER_LENGTH_IN_BYTES, slid, severity);
 
             }
@@ -293,7 +295,7 @@ void SbeFFDCParser::parseFFDCData(void * i_ffdcPackageBuffer)
                   });
     }
 
-    SBE_TRACD(EXIT_MRK "parseFFDCData");
+    SBE_TRACF(EXIT_MRK "parseFFDCData");
 }
 
 errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
@@ -302,6 +304,9 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                                                          const uint64_t i_userdata1,
                                                          const uint64_t i_userdata2)
 {
+    SBE_TRACF(ENTER_MRK" generateSbeErrors(%.8X)",
+              TARGETING::get_huid(i_target));
+
     // The SBE could have multiple errors it wants to create for context. During the process of creating the logs
     // use a vector to store them. Later, aggregate all the logs together since one needs to be the main log and
     // we don't want to create an unnecessary log to be the main log.
@@ -320,6 +325,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
     // errors/packages belong together.
     for (const auto & package : iv_ffdcPackages)
     {
+        SBE_TRACF("generateSbeErrors> currentSlid=%d, package=%d",currentSlid,package->slid);
         if (currentSlid != package->slid)
         {
             // New SLID detected.
@@ -328,6 +334,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
             {
                 // Add existing error to the list of return logs
                 slidErrl->collectTrace(SBEIO_COMP_NAME);
+                SBE_TRACF("Adding %.8X to error list",slidErrl->eid());
                 sbeErrors.push_back(slidErrl);
 
                 slidErrl = nullptr;
@@ -368,6 +375,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
              */
             sbeFfdc_t * ffdcBuf = reinterpret_cast<sbeFfdc_t * >(package->ffdcPtr);
 
+            SBE_TRACF("Parsing RC=%.8X",package->rc);
             FAPI_SET_SBE_ERROR(fapiRC,
                                package->rc,
                                ffdcBuf,
@@ -388,6 +396,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
         {
             if (slidErrl == nullptr)
             {
+                SBE_TRACF("Creating log for FAPI2_RC_PLAT_ERR_SEE_DATA");
                 // Create new error for this SLID
                 //     severity comes from ffdc package
                 slidErrl = new ERRORLOG::ErrlEntry(package->severity,
@@ -399,6 +408,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
             }
             else
             {
+                SBE_TRACF("Reusing log %.8X for FAPI2_RC_PLAT_ERR_SEE_DATA",slidErrl->eid());
                 // An error was already created earlier.
                 // If severity of this package exceeds severity of slid-pel then upgrade severity
                 if (((package->severity == ERRORLOG::ERRL_SEV_UNRECOVERABLE)
@@ -420,8 +430,10 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
         }
         else // RC==0
         {
+            SBE_TRACF("RC=0 case");
             if (slidErrl == nullptr)
             {
+                SBE_TRACF("Creating log for RC=0");
                 // Create new error for this SLID
                 slidErrl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_PREDICTIVE,
                                                    i_modId,
@@ -452,6 +464,7 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
 
         if (slidErrl != nullptr)
         {
+            SBE_TRACF("Calling doDefaultProcessing for %.8X", slidErrl->eid());
             // If FFDC schema is known and a processing routine is defined then perform the processing.
             // For scom PIB errors, addFruCallouts is invoked. Only processing known FFDC schemas protects us
             // from trying to process FFDC formats we do not anticipate. For example, the SBE can send user and
@@ -466,6 +479,8 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
     // Aggregate all the errors together. There isn't any one error log that ought to be the main one so it doesn't
     // matter which is returned as the main log.
     ERRORLOG::aggregate(slidErrl, sbeErrors);
+
+    SBE_TRACF(EXIT_MRK" generateSbeErrors");
 
     // Return aggregated list of all logs made to caller to deal with (add callouts or whatever)
     return slidErrl;
