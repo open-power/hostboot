@@ -28,8 +28,8 @@
 ///
 /// *HWP HW Maintainer : Josh Chica <josh.chica@ibm.com>
 /// *HWP FW Maintainer :
-/// *HWP Team: IO
-/// *HWP Level: 3
+/// *HW Team: IO
+/// *HW Level: 3
 /// *HWP Consumed by: SBE
 ///------------------------------------------------------------------------------
 
@@ -73,40 +73,46 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
         fapi2::ATTR_MFG_FLAGS_Type l_mfg_flags = {0};
         TdrResult l_status = TdrResult::None;
         uint32_t l_length = 0;
+        uint32_t l_tx_lane_mask = 0;
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags));
 
-        for (uint8_t l_lane = 0; l_lane < 8; l_lane++)
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_OMI_TX_LANES, i_target, l_tx_lane_mask));
+
+        for (uint8_t l_lane = 0; l_lane < 32; l_lane++)
         {
-            FAPI_TRY(ody_io_tdr(i_target, PHY_ODY_OMI_BASE, l_groupa, l_lane, l_freq, l_status, l_length));
-
-            FAPI_DBG("Checking on lane %d with status %d.", l_lane, l_status);
-
-            if (l_status != TdrResult::NoIssues)
+            if (l_tx_lane_mask & (0x80000000 >> l_lane))
             {
-                if (l_mfg_flags[fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / 32] & (1 << (31 -
-                        (fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % 32))))
-                {
-                    l_sev = fapi2::FAPI2_ERRL_SEV_PREDICTIVE;
-                }
-                else
-                {
-                    l_sev = fapi2::FAPI2_ERRL_SEV_RECOVERED;
-                }
+                FAPI_TRY(ody_io_tdr(i_target, PHY_ODY_OMI_BASE, l_groupa, l_lane, l_freq, l_status, l_length));
 
-                // note - FAPI_ASSERT_NOEXIT clears current_err on return
-                FAPI_ASSERT_NOEXIT(false,
-                                   fapi2::POZ_IO_TX_TDR_ERROR(l_sev)
-                                   .set_TARGET_CHIP(i_target)
-                                   .set_LANE(l_lane)
-                                   .set_STATUS(l_status)
-                                   .set_DISTANCE(l_length),
-                                   "OMI Tx TDR Fail :: lane(%d), status(0x%04X) length(%d)...",
-                                   l_lane, l_status, l_length);
-                fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+                FAPI_DBG("Checking on lane %d with status %d.", l_lane, l_status);
 
-                l_groupa |= (0x1 << l_lane) & c_groupa_mask;
-                l_groupb |= (0x1 << l_lane) & c_groupb_mask;
+                if (l_status != TdrResult::NoIssues)
+                {
+                    if (l_mfg_flags[fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS / 32] & (1 << (31 -
+                            (fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_THRESHOLDS % 32))))
+                    {
+                        l_sev = fapi2::FAPI2_ERRL_SEV_PREDICTIVE;
+                    }
+                    else
+                    {
+                        l_sev = fapi2::FAPI2_ERRL_SEV_RECOVERED;
+                    }
+
+                    // note - FAPI_ASSERT_NOEXIT clears current_err on return
+                    FAPI_ASSERT_NOEXIT(false,
+                                       fapi2::POZ_IO_TX_TDR_ERROR(l_sev)
+                                       .set_TARGET_CHIP(i_target)
+                                       .set_LANE(l_lane)
+                                       .set_STATUS(l_status)
+                                       .set_DISTANCE(l_length),
+                                       "OMI Tx TDR Fail :: lane(%d), status(0x%04X) length(%d)...",
+                                       l_lane, l_status, l_length);
+                    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+
+                    l_groupa |= (0x1 << l_lane) & c_groupa_mask;
+                    l_groupb |= (0x1 << l_lane) & c_groupb_mask;
+                }
             }
         }
 

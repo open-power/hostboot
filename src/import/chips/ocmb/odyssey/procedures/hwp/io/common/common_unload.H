@@ -49,6 +49,22 @@ enum UNLOAD_SHIFT_CONSTS
 };
 
 ///
+/// @brief Utility to put custom data through ostream and reset RC value so it resets the buffer pointer
+///         and all of the data (even if there's a bad scom) are streamed out.
+/// @param[in] i_data           Data being streamed out
+/// @param[in] i_length         Bit length of data being streamed out
+/// @param[in] o_ostream        Stream object
+///
+/// @return void function, as we want to continue in fail case.
+///
+void custom_put(uint64_t i_data, uint32_t i_length, fapi2::hwp_bit_ostream& o_ostream)
+{
+    fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+    o_ostream.put(i_data, i_length);
+    return;
+}
+
+///
 /// @brief Utility to enable/disable auto increment mode.
 /// @param[in] i_target         Target Chip
 /// @param[in] i_base_addr      Target chip's base address
@@ -114,7 +130,7 @@ void stream_scom_data(const fapi2::Target<K, M, V>& i_target,
                       fapi2::hwp_bit_ostream& o_ostream,
                       const uint64_t i_base_addr)
 {
-    static constexpr uint32_t offsets[] __attribute__((aligned(8))) = {0x00, 0x02, 0x04, 0x05, 0x0A, 0x0D, 0x0E, 0x13, 0x14, 0x15, 0x17, 0x18, 0x19, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x26, 0x27, 0x2C, 0x2D, 0x2E};
+    static constexpr uint8_t offsets[] __attribute__((aligned(8))) = {0x00, 0x02, 0x04, 0x05, 0x0A, 0x0D, 0x0E, 0x13, 0x14, 0x15, 0x17, 0x18, 0x19, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x26, 0x27, 0x2C, 0x2D, 0x2E};
 
     fapi2::buffer<uint64_t> l_data = 0;
     uint64_t l_addr = 0;
@@ -131,7 +147,7 @@ void stream_scom_data(const fapi2::Target<K, M, V>& i_target,
             l_data = 0xDEADDEADDEADDEAD;
         }
 
-        o_ostream.put64(l_data);
+        custom_put(l_data, 64, o_ostream);
     }
 
 }
@@ -171,7 +187,7 @@ void stream_mem_data_pp(const fapi2::Target<K, M, V>& i_target,
                 l_data = 0xDEADDEADDEADDEAD;
             }
 
-            o_ostream.put64(l_data);
+            custom_put(l_data, 64, o_ostream);
         }
     }
 
@@ -220,7 +236,7 @@ void stream_mem_data_pt(const fapi2::Target<K, M, V>& i_target,
                     l_data = 0xDEADDEADDEADDEAD;
                 }
 
-                o_ostream.put64(l_data);
+                custom_put(l_data, 64, o_ostream);
             }
         }
     }
@@ -300,6 +316,7 @@ void stream_hw_data(const fapi2::Target<K, M, V>& i_target,
             l_data = 0xDEADDEADDEADDEAD;
         }
 
-        o_ostream.put16(l_data);
+        custom_put(l_data, 16, o_ostream);
     }
+
 }

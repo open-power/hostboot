@@ -178,7 +178,7 @@ fapi2::ReturnCode common_io_tdr(
              i_freq);
 
     const uint32_t c_pulse_width = 100;
-    const uint32_t c_fs_per_ui = 100000000 / i_freq;
+    const uint32_t c_fs_per_ui = 1000000000 / i_freq;
 
     uint32_t min_offset = 0;
     uint32_t max_offset = 0;
