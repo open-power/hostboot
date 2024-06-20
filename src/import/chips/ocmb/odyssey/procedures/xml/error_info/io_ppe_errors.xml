@@ -46,7 +46,7 @@
       <description>IO PPE done BIST clenaup failed</description>
       <ffdc>TARGET</ffdc>
       <ffdc>POS</ffdc>
-      <ffdc>DONE</ffdc>
+      <ffdc>NOT_DONE</ffdc>
       <ffdc>FAIL</ffdc>
       <callout>
         <target>TARGET</target>
