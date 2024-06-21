@@ -394,6 +394,11 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
         }
         else if (package->rc == fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
         {
+            // By definition this package only contains FFDC, it is not logging
+            // an actual error.  The Severity that comes back from Odyssey is
+            // invalid so we will force it to informational.
+            package->severity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
+
             if (slidErrl == nullptr)
             {
                 SBE_TRACF("Creating log for FAPI2_RC_PLAT_ERR_SEE_DATA");
