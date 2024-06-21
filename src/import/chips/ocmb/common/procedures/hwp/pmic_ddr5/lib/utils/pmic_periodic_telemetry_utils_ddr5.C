@@ -386,61 +386,70 @@ void read_dt_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
 
     for (auto l_dt_count = 0; l_dt_count < CONSTS::NUM_PMICS_4U; l_dt_count++)
     {
-        // If the corresponding PMIC in the PMIC/DT pair is not overridden to disabled, run the enable
-        mss::pmic::ddr5::run_if_present_dt(io_target_info, l_dt_count, [&io_target_info, &io_periodic_tele_info, l_dt_count]
-                                           (const fapi2::Target<fapi2::TARGET_TYPE_POWER_IC>& i_dt) -> fapi2::ReturnCode
-        {
-            static constexpr uint8_t SEL_SWA_ORFET_CNT = 0x00;
-            static constexpr uint8_t SEL_SWC_ORFET_CNT = 0x10;
-            static constexpr uint8_t SEL_SWD_ORFET_CNT = 0x18;
-            static constexpr uint32_t VOLT_SCALE = 31250;
-            static constexpr uint32_t VIN_VINP_SCALE = 62500;
-            static constexpr uint64_t TO_MV = 1000;
-            fapi2::buffer<uint8_t> l_dt_buffer[NUM_BYTES_TO_READ];
+        // We dont need run_if_present_dt here as irrespective of any issues PMIC/DT pair is facing, the PMIC/DTs
+        // should be accessible. If there are any I2C issues, they will be caught in all throughout.
 
-            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Populating DT data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_dt_count].iv_dt));
+        static constexpr uint8_t SEL_SWA_ORFET_CNT = 0x00;
+        static constexpr uint8_t SEL_SWC_ORFET_CNT = 0x10;
+        static constexpr uint8_t SEL_SWD_ORFET_CNT = 0x18;
+        static constexpr uint32_t VOLT_SCALE = 31250;
+        static constexpr uint32_t VIN_VINP_SCALE = 62500;
+        static constexpr uint64_t TO_MV = 1000;
+        fapi2::buffer<uint8_t> l_dt_buffer[NUM_BYTES_TO_READ];
 
-            // IIN scale = (value * 31250) / 1000
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::IIN_VCC, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_r9a_iin = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VOLT_SCALE) / TO_MV);
-            // VCC scale = (value * 31250) / 1000
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_r9b_vcc = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VOLT_SCALE) / TO_MV);
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Populating DT data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_dt_count].iv_dt));
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::VINP_VIN, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_r9c_vinp = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VIN_VINP_SCALE) / TO_MV);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_r9d_vin = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VIN_VINP_SCALE) / TO_MV);
+        // IIN scale = (value * 31250) / 1000
+        mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::IIN_VCC, l_dt_buffer);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_r9a_iin = static_cast<uint16_t>((
+                    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VOLT_SCALE) / TO_MV);
+        // VCC scale = (value * 31250) / 1000
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_r9b_vcc = static_cast<uint16_t>((
+                    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VOLT_SCALE) / TO_MV);
 
-            read_store_vaux_values(io_target_info.iv_pmic_dt_map[l_dt_count], io_periodic_tele_info.iv_dt[l_dt_count]);
+        mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::VINP_VIN, l_dt_buffer);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_r9c_vinp = static_cast<uint16_t>((
+                    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VIN_VINP_SCALE) / TO_MV);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_r9d_vin = static_cast<uint16_t>((
+                    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VIN_VINP_SCALE) / TO_MV);
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::VINP_MIN_MAX, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_ra2_vinp_min = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VIN_VINP_SCALE) / TO_MV);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_ra3_vinp_max = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VIN_VINP_SCALE) / TO_MV);
+        read_store_vaux_values(io_target_info.iv_pmic_dt_map[l_dt_count], io_periodic_tele_info.iv_dt[l_dt_count]);
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::IIN_MIN_MAX, l_dt_buffer);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_ra4_iin_min = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VOLT_SCALE) / TO_MV);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_ra5_iin_max = static_cast<uint16_t>((l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VOLT_SCALE) / TO_MV);
+        mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::VINP_MIN_MAX, l_dt_buffer);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_ra2_vinp_min = static_cast<uint16_t>((
+                    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VIN_VINP_SCALE) / TO_MV);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_ra3_vinp_max = static_cast<uint16_t>((
+                    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VIN_VINP_SCALE) / TO_MV);
 
-            mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_breadcrumb = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
+        mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::IIN_MIN_MAX, l_dt_buffer);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_ra4_iin_min = static_cast<uint16_t>((
+                    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0] * VOLT_SCALE) / TO_MV);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_ra5_iin_max = static_cast<uint16_t>((
+                    l_dt_buffer[mss::pmic::ddr5::data_position::DATA_1] * VOLT_SCALE) / TO_MV);
 
-            mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RECOVERY_COUNT, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_recovery_count = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
+        mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::BREADCRUMB,
+                                     l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_breadcrumb = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
 
-            // Read neg orfet cnt for SWA
-            read_neg_orfet_cnt(io_target_info.iv_pmic_dt_map[l_dt_count], SEL_SWA_ORFET_CNT, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_neg_orfet_cnt_swa = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
+        mss::pmic::ddr5::dt_reg_read(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::RECOVERY_COUNT,
+                                     l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_recovery_count = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
 
-            // We don't use SWB here (except in current readings)
-            // Read neg orfet cnt for SWA
-            read_neg_orfet_cnt(io_target_info.iv_pmic_dt_map[l_dt_count], SEL_SWC_ORFET_CNT, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_neg_orfet_cnt_swc = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
+        // Read neg orfet cnt for SWA
+        read_neg_orfet_cnt(io_target_info.iv_pmic_dt_map[l_dt_count], SEL_SWA_ORFET_CNT,
+                           l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_neg_orfet_cnt_swa = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
 
-            // Read neg orfet cnt for SWA
-            read_neg_orfet_cnt(io_target_info.iv_pmic_dt_map[l_dt_count], SEL_SWD_ORFET_CNT, l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
-            io_periodic_tele_info.iv_dt[l_dt_count].iv_neg_orfet_cnt_swd = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
+        // We don't use SWB here (except in current readings)
+        // Read neg orfet cnt for SWA
+        read_neg_orfet_cnt(io_target_info.iv_pmic_dt_map[l_dt_count], SEL_SWC_ORFET_CNT,
+                           l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_neg_orfet_cnt_swc = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
 
-            return fapi2::FAPI2_RC_SUCCESS;
-        });
+        // Read neg orfet cnt for SWA
+        read_neg_orfet_cnt(io_target_info.iv_pmic_dt_map[l_dt_count], SEL_SWD_ORFET_CNT,
+                           l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0]);
+        io_periodic_tele_info.iv_dt[l_dt_count].iv_neg_orfet_cnt_swd = l_dt_buffer[mss::pmic::ddr5::data_position::DATA_0];
     }
 }
 
@@ -459,74 +468,82 @@ void read_pmic_regs(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info
 
     for (auto l_pmic_count = 0; l_pmic_count < CONSTS::NUM_PMICS_4U; l_pmic_count++)
     {
-        // If the pmic is not overridden to disabled, run the below code
-        mss::pmic::ddr5::run_if_present(io_target_info, l_pmic_count, [&io_target_info, l_pmic_count, &io_periodic_tele_info,
-                                        &l_pmic_aggregate_state]
-                                        (const fapi2::Target<fapi2::TARGET_TYPE_PMIC>& i_pmic) -> fapi2::ReturnCode
-        {
-            using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
-            using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
-            using DATA_POS = mss::pmic::ddr5::data_position;
-            fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ_TELE];
+        // We dont need run_if_present here as irrespective of any issues PMIC/DT pair is facing, the PMIC/DTs
+        // should be accessible. If there are any I2C issues, they will be caught in all throughout.
 
-            FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Populating PMIC data", GENTARGTID(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic));
+        using REGS = pmicRegs<mss::pmic::product::JEDEC_COMPLIANT>;
+        using TPS_REGS = pmicRegs<mss::pmic::product::TPS5383X>;
+        using DATA_POS = mss::pmic::ddr5::data_position;
+        fapi2::buffer<uint8_t> l_data_buffer[NUMBER_PMIC_REGS_READ_TELE];
 
-            // Read SWA/B/C/D
-            mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R08, l_data_buffer);
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Populating PMIC data",
+                        GENTARGTID(io_target_info.iv_pmic_dt_map[l_pmic_count].iv_pmic));
 
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r08 = l_data_buffer[DATA_POS::DATA_0];
-            l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_0];
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r09 = l_data_buffer[DATA_POS::DATA_1];
-            l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_1];
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r0a = l_data_buffer[DATA_POS::DATA_2];
-            l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_2];
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r0b = l_data_buffer[DATA_POS::DATA_3];
-            l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_3];
+        // Read SWA/B/C/D
+        mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R08, l_data_buffer);
 
-            // Convert raw value
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_swa_current_mA = l_data_buffer[DATA_POS::DATA_4] * mss::pmic::ddr5::CURRENT_MULTIPLIER;
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_swb_current_mA = l_data_buffer[DATA_POS::DATA_5] * mss::pmic::ddr5::CURRENT_MULTIPLIER;
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_swc_current_mA = l_data_buffer[DATA_POS::DATA_6] * mss::pmic::ddr5::CURRENT_MULTIPLIER;
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_swd_current_mA = l_data_buffer[DATA_POS::DATA_7] * mss::pmic::ddr5::CURRENT_MULTIPLIER;
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r08 = l_data_buffer[DATA_POS::DATA_0];
+        l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_0];
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r09 = l_data_buffer[DATA_POS::DATA_1];
+        l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_1];
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r0a = l_data_buffer[DATA_POS::DATA_2];
+        l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_2];
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r0b = l_data_buffer[DATA_POS::DATA_3];
+        l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_3];
 
-            // Set PMIC internal ADC to sample VIN
-            mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[DATA_POS::DATA_0]);
-            l_data_buffer[DATA_POS::DATA_0].clearBit<6>();
-            l_data_buffer[DATA_POS::DATA_0].setBit<5>();
-            l_data_buffer[DATA_POS::DATA_0].clearBit<4>();
-            l_data_buffer[DATA_POS::DATA_0].setBit<3>();
-            mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[DATA_POS::DATA_0]);
-            // VIN
-            mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R31, l_data_buffer[DATA_POS::DATA_0]);
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r31_sample_vin = static_cast<uint16_t>(l_data_buffer[DATA_POS::DATA_0]()) * ADC_VIN_BULK_STEP;
+        // Convert raw value
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_swa_current_mA = l_data_buffer[DATA_POS::DATA_4] *
+                mss::pmic::ddr5::CURRENT_MULTIPLIER;
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_swb_current_mA = l_data_buffer[DATA_POS::DATA_5] *
+                mss::pmic::ddr5::CURRENT_MULTIPLIER;
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_swc_current_mA = l_data_buffer[DATA_POS::DATA_6] *
+                mss::pmic::ddr5::CURRENT_MULTIPLIER;
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_swd_current_mA = l_data_buffer[DATA_POS::DATA_7] *
+                mss::pmic::ddr5::CURRENT_MULTIPLIER;
 
-            // Set PMIC internal ADC to sample temp
-            mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[DATA_POS::DATA_0]);
-            l_data_buffer[DATA_POS::DATA_0].setBit<6>();
-            l_data_buffer[DATA_POS::DATA_0].clearBit<5>();
-            l_data_buffer[DATA_POS::DATA_0].setBit<4>();
-            l_data_buffer[DATA_POS::DATA_0].clearBit<3>();
-            mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30, l_data_buffer[DATA_POS::DATA_0]);
-            // Temp
-            mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R31, l_data_buffer[DATA_POS::DATA_0]);
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r31_sample_temp = static_cast<uint16_t>(l_data_buffer[DATA_POS::DATA_0]()) * ADC_TEMP_STEP;
+        // Set PMIC internal ADC to sample VIN
+        mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30,
+                l_data_buffer[DATA_POS::DATA_0]);
+        l_data_buffer[DATA_POS::DATA_0].clearBit<6>();
+        l_data_buffer[DATA_POS::DATA_0].setBit<5>();
+        l_data_buffer[DATA_POS::DATA_0].clearBit<4>();
+        l_data_buffer[DATA_POS::DATA_0].setBit<3>();
+        mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30,
+                l_data_buffer[DATA_POS::DATA_0]);
+        // VIN
+        mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R31, l_data_buffer[DATA_POS::DATA_0]);
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r31_sample_vin = static_cast<uint16_t>
+                (l_data_buffer[DATA_POS::DATA_0]()) * ADC_VIN_BULK_STEP;
 
-            // Read SWA/B/C/D offsets
-            mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R7C_SET_SWA_OFFSET, l_data_buffer);
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r7c_set_swa_offset = l_data_buffer[DATA_POS::DATA_0];
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r7d_set_swb_offset = l_data_buffer[DATA_POS::DATA_1];
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r7e_set_swc_offset = l_data_buffer[DATA_POS::DATA_2];
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r7f_set_swd_offset = l_data_buffer[DATA_POS::DATA_3];
+        // Set PMIC internal ADC to sample temp
+        mss::pmic::ddr5::pmic_reg_read_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30,
+                l_data_buffer[DATA_POS::DATA_0]);
+        l_data_buffer[DATA_POS::DATA_0].setBit<6>();
+        l_data_buffer[DATA_POS::DATA_0].clearBit<5>();
+        l_data_buffer[DATA_POS::DATA_0].setBit<4>();
+        l_data_buffer[DATA_POS::DATA_0].clearBit<3>();
+        mss::pmic::ddr5::pmic_reg_write_reverse_buffer(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R30,
+                l_data_buffer[DATA_POS::DATA_0]);
+        // Temp
+        mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R31, l_data_buffer[DATA_POS::DATA_0]);
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r31_sample_temp = static_cast<uint16_t>
+                (l_data_buffer[DATA_POS::DATA_0]()) * ADC_TEMP_STEP;
 
-            mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R73, l_data_buffer[DATA_POS::DATA_0]);
-            io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r73_status_5 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0];
-            l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_0];
+        // Read SWA/B/C/D offsets
+        mss::pmic::ddr5::pmic_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R7C_SET_SWA_OFFSET,
+                l_data_buffer);
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r7c_set_swa_offset = l_data_buffer[DATA_POS::DATA_0];
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r7d_set_swb_offset = l_data_buffer[DATA_POS::DATA_1];
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r7e_set_swc_offset = l_data_buffer[DATA_POS::DATA_2];
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r7f_set_swd_offset = l_data_buffer[DATA_POS::DATA_3];
 
-            // GLOBAL_CLEAR_STATUS
-            mss::pmic::ddr5::pmic_reg_write(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R14, 0x01);
+        mss::pmic::ddr5::pmic_reg_read(io_target_info.iv_pmic_dt_map[l_pmic_count], TPS_REGS::R73,
+                                       l_data_buffer[DATA_POS::DATA_0]);
+        io_periodic_tele_info.iv_pmic[l_pmic_count].iv_r73_status_5 = l_data_buffer[mss::pmic::ddr5::data_position::DATA_0];
+        l_pmic_aggregate_state |= l_data_buffer[DATA_POS::DATA_0];
 
-            return fapi2::FAPI2_RC_SUCCESS;
-        });
+        // GLOBAL_CLEAR_STATUS
+        mss::pmic::ddr5::pmic_reg_write(io_target_info.iv_pmic_dt_map[l_pmic_count], REGS::R14, 0x01);
     }
 
     // OR PMIC status registers 0x08-0x0B and 0x73 of all PMICs
