@@ -394,6 +394,11 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
         }
         else if (package->rc == fapi2::FAPI2_RC_PLAT_ERR_SEE_DATA)
         {
+            // By definition this package only contains FFDC, it is not logging
+            // an actual error.  The Severity that comes back from Odyssey is
+            // invalid so we will force it to informational.
+            package->severity = ERRORLOG::ERRL_SEV_INFORMATIONAL;
+
             if (slidErrl == nullptr)
             {
                 SBE_TRACF("Creating log for FAPI2_RC_PLAT_ERR_SEE_DATA");
@@ -405,19 +410,6 @@ errlHndl_t SbeFFDCParser::generateSbeErrors(TARGETING::TargetHandle_t i_target,
                                                    i_userdata1,
                                                    i_userdata2);
                 slidErrl->setErrorType(SBEIO_ERROR_TYPE_FFDC_PACKAGE);
-            }
-            else
-            {
-                SBE_TRACF("Reusing log %.8X for FAPI2_RC_PLAT_ERR_SEE_DATA",slidErrl->eid());
-                // An error was already created earlier.
-                // If severity of this package exceeds severity of slid-pel then upgrade severity
-                if (((package->severity == ERRORLOG::ERRL_SEV_UNRECOVERABLE)
-                        && (slidErrl->sev() != package->severity))
-                    || ((package->severity == ERRORLOG::ERRL_SEV_PREDICTIVE)
-                        && (slidErrl->sev() == ERRORLOG::ERRL_SEV_RECOVERED)))
-                {
-                    slidErrl->setSev(package->severity);
-                }
             }
 
             // Add (platform) data to error
