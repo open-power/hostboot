@@ -171,6 +171,9 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <gard>
+        <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
