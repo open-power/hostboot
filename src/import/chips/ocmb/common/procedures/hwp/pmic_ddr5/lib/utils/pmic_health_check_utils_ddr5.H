@@ -369,13 +369,20 @@ fapi2::ReturnCode generate_and_send_response(const mss::pmic::ddr5::target_info_
         fapi2::hwp_data_ostream& o_data);
 
 ///
-/// @brief Check if at least one PMIC has issues
+/// @brief Check if at least one PMIC has issues and collect additional data in case of issues
 ///
 /// @param[in] i_failed_pmics n-mode states of the 4 PMICs
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_additional_info additional health check data
+/// @param[in,out] io_failed_pmic_number the failed PMIC/DT number for FFDC collection
 /// @return true/false at least one pmic is bad
 ///
-bool mnfg_mode_check_failed_pmics (const bool i_failed_pmics);
+bool mnfg_mode_check_failed_pmics (const mss::pmic::n_mode i_failed_pmics[mss::dt::dt_i2c_devices::NUM_TOTAL_DEVICES],
+                                   mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                   mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
+                                   uint8_t& io_failed_pmic_number);
 
+///
 /// @brief Resets breadcrumb for PMIC/DT pair if both PMIC and DT states are ALL_GOOD
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct

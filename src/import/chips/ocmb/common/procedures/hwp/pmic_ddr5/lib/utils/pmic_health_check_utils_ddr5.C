@@ -915,21 +915,39 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Check if at least one PMIC has issues
+/// @brief Check if at least one PMIC has issues and collect additional data in case of issues
 ///
 /// @param[in] i_failed_pmics n-mode states of the 4 PMICs
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_additional_info additional health check data
+/// @param[in,out] io_failed_pmic_number the failed PMIC/DT number for FFDC collection
 /// @return true/false at least one pmic is bad
 ///
-bool mnfg_mode_check_failed_pmics (const mss::pmic::n_mode i_failed_pmics[mss::dt::dt_i2c_devices::NUM_TOTAL_DEVICES])
+bool mnfg_mode_check_failed_pmics (const mss::pmic::n_mode i_failed_pmics[mss::dt::dt_i2c_devices::NUM_TOTAL_DEVICES],
+                                   mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                                   mss::pmic::ddr5::additional_n_mode_telemetry_data& io_additional_info,
+                                   uint8_t& io_failed_pmic_number)
 {
     // For readability
     static constexpr mss::pmic::n_mode N_MODE = mss::pmic::n_mode::N_MODE;
+    using CONSTS = mss::dt::dt_i2c_devices;
 
-    // True if any are N_MODE
-    return i_failed_pmics[mss::dt::dt_i2c_devices::DT0] == N_MODE ||
-           i_failed_pmics[mss::dt::dt_i2c_devices::DT1] == N_MODE ||
-           i_failed_pmics[mss::dt::dt_i2c_devices::DT2] == N_MODE ||
-           i_failed_pmics[mss::dt::dt_i2c_devices::DT3] == N_MODE;
+    // Collect additional data if any of the PMIC/DT have errors as that data needs
+    // to be filled into the FFDC
+    for (uint8_t l_dt_count = 0; l_dt_count < CONSTS::NUM_TOTAL_DEVICES; l_dt_count++)
+    {
+        if (i_failed_pmics[l_dt_count] == N_MODE)
+        {
+            collect_additional_n_mode_data(io_target_info, io_additional_info);
+            // Want to know the exact number of PMIC/DT that failed for FFDC
+            io_failed_pmic_number = l_dt_count;
+            // Return true if issue found
+            return true;
+        }
+    }
+
+    // Else False
+    return false;
 }
 
 ///
@@ -946,6 +964,8 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
 {
     using CONSTS = mss::dt::dt_i2c_devices;
     using DT_REGS  = mss::dt::regs;
+    uint8_t l_failed_pmic_number = 0;
+    mss::pmic::ddr5::additional_n_mode_telemetry_data l_additional_info;
 
     mss::pmic::n_mode l_failed_pmics[CONSTS::NUM_TOTAL_DEVICES] =
     {
@@ -1019,13 +1039,100 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
     // in case if we are in manufacturing mode.
     if (i_mnfg_thresholds)
     {
-        FAPI_ASSERT(!(mnfg_mode_check_failed_pmics(l_failed_pmics)),
+        FAPI_ASSERT(!(mnfg_mode_check_failed_pmics(l_failed_pmics, io_target_info, l_additional_info, l_failed_pmic_number)),
                     fapi2::PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U()
                     .set_OCMB_TARGET(io_target_info.iv_ocmb)
                     .set_N_MODE_PMIC0(l_failed_pmics[CONSTS::DT0])
                     .set_N_MODE_PMIC1(l_failed_pmics[CONSTS::DT1])
                     .set_N_MODE_PMIC2(l_failed_pmics[CONSTS::DT2])
-                    .set_N_MODE_PMIC3(l_failed_pmics[CONSTS::DT3]),
+                    .set_N_MODE_PMIC3(l_failed_pmics[CONSTS::DT3])
+                    .set_DT0_BREADCRUMB(io_health_check_info.iv_dt[CONSTS::DT0].iv_breadcrumb)
+                    .set_DT0_RO_INPUTS_1(io_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_1)
+                    .set_DT0_RO_INPUTS_0(io_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_0)
+                    .set_DT1_BREADCRUMB(io_health_check_info.iv_dt[CONSTS::DT1].iv_breadcrumb)
+                    .set_DT1_RO_INPUTS_1(io_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_1)
+                    .set_DT1_RO_INPUTS_0(io_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_0)
+                    .set_DT2_BREADCRUMB(io_health_check_info.iv_dt[CONSTS::DT2].iv_breadcrumb)
+                    .set_DT2_RO_INPUTS_1(io_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_1)
+                    .set_DT2_RO_INPUTS_0(io_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_0)
+                    .set_DT3_BREADCRUMB(io_health_check_info.iv_dt[CONSTS::DT3].iv_breadcrumb)
+                    .set_DT3_RO_INPUTS_1(io_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_1)
+                    .set_DT3_RO_INPUTS_0(io_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_0)
+                    .set_PMIC0_R04(io_health_check_info.iv_pmic[CONSTS::DT0].iv_r04)
+                    .set_PMIC0_R05(io_health_check_info.iv_pmic[CONSTS::DT0].iv_r05)
+                    .set_PMIC0_R06(io_health_check_info.iv_pmic[CONSTS::DT0].iv_r06)
+                    .set_PMIC0_R07(io_health_check_info.iv_pmic[CONSTS::DT0].iv_r07)
+                    .set_PMIC0_R08(io_health_check_info.iv_pmic[CONSTS::DT0].iv_r08)
+                    .set_PMIC0_R09(io_health_check_info.iv_pmic[CONSTS::DT0].iv_r09)
+                    .set_PMIC0_R0A(io_health_check_info.iv_pmic[CONSTS::DT0].iv_r0a)
+                    .set_PMIC0_R0B(io_health_check_info.iv_pmic[CONSTS::DT0].iv_r0b)
+                    .set_PMIC0_SWA_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT0].iv_swa_current_mA)
+                    .set_PMIC0_SWB_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT0].iv_swb_current_mA)
+                    .set_PMIC0_SWC_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT0].iv_swc_current_mA)
+                    .set_PMIC0_SWD_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT0].iv_swd_current_mA)
+                    .set_PMIC0_R73_STATUS_5(io_health_check_info.iv_pmic[CONSTS::DT0].iv_r73_status_5)
+                    .set_PMIC1_R04(io_health_check_info.iv_pmic[CONSTS::DT1].iv_r04)
+                    .set_PMIC1_R05(io_health_check_info.iv_pmic[CONSTS::DT1].iv_r05)
+                    .set_PMIC1_R06(io_health_check_info.iv_pmic[CONSTS::DT1].iv_r06)
+                    .set_PMIC1_R07(io_health_check_info.iv_pmic[CONSTS::DT1].iv_r07)
+                    .set_PMIC1_R08(io_health_check_info.iv_pmic[CONSTS::DT1].iv_r08)
+                    .set_PMIC1_R09(io_health_check_info.iv_pmic[CONSTS::DT1].iv_r09)
+                    .set_PMIC1_R0A(io_health_check_info.iv_pmic[CONSTS::DT1].iv_r0a)
+                    .set_PMIC1_R0B(io_health_check_info.iv_pmic[CONSTS::DT1].iv_r0b)
+                    .set_PMIC1_SWA_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT1].iv_swa_current_mA)
+                    .set_PMIC1_SWB_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT1].iv_swb_current_mA)
+                    .set_PMIC1_SWC_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT1].iv_swc_current_mA)
+                    .set_PMIC1_SWD_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT1].iv_swd_current_mA)
+                    .set_PMIC1_R73_STATUS_5(io_health_check_info.iv_pmic[CONSTS::DT1].iv_r73_status_5)
+                    .set_PMIC2_R04(io_health_check_info.iv_pmic[CONSTS::DT2].iv_r04)
+                    .set_PMIC2_R05(io_health_check_info.iv_pmic[CONSTS::DT2].iv_r05)
+                    .set_PMIC2_R06(io_health_check_info.iv_pmic[CONSTS::DT2].iv_r06)
+                    .set_PMIC2_R07(io_health_check_info.iv_pmic[CONSTS::DT2].iv_r07)
+                    .set_PMIC2_R08(io_health_check_info.iv_pmic[CONSTS::DT2].iv_r08)
+                    .set_PMIC2_R09(io_health_check_info.iv_pmic[CONSTS::DT2].iv_r09)
+                    .set_PMIC2_R0A(io_health_check_info.iv_pmic[CONSTS::DT2].iv_r0a)
+                    .set_PMIC2_R0B(io_health_check_info.iv_pmic[CONSTS::DT2].iv_r0b)
+                    .set_PMIC2_SWA_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT2].iv_swa_current_mA)
+                    .set_PMIC2_SWB_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT2].iv_swb_current_mA)
+                    .set_PMIC2_SWC_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT2].iv_swc_current_mA)
+                    .set_PMIC2_SWD_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT2].iv_swd_current_mA)
+                    .set_PMIC2_R73_STATUS_5(io_health_check_info.iv_pmic[CONSTS::DT2].iv_r73_status_5)
+                    .set_PMIC3_R04(io_health_check_info.iv_pmic[CONSTS::DT3].iv_r04)
+                    .set_PMIC3_R05(io_health_check_info.iv_pmic[CONSTS::DT3].iv_r05)
+                    .set_PMIC3_R06(io_health_check_info.iv_pmic[CONSTS::DT3].iv_r06)
+                    .set_PMIC3_R07(io_health_check_info.iv_pmic[CONSTS::DT3].iv_r07)
+                    .set_PMIC3_R08(io_health_check_info.iv_pmic[CONSTS::DT3].iv_r08)
+                    .set_PMIC3_R09(io_health_check_info.iv_pmic[CONSTS::DT3].iv_r09)
+                    .set_PMIC3_R0A(io_health_check_info.iv_pmic[CONSTS::DT3].iv_r0a)
+                    .set_PMIC3_R0B(io_health_check_info.iv_pmic[CONSTS::DT3].iv_r0b)
+                    .set_PMIC3_SWA_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT3].iv_swa_current_mA)
+                    .set_PMIC3_SWB_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT3].iv_swb_current_mA)
+                    .set_PMIC3_SWC_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT3].iv_swc_current_mA)
+                    .set_PMIC3_SWD_CURRENT(io_health_check_info.iv_pmic[CONSTS::DT3].iv_swd_current_mA)
+                    .set_PMIC3_R73_STATUS_5(io_health_check_info.iv_pmic[CONSTS::DT3].iv_r73_status_5)
+                    .set_ADC_SYSTEM_STATUS(l_additional_info.iv_adc.iv_system_status)
+                    .set_ADC_GENERAL_CFG(l_additional_info.iv_adc.iv_general_cfg)
+                    .set_ADC_DATA_CFG(l_additional_info.iv_adc.iv_data_cfg)
+                    .set_ADC_OSR_CFG(l_additional_info.iv_adc.iv_osr_cfg)
+                    .set_ADC_OPMODE_CFG(l_additional_info.iv_adc.iv_opmode_cfg)
+                    .set_ADC_PIN_CFG(l_additional_info.iv_adc.iv_pin_cfg)
+                    .set_ADC_GPIO_CFG(l_additional_info.iv_adc.iv_gpio_cfg)
+                    .set_ADC_GPO_DRIVE_CFG(l_additional_info.iv_adc.iv_gpo_drive_cfg)
+                    .set_ADC_GPO_VALUE_CFG(l_additional_info.iv_adc.iv_gpo_value_cfg)
+                    .set_ADC_GPI_VALUE(l_additional_info.iv_adc.iv_gpi_value)
+                    .set_ADC_PIN_CFG(l_additional_info.iv_adc.iv_system_status)
+                    .set_DT_R90_OPS_STATE(l_additional_info.iv_dt[l_failed_pmic_number].iv_r90_ops_state)
+                    .set_DT_R92_FAULTS_STATUS_0(l_additional_info.iv_dt[l_failed_pmic_number].iv_r92_faults_status_0)
+                    .set_DT_R94_FAULTS_STATUS_1(l_additional_info.iv_dt[l_failed_pmic_number].iv_r94_faults_status_1)
+                    .set_DT_R96_FIRST_FAULTS_STATUS_0(l_additional_info.iv_dt[l_failed_pmic_number].iv_r96_first_faults_status_0)
+                    .set_DT_R98_FIRST_FAULTS_STATUS_1(l_additional_info.iv_dt[l_failed_pmic_number].iv_r98_first_faults_status_1)
+                    .set_DT_RA6_INFET_MPT_ADDR(l_additional_info.iv_dt[l_failed_pmic_number].iv_ra6_infet_mpt_addr)
+                    .set_DT_RA8_NVM_DATA(l_additional_info.iv_dt[l_failed_pmic_number].iv_ra8_nvm_data)
+                    .set_DT_RB4_VCC_VIN_VINP(l_additional_info.iv_dt[l_failed_pmic_number].iv_rb4_vcc_vin_vinp)
+                    .set_PMIC_R2F_PMIC_CONFIG(l_additional_info.iv_pmic[l_failed_pmic_number].iv_r2f_pmic_config)
+                    .set_PMIC_R32_PMIC_ENABLE(l_additional_info.iv_pmic[l_failed_pmic_number].iv_r32_pmic_enable)
+                    .set_PMIC_R33_TEMP_STATUS(l_additional_info.iv_pmic[l_failed_pmic_number].iv_r33_temp_status)
+                    .set_PMIC_R9C_ON_OFF_CONFIG(l_additional_info.iv_pmic[l_failed_pmic_number].iv_r9c_on_off_config),
 #ifndef __PPE__
                     GENTARGTIDFORMAT " Warning: At least one of the 4 PMIC/DTs had errors running health check. "
                     "MNFG_THRESHOLDS has asserted that we %s. N-Mode States:"
