@@ -128,7 +128,7 @@
             DISABLE = 0,
             ENABLE = 1
         </enum>
-        <default>1</default>
+        <default>0</default>
         <writeable/>
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
