@@ -66,6 +66,12 @@
    <!-- ******************************************************************** -->
    <hwpError>
       <sbeError/>
+      <rc>RC_POZ_IMMEDIATE_CLOCKSTOP_ON_XSTOP</rc>
+      <description>Immediate clock stop on xstop</description>
+   </hwpError>
+   <!-- ******************************************************************** -->
+   <hwpError>
+      <sbeError/>
       <rc>RC_POZ_ARBSEMA_RESERVE_TIMEOUT</rc>
       <description>Couldn't reserve semaphore on a side</description>
       <ffdc>SEMAPHORE</ffdc>
