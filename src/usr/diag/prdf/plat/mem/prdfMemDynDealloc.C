@@ -488,7 +488,7 @@ int32_t __odyGetPortAddr( ExtensibleChip * i_chip, MemAddr i_addr,
         // Row 12 bitmap: MC_ADDR_TRANS3[48:51]
         // Row 13 bitmap: MC_ADDR_TRANS3[52:55]
         // Row 14 bitmap: MC_ADDR_TRANS3[56:59]
-        for (uint8_t bit = 0; bit < 14; bit++)
+        for (uint8_t bit = 0; bit <= 14; bit++)
         {
             uint64_t r = (row >> bit) & 0x1;
 
