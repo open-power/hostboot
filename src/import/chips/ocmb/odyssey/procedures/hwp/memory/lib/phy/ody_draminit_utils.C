@@ -6093,6 +6093,7 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
     uint8_t l_is_simics = 0;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     bool l_fir_error = false;
+    uint8_t l_fir_check_enable = 0;
 
     mss::ody::phy::bad_bit_interface l_interface(i_target, i_msg_block_response, l_rc);
     FAPI_TRY(l_rc, TARGTIDFORMAT " bad_bit_interface constructor failed", TARGTID);
@@ -6126,14 +6127,23 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
                 "in the message block: 0x%02x (expected 0x%02x)",
                 TARGTID, i_msg_block_response.CsTestFail, MSG_BLOCK_TRAIN_PASS);
 
-    // Official FIR checking will run on Hostboot in FW, which will check the procedure RC
-    // But we only want to record the bad bits here if we can't blame any FIRs for the fail
-    FAPI_TRY( (mss::check::bad_fir_bits<mss::mc_type::ODYSSEY, mss::check::firChecklist::DRAMINIT>(
-                   i_target,
-                   l_rc,
-                   l_fir_error)) );
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_fir_check_enable) );
 
-    if (!l_fir_error)
+    // Only run the blame a FIR functionality if requested
+    if(l_fir_check_enable == fapi2::ENUM_ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE_ENABLE)
+    {
+        // Official FIR checking will run on Hostboot in FW, which will check the procedure RC
+        // But we only want to record the bad bits here if we can't blame any FIRs for the fail
+        FAPI_TRY( (mss::check::bad_fir_bits<mss::mc_type::ODYSSEY, mss::check::firChecklist::DRAMINIT>(
+                       i_target,
+                       l_rc,
+                       l_fir_error)) );
+    }
+
+    // No FIR found or blame a FIR is NOT requested
+    // Note: explicitly calling out the enable check in case the default for l_fir_error changes
+    if (!l_fir_error || l_fir_check_enable == fapi2::ENUM_ATTR_ODY_DRAMINIT_FIR_CHECK_ENABLE_DISABLE)
     {
         FAPI_TRY(mss::record_bad_bits(i_target, l_interface));
     }
