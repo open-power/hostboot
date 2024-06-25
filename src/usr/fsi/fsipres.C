@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -166,10 +166,6 @@ errlHndl_t procPresenceDetect(DeviceFW::OperationType i_opType,
         // Next look for valid Module VPD
         bool mvpd_present = false;
         bool check_for_mvpd = true;
-
-#ifdef CONFIG_MVPD_READ_FROM_HW
-        check_for_mvpd = fsi_present;
-#endif
 
         if ((i_target != TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) &&
             (i_target != l_masterChip) &&

@@ -1293,25 +1293,7 @@ errlHndl_t platPresenceDetect(TargetHandleList &io_targets)
         // force the caches to get wiped out just in case
         l_pnorInfo.isGolden = true;
     }
-    if( l_pnorInfo.isGolden )
-    {
-#ifdef CONFIG_DJVPD_WRITE_TO_PNOR
-        errl = PNOR::clearSection( PNOR::DIMM_JEDEC_VPD );
-        if( errl )
-        {
-            // commit the error but keep going
-            errlCommit(errl, HWAS_COMP_ID);
-        }
-#endif
-#ifdef CONFIG_MVPD_WRITE_TO_PNOR
-        errl = PNOR::clearSection( PNOR::MODULE_VPD );
-        if( errl )
-        {
-            // commit the error but keep going
-            errlCommit(errl, HWAS_COMP_ID);
-        }
-#endif
-    }
+
 #endif
 
     // we got a list of targets - determine if they are present
