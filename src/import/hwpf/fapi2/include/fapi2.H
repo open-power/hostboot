@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,7 @@
 #include <hw_access.H>
 #include <utils.H>
 #include <plat_trace.H>
+#include <fapi2_trace.H>
 
 // In turn includes the needed generated headers (hwp_ffd_classes, etc.)
 #include <error_scope.H>
@@ -54,5 +55,4 @@
 #ifdef FAPI2_MISSING_HEADERS
     #include <mbvpdAccess.H>
 #endif
-
 #endif // __FAPI2_TOP_LEVEL__
