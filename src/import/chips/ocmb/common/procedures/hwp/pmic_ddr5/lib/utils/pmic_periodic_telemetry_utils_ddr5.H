@@ -41,8 +41,6 @@
 #include <lib/utils/pmic_common_utils_ddr5.H>
 #include <hwp_data_stream.H>
 
-// TODO: Zen:MST-2652 Enable DQS drift track in Metis
-// Need to make this chip-op available in ZSBE
 #ifndef __PPE__
     #include <ody_tsns_dqs_period.H>
 #endif
@@ -127,17 +125,40 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper function to issue the DQS tracking update chip op
+/// @param[in] i_target OCMB target
+/// @param[in] i_tsns_period_ms temperature sensor period in miliseconds
+/// @param[in] i_dqs_period DQS tracking period
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+inline fapi2::ReturnCode send_dqs_track_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const uint32_t i_tsns_period_ms, const uint8_t i_dqs_period)
+{
+#ifndef __PPE__
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    FAPI_EXEC_HWP(l_rc,
+                  ody_tsns_dqs_period,
+                  i_target,
+                  i_tsns_period_ms,
+                  i_dqs_period);
+    FAPI_TRY(l_rc);
+#endif
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Suspend DQS drift track and poll MCBIST until it's done executing
-/// @param [in] i_target OCMB target
+/// @param[in] i_target OCMB target
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note This function has been duplicated in pmic_periodic_telemetry_utils_ddr5.H since we did not want to include unnecessary
 ///       libraries in to the PMIC code. Please make sure that both the locations of the function are up to date
 ///
 inline fapi2::ReturnCode suspend_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-#ifndef __PPE__
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-#endif
+    // 0 indicates that the thermal polling should be disabled
+    constexpr uint8_t DISABLE_POLLING_DQS_PERIOD = 0;
     uint8_t l_thermal_init_complete = 0;
     uint32_t l_tsns_period_ms = 0;
     uint8_t l_dqs_period = 0;
@@ -159,16 +180,8 @@ inline fapi2::ReturnCode suspend_dqs_track(const fapi2::Target<fapi2::TARGET_TYP
                            i_target,
                            l_dqs_period));
 
-// TODO: Zen:MST-2652 Enable DQS drift track in Metis
-// Need to make this chip-op available in ZSBE
-#ifndef __PPE__
-    FAPI_EXEC_HWP(l_rc,
-                  ody_tsns_dqs_period,
-                  i_target,
-                  l_tsns_period_ms,
-                  0);
-    FAPI_TRY(l_rc);
-#endif
+    FAPI_TRY(send_dqs_track_helper(i_target, l_tsns_period_ms, DISABLE_POLLING_DQS_PERIOD));
+
 
     // Wait two polling cycles to ensure any currently-running recal is complete
     fapi2::delay(l_tsns_period_ms * l_dqs_period * mss::DELAY_1MS * 2, 200);
@@ -179,16 +192,13 @@ fapi_try_exit:
 
 ///
 /// @brief Resume DQS drift track
-/// @param [in] i_target OCMB target
+/// @param[in] i_target OCMB target
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note This function has been duplicated in pmic_periodic_telemetry_utils_ddr5.H since we did not want to include unnecessary
 ///       libraries in to the PMIC code. Please make sure that both the locations of the function are up to date
 ///
 inline fapi2::ReturnCode resume_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-#ifndef __PPE__
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-#endif
     uint8_t l_thermal_init_complete = 0;
     uint32_t l_tsns_period_ms = 0;
     uint8_t l_dqs_period = 0;
@@ -210,16 +220,7 @@ inline fapi2::ReturnCode resume_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE
                            i_target,
                            l_dqs_period));
 
-// TODO: Zen:MST-2652 Enable DQS drift track in Metis
-// Need to make this chip-op available in ZSBE
-#ifndef __PPE__
-    FAPI_EXEC_HWP(l_rc,
-                  ody_tsns_dqs_period,
-                  i_target,
-                  l_tsns_period_ms,
-                  l_dqs_period);
-    FAPI_TRY(l_rc);
-#endif
+    FAPI_TRY(send_dqs_track_helper(i_target, l_tsns_period_ms, l_dqs_period));
 
 fapi_try_exit:
     return fapi2::current_err;

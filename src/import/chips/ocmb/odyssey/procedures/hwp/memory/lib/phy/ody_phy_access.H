@@ -62,6 +62,9 @@ constexpr uint64_t convert_synopsys_to_ibm_reg_addr( const uint64_t i_synopsys_a
 /// @param[in] i_state the state to set the PHY to - either mss::states::ON_N (scom access) or mss::states::OFF_N (training access)
 /// @param[in] i_runtime true if running at runtime, meaning the UCCLK needs to be switched on/off (default: false)
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note This function has been partially duplicated in pmic_periodic_telemetry_utils_ddr5.H since we did not want to include unnecessary
+///       libraries in to the PMIC code. Please make sure that both the locations of the function are up to date.
+///       Note: the true duplicated function is host_configure_phy_scom_access, but it pulls functionality from this function
 ///
 fapi2::ReturnCode configure_phy_scom_access(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const mss::states i_state,

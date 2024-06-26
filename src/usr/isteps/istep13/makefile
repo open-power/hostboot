@@ -96,6 +96,7 @@ OBJS += ody_throttle.o
 OBJS += ody_draminit_procedure.o
 OBJS += odyssey_mp_scom.o
 OBJS += ody_ddrphy_phyinit_config.o
+OBJS += host_ody_phy_access.o
 OBJS += dwc_ddrphy_phyinit_I_loadPIEImage.o
 OBJS += dwc_ddrphy_phyinit_LoadPieProdCode_rdimm.o
 OBJS += dwc_ddrphy_phyinit_LoadPieProdCode.o

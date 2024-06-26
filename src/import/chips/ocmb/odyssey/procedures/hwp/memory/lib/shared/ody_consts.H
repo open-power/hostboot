@@ -308,6 +308,9 @@ enum generic_consts
     // As such, our spare is located on byte 5
     // Byte where the spare DRAM(s) are located
     SPARE_DQ_BYTE = 5,
+
+    // Port 1's address offset compared to port 0
+    PORT1_ADDR_OFFSET = 0x0000000000000400,
 };
 
 ///

@@ -123,7 +123,6 @@ OBJS += p10_omi_isolation.o
 OBJS += exp_process_image_status.o
 OBJS += ody_getecid.o
 OBJS += ody_omi_init.o
-OBJS += ody_host_draminit.o
 OBJS += ody_omi_hss_ppe_load.o
 OBJS += ody_omi_hss_config.o
 OBJS += ody_omi_hss_ppe_start.o
