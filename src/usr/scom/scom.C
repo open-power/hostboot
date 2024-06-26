@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1400,209 +1400,217 @@ void addScomFailFFDC( errlHndl_t i_err,
     l_insideFFDC = false;
 }
 
-  /**
-   * @brief Perform a manual multicast operation if appropriate
-   *
-   * @param [in] i_opType : operation type
-   * @param [in] i_target : target (OCMB chip)
-   * @param [in] io_buffer : buffer to return data read
-   * @param [in] io_buflen : read size
-   * @param [in] i_addr : address to read from
-   * @param [in] o_didWorkaround : workaround done flag
-   * @return l_err : An error that is set in this routine
-   *
-   */
-  errlHndl_t doIbscomMulticastWorkaround( DeviceFW::OperationType i_opType,
-                                          TARGETING::Target* i_target,
-                                          void* io_buffer,
-                                          size_t& io_buflen,
-                                          uint64_t i_addr,
-                                          bool& o_didWorkaround )
-  {
-      errlHndl_t l_err = nullptr;
-      uint64_t* l_summaryReg = reinterpret_cast<uint64_t*>(io_buffer);
+/**
+ * @brief Perform a manual multicast operation if appropriate
+ *
+ * @param [in] i_opType : operation type
+ * @param [in] i_target : target (OCMB chip)
+ * @param [inout] io_buffer : buffer to return data read
+ * @param [inout] io_buflen : read size
+ * @param [in] i_addr : address to read from
+ * @param [in] o_didWorkaround : workaround done flag
+ * @return l_err : An error that is set in this routine
+ *
+ */
+errlHndl_t doIbscomMulticastWorkaround( DeviceFW::OperationType i_opType,
+                                        TARGETING::Target* i_target,
+                                        void* io_buffer,
+                                        size_t& io_buflen,
+                                        uint64_t i_addr,
+                                        bool& o_didWorkaround )
+{
+    errlHndl_t l_err = nullptr;
+    uint64_t* l_summaryReg = reinterpret_cast<uint64_t*>(io_buffer);
+    uint64_t l_writeData = *l_summaryReg;
 
-      // Some masks for parsing the address
-      constexpr uint64_t IS_MULTICAST         = 0x40000000;
-      constexpr uint64_t MULTICAST_GROUP_MASK = 0x07000000;
-      constexpr uint64_t GROUP_ALL            = 0x07000000;
-      constexpr uint64_t CHIPLET_BYTE         = 0xFF000000;
-      constexpr uint64_t MULTICAST_OP         = 0x38000000;
-      constexpr uint64_t MULTICAST_OP_BITWISE = 0x10000000;
-      constexpr uint64_t MULTICAST_OP_OR      = 0x00000000;
+    // Some masks for parsing the address
+    constexpr uint64_t IS_MULTICAST         = 0x40000000;
+    constexpr uint64_t MULTICAST_GROUP_MASK = 0x07000000;
+    constexpr uint64_t GROUP_ALL            = 0x07000000;
+    constexpr uint64_t CHIPLET_BYTE         = 0xFF000000;
+    constexpr uint64_t MULTICAST_OP         = 0x38000000;
+    constexpr uint64_t MULTICAST_OP_BITWISE = 0x10000000;
+    constexpr uint64_t MULTICAST_OP_OR      = 0x00000000;
 
-      o_didWorkaround = false;
+    o_didWorkaround = false;
 
-      do
-      {
-           TRACUCOMP( g_trac_scom, ENTER_MRK"doIbscomMulticastWorkaround: Target:0x%.8X Addr:0x%.8X buf:0x%llx",
-                      TARGETING::get_huid(i_target), i_addr, *l_summaryReg );
+    do
+    {
+        TRACUCOMP( g_trac_scom, ENTER_MRK"doIbscomMulticastWorkaround: Target:0x%.8X Addr:0x%.8X buf:0x%llx",
+                   TARGETING::get_huid(i_target), i_addr, *l_summaryReg );
 
-          // Skip calls to the SENTINEL since we don't have the
-          // ability to find its children
-          if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target )
-          {
-              break;
-          }
+        // Skip calls to the SENTINEL since we don't have the
+        // ability to find its children
+        if( TARGETING::MASTER_PROCESSOR_CHIP_TARGET_SENTINEL == i_target )
+        {
+            break;
+        }
 
-          bool l_opIsBitwise = false;
-          bool l_opIsOr      = false;
-          bool l_groupIsAll  = false;
+        bool l_opIsBitwise = false;
+        bool l_opIsOr      = false;
+        bool l_groupIsAll  = false;
+        bool l_unsupportedOp = false;
 
-          // Only perform this workaround for:
-          //  - Odyssey targets
-          //  - read operations
-          //  - multicast registers
-          if ((i_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16) &&
-              (DeviceFW::READ == i_opType) && ((IS_MULTICAST & i_addr) == IS_MULTICAST))
-          {
-              l_opIsBitwise = ((MULTICAST_OP & i_addr) == MULTICAST_OP_BITWISE);
-              l_opIsOr      = ((MULTICAST_OP & i_addr) == MULTICAST_OP_OR);
-              l_groupIsAll  = ((MULTICAST_GROUP_MASK & i_addr) == GROUP_ALL);
+        // Only perform this workaround for:
+        //  - Odyssey targets
+        //  - multicast registers
+        if( (i_target->getAttr<TARGETING::ATTR_CHIP_ID>() != POWER_CHIPID::ODYSSEY_16)
+            || ((IS_MULTICAST & i_addr) != IS_MULTICAST) )
+        {
+            TRACUCOMP(g_trac_scom, "doIbscomMulticastWorkaround: not Odyssey multicast!!");
+            break;
+        }
+        else if( DeviceFW::READ == i_opType )
+        {
+            l_opIsBitwise = ((MULTICAST_OP & i_addr) == MULTICAST_OP_BITWISE);
+            l_opIsOr      = ((MULTICAST_OP & i_addr) == MULTICAST_OP_OR);
+            l_groupIsAll  = ((MULTICAST_GROUP_MASK & i_addr) == GROUP_ALL);
 
-              TRACUCOMP( g_trac_scom, "doIbscomMulticastWorkaround: BW=%d OR=%d GroupAll=%d",
-                         l_opIsBitwise, l_opIsOr, l_groupIsAll );
+            TRACUCOMP( g_trac_scom, "doIbscomMulticastWorkaround: BW=%d OR=%d GroupAll=%d",
+                       l_opIsBitwise, l_opIsOr, l_groupIsAll );
 
-              //  - multicast read option XXX 'bit-wise'
-              //  - multicast read option XXX 'or'
-              //  - multicast group 7 or group all 'all functional chiplets'
-              if( (l_opIsBitwise || l_opIsOr) && (l_groupIsAll) )
-              {
-                  TRACUCOMP( g_trac_scom, "doIbscomMulticastWorkaround: "
-                             "workaround applicable on %.8X for %.8X",
-                             TARGETING::get_huid(i_target), i_addr );
-              }
-              // Not a supported multicast group or op
-              else
-              {
-                  TRACFCOMP( g_trac_scom, "doIbscomMulticastWorkaround: "
-                             "Multicast op is unsupported for %.8X for %.8X",
-                             TARGETING::get_huid(i_target), i_addr );
-                  /*@
-                  * @errortype
-                  * @moduleid     SCOM::SCOM_DO_MULTICAST_WORKAROUND
-                  * @reasoncode   SCOM::SCOM_UNSUPPORTED_MULTICAST_OP
-                  * @userdata1    Address
-                  * @userdata1    Target huid
-                  * @devdesc      Unsupported multicast op
-                  * @custdesc     Internal firmware error
-                  */
-                  l_err = new ERRORLOG::ErrlEntry(
-                                      ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                                      SCOM_DO_MULTICAST_WORKAROUND,
-                                      SCOM_UNSUPPORTED_MULTICAST_OP,
-                                      i_addr,
-                                      get_huid(i_target),
-                                      ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-                  //Add this target to the FFDC
-                  ERRORLOG::ErrlUserDetailsTarget(i_target,"IBSCOM Target").addToLog(l_err);
-                  l_err->collectTrace( SCOM_COMP_NAME, 256);
-                  break;
-              }
-          }
-          else if ((DeviceFW::WRITE == i_opType) && ((IS_MULTICAST & i_addr) == IS_MULTICAST))
-          {
-              TRACFCOMP( g_trac_scom, "doIbscomMulticastWorkaround: "
-                         "Multicast write is unsupported for %.8X for %.8X",
-                         TARGETING::get_huid(i_target), i_addr );
-              /*@
-               * @errortype
-               * @moduleid     SCOM::SCOM_DO_MULTICAST_WORKAROUND
-               * @reasoncode   SCOM::SCOM_MULTICAST_WRITE_INVALID
-               * @userdata1    Address
-               * @userdata1    Target huid
-               * @devdesc      Unsupported multicast write operation
-               * @custdesc     Internal firmware error
-               */
-              l_err = new ERRORLOG::ErrlEntry(
-                  ERRORLOG::ERRL_SEV_UNRECOVERABLE,
-                  SCOM_DO_MULTICAST_WORKAROUND,
-                  SCOM_MULTICAST_WRITE_INVALID,
-                  i_addr,
-                  get_huid(i_target),
-                  ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
-              //Add this target to the FFDC
-              ERRORLOG::ErrlUserDetailsTarget(i_target,"IBSCOM Target").addToLog(l_err);
-              l_err->collectTrace( SCOM_COMP_NAME, 256);
-              break;
-          }
-          else
-          {
-              // Common path when not a multicast op
-              TRACUCOMP(g_trac_scom, "doIbscomMulticastWorkaround: not multicast path!!");
-              break;
-          }
+            //  - multicast read option XXX 'bit-wise'
+            //  - multicast read option XXX 'or'
+            //  - multicast group 7 or group all 'all functional chiplets'
+            if( (l_opIsBitwise || l_opIsOr) && (l_groupIsAll) )
+            {
+                TRACUCOMP( g_trac_scom, "doIbscomMulticastWorkaround: "
+                           "workaround applicable on %.8X for %.8X",
+                           TARGETING::get_huid(i_target), i_addr );
+            }
+            // Not a supported multicast group or op
+            else
+            {
+                TRACFCOMP( g_trac_scom, "doIbscomMulticastWorkaround: "
+                           "Multicast read op is unsupported for %.8X for %.8X",
+                           TARGETING::get_huid(i_target), i_addr );
+                l_unsupportedOp = true;
+            }
+        }
+        else if( DeviceFW::WRITE == i_opType )
+        {
+            TRACUCOMP( g_trac_scom, "doIbscomMulticastWorkaround: "
+                       "Multicast write for %.8X for %.8X",
+                       TARGETING::get_huid(i_target), i_addr );
 
-          // Loop through the chiplets, perform the scom reads and combine the results
-          // as per the multicast bits set.
-          // For Odyssey OCMBs, there are only two chiplets with IDs: 0x01 & 0x08.
-          // We'll hard code them for now.
+            // Writes ignore the OP portion, all data is written to each chiplet
+            //  - multicast group 7 or group all 'all functional chiplets'
+            if( (MULTICAST_GROUP_MASK & i_addr) != GROUP_ALL )
+            {
+                TRACFCOMP( g_trac_scom, "doIbscomMulticastWorkaround: "
+                           "Multicast write op is unsupported for %.8X for %.8X",
+                           TARGETING::get_huid(i_target), i_addr );
+                l_unsupportedOp = true;
+            }
+        }
+        else // impossible path but just in case skip the workaround
+        {
+            // Common path when not a multicast op
+            TRACUCOMP(g_trac_scom, "doIbscomMulticastWorkaround: unknown path!!");
+            break;
+        }
 
-          uint32_t l_chipletIds[2] = { 0x01, 0x08 };
-          for (const auto l_id : l_chipletIds)
-          {
-              uint64_t l_data = 0x0ULL;
-              uint64_t l_addr = (i_addr & ~CHIPLET_BYTE);
-              uint64_t l_unit = l_id;
+        if( l_unsupportedOp )
+        {
+            /*@
+             * @errortype
+             * @moduleid     SCOM::SCOM_DO_MULTICAST_WORKAROUND
+             * @reasoncode   SCOM::SCOM_UNSUPPORTED_MULTICAST_OP
+             * @userdata1    Address
+             * @userdata2[00:31]    Optype
+             * @userdata2[32:63]    Target huid
+             * @devdesc      Unsupported multicast op
+             * @custdesc     Internal firmware error
+             */
+            l_err = new ERRORLOG::ErrlEntry(
+                                            ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                            SCOM_DO_MULTICAST_WORKAROUND,
+                                            SCOM_UNSUPPORTED_MULTICAST_OP,
+                                            i_addr,
+                                            TWO_UINT32_TO_UINT64(i_opType,
+                                                                 get_huid(i_target)),
+                                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            //Add this target to the FFDC
+            ERRORLOG::ErrlUserDetailsTarget(i_target,"IBSCOM Target").addToLog(l_err);
+            l_err->collectTrace( SCOM_COMP_NAME, 256);
+            break;
+        }
 
-              TRACUCOMP(g_trac_scom, "doIbscomMulticastWorkaround: l_unit=0x%x addr:0x%x id=%d",
-                        l_unit, l_addr, l_id );
+        // Loop through the chiplets, perform the scom reads and combine the results
+        // as per the multicast bits set.
+        // For Odyssey OCMBs, there are only two chiplets with IDs: 0x01 & 0x08.
+        // We'll hard code them for now.
 
-              // The first byte of the scom address is the chiplet id. Append
-              // the chiplet ID to form the correct address to access the chiplet.
-              l_addr |= (l_unit << 24);
-              io_buflen = sizeof(uint64_t);
-              l_err = deviceOp(i_opType,
-                              i_target,
-                              &l_data,
-                              io_buflen,
-                              DEVICE_IBSCOM_ADDRESS(l_addr));
-              if( l_err )
-              {
-                  TRACFCOMP( g_trac_scom, "doIbscomMulticastWorkaround: "
-                             "Multicast op failed! for %.8X for %.8X",
-                             TARGETING::get_huid(i_target), i_addr );
+        uint32_t l_chipletIds[2] = { 0x01, 0x08 };
+        for (const auto l_id : l_chipletIds)
+        {
+            uint64_t l_data = 0x0ULL;
+            if(DeviceFW::WRITE == i_opType)
+            {
+                l_data = l_writeData;
+            }
 
-                  //Add this target to the FFDC
-                  ERRORLOG::ErrlUserDetailsTarget(i_target,"IBSCOM Target").addToLog(l_err);
-                  l_err->collectTrace( SCOM_COMP_NAME, 256);
-                  break;
-              }
+            uint64_t l_addr = (i_addr & ~CHIPLET_BYTE);
+            uint64_t l_unit = l_id;
 
-              TRACUCOMP(g_trac_scom, "doIbscomMulticastWorkaround: l_summ=0x%llx l_data=0x%llx unit=0x%x",
-               *l_summaryReg, l_data, l_unit );
+            TRACUCOMP(g_trac_scom, "doIbscomMulticastWorkaround: l_unit=0x%x addr:0x%x id=%d",
+                      l_unit, l_addr, l_id );
 
-              if( l_opIsBitwise )
-              {
-                  // if any bits are set, set this unit's bit in summary reg
-                  // note: this is good enough for the use-case we have now
-                  // but a better implementation would be to actually
-                  // check the select regs as well so we know which bit(s)
-                  // are the trigger.
-                  // This assumes the "bit select register" in the PCB master's
-                  // set of internal registers is always set to 0.
-                  if( l_data & 0x8000000000000000 )
-                  {
-                      *l_summaryReg |= (0x8000000000000000 >> l_unit);
-                  }
-              }
-              else if( l_opIsOr )
-              {
-                  *l_summaryReg |= l_data;
-              }
+            // The first byte of the scom address is the chiplet id. Append
+            // the chiplet ID to form the correct address to access the chiplet.
+            l_addr |= (l_unit << 24);
+            io_buflen = sizeof(uint64_t);
+            l_err = deviceOp(i_opType,
+                             i_target,
+                             &l_data,
+                             io_buflen,
+                             DEVICE_IBSCOM_ADDRESS(l_addr));
+            if( l_err )
+            {
+                TRACFCOMP( g_trac_scom, "doIbscomMulticastWorkaround: "
+                           "Multicast op failed! for %.8X for %.8X",
+                           TARGETING::get_huid(i_target), i_addr );
 
-          } // end of for loop
+                //Add this target to the FFDC
+                ERRORLOG::ErrlUserDetailsTarget(i_target,"IBSCOM Target").addToLog(l_err);
+                l_err->collectTrace( SCOM_COMP_NAME, 256);
+                break;
+            }
 
-          // Set the flag to indicate workaround was done
-          o_didWorkaround = true;
+            TRACUCOMP(g_trac_scom, "doIbscomMulticastWorkaround: l_summ=0x%llx l_data=0x%llx unit=0x%x",
+                      *l_summaryReg, l_data, l_unit );
 
-     } while (0);
+            if( l_opIsBitwise )
+            {
+                // if any bits are set, set this unit's bit in summary reg
+                // note: this is good enough for the use-case we have now
+                // but a better implementation would be to actually
+                // check the select regs as well so we know which bit(s)
+                // are the trigger.
+                // This assumes the "bit select register" in the PCB master's
+                // set of internal registers is always set to 0.
+                if( l_data & 0x8000000000000000 )
+                {
+                    *l_summaryReg |= (0x8000000000000000 >> l_unit);
+                }
+            }
+            else if( l_opIsOr )
+            {
+                *l_summaryReg |= l_data;
+            }
 
-     TRACUCOMP(g_trac_scom, EXIT_MRK"doIbscomMulticastWorkaround: l_summ=0x%llx didWork:%d l_err=%d",
-               *l_summaryReg, o_didWorkaround, l_err);
+        } // end of for loop
 
-     return l_err;
-  }
+        // Set the flag to indicate workaround was done
+        o_didWorkaround = true;
+
+    } while (0);
+
+    TRACUCOMP(g_trac_scom, EXIT_MRK"doIbscomMulticastWorkaround: l_summ=0x%llx didWork:%d l_err=%d",
+              *l_summaryReg, o_didWorkaround, l_err);
+
+    return l_err;
+}
 
 
 } // end namespace
