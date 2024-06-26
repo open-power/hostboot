@@ -78,7 +78,7 @@
       <target>PORT_TARGET</target>
     </deconfigure>
     <gard>
-        <target>PORT_TARGET</target>
+      <target>PORT_TARGET</target>
     </gard>
   </hwpError>
 
@@ -98,6 +98,9 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -118,6 +121,9 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
    <hwpError>
@@ -172,7 +178,7 @@
       <target>PORT_TARGET</target>
     </deconfigure>
     <gard>
-        <target>PORT_TARGET</target>
+      <target>PORT_TARGET</target>
     </gard>
   </hwpError>
 
@@ -204,6 +210,9 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -223,6 +232,9 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -270,6 +282,9 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -294,6 +309,9 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -312,6 +330,9 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -328,6 +349,12 @@
         <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
@@ -531,7 +558,7 @@
     </callout>
     <callout>
       <target>OCMB_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>LOW</priority>
     </callout>
     <deconfigure>
       <target>OCMB_TARGET</target>

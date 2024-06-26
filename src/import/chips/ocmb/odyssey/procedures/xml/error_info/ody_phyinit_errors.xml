@@ -33,11 +33,11 @@
     <ffdc>DBYTENUMBER</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PORT_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
@@ -54,11 +54,11 @@
     <ffdc>PORT_TARGET</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PORT_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
@@ -74,11 +74,11 @@
     <ffdc>MR8A0</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PORT_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
@@ -94,11 +94,11 @@
     <ffdc>MR8A0</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PORT_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
@@ -113,11 +113,11 @@
     <ffdc>PREAMBLECTRL</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PORT_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
@@ -132,11 +132,11 @@
     <ffdc>FREQ</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PORT_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
@@ -151,11 +151,11 @@
     <ffdc>PATTERN</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PORT_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
@@ -170,11 +170,11 @@
     <ffdc>PATTERN</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PORT_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
@@ -189,11 +189,11 @@
     <ffdc>PATTERN</ffdc>
     <callout>
       <procedure>CODE</procedure>
-      <priority>MEDIUM</priority>
+      <priority>HIGH</priority>
     </callout>
     <callout>
       <target>PORT_TARGET</target>
-      <priority>HIGH</priority>
+      <priority>MEDIUM</priority>
     </callout>
     <deconfigure>
       <target>PORT_TARGET</target>
@@ -278,6 +278,9 @@
     <deconfigure>
       <target>PORT_TARGET</target>
     </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
