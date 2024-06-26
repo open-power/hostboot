@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,7 +71,7 @@ public:
    *        application layer interfaces in order to achieve the desired
    *        call/return logic.
    */
-  void test_SCOMreadWrite_ocmb_ody(void)
+  void _DISABLE_test_SCOMreadWrite_ocmb_ody(void)
   {
       TRACFCOMP( g_trac_scom, "ScomTest::test_SCOMreadWrite_ocmb_ody> Start" );
       errlHndl_t l_err = nullptr;

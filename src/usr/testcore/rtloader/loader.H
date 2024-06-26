@@ -57,7 +57,7 @@
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 12*KILOBYTE);
 
-constexpr uint64_t MMIO_MASK = 0xBFFFFFFF; // Mask out the 4GIG
+constexpr uint64_t MMIO_MASK = 0xFFFFFFFF; // Mask out the 4GIG
 
 class RuntimeLoaderTest : public CxxTest::TestSuite
 {
@@ -438,8 +438,15 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 }
                 else // EXPLORER_16 not yet supported
                 {
-                    custom_addr = addr;
+                    custom_addr = (addr & MMIO_MASK);
+
+                    // need to shift IBM regs but not UCHIP regs
+                    if( 0x08000000 & (custom_addr >> 3) )
+                    {
+                        custom_addr = custom_addr >> 3;
+                    }
                 }
+
 
                 l_errl = DeviceFW::deviceRead(l_target,
                                               data,
@@ -457,7 +464,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             if(l_errl)
             {
-                TRACDCOMP(g_trac_hbrt, "rt_loader.H rt_scom_read ERROR USING CACHE, deleting ERROR !");
+                TRACFCOMP(g_trac_hbrt, "rt_loader.H rt_scom_read ERROR USING CACHE, deleting ERROR !");
                 delete l_errl;
                 l_errl = nullptr;
 
@@ -539,11 +546,17 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                     // OMI is little-endian, need to byteswap the data
                     *data64 = __builtin_bswap64(*data64);
 
-                    custom_addr = (addr & MMIO_MASK) >> 3;
+                    custom_addr = (addr & MMIO_MASK);
                 }
                 else // EXPLORER_16 not yet supported
                 {
-                    custom_addr = addr;
+                    custom_addr = (addr & MMIO_MASK);
+
+                    // need to shift IBM regs but not UCHIP regs
+                    if( 0x08000000 & (custom_addr >> 3) )
+                    {
+                        custom_addr = custom_addr >> 3;
+                    }
                 }
 
                 l_errl = DeviceFW::deviceWrite(l_target,
@@ -561,7 +574,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             if(l_errl)
             {
-                TRACDCOMP(g_trac_hbrt, "rt_loader.H rt_scom_write ERROR USING CACHE, deleting ERROR !");
+                TRACFCOMP(g_trac_hbrt, "rt_loader.H rt_scom_write ERROR USING CACHE, deleting ERROR !");
                 delete l_errl;
                 l_errl = nullptr;
 

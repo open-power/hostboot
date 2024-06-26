@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -410,8 +410,8 @@ class MmioTest : public TestSuite
                 // multicast operation. It will test both the OR
                 // and the bit-wise mode.
 
-                constexpr uint64_t CHIPLET1  = 0x010f001e;
-                constexpr uint64_t CHIPLET2  = 0x080f001e;
+                constexpr uint64_t CHIPLET1_ADDR  = 0x010f001e;
+                constexpr uint64_t CHIPLET8_ADDR  = 0x080f001e;
                 constexpr uint64_t MC_OR_ADDR      = 0x470f001e;
                 constexpr uint64_t MC_BITWISE_ADDR = 0x570f001e;
                 constexpr uint64_t DATA1 = 0xA0A0A0A0B0B0B0B0;
@@ -422,23 +422,23 @@ class MmioTest : public TestSuite
 
                 l_total++;
 
-                l_err = test_write(CHIPLET1, l_ocmb_target, DATA1);
+                l_err = test_write(CHIPLET1_ADDR, l_ocmb_target, DATA1);
                 if (l_err)
                 {
                     TS_FAIL("testOdyMulticastScom: Failed writing 0x%llX to 0x%llX"
                             " target huid= 0x%.8X",
-                            DATA1, CHIPLET1, get_huid(l_ocmb_target) );
+                            DATA1, CHIPLET1_ADDR, get_huid(l_ocmb_target) );
                     l_fails++;
                     errlCommit (l_err, CXXTEST_COMP_ID);
                     continue;
                 }
-                l_err = test_write(CHIPLET2, l_ocmb_target, DATA2);
 
+                l_err = test_write(CHIPLET8_ADDR, l_ocmb_target, DATA2);
                 if (l_err)
                 {
                     TS_FAIL("testOdyMulticastScom: Failed writing 0x%llX to 0x%llX"
                             " target huid= 0x%.8X",
-                            DATA2, CHIPLET2, get_huid(l_ocmb_target) );
+                            DATA2, CHIPLET8_ADDR, get_huid(l_ocmb_target) );
                     l_fails++;
                     errlCommit (l_err, CXXTEST_COMP_ID);
                     continue;
@@ -503,6 +503,70 @@ class MmioTest : public TestSuite
                     TS_INFO("testOdyMulticastScom: Matched Read:0x%llX Exp:0x%llX",
                             *reinterpret_cast<uint64_t *>(l_buf), l_expected);
                 }
+
+                // Next test the write path by using multicast to write a known
+                // pattern in and reading it back from each chiplet individually.
+                constexpr uint64_t MC_WRITE_ADDR = 0x470f001e;
+                constexpr uint64_t DATA3 = 0x1234567811223344;
+                l_expected = DATA3;
+
+                // Multicast write
+                l_err = test_write(MC_WRITE_ADDR, l_ocmb_target, DATA3);
+                if (l_err)
+                {
+                    TS_FAIL("testOdyMulticastScom: Failed writing 0x%llX to 0x%llX"
+                            " target huid= 0x%.8X",
+                            DATA3, MC_WRITE_ADDR, get_huid(l_ocmb_target) );
+                    l_fails++;
+                    errlCommit (l_err, CXXTEST_COMP_ID);
+                    continue;
+                }
+
+                // Read back from CHIPLET1
+                l_err = test_read(CHIPLET1_ADDR, l_ocmb_target, l_buf);
+                if (l_err)
+                {
+                    TS_FAIL("testOdyMulticastScom: Failed reading from 0x%llX"
+                            " target huid= 0x%.8X", CHIPLET1_ADDR, get_huid(l_ocmb_target));
+                    l_fails++;
+                    errlCommit (l_err, CXXTEST_COMP_ID);
+                    continue;
+                }
+                if (memcmp(l_buf, &l_expected, l_numBytes))
+                {
+                    TS_FAIL("testOdyMulticastScom: CHIPLET1 Write:0x%llX Exp:0x%llX",
+                            *reinterpret_cast<uint64_t *>(l_buf), l_expected);
+                    l_fails++;
+                }
+                else
+                {
+                    TS_INFO("testOdyMulticastScom: CHIPLET1 Matched Write:0x%llX Exp:0x%llX",
+                            *reinterpret_cast<uint64_t *>(l_buf), l_expected);
+                }
+
+                // Read back from CHIPLET8
+                l_err = test_read(CHIPLET8_ADDR, l_ocmb_target, l_buf);
+                if (l_err)
+                {
+                    TS_FAIL("testOdyMulticastScom: Failed reading from 0x%llX"
+                            " target huid= 0x%.8X", CHIPLET8_ADDR, get_huid(l_ocmb_target));
+                    l_fails++;
+                    errlCommit (l_err, CXXTEST_COMP_ID);
+                    continue;
+                }
+                if (memcmp(l_buf, &l_expected, l_numBytes))
+                {
+                    TS_FAIL("testOdyMulticastScom: CHIPLET8 Write:0x%llX Exp:0x%llX",
+                            *reinterpret_cast<uint64_t *>(l_buf), l_expected);
+                    l_fails++;
+                }
+                else
+                {
+                    TS_INFO("testOdyMulticastScom: CHIPLET8 Matched Write:0x%llX Exp:0x%llX",
+                            *reinterpret_cast<uint64_t *>(l_buf), l_expected);
+                }
+
+
             } // end of for loop
         } while (0);
 

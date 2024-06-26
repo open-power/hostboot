@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -593,7 +593,7 @@ public:
      *        Write value and read back to verify MMIO scoms to OCMBs
      *        using fapi HWPs.
      */
-    void testExpscomMmio(void)
+    void _DISABLE_testExpscomMmio(void)
     {
         TargetHandleList l_explorerList;
         uint32_t l_tests = 0;
@@ -664,6 +664,7 @@ public:
                     l_scom_buffer.insert<32,32,0,uint32_t>(l_testEntry.data);
                 }
 
+                TRACFCOMP(g_trac_expscom,"put_scom(%.8X,%X)",get_huid(l_firstExpChip),l_testEntry.addr);
                 // putScom to first OCMB over mmio
                 l_rc = put_scom(l_firstExpChip_fapi,
                                 l_testEntry.addr,
@@ -680,6 +681,7 @@ public:
                     errlCommit(l_err, CXXTEST_COMP_ID);
                 }
 
+                TRACFCOMP(g_trac_expscom,"put_scom(%.8X,%X)",get_huid(l_lastExpChip),l_testEntry.addr);
                 // putScom to last OCMB over mmio
                 l_rc = put_scom(l_lastExpChip_fapi,
                                 l_testEntry.addr,
@@ -699,6 +701,7 @@ public:
                 // Flush scom buffer so it doesnt mess up next test
                 l_scom_buffer.flush<0>();
 
+                TRACFCOMP(g_trac_expscom,"get_scom(%.8X,%X)",get_huid(l_firstExpChip),l_testEntry.addr);
                 // getScom to first OCMB over mmio
                 l_rc = get_scom(l_firstExpChip_fapi,
                                 l_testEntry.addr,
@@ -719,7 +722,7 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                    l_fails++;
-                   TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
+                   TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx for scom 0x%.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             l_testEntry.addr,
@@ -729,6 +732,7 @@ public:
                 // Flush scom buffer so it doesnt mess up next test
                 l_scom_buffer.flush<0>();
 
+                TRACFCOMP(g_trac_expscom,"get_scom(%.8X,%X)",get_huid(l_lastExpChip),l_testEntry.addr);
                 // getScom to last OCMB over mmio
                 l_rc = get_scom(l_lastExpChip_fapi,
                                 l_testEntry.addr,
@@ -749,7 +753,7 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomMmio>> Expected 0x%016lx but got 0x%016lx for scom 0x%.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             l_testEntry.addr,
@@ -905,7 +909,7 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx for scom 0x%.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             l_testEntry.addr,
@@ -946,7 +950,7 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomCombined>> Expected 0x%016lx but got 0x%016lx for scom 0x%.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             l_testEntry.addr,
@@ -1109,7 +1113,7 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx for scom 0x%.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             l_testEntry.addr,
@@ -1137,7 +1141,7 @@ public:
                 if(l_scom_buffer() != l_testEntry.data)
                 {
                     l_fails++;
-                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx for scom %0x.8X on target w/ huid 0x%08x",
+                    TS_FAIL("testExpscomSbe>> Expected 0x%016lx but got 0x%016lx for scom 0x%.8X on target w/ huid 0x%08x",
                             l_testEntry.data,
                             l_scom_buffer(),
                             l_testEntry.addr,

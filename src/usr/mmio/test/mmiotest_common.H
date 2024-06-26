@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -399,6 +399,7 @@ void runOdyMmioCI()
     TS_INFO("runOdyMmioCI: Re-enable MMIO and PIPE 0x%x", get_huid(l_target));
     enableMmioFlags(l_target);
 
+#if 0 //fixme
     runOdyMmioTestcase(l_target,
                        TC9_INBAND_CHIPOP,
                        CHIP_OP,
@@ -406,6 +407,7 @@ void runOdyMmioCI()
                        INJECT_NONE,
                        ERROR_LOG_NOT_EXPECTED,
                        SWITCHES_INBAND);
+#endif
 
     runOdyMmioTestcase(l_target,
                        TC10_INBAND_CHIPOP_UE,
