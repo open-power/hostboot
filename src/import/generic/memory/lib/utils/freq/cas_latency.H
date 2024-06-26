@@ -1393,9 +1393,12 @@ class cas_latency<mss::mc_type::ODYSSEY>
 
                 // Now select one or more CL values using target tAA values that are greater than or equal to
                 // our tAA_min, while the corresponding target tRCD greater than or equal to tRCD_min
+                // As per DDR5 Speed Bin Table Note 12, scaled correction factor of 0.997 multiplied to tAA_min and tRCD_min
+                uint64_t l_taa_corr = (i_taa * 997) / 1000;
+                uint64_t l_trcd_corr = (i_trcd * 997) / 1000;
 
                 // Check bin AN with tRCD even
-                if (((l_bin_an_taa_ra_even * l_tck_std) >= i_taa) && ((l_bin_an_trcd_ra_even * l_tck_std) >= i_trcd))
+                if (((l_bin_an_taa_ra_even * l_tck_std) >= l_taa_corr) && ((l_bin_an_trcd_ra_even * l_tck_std) >= l_trcd_corr))
                 {
                     // Push all the binning values onto the vector
                     o_cas_latency_list.push_back(l_bin_an_taa_ra_even);
@@ -1404,20 +1407,20 @@ class cas_latency<mss::mc_type::ODYSSEY>
                     o_cas_latency_list.push_back(l_bin_c_taa_ra_even);
                 }
                 // Check bin B with tRCD even or odd
-                else if (((l_bin_b_taa_ra_even * l_tck_std) >= i_taa) && ((l_bin_b_trcd_ra * l_tck_std) >= i_trcd))
+                else if (((l_bin_b_taa_ra_even * l_tck_std) >= l_taa_corr) && ((l_bin_b_trcd_ra * l_tck_std) >= l_trcd_corr))
                 {
                     o_cas_latency_list.push_back(l_bin_b_taa_ra_even);
                     o_cas_latency_list.push_back(l_bin_bn_taa_ra_even);
                     o_cas_latency_list.push_back(l_bin_c_taa_ra_even);
                 }
                 // Check bin BN with tRCD even
-                else if (((l_bin_bn_taa_ra_even * l_tck_std) >= i_taa) && ((l_bin_bn_trcd_ra_even * l_tck_std) >= i_trcd))
+                else if (((l_bin_bn_taa_ra_even * l_tck_std) >= l_taa_corr) && ((l_bin_bn_trcd_ra_even * l_tck_std) >= l_trcd_corr))
                 {
                     o_cas_latency_list.push_back(l_bin_bn_taa_ra_even);
                     o_cas_latency_list.push_back(l_bin_c_taa_ra_even);
                 }
                 // Check bin C with tRCD even or odd
-                else if (((l_bin_c_taa_ra_even * l_tck_std) >= i_taa) && ((l_bin_c_trcd_ra * l_tck_std) >= i_trcd))
+                else if (((l_bin_c_taa_ra_even * l_tck_std) >= l_taa_corr) && ((l_bin_c_trcd_ra * l_tck_std) >= l_trcd_corr))
                 {
                     o_cas_latency_list.push_back(l_bin_c_taa_ra_even);
                 }
