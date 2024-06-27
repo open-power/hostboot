@@ -158,7 +158,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
         if (l_err)
         {
             // This function is collecting additional "nice to have" data.
-            // Since we couldn't get ddimm height, just continue, this is unlikely 
+            // Since we couldn't get ddimm height, just continue, this is unlikely
             TRACFCOMP(g_trac_sbeio, ERR_MRK"getMultiPmicHealthCheckData: "
                         "Failed to get DDIMM Module height using OCMB[0x%X]. "
                         "Deleting error and leaving.",
@@ -662,13 +662,15 @@ errlHndl_t getAllPmicHealthCheckData(bool i_ddr5_health_check)
             {
                 auto end_chunk = l_TargetList.end();
 
-                // if we have more than 8 set next call to index in 8th element.
-                if (l_ocmb_target_list_size > 8)
+                // if we have more than l_ocmb_dump_count_max set next call to index into offset
+                //   of l_ocmb_dump_count_max element.
+                uint8_t l_ocmb_dump_count_max = 4;
+                if (l_ocmb_target_list_size > l_ocmb_dump_count_max)
                 {
-                    end_chunk = l_TargetList.begin() + 8;
-                    l_ocmb_target_list_size -= 8;
+                    end_chunk = l_TargetList.begin() + l_ocmb_dump_count_max;
+                    l_ocmb_target_list_size -= l_ocmb_dump_count_max;
                 }
-                // else we have a list with less than 8
+                // else we have a list with less than l_ocmb_dump_count_max
 
                 // Call this with list beginning until the end. count.
                 getMultiPmicHealthCheckData(l_pProc, i_ddr5_health_check, { l_TargetList.begin(), end_chunk });
