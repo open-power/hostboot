@@ -2966,15 +2966,38 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
 
     //--- Reset the watchdog before every istep
 #ifdef CONFIG_PLDM
-    errlHndl_t err_pldm = PLDM::resetWatchdogTimer();
-
-    if(err_pldm)
+    //Update the progress code/watchdog to the BMC at a reasonable clip:
+    // 1) if istep/substep changes
+    // 2) if it has been longer than ~3 seconds
+    //    a) Note that this doesn't have to be super accurate, just guideline
+    static timespec_t lastBMCUpdateTime = {0,};
+    errlHndl_t err_pldm = nullptr;
+    bool l_sendToBMC = false;
+    timespec_t l_curTime;
+    clock_gettime(CLOCK_MONOTONIC, &l_curTime);
+    if ((l_curTime.tv_sec > (lastBMCUpdateTime.tv_sec +3)) || // > ~3 seconds, update
+        ((iv_curIStep != lastIstep) || (iv_curSubStep != lastSubstep))) //sub/step changed, update
     {
-       TRACFCOMP(g_trac_initsvc,
-                 "init: ERROR: reset PLDM watchdog Failed");
-        err_pldm->collectTrace(PLDM_COMP_NAME);
-        err_pldm->collectTrace(INITSVC_COMP_NAME);
-        errlCommit(err_pldm, INITSVC_COMP_ID );
+        TRACDCOMP(g_trac_initsvc,
+                  "sendProgressCode cur.sec[%llx] cur.ns[%llx] last.sec[%llx] last.ns [%llx]",
+                  l_curTime.tv_sec, l_curTime.tv_nsec, lastBMCUpdateTime.tv_sec+3,
+                  lastBMCUpdateTime.tv_nsec);
+        lastBMCUpdateTime = l_curTime;
+        l_sendToBMC = true;
+    }
+
+    if (l_sendToBMC)
+    {
+        err_pldm = PLDM::resetWatchdogTimer();
+
+        if(err_pldm)
+        {
+            TRACFCOMP(g_trac_initsvc,
+                      "init: ERROR: reset PLDM watchdog Failed");
+            err_pldm->collectTrace(PLDM_COMP_NAME);
+            err_pldm->collectTrace(INITSVC_COMP_NAME);
+            errlCommit(err_pldm, INITSVC_COMP_ID );
+        }
     }
 #endif
 
@@ -3003,17 +3026,20 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     // -- Send the progress code src to the BMC;
     // do not send the internal step/counter
 #ifdef CONFIG_PLDM
-    ProgressCodeSrc l_progressSrc(iv_curIStep, iv_curSubStep, 0);
-    err_pldm = l_progressSrc.sendProgressCodeToBmc();
-    if (err_pldm)
+    if (l_sendToBMC)
     {
-        TRACFCOMP(g_trac_initsvc, ERR_MRK"sendProgressCodeToBmc() failed for istep %d:%d",
-            iv_curIStep, iv_curSubStep);
-        err_pldm->collectTrace(PLDM_COMP_NAME);
-        err_pldm->collectTrace(INITSVC_COMP_NAME);
-        // make sure it is just informational, sending progress code shouldn't stop the IPL
-        err_pldm->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-        errlCommit(err_pldm, INITSVC_COMP_ID);
+        ProgressCodeSrc l_progressSrc(iv_curIStep, iv_curSubStep, 0);
+        err_pldm = l_progressSrc.sendProgressCodeToBmc();
+        if (err_pldm)
+        {
+            TRACFCOMP(g_trac_initsvc, ERR_MRK"sendProgressCodeToBmc() failed for istep %d:%d",
+                      iv_curIStep, iv_curSubStep);
+            err_pldm->collectTrace(PLDM_COMP_NAME);
+            err_pldm->collectTrace(INITSVC_COMP_NAME);
+            // make sure it is just informational, sending progress code shouldn't stop the IPL
+            err_pldm->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
+            errlCommit(err_pldm, INITSVC_COMP_ID);
+        }
     }
 #endif
 
