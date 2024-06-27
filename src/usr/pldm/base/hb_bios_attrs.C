@@ -200,6 +200,9 @@ const std::vector<const char*> POSSIBLE_HB_LATERAL_CAST_OUT_MODE_STRINGS = {PLDM
 const std::vector<const char*> POSSIBLE_HB_PROC_FAVOR_AGGRESSIVE_PREFETCH_STRINGS = {PLDM_BIOS_ENABLED_STRING,
                                                                                      PLDM_BIOS_DISABLED_STRING};
 
+const std::vector<const char*> POSSIBLE_HB_PREDICTIVE_MEM_GUARD_STRINGS = {PLDM_BIOS_ENABLED_STRING,
+                                                                       PLDM_BIOS_DISABLED_STRING};
+
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_ASCII = 0x1;
 constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
 constexpr size_t MFG_FLAGS_CONVERT_STRING_SIZE = 8;
@@ -2828,18 +2831,31 @@ errlHndl_t getDisablePredictiveMemGuard(std::vector<uint8_t>& io_string_table,
     // if the value read is 1, then predictive memory error guards are
     // DISABLED
     uint64_t disablingMemGuards = 0;
-    errl = systemIntAttrLookup(io_string_table,
-                               io_attr_table,
-                               PLDM_BIOS_HB_DISABLE_PREDICTIVE_MEM_GUARD,
-                               disablingMemGuards);
+    std::vector<char> decoded;
+    errl = getDecodedEnumAttr(io_string_table,
+                              io_attr_table,
+                              PLDM_BIOS_HB_DISABLE_PREDICTIVE_MEM_GUARD,
+                              POSSIBLE_HB_PREDICTIVE_MEM_GUARD_STRINGS,
+                              decoded);
 
     if (errl) {
         PLDM_ERR("PLDM::getDisablePredictiveMemGuard failed to get disable/enable value. Defaulting to ENABLING"
         " predictive mem guards. Error=%d", errl->reasonCode());
     }
+
+    if (strncmp(decoded.data(), PLDM_BIOS_ENABLED_STRING, decoded.size()) == 0)
+    {
+        // disablingMemGuards is still 0 by this point so don't need to update its value again
+        PLDM_INF("PLDM::getDisablePredictiveMemGuard: Enabling predictive memory error guard creation.");
+    }
+    if (strncmp(decoded.data(), PLDM_BIOS_DISABLED_STRING, decoded.size()) == 0)
+    {
+        PLDM_INF("PLDM::getDisablePredictiveMemGuard: Disabling predictive memory error guard creation.");
+        disablingMemGuards = 1;
+    }
     o_disable_guards = static_cast<uint8_t>(disablingMemGuards);
 
-    PLDM_INF(EXIT_MRK"PLDM::getDisablePredictiveMemGuard: returning %.2X and %s",
+    PLDM_INF(EXIT_MRK"PLDM::getDisablePredictiveMemGuard: returning %.1X and %s",
              o_disable_guards, errl ? "Error" : "No Error");
 
     return errl;

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,6 +127,7 @@ public:
 
           ATTR_FW_RELEASE_VERSION, //ok,BMC only
           ATTR_RAW_MTM, //ok,BMC only
+          ATTR_DISABLE_PREDICTIVE_MEM_GUARD,
 #ifdef CONFIG_INCLUDE_XML_OPENPOWER
           ATTR_SYSTEM_BRAND_NAME, //ok,BMC only
           ATTR_SYS_CLOCK_DECONFIG_STATE, //ok,BMC only

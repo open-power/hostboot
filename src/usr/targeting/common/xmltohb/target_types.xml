@@ -2510,6 +2510,9 @@
       <id>DISABLE_PLD_WAIT</id>
     </attribute>
     <attribute>
+      <id>DISABLE_PREDICTIVE_MEM_GUARD</id>
+    </attribute>
+    <attribute>
       <id>EECACHE_DISABLE_AUTO_RESET</id>
     </attribute>
     <attribute>
