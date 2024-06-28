@@ -165,7 +165,7 @@
         MNFG_POLICY_FLAG_AVAIL_34           = 79,
         MNFG_POLICY_FLAG_AVAIL_35           = 80,
         MNFG_POLICY_FLAG_AVAIL_36           = 81,
-        MNFG_POLICY_FLAG_AVAIL_37           = 82,
+        MNFG_TEST_SPARE_CORES               = 82,
         MNFG_DDR5_ECS_TEST                  = 83,
         MNFG_POLICY_FLAG_AVAIL_39           = 84,
         MNFG_ENABLE_DMIGB                   = 85,
