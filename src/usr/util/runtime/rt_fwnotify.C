@@ -64,7 +64,7 @@ extern trace_desc_t* g_trac_runtime;
 extern trace_desc_t* g_trac_hbrt;
 
 const uint32_t HOST_CALLBACK_TIMER_DISABLED = 0xFFFFFFFF;
-const uint32_t HOST_CALLBACK_TIMER_ONE_SECOND = MS_PER_SEC;
+const uint32_t HOST_CALLBACK_TIMER_FIRST_PMIC_CALL = 60*60*MS_PER_SEC; //1 hour
 
 /**
  * @brief Declare a prototype for the Power Management Complex (PMC) load and
@@ -1064,7 +1064,8 @@ errlHndl_t createPmicHealthCheckCallback(bool i_firstCall)
         // On the first call to this function set the callback timer to 1 second
         if (i_firstCall)
         {
-            l_host_callback_timer = HOST_CALLBACK_TIMER_ONE_SECOND;
+            l_host_callback_timer = std::min(l_host_callback_timer,
+                                             HOST_CALLBACK_TIMER_FIRST_PMIC_CALL);
         }
 
         // Check the interface
@@ -1175,7 +1176,8 @@ errlHndl_t createPmicHealthCheckDDR5Callback(bool i_firstCall)
         // On the first call to this function set the callback timer to 1 second
         if (i_firstCall)
         {
-            l_host_callback_timer = HOST_CALLBACK_TIMER_ONE_SECOND;
+            l_host_callback_timer = std::min(l_host_callback_timer,
+                                             HOST_CALLBACK_TIMER_FIRST_PMIC_CALL);
         }
 
         // Check the interface
@@ -1455,7 +1457,7 @@ errlHndl_t createPMCLoadStartCallback()
         l_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_TYPE_LOAD_START_PMC;
 
         // Ask host interface to invoke the callback at the specified time
-        const uint64_t l_host_callback_timer = HOST_CALLBACK_TIMER_ONE_SECOND;
+        const uint64_t l_host_callback_timer = MS_PER_SEC; //immediately
 
         int l_rc = g_hostInterfaces->host_callback( l_host_callback_timer,
                                                     l_msg_size,
