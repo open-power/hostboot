@@ -25,6 +25,7 @@
 #ifndef _SBEIOIF_H
 #define _SBEIOIF_H
 
+#include <targeting/common/target.H>
 #include <errl/errlentry.H>
 
 /* Associated defines for sendPsuReadSeeprom() function below */
@@ -340,16 +341,14 @@ namespace SBEIO
     void get4uDdimmPmicHealthCheckData(TARGETING::Target * i_ocmb, uint32_t i_plid = 0);
 
     /**
-     * @brief Get PMIC Health Check Data from the SBE
+     * @brief Get PMIC Health Check Data for all OCMBs from either
+     *        a specific processor, or all processors on the system.
      *
-     * @param[in] i_ddr5_health_check A flag set from the registered
-     *            callback which indicates if this is for a HWP Health
-     *            Check or HWP Telemetry Check
-     *
-     * @return errlHndl_t Error log handle on failure.
-     *
+     * @param[in] i_target_proc Which processor to collect data from. If null, collects data from all processors.
+     * @param[in] i_ddr5_health_check Flag indicating if this is a HWP health check or telemetry check
+     * @return errHndl_t Error log handle on failure.
      */
-    errlHndl_t getAllPmicHealthCheckData(bool i_ddr5_health_check = false);
+    errlHndl_t getPmicHealthCheckData(TARGETING::TargetHandle_t i_target_proc, bool i_ddr5_health_check = false);
 
      /**
      * @brief Get the capabilities of the SBE via PSU

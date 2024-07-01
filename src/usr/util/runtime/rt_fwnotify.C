@@ -29,8 +29,11 @@
  *        by the hypervisor to control HBRT
  */
 
+#include <targeting/common/targetservice.H>
+#include <targeting/common/util.H>
+#include <cstdint>
 #include <sbeio/sbe_retry_handler.H>       // SbeRetryHandler
-#include <sbeio/sbeioif.H>                 // getAllPmicHealthCheckData
+#include <sbeio/sbeioif.H>                 // getPmicHealthCheckData
 #include <sbeio/sbe_psudd.H>               // SbePsu
 #include <util/runtime/rt_fwreq_helper.H>  // firmware_request_helper
 #include <runtime/interface.h>             // g_hostInterfaces
@@ -64,7 +67,11 @@ extern trace_desc_t* g_trac_runtime;
 extern trace_desc_t* g_trac_hbrt;
 
 const uint32_t HOST_CALLBACK_TIMER_DISABLED = 0xFFFFFFFF;
+const uint32_t HOST_CALLBACK_STAGGER_DISABLED = 0xFFFFFFFF;
 const uint32_t HOST_CALLBACK_TIMER_FIRST_PMIC_CALL = 60*60*MS_PER_SEC; //1 hour
+
+// Our private global for processor list
+static TargetHandleList g_telemetry_proc_list;
 
 /**
  * @brief Declare a prototype for the Power Management Complex (PMC) load and
@@ -1041,7 +1048,7 @@ void handleMctpAvailable(void)
  *
  *  @return errlHndl_t - nullptr if no error
  **/
-errlHndl_t createPmicHealthCheckCallback(bool i_firstCall)
+errlHndl_t createPmicHealthCheckCallback(bool i_firstCall, uint8_t i_processor)
 {
     errlHndl_t l_err = nullptr;
 
@@ -1051,6 +1058,10 @@ errlHndl_t createPmicHealthCheckCallback(bool i_firstCall)
         // the attribute (in milliseconds)
         auto l_host_callback_timer = UTIL::assertGetToplevelTarget()->
                                         getAttr<ATTR_PMIC_HEALTH_CHECK_TIMER>();
+        // Get the health check starting staggered time for processor
+        // callback delay
+        auto l_host_stagger_delay = UTIL::assertGetToplevelTarget()->
+                                        getAttr<ATTR_PMIC_CALLBACK_STAGGER_TIME>();
 
         // First check for callback disabled
         if (l_host_callback_timer == HOST_CALLBACK_TIMER_DISABLED)
@@ -1060,12 +1071,13 @@ errlHndl_t createPmicHealthCheckCallback(bool i_firstCall)
                 HOST_CALLBACK_TIMER_DISABLED);
             break;
         }
-
-        // On the first call to this function set the callback timer to 1 second
-        if (i_firstCall)
+        // Then check if we aren't staggering callbacks at all
+        if (l_host_stagger_delay == HOST_CALLBACK_STAGGER_DISABLED)
         {
-            l_host_callback_timer = std::min(l_host_callback_timer,
-                                             HOST_CALLBACK_TIMER_FIRST_PMIC_CALL);
+            TRACFCOMP(g_trac_hbrt,
+                "createPmicHealthCheckCallback: ATTR_PMIC_CALLBACK_STAGGER_TIME = %d Callback stagger disabled, setting default.",
+                l_host_stagger_delay);
+            l_host_stagger_delay = 0;
         }
 
         // Check the interface
@@ -1093,23 +1105,39 @@ errlHndl_t createPmicHealthCheckCallback(bool i_firstCall)
             l_err->collectTrace(HBRT_TRACE_NAME,1024);
             break;
         }
+        // If it's the first time call, stagger our callback delays
+        // to service other requests in between telemetry calls.
+        // Default is 1hr + 5 minutes * processor #
+        if (i_firstCall)
+        {
+            // Always initial offset time of 1 hour
+            l_host_callback_timer = std::min(l_host_callback_timer,
+                                    HOST_CALLBACK_TIMER_FIRST_PMIC_CALL);
+            // Tack on whatever delay we are using
+            l_host_callback_timer += i_processor * l_host_stagger_delay;
+        }
+
+        hostInterfaces::hbrt_fw_msg l_fw_msg;
+        l_fw_msg.io_type = hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK;
+        l_fw_msg.processorNumber = i_processor; // Assign the proc number to the msg payload for future callback handling
+
+        // Include the base size plus the additional payload size needed to be able to receive the proper completed msg handling.
+        // If future additions are made this will need to be adjusted.
+        constexpr auto l_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE
+            + sizeof(hostInterfaces::hbrt_fw_msg::processorNumber);
 
         // Generate a new host callback (in milliseconds)
         TRACFCOMP(g_trac_hbrt,
-            "createPmicHealthCheckCallback: Create host_callback for PMIC Telemetry in %d milliseconds",
-            l_host_callback_timer);
+            "createPmicHealthCheckCallback: Create host_callback on functional proc %d (HUID=0x%X) for PMIC Telemetry in %d milliseconds",
+            i_processor, get_huid(g_telemetry_proc_list.at(i_processor)), l_host_callback_timer);
 
-        size_t l_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE;
-        uint8_t l_msg_buf[l_msg_size] = {0};
-
-        hostInterfaces::hbrt_fw_msg* l_fw_msg =
-            reinterpret_cast<hostInterfaces::hbrt_fw_msg *>(l_msg_buf);
-        l_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK;
-
-        int l_rc = g_hostInterfaces->host_callback(
-                                        l_host_callback_timer,
-                                        l_msg_size,
-                                        reinterpret_cast<void*>(l_fw_msg) );
+        // First time call will stagger all processor callbacks according
+        // to the processor # they are running on
+        int l_rc;
+        l_rc = g_hostInterfaces->host_callback(
+                                    l_host_callback_timer,
+                                    l_msg_size,
+                                    reinterpret_cast<void*>(&l_fw_msg) );
 
         if(l_rc)
         {
@@ -1153,7 +1181,7 @@ errlHndl_t createPmicHealthCheckCallback(bool i_firstCall)
  *
  *  @return errlHndl_t - nullptr if no error
  **/
-errlHndl_t createPmicHealthCheckDDR5Callback(bool i_firstCall)
+errlHndl_t createPmicHealthCheckDDR5Callback(bool i_firstCall, uint8_t i_processor)
 {
     errlHndl_t l_err = nullptr;
 
@@ -1163,6 +1191,10 @@ errlHndl_t createPmicHealthCheckDDR5Callback(bool i_firstCall)
         // the attribute (in milliseconds)
         auto l_host_callback_timer = UTIL::assertGetToplevelTarget()->
                                         getAttr<ATTR_PMIC_HEALTH_CHECK_DDR5_TIMER>();
+        // Get the health check starting staggered time for processor
+        // callback delay
+        auto l_host_stagger_delay = UTIL::assertGetToplevelTarget()->
+                                        getAttr<ATTR_PMIC_CALLBACK_STAGGER_TIME>();
 
         // First check for callback disabled
         if (l_host_callback_timer == HOST_CALLBACK_TIMER_DISABLED)
@@ -1172,12 +1204,13 @@ errlHndl_t createPmicHealthCheckDDR5Callback(bool i_firstCall)
                 HOST_CALLBACK_TIMER_DISABLED);
             break;
         }
-
-        // On the first call to this function set the callback timer to 1 second
-        if (i_firstCall)
+        // Then check if we aren't staggering callbacks at all
+        if (l_host_stagger_delay == HOST_CALLBACK_STAGGER_DISABLED)
         {
-            l_host_callback_timer = std::min(l_host_callback_timer,
-                                             HOST_CALLBACK_TIMER_FIRST_PMIC_CALL);
+            TRACFCOMP(g_trac_hbrt,
+                "createPmicHealthCheckDDR5Callback: ATTR_PMIC_CALLBACK_STAGGER_TIME = %d Callback stagger disabled, setting default.",
+                l_host_stagger_delay);
+            l_host_stagger_delay = 0;
         }
 
         // Check the interface
@@ -1206,22 +1239,39 @@ errlHndl_t createPmicHealthCheckDDR5Callback(bool i_firstCall)
             break;
         }
 
+        // If it's the first time call, stagger our callback delays
+        // to service other requests in between telemetry calls.
+        // Default is 1 hour + 5 minutes * processor #
+        if (i_firstCall)
+        {
+            // Always initial offset time of 1 hour
+            l_host_callback_timer = std::min(l_host_callback_timer,
+                                    HOST_CALLBACK_TIMER_FIRST_PMIC_CALL);
+            // Tack on whatever delay we are using
+            l_host_callback_timer += i_processor * l_host_stagger_delay;
+        }
+
+        hostInterfaces::hbrt_fw_msg l_fw_msg;
+        l_fw_msg.io_type = hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK_DDR5;
+        l_fw_msg.processorNumber = i_processor; // Assign the proc number to the msg payload for future callback handling
+
+        // Include the base size plus the additional payload size needed to be able to receive the proper completed msg handling.
+        // If future additions are made this will need to be adjusted.
+        constexpr auto l_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE
+            + sizeof(hostInterfaces::hbrt_fw_msg::processorNumber);
+
         // Generate a new host callback (in milliseconds)
         TRACFCOMP(g_trac_hbrt,
-            "createPmicHealthCheckDDR5Callback: Create host_callback for PMIC Health Check in %d milliseconds",
-            l_host_callback_timer);
+            "createPmicHealthCheckDDR5Callback: Create host_callback on functional proc %d (HUID=0x%X) for PMIC Health Check in %d milliseconds",
+            i_processor, get_huid(g_telemetry_proc_list.at(i_processor)), l_host_callback_timer);
 
-        size_t l_msg_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE;
-        uint8_t l_msg_buf[l_msg_size] = {0};
-
-        hostInterfaces::hbrt_fw_msg* l_fw_msg =
-            reinterpret_cast<hostInterfaces::hbrt_fw_msg *>(l_msg_buf);
-        l_fw_msg->io_type = hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK_DDR5;
-
-        int l_rc = g_hostInterfaces->host_callback(
-                                        l_host_callback_timer,
-                                        l_msg_size,
-                                        reinterpret_cast<void*>(l_fw_msg) );
+        // First time call will stagger all processor callbacks according
+        // to the processor # they are running on
+        int l_rc;
+        l_rc = g_hostInterfaces->host_callback(
+                                    l_host_callback_timer,
+                                    l_msg_size,
+                                    reinterpret_cast<void*>(&l_fw_msg) );
 
         if(l_rc)
         {
@@ -1262,26 +1312,32 @@ errlHndl_t createPmicHealthCheckDDR5Callback(bool i_firstCall)
  *
  *  @return void
  **/
-void handlePmicHealthCheckCallback(void)
+void handlePmicHealthCheckCallback(uint8_t i_processor)
 {
     errlHndl_t l_err = nullptr;
 
     do
     {
-        if (!TARGETING::arePmicsInBlueprint())
+        TRACFCOMP(g_trac_hbrt,
+            "handlePmicHealthCheckCallback: running for functional processor=%d", i_processor);
+        if (!TARGETING::arePmicsInBlueprint() || i_processor >= g_telemetry_proc_list.size())
         {
-            // skip responding on non-PMIC system configuration
+            // skip responding on non-PMIC system configuration, or
+            // out of bounds processor number.
+            TRACFCOMP(g_trac_hbrt, "handlePmicHealthCheckCallback did not execute for functional processor=%d"
+                " - either non-PMIC system configuration, or the processor number is out of bounds (corrupted data?)", i_processor);
             break;
         }
 
-        // Call function to create a PEL with PMIC telemetry data from the SBE.
-        // This info PEL will be committed inside the health check function.
-        // The error returned indicates a problem with the health check, commit it.
-        l_err = SBEIO::getAllPmicHealthCheckData();
+        // Currently, getPmicHealthCheckData() doesn't hold onto error information from the health check call. This may change
+        // at a later date, but for now, we can ignore errl handling in the handle functions.
+        bool l_ddr_health_check = false;
+        l_err = SBEIO::getPmicHealthCheckData(g_telemetry_proc_list.at(i_processor), l_ddr_health_check);
+
         if (l_err)
         {
             TRACFCOMP(g_trac_hbrt,
-                "handlePmicHealthCheckCallback: Call to getAllPmicHealthCheckData failed");
+                "handlePmicHealthCheckCallback: Call to getTargetPmicHealthCheckData failed");
             // Do not break out, commit the error then create a new
             // callback and try again, make sure the error is informational
             l_err->setSev(ERRL_SEV_INFORMATIONAL);
@@ -1290,7 +1346,7 @@ void handlePmicHealthCheckCallback(void)
 
         // Call the function to create a new callback
         uint32_t l_firstCall = false;
-        l_err = createPmicHealthCheckCallback( l_firstCall );
+        l_err = createPmicHealthCheckCallback( l_firstCall , i_processor );
         if (l_err)
         {
             TRACFCOMP(g_trac_hbrt,
@@ -1310,27 +1366,32 @@ void handlePmicHealthCheckCallback(void)
  *
  *  @return void
  **/
-void handlePmicHealthCheckDDR5Callback(void)
+void handlePmicHealthCheckDDR5Callback(uint8_t i_processor)
 {
     errlHndl_t l_err = nullptr;
 
     do
     {
-        if (!TARGETING::arePmicsInBlueprint())
+        TRACFCOMP(g_trac_hbrt,
+            "handlePmicHealthCheckDDR5Callback: running for functional processor=%d", i_processor);
+        if (!TARGETING::arePmicsInBlueprint() || i_processor >= g_telemetry_proc_list.size())
         {
-            // skip responding on non-PMIC system configuration
+            // skip responding on non-PMIC system configuration, or
+            // out of bounds processor number.
+            TRACFCOMP(g_trac_hbrt, "handlePmicHealthCheckDDR5Callback did not execute for functional processor=%d"
+                " - either non-PMIC system configuration, or the processor number is out of bounds (corrupted data?)", i_processor);
             break;
         }
 
-        // Call function to create a PEL with PMIC telemetry data
-        // This info PEL will be committed inside the health check function.
-        // The error returned indicates a problem with the health check, commit it.
+        // Currently, getPmicHealthCheckData() doesn't hold onto error information from the health check call. This may change
+        // at a later date, but for now, we can ignore errl handling in the handle functions.
         bool l_ddr_health_check = true;
-        l_err = SBEIO::getAllPmicHealthCheckData(l_ddr_health_check);
+        l_err = SBEIO::getPmicHealthCheckData(g_telemetry_proc_list.at(i_processor), l_ddr_health_check);
+
         if (l_err)
         {
             TRACFCOMP(g_trac_hbrt,
-                "handlePmicHealthCheckDDR5Callback: Call to getAllPmicHealthCheckData failed");
+                "handlePmicHealthCheckDDR5Callback: Call to getPmicHealthCheckData failed");
             // Do not break out, commit the error then create a new
             // callback and try again, make sure the error is informational
             l_err->setSev(ERRL_SEV_INFORMATIONAL);
@@ -1339,11 +1400,11 @@ void handlePmicHealthCheckDDR5Callback(void)
 
         // Call the function to create a new callback
         uint32_t l_firstCall = false;
-        l_err = createPmicHealthCheckDDR5Callback( l_firstCall );
+        l_err = createPmicHealthCheckDDR5Callback( l_firstCall , i_processor );
         if (l_err)
         {
             TRACFCOMP(g_trac_hbrt,
-                "handlePmicHealthCheckDDR5Callback: Call to createPmicHealthCheckCallback failed");
+                "handlePmicHealthCheckDDR5Callback: Call to createPmicHealthCheckDDR5Callback failed");
             // Make sure the error is informational
             l_err->setSev(ERRL_SEV_INFORMATIONAL);
             errlCommit(l_err, RUNTIME_COMP_ID);
@@ -1366,14 +1427,28 @@ void setupPmicHealthCheck()
 
     if (!Util::isSimicsRunning())
     {
-        l_err = createPmicHealthCheckCallback( l_firstCall );
-    }
+        // Capture all functional processors to initialize health check
+        // callbacks on.
+        if (g_telemetry_proc_list.size() == 0)
+        {
+            getAllChips(g_telemetry_proc_list, TYPE_PROC, true);
+        }
 
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_hbrt,
-            "setupPmicHealthCheck: Call to createPmicHealthCheckCallback failed");
-        errlCommit(l_err, RUNTIME_COMP_ID);
+        const auto num_procs = g_telemetry_proc_list.size();
+        TRACFCOMP(g_trac_hbrt, "setupPmicHealthCheck: Number of functional processors identified = %d", num_procs);
+
+        // For every processor, create callback
+        for (uint64_t i = 0; i < num_procs; i++)
+        {
+            l_err = createPmicHealthCheckCallback( l_firstCall , i );
+            // Check (and commit) errors for every call
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_hbrt,
+                    "setupPmicHealthCheck: Call to createPmicHealthCheckCallback failed");
+                errlCommit(l_err, RUNTIME_COMP_ID);
+            }
+        }
     }
 }
 
@@ -1389,14 +1464,28 @@ void setupPmicHealthCheckDDR5()
 
     if (!Util::isSimicsRunning())
     {
-        l_err = createPmicHealthCheckDDR5Callback( l_firstCall );
-    }
+        // Capture all functional processors to initialize health check
+        // callbacks on
+        if (g_telemetry_proc_list.size() == 0)
+        {
+            getAllChips(g_telemetry_proc_list, TYPE_PROC, true);
+        }
 
-    if (l_err)
-    {
-        TRACFCOMP(g_trac_hbrt,
-            "setupPmicHealthCheckDDR5: Call to createPmicHealthCheckDDR5Callback failed");
-        errlCommit(l_err, RUNTIME_COMP_ID);
+        const auto num_procs = g_telemetry_proc_list.size();
+        TRACFCOMP(g_trac_hbrt, "setupPmicHealthCheckDDR5: Number of functional processors identified = %d", num_procs);
+
+        // For every processor, create callback
+        for (uint64_t i = 0; i < num_procs; i++)
+        {
+            l_err = createPmicHealthCheckDDR5Callback( l_firstCall , i );
+            // Check (and commit) errors for every call
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_hbrt,
+                    "setupPmicHealthCheckDDR5: Call to createPmicHealthCheckDDR5Callback failed");
+                errlCommit(l_err, RUNTIME_COMP_ID);
+            }
+        }
     }
 }
 
@@ -1665,19 +1754,43 @@ void firmware_notify( uint64_t i_len, void *i_data )
 
             case hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK:
             {
-                TRACFCOMP(g_trac_runtime,
-                          "firmware_notify: PMIC Telemetry callback");
-
-                handlePmicHealthCheckCallback();
+                constexpr uint8_t expected_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE + sizeof(hostInterfaces::hbrt_fw_msg::processorNumber);
+                if (i_len == expected_size)
+                {
+                    uint8_t proc = reinterpret_cast<uint8_t>(l_hbrt_fw_msg->processorNumber);
+                    TRACFCOMP(g_trac_runtime,
+                            "firmware_notify: PMIC Telemetry callback on functional proc=%d", proc);
+                    // Extract out the processor from the msg
+                    handlePmicHealthCheckCallback(proc);
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_runtime, "firmware_notify: Error handling PMIC Telemetry Check - i_len invalid size! %d bytes, expected %d", i_len, expected_size);
+                    // Set error flags for errl collection
+                    l_badMessage = true;
+                    l_userData1 = l_hbrt_fw_msg->io_type;
+                }
             }
             break;
 
             case hostInterfaces::HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK_DDR5:
             {
-                TRACFCOMP(g_trac_runtime,
-                          "firmware_notify: PMIC Health Check callback");
-
-                handlePmicHealthCheckDDR5Callback();
+                constexpr uint8_t expected_size = hostInterfaces::HBRT_FW_MSG_BASE_SIZE + sizeof(hostInterfaces::hbrt_fw_msg::processorNumber);
+                if (i_len == expected_size)
+                {
+                    uint8_t proc = reinterpret_cast<uint8_t>(l_hbrt_fw_msg->processorNumber);
+                    TRACFCOMP(g_trac_runtime,
+                            "firmware_notify: PMIC Health Check DDR5 callback on functional proc=%d", proc);
+                    // Extract out the processor from the msg
+                    handlePmicHealthCheckDDR5Callback(proc);
+                }
+                else
+                {
+                    TRACFCOMP(g_trac_runtime, "firmware_notify: Error handling PMIC Health Check DDR5 - i_len invalid size! %d bytes, expected %d", i_len, expected_size);
+                    // Set error flags for errl collection
+                    l_badMessage = true;
+                    l_userData1 = l_hbrt_fw_msg->io_type;
+                }
             }
             break;
 

@@ -742,6 +742,14 @@ typedef struct hostInterfaces
        uint64_t io_type;          // message type from HBRT_FW_MSG_TYPE enum
        union
        {
+          // This u8 is sent to PHYP and received back
+          // during health check and telemtry callbacks
+          // in HBRT. io_type is either HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK_DDR5
+          // or HBRT_FW_MSG_TYPE_PMIC_HEALTH_CHECK. This is the only
+          // extra byte needed for telemetry/health check callbacks at this time.
+          // This value is set in rt_fwnotify.C:createPmicHealthCheckCallback and its DDR5 variant.
+          uint8_t processorNumber;
+
           // This struct is returned from skiboot with
           // io_type set to HBRT_FW_MSG_TYPE_RESP_GENERIC or
           // with HBRT_FW_MSG_TYPE_RESP_NOP
