@@ -28,6 +28,7 @@
 #include "hdatpcia.H"
 #include <targeting/common/util.H>
 #include <targeting/common/utilFilter.H>
+#include <targeting/common/mfgFlagAccessors.H>
 #include <util/align.H>
 #include <arch/pirformat.H>
 
@@ -803,8 +804,8 @@ errlHndl_t HdatPcia::hdatSetCoreInfo(const uint32_t i_index,
         this->iv_spPcia[i_index].hdatCoreData.pciaHdwProcId = l_coreOrdId;
 
         // Depending on is_fused_mode, i_pCoreTarget could be a fused core target or a core target.
-        // @TODO PFHB-667 Do not set spare core attr if mfg flag for no spare is set.
-        if (i_pCoreTarget->getAttr<ATTR_CORE_IS_SPARE>())
+        // Do not set spare core attr if mfg flag to test spare cores is set.
+        if (!TARGETING::isTestSpareCoresSet() && i_pCoreTarget->getAttr<ATTR_CORE_IS_SPARE>())
         {
             this->iv_spPcia[i_index].hdatCoreData.pciaProcStatus |= HDAT_CORE_IS_SPARE;
         }
