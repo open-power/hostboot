@@ -593,7 +593,7 @@ public:
      *        Write value and read back to verify MMIO scoms to OCMBs
      *        using fapi HWPs.
      */
-    void _DISABLE_testExpscomMmio(void)
+    void testExpscomMmio(void)
     {
         TargetHandleList l_explorerList;
         uint32_t l_tests = 0;

@@ -57,7 +57,7 @@
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 12*KILOBYTE);
 
-constexpr uint64_t MMIO_MASK = 0xFFFFFFFF; // Mask out the 4GIG
+constexpr uint64_t MMIO_MASK = 0x7FFFFFFF; // Mask out the 4GIG
 
 class RuntimeLoaderTest : public CxxTest::TestSuite
 {
@@ -406,7 +406,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                                 void* data)
         {
             int rc = 0;
-            bool l_odyssey = false;
             uint64_t custom_addr = 0x0;
             uint64_t *data64 = static_cast<uint64_t*>(data);
 
@@ -428,30 +427,24 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             size_t l_size = sizeof(uint64_t);
             if (l_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
             {
-                // See testscom_rt.H for details on how rtloader.H is leveraged to provide
-                // PHYP-like emulation during the running of the Runtime test interfaces
-                //
-                if (l_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+                auto phys_base = l_target->getAttr<ATTR_MMIO_PHYS_ADDR>();
+                custom_addr = (addr - phys_base);
+                custom_addr &= ~0x8000000000000000; //force no HRMOR bit
+                if (l_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::EXPLORER_16)
                 {
-                    l_odyssey = true;
-                    custom_addr = (addr & MMIO_MASK) >> 3;
-                }
-                else // EXPLORER_16 not yet supported
-                {
-                    custom_addr = (addr & MMIO_MASK);
-
-                    // need to shift IBM regs but not UCHIP regs
+                    // IBM regs are 8 bytes, UCHIP regs are 4 bytes
+                    l_size = 4;
                     if( 0x08000000 & (custom_addr >> 3) )
                     {
-                        custom_addr = custom_addr >> 3;
+                        l_size = 8;
                     }
                 }
-
-
+                TRACFCOMP(g_trac_hbrt, "rt_scom_read mmio_addr=%X", custom_addr);
                 l_errl = DeviceFW::deviceRead(l_target,
                                               data,
                                               l_size,
-                                              DEVICE_SCOM_ADDRESS(custom_addr) );
+                                              DEVICE_MMIO_ADDRESS(custom_addr,l_size) );
+
             }
             else
             {
@@ -491,36 +484,16 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                     rc = HBRT_RC_PIBERR_100_INVALIDADDR;
                 }
             }
-            else if (l_odyssey) // dont byteswap if data comes from the cache
-            {
-                // OMI is little-endian, need to byteswap the data
-                *data64 = __builtin_bswap64(*data64);
-            }
 
-            if (!l_odyssey) // Explorer only handling
-            {
-                // PHYP handles the 4-byte accesses to the OCMB differently
-                // than our native code does, need to rearrange the results.
-                if( ((chipid & HBRT_CHIPID_TYPE_MASK) == HBRT_OCMB_TYPE)
-                    //input is mmio addr which is scom left-shifted by 3
-                    && (((addr>>3) & 0x0F000000) != 0x08000000) ) //Not IBM scom
-                {
-                    // HB has the data right-justified
-                    // PHYP returns it left-justified
-                    uint32_t* l_u32 = reinterpret_cast<uint32_t*>(data);
-                    l_u32[0] = l_u32[1];
-                    l_u32[1] = 0;
-                }
-            }
             return rc;
         }
 
         static int rt_scom_write(uint64_t chipid,
-                                  uint64_t addr,
-                                  void* data)
+                                 uint64_t addr,
+                                 void* data)
         {
             int rc = 0;
-            uint64_t * data64 = static_cast<uint64_t *>(data);
+            uint64_t* data64 = static_cast<uint64_t *>(data);
             uint64_t custom_addr = 0x0;
             TRACDCOMP(g_trac_hbrt, "rtloader loader.H rt_scom_write chipid=0x%llX addr=0x%llX data=0x%llX",
                           chipid, addr, *data64);
@@ -538,31 +511,29 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
 
             if (l_target->getAttr<TARGETING::ATTR_TYPE>() == TARGETING::TYPE_OCMB_CHIP)
             {
-                // See testscom_rt.H for details on how rtloader.H is leveraged to provide
-                // PHYP-like emulation during the running of the Runtime test interfaces
-                //
-                if (l_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::ODYSSEY_16)
+                auto phys_base = l_target->getAttr<ATTR_MMIO_PHYS_ADDR>();
+                custom_addr = (addr - phys_base);
+                custom_addr &= ~0x8000000000000000; //force no HRMOR bit
+                if (l_target->getAttr<TARGETING::ATTR_CHIP_ID>() == POWER_CHIPID::EXPLORER_16)
                 {
-                    // OMI is little-endian, need to byteswap the data
-                    *data64 = __builtin_bswap64(*data64);
-
-                    custom_addr = (addr & MMIO_MASK);
-                }
-                else // EXPLORER_16 not yet supported
-                {
-                    custom_addr = (addr & MMIO_MASK);
-
-                    // need to shift IBM regs but not UCHIP regs
+                    // IBM regs are 8 bytes, UCHIP regs are 4 bytes
+                    l_size = 4;
                     if( 0x08000000 & (custom_addr >> 3) )
                     {
-                        custom_addr = custom_addr >> 3;
+                        l_size = 8;
+                    }
+                    else
+                    {
+                        (*data64) = (*data64) << 32;
                     }
                 }
 
+                TRACFCOMP(g_trac_hbrt, "rt_scom_write mmio_addr=%X", custom_addr);
                 l_errl = DeviceFW::deviceWrite(l_target,
                                               data,
                                               l_size,
-                                              DEVICE_SCOM_ADDRESS(custom_addr));
+                                              DEVICE_MMIO_ADDRESS(custom_addr,l_size));
+
             }
             else // proc
             {

@@ -71,7 +71,7 @@ public:
    *        application layer interfaces in order to achieve the desired
    *        call/return logic.
    */
-  void _DISABLE_test_SCOMreadWrite_ocmb_ody(void)
+  void test_SCOMreadWrite_ocmb_ody(void)
   {
       TRACFCOMP( g_trac_scom, "ScomTest::test_SCOMreadWrite_ocmb_ody> Start" );
       errlHndl_t l_err = nullptr;
@@ -148,7 +148,7 @@ public:
                   }
                   else if (read_data[x] != test_data[x].data)
                   {
-                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d FAILURE !! NO MATCH !! READ -> 0x%llX TEST DATA -> 0x%llX", x, read_data[x], test_data[x].data);
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d FAILURE !! NO MATCH !! READ -> 0x%llX TEST DATA -> 0x%llX ADDR=%.8X", x, read_data[x], test_data[x].data, test_data[x].addr);
                       fails++;
                   }
               } // end FOR ALL NUM_ADDRS
