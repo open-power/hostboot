@@ -27,6 +27,12 @@
 * @brief Send Memory configuration information, for a PROC, to the SBE
 */
 
+#include "targeting/common/util.H"
+#include <errl/errlentry.H>
+#include <targeting/common/target.H>
+#include <trace/interface.H>
+#include <algorithm>
+#include <cstddef>
 #include <errl/errlmanager.H>                  // errlHndl_t
 #include <sbeio/sbe_psudd.H>                   // SbePsu::psuCommand
 #include <targeting/common/commontargeting.H>  // get_huid
@@ -652,75 +658,94 @@ void get4uDdimmPmicHealthCheckData(Target * i_ocmb, const uint32_t i_plid)
     } while(0);
 }
 
- /** @brief Get PMIC Health Check Data from the SBE
+/** @brief Get PMIC Health Check Data from the SBE
  *
+ *   @param[in] i_target_proc Either a processor target to perform health checks on a specific processor,
+ *              or nullptr to perform health checks on all processors.
  *   @param[in] i_ddr5_health_not_telemetry_check A flag set from the registered
  *              callback which indicates if this is for a HWP Health
  *              Check or HWP Telemetry Check
  *
  *   @return nullptr if no error else an error log
  */
-errlHndl_t getAllPmicHealthCheckData(bool i_ddr5_health_not_telemetry_check)
+errlHndl_t getPmicHealthCheckData(TargetHandle_t i_target_proc, bool i_ddr5_health_not_telemetry_check)
 {
     errlHndl_t l_err(nullptr);
+    TargetHandleList l_procs;
+    TRACFCOMP(g_trac_sbeio, ENTER_MRK"getPmicHealthCheckData: i_ddr5_health_not_telemetry_check=%d", i_ddr5_health_not_telemetry_check);
 
-    TRACFCOMP(g_trac_sbeio, ENTER_MRK"getAllPmicHealthCheckData i_ddr5_health_not_telemetry_check=%d", i_ddr5_health_not_telemetry_check);
-
-    do
+    if (i_target_proc == nullptr)
     {
-        TargetHandleList functionalProcChipList;
-        getAllChips(functionalProcChipList, TYPE_PROC, true);
-        for (const auto & l_pProc: functionalProcChipList)
+        // If running a check for all processors, gather all chips
+        TRACFCOMP(g_trac_sbeio, "getPmicHealthCheckData: Running for ALL processors");
+        getAllChips(l_procs, TYPE_PROC, true);
+    }
+    else
+    {
+        // If running a check for a specific processor, put it (and only it) into the vector
+        TRACFCOMP(g_trac_sbeio, "getPmicHealthCheckData: Running for proc=0x%X", get_huid(i_target_proc));
+        l_procs.push_back(i_target_proc);
+    }
+
+    // Iterate over all procs in the list
+    for (const auto & l_target : l_procs)
+    {
+        TargetHandleList l_ocmb_list;
+        // Get the targets associated with the PROC target based on i_class and i_type
+        // UTIL_FILTER_FUNCTIONAL for the Health Check Data
+        getChildAffinityTargetsByState( l_ocmb_list,
+                                        l_target,
+                                        CLASS_NA,
+                                        TYPE_OCMB_CHIP,
+                                        UTIL_FILTER_FUNCTIONAL);
+        TRACFCOMP( g_trac_sbeio, "getPmicHealthCheckData: PROC HUID=0x%X OCMB_CHIP targets found=%d",
+        get_huid(l_target), l_ocmb_list.size());
+
+        // Send all OCMBs from this Processor for PMIC to be logged.
+        uint8_t l_ocmb_target_list_size = l_ocmb_list.size();
+
+        // Define a variable determining chunk size of
+        // OCMBs we want to operate on
+        constexpr uint8_t group_size = 4;
+        uint8_t l_index = 0;
+
+        while (!l_ocmb_list.empty())
         {
-            TargetHandleList l_TargetList;
-            // Get the targets associated with the PROC target based on i_class and i_type
-            // UTIL_FILTER_FUNCTIONAL for the Health Check Data
-            getChildAffinityTargetsByState( l_TargetList,
-                                            l_pProc,
-                                            CLASS_NA,
-                                            TYPE_OCMB_CHIP,
-                                            UTIL_FILTER_FUNCTIONAL);
-            TRACFCOMP( g_trac_sbeio, "getAllPmicHealthCheckData PROC HUID=0x%X OCMB_CHIP targets found=%d",
-                get_huid(l_pProc), l_TargetList.size());
+            auto end_chunk = l_ocmb_list.end();
 
-
-            // Send all OCMBs from this Processor for PMIC to be logged.
-            uint8_t l_ocmb_target_list_size = l_TargetList.size() ;
-            // When the list is not empty,Send PMIC telemetry logs in groups of 8
-            //       until there are no more targets in the list.
-            // 8 is currently the largest group of OCMBs 4U PMIC telemetry that
-            //       can fit in a 4K error log.
-            while (!l_TargetList.empty())
+            // if we have more than group_size set next call to appropriate index
+            if (l_ocmb_target_list_size > group_size)
             {
-                auto end_chunk = l_TargetList.end();
+                end_chunk = l_ocmb_list.begin() + group_size;
+                l_ocmb_target_list_size -= group_size;
+            }
+            // else we have a list with less than group_size
 
-                // if we have more than l_ocmb_dump_count_max set next call to index into offset
-                //   of l_ocmb_dump_count_max element.
-                uint8_t l_ocmb_dump_count_max = 4;
-                if (l_ocmb_target_list_size > l_ocmb_dump_count_max)
-                {
-                    end_chunk = l_TargetList.begin() + l_ocmb_dump_count_max;
-                    l_ocmb_target_list_size -= l_ocmb_dump_count_max;
-                }
-                // else we have a list with less than l_ocmb_dump_count_max
+            // Call this with list beginning until the end. count.
+            l_err = getMultiPmicHealthCheckData(i_target_proc, i_ddr5_health_not_telemetry_check, { l_ocmb_list.begin(), end_chunk });
 
-                // Call this with list beginning until the end. count.
-                getMultiPmicHealthCheckData(l_pProc, i_ddr5_health_not_telemetry_check, { l_TargetList.begin(), end_chunk });
+            // Set target list to end to get out of loop.
+            //     or to the end of the last OCMB for next pass
+            //     through loop.
+            l_ocmb_list.erase(l_ocmb_list.begin(), end_chunk);
 
-                // Set target list to end to get out of loop.
-                //     or to the end of the last OCMB for next pass
-                //     through loop.
-                l_TargetList.erase(l_TargetList.begin(), end_chunk);
+            // If we had an error, trace that info, but don't commit the error.
+            if (l_err)
+            {
+                TRACFCOMP(g_trac_sbeio, "getPmicHealthCheckData: failed to get health check data for "
+                    "OCMBs %d thru %d on processor HUID = %X, reason = %X",
+                    l_index, std::min((uint8_t)(l_index + group_size - 1), l_ocmb_target_list_size),
+                    get_huid(l_target), l_err->reasonCode());
+                delete l_err;
+                l_err = nullptr;
             }
 
-        } // end for l_pProc
-    } while (0);
-
-    TRACFCOMP(g_trac_sbeio, EXIT_MRK "getAllPmicHealthCheckData");
-
+            l_index += group_size; // for nice debug counting
+        }
+    }
+    TRACFCOMP(g_trac_sbeio, EXIT_MRK "getPmicHealthCheckData");
     return l_err;
-}; // getAllPmicHealthCheckData
-
+}
 
  /** @brief Populate the PSU Command with Memory target configuration info
  *          and send to the SBE

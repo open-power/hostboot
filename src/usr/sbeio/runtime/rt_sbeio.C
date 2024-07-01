@@ -32,7 +32,7 @@
 #include <sbeio/runtime/sbeio_attr_override.H>
 #include <sbe/sbereasoncodes.H>
 #include <sbeio/sbeioreasoncodes.H>
-#include <sbeio/sbeioif.H>                 // getAllPmicHealthCheckData
+#include <sbeio/sbeioif.H>                 // getPmicHealthCheckData
 #include <errno.h>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
@@ -784,7 +784,7 @@ namespace RT_SBEIO
         *o_rspDataSize = 0;
         *o_rspData = 0;
 
-        l_err = SBEIO::getAllPmicHealthCheckData();
+        l_err = SBEIO::getPmicHealthCheckData(nullptr); // health check for all procs
 
         if (l_err)
         {   // if error, return a bad status
@@ -819,7 +819,7 @@ namespace RT_SBEIO
         *o_rspDataSize = 0;
         *o_rspData = 0;
 
-        l_err = SBEIO::getAllPmicHealthCheckData(true);
+        l_err = SBEIO::getPmicHealthCheckData(nullptr, true); // DDR5 health check for all procs
 
         if (l_err)
         {   // if error, return a bad status

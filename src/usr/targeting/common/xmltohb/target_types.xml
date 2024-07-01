@@ -2890,6 +2890,9 @@
       <id>MODEL</id>
     </attribute>
     <attribute>
+      <id>PMIC_CALLBACK_STAGGER_TIME</id>
+    </attribute>
+    <attribute>
       <id>PMIC_HEALTH_CHECK_DDR5_TIMER</id>
     </attribute>
     <attribute>
