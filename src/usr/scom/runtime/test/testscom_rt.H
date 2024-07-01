@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -148,7 +148,7 @@ public:
                   }
                   else if (read_data[x] != test_data[x].data)
                   {
-                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d FAILURE !! NO MATCH !! READ -> 0x%llX TEST DATA -> 0x%llX", x, read_data[x], test_data[x].data);
+                      TS_FAIL("ScomTest::test_SCOMreadWrite_ocmb_ody> x=%d FAILURE !! NO MATCH !! READ -> 0x%llX TEST DATA -> 0x%llX ADDR=%.8X", x, read_data[x], test_data[x].data, test_data[x].addr);
                       fails++;
                   }
               } // end FOR ALL NUM_ADDRS
