@@ -74,16 +74,13 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
         TdrResult l_status = TdrResult::None;
         uint32_t l_length = 0;
 
-        char l_tgt_str[fapi2::MAX_ECMD_STRING_LEN];
-        fapi2::toString(i_target, l_tgt_str, sizeof(l_tgt_str));
-
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MFG_FLAGS, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_mfg_flags));
 
         for (uint8_t l_lane = 0; l_lane < 8; l_lane++)
         {
             FAPI_TRY(ody_io_tdr(i_target, PHY_ODY_OMI_BASE, l_groupa, l_lane, l_freq, l_status, l_length));
 
-            FAPI_DBG("Checking %s on lane %d with status %d.", l_tgt_str, l_lane, l_status);
+            FAPI_DBG("Checking on lane %d with status %d.", l_lane, l_status);
 
             if (l_status != TdrResult::NoIssues)
             {
@@ -104,8 +101,8 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                                    .set_LANE(l_lane)
                                    .set_STATUS(l_status)
                                    .set_DISTANCE(l_length),
-                                   "OMI Tx TDR Fail on %s :: lane(%d), status(0x%04X) length(%d)...",
-                                   l_tgt_str, l_lane, l_status, l_length);
+                                   "OMI Tx TDR Fail :: lane(%d), status(0x%04X) length(%d)...",
+                                   l_lane, l_status, l_length);
                 fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
 
                 l_groupa |= (0x1 << l_lane) & c_groupa_mask;
@@ -121,8 +118,8 @@ fapi2::ReturnCode ody_omi_hss_tx_zcal(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                                .set_TARGET_CHIP(i_target)
                                .set_GROUPA(l_groupa)
                                .set_GROUPB(l_groupb),
-                               "OMI Tx TDR Multiple Degrade Groups Fail on %s :: groupa(0x%02X), groupb(0x%02X)...",
-                               l_tgt_str, l_groupa, l_groupb);
+                               "OMI Tx TDR Multiple Degrade Groups Fail :: groupa(0x%02X), groupb(0x%02X)...",
+                               l_groupa, l_groupb);
         }
     }
 
