@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,8 +91,11 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
     uint8_t l_dqs_period = 0;
     uint8_t l_half_dimm_attr = 0;
     uint8_t l_override_attr = 0;
+    uint8_t l_suspended = 0;
 
     uint16_t l_log_16[CONSTS::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES * CONSTS::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY] = {0};
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_ocmb_target, l_suspended));
 
     for(auto& l_port_target : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_ocmb_target) )
     {
@@ -150,7 +153,12 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
             }
 
             FAPI_TRY(host_configure_phy_scom_access(l_port_target, mss::states::OFF_N, true));
-            FAPI_TRY(resume_dqs_track(i_ocmb_target));
+
+            // Only resume DQS drift track if it's meant to be running
+            if (l_suspended == fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_FALSE)
+            {
+                FAPI_TRY(resume_dqs_track(i_ocmb_target));
+            }
         }
 
         // Only need to do this on the first port

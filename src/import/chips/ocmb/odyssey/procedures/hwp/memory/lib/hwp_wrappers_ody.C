@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,6 +94,8 @@ fapi2::ReturnCode ody_sf_read( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
                                const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_end_address )
 {
     FAPI_TRY(mss::ody::suspend_dqs_track(i_target));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
+                                 fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_TRUE));
     FAPI_TRY(mss::memdiags::sf_read<mss::mc_type::ODYSSEY>(i_target, i_stop, i_address, i_end, i_end_address));
 
 fapi_try_exit:
@@ -118,6 +120,8 @@ fapi2::ReturnCode ody_background_steer( const fapi2::Target<fapi2::TARGET_TYPE_O
              i_speed,
              i_address));
     FAPI_TRY(mss::ody::resume_dqs_track(i_target));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
+                                 fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_FALSE));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -132,8 +136,10 @@ fapi_try_exit:
 fapi2::ReturnCode ody_mnfg_fast_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                        const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop)
 {
-    FAPI_TRY(mss::ody::suspend_dqs_track(i_target));
     FAPI_TRY(mss::memdiags::mnfg_fast_scrub<mss::mc_type::ODYSSEY>(i_target, i_stop));
+    FAPI_TRY(mss::ody::resume_dqs_track(i_target));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
+                                 fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_FALSE));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -149,6 +155,8 @@ fapi2::ReturnCode ody_single_address_steer( const fapi2::Target<fapi2::TARGET_TY
         const mss::mcbist::address<mss::mc_type::ODYSSEY>& i_address )
 {
     FAPI_TRY(mss::ody::suspend_dqs_track(i_target));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
+                                 fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_TRUE));
     FAPI_TRY(mss::memdiags::targeted_steer<mss::mc_type::ODYSSEY>(i_target,
              mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>::DONT_CHANGE,
              i_address,
@@ -176,6 +184,8 @@ fapi2::ReturnCode ody_targeted_scrub( const fapi2::Target<fapi2::TARGET_TYPE_OCM
                                       const mss::mcbist::end_boundary i_end )
 {
     FAPI_TRY(mss::ody::suspend_dqs_track(i_target));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
+                                 fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_TRUE));
     FAPI_TRY(mss::memdiags::targeted_scrub<mss::mc_type::ODYSSEY>(i_target, i_stop, i_start_address, i_end_address, i_end));
 
 fapi_try_exit:
@@ -195,8 +205,10 @@ fapi2::ReturnCode ody_continue_cmd( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
                                     const mss::mcbist::stop_conditions<mss::mc_type::ODYSSEY>& i_stop,
                                     const mss::mcbist::speed i_speed )
 {
-    // drift track should already be suspended here, but check the "drift track running" bit just in case
+
     FAPI_TRY(mss::ody::suspend_dqs_track(i_target));
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_SUSPENDED, i_target,
+                                 fapi2::ENUM_ATTR_ODY_DQS_TRACKING_SUSPENDED_TRUE));
     FAPI_TRY(mss::memdiags::continue_cmd<mss::mc_type::ODYSSEY>(i_target, i_end, i_stop, i_speed));
 
 fapi_try_exit:

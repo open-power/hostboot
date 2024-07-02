@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -110,6 +110,10 @@ struct mcbist_state
     // iv_current_addr saves the last address completed by the test, and thus the
     // starting address for when we resume the test
     fapi2::buffer<uint64_t> iv_current_addr;
+
+    // saves whether the test is scrub or steer
+    mss::mcbist::op_type iv_op_type;
+
 } __attribute__ ((__aligned__(8)));
 
 ///
@@ -284,24 +288,24 @@ fapi2::ReturnCode restore_mcbist_state(const fapi2::Target<fapi2::TARGET_TYPE_OC
                                        const mcbist_state& i_saved_mcbist_state);
 
 ///
-/// @brief Suspend and save the state of a background steer operation
+/// @brief Suspend and save the state of a background steer/scrub operation
 /// @param [in] i_target OCMB target
-/// @param [in,out] io_saved_mcbist_state saved state of MCBIST, to be used in later resume_bg_scrub call
+/// @param [in,out] io_saved_mcbist_state saved state of MCBIST, to be used in later resume_bg_scrub_or_steer call
 /// @param [out] o_cannot_suspend will be set to true if steer test cannot be suspended, false otherwise
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode suspend_bg_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                   mcbist_state& io_saved_mcbist_state,
-                                   bool& o_cannot_suspend);
+fapi2::ReturnCode suspend_bg_scrub_or_steer(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        mcbist_state& io_saved_mcbist_state,
+        bool& o_cannot_suspend);
 
 ///
-/// @brief Restore the state of a background steer operation and restart it
+/// @brief Restore the state of a background steer/scrub operation and restart it
 /// @param [in] i_target OCMB target
-/// @param [in] i_saved_mcbist_state saved state of MCBIST, from suspend_bg_scrub
+/// @param [in] i_saved_mcbist_state saved state of MCBIST, from suspend_bg_scrub_or_steer
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode resume_bg_scrub(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                  const mcbist_state& i_saved_mcbist_state);
+fapi2::ReturnCode resume_bg_scrub_or_steer(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const mcbist_state& i_saved_mcbist_state);
 
 ///
 /// @brief Convert DQS offset from 10-bit 2's complement to int16

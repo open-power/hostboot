@@ -741,6 +741,24 @@
 
   <hwpError>
     <sbeError/>
+    <rc>RC_MSS_INCORRECT_SUBTEST_TYPE</rc>
+    <description>
+        An invalid subtest type is encountered while resuming the scrub/steer test after enabling DQS drift tracking
+    </description>
+    <ffdc>TEST_TYPE</ffdc>
+    <ffdc>OCMB_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>DIMM_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_FREQUENCY</rc>
     <description>
       An invalid frequency was passed to frequency to clock period

@@ -303,6 +303,7 @@ fapi2::ReturnCode pre_maint_read_settings( const fapi2::Target<T>&
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif
 
 ///
 /// @brief Set up memory controller specific settings for pre-scrub
@@ -329,7 +330,7 @@ fapi2::ReturnCode pre_scrub_settings( const fapi2::Target<T>&
 fapi_try_exit:
     return fapi2::current_err;
 }
-#endif
+
 ///
 /// @brief Set up memory controller specific settings for pre-steer
 /// @tparam MC the mc type of the T
@@ -977,6 +978,7 @@ fapi2::ReturnCode sf_read_eop_operation<MC, T, TT>::multi_port_init_internal()
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif
 
 ///
 /// @class Class for memdiags' continuous scrub
@@ -998,7 +1000,9 @@ struct continuous_scrub_operation : public operation<MC>
                                 const constraints<MC> i_const,
                                 fapi2::ReturnCode& o_rc );
 
+#ifndef __PPE__
     continuous_scrub_operation() = delete;
+#endif
 
     ///
     /// @brief memdiags multi-port init helper for continuous_scrub_operation
@@ -1185,7 +1189,7 @@ fapi_try_exit:
     o_rc = fapi2::current_err;
     return;
 }
-#endif
+
 
 ///
 /// @class Class for memdiags' continuous steer
@@ -1717,6 +1721,7 @@ fapi2::ReturnCode background_scrub( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
+#endif
 
 ///
 /// @brief Fast Scrub - continuous scrub all memory behind the target
@@ -1724,15 +1729,16 @@ fapi_try_exit:
 /// @tparam T the fapi2::TargetType of the target
 /// @param[in] i_target the target behind which all memory should be scrubbed
 /// @param[in] i_stop stop conditions
+/// @param[in] i_address the address to start the subtest -
+/// default(0) for new test or the address to resume the subtest
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 /// @note The address is often the port, dimm, rank but this is not enforced in the API.
 ///
 template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode background_fast_scrub( const fapi2::Target<T>& i_target,
-        const stop_conditions<MC>& i_stop)
+        const stop_conditions<MC>& i_stop, const mss::mcbist::address<MC>& i_address = mss::mcbist::address<MC>())
 {
-    const mss::mcbist::address<MC> l_start_address;
     using ET = mss::mcbistMCTraits<MC>;
     FAPI_INF_NO_SBE("Fast scrub for %s", mss::c_str(i_target));
 
@@ -1740,7 +1746,7 @@ fapi2::ReturnCode background_fast_scrub( const fapi2::Target<T>& i_target,
 
     {
         fapi2::ReturnCode l_rc;
-        constraints<MC> l_const(i_stop, mss::mcbist::speed::LUDICROUS, end_boundary::STOP_AFTER_ADDRESS, l_start_address);
+        constraints<MC> l_const(i_stop, mss::mcbist::speed::LUDICROUS, end_boundary::STOP_AFTER_ADDRESS, i_address);
         continuous_scrub_operation<MC> l_op(i_target, l_const, l_rc);
 
         FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
@@ -1753,7 +1759,7 @@ fapi2::ReturnCode background_fast_scrub( const fapi2::Target<T>& i_target,
 fapi_try_exit:
     return fapi2::current_err;
 }
-#endif
+
 
 ///
 /// @brief Steer - continuous steer all memory behind the target
@@ -2257,7 +2263,6 @@ fapi_try_exit:
     return fapi2::current_err;
 }
 
-#ifndef __PPE__
 ///
 /// @brief Begin MNFG FAST SCRUB here
 /// @tparam MC the mc type of the T
@@ -2265,20 +2270,23 @@ fapi_try_exit:
 /// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target MC
 /// @param[in] i_stop stop conditions
+/// @param[in] i_address the address to start the subtest -
+/// default(0) for new test or the address to resume the subtest
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
 fapi2::ReturnCode mnfg_fast_scrub( const fapi2::Target<T>& i_target,
-                                   const stop_conditions<MC>& i_stop)
+                                   const stop_conditions<MC>& i_stop, const mss::mcbist::address<MC>& i_address = mss::mcbist::address<MC>())
 {
     FAPI_INF_NO_SBE("Start mnfg_fast_scrub on: " TARGTIDFORMAT, TARGTID);
     // Start Fast scrub
-    FAPI_TRY ( mss::memdiags::background_fast_scrub<MC>( i_target, i_stop));
+    FAPI_TRY ( mss::memdiags::background_fast_scrub<MC>( i_target, i_stop, i_address));
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
+#ifndef __PPE__
 ///
 /// @brief Process the result from the mcbist sf_read subtest after memdiags
 /// @tparam MC the mc type of the T
