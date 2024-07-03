@@ -4027,12 +4027,12 @@ fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
                     if (iv_curr_scale[i] )
                     {
                         iv_attr_mvpd_poundV_biased[i].idd_rdp_ac_10ma =
-                            (double)iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma +
-                            (((double)iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma * (double)iv_curr_scale[i])/100);
+                            (double)iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma *
+                            ((double)iv_curr_scale[i]/100);
 
                         iv_attr_mvpd_poundV_biased[i].idd_rdp_dc_10ma =
-                            (double)iv_attr_mvpd_poundV_raw[i].idd_rdp_dc_10ma +
-                            (((double)iv_attr_mvpd_poundV_raw[i].idd_rdp_dc_10ma * (double)iv_curr_scale[i])/100);
+                            (double)iv_attr_mvpd_poundV_raw[i].idd_rdp_dc_10ma *
+                            ((double)iv_curr_scale[i]/100);
                     }
                 }
             }
