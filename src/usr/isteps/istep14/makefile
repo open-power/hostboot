@@ -92,7 +92,6 @@ OBJS += call_host_enable_memory_encryption.o
 # Include the makefiles to compile the HWPs needed by the sub steps
 include ${ROOTPATH}/procedure.rules.mk
 include ${P10_PROCEDURE_PATH}/nest/p10_adu_access.mk
-include ${P10_PROCEDURE_PATH}/nest/p10_htm_setup.mk
 include ${P10_PROCEDURE_PATH}/nest/p10_exit_cache_contained.mk
 include ${P10_PROCEDURE_PATH}/nest/p10_load_iop_xram.mk
 
@@ -127,6 +126,11 @@ OBJS += p10_pcie_scom.o
 OBJS += p10_rng_init_phase2.o
 OBJS += p10_disable_ocmb_i2c.o
 OBJS += p10_ncu_enable_darn.o
+OBJS += p10_mss_eff_grouping.o
+OBJS += p10_htm_start.o
+OBJS += p10_htm_reset.o
+OBJS += p10_htm_adu_ctrl.o
+OBJS += p10_htm_setup.o
 
 #TODO-RTC:257623--Consolidate this into 3rd-party module to avoid duplication with istep10
 # needed by p10_exit_cache_contained
