@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -29,6 +29,8 @@
 ///
 /// *HWP HW Maintainer: Josh Chica <Josh.Chica@ibm.com>
 /// *HWP FW Maintainer:
+/// *HW Team: IO
+/// *HW Level: 3
 /// *HWP Consumed by: SBE
 ///
 
@@ -52,3 +54,4 @@ class io_ppe_cache
         bool add(uint64_t i_addr, uint64_t i_data, uint8_t i_modified);
         bool pop(uint64_t& o_addr, uint64_t& o_data, uint8_t& o_modified);
 };
+

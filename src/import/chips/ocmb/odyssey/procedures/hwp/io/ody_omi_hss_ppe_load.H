@@ -28,6 +28,8 @@
 ///
 /// *HWP HW Maintainer: Thi Tran <thi@us.ibm.com>
 /// *HWP FW Maintainer:
+/// *HWP Team: IO
+/// *HWP Level: 3
 /// *HWP Consumed by: SBE, Cronus
 ///
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,8 +38,6 @@
 
 #include <lib/eff_config/p10_spd_utils.H>
 #include <generic/memory/lib/utils/find.H>
-#include <lib/dimm/exp_rank.H>
-#include <lib/dimm/ody_rank.H>
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <mss_generic_attribute_getters.H>
 

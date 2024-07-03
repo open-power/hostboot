@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2021                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -22,9 +22,6 @@
 <!-- permissions and limitations under the License.                         -->
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
-
-<!-- EKB-Mirror-To: hostboot                                                -->
-<!-- EKB-Mirror-To: hw/ppe                                                  -->
 <hwpErrors>
   <!-- ******************************************************************** -->
   <hwpError>

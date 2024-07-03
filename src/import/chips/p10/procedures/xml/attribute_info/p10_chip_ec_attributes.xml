@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -31,6 +31,7 @@
 <!--                                                                        -->
 <!-- EKB Project                                                            -->
 <!--                                                                        -->
+<!-- COPYRIGHT 2019,2020                                                    -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -38,6 +39,7 @@
 <!-- divested of its trade secrets, irrespective of what has been           -->
 <!-- deposited with the U.S. Copyright Office.                              -->
 <!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
 
 <attributes>
   <!-- ******************************************************************** -->

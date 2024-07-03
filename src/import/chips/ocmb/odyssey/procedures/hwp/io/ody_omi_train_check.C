@@ -28,6 +28,8 @@
 ///
 /// *HWP HW Maintainer : Josh Chica <josh.chica@ibm.com>
 /// *HWP FW Maintainer :
+/// *HWP Team: IO
+/// *HWP Level: 3
 /// *HWP Consumed by: SBE
 ///------------------------------------------------------------------------------
 #include <ody_omi_train_check.H>

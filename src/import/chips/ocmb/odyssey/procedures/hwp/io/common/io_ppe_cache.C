@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,6 +28,8 @@
 ///
 /// *HWP HW Maintainer: Josh Chica <Josh.Chica@ibm.com>
 /// *HWP FW Maintainer:
+/// *HW Team: IO
+/// *HW Level: 3
 /// *HWP Consumed by: SBE
 
 #include <fapi2.H>
