@@ -2937,7 +2937,12 @@ sub _set_wof_tables_header
 
     if ( defined( $csv_file->access($CSV_ATTR_dimm_dimension_enable) ) )
     {
-        $sys_flag_value = $CSV_EXP_FREQ_ENABLE;
+        $sys_flag_value = $sys_flag_value | $CSV_DIMM_ADJ_ENABLE;
+    }
+
+    if ( defined($g_expand_freq_enable) )
+    {
+        $sys_flag_value = $sys_flag_value | $CSV_EXP_FREQ_ENABLE;
     }
 
     if ( defined( $csv_file->access($CSV_ATTR_ocs_mode) ) )

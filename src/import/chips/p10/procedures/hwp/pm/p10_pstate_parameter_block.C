@@ -1243,9 +1243,11 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         compute_dds_slopes(io_globalppb);
 
         float pstatef = 0;
-        if (iv_attrs.attr_extended_freq_mode)
+        if (iv_attrs.attr_extended_freq_mode ||
+            iv_expand_freq_enable)
         {
-            if ( iv_attrs.attr_extended_freq_mode == ENUM_ATTR_EXTENDED_FREQ_MODE_OLD_FREQ)
+            if ( (iv_attrs.attr_extended_freq_mode == ENUM_ATTR_EXTENDED_FREQ_MODE_OLD_FREQ) &&
+                   !iv_expand_freq_enable)
             {
                 pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
             }
@@ -1322,8 +1324,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_THROTTLE_ENABLE] = is_wof_throttle_enabled();
         io_globalppb->base.vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
         io_globalppb->base.vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
-        io_globalppb->pgpe_flags[PGPE_FLAG_NEGATIVE_SLOPE_SUPPORT] = (iv_attrs.attr_extended_freq_mode) ? 1 : 0;
-        io_globalppb->pgpe_flags[PGPE_FLAG_USE_RDP] = (iv_attrs.attr_extended_freq_mode == 3) ? 1 : 0;
+        io_globalppb->pgpe_flags[PGPE_FLAG_NEGATIVE_SLOPE_SUPPORT] = (iv_attrs.attr_extended_freq_mode || iv_expand_freq_enable) ? 1 : 0;
+        io_globalppb->pgpe_flags[PGPE_FLAG_USE_RDP] = (iv_attrs.attr_extended_freq_mode == 3 || iv_expand_freq_enable) ? 1 : 0;
         io_globalppb->pgpe_flags[PGPE_FLAG_SLOPE_FIX_8_8] = 1;
 
         //WOV parameters
@@ -3484,7 +3486,7 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
             FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
                     pv_op_str[i - 1], pv_op_str[i]);
 
-            if ( (iv_attrs.attr_extended_freq_mode) &&
+            if ( (iv_attrs.attr_extended_freq_mode || iv_expand_freq_enable) &&
                  POUNDV_POINTS_INCREASE_PNEXT_CHECK(i))
             {
                 l_cf_point_check_fail = 1;
@@ -6246,6 +6248,7 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
     uint32_t          l_step_freq_khz;
     Pstate            l_ps;
     uint8_t           l_temp = 0;
+    uint8_t           l_up_lift = 60; //without expand freq
 
     l_step_freq_khz = iv_frequency_step_khz;
 //    FAPI_DBG("l_step_freq_khz = 0x%X (%d)", l_step_freq_khz, l_step_freq_khz);
@@ -6284,6 +6287,11 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
         b_output_trace = true;
     }
 
+    if ( iv_expand_freq_enable ||  iv_attrs.attr_extended_freq_mode)
+    {
+        l_up_lift = 12;
+    }
+
     if (b_output_trace)
     {
         strcpy(l_line_str, "VRT:");
@@ -6318,13 +6326,13 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
         strcpy(l_line_str, "    ");
         strcpy(l_buffer_str, "");
 
-        // Offset MHz*1000 (khz) + step (khz) * (sysvalue - 60)
+        // Offset MHz*1000 (khz) + step (khz) * (sysvalue - l_up_lift)
         // Note: the table generation already did rounding so simply translate
         float l_freq_raw_khz = 0;
         float l_freq_biased_khz = 0;
-        //This condition to handle if sys vrt is less than 60
+        //This condition to handle if sys vrt is less than l_up_lift
         //CeffRatio overage
-        if (*i_pBuffer <= 60 )
+        if (*i_pBuffer <= l_up_lift)
         {
             l_ps = i_floor_ps + *i_pBuffer;
             FAPI_DBG("Throttle Pstate: %u (0x%X)", l_ps, l_ps);
@@ -6336,7 +6344,7 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
         }
         else
         {
-            l_freq_raw_khz = (float)(1000 * 1000 + (l_step_freq_khz * ((*i_pBuffer) - 60)));
+            l_freq_raw_khz = (float)(1000 * 1000 + (l_step_freq_khz * ((*i_pBuffer) - l_up_lift)));
 
             l_freq_biased_khz = l_freq_raw_khz * f_freq_bias;
             l_freq_khz = (uint32_t)(l_freq_biased_khz);
@@ -6517,6 +6525,21 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
         WofTablesHeader_t* p_wfth;
         p_wfth = reinterpret_cast<WofTablesHeader_t*>(o_buf);
 
+        if ( p_wfth->header_version == 2 )
+        {
+            iv_rdp_scaling_factor = true;
+            memcpy(&iv_curr_scale,&p_wfth->cur_scale_pct,sizeof(iv_curr_scale));
+            //flags[4:7]
+            //[0] DIMM adjustment enablement
+            //   0: DIMM adjustment disabled
+            //   1: DIMM adjustment enabled
+            //[1] Expanded Frequency Encoding
+            //[2] Efficiency Mode Algorithm (0=Core Utilization based; 1=Ceff based)
+            //[3] Over Current Sensor Mode
+            //   0: OCS disabled
+            //   1: OCS enabled
+            iv_expand_freq_enable = (p_wfth->sys_flags & 0x04) ? true : false;
+        }
         l_vcs_size = revle16(p_wfth->vcs_size);
         l_vdd_size = revle16(p_wfth->vdd_size);
         l_io_size  = revle16(p_wfth->io_size);
@@ -6693,6 +6716,16 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         {
             iv_rdp_scaling_factor = true;
             memcpy(&iv_curr_scale,&p_wfth->cur_scale_pct,sizeof(iv_curr_scale));
+            //flags[4:7]
+            //[0] DIMM adjustment enablement
+            //   0: DIMM adjustment disabled
+            //   1: DIMM adjustment enabled
+            //[1] Expanded Frequency Encoding
+            //[2] Efficiency Mode Algorithm (0=Core Utilization based; 1=Ceff based)
+            //[3] Over Current Sensor Mode
+            //   0: OCS disabled
+            //   1: OCS enabled
+            iv_expand_freq_enable = (p_wfth->sys_flags & 0x04) ? true : false;
         }
     }
 

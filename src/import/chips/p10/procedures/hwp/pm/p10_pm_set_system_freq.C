@@ -667,6 +667,7 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
 
     fapi2::voltageBucketData_t l_poundV_data;
     uint32_t l_wofbase_freq = 0;
+    uint32_t l_attr_wofbase_freq = 0;
     uint16_t l_tmp_wofbase_freq = 0;
 
     fapi2::ATTR_CHIP_EC_FEATURE_STATIC_POUND_V_Type l_chip_static_pound_v = 0;
@@ -677,12 +678,11 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
     {
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOFBASE_FREQ_MHZ,
-                        i_sys_target, l_wofbase_freq));
+                        i_sys_target, l_attr_wofbase_freq));
 
-        if ( l_wofbase_freq )
+        if ( l_attr_wofbase_freq)
         {
-            FAPI_INF("WOFBASE of %x is already set",l_wofbase_freq);
-            break;
+            FAPI_INF("WOFBASE of %x is already set",l_attr_wofbase_freq);
         }
         // Find Pstate 0 across the processor chips depending on the mode (FMax or UT)
         for (auto l_proc_target : i_sys_target.getChildren<fapi2::TARGET_TYPE_PROC_CHIP>())
@@ -757,37 +757,43 @@ fapi2::ReturnCode pm_set_wofbase_frequency(
                         attr_freq_bias_0p5pct),
                     "Error from FAPI_ATTR_GET for attribute ATTR_FREQ_BIAS");
 
-            l_wofbase_freq  = htobe16(l_poundV_data.other_info.VddTdpWofCoreFreq);
-
-            FAPI_INF("wofbase_freq=%04d",l_wofbase_freq);
-
-            // Compute WOFBase (minumim across chips)
-            if (l_wofbase_freq > l_tmp_wofbase_freq &&
-                    l_tmp_wofbase_freq == 0)
+            if ( !l_attr_wofbase_freq)
             {
-                l_tmp_wofbase_freq = l_wofbase_freq;
-            }
-            else
-            {
-                if (l_wofbase_freq != l_tmp_wofbase_freq)
-                {
-                    FAPI_INF("Present System WOF Base freq %04d is not equal to this chip's WOF Base Freq %04d",
-                            l_tmp_wofbase_freq, l_wofbase_freq);
-                    // This does not produce an error log as the system will operate ok
-                    // for this case.
-                }
+                l_wofbase_freq  = htobe16(l_poundV_data.other_info.VddTdpWofCoreFreq);
 
-                if ( l_wofbase_freq < l_tmp_wofbase_freq)
+                FAPI_INF("wofbase_freq=%04d",l_wofbase_freq);
+
+                // Compute WOFBase (minumim across chips)
+                if (l_wofbase_freq > l_tmp_wofbase_freq &&
+                        l_tmp_wofbase_freq == 0)
                 {
                     l_tmp_wofbase_freq = l_wofbase_freq;
+                }
+                else
+                {
+                    if (l_wofbase_freq != l_tmp_wofbase_freq)
+                    {
+                        FAPI_INF("Present System WOF Base freq %04d is not equal to this chip's WOF Base Freq %04d",
+                                l_tmp_wofbase_freq, l_wofbase_freq);
+                        // This does not produce an error log as the system will operate ok
+                        // for this case.
+                    }
+
+                    if ( l_wofbase_freq < l_tmp_wofbase_freq)
+                    {
+                        l_tmp_wofbase_freq = l_wofbase_freq;
+                    }
                 }
             }
             FAPI_INF("Running Computed WOFBASE frequency:   %04d (0x%04x)", l_tmp_wofbase_freq, l_tmp_wofbase_freq);
         } //end of proc list
-        l_wofbase_freq = l_tmp_wofbase_freq;
+        if (!l_attr_wofbase_freq)
+        {
+            l_wofbase_freq = l_tmp_wofbase_freq;
 
-        FAPI_INF("WOFBASE frequency:   %04d (0x%04x)", l_wofbase_freq, l_wofbase_freq);
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOFBASE_FREQ_MHZ,i_sys_target, l_wofbase_freq));
+            FAPI_INF("WOFBASE frequency:   %04d (0x%04x)", l_wofbase_freq, l_wofbase_freq);
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_WOFBASE_FREQ_MHZ,i_sys_target, l_wofbase_freq));
+        }
     }
     while(0);
 fapi_try_exit:
