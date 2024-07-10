@@ -158,6 +158,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_DIVIDE_BY_ZERO</rc>
     <description>
       Attempt to divide by zero
@@ -172,6 +173,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_EMPTY_VECTOR</rc>
     <description>
       Empty vector conditional failed.
@@ -553,6 +555,7 @@
   </hwpError>
 
 <hwpError>
+  <sbeError/>
   <rc>RC_MSS_INVALID_CLOCK_PERIOD</rc>
   <description>
     An invalid clock period was passed to clock period to frequency
@@ -745,6 +748,7 @@
   </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_INVALID_RANK</rc>
     <description>
       Invalid rank passed into function
@@ -976,6 +980,7 @@
   </hwpError>
 
 <hwpError>
+  <sbeError/>
   <rc>RC_MSS_LOOKUP_FAILED</rc>
   <description>
     Conditional that tests whether a certain key value is located in a map.
@@ -998,6 +1003,7 @@
 </hwpError>
 
   <hwpError>
+    <sbeError/>
     <rc>RC_MSS_MEMDIAGS_NO_MCBIST_SUBTESTS</rc>
     <description>Attempt to run an MCBIST program with no subtests</description>
     <ffdc>MC_TARGET</ffdc>
