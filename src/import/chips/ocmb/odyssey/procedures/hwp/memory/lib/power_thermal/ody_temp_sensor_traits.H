@@ -101,7 +101,9 @@ class temp_sensor_traits<mss::mc_type::ODYSSEY>
         static constexpr uint8_t EXT_SENSOR_TEMP_BIT_LENGTH  = 11;
         static constexpr uint8_t EXT_SENSOR_TEMP_DIVISOR     =  8;
 
-        // temperature sensor types
+        ///
+        /// @brief temperature sensor types
+        ///
         enum temp_sensor
         {
             OCMB        = 0,
@@ -111,6 +113,17 @@ class temp_sensor_traits<mss::mc_type::ODYSSEY>
             DIMM3       = 4,
             NUM_SENSORS = 5,
         };
+
+        ///
+        /// @brief scratch register offsets for sensor cache workaround
+        ///
+        enum scratch_reg_offset
+        {
+            SCRATCH_REG_BIT0_OFFSET  =  0,
+            SCRATCH_REG_BIT20_OFFSET = 20,
+            SCRATCH_REG_BIT40_OFFSET = 40,
+        };
+
 
 #ifndef __PPE__
         // temperature sensor names

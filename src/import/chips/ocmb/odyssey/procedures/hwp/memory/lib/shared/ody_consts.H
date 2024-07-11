@@ -220,6 +220,53 @@ enum dts_consts
 };
 
 ///
+/// @brief const for scratch fields used in sensor cache workarounds
+///
+enum scratch_fields
+{
+    OCTHERM_PRESENTBIT = 1,
+    OCTHERM_VALIDBIT = 2,
+    OCTHERM_ERRORBIT = 3,
+    OCTHERM_THERMALDATA = 4,
+    OCTHERM_THERMALDATA_LEN = 16,
+
+    D0THERM_PRESENTBIT = 21,
+    D0THERM_VALIDBIT = 22,
+    D0THERM_ERRORBIT = 23,
+    D0THERM_THERMALDATA = 24,
+    D0THERM_THERMALDATA_LEN = 16,
+
+    D1THERM_PRESENTBIT = 41,
+    D1THERM_VALIDBIT = 42,
+    D1THERM_ERRORBIT = 43,
+    D1THERM_THERMALDATA = 44,
+    D1THERM_THERMALDATA_LEN = 16,
+
+    LFIR_IN08_BIT = 63,
+
+    D2THERM_PRESENTBIT = 1,
+    D2THERM_VALIDBIT = 2,
+    D2THERM_ERRORBIT = 3,
+    D2THERM_THERMALDATA = 4,
+    D2THERM_THERMALDATA_LEN = 16,
+
+    D3THERM_PRESENTBIT = 21,
+    D3THERM_VALIDBIT = 22,
+    D3THERM_ERRORBIT = 23,
+    D3THERM_THERMALDATA = 24,
+    D3THERM_THERMALDATA_LEN = 16,
+
+    SR_CYCLE_COUNT_START = 40,
+    SR_CYCLE_COUNT_LEN = 24,
+
+    PMU0_READ_COUNT_START = 0,
+    PMU0_READ_COUNT_LEN = 32,
+
+    PMU1_WRITE_COUNT_START = 32,
+    PMU1_WRITE_COUNT_LEN = 32,
+};
+
+///
 /// @brief constants for getecid procedure
 /// TODO: Zen:MST-1414 Update these when we do ody_getidec
 ///

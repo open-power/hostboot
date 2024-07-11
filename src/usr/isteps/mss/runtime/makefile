@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2023
+# Contributors Listed Below - COPYRIGHT 2019,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -84,6 +84,11 @@ MSS_LIB += ${IMPORT_PATH}/generic/memory/
 MSS_LIB += ${IMPORT_PATH}/chips/p10/procedures/hwp/memory/lib/utils/
 MSS_LIB += ${IMPORT_PATH}/chips/ocmb/explorer/procedures/hwp/memory/lib/
 
+MSS_LIB += ${IMPORT_PATH}/chips/ocmb/odyssey/procedures/hwp/memory/lib/workarounds
+MSS_LIB += ${IMPORT_PATH}/chips/ocmb/odyssey/procedures/hwp/memory
+MSS_LIB += ${IMPORT_PATH}/chips/ocmb/odyssey/common/include
+MSS_LIB += ${ROOTPATH}/obj/genfiles/chips/ocmb/odyssey/procedures/hwp/memory/lib
+
 EXTRAINCDIR += ${MSS_LIB}
 
 VPATH += ${MSS_LIB}
@@ -92,6 +97,7 @@ VPATH += ${MSS_LIB}
 # Add the specific files we need for HBRT
 OBJS += gen_mss_mcbist_patterns.o
 OBJS += exp_attribute_accessors_manual.o
+OBJS += ody_temp_sensor_workarounds.o
 
 
 #HWP build tool

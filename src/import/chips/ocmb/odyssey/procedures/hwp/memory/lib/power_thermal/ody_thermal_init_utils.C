@@ -51,6 +51,7 @@
 #include <generic/memory/lib/utils/count_dimm.H>
 #include <generic/memory/lib/utils/power_thermal/gen_throttle.H>
 #include <lib/power_thermal/ody_temp_sensor_traits.H>
+#include <lib/workarounds/ody_temp_sensor_workarounds.H>
 
 
 namespace mss
@@ -664,6 +665,8 @@ fapi2::ReturnCode read_dts_sensors(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
     }
 
     FAPI_TRY(read_oc_results(i_ocmb));
+
+    FAPI_TRY(mss::ody::workarounds::write_sensor_cache_into_scratch_regs(i_ocmb));
 
 fapi_try_exit:
     return fapi2::current_err;

@@ -63,7 +63,6 @@ OBJS += ody_throttle.o
 OBJS += ody_decoder.o
 OBJS += ody_kind.o
 OBJS += exp_kind.o
-OBJS += ody_temp_sensor_workarounds.o
 OBJS += ody_thermal_init_utils.o
 OBJS += ody_dts_read.o
 
