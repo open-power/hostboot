@@ -88,7 +88,8 @@ const uint32_t WOF_IMAGE_MAGIC_VALUE    = 0x57544948; // "WTIH": WOF Tables Imag
 const uint32_t WOF_TABLES_MAGIC_VALUE   = 0x57465448; // "WFTH": WOF Tables Header
 const uint32_t WOF_OVERRIDE_MAGIC_VALUE = 0x5754534f; // "WTSO": WOF Table Set Override
 const uint32_t WOF_IMAGE_VERSION    = 1;
-const uint32_t WOF_TABLE_VERSION    = 1;
+const uint32_t WOF_TABLE_VERSION_1    = 1;
+const uint32_t WOF_TABLE_VERSION_2    = 2;
 const uint32_t WOF_OVERRIDE_VERSION = 1;
 
 #ifndef __HOSTBOOT_RUNTIME
@@ -1349,20 +1350,25 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
         }
 
         // Check for a valid tables header version
-        if(i_version != WOF_TABLE_VERSION)
+        if(i_version != WOF_TABLE_VERSION_1 && 
+           i_version != WOF_TABLE_VERSION_2)
         {
-            l_userData1 = TWO_UINT32_TO_UINT64(i_version, WOF_TABLE_VERSION);
+            l_userData1 = TWO_UINT32_TO_UINT64(i_version,
+                          (WOF_TABLE_VERSION_1 | WOF_TABLE_VERSION_2 << 4));
             if (i_isOverride)
             {
                 // Error from Override WOF image in WOFDATA LID
                 FAPI_ERR("checkWofTableHeaderForCorrectness: WOF table header version not supported: "
-                    "Header Version %d, Supported Version is %d", i_version, WOF_TABLE_VERSION);
+                    "Header Version %d, Supported Versions are %d, %d",
+                    i_version, WOF_TABLE_VERSION_1, WOF_TABLE_VERSION_2);
                 /*@
                 * @errortype
                 * @moduleid          fapi2::MOD_FAPI2_GET_OVERRIDE_WOF_TABLE
                 * @reasoncode        fapi2::RC_WOF_TABLES_VERSION_MISMATCH
                 * @userdata1[00:31]  Override WOF tables header version
                 * @userdata1[32:63]  Supported header version
+                *                    Each nibble represents different version
+                *                    support.
                 * @devdesc           WOF tables header version not supported
                 * @custdesc          Unsupported WOFDATA in current firmware version
                 */
@@ -1379,8 +1385,8 @@ errlHndl_t checkWofTableHeaderForCorrectness(TARGETING::Target* i_procTarg,
             {
                 // Error from WOF img in SEEPROM
                 FAPI_ERR("(Retrieved from SEEPROM) WOF table header version not "
-                    "supported: Header Version %d, Supported Version is "
-                    "%d", i_version, WOF_TABLE_VERSION);
+                    "supported: Header Version %d, Supported Versions are "
+                    "%d, %d", i_version, WOF_TABLE_VERSION_1, WOF_TABLE_VERSION_2);
                 l_userData2 = 0;
 
                 /*@
