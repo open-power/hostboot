@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,7 @@ class PageManagerCore
          * @param[in] i_supports_coalesce, Does this instance support coalesce
          */
         PageManagerCore(bool i_supports_coalesce)
-            : iv_available(0), iv_supports_coalesce(i_supports_coalesce) {}
+            : iv_supports_coalesce(i_supports_coalesce) {}
 
         /**
          * Add memory to the page manager
@@ -100,12 +100,6 @@ class PageManagerCore
         void coalesce( void );
 
         /**
-         * Query the the current number of pages in the page manager
-         */
-        ALWAYS_INLINE
-        size_t getFreePageCount() const { return iv_available; }
-
-        /**
          * Get the start of memory after the code
          */
         ALWAYS_INLINE uint64_t firstPageAddr( void ) const
@@ -115,8 +109,7 @@ class PageManagerCore
 
     private:
 
-        size_t iv_available;            //!< free pages
-        bool iv_supports_coalesce;      //!< coalesce supported for this instance
+        bool iv_supports_coalesce;    //!< coalesce supported for this instance
 
         Util::Lockfree::Stack<page_t> iv_heap[BUCKETS]; //!< The heap
 
@@ -219,6 +212,12 @@ class PageManager
          */
         static void addDebugPointers();
 
+        /**
+         * @brief Copy statistics data from memory to o_stats
+         * @param[out] o_stats  The memory block to copy statistics data into
+         */
+        static void get_stats(struct kmem_trc_data &o_stats);
+
         enum
         {
             // Always keep this many free pages for the kernel to use
@@ -235,9 +234,13 @@ class PageManager
             LOWMEM_CRIT_LIMIT = KERNEL_HEAP_RESERVED_PAGES+1,
         };
 
-        static size_t cv_coalesce_count;        //!< running coalesced counter
-        static size_t cv_low_page_count;        //!< lowest page count
-        static size_t cv_alloc_coalesce_count;  //!< number of repeat allocs
+        static constexpr size_t   KMEMSTATS_SIZE   = 4096;
+        static constexpr size_t   KALLOC_SIZE      = 1024;
+
+        static uint64_t cv_free_bucket_count[PageManagerCore::BUCKETS];
+        static uint64_t cv_coalesce_state;     //!< 1 if coalesce is running, else 0
+        static uint64_t cv_coalesce_attempts;  //!< iv_heap coalesce attempts
+        static uint64_t cv_coalesce_count;     //!< iv_heap coalesced page count
 
     protected:
 
@@ -256,7 +259,7 @@ class PageManager
         /** see queryAvail() */
         ALWAYS_INLINE uint64_t _queryAvail() const
         {
-            return (100*iv_pagesAvail)/iv_pagesTotal;
+            return (100*cv_pagesAvail)/cv_pagesTotal;
         }
 
         ALWAYS_INLINE uint64_t firstPageAddr( void ) const
@@ -267,20 +270,21 @@ class PageManager
         /** see availPages() */
         ALWAYS_INLINE uint64_t _availPages() const
         {
-            return iv_pagesAvail;
+            return cv_pagesAvail;
         }
 
         /** see isSmallMemEnv() */
         ALWAYS_INLINE bool _isSmallMemEnv() const
         {
-            return (iv_pagesTotal < 0xE00 /*14MB*/);
+            return (cv_pagesTotal < 0xE00 /*14MB*/);
         }
 
+        static uint64_t cv_pagesTotal;                  //!< Total iv_heap + iv_heapKernel pages
+        static uint64_t cv_pagesAvail;                  //!< free iv_heap + iv_heapKernel pages
+        static uint64_t cv_low_page_count;              //!< lowest page count
+        static uint64_t cv_allocatePage_coalesce_wait;  //!< number of repeat allocs
+        static uint64_t cv_reserved_pages_available;    //!< iv_heapKernel pages
 
-        // Private data
-
-        uint64_t iv_pagesAvail;         //!< free pages (for debug)
-        uint64_t iv_pagesTotal;         //!< Total number o fpages
         Spinlock iv_lock;               //!< lock for allocating
 
         PageManagerCore iv_heap{ true };        //!< Main heap, allow coalesce

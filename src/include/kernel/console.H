@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,6 +31,8 @@
 
 #include <util/sprintf.H>
 
+extern int g_kernel_trace_level;
+
 #ifdef HOSTBOOT_DEBUG
     #define printkd(format...) printk(format)
 #else
@@ -38,6 +40,20 @@
 #endif
 
 void printk(const char*, ...) FORMAT_PRINTF;
+
+#define KTRC0(format...) printk(format)
+#define KTRC1(format...)                                   \
+    do { if (g_kernel_trace_level >= 1) {printk(format);}  \
+       } while(false)
+#define KTRC2(format...)                                   \
+    do { if (g_kernel_trace_level >= 2) {printk(format);}  \
+       } while(false)
+#define KTRC3(format...)                                   \
+    do { if (g_kernel_trace_level >= 3) {printk(format);}  \
+       } while(false)
+#define KTRC4(format...)                                   \
+    do { if (g_kernel_trace_level >= 4) {printk(format);}  \
+       } while(false)
 
 class Console : public Util::ConsoleBufferInterface
 {

@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2018
+# Contributors Listed Below - COPYRIGHT 2012,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -30,11 +30,7 @@ package Hostboot::PageMgr;
 use Exporter;
 our @EXPORT_OK = ('main');
 
-use constant PAGEMGR_INSTANCE_NAME =>
-                "Singleton<PageManager>::instance()::instance";
-use constant PAGEMGR_CORE_OFFSET => 5 * 8;
-use constant PAGEMGR_PAGES_AVAIL_OFFSET => 0;
-use constant PAGEMGR_BUCKETS_OFFSET => 8;
+use constant PAGEMGR_BUCKETS_NAME => "PageManager::iv_heap";
 use constant PAGEMGR_NUMBER_OF_BUCKETS => 16;
 
 sub main
@@ -53,28 +49,31 @@ sub main
         $showpages = 1;
     }
 
-    # Find the PageManager
-    my ($symAddr, $symSize) = ::findPointer("PAGEMGR ",
-                                          PAGEMGR_INSTANCE_NAME);
-    if (not defined $symAddr)
+    my ($addr,$symsize) = ::findPointer("PAGEMPGA",
+                                        "PageManager::cv_pagesAvail");
+    if (not defined $addr)
     {
-        ::userDisplay "Couldn't find ".PAGEMGR_INSTANCE_NAME;
+        ::userDisplay "Couldn't find "."PageManager::cv_pagesAvail";
         die;
     }
-    # Increment to the PageManagerCore for the general heap.
-    $symAddr = $symAddr + PAGEMGR_CORE_OFFSET;
+    my $pagesAvail = ::read64($addr);
 
-    # Read pages available.
-    my $pagesAvail = ::read64($symAddr + PAGEMGR_PAGES_AVAIL_OFFSET);
-    ::userDisplay "Pages available: ".$pagesAvail."\n";
+    # Find the PageManager::iv_heap
+    my ($symAddr, $symSize) = ::findPointer("PAGEMBKT",
+                                          PAGEMGR_BUCKETS_NAME);
+    if (not defined $symAddr)
+    {
+        ::userDisplay "Couldn't find ".PAGEMGR_BUCKETS_NAME;
+        die;
+    }
+    $symAddr += 8;
 
     # Parse through buckets and count pages in buckets.
     my $pagesInBuckets = 0;
 
     for (my $bucket = 0; $bucket <  PAGEMGR_NUMBER_OF_BUCKETS; $bucket++)
     {
-        my $stackAddr = ::read32($symAddr + PAGEMGR_BUCKETS_OFFSET +
-                                 (8 * $bucket) + 4);
+        my $stackAddr = ::read32($symAddr + (8 * $bucket) + 4);
 
         my $stackCount = countItemsInStack($stackAddr);
         my $size = (1 << $bucket) * $stackCount;

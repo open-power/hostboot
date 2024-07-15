@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,6 +126,19 @@ class HeapManager
          */
         static void addDebugPointers();
 
+        /**
+         * Coalesce unallocated memory chucks
+         * @pre This function can only be called from kernel space and
+         * requires that all other processes are quiesced
+         */
+        static void coalesce( void );
+
+        /**
+         * @brief Copy statistics data from memory to o_stats
+         * @param[out] o_stats  The memory block to copy statistics data into
+         */
+        static void get_stats(struct kmem_trc_data &o_stats);
+
     protected:
 
         /**
@@ -138,20 +151,6 @@ class HeapManager
          */
         ~HeapManager() {};
 
-        /**
-         * Coalesce unallocated memory chucks
-         * @pre This function can only be called from kernel space and
-         * requires that all other processes are quiesced
-         */
-        static void coalesce( void );
-
-        /**
-         * Print some stats to printkd
-         * @pre system quiesced, This function can only be called from
-         *      kernel space.
-         * @post coalesce() called
-         */
-        static void stats( void );
 
     private:
 
@@ -234,7 +233,7 @@ class HeapManager
         ALWAYS_INLINE
             size_t bucketByteSize(size_t i_bucketIndex)
             {
-                return cv_chunk_size[i_bucketIndex];
+                return iv_chunk_size[i_bucketIndex];
             }
 
         /**
@@ -254,20 +253,27 @@ class HeapManager
          */
         void _addDebugPointers();
 
-    private: // data
+        static uint64_t iv_hugeblock_allocated;          //!< Huge Block allocated
+        static uint64_t cv_hugeblock_page_count;         //!< # of pages being used
+        static uint64_t cv_hugeblock_page_max;           //!< Max # of pages used
+        static uint64_t cv_largeheap_page_count;         //!< # of pages being used
+        static uint64_t cv_largeheap_page_max;           //!< Max # of pages used
+        static uint64_t cv_smallheap_page_count;         //!< # of pages being used
+        static uint64_t cv_smallheap_alloc_hw;           //!< allocated high water
+        static uint64_t cv_smallheap_allocated;          //!< sum of currently allocated
+        static uint64_t cv_smallheap_user_allocated;     //!< sum of user data size allocated
+        static uint64_t cv_smallheap_coalesce_state;     //!< 1 if a coalesce is running, else 0
+        static uint64_t cv_smallheap_coalesce_attempts;  //!< coalesced attempts
+        static uint64_t cv_smallheap_coalesce_count;     //!< coalesced chunk count
+        static uint64_t cv_smallheap_coalesce_page;      //!< coalesced page count
+        static uint64_t cv_free_bucket_counts  [BUCKETS];//!< free chunks
+        static uint64_t cv_inuse_bucket_counts [BUCKETS];//!< allocated chunks currently in use
+        static uint64_t cv_alloc_sizes         [BUCKETS];//!< total allocated chunks since boot
+        static uint64_t iv_chunk_size          [BUCKETS];//!< The bucket sizes
 
         Util::Lockfree::Stack<chunk_t> first_chunk[BUCKETS]; //!< free pool
         Util::Lockfree::Stack<big_chunk_t> big_chunk_stack;  //!< big chunk dir
         Util::Lockfree::Stack<huge_chunk_t> huge_chunk_stack; //!< huge chunks
-
-        static const size_t cv_chunk_size[BUCKETS];//!< The bucket sizes
-        static uint32_t cv_coalesce_count;       //!< coalesced chunk count
-        static uint32_t cv_free_bytes;           //!< Only valid after coalesce()
-        static uint32_t cv_free_chunks;          //!< Only valid after coalesce()
-        static uint32_t cv_smallheap_page_count; //!< # of pages being used
-        static uint32_t cv_largeheap_page_count; //!< # of pages being used
-        static uint32_t cv_largeheap_page_max;   //!< Max # of pages used
-        static uint32_t cv_hugeblock_allocated;  //!< Huge Block allocated
 
 #endif //__HOSTBOOT_RUNTIME
 

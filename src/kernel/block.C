@@ -47,10 +47,24 @@
 
 #include <usr/debugpointers.H>
 #include <kernel/bltohbdatamgr.H>
+#include <kernel/simpletrace.H>
+
+uint64_t Block::cv_pages_allocated{0};
+uint64_t Block::cv_pages_allocated_peak{0};
+uint64_t Block::cv_pages_allocated_count{0};
 
 // Track eviction requests due to aging pages
-uint32_t Block::cv_ro_evict_req = 0;
-uint32_t Block::cv_rw_evict_req = 0;
+uint64_t Block::cv_ro_evict_req = 0;
+uint64_t Block::cv_rw_evict_req = 0;
+
+void Block::get_stats(struct kmem_trc_data &o_stats)
+{
+    o_stats.cv_pages_allocated       = cv_pages_allocated;
+    o_stats.cv_pages_allocated_peak  = cv_pages_allocated_peak;
+    o_stats.cv_pages_allocated_count = cv_pages_allocated_count;
+    o_stats.cv_ro_evict_req          = cv_ro_evict_req;
+    o_stats.cv_rw_evict_req          = cv_rw_evict_req;
+}
 
 Block::~Block()
 {
@@ -154,6 +168,10 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store, bool*
                     *o_oom = true;
                     return false;
                 }
+                __sync_add_and_fetch(&cv_pages_allocated,1);
+                __sync_add_and_fetch(&cv_pages_allocated_count,1);
+                if (cv_pages_allocated > cv_pages_allocated_peak)
+                    cv_pages_allocated_peak = cv_pages_allocated;
 
                 //Add to ShadowPTE
                 pte->setPageAddr(reinterpret_cast<uint64_t>(l_page));
@@ -174,6 +192,11 @@ bool Block::handlePageFault(task_t* i_task, uint64_t i_addr, bool i_store, bool*
                 *o_oom = true;
                 return false;
             }
+
+            __sync_add_and_fetch(&cv_pages_allocated,1);
+            __sync_add_and_fetch(&cv_pages_allocated_count,1);
+            if (cv_pages_allocated > cv_pages_allocated_peak)
+                cv_pages_allocated_peak = cv_pages_allocated;
 
             // set the permission of the physical address pte entry to
             // READ_ONLY now that we have handled the page fault and
@@ -353,6 +376,7 @@ void Block::releaseAllPages()
             {
                 releaseSPTE(pte);
                 PageManager::freePage(reinterpret_cast<void*>(addr));
+                __sync_sub_and_fetch(&cv_pages_allocated,1);
             }
         }
     }
@@ -763,6 +787,7 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
                 //'Release' page entry
                 releaseSPTE(pte);
                 PageManager::freePage(reinterpret_cast<void*>(pageAddr));
+                __sync_sub_and_fetch(&cv_pages_allocated,1);
             }
         }
     }
@@ -788,6 +813,15 @@ void Block::releaseSPTE(ShadowPTE* i_pte)
 
 void Block::addDebugPointers()
 {
+    DEBUG::add_debug_pointer(DEBUG::BLOCKPAGESALLOC,
+                             &cv_pages_allocated,
+                             sizeof(cv_pages_allocated));
+    DEBUG::add_debug_pointer(DEBUG::BLOCKPAGESALLOCPEAK,
+                             &cv_pages_allocated_peak,
+                             sizeof(cv_pages_allocated_peak));
+    DEBUG::add_debug_pointer(DEBUG::BLOCKPAGESALLOCCOUNT,
+                             &cv_pages_allocated_count,
+                             sizeof(cv_pages_allocated_count));
     DEBUG::add_debug_pointer(DEBUG::BLOCKREADONLYEVICT,
                              &cv_ro_evict_req,
                              sizeof(cv_ro_evict_req));

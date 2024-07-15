@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -160,4 +160,11 @@ void set_topology_mode(uint8_t i_topologyMode)
 {
     _syscall1(MISC_SET_TOPOLOGY_MODE,
               reinterpret_cast<void*>(i_topologyMode));
+}
+
+void save_mem_stats(uint64_t istep, uint64_t substep)
+{
+    _syscall2(SAVE_MEM_STATS,
+              reinterpret_cast<void*>(istep),
+              reinterpret_cast<void*>(substep));
 }

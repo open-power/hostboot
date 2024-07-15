@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@
 #include <errno.h>
 #include <kernel/machchk.H>
 #include <kernel/ipc.H>
-
+#include <kernel/simpletrace.H>
 
 extern "C"
 void kernel_execute_hyp_doorbell()
@@ -161,6 +161,7 @@ namespace Systemcalls
     void QryLocalIpcInfo(task_t *t);
     void SetTopologyMode(task_t *t);
 
+    void SaveMemStats(task_t *t);
 
     syscall syscalls[] =
     {
@@ -207,8 +208,8 @@ namespace Systemcalls
         &SetMchkData,  // MISC_SETMCHKDATA
         &UpdateRemoteIpcAddr, // UPDATE_REMOTE_IPC_ADDR
         &QryLocalIpcInfo,  // QRY_LOCAL_IPC_INFO
-        &SetTopologyMode   // MISC_SET_TOPOLOGY_MODE
-
+        &SetTopologyMode,  // MISC_SET_TOPOLOGY_MODE
+        &SaveMemStats      // SAVE_MEM_STATS
     };
 };
 
@@ -1065,5 +1066,12 @@ namespace Systemcalls
         KernelIpc::setTopologyMode(i_topologyMode);
     }
 
+    void SaveMemStats(task_t *t)
+    {
+        uint16_t istep   = (uint16_t)(TASK_GETARG0(t));
+        uint16_t substep = (uint16_t)(TASK_GETARG1(t));
+
+        STRC_KMEM(STRC_L0, KMEM_STATS_SYSCALL, istep, substep);
+    }
 };
 

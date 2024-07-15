@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,9 +158,15 @@ class Block
 			     PageTableManager::UsageStats_t i_stats );
 
         /**
-         * Add pointers to the global debug area
+         * @brief Add pointers to the global debug area
          */
         static void addDebugPointers();
+
+        /**
+         * @brief Copy statistics data from memory to o_stats
+         * @param[out] o_stats  The memory block to copy statistics data into
+         */
+        static void get_stats(struct kmem_trc_data &o_stats);
 
         friend class Segment;
         friend class BaseSegment;
@@ -299,6 +305,12 @@ class Block
 
 
     private:
+        static uint64_t cv_pages_allocated;      //!< memstat pages currently allocated
+        static uint64_t cv_pages_allocated_peak; //!< memstat peak pages allocated
+        static uint64_t cv_pages_allocated_count;//!< memstat total pages allocated since boot
+        static uint64_t cv_ro_evict_req;         //!< memstat ro eviction requests
+        static uint64_t cv_rw_evict_req;         //!< memstat rw eviction requests
+
             /** Base address of the block */
         const uint64_t iv_baseAddr;
             /** Size of the block */
@@ -315,9 +327,6 @@ class Block
         BlockReadMsgHdlr* iv_readMsgHdlr;
             /** Pointer to message handler(write) */
         BlockWriteMsgHdlr* iv_writeMsgHdlr;
-
-        static uint32_t cv_ro_evict_req;   //!< memstat ro eviction requests
-        static uint32_t cv_rw_evict_req;   //!< memstat rw eviction requests
 
         bool iv_mappedToPhysical;
         /**

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2010,2019
+# Contributors Listed Below - COPYRIGHT 2010,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -70,6 +70,8 @@ OBJS += doorbell.o
 OBJS += workitem.o
 
 OBJS += bltohbdatamgr.o
+
+OBJS += simpletrace.o
 
 EXTRAINCDIR += ${ROOTPATH}/src/include
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr

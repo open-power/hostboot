@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #include <stdint.h>
 #include <kernel/console.H>
+#include <kernel/simpletrace.H>
 #include <kernel/pagemgr.H>
 #include <kernel/heapmgr.H>
 #include <kernel/cpumgr.H>
@@ -49,6 +50,8 @@
 #include <arch/magic.H>
 
 #include <stdlib.h>
+
+int g_kernel_trace_level{0};
 
 uint64_t NO_FORCE_ENABLE_MACHINE_CHECK_EXCEPTIONS = 0;
 
@@ -165,6 +168,7 @@ int main()
     TaskManager::addDebugPointers();
     SegmentManager::addDebugPointers();
     Block::addDebugPointers();
+    SimpleTrace_addDebugPointers();
 
     kernel.inittaskBootstrap();
 

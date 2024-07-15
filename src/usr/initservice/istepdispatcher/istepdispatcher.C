@@ -832,7 +832,6 @@ errlHndl_t IStepDispatcher::executeAllISteps()
 #endif
                         // We need this outside the CONFIG_CONSOLE
                         const auto l_mfg_reconfigAttr = l_pTopLevel->getAttr<TARGETING::ATTR_RECONFIGURE_LOOP>();
-
                         // If mfg mode and we are attempting to deconfigure we need to skip
                         // performing the deconfig reconfig and fall out to allow the manufacturing
                         // handling to be performed in the next logical section of code handling below
@@ -1215,6 +1214,11 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         {
             TRACFCOMP(g_trac_initsvc,"Error returned from istep : %.8X=%.4X",
                       err->eid(), err->reasonCode());
+        }
+
+        if ((i_istep == 6 && i_substep == 4) || i_substep == 1)
+        {
+            save_mem_stats(i_istep, i_substep);
         }
 
         //  flush contTrace immediately after each i_istep/substep  returns

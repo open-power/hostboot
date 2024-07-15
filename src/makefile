@@ -127,6 +127,7 @@ DIRECT_BOOT_OBJECTS += console.o
 DIRECT_BOOT_OBJECTS += spinlock.o
 DIRECT_BOOT_OBJECTS += heapmgr.o
 DIRECT_BOOT_OBJECTS += pagemgr.o
+DIRECT_BOOT_OBJECTS += simpletrace.o
 DIRECT_BOOT_OBJECTS += barrier.o
 DIRECT_BOOT_OBJECTS += idebug.o
 DIRECT_BOOT_OBJECTS += intmsghandler.o

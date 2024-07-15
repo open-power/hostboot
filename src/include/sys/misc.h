@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -309,6 +309,14 @@ void set_mchk_data(uint64_t i_xstopAddr, uint64_t i_xstopData);
  *  @param[in]  i_topologyMode   The topology mode setting for this system.
  */
 void set_topology_mode(uint8_t i_topologyMode);
+
+/** @fn save_mem_stats
+ *  @brief Save a kernel memory statistics entry into the KMEM simple trace
+ *
+ *  @param[in]  i_istep   - current IStep to save in the KMEM trace
+ *  @param[in]  i_substep - current substep to save in the KMEM trace
+ */
+void save_mem_stats(uint64_t istep, uint64_t substep);
 
 #ifdef __cplusplus
 }

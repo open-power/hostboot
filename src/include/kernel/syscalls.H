@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -137,8 +137,8 @@ namespace Systemcalls
             /** set_topology_mode() */
         MISC_SET_TOPOLOGY_MODE,
 
-            /** save_payload_attn_addr() */
-        SAVE_PAYLOAD_ATTN_ADDR,
+           /** SaveMemStats() */
+        SAVE_MEM_STATS,
 
         SYSCALL_MAX
     };
