@@ -35,6 +35,7 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <runtime/interface.h>
 #include <p10_omi_ddr4_edpl.H>
+#include <targeting/common/mfgFlagAccessors.H>
 
 extern trace_desc_t* g_trac_hbrt;
 
@@ -49,29 +50,31 @@ void do_concurrent_inits( void )
 
     //-----------------------------------------------------
     // Apply P10 OMI DDR4 EDPL changes to active systems
-
-    TRACFCOMP(g_trac_hbrt,
-              "Executing p10_omi_ddr4_edpl on all OCMBs" );
-
-    TARGETING::TargetHandleList l_ocmbList;
-    TARGETING::getAllChips( l_ocmbList,
-                            TARGETING::TYPE_OCMB_CHIP,
-                            true );
-    for( const auto & l_ocmb : l_ocmbList )
+    if (!TARGETING::isMfgOmiCrcEdplScreen())
     {
-        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
-          l_fapiOcmb( l_ocmb );
-        FAPI_INVOKE_HWP( l_err,
-                         p10_omi_ddr4_edpl,
-                         l_fapiOcmb,
-                         false );
-        if( l_err )
+        TRACFCOMP(g_trac_hbrt,
+                "Executing p10_omi_ddr4_edpl on all OCMBs" );
+
+        TARGETING::TargetHandleList l_ocmbList;
+        TARGETING::getAllChips( l_ocmbList,
+                                TARGETING::TYPE_OCMB_CHIP,
+                                true );
+        for( const auto & l_ocmb : l_ocmbList )
         {
-            TRACFCOMP(g_trac_hbrt,
-                      "FAILURE: p10_omi_ddr4_edpl on OCMB %.8X",
-                      TARGETING::get_huid( l_ocmb ) );
-            //Commit the log and keep going
-            errlCommit(l_err, HWPF_COMP_ID);
+            const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
+            l_fapiOcmb( l_ocmb );
+            FAPI_INVOKE_HWP( l_err,
+                            p10_omi_ddr4_edpl,
+                            l_fapiOcmb,
+                            false );
+            if( l_err )
+            {
+                TRACFCOMP(g_trac_hbrt,
+                        "FAILURE: p10_omi_ddr4_edpl on OCMB %.8X",
+                        TARGETING::get_huid( l_ocmb ) );
+                //Commit the log and keep going
+                errlCommit(l_err, HWPF_COMP_ID);
+            }
         }
     }
     //-----------------------------------------------------

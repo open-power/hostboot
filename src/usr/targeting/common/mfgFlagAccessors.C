@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -200,6 +200,11 @@ bool isMslChecksSet()
     return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_MSL_CHECK);
 };
 
+bool isMfgOmiCrcEdplScreen()
+{
+    return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05);
+};
+
 //##############################################################################
 // Canned responses with bit-field of all the manufacturing flags as a parameter
 //##############################################################################
@@ -321,6 +326,12 @@ bool isDimmSpiFlashScreenSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
 bool isMslChecksSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
 {
     return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_MSL_CHECK,
+                        i_mfgFlags);
+}
+
+bool isMfgOmiCrcEdplScreen(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
+{
+    return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_POLICY_FLAG_AVAIL_05,
                         i_mfgFlags);
 }
 
