@@ -715,6 +715,9 @@ enum fields
 ///
 namespace i2c
 {
+///
+/// @brief Opcodes for ADC I2C transactions
+///
 enum opcode
 {
     READ             = 0x10,
@@ -722,6 +725,16 @@ enum opcode
     WRITE_CONTIGUOUS = 0x28,
     READ_CONTIGUOUS  = 0x30,
 };
+
+///
+/// @brief Data byte sent/received strategy
+///
+enum byte_read
+{
+    NON_CONTIGUOUS = 0,
+    CONTIGUOUS     = 1,
+};
+
 }; // ns i2c
 
 } // ns adc

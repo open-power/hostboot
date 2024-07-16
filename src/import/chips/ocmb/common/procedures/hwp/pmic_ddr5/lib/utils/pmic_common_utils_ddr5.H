@@ -1079,11 +1079,21 @@ uint8_t calculate_ov_threshold_voltage(const uint32_t i_voltage);
 /// @param i_ocmb_target OCMB Target
 /// @param i_volt_domain Voltage domain to ensure we're setting the proper rails
 /// @param i_voltage Voltage being set to PMIC
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @param[in] i_write_read_non_contiguous Read/write I2C contiguously or single byte.
+///            Set to single byte by default so as not to change the code in pmic_enabl()
+/// @note With the i2c changes recently done to not do contiguous writes for DT, we see the DT OV thresholds get programmed by the pmic
+/// bias tool by writing to R5C first and then R5D. Since the OV threshold bits come from both R5C and R5D, when R5C gets programmed
+/// we can end up with a threshold value that causes the VIN_NOT_OK error. If the upper bits (15:8) are programmed first (ie.  R5B or R5D)
+/// followed by the lower bits (7:0) (ie.  R5A or R5C) then that would work since the upper bits are more significant. Hence we need to
+/// write the bytes contiguously when this function gets called from pmic_bias_tool. The reading/writing can be done as single byte in case of
+/// pmic_enable() as the PMICs are not enabled by the time this function gets called. To mitigate this issue, i_write_read_non_contiguous
+/// has been used. By default this parameter has been set to use single byte operations.
+///
 ///
 fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                       const uint8_t i_volt_domain,
-                                      const uint32_t i_voltage);
+                                      const uint32_t i_voltage,
+                                      const bool i_write_read_non_contiguous = mss::adc::i2c::byte_read::NON_CONTIGUOUS);
 } // ddr5
 } // pmic
 } // mss

@@ -658,11 +658,21 @@ uint8_t calculate_ov_threshold_voltage(const uint32_t i_voltage)
 /// @param i_ocmb_target OCMB Target
 /// @param i_volt_domain Voltage domain to ensure we're setting the proper rails
 /// @param i_voltage Voltage being set to PMIC
+/// @param[in] i_write_read_non_contiguous Read/write I2C contiguously or single byte
+///            Set to single byte by default so as not to change the code in pmic_enable()
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+/// @note With the i2c changes recently done to not do contiguous writes for DT, we see the DT OV thresholds get programmed by the pmic
+/// bias tool by writing to R5C first and then R5D. Since the OV threshold bits come from both R5C and R5D, when R5C gets programmed
+/// we can end up with a threshold value that causes the VIN_NOT_OK error. If the upper bits (15:8) are programmed first (ie.  R5B or R5D)
+/// followed by the lower bits (7:0) (ie.  R5A or R5C) then that would work since the upper bits are more significant. Hence we need to
+/// write the bytes contiguously when this function gets called from pmic_bias_tool. The reading/writing can be done as single byte in case of
+/// pmic_enable() as the PMICs are not enabled by the time this function gets called. To mitigate this issue, i_write_read_non_contiguous
+/// has been used. By default this parameter has been set to use single byte operations.
 ///
 fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
                                       const uint8_t i_volt_domain,
-                                      const uint32_t i_voltage)
+                                      const uint32_t i_voltage,
+                                      const bool i_write_read_non_contiguous)
 {
     using DT_REGS  = mss::dt::regs;
     using DT_FIELDS  = mss::dt::fields;
@@ -701,7 +711,8 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
                 (l_threshold_voltage >> DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN);
                 l_dt_thresh_buffer[0].insertFromRight<DT_FIELDS::OV_THRESH_START_AC_SECOND_BYTE, DT_FIELDS::THRESHOLD_AC_SECOND_BYTE_LEN>
                 (l_threshold_voltage);
-                FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dt, DT_REGS::OV_THRESHOLD_AB, l_dt_thresh_buffer));
+                FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dt, DT_REGS::OV_THRESHOLD_AB, l_dt_thresh_buffer,
+                         i_write_read_non_contiguous));
             }
 
             break;
@@ -720,7 +731,7 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
             (l_threshold_voltage);
 
             FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT0], DT_REGS::OV_THRESHOLD_CD,
-                     l_dt_thresh_buffer));
+                     l_dt_thresh_buffer, i_write_read_non_contiguous));
 
             // DT1
             FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT1], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
@@ -732,7 +743,7 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
             (l_threshold_voltage);
 
             FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT1], DT_REGS::OV_THRESHOLD_CD,
-                     l_dt_thresh_buffer));
+                     l_dt_thresh_buffer, i_write_read_non_contiguous));
             // DT 3
             FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT3], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
 
@@ -743,7 +754,7 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
             (l_threshold_voltage);
 
             FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT3], DT_REGS::OV_THRESHOLD_CD,
-                     l_dt_thresh_buffer));
+                     l_dt_thresh_buffer, i_write_read_non_contiguous));
 
             break;
 
@@ -763,7 +774,7 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
             (l_threshold_voltage);
 
             FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT0], DT_REGS::OV_THRESHOLD_CD,
-                     l_dt_thresh_buffer));
+                     l_dt_thresh_buffer, i_write_read_non_contiguous));
 
             // DT2
             FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT2], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
@@ -773,7 +784,7 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
             (l_threshold_voltage);
 
             FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT2], DT_REGS::OV_THRESHOLD_CD,
-                     l_dt_thresh_buffer));
+                     l_dt_thresh_buffer, i_write_read_non_contiguous));
 
             break;
 
@@ -789,7 +800,7 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
             (l_threshold_voltage);
 
             FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT1], DT_REGS::OV_THRESHOLD_CD,
-                     l_dt_thresh_buffer));
+                     l_dt_thresh_buffer, i_write_read_non_contiguous));
 
             // DT2
             FAPI_TRY(mss::pmic::i2c::reg_read_contiguous(l_dts[DT_POS::DT2], DT_REGS::OV_THRESHOLD_CD, l_dt_thresh_buffer));
@@ -801,7 +812,7 @@ fapi2::ReturnCode update_ov_threshold(const fapi2::Target<fapi2::TARGET_TYPE_OCM
             (l_threshold_voltage);
 
             FAPI_TRY(mss::pmic::i2c::reg_write_contiguous(l_dts[DT_POS::DT2], DT_REGS::OV_THRESHOLD_CD,
-                     l_dt_thresh_buffer));
+                     l_dt_thresh_buffer, i_write_read_non_contiguous));
             break;
 
         default:

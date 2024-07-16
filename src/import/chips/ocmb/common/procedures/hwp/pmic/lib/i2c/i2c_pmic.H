@@ -715,12 +715,15 @@ fapi_try_exit:
 /// @param[in] i_target the PMIC/I2C/DT device target
 /// @param[in] i_addr starting register address to write to
 /// @param[in] i_data_buffer buffer of data to be writen to register addresses
+/// @param[in] i_write_single_or_contiguous Perform I2C Write operation contiguously or single byte.
+///            Set to single byte by default so as not to change the code in pmic_enabl()
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template <fapi2::TargetType T, size_t N>
 inline fapi2::ReturnCode reg_write_contiguous(const fapi2::Target<T>& i_target,
         const uint8_t i_addr,
-        const fapi2::buffer<uint8_t> (&i_data_buffer)[N])
+        const fapi2::buffer<uint8_t> (&i_data_buffer)[N],
+        const bool i_write_single_or_contiguous = mss::adc::i2c::byte_read::NON_CONTIGUOUS)
 {
     std::vector<uint8_t> l_data;
 
@@ -729,7 +732,16 @@ inline fapi2::ReturnCode reg_write_contiguous(const fapi2::Target<T>& i_target,
         l_data.push_back(uint8_t(i_data_buffer[l_count]));
     }
 
-    FAPI_TRY(mss::pmic::i2c::reg_write_helper(i_target, i_addr, l_data, N));
+    if(i_write_single_or_contiguous == mss::adc::i2c::byte_read::NON_CONTIGUOUS)
+    {
+        FAPI_TRY(mss::pmic::i2c::reg_write_helper(i_target, i_addr, l_data, N));
+    }
+    else
+    {
+        l_data.insert(l_data.begin(), i_addr);
+        // Use fapi2 putI2c interface to execute command
+        FAPI_TRY(fapi2::putI2c(i_target, l_data));
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -773,6 +785,7 @@ inline fapi2::ReturnCode reg_write_default_dt_contiguous(const fapi2::Target<fap
 /// @param[in] i_target the PMIC/I2C/DT device target
 /// @param[in] i_addr starting register address to read from
 /// @param[out] o_data_buffer buffer of data to be read from given register addresses
+///            Set to single byte by default so as not to change the code in pmic_enabl()
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template <fapi2::TargetType T, size_t N>
