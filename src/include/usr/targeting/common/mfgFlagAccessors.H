@@ -164,6 +164,7 @@ bool isSeepromSecurityChecksSet();
 bool isDimmSpiFlashScreenSet();
 bool isMslChecksSet();
 bool isTestSpareCoresSet();
+bool isOmiCrcEdplScreen();
 
 /**
  * @brief Check if a particular manufacturing flag is set
@@ -208,7 +209,7 @@ bool isSeepromSecurityChecksSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isDimmSpiFlashScreenSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isMslChecksSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 bool isTestSpareCoresSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
-
+bool isOmiCrcEdplScreen(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags);
 
 //##############################################################################
 //##                 Manufacturing (MFG) Flag Full API

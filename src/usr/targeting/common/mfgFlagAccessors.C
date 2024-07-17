@@ -203,6 +203,11 @@ bool isMslChecksSet()
 bool isTestSpareCoresSet()
 {
     return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_TEST_SPARE_CORES);
+}
+
+bool isOmiCrcEdplScreen()
+{
+    return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN);
 };
 
 //##############################################################################
@@ -334,6 +339,14 @@ bool isTestSpareCoresSet(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
     return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_TEST_SPARE_CORES,
                         i_mfgFlags);
 }
+
+bool isOmiCrcEdplScreen(ATTR_MFG_FLAGS_typeStdArr &i_mfgFlags)
+{
+    return isMfgFlagSet(TARGETING::MFG_FLAGS_MNFG_OMI_CRC_EDPL_SCREEN,
+                        i_mfgFlags);
+}
+
+
 
 //##############################################################################
 //##                 Manufacturing (MFG) Flag full API
