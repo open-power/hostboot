@@ -271,6 +271,10 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         }
 
         // ----------------
+        // get VPD data (#V,#W,IQ)
+        // ----------------
+        FAPI_TRY(l_pmPPB->vpd_init(),"vpd_init function failed");
+        // ----------------
         // WOF initialization
         // ----------------
         io_size = 0;
@@ -280,10 +284,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                  io_size),
                  "WOF initialization failure");
 
-        // ----------------
-        // get VPD data (#V,#W,IQ)
-        // ----------------
-        FAPI_TRY(l_pmPPB->vpd_init(),"vpd_init function failed");
 
         // ----------------
         // Compute VPD points for different regions
@@ -2483,12 +2483,6 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         FAPI_TRY(apply_biased_values(),
                 "apply_biased_values function failed");
 
-        // Compute Pstates
-        // This must be done after all stretch and biasing as the reference
-        // frequency can be modified
-        FAPI_TRY(update_biased_pstates(),
-                "update_biased_pstates function failed");
-
         // Read #AW data
         FAPI_TRY(get_mvpd_poundAW(),
                 "get_mvpd_poundAW function failed to retrieve pound AW data");
@@ -4019,26 +4013,6 @@ fapi2::ReturnCode PlatPmPPB::apply_biased_values ()
                     iv_attr_mvpd_poundV_biased[i].idd_tdp_dc_10ma,
                     iv_attr_mvpd_poundV_biased[i].vcs_mv,
                     iv_attr_mvpd_poundV_biased[i].ics_tdp_dc_10ma);
-
-            // If RDP scaling factor is true, then it means we have WOF table
-            // version 2, that current scale percentage, that needs to apply for RDP
-            if ( iv_rdp_scaling_factor )
-            {
-                for (int i = 0; i < NUM_PV_POINTS; i++)
-                {
-                    if (iv_curr_scale[i] )
-                    {
-                        iv_attr_mvpd_poundV_biased[i].idd_rdp_ac_10ma =
-                            (double)iv_attr_mvpd_poundV_raw[i].idd_rdp_ac_10ma *
-                            ((double)iv_curr_scale[i]/100);
-
-                        iv_attr_mvpd_poundV_biased[i].idd_rdp_dc_10ma =
-                            (double)iv_attr_mvpd_poundV_raw[i].idd_rdp_dc_10ma *
-                            ((double)iv_curr_scale[i]/100);
-                    }
-                }
-            }
-
         }
 
         //Validating Bias values
@@ -4844,6 +4818,13 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
 
     FAPI_INF(">>>>>>>>>> compute_vpd_pts");
 
+    // Compute Pstates
+    // This must be done after all stretch and biasing as the reference
+    // frequency can be modified
+    FAPI_TRY(update_biased_pstates(),
+                "update_biased_pstates function failed");
+
+
     //RAW POINTS. We just copy them as is
     memcpy (iv_operating_points[VPD_PT_SET_RAW],
             iv_attr_mvpd_poundV_raw,
@@ -4878,6 +4859,26 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
                         p, iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz, MAX_PSTATE0_FREQ_MHZ);
             iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz = MAX_PSTATE0_FREQ_MHZ;
         }
+            // If RDP scaling factor is true, then it means we have WOF table
+            // version 2, that current scale percentage, that needs to apply for RDP
+        if ( iv_rdp_scaling_factor )
+        {
+            if (iv_curr_scale[p] )
+            {
+                iv_attr_mvpd_poundV_biased[p].idd_rdp_ac_10ma =
+                    (double)iv_attr_mvpd_poundV_raw[p].idd_rdp_ac_10ma *
+                    ((double)iv_curr_scale[p]/100);
+
+                iv_attr_mvpd_poundV_biased[p].idd_rdp_dc_10ma =
+                    (double)iv_attr_mvpd_poundV_raw[p].idd_rdp_dc_10ma *
+                    ((double)iv_curr_scale[p]/100);
+            }
+
+            FAPI_INF("iv_curr_scale[%d], %u",p, iv_curr_scale[p] );
+        }
+
+
+
 
         iv_operating_points[VPD_PT_SET_BIASED][p].idd_tdp_ac_10ma=
             iv_attr_mvpd_poundV_biased[p].idd_tdp_ac_10ma;
@@ -6528,7 +6529,7 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
         if ( p_wfth->header_version == 2 )
         {
             iv_rdp_scaling_factor = true;
-            memcpy(&iv_curr_scale,&p_wfth->cur_scale_pct,sizeof(iv_curr_scale));
+            memcpy(iv_curr_scale,p_wfth->cur_scale_pct,sizeof(iv_curr_scale));
             //flags[4:7]
             //[0] DIMM adjustment enablement
             //   0: DIMM adjustment disabled
@@ -6539,6 +6540,14 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
             //   0: OCS disabled
             //   1: OCS enabled
             iv_expand_freq_enable = (p_wfth->sys_flags & 0x04) ? true : false;
+
+            if (iv_attrs.attr_extended_freq_mode ||
+                    iv_expand_freq_enable)
+            {
+                iv_reference_frequency_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+                iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
+            }
+
         }
         l_vcs_size = revle16(p_wfth->vcs_size);
         l_vdd_size = revle16(p_wfth->vdd_size);
