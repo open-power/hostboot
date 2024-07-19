@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -271,9 +271,10 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
             * @errortype
             * @moduleid     EEPROM_CACHE_PERFORM_OP
             * @reasoncode   EEPROM_NOT_IN_CACHE
-            * @userdata1[0:31]  Op Type
+            * @userdata1[00:31] Op Type
             * @userdata1[32:63] Eeprom Role
-            * @userdata2    Offset we are attempting to read/write
+            * @userdata2[00:31] Associated HUID
+            * @userdata2[32:63] Offset we are attempting to read/write
             * @custdesc     Soft error in Firmware
             * @devdesc      Tried to lookup eeprom not in cache
             */
@@ -283,7 +284,8 @@ errlHndl_t eepromPerformOpCache(DeviceFW::OperationType i_opType,
                             EEPROM_NOT_IN_CACHE,
                             TWO_UINT32_TO_UINT64(i_opType,
                                                  i_eepromInfo.eepromRole),
-                            TO_UINT64(i_eepromInfo.offset),
+                            TWO_UINT32_TO_UINT64(TARGETING::get_huid(i_target),
+                                                 i_eepromInfo.offset),
                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             ERRORLOG::ErrlUserDetailsTarget(i_target).addToLog(l_errl);
             l_errl->collectTrace( EEPROM_COMP_NAME );
