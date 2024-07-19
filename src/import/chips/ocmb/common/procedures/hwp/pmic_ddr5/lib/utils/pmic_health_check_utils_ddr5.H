@@ -422,12 +422,25 @@ inline mss::pmic::ddr5::aggregate_state check_breadcrumbs_subsequent_n_modes(con
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
-/// @param[in,out] io_number_bytes_to_send number of bytes to send as log
 /// @return None
 ///
 void check_gi2c_fail_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                           mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
-                           uint8_t& io_number_bytes_to_send);
+                           mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info);
+
+///
+/// @brief Set/clear the GI2C fail count based on the aggregate state.
+///        For P systems, data needs to be sent only the first 3 times, after that just
+///        the 1 byte of aggregate state. For Z systems, data can be sent everytime GI2C
+///        fail is encountered as Z is not restricted by the number of logs generated
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @param[in,out] io_number_bytes_to_send number of bytes to send as log
+/// @return None
+///
+void set_gi2c_fail_count(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                         mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+                         uint8_t& io_number_bytes_to_send);
 
 ///
 /// @brief Runs the actual health check for 4U parts
