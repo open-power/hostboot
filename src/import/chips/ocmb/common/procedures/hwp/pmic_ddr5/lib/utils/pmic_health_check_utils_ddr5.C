@@ -1158,37 +1158,52 @@ fapi_try_exit:
 ///
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_health_check_info health check struct
-/// @param[in,out] io_number_bytes_to_send number of bytes to send as log
 /// @return None
 ///
 void check_gi2c_fail_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
-                           mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
-                           uint8_t& io_number_bytes_to_send)
+                           mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info)
 {
     using CONSTS  = mss::pmic::id;
     using CONSTS_DT = mss::dt::dt_i2c_devices;
 
-    uint8_t l_gi2c_fail_count = 0;
-
-    // Get the I2C fail attribute
-#ifndef __PPE__
-    FAPI_ATTR_GET(fapi2::ATTR_I2C_FAIL_COUNT, io_target_info.iv_ocmb, l_gi2c_fail_count);
-#endif
-
-    if ((io_target_info.iv_pmic_dt_map[CONSTS::PMIC0].iv_pmic_state == mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
-        (io_target_info.iv_pmic_dt_map[CONSTS::PMIC1].iv_pmic_state == mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
-        (io_target_info.iv_pmic_dt_map[CONSTS::PMIC2].iv_pmic_state == mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
-        (io_target_info.iv_pmic_dt_map[CONSTS::PMIC3].iv_pmic_state == mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
-        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT0].iv_dt_state == mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
-        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT1].iv_dt_state == mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
-        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT2].iv_dt_state == mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
-        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT3].iv_dt_state == mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
+    if ((io_target_info.iv_pmic_dt_map[CONSTS::PMIC0].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS::PMIC1].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS::PMIC2].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS::PMIC3].iv_pmic_state & mss::pmic::ddr5::pmic_state::PMIC_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT0].iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT1].iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT2].iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
+        (io_target_info.iv_pmic_dt_map[CONSTS_DT::DT3].iv_dt_state & mss::pmic::ddr5::dt_state::DT_I2C_FAIL) ||
         (io_target_info.iv_adc_state == mss::pmic::ddr5::adc_state::ADC_I2C_FAIL))
     {
         io_health_check_info.iv_aggregate_state = mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL;
+    }
+}
 
+///
+/// @brief Set/clear the GI2C fail count based on the aggregate state.
+///        For P systems, data needs to be sent only the first 3 times, after that just
+///        the 1 byte of aggregate state. For Z systems, data can be sent everytime GI2C
+///        fail is encountered as Z is not restricted by the number of logs generated
+///
+/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in,out] io_health_check_info health check struct
+/// @param[in,out] io_number_bytes_to_send number of bytes to send as log
+/// @return None
+///
+void set_gi2c_fail_count(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+                         mss::pmic::ddr5::health_check_telemetry_data& io_health_check_info,
+                         uint8_t& io_number_bytes_to_send)
+{
 #ifndef __PPE__
+    // Get the I2C fail attribute for P
+    uint8_t l_gi2c_fail_count = 0;
 
+    if (io_health_check_info.iv_aggregate_state & mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL)
+    {
+        FAPI_ATTR_GET(fapi2::ATTR_I2C_FAIL_COUNT, io_target_info.iv_ocmb, l_gi2c_fail_count);
+
+        // For P systems, data needs to be sent only the first 3 times, after that just the aggregate state
         if(l_gi2c_fail_count >= GI2C_FAIL_MAX_COUNT)
         {
             io_number_bytes_to_send = SIZEOF_AGGREGATE_STATE;
@@ -1199,18 +1214,22 @@ void check_gi2c_fail_state(mss::pmic::ddr5::target_info_redundancy_ddr5& io_targ
             FAPI_ATTR_SET(fapi2::ATTR_I2C_FAIL_COUNT, io_target_info.iv_ocmb, l_gi2c_fail_count);
             io_number_bytes_to_send = SIZEOF_GI2C_FAIL_DATA;
         }
-
-#else
-        io_number_bytes_to_send = SIZEOF_GI2C_FAIL_DATA;
-#endif
     }
     else
     {
-        l_gi2c_fail_count = 0;
-#ifndef __PPE__
+        // Clear the count as I2C communication was a success
         FAPI_ATTR_SET(fapi2::ATTR_I2C_FAIL_COUNT, io_target_info.iv_ocmb, l_gi2c_fail_count);
-#endif
     }
+
+#else
+    {
+        if (io_health_check_info.iv_aggregate_state & mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL)
+        {
+            // This is for Z since there is no restriction on Z for how many times we send the data.
+            io_number_bytes_to_send = SIZEOF_GI2C_FAIL_DATA;
+        }
+    }
+#endif
 }
 
 ///
@@ -1242,10 +1261,11 @@ fapi2::ReturnCode health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5
     read_dt_regs(io_target_info, io_health_check_info);
 
     // Check for I2C fails
-    check_gi2c_fail_state(io_target_info, io_health_check_info, io_number_bytes_to_send);
+    check_gi2c_fail_state(io_target_info, io_health_check_info);
 
-    if (io_health_check_info.iv_aggregate_state == mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL)
+    if (io_health_check_info.iv_aggregate_state & mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL)
     {
+        set_gi2c_fail_count(io_target_info, io_health_check_info, io_number_bytes_to_send);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -1264,10 +1284,11 @@ fapi2::ReturnCode health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5
     read_pmic_regs(io_target_info, io_health_check_info);
 
     // Check for I2C fails
-    check_gi2c_fail_state(io_target_info, io_health_check_info, io_number_bytes_to_send);
+    check_gi2c_fail_state(io_target_info, io_health_check_info);
 
-    if (io_health_check_info.iv_aggregate_state == mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL)
+    if (io_health_check_info.iv_aggregate_state & mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL)
     {
+        set_gi2c_fail_count(io_target_info, io_health_check_info, io_number_bytes_to_send);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -1297,7 +1318,12 @@ fapi2::ReturnCode health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5
     }
 
     // Check for I2C fails
-    check_gi2c_fail_state(io_target_info, io_health_check_info, io_number_bytes_to_send);
+    check_gi2c_fail_state(io_target_info, io_health_check_info);
+
+    if (!(io_health_check_info.iv_aggregate_state & mss::pmic::ddr5::aggregate_state::GI2C_I2C_FAIL))
+    {
+        set_gi2c_fail_count(io_target_info, io_health_check_info, io_number_bytes_to_send);
+    }
 
     return fapi2::FAPI2_RC_SUCCESS;
 
