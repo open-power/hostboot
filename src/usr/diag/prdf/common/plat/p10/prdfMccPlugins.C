@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,7 @@
 #include <prdfMemUtils.H>
 #include <prdfPlatServices.H>
 #include <prdfMemExtraSig.H>
+#include <UtilHash.H> // for Util::hashString
 
 using namespace TARGETING;
 
@@ -257,7 +258,44 @@ PRDF_PLUGIN_DEFINE(p10_mcc, chnlTimeout_##POS);
 PLUGIN_CHNL_TIMEOUT(0);
 PLUGIN_CHNL_TIMEOUT(1);
 
+/**
+ * @brief  Collects FFDC on the associated OCMB for a channel timeout
+ * @param  i_chip An MCC chip.
+ * @param  io_sc  The step code data struct.
+ * @param  i_pos  The OMI pos (0:1)
+ * @return SUCCESS
+ */
+int32_t chnlTimeoutFfdc(ExtensibleChip* i_chip, STEP_CODE_DATA_STRUCT& io_sc,
+                        uint8_t i_pos)
+{
+    #define PRDF_FUNC "[p10_mcc::chnlTimeoutFfdc] "
 
+    ExtensibleChip* ocmb = getConnectedChild(i_chip, TYPE_OCMB_CHIP, i_pos);
+    if ( nullptr == ocmb )
+    {
+        PRDF_ERR(PRDF_FUNC "Unable to get connected OCMB from parent MCC "
+                "0x%08x", i_chip->getHuid());
+        return SUCCESS;
+    }
+
+    ocmb->CaptureErrorData(io_sc.service_data->GetCaptureData(),
+                           Util::hashString("ocmb_regs"));
+
+    return SUCCESS;
+
+    #undef PRDF_FUNC
+}
+
+#define PLUGIN_CHNL_TIMEOUT_FFDC(POS) \
+int32_t chnlTimeoutFfdc_##POS(ExtensibleChip* i_chip,\
+                              STEP_CODE_DATA_STRUCT& io_sc)\
+{ \
+    return chnlTimeoutFfdc(i_chip, io_sc, POS); \
+} \
+PRDF_PLUGIN_DEFINE(p10_mcc, chnlTimeoutFfdc_##POS);
+
+PLUGIN_CHNL_TIMEOUT_FFDC(0);
+PLUGIN_CHNL_TIMEOUT_FFDC(1);
 
 /**
  * @brief  Calls out all dimms under an attached OCMB.
