@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2018,2023
+# Contributors Listed Below - COPYRIGHT 2018,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -182,6 +182,7 @@ actionclass chnl0_timeout_th_1_CRC_UERE
 {
     SueSource;
     try( funccall("CrcSideEffect_Mcc_0"), funccall("chnlTimeout_0") );
+    funccall("chnlTimeoutFfdc_0");
     threshold1;
 };
 
@@ -189,6 +190,7 @@ actionclass chnl1_timeout_th_1_CRC_UERE
 {
     SueSource;
     try( funccall("CrcSideEffect_Mcc_1"), funccall("chnlTimeout_1") );
+    funccall("chnlTimeoutFfdc_1");
     threshold1;
 };
 
