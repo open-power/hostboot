@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,6 +120,16 @@ namespace SCOM
     * @userdata2[32:63] Wakeup Count (ATTR_SPCWKUP_COUNT)
     * @devdesc          Unexpectedly forcing wakeup off when the counter
     *                   is non-zero, implies a bug in the code flow.
+    * @custdesc         Internal firmware error.
+    */
+
+    /*@
+    * @errortype        ERRL_SEV_UNRECOVERABLE
+    * @moduleid         SCOM::SCOM_DO_MULTICAST_WORKAROUND
+    * @reasoncode       SCOM::SCOM_MULTICAST_WRITE_INVALID
+    * @userdata1        Address
+    * @userdata2        Target huid
+    * @devdesc          Unsupported multicast write operation
     * @custdesc         Internal firmware error.
     */
 

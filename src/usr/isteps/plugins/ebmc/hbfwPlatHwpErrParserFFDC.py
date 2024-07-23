@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2023,2024
+# Contributors Listed Below - COPYRIGHT 2024
 # [+] International Business Machines Corp.
 #
 #
@@ -34,7 +34,7 @@
 # openbmc project's meta-openpower/recipes-phosphor/logging/hostboot-pel-parsers_git.bb
 # file to reference the Hostboot commit with the change.
 
-# Last generated: Mon Apr  1 15:34:26 2024 GMT
+# Last generated: Wed Aug  7 19:34:42 2024 GMT
 
 import json
 from udparsers.helpers.errludP_Helpers import memConcat, hexDump, intConcat
@@ -293,6 +293,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="WRITE_OFFSET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0220da09:
+        d["HwpReturnCode"]="RC_SPI_TPM_RESPONSE_SIZE_MISMATCH"
+        d["FFDC"]="HEADER_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0235b546:
         d["HwpReturnCode"]="RC_CORECACHE_CLK_CTRL_ARY_FAILED"
         d["FFDC"]="MC_QUAD_TARGET"
@@ -306,6 +311,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x02418742:
         d["HwpReturnCode"]="RC_P10_IO_QUIESCE_LANE_CALCULATION_ERR"
         d["FFDC"]="PAUC_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x02481f04:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET1"
+        d["FFDC"]="MY_TEST_UINT16"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0248f381:
@@ -353,6 +363,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="FREQUENCY_MAPPED_VALUE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0312760d:
+        d["HwpReturnCode"]="RC_MSS_PLUG_RULES_DDR5_DIMM_SPD_REV_NOT_CURRENT"
+        d["FFDC"]="DIMM_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x031ce3e1:
         d["HwpReturnCode"]="RC_GETTRACEARRAY_CORE_NOT_DUMPABLE"
         d["FFDC"]="TRACE_BUS"
@@ -386,6 +401,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x036ef023:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_EFD_MEMORY_SPACE_OFFSET_ERROR"
         d["FFDC"]="OCMB_CHIP_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0384c2f5:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET1"
+        d["FFDC"]="MY_TEST_UINT32"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x03857b40:
@@ -443,6 +463,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="END_ADDR"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x03e04415:
+        d["HwpReturnCode"]="RC_NONZERO_MISCOMPARES"
+        d["FFDC"]="FAILING_RING_COUNT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x03e1f9a0:
         d["HwpReturnCode"]="RC_PGPE_INIT_TIMEOUT"
         d["FFDC"]="PGPE_BASE_ADDRESS"
@@ -468,9 +493,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="THREAD"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x040e5931:
+        d["HwpReturnCode"]="RC_SPI_TPM_ZERO_LENGTH_RW"
+        d["FFDC"]="READ_NOT_WRITE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0412a213:
         d["HwpReturnCode"]="RC_P10_BOOT_MODE_FEATURE_LOOKUP_ERROR"
         d["FFDC"]="FEATURE_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x043b7091:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET1"
+        d["FFDC"]="TARGET_PERV"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x044b807d:
@@ -516,6 +551,16 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x04911098:
         d["HwpReturnCode"]="RC_MSS_VOLT_WRONG_NUMBER_OF_VOLTAGES"
         d["FFDC"]="SUPPLIED_NUMBER"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x049d319d:
+        d["HwpReturnCode"]="RC_SBE_SPI_LENGTH_IS_NOT_ALIGNED"
+        d["FFDC"]="LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x049d8485:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT_R98_FIRST_FAULTS_STATUS_1"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x04b398f0:
@@ -596,6 +641,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="EXP_ACTIVE_LOG_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x05b4d98a:
+        d["HwpReturnCode"]="RC_INVALID_PMIC_GI2C_TARGET_CONFIG"
+        d["FFDC"]="PRESENT_PMIC_ADC_GPIO_TARGETS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x05b62a0e:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_EFD_NOT_FOUND"
         d["FFDC"]="EFD_METADATA26"
@@ -634,6 +684,11 @@ def hbfwParseHwpFfdc(ver, data):
                 i += SCOM_DATA_LEN
                 registerArray.append(dReg)
             d[chipPosLabel] = registerArray
+    if ffdcId == 0x0621bf97:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_R07"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x06280235:
         d["HwpReturnCode"]="RC_NO_MALF_PM_RESET"
         d["FFDC"]="CHIP"
@@ -739,6 +794,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="QME_HCODE_BLOCK_COUNT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0747af3d:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_SWC_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x074c3a0d:
         d["HwpReturnCode"]="RC_MSS_FREQ_CL_EXCEEDS_TAA_MAX"
         d["FFDC"]="MC_TYPE"
@@ -752,6 +812,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x077faba3:
         d["HwpReturnCode"]="RC_MSS_INVALID_FREQ_PASSED_IN"
         d["FFDC"]="DIMM_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0798dcb9:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_ADDRESS_OVERRUN"
+        d["FFDC"]="LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x079dfd8a:
@@ -794,6 +859,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x086def87:
+        d["HwpReturnCode"]="RC_SBE_SPI_INVALID_LENGTH"
+        d["FFDC"]="ECC_STATUS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0871dddc:
         d["HwpReturnCode"]="RC_P10_ATTR_UPDATE_PDI_KEYWORD_HEADER_ERR"
         d["FFDC"]="HEADER_B1"
@@ -817,6 +887,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x08a29c42:
         d["HwpReturnCode"]="RC_PSTATE_PB_POUND_W_INVALID_FREQ_DROP_VALUE"
         d["FFDC"]="VDM_LARGE_SMALL"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x08a9a99e:
+        d["HwpReturnCode"]="RC_POZ_TP_VITL_CLK_OFF_ERR"
+        d["FFDC"]="TARGET_CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x08b52514:
@@ -859,6 +934,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x09227a10:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_INVALID_WRITE_SEQUENCE"
+        d["FFDC"]="OPERATION"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x09242486:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_DIMM_DECONFIG_TARGET0"
         d["FFDC"]="MY_TEST_UINT64"
@@ -877,6 +957,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x092a523b:
         d["HwpReturnCode"]="RC_PSTATE_PB_WOF_HEADER_DATA_INVALID"
         d["FFDC"]="VRT_DATA_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x092d4f55:
+        d["HwpReturnCode"]="RC_SPI_POLL_TIMEOUT"
+        d["FFDC"]="COUNTER_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x093447bd:
@@ -912,64 +997,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x099f51cc:
         d["HwpReturnCode"]="RC_P10_FBC_EFF_CONFIG_LINKS_IOLINK_POS_ERR"
         d["FFDC"]="IOLINK_A_TARGET"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x09afe0b3:
-        d["Register FFDC"]="ODY_CBS_STATUS_REGS_CFAM"
-        while (len(data) - i) > 0:
-            registerArray = []
-            if (len(data) - i) >= POS_LEN:
-                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
-                i += POS_LEN
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_CS_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_TR_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_EL_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_TR_HIST_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_EL_HIST_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SB_CS_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SB_MSG_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_STAT_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            d[chipPosLabel] = registerArray
-    if ffdcId == 0x09c197dd:
-        d["HwpReturnCode"]="RC_TEST_PERV_TARGET0"
-        d["FFDC"]="TARGET_CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x09c2aa2a:
@@ -1261,19 +1288,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MAX_BURST_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x0b5874e4:
-        d["Register FFDC"]="ODY_OSC_SWITCH_SENSE_REG_SCOM"
-        while (len(data) - i) > 0:
-            registerArray = []
-            if (len(data) - i) >= POS_LEN:
-                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
-                i += POS_LEN
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SNS1LTH_RO",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            d[chipPosLabel] = registerArray
+    if ffdcId == 0x0b64ade7:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC_R33_TEMP_STATUS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0b68c8c6:
         d["HwpReturnCode"]="RC_SELF_REST_IMG_BUILD_FAIL"
         d["FFDC"]="EC_LEVEL"
@@ -1354,6 +1373,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="LOOP_COUNT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0c327845:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET1"
+        d["FFDC"]="TARGET_CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0c331138:
         d["HwpReturnCode"]="RC_P10_REVERT_SBE_MCS_SETUP_SELECTED_MC_NOT_FOUND"
         d["FFDC"]="ATTR_PROC_SBE_MCS_SETUP_SELECTED_MC"
@@ -1369,6 +1393,24 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ERR1_STATUS_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0ca154d6:
+        d["Register FFDC"]="PERV_CTRL_REGS_CFAM"
+        while (len(data) - i) > 0:
+            registerArray = []
+            if (len(data) - i) >= POS_LEN:
+                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
+                i += POS_LEN
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL0_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL1_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            d[chipPosLabel] = registerArray
     if ffdcId == 0x0cbd8644:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR38_ODTLOFF_NT_ATTR_VALUE"
         d["FFDC"]="DIMM_IN_ERROR"
@@ -1435,6 +1477,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x0d12bf2a:
         d["HwpReturnCode"]="RC_P10_PHB_HV_UTILS_INVALID_ARGS"
         d["FFDC"]="ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0d28eedb:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_WRITE_TIMEOUT"
+        d["FFDC"]="LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0d347ccc:
@@ -1532,6 +1579,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT16"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0e8e6668:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_R0A"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0e8f7d82:
         d["HwpReturnCode"]="RC_PSTATE_PB_BIASED_POUNDV_WOF_UT_ERROR"
         d["FFDC"]="ICS_RDP_AC_A"
@@ -1555,6 +1607,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x0eb598d9:
         d["HwpReturnCode"]="RC_P10_NHTM_CTRL_BAD_STATE"
         d["FFDC"]="HTM_STATUS_REG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x0eb827fd:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_R05"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0ecb691d:
@@ -1612,19 +1669,9 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PDW_VALUE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x0f808f0b:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET0"
-        d["FFDC"]="TARGET_CHIP"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0fb0d22a:
         d["HwpReturnCode"]="RC_P10_BUILD_SMP_INVALID_LINK_STATE"
         d["FFDC"]="PAUC_TARGET"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x0fba050f:
-        d["HwpReturnCode"]="RC_ODY_DRAMINIT_START_DATA_PTR_NULL"
-        d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x0fc25cf6:
@@ -1772,6 +1819,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x11661e28:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_R09"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1181b13f:
         d["HwpReturnCode"]="RC_P10_GETPUTMEMPROC_INVALID_FLAGS"
         d["FFDC"]="ADDRESS"
@@ -1832,9 +1884,14 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="GPE2XISRR0"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x1239144b:
-        d["HwpReturnCode"]="RC_ODY_OUT_OF_BOUNDS_DBYTE_PASSED_TO_SWIZZLE"
-        d["FFDC"]="MAX_DBYTE"
+    if ffdcId == 0x121c7cea:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT2_RO_INPUTS_0"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x124cfd11:
+        d["HwpReturnCode"]="RC_SPI_FLASH_UNKNOWN_DEVICE"
+        d["FFDC"]="DEVICE_ID"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x125fe0dd:
@@ -1945,6 +2002,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x12e3e9f5:
+        d["HwpReturnCode"]="RC_PROC_DOES_NOT_SUPPORT_DS_A"
+        d["FFDC"]="OCMB_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1303f908:
         d["HwpReturnCode"]="RC_P10_IOHS_INIT_TIMEOUT_ERROR"
         d["FFDC"]="HALF"
@@ -2048,9 +2110,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PRE_CURSOR"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x138d511e:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="GEN_HASH_1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x139d846d:
         d["HwpReturnCode"]="RC_P10_FBC_EFF_CONFIG_LINKS_IOLINK_NUM_ERR"
         d["FFDC"]="IOHS_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x13a80023:
+        d["HwpReturnCode"]="RC_SBE_SPI_INVALID_LENGTH"
+        d["FFDC"]="SPI_ENGINE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x13aa4421:
@@ -2071,6 +2143,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x13bffb91:
         d["HwpReturnCode"]="RC_P10_SBE_SCOMINIT_FABRIC_BROADCAST_ATTR_ERR"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x13c9dafc:
+        d["HwpReturnCode"]="RC_SBE_SPI_WRITTEN_DATA_MISMATCH"
+        d["FFDC"]="WRITTEN_DATA_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x13d03cab:
@@ -2108,11 +2185,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x14355998:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET0"
-        d["FFDC"]="TARGET_PERV"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x14514eeb:
         d["HwpReturnCode"]="RC_P10_IO_INIT_DONE_TIMEOUT_ERROR"
         d["FFDC"]="EXT_CMD_REQ"
@@ -2126,6 +2198,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x1486cea9:
         d["HwpReturnCode"]="RC_MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL"
         d["FFDC"]="FW_PARTITION_ID"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x14ab065d:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1"
+        d["FFDC"]="MY_TEST_UINT8"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x14af090f:
@@ -2336,6 +2413,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CHIP_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x15471683:
+        d["HwpReturnCode"]="RC_UNTRUSTED_RING_IMAGE"
+        d["FFDC"]="RS4_HEADER"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1569a8d6:
         d["HwpReturnCode"]="RC_QME_START_HALTED"
         d["FFDC"]="EQ_TARGET"
@@ -2354,6 +2436,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x157d6e06:
         d["HwpReturnCode"]="RC_MSS_BAD_FREQ_CALCULATED"
         d["FFDC"]="MSS_FREQ"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1587de36:
+        d["HwpReturnCode"]="RC_SPI_FLASH_WRITE_FAIL"
+        d["FFDC"]="LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x158acb07:
@@ -2394,6 +2481,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x15e9c189:
         d["HwpReturnCode"]="RC_P10_FBC_EFF_CONFIG_EPSILON_UNSUPPORTED_BROADCAST_MODE_ERR"
         d["FFDC"]="BROADCAST_MODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x163d51a5:
+        d["HwpReturnCode"]="RC_PSTATE_NODE_PAU_FREQ_MISMATCH"
+        d["FFDC"]="PAU_FREQ"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x164c7a5d:
@@ -2449,6 +2541,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x16c8aa50:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_MEMPORT_DECONFIGURE_TARGET0"
         d["FFDC"]="TARGET_PORT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x16e2bc0e:
+        d["HwpReturnCode"]="RC_SBE_SPI_ADDRESS_IS_NOT_ALIGNED"
+        d["FFDC"]="CHIP_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x16f57189:
@@ -2546,11 +2643,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="STATUS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x17b7a986:
-        d["HwpReturnCode"]="RC_TEST_PERV_TARGET0"
-        d["FFDC"]="MY_TEST_UINT16"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x17bfe4ad:
         d["HwpReturnCode"]="RC_PMIC_MISMATCHING_VENDOR_IDS"
         d["FFDC"]="OCMB_TARGET"
@@ -2559,6 +2651,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x17dd8372:
         d["HwpReturnCode"]="RC_EXP_RESPONSE_WRONG_REQID"
         d["FFDC"]="CMD_ID"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x17e0f483:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_R07"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x17e3a087:
@@ -2601,6 +2698,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BIT_POS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x18a57fc7:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_ADDRESS_OVERRUN"
+        d["FFDC"]="RAW_START"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x18a7d1a4:
         d["HwpReturnCode"]="RC_MSS_EXP_DDR_PHY_INIT_TRAINING_FAIL"
         d["FFDC"]="RANK3_BADDQ0_63"
@@ -2629,6 +2731,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x18e68a11:
         d["HwpReturnCode"]="RC_I2C_PMIC_INVALID_READ_SIZE"
         d["FFDC"]="SIZE_REQUESTED"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x18fbd08c:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_INCOMPLETE_WRITE"
+        d["FFDC"]="ECC_MODE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x190a0cf7:
@@ -2691,11 +2798,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PROC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x19e28d2a:
-        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
-        d["FFDC"]="BANK_MAX"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x19ed7362:
         d["HwpReturnCode"]="RC_PM_BACKING_CACHEPOWER_DOWN_FAILED"
         d["FFDC"]="EQ_TARGET"
@@ -2709,11 +2811,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x19ee96a9:
         d["HwpReturnCode"]="RC_P10_BOOT_MODE_UNEQUAL_MC_FREQS"
         d["FFDC"]="MC_FREQ2"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x19fbe54c:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET0"
-        d["FFDC"]="MY_TEST_UINT16"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1a06338e:
@@ -2741,9 +2838,24 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="EC_LEVEL"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1a442bd3:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="MR16_TO_19_PAT1_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1a499001:
+        d["HwpReturnCode"]="RC_ODY_ECS_ERR_THRESHOLD_EXCEEDED"
+        d["FFDC"]="OPCODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1a521711:
         d["HwpReturnCode"]="RC_MSS_PLUG_RULES_INVALID_DIMM_HEIGHT_MIX"
         d["FFDC"]="SMALLER_DIMM_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1aa83e7f:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="GEN_HASH_4"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1ab5eeb6:
@@ -3144,6 +3256,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ACTIVE_CORES_NUM"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1b34feec:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="GEN_HASH_7"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1b762558:
         d["HwpReturnCode"]="RC_XIPC_SKELETON_GEN_FAILED"
         d["FFDC"]="CHIP_TARGET"
@@ -3219,6 +3336,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="REF_MAGIC"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1c872f72:
+        d["HwpReturnCode"]="RC_ODY_ECS_ERR_THRESHOLD_EXCEEDED"
+        d["FFDC"]="SRANK"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1c9641df:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR33_DQS_RTT_PARK_PER_DRAM_ATTR_VALUE"
         d["FFDC"]="DIMM_IN_ERROR"
@@ -3257,11 +3379,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x1cf14499:
         d["HwpReturnCode"]="RC_DIMM_RUNNING_IN_N_MODE_DDR5"
         d["FFDC"]="N_MODE_PMIC2"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x1d12738d:
-        d["HwpReturnCode"]="RC_ODY_DRAMINIT_OFFSET_UNSUPPORTED"
-        d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1d15b454:
@@ -3354,6 +3471,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BIT_POS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1dfb885e:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="CMP_HASH_1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1e069929:
         d["HwpReturnCode"]="RC_PSTATE_PB_BIASED_POUNDV_WOF_UT_ERROR"
         d["FFDC"]="IRT_RDP_DC_10MA_A"
@@ -3404,6 +3526,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="HOST_DL0_EDPL_MAX_COUNT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1e7f747f:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_SWC_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1e8f8187:
         d["HwpReturnCode"]="RC_CPLT_NOT_ALIGNED_ERR"
         d["FFDC"]="PROC_TARGET"
@@ -3412,6 +3539,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x1e947d6d:
         d["HwpReturnCode"]="RC_P10_IO_INIT_DONE_TIMEOUT_ERROR"
         d["FFDC"]="ERROR_LANE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1e94ed78:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1"
+        d["FFDC"]="MY_TEST_UINT32"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1ebd9a83:
@@ -3437,11 +3569,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x1eee139e:
         d["HwpReturnCode"]="RC_PM_PBA_BAR_SIZE_INVALID"
         d["FFDC"]="CMD_SCOPE"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x1eee81eb:
-        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
-        d["FFDC"]="BANK_GROUP_MAX"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1ef75175:
@@ -3514,6 +3641,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BADMODE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1f644d5b:
+        d["HwpReturnCode"]="RC_THRESHOLD_STACK_LIMIT_CROSSED"
+        d["FFDC"]="UTILIZATION_PERCENTAGE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1f6ae114:
         d["HwpReturnCode"]="RC_P10_PUTRING_CHECKWORD_DATA_MISMATCH"
         d["FFDC"]="RETURN_CODE"
@@ -3524,14 +3656,14 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PROC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x1f76c48c:
-        d["HwpReturnCode"]="RC_TEST_PERV_TARGET0"
-        d["FFDC"]="MY_TEST_UINT8"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1f902b6f:
         d["HwpReturnCode"]="RC_POZ_I2C_FIFO_TIMEOUT_ERROR"
         d["FFDC"]="PORT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x1faa23d2:
+        d["HwpReturnCode"]="RC_SPI_TPM_FIFO_TIMEOUT"
+        d["FFDC"]="REMAINING_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x1fc3d0de:
@@ -3594,6 +3726,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="FW_PARTITION_ID"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x2080d2a3:
+        d["HwpReturnCode"]="RC_POZ_PLL_LOCK_ERROR"
+        d["FFDC"]="FAILED_PLLS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x208f213a:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_EFD_MEMORY_SIZE_MAPPING_ERROR"
         d["FFDC"]="OCMB_CHIP_TARGET"
@@ -3609,9 +3746,102 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x20b65d58:
+        d["Register FFDC"]="SCRATCH_REGS_SCOM"
+        while (len(data) - i) > 0:
+            registerArray = []
+            if (len(data) - i) >= POS_LEN:
+                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
+                i += POS_LEN
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_12_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            d[chipPosLabel] = registerArray
     if ffdcId == 0x20c0a1be:
         d["HwpReturnCode"]="RC_P10_BUILD_SMP_INVALID_TOPOLOGY"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x20c46659:
+        d["HwpReturnCode"]="RC_PROC_DOES_NOT_SUPPORT_US_B"
+        d["FFDC"]="OCMB_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x20cdf902:
@@ -3622,6 +3852,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x20db5dcd:
         d["HwpReturnCode"]="RC_P10_RAM_STATUS_POLL_THRESHOLD_ERR"
         d["FFDC"]="OPCODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x20ee5287:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT_R92_FAULTS_STATUS_0"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x20fdb8ba:
@@ -3767,6 +4002,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x23528ab5:
         d["HwpReturnCode"]="RC_POZ_FILE_HASH_MISMATCH"
         d["FFDC"]="GEN_HASH_1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x23547ceb:
+        d["HwpReturnCode"]="RC_THRESHOLD_STACK_LIMIT_CROSSED"
+        d["FFDC"]="THRESHOLD_PERCENTAGE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2365f18d:
@@ -3919,6 +4159,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x250dc4c0:
+        d["HwpReturnCode"]="RC_SBE_BOOT_CHECK_ERR_CFAM_PATH"
+        d["FFDC"]="SDB"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x250e2874:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_DIMM_GARD_TARGET2"
         d["FFDC"]="MY_TEST_UINT8"
@@ -3997,6 +4242,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x25d44dcb:
         d["HwpReturnCode"]="RC_XIPC_IMAGE_TOO_LARGE"
         d["FFDC"]="IMAGE_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x25ee5050:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="CMP_HASH_5"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x260a3d4c:
@@ -4142,6 +4392,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="EXPECTED_PMICS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x27419c85:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="MR16_TO_19_PAT0"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2751e897:
         d["HwpReturnCode"]="RC_INVALID_PMIC_DT_DDR5_TARGET_CONFIG"
         d["FFDC"]="NUM_PMICS"
@@ -4160,6 +4415,16 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x277282ad:
         d["HwpReturnCode"]="RC_QMEC_TOR_APPEND_RING_ERROR"
         d["FFDC"]="CUST_QME_RINGS_BUF_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x27ce5f13:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC_R9C_ON_OFF_CONFIG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x27da9a49:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_OSR_CFG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x27efc971:
@@ -4222,6 +4487,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="EXP_ACTIVE_LOG_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x289b4c83:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_GENERAL_CFG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x28bd4ee2:
         d["HwpReturnCode"]="RC_P10_MSS_BAD_FREQ_CALCULATED"
         d["FFDC"]="SUPPORTED_FREQ_0"
@@ -4282,11 +4552,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BOOT_STAGE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x296efb32:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET0"
-        d["FFDC"]="MY_TEST_UINT16"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x29799835:
         d["HwpReturnCode"]="RC_P10_FBC_EFF_CONFIG_CORE_FREQ_RATIO_ERR"
         d["FFDC"]="FREQ_CORE_CEILING"
@@ -4320,6 +4585,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x29d3c53e:
         d["HwpReturnCode"]="RC_SBE_SELECT_EX_ECO_CHIP_CONTAINED_CONFIG_ERROR"
         d["FFDC"]="CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x29d5e41e:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="CMP_HASH_7"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x29e4d167:
@@ -4422,6 +4692,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT8"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x2b04850e:
+        d["HwpReturnCode"]="RC_POZ_PPM_ERROR"
+        d["FFDC"]="PROC_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2b0a349c:
         d["HwpReturnCode"]="RC_MSS_DIVIDE_BY_ZERO"
         d["FFDC"]="DIVIDEND"
@@ -4460,11 +4735,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x2b44c10d:
         d["HwpReturnCode"]="RC_SBE_BOOT_CHECK_ERR_SCOM_PATH"
         d["FFDC"]="SB_MSG"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x2b53c906:
-        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
-        d["FFDC"]="SRANK_MAX"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2b6246e2:
@@ -4542,11 +4812,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="REM_FBC_GROUP_ID"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x2c72839b:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET0"
-        d["FFDC"]="MY_TEST_UINT8"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2c75fd16:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_MEMPORT_GARD_TARGET0"
         d["FFDC"]="MY_TEST_UINT32"
@@ -4562,9 +4827,9 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="COMMAND_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x2ca2f438:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET0"
-        d["FFDC"]="MY_TEST_UINT32"
+    if ffdcId == 0x2c9f835c:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_VERIFY_FAIL"
+        d["FFDC"]="LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2ca4ab94:
@@ -4625,6 +4890,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x2d1e23cb:
         d["HwpReturnCode"]="RC_TEST_TEMPSENSOR_TARGET0"
         d["FFDC"]="MY_TEST_UINT64"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x2d332bb2:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_ERASE_MISMATCH"
+        d["FFDC"]="ECC_MODE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2d49aa23:
@@ -4690,6 +4960,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x2dd24e31:
         d["HwpReturnCode"]="RC_EXPLORER_SAVED_IMAGEA_ERROR_LOG"
         d["FFDC"]="UNIT_FFDC_EXP_ERROR"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x2df7a974:
+        d["HwpReturnCode"]="RC_SPI_FLASH_ERASE_INSUFFICIENT"
+        d["FFDC"]="ERASE_START"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2e462a90:
@@ -4782,6 +5057,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="SDRAM_DENSITY"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x2ee6eb2e:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1"
+        d["FFDC"]="MY_TEST_UINT16"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2ef90f7f:
         d["HwpReturnCode"]="RC_MSS_MDS_I2C_CMD_FAIL"
         d["FFDC"]="STATUS"
@@ -4810,6 +5090,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x2f47512c:
         d["HwpReturnCode"]="RC_ODY_PHYINIT_INVALID_WRITE_POSTAMBLE"
         d["FFDC"]="PORT_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x2f57bb3a:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_INVALID_ADDR_LEN"
+        d["FFDC"]="START"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2f61ba68:
@@ -4855,6 +5140,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x2f95d634:
         d["HwpReturnCode"]="RC_PUTRING_RS4_STRING_OVERRUN"
         d["FFDC"]="NIBBLE_INDEX"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x2f98a6f7:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC_R32_PMIC_ENABLE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x2f9ca243:
@@ -4922,6 +5212,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT64"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x3066099a:
+        d["HwpReturnCode"]="RC_SBE_SPI_INVALID_LENGTH"
+        d["FFDC"]="CHIP_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x30823714:
         d["HwpReturnCode"]="RC_PSTATE_PB_POUND_W_ACCESS_FAIL"
         d["FFDC"]="CHIP_TARGET"
@@ -4930,6 +5225,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x308b49e6:
         d["HwpReturnCode"]="RC_MSS_EXP_RSP_ARG_FAILED"
         d["FFDC"]="CMD_ID"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x309c1e94:
+        d["HwpReturnCode"]="RC_SPI_FLASH_ERASE_FAIL"
+        d["FFDC"]="ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x30af4d6b:
@@ -4997,11 +5297,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BANK_GROUP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x316cb46c:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET0"
-        d["FFDC"]="MY_TEST_UINT16"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x3172bddf:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR52_BAD_WR_CRC_WINDOW"
         d["FFDC"]="VALUE"
@@ -5045,6 +5340,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x31dcc177:
         d["HwpReturnCode"]="RC_PMIC_EFUSE_BLOWN"
         d["FFDC"]="EFUSE_DATA"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x31f8b6a9:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET1"
+        d["FFDC"]="TARGET_PERV"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x31fd6957:
@@ -5118,6 +5418,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x32b53859:
         d["HwpReturnCode"]="RC_MSS_EXP_DDR_PHY_INIT_UNSUPPORTED_MODE"
         d["FFDC"]="ERROR_CODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x32c5cbd5:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT_RA6_INFET_MPT_ADDR"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x32f4802d:
@@ -5238,6 +5543,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x34e2f722:
         d["HwpReturnCode"]="RC_QME_START_HALTED"
         d["FFDC"]="EQ_POS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x34e4e663:
+        d["HwpReturnCode"]="RC_SPI_ERROR_STATUS"
+        d["FFDC"]="STATUS_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x34ea630e:
@@ -5863,24 +6173,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CHANNEL"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x3ad56999:
-        d["Register FFDC"]="ODY_PERV_CTRL_REGS_CFAM"
-        while (len(data) - i) > 0:
-            registerArray = []
-            if (len(data) - i) >= POS_LEN:
-                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
-                i += POS_LEN
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL0_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL1_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            d[chipPosLabel] = registerArray
+    if ffdcId == 0x3ad746fa:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1"
+        d["FFDC"]="MY_TEST_UINT64"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x3ae44db3:
         d["HwpReturnCode"]="RC_PMIC_DELAY_OUT_OF_RANGE"
         d["FFDC"]="RAIL"
@@ -6019,6 +6316,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MAX_IMAGE_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x3b78d5de:
+        d["HwpReturnCode"]="RC_SPI_INVALID_TRANSACTION_PARMS"
+        d["FFDC"]="COMMAND"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x3bb824ea:
         d["HwpReturnCode"]="RC_CPMR_HDR_BUILD_FAIL"
         d["FFDC"]="IMAGE_TYPE"
@@ -6052,6 +6354,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x3c2ec739:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_EFD_NOT_FOUND"
         d["FFDC"]="EFD_METADATA27"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x3c38de82:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT0_RO_INPUTS_1"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x3c3f252b:
@@ -6187,9 +6494,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MCC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x3d86b2b6:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_R0A"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x3d90220f:
         d["HwpReturnCode"]="RC_GETTRACEARRAY_INVALID_TARGET"
         d["FFDC"]="TRACE_BUS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x3d9aac00:
+        d["HwpReturnCode"]="RC_ODY_ECS_MR20_PAT0"
+        d["FFDC"]="UNIT_FFDC_MR20_PAT0"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x3d9ed105:
@@ -6200,11 +6517,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x3db2f54c:
         d["HwpReturnCode"]="RC_PGPE_INIT_TIMEOUT"
         d["FFDC"]="CHIP"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x3dce4abe:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET0"
-        d["FFDC"]="MY_TEST_UINT8"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x3de05ce4:
@@ -6245,6 +6557,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x3e2fa4e1:
         d["HwpReturnCode"]="RC_P10_FAB_IOVALID_DL_FULL_NOT_TRAINED_RETRAIN_NONE_ERR"
         d["FFDC"]="LOC_IOLINK_EVN_FAIL"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x3e33af28:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_R06"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x3e39140b:
@@ -6443,6 +6760,11 @@ def hbfwParseHwpFfdc(ver, data):
                 i += SCOM_DATA_LEN
                 registerArray.append(dReg)
             d[chipPosLabel] = registerArray
+    if ffdcId == 0x3ea257a0:
+        d["HwpReturnCode"]="RC_ODY_DRAMINIT_OFFSET_UNSUPPORTED"
+        d["FFDC"]="OCMB_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x3ebb93f0:
         d["HwpReturnCode"]="RC_MSS_CALC_PORT_POWER_EXCEEDS_MAX"
         d["FFDC"]="MAX_POWER_ALLOWED"
@@ -6588,6 +6910,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET_CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x3ffeb175:
+        d["HwpReturnCode"]="RC_MSS_IRRELEVANT_FUNC_CALL"
+        d["FFDC"]="FUNCTION"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4007dd60:
         d["HwpReturnCode"]="RC_P10_L3_FLUSH_INVALID_ARGS_ERR"
         d["FFDC"]="PURGETYPE"
@@ -6661,6 +6988,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x40ba829d:
         d["HwpReturnCode"]="RC_P10_LOAD_IOP_XRAM_IMG_ERROR"
         d["FFDC"]="XIP_SECTION"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x40c79ce6:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1"
+        d["FFDC"]="TARGET_CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x40d2f485:
@@ -6811,6 +7143,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="RING_SECTION_BUF"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x41bb9960:
+        d["HwpReturnCode"]="RC_SBE_SPI_LENGTH_IS_NOT_ALIGNED"
+        d["FFDC"]="CHIP_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x41c48c8e:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_EFD_NOT_FOUND"
         d["FFDC"]="EFD_METADATA1"
@@ -6831,9 +7168,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x41f80b79:
+        d["HwpReturnCode"]="RC_SPI_TPM_READ_ABORT"
+        d["FFDC"]="LOCALITY"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x420ba9d5:
         d["HwpReturnCode"]="RC_P10_BUILD_SMP_DLR_INVALID_MODE"
         d["FFDC"]="DLR_MODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4232aeae:
+        d["HwpReturnCode"]="RC_SPI_FLASH_WRITE_FAIL"
+        d["FFDC"]="ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x42419d7b:
@@ -6886,9 +7233,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CORE_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x42c0dc81:
+        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
+        d["FFDC"]="ROW_MAX_INDEX"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x42cb8b29:
         d["HwpReturnCode"]="RC_PM_QME_ADDR_ALIGNMENT_ERROR"
         d["FFDC"]="BAR_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x42cc117b:
+        d["HwpReturnCode"]="RC_MSS_PLUG_RULES_DDR5_DIMM_SPD_REV_NOT_CURRENT"
+        d["FFDC"]="SPD_REV"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x42d011f0:
@@ -6916,6 +7273,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="IDD_RDP_DC_A"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x430484c9:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_SWC_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x430fed9d:
         d["HwpReturnCode"]="RC_P10_EXIT_CACHE_CONTAINED_MULTIPLE_MASTER_ERR"
         d["FFDC"]="MASTER_CHIP1"
@@ -6936,14 +7298,14 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="STATUS_DATA"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x43506112:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET0"
-        d["FFDC"]="TARGET_PERV"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x436650c4:
         d["HwpReturnCode"]="RC_P10_RAM_HW533775_FUSED_CORE_SEARCH_ERROR"
         d["FFDC"]="CORE_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x437bbfdc:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT_R96_FIRST_FAULTS_STATUS_0"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4387a8fe:
@@ -6956,6 +7318,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ASSOCIATED_PERV"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4393d680:
+        d["HwpReturnCode"]="RC_LINK_TRAINING_DONE_POLL_FAILED"
+        d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x43c9ad87:
         d["HwpReturnCode"]="RC_P10_SETUP_MMIO_BARS_RANGE_OVERLAP_ERR"
         d["FFDC"]="TARGET"
@@ -6964,6 +7331,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x43d2cfa4:
         d["HwpReturnCode"]="RC_P10_PHB_PERST_NFIR_NOT_CLEARED"
         d["FFDC"]="PFIR_DATA"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x43d3381f:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_ERASE_MISMATCH"
+        d["FFDC"]="FINAL_ERASE_POINTER"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x43e9b57d:
@@ -7021,6 +7393,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PLL_READ"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x44c316b9:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="MR20_PAT0"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x44d03b84:
         d["HwpReturnCode"]="RC_P10_PHB_PERST_ACTION_INVALID_ARGS_ERR"
         d["FFDC"]="TARGET"
@@ -7074,6 +7451,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x45409459:
         d["HwpReturnCode"]="RC_IO_EXT_CMD_POLL_FAILED"
         d["FFDC"]="POS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x45546b47:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET1"
+        d["FFDC"]="MY_TEST_UINT8"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x455b23c0:
@@ -7464,6 +7846,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="VDD_A"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4819db13:
+        d["HwpReturnCode"]="RC_SPI_INVALID_TRANSACTION_PARMS"
+        d["FFDC"]="CMD_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x482cca9e:
         d["HwpReturnCode"]="RC_P10_L3ERR_EXTRACT_UNKNOWN_SYNDROME_ECC"
         d["FFDC"]="SYNDROME"
@@ -7519,6 +7906,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CORE_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x48a0cd2c:
+        d["HwpReturnCode"]="RC_SBE_SPI_INVALID_LENGTH"
+        d["FFDC"]="MIN_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x48af5af1:
         d["HwpReturnCode"]="RC_IO_PPE_RESET"
         d["FFDC"]="IAR"
@@ -7554,94 +7946,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="SECTION"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x48ea46e0:
-        d["Register FFDC"]="ODY_SCRATCH_REGS_CFAM"
-        while (len(data) - i) > 0:
-            registerArray = []
-            if (len(data) - i) >= POS_LEN:
-                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
-                i += POS_LEN
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_12_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            d[chipPosLabel] = registerArray
     if ffdcId == 0x48f64e80:
         d["HwpReturnCode"]="RC_RCS_CLOCK_TEST_OUT_ERROR"
         d["FFDC"]="PROC_TARGET"
@@ -7655,6 +7959,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x49052998:
         d["HwpReturnCode"]="RC_XIPC_RINGID_CHIPLETPROPS_ERROR"
         d["FFDC"]="TOR_VER"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x490e453d:
+        d["HwpReturnCode"]="RC_SPI_INVALID_TRANSACTION_PARMS"
+        d["FFDC"]="TPM_MODE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4917458c:
@@ -7740,6 +8049,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x4a19fea0:
         d["HwpReturnCode"]="RC_P10_FBC_EFF_CONFIG_LINKS_IOLINK_ENDP_ERR"
         d["FFDC"]="IOHS_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4a1ac3f3:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_GPO_VALUE_CFG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4a2354e3:
@@ -7893,6 +8207,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x4ac8fd6e:
         d["HwpReturnCode"]="RC_MSS_EXP_I2C_WRONG_BOOT_STAGE"
         d["FFDC"]="EXPECTED_BOOT_STAGE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4aca6935:
+        d["HwpReturnCode"]="RC_SBE_SPI_WRITTEN_DATA_MISMATCH"
+        d["FFDC"]="WRITTEN_DATA_ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4ad7b1eb:
@@ -8123,24 +8442,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="VDD_STEP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x4c40311a:
-        d["Register FFDC"]="ODY_PERV_CTRL_REGS_SCOM"
-        while (len(data) - i) > 0:
-            registerArray = []
-            if (len(data) - i) >= POS_LEN:
-                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
-                i += POS_LEN
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL0_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL1_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            d[chipPosLabel] = registerArray
     if ffdcId == 0x4c43d154:
         d["HwpReturnCode"]="RC_CPLT_OPCG_DONE_NOT_SET_ERR"
         d["FFDC"]="PERV_CPLT_STAT0"
@@ -8149,11 +8450,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x4c45657f:
         d["HwpReturnCode"]="RC_P10_ADU_UTILS_EXTRA_INPUT_DATA"
         d["FFDC"]="FLAGS"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x4c5c8ba9:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET0"
-        d["FFDC"]="TARGET_PERV"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4c60dfc4:
@@ -8189,6 +8485,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="LATENCY_MEASURE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4c6b0a96:
+        d["HwpReturnCode"]="RC_POZ_FFDC_SCRATCH_SPACE_FULL_ERROR"
+        d["FFDC"]="REQUIRED_SPACE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4c72f7d9:
         d["HwpReturnCode"]="RC_IO_PPE_DONE_POLL_FAILED"
         d["FFDC"]="POS"
@@ -8197,6 +8498,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x4c7a514a:
         d["HwpReturnCode"]="RC_POZ_SRAM_ABIST_DONE_BIT_ERR"
         d["FFDC"]="SELECT_SRAM"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4c7b1581:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_INCOMPLETE_WRITE"
+        d["FFDC"]="FINAL_WRITE_POINTER"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4c7c2a8c:
@@ -8382,6 +8688,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="XRAM_FW_DATA_PTR"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4db5ac13:
+        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
+        d["FFDC"]="BANK_MAX_INDEX"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4db95061:
         d["HwpReturnCode"]="RC_PSTATE_PB_POUND_W_INVALID_VID_ORDER"
         d["FFDC"]="ULTRA_VID_COMPARE_IVID_VALUE"
@@ -8430,6 +8741,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x4dfa8819:
         d["HwpReturnCode"]="RC_TEST_MEMPORT_TARGET1"
         d["FFDC"]="TARGET_PORT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4e056abc:
+        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
+        d["FFDC"]="DRAM_MAX_INDEX"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4e1e93e2:
@@ -8482,6 +8798,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="IOLINK_LINK_SPLIT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4e868897:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_SWB_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4e8ab67f:
         d["HwpReturnCode"]="RC_POZ_IO_TX_TDR_MULTI_GROUP_ERROR"
         d["FFDC"]="TARGET_CHIP"
@@ -8520,6 +8841,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x4f14b38c:
         d["HwpReturnCode"]="RC_SBE_SPI_CMD_STATUS_REG_UNSUPPORTED_STATE"
         d["FFDC"]="CHIP_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4f18d979:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1"
+        d["FFDC"]="MY_TEST_UINT32"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4f277d18:
@@ -8580,6 +8906,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x4fba3f3f:
         d["HwpReturnCode"]="RC_P10_PURGE_COMPLETE_TIMEOUT"
         d["FFDC"]="CMD_REG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x4fbec491:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_R73_STATUS_5"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x4fc33205:
@@ -8843,6 +9174,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OCMB_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x51c04f5b:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1"
+        d["FFDC"]="TARGET_PERV"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x51d17f11:
         d["HwpReturnCode"]="RC_P10_L2ERR_EXTRACT_SYNDROME_NOT_FOUND"
         d["FFDC"]="TRACE_ARRAY_1"
@@ -9071,6 +9407,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PORT_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x54145fef:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_R0A"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x5417c270:
         d["HwpReturnCode"]="RC_POZ_THOLD_ERR"
         d["FFDC"]="REGIONS"
@@ -9091,6 +9432,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="DRAM_GEN"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x544f070b:
+        d["HwpReturnCode"]="RC_ODY_DRAMINIT_START_DATA_PTR_NULL"
+        d["FFDC"]="OCMB_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x5470231e:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_UNSUPPORTED_RANK"
         d["FFDC"]="RANK1"
@@ -9099,6 +9445,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x5476021e:
         d["HwpReturnCode"]="RC_XIPC_INVALID_INPUT_BUFFER_PTR_PARM"
         d["FFDC"]="RING_BUF2"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x54829ed4:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_R0B"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x54913205:
@@ -9184,6 +9535,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x55339f0d:
         d["HwpReturnCode"]="RC_SBE_BOOT_CHECK_ERR_CFAM_PATH"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x553a9792:
+        d["HwpReturnCode"]="RC_SYSTEM_PAU_FREQ_MISMATCH"
+        d["FFDC"]="VPD_PAU_FREQ"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x553f74c4:
@@ -9279,6 +9635,16 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x5608bb64:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_UNSUPPORTED_DMB_MFG_ID"
         d["FFDC"]="OCMB_CHIP_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x561a5505:
+        d["HwpReturnCode"]="RC_ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS"
+        d["FFDC"]="OCMB_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x562bfef1:
+        d["HwpReturnCode"]="RC_SPI_ERROR_STATUS"
+        d["FFDC"]="COUNTER_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x562fffb2:
@@ -9511,6 +9877,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET_CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x5898e73f:
+        d["HwpReturnCode"]="RC_SPI_FLASH_ERASE_BUFFER_NEEDED"
+        d["FFDC"]="LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x589e4e83:
         d["HwpReturnCode"]="RC_P10_SETUP_MMIO_BARS_PSI_BAR_ATTR_ERR"
         d["FFDC"]="BAR_OFFSET_MASK"
@@ -9546,6 +9917,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MSS_MAX_FREQ_3"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x592f4dc5:
+        d["HwpReturnCode"]="RC_SBE_SPI_ADDRESS_IS_NOT_ALIGNED"
+        d["FFDC"]="SPI_ENGINE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x59362466:
         d["HwpReturnCode"]="RC_MSS_MCBIST_EXCEEDED_MAX_SUBTESTS"
         d["FFDC"]="NUMBER_OF_SUBTESTS"
@@ -9554,6 +9930,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x597d67ff:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_EFD_NOT_FOUND"
         d["FFDC"]="EFD_METADATA18"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x598ca163:
+        d["HwpReturnCode"]="RC_UNTRUSTED_RING_IMAGE"
+        d["FFDC"]="MAGIC"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x59a3632e:
@@ -9581,9 +9962,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET_CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x59f9142e:
+        d["HwpReturnCode"]="RC_MSS_INVALID_CCS_INSTR_OFFSET"
+        d["FFDC"]="MC_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x59fa32ae:
         d["HwpReturnCode"]="RC_P10_SBE_SCOMINIT_XSCOM_BAR_ATTR_ERR"
         d["FFDC"]="BAR_MASK"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x59fbc04e:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_R09"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x5a008583:
@@ -9651,9 +10042,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="DRAM_GEN"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x5ab778cf:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="GEN_HASH_6"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x5ad0323b:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR3_BAD_CYCLE_ALIGN"
         d["FFDC"]="VALUE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x5b08b66c:
+        d["HwpReturnCode"]="RC_SPI_POLL_TIMEOUT"
+        d["FFDC"]="SEQUENCE_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x5b09978f:
@@ -9959,6 +10360,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OMI_FREQ_4"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x5ce223f0:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT_RA8_NVM_DATA"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x5ce4ccd2:
         d["HwpReturnCode"]="RC_MSS_EXP_DDR_PHY_INIT_UNKNOWN_ERROR"
         d["FFDC"]="TARGET"
@@ -9972,6 +10378,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x5d05d81d:
         d["HwpReturnCode"]="RC_I2C_GET_SCOM_INVALID_READ_SIZE"
         d["FFDC"]="OCMB_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x5d37fd5c:
+        d["HwpReturnCode"]="RC_MSS_INVALID_CCS_INSTR_OFFSET"
+        d["FFDC"]="INST_COUNT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x5d517d16:
@@ -10197,6 +10608,11 @@ def hbfwParseHwpFfdc(ver, data):
                 i += CFAM_DATA_LEN
                 registerArray.append(dReg)
             d[chipPosLabel] = registerArray
+    if ffdcId == 0x5f54b13f:
+        d["HwpReturnCode"]="RC_SPI_TPM_RESPONSE_BUF_TOO_SHORT"
+        d["FFDC"]="MAX_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x5f6d8a12:
         d["HwpReturnCode"]="RC_XIP_SECTION_APPEND_SIZE_RC"
         d["FFDC"]="SECTION_SIZE"
@@ -10257,6 +10673,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BAD_OVERRIDE_BIN_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x60152931:
+        d["HwpReturnCode"]="RC_SBE_SPI_LENGTH_IS_NOT_ALIGNED"
+        d["FFDC"]="SPI_ENGINE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x604480dd:
         d["HwpReturnCode"]="RC_P10_OMI_TRAIN_ERR"
         d["FFDC"]="OCMB_TARGET"
@@ -10265,6 +10686,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x60717200:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR0_BAD_BURST_LENGTH"
         d["FFDC"]="DIMM_IN_ERROR"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6082683b:
+        d["HwpReturnCode"]="RC_SPI_TPM_RESPONSE_TOO_LONG"
+        d["FFDC"]="MAX_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x608872ce:
@@ -10285,6 +10711,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x609e36f7:
         d["HwpReturnCode"]="RC_MSS_POWER_THERMAL_DIMM_INDEX_OUT_OF_BOUND"
         d["FFDC"]="PORT_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x609f1149:
+        d["HwpReturnCode"]="RC_SPI_POLL_TIMEOUT"
+        d["FFDC"]="CLOCK_CONFIG_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x60ae5737:
@@ -10340,6 +10771,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x613c90c4:
         d["HwpReturnCode"]="RC_PSTATE_PB_WOF_HEADER_DATA_INVALID"
         d["FFDC"]="MAGIC_NUMBER"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6144f89a:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="MR16_TO_19_PAT0_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x615bca04:
@@ -10477,6 +10913,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="GENERATED_KEY"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x62b07842:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_R09"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x62d6cd04:
         d["HwpReturnCode"]="RC_MSS_EXP_SUM_MASK_REG_SCOM_FAIL"
         d["FFDC"]="OCMB_TARGET"
@@ -10502,6 +10943,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ATTRIBUTEID"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x63199604:
+        d["HwpReturnCode"]="RC_SPI_POLL_TIMEOUT"
+        d["FFDC"]="BASE_ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x631ca0fc:
         d["HwpReturnCode"]="RC_ODY_PHYINIT_INVALID_EN_TX_DQ_PREAMBLE_PATTERN_U1"
         d["FFDC"]="PATTERN"
@@ -10510,6 +10956,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x631e7877:
         d["HwpReturnCode"]="RC_MVPD_CODE_BUG"
         d["FFDC"]="OCCURRENCE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x632efee8:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_SWC_CURRENT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x634cd59c:
@@ -10525,6 +10976,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x635218b6:
         d["HwpReturnCode"]="RC_PSTATE_PB_RESCLK_L3_TABLE_ERROR"
         d["FFDC"]="L3_VEC_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x635a4370:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="N_MODE_PMIC0"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x635b698f:
@@ -10595,6 +11051,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x64040390:
         d["HwpReturnCode"]="RC_PGPE_BAD_MODE"
         d["FFDC"]="BADMODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6408a441:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_INCOMPLETE_WRITE"
+        d["FFDC"]="START_ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x64134764:
@@ -10707,6 +11168,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="LOC_ENDP_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x650d95d8:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT1_RO_INPUTS_0"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x651d1860:
         d["HwpReturnCode"]="RC_INVALID_PMIC_INDEX_RECEIVED"
         d["FFDC"]="EXPECTED_MAX_PMICS"
@@ -10732,6 +11198,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="IMAGE_TYPE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6539ed63:
+        d["HwpReturnCode"]="RC_SPI_TPM_FIFO_TIMEOUT"
+        d["FFDC"]="TOTAL_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6544c84c:
         d["HwpReturnCode"]="RC_XIPC_RS4_DECOMPRESS_ERROR"
         d["FFDC"]="CHIP_TARGET"
@@ -10740,6 +11211,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x65478822:
         d["HwpReturnCode"]="RC_POZ_SPPE_NOT_READY_ERR"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x654b77af:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="MRANK"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6559d0da:
@@ -10842,11 +11318,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="FAILING_ATTR"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x66482b00:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET0"
-        d["FFDC"]="MY_TEST_UINT32"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x665434ce:
         d["HwpReturnCode"]="RC_P10_IO_QUIESCE_LANE_RX_LANE_BUSY_TIMEOUT_ERROR"
         d["FFDC"]="PAUC_TARGET"
@@ -10907,6 +11378,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="VDD_A"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x674c310f:
+        d["HwpReturnCode"]="RC_POZ_TP_VITL_CLK_OFF_ERR"
+        d["FFDC"]="PERV_CTRL0_READ_DATA"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x674d5b4f:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_EFD_MEMORY_SPACE_SIZE_ERROR"
         d["FFDC"]="OCMB_CHIP_TARGET"
@@ -10932,6 +11408,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET_CHIPLET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x67bc4ced:
+        d["Register FFDC"]="OSC_SWITCH_SENSE_REG_SCOM"
+        while (len(data) - i) > 0:
+            registerArray = []
+            if (len(data) - i) >= POS_LEN:
+                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
+                i += POS_LEN
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SNS1LTH_RO",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            d[chipPosLabel] = registerArray
     if ffdcId == 0x67be062f:
         d["HwpReturnCode"]="RC_P10_TOD_SETUP_INVALID_NODE_DELAY"
         d["FFDC"]="LONGEST_DELAY"
@@ -10960,6 +11449,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x681ae901:
         d["HwpReturnCode"]="RC_I2C_SCOM_EXPECTED_IBM_INDICATOR"
         d["FFDC"]="ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x683d1ffc:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_R0A"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6844cafb:
@@ -11015,6 +11509,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x691d12e0:
         d["HwpReturnCode"]="RC_P10_ATTR_UPDATE_PDI_KEYWORD_HEADER_ERR"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x69213eb7:
+        d["HwpReturnCode"]="RC_TEST_PERV_TARGET1"
+        d["FFDC"]="TARGET_PERV"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x69407c8f:
@@ -11127,6 +11626,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="POW_COMMAND"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6a68ee08:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC_R2F_PMIC_CONFIG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6a953b4a:
         d["HwpReturnCode"]="RC_XGPE_IMG_NOT_FOUND_IN_HW_IMG"
         d["FFDC"]="XIP_FAILURE_CODE"
@@ -11162,11 +11666,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CLOCK_POS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x6b0f79c6:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET0"
-        d["FFDC"]="MY_TEST_UINT64"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6b14f0d8:
         d["HwpReturnCode"]="RC_MSS_EFF_GROUPING_NOT_ENOUGH_MEMORY"
         d["FFDC"]="REQUESTED_MEM_SIZE"
@@ -11187,9 +11686,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="UT_FREQ"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6b38ac7d:
+        d["HwpReturnCode"]="RC_POZ_CBS_ACK_NOT_SEEN_ERR"
+        d["FFDC"]="TARGET_CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6b3fca06:
         d["HwpReturnCode"]="RC_P10_SETUP_MMIO_BARS_PAU_MMIO_BAR_ATTR_ERR"
         d["FFDC"]="BAR_OFFSET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6b3fdbc9:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="OCMB_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6b43a139:
@@ -11212,6 +11721,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CHIP_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6b77c09a:
+        d["HwpReturnCode"]="RC_POZ_FFDC_SCRATCH_SPACE_FULL_ERROR"
+        d["FFDC"]="FAILED_RC"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6b852382:
         d["HwpReturnCode"]="RC_P10_GETPUTMEMPROC_UNSUPPORTED_FLAGS"
         d["FFDC"]="FLAGS"
@@ -11225,6 +11739,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x6b87eed8:
         d["HwpReturnCode"]="RC_P10_THREAD_CONTROL_STEP_FAIL"
         d["FFDC"]="THREAD"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6b8f8250:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_R73_STATUS_5"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6b95fc36:
@@ -11322,14 +11841,14 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="REQ_ID"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x6c659432:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET0"
-        d["FFDC"]="TARGET_CHIP"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6c694ef0:
         d["HwpReturnCode"]="RC_P10_CHTM_CTRL_TIMEOUT"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6c8b674e:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="PORT_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6ca59029:
@@ -11340,6 +11859,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x6cab301d:
         d["HwpReturnCode"]="RC_ODY_DRAMINIT_TRAINING_FW_MISMATCH"
         d["FFDC"]="PORT_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6cc8f5ef:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_ERASE_MISMATCH"
+        d["FFDC"]="END_ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6cf29c22:
@@ -11465,6 +11989,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TP_PLL_LOCK_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6eb408a4:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET1"
+        d["FFDC"]="MY_TEST_UINT32"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6edb8615:
         d["HwpReturnCode"]="RC_PSTATE_PB_WOF_OVERRIDE_INVALID"
         d["FFDC"]="SYS_PS"
@@ -11478,6 +12007,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x6f3903f2:
         d["HwpReturnCode"]="RC_P10_BUILD_SMP_INVALID_TOPOLOGY"
         d["FFDC"]="FBC_BROADCAST_MODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x6f492142:
+        d["HwpReturnCode"]="RC_SPI_INVALID_TRANSACTION_PARMS"
+        d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x6f4cf0d5:
@@ -11720,6 +12254,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MSS_VPD_FREQ_2"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x71b878e5:
+        d["HwpReturnCode"]="RC_THRESHOLD_STACK_LIMIT_CROSSED"
+        d["FFDC"]="THREAD_ID"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x71c1bb8a:
         d["HwpReturnCode"]="RC_PSTATE_PB_IQ_VPD_ERROR"
         d["FFDC"]="GOOD_CACHES_PER_SORT"
@@ -11733,6 +12272,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x71dc19c6:
         d["HwpReturnCode"]="RC_P10_MSS_BAD_FREQ_CALCULATED"
         d["FFDC"]="PROC_TYPE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x71e3a5f7:
+        d["HwpReturnCode"]="RC_SBE_SPI_WRITTEN_DATA_MISMATCH"
+        d["FFDC"]="SPI_ENGINE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x71e71179:
@@ -11750,6 +12294,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ROTATE_COUNT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x7222a8f0:
+        d["HwpReturnCode"]="RC_TEST_PERV_TARGET1"
+        d["FFDC"]="MY_TEST_UINT8"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x72436fd0:
         d["HwpReturnCode"]="RC_MSS_NO_DATABUS_UTILIZATION"
         d["FFDC"]="PORT_DATABUS_UTIL"
@@ -11758,6 +12307,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x7247f6c9:
         d["HwpReturnCode"]="RC_EXP_UPDATE_DEV_INF_ERR"
         d["FFDC"]="MCHP_ERROR_CODE_1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x724dba7e:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET1"
+        d["FFDC"]="TARGET_CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x725e3e00:
@@ -12025,6 +12579,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PORT9_FREQ_SUPPORT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x750393c6:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_R05"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x750e0c53:
         d["HwpReturnCode"]="RC_EXP_ROW_REPAIR_WITH_MNFG_REPAIRS_DISABLED"
         d["FFDC"]="SRANK"
@@ -12085,6 +12644,94 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="REFRESH_MODE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x75a5c055:
+        d["Register FFDC"]="SCRATCH_REGS_CFAM"
+        while (len(data) - i) > 0:
+            registerArray = []
+            if (len(data) - i) >= POS_LEN:
+                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
+                i += POS_LEN
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_12_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            d[chipPosLabel] = registerArray
     if ffdcId == 0x75ab984a:
         d["HwpReturnCode"]="RC_INVALID_PMIC_INDEX_RECEIVED"
         d["FFDC"]="OCMB_TARGET"
@@ -12193,6 +12840,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x772dccde:
         d["HwpReturnCode"]="RC_P10_BOOT_MODE_BITVEC_MERGE_ERROR"
         d["FFDC"]="PLAT_TYPE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x77471563:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="MR20_PAT1_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x774ad54b:
@@ -12325,6 +12977,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT32"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x789762ae:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1"
+        d["FFDC"]="TARGET_CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x78be0191:
         d["HwpReturnCode"]="RC_XGPE_IMG_EXCEED_SRAM_SIZE"
         d["FFDC"]="BAD_IMG_SIZE"
@@ -12388,6 +13045,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x791a2aa3:
         d["HwpReturnCode"]="RC_PM_AVSBUS_STATUS_READ_ERROR"
         d["FFDC"]="RESP_DATA"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x7921e67f:
+        d["HwpReturnCode"]="RC_MSS_INVALID_CCS_INSTR_OFFSET"
+        d["FFDC"]="OFFSET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x79405cc0:
@@ -12463,6 +13125,26 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x79cb0b9b:
         d["HwpReturnCode"]="RC_P10_PHB_PERST_PBCQ_CQ_NOT_IDLE"
         d["FFDC"]="NFIR_ADDR"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x79d33adf:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_SWA_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x79d7f77b:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_R08"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x79f149ab:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_VERIFY_FAIL"
+        d["FFDC"]="ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x79ff0810:
+        d["HwpReturnCode"]="RC_SPI_TPM_RESPONSE_TOO_SHORT"
+        d["FFDC"]="MAX_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x7a0199f0:
@@ -12555,9 +13237,9 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT64"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x7ad2162f:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET0"
-        d["FFDC"]="TARGET_CHIP"
+    if ffdcId == 0x7ad567d1:
+        d["HwpReturnCode"]="RC_PSTATE_NODE_PAU_FREQ_MISMATCH"
+        d["FFDC"]="CHIP_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x7ae4ad08:
@@ -12568,6 +13250,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x7afbeff7:
         d["HwpReturnCode"]="RC_ODY_DRAMINIT_TRAINING_FAILURE_MSG_BLOCK"
         d["FFDC"]="PMU_REVISION"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x7b0113fe:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT3_BREADCRUMB"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x7b02fc55:
@@ -12603,6 +13290,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x7b457158:
         d["HwpReturnCode"]="RC_SBE_SELECT_EX_FUSED_ODD_ERROR"
         d["FFDC"]="CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x7b4b758c:
+        d["HwpReturnCode"]="RC_SBE_SPI_ADDRESS_IS_NOT_ALIGNED"
+        d["FFDC"]="ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x7b7cd76c:
@@ -12740,6 +13432,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MC_PORT_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x7cc3c4b3:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_R04"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x7ce7dd82:
         d["HwpReturnCode"]="RC_SBE_SELECT_EX_ECO_CACHE_CONTAINED_CONFIG_ERROR"
         d["FFDC"]="CHIP"
@@ -12758,6 +13455,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x7cf0f253:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR8_RD_PREAMBLE_ATTR_VALUE"
         d["FFDC"]="DIMM_IN_ERROR"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x7cf8062f:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_R05"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x7d0936ad:
@@ -12930,6 +13632,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="C_RAS_STATUS_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x7eed3d8e:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_SWD_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x7f24c576:
         d["HwpReturnCode"]="RC_POZ_I2CC_RESET_ERROR"
         d["FFDC"]="STATUS"
@@ -13095,6 +13802,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="DISABLES_BYTE7"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x80bf40ba:
+        d["HwpReturnCode"]="RC_ODY_ECS_CCS_STUCK_IN_PROGRESS"
+        d["FFDC"]="OCMB_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x80d57a02:
         d["HwpReturnCode"]="RC_P10_THREAD_CONTROL_START_NOMAINT"
         d["FFDC"]="THREAD"
@@ -13183,11 +13895,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="DDLEVEL"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x81987fe8:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET0"
-        d["FFDC"]="TARGET_CHIP"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x81b5fc38:
         d["HwpReturnCode"]="RC_EXP_TWI_UNEXPECTED_WRITE_OFFSET"
         d["FFDC"]="STATUS_WORD32"
@@ -13196,6 +13903,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x81e0f12d:
         d["HwpReturnCode"]="RC_PSTATE_PB_BIASED_POUNDV_WOF_UT_ERROR"
         d["FFDC"]="ICS_TDP_DC_A"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x81ecdd0b:
+        d["HwpReturnCode"]="RC_POZ_CBS_ACK_NOT_SEEN_ERR"
+        d["FFDC"]="EXPECTED_ACK_VALUE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x81f78b32:
@@ -13233,11 +13945,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="REM_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x82695443:
-        d["HwpReturnCode"]="RC_TEST_PERV_TARGET0"
-        d["FFDC"]="TARGET_PERV"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x827041b8:
         d["HwpReturnCode"]="RC_MSS_EXP_POLL_ABORT_FW_STATUS_BUSY"
         d["FFDC"]="HOST_DL0_TRAINING_STATUS"
@@ -13251,6 +13958,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x82a7e0b6:
         d["HwpReturnCode"]="RC_P10_L3ERR_EXTRACT_TA_WRONG_SIZE_ERR"
         d["FFDC"]="TA_DATA_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x82b63d0f:
+        d["HwpReturnCode"]="RC_POZ_RCS_ERROR"
+        d["FFDC"]="PROC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x82b9fc8f:
@@ -13338,9 +14050,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="HEADER_MAGIC"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x834d6554:
+        d["HwpReturnCode"]="RC_IO_PPE_DONE_CLEANUP_FAILED"
+        d["FFDC"]="NOT_DONE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8355a8bd:
         d["HwpReturnCode"]="RC_ODY_SPPE_ATTR_SETUP_GRID_FREQ_MISMATCH"
         d["FFDC"]="PLL_BUCKET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x8359f445:
+        d["HwpReturnCode"]="RC_PSTATE_NODE_PAU_FREQ_MISMATCH"
+        d["FFDC"]="VPD_PAU_FREQ"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x835e752c:
@@ -13399,6 +14121,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x83e9906a:
         d["HwpReturnCode"]="RC_ODY_IO_LOAD_PPE_IMG_ERROR"
         d["FFDC"]="IMAGE_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x840671a2:
+        d["HwpReturnCode"]="RC_SPI_INVALID_TRANSACTION_PARMS"
+        d["FFDC"]="REQ_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x841228db:
@@ -13551,6 +14278,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="IMAGE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x851607fa:
+        d["HwpReturnCode"]="RC_SPI_INVALID_TRANSACTION_PARMS"
+        d["FFDC"]="BASE_ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x851c1703:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_OPMODE_CFG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8532bea0:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR51_BAD_WR_CRC_THRESHOLD"
         d["FFDC"]="DIMM_IN_ERROR"
@@ -13591,14 +14328,29 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MASTER_CORE_NUM"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x859df610:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_R06"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x85bad602:
         d["HwpReturnCode"]="RC_MSS_FREQ_INVALID_CALCULATED_TCK"
         d["FFDC"]="PROPOSED_TCK"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x85be9e6f:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_ERASE_MISMATCH"
+        d["FFDC"]="START_ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x85c6035a:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR112_BAD_DFE_GAIN_BIAS"
         d["FFDC"]="MAX"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x85d00211:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_R09"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x85d9b6c6:
@@ -13687,6 +14439,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x869c09a5:
         d["HwpReturnCode"]="RC_IO_PPE_DONE_CLEANUP_FAILED"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x869e4e5c:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="THRESHOLD"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x86c7388c:
@@ -13874,6 +14631,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OFFSET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x88e862e5:
+        d["HwpReturnCode"]="RC_MSS_INVALID_CCS_INSTR_OFFSET"
+        d["FFDC"]="MAX_INSTRUCTIONS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x88ed5d9f:
         d["HwpReturnCode"]="RC_P10_SBE_EXIT_CACHE_CONTAINED_ACTIVE_BACKING_OVERLAP_ERR"
         d["FFDC"]="BACKING_CACHES"
@@ -14044,11 +14806,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="HOST_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x8a55f064:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET0"
-        d["FFDC"]="MY_TEST_UINT8"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8a5b65f0:
         d["HwpReturnCode"]="RC_ODY_MEMDIAGS_TARGETED_SCRUB_FAILED_TO_INIT"
         d["FFDC"]="MC_TARGET"
@@ -14114,6 +14871,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="LINK_SPLIT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x8af28e07:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_SYSTEM_STATUS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8afe4396:
         d["HwpReturnCode"]="RC_HCODE_INVALID_TEMP2_BUF_SIZE"
         d["FFDC"]="SYS_PHASE"
@@ -14137,6 +14899,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x8b605f69:
         d["HwpReturnCode"]="RC_POZ_INVALID_GROUP_ID"
         d["FFDC"]="GROUP_ID_VALUE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x8b68eafe:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_R08"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8b75f224:
@@ -14192,6 +14959,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x8c18fd9e:
         d["HwpReturnCode"]="RC_INVALID_RING_IMAGE"
         d["FFDC"]="MAGIC"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x8c19fedb:
+        d["HwpReturnCode"]="RC_POZ_RCS_FPLL_NOT_LOCKED"
+        d["FFDC"]="PROC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8c27e43f:
@@ -14359,6 +15131,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT32"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x8d732ff1:
+        d["HwpReturnCode"]="RC_SBE_SPI_OPR_COMPLETION_CHECK_ERROR"
+        d["FFDC"]="SPI_ENGINE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8d76b729:
         d["HwpReturnCode"]="RC_P10_IOP_XRAM_INIT_TIMEOUT_ERROR"
         d["FFDC"]="TARGET"
@@ -14419,6 +15196,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CMD"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x8db7e102:
+        d["HwpReturnCode"]="RC_SPI_ERROR_STATUS"
+        d["FFDC"]="SEQUENCE_REG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8dcbb9e1:
         d["HwpReturnCode"]="RC_P10_MSS_FAILED_SYNC_MODE"
         d["FFDC"]="MEM_FREQ"
@@ -14442,6 +15224,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x8e001a78:
         d["HwpReturnCode"]="RC_PM_AVSBUS_WRITE_VOLTAGE_ERROR"
         d["FFDC"]="STATUS_ALERT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x8e008aab:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="CMP_HASH_3"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8e0a972c:
@@ -14554,14 +15341,14 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="REVISION_ATTR"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x8f39b04f:
+        d["HwpReturnCode"]="RC_SPI_TPM_COMMAND_TIMEOUT"
+        d["FFDC"]="TIMEOUT_MS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8f488eea:
         d["HwpReturnCode"]="RC_POZ_I2C_FIFO_TIMEOUT_ERROR"
         d["FFDC"]="DEVICEADDR"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x8f54dc8a:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET0"
-        d["FFDC"]="MY_TEST_UINT32"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8f55487a:
@@ -14609,6 +15396,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="SRANK"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x8fa097f0:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="GEN_HASH_2"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8fae3977:
         d["HwpReturnCode"]="RC_SBE_SELECT_EX_INSUFFICIENT_ACTIVE_CORES_ERROR"
         d["FFDC"]="ATTR_ACTIVE_CORES_NUM"
@@ -14627,11 +15419,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x8ff0b668:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_DIMM_GARD_TARGET0"
         d["FFDC"]="TARGET_DIMM"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x8ff1fd9c:
-        d["HwpReturnCode"]="RC_IO_PPE_DONE_CLEANUP_FAILED"
-        d["FFDC"]="DONE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x8ffd78db:
@@ -14722,6 +15509,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x90d5e579:
         d["HwpReturnCode"]="RC_EXP_UPDATE_INV_IMAGE_LEN"
         d["FFDC"]="FW_VERSION_A"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x90e62f97:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1"
+        d["FFDC"]="MY_TEST_UINT64"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x90ee410a:
@@ -14824,6 +15616,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="AVSRAIL"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x921117c4:
+        d["HwpReturnCode"]="RC_SBE_SPI_INVALID_LENGTH"
+        d["FFDC"]="ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x921ceb77:
         d["HwpReturnCode"]="RC_P10_L3_FLUSH_PURGE_REQ_TIMEOUT_ERR"
         d["FFDC"]="PURGEADDR"
@@ -14847,11 +15644,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x9264bc92:
         d["HwpReturnCode"]="RC_P10_FBC_EFF_CONFIG_LINKS_SAME_GROUP_ID_ERR"
         d["FFDC"]="LOC_FBC_CHIP_ID"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x92710b18:
-        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
-        d["FFDC"]="ROW_MAX"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x927695ee:
@@ -14995,6 +15787,11 @@ def hbfwParseHwpFfdc(ver, data):
                 i += SCOM_DATA_LEN
                 registerArray.append(dReg)
             d[chipPosLabel] = registerArray
+    if ffdcId == 0x93f72e8c:
+        d["HwpReturnCode"]="RC_SBE_SPI_INVALID_LENGTH"
+        d["FFDC"]="LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x93fb9320:
         d["HwpReturnCode"]="RC_RCS_CLOCK_TEST_OUT_ERROR"
         d["FFDC"]="ATTR_CP_REFCLOCK_SELECT_VALUE"
@@ -15055,6 +15852,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="COMMAND"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x94d6f1cc:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="CMP_HASH_2"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x94e1e69a:
         d["HwpReturnCode"]="RC_AUTO_WAKEUP_VECTOR_CREATION_FAILED"
         d["FFDC"]="FUSE_MODE"
@@ -15063,11 +15865,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x94ea9754:
         d["HwpReturnCode"]="RC_PM_AVSBUS_STATUS_READ_ERROR"
         d["FFDC"]="RAIL"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x94fa534a:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET0"
-        d["FFDC"]="MY_TEST_UINT64"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x94fe4a3e:
@@ -15190,6 +15987,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="DRAM"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x95e3313c:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="N_MODE_PMIC1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x95fdee73:
         d["HwpReturnCode"]="RC_P10_OMI_TRAIN_ERR"
         d["FFDC"]="TRAINING_STATUS"
@@ -15233,6 +16035,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x966feaf2:
         d["HwpReturnCode"]="RC_P10_DOWNSTREAM_TMPL1_REQUIRED_ERR"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x967565fa:
+        d["HwpReturnCode"]="RC_SPI_ERROR_STATUS"
+        d["FFDC"]="BASE_ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x96761956:
@@ -15358,6 +16165,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x97bbdca5:
         d["HwpReturnCode"]="RC_P10_MSS_BAD_FREQ_CALCULATED"
         d["FFDC"]="SUPPORTED_FREQ_1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x97c75789:
+        d["HwpReturnCode"]="RC_SPI_POLL_TIMEOUT"
+        d["FFDC"]="POLL_BITRANGE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x97c9746e:
@@ -15785,6 +16597,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="SYS_PHASE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x9c887d7d:
+        d["HwpReturnCode"]="RC_TEST_PERV_TARGET1"
+        d["FFDC"]="TARGET_CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x9c9a60f0:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR6_TRTP_ATTR_VALUE"
         d["FFDC"]="DIMM_IN_ERROR"
@@ -15805,11 +16622,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CORE_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x9cfa96b5:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET0"
-        d["FFDC"]="TARGET_PERV"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x9cfcd408:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_EFD_MEMORY_SPACE_OFFSET_ERROR"
         d["FFDC"]="BASE_MEMORY_SIZE"
@@ -15823,6 +16635,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x9d1d8de7:
         d["HwpReturnCode"]="RC_QME_SRAM_ACCESS_ERROR"
         d["FFDC"]="USE_BYTE_BUFFER"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x9d416d1d:
+        d["HwpReturnCode"]="RC_LINK_TRAINING_DONE_POLL_FAILED"
+        d["FFDC"]="FAIL"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x9d450fd6:
@@ -15935,6 +16752,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OCCURRENCE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x9ea1c454:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_SWA_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x9ea3a987:
         d["HwpReturnCode"]="RC_P10_SBE_CORE_SPR_SETUP_MASTER_CORE_ECO_MODE"
         d["FFDC"]="CHIP_TARGET"
@@ -15943,6 +16765,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0x9ea918c7:
         d["HwpReturnCode"]="RC_ODY_DRAMINIT_PERDRAM_RECOVERY_ATTEMPTS_EXCEEDED"
         d["FFDC"]="PORT_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x9eb3a748:
+        d["HwpReturnCode"]="RC_SPI_FLASH_ERASE_INSUFFICIENT"
+        d["FFDC"]="PAGE_ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x9eb92417:
@@ -15955,9 +16782,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MVPD_NAME"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x9ec8138f:
+        d["HwpReturnCode"]="RC_SPI_TPM_REQUEST_TOO_LONG"
+        d["FFDC"]="REMAINING_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x9ed1c8f9:
         d["HwpReturnCode"]="RC_ODY_DRAMINIT_SMBUS_SYNC_MSG_NOT_FOUND"
         d["FFDC"]="SYNOPSYS_MESSAGE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x9ed6b001:
+        d["HwpReturnCode"]="RC_TEST_PERV_TARGET1"
+        d["FFDC"]="MY_TEST_UINT64"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x9ee150b7:
@@ -15983,6 +16820,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="RING_ID"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x9f0202e5:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_R04"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x9f196142:
         d["HwpReturnCode"]="RC_FBC_CORE_TOPO_SIZE_ERROR"
         d["FFDC"]="CORE_TARGET"
@@ -15998,69 +16840,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="IDD_TDP_AC_B"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0x9f2b59c3:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT1_BREADCRUMB"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0x9f55af33:
         d["HwpReturnCode"]="RC_P10_RNG_INIT_SELF_TEST_FAILED_ERR"
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0x9f59579f:
-        d["Register FFDC"]="ODY_ROOT_CTRL_REGS_SCOM"
-        while (len(data) - i) > 0:
-            registerArray = []
-            if (len(data) - i) >= POS_LEN:
-                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
-                i += POS_LEN
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL0_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL1_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL2_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL3_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL4_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL5_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL6_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL7_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL8_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL9_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            d[chipPosLabel] = registerArray
     if ffdcId == 0x9f6c5d11:
         d["HwpReturnCode"]="RC_PSTATE_PB_XLATE_OVERFLOW"
         d["FFDC"]="FREQ_KHZ"
@@ -16221,9 +17010,9 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OFFSET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xa0c6b3a7:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET0"
-        d["FFDC"]="MY_TEST_UINT32"
+    if ffdcId == 0xa0dafb72:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="CMP_HASH_6"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xa0faed64:
@@ -16249,6 +17038,16 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xa12af704:
         d["HwpReturnCode"]="RC_EXP_UPDATE_AUTH_FAIL"
         d["FFDC"]="MCHP_ERROR_CODE_2"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa1329609:
+        d["HwpReturnCode"]="RC_VIN_BULK_BELOW_TOLERANCE"
+        d["FFDC"]="PMIC_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa13633d5:
+        d["HwpReturnCode"]="RC_SBE_SPI_INVALID_LENGTH"
+        d["FFDC"]="MAX_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xa13cafed:
@@ -16406,6 +17205,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MC1_PG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa3564d6f:
+        d["HwpReturnCode"]="RC_SPI_ERROR_STATUS"
+        d["FFDC"]="CLOCK_CONFIG_REG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xa37e0c17:
         d["HwpReturnCode"]="RC_P10_OCMB_ENABLE_SWIZZLE_BIT_OUT_OF_RANGE_ERROR"
         d["FFDC"]="MAX"
@@ -16496,6 +17300,59 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa4881b48:
+        d["Register FFDC"]="CBS_STATUS_REGS_SCOM"
+        while (len(data) - i) > 0:
+            registerArray = []
+            if (len(data) - i) >= POS_LEN:
+                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
+                i += POS_LEN
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_CS",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_TR_RO",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_EL",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_ENVSTAT_RO",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_TR_HIST",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_EL_HIST",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SB_CS",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SB_MSG",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_STAT_RO",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            d[chipPosLabel] = registerArray
     if ffdcId == 0xa498670a:
         d["HwpReturnCode"]="RC_SBE_SPI_HANG_TIMEOUT"
         d["FFDC"]="SPI_ENGINE"
@@ -16509,6 +17366,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xa4a54277:
         d["HwpReturnCode"]="RC_POZ_I2C_WAIT_FOR_CMD_COMP_TIMEOUT_ERROR"
         d["FFDC"]="ENGINE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa4ac0965:
+        d["HwpReturnCode"]="RC_ODY_ECS_MR16_TO_19_PAT1"
+        d["FFDC"]="UNIT_FFDC_MR16_TO_19_PAT1"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xa4b24472:
@@ -16679,6 +17541,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xa69066b0:
         d["HwpReturnCode"]="RC_OPIT_INTERRUPT_NOT_CLEAR"
         d["FFDC"]="CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa6976b94:
+        d["HwpReturnCode"]="RC_SPI_TPM_FIFO_TIMEOUT"
+        d["FFDC"]="STATUS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xa69ab8a2:
@@ -17345,6 +18212,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET_CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa9232ffb:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="CMP_HASH_0"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xa92aaeb2:
         d["HwpReturnCode"]="RC_PSTATE_PB_IQ_VPD_ERROR"
         d["FFDC"]="VERSION"
@@ -17410,6 +18282,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PLL_READ"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa9d72927:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_R0B"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xa9e55d24:
+        d["HwpReturnCode"]="RC_INVALID_PMIC_DT_DDR5_TARGET_CONFIG"
+        d["FFDC"]="PRESENT_PMIC_DT_TARGETS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xa9eac0a4:
         d["HwpReturnCode"]="RC_ODY_DRAMINIT_REPAIRS_EXCEEDED"
         d["FFDC"]="DISABLES_BYTE5"
@@ -17438,6 +18320,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xaa32aa11:
         d["HwpReturnCode"]="RC_PGPE_INIT_DEBUG_HALT"
         d["FFDC"]="CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xaa35c86a:
+        d["HwpReturnCode"]="RC_ODY_ECS_MR16_TO_19_PAT0"
+        d["FFDC"]="UNIT_FFDC_MR16_TO_19_PAT0"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xaa3b2a82:
@@ -17648,9 +18535,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MISMATCHED_PORT_RANK"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xabd60576:
+        d["HwpReturnCode"]="RC_SPI_FLASH_ERASE_INSUFFICIENT"
+        d["FFDC"]="ERASE_END"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xabe444bc:
         d["HwpReturnCode"]="RC_POZ_FILE_HASH_MISMATCH"
         d["FFDC"]="GEN_HASH_5"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xabe68e74:
+        d["HwpReturnCode"]="RC_BIST_NONZERO_MISCOMPARES"
+        d["FFDC"]="ABIST_NOT_LBIST"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xabea2fc8:
@@ -17758,6 +18655,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CHIPLET_NUMBER"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xacee5f96:
+        d["HwpReturnCode"]="RC_POZ_TP_STOPCLOCKS_ERR"
+        d["FFDC"]="TARGET_CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xad05a382:
         d["HwpReturnCode"]="RC_PSTATE_MVPD_CHIPLET_VOLTAGE_NOT_EQUAL"
         d["FFDC"]="CURRENT_EQ_CHIPLET_TARGET"
@@ -17781,6 +18683,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xad667030:
         d["HwpReturnCode"]="RC_XGPE_PBA_INIT_FAILED"
         d["FFDC"]="CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xad68a113:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_R0B"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xad7f500b:
@@ -17823,9 +18730,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OMI_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xae0fbecf:
+        d["HwpReturnCode"]="RC_POZ_ARBSEMA_RESERVE_TIMEOUT"
+        d["FFDC"]="SIDE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xae240cf6:
         d["HwpReturnCode"]="RC_P10_SBE_MCS_SETUP_NO_MC_FOUND_ERR"
         d["FFDC"]="IS_MPIPL"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xae241199:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_SWB_CURRENT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xae3b7031:
@@ -17936,6 +18853,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TURBO_VID_COMPARE_IVID_VALUE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xae7e85d7:
+        d["HwpReturnCode"]="RC_SBE_SPI_WRITTEN_DATA_MISMATCH"
+        d["FFDC"]="CHIP_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xae8c1619:
         d["HwpReturnCode"]="RC_PM_OCB2_PUT_DATA_ERROR"
         d["FFDC"]="TARGET"
@@ -17961,9 +18883,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="XGPE_BASE_ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xaed13eeb:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_DATA_CFG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xaeda5642:
         d["HwpReturnCode"]="RC_P10_SBE_CORE_SPR_SETUP_MASTER_CORE_ECO_MODE"
         d["FFDC"]="ECO_MODE_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xaeea0c03:
+        d["HwpReturnCode"]="RC_POZ_SBEFIFO_OPERATION_FAILED"
+        d["FFDC"]="SBEFIFO_RC"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xaeeab277:
@@ -18026,6 +18958,64 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CORE_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xaf6d4f8b:
+        d["Register FFDC"]="ROOT_CTRL_REGS_SCOM"
+        while (len(data) - i) > 0:
+            registerArray = []
+            if (len(data) - i) >= POS_LEN:
+                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
+                i += POS_LEN
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL0_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL1_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL2_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL3_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL4_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL5_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL6_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL7_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL8_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL9_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            d[chipPosLabel] = registerArray
     if ffdcId == 0xaf837662:
         d["HwpReturnCode"]="RC_MSS_EXP_BOOT_CONFIG_LANE_INV_FAIL"
         d["FFDC"]="BOOT_MODE"
@@ -18056,9 +19046,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ADDR"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xaff048d7:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT2_BREADCRUMB"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xaff698b4:
         d["HwpReturnCode"]="RC_PM_PBA_INIT_INCORRECT_MODE"
         d["FFDC"]="PM_MODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xaff9c4b1:
+        d["HwpReturnCode"]="RC_MSS_INVALID_CCS_INSTR_OFFSET"
+        d["FFDC"]="INVALID_OFFSET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb000adcd:
@@ -18151,6 +19151,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT16"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb0fbb1d7:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_R07"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb1146a71:
         d["HwpReturnCode"]="RC_P10_INTP_QUIESCE_TIMEOUT"
         d["FFDC"]="RST_CTL_DATA"
@@ -18169,6 +19174,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xb140de70:
         d["HwpReturnCode"]="RC_L3_PURGE_DONE_TIMEOUT"
         d["FFDC"]="MC_CORE_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb148b26e:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET1"
+        d["FFDC"]="MY_TEST_UINT64"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb18c87ac:
@@ -18194,6 +19204,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xb1f98984:
         d["HwpReturnCode"]="RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP"
         d["FFDC"]="MSS_INTERLEAVE_ENABLE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb21f05c2:
+        d["HwpReturnCode"]="RC_POZ_PLL_LOCK_ERROR"
+        d["FFDC"]="FAILED_CHIPLETS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb220e1dc:
@@ -18321,64 +19336,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PMIC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xb351fc3a:
-        d["Register FFDC"]="ODY_ROOT_CTRL_REGS_CFAM"
-        while (len(data) - i) > 0:
-            registerArray = []
-            if (len(data) - i) >= POS_LEN:
-                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
-                i += POS_LEN
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL0_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL1_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL2_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL3_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL4_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL5_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL6_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL7_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL8_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= CFAM_DATA_LEN:
-                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL9_FSI",
-                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
-                i += CFAM_DATA_LEN
-                registerArray.append(dReg)
-            d[chipPosLabel] = registerArray
     if ffdcId == 0xb359b28f:
         d["HwpReturnCode"]="RC_P10_ADU_UTILS_INVALID_ADDR"
         d["FFDC"]="MAXADDRESS"
@@ -18387,6 +19344,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xb3699549:
         d["HwpReturnCode"]="RC_TOR_TRAVERSAL_ERROR"
         d["FFDC"]="EXPECTED_RING_ID"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb375f412:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="MR16_TO_19_PAT1"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb37eb52f:
@@ -18549,6 +19511,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb5910fd3:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_SWD_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb5921c45:
         d["HwpReturnCode"]="RC_P10_HW540133_FLB_WA_ERR"
         d["FFDC"]="TARGET"
@@ -18674,6 +19641,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="HEADER_RING_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb731a624:
+        d["HwpReturnCode"]="RC_SBE_SPI_OPR_COMPLETION_CHECK_ERROR"
+        d["FFDC"]="BASE_ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb746f86a:
         d["HwpReturnCode"]="RC_PMIC_ENABLE_FAIL"
         d["FFDC"]="PMIC_TARGET"
@@ -18717,6 +19689,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xb7b3d7e3:
         d["HwpReturnCode"]="RC_ODY_PPR_RESOURCE_UNAVAILABLE"
         d["FFDC"]="MRANK"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb7b827d4:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="N_MODE_PMIC3"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb7b9e629:
@@ -18769,6 +19746,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="HW_DELAY"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb819463f:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="CMP_HASH_4"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb89a4e4a:
         d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_WITH_MNFG_REPAIRS_DISABLED"
         d["FFDC"]="MRANK"
@@ -18812,6 +19794,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xb93730a2:
         d["HwpReturnCode"]="RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR"
         d["FFDC"]="LOC_IOLINK_EVN_FAIL"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xb94d94b2:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_GPO_DRIVE_CFG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xb94ef3ba:
@@ -18882,6 +19869,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xba1a9a84:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR33_CA_ODT_FIELD_VALUE"
         d["FFDC"]="FIELD"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xba1d7f37:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_R0B"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xba327795:
@@ -18962,6 +19954,11 @@ def hbfwParseHwpFfdc(ver, data):
                 i += SCOM_DATA_LEN
                 registerArray.append(dReg)
             d[chipPosLabel] = registerArray
+    if ffdcId == 0xba41e776:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="N_MODE_PMIC2"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xba4f5c74:
         d["HwpReturnCode"]="RC_GPIO_INPUT_PORT_TIMEOUT"
         d["FFDC"]="GPIO"
@@ -18970,6 +19967,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xba535c56:
         d["HwpReturnCode"]="RC_POZ_I2CC_RESET_ERROR"
         d["FFDC"]="RETRYCOUNT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xba6c84f1:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_SWD_CURRENT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xba7a1002:
@@ -19022,6 +20024,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT32"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xbb0e82d7:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT1_RO_INPUTS_1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xbb1c7053:
         d["HwpReturnCode"]="RC_P10_PHB_PERST_PBCQ_CQ_NOT_IDLE"
         d["FFDC"]="NFIR_DATA"
@@ -19060,6 +20067,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xbb6959f2:
         d["HwpReturnCode"]="RC_TIMEFAC_FROM_PC_XFER_RECEIVE_DONE_TIMEOUT"
         d["FFDC"]="QME_TFCSR"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xbb69c7a2:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_ADDRESS_OVERRUN"
+        d["FFDC"]="RAW_DEVICE_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xbb7deb13:
@@ -19112,6 +20124,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="COARSE_DEBUG_VALUE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xbbca92d2:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_R06"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xbbda19fc:
         d["HwpReturnCode"]="RC_TOR_TRAVERSAL_ERROR"
         d["FFDC"]="SECTION_OFFSET"
@@ -19130,6 +20147,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xbc11e6d9:
         d["HwpReturnCode"]="RC_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET"
         d["FFDC"]="MSS_NEST_FREQ_4"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xbc2aa223:
+        d["HwpReturnCode"]="RC_GPIO_INPUT_PORT_TIMEOUT"
+        d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xbc445063:
@@ -19152,11 +20174,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TAA"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xbc905a96:
-        d["HwpReturnCode"]="RC_OMI_TRAINING_DONE_POLL_FAILED"
-        d["FFDC"]="TARGET"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xbc90ba53:
         d["HwpReturnCode"]="RC_P10_MSS_ZERO_HOST_TO_DDR_FREQ_RATIO"
         d["FFDC"]="PORT_TARGET"
@@ -19170,6 +20187,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xbc9a5017:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR8_RD_PREAMBLE_FIELD_VALUE"
         d["FFDC"]="FIELD"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xbca6c588:
+        d["HwpReturnCode"]="RC_SPI_TPM_RESPONSE_SIZE_MISMATCH"
+        d["FFDC"]="RECEIVED_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xbcaf78c3:
@@ -19210,6 +20232,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xbd2e5917:
         d["HwpReturnCode"]="RC_XIPC_MVPD_PG_KEYWORD_VERSION_ERROR"
         d["FFDC"]="MVPD_PG_KWD_VERSION"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xbd36c697:
+        d["HwpReturnCode"]="RC_SPI_POLL_TIMEOUT"
+        d["FFDC"]="POLL_VALUE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xbd42da66:
@@ -19367,6 +20394,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BUCKET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xbed0d1c6:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_INVALID_WRITE_SEQUENCE"
+        d["FFDC"]="WRITE_ACTIVE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xbed5810d:
         d["HwpReturnCode"]="RC_ODY_SPPE_ATTR_SETUP_GRID_FREQ_MISMATCH"
         d["FFDC"]="FREQ_GRID_EXP"
@@ -19385,6 +20417,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xbef41dd6:
         d["HwpReturnCode"]="RC_MSS_EFF_CONFIG_MIRROR_DISABLED"
         d["FFDC"]="MIRROR_PLACEMENT_POLICY"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xbef77354:
+        d["HwpReturnCode"]="RC_ODY_ECS_ERR_THRESHOLD_EXCEEDED"
+        d["FFDC"]="DRAM_NUM"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xbf08fa11:
@@ -19508,6 +20545,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc044e7f9:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_GPI_VALUE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc048b4cd:
         d["HwpReturnCode"]="RC_INVALID_RING_CHIPLET_SECTION"
         d["FFDC"]="IMG_POINTER"
@@ -19566,6 +20608,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xc10158b8:
         d["HwpReturnCode"]="RC_P10_IO_LOAD_PPE_IOPPE_IMG_ERROR"
         d["FFDC"]="IOO_IMAGE_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc11d22ab:
+        d["HwpReturnCode"]="RC_POZ_CBS_ACK_NOT_SEEN_ERR"
+        d["FFDC"]="CBS_STAT_READ_DATA"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc17c5ffd:
@@ -19693,6 +20740,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MAX_ALLOWED_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc24d1d54:
+        d["HwpReturnCode"]="RC_MSS_PLUG_RULES_DDR5_DIMM_SPD_REV_NOT_CURRENT"
+        d["FFDC"]="DRAM_GEN"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc262d772:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_EFD_NOT_FOUND"
         d["FFDC"]="EFD_METADATA7"
@@ -19723,6 +20775,24 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="EFD_MEMORY_SPACE_MAPPING_VALUE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc2bd0400:
+        d["Register FFDC"]="PERV_CTRL_REGS_SCOM"
+        while (len(data) - i) > 0:
+            registerArray = []
+            if (len(data) - i) >= POS_LEN:
+                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
+                i += POS_LEN
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL0_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= SCOM_DATA_LEN:
+                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_PERV_CTRL1_RW",
+                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
+                i += SCOM_DATA_LEN
+                registerArray.append(dReg)
+            d[chipPosLabel] = registerArray
     if ffdcId == 0xc2c39c89:
         d["HwpReturnCode"]="RC_PSTATE_PB_POUNDV_SLOPE_ERROR"
         d["FFDC"]="POINT"
@@ -19876,6 +20946,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ERROR_CODE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc2d5d087:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT_RB4_VCC_VIN_VINP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc2ec9eb8:
         d["HwpReturnCode"]="RC_POZ_I2C_WAIT_FOR_CMD_COMP_TIMEOUT_ERROR"
         d["FFDC"]="STATUS"
@@ -19961,6 +21036,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="IMAGE_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc3d5e018:
+        d["HwpReturnCode"]="RC_SPI_TPM_RESPONSE_TOO_SHORT"
+        d["FFDC"]="RESPONSE_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc3d95d4a:
         d["HwpReturnCode"]="RC_PM_AVSBUS_WRITE_VOLTAGE_ERROR"
         d["FFDC"]="RESP_DATA"
@@ -19996,59 +21076,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="NX_PBI_UMAC_STATUS_CONTROL"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xc493d482:
-        d["Register FFDC"]="ODY_CBS_STATUS_REGS_SCOM"
-        while (len(data) - i) > 0:
-            registerArray = []
-            if (len(data) - i) >= POS_LEN:
-                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
-                i += POS_LEN
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_CS",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_TR_RO",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_EL",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_ENVSTAT_RO",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_TR_HIST",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_EL_HIST",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SB_CS",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SB_MSG",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_STAT_RO",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            d[chipPosLabel] = registerArray
     if ffdcId == 0xc4a056a6:
         d["HwpReturnCode"]="RC_MSS_EXP_I2C_CMD_FAIL"
         d["FFDC"]="OCMB_TARGET"
@@ -20062,6 +21089,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xc4bc578c:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET8"
         d["FFDC"]="MY_TEST_UINT64"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc4c6428e:
+        d["HwpReturnCode"]="RC_SBE_SPI_ADDRESS_IS_NOT_ALIGNED"
+        d["FFDC"]="ECC_STATUS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc4cc1119:
@@ -20099,9 +21131,24 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="FW_VERSION_A"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc52b2c27:
+        d["HwpReturnCode"]="RC_TEST_PERV_TARGET1"
+        d["FFDC"]="MY_TEST_UINT32"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc53dcbf1:
         d["HwpReturnCode"]="RC_QME_SRAM_ACCESS_ERROR"
         d["FFDC"]="LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc54097c5:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET1"
+        d["FFDC"]="TARGET_PERV"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc560d1dd:
+        d["HwpReturnCode"]="RC_MSS_IRRELEVANT_FUNC_CALL"
+        d["FFDC"]="DIMM_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc564151f:
@@ -20117,6 +21164,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xc57b93ca:
         d["HwpReturnCode"]="RC_MC_GROUP_SETUP_ERR"
         d["FFDC"]="PROC_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc5818d9c:
+        d["HwpReturnCode"]="RC_MSS_PLUG_RULES_DDR5_DIMM_SPD_REV_NOT_CURRENT"
+        d["FFDC"]="MIN_SPD_REV"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc58fb84d:
@@ -20202,6 +21254,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xc632a210:
         d["HwpReturnCode"]="RC_MAGIC_NUMBER_NOT_VALID"
         d["FFDC"]="CHIP_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc63516f7:
+        d["HwpReturnCode"]="RC_ODY_OUT_OF_BOUNDS_DBYTE_PASSED_TO_SWIZZLE"
+        d["FFDC"]="MAX_DBYTE_INDEX"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc635b60c:
@@ -20399,6 +21456,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="VALUE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc804bed7:
+        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
+        d["FFDC"]="BANK_GROUP_MAX_INDEX"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc8107f74:
         d["HwpReturnCode"]="RC_PROCPM_AVSBUS_POLL_TIMEOUT"
         d["FFDC"]="AVSBUS_BRIDGE_NUM"
@@ -20444,6 +21506,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PLAT_SOURCE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc8b9a611:
+        d["HwpReturnCode"]="RC_SPI_POLL_TIMEOUT"
+        d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc8e1e941:
         d["HwpReturnCode"]="RC_ODY_INVALID_GI2C_TARGET_CONFIG"
         d["FFDC"]="RCD_TARGET_POS"
@@ -20457,6 +21524,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xc8f1daed:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET8"
         d["FFDC"]="TARGET_CHIP"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc8fb8e3c:
+        d["HwpReturnCode"]="RC_SPI_INVALID_TRANSACTION_PARMS"
+        d["FFDC"]="RSP_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc9053bc2:
@@ -20514,6 +21586,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="AVS_BUS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xc9e09a26:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_INCOMPLETE_WRITE"
+        d["FFDC"]="END_ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xc9e636c6:
         d["HwpReturnCode"]="RC_PMIC_MISMATCHING_REVISIONS"
         d["FFDC"]="PMIC_TARGET"
@@ -20537,6 +21614,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xca53116d:
         d["HwpReturnCode"]="RC_P10_PGPE_BOOT_COPIER_BUILD_FAIL"
         d["FFDC"]="EC_LEVEL"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xca54dd66:
+        d["HwpReturnCode"]="RC_POZ_CBS_ACK_NOT_SEEN_ERR"
+        d["FFDC"]="TIMEOUT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xca7b1a50:
@@ -20624,6 +21706,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="DDR_TYPE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xcb688e1a:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="MR20_PAT1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcb6cc969:
         d["HwpReturnCode"]="RC_P10_SBE_MCS_SETUP_NO_MC_FOUND_ERR"
         d["FFDC"]="IS_MASTER_SBE"
@@ -20674,6 +21761,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xcc021cbe:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_R08"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcc090eaa:
         d["HwpReturnCode"]="RC_MSS_INVALID_PRIMARY_RANK_COUNT"
         d["FFDC"]="RANK_COUNT"
@@ -20687,6 +21779,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xcc0e5a77:
         d["HwpReturnCode"]="RC_QME_START_TIMEOUT"
         d["FFDC"]="IR_REG_VAL"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xcc1300c9:
+        d["HwpReturnCode"]="RC_UNTRUSTED_RING_IMAGE"
+        d["FFDC"]="OFFSET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcc3405e1:
@@ -20709,9 +21806,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CONTAINED_IPL_TYPE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xcc487c1a:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_WRITE_TIMEOUT"
+        d["FFDC"]="OPERATION"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcc48ccea:
         d["HwpReturnCode"]="RC_SBE_SELECT_EX_INSUFFICIENT_ACTIVE_CORES_ERROR"
         d["FFDC"]="ACTIVE_CORES_NUM"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xcc4993fc:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_GPIO_CFG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcc4fbbb9:
@@ -20799,6 +21906,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TOPOSCOMS3"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xccee1882:
+        d["HwpReturnCode"]="RC_SPI_TPM_REQUEST_TOO_SHORT"
+        d["FFDC"]="REQUEST_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xccf093e7:
         d["HwpReturnCode"]="RC_EXP_UPDATE_WRITE_FAIL"
         d["FFDC"]="MCHP_ERROR_CODE_2"
@@ -20824,11 +21936,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MAX_ALLOWED_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xcd2c2327:
-        d["HwpReturnCode"]="RC_TEST_PERV_TARGET0"
-        d["FFDC"]="MY_TEST_UINT64"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcd3f4f92:
         d["HwpReturnCode"]="RC_MSS_EXP_BOOT_CONFIG_INVALID_CMD"
         d["FFDC"]="COMMAND"
@@ -20852,6 +21959,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xcd8dd354:
         d["HwpReturnCode"]="RC_ODY_PPR_RESOURCE_UNAVAILABLE"
         d["FFDC"]="ROW"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xcda11063:
+        d["HwpReturnCode"]="RC_ODY_ECS_MR20_PAT1"
+        d["FFDC"]="UNIT_FFDC_MR20_PAT1"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcda5d3ca:
@@ -20947,6 +22059,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xce5c9dc4:
         d["HwpReturnCode"]="RC_BCEBAR1_TOPOLOGY_INIT_ERROR"
         d["FFDC"]="BCE1_BAR_REG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xce5f0ed9:
+        d["HwpReturnCode"]="RC_POZ_SCRATCH_ALLOC_FAILED"
+        d["FFDC"]="AVAILABLE_SPACE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xce82329f:
@@ -21112,6 +22229,16 @@ def hbfwParseHwpFfdc(ver, data):
                 i += SCOM_DATA_LEN
                 registerArray.append(dReg)
             d[chipPosLabel] = registerArray
+    if ffdcId == 0xce904ee1:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_SWD_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xcea88b1e:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_SWB_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xceb0dcc7:
         d["HwpReturnCode"]="RC_POZ_FILE_HASH_MISMATCH"
         d["FFDC"]="GEN_HASH_4"
@@ -21130,6 +22257,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xced1e7f5:
         d["HwpReturnCode"]="RC_EXP_ROW_REPAIR_WITH_MNFG_REPAIRS_DISABLED"
         d["FFDC"]="ROW"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xced84fbc:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT2_RO_INPUTS_1"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcee1d766:
@@ -21212,6 +22344,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="N1_PG_MVPD"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xcf8417cb:
+        d["HwpReturnCode"]="RC_SYSTEM_PAU_FREQ_MISMATCH"
+        d["FFDC"]="CHIP_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcf8e46cf:
         d["HwpReturnCode"]="RC_PM_OCB3_GET_DATA_ERROR"
         d["FFDC"]="TARGET"
@@ -21250,6 +22387,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xcfd0360b:
         d["HwpReturnCode"]="RC_DDIMM_GET_EFD_VPD_BUFFER_INADEQUATE_FOR_DDR"
         d["FFDC"]="VPD_BUFFER_SIZE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xcfd57382:
+        d["HwpReturnCode"]="RC_ODY_ECS_ERR_THRESHOLD_EXCEEDED"
+        d["FFDC"]="PORT_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xcfdbfcf7:
@@ -21665,6 +22807,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TX1_LANE_CONTROL_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xd2469204:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_R73_STATUS_5"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xd26e3e6a:
         d["HwpReturnCode"]="RC_POZ_I2C_STATUS_ERROR"
         d["FFDC"]="RETRYCOUNT"
@@ -21860,6 +23007,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CQ_STAT_ADDR"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xd47922e4:
+        d["HwpReturnCode"]="RC_POZ_ARBSEMA_RESERVE_TIMEOUT"
+        d["FFDC"]="SEMAPHORE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xd488ed53:
         d["HwpReturnCode"]="RC_THOLD_ERR"
         d["FFDC"]="REGIONS"
@@ -21920,11 +23072,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="VALUE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xd5054b3f:
-        d["HwpReturnCode"]="RC_ODY_DRAMINIT_MEM_ADDR_RANGE_OUT_OF_BOUNDS"
-        d["FFDC"]="TARGET"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xd50cd50c:
         d["HwpReturnCode"]="RC_P10_FAB_IOVALID_TL_FULL_NOT_TRAINED_RETRAIN_HALF_ERR"
         d["FFDC"]="REM_ENDP_TARGET"
@@ -21975,94 +23122,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="STATUS_DATA"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xd57f8419:
-        d["Register FFDC"]="ODY_SCRATCH_REGS_SCOM"
-        while (len(data) - i) > 0:
-            registerArray = []
-            if (len(data) - i) >= POS_LEN:
-                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
-                i += POS_LEN
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_1_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_2_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_3_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_4_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_5_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_6_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_7_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_8_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_9_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_10_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_11_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_12_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_13_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_14_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_15_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            if (len(data) - i) >= SCOM_DATA_LEN:
-                dReg = {"SCOM Register": "scomt::poz::FSXCOMP_FSXLOG_SCRATCH_REGISTER_16_RW",
-                             "Hex Dump": hexDump(data, i, i+SCOM_DATA_LEN)}
-                i += SCOM_DATA_LEN
-                registerArray.append(dReg)
-            d[chipPosLabel] = registerArray
     if ffdcId == 0xd58fae5d:
         d["HwpReturnCode"]="RC_MSS_INVALID_VPD_KEYWORD_MAX"
         d["FFDC"]="KEYWORD"
@@ -22246,6 +23305,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xd7274fdb:
         d["HwpReturnCode"]="RC_P10_PGPE_BOOT_COPIER_BUILD_FAIL"
         d["FFDC"]="IMAGE_TYPE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xd7383829:
+        d["HwpReturnCode"]="RC_SPI_FLASH_WRITE_PROTECTED"
+        d["FFDC"]="LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xd739a9ba:
@@ -22844,6 +23908,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="SECONDARY_CONFIG_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xd7f02828:
+        d["HwpReturnCode"]="RC_PMIC_EFUSE_BLOWN"
+        d["FFDC"]="PMIC_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xd7fd1f88:
         d["HwpReturnCode"]="RC_MSS_VOLT_DDR5_TYPE_REQUIRED_VOLTAGE"
         d["FFDC"]="EXPECTED_OPERABLE"
@@ -22862,6 +23931,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xd83846ff:
         d["HwpReturnCode"]="RC_EXP_UPDATE_AUTH_FAIL"
         d["FFDC"]="MCHP_ERROR_CODE_1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xd8405fc3:
+        d["HwpReturnCode"]="RC_POZ_SBEFIFO_OPERATION_FAILED"
+        d["FFDC"]="OPERATION_TYPE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xd84e59d2:
@@ -23047,6 +24121,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ACTUAL_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xd9e4817d:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT3_RO_INPUTS_1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xd9f3d07a:
         d["HwpReturnCode"]="RC_ODY_DRAMINIT_TOTAL_RECOVERY_ATTEMPTS_EXCEEDED"
         d["FFDC"]="MAX_ATTEMPTS"
@@ -23102,11 +24181,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PROC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xda86f601:
-        d["HwpReturnCode"]="RC_ODY_OUT_OF_BOUNDS_RANK_PASSED_TO_SWIZZLE"
-        d["FFDC"]="MAX_RANK"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xda98667f:
         d["HwpReturnCode"]="RC_P10_MSS_NO_SUPPORTED_FREQ"
         d["FFDC"]="MRW_MAX_FREQ_0"
@@ -23120,6 +24194,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xdaace873:
         d["HwpReturnCode"]="RC_P10_FBC_EFF_CONFIG_EPSILON_INVALID_VALUES_ERR"
         d["FFDC"]="EPS_GB_PERCENTAGE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xdac3cbc4:
+        d["HwpReturnCode"]="RC_SPI_FLASH_WRITE_PROTECTED"
+        d["FFDC"]="ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xdadc80bd:
@@ -23237,6 +24316,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PORT_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xdc87caf8:
+        d["HwpReturnCode"]="RC_SPI_INVALID_TRANSACTION_PARMS"
+        d["FFDC"]="ECC_MODE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xdca706f0:
         d["HwpReturnCode"]="RC_P10_IOP_XRAM_INIT_TIMEOUT_ERROR"
         d["FFDC"]="PEC_MC_TARGET"
@@ -23262,6 +24346,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BAR"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xdcfba16a:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_R08"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xdcfdb073:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1"
+        d["FFDC"]="MY_TEST_UINT16"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xdd24d50b:
         d["HwpReturnCode"]="RC_EXP_ROW_REPAIR_WITH_MNFG_REPAIRS_DISABLED"
         d["FFDC"]="MRANK"
@@ -23280,6 +24374,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xdd42f5e4:
         d["HwpReturnCode"]="RC_P10_SETUP_MMIO_BARS_RANGE_OVERLAP_ERR"
         d["FFDC"]="ENABLED1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xdd54d642:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_ADDRESS_OVERRUN"
+        d["FFDC"]="RAW_LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xdd5a11c7:
@@ -23478,9 +24577,19 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BIST_PARAMS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xdf190191:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_R04"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xdf3cfc98:
         d["HwpReturnCode"]="RC_ODY_PHYINIT_INVALID_WRITE_PREAMBLE"
         d["FFDC"]="WRPRE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xdf416e09:
+        d["HwpReturnCode"]="RC_ODY_DRAMINIT_MSGBLOCK"
+        d["FFDC"]="UNIT_FFDC_DRAMINIT_MSGBLOCK"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xdf41fb7d:
@@ -23503,6 +24612,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OMIC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xdfda6b08:
+        d["HwpReturnCode"]="RC_POZ_ARBSEMA_RELEASE_ERROR"
+        d["FFDC"]="SIDE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xdfe368b4:
         d["HwpReturnCode"]="RC_EXP_OMI_TRAIN_ERR"
         d["FFDC"]="DL0_CONFIG1"
@@ -23518,6 +24632,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xdfefd2cd:
+        d["HwpReturnCode"]="RC_SBE_SPI_LENGTH_IS_NOT_ALIGNED"
+        d["FFDC"]="ECC_STATUS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xdff4fc26:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_MEMPORT_TARGET0"
         d["FFDC"]="MY_TEST_UINT8"
@@ -23531,6 +24650,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xe0252abe:
         d["HwpReturnCode"]="RC_ODY_GETTRACEARRAY_CLOCKS_OFF"
         d["FFDC"]="TRACE_ARRAY"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe02efe3d:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_R06"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe0399c94:
@@ -23583,6 +24707,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET_INS_NUM"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe0e84274:
+        d["HwpReturnCode"]="RC_SPI_TPM_RESPONSE_TOO_LONG"
+        d["FFDC"]="RESPONSE_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe0f64f67:
+        d["HwpReturnCode"]="RC_POZ_CBS_ACK_NOT_SEEN_ERR"
+        d["FFDC"]="DELAY"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe1114037:
         d["HwpReturnCode"]="RC_MSS_EXP_BOOT_CONFIG_PARITY_UECC_ERROR"
         d["FFDC"]="COMMAND"
@@ -23611,6 +24745,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xe13e9b45:
         d["HwpReturnCode"]="RC_MSS_TCCDL_OVERFLOW_CALC"
         d["FFDC"]="FTB"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe14303c4:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC3_R07"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe1497a92:
@@ -23646,6 +24785,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xe1a5a7cd:
         d["HwpReturnCode"]="RC_P10_BOOT_MODE_BITVEC_MERGE_ERROR"
         d["FFDC"]="PLAT_BIT_COUNT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe1ae0039:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="GEN_HASH_0"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe1b880c3:
@@ -23768,6 +24912,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="FREQUENCY_A"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe2d2a2b5:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="GEN_HASH_3"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe2eca6d8:
         d["HwpReturnCode"]="RC_P10_DETERMINE_ECO_MODE_TARGET_STATE_ERR"
         d["FFDC"]="ASSOCIATED_EQ_FUNCTIONAL"
@@ -23793,6 +24942,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BUS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe32baffc:
+        d["HwpReturnCode"]="RC_POZ_ARBSEMA_RELEASE_ERROR"
+        d["FFDC"]="SEMAPHORE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe33bbf8e:
         d["HwpReturnCode"]="RC_MSS_EXP_ENTERPRISE_SETUP_ERROR"
         d["FFDC"]="REGISTER_DATA"
@@ -23811,11 +24965,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xe3715d2c:
         d["HwpReturnCode"]="RC_MSS_FREQ_NOT_EQUAL_MAX_DOMAIN_FREQ"
         d["FFDC"]="MEM_PORT_TARGET"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xe37b6f42:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET0"
-        d["FFDC"]="MY_TEST_UINT64"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe37f2dce:
@@ -23856,6 +25005,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xe3e0c600:
         d["HwpReturnCode"]="RC_SBE_BOOT_CHECK_ERR_SCOM_PATH"
         d["FFDC"]="POLL_DELAY"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe3f8eb0f:
+        d["HwpReturnCode"]="RC_INVALID_GI2C_DDR5_TARGET_CONFIG"
+        d["FFDC"]="PRESENT_ADC_TARGETS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe3f9946c:
@@ -23968,6 +25122,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT16"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe535482e:
+        d["HwpReturnCode"]="RC_ODY_OUT_OF_BOUNDS_RANK_PASSED_TO_SWIZZLE"
+        d["FFDC"]="MAX_RANK_INDEX"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe5375922:
         d["HwpReturnCode"]="RC_XGPE_BAD_MODE"
         d["FFDC"]="BADMODE"
@@ -24016,11 +25175,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xe5a49783:
         d["HwpReturnCode"]="RC_QME_HCODE_TRANSFER_FAILED"
         d["FFDC"]="QME_BCEBAR1"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xe5c1e7b4:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET0"
-        d["FFDC"]="MY_TEST_UINT64"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe5fb4b3f:
@@ -24091,6 +25245,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xe6b5cd2b:
         d["HwpReturnCode"]="RC_P10_BUILD_SMP_MASTER_DESIGNATION_ERR"
         d["FFDC"]="CHIP_ID"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe6b6b970:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_ADDRESS_OVERRUN"
+        d["FFDC"]="START"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe6cd75c0:
@@ -24221,6 +25380,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BROADCAST_MODE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe7d59e27:
+        d["HwpReturnCode"]="RC_SBE_BOOT_CHECK_ERR_SCOM_PATH"
+        d["FFDC"]="SDB"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe7ef34bb:
         d["HwpReturnCode"]="RC_P10_ADU_UTILS_LOCK_ERR"
         d["FFDC"]="TARGET"
@@ -24321,6 +25485,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OCMB_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe8bb323f:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_SWA_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe8d1602e:
         d["HwpReturnCode"]="RC_MSS_MRW_FREQ_MAX_FREQ_EMPTY_SET"
         d["FFDC"]="MSS_MAX_FREQ_1"
@@ -24349,6 +25518,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xe8ef19ee:
         d["HwpReturnCode"]="RC_MSS_EXP_BOOT_CONFIG_SERDES_DLL_LOCK_FAIL"
         d["FFDC"]="OMI_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xe902a883:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT0_BREADCRUMB"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xe90b83d0:
@@ -24626,11 +25800,6 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="EXPECTED_NUMBER"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xebb35d79:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET0"
-        d["FFDC"]="MY_TEST_UINT8"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xebb9607b:
         d["HwpReturnCode"]="RC_MSS_EXP_HALF_DIMM_MODE_NOT_SUPPORTED"
         d["FFDC"]="HALF_DIMM_SETTING"
@@ -24716,6 +25885,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="INDEX"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xec8b9b0c:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT0_RO_INPUTS_0"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xecba04d0:
         d["HwpReturnCode"]="RC_P10_RAM_STATUS_IN_RECOVERY_ERR"
         d["FFDC"]="CORE_TARGET"
@@ -24789,6 +25963,11 @@ def hbfwParseHwpFfdc(ver, data):
                 i += CFAM_DATA_LEN
                 registerArray.append(dReg)
             d[chipPosLabel] = registerArray
+    if ffdcId == 0xece17f5b:
+        d["HwpReturnCode"]="RC_SPI_ERROR_STATUS"
+        d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xed247417:
         d["HwpReturnCode"]="RC_P10_RAM_INVALID_REG_TYPE_ACCESS_ERR"
         d["FFDC"]="REG_NUM"
@@ -24869,6 +26048,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="BAR_OFFSET_MASK"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xedb8473c:
+        d["HwpReturnCode"]="RC_SPI_FLASH_ERASE_FAIL"
+        d["FFDC"]="LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xedb8c77d:
         d["HwpReturnCode"]="RC_ODY_PHYINIT_INVALID_EN_TX_DM_PREAMBLE_PATTERN"
         d["FFDC"]="PATTERN"
@@ -24902,6 +26086,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xee1e301a:
         d["HwpReturnCode"]="RC_ODY_DRAMINIT_HARDCODE_UNSUPPORTED"
         d["FFDC"]="PORT_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xee1e9f67:
+        d["HwpReturnCode"]="RC_ODY_ECS_FAIL"
+        d["FFDC"]="MR20_PAT0_SIZE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xee2a038c:
@@ -25004,6 +26193,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ACTIVE_CORES_NUM"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xef4b102d:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET1"
+        d["FFDC"]="MY_TEST_UINT16"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xef52dc2c:
         d["HwpReturnCode"]="RC_PSTATE_PB_PDV_TDP_CURRENT_ERROR"
         d["FFDC"]="MODEL_DATA_FLAG"
@@ -25017,6 +26211,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xef744dd1:
         d["HwpReturnCode"]="RC_INVALID_ATTR_INDEX"
         d["FFDC"]="HGT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xef8ff5e3:
+        d["HwpReturnCode"]="RC_POZ_SBE_STOPCLOCKS_ERR"
+        d["FFDC"]="TARGET_CHIP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xef91cb27:
@@ -25072,6 +26271,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xf0096c88:
         d["HwpReturnCode"]="RC_MSS_DDR5_MR3_BAD_CYCLE_ALIGN"
         d["FFDC"]="MAX"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf00ae158:
+        d["HwpReturnCode"]="RC_SBE_FILE_HASH_MISMATCH"
+        d["FFDC"]="GEN_HASH_5"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf00bb4c2:
@@ -25182,6 +26386,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MC_POS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf0b903ac:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT_R94_FAULTS_STATUS_1"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf0bab3b5:
+        d["HwpReturnCode"]="RC_SPI_FLASH_ERASE_BUFFER_NEEDED"
+        d["FFDC"]="ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf0bcb603:
         d["HwpReturnCode"]="RC_MSS_EFF_GROUPING_UNABLE_TO_GROUP"
         d["FFDC"]="MAX_REGION_SIZE"
@@ -25200,11 +26414,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xf0dc6268:
         d["HwpReturnCode"]="RC_P10_PAU_SCOMINIT_IOHS_OCAPI_CONFIG_ERR"
         d["FFDC"]="IOHS_ID"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xf0edb84a:
-        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
-        d["FFDC"]="DRAM_MAX"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf0f55920:
@@ -25230,6 +26439,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xf0fbb8db:
         d["HwpReturnCode"]="RC_P10_PURGE_CMD_REG_ERR"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf1088fef:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_SWA_CURRENT"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf10fe047:
@@ -25277,6 +26491,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OCMB_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf1513131:
+        d["HwpReturnCode"]="RC_BIST_NONZERO_MISCOMPARES"
+        d["FFDC"]="FAILING_CHIPLETS_MASK"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf160dfa0:
         d["HwpReturnCode"]="RC_ODY_SCRATCH_REGS_UTILS_BUCKET_OUT_OF_RANGE_ERR"
         d["FFDC"]="BUCKET"
@@ -25290,11 +26509,6 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xf181f9e0:
         d["HwpReturnCode"]="RC_P10_IO_QUIESCE_LANE_MULTIPLE_RX_IDENTIFIED_ERR"
         d["FFDC"]="IOHS_TARGET"
-        if (len(data) - i):
-            d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xf18485ce:
-        d["HwpReturnCode"]="RC_TEST_PERV_TARGET0"
-        d["FFDC"]="MY_TEST_UINT32"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf19890c0:
@@ -25367,6 +26581,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MY_TEST_UINT32"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf2c580ad:
+        d["HwpReturnCode"]="RC_SPI_FLASH_ERASE_INSUFFICIENT"
+        d["FFDC"]="ERASE_POS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf2c9648f:
         d["HwpReturnCode"]="RC_PMIC_REDUNDANCY_FAIL_DDR5"
         d["FFDC"]="N_MODE_PMIC2"
@@ -25412,6 +26631,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="CURPROC"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf337c4f5:
+        d["HwpReturnCode"]="RC_SBE_SPI_OPR_COMPLETION_CHECK_ERROR"
+        d["FFDC"]="CHIP_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf34a5e09:
         d["HwpReturnCode"]="RC_TOR_TRAVERSAL_ERROR"
         d["FFDC"]="RING_TYPE"
@@ -25437,6 +26661,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="ATTR_ACTIVE_CORES_NUM"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf399046f:
+        d["HwpReturnCode"]="RC_SPI_TPM_REQUEST_TOO_LONG"
+        d["FFDC"]="REQUEST_LENGTH"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf39d46cf:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_MEMPORT_GARD_TARGET1"
         d["FFDC"]="TARGET_PORT"
@@ -25445,6 +26674,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xf39e4eeb:
         d["HwpReturnCode"]="RC_XGPE_BOOT_LOADER_BUILD_FAIL"
         d["FFDC"]="PROC_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf3a74a75:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_WRITE_TIMEOUT"
+        d["FFDC"]="ADDRESS"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf3a969fe:
@@ -25457,9 +26691,9 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="PROC_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
-    if ffdcId == 0xf3ab9b27:
-        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET0"
-        d["FFDC"]="MY_TEST_UINT16"
+    if ffdcId == 0xf3c4c188:
+        d["HwpReturnCode"]="RC_SPI_TPM_ACCESS_TIMEOUT"
+        d["FFDC"]="LOCALITY"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf3d45359:
@@ -25505,6 +26739,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xf452f55f:
         d["HwpReturnCode"]="RC_MSS_VOLT_DDR5_TYPE_REQUIRED_VOLTAGE"
         d["FFDC"]="ACTUAL_VDDQ_OPERABLE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf463b797:
+        d["HwpReturnCode"]="RC_POZ_SCRATCH_ALLOC_FAILED"
+        d["FFDC"]="REQUIRED_SPACE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf47a3f9b:
@@ -25577,6 +26816,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf4f7cfad:
+        d["HwpReturnCode"]="RC_MSS_NO_POWER_THERMAL_ATTR_FOUND"
+        d["FFDC"]="DIMM_DATA_RATE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf50093b4:
         d["HwpReturnCode"]="RC_PSTATE_PB_BIASED_POUNDV_ZERO_ERROR"
         d["FFDC"]="ICS_TDP_DC_A"
@@ -25625,6 +26869,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xf5e9b2a2:
         d["HwpReturnCode"]="RC_P10_THREAD_CONTROL_START_NOMAINT"
         d["FFDC"]="C_RAS_STATUS_REG"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf5ef0e5c:
+        d["HwpReturnCode"]="RC_POZ_FFDC_SCRATCH_SPACE_FULL_ERROR"
+        d["FFDC"]="AVAILABLE_SPACE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf5ef932c:
@@ -25755,6 +27004,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="LATENCY_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf6e54187:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_SWB_CURRENT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf6e8409b:
         d["HwpReturnCode"]="RC_P10_ADU_STATUS_REG_ADDRESS_ERR"
         d["FFDC"]="STATUSREG"
@@ -25810,6 +27064,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf762bf25:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC0_R05"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf763b690:
+        d["HwpReturnCode"]="RC_SPI_TPM_READ_ABORT"
+        d["FFDC"]="ADDRESS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf7702fa4:
         d["HwpReturnCode"]="RC_EXP_FW_UPDATE_WRITE_NO_DOORBELL"
         d["FFDC"]="SEQUENCE_NUMBER"
@@ -25840,9 +27104,24 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="VPD_TYPE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf7d03547:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_GARD_TARGET1"
+        d["FFDC"]="MY_TEST_UINT64"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf7e911bf:
+        d["HwpReturnCode"]="RC_ODY_ROW_REPAIR_ENTRY_OUT_OF_BOUNDS"
+        d["FFDC"]="SRANK_MAX_INDEX"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf7f1c672:
         d["HwpReturnCode"]="RC_PMIC_STATUS_ERRORS"
         d["FFDC"]="OCMB_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf7f4159b:
+        d["HwpReturnCode"]="RC_TEST_PERV_TARGET1"
+        d["FFDC"]="MY_TEST_UINT16"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf7f72a3d:
@@ -25905,6 +27184,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="MCC1_MCC_NUM_IN_GROUP"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf86a5955:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_TARGET1"
+        d["FFDC"]="MY_TEST_UINT8"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf86ff6ff:
+        d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_TARGET1"
+        d["FFDC"]="MY_TEST_UINT8"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf87f7a2c:
         d["HwpReturnCode"]="RC_PSTATE_PB_DDS_ADJ_LARGE_DROOP_OVERFLOW"
         d["FFDC"]="PDW_VALUE"
@@ -25923,6 +27212,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xf8840bc8:
         d["HwpReturnCode"]="RC_TEST_CALLOUT_PERV_DECONFIGURE_GARD_TARGET8"
         d["FFDC"]="MY_TEST_UINT8"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf88e1b32:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT3_RO_INPUTS_0"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf88eda46:
@@ -25945,9 +27239,72 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf8cec49e:
+        d["Register FFDC"]="ROOT_CTRL_REGS_CFAM"
+        while (len(data) - i) > 0:
+            registerArray = []
+            if (len(data) - i) >= POS_LEN:
+                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
+                i += POS_LEN
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL0_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL1_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL2_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL3_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL4_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL5_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL6_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL7_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL8_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_ROOT_CTRL9_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            d[chipPosLabel] = registerArray
     if ffdcId == 0xf8cf3c6f:
         d["HwpReturnCode"]="RC_SPCWKUP_CORE_TIMEOUT"
         d["FFDC"]="ENTITY"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xf8d3309f:
+        d["HwpReturnCode"]="RC_LINK_TRAINING_DONE_POLL_FAILED"
+        d["FFDC"]="DONE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xf8d4f4d1:
@@ -26133,6 +27490,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="IDD_TDP_DC_A"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfa5f4ae8:
+        d["HwpReturnCode"]="RC_SBE_SPI_OPR_COMPLETION_CHECK_ERROR"
+        d["FFDC"]="STATUS_REGISTER"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xfa87ddc7:
         d["HwpReturnCode"]="RC_SBE_SPI_INVALID_PORT_MULTIPLEX_SET"
         d["FFDC"]="BASE_ADDRESS"
@@ -26198,6 +27560,16 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfb58574f:
+        d["HwpReturnCode"]="RC_POZ_PLL_LOCK_ERROR"
+        d["FFDC"]="PROC_TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfb8fe646:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC1_R04"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xfba0a340:
         d["HwpReturnCode"]="RC_PGPE_INIT_DEBUG_HALT"
         d["FFDC"]="PGPE_BASE_ADDRESS"
@@ -26211,6 +27583,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xfbbb38ab:
         d["HwpReturnCode"]="RC_SHADOW_DIS_CORE_SHADOW_STATE_TIMEOUT"
         d["FFDC"]="SHADOW_DIS_CORE_SHADOW_STATE_POLL_TIMEOUT_HW_NS"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfbcb30fd:
+        d["HwpReturnCode"]="RC_POZ_PAK_OPERATION_FAILED"
+        d["FFDC"]="PAK_RC"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xfbd4d66e:
@@ -26233,6 +27610,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="VALID_TARGET_TYPES"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfc190681:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="DT_R90_OPS_STATE"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xfc22a1b4:
         d["HwpReturnCode"]="RC_MSS_INVALID_VPD_FREQ_LIST_PASSED"
         d["FFDC"]="EXPECTED"
@@ -26251,6 +27633,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xfc3332d6:
         d["HwpReturnCode"]="RC_VIN_BULK_BELOW_TOLERANCE"
         d["FFDC"]="NOMINAL_MV"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfc38e21d:
+        d["HwpReturnCode"]="RC_SYSTEM_PAU_FREQ_MISMATCH"
+        d["FFDC"]="PAU_FREQ"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xfc43b19a:
@@ -26278,6 +27665,59 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="C_RAS_STATUS_REG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfc8130ca:
+        d["Register FFDC"]="CBS_STATUS_REGS_CFAM"
+        while (len(data) - i) > 0:
+            registerArray = []
+            if (len(data) - i) >= POS_LEN:
+                chipPosLabel = "Chip Position: " + memConcat(data, i, i+4)[0]
+                i += POS_LEN
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_CS_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_TR_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_EL_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_ENVSTAT_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_TR_HIST_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_EL_HIST_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SB_CS_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_SB_MSG_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            if (len(data) - i) >= CFAM_DATA_LEN:
+                dReg = {"CFAM Register": "scomt::poz::FSXCOMP_FSXLOG_CBS_STAT_FSI",
+                             "Hex Dump": hexDump(data, i, i+CFAM_DATA_LEN)}
+                i += CFAM_DATA_LEN
+                registerArray.append(dReg)
+            d[chipPosLabel] = registerArray
     if ffdcId == 0xfc84436d:
         d["HwpReturnCode"]="RC_P10_SBE_CORE_SPR_SETUP_MASTER_FUSED_CORE_PARTNER_NOT_FOUND"
         d["FFDC"]="FUSED_MODE"
@@ -26291,6 +27731,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xfc91a8f1:
         d["HwpReturnCode"]="RC_PSTATE_PB_DDS_ADJ_TRIP_OFFSET_UNDERFLOW"
         d["FFDC"]="LIMIT"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfc93d2ff:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="ADC_PIN_CFG"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xfc987db1:
@@ -26351,6 +27796,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xfd3ac7d5:
         d["HwpReturnCode"]="RC_QMEC_RINGID_API_ERROR"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xfd3c4c5a:
+        d["HwpReturnCode"]="RC_SPI_MEMORY_INVALID_ADDR_LEN"
+        d["FFDC"]="LENGTH"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xfd4e318f:
@@ -26488,6 +27938,11 @@ def hbfwParseHwpFfdc(ver, data):
         d["FFDC"]="OCCURRENCE"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xff3be377:
+        d["HwpReturnCode"]="RC_PMIC_HEALTH_CHECK_FAIL_MNFG_MODE_DDR5_4U"
+        d["FFDC"]="PMIC2_R73_STATUS_5"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xff4affba:
         d["HwpReturnCode"]="RC_CORECACHE_CLK_CTRL_SL_FAILED"
         d["FFDC"]="CLK_COMMAND"
@@ -26496,6 +27951,11 @@ def hbfwParseHwpFfdc(ver, data):
     if ffdcId == 0xff4b0791:
         d["HwpReturnCode"]="RC_P10_GETPUTMEMPROC_INVALID_SIZE_DMA"
         d["FFDC"]="TARGET"
+        if (len(data) - i):
+            d["Hex Dump"]=hexDump(data, i, len(data))
+    if ffdcId == 0xff4ffe30:
+        d["HwpReturnCode"]="RC_ODY_DRAMINIT_PERDRAM_RECOVERY_NOT_SUPPORTED"
+        d["FFDC"]="PORT_TARGET"
         if (len(data) - i):
             d["Hex Dump"]=hexDump(data, i, len(data))
     if ffdcId == 0xff52b471:
