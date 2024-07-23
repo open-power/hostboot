@@ -165,6 +165,12 @@ namespace fapi2
 
     };
 
+    /** The following two sets of ENUMs need to correspond to the
+     *  b0900.py parsers respectively, i.e.
+     *    HwpUserDetailsParserSpecialOneByte
+     *  FSP parser changes see hwpfUdParserFactory.H
+     */
+
     /**
      * @brief Defines the HWPF error log user detail data sections
      *
@@ -189,18 +195,25 @@ namespace fapi2
     };
 
     /**
-     * @brief Defines the BAD_DQ_BITMAP error log detail data sections
+     * @brief Defines the HWPF BAD DQ error log user detail data sections
+     *
+     *  NOTE: No additions should be made to this range without explicit
+     *  review of the BMC and FSP parsers respectively (i.e. b0900.py and
+     *  hwpfUdParserFactory.H)
+     *
+     *  NOTE: At this time the BAD DQ bits does NOT have
+     *        FSP parsing support (only BMC b0900.py supports today).
      */
     enum fapi2BadDqBitmapDataSection
     {
-        CLEAN_BAD_DQ_BITMAP_RANK0   = 0x01,
-        CLEAN_BAD_DQ_BITMAP_RANK1   = 0x02,
-        CLEAN_BAD_DQ_BITMAP_RANK2   = 0x03,
-        CLEAN_BAD_DQ_BITMAP_RANK3   = 0x04,
-        CURRENT_BAD_DQ_BITMAP_RANK0 = 0x05,
-        CURRENT_BAD_DQ_BITMAP_RANK1 = 0x06,
-        CURRENT_BAD_DQ_BITMAP_RANK2 = 0x07,
-        CURRENT_BAD_DQ_BITMAP_RANK3 = 0x08,
+        CLEAN_BAD_DQ_BITMAP_RANK0         = 10,
+        CLEAN_BAD_DQ_BITMAP_RANK1         = 11,
+        CLEAN_BAD_DQ_BITMAP_RANK2         = 12,
+        CLEAN_BAD_DQ_BITMAP_RANK3         = 13,
+        CURRENT_BAD_DQ_BITMAP_RANK0       = 14,
+        CURRENT_BAD_DQ_BITMAP_RANK1       = 15,
+        CURRENT_BAD_DQ_BITMAP_RANK2       = 16,
+        CURRENT_BAD_DQ_BITMAP_RANK3       = 17,
     };
 
 };
