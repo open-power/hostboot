@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2023
+# Contributors Listed Below - COPYRIGHT 2012,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -372,12 +372,15 @@ hcode_lid: ${ENGD_SRCPATH:Fp10.hw_ref_image.bin}
 P10_OCC_IMG = ${bb}/images/ppc/lab/fs/p9le/rootfs/opt/extucode/81e00430.lid
 
 ## System Specific
+## PLEASE NOTE: Mckinley WOF data is same as Denali
 
 DENALI_WOFDATA_IMG = ${ENGD_WOFPATH:Fdenali_wof_data.bin}
 
 # Create list of images for each node (in node order)
 # genPnorImages will handle multiple HBD=binfile pairs
 DENALI_HBD_IMGS = HBD=${${HBFW_TARGPATH:FDENALI_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_node_3_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_SMP_WRAP_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_2N_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_2N_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_FLAT8_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FDENALI_FLAT8_node_1_hb_targeting.bin}:P}
+
+MCKINLEY_HBD_IMGS = HBD=${${HBFW_TARGPATH:FMCKINLEY_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FMCKINLEY_node_1_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FMCKINLEY_node_2_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FMCKINLEY_node_3_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FMCKINLEY_SMP_WRAP_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FMCKINLEY_2N_node_0_hb_targeting.bin}:P},HBD=${${HBFW_TARGPATH:FMCKINLEY_2N_node_1_hb_targeting.bin}:P}
 
 # Input fake images
 
@@ -392,6 +395,9 @@ P10_OCC_FINAL_IMG = P10.OCC.bin
 ## System Specific
 DENALI_HBD_FINAL_IMG = DENALI.HBD_NODE_0.bin
 DENALI_WOFDATA_FINAL_IMG = DENALI.WOFDATA.bin
+
+MCKINLEY_HBD_FINAL_IMG = MCKINLEY.HBD_NODE_0.bin
+
 # Fips has its own build process and will not use these, but rather what's
 # defined in fipsfs.db.
 
@@ -405,9 +411,12 @@ DENALI_WOFDATA_FINAL_IMG = DENALI.WOFDATA.bin
     GEN_P10_BIN_FILES = P10:SBE=${${P10_SBE_IMG}:P},HCODE=${${P10_HCODE_IMG}:P},HCODE_LID=${${P10_HCODE_LID_IMG}:P},OCC=${${P10_OCC_IMG}:P},HBD=${${P10_HBD_IMG}:P}
 .endif
 GEN_DENALI_BIN_FILES = DENALI:WOFDATA=${${DENALI_WOFDATA_IMG}:P},${DENALI_HBD_IMGS}
+GEN_MCKINLEY_BIN_FILES = MCKINLEY:${MCKINLEY_HBD_IMGS}
+
 SYSTEM_SPECIFIC_PARAMS = --install-all --emit-eccless ${TARGET_TEST:b--test} ${CONFIG_SECUREBOOT:b--secureboot}  \
 			 --pnorLayout ${PNOR_LAYOUT} ${CORRUPT_PARAMS} ${HB_STANDALONE:b--hb-standalone} \
 			 --systemBinFiles ${GEN_DENALI_BIN_FILES} \
+			 --systemBinFiles ${GEN_MCKINLEY_BIN_FILES} \
 			 --systemBinFiles ${GEN_P10_BIN_FILES} \
 			 --hwKeyHashFile ${IMPRINT_HW_KEY_HASH} \
                          --secure-version ${SIGNING_SECURITY_VERSION} \
@@ -432,6 +441,9 @@ gen_system_specific_images: build_sbe_partitions .PMAKE
 .endif
 
 DENALI_SECT = HBD=${DENALI_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},HCODE_LID=${P10_HCODE_LID_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${DENALI_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
+
+MCKINLEY_SECT = HBD=${MCKINLEY_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},HCODE_LID=${P10_HCODE_LID_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
+
 P10_SECT = HBD=${P10_HBD_FINAL_IMG},SBE=${P10_SBE_FINAL_IMG},HCODE=${P10_HCODE_FINAL_IMG},HCODE_LID=${P10_HCODE_LID_FINAL_IMG},OCC=${P10_OCC_FINAL_IMG},WOFDATA=${DENALI_WOFDATA_FINAL_IMG},EECACHE=${EECACHE_FINAL_IMG},OCMBFW=${OCMBFW_FINAL_IMG}
 
 
