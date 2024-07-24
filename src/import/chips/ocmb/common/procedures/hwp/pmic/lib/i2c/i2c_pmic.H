@@ -727,6 +727,12 @@ inline fapi2::ReturnCode reg_write_contiguous(const fapi2::Target<T>& i_target,
 {
     std::vector<uint8_t> l_data;
 
+    // PPE workaround as it does not support insert
+    if(i_write_single_or_contiguous == mss::adc::i2c::byte_read::CONTIGUOUS)
+    {
+        l_data.push_back(i_addr);
+    }
+
     for(uint32_t l_count = 0; l_count < N; l_count++)
     {
         l_data.push_back(uint8_t(i_data_buffer[l_count]));
@@ -738,7 +744,6 @@ inline fapi2::ReturnCode reg_write_contiguous(const fapi2::Target<T>& i_target,
     }
     else
     {
-        l_data.insert(l_data.begin(), i_addr);
         // Use fapi2 putI2c interface to execute command
         FAPI_TRY(fapi2::putI2c(i_target, l_data));
     }
@@ -785,7 +790,6 @@ inline fapi2::ReturnCode reg_write_default_dt_contiguous(const fapi2::Target<fap
 /// @param[in] i_target the PMIC/I2C/DT device target
 /// @param[in] i_addr starting register address to read from
 /// @param[out] o_data_buffer buffer of data to be read from given register addresses
-///            Set to single byte by default so as not to change the code in pmic_enabl()
 /// @return FAPI2_RC_SUCCESS iff okay
 ///
 template <fapi2::TargetType T, size_t N>
