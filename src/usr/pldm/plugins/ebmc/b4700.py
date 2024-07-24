@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2022
+# Contributors Listed Below - COPYRIGHT 2022,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -255,7 +255,7 @@ def parseFrDumpVersion1(data, hdrByteSize):
             subd['Hex Dump']=hexDump(data, 0, len(data))
         else:
             if (frDataLen == 0):
-                subd['Empty']
+                subd['Data'] = "Flight Recorder Empty"
             else:
                 subd = parseHeaderData(data[2:frDataLen+2], hdrByteSize)
     return subd
