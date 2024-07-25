@@ -261,7 +261,7 @@ class PlatPmPPB
             iv_reference_frequency_mhz(0), iv_reference_frequency_khz(0),
             iv_frequency_step_khz(0), iv_proc_dpll_divider(0), iv_occ_freq_mhz(0),
             iv_wov_underv_enabled(0), iv_wov_overv_enabled(0), iv_ocs_enabled(0),
-            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_rdp_scaling_factor(false), iv_expand_freq_enable(false),
+            iv_wof_throttle_enabled(0), iv_poundV_fmax_enable(true), iv_rdp_scaling_factor(false), iv_extended_freq_enable(false),
             iv_eco_count(0), iv_spare_count(0), iv_curr_scale{0},
             iv_safe_mode_throt_idx(0),
             iv_dccr_value(0), iv_flmr_value(0), iv_fmmr_value(0),
@@ -661,12 +661,6 @@ class PlatPmPPB
         fapi2::ReturnCode apply_extint_bias();
 
         /// -----------------------------------------------------------------------
-        /// @brief Update the Pstates withing the biased structure
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
-        /// -----------------------------------------------------------------------
-        fapi2::ReturnCode update_biased_pstates();
-
-        /// -----------------------------------------------------------------------
         /// @brief apply biased values for #V data
         /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
         /// -----------------------------------------------------------------------
@@ -833,7 +827,7 @@ class PlatPmPPB
                            ) / 1000);  // uV -> mV
             uint32_t l_result = static_cast<uint32_t>(l_mv);
             FAPI_DBG("  system_uplift_mv: i_vpd_mv=%d; i_vpd_ma=%d; i_loadline_uohm=%d "
-                     "i_distloss_uohm = %d i_distoffset_uohm = %d l_mv = %5.3f l_result = %d" ,
+                     "i_distloss_uohm = %d i_distoffset_uohm = %d l_mv = %5.3f l_result = %d",
                      i_vpd_mv,
                      i_vpd_ma,
                      i_loadline_uohm,
@@ -878,6 +872,13 @@ class PlatPmPPB
         /// -----------------------------------------------------------------------
         void poison_mvpd_poundV();
 
+        /// -----------------------------------------------------------------------
+        /// @brief Set reference frequency according to extended freq mode
+        /// @param[in]     WOF table data
+        /// @return Error handle
+        /// -----------------------------------------------------------------------
+        fapi2::ReturnCode set_reference_freq
+        (fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data);
 
 
     public:
@@ -913,7 +914,7 @@ class PlatPmPPB
         bool                      iv_optional_pdv_pts_value_zero;
         bool                      iv_poundV_fmax_enable;
         bool                      iv_rdp_scaling_factor;
-        bool                      iv_expand_freq_enable;
+        bool                      iv_extended_freq_enable;
         uint16_t                  iv_array_vdn_mv;
         uint16_t                  iv_array_vdd_mv;
         uint8_t                   iv_pdv_model_data;

@@ -203,7 +203,6 @@ char const* region_names[] = VPD_OP_SLOPES_REGION_ORDER_STR;
 double mod(double a);
 double power(double x,int y);
 double root(double num, int r);
-
 ///////////////////////////////////////////////////////////
 ////////     p10_pstate_parameter_block
 ///////////////////////////////////////////////////////////
@@ -274,6 +273,7 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         // get VPD data (#V,#W,IQ)
         // ----------------
         FAPI_TRY(l_pmPPB->vpd_init(),"vpd_init function failed");
+
         // ----------------
         // WOF initialization
         // ----------------
@@ -284,12 +284,10 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
                  io_size),
                  "WOF initialization failure");
 
-
         // ----------------
         // Compute VPD points for different regions
         // ----------------
         FAPI_TRY(l_pmPPB->compute_vpd_pts());
-
 
         // ----------------
         // Safe mode freq and volt init
@@ -1244,10 +1242,10 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
         float pstatef = 0;
         if (iv_attrs.attr_extended_freq_mode ||
-            iv_expand_freq_enable)
+            iv_extended_freq_enable)
         {
             if ( (iv_attrs.attr_extended_freq_mode == ENUM_ATTR_EXTENDED_FREQ_MODE_OLD_FREQ) &&
-                   !iv_expand_freq_enable)
+                   !iv_extended_freq_enable)
             {
                 pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
             }
@@ -1324,8 +1322,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->pgpe_flags[PGPE_FLAG_WOF_THROTTLE_ENABLE] = is_wof_throttle_enabled();
         io_globalppb->base.vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
         io_globalppb->base.vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
-        io_globalppb->pgpe_flags[PGPE_FLAG_NEGATIVE_SLOPE_SUPPORT] = (iv_attrs.attr_extended_freq_mode || iv_expand_freq_enable) ? 1 : 0;
-        io_globalppb->pgpe_flags[PGPE_FLAG_USE_RDP] = (iv_attrs.attr_extended_freq_mode == 3 || iv_expand_freq_enable) ? 1 : 0;
+        io_globalppb->pgpe_flags[PGPE_FLAG_NEGATIVE_SLOPE_SUPPORT] = (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable) ? 1 : 0;
+        io_globalppb->pgpe_flags[PGPE_FLAG_USE_RDP] = (iv_attrs.attr_extended_freq_mode == 3 || iv_extended_freq_enable) ? 1 : 0;
         io_globalppb->pgpe_flags[PGPE_FLAG_SLOPE_FIX_8_8] = 1;
 
         //WOV parameters
@@ -2355,9 +2353,6 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
             // Only process VDD and VCS elements if there are cores
             if (iv_core_count)
             {
-                // Compute the VPD operating points
-                FAPI_TRY(compute_vpd_pts());
-
                 // ----------------
                 // WOF table analysis to determine the safe mode throttle index
                 // ----------------
@@ -2371,6 +2366,10 @@ fapi2::ReturnCode PlatPmPPB::compute_boot_safe(
                          io_size),
                          "WOF initialization failure");
                 delete[] t_buf;
+
+                // Compute the VPD operating points
+                FAPI_TRY(compute_vpd_pts());
+
             }
 
             // ----------------
@@ -3480,7 +3479,7 @@ fapi2::ReturnCode PlatPmPPB::chk_valid_poundv(
             FAPI_INF("Checking for relationship between #V operating point (%s <= %s)",
                     pv_op_str[i - 1], pv_op_str[i]);
 
-            if ( (iv_attrs.attr_extended_freq_mode || iv_expand_freq_enable) &&
+            if ( (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable) &&
                  POUNDV_POINTS_INCREASE_PNEXT_CHECK(i))
             {
                 l_cf_point_check_fail = 1;
@@ -4059,46 +4058,6 @@ fapi_try_exit:
     FAPI_INF("<<<<<<<<<<<< apply_biased_values");
     return fapi2::current_err;
 
-}
-
-///////////////////////////////////////////////////////////
-////////   update_biased_pstates
-///////////////////////////////////////////////////////////
-fapi2::ReturnCode PlatPmPPB::update_biased_pstates()
-{
-    FAPI_INF(">>>>>>>>>>>>> update_pstates");
-
-    fapi2::ReturnCode   l_rc;
-    Pstate              l_ps;
-
-    FAPI_INF("PSTATE Reference: 0x%X (%d)",
-        iv_attrs.attr_pstate0_freq_mhz, iv_attrs.attr_pstate0_freq_mhz);
-    FAPI_INF("PSTATE Reference Khz: 0x%X (%d)",
-        iv_reference_frequency_khz, iv_reference_frequency_khz);
-
-    for (int i = 0; i < NUM_PV_POINTS; i++)
-    {
-        l_rc = freq2pState(iv_attr_mvpd_poundV_biased[i].frequency_mhz*1000, &l_ps, ROUND_NEAR);
-        if (l_rc)
-        {
-            disable_pstates();
-            // TODO: put in notification controls
-            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
-            goto fapi_try_exit;
-        }
-
-        iv_attr_mvpd_poundV_biased[i].pstate = l_ps;
-
-        FAPI_INF("Biased point %d: PSTATE=%03d  Frequency: 0x%04x (%04d)",
-            i,
-            iv_attr_mvpd_poundV_biased[i].pstate,
-            iv_attr_mvpd_poundV_biased[i].frequency_mhz,
-            iv_attr_mvpd_poundV_biased[i].frequency_mhz);
-    }
-
-fapi_try_exit:
-    FAPI_INF("<<<<<<<<<< update_pstates");
-    return fapi2::current_err;
 }
 
 // Macro to compress duplicate code in apply_pdw_biased_values
@@ -4803,6 +4762,55 @@ void iddq_print(IddqTable_t* i_iddqt)
 }
 
 ///////////////////////////////////////////////////////////
+////////   set_reference_freq
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode PlatPmPPB::set_reference_freq(fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data)
+{
+
+    fapi2::ReturnCode l_rc;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    FAPI_INF(">>>>>>>>>> set_reference_freq!!!!!!!!!");
+    WofTablesHeader_t* p_wfth;
+    p_wfth = reinterpret_cast<WofTablesHeader_t*>(l_wof_table_data);
+
+    if ( p_wfth->header_version == 2 )
+    {
+        iv_rdp_scaling_factor = true;
+        memcpy(iv_curr_scale,p_wfth->cur_scale_pct,sizeof(iv_curr_scale));
+        //flags[4:7]
+        //[0] DIMM adjustment enablement
+        //   0: DIMM adjustment disabled
+        //   1: DIMM adjustment enabled
+        //[1] Extended Frequency Encoding
+        //[2] Efficiency Mode Algorithm (0=Core Utilization based; 1=Ceff based)
+        //[3] Over Current Sensor Mode
+        //   0: OCS disabled
+        //   1: OCS enabled
+        iv_extended_freq_enable = (p_wfth->sys_flags & 0x04) ? true : false;
+    }
+
+    if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
+    {
+        iv_attrs.attr_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+                    FAPI_SYSTEM,
+                    iv_attrs.attr_pstate0_freq_mhz));
+        FAPI_INF("Extended frequency mode detected.  Moving Pstate 0 frequency to %d MHz",
+                iv_attrs.attr_pstate0_freq_mhz);
+    }
+
+    iv_reference_frequency_mhz = iv_attrs.attr_pstate0_freq_mhz;
+    iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
+    FAPI_INF("Pstate0 reference frequency %d MHz",
+            iv_reference_frequency_mhz);
+
+fapi_try_exit:
+    FAPI_INF("<<<<<<<<<< compute_vpd_pts");
+    return fapi2::current_err;
+}
+
+///////////////////////////////////////////////////////////
 ////////   compute_vpd_pts
 ///////////////////////////////////////////////////////////
 fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
@@ -4814,16 +4822,12 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
     uint32_t l_vcs_distloss_uohm    = iv_vcs_sysparam.distloss_uohm;
     uint32_t l_vcs_distoffset_uv    = iv_vcs_sysparam.distoffset_uv;
 
+    uint32_t l_max_pstate0_freq_mhz = MAX_PSTATE0_FREQ_MHZ;
+
     fapi2::ReturnCode l_rc;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
-    FAPI_INF(">>>>>>>>>> compute_vpd_pts");
-
-    // Compute Pstates
-    // This must be done after all stretch and biasing as the reference
-    // frequency can be modified
-    FAPI_TRY(update_biased_pstates(),
-                "update_biased_pstates function failed");
-
+    FAPI_INF(">>>>>>>>>> compute_vpd_pts !!!!!!!!!");
 
     //RAW POINTS. We just copy them as is
     memcpy (iv_operating_points[VPD_PT_SET_RAW],
@@ -4853,14 +4857,15 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
         iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz =
             bias_adjust_mhz(l_frequency_mhz, iv_bias.frequency_0p5pct);
 
-        if (iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz > MAX_PSTATE0_FREQ_MHZ)
+        if (iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz > l_max_pstate0_freq_mhz)
         {
             FAPI_INF("Clamping Biased operating point %d from %dMHz to %dMHz as the limit of legal Pstates",
-                        p, iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz, MAX_PSTATE0_FREQ_MHZ);
-            iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz = MAX_PSTATE0_FREQ_MHZ;
+                        p, iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz, l_max_pstate0_freq_mhz);
+            iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz = l_max_pstate0_freq_mhz;
         }
-            // If RDP scaling factor is true, then it means we have WOF table
-            // version 2, that current scale percentage, that needs to apply for RDP
+
+        // If RDP scaling factor is true, then it means we have WOF table
+        // version 2, that current scale percentage, that needs to apply for RDP
         if ( iv_rdp_scaling_factor )
         {
             if (iv_curr_scale[p] )
@@ -4876,9 +4881,6 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
 
             FAPI_INF("iv_curr_scale[%d], %u",p, iv_curr_scale[p] );
         }
-
-
-
 
         iv_operating_points[VPD_PT_SET_BIASED][p].idd_tdp_ac_10ma=
             iv_attr_mvpd_poundV_biased[p].idd_tdp_ac_10ma;
@@ -4906,10 +4908,70 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
             iv_attr_mvpd_poundV_biased[p].pstate;
     }
 
+    // Compute Pstates
+    // This must be done after all stretch and biasing as the reference
+    // frequency can be modified
+
+    if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
+    {
+        l_max_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+        iv_attrs.attr_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+                               FAPI_SYSTEM,
+                               iv_attrs.attr_pstate0_freq_mhz));
+        FAPI_INF("Extended frequency mode detected.  Moving Pstate 0 frequency to %d MHz",
+                                iv_attrs.attr_pstate0_freq_mhz);
+    }
+
+    iv_reference_frequency_mhz = iv_attrs.attr_pstate0_freq_mhz;
+    iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
+    FAPI_INF("Pstate0 reference frequency %d MHz",
+                iv_reference_frequency_mhz);
+
     // Now that the Pstate 0 frequency is known, Pstates can be calculated
     for (auto p = 0; p < NUM_PV_POINTS; p++)
     {
         Pstate l_ps;
+
+        l_rc = freq2pState(iv_attr_mvpd_poundV_raw[p].frequency_mhz*1000,
+                            &l_ps, ROUND_NEAR, PPB_INFO);
+        if (l_rc)
+        {
+            disable_pstates();
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            goto fapi_try_exit;
+        }
+
+        iv_attr_mvpd_poundV_raw[p].pstate = l_ps;
+
+        l_rc = freq2pState(iv_attr_mvpd_poundV_biased[p].frequency_mhz*1000,
+                            &l_ps, ROUND_NEAR, PPB_INFO);
+        if (l_rc)
+        {
+            disable_pstates();
+            fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
+            goto fapi_try_exit;
+        }
+
+        iv_attr_mvpd_poundV_biased[p].pstate = l_ps;
+
+        FAPI_INF("Biased point %d: PSTATE=%03d  Frequency: 0x%04x (%04d)",
+            p,
+            iv_attr_mvpd_poundV_biased[p].pstate,
+            iv_attr_mvpd_poundV_biased[p].frequency_mhz,
+            iv_attr_mvpd_poundV_biased[p].frequency_mhz);
+
+        l_rc = freq2pState(iv_operating_points[VPD_PT_SET_RAW][p].frequency_mhz*1000, \
+                            &l_ps, ROUND_NEAR, PPB_INFO);
+        if (l_rc)
+        {
+            disable_pstates();
+            fapi2::current_err = l_rc;
+            goto fapi_try_exit;
+        }
+
+        iv_operating_points[VPD_PT_SET_RAW][p].pstate = l_ps;
+
         l_rc = freq2pState(iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz*1000, \
                             &l_ps, ROUND_NEAR, PPB_INFO);
         if (l_rc)
@@ -4920,6 +4982,8 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
             fapi2::current_err = l_rc;
             goto fapi_try_exit;
         }
+
+        iv_operating_points[VPD_PT_SET_BIASED][p].pstate = l_ps;
 
         FAPI_DBG("Bi: OpPoint=[%d][%d], PS=%3d, Freq=0x%3X (%4d), Vdd=0x%3X (%4d), CF6 Freq=0x%3d (%4d) Step Freq=%5d",
                     VPD_PT_SET_BIASED, p,
@@ -5755,7 +5819,7 @@ fapi2::ReturnCode PlatPmPPB::freq2pState (
             {
                 if (ps_cnt < 5)
                 {
-                FAPI_INF("WARNING: Pstate is less than PSTATE_MIN");
+                    FAPI_INF("WARNING: Pstate is less than PSTATE_MIN");
                 }
 
             }
@@ -6288,7 +6352,7 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
         b_output_trace = true;
     }
 
-    if ( iv_expand_freq_enable ||  iv_attrs.attr_extended_freq_mode)
+    if ( iv_extended_freq_enable ||  iv_attrs.attr_extended_freq_mode)
     {
         l_up_lift = 12;
     }
@@ -6526,29 +6590,6 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
         WofTablesHeader_t* p_wfth;
         p_wfth = reinterpret_cast<WofTablesHeader_t*>(o_buf);
 
-        if ( p_wfth->header_version == 2 )
-        {
-            iv_rdp_scaling_factor = true;
-            memcpy(iv_curr_scale,p_wfth->cur_scale_pct,sizeof(iv_curr_scale));
-            //flags[4:7]
-            //[0] DIMM adjustment enablement
-            //   0: DIMM adjustment disabled
-            //   1: DIMM adjustment enabled
-            //[1] Expanded Frequency Encoding
-            //[2] Efficiency Mode Algorithm (0=Core Utilization based; 1=Ceff based)
-            //[3] Over Current Sensor Mode
-            //   0: OCS disabled
-            //   1: OCS enabled
-            iv_expand_freq_enable = (p_wfth->sys_flags & 0x04) ? true : false;
-
-            if (iv_attrs.attr_extended_freq_mode ||
-                    iv_expand_freq_enable)
-            {
-                iv_reference_frequency_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
-                iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
-            }
-
-        }
         l_vcs_size = revle16(p_wfth->vcs_size);
         l_vdd_size = revle16(p_wfth->vdd_size);
         l_io_size  = revle16(p_wfth->io_size);
@@ -6696,14 +6737,28 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         if (wof_get_tables(iv_procChip, l_wof_table_data))
         {
             b_wof_error = true;
+            break;
         }
+
         if (wof_validate_header(iv_procChip, l_wof_table_data))
         {
-          b_wof_error = true;
+            b_wof_error = true;
+            break;
         }
+
+        // See if a validation check actually disabled WOF
+        fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED, iv_procChip, l_wof_enabled));
+        if (!l_wof_enabled)
+        {
+            break;
+        }
+
+        set_reference_freq(l_wof_table_data);
+
         if (wof_convert_tables( l_wof_table_data, i_wof_table_mode, o_buf, io_size ))
         {
-          b_wof_error = true;
+            b_wof_error = true;
         }
     } while(0);
 
@@ -6716,28 +6771,8 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
         FAPI_INF("Disabling WOF");
         disable_wof();
     }
-    else
-    {
-        WofTablesHeader_t* p_wfth;
-        p_wfth = reinterpret_cast<WofTablesHeader_t*>(l_wof_table_data);
 
-        if ( p_wfth->header_version == 2 )
-        {
-            iv_rdp_scaling_factor = true;
-            memcpy(&iv_curr_scale,&p_wfth->cur_scale_pct,sizeof(iv_curr_scale));
-            //flags[4:7]
-            //[0] DIMM adjustment enablement
-            //   0: DIMM adjustment disabled
-            //   1: DIMM adjustment enabled
-            //[1] Expanded Frequency Encoding
-            //[2] Efficiency Mode Algorithm (0=Core Utilization based; 1=Ceff based)
-            //[3] Over Current Sensor Mode
-            //   0: OCS disabled
-            //   1: OCS enabled
-            iv_expand_freq_enable = (p_wfth->sys_flags & 0x04) ? true : false;
-        }
-    }
-
+fapi_try_exit:
     if (l_wof_table_data)
     {
         delete[] l_wof_table_data;
@@ -6865,6 +6900,10 @@ bool pdv_override(uint16_t* value, uint16_t override_value)
 fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
 {
     FAPI_INF("PlatPmPPB::pm_set_frequency >>>>>");
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    uint32_t l_max_pstate0_freq_mhz = MAX_PSTATE0_FREQ_MHZ;
     fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
 
     fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled;
@@ -6887,23 +6926,39 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
 
     FAPI_TRY(p10_pm_set_system_freq(sys_target,wof_state), "p10_pm_set_system_freq failed.");
 
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
-             sys_target, l_sys_pstate0_freq_mhz));
-
-    iv_attrs.attr_pstate0_freq_mhz = l_sys_pstate0_freq_mhz;
-
-    if (iv_attrs.attr_pstate0_freq_mhz > MAX_PSTATE0_FREQ_MHZ)
+    if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
     {
-        FAPI_INF("Clamping the Pstate0 frequency from %dMHz to %dMHz as the limit of legal Pstates",
-                    l_sys_pstate0_freq_mhz, MAX_PSTATE0_FREQ_MHZ);
-        iv_attrs.attr_pstate0_freq_mhz = MAX_PSTATE0_FREQ_MHZ;
-
+        l_max_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+        iv_attrs.attr_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+        FAPI_INF("Extended frequency mode detected.  Moving Pstate 0 frequency to %d MHz",
+                                iv_attrs.attr_pstate0_freq_mhz);
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
-             sys_target, iv_attrs.attr_pstate0_freq_mhz));
+                               FAPI_SYSTEM,
+                               iv_attrs.attr_pstate0_freq_mhz));
+    }
+    else
+    {
+        l_max_pstate0_freq_mhz = MAX_PSTATE0_FREQ_MHZ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+                                FAPI_SYSTEM,
+                                l_sys_pstate0_freq_mhz));
+        iv_attrs.attr_pstate0_freq_mhz = l_sys_pstate0_freq_mhz;
+    }
+
+    if (iv_attrs.attr_pstate0_freq_mhz > l_max_pstate0_freq_mhz)
+    {
+        FAPI_INF("Clamping the Pstate0 frequency from %dMHz to %d MHz as the limit of legal Pstates",
+                    l_sys_pstate0_freq_mhz, l_max_pstate0_freq_mhz);
+        iv_attrs.attr_pstate0_freq_mhz = l_max_pstate0_freq_mhz;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+                               FAPI_SYSTEM,
+                               iv_attrs.attr_pstate0_freq_mhz));
     }
 
     iv_reference_frequency_mhz = iv_attrs.attr_pstate0_freq_mhz;
     iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
+    FAPI_INF("Pstate0 reference frequency %d MHz",
+                    iv_reference_frequency_mhz);
 
     if ((iv_reference_frequency_mhz == 0) || (iv_reference_frequency_khz == 0))
     {

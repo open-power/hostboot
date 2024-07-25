@@ -266,6 +266,10 @@ fapi2::ReturnCode wof_get_tables(
             FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number.value));
 
             // Set some defaults into the header
+            p_wfth->header_version = 2;
+            p_wfth->sys_flags =  0x54;   // Blueridge-2U, Extended frequency
+            p_wfth->max_powr_min_freq_watts =  200;   // Made up number
+
             strcpy(p_wfth->table_version, "v9.9.9");
             strcpy(p_wfth->package_name,  "DCM");
 
