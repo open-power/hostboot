@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -112,6 +112,7 @@ case HWAS::_type: i_parser.PrintString( "Deconfig State", #_type); break;
 #define case_GARD_ERROR_TYPE(_type) \
 case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                     case_GARD_ERROR_TYPE(GARD_NULL)
+                    case_GARD_ERROR_TYPE(GARD_Spare)
                     case_GARD_ERROR_TYPE(GARD_User_Manual)
                     case_GARD_ERROR_TYPE(GARD_Unrecoverable)
                     case_GARD_ERROR_TYPE(GARD_Fatal)
@@ -179,6 +180,7 @@ case HWAS::_type: i_parser.PrintString( "Deconfig State", #_type); break;
 #define case_GARD_ERROR_TYPE(_type) \
 case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                     case_GARD_ERROR_TYPE(GARD_NULL)
+                    case_GARD_ERROR_TYPE(GARD_Spare)
                     case_GARD_ERROR_TYPE(GARD_User_Manual)
                     case_GARD_ERROR_TYPE(GARD_Unrecoverable)
                     case_GARD_ERROR_TYPE(GARD_Fatal)
@@ -268,6 +270,7 @@ case HWAS::_type: i_parser.PrintString( "Deconfig State", #_type); break;
 #define case_GARD_ERROR_TYPE(_type) \
 case HWAS::_type: i_parser.PrintString( "GARD Error Type", #_type); break;
                     case_GARD_ERROR_TYPE(GARD_NULL)
+                    case_GARD_ERROR_TYPE(GARD_Spare)
                     case_GARD_ERROR_TYPE(GARD_User_Manual)
                     case_GARD_ERROR_TYPE(GARD_Unrecoverable)
                     case_GARD_ERROR_TYPE(GARD_Fatal)

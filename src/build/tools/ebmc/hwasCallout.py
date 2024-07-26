@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2022
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -44,6 +44,7 @@ DeconfigEnum    = { 0: "NO_DECONFIG",
                     2: "DELAYED_DECONFIG" }
 
 GARD_ErrorType  = { 0x00: "GARD_NULL",
+                    0xC0: "GARD_Spare",
                     0xD2: "GARD_User_Manual",
                     0xE2: "GARD_Unrecoverable",
                     0xE3: "GARD_Fatal",

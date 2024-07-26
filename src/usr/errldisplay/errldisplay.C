@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -490,6 +490,7 @@ case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  Deconfig State   
 #define case_GARD_ERROR_TYPE(_type) \
 case HWAS::_type: CONSOLE::displayf(CONSOLE::DEFAULT, NULL, "  GARD Error Type            : %s", #_type); break;
                 case_GARD_ERROR_TYPE(GARD_NULL)
+                case_GARD_ERROR_TYPE(GARD_Spare)
                 case_GARD_ERROR_TYPE(GARD_User_Manual)
                 case_GARD_ERROR_TYPE(GARD_Unrecoverable)
                 case_GARD_ERROR_TYPE(GARD_Fatal)

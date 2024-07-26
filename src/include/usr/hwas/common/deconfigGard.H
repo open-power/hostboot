@@ -1152,6 +1152,30 @@ public:
      */
     void setXAOBusEndpointDeconfigured(bool deconfig);
 
+    /**
+     * @brief Reduce the number of spare cores available on the associated
+     *        processor chip.
+     *
+     * This function encapsulates all of the rules regarding when to spare
+     * and any record keeping involved.  Callers can pass in any target
+     * and use the return value to decide if they need to perform any
+     * special behavior based on a spare action having taken place.
+     *
+     * Pseudocode:
+     *   if( reduceSpareCores(mytarget) {
+     *      run special sparing logic
+     *   else
+     *      do normal behavior
+     *
+     * @param[in] i_target : target being called out
+     * @return true : spares were available and the number has been reduced
+     *                OR this part was already spared out
+     *         false : input is not relevant to sparing logic
+     *                 OR there are no more spares available
+     */
+    bool reduceSpareCores( TARGETING::Target* i_target );
+
+
 #ifndef __HOSTBOOT_RUNTIME
     /**
      *  @brief Pair of records to represent the pre/post migration

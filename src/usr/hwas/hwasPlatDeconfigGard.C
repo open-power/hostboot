@@ -666,11 +666,27 @@ errlHndl_t DeconfigGard::platCreateGardRecord(
                     case GARD_Predictive:
                     case GARD_Power:
                     case GARD_PHYP:
+                    case GARD_Spare:
                     case GARD_Void:
                         HWAS_INF("No Duplication rule for existing Gard type - "
                                  "keeping existing Deconfig Gard record");
                 }
             }
+
+            // This path will happen if the SP creates a guard record in a
+            // checkstop case but Hostboot determines that we can spare out
+            // the part.  Do not adjust anything for the ephemeral record
+            // types because they are not persistent.
+            if( (i_errorType == GARD_Spare) && (i_errlEid == 0)
+                && !isDeconfigGard(l_pRecord->iv_errorType)
+                && (l_pRecord->iv_errorType != GARD_User_Manual) )
+            {
+                HWAS_INF("New record is GARD_Spare - overwriting type only, original EID=%.8X",
+                         l_pRecord->iv_errlogEid);
+                l_pRecord->iv_errorType = i_errorType;
+                _flush((void *)l_pRecord);
+            }
+
             // either way, return success
             break;
         }
@@ -916,7 +932,9 @@ errlHndl_t _GardRecordIdSetup( void *&io_platDeconfigGard)
             l_section.vaddr, l_section.size, sizeof(DeconfigGard::GardRecord));
 
         HWAS_INF_BIN("_GardRecordIdSetup:l_pGardRecordsBinary header BINARY DUMP",
-            l_pGardRecordsBinary, sizeof(DeconfigGard::GardRecordsBinary) );
+                     l_pGardRecordsBinary,
+                     sizeof(DeconfigGard::GardRecordsBinary)+sizeof(DeconfigGard::GardRecord) );
+        HWAS_INF("l_pGardRecordsBinary=%p",l_pGardRecordsBinary);
 
         DeconfigGard::GardRecord *l_pGardRecords =
                 (DeconfigGard::GardRecord *)l_hbDeconfigGard->iv_pGardRecords;

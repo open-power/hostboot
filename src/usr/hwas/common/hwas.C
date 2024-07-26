@@ -3715,4 +3715,16 @@ errlHndl_t validateProcessorEcLevels()
 } //validateProccesorEcLevels
 #endif // end #ifndef __HOSTBOOT_RUNTIME
 
+/**
+ * @brief Determine if the given target is relevant to a spare core scenario.
+ */
+bool isSpareCoreTarget( TARGETING::Target* i_target )
+{
+    auto l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+    return( (l_type == TARGETING::TYPE_CORE)
+            || (l_type == TARGETING::TYPE_FC) );
+}
+
+
 };   // end namespace
+

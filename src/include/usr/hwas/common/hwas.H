@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -340,6 +340,14 @@ enum class ReconfigSetOrClear
 void setOrClearReconfigLoopReason(
     const ReconfigSetOrClear          i_action,
     const TARGETING::RECONFIGURE_LOOP i_reason);
+
+/**
+ * @brief Determine if the given target is relevant to a spare core scenario.
+ *
+ * @param[in] i_target : target to check
+ * @return true : given target is associated with core sparing
+ */
+bool isSpareCoreTarget( TARGETING::Target* i_target );
 
 };   // end namespace
 

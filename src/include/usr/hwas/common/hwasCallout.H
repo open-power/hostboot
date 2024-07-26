@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -54,6 +54,7 @@ enum DeconfigEnum
 
 typedef enum {
     GARD_NULL                   = 0x00,
+    GARD_Spare                  = 0xC0, //Guard of a spare resource.
     GARD_User_Manual            = 0xD2, //Manual Guard.
     GARD_Unrecoverable          = 0xE2, //TODO:RTC-76814
     GARD_Fatal                  = 0xE3, //IPL Failures, and others.

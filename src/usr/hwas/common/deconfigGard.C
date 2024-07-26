@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1124,6 +1124,8 @@ errlHndl_t DeconfigGard::deconfigureAssocProc()
     HWAS_MUTEX_UNLOCK(iv_mutex);
     return l_pErr;
 } // deconfigureAssocProc
+
+
 
 //******************************************************************************
 errlHndl_t DeconfigGard::_invokeDeconfigureAssocProc(TARGETING::ConstTargetHandle_t i_node)
@@ -2776,8 +2778,30 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
         }
 
         HWAS_DBG("%d GARD Records found", l_gardRecords.size());
-
         std::vector<uint32_t> errlLogEidList;
+
+        // Need to apply any SPARE records first so that we don't double-count
+        GardRecords_t l_spareRecords;
+        for( auto rec = l_gardRecords.begin();
+             rec != l_gardRecords.end(); )
+        {
+            if( rec->iv_errorType == GARD_Spare )
+            {
+                l_spareRecords.push_back(*rec);
+                rec = l_gardRecords.erase(rec);
+            }
+            else
+            {
+                rec++;
+            }
+        }
+        for( auto rec : l_spareRecords )
+        {
+            // this is inefficient but the numbers involved are tiny
+            l_gardRecords.insert(l_gardRecords.begin(),rec);
+        }
+             
+
         // Apply ALL gard records (NO Resource Recovery Support)
         for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
              l_itr != l_gardRecords.end();
@@ -2828,12 +2852,37 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
+#ifdef __HOSTBOOT_MODULE            
+            // Before we apply any guard records for core-related targets
+            // check if we have any spares and modify the record if so.
+            // This is required because the SP may add guard records for
+            // a checkstop and not have any knowledge of the spares.
+            // This does not need to be run in MPIPL because the SP would
+            // not have created any new records.
+            if( !UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>() )
+            {
+                if( reduceSpareCores(l_pTarget) )
+                {
+                    l_pErr = platCreateGardRecord( l_pTarget,
+                                                   0,
+                                                   GARD_Spare );
+                    if (l_pErr)
+                    {
+                        HWAS_ERR("platReLogGardError returned an error trying to modify type to be spare");
+                        // commit the log and keep going
+                        errlCommit(l_pErr, HWAS_COMP_ID);
+                    }
+                }
+            }
+#endif
+
             l_pErr = applyGardRecord(l_pTarget, l_gardRecord);
             if (l_pErr)
             {
                 HWAS_ERR("applyGardRecord returned an error");
                 break;
             }
+
             uint32_t l_errlogEid = l_gardRecord.iv_errlogEid;
             //If the errlogEid is already in the errLogEidList, then
             //don't need to log it again as a single error log can
@@ -3865,5 +3914,95 @@ errlHndl_t DeconfigGard::migrateDimmGardRecordsForward( std::vector<GardRecordPa
 }
 #endif //#ifndef __HOSTBOOT_RUNTIME
 
+/**
+ * @brief Reduce the number of spare cores available on the associated
+ *        processor chip.
+ */
+bool DeconfigGard::reduceSpareCores( TARGETING::Target* i_target )
+{
+    bool l_usedSpare = false;
+    bool l_alreadySpared = false;
+    auto l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+    TARGETING::Target* l_parentProc = getParent(i_target,TARGETING::TYPE_PROC);
+
+    if( l_parentProc && HWAS::isSpareCoreTarget(i_target) )
+    {
+        // lock around access to ATTR_SPARE_CORES_DEPLOYED
+        HWAS_MUTEX_LOCK(iv_mutex);
+
+        auto l_numSpares = l_parentProc->getAttr<TARGETING::ATTR_SPARE_CORES>();
+        auto l_spareErrors = l_parentProc->getAttr<TARGETING::ATTR_SPARE_CORES_DEPLOYED>();
+
+        // keep track of all affected core/fc targets for later
+        TARGETING::TargetHandleList l_sparedCores;
+
+        if( TARGETING::TYPE_FC == l_type )
+        {
+            // add  all of its child cores
+            getChildChiplets(l_sparedCores, i_target,
+                             TARGETING::TYPE_CORE, false);
+        }
+        else if( TARGETING::TYPE_CORE == l_type )
+        {
+            if (is_fused_mode())
+            {
+                // need to knock out the entire FC
+                TargetHandle_t fcParent = getParent(i_target, TYPE_FC);
+                getChildChiplets(l_sparedCores, fcParent,
+                                 TARGETING::TYPE_CORE, false);
+            }
+            else
+            {
+                // only affects this core
+                l_sparedCores.push_back(i_target);
+            }
+        }
+
+        // Make sure we haven't already taken these cores into account
+        for( auto core = l_sparedCores.begin();
+             core != l_sparedCores.end(); )
+        {
+            if( (*core)->getAttr<TARGETING::ATTR_REPLACED_BY_SPARE>() )
+            {
+                HWAS_INF("Core %.8X was already spared out",
+                         TARGETING::get_huid(*core) );
+                core = l_sparedCores.erase(core);
+                l_alreadySpared = true;
+            }
+            else
+            {
+                core++;
+            }
+        }
+
+        // If there were any spareable errors and we still have some
+        // spares left to give, update values.
+        // Note: If multiple spares are attempted but there is only
+        // room for some of them, none will be applied.
+        uint8_t l_requiredSpares = l_sparedCores.size();
+        if( (l_requiredSpares > 0)
+            && ((l_requiredSpares + l_spareErrors) <= l_numSpares) )
+        {
+            l_usedSpare = true;
+            HWAS_INF("Spare cores for %.8X reduced to %d (from %d) because of %.8X",
+                     TARGETING::get_huid(l_parentProc),
+                     l_numSpares - l_requiredSpares - l_spareErrors,
+                     l_numSpares - l_spareErrors,
+                     TARGETING::get_huid(i_target));
+            l_spareErrors += l_requiredSpares;
+            l_parentProc->setAttr<TARGETING::ATTR_SPARE_CORES_DEPLOYED>(l_spareErrors);
+
+            // Remember that we spared these cores out
+            for( auto core : l_sparedCores )
+            {
+                core->setAttr<TARGETING::ATTR_REPLACED_BY_SPARE>(1);
+            }
+        }
+
+        HWAS_MUTEX_UNLOCK(iv_mutex);
+    }
+
+    return( l_usedSpare || l_alreadySpared );
+}
 
 } // namespace HWAS

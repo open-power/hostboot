@@ -1274,6 +1274,189 @@ public:
 
         TS_INFO( "testHWASplatReadLx exit" );
     }
+
+    /**
+     * @brief Utility function to gather the current state of all spares
+     * @param[out] o_isspare : map of all CORE targets vs ATTR_REPLACED_BY_SPARE
+     * @param[out] o_numspares : map of all PROC targets vs ATTR_SPARE_CORES_DEPLOYED
+     */
+    void get_spare_state( std::map<TargetHandle_t,ATTR_REPLACED_BY_SPARE_type>& o_isspare,
+                          std::map<TargetHandle_t,ATTR_SPARE_CORES_DEPLOYED_type>& o_numspares )
+    {
+        o_isspare.clear();
+        o_numspares.clear();
+
+        TargetHandleList l_cores;
+        TARGETING::getAllChiplets(l_cores, TARGETING::TYPE_CORE, false);
+        for( auto core : l_cores )
+        {
+            auto spare = core->getAttr<ATTR_REPLACED_BY_SPARE>();
+            o_isspare[core] = spare;
+        }
+
+        TargetHandleList l_procs;
+        getAllChips( l_procs, TYPE_PROC, false );
+        for( auto proc : l_procs )
+        {
+            auto numspares = proc->getAttr<ATTR_SPARE_CORES_DEPLOYED>();
+            o_numspares[proc] = numspares;
+        }
+    }
+
+    /**
+     * @brief   test reduceSpareCores
+     *
+     * This test will attempt to "knock out" every core in order to verify
+     * how the sparing logic works.  As part of the standalone setup there
+     * are 2 spares specified in proc1 and zero in proc0.  For the proc0
+     * cores there are no spares available so there should be no changes in
+     * the state.  For the proc1 cores the spares should be depleted by the
+     * first 2 cores which should be reflected by state changes in the
+     * tracking attributes.
+     */
+    void test_reduceSpareCores()
+    {
+        using namespace TARGETING;
+        TS_INFO(ENTER_MRK" test_reduceSpareCores");
+
+        // first save off the value of any attributes we might change
+        std::map<TargetHandle_t,ATTR_REPLACED_BY_SPARE_type> l_originalSpares;
+        std::map<TargetHandle_t,ATTR_SPARE_CORES_DEPLOYED_type> l_originalErrors;
+        get_spare_state(l_originalSpares,l_originalErrors);
+
+
+        //--- Attempt to apply a spare to every CORE and FC
+        std::list<ATTR_TYPE_type> l_coreTypes = { TYPE_CORE, TYPE_FC };
+        for( auto coretype : l_coreTypes )
+        {
+            TargetHandle_t l_peer = nullptr;
+            ATTR_REPLACED_BY_SPARE_type l_peerExpect = 0;
+
+            // setup the starting state for expectations
+            // REPLACED_BY_SPARE gets set on a core that is knocked out
+            std::map<TargetHandle_t,ATTR_REPLACED_BY_SPARE_type> l_expectedSpares = l_originalSpares;
+            // SPARE_CORES_DEPLOYED increments when a core is knocked out
+            std::map<TargetHandle_t,ATTR_SPARE_CORES_DEPLOYED_type> l_expectedErrors = l_originalErrors;
+
+            TargetHandleList l_cores;
+            getAllChiplets( l_cores, coretype, false );
+            for( auto testcore : l_cores )
+            {
+                auto proc = getParentChip(testcore);
+                auto l_takenSpares = proc->getAttr<ATTR_SPARE_CORES_DEPLOYED>();
+                auto l_totalSpares = proc->getAttr<ATTR_SPARE_CORES>();
+
+                // if there are any spares left to give we should expect this core
+                // to use it, otherwise nothing should change
+                ATTR_REPLACED_BY_SPARE_type expectchange = 0;
+                if( l_takenSpares < l_totalSpares )
+                {
+                    expectchange = 1;
+                }
+                // if this is the second half of a fused-core pair, we should see
+                // no additional spares taken, but we should be informed that
+                // this core was already spared
+                ATTR_SPARE_CORES_DEPLOYED_type numchanges = 2;
+                if( testcore == l_peer )
+                {
+                    expectchange = l_peerExpect;
+                    numchanges = 0;
+                }
+
+                // simulates knocking out a core so that a sparing
+                // operation may be attempted
+                bool sparechange = HWAS::theDeconfigGard().reduceSpareCores(testcore);
+
+                // confirm we actually applied a spare (or not)
+                if( sparechange != expectchange )
+                {
+                    TS_FAIL("test_reduceSpareCores> Unexpected result when sparing out %.8X (l_takenSpares=%d/%d), exp=%d/act=%d",
+                            get_huid(testcore), l_takenSpares, l_totalSpares, expectchange, sparechange);
+                }
+
+                // make sure we used 2 spares (we're always fused mode)
+                // or we used no spares
+                auto l_takenSpares2 = proc->getAttr<ATTR_SPARE_CORES_DEPLOYED>();
+                if( (expectchange && (l_takenSpares2 != l_takenSpares+numchanges))
+                    || (!expectchange && (l_takenSpares != l_takenSpares2)) )
+                {
+                    TS_FAIL("test_reduceSpareCores> Spare reduction incorrect orig=%d, current=%d for %.8X (exp=%d, num=%d)",
+                            l_takenSpares, l_takenSpares2, get_huid(testcore), expectchange, numchanges);
+                }
+
+                if( coretype == TYPE_FC )
+                {
+                    // update our expected list for both child COREs
+                    TargetHandleList l_smallcores;
+                    getChildChiplets(l_smallcores, testcore,
+                                     TARGETING::TYPE_CORE, false);
+                    for( auto sc : l_smallcores )
+                    {
+                        l_expectedSpares[sc] = expectchange;
+                    }
+                }
+                else // TYPE_CORE
+                {
+                    // update our expected list but do not double-count the peer
+                    // of what we already did
+                    if( testcore != l_peer )
+                    {
+                        // need to update myself and my peer CORE
+                        TargetHandle_t fcParent = getParent(testcore, TYPE_FC);
+                        TargetHandleList l_smallcores;
+                        getChildChiplets(l_smallcores, fcParent,
+                                         TARGETING::TYPE_CORE, false);
+                        for( auto acore : l_smallcores )
+                        {
+                            l_expectedSpares[acore] = expectchange;
+                            if( acore != testcore )
+                            {
+                                l_peer = acore;
+                                l_peerExpect = expectchange;
+                            }
+                        }
+                    }
+                }
+            }
+
+            std::map<TargetHandle_t,ATTR_REPLACED_BY_SPARE_type> l_newSpares;
+            std::map<TargetHandle_t,ATTR_SPARE_CORES_DEPLOYED_type> l_newErrors;
+            get_spare_state(l_newSpares,l_newErrors);
+
+            // check to make sure we exhausted all of the spares
+            for( auto err : l_newErrors )
+            {
+                if( err.second != (err.first)->getAttr<ATTR_SPARE_CORES>() )
+                {
+                    TS_FAIL("test_reduceSpareCores> Only %d spares taken of %d on %.8X",
+                            err.second, l_originalErrors[err.first], get_huid(err.first));
+                }
+            }
+
+            // make sure the spare flags are valid
+            for( auto spare : l_newSpares )
+            {
+                if( l_expectedSpares[spare.first] != spare.second )
+                {
+                    TS_FAIL("test_reduceSpareCores> Unexpected change of spare status on %.8X (%d->%d != %d)",
+                            get_huid(spare.first), l_originalSpares[spare.first], spare.second, l_expectedSpares[spare.first]);
+                }
+            }
+
+            // put everything back to the way it started
+            for( auto spare : l_originalSpares )
+            {
+                (spare.first)->setAttr<ATTR_REPLACED_BY_SPARE>(spare.second);
+                l_expectedSpares[spare.first] = spare.second;
+            }
+            for( auto err : l_originalErrors )
+            {
+                (err.first)->setAttr<ATTR_SPARE_CORES_DEPLOYED>(err.second);
+            }
+        }
+
+        TS_INFO(EXIT_MRK" test_reduceSpareCores");
+    }
 };
 
 #endif //
