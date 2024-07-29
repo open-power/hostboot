@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -92,6 +92,13 @@ class TimeManager
             {
                 return iv_timeslicePerSec;
             };
+
+            /* Return the timebase frequency */
+        static uint64_t getTimebaseFreq()
+            {
+                return iv_timebaseFreq;
+            };
+
 
         /**
          * Return the number of ticks for an idle time-slice

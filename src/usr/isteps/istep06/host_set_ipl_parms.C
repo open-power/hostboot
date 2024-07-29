@@ -122,6 +122,33 @@ void* host_set_ipl_parms( void *io_pArgs )
 #endif
     }
 
+    // checks core freq attribute compared to timebase
+    const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
+    uint64_t coreFreq = sys->getAttr<TARGETING::ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ>();
+    uint64_t assumedCoreFreq = (TimeManager::getTimebaseFreq() * 4) / 1000000;
+    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms Timebase assumed core frequency: %u, actual: %u", assumedCoreFreq, coreFreq);
+
+    if (coreFreq != assumedCoreFreq) {
+        /*@
+         * @errortype
+         * @moduleid     ISTEP::MOD_HOST_SET_IPL_PARMS
+         * @reasoncode   ISTEP::RC_TIMEBASE_CORE_FREQ_MISMATCH
+         * @devdesc      kernal/timemgr.c has incorrect timebase compared to core frequency attribute
+         * @custdesc     Kernal timebase may be skewed
+         * @userdata1    Core frequency floor attribute value
+         * @userdata2    Assumed core frequency based on timebase frequency
+         */
+        errlHndl_t l_err = new ERRORLOG::ErrlEntry(
+            ERRORLOG::ERRL_SEV_PREDICTIVE,
+            ISTEP::MOD_HOST_SET_IPL_PARMS,
+            ISTEP::RC_TIMEBASE_CORE_FREQ_MISMATCH,
+            coreFreq,
+            assumedCoreFreq,
+            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+        errlCommit(l_err, ISTEP_COMP_ID);
+    }
+
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "host_set_ipl_parms exit" );
 
     }while(0);

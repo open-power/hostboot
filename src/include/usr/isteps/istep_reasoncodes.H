@@ -94,6 +94,7 @@ namespace ISTEP
         MOD_BIOS_ATTR_SETTERS                             = 0x40,
         MOD_FINISH_PDR_EXCHANGE                           = 0x41,
         MOD_MSS_ATTR_CLEANUP                              = 0x42,
+        MOD_HOST_SET_IPL_PARMS                            = 0x43,
     };
 
     /**
@@ -201,6 +202,7 @@ namespace ISTEP
         RC_BOOT_CORE_REPLACEMENT                 = ISTEP_COMP_ID | 0x6F,
         RC_REQUESTED_FREQ_OUTSIDE_BOUNDARY       = ISTEP_COMP_ID | 0x70,
         RC_OCMB_MIXING_RULES_ERROR               = ISTEP_COMP_ID | 0x71,
+        RC_TIMEBASE_CORE_FREQ_MISMATCH           = ISTEP_COMP_ID | 0x72,
     };
 
 };

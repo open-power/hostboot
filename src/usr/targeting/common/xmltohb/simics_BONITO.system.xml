@@ -149,6 +149,10 @@
         <default>2000</default>
     </attribute>
     <attribute>
+        <id>MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ</id>
+        <default>2000</default>
+    </attribute>
+    <attribute>
         <id>HUID</id>
         <default>0x00010000</default>
     </attribute>

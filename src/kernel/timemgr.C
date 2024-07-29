@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,6 +32,18 @@
 #include <sys/task.h>
 #include <kernel/doorbell.H>
 
+/* Note: timebase frequency is core freq / 4
+ * non-fsp systems have core freq of 2000Mhz (timeclock is ~512Mhz)
+ * fsp systems run at 3250Mhz, but boot at 2000Mhz and change between istep 7-9
+ * we cant know exactly when this happens so we compromise and pretend its always 3250
+ * this means we sleep too long during early isteps but its better than not sleeping enough
+*/
+#ifdef CONFIG_FSP_BUILD
+#define SYSTEM_CORE_FREQ 3250000000ULL
+#else
+#define SYSTEM_CORE_FREQ 2000000000ULL
+#endif
+
 uint64_t TimeManager::iv_timebaseFreq = 0xFFFFFFFF;
 uint64_t TimeManager::iv_timeslicePerSec = DEFAULT_TIMESLICE_PER_SEC;
 
@@ -44,7 +56,7 @@ void TimeManager::init()
 
 void TimeManager::_init()
 {
-    iv_timebaseFreq = 512000000ULL;
+    iv_timebaseFreq = SYSTEM_CORE_FREQ / 4;
 }
 
 void TimeManager::init_cpu(cpu_t* cpu)
