@@ -162,9 +162,14 @@ void set_topology_mode(uint8_t i_topologyMode)
               reinterpret_cast<void*>(i_topologyMode));
 }
 
-void save_mem_stats(uint64_t istep, uint64_t substep)
+void save_mem_stats(uint64_t i_istep, uint64_t i_substep)
 {
     _syscall2(SAVE_MEM_STATS,
-              reinterpret_cast<void*>(istep),
-              reinterpret_cast<void*>(substep));
+              reinterpret_cast<void*>(i_istep),
+              reinterpret_cast<void*>(i_substep));
+}
+
+void coalesce_heap_memory()
+{
+    _syscall0(COALESCE_HEAP_MEMORY);
 }

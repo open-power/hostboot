@@ -137,8 +137,11 @@ namespace Systemcalls
             /** set_topology_mode() */
         MISC_SET_TOPOLOGY_MODE,
 
-           /** SaveMemStats() */
+           /** save_mem_stats() */
         SAVE_MEM_STATS,
+
+        /** coalesce_heap_memory() */
+        COALESCE_HEAP_MEMORY,
 
         SYSCALL_MAX
     };

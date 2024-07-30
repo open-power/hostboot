@@ -51,7 +51,9 @@
 
 #include <stdlib.h>
 
-int g_kernel_trace_level{0};
+int g_kernel_trace_level{0}; // trace level for printk
+int g_istep{0};              // current istep,   set by SaveMemStats syscall
+int g_substep{0};            // current substep, set by SaveMemStats syscall
 
 uint64_t NO_FORCE_ENABLE_MACHINE_CHECK_EXCEPTIONS = 0;
 

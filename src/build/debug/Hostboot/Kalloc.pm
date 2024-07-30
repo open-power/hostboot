@@ -34,14 +34,16 @@ use Exporter;
 use Hostboot::SimpleTraceCommon;
 our @EXPORT_OK = ('main');
 
-################################################################################
 # print a msg for the tag passed in
 sub display_tag
 {
     my $tag = shift || 0;
     switch ($tag)
     {
-        case 0x1001 {::userDisplay "K_ALLOC_PAGES_FAIL";}
+        case 0x1001 {::userDisplay "K_ALLOC_USR_FIRST     ";}
+        case 0x1002 {::userDisplay "K_ALLOC_USR_PERIODIC  ";}
+        case 0x1003 {::userDisplay "K_ALLOC_USR_GET_RES   ";}
+        case 0x1004 {::userDisplay "K_ALLOC_KERNEL_GET_RES";}
     }
 }
 
@@ -54,22 +56,16 @@ sub display_trace_data
 
     $data{summary} or ::userDisplay "=========================================================\n";
     display_tag($data{tag});
-    $data{summary} or ::userDisplay "\n";
+    $data{summary} or $data{tag} and ::userDisplay "\n";
+    Hostboot::SimpleTraceCommon::st_display_istep($data{istep}, $data{substep});
+    $data{summary} or $data{istep} and ::userDisplay "\n";
     Hostboot::SimpleTraceCommon::st_display_tid($data{tid});
+    $data{summary} or ::userDisplay "\n";
+    Hostboot::SimpleTraceCommon::st_display_req_pages($data{requested_pages});
+    ::userDisplay "\n";
 
     $data{summary} and return;
 
-    $str = sprintf("  %6d which_bucket\n", $data{which_bucket});
-    ::userDisplay "$str";
-    $str = sprintf("  %6d bucket_size\n", $data{bucket_size});
-    ::userDisplay "$str";
-    $str = sprintf("  %6d page_count\n", $data{page_count});
-    ::userDisplay "$str";
-    $str = sprintf("  %6d stats_count\n", $data{stats_count});
-    ::userDisplay "$str";
-    $str = sprintf("  %6d coalesce_state\n", $data{coalesce_state});
-    ::userDisplay "$str";
-    $str = sprintf("  %08x  <= first\n", $data{first});
     ::userDisplay "$str";
 }
 
@@ -87,13 +83,10 @@ sub get_trace_data
         return 0;
     }
 
-    $data->{which_bucket}   = ::read32 ($addr); $addr+=4;
-    $data->{bucket_size}    = ::read32 ($addr); $addr+=4;
-    $data->{page_count}     = ::read32 ($addr); $addr+=4;
-    $data->{stats_count}    = ::read32 ($addr); $addr+=4;
-    $data->{coalesce_state} = ::read32 ($addr); $addr+=4;
-    $data->{first}          = ::read64 ($addr); $addr+=8;
-    $data->{tid}            = ::read16 ($addr);
+    $data->{istep}           = ::read16 ($addr); $addr+=2;
+    $data->{substep}         = ::read16 ($addr); $addr+=2;
+    $data->{tid}             = ::read16 ($addr); $addr+=2;
+    $data->{requested_pages} = ::read16 ($addr); $addr+=2;
 
     return 1;
 }

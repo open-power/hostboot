@@ -59,10 +59,15 @@ void STRC_KALLOC_INIT(uint32_t i_size, simple_trace_format_t i_format)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-void STRC_KALLOC(kalloc_trc_tag_t i_tag, kalloc_trc_data_t &i_data)
+void STRC_KALLOC(simple_trace_level_t i_lvl,
+                     kalloc_trc_tag_t i_tag,
+                   kalloc_trc_data_t &i_data)
 {
-    i_data.tid = task_gettid();
-    g_kalloc_trace.add(i_tag, i_data);
+    if (g_kalloc_trace.get_trace_level() >= i_lvl)
+    {
+        i_data.tid = task_gettid();
+        g_kalloc_trace.add(i_tag, i_data);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -84,28 +89,11 @@ void STRC_KMEM(kmem_trc_tag_t i_tag, kmem_trc_data_t &i_data)
 ////////////////////////////////////////////////////////////////////////////////
 void STRC_KMEM(simple_trace_level_t i_lvl,
                      kmem_trc_tag_t i_tag,
-                           uint16_t i_requested_pages)
+                   kmem_trc_data_t &i_data)
 {
     if (g_kmemstats_trace.get_trace_level() >= i_lvl)
     {
-        kmem_trc_data_t l_data{0};
-        l_data.requested_pages = i_requested_pages;
-        l_data.tid             = task_gettid();
-        STRC_KMEM(i_tag, l_data);
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-void STRC_KMEM(simple_trace_level_t i_lvl,
-                     kmem_trc_tag_t i_tag,
-                           uint16_t i_istep,
-                           uint16_t i_substep)
-{
-    if (g_kmemstats_trace.get_trace_level() >= i_lvl)
-    {
-        kmem_trc_data_t l_data{0};
-        l_data.istep    = i_istep;
-        l_data.substep  = i_substep;
-        STRC_KMEM(i_tag, l_data);
+        i_data.tid = task_gettid();
+        STRC_KMEM(i_tag, i_data);
     }
 }
