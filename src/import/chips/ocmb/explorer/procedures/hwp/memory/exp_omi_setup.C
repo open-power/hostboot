@@ -319,6 +319,12 @@ extern "C"
             mss::exp::omi::setup_edpl_threshold(l_dlx_config1_data, !l_edpl_disable, l_mnfg_screen_test, l_mnfg_edpl_threshold);
 
             FAPI_TRY(mss::exp::omi::write_dlx_config1(i_target, l_dlx_config1_data));
+
+            l_data.flush<0>();
+            l_data.setBit<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>();
+            FAPI_TRY(putScom(i_target, EXPLR_DLX_MC_OMI_FIR_MASK_REG_AND, ~l_data)); // Clear the CRC Mask
+            l_data.flush<0>();
+
             FAPI_INF("%s EDPL enable: %s", mss::c_str(i_target), l_edpl_disable ? "false" : "true");
         }
 
