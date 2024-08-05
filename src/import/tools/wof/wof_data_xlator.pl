@@ -2037,7 +2037,7 @@ sub print
     printf( "  VRT Block Size                 : %u\n", $self->access($WOF_ATTR_vrt_block_size) );
     printf( "  VRT Block Header Size          : %u\n", $self->access($WOF_ATTR_vrt_block_header_size) );
     printf( "  VRT Data Size                  : %u\n", $self->access($WOF_ATTR_vrt_data_size) );
-    printf( "  Sys Flags                      : %u\n", $self->access($WOF_ATTR_sys_flags) );
+    printf( "  Sys Flags                      : %x\n", $self->access($WOF_ATTR_sys_flags) );
     printf( "  Core Count                     : %u\n", $self->access($WOF_ATTR_core_count) );
     printf( "  Vcs Start                      : %u\n", $self->access($WOF_ATTR_vcs_start) );
     printf( "  Vcs Step                       : %u\n", $self->access($WOF_ATTR_vcs_step) );
@@ -3207,7 +3207,8 @@ sub _calc_system_vre
         Log::log_print $p_log_lvl, "  wof_freq_mhz: $wof_freq_mhz\n";
 
         # Convert frequency from MHz to one-byte System VRT format using equation
-        # System VRT value = Roundup((Freq(MHz) - 1000)/(16.667 (MHz)))+60
+        # System VRT value = Roundup((Freq(MHz) - 1000)/(16.667 (MHz)))+60/12(if
+        # expand freq enable)
         # where 1800MHz <= Freq <= 4250MHz
         my $system_vre_freq_encode = Util::round( ( $wof_freq_mhz - 1000 ) / 16.667 ) + $up_lift;
         Log::log_print $p_log_lvl, "  system_vre_freq_encode: $system_vre_freq_encode\n";
@@ -3582,7 +3583,14 @@ sub _disp_view_vre_freq
             }
             else
             {
-                $freq = 1000 + 16.667 * ( $vre - 60 );
+                my $up_lift = 60;
+
+                if ( defined($g_expand_freq_enable) )
+                {
+                    $up_lift = 12;
+                }
+
+                $freq = 1000 + 16.667 * ( $vre - $up_lift );
             }
             printf( $fmt_dec, $freq );
         }
@@ -5244,7 +5252,7 @@ sub print_usage
         . "  wof_data_xlator.pl --create <image_file> --expand_freq <csv_file>/<csv_dir> [<csv_file> ...]\n"
         . "  wof_data_xlator.pl --create <overrid_image_file> --combine <override_list_file>]\n"
         . "  wof_data_xlator.pl --list <image_file>\n"
-        . "  wof_data_xlator.pl --view <image_file> --section_number <number>\n"
+        . "  wof_data_xlator.pl --view <image_file> --expand_freq  --section_number <number>\n"
         . "                   --vcs_ceff_index <number> --vdd_ceff_index <number>\n"
         . "                   --io_power_index <number> --amb_cond_index <number>\n"
         . "                   --vratio_index <number>\n"
@@ -5432,7 +5440,7 @@ sub _verify_view_options
     my @valid_options = (
         $OPT_ATTR_view,           $OPT_ATTR_section_number, $OPT_ATTR_outrows,        $OPT_ATTR_outcols,
         $OPT_ATTR_vcs_ceff_index, $OPT_ATTR_vdd_ceff_index, $OPT_ATTR_io_power_index, $OPT_ATTR_amb_cond_index,
-        $OPT_ATTR_vratio_index,   $OPT_ATTR_freq_format,
+        $OPT_ATTR_vratio_index,   $OPT_ATTR_freq_format,    $OPT_ATTR_EXPAND_FREQ,
     );
 
     # Verify no invalid options were specified.
@@ -5459,6 +5467,8 @@ sub _verify_view_options
         $self->access( $OPT_ATTR_outrows, $OPT_ATTR_disp_axis_io );
         $self->access( $OPT_ATTR_outcols, $OPT_ATTR_disp_axis_vratio );
     }
+
+    $g_expand_freq_enable = $self->access($OPT_ATTR_EXPAND_FREQ);
 
     # Verify all required options were specified
     foreach my $option (
