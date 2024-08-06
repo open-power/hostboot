@@ -104,6 +104,8 @@ ODY_SBE_PARSER_PRINT_DELIMITER }
 
 #define SPPE_LEVEL_ATTR_MAX_STRING_SIZE 20
 #define SPPE_CODE_LEVEL_ATTR_ARRAY_SIZE 64
+
+#define TO_UINT16(ptr) (ntohs(*(reinterpret_cast<uint16_t*>(ptr))))
 #define TO_UINT32(ptr)  (ntohl(*(reinterpret_cast<uint32_t*>(ptr))))
 #define TO_UINT64(ptr)  (ntohll(*(reinterpret_cast<uint64_t*>(ptr))))
 
@@ -731,6 +733,74 @@ private:
     // Disabled
     UdParserSPPECodeLevels(const UdParserSPPECodeLevels&);
     UdParserSPPECodeLevels & operator=(const UdParserSPPECodeLevels&);
+};
+
+/**
+ * @class UdParserFFDCDetails
+ *
+ * Parses UdSBEResponse
+ */
+class UdParserSBEResponse : public ERRORLOG::ErrlUserDetailsParser
+{
+public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserSBEResponse() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserSBEResponse() {}
+
+    /**
+     *  @brief Parses string user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        char* l_databuf = static_cast<char*>(i_pBuffer);
+        i_parser.PrintHeading("SPPE Code Levels");
+
+        //***** Memory Layout *****
+        // 4 bytes  : OCMB HUID
+        // 4 bytes  : FIFO REQUEST
+        // 2 bytes  : MAGIC
+        // 2 bytes : PRIMARY STATUS
+        // 2 bytes : SECONDARY STATUS
+
+        i_parser.PrintNumber("OCMB HUID",
+                             "%.8lX", TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+
+        i_parser.PrintNumber("FIFO REQUEST",
+                             "%.8lX", TO_UINT32(l_databuf));
+        l_databuf += sizeof(uint32_t);
+
+        i_parser.PrintNumber("Magic ",
+                             "0x%04X", TO_UINT16(l_databuf));
+        l_databuf += sizeof(uint16_t);
+
+        i_parser.PrintNumber("Primary Status ",
+                             "0x%04X", TO_UINT16(l_databuf));
+        l_databuf += sizeof(uint16_t);
+
+        i_parser.PrintNumber("Secondary Status ",
+                             "0x%04X", TO_UINT16(l_databuf));
+        l_databuf += sizeof(uint16_t);
+    }
+
+private:
+    // Disabled
+    UdParserSBEResponse(const UdParserSBEResponse&);
+    UdParserSBEResponse & operator=(const UdParserSBEResponse&);
 };
 
 

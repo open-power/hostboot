@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,14 +48,38 @@ class UdSPPECodeLevels : public ERRORLOG::ErrlUserDetails
     /**
      *  @brief Constructor
      *
-     *  @param i_ocmb  OCMB target
+     *  @param i_chip  chip target
      */
-    UdSPPECodeLevels( TARGETING::Target * i_ocmb );
+    UdSPPECodeLevels( TARGETING::Target * i_chip );
 
     /**
      *  @brief Destructor
      */
     virtual ~UdSPPECodeLevels();
+
+  private:
+};
+
+/**
+ * @class UdFFDCDetails
+ *
+ * Adds basic details of the SBE Response to an error log as user detail data
+ */
+class UdSBEResponse : public ERRORLOG::ErrlUserDetails
+{
+  public:
+    /**
+     *  @brief Constructor
+     *
+     *  @param i_chip  chip target
+     */
+    UdSBEResponse( TARGETING::TargetHandle_t i_chip, uint32_t fifo_request, uint16_t magic,
+                    uint16_t primary_status, uint16_t secondary_status);
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdSBEResponse();
 
   private:
 };

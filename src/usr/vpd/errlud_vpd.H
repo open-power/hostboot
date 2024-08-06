@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,7 +75,8 @@ class UdVpdParms : public ERRORLOG::ErrlUserDetails
      *
      *  @param  i_errl Error log handle to add detail data to.
      */
-    virtual void addToLog(errlHndl_t i_errl);
+    virtual void addToLog(errlHndl_t i_errl,
+      ERRORLOG::propagation_t i_behavior = ERRORLOG::propagation_t::NO_PROPAGATE);
 
   private:
     // Disabled

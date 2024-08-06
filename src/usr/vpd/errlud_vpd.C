@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -100,7 +100,8 @@ UdVpdParms::~UdVpdParms()
 }
 
 //------------------------------------------------------------------------------
-void UdVpdParms::addToLog(errlHndl_t i_errl)
+void UdVpdParms::addToLog(errlHndl_t i_errl,
+                          ERRORLOG::propagation_t i_behavior)
 {
     // Check for a previous version of this type before adding myself.
     // There are a few code paths that could end up with duplicate calls.
@@ -109,7 +110,7 @@ void UdVpdParms::addToLog(errlHndl_t i_errl)
     auto l_prevUD = i_errl->getUDSections(VPD_COMP_ID, VPD_UDT_PARAMETERS);
     if( l_prevUD.empty() )
     {
-        ERRORLOG::ErrlUserDetails::addToLog(i_errl);
+        ERRORLOG::ErrlUserDetails::addToLog(i_errl, i_behavior);
     }
 }
 

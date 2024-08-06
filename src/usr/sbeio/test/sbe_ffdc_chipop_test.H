@@ -322,7 +322,10 @@ private:
                         exp_to_str(i_test.expectations).data());
                 goto TEST_FAIL_EXIT;
             }
-            delete err;
+            if(err)
+            {
+                errlCommit(err, CXXTEST_COMP_ID);
+            }
             err = nullptr;
             TS_INFO(TEST_FUNC"OCMB[0x%X], test target[0x%X] w/ %s and expectations=%s PASSED",
                     get_huid(i_chip),
@@ -384,9 +387,10 @@ TEST_FAIL_EXIT:
                 goto TEST_FAIL_EXIT;
             }
         }
-
-        // Clean up the chip-op log from this test.
-        delete chipopErr;
+        if(chipopErr)
+        {
+            errlCommit(chipopErr, CXXTEST_COMP_ID);
+        }
         chipopErr = nullptr;
 
         // If this is an async test, call the getFfdc chip-op to check for the expected errors.
@@ -419,8 +423,10 @@ TEST_FAIL_EXIT:
                     goto TEST_FAIL_EXIT;
                 }
             }
-            // Clean up the async log for this test.
-            delete async_errls;
+            if(async_errls)
+            {
+                errlCommit(async_errls, CXXTEST_COMP_ID);
+            }
             async_errls = nullptr;
         }
 

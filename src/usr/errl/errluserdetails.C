@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2011,2014              */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -59,13 +61,13 @@ ErrlUserDetails::~ErrlUserDetails()
 /*****************************************************************************/
 //  ErrlUserDetails  add/appendToLog
 /*****************************************************************************/
-void ErrlUserDetails::addToLog(errlHndl_t i_errl)
+void ErrlUserDetails::addToLog(errlHndl_t i_errl, propagation_t i_behavior)
 {
     if((i_errl) && (iv_BufLen))
     {
         i_errl->addFFDC(iv_CompId, iv_pBuffer, iv_BufLen, 
                 iv_Version, iv_SubSection,
-                iv_merge );
+                iv_merge, i_behavior );
     }
 }
 
