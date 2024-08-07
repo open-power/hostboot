@@ -36,6 +36,9 @@ echo "Master PNOR is: "+$hb_pnor
 #EEPROM Cache
 ###################################
 
+# Note: To generate a new file, IPL through step 6 and run this.
+# ($hb_pnor).save-file custom_eecache.bin 0x2C000 0x001C8000
+
 # Skip any preloading if directed
 if( $hb_skip_eecache == "1" ) {
     echo "Skipping load of EECACHE (HB_SKIP_EECACHE)"
@@ -85,17 +88,15 @@ if( $hb_skip_eecache == "1" ) {
 
     }
 }
+
 ###################################
 
 ###################################
 #Attribute Overrides
 ###################################
 
-# Look for a custom pre-built copy first
-$found_custom_eecache = 0
 try {
     $attrOverride = (lookup-file "attribute_override.bin")
-    $found_attr_override = 1
 
     # NOTE must change offset if PNOR layout changes EECACHE offsets
     echo "    - Loading ATTR_TMP "+$attrOverride+" at 0x22E000 in PNOR"
@@ -106,6 +107,29 @@ try {
     }
 } except {
     echo "    - No attribute overrides found"
+}
+###################################
+
+###################################
+#GUARD
+###################################
+
+# Note: To save a copy from a simics session run this command.
+# ($hb_pnor).save-file guard.bin 0x236000 0x00004000
+# ATTR_ISTEP_CALLOUT_INJECT_ACTION can be useful to create records.
+
+try {
+    $guardfile = (lookup-file "guard.bin")
+
+    # NOTE must change offset if PNOR layout changes GUARD offsets
+    echo "    - Loading GUARD "+$guardfile+" at 0x236000 in PNOR"
+    try {
+        ($hb_pnor).load-file $guardfile 0x236000
+    } except {
+        echo "**** Unable to load "+$guardfile+" - booting with blank GUARD ****"
+    }
+} except {
+    echo "    - No custom guard records found"
 }
 ###################################
 
@@ -204,7 +228,6 @@ if( $hb_nospares == "0" ) {
 }
 
 ###################################
-
 
 #################################
 # Turn on all processor cec-chips
