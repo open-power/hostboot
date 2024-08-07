@@ -310,11 +310,6 @@ p10_pstate_parameter_block( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i
         l_pmPPB->resclk_init();
 
         // ----------------
-        // Set this part's fmax value based on VPD and attributes
-        // ----------------
-        FAPI_TRY(l_pmPPB->part_fmax());
-
-        // ----------------
         // Initialize GPPB structure
         // ----------------
         FAPI_TRY(l_pmPPB->gppb_init(l_globalppb));
@@ -1967,7 +1962,6 @@ void PlatPmPPB::attr_init( void )
     PPB_GET_ATTR(ATTR_SYSTEM_PSTATE0_FREQ_MHZ,              FAPI_SYSTEM,  attr_pstate0_freq_mhz);
     PPB_GET_ATTR(ATTR_NOMINAL_FREQ_MHZ,                     FAPI_SYSTEM,  attr_nominal_freq_mhz);
     PPB_GET_ATTR(ATTR_FREQ_PAU_MHZ,                         FAPI_SYSTEM,  attr_pau_frequency_mhz);
-    PPB_GET_ATTR(ATTR_SYSTEM_FMAX_ENABLE,                   FAPI_SYSTEM,  attr_fmax_enable);
     PPB_GET_ATTR(ATTR_FREQ_BIAS,                            FAPI_SYSTEM,  attr_freq_bias);
     PPB_GET_ATTR(ATTR_FREQ_DPLL_REFCLOCK_KHZ,               FAPI_SYSTEM,  attr_freq_proc_refclock_khz);
     PPB_GET_ATTR(ATTR_HW543384_WAR_MODE,                    FAPI_SYSTEM,  attr_war_mode);
@@ -2549,6 +2543,10 @@ fapi2::ReturnCode PlatPmPPB::vpd_init( void )
         //Compute fmax, ceil freq
         FAPI_TRY(pm_set_frequency(),
                 "pm_set_frequency function failed");;
+
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_CORE_CEILING_MHZ, iv_procChip,
+                               iv_attrs.attr_freq_core_ceiling_mhz),"Attribute read failed");
+        iv_part_ceiling_freq_mhz = iv_attrs.attr_freq_core_ceiling_mhz;
 
         FAPI_INF("Getting ECO core count from PG");
         l_rc = get_mvpd_PG ();
@@ -4363,31 +4361,6 @@ fapi2::ReturnCode PlatPmPPB::apply_pdw_biased_values ()
     return fapi2::current_err;
 }
 
-///////////////////////////////////////////////////////////
-////////   part_fmax
-///////////////////////////////////////////////////////////
-fapi2::ReturnCode PlatPmPPB::part_fmax()
-{
-    FAPI_INF(">>>>>>>>>>>>> part_fmax");
-
-    fapi2::ReturnCode   l_rc;
-    if (iv_vddFmaxFreq < iv_attrs.attr_freq_core_ceiling_mhz)
-    {
-        FAPI_INF("Part ceiling limit to fmax of %X (%d)",
-                    iv_vddFmaxFreq,  iv_vddFmaxFreq);
-        iv_part_ceiling_freq_mhz = iv_vddFmaxFreq;
-    }
-    else
-    {
-        FAPI_INF("Part ceiling set to system ceiling of %X (%d)",
-                    iv_attrs.attr_freq_core_ceiling_mhz, iv_attrs.attr_freq_core_ceiling_mhz);
-        iv_part_ceiling_freq_mhz = iv_attrs.attr_freq_core_ceiling_mhz;
-    }
-
-    FAPI_INF("<<<<<<<<<< part_fmax");
-    return fapi2::current_err;
-}
-
 
 ///////////////////////////////////////////////////////////
 ////////  get_mvpd_poundW
@@ -4910,7 +4883,6 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
     uint32_t l_vcs_distloss_uohm    = iv_vcs_sysparam.distloss_uohm;
     uint32_t l_vcs_distoffset_uv    = iv_vcs_sysparam.distoffset_uv;
 
-    uint32_t l_max_pstate0_freq_mhz = MAX_PSTATE0_FREQ_MHZ;
 
     fapi2::ReturnCode l_rc;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
@@ -4945,12 +4917,6 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
         iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz =
             bias_adjust_mhz(l_frequency_mhz, iv_bias.frequency_0p5pct);
 
-        if (iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz > l_max_pstate0_freq_mhz)
-        {
-            FAPI_INF("Clamping Biased operating point %d from %dMHz to %dMHz as the limit of legal Pstates",
-                        p, iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz, l_max_pstate0_freq_mhz);
-            iv_operating_points[VPD_PT_SET_BIASED][p].frequency_mhz = l_max_pstate0_freq_mhz;
-        }
 
         // If RDP scaling factor is true, then it means we have WOF table
         // version 2, that current scale percentage, that needs to apply for RDP
@@ -5002,7 +4968,6 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
 
     if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
     {
-        l_max_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
         iv_attrs.attr_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
                                FAPI_SYSTEM,
@@ -6990,8 +6955,8 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     FAPI_INF("PlatPmPPB::pm_set_frequency >>>>>");
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-
     uint32_t l_max_pstate0_freq_mhz = MAX_PSTATE0_FREQ_MHZ;
+
     fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
 
     fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled;
@@ -7032,6 +6997,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
                                 l_sys_pstate0_freq_mhz));
         iv_attrs.attr_pstate0_freq_mhz = l_sys_pstate0_freq_mhz;
     }
+
 
     if (iv_attrs.attr_pstate0_freq_mhz > l_max_pstate0_freq_mhz)
     {

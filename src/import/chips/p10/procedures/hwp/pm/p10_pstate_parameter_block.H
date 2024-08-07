@@ -547,12 +547,6 @@ class PlatPmPPB
         fapi2::ReturnCode get_mvpd_iddq( void );
 
         /// -----------------------------------------------------------------------
-        /// @brief Set the class variable that reflects this parts maximum frequency
-        /// @return fapi::ReturnCode: FAPI2_RC_SUCCESS if success, else error code.
-        /// -----------------------------------------------------------------------
-        fapi2::ReturnCode part_fmax( void );
-
-        /// -----------------------------------------------------------------------
         /// @brief Disable Pstates and any dependent functions
         /// -----------------------------------------------------------------------
         void disable_pstates();
