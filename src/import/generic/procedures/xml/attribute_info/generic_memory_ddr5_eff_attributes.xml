@@ -732,6 +732,7 @@
     <writeable/>
     <default>1</default>
     <mssAccessorName>ddr5_rcw00_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
    <attribute>
@@ -744,6 +745,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw01_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -756,6 +758,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw05_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -768,6 +771,7 @@
     <writeable/>
     <default>0x2e</default>
     <mssAccessorName>ddr5_rcw08_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
    <attribute>
@@ -780,6 +784,7 @@
     <writeable/>
     <default>0x4e</default>
     <mssAccessorName>ddr5_rcw09_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -792,6 +797,7 @@
     <writeable/>
     <default>0x55</default>
     <mssAccessorName>ddr5_rcw0a_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -804,6 +810,7 @@
     <writeable/>
     <default>1</default>
     <mssAccessorName>ddr5_rcw0c_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -816,6 +823,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw0d_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -828,6 +836,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw0e_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -840,6 +849,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw0f_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -852,6 +862,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw40_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -864,6 +875,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw41_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -876,6 +888,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw42_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -888,6 +901,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw43_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -900,6 +914,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw44_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -912,6 +927,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw45_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -924,6 +940,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw46_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -936,6 +953,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw47_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -948,6 +966,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw48_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -960,6 +979,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw49_cha_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
     <!-- RCW attributes for Channel B DIMM0-->
@@ -973,6 +993,7 @@
     <writeable/>
     <default>1</default>
     <mssAccessorName>ddr5_rcw00_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -985,6 +1006,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw01_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -997,6 +1019,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw05_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1009,6 +1032,7 @@
     <writeable/>
     <default>0x2e</default>
     <mssAccessorName>ddr5_rcw08_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
    <attribute>
@@ -1021,6 +1045,7 @@
     <writeable/>
     <default>0x4e</default>
     <mssAccessorName>ddr5_rcw09_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1033,6 +1058,7 @@
     <writeable/>
     <default>0x55</default>
     <mssAccessorName>ddr5_rcw0a_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1045,6 +1071,7 @@
     <writeable/>
     <default>1</default>
     <mssAccessorName>ddr5_rcw0c_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1057,6 +1084,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw0d_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1069,6 +1097,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw0e_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1081,6 +1110,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw0f_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
    <attribute>
@@ -1093,6 +1123,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw40_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1105,6 +1136,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw41_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1117,6 +1149,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw42_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1129,6 +1162,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw43_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1141,6 +1175,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw44_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1153,6 +1188,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw45_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1165,6 +1201,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw46_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1177,6 +1214,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw47_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1189,6 +1227,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw48_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1201,6 +1240,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw49_chb_d0</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <!-- RCW attributes for Channel B DIMM1 -->
@@ -1214,6 +1254,7 @@
     <writeable/>
     <default>1</default>
     <mssAccessorName>ddr5_rcw00_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1226,6 +1267,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw01_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1238,6 +1280,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw05_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1250,6 +1293,7 @@
     <writeable/>
     <default>0x2e</default>
     <mssAccessorName>ddr5_rcw08_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
    <attribute>
@@ -1262,6 +1306,7 @@
     <writeable/>
     <default>0x4e</default>
     <mssAccessorName>ddr5_rcw09_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1274,6 +1319,7 @@
     <writeable/>
     <default>0x55</default>
     <mssAccessorName>ddr5_rcw0a_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1286,6 +1332,7 @@
     <writeable/>
     <default>1</default>
     <mssAccessorName>ddr5_rcw0c_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1298,6 +1345,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw0d_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1310,6 +1358,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw0e_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1322,6 +1371,7 @@
     <writeable/>
     <default>0</default>
     <mssAccessorName>ddr5_rcw0f_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
     <attribute>
@@ -1334,6 +1384,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw40_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1346,6 +1397,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw41_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1358,6 +1410,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw42_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1370,6 +1423,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw43_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1382,6 +1436,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw44_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1394,6 +1449,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw45_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1406,6 +1462,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw46_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1418,6 +1475,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw47_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1430,6 +1488,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw48_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
   <attribute>
@@ -1442,6 +1501,7 @@
     <writeable/>
     <default>0x39</default>
     <mssAccessorName>ddr5_rcw49_chb_d1</mssAccessorName>
+    <noSBEAccessor/>
   </attribute>
 
 </attributes>

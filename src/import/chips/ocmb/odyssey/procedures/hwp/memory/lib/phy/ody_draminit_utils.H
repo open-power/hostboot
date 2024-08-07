@@ -118,11 +118,13 @@ namespace phy
 fapi2::ReturnCode nibble_enable_db_disable(const fapi2::buffer<uint32_t>& i_nibble_enables,
         uint8_t(&o_byte_disables)[10]);
 
-constexpr uint8_t NUM_RCW = 0x80;
-constexpr uint8_t NUM_SUPPORTED_RCW = 20;
-constexpr uint8_t DIMM_NUMBER = 2;
-constexpr uint8_t DIMM0 = 0;
-constexpr uint8_t DIMM1 = 1;
+#ifndef __PPE__
+    constexpr uint8_t NUM_RCW = 0x80;
+    constexpr uint8_t NUM_SUPPORTED_RCW = 20;
+    constexpr uint8_t DIMM_NUMBER = 2;
+    constexpr uint8_t DIMM0 = 0;
+    constexpr uint8_t DIMM1 = 1;
+#endif
 
 #ifndef __PPE__
 // Attribute getter FP type
@@ -438,7 +440,9 @@ struct msg_block_vars
     uint8_t iv_Reserved1E7 = 0;
     uint16_t iv_WL_ADJ_START = 0;
     uint16_t iv_WL_ADJ_END = 0;
+#ifndef __PPE__
     uint8_t iv_RCW[NUM_RCW][mss::ddr5::mr::ATTR_NUM_CHANNELS][DIMM_NUMBER] = {};
+#endif
     uint32_t iv_nibbles_enables[mss::ody::MAX_DIMM_PER_PORT] = {0};
     uint8_t iv_DisabledDB[mss::ody::MAX_BYTES_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
     uint8_t iv_VrefCS_Sweep_Min = 0;
@@ -446,7 +450,7 @@ struct msg_block_vars
     uint8_t iv_VrefCA_Sweep_Min = 0;
     uint8_t iv_VrefCA_Sweep_Max = 0;
     uint8_t iv_MR32_per_dram[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
-};
+} __attribute__ ((aligned (8))) ;
 
 ///
 /// @brief Configures the sequence control based upon attributes and requested sequences
@@ -768,9 +772,9 @@ class msg_block_params
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_START, i_target, iv_msg_block_vars.iv_WL_ADJ_START));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_END, i_target, iv_msg_block_vars.iv_WL_ADJ_END));
 
+#ifndef __PPE__
             // Initialize the RCW to zeros
             memset(iv_msg_block_vars.iv_RCW, 0, sizeof(iv_msg_block_vars.iv_RCW));
-#ifndef __PPE__
 
             // Get the supported RCW attr values
             for(uint8_t l_getter_index = 0; l_getter_index < NUM_SUPPORTED_RCW; l_getter_index++)
@@ -876,7 +880,7 @@ class msg_block_params
 
             return fapi2::FAPI2_RC_SUCCESS;
         }
-
+#ifndef __PPE__
         ///
         /// @brief msg_block_params structure setup for parameter RCW05_next
         /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
@@ -900,6 +904,7 @@ class msg_block_params
 
             return fapi2::FAPI2_RC_SUCCESS;
         }
+#endif
 
         ///
         /// @brief msg_block_params structure setup for parameter RXEN_ADJ
@@ -2035,6 +2040,7 @@ class msg_block_params
         /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
         /// @return FAPI2_RC_SUCCESS iff okay
         ///
+#ifndef __PPE__
         fapi2::ReturnCode setup_RCW(PMU_SMB_DDR5U_1D_t& io_msg_block) const
         {
             io_msg_block.RCW00_ChA_D0 = iv_msg_block_vars.iv_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
@@ -2555,6 +2561,7 @@ class msg_block_params
 
             return fapi2::FAPI2_RC_SUCCESS;
         }
+#endif
 
         ///
         /// @brief msg_block_params structure setup for parameter BCW[N]_CHA/B_D[DIMM]

@@ -520,8 +520,10 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     FAPI_TRY(l_msg_block_config.setup_Pstate(o_struct));
     FAPI_TRY(l_msg_block_config.setup_PllBypassEn(o_struct));
     FAPI_TRY(l_msg_block_config.setup_DRAMFreq(o_struct));
+#ifndef __PPE__
     FAPI_TRY(l_msg_block_config.setup_RCW05_next(o_struct));
     FAPI_TRY(l_msg_block_config.setup_RCW06_next(o_struct));
+#endif
     FAPI_TRY(l_msg_block_config.setup_RXEN_ADJ(o_struct));
     FAPI_TRY(l_msg_block_config.setup_RX2D_DFE_Misc(o_struct));
     FAPI_TRY(l_msg_block_config.setup_PhyVref(o_struct));
@@ -587,7 +589,9 @@ fapi2::ReturnCode configure_dram_train_message_block(const fapi2::Target<fapi2::
     FAPI_TRY(l_msg_block_config.setup_Reserved1E7(o_struct));
     FAPI_TRY(l_msg_block_config.setup_WL_ADJ_START(o_struct));
     FAPI_TRY(l_msg_block_config.setup_WL_ADJ_END(o_struct));
+#ifndef __PPE__
     FAPI_TRY(l_msg_block_config.setup_RCW(o_struct));
+#endif
     FAPI_TRY(l_msg_block_config.setup_BCW(o_struct));
     FAPI_TRY(l_msg_block_config.setup_VrefDq(o_struct));
     FAPI_TRY(l_msg_block_config.setup_MR3_per_dram(o_struct));
