@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -65,6 +65,14 @@ static const uint64_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG = 0x800ccc0010
 static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG_TX_PSAVE_FENCE_REQ_DL_IO_16_23 = 48;
 static const uint32_t IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG_TX_PSAVE_FENCE_REQ_DL_IO_16_23_LEN = 8;
 //<< [IOO_TX0_TXCTL_TX_CTL_SM_REGS_CTLSM_CNTL2_PG]
+// iohs/reg00007.H
+
+//>> [IOO_TX0_0_DD_TX_BIT_REGS_CNTL9_PL]
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL9_PL = 0x8004740010012c3full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_24_HS_EN = 48;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_24_HS_EN_LEN = 9;
+//<< [IOO_TX0_0_DD_TX_BIT_REGS_CNTL9_PL]
 // iohs/reg00007.H
 
 //>>THE END<<

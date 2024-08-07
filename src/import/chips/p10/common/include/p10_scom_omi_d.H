@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,22 @@ static const uint32_t CONFIG1_EDPL_THRESHOLD_LEN = 3;
 static const uint32_t CONFIG1_EDPL_ENA = 63;
 //<< [CONFIG1]
 // omi/reg00026.H
+
+//>> [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL11_PL]
+static const uint64_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL11_PL = 0x8004844010012c3full;
+
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_24_HS_EN = 48;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_24_HS_EN_LEN = 9;
+//<< [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL11_PL]
+// omi/reg00027.H
+
+//>> [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL9_PL]
+static const uint64_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL9_PL = 0x8004744010012c3full;
+
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_24_HS_EN = 48;
+static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_24_HS_EN_LEN = 9;
+//<< [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL9_PL]
+// omi/reg00027.H
 
 //>>THE END<<
 

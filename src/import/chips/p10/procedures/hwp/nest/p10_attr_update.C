@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include <p10_attr_update.H>
+#include <p10_get_interposer_ecid.H>
 
 //------------------------------------------------------------------------------
 // Constant definitions
@@ -237,7 +238,23 @@ p10_attr_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 {
     FAPI_DBG("Start");
 
+    fapi2::variable_buffer l_interposer_ecid(p10_get_interposer_ecid_fuseString_len);
+    fapi2::ATTR_INTERPOSER_REV_Type l_interposer_rev = fapi2::ENUM_ATTR_INTERPOSER_REV_NONE;
+
+    fapi2::ATTR_INTERPOSER_FEATURE_HW632898_Type l_hw632898 = fapi2::ENUM_ATTR_INTERPOSER_FEATURE_HW632898_FALSE;
+
     FAPI_TRY(p10_attr_update_mer0_pdI_mvpd(i_target));
+
+    FAPI_TRY(p10_get_interposer_ecid(i_target, l_interposer_ecid));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INTERPOSER_REV, i_target, l_interposer_rev));
+
+    if (l_interposer_rev == fapi2::ENUM_ATTR_INTERPOSER_REV_REV1)
+    {
+        l_hw632898 = fapi2::ENUM_ATTR_INTERPOSER_FEATURE_HW632898_TRUE;
+    }
+
+    FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_INTERPOSER_FEATURE_HW632898, i_target, l_hw632898));
 
 fapi_try_exit:
     FAPI_DBG("End");

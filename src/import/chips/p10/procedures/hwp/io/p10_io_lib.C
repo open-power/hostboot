@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -50,6 +50,24 @@ class p10_io_lib : public p10_io_ppe_cache_proc
         fapi2::ReturnCode clear_error_valid(
             const fapi2::Target<fapi2::TARGET_TYPE_PAUC>& i_pauc_target);
 };
+
+///
+/// @brief Generates full register address for a given group & lane
+///
+/// @param[in] i_reg_addr       Register's address
+/// @param[in] i_group          Group of the register
+/// @param[in] i_lane           Lane to scom (likely broadcast lane)
+///
+/// @return uint64_t 64b address
+uint64_t generate_address(const uint64_t i_reg_addr,
+                          const uint8_t i_group,
+                          const uint8_t i_lane)
+{
+    uint64_t r_addr = i_reg_addr;
+    r_addr |= static_cast<uint64_t>(i_lane & 0x1F) << 32;   // 63-31=32
+    r_addr |= static_cast<uint64_t>(i_group & 0x1F) << 37;   // 63-26=37
+    return r_addr;
+}
 
 /// @brief Determines the thread number for the given iohs target
 /// @param[in] i_iohs_target    IOHS target to get thread id for

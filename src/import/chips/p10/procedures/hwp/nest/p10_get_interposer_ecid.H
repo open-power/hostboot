@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/import/chips/p10/common/include/p10_scom_omi_8.H $        */
+/* $Source: src/import/chips/p10/procedures/hwp/nest/p10_get_interposer_ecid.H $ */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -22,55 +22,45 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+///
+/// @file p10_get_interposer_ecid.H
+/// @brief Check the if interposer is present and it's revision level
+///-----------------------------------------------------------------------------
+/// *HW HW Maintainer: Chris Steffen <cwsteffen@us.ibm.com>
+/// *HW FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
+/// *HW Consumed by  : HB
+///-----------------------------------------------------------------------------
+// EKB-Mirror-To: hostboot
 
-#ifndef __PPE_HCODE__
-    #include "proc_scomt.H"
-#endif
+#include <fapi2.H>
 
-#ifndef __p10_scom_omi_8_H_
-#define __p10_scom_omi_8_H_
+//------------------------------------------------------------------------------
+// Structure definitions
+//------------------------------------------------------------------------------
+typedef fapi2::ReturnCode (*p10_get_interposer_ecid_FP_t)(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
+    fapi2::variable_buffer&);
 
-
-#ifndef __PPE_HCODE__
-namespace scomt
+enum P10_GET_INTERPOSER_ECID_Public_Constants
 {
-namespace omi
+    p10_get_interposer_ecid_fuseString_len = 64,       // fuse string length
+};
+
+//------------------------------------------------------------------------------
+// Function prototypes
+//------------------------------------------------------------------------------
+
+extern "C"
 {
-#endif
 
+///
+/// @brief Wait for dccal done and power-up all configured links/lanes
+///
+/// @param[in] i_target Chip target to start
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+    fapi2::ReturnCode p10_get_interposer_ecid(
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+        fapi2::variable_buffer& o_ecid);
 
-//>> [RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL]
-static const uint64_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL = 0x8000184010012c3full;
-
-static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL_GAIN = 48;
-static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL_GAIN_LEN = 3;
-static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL_ZERO = 51;
-static const uint32_t RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL_ZERO_LEN = 3;
-//<< [RXPACKS_0_DEFAULT_RD_RX_DAC_REGS_CNTL3_PL]
-// omi/reg00016.H
-
-//>> [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL10_PL]
-static const uint64_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL10_PL = 0x80047c4010012c3full;
-
-static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN = 48;
-static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN_LEN = 16;
-//<< [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL10_PL]
-// omi/reg00017.H
-
-//>> [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL]
-static const uint64_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL = 0x80046c4010012c3full;
-
-static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN = 48;
-static const uint32_t TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN_LEN = 16;
-//<< [TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL]
-// omi/reg00017.H
-
-//>>THE END<<
-
-#ifndef __PPE_HCODE__
-}
-}
-#include "omi/reg00016.H"
-#include "omi/reg00017.H"
-#endif
-#endif
+} // extern "C"

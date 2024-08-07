@@ -144,6 +144,7 @@ OBJS += ody_putsram.o
 OBJS += ody_putsram_io_ppe.o
 OBJS += io_ppe_cache.o
 OBJS += ody_mask_firs_omi_init.o
+OBJS += p10_get_interposer_ecid.o
 
 
 include ${ROOTPATH}/config.mk

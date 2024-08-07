@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,6 +58,9 @@ class p10_io_done : public p10_io_ppe_cache_proc
 
         fapi2::ReturnCode p10_io_init_done_sw531947_check_x18_swizzle(
             const fapi2::Target<fapi2::TARGET_TYPE_IOHS>& i_iohs_target);
+
+        fapi2::ReturnCode p11_isc_optimizations(
+            const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target);
 
 };
 
@@ -496,6 +499,180 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Optimization for P11 ISC
+///
+/// @param[in] i_target Chip target to start
+///
+/// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
+fapi2::ReturnCode p10_io_done::p11_isc_optimizations(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+{
+    FAPI_DBG("ISC Optimizations");
+
+    constexpr uint16_t c_max_tx_segments_0_15 = 0xFFFF;
+    constexpr uint16_t c_max_tx_segments_16_24 = 0x1FF;
+
+    constexpr uint8_t c_pr_phase_step = 4;
+    constexpr uint8_t c_fw_inertia_amt = 4;
+    constexpr uint8_t c_peak1_disable = 0;
+    constexpr uint8_t c_peak2_disable = 1;
+    constexpr uint8_t c_peak1 = 0;
+    constexpr uint8_t c_broadcast_lane = 31;
+    constexpr uint8_t c_group_0 = 0;
+
+    auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+
+    fapi2::buffer<uint64_t> l_data;
+    uint64_t l_addr = 0;
+
+    uint8_t l_peak2 = 0;
+    int l_thread = 0;
+    fapi2::ATTR_IO_IOHS_CHANNEL_LOSS_Type l_channel_loss = 0;
+
+    for (auto l_pauc_target : l_pauc_targets)
+    {
+        auto l_iohs_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_IOHS>();
+        auto l_omic_targets = l_pauc_target.getChildren<fapi2::TARGET_TYPE_OMIC>();
+
+        // IOHS Targets
+        for (auto l_iohs_target : l_iohs_targets)
+        {
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_CHANNEL_LOSS, l_iohs_target, l_channel_loss),
+                     "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_LOSS)");
+
+            if (l_channel_loss == fapi2::ENUM_ATTR_IO_IOHS_CHANNEL_LOSS_LOW_LOSS)
+            {
+                l_peak2 = 0;
+            }
+            else if (l_channel_loss == fapi2::ENUM_ATTR_IO_IOHS_CHANNEL_LOSS_MID_LOSS)
+            {
+                l_peak2 = 2;
+            }
+            else if (l_channel_loss == fapi2::ENUM_ATTR_IO_IOHS_CHANNEL_LOSS_HIGH_LOSS)
+            {
+                l_peak2 = 12;
+            }
+
+            FAPI_TRY(p10_io_get_iohs_thread(l_iohs_target, l_thread));
+
+            // Peak Disable Broadcast
+            FAPI_TRY(p10_io_ppe_ppe_ctle_peak1_disable[l_thread].putData(l_pauc_target, c_peak1_disable));
+            FAPI_TRY(p10_io_ppe_ppe_ctle_peak2_disable[l_thread].putData(l_pauc_target, c_peak2_disable));
+
+            // Flush the data to the sram
+            FAPI_TRY(p10_io_ppe_mem_regs[l_thread].flush());
+
+            // Peak ABANK Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL, c_group_0, c_broadcast_lane);
+            l_data.insertFromRight<scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1, scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK1_LEN>
+            (c_peak1);
+            l_data.insertFromRight<scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK2, scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL6_PL_PEAK2_LEN>
+            (l_peak2);
+            FAPI_TRY(fapi2::putScom(l_iohs_target, l_addr, l_data));
+
+            // Peak BBANK Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL, c_group_0, c_broadcast_lane);
+            l_data.insertFromRight<scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1, scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK1_LEN>
+            (c_peak1);
+            l_data.insertFromRight<scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK2, scomt::iohs::IOO_RX0_0_RD_RX_DAC_REGS_CNTL13_PL_PEAK2_LEN>
+            (l_peak2);
+            FAPI_TRY(fapi2::putScom(l_iohs_target, l_addr, l_data));
+
+            // PR Phase Step Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::iohs::IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL, c_group_0, c_broadcast_lane);
+            l_data.insertFromRight<scomt::iohs::IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP, scomt::iohs::IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP_LEN>
+            (c_pr_phase_step);
+            l_data.insertFromRight<scomt::iohs::IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT, scomt::iohs::IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT_LEN>
+            (c_fw_inertia_amt);
+            FAPI_TRY(fapi2::putScom(l_iohs_target, l_addr, l_data));
+
+            // Tx P-Segment 0-15 Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL8_PL, c_group_0, c_broadcast_lane);
+            l_data.insertFromRight<scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN, scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN_LEN>
+            (c_max_tx_segments_0_15);
+            FAPI_TRY(fapi2::putScom(l_iohs_target, l_addr, l_data));
+
+            // Tx P-Segment 16-24 Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL9_PL, c_group_0, c_broadcast_lane);
+            l_data.insertFromRight<scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_24_HS_EN, scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_24_HS_EN_LEN>
+            (c_max_tx_segments_16_24);
+            FAPI_TRY(fapi2::putScom(l_iohs_target, l_addr, l_data));
+
+            // Tx N-Segment 0-15 Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL10_PL, c_group_0, c_broadcast_lane);
+            l_data.insertFromRight<scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN, scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN_LEN>
+            (c_max_tx_segments_0_15);
+            FAPI_TRY(fapi2::putScom(l_iohs_target, l_addr, l_data));
+
+            // Tx N-Segment 16-24 Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL11_PL, c_group_0, c_broadcast_lane);
+            l_data.insertFromRight<scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_24_HS_EN, scomt::iohs::IOO_TX0_0_DD_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_24_HS_EN_LEN>
+            (c_max_tx_segments_16_24);
+            FAPI_TRY(fapi2::putScom(l_iohs_target, l_addr, l_data));
+
+        }
+
+        // OMIC Targets
+        for (auto l_omic_target : l_omic_targets)
+        {
+
+            FAPI_TRY(p10_io_get_omic_thread(l_omic_target, l_thread));
+
+            // PR Phase Step Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::omi::RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL, c_group_0, c_broadcast_lane);
+            FAPI_TRY(fapi2::getScom(l_omic_target, l_addr, l_data));
+            l_data.insertFromRight<scomt::omi::RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP, scomt::omi::RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP_LEN>
+            (c_pr_phase_step);
+            l_data.insertFromRight<scomt::omi::RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT, scomt::omi::RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT_LEN>
+            (c_fw_inertia_amt);
+            FAPI_TRY(fapi2::putScom(l_omic_target, l_addr, l_data));
+
+            // Tx P-Segment 0-15 Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL, c_group_0, c_broadcast_lane);
+            FAPI_TRY(fapi2::getScom(l_omic_target, l_addr, l_data));
+            l_data.insertFromRight<scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN, scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL8_PL_TX_PSEG_MAIN_0_15_HS_EN_LEN>
+            (c_max_tx_segments_0_15);
+            FAPI_TRY(fapi2::putScom(l_omic_target, l_addr, l_data));
+
+            // Tx P-Segment 16-24 Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL9_PL, c_group_0, c_broadcast_lane);
+            FAPI_TRY(fapi2::getScom(l_omic_target, l_addr, l_data));
+            l_data.insertFromRight<scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_24_HS_EN, scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL9_PL_TX_PSEG_MAIN_16_24_HS_EN_LEN>
+            (c_max_tx_segments_16_24);
+            FAPI_TRY(fapi2::putScom(l_omic_target, l_addr, l_data));
+
+            // Tx N-Segment 0-15 Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL10_PL, c_group_0, c_broadcast_lane);
+            FAPI_TRY(fapi2::getScom(l_omic_target, l_addr, l_data));
+            l_data.insertFromRight<scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN, scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL10_PL_TX_NSEG_MAIN_0_15_HS_EN_LEN>
+            (c_max_tx_segments_0_15);
+            FAPI_TRY(fapi2::putScom(l_omic_target, l_addr, l_data));
+
+            // Tx N-Segment 16-24 Broadcast
+            l_data.flush<0>();
+            l_addr = generate_address(scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL11_PL, c_group_0, c_broadcast_lane);
+            FAPI_TRY(fapi2::getScom(l_omic_target, l_addr, l_data));
+            l_data.insertFromRight<scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_24_HS_EN, scomt::omi::TXPACKS_0_DEFAULT_DD_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_24_HS_EN_LEN>
+            (c_max_tx_segments_16_24);
+            FAPI_TRY(fapi2::putScom(l_omic_target, l_addr, l_data));
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Wait for dccal done and power-up all configured links/lanes
 ///
 /// @param[in] i_target Chip target to start
@@ -509,14 +686,18 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     p10_io_done l_proc;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+    fapi2::ATTR_INTERPOSER_FEATURE_HW632898_Type l_isc_defect = 0;
 
     //Poll for done
     int POLLING_LOOPS = 1000;
 
     fapi2::ATTR_IS_SIMICS_Type l_simics;
+    fapi2::ATTR_IS_SIMULATION_Type l_is_sim;
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMICS, FAPI_SYSTEM, l_simics),
              "Error from FAPI_ATTR_GET (ATTR_IS_SIMICS)");
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_SIMULATION, FAPI_SYSTEM, l_is_sim),
+             "Error from FAPI_ATTR_GET (ATTR_IS_SIMULATION)");
 
     // In simics we don't want to wait a long time since it will either be done or not instantly
     if( l_simics == fapi2::ENUM_ATTR_IS_SIMICS_SIMICS )
@@ -594,6 +775,15 @@ fapi2::ReturnCode p10_io_init_done(const fapi2::Target<fapi2::TARGET_TYPE_PROC_C
     else if (!l_done)
     {
         FAPI_TRY(l_proc.p10_io_init_done_check_fails(i_target))
+    }
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INTERPOSER_FEATURE_HW632898, i_target, l_isc_defect),
+             "Error from FAPI_ATTR_GET (ATTR_INTERPOSER_FEATURE_HW632898)");
+
+    // P11 ISC optimizations. Skipping simulation environment because they're not set up for lane broadcasting
+    if((l_isc_defect == fapi2::ENUM_ATTR_INTERPOSER_FEATURE_HW632898_TRUE) && !l_is_sim)
+    {
+        FAPI_TRY(l_proc.p11_isc_optimizations(i_target));
     }
 
 fapi_try_exit:

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -545,6 +545,14 @@ static const uint32_t XSTOP3_REGION_UNIT14 = 18;
 static const uint32_t XSTOP3_WAIT_CYCLES = 48;
 static const uint32_t XSTOP3_WAIT_CYCLES_LEN = 12;
 //<< [XSTOP3]
+// perv/reg00017.H
+
+//>> [SINGLE_OTP_ROM_OTPROM_REG5]
+static const uint64_t SINGLE_OTP_ROM_OTPROM_REG5 = 0x00018005ull;
+
+static const uint32_t SINGLE_OTP_ROM_OTPROM_REG5_REGISTER5 = 0;
+static const uint32_t SINGLE_OTP_ROM_OTPROM_REG5_REGISTER5_LEN = 64;
+//<< [SINGLE_OTP_ROM_OTPROM_REG5]
 // perv/reg00017.H
 
 //>>THE END<<

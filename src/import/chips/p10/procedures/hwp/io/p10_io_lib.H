@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,18 @@ static const uint64_t P10_IO_LIB_FREQ_ADJUST_GE_25G = 0x0D;
 //------------------------------------------------------------------------------
 // Functions
 //------------------------------------------------------------------------------
+
+///
+/// @brief Generates full register address for a given group & lane
+///
+/// @param[in] i_reg_addr       Register's address
+/// @param[in] i_group          Group of the register
+/// @param[in] i_lane           Lane to scom (likely broadcast lane)
+///
+/// @return uint64_t 64b address
+uint64_t generate_address(const uint64_t i_reg_addr,
+                          const uint8_t i_group,
+                          const uint8_t i_lane);
 
 ///// @brief Drive PRBS from PHY
 ///// @param[in] i_iohs_target   OMI target to get thread id for

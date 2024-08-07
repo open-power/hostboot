@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -242,6 +242,24 @@ static const uint64_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT11_PG = 0x8009d80010012c3f
 static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT11_PG_RX_PSAVE_FORCE_STS_0_15 = 48;
 static const uint32_t IOO_RX0_RXCTL_DATASM_REGS_RX_CNT11_PG_RX_PSAVE_FORCE_STS_0_15_LEN = 16;
 //<< [IOO_RX0_RXCTL_DATASM_REGS_RX_CNT11_PG]
+// iohs/reg00042.H
+
+//>> [IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL]
+static const uint64_t IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL = 0x8003380010012c3full;
+
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT = 48;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL_FW_INERTIA_AMT_LEN = 4;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP = 56;
+static const uint32_t IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP_LEN = 7;
+//<< [IOO_RX0_0_RD_RX_BIT_REGS_MODE4_PL]
+// iohs/reg00040.H
+
+//>> [IOO_TX0_0_DD_TX_BIT_REGS_CNTL11_PL]
+static const uint64_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL11_PL = 0x8004840010012c3full;
+
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_24_HS_EN = 48;
+static const uint32_t IOO_TX0_0_DD_TX_BIT_REGS_CNTL11_PL_TX_NSEG_MAIN_16_24_HS_EN_LEN = 9;
+//<< [IOO_TX0_0_DD_TX_BIT_REGS_CNTL11_PL]
 // iohs/reg00042.H
 
 //>>THE END<<

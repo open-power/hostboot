@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -317,6 +317,18 @@
   <odmVisable/>
   <odmChangeable/>
   <array>2</array>
+</attribute>
+<!-- ********************************************************************** -->
+<attribute>
+  <id>ATTR_INTERPOSER_ECID</id>
+  <targetType>TARGET_TYPE_PROC_CHIP, TARGET_TYPE_MEMBUF_CHIP, TARGET_TYPE_OCMB_CHIP</targetType>
+  <description>Populated by HWP called during IPL.
+  PROC, MEMBUF: Bits 0 to 63 of the ECID in array entry 0 and bits 64 to 127 in ECID array entry 1
+  </description>
+  <valueType>uint64</valueType>
+  <writeable/>
+  <odmVisable/>
+  <odmChangeable/>
 </attribute>
 <!-- ********************************************************************** -->
 <attribute>
