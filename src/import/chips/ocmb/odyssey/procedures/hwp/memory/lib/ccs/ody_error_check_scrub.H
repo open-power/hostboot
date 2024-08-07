@@ -154,20 +154,13 @@ fapi2::ReturnCode enable_periodic_cal_ecc_modes(const fapi2::Target<fapi2::TARGE
 /// @param[in] i_target OCMB Chip
 /// @param[in] i_srank the srank to initialize
 /// @param[in] i_pattern mcbist pattern
+/// @param[out] o_ecc_data output buffer to get the original ecc reg value
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-
 fapi2::ReturnCode memory_init_via_memdiags(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
         const uint8_t i_srank,
-        const uint64_t i_pattern);
-
-
-///
-/// @brief Initialize the memory
-/// @param[in] i_target OCMB Chip
-/// @return FAPI2_RC_SUCCESS iff successful
-///
-fapi2::ReturnCode memory_init_via_memdiags(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+        const uint64_t i_pattern,
+        fapi2::buffer<uint64_t>& o_ecc_data);
 
 ///
 /// @brief Reads the MR registers

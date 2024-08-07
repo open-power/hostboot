@@ -113,8 +113,8 @@ fapi2::ReturnCode  setup_arrays_with_ecs_instructions(const mss::rank::info<mss:
         // (use Code Word for finer granularity of counts)
         //             [CID/SRANK]
         // 7  6  5  4  3  2  1  0
-        // 1  1  0  0  0  0  0  0 (0xE0)
-        // 1  0  0  0  0  0  0  0 (0xA0)
+        // 1  1  1  0  0  0  0  0 (0xE0)
+        // 1  0  1  0  0  0  0  0 (0xA0)
         // MR OP are in reversed order so we need to reverse the CID bits
 
         l_mr14_value0 |= i_srank;
@@ -602,19 +602,20 @@ fapi_try_exit:
 /// @param[in] i_target OCMB Chip
 /// @param[in] i_srank the srank to initialize
 /// @param[in] i_pattern mcbist pattern
+/// @param[out] o_ecc_data output buffer to get the original ecc reg value
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 
 fapi2::ReturnCode memory_init_via_memdiags(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
         const uint8_t i_srank,
-        const uint64_t i_pattern)
+        const uint64_t i_pattern,
+        fapi2::buffer<uint64_t>& o_ecc_data)
 {
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_rank_info.get_port_target());
-    fapi2::buffer<uint64_t> l_ecc_data;
     fapi2::buffer<uint64_t> l_fir_mask_save;
 
     // Disable the ecc mode
-    FAPI_TRY(disable_ecc_mode(l_ocmb, l_ecc_data));
+    FAPI_TRY(disable_ecc_mode(l_ocmb, o_ecc_data));
 
     // Mask the mcbist program complete
     FAPI_TRY( mss::memdiags::mask_program_complete<mss::mc_type::ODYSSEY>(l_ocmb, l_fir_mask_save) );
@@ -700,7 +701,7 @@ fapi2::ReturnCode run_hynix_workaround(const mss::rank::info<mss::mc_type::ODYSS
                         GENTARGTID(l_port),
                         i_rank_info.get_port_rank(), i_srank, i_pattern);
         // Do mem init for each srank
-        FAPI_TRY(memory_init_via_memdiags(i_rank_info, i_srank, mss::mcbist::PATTERN_0));
+        FAPI_TRY(memory_init_via_memdiags(i_rank_info, i_srank, mss::mcbist::PATTERN_0, l_ecc_reg_data));
 
         // Disable periodic calibration
         FAPI_TRY(disable_periodic_cal(l_ocmb, l_periodic_calib_data));
@@ -773,7 +774,7 @@ fapi2::ReturnCode run_ecs_helper(const mss::rank::info<mss::mc_type::ODYSSEY>& i
         FAPI_TRY(run_hynix_workaround(i_rank_info, l_srank, i_pattern));
 
         // Do mem init for each srank
-        FAPI_TRY(memory_init_via_memdiags(i_rank_info, l_srank, i_pattern));
+        FAPI_TRY(memory_init_via_memdiags(i_rank_info, l_srank, i_pattern, l_ecc_reg_data));
 
         // Disable periodic calibration
         FAPI_TRY(disable_periodic_cal(l_ocmb, l_periodic_calib_data));
