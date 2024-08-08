@@ -47,6 +47,8 @@
     #include <ody_tsns_dqs_period.H>
 #endif
 
+#include <generic/memory/lib/utils/host_scom_abstraction.H>
+
 typedef fapi2::ReturnCode (*pmic_periodic_telemetry_ddr5_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&,
     fapi2::hwp_data_ostream&);
@@ -81,41 +83,45 @@ void read_serial_ccin_number(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
 /// @param[in] i_state the state to set the PHY to - either mss::states::ON_N (scom access) or mss::states::OFF_N (training access)
 /// @param[in] i_runtime true if running at runtime, meaning the UCCLK needs to be switched on/off (default: false)
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
-/// @note This function has been duplicated in pmic_periodic_telemetry_utils_ddr5.C since we did not want to include unnecessary
+/// @note This function has been duplicated in host_ody_phy_access.C since we did not want to include unnecessary
 ///       libraries in to the PMIC code. Please make sure that both the locations of the function are up to date
 ///
-inline fapi2::ReturnCode configure_phy_scom_access(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+inline fapi2::ReturnCode host_configure_phy_scom_access(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const mss::states i_state,
         const bool i_runtime)
 {
-    static const uint64_t DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL = 0x800D00000801303Full;
-    static const uint32_t DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL = 63;
-    static const uint64_t DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES = 0x800C00800801303Full;
-    static const uint32_t DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES_UCCLKEN = 63;
 
-    fapi2::buffer<uint64_t> l_data;
-    FAPI_TRY(fapi2::getScom(i_target, DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_data));
-
-    l_data.writeBit<DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL>(i_state);
-    FAPI_TRY(fapi2::putScom(i_target, DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_data));
-
-    // Turn UCCLK on/off if at runtime
-    if (i_runtime)
     {
-        FAPI_TRY(fapi2::getScom(i_target, DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES, l_data));
+        static const uint64_t DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL = 0x800D00000801303Full;
+        static const uint32_t DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL = 63;
+        static const uint64_t DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES = 0x800C00800801303Full;
+        static const uint32_t DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES_UCCLKEN = 63;
 
-        if (i_state == mss::states::ON_N)
-        {
-            l_data.setBit<DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES_UCCLKEN>();
-        }
-        else
-        {
-            l_data.clearBit<DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES_UCCLKEN>();
-        }
+        fapi2::buffer<uint64_t> l_data;
 
-        FAPI_TRY(fapi2::putScom(i_target, DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES, l_data));
+        FAPI_TRY(getScomHost(i_target, DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_data));
+
+        l_data.writeBit<DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL_MICROCONTMUXSEL>(i_state);
+
+        FAPI_TRY(putScomHost(i_target, DWC_DDRPHYA_APBONLY0_MICROCONTMUXSEL, l_data));
+
+        // Turn UCCLK on/off if at runtime
+        if (i_runtime)
+        {
+            FAPI_TRY(getScomHost(i_target, DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES, l_data));
+
+            if (i_state == mss::states::ON_N)
+            {
+                l_data.setBit<DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES_UCCLKEN>();
+            }
+            else
+            {
+                l_data.clearBit<DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES_UCCLKEN>();
+            }
+
+            FAPI_TRY(putScomHost(i_target, DWC_DDRPHYA_DRTUB0_UCCLKHCLKENABLES, l_data));
+        }
     }
-
 fapi_try_exit:
     return fapi2::current_err;
 }

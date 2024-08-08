@@ -95,7 +95,7 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
         if(l_dqs_period)
         {
             FAPI_TRY(suspend_dqs_track(i_ocmb_target));
-            FAPI_TRY(configure_phy_scom_access(l_port_target, mss::states::ON_N, true));
+            FAPI_TRY(host_configure_phy_scom_access(l_port_target, mss::states::ON_N, true));
 
             // Get the log
             for (uint8_t l_idx = 0;
@@ -103,7 +103,7 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
             {
                 l_syn_addr = CONSTS::ODY_DQS_TRACKING_LOG_START_ADDRESS + l_idx;
                 l_address = (l_syn_addr << INSERT_AT_32_BIT) | SCOM_ADDRESS;
-                FAPI_TRY(fapi2::getScom(l_port_target, l_address, l_data));
+                FAPI_TRY(getScomHost(l_port_target, l_address, l_data));
                 l_log_16[l_idx] = l_data;
             }
 
@@ -123,15 +123,15 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
             // Read the recal count
             l_syn_addr = CONSTS::ODY_DQS_TRACKING_COUNT_START_ADDRESS;
             l_address = (l_syn_addr << INSERT_AT_32_BIT) | SCOM_ADDRESS;
-            FAPI_TRY(fapi2::getScom(l_port_target, l_address, l_data));
+            FAPI_TRY(getScomHost(l_port_target, l_address, l_data));
 
             // Reset the recal count
-            FAPI_TRY(fapi2::putScom(l_port_target, l_address, 0));
+            FAPI_TRY(putScomHost(l_port_target, l_address, 0));
             // Required to write even+odd addresses on PHY imem
             l_address = ((l_syn_addr + 1) << INSERT_AT_32_BIT) | SCOM_ADDRESS;
-            FAPI_TRY(fapi2::putScom(l_port_target, l_address, 0));
+            FAPI_TRY(putScomHost(l_port_target, l_address, 0));
 
-            FAPI_TRY(configure_phy_scom_access(l_port_target, mss::states::OFF_N, true));
+            FAPI_TRY(host_configure_phy_scom_access(l_port_target, mss::states::OFF_N, true));
             FAPI_TRY(resume_dqs_track(i_ocmb_target));
         }
 
@@ -171,7 +171,7 @@ void read_dts_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_tar
     // Read DTS registers and store value in tele structure
     for (uint8_t l_idx = 0; l_idx < NUM_DTS_LOG_ENTRIES; l_idx++)
     {
-        FAPI_TRY(fapi2::getScom(i_ocmb_target, DTS_ADDRESS_MAP[l_idx], l_data));
+        FAPI_TRY(getScomHost(i_ocmb_target, DTS_ADDRESS_MAP[l_idx], l_data));
         io_dts_data[l_idx] = l_data;
     }
 
