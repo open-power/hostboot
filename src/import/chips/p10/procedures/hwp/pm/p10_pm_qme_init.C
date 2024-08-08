@@ -141,7 +141,7 @@ fapi2::ReturnCode qme_halt(
 fapi2::ReturnCode initQmeBoot( const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target );
 
 fapi2::ReturnCode get_functional_chiplet_info(
-    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target ,
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
     std::vector<uint64_t>& o_ppe_addr_list,
     std::vector< fapi2::Target<fapi2::TARGET_TYPE_EQ > >& o_eq_target_list );
 
@@ -460,6 +460,12 @@ fapi2::ReturnCode qme_init(
     l_qmcr.flush<0>().setBit<QME_QMCR_STOP_SHIFTREG_OVERRIDE_EN>();
     FAPI_TRY(fapi2::putScom(l_eq_mc_or, QME_QMCR_WO_CLEAR, l_qmcr),
              "Error during putscom of QME_QMCR_WO_CLEAR for shiftable regs access");
+
+    //Clear FIR bits
+    l_data64.flush<0>()
+    .setBit<QME_LFIR_PPE_HALT_ERROR>()
+    .setBit<QME_LFIR_PPE_WATCHDOG>();
+    FAPI_TRY(fapi2::putScom(i_target, QME_LFIR_WO_AND, ~l_data64));
 
     FAPI_INF("Start the QMEs");
     l_xcr.flush< 0 >().insertFromRight( XCR_HARD_RESET, 1, 3 );

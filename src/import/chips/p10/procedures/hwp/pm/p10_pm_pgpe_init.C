@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -180,11 +180,17 @@ fapi2::ReturnCode pgpe_start(
         .setBit<p10hcd::PGPE_HCODE_ERROR_INJECT>();
         FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG2_WO_CLEAR, l_data64));
 
+        // Clear FIR bits
+        l_data64.flush<0>()
+        .setBit<TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_GPE2_WATCHDOG_TIMEOUT>()
+        .setBit<TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_GPE2_HALTED>();
+        FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_AND, ~l_data64));
+
         // Program XCR to ACTIVATE PGPE
         FAPI_INF("Starting the PGPE...");
         l_xcr.flush<0>().insertFromRight(XCR_HARD_RESET, 1, 3);
         FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIXCR, l_xcr));
-        l_xcr.flush<0>().insertFromRight(XCR_TOGGLE_XSR_TRH, 1 , 3);
+        l_xcr.flush<0>().insertFromRight(XCR_TOGGLE_XSR_TRH, 1, 3);
         FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIXCR, l_xcr));
         l_xcr.flush<0>().insertFromRight(XCR_RESUME, 1, 3);
         FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_GPE2_OCB_GPEXIXCR, l_xcr));

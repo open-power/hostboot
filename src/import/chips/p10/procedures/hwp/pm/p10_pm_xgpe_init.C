@@ -336,11 +336,17 @@ fapi2::ReturnCode xgpe_start(
         .setBit<p10hcd::XGPE_HCODE_ERROR_INJECT>();
         FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_OCB_OCCFLG3_WO_CLEAR, l_data64));
 
+        // Clear FIR bits
+        l_data64.flush<0>()
+        .setBit<TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_GPE3_WATCHDOG_TIMEOUT>()
+        .setBit<TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_GPE3_HALTED>();
+        FAPI_TRY(fapi2::putScom(i_target, TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_AND, ~l_data64));
+
         // Program XCR to ACTIVATE XGPE
         FAPI_INF("   Starting the XGPE...");
         l_xcr.flush<0>().insertFromRight(XCR_HARD_RESET, 1, 3);
         FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIXCR, l_xcr));
-        l_xcr.flush<0>().insertFromRight(XCR_TOGGLE_XSR_TRH, 1 , 3);
+        l_xcr.flush<0>().insertFromRight(XCR_TOGGLE_XSR_TRH, 1, 3);
         FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIXCR, l_xcr));
         l_xcr.flush<0>().insertFromRight(XCR_RESUME, 1, 3);
         FAPI_TRY(putScom(i_target, TP_TPCHIP_OCC_OCI_GPE3_OCB_GPEXIXCR, l_xcr));

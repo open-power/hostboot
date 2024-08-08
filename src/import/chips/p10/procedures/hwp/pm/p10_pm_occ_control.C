@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -489,9 +489,14 @@ fapi2::ReturnCode p10_pm_occ_control
             PREP_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target);
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_WO_AND(i_target,
                      ~BIT64(TP_TPCHIP_OCC_OCI_OCB_PIB_OJCFG_DBG_HALT)));
+
             PREP_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_AND(i_target);
+            l_data64.flush<0>()
+            .setBit<TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_GPE0_WATCHDOG_TIMEOUT>()
+            .setBit<TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_GPE0_HALTED>()
+            .setBit<TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_PPC405_DBGSTOPACK>();
             FAPI_TRY(PUT_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_WO_AND(i_target,
-                     ~BIT64(TP_TPCHIP_OCC_OCI_SCOM_OCCLFIR_PPC405_DBGSTOPACK)));
+                     ~BIT64(l_data64)));
 
             // Restore the original FIR mask
             PREP_TP_TPCHIP_OCC_OCI_SCOM_OCCLFIRMASK_RW(i_target);
@@ -533,7 +538,6 @@ fapi2::ReturnCode p10_pm_occ_control
             }
 
 #endif
-
 
             break;
 
