@@ -90,9 +90,21 @@ fapi2::ReturnCode prepare_ody_ccs_beat_data(const fapi2::Target<fapi2::TARGET_TY
 /// @param[in] i_data processed and assembled data from maint buffer
 /// @param[out] o_op_code final op code data
 /// @return FAPI2_RC_SUCCSS iff ok
-//
+///
 fapi2::ReturnCode get_op_code(const uint8_t i_dram_number, const uint8_t i_dram_width,
-                              const mss::pair<uint64_t, uint16_t> (&i_data)[mss::ody::CCS_BEAT_DATA_SIZE], uint8_t& o_op_code);
+                              mss::pair<uint64_t, uint16_t> (&i_data)[mss::ody::CCS_BEAT_DATA_SIZE], uint8_t& o_op_code);
+
+///
+/// @brief Invert data based on inversion mode in Read ECC Control Register.
+///        The inversion needs to happen on second half of data if mode is 0x01.
+///        This is applicable for half dimm mode too as all bits there are treated as data.
+///
+/// @param[in] i_target the ocmb target on which to operate
+/// @param[in,out] io_data processed and assembled data from maint buffer
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode invert_data_if_needed(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        mss::pair<uint64_t, uint16_t> (&io_data)[mss::ody::CCS_BEAT_DATA_SIZE]);
 
 } // namespace ccs
 } // namespace mss

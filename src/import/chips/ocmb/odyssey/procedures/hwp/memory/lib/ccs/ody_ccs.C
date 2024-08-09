@@ -812,6 +812,8 @@ fapi2::ReturnCode mr_data_process<mss::mc_type::ODYSSEY>(
 
     mss::pair<uint64_t, uint16_t> l_processed_data[mss::ody::CCS_BEAT_DATA_SIZE];
 
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
+
     // Read and process the CCS data out of the buffers
     FAPI_TRY(mss::ccs::prepare_ody_ccs_beat_data(i_target, l_processed_data));
     {
@@ -822,10 +824,12 @@ fapi2::ReturnCode mr_data_process<mss::mc_type::ODYSSEY>(
         const auto START_DRAM = i_channel_select == mss::ccs::channel_select::CHB ?  MAX_NUM_DRAM / 2 : 0;
         const auto END_DRAM   = i_channel_select == mss::ccs::channel_select::CHA ?  MAX_NUM_DRAM / 2 : MAX_NUM_DRAM;
 
+        FAPI_TRY(mss::ccs::invert_data_if_needed(l_ocmb, l_processed_data));
+
         for (uint8_t l_dq_index = START_DRAM; l_dq_index < END_DRAM; l_dq_index++)
         {
             uint8_t l_op_code = 0;
-            FAPI_TRY(mss::ccs::get_op_code(l_dq_index, l_dram_width[0], l_processed_data, l_op_code ));
+            FAPI_TRY(mss::ccs::get_op_code(l_dq_index, l_dram_width[0], l_processed_data, l_op_code));
             FAPI_DBG(GENTARGTIDFORMAT " DRAM%d OP=0x%02X", GENTARGTID(i_target), l_dq_index, l_op_code);
             o_data[l_dq_index] = l_op_code;
         }
@@ -925,12 +929,8 @@ fapi2::ReturnCode setup_execute_restore<mss::mc_type::ODYSSEY>(
         // Configure CCS regs for execution
         FAPI_TRY( config_ccs_regs_for_concurrent<mss::mc_type::ODYSSEY>(i_target, l_modeq_reg ) );
 
-        FAPI_TRY( disable_recr_data_inversion<mss::mc_type::ODYSSEY>(i_target, l_recr_reg) );
-
         // Run CCS standalone execution
         FAPI_TRY( execute<mss::mc_type::ODYSSEY>(i_target, io_program, i_port) );
-
-        FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_WDF_REGS_RECR, l_recr_reg));
 
         // Revert CCS regs after execution
         FAPI_TRY( revert_config_regs<mss::mc_type::ODYSSEY>(i_target, l_modeq_reg) );

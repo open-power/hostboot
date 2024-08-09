@@ -177,9 +177,9 @@ fapi_try_exit:
 /// @param[in] i_data processed and assembled data from maint buffer
 /// @param[out] o_op_code final op code data
 /// @return FAPI2_RC_SUCCSS iff ok
-//
+///
 fapi2::ReturnCode get_op_code(const uint8_t i_dram_number, const uint8_t i_dram_width,
-                              const mss::pair<uint64_t, uint16_t> (&i_data)[mss::ody::CCS_BEAT_DATA_SIZE], uint8_t& o_op_code)
+                              mss::pair<uint64_t, uint16_t> (&i_data)[mss::ody::CCS_BEAT_DATA_SIZE], uint8_t& o_op_code)
 {
     /// As per ddr5 JEDEC spec, this function ignores BL 0-7
     /// and Extracts data out of BL 8-15 of DQ0 since rest of the DQs per device are redundant
@@ -247,5 +247,57 @@ fapi2::ReturnCode get_op_code(const uint8_t i_dram_number, const uint8_t i_dram_
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Invert data based on inversion mode in Read ECC Control Register.
+///        The inversion needs to happen on second half of data if mode is 0x01.
+///        This is applicable for half dimm mode too as all bits there are treated as data.
+///
+/// @param[in] i_target the ocmb target on which to operate
+/// @param[in,out] io_data processed and assembled data from maint buffer
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode invert_data_if_needed(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                        mss::pair<uint64_t, uint16_t> (&io_data)[mss::ody::CCS_BEAT_DATA_SIZE])
+{
+    fapi2::buffer<uint64_t> l_data;
+    fapi2::buffer<uint64_t> l_data_reg;
+    fapi2::buffer<uint64_t> l_data_inversion_bits;
+    static constexpr uint8_t INVERT_SECOND_HALF = 0x01;
+    static constexpr uint8_t INVERT_ALWAYS = 0x02;
+    static constexpr uint8_t INVERSION_SECOND_HALF_AND_ALWAYS = 0x03;
+    static constexpr uint8_t INVERT_START0_OFFSET = 4;
+    static constexpr uint8_t INVERT_START1_OFFSET = 12;
+    static constexpr uint8_t INVERT_LEN = 4;
+
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_WDF_REGS_RECR, l_data));
+
+    l_data.extractToRight<scomt::ody::ODC_WDF_REGS_RECR_MBSECCQ_DATA_INVERSION, scomt::ody::ODC_WDF_REGS_RECR_MBSECCQ_DATA_INVERSION_LEN>
+    (l_data_inversion_bits);
+
+    if (l_data_inversion_bits == INVERT_SECOND_HALF)
+    {
+        for(uint8_t l_data_index = 0; l_data_index < INVERT_LEN; ++l_data_index)
+        {
+            io_data[INVERT_START0_OFFSET + l_data_index].first = ~io_data[INVERT_START0_OFFSET + l_data_index].first;
+            io_data[INVERT_START0_OFFSET + l_data_index].second = ~io_data[INVERT_START0_OFFSET + l_data_index].second;
+            io_data[INVERT_START1_OFFSET + l_data_index].first = ~io_data[INVERT_START1_OFFSET + l_data_index].first;
+            io_data[INVERT_START1_OFFSET + l_data_index].second = ~io_data[INVERT_START1_OFFSET + l_data_index].second;
+        }
+    }
+    else if ((l_data_inversion_bits == INVERT_ALWAYS) || (l_data_inversion_bits == INVERSION_SECOND_HALF_AND_ALWAYS))
+    {
+        for(uint8_t l_data_index = 0; l_data_index < mss::ody::CCS_BEAT_DATA_SIZE; ++l_data_index )
+        {
+            io_data[l_data_index].first = ~io_data[l_data_index].first;
+            io_data[l_data_index].second = ~io_data[l_data_index].second;
+        }
+    }
+
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 }//mss
 }//ccs
