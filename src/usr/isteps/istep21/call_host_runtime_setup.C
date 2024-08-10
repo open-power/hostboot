@@ -266,8 +266,8 @@ void* call_host_runtime_setup (void *io_pArgs)
             break;
         }
 
-        // On eBMC systems, the PHYP lids were loaded and verified earlier, so
-        // need to re-verify/move here.
+        // On eBMC systems, the PHYP lids were loaded and verified earlier.
+        // Now for FSP systems call verifyAndMovePayload to handle the PHYP payload
         if(INITSERVICE::spBaseServicesEnabled())
         {
             // Verify PAYLOAD and Move PAYLOAD+HDAT from Temporary TCE-related
@@ -415,7 +415,7 @@ void* call_host_runtime_setup (void *io_pArgs)
 #endif
 
         // Update the MDRT Count and PDA Table Entries from Attribute
-        // Captured Address offset and size will be updated during the data 
+        // Captured Address offset and size will be updated during the data
         // collection.
         TargetService& l_targetService = targetService();
         Target* l_sys = nullptr;

@@ -43,6 +43,8 @@
 #include <targeting/targplatutil.H>
 #include <runtime/runtime_reasoncodes.H>
 #include <runtime/runtime.H>
+#include "attributeenums.H"
+#include "hbotcompid.H"
 #include "hdatstructs.H"
 #include <mbox/ipc_msg_types.H>
 #include <sys/task.h>
@@ -76,6 +78,7 @@
 #include <runtime/populate_hbruntime.H>
 #include <runtime/preverifiedlidmgr.H>
 #include <util/utilmclmgr.H>
+#include <util/utilhllmgr.H>
 #include <pnor/pnor_reasoncodes.H>
 #include <runtime/common/runtime_utils.H>
 #include <limits.h>
@@ -1711,13 +1714,20 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
             }
 
             // Initialize Pre-Verified Lid Manager, which is required
-            // to process the MCL, then process the MCL and unlock the Pre-Verified
-            // Lid Manager.
+            // to process the MCL or HLL
             if(TARGETING::is_phyp_load())
             {
                 PreVerifiedLidMgr::initLock(l_prevDataAddr, l_prevDataSize,i_nodeId);
-                MCL::MasterContainerLidMgr l_mcl;
-                l_elog = l_mcl.processComponents();
+                if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V1_CONTAINER)
+                {
+                    MCL::MasterContainerLidMgr l_mcl;
+                    l_elog = l_mcl.processComponents();
+                }
+                else if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
+                {
+                    HLL::HLLMgr l_hll;
+                    l_elog = l_hll.managePreVerifiedGroup();
+                }
                 PreVerifiedLidMgr::unlock();
                 if(l_elog)
                 {
@@ -2044,7 +2054,6 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                 "get_host_data_section() failed for Node TPM-related Data section");
         break;
     }
-
     // obtain the node target, used later to populate fields
     TARGETING::Target* mproc = nullptr;
     l_elog = TARGETING::targetService().queryMasterProcChipTargetHandle(mproc);
@@ -2057,7 +2066,6 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
     auto targetType = TARGETING::TYPE_NODE;
     const TARGETING::Target* l_node = getParent(mproc, targetType);
     assert(l_node != nullptr, "Bug! getParent on master proc returned null.");
-
     // this will additively keep track of the next available offset
     // as we fill the section
     uint32_t l_currOffset = 0;
@@ -4563,8 +4571,8 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
 
     // Make sure these constants are page-aligned, as they are used below for
     // mm_block_map:
-    static_assert((MCL_TMP_ADDR % PAGESIZE) == 0, "verifyAndMovePayload() MCL_TMP_ADDR isn't page-aligned");
-    static_assert((MCL_TMP_SIZE % PAGESIZE) == 0, "verifyAndMovePayload() MCL_TMP_SIZE isn't page-aligned");
+    static_assert((TOC_TMP_ADDR % PAGESIZE) == 0, "verifyAndMovePayload() TOC_TMP_ADDR isn't page-aligned");
+    static_assert((TOC_TMP_SIZE % PAGESIZE) == 0, "verifyAndMovePayload() TOC_TMP_SIZE isn't page-aligned");
     static_assert((HDAT_TMP_ADDR % PAGESIZE) == 0, "verifyAndMovePayload() HDAT_TMP_ADDR isn't page-aligned");
 
     do{
@@ -4572,6 +4580,7 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
     if (TARGETING::is_sapphire_load() && !INITSERVICE::spBaseServicesEnabled())
     {
         // OPAL load on BMC, no need to verify and move
+        TRACFCOMP(g_trac_runtime, "verifyAndMovePayload(): OPAL load on BMC, no verifications performed.");
         break;
     }
 
@@ -4596,12 +4605,25 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
     // Get Temporary Virtual Address To Payload
     // - Need to make Memory spaces HRMOR-relative
     uint64_t hostboot_base_addr = RUNTIME::getHbBaseAddrWithNodeOffset();
-    uint64_t payload_tmp_phys_addr = hostboot_base_addr + MCL_TMP_ADDR;
-    uint64_t payload_size          = MCL_TMP_SIZE;
+    uint64_t payload_tmp_phys_addr = hostboot_base_addr + TOC_TMP_ADDR;
+    uint64_t payload_size          = TOC_TMP_SIZE;
 
     payload_tmp_virt_addr = mm_block_map(
                              reinterpret_cast<void*>(payload_tmp_phys_addr),
                              payload_size);
+
+    // The following HLL logic is here for scope
+    // Only when V3 should we initialize the tmp TOC space
+    HLL::GroupIdString l_HLLStr = {};
+    HLL::HLLMgr *l_hll = nullptr;
+    if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
+    {
+        // For the HLL we want to initialize only the TOC of the temporary memory space
+        // and leave the larger temp space with the lids untouched
+        HLL::groupIdToString(HLL::g_HLLPowerVM, l_HLLStr);
+        bool l_toc_only = true;
+        l_hll = new HLL::HLLMgr(l_toc_only);
+    }
 
     // Check for nullptr being returned
     if (payload_tmp_virt_addr == nullptr)
@@ -4616,26 +4638,33 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
     }
 
     TRACFCOMP( g_trac_runtime,"verifyAndMovePayload() "
-               "Processing PAYLOAD_KIND = %d (Id='%s') (is_phyp=%d): "
+               "Processing PAYLOAD_KIND = %d (is_phyp=%d): "
                "physAddr=0x%.16llX, virtAddr=0x%.16llX",
-               payload_kind, l_IdStr, is_phyp, payload_tmp_phys_addr,
+               payload_kind, is_phyp, payload_tmp_phys_addr,
                payload_tmp_virt_addr );
 
-
-    // Parse Container Header
     SECUREBOOT::ContainerHeader l_conHdr;
-    l_err = l_conHdr.setHeader(payload_tmp_virt_addr);
-    if (l_err)
+    if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V1_CONTAINER)
     {
-        TRACFCOMP( g_trac_runtime,
-                   ERR_MRK"verifyAndMovePayload(): Fail to parse container "
-                   "header at payload_tmp_virt_addr = 0x%.16llX",
-                   payload_tmp_virt_addr);
-        break;
+        // Parse Container Header
+        TRACFCOMP(g_trac_runtime, "verifyAndMovePayload() processing component=%s", l_IdStr);
+        l_err = l_conHdr.setHeader(payload_tmp_virt_addr);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_runtime,
+                    ERR_MRK"verifyAndMovePayload(): Fail to parse container "
+                    "header at payload_tmp_virt_addr = 0x%.16llX",
+                    payload_tmp_virt_addr);
+            break;
+        }
+    } else if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
+    {
+        // HLL does not have a secure container header for the PowerVM payload
+        TRACFCOMP(g_trac_runtime, "verifyAndMovePayload() processing group=%s", l_HLLStr);
     }
 
     // If in Secure Mode Verify Payload at Temporary TCE-related Memory Location
-    if (SECUREBOOT::enabled())
+    if ((SECUREBOOT::enabled()) && (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V1_CONTAINER))
     {
         if(i_payloadAlreadyVerified)
         {
@@ -4649,8 +4678,9 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
                     payload_tmp_phys_addr, payload_tmp_virt_addr );
 
             // Verify Container
-            // payload_tmp_virt_addr is the hostboot MCL_TMP_ADDR space which is untouched
+            // payload_tmp_virt_addr is the hostboot TOC_TMP_ADDR space which is untouched
             // by the manageSingleComponent decompression data management
+            // FSP TCE does not support compression, only eBMC support compression of the PowerVM payload
             l_err = SECUREBOOT::verifyContainer(payload_tmp_virt_addr);
             if (l_err)
             {
@@ -4663,7 +4693,7 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
 
             // Get PAYLOAD size from verified Header
             payload_size = l_conHdr.payloadTextSize() + PAGESIZE;
-            assert(payload_size <= MCL_TMP_SIZE, "verifyAndMovePayload payload_size 0x%X must be <= MCL_TMP_SIZE (0x%X)", payload_size, MCL_TMP_SIZE );
+            assert(payload_size <= TOC_TMP_SIZE, "verifyAndMovePayload payload_size 0x%X must be <= TOC_TMP_SIZE (0x%X)", payload_size, TOC_TMP_SIZE );
 
             // Verify ASCII Component Id in the Secure Header matches expected value
             l_err = SECUREBOOT::verifyComponentId(l_conHdr, l_IdStr);
@@ -4677,22 +4707,71 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
             }
         }
     }
+    else if ((SECUREBOOT::enabled()) && (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER))
+    {
+        if (is_phyp)
+        {
+            if(i_payloadAlreadyVerified)
+            {
+                TRACFCOMP(g_trac_runtime,"verifyAndMovePayload(): "
+                          "Payload already verified, not verifying again");
+            }
+            else
+            {
+                errlHndl_t l_err_verify = l_hll->verifyPowerVM(payload_tmp_virt_addr);
+                if (l_err_verify)
+                {
+                    TRACFCOMP(g_trac_runtime, "verifyAndMovePayload(): Failed verifyPowerVM Group=%s", l_HLLStr);
+                    l_err->collectTrace("",256);
+                    SECUREBOOT::handleSecurebootFailure(l_err);
+                    assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+                }
+            }
+        }
+    }
 
     if(is_phyp)
     {
-        MCL::MasterContainerLidMgr::cachePhypHeader(
-            reinterpret_cast<uint8_t*>(payload_tmp_virt_addr));
+        // Based on MCL or HLL (hashSignMode) perform the proper method
+        // The PhypHeader is the NACA platform specific lid (88A00702)
+        if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V1_CONTAINER)
+        {
+            MCL::MasterContainerLidMgr::cachePhypHeader(
+                reinterpret_cast<uint8_t*>(payload_tmp_virt_addr));
+        }
+        else if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
+        {
+            TRACFCOMP(g_trac_runtime, "verifyAndMovePayload(): HLL No cachePhypHeader");
+        }
     }
 
     // Extend PAYLOAD
-    l_err = MCL::MasterContainerLidMgr::tpmExtend(l_compId, l_conHdr);
-    if (l_err)
+    if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V1_CONTAINER)
     {
-        TRACFCOMP( g_trac_runtime,
-                   ERR_MRK"verifyAndMovePayload(): Fail to tpmExend "
-                   "Id %s in header at payload_tmp_virt_addr = 0x%.16llX",
-                   l_IdStr, payload_tmp_virt_addr);
-        break;
+        l_err = MCL::MasterContainerLidMgr::tpmExtend(l_compId, l_conHdr);
+        if (l_err)
+        {
+            TRACFCOMP( g_trac_runtime,
+                    ERR_MRK"verifyAndMovePayload(): MCL Fail to tpmExend "
+                    "Id %s in header at payload_tmp_virt_addr = 0x%.16llX",
+                    l_IdStr, payload_tmp_virt_addr);
+            break;
+        }
+    }
+    else if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
+    {
+        if(i_payloadAlreadyVerified)
+        {
+            TRACFCOMP(g_trac_runtime,"verifyAndMovePayload(): "
+                    "BMC platform previously verified (comes in payload already verified)");
+        }
+        else
+        {
+            // For HLL, the PowerVM lids are NOT tpmExtended as done in MCL flow
+            // See utilhllmgr.C for manageTpmExtendsHLL for how the HLL itself is managed
+            TRACFCOMP(g_trac_runtime,"verifyAndMovePayload(): "
+                    "HLL previously tpmExtended");
+        }
     }
 
     const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
@@ -4703,7 +4782,7 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
 
     payloadBase = payloadBase * MEGABYTE;
 
-    // Move virtual address past payload header for memcpy below
+    // Move virtual address past the PhypHeader for memcpy below
     payload_tmp_virt_addr = reinterpret_cast<void*>(
                               reinterpret_cast<uint64_t>(
                                 payload_tmp_virt_addr) +
@@ -4785,6 +4864,7 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
     // function, it would not have been built yet.
     if(!INITSERVICE::spBaseServicesEnabled())
     {
+        TRACFCOMP(g_trac_runtime, "verifyAndMovePayload SKIPPING, no need to move HDAT on eBMC, not built yet");
         break;
     }
 

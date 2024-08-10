@@ -637,6 +637,13 @@ bool enabled()
 }
 #endif
 
+#if defined(CONFIG_SECUREBOOT) && !defined(__HOSTBOOT_RUNTIME)
+uint8_t hashSignMode()
+{
+    return Singleton<Settings>::instance().getHashSignMode();
+}
+#endif
+
 errlHndl_t getSecuritySwitch(uint64_t& o_regValue, TARGETING::Target* i_pProc)
 {
     return Singleton<Settings>::instance().getSecuritySwitch(o_regValue,

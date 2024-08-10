@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2012,2022
+# Contributors Listed Below - COPYRIGHT 2012,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -41,6 +41,7 @@ OBJS += utilsemipersist.o
 OBJS += utilrsvdmem.o
 OBJS += utilxipimage.o
 OBJS += utilmclmgr.o
+OBJS += utilhllmgr.o
 OBJS += utilcommonattr.o
 
 # We need this logic to be available very early so we will

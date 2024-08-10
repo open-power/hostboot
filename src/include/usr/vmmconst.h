@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -305,29 +305,29 @@ enum VmmRestriction : uint64_t
  * (HRMOR+108MB)..(HRMOR+109MB): Arch reg data (1MB)
  * (HRMOR+109MB)..(HRMOR+110MB): HBRT Data TOC (hbrtTableOfContents_t)
  * (HRMOR+110MB): Reserved mem start
- * (HRMOR+(172MB-20KB)): Reserved mem end
- * (HRMOR+(172MB-20KB))..(HRMOR+172MB): MCL_ADDR (20KB)
- * (HRMOR+172MB)..(HRMOR+236MB): MCL_TMP_ADDR (64MB + PAGESIZE)
+ * (HRMOR+(172MB-32KB)): Reserved mem end
+ * (HRMOR+(172MB-32KB))..(HRMOR+172MB): TOC_ADDR (32KB)
+ * (HRMOR+172MB)..(HRMOR+236MB): TOC_TMP_ADDR (64MB + PAGESIZE)
  * (HRMOR+236MB)..(HRMOR+252MB): HDAT_TMP_ADDR (16MB)
  * (HRMOR+252MB)..(HRMOR+256MB): TCE Table (needs to be 4-byte aligned) (4MB)
  * (HRMOR+256MB): The end of usable memory
  */
 
-/* Reserved memory starts with HB TOC and ends on MCL_ADDR */
-#define RESERVED_MEM_MAX_SIZE (MCL_ADDR - VMM_HB_DATA_TOC_START_OFFSET)
+/* Reserved memory starts with HB TOC and ends on TOC_ADDR */
+#define RESERVED_MEM_MAX_SIZE (TOC_ADDR - VMM_HB_DATA_TOC_START_OFFSET)
 #define RESERVED_MEM_START_OFFSET (VMM_HB_DATA_TOC_START_OFFSET)
-#define RESERVED_MEM_END_OFFSET (MCL_ADDR)
+#define RESERVED_MEM_END_OFFSET (TOC_ADDR)
 
-/** Two memory locations for MCL processing **/
-// Note: 2 spaces needed so the MCL can be initialized without wiping out PHYP
-// Location for the MCL itself to sit in.
-#define MCL_SIZE (20*KILOBYTE)
-#define MCL_ADDR (MCL_TMP_ADDR - MCL_SIZE)
-// Location for PHYP to be loaded into and reused for all Master Container Lids
+/** Two memory locations for TOC processing **/
+// Note: 2 spaces needed so the TOC can be initialized without wiping out PHYP
+// Location for the TOC itself to sit in.
+#define MTOC_SIZE (32*KILOBYTE)  // master TOC size to not conflict with other vars
+#define TOC_ADDR (TOC_TMP_ADDR - MTOC_SIZE)
+// Location for PHYP to be loaded into and reused for all Lids
 // Verification is done in a temporary, non-secure area of mainstore memory,
 // then relocated to its final, secure location in mainstore.
-#define MCL_TMP_SIZE ((64 * MEGABYTE) + PAGESIZE)
-#define MCL_TMP_ADDR (HDAT_TMP_ADDR - MCL_TMP_SIZE)
+#define TOC_TMP_SIZE ((64 * MEGABYTE) + PAGESIZE)
+#define TOC_TMP_ADDR (HDAT_TMP_ADDR - TOC_TMP_SIZE)
 
 // Location for HDAT to be loaded into via TCEs by FSP
 // Verification is done in a temporary, non-secure area of mainstore memory,

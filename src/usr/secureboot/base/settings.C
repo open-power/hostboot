@@ -70,6 +70,9 @@ namespace SECUREBOOT
         auto l_min_secure_version = getMinimumSecureVersion();
         auto l_sb_signing_mode = g_BlToHbDataManager.getSecurebootSigningMode();
 
+        // save off the signing mode for usages during Hash Lid List (HLL) processing
+        iv_hash_mode = l_sb_signing_mode;
+
         SB_INF("getEnabled() state:%i, (minimum secure version=0x%.02X secureboot signing mode=0x%.02X)",
                iv_enabled, l_min_secure_version, l_sb_signing_mode);
         printk("SECUREBOOT::enabled() state:%i (minimum secure version=0x%.02X secureboot signing mode=0x%.02X)\n",
@@ -156,6 +159,16 @@ namespace SECUREBOOT
     bool Settings::getEnabled() const
     {
         return iv_enabled;
+    }
+
+    uint8_t Settings::getHashSignMode() const
+    {
+        if ((iv_hash_mode != TARGETING::SB_SIGNING_V1_CONTAINER) &&
+            (iv_hash_mode != TARGETING::SB_SIGNING_V3_CONTAINER))
+        {
+            assert(false, "Settings::getHashSignMode Found unsupported iv_hash_mode", iv_hash_mode);
+        }
+        return iv_hash_mode;
     }
 
     errlHndl_t Settings::getJumperState(SecureJumperState& o_state,

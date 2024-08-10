@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -121,6 +121,10 @@ namespace SECUREBOOT
 #else
     inline bool enabled() { return false; };
 #endif
+
+    /** @brief Determines Secureboot hash sign mode.
+     */
+    uint8_t hashSignMode();
 
     /** @brief Get security switch register value
      *  @par Detailed Description:

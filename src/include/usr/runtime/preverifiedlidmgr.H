@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -85,7 +85,7 @@ class PreVerifiedLidMgr
      *
      * @return errlHndl_t Error log handle on failure, else nullptr
      */
-    static errlHndl_t loadFromMCL(
+    static errlHndl_t loadFromTOC(
         uint32_t  i_lidId,
         uint64_t  i_addr,
         size_t    i_size,
@@ -143,9 +143,9 @@ class PreVerifiedLidMgr
                              const size_t i_size);
 
     /**
-     * @brief Internal implementation of loadFromMCL function.
+     * @brief Internal implementation of loadFromTOC function.
      */
-    errlHndl_t _loadFromMCL(
+    errlHndl_t _loadFromTOC(
         uint32_t  i_lidId,
         uint64_t  i_addr,
         size_t    i_size,
@@ -250,6 +250,7 @@ class PreVerifiedLidMgr
     // Allow test cases to have direct access
     friend class PreVerifiedLidMgrTest;
     friend class MasterContainerLidMgrTest;
+    friend class HLLTest;
 };
 
 

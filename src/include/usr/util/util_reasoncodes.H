@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,6 +61,14 @@ namespace Util
         UTIL_DECOMPRESS_LID      = 0x1C,      // decompressLid
         UTIL_MCL_MANAGE_SINGLE   = 0x1D,      // manageComponent
         UTIL_MCL_MANAGE_PHYP     = 0x1E,      // managePhypLids
+        UTIL_HLL_DECOMPRESS_LID  = 0x1F,      // decompressLid
+        UTIL_HLL_MANAGE_PHYP     = 0x20,      // managePhypLids
+        UTIL_HLL_INIT_MEM        = 0x21,      // HLLMgr::initMem
+        UTIL_HLL_REL_MEM         = 0x22,      // HLLMgr::releaseMem
+        UTIL_HLL_INIT_METADATA   = 0x23,      // HLLMgr::initMetaData
+        UTIL_HLL_PARSE_TOC       = 0x24,      // HLLMgr::parseHLL
+        UTIL_HLL_LOADLIDS        = 0x25,      // HLLMgr::loadLids
+        UTIL_HLL_VERIFY_POWERVM  = 0x26,      // HLLMgr::verifyPowerVM
     };
 
     enum ReasonCode
@@ -101,7 +109,17 @@ namespace Util
         UTIL_DECOMPRESS_FAILED           = UTIL_COMP_ID | 0x23,
         UTIL_DECOMPRESS_EMPTY            = UTIL_COMP_ID | 0x24,
         UTIL_MCL_MANAGE_NOT_SUPPORTED    = UTIL_COMP_ID | 0x25,
+        UTIL_HLL_DECOMPRESS_FAIL_INIT    = UTIL_COMP_ID | 0x26,
+        UTIL_HLL_DECOMPRESS_FAILED       = UTIL_COMP_ID | 0x27,
+        UTIL_HLL_DECOMPRESS_EMPTY        = UTIL_COMP_ID | 0x28,
+        UTIL_HLL_SIZE_MISMATCH           = UTIL_COMP_ID | 0x29,
+        UTIL_HLL_MAX_SIZE                = UTIL_COMP_ID | 0x2A,
+        UTIL_HLL_PAYLOAD_BASE_SIZE       = UTIL_COMP_ID | 0x2B,
+        UTIL_HLL_HASH_FAILURE            = UTIL_COMP_ID | 0x2C,
+        UTIL_HLL_VERSION_COMPAT          = UTIL_COMP_ID | 0x2D,
+        UTIL_HLL_SIZE_MISCOMPARE         = UTIL_COMP_ID | 0x2E,
     };
 };
 
 #endif
+

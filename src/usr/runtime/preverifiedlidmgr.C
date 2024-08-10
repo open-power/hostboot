@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,7 +83,7 @@ errlHndl_t PreVerifiedLidMgr::loadFromPnor(const PNOR::SectionId i_sec,
                                                                   i_size);
 }
 
-errlHndl_t PreVerifiedLidMgr::loadFromMCL(
+errlHndl_t PreVerifiedLidMgr::loadFromTOC(
     const uint32_t  i_lidId,
     const uint64_t  i_addr,
     const size_t    i_size,
@@ -92,7 +92,7 @@ errlHndl_t PreVerifiedLidMgr::loadFromMCL(
           uint64_t& o_resvMemAddr)
 {
     return Singleton<PreVerifiedLidMgr>::instance().
-        _loadFromMCL(
+        _loadFromTOC(
             i_lidId,
             i_addr,
             i_size,
@@ -334,7 +334,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromPnor(const PNOR::SectionId i_sec,
     return l_errl;
 }
 
-errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
+errlHndl_t PreVerifiedLidMgr::_loadFromTOC(
     const uint32_t  i_lidId,
     const uint64_t  i_addr,
     const size_t    i_size,
@@ -343,9 +343,8 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
           uint64_t& o_resvMemAddr)
 {
     mutex_lock(&cv_loadImageMutex);
-
-    TRACFCOMP(g_trac_runtime, ENTER_MRK"PreVerifiedLidMgr::_loadFromMCL lid = 0x%X",
-              i_lidId);
+    TRACFCOMP(g_trac_runtime, ENTER_MRK"PreVerifiedLidMgr::_loadFromTOC i_lidId=0x%X i_isPhypComp=0x%X i_firstLid=0x%X",
+              i_lidId, i_isPhypComp, i_firstLid);
 
     // Force fake header bool to be false in MCL path
     cv_addFakeHdrs = false;
@@ -355,6 +354,8 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
 
     // Switch to Different Memory Info for PHYP component
     // Exception: put the PHyp signature LID in the normal reserved memory area
+    // For HLL handling the switching due to i_isPhypComp is not used
+    // HLL handling uses the managePowerVMGroup and managePhypLids to manipulate the temp and mainstore contents
     if (i_isPhypComp && !i_firstLid)
     {
         cv_pResvMemInfo = &cv_phypResvMemInfo;
@@ -365,7 +366,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
     // Only load if not previously done.
     if( isLidLoaded(i_lidId) )
     {
-        TRACFCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromMCL - lid 0x%08X already loaded",
+        TRACFCOMP( g_trac_runtime, "PreVerifiedLidMgr::_loadFromTOC - lid 0x%08X already loaded",
                    i_lidId);
         continue;
     }
@@ -394,14 +395,14 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
                                                !(i_isPhypComp));
             if(l_errl)
             {
-                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - setNextHbRsvMemEntry Lid content failed");
+                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromTOC - setNextHbRsvMemEntry Lid content failed");
                 break;
             }
 
             l_errl = loadImage(i_addr, i_size);
             if(l_errl)
             {
-                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromMCL - Load Image failed");
+                TRACFCOMP( g_trac_runtime, ERR_MRK"PreVerifiedLidMgr::_loadFromTOC - Load Image failed");
                 break;
             }
 
@@ -415,7 +416,7 @@ errlHndl_t PreVerifiedLidMgr::_loadFromMCL(
     // Force switch back to default reserved memory info
     cv_pResvMemInfo = &cv_resvMemInfo;
 
-    TRACFCOMP(g_trac_runtime, EXIT_MRK"PreVerifiedLidMgr::_loadFromMCL");
+    TRACFCOMP(g_trac_runtime, EXIT_MRK"PreVerifiedLidMgr::_loadFromTOC");
 
     mutex_unlock(&cv_loadImageMutex);
 
@@ -479,8 +480,8 @@ errlHndl_t PreVerifiedLidMgr::loadImage(const uint64_t i_imgAddr,
         break;
     }
 
-    TRACDCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage - curAddr 0x%X, size 0x%X, vaddr 0x%X",
-              cv_pResvMemInfo->curAddr, i_imgSize, l_tmpVaddr);
+    TRACDCOMP(g_trac_runtime, "PreVerifiedLidMgr::loadImage - curAddr 0x%X, size 0x%X, vaddr 0x%X cv_addFakeHdrs=0x%X",
+              cv_pResvMemInfo->curAddr, i_imgSize, l_tmpVaddr, cv_addFakeHdrs);
 
     // Inject a fake header when loading from PNOR and secureboot is compiled
     // out.

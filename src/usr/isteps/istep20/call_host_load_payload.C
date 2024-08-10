@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <kernel/console.H>
 #include <xz/xz.h>
 #include <util/utilmclmgr.H>
+#include <util/utilhllmgr.H>
 #include <runtime/runtime.H>
 
 
@@ -116,31 +117,43 @@ void* call_host_load_payload (void *io_pArgs)
                 break;
             }
 #elif defined (CONFIG_LOAD_LIDS_VIA_PLDM)
-            MCL::MasterContainerLidMgr l_mcl(true);// load only
-            l_err = l_mcl.processSingleComponent(MCL::g_PowervmCompId,
+            if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V1_CONTAINER)
+            {
+                MCL::MasterContainerLidMgr l_mcl(true);// load only
+                l_err = l_mcl.processSingleComponent(MCL::g_PowervmCompId,
+                                                     MCL::g_PowervmCompInfo,
+                                                     true); // force PHYP to be
+                                                            // processed
+                if(l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                              "call_host_load_payload: could not process POWERVM component!");
+                    break;
+                }
+                // This interrogates the TOC_TMP_ADDR lid space and directly decompresses
+                // the lids to PHYP mainstore
+                // Scope of the PHYP processSingleComponent MUST remain for this
+                // manageSingleComponent to operate on the properly cached info
+                l_err = l_mcl.manageSingleComponent(MCL::g_PowervmCompId,
                                                  MCL::g_PowervmCompInfo,
-                                                 true); // force PHYP to be
-                                                        // processed
-            if(l_err)
-            {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "call_host_load_payload: could not process POWERVM component!");
-                break;
+                                                 true);
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                              "call_host_load_payload: unable to uncompress and move payloadBase");
+                    break;
+                }
             }
-
-
-            // This interrogates the MCL_TMP_ADDR lid space and directly decompresses
-            // the lids to PHYP mainstore
-            // Scope of the PHYP processSingleComponent MUST remain for this
-            // manageSingleComponent to operate on the properly cached info
-            l_err = l_mcl.manageSingleComponent(MCL::g_PowervmCompId,
-                                             MCL::g_PowervmCompInfo,
-                                             true);
-            if (l_err)
+            else if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
             {
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
-                          "call_host_load_payload: unable to uncompress and move payloadBase");
-                break;
+                HLL::HLLMgr l_hll;
+
+                l_err = l_hll.managePowerVMGroup();
+                if (l_err)
+                {
+                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK"call_host_load_payload problem with managePowerVMGroup");
+                    break;
+                }
             }
 
             // On eBMC systems, move the PAYLOAD to the final location.
@@ -151,7 +164,7 @@ void* call_host_load_payload (void *io_pArgs)
             // copied to PHYP mainstore
             if(!INITSERVICE::spBaseServicesEnabled())
             {
-                // For eBMC verifyAndMovePayload does NOT manage the MCL_TMP_ADDR space for PHYP lids
+                // For eBMC verifyAndMovePayload does NOT manage the TOC_TMP_ADDR space for PHYP lids
                 // manageSingleComponent manages the lid decompressions and movement
                 // to PHYP mainstore
                 // This is ifdef'd in CONFIG_LOAD_LIDS_VIA_PLDM flow here

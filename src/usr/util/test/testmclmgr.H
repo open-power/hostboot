@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017                             */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,7 +97,7 @@ public:
 
         TestMcl()
         : iv_size(0),iv_bufferCur(nullptr),iv_bufferStart(nullptr),
-          iv_pHeader(nullptr), iv_compInfoCache{}, iv_testLids{defaultLids},
+          iv_pHeader(nullptr), iv_compInfoCache{}, iv_testLids{MCL::defaultLids},
           iv_testComps{defaultComps}
         {
             initMcl();

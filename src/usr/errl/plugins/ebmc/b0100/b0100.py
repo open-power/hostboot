@@ -662,6 +662,15 @@ class errludP_errl:
         jsonStr = json.dumps(d)
         return jsonStr
 
+    def ErrlUserDetailsParserDefaultDump(ver, data):
+        d = dict()
+        d["Data subType Unknown"] = ("Did not find a user data subsection type, defaulting to dumping hex")
+        if data:
+            mv = memoryview(data)
+            d['Data Hex Dump'] = hexdump(mv)
+        jsonStr = json.dumps(d)
+        return jsonStr
+
     """ This function is used by ErrlUserDetailsParserCallout
     Creates entity path string, can call errlud_parse_entity_path()
 
@@ -687,8 +696,11 @@ errlUserDetailDataSubsection = { 1: "ErrlUserDetailsParserString",
                                  9: "ErrlUserDetailsParserStringSet",
                                  10: "ErrlUserDetailsParserBuild",
                                  11: "ErrlUserDetailsParserSysState",
-                                 12: "ErrlUserDetailsParserWofData" }
+                                 12: "ErrlUserDetailsParserWofData",
+                                 13: "ErrlUserDetailsParserDefaultDump",
+                                 99: "ErrlUserDetailsParserDefaultDump"}
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data)
-    return getattr(errludP_errl, errlUserDetailDataSubsection[subType])(*args)
+    # provide a default subsection type to just hex dump if nothing in the dictionary specifically
+    return getattr(errludP_errl, errlUserDetailDataSubsection.get(subType, "ErrlUserDetailsParserDefaultDump"))(*args)

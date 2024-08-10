@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,11 +66,14 @@ namespace SECUREBOOT
     class Settings
     {
         public:
-            Settings() : iv_enabled(false) { _init(); };
+            Settings() : iv_enabled(false), iv_hash_mode(0xFF) { _init(); };
             ~Settings() {};
 
             /** @brief Determine if Secureboot is enabled. */
             bool getEnabled() const;
+
+            /** @brief Determine Secureboot hash mode */
+            uint8_t getHashSignMode() const;
 
             /** @brief Get security switch register value. See wrapper
              *         in Secureboot's service.H for documentation
@@ -160,6 +163,7 @@ namespace SECUREBOOT
 
             /** Cached secure boot enabled value */
             bool iv_enabled;
+            uint8_t iv_hash_mode;
     };
 }
 

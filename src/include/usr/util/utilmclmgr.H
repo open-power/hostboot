@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,27 +38,6 @@ class MasterContainerLidMgrTest;
 
 namespace MCL
 {
-
-/**
- *  @brief Structure used to hold information about a container loaded into
- *      memory using the MCL manager
- */
-struct LoadedContainerInfo_t
-{
-    void*  pSecureHeader; ///< Virtual address of secure header; nullptr if N/A
-    void*  pContent;      ///< Virtual address of container logical content
-    size_t size;          ///< Size of container logical content in bytes
-
-    /**
-     *  @brief Builds a default LoadedContainerInfo_t
-     */
-    LoadedContainerInfo_t()
-        : pSecureHeader(nullptr),
-          pContent(nullptr),
-          size(0)
-    {
-    }
-};
 
 // Component ID(name) within MCL
 typedef std::array<uint8_t,16> ComponentID;
@@ -395,16 +374,6 @@ class MasterContainerLidMgr
         memcpy(cv_pPhypHeader,i_pHeader,PAGESIZE);
     }
 
-    /**
-     *  @brief Returns pointer to the cached PHyp secure header
-     *
-     *  @return const uint8_t* Pointer to cached Phyp secure header
-     */
-    static const uint8_t* getPhypHeader()
-    {
-        return cv_pPhypHeader;
-    };
-
     protected:
 
     /**
@@ -494,7 +463,7 @@ class MasterContainerLidMgr
      *      the lid header represents an XZ compressed lid.
      *
      *      If XZ compression is indicated in the lid header
-     *      (the lid resides in hostboot temporary memory, MCL_TMP_ADDR)
+     *      (the lid resides in hostboot temporary memory, TOC_TMP_ADDR)
      *      then performs direct decompression to mainstore memory for PHYP.
      *
      * @param[in]     i_compId - Component Id

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -141,8 +141,8 @@ errlHndl_t utilSetupPayloadTces(void)
     const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
 
     // Allocate TCEs for PAYLOAD to Temporary Space
-    addr = hostboot_base_address + MCL_TMP_ADDR;
-    size = MCL_TMP_SIZE;
+    addr = hostboot_base_address + TOC_TMP_ADDR;
+    size = TOC_TMP_SIZE;
     TRACFCOMP(g_trac_tce,"utilSetupPayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX, size=0x%X", addr, hostboot_base_address, size);
 
     errl = utilAllocateTces(addr, size, token);
@@ -238,7 +238,7 @@ errlHndl_t utilClosePayloadTces(void)
     // Close the Unsecure Memory Region that was opened for the FSP to run
     // PSI Diagnostics Test using the PAYLOAD section
     // -- addr is a constant for PAYLOAD
-    uint64_t addr = hostboot_base_address + MCL_TMP_ADDR;
+    uint64_t addr = hostboot_base_address + TOC_TMP_ADDR;
     TRACUCOMP(g_trac_tce,"utilClosePayloadTces(): addr=0x%.16llX, hrmor=0x%.16llX", addr, hostboot_base_address);
 
     errl = SBEIO::closeUnsecureMemRegion(addr,

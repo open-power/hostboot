@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -91,6 +91,7 @@ namespace ERRORLOG
         ERRL_UDT_BUILD            = 0x0A,
         ERRL_UDT_SYSSTATE         = 0x0B,
         ERRL_UDT_WOFDATA          = 0x0C,
+        ERRL_UDT_HASH             = 0x0D,
     };
 
     // Identifiers for ERRL user data subsection versions

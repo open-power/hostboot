@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -199,30 +199,30 @@ void CompInfo::print() const
 ////////////////////////////////////////////////////////////////////////////////
 
 MasterContainerLidMgr::MasterContainerLidMgr(const bool i_loadOnly)
-: iv_mclSize(MCL_SIZE), iv_tmpSize(MCL_TMP_SIZE), iv_maxSize(0),
+: iv_mclSize(MTOC_SIZE), iv_tmpSize(TOC_TMP_SIZE), iv_maxSize(0),
   iv_pMclVaddr(nullptr), iv_pTempVaddr(nullptr), iv_pVaddr(nullptr),
   iv_compInfoCache{}, iv_hasHeader(true), iv_loadOnly(i_loadOnly)
 {
     // Need to make Memory spaces HRMOR-relative
     const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
 
-    iv_tmpAddr = hostboot_base_address + MCL_TMP_ADDR;
-    iv_mclAddr = hostboot_base_address + MCL_ADDR;
+    iv_tmpAddr = hostboot_base_address + TOC_TMP_ADDR;
+    iv_mclAddr = hostboot_base_address + TOC_ADDR;
 
     initMcl();
 }
 
 MasterContainerLidMgr::MasterContainerLidMgr(const void* i_pMcl,
                                              const size_t i_size)
-: iv_mclSize(MCL_SIZE), iv_tmpSize(MCL_TMP_SIZE), iv_maxSize(0),
+: iv_mclSize(MTOC_SIZE), iv_tmpSize(TOC_TMP_SIZE), iv_maxSize(0),
   iv_pMclVaddr(nullptr), iv_pTempVaddr(nullptr), iv_pVaddr(nullptr),
   iv_compInfoCache{}, iv_hasHeader(false)
 {
     // Need to make Memory spaces HRMOR-relative
     const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
 
-    iv_mclAddr = hostboot_base_address + MCL_ADDR;
-    iv_tmpAddr = hostboot_base_address + MCL_TMP_ADDR;
+    iv_mclAddr = hostboot_base_address + TOC_ADDR;
+    iv_tmpAddr = hostboot_base_address + TOC_TMP_ADDR;
 
 
     initMcl(i_pMcl, i_size);
@@ -802,7 +802,7 @@ errlHndl_t MasterContainerLidMgr::processComponent(
         {
             uint64_t l_addr = 0;
             // Load Pnor section into HB reserved memory
-            l_errl = PreVerifiedLidMgr::loadFromMCL(lidInfo.id,
+            l_errl = PreVerifiedLidMgr::loadFromTOC(lidInfo.id,
                                                     l_curAddr,
                                                     lidInfo.size,
                                                     l_skipPhypComp,
@@ -852,7 +852,7 @@ errlHndl_t MasterContainerLidMgr::managePhypLids(CompInfo& io_compInfo,
     do {
     o_totalSize = 0;
     void * payloadBase_virt_addr = nullptr;
-    uint64_t payload_size = MCL_TMP_SIZE;
+    uint64_t payload_size = TOC_TMP_SIZE;
     const auto sys = TARGETING::UTIL::assertGetToplevelTarget();
     uint64_t payloadBase = sys->getAttr<TARGETING::ATTR_PAYLOAD_BASE>();
     payloadBase = payloadBase * MEGABYTE;
