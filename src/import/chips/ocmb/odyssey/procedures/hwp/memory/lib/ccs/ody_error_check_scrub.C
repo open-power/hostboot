@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/mss_math.H>
 #include <lib/mcbist/ody_mcbist_traits.H>
 #include <generic/memory/lib/utils/mcbist/gen_mss_memdiags.H>
+#include <lib/ccs/ody_ccs.H>
 
 
 namespace mss
@@ -428,6 +429,7 @@ fapi2::ReturnCode setup_to_execute_ecs(const mss::rank::info<mss::mc_type::ODYSS
 
     // Setup the arrays with CCS instruction to perform ECS for the selected SRANK
     FAPI_TRY(setup_arrays_with_ecs_instructions(i_rank_info, i_srank, l_program));
+
     FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying ecs using standalone CCS", GENTARGTID(l_ocmb_target));
 
     // Configure CCS regs for execution and enable the nested loop in modeq register.
@@ -649,20 +651,28 @@ fapi2::ReturnCode read_mr_error_regs(const mss::rank::info<mss::mc_type::ODYSSEY
 
     mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
 
-    l_program.iv_instructions.push_back(mss::ccs::ddr5::mrr_command<mss::mc_type::ODYSSEY>
-                                        (i_rank_info.get_port_rank(), i_mrs, ccsTraits<mss::mc_type::ODYSSEY>::MRR_SAFE_IDLE));
-
     const auto& l_port = i_rank_info.get_port_target();
 
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+    std::vector<mss::ccs::channel_select> l_channels;
 
-    FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb, l_program, l_port, STATIC));
+    FAPI_TRY(mss::ccs::get_channels(l_ocmb, l_channels));
 
-    FAPI_INF_NO_SBE("Read data from MR%d in port: " GENTARGTIDFORMAT,
-                    i_mrs,
-                    GENTARGTID(l_port));
+    // Runs on all the configure channels
+    for(const auto l_channel : l_channels)
+    {
+        l_program.iv_instructions.push_back(mss::ccs::ddr5::mrr_command<mss::mc_type::ODYSSEY>
+                                            (i_rank_info.get_port_rank(), i_mrs, ccsTraits<mss::mc_type::ODYSSEY>::MRR_SAFE_IDLE));
+        l_program.iv_channel_select = l_channel;
+        FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb, l_program, l_port, STATIC));
 
-    FAPI_TRY(mss::ccs::mr_data_process<mss::mc_type::ODYSSEY>(l_port, o_data));
+        FAPI_INF_NO_SBE("Read data from MR%d in port: " GENTARGTIDFORMAT,
+                        i_mrs,
+                        GENTARGTID(l_port));
+
+        FAPI_TRY(mss::ccs::mr_data_process<mss::mc_type::ODYSSEY>(l_port, l_channel, o_data));
+        l_program.iv_instructions.clear();
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

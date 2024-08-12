@@ -159,23 +159,32 @@ fapi2::ReturnCode get_ppr_resources(
 
     mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
 
-    // First program MR14 to select the CID for our srank
-    l_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
-                                        (i_rank_info.get_port_rank(), MR14_ECC_CONFIG, l_repair.iv_srank, tMRD));
-
-    // map the BG to the MR which contains the PPR resource info for it
-    // BG[0:1]=MR54, BG[2:3]=MR55, BG[4:5]=MR56, BG[6:7]=MR57
-    const uint8_t l_mr = get_ppr_resource_mr(l_repair.iv_bg);
-
-    l_program.iv_instructions.push_back(mss::ccs::ddr5::mrr_command<mss::mc_type::ODYSSEY>
-                                        (i_rank_info.get_port_rank(), l_mr, ccsTraits<mss::mc_type::ODYSSEY>::MRR_SAFE_IDLE));
-
     const auto& l_port = i_rank_info.get_port_target();
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
 
-    FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb, l_program, l_port, i_runtime));
+    std::vector<mss::ccs::channel_select> l_channels;
 
-    FAPI_TRY(mss::ccs::mr_data_process<mss::mc_type::ODYSSEY>(l_port, o_data));
+    FAPI_TRY(mss::ccs::get_channels(l_ocmb, l_channels));
+
+    // Runs on all the configure channels
+    for(const auto l_channel : l_channels)
+    {
+        // First program MR14 to select the CID for our srank
+        l_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
+                                            (i_rank_info.get_port_rank(), MR14_ECC_CONFIG, l_repair.iv_srank, tMRD));
+        l_program.iv_channel_select = l_channel;
+        // map the BG to the MR which contains the PPR resource info for it
+        // BG[0:1]=MR54, BG[2:3]=MR55, BG[4:5]=MR56, BG[6:7]=MR57
+        const uint8_t l_mr = get_ppr_resource_mr(l_repair.iv_bg);
+
+        l_program.iv_instructions.push_back(mss::ccs::ddr5::mrr_command<mss::mc_type::ODYSSEY>
+                                            (i_rank_info.get_port_rank(), l_mr, ccsTraits<mss::mc_type::ODYSSEY>::MRR_SAFE_IDLE));
+
+        FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb, l_program, l_port, i_runtime));
+
+        FAPI_TRY(mss::ccs::mr_data_process<mss::mc_type::ODYSSEY>(l_port, l_channel, o_data));
+        l_program.iv_instructions.clear();
+    }
 
 #ifndef __PPE__
 
@@ -589,7 +598,23 @@ fapi2::ReturnCode setup_sppr( const mss::rank::info<mss::mc_type::ODYSSEY>& i_ra
     // Copy and update the inputted class's address swizzle
     auto l_repair = i_repair;
     swizzle_repair_entry(l_repair);
+    {
+        bool l_is_half_dimm_mode = false;
+        FAPI_TRY(mss::ody::half_dimm_mode(l_ocmb_target, l_is_half_dimm_mode));
 
+        // Full dimm mode? just all the channels
+        if(l_is_half_dimm_mode)
+        {
+            uint8_t l_dram_width[mss::ody::MAX_PORT_PER_OCMB] = {};
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, l_port_target, l_dram_width) );
+
+            const auto MAX_NUM_DRAM = (l_dram_width[0] == 4) ? ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4 :
+                                      ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X8;
+
+            io_program.iv_channel_select = l_repair.iv_dram < (MAX_NUM_DRAM / 2) ? mss::ccs::channel_select::CHA :
+                                           mss::ccs::channel_select::CHB;
+        }
+    }
     // Get timing from API and attributes
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TRCD, l_port_target, tRCD) );
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_TWR, l_port_target, tWR) );
@@ -710,13 +735,13 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSE
 
     // Create Program
     mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
-
     // Add des command to ensure that there's no timing violations between a refresh and another command
     // The time for this is tRFC
     // This is 410ns -> 984 clocks. rounded up to 1000 for saftey
     // Note: assuming that we will not be in powerdown or selftime refresh as it's unclear what happens when a PDX/SRX is done on an idle DRAM
     constexpr uint16_t POWER_DOWN_EXIT_DELAY = 1000;
     l_program.iv_instructions.push_back(mss::ccs::ddr5::des_command<mss::mc_type::ODYSSEY>(POWER_DOWN_EXIT_DELAY));
+
 
     // Setup SPPR CCS program
     FAPI_TRY( setup_sppr(i_rank_info, i_repair, l_program),

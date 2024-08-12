@@ -315,14 +315,17 @@ fapi2::ReturnCode disable_recr_data_inversion(
 ///
 /// @brief Process the MR data out of the trace array
 /// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_target the port target on which to operate
+/// @param[in] i_channel_select the channels upon which to operate - DDR5+ only specific
 /// @param[out] o_data array of mr values per dram
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful, fapi2 error code otherwise
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode mr_data_process(
     const fapi2::Target<T>& i_target,
+    const channel_select i_channel_select,
     uint8_t (&o_data)[TT::NUM_DRAM_X4]);
 
 ///

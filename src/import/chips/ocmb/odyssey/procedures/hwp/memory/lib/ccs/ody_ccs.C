@@ -798,12 +798,14 @@ fapi_try_exit:
 ///
 /// @brief Process the MR data out of the trace array - Odyssey specialization
 /// @param[in] i_target the port target on which to operate
+/// @param[in] i_channel_select the channels upon which to operate - DDR5+ only specific
 /// @param[out] o_data array of mr values per dram
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful, fapi2 error code otherwise
 ///
 template<>
 fapi2::ReturnCode mr_data_process<mss::mc_type::ODYSSEY>(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+    const channel_select i_channel_select,
     uint8_t (&o_data)[ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4])
 {
     using TT = ccsTraits<mss::mc_type::ODYSSEY>;
@@ -814,12 +816,13 @@ fapi2::ReturnCode mr_data_process<mss::mc_type::ODYSSEY>(
     FAPI_TRY(mss::ccs::prepare_ody_ccs_beat_data(i_target, l_processed_data));
     {
         uint8_t l_dram_width[mss::ody::MAX_PORT_PER_OCMB] = {};
-        int l_num_dram = 0;
-
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_WIDTH, i_target, l_dram_width) );
-        l_num_dram = (l_dram_width[0] == 4) ? TT::NUM_DRAM_X4 : TT::NUM_DRAM_X8;
 
-        for (uint8_t l_dq_index = 0; l_dq_index < l_num_dram; l_dq_index++)
+        const auto MAX_NUM_DRAM = (l_dram_width[0] == 4) ? TT::NUM_DRAM_X4 : TT::NUM_DRAM_X8;
+        const auto START_DRAM = i_channel_select == mss::ccs::channel_select::CHB ?  MAX_NUM_DRAM / 2 : 0;
+        const auto END_DRAM   = i_channel_select == mss::ccs::channel_select::CHA ?  MAX_NUM_DRAM / 2 : MAX_NUM_DRAM;
+
+        for (uint8_t l_dq_index = START_DRAM; l_dq_index < END_DRAM; l_dq_index++)
         {
             uint8_t l_op_code = 0;
             FAPI_TRY(mss::ccs::get_op_code(l_dq_index, l_dram_width[0], l_processed_data, l_op_code ));

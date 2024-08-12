@@ -944,7 +944,6 @@ inline bool is_write_or_read(const instruction_t<MC>& i_inst)
 
     return ((l_command == cmd_encoding::WRP) ||
             (l_command == cmd_encoding::WRPA) ||
-            (l_command == cmd_encoding::MRW) ||
             (l_command == cmd_encoding::MRR) ||
             (l_command == cmd_encoding::WR) ||
             (l_command == cmd_encoding::WRA) ||
