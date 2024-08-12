@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,6 +83,9 @@ const char HDAT_RAINIER2U_SYSTEM_TYPE[] = "ibm,rainier-2s2u";
 const char HDAT_RAINIER4U_SYSTEM_TYPE[] = "ibm,rainier-2s4u";
 const char HDAT_EVEREST_SYSTEM_TYPE[] = "ibm,everest";
 const char HDAT_BONNELL_SYSTEM_TYPE[] = "ibm,bonnell";
+const char HDAT_BLUERIDGE2U_SYSTEM_TYPE[] = "ibm,blueridge-2s2u";
+const char HDAT_BLUERIDGE4U_SYSTEM_TYPE[] = "ibm,blueridge-2s4u";
+const char HDAT_FUJI_SYSTEM_TYPE[] = "ibm,fuji";
 
 extern trace_desc_t *g_trac_hdat;
 
@@ -140,7 +143,7 @@ static_assert( NUM_OF_LANES_PER_PHB ==
 // TODO:SW398487 : Need to replace this with PNOR : HDAT partition consumption.
 // The below hardcoding is for temporary purpose but still valid values from mrw
 // hdatSlotMapAreas got changed to reflect P10 Rainier model values
-// Rainier related slot map area entries
+// Rainier and Blueridge related slot map area entries
 hdatSlotMapArea_t hdatSlotMapAreasRainier[PROC0_NUM_SLOT_TABLE_AREAS + PROC1_NUM_SLOT_TABLE_AREAS + PROC2_NUM_SLOT_TABLE_AREAS + PROC3_NUM_SLOT_TABLE_AREAS]=
 {
 { 1,0,0,0,0,0,0xFF00,0,0,0,1,0,0,0,0,0,0,0,"C11" },
@@ -160,7 +163,7 @@ hdatSlotMapArea_t hdatSlotMapAreasRainier[PROC0_NUM_SLOT_TABLE_AREAS + PROC1_NUM
 };
 
 
-// Rainier related slot map info entries
+// Rainier and Blueridge related slot map info entries
 hdatSlotEntryInfo_t hdatSlotMapEntriesRainier[PROC0_NUM_SLOT_ENTRY_INFO + PROC1_NUM_SLOT_ENTRY_INFO + PROC2_NUM_SLOT_ENTRY_INFO + PROC3_NUM_SLOT_ENTRY_INFO] = {
 { 1,0,5,2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0,0 },
 { 2,0,0,128, 0,  2,0,0,0,0,0,25,0, 32,  0,0,0,0,0,0 },
@@ -178,7 +181,7 @@ hdatSlotEntryInfo_t hdatSlotMapEntriesRainier[PROC0_NUM_SLOT_ENTRY_INFO + PROC1_
 { 14,0,2, 2040,256,2,0,0,0,0,0,25,46,4072,0,0,0,0,0 }
 };
 
-//Everest related slot map area entries
+//Everest and Fuji related slot map area entries
 //@TODO:RTC 270825 HDAT : Slot map hard code removal
 //Need to replace the hard codings with a different mechanism
 hdatSlotMapArea_t hdatSlotMapAreasEverest[TOTAL_NUM_SLOTS]=
@@ -218,7 +221,7 @@ hdatSlotMapArea_t hdatSlotMapAreasEverest[TOTAL_NUM_SLOTS]=
 };
 
 
-//Everest related slot map info entries
+//Everest and Fuji related slot map info entries
 hdatSlotEntryInfo_t hdatSlotMapEntriesEverest[TOTAL_NUM_SLOTS]=
 {
 { 1, 0,0,2040,256,2,0,0,0,0,0,75,46,4072,0,0,0,0,0,0 },
@@ -994,8 +997,10 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
             uint32_t arrayCount = 0;
             auto startIndex = 0;
             if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
-                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
-               ) //Rainier
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE4U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0) 
+               ) //Rainier and Blueridge
             {
                 if(i_iohubNum == 1)
                 {
@@ -1015,7 +1020,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
                 arrayCount = PROC0_NUM_SLOT_BONNELL_TABLE_AREAS +
                              PROC1_NUM_SLOT_BONNELL_TABLE_AREAS;
             }
-            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
+                     !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
+                     ) //Everest and Fuji
             {
                 if(i_iohubNum == 1)
                 {
@@ -1061,8 +1068,10 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
                               sizeof(hdatSlotMapArea_t),
                               sizeof(hdatSlotMapArea_t) };
             if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
-                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
-               ) //Rainier
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE4U_SYSTEM_TYPE) == 0)
+               ) //Rainier and Blueridge
             {
                 memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreasRainier+startIndex) ,
                 sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
@@ -1072,7 +1081,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
                 memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreasBonnell+startIndex),
                 sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
             }
-            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
+                     !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
+                     ) //Everest and Fuji
             {
                 memcpy(iv_hdatSlotMapAreaPtr, (hdatSlotMapAreasEverest+startIndex),
                 sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
@@ -1088,8 +1099,10 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
             uint32_t arrayCount = 0;
             auto startIndex = 0;
             if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
-                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
-               ) //Rainier
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE4U_SYSTEM_TYPE) == 0)
+               ) //Rainier and Blueridge
             {
                 switch(i_iohubNum)
                 {
@@ -1109,7 +1122,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
                 arrayCount = PROC0_NUM_SLOT_BONNELL_TABLE_AREAS +
                              PROC1_NUM_SLOT_BONNELL_TABLE_AREAS;
             }
-            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
+                     !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
+                     ) //Everest and Fuji
             {
                 switch(i_iohubNum)
                 {
@@ -1153,8 +1168,10 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
                sizeof(hdatSlotMapArea_t), sizeof(hdatSlotMapArea_t) };
 
             if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
-                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
-               ) //Rainier
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE4U_SYSTEM_TYPE) == 0)
+               ) //Rainier and Blueridge
             {
                 memcpy(iv_hdatSlotMapAreaPtr,(hdatSlotMapAreasRainier + startIndex),
                 sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
@@ -1165,7 +1182,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapTableAreas(/*uint32_t i_numProc,*/
                     (hdatSlotMapAreasBonnell + startIndex),
                 sizeof(hdatSlotMapArea_t)*iv_hdatSlotMapAreaArrayHdr.hdatArrayCnt);
             }
-            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
+                     !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
+                     ) //Everest and Fuji
             {
                 memcpy(iv_hdatSlotMapAreaPtr,
                     (hdatSlotMapAreasEverest + startIndex),
@@ -1236,8 +1255,10 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
             uint32_t arrayCount = 0;
             auto startIndex = 0;
             if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
-                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
-               ) //Rainier
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE4U_SYSTEM_TYPE) == 0)
+               ) //Rainier and Blueridge
             {
                 if(i_iohubNum == 1)
                 {
@@ -1257,7 +1278,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
                 arrayCount = PROC0_NUM_SLOT_BONNELL_ENTRY_INFO +
                              PROC1_NUM_SLOT_BONNELL_ENTRY_INFO;
             }
-            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
+                     !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
+                     ) //Everest and Fuji
             {
                 if(i_iohubNum == 1)
                 {
@@ -1303,8 +1326,10 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
                             sizeof(hdatSlotEntryInfo_t),
                             sizeof(hdatSlotEntryInfo_t) };
             if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
-                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
-               ) //Rainier
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE4U_SYSTEM_TYPE) == 0)
+               ) //Rainier and Blueridge
             {
                 memcpy(iv_hdatSlotMapEntryInfoPtr,
                        (hdatSlotMapEntriesRainier+startIndex),
@@ -1318,7 +1343,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
                        sizeof(hdatSlotEntryInfo_t) *
                        iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
             }
-            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
+                     !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
+                     ) //Everest and Fuji
             {
                 memcpy(iv_hdatSlotMapEntryInfoPtr,
                        (hdatSlotMapEntriesEverest+startIndex),
@@ -1336,8 +1363,10 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
             uint32_t arrayCount = 0;
             auto startIndex = 0;
             if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
-                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
-               ) //Rainier
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE4U_SYSTEM_TYPE) == 0)
+               ) //Rainier and Blueridge
             {
                 switch(i_iohubNum)
                 {
@@ -1357,7 +1386,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
                 arrayCount = PROC0_NUM_SLOT_BONNELL_ENTRY_INFO +
                              PROC1_NUM_SLOT_BONNELL_ENTRY_INFO;
             }
-            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
+                     !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
+                     ) //Everest and Fuji
             {
                 switch(i_iohubNum)
                 {
@@ -1400,8 +1431,10 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
                           sizeof(hdatSlotEntryInfo_t),
                           sizeof(hdatSlotEntryInfo_t) };
             if ( (strcmp(i_systemType, HDAT_RAINIER2U_SYSTEM_TYPE) == 0) ||
-                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0)
-               ) //Rainier
+                 (strcmp(i_systemType, HDAT_RAINIER4U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE2U_SYSTEM_TYPE) == 0) ||
+                 (strcmp(i_systemType, HDAT_BLUERIDGE4U_SYSTEM_TYPE) == 0)
+               ) //Rainier and Blueridge
             {
                 memcpy(iv_hdatSlotMapEntryInfoPtr,
                    (hdatSlotMapEntriesRainier + startIndex),
@@ -1415,7 +1448,9 @@ errlHndl_t HdatIoHubFru::hdatGetSlotMapEntryInfos(/*uint32_t i_numProc,*/
                    sizeof(hdatSlotEntryInfo_t) *
                    iv_hdatSlotMapEntryArrayHdr.hdatArrayCnt);
             }
-            else if(!strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE)) //Everest
+            else if( !strcmp(i_systemType, HDAT_EVEREST_SYSTEM_TYPE) ||
+                     !strcmp(i_systemType, HDAT_FUJI_SYSTEM_TYPE)
+                     ) //Everest and Fuji
             {
                 memcpy(iv_hdatSlotMapEntryInfoPtr,
                    (hdatSlotMapEntriesEverest + startIndex),
