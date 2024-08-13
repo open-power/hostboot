@@ -24,7 +24,6 @@
 /* IBM_PROLOG_END_TAG                                                     */
 #ifndef _FIELDCOREOVERRIDETEST_H
 #define _FIELDCOREOVERRIDETEST_H
-
 /**
  *  @file fieldCoreOverrideTest.H
  *
@@ -41,7 +40,9 @@
 #include <targeting/targplatutil.H> //assertGetToplevelTarget
 #include <hwas/common/fieldCoreOverride.H>
 #include <util/random.H>
+#include <targeting/namedtarget.H> // getBootCore
 
+using namespace FCO;
 using namespace HWAS;
 using namespace TARGETING;
 
@@ -55,7 +56,56 @@ constexpr size_t NUM_CHIP_PER_SYSTEM = 8;
 typedef std::vector<std::pair<FCO::procFcoMetadata_t*, std::vector<FCO::coreFcoMetadata_t*>>> systemList_t;
 typedef std::vector<uint32_t> systemBitStringList_t;
 
-void printSystem(const systemList_t & i_list)
+// Forward decl for spare algorithm
+namespace HWAS
+{
+void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData);
+};
+
+// Finds CORE/FC units for a given chip parent which have ATTR_CORE_IS_SPARE set.
+void findSpareCores(TargetHandleList & o_spares, Target * i_parent)
+{
+    o_spares.clear();
+    for (const auto & fc : composable(getNonEcoFcs)(i_parent, false))
+    {
+        if (fc->getAttr<ATTR_CORE_IS_SPARE>())
+        {
+            o_spares.push_back(fc);
+        }
+        for (const auto & core : composable(getChildChiplets)(fc, TYPE_CORE, false))
+        {
+            if (core->getAttr<ATTR_CORE_IS_SPARE>())
+            {
+                o_spares.push_back(core);
+            }
+        }
+    }
+}
+
+// Gets all spare-able units in the system. This is used to keep track of and restore system state before/after tests
+void getSpareableUnits(std::map<TargetHandle_t, ATTR_CORE_IS_SPARE_type> & o_spareStates)
+{
+    o_spareStates.clear();
+
+    PredicatePostfixExpr coreTypes;
+    PredicateCTM isFc(CLASS_NA, TYPE_FC);
+    PredicateCTM isCore(CLASS_NA, TYPE_CORE);
+    coreTypes.push(&isFc)
+        .push(&isCore).Or();
+
+    TargetHandleList unitList;
+    targetService().getAssociated(unitList, UTIL::assertGetToplevelTarget(),
+            TargetService::CHILD_BY_AFFINITY,
+            TargetService::ALL,
+            &coreTypes);
+
+    for (auto & coreUnit : unitList)
+    {
+        o_spareStates[coreUnit] = coreUnit->getAttr<ATTR_CORE_IS_SPARE>();
+    }
+}
+
+void printSystem(const systemList_t & i_list, bool i_printSpares = false)
 {
     for (const auto & pair : i_list)
     {
@@ -69,11 +119,31 @@ void printSystem(const systemList_t & i_list)
                 bitString |= (0x80000000 >> (pCore->chipUnit));
             }
         }
-        TS_INFO("%sProc[%d] FuncCores[%d]: 0x%08X",
+        TS_INFO("%sProc[%X] FuncCores[%d]: 0x%08X",
                 pProc->isBootProc ? "B " : "  ",
                 pProc->procId,
                 pProc->availableCores,
                 bitString);
+        for (const auto & spare : composable(findSpareCores)(pProc->target))
+        {
+            auto hwasState = spare->getAttr<ATTR_HWAS_STATE>();
+            TS_INFO("SPARE %s CHIP_UNIT=%d, P=%d, F=%d",
+                    spare->getAttr<ATTR_TYPE>() == TYPE_FC ? "FC" : "CORE",
+                    spare->getAttr<ATTR_CHIP_UNIT>(),
+                    hwasState.present,
+                    hwasState.functional);
+            if (spare->getAttr<ATTR_TYPE>() == TYPE_FC)
+            {
+                for (const auto & core : composable(getChildChiplets)(spare, TYPE_CORE, false))
+                {
+                    auto hwasState = core->getAttr<ATTR_HWAS_STATE>();
+                    TS_INFO("    Core CU=%d, P=%d, F=%d, Spare=%d", core->getAttr<ATTR_CHIP_UNIT>(),
+                            hwasState.present,
+                            hwasState.functional,
+                            core->getAttr<ATTR_CORE_IS_SPARE>());
+                }
+            }
+        }
     }
 }
 
@@ -82,7 +152,7 @@ void printSystem(const systemBitStringList_t & i_list)
     size_t procId = 0;
     for (const auto & bitString : i_list)
     {
-        TS_INFO("Proc[%d] FuncCores[%d]: 0x%08X",
+        TS_INFO("Proc[%X] FuncCores[%d]: 0x%08X",
                 procId++,
                 __builtin_popcount(bitString),
                 bitString);
@@ -92,6 +162,11 @@ void printSystem(const systemBitStringList_t & i_list)
 inline void clearBit(uint32_t & i_bitString, const size_t i_chipUnit)
 {
     i_bitString &= ~(0x80000000UL >> i_chipUnit);
+}
+
+inline void setBit(uint32_t & i_bitString, const size_t i_chipUnit)
+{
+    i_bitString |= (0x80000000UL >> i_chipUnit);
 }
 
 // Setup a fully configured system as input for FCO algorithm testing
@@ -188,8 +263,7 @@ void buildSystem(const systemBitStringList_t & i_bitStrings, systemList_t & o_sy
             }
             else
             {
-                // The bit is unset meaning it's deconfigured. Simulate this by setting markedForFcoDeconfig and
-                // decrementing the available core count.
+                // The bit is unset meaning it's deconfigured. Simulate this by setting markedForFcoDeconfig.
                 pCore->markedForFcoDeconfig = true;
             }
         }
@@ -197,10 +271,111 @@ void buildSystem(const systemBitStringList_t & i_bitStrings, systemList_t & o_sy
     }
 }
 
+/*
+ * @brief Takes in a systemList_t and uses the actual present/functional chips/cores to configure the system list
+ */
+systemList_t buildSimicsSystem(FCO::fcoRestrictMetadata_t & o_fcoData, systemBitStringList_t & o_bitStrings)
+{
+    systemList_t sysList;
+    do {
+        TargetHandle_t bootChip = nullptr;
+        if (targetService().queryMasterProcChipTargetHandle(bootChip))
+        {
+            TS_INFO("Error from queryMasterProcChipTargetHandle");
+            break;
+        }
+
+        // Get only the functional procs in the system since a non-functional proc won't have spare cores.
+        TargetHandleList procs;
+        getAllChips(procs, TYPE_PROC);
+
+        const Target * bootCore = getBootCore(false);
+        // Builds a fully configured system with all the metadata pointers setup.
+        sysList = buildSystem(o_fcoData,
+                              procs.size(),
+                              0,
+                              bootCore->getAttr<ATTR_CHIP_UNIT>());
+
+        systemBitStringList_t sysBitStrings(procs.size(), 0);
+
+        // Fill in the real data
+        for (size_t i = 0; i < procs.size(); ++i)
+        {
+            Target * proc = procs[i];
+            auto & fcoProc = o_fcoData.procFcoMetadataList[i];
+            fcoProc->target = proc;
+            fcoProc->procId = get_huid(proc);
+
+            TargetHandleList cores;
+            getNonEcoCores(cores, proc, false);
+            for (size_t j = 0; j < cores.size(); ++j)
+            {
+                Target * core = cores[j];
+                auto & fcoCore = fcoProc->coreCandidateList[j];
+
+                fcoCore->target = core;
+                fcoCore->chipUnit = core->getAttr<ATTR_CHIP_UNIT>();
+
+                setBit(sysBitStrings[i], fcoCore->chipUnit);
+            }
+            fcoProc->availableCores = __builtin_popcount(sysBitStrings[i]);
+
+            // Remove unused cores from the lists. sysList holds raw pointers to the metadata objects so erase those
+            // first then the objects themselves which fcoProc has ownership of.
+            auto eraseIf = [](const auto & i_core)
+                           { return i_core->target == nullptr; };
+            sysList[i].second.erase(std::remove_if(begin(sysList[i].second),
+                                                   end(sysList[i].second),
+                                                   eraseIf),
+                                    end(sysList[i].second));
+            fcoProc->coreCandidateList.erase(std::remove_if(begin(fcoProc->coreCandidateList),
+                                                            end(fcoProc->coreCandidateList),
+                                                            eraseIf),
+                                             end(fcoProc->coreCandidateList));
+        }
+        printSystem(sysBitStrings);
+        o_bitStrings = sysBitStrings;
+
+    } while(0);
+
+    return sysList;
+
+}
+
 // A wrapper for buildSystem to clearly state the intent of the call to the reader.
 void resetSystem(const systemBitStringList_t & i_originalSystemBits, systemList_t & o_sysList)
 {
     buildSystem(i_originalSystemBits, o_sysList);
+}
+
+void setHwasFunctional(bool i_functional, Target * i_target)
+{
+    TARGETING::HwasState hwasState = i_target->getAttr<TARGETING::ATTR_HWAS_STATE>();
+    hwasState.poweredOn  = true;
+    hwasState.present    = true;
+    hwasState.functional = i_functional;
+
+    i_target->setAttr<TARGETING::ATTR_HWAS_STATE>(hwasState);
+
+}
+
+// Resets the systemList markedForFcoDeconfig flags and unsets any fcs/cores which may have been marked as spare.
+// Does not touch HWAS state for targets.
+void resetSimicsSystem(const systemBitStringList_t & i_originalSystemBits, systemList_t & o_sysList)
+{
+    // Call build system to reset all the markedForFcoDeconfig flags
+    buildSystem(i_originalSystemBits, o_sysList);
+    // Walk through all the cores under each proc to unset the spare core flag.
+    for (auto & [pProc, pCores] : o_sysList)
+    {
+        // Get a list of the spares and reset to not spare. FCO doesn't deal directly with FC targets but this
+        // will ensure regardless of fused_mode that the FC/CORE targets will have their attr set.
+        for (auto & spare : composable(findSpareCores)(pProc->target))
+        {
+            // Clear spare
+            spare->setAttr<ATTR_CORE_IS_SPARE>(0);
+        }
+    }
 }
 
 // A chaos generator which will deconfigure a random number of PROCs and CORE/FCs in the FCO data structure to simulate
@@ -432,6 +607,51 @@ bool verifyFieldCoreOverrides(const size_t i_fcoNumber,
 
 class fieldCoreOverrideTest: public CxxTest::TestSuite
 {
+private:
+    // Used to HWAS deconfigure a core for testing
+    void deconfigCores(systemList_t     & i_sysList,
+                       const size_t       i_coresToDeconfig)
+    {
+        for (auto & [pProc, pCores] : i_sysList)
+        {
+            size_t coresToDeconfig = i_coresToDeconfig;
+            for (auto & core : pCores)
+            {
+                if ((! core->isBootCore) &&
+                    (core->target != nullptr))
+                {
+                    if (coresToDeconfig && core->target->getAttr<ATTR_HWAS_STATE>().functional)
+                    {
+                        // FCO algorithm doesn't check actual HWAS state, so setting markedForFcoDeconfig is a way to
+                        // tell FCO to ignore this core like it wasn't HWAS functional.
+                        core->markedForFcoDeconfig = true;
+                        setHwasFunctional(false, core->target);
+
+                        --coresToDeconfig;
+                        --pProc->availableCores;
+                        if (is_fused_mode())
+                        {
+                            auto & sibling = core->fcSiblingCore;
+                            // FCO algorithm doesn't check actual HWAS state, so setting markedForFcoDeconfig is a way
+                            // to tell FCO to ignore this core like it wasn't HWAS functional.
+                            sibling->markedForFcoDeconfig = true;
+                            setHwasFunctional(false, sibling->target);
+
+                            --coresToDeconfig;
+                            --pProc->availableCores;
+                        }
+
+                    }
+                }
+                if (coresToDeconfig == 0)
+                {
+                    // No more cores to knock out for this chip. Move to the next.
+                    break;
+                }
+            }
+        }
+    }
+
 public:
 
     void testFieldCoreOverrides()
@@ -610,6 +830,312 @@ public:
         pSys->setAttr<ATTR_FUSED_CORE_MODE_HB>(originalFusedMode);
         pSys->setAttr<ATTR_FUSED_CORE_OPTION>(originalFusedOption);
         } while(0);
+    }
+
+    void testSpareCoreSelection()
+    {
+        TS_INFO("testSpareCoreSelection: Start");
+        // Save original fused core mode attrs
+        Target* pSys = UTIL::assertGetToplevelTarget();
+        auto originalFusedMode = pSys->getAttr<ATTR_FUSED_CORE_MODE_HB>();
+        auto originalFusedOption = pSys->getAttr<ATTR_FUSED_CORE_OPTION>();
+        // Save original spare settings
+        std::map<TargetHandle_t, ATTR_CORE_IS_SPARE_type> originalSpares;
+        getSpareableUnits(originalSpares);
+
+        do {
+        // Need to ensure fused mode is set before the test system is built so that the sibling pointers are valid.
+        pSys->setAttr<ATTR_FUSED_CORE_OPTION>(FUSED_CORE_OPTION_USING_FUSED_CORES);
+        pSys->setAttr<ATTR_FUSED_CORE_MODE_HB>(FUSED_CORE_MODE_HB_SMT8_ONLY);
+        if (!is_fused_mode())
+        {
+            TS_FAIL("testFieldCoreOverrides(): Could not force fused core mode");
+            break;
+        }
+
+        // Build up the FCO metadata structure. To test spare selection, we want to include FCO settings to fully
+        // exercise the various cases. The twist here is that usually FCO doesn't actually touch the real targets
+        // but spare core selection has to so it can pick between present/functional/FCO cores.
+        FCO::fcoRestrictMetadata_t fcoList;
+
+        // This holds the original state of the system to reset with later.
+        systemBitStringList_t originalSystemConfig;
+        // The sysList will hold all pointers to all the PROCs and COREs for easy access since FCO sorts the fcoList.
+        // This way the system can be built once and then modified over each run as necessary to produce a different
+        // system configuration.
+        systemList_t sysList = buildSimicsSystem(fcoList, originalSystemConfig);
+
+        // Clear all the spare settings from the targets before the test. This isn't touching the saved value.
+        for (auto & [coreUnit, originalSpareSetting]  : originalSpares )
+        {
+            coreUnit->setAttr<ATTR_CORE_IS_SPARE>(0);
+        }
+
+        // Get the total functional cores available to test with. These will be used to select FCO values for testing a
+        // few scenarios below.
+        size_t coreCount = 0;
+        for (auto & [pProc, pCores] : sysList)
+        {
+            coreCount += pProc->availableCores;
+        }
+        const size_t totalCoresAvailable = coreCount;
+
+        // These values are used to create test systems to run FCO and spare core algorithm against. The values are not
+        // cumulative. So an FCO reduction of 1 and a deconfig of 1 does not mean a core/fc will be marked for FCO
+        // deconfig and one will be marked non-functional.
+        //
+        // The values are also scaled according to fused mode. So if you want to add a test you can just write in terms
+        // of CORE for small core mode and FC for fused core mode.
+        struct spareCoreTest_t {
+            size_t fcoReductionPerProc; // number of core/fcs to take from each proc
+            size_t numSparesPerProc;    // number of core/fcs to mark spare per proc
+            size_t numDeconfigsPerProc; // number of core/fcs to deconfig per proc
+            bool fusedMode;      // small core or fused core test
+
+        };
+
+        std::vector<spareCoreTest_t> tests = {
+                                               // Test normal and fused modes choose a spare from full config
+                                               {0, 1, 0, true},
+                                               {0, 1, 0, false},
+                                               // Test normal and fused modes choose the spare as the deconfiged CORE/FC
+                                               {0, 1, 1, true},
+                                               {0, 1, 1, false},
+                                               // Test normal and fused modes reclaim spare from FCO
+                                               {1, 1, 0, true},
+                                               {1, 1, 0, false},
+                                               // Test normal and fused modes choose deconfig and don't reclaim from FCO
+                                               {1, 1, 1, true},
+                                               {1, 1, 1, false},
+                                               // Test normal and fused modes choose deconfig and reclaim from FCO
+                                               {3, 2, 1, true},
+                                               {3, 2, 1, false},
+                                             };
+
+        constexpr bool PRINT_SPARES = true;
+        size_t testNum = 0;
+        for (const auto & test : tests)
+        {
+            TS_TRACE("testSpareCoreSelection: Test %d/%d: FCO Reduction=%d, Spare Per Proc=%d, Deconfigs Per Proc=%d, Fused=%d",
+                     ++testNum,
+                     tests.size(),
+                     test.fcoReductionPerProc,
+                     test.numSparesPerProc,
+                     test.numDeconfigsPerProc,
+                     test.fusedMode ? 1 : 0);
+            size_t numCoresToDeconfig = test.numDeconfigsPerProc;
+            size_t numCoresToSpare = test.numSparesPerProc;
+            size_t fcoReductionPerProc = (test.fcoReductionPerProc * sysList.size()); /* multiply by number of procs to
+                                                                                         reduce each proc by requested
+                                                                                         amount */
+            if (test.fusedMode)
+            {
+                // This test is fused mode, recontextualize test numbers in terms of small cores
+                numCoresToDeconfig *= 2;
+                numCoresToSpare *= 2;
+                fcoReductionPerProc *= 2;
+
+                // Set fused mode attrs.
+                TS_TRACE("Switching to FUSED MODE");
+                // Force fused core mode. Note, none of these functions touch targeting directly so the real simulated
+                // hardware configuration doesn't matter.
+                pSys->setAttr<ATTR_FUSED_CORE_OPTION>(FUSED_CORE_OPTION_USING_FUSED_CORES);
+                pSys->setAttr<ATTR_FUSED_CORE_MODE_HB>(FUSED_CORE_MODE_HB_SMT8_ONLY);
+                if (!is_fused_mode())
+                {
+                    TS_FAIL("testFieldCoreOverrides(): Could not force fused core mode");
+                    break;
+                }
+
+            }
+            else
+            {
+                // This is a small core test, set the attrs.
+                TS_TRACE("Switching to NORMAL MODE");
+                // Force non-fused core mode.
+                pSys->setAttr<ATTR_FUSED_CORE_OPTION>(FUSED_CORE_OPTION_USING_NORMAL_CORES);
+                pSys->setAttr<ATTR_FUSED_CORE_MODE_HB>(FUSED_CORE_MODE_HB_SMT4_ONLY);
+                if (is_fused_mode())
+                {
+                    TS_FAIL("testFieldCoreOverrides(): Could not force normal core mode");
+                    break;
+                }
+            }
+            // Set the FCO value for this test.
+            assert(totalCoresAvailable >= fcoReductionPerProc,
+                    "Testcase bug, totalCoresAvailable < fcoReductionPerProc");
+            // If the test is in fused mode then we need to divide FCO value by 2 since the value needs to be in
+            // terms of FCs, not COREs.
+            const size_t fusedModeDivisor = is_fused_mode() ? 2 : 1;
+            fcoList.fcoValue = fcoReductionPerProc ? ((totalCoresAvailable - fcoReductionPerProc) / fusedModeDivisor)
+                                                   : 0; // No reduction means no FCO mode, 0 signifies that.
+
+            // Set the number of spare cores for each proc in this test.
+            for (auto & [pProc, pCores] : sysList)
+            {
+                // Based on PG data:
+                // The number of normal core spares identified can be 0, 2, 4, 6, or 8.
+                // Which would translate into fused-core spares of 0, 1, 2, 3 or 4.
+                // The algorithm was written to support an arbitrary number of spares though.
+                pProc->target->setAttr<ATTR_SPARE_CORES>(numCoresToSpare);
+            }
+
+            // Knock out the requested number of cores/fcs per proc for this test.
+            deconfigCores(sysList,
+                          numCoresToDeconfig);
+
+            // Call FCO
+            applyFieldCoreOverrides(fcoList);
+
+            // Call selectSpareCores with same fcoList. Spare selection gathers it's own data but uses FCO as a
+            // cross-reference
+            selectSpareCores(fcoList);
+
+            bool procFailedTest = false;
+            bool bootCoreSpared = false;
+            // For each proc, walk through it's list of cores and count the spares
+            for (auto & [pProc, pCores] : sysList)
+            {
+                // Count the number of cores spared, how many of those spares were deconfigured cores, and how many
+                // cores were marked for FCO deconfig. With these values, we can compare to the test's values to
+                // determine if spares were selected properly.
+                size_t coresSpared = 0,
+                       deconfigedSpares = 0,
+                       numFcoDeconfigs = 0;
+                for (auto & core : pCores)
+                {
+                    if (core->markedForFcoDeconfig)
+                    {
+                        // When the test deconfigs a core it also will set markedForFcoDeconfig to tell FCO this core
+                        // was deconfigured since FCO doesn't inspect targets directly.
+                        ++numFcoDeconfigs;
+                    }
+                    if (core->target->getAttr<ATTR_CORE_IS_SPARE>())
+                    {
+                        ++coresSpared;
+                        if (not core->target->getAttr<ATTR_HWAS_STATE>().functional)
+                        {
+                            ++deconfigedSpares;
+                            // Reset HWAS state for future tests
+                            setHwasFunctional(true, core->target);
+                        }
+                        if (core->isBootCore)
+                        {
+                            TS_FAIL("testSpareCoreSelection: FAIL Boot CORE[chip_unit=%d] was chosen as spare!",
+                                    core->chipUnit);
+                            bootCoreSpared = true;
+                            // Finish counting the results to check other fail conditions.
+                        }
+                    }
+                }
+
+                // Number of cores spared on this proc should match what was asked for.
+                if (coresSpared != numCoresToSpare)
+                {
+                    TS_FAIL("testSpareCoreSelection: Test (%d/%d) for PROC[%X] w/ "
+                             "coresSpared=%d, deconfigedSpares=%d, numFcoDeconfigs=%d "
+                             "Failed to pick enough spares",
+                             testNum,
+                             tests.size(),
+                             pProc->procId,
+                             coresSpared,
+                             deconfigedSpares,
+                             numFcoDeconfigs);
+                    procFailedTest = true;
+                    // Check the other proc
+                    continue;
+                }
+                // Spare algorithm priorizes selecting deconfigured (non-functional) cores before choosing to reclaim
+                // from FCO or using available functional cores. If there were deconfigured cores for this test
+                // then ensure this expectation was met.
+                if (numCoresToDeconfig &&
+                        // Number of spares are more than number of deconfiged cores but spare algorithm didn't
+                        // assign spares to all available deconfigured cores first.
+                        (((numCoresToSpare > numCoresToDeconfig) && (deconfigedSpares != numCoresToDeconfig)) ||
+                        // Number of spares are less than or equal to number of deconfiged cores but spare algorithm
+                        // didn't assign all spares to deconfigured cores.
+                        ((numCoresToSpare <= numCoresToDeconfig) && (deconfigedSpares != coresSpared))))
+                {
+                    TS_FAIL("testSpareCoreSelection: Test (%d/%d) for PROC[%X] w/ "
+                             "coresSpared=%d, deconfigedSpares=%d, numFcoDeconfigs=%d "
+                             "failed to spare enough deconfigured cores",
+                             testNum,
+                             tests.size(),
+                             pProc->procId,
+                             coresSpared,
+                             deconfigedSpares,
+                             numFcoDeconfigs);
+                    procFailedTest = true;
+                    // Check the other proc
+                    continue;
+
+                }
+                // When FCO mode is enabled, the spare algorithm should always try to reclaim a core from FCO if there
+                // are no deconfigured (non-functional) cores to choose from. Check if we're testing that scenario
+                if ((test.numSparesPerProc > test.numDeconfigsPerProc)
+                    && (test.fcoReductionPerProc > test.numDeconfigsPerProc))
+                {
+                    // The number of spares is greater than the deconfigs per proc and
+                    // FCO value was high enough to mark some cores for FCO deconfig. So,
+                    // check that the spare core algorithm reclaimed from FCO
+                    if (numFcoDeconfigs == test.fcoReductionPerProc)
+                    {
+                        // if the number of FCO deconfigs matches what the test requested
+                        // then that means that the spare core algorithm didn't reclaim any
+                        // units from FCO to mark as spare.
+                        TS_TRACE("testSpareCoreSelection: Test (%d/%d) for PROC[%X] w/ "
+                                 "coresSpared=%d, deconfigedSpares=%d, numFcoDeconfigs=%d",
+                                 testNum,
+                                 tests.size(),
+                                 pProc->procId,
+                                 coresSpared,
+                                 deconfigedSpares,
+                                 numFcoDeconfigs);
+                        TS_FAIL("testSpareCoreSelection: Failed to reclaim spare from FCO when spares=%d, fco=%d,"
+                                " deconfigs=%d", numCoresToSpare,
+                                                 fcoList.fcoValue,
+                                                 numCoresToDeconfig);
+                        procFailedTest = true;
+                        // Check the other proc
+                        continue;
+                    }
+                }
+                // Emit a pass for this chip if the boot core wasn't spared or this isn't the boot proc and the test got
+                // this far indicating no other fails occurred above.
+                if ( ! bootCoreSpared || ! pProc->isBootProc)
+                {
+                    TS_TRACE("testSpareCoreSelection: Test (%d/%d) for PROC[%X] PASS w/ "
+                             "coresSpared=%d, deconfigedSpares=%d, numFcoDeconfigs=%d",
+                             testNum,
+                             tests.size(),
+                             pProc->procId,
+                             coresSpared,
+                             deconfigedSpares,
+                             numFcoDeconfigs);
+                }
+            }
+            if (bootCoreSpared || procFailedTest)
+            {
+                // The test failed. Print out the system state for inspection
+                printSystem(sysList, PRINT_SPARES);
+            }
+
+            // Reset the spare and deconfigByFco flags
+            resetSimicsSystem(originalSystemConfig, sysList);
+        }
+
+        } while(0);
+
+        // Restore the original spare core settings
+        for (auto & [coreUnit, originalSpareSetting]  : originalSpares )
+        {
+            coreUnit->setAttr<ATTR_CORE_IS_SPARE>(originalSpareSetting);
+        }
+
+        // Put the fused core attrs back to original values.
+        pSys->setAttr<ATTR_FUSED_CORE_MODE_HB>(originalFusedMode);
+        pSys->setAttr<ATTR_FUSED_CORE_OPTION>(originalFusedOption);
+        TS_INFO("testSpareCoreSelection: Done");
     }
 
 };

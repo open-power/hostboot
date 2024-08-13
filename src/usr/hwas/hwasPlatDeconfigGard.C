@@ -1795,7 +1795,7 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
                 if (isFusedCoreMode)
                 {
                     // HDAT deals directly with fused core targets when
-                    // eporting spares so need to set the attribute on
+                    // reporting spares so need to set the attribute on
                     // the FC parent.
                     TargetHandle_t fcParent = getParent(core, TYPE_FC);
                     if (fcParent->getAttr<ATTR_CORE_IS_SPARE>())
