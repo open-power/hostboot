@@ -2171,12 +2171,12 @@ void PlatPmPPB::attr_init( void )
     }
     //Ensure that the ranges for WOV attributes are honored
 
-    SET_CEIL (attr_wov_overv_step_incr_pct,         20  );
-    SET_CEIL (attr_wov_overv_step_decr_pct,         20  );
-    SET_CEIL (attr_wov_overv_max_pct,               100 );
-    SET_CEIL (attr_wov_underv_step_incr_pct,        20  );
-    SET_CEIL (attr_wov_underv_step_decr_pct,        20  );
-    SET_FLOOR(attr_wov_underv_max_pct,              200 );
+    SET_CEIL (attr_wov_overv_step_incr_pct,         255 );
+    SET_CEIL (attr_wov_overv_step_decr_pct,         255 );
+    SET_CEIL (attr_wov_overv_max_pct,               255 );
+    SET_CEIL (attr_wov_underv_step_incr_pct,        255 );
+    SET_CEIL (attr_wov_underv_step_decr_pct,        255 );
+    SET_FLOOR(attr_wov_underv_max_pct,              255 );
 
 #define PPB_SET_ATTR(attr_name, target, attr_assign) \
     FAPI_TRY(FAPI_ATTR_SET(fapi2::attr_name, target, iv_attrs.attr_assign),"Attribute write failed"); \
