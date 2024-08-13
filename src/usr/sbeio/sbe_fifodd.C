@@ -210,10 +210,7 @@ errlHndl_t SbeFifo::performFifoChipOp(TARGETING::Target   *i_target,
     if (errl)
     {
         SBE_TRACF(ERR_MRK"performFifoChipOp: PIPE Fifo HUID=0x%X", get_huid(i_target));
-        if (TARGETING::UTIL::isOdysseyChip(i_target))
-        {
-            UdSPPECodeLevels(i_target).addToLog(errl);
-        }
+        UdSPPECodeLevels(i_target).addToLog(errl);
     }
 
     SBE_TRACD(EXIT_MRK "performFifoChipOp");
@@ -757,6 +754,7 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target    *i_target,
                                HWAS::GARD_NULL);
             errl->collectTrace(SBEIO_COMP_NAME);
 
+            UdSPPECodeLevels(i_target).addToLog(errl);
         }
 
         // Only parse FFDC from the fifo buffer if the message contains FFDC and this is not a get FFDC chip-op request,
@@ -800,6 +798,21 @@ errlHndl_t SbeFifo::readResponse(TARGETING::Target    *i_target,
                 if (sbeErrors)
                 {
                     sbeErrors->plid(plid);
+
+                    if(sbeErrors->isSevVisible(propagation_t::PROPAGATE))
+                    {
+                        errl->setSev(ERRL_SEV_INFORMATIONAL);
+                    }
+
+                    UdSBEResponse* sbeResp = new UdSBEResponse(
+                            i_target,
+                            i_pFifoRequest[1],
+                            l_statusHeader.magic,
+                            l_statusHeader.primaryStatus,
+                            l_statusHeader.secondaryStatus
+                        );
+
+                    sbeResp->addToLog(sbeErrors, propagation_t::PROPAGATE);
                 }
             }
 

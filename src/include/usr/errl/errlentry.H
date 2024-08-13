@@ -1246,6 +1246,25 @@ public:
         return aggregate(log);
     }
 
+    /**
+     * @brief Check if the severity of this log indicates it is
+     *   customer visible, note this ignores any override flags that
+     *   might change standard behavior
+     *
+     *  @param[in]  i_behavior      Whether to propagate this call to the
+     *                              other logs in the aggregate below. If
+     *                              any are visible return true.
+     *  INFORMATIONAL = false
+     *  RECOVERED = false
+     *  PREDICTIVE = true
+     *  UNRECOVERABLE = true
+     *  CRITICAL_SYS_TERM = true
+     *
+     * @return true if log is visible
+     */
+
+    bool isSevVisible( propagation_t i_behavior = propagation_t::PROPAGATE);
+
 private:
 
     /**
@@ -1588,21 +1607,6 @@ private:
      * @return nothing
      */
     void checkHiddenLogsEnable( );
-
-    /**
-     * @brief Check if the severity of this log indicates it is
-     *   customer visible, note this ignores any override flags that
-     *   might change standard behavior
-     *
-     *  INFORMATIONAL = false
-     *  RECOVERED = false
-     *  PREDICTIVE = true
-     *  UNRECOVERABLE = true
-     *  CRITICAL_SYS_TERM = true
-     *
-     * @return true if log is visible
-     */
-    bool isSevVisible( void );
 
 
     /**

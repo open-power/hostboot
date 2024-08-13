@@ -6604,7 +6604,7 @@ srcInfo = {
                       },
             0x28731C: {    "devdesc": "Null target passed",
                            "moduleid": "SBEIO_ERRLUD_SPPE_CODE_LEVELS",
-                           "reasoncode": "SBEIO_OCMB_NULL_TARGET",
+                           "reasoncode": "SBEIO_CHIP_NULL_TARGET",
                            "userdata1":  "unused",
                            "userdata2":  "unused",
                       },

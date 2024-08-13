@@ -201,7 +201,7 @@ enum sbeioReasonCode
     SBEIO_RECEIVE_CODE_LEVELS_BAD_MSG  = SBEIO_COMP_ID | 0x70,
     SBEIO_FIFO_SBE_ASYNC_FFDC_REQUEST  = SBEIO_COMP_ID | 0x71,
     SBEIO_ODY_RECOVERY_NOT_AVAILABLE   = SBEIO_COMP_ID | 0x72,
-    SBEIO_OCMB_NULL_TARGET             = SBEIO_COMP_ID | 0x73,
+    SBEIO_CHIP_NULL_TARGET             = SBEIO_COMP_ID | 0x73,
     SBEIO_TEST_INJECT_HRESET           = SBEIO_COMP_ID | 0x74,
     SBEIO_ODY_FLASH_CHECK_ERR          = SBEIO_COMP_ID | 0x75,
     SBEIO_PMIC_TELEMETRY_DATA_DDR5     = SBEIO_COMP_ID | 0x76, // Do NOT alter the value, HMC dependency
@@ -225,6 +225,7 @@ enum UserDetailsTypes
         SBEIO_UDT_SCRATCH_DATA     = 0x4, //reserved for future/offline parsing
         SBEIO_UDT_LOC              = 0x5, //reserved for future/offline parsing
         SBEIO_UDT_PMIC_HEALTH      = 0x6, //reserved for future/offline parsing
+        SBEIO_UDT_SBE_RESPONSE     = 0x7, // SBE Response details
 };
 
 

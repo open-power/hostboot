@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,20 +44,20 @@ namespace SBEIO
 //------------------------------------------------------------------------------
 //  SPPE Code Levels User Details
 //------------------------------------------------------------------------------
-UdSPPECodeLevels::UdSPPECodeLevels( TARGETING::Target * i_ocmb )
+UdSPPECodeLevels::UdSPPECodeLevels( TARGETING::Target * i_chip )
 {
     errlHndl_t l_err = nullptr;
 
     do
     {
         // Check for NULL target
-        if( nullptr == i_ocmb )
+        if( nullptr == i_chip )
         {
-            TRACFCOMP(g_trac_sbeio, ERR_MRK"UdSPPECodeLevels: OCMB target is NULL");
+            TRACFCOMP(g_trac_sbeio, ERR_MRK"UdSPPECodeLevels: Chip target is NULL");
             /*@
             * @errortype
             * @moduleid        SBEIO_ERRLUD_SPPE_CODE_LEVELS
-            * @reasoncode      SBEIO_OCMB_NULL_TARGET
+            * @reasoncode      SBEIO_CHIP_NULL_TARGET
             * @userdata1       unused
             * @userdata2       unused
             * @devdesc         Null target passed
@@ -65,7 +65,7 @@ UdSPPECodeLevels::UdSPPECodeLevels( TARGETING::Target * i_ocmb )
             */
             l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                             SBEIO_ERRLUD_SPPE_CODE_LEVELS,
-                                            SBEIO_OCMB_NULL_TARGET,
+                                            SBEIO_CHIP_NULL_TARGET,
                                             0,
                                             0,
                                             ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
@@ -82,7 +82,7 @@ UdSPPECodeLevels::UdSPPECodeLevels( TARGETING::Target * i_ocmb )
         iv_SubSection = SBEIO_UDT_SPPE_CODE_LEVELS;
 
         //***** Memory Layout *****
-        // 4 bytes  : OCMB HUID
+        // 4 bytes  : Chip HUID
         // 4 bytes  : ATTR_SBE_VERSION_INFO
         // 4 bytes  : ATTR_SBE_COMMIT_ID
         // 64 bytes : ATTR_SBE_BOOTLOADER_CODELEVEL
@@ -91,35 +91,35 @@ UdSPPECodeLevels::UdSPPECodeLevels( TARGETING::Target * i_ocmb )
         // 21 bytes : ATTR_SBE_BUILD_TAG
         // 21 bytes : ATTR_SBE_EKB_BUILD_TAG
 
-        auto l_ocmbHuid = get_huid(i_ocmb);
+        auto l_chipHuid = get_huid(i_chip);
 
         ATTR_SBE_VERSION_INFO_type l_sbeVersionInfo;
-        i_ocmb->tryGetAttr<ATTR_SBE_VERSION_INFO>(l_sbeVersionInfo);
+        i_chip->tryGetAttr<ATTR_SBE_VERSION_INFO>(l_sbeVersionInfo);
 
         ATTR_SBE_COMMIT_ID_type l_sbeCommitId;
-        i_ocmb->tryGetAttr<ATTR_SBE_COMMIT_ID>(l_sbeCommitId);
+        i_chip->tryGetAttr<ATTR_SBE_COMMIT_ID>(l_sbeCommitId);
 
         ATTR_SBE_BOOTLOADER_CODELEVEL_type l_sbeBldrCodeLvl;
-        i_ocmb->tryGetAttr<ATTR_SBE_BOOTLOADER_CODELEVEL>(l_sbeBldrCodeLvl);
+        i_chip->tryGetAttr<ATTR_SBE_BOOTLOADER_CODELEVEL>(l_sbeBldrCodeLvl);
 
         ATTR_SBE_RUNTIME_CODELEVEL_type l_sbeRntmCodeLvl;
-        i_ocmb->tryGetAttr<ATTR_SBE_RUNTIME_CODELEVEL>(l_sbeRntmCodeLvl);
+        i_chip->tryGetAttr<ATTR_SBE_RUNTIME_CODELEVEL>(l_sbeRntmCodeLvl);
 
         ATTR_SBE_RELEASE_TAG_type l_sbeRelTag;
-        i_ocmb->tryGetAttr<ATTR_SBE_RELEASE_TAG>(l_sbeRelTag);
+        i_chip->tryGetAttr<ATTR_SBE_RELEASE_TAG>(l_sbeRelTag);
 
         ATTR_SBE_BUILD_TAG_type l_sbeBldTag;
-        i_ocmb->tryGetAttr<ATTR_SBE_BUILD_TAG>(l_sbeBldTag);
+        i_chip->tryGetAttr<ATTR_SBE_BUILD_TAG>(l_sbeBldTag);
 
         ATTR_SBE_EKB_BUILD_TAG_type l_sbeEkbBldTag;
-        i_ocmb->tryGetAttr<ATTR_SBE_EKB_BUILD_TAG>(l_sbeEkbBldTag);
+        i_chip->tryGetAttr<ATTR_SBE_EKB_BUILD_TAG>(l_sbeEkbBldTag);
 
         uint8_t * l_pBuf = reallocUsrBuf(sizeof(uint32_t)*3
                                         +sizeof(uint8_t)*64*2
                                         +sizeof(char)*21*3 );
 
         // HUID (uint32_t)
-        memcpy(l_pBuf, &l_ocmbHuid, sizeof(uint32_t));
+        memcpy(l_pBuf, &l_chipHuid, sizeof(uint32_t));
         l_pBuf += sizeof(uint32_t);
 
         // ATTR_SBE_VERSION_INFO (uint32_t)
@@ -155,6 +155,60 @@ UdSPPECodeLevels::UdSPPECodeLevels( TARGETING::Target * i_ocmb )
 
 //------------------------------------------------------------------------------
 UdSPPECodeLevels::~UdSPPECodeLevels()
+{
+}
+
+
+//------------------------------------------------------------------------------
+//  Basic details of the SBE Response
+//------------------------------------------------------------------------------
+UdSBEResponse::UdSBEResponse( TARGETING::TargetHandle_t i_chip, uint32_t i_fifo_request,
+                    uint16_t i_magic, uint16_t i_primary_status, uint16_t i_secondary_status)
+{
+    do
+    {
+        // Set up Ud instance variables
+        iv_CompId = SBEIO_COMP_ID;
+        iv_Version = 1;
+        iv_SubSection = SBEIO_UDT_SBE_RESPONSE;
+
+        //***** Memory Layout *****
+        // 4 bytes  : Chip HUID
+        // 4 bytes  : FIFO REQUEST
+        // 2 bytes  : MAGIC
+        // 2 bytes : PRIMARY STATUS
+        // 2 bytes : SECONDARY STATUS
+
+        auto l_chipHuid = get_huid(i_chip);
+
+        uint8_t * l_pBuf = reallocUsrBuf(sizeof(uint32_t)*2
+                                        +sizeof(uint16_t)*3);
+
+        // HUID (uint32_t)
+        memcpy(l_pBuf, &l_chipHuid, sizeof(uint32_t));
+        l_pBuf += sizeof(uint32_t);
+
+        // FIFO REQUEST (uint32_t)
+        memcpy(l_pBuf, &i_fifo_request, sizeof(uint32_t));
+        l_pBuf += sizeof(uint32_t);
+
+        // MAGIC (uint16_t)
+        memcpy(l_pBuf, &i_magic, sizeof(uint16_t));
+        l_pBuf += sizeof(uint16_t);
+
+        // PRIMARY STATUS (uint16_t)
+        memcpy(l_pBuf, &i_primary_status, sizeof(uint16_t));
+        l_pBuf += sizeof(uint16_t);
+
+        // SECONDARY STATUS (uint16_t)
+        memcpy(l_pBuf, &i_secondary_status, sizeof(uint16_t));
+        l_pBuf += sizeof(uint16_t);
+
+    } while(0);
+}
+
+//------------------------------------------------------------------------------
+UdSBEResponse::~UdSBEResponse()
 {
 }
 

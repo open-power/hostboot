@@ -73,7 +73,7 @@ class errludP_sbeio:
                 raise
 
     def SbeIoUserDetailsSPPECodeLevels(ver, data, subType):
-        # 4 bytes  : OCMB HUID
+        # 4 bytes  : CHIP HUID
         # 4 bytes  : ATTR_SBE_VERSION_INFO
         # 4 bytes  : ATTR_SBE_COMMIT_ID
         # 64 bytes : ATTR_SBE_BOOTLOADER_CODELEVEL
@@ -85,7 +85,7 @@ class errludP_sbeio:
         subd = dict()
         i = 0
 
-        subd['OCMB HUID'], i=memConcat(data, i, i+4)
+        subd['CHIP HUID'], i=memConcat(data, i, i+4)
         subd['ATTR_SBE_VERSION_INFO'], i=memConcat(data, i, i+4)
         subd['ATTR_SBE_COMMIT_ID'], i=memConcat(data, i, i+4)
         subd['ATTR_SBE_BOOTLOADER_CODELEVEL[0-63]'], i=memConcat(data, i, i+64)
@@ -105,6 +105,29 @@ class errludP_sbeio:
         jsonStr = json.dumps(d)
         return jsonStr
 
+    def SbeIoUserDetailsSBEResponse(ver, data, subType):
+        #***** Memory Layout *****
+        # 4 bytes  : Chip HUID
+        # 4 bytes  : FIFO REQUEST
+        # 2 bytes  : MAGIC
+        # 2 bytes : PRIMARY STATUS
+        # 2 bytes : SECONDARY STATUS
+
+        d = dict()
+        subd = dict()
+        i = 0
+
+        subd['CHIP_HUID'], i=memConcat(data, i, i+4)
+        subd['FIFO_REQUEST'], i=memConcat(data, i, i+4)
+        subd['MAGIC'], i=memConcat(data, i, i+2)
+        subd['PRIMARY_STATUS'], i=memConcat(data, i, i+2)
+        subd['SECONDARY_STATUS'], i=memConcat(data, i, i+2)
+
+        d['SBE Response']=subd
+
+        jsonStr = json.dumps(d)
+        return jsonStr
+
 #Dictionary with parser functions for each subtype
 #Values are from UserDetailsTypes enum
 #in src/include/usr/sbeio/sbeioreasoncodes.H
@@ -114,7 +137,8 @@ SbeIoUserDetailDataSubSection = { 0: "SbeIoUserDetailsParserNoFormat",
                                   3: "SbeIoUserDetailsParserSPPEFFDC",
                                   4: "SbeIoUserDetailsParserNoFormat",
                                   5: "SbeIoUserDetailsParserNoFormat",
-                                  6: "SbeIoUserDetailsParserNoFormat" }
+                                  6: "SbeIoUserDetailsParserNoFormat",
+                                  7: "SbeIoUserDetailsSBEResponse" }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data, subType)

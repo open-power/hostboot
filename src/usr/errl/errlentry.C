@@ -3731,16 +3731,7 @@ void ErrlEntry::removeDuplicateTraces()
     }
 
 }
-
-
-
-/**
- * @brief Check if the severity of this log indicates it is
- *   customer visible, note this ignores any override flags that
- *   might change standard behavior
- * @return true if log is visible
- */
-bool ErrlEntry::isSevVisible( void )
+bool ErrlEntry::isSevVisible( const propagation_t i_propagate )
 {
     bool l_vis = true;
     switch( sev() )
@@ -3750,7 +3741,41 @@ bool ErrlEntry::isSevVisible( void )
         case( ERRL_SEV_RECOVERED ): l_vis = false; break;
 
         // Visible logs
-        default: l_vis = true;
+        case( ERRL_SEV_PREDICTIVE ): l_vis = true; break;
+        case( ERRL_SEV_PREDICTIVE_DEGRADED ): l_vis = true; break;
+        case( ERRL_SEV_PREDICTIVE_CORRECTABLE ): l_vis = true; break;
+        case( ERRL_SEV_PREDICTIVE_CORRECTABLE2 ): l_vis = true; break;
+        case( ERRL_SEV_PREDICTIVE_REDUNDANCY_LOST ): l_vis = true; break;
+        case( ERRL_SEV_UNRECOVERABLE ): l_vis = true; break;
+        case( ERRL_SEV_UNRECOVERABLE1 ): l_vis = true; break;
+        case( ERRL_SEV_UNRECOVERABLE2 ): l_vis = true; break;
+        case( ERRL_SEV_UNRECOVERABLE3 ): l_vis = true; break;
+        case( ERRL_SEV_UNRECOVERABLE4 ): l_vis = true; break;
+        case( ERRL_SEV_CRITICAL_FAIL_UNKNOWN ): l_vis = true; break;
+        case( ERRL_SEV_CRITICAL_SYS_TERM ): l_vis = true; break;
+        case( ERRL_SEV_CRITICAL_SYS_FAIL ): l_vis = true; break;
+        case( ERRL_SEV_CRITICAL_PART_TERM ): l_vis = true; break;
+        case( ERRL_SEV_CRITICAL_PART_FAIL ): l_vis = true; break;
+        case( ERRL_SEV_DIAGNOSTIC_ERROR1 ): l_vis = true; break;
+        case( ERRL_SEV_DIAGNOSTIC_ERROR2 ): l_vis = true; break;
+        case( ERRL_SEV_SYMPTOM_RECOVERED ): l_vis = true; break;
+        case( ERRL_SEV_SYMPTOM_PREDICTIVE ): l_vis = true; break;
+        case( ERRL_SEV_SYMPTOM_UNRECOV ): l_vis = true; break;
+        case( ERRL_SEV_SYMPTOM_DIAGERR ): l_vis = true; break;
+        case( ERRL_SEV_UNKNOWN ): l_vis = true; break;
+
+    }
+
+    if(!l_vis && i_propagate == propagation_t::PROPAGATE)
+    {
+        for (const auto log : iv_aggregate_errors)
+        {
+            if(log->isSevVisible(i_propagate))
+            {
+                l_vis = true;
+                break;
+            }
+        }
     }
     return l_vis;
 }

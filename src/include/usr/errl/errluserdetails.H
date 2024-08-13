@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -68,13 +68,16 @@ public:
     /**
      *  @brief Adds user detail data to an error log
      *
+     *  @param i_behavior propagate the detail data into aggregate logs
+     *
      *  Adds the user detail data stored in the internal buffer to the error
      *  log. Subclasses should override if the detail data is not stored in the
      *  internal buffer.
      *
      *  @param  i_errl Error log handle to add detail data to.
      */
-    virtual void addToLog(errlHndl_t i_errl);
+    virtual void addToLog(errlHndl_t i_errl,
+                          propagation_t i_behavior = propagation_t::NO_PROPAGATE);
 
     template<typename Del>
     void addToLog(const errlOwner_d<Del>& i_errl)
