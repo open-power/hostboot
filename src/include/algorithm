@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -775,7 +775,7 @@ namespace std
             // 'new_last'.
             if (!(pred(*first)))
             {
-                *new_last = *first;
+                *new_last = std::move(*first);
                 ++new_last;
             }
 
