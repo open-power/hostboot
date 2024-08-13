@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -687,231 +687,114 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
     o_unitPos = AttributeTank::ATTR_UNIT_POS_NA;
     o_node = AttributeTank::ATTR_NODE_NA;
 
-    // Pos, UnitPos and Node are figured out from the PHYS_PATH
-    void * l_pAttr = NULL;
-    _getAttrPtr(ATTR_PHYS_PATH, l_pAttr);
-    if (l_pAttr)
-    {
-        AttributeTraits<ATTR_PHYS_PATH>::Type & l_physPath =
-            *(reinterpret_cast<AttributeTraits<ATTR_PHYS_PATH>::Type *>(
-                l_pAttr));
+    // Get pointers to FAPINAME position elements
+    void * l_pAttr_pos = NULL;
+    void * l_pAttr_unitPos = NULL;
+    void * l_pAttr_node = NULL;
+    _getAttrPtr(ATTR_FAPINAME_POS, l_pAttr_pos);
+    _getAttrPtr(ATTR_FAPINAME_UNIT, l_pAttr_unitPos);
+    _getAttrPtr(ATTR_FAPINAME_NODE, l_pAttr_node);
 
-        // Walk the PHYS_PATH from top (sys) down element by element and set o_node, o_pos, and o_unitPos accordingly.
-        for (uint32_t i = 0; i < l_physPath.size(); i++)
-        {
-            // Grab the path element
-            const EntityPath::PathElement & l_element = l_physPath[i];
+    // Check that each element exists and cast to correct type
+    if (l_pAttr_node) {
+        AttributeTraits<ATTR_FAPINAME_NODE>::Type & l_fapiname_node =
+            *(reinterpret_cast<AttributeTraits<ATTR_FAPINAME_NODE>::Type *>(
+                l_pAttr_node));
 
-            // Check the type this element is
-            switch(l_element.type)
-            {
-                case(TYPE_NODE):
-                case(TYPE_CONTROL_NODE):
-                {
-                    // Element was a node, instance is the position value for the node.
-                    // ex. /sys-0/node-1/.../
-                    // instance == 1
-                    o_node = l_element.instance;
-                    break;
-                }
-                case(TYPE_PROC):
-                case(TYPE_MEMBUF):
-                case(TYPE_DIMM):
-                case(TYPE_BMC):
-                case(TYPE_OCMB_CHIP):
-                case(TYPE_PMIC):
-                case(TYPE_GENERIC_I2C_DEVICE):
-                case(TYPE_FSP):
-                case(TYPE_PNOR):
-                case(TYPE_APSS):
-                case(TYPE_DPSS):
-                case(TYPE_TPM):
-                case(TYPE_TEMP_SENSOR):
-                case(TYPE_POWER_IC):
-                case(TYPE_MDS_CTLR):
-                {
-                    // Element was a CHIP, instance is the position value for the chip
-                    // ex. /sys-0/node-1/proc-2/.../
-                    // instance == 2
-                    // o_pos refers to the parent chip's position. In the above example some arbitrary child unit of a
-                    // proc is being looked up.
-                    o_pos = l_element.instance;
-                    break;
-                }
-                case(TYPE_MC):
-                case(TYPE_EQ):
-                case(TYPE_CAPP):
-                case(TYPE_PERV):
-                case(TYPE_PEC):
-                case(TYPE_PHB):
-                case(TYPE_OMI):
-                case(TYPE_SMPGROUP):
-                case(TYPE_MCC):
-                case(TYPE_OMIC):
-                case(TYPE_MEM_PORT):
-                case(TYPE_NMMU):
-                case(TYPE_PAU):
-                case(TYPE_IOHS):
-                case(TYPE_PAUC):
-                case(TYPE_CORE):
-                case(TYPE_MI):
-                case(TYPE_FC):
-                case(TYPE_NX):
-                case(TYPE_OCC):
-                {
-                    // Element was a UNIT. In this case, the attribute CHIP_UNIT has the correct position value.
-                    // processMrw.pl is responsible for calculating the right unit position so take that.
-                    void * l_pUnitPos = NULL;
-                    _getAttrPtr(ATTR_CHIP_UNIT, l_pUnitPos);
-                    if (l_pUnitPos)
-                    {
-                        AttributeTraits<ATTR_CHIP_UNIT>::Type & l_unitPos =
-                            *(reinterpret_cast<AttributeTraits<ATTR_CHIP_UNIT>::Type *>(l_pUnitPos));
+        o_node = l_fapiname_node;
 
-                        o_unitPos = l_unitPos;
-                    }
-                    break;
-                }
-                case(TYPE_SYS):
-                {
-                    o_pos = AttributeTank::ATTR_POS_NA;
-                    o_unitPos = AttributeTank::ATTR_UNIT_POS_NA;
-                    o_node = AttributeTank::ATTR_NODE_NA;
-                    break;
-                }
-                case(TYPE_XBUS):
-                case(TYPE_ABUS):
-                case(TYPE_OBUS):
-                case(TYPE_OBUS_BRICK):
-                case(TYPE_L2):
-                case(TYPE_L3):
-                case(TYPE_L4):
-                case(TYPE_NPU):
-                case(TYPE_PCI):
-                case(TYPE_OSC):
-                case(TYPE_TODCLK):
-                case(TYPE_OSCPCICLK):
-                case(TYPE_REFCLKENDPT):
-                case(TYPE_PORE):
-                case(TYPE_PCIESWITCH):
-                case(TYPE_MFREFCLKENDPT):
-                case(TYPE_SP):
-                case(TYPE_UART):
-                case(TYPE_PS):
-                case(TYPE_FAN):
-                case(TYPE_VRM):
-                case(TYPE_USB):
-                case(TYPE_ETH):
-                case(TYPE_PANEL):
-                case(TYPE_FLASH):
-                case(TYPE_SEEPROM):
-                case(TYPE_TMP):
-                case(TYPE_GPIO_EXPANDER):
-                case(TYPE_POWER_SEQUENCER):
-                case(TYPE_RTC):
-                case(TYPE_FANCTLR):
-                case(TYPE_MFREFCLK):
-                case(TYPE_I2C_MUX):
-                case(TYPE_FSI):
-                case(TYPE_PSI):
-                case(TYPE_SBE):
-                case(TYPE_PPE):
-                case(TYPE_MCS):
-                case(TYPE_MCA):
-                case(TYPE_DMI):
-                case(TYPE_MBA):
-                case(TYPE_MCBIST):
-                case(TYPE_EX):
-                case(TYPE_OSCREFCLK):
-                case(TYPE_PCICLKENDPT):
-                case(TYPE_SYSREFCLKENDPT):
-                case(TYPE_LPCREFCLKENDPT):
-                case(TYPE_NA):
-                case(TYPE_TEST_FAIL):
-                case(TYPE_DCM):
-                case(TYPE_LAST_IN_RANGE):
-                case(TYPE_INVALID):
-                {
-                    // not supported. Assert to follow below.
-                    TRACFCOMP(g_trac_targeting, "getAttrTankTargetPosData(): Unsupported unit type found 0x%X",
-                              l_element.type);
-                    break;
-                }
-            } // end switch(l_element.type)
-        } // end for
-
-        // Check that the correct values are returned
-        _getAttrPtr(ATTR_CLASS, l_pAttr);
-        if (l_pAttr)
-        {
-            AttributeTraits<ATTR_CLASS>::Type & l_class =
-                *(reinterpret_cast<AttributeTraits<ATTR_CLASS>::Type *>(
-                    l_pAttr));
-            switch( l_class )
-            {
-                    // Expects no position info
-                case(TARGETING::CLASS_SYS):
-                    if ((o_pos != AttributeTank::ATTR_POS_NA) ||
-                        (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
-                        (o_node != AttributeTank::ATTR_NODE_NA))
-                    {
-                        targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
-                    }
-                    break;
-
-                    // Expects valid position+node
-                case(TARGETING::CLASS_CHIP):
-                case(TARGETING::CLASS_CARD):
-                case(TARGETING::CLASS_LOGICAL_CARD):
-                case(TARGETING::CLASS_DEV):
-                case(TARGETING::CLASS_BATTERY):
-                case(TARGETING::CLASS_LED):
-                case(TARGETING::CLASS_SP):
-                case(TARGETING::CLASS_ASIC):
-                    if ((o_pos == AttributeTank::ATTR_POS_NA) ||
-                        (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
-                        (o_node == AttributeTank::ATTR_NODE_NA))
-                    {
-                        targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
-                    }
-                    break;
-
-                    // Expects valid position+node+unit
-                case(TARGETING::CLASS_UNIT):
-                    if ((o_pos == AttributeTank::ATTR_POS_NA) ||
-                        (o_unitPos == AttributeTank::ATTR_UNIT_POS_NA) ||
-                        (o_node == AttributeTank::ATTR_NODE_NA))
-                    {
-                        TRACFCOMP(g_trac_targeting,"o_pos[%d], o_unitPos[%d] o_node[%d]", o_pos, o_unitPos, o_node);
-                        targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
-                    }
-                    break;
-
-                    // Expects valid node
-                case(TARGETING::CLASS_ENC):
-                    if ((o_pos != AttributeTank::ATTR_POS_NA) ||
-                        (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
-                        (o_node == AttributeTank::ATTR_NODE_NA))
-                    {
-                        targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
-                    }
-                    break;
-
-                    // Fail on nonsense values
-                case(TARGETING::CLASS_NA):
-                case(TARGETING::CLASS_MAX):
-                case(TARGETING::CLASS_INVALID):
-                    targAssert(GET_ATTR_TANK_TARGET_POS_DATA, ATTR_CLASS);
-            } // end swtich(l_class)
+        // Because ATTR_FAPINAME_NODE is uint8_t o_node will be set as 0xFF
+        // when the attribute is not set even though this attribute
+        // is actually only 4 bits so we translate here if needed
+        if (o_node == AttributeTraits<ATTR_FAPINAME_NODE>::FAPINAME_NODE_INVALID) {
+            o_node = AttributeTank::ATTR_NODE_NA;
         }
-        else
-        {
-            targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_CLASS);
-        }
+    } else {
+        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_FAPINAME_NODE);
     }
-    else
-    {
-        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_PHYS_PATH);
+
+    if (l_pAttr_pos) {
+        AttributeTraits<ATTR_FAPINAME_POS>::Type & l_fapiname_pos =
+            *(reinterpret_cast<AttributeTraits<ATTR_FAPINAME_POS>::Type *>(
+                l_pAttr_pos));
+
+        o_pos = l_fapiname_pos;
+    } else {
+        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_FAPINAME_POS);
+    }
+
+    if (l_pAttr_unitPos) {
+        AttributeTraits<ATTR_FAPINAME_UNIT>::Type & l_fapiname_unitPos =
+            *(reinterpret_cast<AttributeTraits<ATTR_FAPINAME_UNIT>::Type *>(
+                l_pAttr_unitPos));
+
+        o_unitPos = l_fapiname_unitPos;
+    } else {
+        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_FAPINAME_UNIT);
+    }
+
+    // Check that the correct values are returned
+    void * l_pAttr = NULL;
+    _getAttrPtr(ATTR_CLASS, l_pAttr);
+    if (l_pAttr) {
+        AttributeTraits<ATTR_CLASS>::Type &l_class =
+            *(reinterpret_cast<AttributeTraits<ATTR_CLASS>::Type *>(l_pAttr));
+
+        switch (l_class) {
+            // Expects no position info
+        case (TARGETING::CLASS_SYS):
+            if ((o_pos != AttributeTank::ATTR_POS_NA) ||
+                (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
+                (o_node != AttributeTank::ATTR_NODE_NA)) {
+                targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+            }
+            break;
+
+            // Expects valid position+node
+        case (TARGETING::CLASS_CHIP):
+        case (TARGETING::CLASS_CARD):
+        case (TARGETING::CLASS_LOGICAL_CARD):
+        case (TARGETING::CLASS_DEV):
+        case (TARGETING::CLASS_BATTERY):
+        case (TARGETING::CLASS_LED):
+        case (TARGETING::CLASS_SP):
+        case (TARGETING::CLASS_ASIC):
+            if ((o_pos == AttributeTank::ATTR_POS_NA) ||
+                (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
+                (o_node == AttributeTank::ATTR_NODE_NA)) {
+                targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+            }
+            break;
+
+            // Expects valid position+node+unit
+        case (TARGETING::CLASS_UNIT):
+            if ((o_pos == AttributeTank::ATTR_POS_NA) ||
+                (o_unitPos == AttributeTank::ATTR_UNIT_POS_NA) ||
+                (o_node == AttributeTank::ATTR_NODE_NA)) {
+                TRACFCOMP(g_trac_targeting,
+                          "o_pos[%d], o_unitPos[%d] o_node[%d]", o_pos,
+                          o_unitPos, o_node);
+                targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+            }
+            break;
+
+            // Expects valid node
+        case (TARGETING::CLASS_ENC):
+            if ((o_pos != AttributeTank::ATTR_POS_NA) ||
+                (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
+                (o_node == AttributeTank::ATTR_NODE_NA)) {
+                targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
+            }
+            break;
+
+            // Fail on nonsense values
+        case (TARGETING::CLASS_NA):
+        case (TARGETING::CLASS_MAX):
+        case (TARGETING::CLASS_INVALID):
+            targAssert(GET_ATTR_TANK_TARGET_POS_DATA, ATTR_CLASS);
+        } // end swtich(l_class)
+    } else {
+        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_CLASS);
     }
 }
 

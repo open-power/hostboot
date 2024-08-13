@@ -32,6 +32,7 @@
 //---------
 // Includes
 //---------
+#include <cstdint>
 #include <vector>
 #include <algorithm>
 #include <string.h>
@@ -101,6 +102,7 @@ TargStrToType CHIP_UNIT_TYPE_TARG_STR_TO_TYPE [] =
     {"nmmu"     , fapi2::TARGET_TYPE_NMMU       , TARGETING::TYPE_NMMU},
     {"pau"      , fapi2::TARGET_TYPE_PAU        , TARGETING::TYPE_PAU},
     {"pauc"     , fapi2::TARGET_TYPE_PAUC       , TARGETING::TYPE_PAUC},
+    {"mc"      , fapi2::TARGET_TYPE_MC        , TARGETING::TYPE_MC},
     {"LAST"     , 0                             , 0}
 };
 

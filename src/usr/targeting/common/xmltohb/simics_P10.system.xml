@@ -14046,7 +14046,15 @@
         <default>ocmb:k0:n0:s0:p00</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>0</default>
     </attribute>
     <attribute>
@@ -14136,7 +14144,15 @@
         <default>ocmb:k0:n0:s0:p01</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>1</default>
     </attribute>
     <attribute>
@@ -14226,7 +14242,15 @@
         <default>ocmb:k0:n0:s0:p02</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>2</default>
     </attribute>
     <attribute>
@@ -14314,7 +14338,15 @@
         <default>ocmb:k0:n0:s0:p03</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>3</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>3</default>
     </attribute>
     <attribute>
@@ -14402,7 +14434,15 @@
         <default>ocmb:k0:n0:s0:p04</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>4</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>4</default>
     </attribute>
     <attribute>
@@ -14490,7 +14530,15 @@
         <default>ocmb:k0:n0:s0:p05</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>5</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>5</default>
     </attribute>
     <attribute>
@@ -14578,7 +14626,15 @@
         <default>ocmb:k0:n0:s0:p06</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>6</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>6</default>
     </attribute>
     <attribute>
@@ -14666,7 +14722,15 @@
         <default>ocmb:k0:n0:s0:p07</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>7</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>7</default>
     </attribute>
     <attribute>
@@ -14754,7 +14818,15 @@
         <default>ocmb:k0:n0:s0:p08</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>8</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>8</default>
     </attribute>
     <attribute><!-- Force a FSP-only code path -->
@@ -14846,7 +14918,15 @@
         <default>ocmb:k0:n0:s0:p09</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>9</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>9</default>
     </attribute>
     <attribute>
@@ -14934,7 +15014,15 @@
         <default>ocmb:k0:n0:s0:p10</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>10</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>10</default>
     </attribute>
     <attribute>
@@ -15022,7 +15110,15 @@
         <default>ocmb:k0:n0:s0:p11</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>11</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>11</default>
     </attribute>
     <attribute>
@@ -15110,7 +15206,15 @@
         <default>ocmb:k0:n0:s0:p12</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>12</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>12</default>
     </attribute>
     <attribute>
@@ -15198,7 +15302,15 @@
         <default>ocmb:k0:n0:s0:p13</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>13</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>13</default>
     </attribute>
     <attribute>
@@ -15286,7 +15398,15 @@
         <default>ocmb:k0:n0:s0:p14</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>14</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>14</default>
     </attribute>
     <attribute>
@@ -15374,7 +15494,15 @@
         <default>ocmb:k0:n0:s0:p15</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
+        <default>15</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>15</default>
     </attribute>
     <attribute>
