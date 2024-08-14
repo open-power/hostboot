@@ -24,6 +24,7 @@
 # IBM_PROLOG_END_TAG
 import json
 from udparsers.helpers.errludP_Helpers import hexConcat, memConcat, intConcat, hexDump
+from udparsers.helpers.hostfw_trace import data_to_hexstring
 
 # Plugin normally installed in: /usr/lib/python3.11/site-packages/udparsers/b2600/b2600.py
 
@@ -267,7 +268,15 @@ tmgtElogSubsecTypes = {
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data)
-    return getattr(errludP_htmgt, tmgtElogSubsecTypes[subType])(*args)
+    if subType in tmgtElogSubsecTypes:
+        return getattr(errludP_htmgt, tmgtElogSubsecTypes[subType])(*args)
+    else:
+        d = dict()
+        d['Note']="b2600.py: Unsupported HTMGT sub-section type="+str(subType)+", version="+str(ver)+", length="+str(len(data))
+        # Dump binary data
+        d['Binary Data'] = data_to_hexstring(data, 0, len(data))
+        jsonStr = json.dumps(d, indent = 0)
+        return jsonStr
 
 if __name__ == "__main__":
     f = open("test2/htmgtUD", "rb").read()
