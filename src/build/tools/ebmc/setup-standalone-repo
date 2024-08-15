@@ -241,7 +241,7 @@ function update_customrc()
 function cleanup_repo ()
 {
     echo "Clobbering Hostboot repo..."
-    vexec make clobber
+    make clobber
     echo "Creating a new sandbox to work with..."
     yes | hb simsetup
 }
