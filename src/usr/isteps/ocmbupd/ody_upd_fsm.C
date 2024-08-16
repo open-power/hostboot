@@ -621,9 +621,9 @@ errlOwner capture_state_in_errlog(const errlSeverity_t i_sev,
                                     bits{56, 63}, i_state_pattern.state.ocmb_fw_up_to_date),
                         i_sw_callout);
 
-    errl->collectTrace(OCMBUPD_COMP_NAME);
-    errl->collectTrace(ISTEP_COMP_NAME);
-    errl->collectTrace(SBEIO_COMP_NAME);
+    errl->collectThreadTrace(OCMBUPD_COMP_NAME);
+    errl->collectThreadTrace(ISTEP_COMP_NAME);
+    errl->collectThreadTrace(SBEIO_COMP_NAME);
 
     const auto vsn_summary = i_ocmb->getAttrAsStdArr<ATTR_OCMB_CODE_LEVEL_SUMMARY>();
     char errl_vsn_details[sizeof(vsn_summary) + 32] = { };
@@ -1538,7 +1538,8 @@ errlHndl_t ocmbupd::set_ody_code_levels_state(Target* const i_ocmb)
         TRACF("set_ody_code_levels_state: check_for_odyssey_codeupdate_needed failed: "
               TRACE_ERR_FMT,
               TRACE_ERR_ARGS(errl));
-        errl->collectTrace(OCMBUPD_COMP_NAME);
+
+        errl->collectThreadTrace(OCMBUPD_COMP_NAME);
         break;
     }
 
