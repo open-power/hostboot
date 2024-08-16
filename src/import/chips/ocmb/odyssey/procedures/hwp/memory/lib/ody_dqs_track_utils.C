@@ -947,6 +947,30 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Handles the DQS track error
+/// @param [in] i_target OCMB target
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_dqs_track_error(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    // Log original error
+    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
+    // Unmask and set FIRs
+    fapi2::ReturnCode l_rc = mss::unmask::dqs_drift_track_error<mss::mc_type::ODYSSEY>(i_target);
+    // Set the attribute to the fail state so we don't run anymore
+    fapi2::ReturnCode l_rc_attr = FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_FAILED, i_target,
+                                  fapi2::ENUM_ATTR_ODY_DQS_TRACKING_FAILED_YES);
+
+    // Return the scom's RC if it's bad, else return the attr set's RC
+    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
+    {
+        return l_rc;
+    }
+
+    return l_rc_attr;
+}
+
+///
 /// @brief Ody DQS track procedure
 /// @param [in] i_target OCMB target
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
@@ -1131,21 +1155,9 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     return fapi2::FAPI2_RC_SUCCESS;
 
 fapi_try_exit:
-    // Log original error
-    fapi2::logError(fapi2::current_err, fapi2::FAPI2_ERRL_SEV_PREDICTIVE);
-    // Unmask and set FIRs
-    fapi2::ReturnCode l_rc = mss::unmask::dqs_drift_track_error<mss::mc_type::ODYSSEY>(i_target);
-    // Set the attribute to the fail state so we don't run anymore
-    fapi2::ReturnCode l_rc_attr = FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_FAILED, i_target,
-                                  fapi2::ENUM_ATTR_ODY_DQS_TRACKING_FAILED_YES);
 
-    // Return the scom's RC if it's bad, else return the attr set's RC
-    if (l_rc != fapi2::FAPI2_RC_SUCCESS)
-    {
-        return l_rc;
-    }
-
-    return l_rc_attr;
+    // Handles the DQS track errors
+    return handle_dqs_track_error(i_target);
 }
 
 } // end ns ody

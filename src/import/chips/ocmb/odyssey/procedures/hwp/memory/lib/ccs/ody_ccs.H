@@ -159,6 +159,15 @@ namespace workarounds
 {
 
 ///
+/// @brief Configures read/write address workaround bits in FARB2
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_port_rank the port rank to set
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode configure_ccs_farb2(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      const uint64_t i_port_rank);
+
+///
 /// @brief Sets up read/write address workaround bits in FARB2 if necessary
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_program the vector of instructions

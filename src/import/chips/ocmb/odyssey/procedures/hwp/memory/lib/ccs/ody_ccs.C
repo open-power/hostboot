@@ -986,6 +986,61 @@ namespace workarounds
 {
 
 ///
+/// @brief Configures read/write address workaround bits in FARB2
+/// @param[in] i_target the target on which to operate
+/// @param[in] i_port_rank the port rank to set
+/// @return FAPI2_RC_SUCCSS iff ok
+///
+fapi2::ReturnCode configure_ccs_farb2(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                      const uint64_t i_port_rank)
+{
+    typedef ccsTraits<mss::mc_type::ODYSSEY> TT;
+    bool l_is_half_dimm_mode = false;
+    fapi2::buffer<uint64_t> l_farb2;
+
+    // Set the workaround bits according to the rank we're targeting
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB2Q, l_farb2));
+
+    // M1 should be set to the port rank of the read/write commands since Odyssey only uses one DIMM per port
+    l_farb2.writeBit<scomt::ody::ODC_SRQ_MBA_FARB2Q_CFG_CCS_RDWR_SET_M1>(i_port_rank);
+    FAPI_DBG(TARGTIDFORMAT " read/write to rank %d, so setting RDWR_SET_M1 to %d", GENTARGTID(i_target), i_port_rank,
+             i_port_rank);
+
+    FAPI_TRY(mss::ody::half_dimm_mode(i_target, l_is_half_dimm_mode));
+
+    if (l_is_half_dimm_mode)
+    {
+        // For XMETA mode, M0 needs to be set to the DIMM half, AKA the selected channel (CHA=0, CHB=1)
+        constexpr uint64_t CHA = 0b1010;
+        constexpr uint64_t CHB = 0b0101;
+
+        fapi2::buffer<uint64_t> l_modeq;
+        uint8_t l_port_sel = 0;
+
+        FAPI_TRY( mss::getScom(i_target, TT::MODEQ_REG, l_modeq) );
+        l_modeq.extractToRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(l_port_sel);
+
+        // Error out if we have both DIMM halves (channels) selected in the CCS mode reg
+        // Note that we are currently selecting both channels for every CCS program so this
+        // will always fail for XMETA on programs we've set up in our lib code
+        FAPI_ASSERT(!((l_port_sel & CHA) && (l_port_sel & CHB)),
+                    fapi2::MSS_ODY_CCS_XMETA_BOTH_HALVES_SELECTED()
+                    .set_MC_TARGET(i_target)
+                    .set_PORT_SEL(l_port_sel),
+                    TARGTIDFORMAT
+                    " PORT_SEL bits select both halves in CCS MODEQ (0x%0x). Only one half can be selected at a time in XMETA mode",
+                    GENTARGTID(i_target), l_port_sel);
+
+        l_farb2.writeBit<scomt::ody::ODC_SRQ_MBA_FARB2Q_CFG_CCS_RDWR_SET_M0>(l_port_sel & CHB);
+    }
+
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB2Q, l_farb2));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Sets up read/write address workaround bits in FARB2 if necessary
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_program the vector of instructions
@@ -996,8 +1051,6 @@ fapi2::ReturnCode setup_ccs_rdwr(
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
     const ccs::program<mss::mc_type::ODYSSEY>& i_program)
 {
-    typedef ccsTraits<mss::mc_type::ODYSSEY> TT;
-
     if (i_ports.size() == 0)
     {
         // No ports? Just exit
@@ -1006,8 +1059,6 @@ fapi2::ReturnCode setup_ccs_rdwr(
 
     const auto& l_mc = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_ports[0]);
     uint64_t l_port_rank = NO_CHIP_SELECT_ACTIVE;
-    bool l_is_half_dimm_mode = false;
-    fapi2::buffer<uint64_t> l_farb2;
 
     // Check for read/write commands and record what rank they go to
     for (const auto& l_inst : i_program.iv_instructions)
@@ -1041,43 +1092,8 @@ fapi2::ReturnCode setup_ccs_rdwr(
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    // Set the workaround bits according to the rank we're targeting
-    FAPI_TRY(fapi2::getScom(l_mc, scomt::ody::ODC_SRQ_MBA_FARB2Q, l_farb2));
-
-    // M1 should be set to the port rank of the read/write commands since Odyssey only uses one DIMM per port
-    l_farb2.writeBit<scomt::ody::ODC_SRQ_MBA_FARB2Q_CFG_CCS_RDWR_SET_M1>(l_port_rank);
-    FAPI_DBG(TARGTIDFORMAT " read/write to rank %d, so setting RDWR_SET_M1 to %d", GENTARGTID(l_mc), l_port_rank,
-             l_port_rank);
-
-    FAPI_TRY(mss::ody::half_dimm_mode(l_mc, l_is_half_dimm_mode));
-
-    if (l_is_half_dimm_mode)
-    {
-        // For XMETA mode, M0 needs to be set to the DIMM half, AKA the selected channel (CHA=0, CHB=1)
-        constexpr uint64_t CHA = 0b1010;
-        constexpr uint64_t CHB = 0b0101;
-
-        fapi2::buffer<uint64_t> l_modeq;
-        uint8_t l_port_sel = 0;
-
-        FAPI_TRY( mss::getScom(l_mc, TT::MODEQ_REG, l_modeq) );
-        l_modeq.extractToRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(l_port_sel);
-
-        // Error out if we have both DIMM halves (channels) selected in the CCS mode reg
-        // Note that we are currently selecting both channels for every CCS program so this
-        // will always fail for XMETA on programs we've set up in our lib code
-        FAPI_ASSERT(!((l_port_sel & CHA) && (l_port_sel & CHB)),
-                    fapi2::MSS_ODY_CCS_XMETA_BOTH_HALVES_SELECTED()
-                    .set_MC_TARGET(l_mc)
-                    .set_PORT_SEL(l_port_sel),
-                    TARGTIDFORMAT
-                    " PORT_SEL bits select both halves in CCS MODEQ (0x%0x). Only one half can be selected at a time in XMETA mode",
-                    GENTARGTID(l_mc), l_port_sel);
-
-        l_farb2.writeBit<scomt::ody::ODC_SRQ_MBA_FARB2Q_CFG_CCS_RDWR_SET_M0>(l_port_sel & CHB);
-    }
-
-    FAPI_TRY(fapi2::putScom(l_mc, scomt::ody::ODC_SRQ_MBA_FARB2Q, l_farb2));
+    // Configures the FARB2 register
+    FAPI_TRY(configure_ccs_farb2(l_mc, l_port_rank));
 
 fapi_try_exit:
     return fapi2::current_err;

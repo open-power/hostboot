@@ -535,6 +535,13 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Handles the DQS track error
+/// @param [in] i_target OCMB target
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode handle_dqs_track_error(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
 /// @brief Ody DQS track procedure
 /// @param [in] i_target OCMB target
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful

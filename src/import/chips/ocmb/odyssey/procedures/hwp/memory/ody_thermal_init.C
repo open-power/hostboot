@@ -37,6 +37,7 @@
 #include <ody_thermal_init.H>
 #include <lib/power_thermal/ody_thermal_init_utils.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/ody_half_dimm_dqs_track_utils.H>
 
 extern "C"
 {
@@ -71,6 +72,12 @@ extern "C"
 
         // Init SPPE polling attributes
         FAPI_TRY(mss::ody::thermal::init_sppe_polling_attr(i_target));
+
+        // Sets up the initial CCS and MCBIST test for half-dimm mode
+        // Half-DIMM mode's DQS drift track is run differently than full-dimm mode
+        // In half-DIMM mode, the CCS routine is setup first, then kicked off later
+        // Note: the function will take care of skipping this routine in full-DIMM mode
+        FAPI_TRY(mss::ody::setup_ccs_initial(i_target));
 
     fapi_try_exit:
         return fapi2::current_err;

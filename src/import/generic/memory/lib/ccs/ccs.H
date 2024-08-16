@@ -493,6 +493,35 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Runs CCS loaded in to the CCS engine via the MCBIST engine
+/// @tparam MC the memory controller type running CCS
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @param[in] i_target the target to effect
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T>
+fapi2::ReturnCode run_inst_via_mcbist(const fapi2::Target<T>& i_target, const bool i_process_errors = true)
+{
+    mss::mcbist::program<MC> l_program;
+
+    // Push back a ccsexec subtest (0x1111)
+    l_program.iv_subtests.push_back( mss::mcbist::ccsexec_subtest<MC, T>() );
+
+    // Setup the polling based on lab experiments
+    // Looks like tests run with 5 clock cycles or 6ns for polling, rounding to 10ns
+    // Unsure if this will hold for all of CCS, but its a starting point
+    l_program.iv_poll.iv_initial_delay = 10 * mss::DELAY_1NS;
+    l_program.iv_poll.iv_delay = 10 * mss::DELAY_1NS;
+    l_program.iv_poll.iv_poll_count = 10;
+
+    // Kick it off, wait for a result
+    FAPI_TRY( mss::mcbist::run<MC>(i_target, l_program, i_process_errors) );
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Execute CCS loaded in to the CCS engine via the MCBIST engine
 /// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction

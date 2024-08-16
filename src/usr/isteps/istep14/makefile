@@ -101,6 +101,7 @@ OBJS += exp_mss_thermal_init.o
 OBJS += ody_dts_read.o
 OBJS += ody_thermal_init.o
 OBJS += ody_thermal_init_utils.o
+OBJS += ody_half_dimm_dqs_track_utils.o
 OBJS += p10_adu_setup.o
 OBJS += p10_getputmemproc_utils.o
 OBJS += p10_getputsram_utils.o

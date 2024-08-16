@@ -4240,10 +4240,12 @@ fapi2::ReturnCode read_rb_array(const fapi2::Target<T>& i_target,
 /// @tparam TT the mcbistTraits associated with T
 /// @param[in] i_target the target to effect
 /// @param[in] i_program, the mcbist program which is executing
+/// @param[in] i_process_errors true if errors should be processed, defaulted to true
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
 template<  mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T> >
-fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_program )
+fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_program,
+                        const bool i_process_errors = true )
 {
     using ET = mss::mcbistMCTraits<MC>;
     fapi2::buffer<uint64_t> l_status;
@@ -4273,6 +4275,13 @@ fapi2::ReturnCode poll( const fapi2::Target<T>& i_target, const program<MC>& i_p
     // The control register has a bit for done-and-happy and a bit for done-and-unhappy
     if ( ((l_status & l_done) == l_done) || ((l_status & l_fail) == l_fail) )
     {
+        // If the user wants to skip error processing, then exit
+        if(!i_process_errors)
+        {
+            FAPI_INF_NO_SBE("MCBIST completed, skipping processing errors for " TARGTIDFORMAT, TARGTID);
+            return fapi2::current_err;
+        }
+
         FAPI_INF_NO_SBE("MCBIST completed, processing errors for " TARGTIDFORMAT, TARGTID);
 
         // We're done. It doesn't mean that there were no errors.
@@ -4322,20 +4331,18 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Execute the mcbist program
+/// @brief Loads the mcbist program
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
 /// @tparam TT the mcbistTraits associated with T
+/// @tparam ET the mcbistTraits associated with MC only
 /// @param[in] i_target the target to effect
 /// @param[in] i_program the mcbist program to execute
 /// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T>, typename ET = mcbistMCTraits<MC> >
-fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& i_program )
+fapi2::ReturnCode load_program( const fapi2::Target<T>& i_target, const program<MC>& i_program )
 {
-    fapi2::buffer<uint64_t> l_status;
-    bool l_poll_result = false;
-    poll_parameters l_poll_parameters;
 
     // Init the fapi2 return code
     fapi2::current_err = fapi2::FAPI2_RC_SUCCESS;
@@ -4376,8 +4383,32 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& 
     // Always do this last so the action file triggers see the other bits set
     FAPI_TRY( load_mcbmr<MC>(i_target, i_program) );
 
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Runs the mcbist engine
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// @tparam ET the mcbistTraits associated with MC only
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist program to execute
+/// @param[in] i_process_errors true if errors should be processed, defaulted to true
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T>, typename ET = mcbistMCTraits<MC> >
+fapi2::ReturnCode run( const fapi2::Target<T>& i_target,
+                       const program<MC>& i_program,
+                       const bool i_process_errors = true )
+{
+    fapi2::buffer<uint64_t> l_status;
+    bool l_poll_result = false;
+    poll_parameters l_poll_parameters;
+
     // Start the engine, and then poll for completion
-    FAPI_TRY(start_stop<MC>(i_target, mss::START));
+    FAPI_TRY(start_stop<MC>( i_target, mss::START ));
 
     // Verify that the in-progress bit has been set, so we know we started
     // Don't use the program's poll as it could be a very long time. Use the default poll.
@@ -4398,8 +4429,31 @@ fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& 
     // If the user asked for async mode, we can leave. Otherwise, poll and check for errors
     if (!i_program.iv_async)
     {
-        return mcbist::poll<MC>(i_target, i_program);
+        return mcbist::poll<MC>(i_target, i_program, i_process_errors);
     }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Execute the mcbist program
+/// @tparam MC the mc type of the T
+/// @tparam T the fapi2::TargetType - derived
+/// @tparam TT the mcbistTraits associated with T
+/// @tparam ET the mcbistTraits associated with MC only
+/// @param[in] i_target the target to effect
+/// @param[in] i_program the mcbist program to execute
+/// @return fapi2::ReturnCode, FAPI2_RC_SUCCESS iff OK
+///
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = mcbistTraits<MC, T>, typename ET = mcbistMCTraits<MC> >
+fapi2::ReturnCode execute( const fapi2::Target<T>& i_target, const program<MC>& i_program )
+{
+    // Loads the MCBIST program
+    FAPI_TRY(load_program<MC>( i_target, i_program ));
+
+    // Runs the MCBIST program
+    FAPI_TRY(run<MC>( i_target, i_program ));
 
 fapi_try_exit:
     return fapi2::current_err;

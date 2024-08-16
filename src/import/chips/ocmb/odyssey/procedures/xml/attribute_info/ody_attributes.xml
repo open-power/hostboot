@@ -191,6 +191,22 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_HALF_DIMM_TARGET</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            The channel, port, rank, and MR targetting for the half-DIMM DQS drift track procedure are encoded in this attr
+            0bxxxxPCRM
+            M = the MR on which to run 0 for LSB 1 for MSB
+            R = rank
+            C = channel in the same way as noted by the CCS register
+            P = the port on which to run
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_DQS_TRACKING_PERIOD</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
