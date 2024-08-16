@@ -749,7 +749,10 @@
   </attribute>
 
   <attribute>
-    <description>Whether or not the core is marked as a spare. 0=Not spare 1=spare</description>
+    <description>
+       Whether or not the core is marked to be used as a spare.
+       0=Not spare 1=spare
+    </description>
     <id>CORE_IS_SPARE</id>
     <persistency>volatile-zeroed</persistency>
     <readable/>
@@ -8219,6 +8222,20 @@
 
   <attribute>
     <description>
+       Whether or not the core has been replaced by a spare due to an error.
+       0=Not spared, 1=spared out due to error.
+    </description>
+    <id>REPLACED_BY_SPARE</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
         Used to tell if a resource is critical to perform an IPL. If this
         attribute is set to 1 and the target is deconfigured, the IPL MUST
         terminate.
@@ -8859,10 +8876,27 @@
 
   <attribute>
     <description>
-       The number of spare cores on this proc chip read from partial good on EQ chiplets.
+       The number of available spare cores on this proc chip read from partial
+       good on EQ chiplets.  Set once during IPL then never modified.
        Value is in terms of SMT4 (small) cores regardless of fused mode.
     </description>
     <id>SPARE_CORES</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+  </attribute>
+
+  <attribute>
+    <description>
+       The number of spareable core errors that have been seen on this proc
+       chip in the current IPL.  Once this value requals ATTR_SPARE_CORES
+       there are no more spares available on this chip.
+       Value is in terms of SMT4 (small) cores regardless of fused mode.  
+    </description>
+    <id>SPARE_CORES_DEPLOYED</id>
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>

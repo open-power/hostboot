@@ -858,6 +858,9 @@
       <id>SPARE_CORES</id>
     </attribute>
     <attribute>
+      <id>SPARE_CORES_DEPLOYED</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <id>reserved</id>
@@ -3085,6 +3088,9 @@
         </field>
       </default>
       <id>PARENT_DECONFIG_RULES</id>
+    </attribute>
+    <attribute>
+      <id>REPLACED_BY_SPARE</id>
     </attribute>
     <attribute>
       <default>CORE</default>
