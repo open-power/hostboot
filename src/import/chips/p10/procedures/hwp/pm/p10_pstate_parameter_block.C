@@ -6440,7 +6440,7 @@ fapi2::ReturnCode PlatPmPPB::update_vrt(
         b_output_trace = true;
     }
 
-    if ( iv_extended_freq_enable ||  iv_attrs.attr_extended_freq_mode)
+    if ( iv_extended_freq_enable )
     {
         l_up_lift = 12;
     }

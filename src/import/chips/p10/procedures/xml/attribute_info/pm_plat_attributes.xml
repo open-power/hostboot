@@ -3705,7 +3705,7 @@
      USE_RDP  = 3
      </enum>
     <platInit/>
-    <initToZero/>
+    <default>NEW_FREQ</default>
     <overrideOnly/>
     <group>wof</group>
   </attribute>
