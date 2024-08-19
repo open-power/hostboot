@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -429,6 +429,27 @@ void set_sys_clock_deconfig_state_attribute(const TARGETING::ATTR_MASTER_MBOX_SC
 }
 #endif
 
+void resetSpareCoreAttrs(Target * i_chip)
+{
+    // Reset the number of spares deployed for the chip.
+    i_chip->setAttr<ATTR_SPARE_CORES_DEPLOYED>(0);
+    // Notably, DO NOT reset ATTR_NUM_SPARES for this chip because ATTR_PG
+    // will not be re-read in MPIPL
+
+    // Get all the cores for this chip and reset their attrs
+    for (const auto & fc : composable(getChildChiplets)(i_chip, TYPE_FC, false))
+    {
+        fc->setAttr<ATTR_CORE_IS_SPARE>(0);
+        for (const auto & core : composable(getChildChiplets)(fc, TYPE_CORE, false))
+        {
+            core->setAttr<ATTR_CORE_IS_SPARE>(0);
+            core->setAttr<ATTR_REPLACED_BY_SPARE>(0);
+        }
+    }
+
+
+}
+
 /*
  * @brief Initialize any attributes that need to be set early on
  */
@@ -612,8 +633,8 @@ static void initializeAttributes(TargetService& i_targetService,
             auto l_sbeExtend =
                 l_nodeTarget->getAttr<TARGETING::ATTR_SBE_HANDLES_SMP_TPM_EXTEND>();
 
-            //Assemble list of functional procs and zero out virtual address values
-            //to ensure they get set again this IPL
+            //Assemble list of functional procs and zero out values which need to get set again
+            // this IPL
             TARGETING::PredicateCTM l_chipFilter(CLASS_CHIP, TYPE_PROC);
             TARGETING::PredicateIsFunctional l_functional;
             TARGETING::PredicatePostfixExpr l_functionalChips;
@@ -627,6 +648,7 @@ static void initializeAttributes(TargetService& i_targetService,
 
             for (auto & l_chip : l_chips)
             {
+                // zero out virtual address values
                 l_chip->setAttr<ATTR_XSCOM_VIRTUAL_ADDR>(0);
                 l_chip->setAttr<ATTR_HOMER_VIRT_ADDR>(0);
                 l_chip->setAttr<ATTR_HB_INITIATED_PM_RESET>
@@ -665,6 +687,16 @@ static void initializeAttributes(TargetService& i_targetService,
                     // targets that are not the master proc chip
                     l_chip->setAttr<ATTR_PROC_SBE_MASTER_CHIP>(0);
                 }
+
+                // Need to clobber most of the spare core attributes for this chip and its FC/COREs
+                // so the selection algorithm can re-run with a fresh start. Presently, HDAT
+                // communicates which cores are spare but not if those spares were
+                // ever deployed. So PHYP and others will not react to the existing
+                // state of these values and could erroneously switch off deployed spares.
+                // By resetting and re-running this allows spares to be chosen in a way that
+                // doesn't require excess communication about prior states.
+                resetSpareCoreAttrs(l_chip);
+
             }
 
             //Assemble list of tpms and zero out some values

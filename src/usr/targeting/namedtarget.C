@@ -97,11 +97,8 @@ const TARGETING::Target *   getBootCore( bool i_functional )
                        "found boot core: 0x%x, PIR=0x%x :",
                        l_coreId,
                        l_corePIR.word  );
-            //EntityPath l_path;
-            //l_path  =   l_core->getAttr<ATTR_PHYS_PATH>();
-            //l_path.dump();
 
-            l_bootCore    =   l_core ;
+            l_bootCore = l_core ;
             break;
         }
 

@@ -1091,7 +1091,7 @@ public:
                             get_huid(core));
                 }
             }
-            
+
 
         }
 

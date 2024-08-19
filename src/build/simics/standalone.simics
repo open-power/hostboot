@@ -203,8 +203,8 @@ if ($hostboot_profile == FALSE) {
 
 # We are going to, for the second processor:
 # 1. Save the MVPD SEEPROM contents to a file
-# 2. Use a python function (get_eq_pg_records) to parse out the EQ PG rows.
-# 3. Modify some of the EQ entries to add spare cores in the file.
+# 2. Use a python function (get-seeprom) to parse out the EQ PG rows.
+# 3. Modify some of the EQ entries to add spare cores (set_spares) in the file.
 # 4. Save the modified file over the original.
 
 if( $hb_nospares == "0" ) {

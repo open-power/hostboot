@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -504,13 +504,16 @@ public:
     void clearFcoDeconfigures();
 
     /**
-     * @brief Processes the Field Core Override attribute
+     * @brief Processes the Field Core Override attribute and additionally handles spare
+     *        core selection since spare core algorithm needs to know FCO selections to
+     *        make its decisions and possibly modify FCO selections.
      *
      * Called by HWAS as part of initial IPL steps.
      *
      * if the Field Core Override is non-zero, then functional cores will
      * be made non-functional, until the number of functional cores is equal
-     * to the FCO value;
+     * to the FCO value
+     *
      *
      * @return errlHndl_t. Error log handle.
      */

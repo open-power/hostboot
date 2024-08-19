@@ -362,7 +362,8 @@ def setMinFileSize(io_filename, i_min_size):
 
 
 ###########################################################################
-# Turn on spare core bits in PG keyword
+# Set spare core bits in PG keyword. Note that PG bits are inverted so
+# a '1' is unset and a '0' is set.
 # @param vpd_path - Path to file containing the meas/mvpd/ks SEEPROM data
 # @param num_spares - Number of spare cores to enable
 ###########################################################################

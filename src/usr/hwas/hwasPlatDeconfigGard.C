@@ -1643,9 +1643,25 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
             // Note that there are some testcases that erroneously cause this.
             if( numSpareCores > cores.size() )
             {
-                HWAS_INF("Not enough cores present (%d) to satisfy requested spares (%d)",
+                HWAS_INF("selectSpareCores: Not enough cores present (%d) to satisfy requested spares (%d)",
                          cores.size(),
                          numSpareCores);
+                /*@
+                 * @errortype
+                 * @moduleid     MOD_SELECT_SPARE_CORES
+                 * @reasoncode   RC_NOT_ENOUGH_CORES
+                 * @devdesc      Chip didn't have enough present cores to satisfy requested number of spares
+                 * @custdesc     Host Firmware encountered an internal error
+                 * @userdata1         Chip Huid
+                 * @userdata2[00:31]  Number of Cores
+                 * @userdata2[32:64]  Number of Spares
+                 */
+                errlHndl_t l_errl = hwasError(ERRORLOG::ERRL_SEV_INFORMATIONAL,
+                                               HWAS::MOD_SELECT_SPARE_CORES,
+                                               HWAS::RC_NOT_ENOUGH_CORES,
+                                               get_huid(chip),
+                                               TWO_UINT32_TO_UINT64(cores.size(), numSpareCores));
+                errlCommit(l_errl, HWAS_COMP_ID);
                 // downgrade the number to how many cores we have
                 numSpareCores = cores.size();
                 // if there are no cores, then we can't have any spares
@@ -1657,21 +1673,27 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
 
             /*
                Selection Priorities
-               1. Choose a present non-functional core, mark as spare. (Always worst)
-               2. Save a core/fc deconfigByFco, mark as spare. (Best of worst)
-               3. Choose a functional core, mark as spare. (Always worst)
+               1. Choose a present non-functional core, mark as spare.
+                   * Always worst option, meaning lowest number in FCO deconfig priorities
+               2. Save a core/fc deconfigByFco, mark as spare.
+                   * Best of worst option, meaning highest number in FCO deconfig priorities. That way, if FCO needs
+                   the spare it's the next optimal unit to use based on the priority list.
+               3. Choose a functional core, mark as spare. Always worst, same as 1.
 
-               Sort by
-                P/NF Cores
-                    * Ties: Sorted by deconfig priority
-                P/F/FCO Deconfig
-                    * Ties: Sorted by reverse deconfig priority
-                P/F
-                    * Ties: Sorted by deconfig priority
+               These priorities are in this order because they handle special cases first and then once those are
+               resolved (if existing at all) then the "No Special Case" priority is hit last.
+               Given those priorities, sort by:
+                1. Present Non-Functional Cores
+                    * Ties: Sorted by deconfig priority (low-to-high)
+                2. Present Functional Cores markedForFcoDeconfig
+                    * Ties: Sorted by reverse deconfig priority (high-to-low)
+                3. Present Functional Cores
+                    * Ties: Sorted by deconfig priority (low-to-high)
             */
             std::sort(cores.begin(), cores.end(),
                     [&](Target * coreA, Target * coreB)
                     {
+                        // Priority 1: Present non-functional cores
                         if ( ! (coreA->getAttr<ATTR_HWAS_STATE>().functional) )
                         {
                             if ( ! (coreB->getAttr<ATTR_HWAS_STATE>().functional) )
@@ -1693,6 +1715,7 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
                             // A functional, B non-functional. B is before A.
                             return false;
                         }
+                        // Priority 2: FCO enabled
                         else if (fcoEnabled)
                         {
                             assert(procIterator != io_fcoData.procFcoMetadataList.end(),
@@ -1742,12 +1765,14 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
                                 // taking cores away from FCO to mark as spare.
                                 return false;
                             }
+                            // This branch handles Priority 3 when FCO is enabled
                             else
                             {
                                 // Both A and B are functional and not marked for FCO deconfig. Use deconfig priority
                                 return getCoreFcoPriority(fcoCoreA) < getCoreFcoPriority(fcoCoreB);
                             }
                         }
+                        // Priority 3: Present Functional Cores
                         else
                         {
                             // A and B are functional. Use deconfig priority
@@ -1787,7 +1812,7 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
                 if (fcoEnabled && core->getAttr<ATTR_HWAS_STATE>().functional)
                 {
                     // The core was functional which means FCO would have considered it a candidate for deconfig to
-                    // fulfill FCO number. Need to find the core and unset the deconfig flag if it was set since this
+                    // fulfill FCO number. Need to find the core and unset markedForFcoDeconfig if it was set since this
                     // core was chosen as spare.
                     HWAS_INF("selectSpareCores: FCO enabled checking for FCO deconfig of chosen SPARE");
                     if (procIterator != io_fcoData.procFcoMetadataList.end())
@@ -1807,7 +1832,8 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
                             FCO::coreFcoMetadata_t & fcoCore = *(coreIterator->get());
                             if (fcoCore.markedForFcoDeconfig)
                             {
-                                HWAS_INF("selectSpareCores: SPARE was marked for FCO deconfig, reclaiming...");
+                                HWAS_INF("selectSpareCores: SPARE was marked for FCO deconfig, reclaiming CORE[0x%X]...",
+                                         get_huid(fcoCore.target));
                                 // Reclaim the deconfiged core as a spare.
                                 fcoCore.markedForFcoDeconfig = false;
                                 if (isFusedCoreMode)
@@ -1815,7 +1841,8 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
                                     // Reclaim the sibling core as well since fused cores cannot be broken up by
                                     // deconfigs.
                                     fcoCore.fcSiblingCore->markedForFcoDeconfig = false;
-                                    HWAS_INF("selectSpareCores: fused_mode detected, reclaiming sibling core...");
+                                    HWAS_INF("selectSpareCores: fused_mode detected, reclaiming sibling CORE[0x%X]...",
+                                            get_huid(fcoCore.fcSiblingCore->target));
                                 }
                             }
                         }
