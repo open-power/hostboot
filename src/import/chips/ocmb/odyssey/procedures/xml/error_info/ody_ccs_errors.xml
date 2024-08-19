@@ -277,4 +277,29 @@
     </gard>
   </hwpError>
 
+  <hwpError>
+    <sbeError/>
+    <rc>RC_MSS_ODY_DQS_DRIFT_TRACK_NO_HALF_DIMM</rc>
+    <description>
+        Odyssey automatic DQS drift track function does not support XMETA mode.
+    </description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>HALF_DIMM_MODE</ffdc>
+    <ffdc>OVERRIDE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
 </hwpErrors>

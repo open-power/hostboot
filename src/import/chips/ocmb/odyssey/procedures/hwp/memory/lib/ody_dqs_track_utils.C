@@ -47,6 +47,7 @@
 #include <lib/mcbist/ody_mcbist_traits.H>
 #include <lib/ccs/ody_ccs.H>
 #include <lib/phy/ody_phy_access.H>
+#include <lib/ody_attribute_accessors_manual.H>
 #include <generic/memory/lib/ccs/ccs_ddr5_commands.H>
 #include <lib/power_thermal/ody_thermal_init_utils.H>
 #include <generic/memory/lib/utils/poll.H>
@@ -969,6 +970,9 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
     uint8_t l_temp_trigger = 0;
     uint8_t l_chosen_sensor_index = 0;
     uint8_t l_has_failed = 0;
+    uint8_t l_half_dimm_attr = 0;
+    uint8_t l_override_attr = 0;
+    bool l_half_dimm_mode = 0;
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_TEMP_THRESHOLD, i_target, l_threshold));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_COUNT_SINCE_LAST_RECAL, i_target, l_count));
@@ -982,6 +986,18 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
                         GENTARGTID(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    // Return an error if we're in half-DIMM mode, since we cannot run autonomously in that case
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, i_target, l_half_dimm_attr));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, i_target, l_override_attr));
+    FAPI_TRY(mss::ody::half_dimm_mode_helper(i_target, l_half_dimm_attr, l_override_attr, l_half_dimm_mode));
+    FAPI_ASSERT(!l_half_dimm_mode,
+                fapi2::MSS_ODY_DQS_DRIFT_TRACK_NO_HALF_DIMM().
+                set_MC_TARGET(i_target).
+                set_HALF_DIMM_MODE(l_half_dimm_attr).
+                set_OVERRIDE(l_override_attr),
+                GENTARGTIDFORMAT " automatic DQS drift track cannot run in half-DIMM mode (mode:0x%02X override:0x%02X",
+                GENTARGTID(i_target), l_half_dimm_attr, l_override_attr);
 
     // Get the temperature delta and the current temperature values, both in centi-degrees
     FAPI_TRY(ody_calc_temp_sensors_delta(i_target, l_temp_delta, l_curr_temp_values, l_chosen_sensor_index));
