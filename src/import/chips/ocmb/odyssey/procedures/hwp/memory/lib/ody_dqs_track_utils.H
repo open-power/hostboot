@@ -28,7 +28,7 @@
 /// @file ody_dqs_track_utils.H
 /// @brief  Tool to track and recal DQS
 ///
-// *HWP HWP Owner: David J. Chung <dj.chung@ibm.com>
+// *HWP HWP Owner: Geetha Pisapati <Geetha.Pisapati@ibm.com>
 // *HWP HWP Backup: Louis Stermole <stermole@us.ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
