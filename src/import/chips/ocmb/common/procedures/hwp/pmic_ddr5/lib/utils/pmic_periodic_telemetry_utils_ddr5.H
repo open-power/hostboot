@@ -160,8 +160,9 @@ inline fapi2::ReturnCode suspend_dqs_track(const fapi2::Target<fapi2::TARGET_TYP
     FAPI_TRY(l_rc);
 #endif
 
-    // Wait two polling cycles to ensure any currently-running recal is complete
-    fapi2::delay(l_tsns_period_ms * l_dqs_period * mss::DELAY_1MS * 2, 200);
+    // Wait for few polling cycles to ensure any currently-running recal is complete
+    // Found this delay via experimentation. This value had the best chance of avoiding contention
+    fapi2::delay((l_tsns_period_ms * l_dqs_period * mss::DELAY_1MS) / 2, 200);
 
 fapi_try_exit:
     return fapi2::current_err;

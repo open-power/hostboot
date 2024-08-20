@@ -30,7 +30,7 @@
 /// @brief DQS tracking utils
 ///
 // *HWP HWP Owner: Louis Stermole <stermole@us.ibm.com>
-// *HWP HWP Backup: David J Chung <dj.chung@ibm.com>
+// *HWP HWP Backup: Geetha Pisapati <Geetha.Pisapati@ibm.com>
 // *HWP Team: Memory
 // *HWP Level: 3
 // *HWP Consumed by: HB:FSP
