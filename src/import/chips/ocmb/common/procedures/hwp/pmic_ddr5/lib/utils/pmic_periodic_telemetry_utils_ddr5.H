@@ -65,6 +65,9 @@ static constexpr uint8_t NUM_BITS_IN_BYTE = 8;
 
 static constexpr uint8_t NUM_DTS_LOG_ENTRIES = 5;
 
+static constexpr uint8_t RESET_RECAL_COUNT = 0;
+static constexpr uint8_t DONT_RESET_RECAL_COUNT = 1;
+
 ///
 /// @brief Read and store serial number and CCIN number
 ///
@@ -231,10 +234,12 @@ fapi_try_exit:
 /// @brief Read and store DQS drift tracking data
 ///
 /// @param[in] i_ocmb_target OCMB target info struct
+/// @param[in] i_reset_dqs_recal_count reset DQS recal count
 /// @param[in,out] io_dqs_tracking_log DQS drift track log array
 /// @return DQS tracking recal count
 ///
 uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                                     const uint8_t i_reset_dqs_recal_count,
                                      uint64_t io_dqs_tracking_log[]);
 
 ///
@@ -331,11 +336,13 @@ void set_i2c_error_states(mss::pmic::ddr5::target_info_redundancy_ddr5& io_targe
 ///
 /// @brief Read and store ADC/PMIC/DT
 ///
+/// @param[in] i_reset_dqs_recal_count reset DQS recal count
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_periodic_tele_info periodic telemetry struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+fapi2::ReturnCode collect_periodic_tele_data(const uint8_t i_reset_dqs_recal_count,
+        mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
 
 ///
@@ -354,11 +361,13 @@ fapi2::ReturnCode send_struct(const uint8_t* i_info,
 /// @brief Runtime periodic telemetry data collection helper for 4U parts
 ///
 /// @param[in] i_ocmb_target ocmb target
+/// @param[in] i_reset_dqs_recal_count reset DQS recal count
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_periodic_tele_info periodic telemetry struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode pmic_periodic_telemetry_ddr5_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        const uint8_t i_reset_dqs_recal_count,
         mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info);
 
@@ -376,12 +385,13 @@ fapi2::ReturnCode collect_periodic_tele_data_2U(const fapi2::Target<fapi2::TARGE
 /// @brief Runtime periodic telemetry data collection helper for 2U parts
 ///
 /// @param[in] i_ocmb_target ocmb target
-/// @param[in,out] io_target_info PMIC and DT target info struct
-/// @param[in,out] io_periodic_tele_info periodic telemetry struct
+/// @param[in] i_reset_dqs_recal_count reset DQS recal count
+/// @param[in,out] io_info periodic telemetry struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode pmic_periodic_telemetry_ddr5_2U_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_ocmb_target,
+        const uint8_t i_reset_dqs_recal_count,
         mss::pmic::ddr5::periodic_2U_telemetry_data& io_info);
 
 #endif

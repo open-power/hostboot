@@ -1310,7 +1310,8 @@ fapi2::ReturnCode health_check_ddr5(mss::pmic::ddr5::target_info_redundancy_ddr5
        || (l_n_mode == mss::pmic::ddr5::aggregate_state::N_MODE_POSSIBLE))
     {
         collect_additional_n_mode_data(io_target_info, io_additional_info);
-        collect_periodic_tele_data(io_target_info, io_periodic_tele_info);
+        // Do not reset the recal count. This needs to happen only during 24 hours periodic tele call
+        collect_periodic_tele_data(DONT_RESET_RECAL_COUNT, io_target_info, io_periodic_tele_info);
     }
     else
     {

@@ -962,7 +962,9 @@ fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmi
     uint8_t l_number_bytes_to_send = 0;
 
     // Run Telemetry to reset/clear various trackers
-    collect_periodic_tele_data(io_target_info, l_periodic_telemetry_data);
+    // Resetting the recal count won't make any difference here as thermal init
+    // is not complete at this point
+    collect_periodic_tele_data(RESET_RECAL_COUNT, io_target_info, l_periodic_telemetry_data);
 
     // Calling health check 3 times here to ensure if any PMICs had any issue during IPL, they would be
     // attempted to recover here and would not be in n_mode if not for major issues

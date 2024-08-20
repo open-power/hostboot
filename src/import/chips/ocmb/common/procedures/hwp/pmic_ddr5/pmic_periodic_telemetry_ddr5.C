@@ -49,13 +49,16 @@ extern "C"
     ///
     /// @param[in] i_ocmb_target ocmb target
     /// @param[out] o_data hwp_data_ostream of struct information
+    /// @param[in] i_reset_dqs_recal_count reset DQS recal count. This count should be
+    ///            reset every 24 hours only. Others calling this HWP otherwise have to
+    ///            make sure to pass DONT_RESET_COUNT in order to keep the count as is
     /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
     /// @note The functional flow of the periodic telemetry tool has been take from
     ///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
     ///       document provided by the Power team
     ///
     fapi2::ReturnCode pmic_periodic_telemetry_ddr5(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-            fapi2::hwp_data_ostream& o_data)
+            fapi2::hwp_data_ostream& o_data, const uint8_t i_reset_dqs_recal_count)
     {
         FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Running pmic_periodic_telemetry HWP", GENTARGTID(i_ocmb_target));
         fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
@@ -71,7 +74,7 @@ extern "C"
         {
             mss::pmic::ddr5::periodic_2U_telemetry_data l_info_2u;
 
-            FAPI_TRY(pmic_periodic_telemetry_ddr5_2U_helper(i_ocmb_target, l_info_2u));
+            FAPI_TRY(pmic_periodic_telemetry_ddr5_2U_helper(i_ocmb_target, i_reset_dqs_recal_count, l_info_2u));
             FAPI_TRY(send_struct(reinterpret_cast<uint8_t*>(&l_info_2u), sizeof(l_info_2u), o_data));
         }
         else
@@ -81,7 +84,7 @@ extern "C"
             mss::pmic::ddr5::target_info_redundancy_ddr5 l_target_info(i_ocmb_target, l_rc);
 
             FAPI_TRY(mss::pmic::ddr5::set_pmic_dt_states(l_target_info));
-            FAPI_TRY(pmic_periodic_telemetry_ddr5_helper(i_ocmb_target, l_target_info, l_info));
+            FAPI_TRY(pmic_periodic_telemetry_ddr5_helper(i_ocmb_target, i_reset_dqs_recal_count, l_target_info, l_info));
             FAPI_TRY(send_struct(reinterpret_cast<uint8_t*>(&l_info), sizeof(l_info), o_data));
         }
 

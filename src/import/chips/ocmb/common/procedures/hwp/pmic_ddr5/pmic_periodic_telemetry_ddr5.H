@@ -53,11 +53,16 @@ extern "C"
     ///
     /// @param[in] i_ocmb_target ocmb target
     /// @param[out] o_data hwp_data_ostream of struct information
+    /// @param[in] i_reset_dqs_recal_count reset DQS recal count. This count should be
+    ///            reset every 24 hours only. Others calling this HWP otherwise have to
+    ///            make sure to pass DONT_RESET_COUNT in order to keep the count as is
     /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
+    /// @note The functional flow of the periodic telemetry tool has been take from
+    ///       "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
+    ///       document provided by the Power team
     ///
-    fapi2::ReturnCode pmic_periodic_telemetry_ddr5(
-        const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
-        fapi2::hwp_data_ostream& o_data);
+    fapi2::ReturnCode pmic_periodic_telemetry_ddr5(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+            fapi2::hwp_data_ostream& o_data, const uint8_t i_reset_dqs_recal_count = RESET_RECAL_COUNT);
 }
 
 #endif

@@ -67,10 +67,12 @@ void read_serial_ccin_number(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& 
 /// @brief Read and store DQS drift tracking data
 ///
 /// @param[in] i_ocmb_target OCMB target info struct
+/// @param[in] i_reset_dqs_recal_count reset DQS recal count
 /// @param[in,out] io_dqs_tracking_log DQS drift track log array
 /// @return DQS tracking recal count
 ///
 uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+                                     const uint8_t i_reset_dqs_recal_count,
                                      uint64_t io_dqs_tracking_log[])
 {
     using CONSTS = mss::ddr5::dqs_track_logging_consts;
@@ -125,11 +127,14 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
             l_address = (l_syn_addr << INSERT_AT_32_BIT) | SCOM_ADDRESS;
             FAPI_TRY(getScomHost(l_port_target, l_address, l_data));
 
-            // Reset the recal count
-            FAPI_TRY(putScomHost(l_port_target, l_address, 0));
-            // Required to write even+odd addresses on PHY imem
-            l_address = ((l_syn_addr + 1) << INSERT_AT_32_BIT) | SCOM_ADDRESS;
-            FAPI_TRY(putScomHost(l_port_target, l_address, 0));
+            if (i_reset_dqs_recal_count == RESET_RECAL_COUNT)
+            {
+                // Reset the recal count
+                FAPI_TRY(putScomHost(l_port_target, l_address, 0));
+                // Required to write even+odd addresses on PHY imem
+                l_address = ((l_syn_addr + 1) << INSERT_AT_32_BIT) | SCOM_ADDRESS;
+                FAPI_TRY(putScomHost(l_port_target, l_address, 0));
+            }
 
             FAPI_TRY(host_configure_phy_scom_access(l_port_target, mss::states::OFF_N, true));
             FAPI_TRY(resume_dqs_track(i_ocmb_target));
@@ -623,11 +628,13 @@ void set_i2c_error_states(mss::pmic::ddr5::target_info_redundancy_ddr5& io_targe
 ///
 /// @brief Read and store ADC/PMIC/DT
 ///
+/// @param[in] i_reset_dqs_recal_count reset DQS recal count
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_periodic_tele_info periodic telemetry struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode collect_periodic_tele_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
+fapi2::ReturnCode collect_periodic_tele_data(const uint8_t i_reset_dqs_recal_count,
+        mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
 {
     uint8_t l_thermal_init_complete = 0;
@@ -643,7 +650,7 @@ fapi2::ReturnCode collect_periodic_tele_data(mss::pmic::ddr5::target_info_redund
     if (l_thermal_init_complete == fapi2::ENUM_ATTR_MEM_THERMAL_INIT_COMPLETE_YES)
     {
         io_periodic_tele_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(io_target_info.iv_ocmb,
-                io_periodic_tele_info.iv_dqs_tracking_log);
+                i_reset_dqs_recal_count, io_periodic_tele_info.iv_dqs_tracking_log);
 
         read_dts_data(io_target_info.iv_ocmb, io_periodic_tele_info.iv_dts_data);
     }
@@ -698,11 +705,13 @@ fapi_try_exit:
 /// @brief Runtime periodic telemetry data collection helper for 4U parts
 ///
 /// @param[in] i_ocmb_target ocmb target
+/// @param[in] i_reset_dqs_recal_count reset DQS recal count
 /// @param[in,out] io_target_info PMIC and DT target info struct
 /// @param[in,out] io_periodic_tele_info periodic telemetry struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode pmic_periodic_telemetry_ddr5_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_target,
+        const uint8_t i_reset_dqs_recal_count,
         mss::pmic::ddr5::target_info_redundancy_ddr5& io_target_info,
         mss::pmic::ddr5::periodic_telemetry_data& io_periodic_tele_info)
 {
@@ -714,7 +723,7 @@ fapi2::ReturnCode pmic_periodic_telemetry_ddr5_helper(const fapi2::Target<fapi2:
              l_aggregate_state_not_used));
 
     // Read and store ADC/DT/PMIC regs
-    FAPI_TRY(collect_periodic_tele_data(io_target_info, io_periodic_tele_info));
+    FAPI_TRY(collect_periodic_tele_data(i_reset_dqs_recal_count, io_target_info, io_periodic_tele_info));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -844,12 +853,13 @@ fapi_try_exit:
 /// @brief Runtime periodic telemetry data collection helper for 2U parts
 ///
 /// @param[in] i_ocmb_target ocmb target
-/// @param[in,out] io_target_info PMIC and DT target info struct
+/// @param[in] i_reset_dqs_recal_count reset DQS recal count
 /// @param[in,out] io_info periodic telemetry struct
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
 fapi2::ReturnCode pmic_periodic_telemetry_ddr5_2U_helper(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_ocmb_target,
+        const uint8_t i_reset_dqs_recal_count,
         mss::pmic::ddr5::periodic_2U_telemetry_data& io_info)
 {
     uint8_t l_thermal_init_complete = 0;
@@ -862,7 +872,8 @@ fapi2::ReturnCode pmic_periodic_telemetry_ddr5_2U_helper(const fapi2::Target<fap
 
     if (l_thermal_init_complete == fapi2::ENUM_ATTR_MEM_THERMAL_INIT_COMPLETE_YES)
     {
-        io_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(i_ocmb_target, io_info.iv_dqs_tracking_log);
+        io_info.iv_dqs_tracking_recal_count = read_dqs_drift_tracking_log(i_ocmb_target, i_reset_dqs_recal_count,
+                                              io_info.iv_dqs_tracking_log);
 
         read_dts_data(i_ocmb_target, io_info.iv_dts_data);
     }

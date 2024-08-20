@@ -472,7 +472,8 @@ inline fapi2::ReturnCode ody_putscom_dqs_track_log(const fapi2::Target<fapi2::TA
 {
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
     uint64_t l_log[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES] = {0};
-    uint16_t l_recal_count = 0;
+    fapi2::buffer<uint64_t> l_recal_count;
+    fapi2::buffer<uint64_t> l_dummy;
     fapi2::buffer<uint64_t> l_muxsel;
 
     // First check MUXSEL to make sure we're not colliding with anybody reading out the logs
@@ -509,16 +510,22 @@ inline fapi2::ReturnCode ody_putscom_dqs_track_log(const fapi2::Target<fapi2::TA
     }
 
     // Write the recal count to the imem area
-    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_RECAL_COUNT, l_ocmb, l_recal_count));
     {
         const uint64_t l_address = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(
                                        static_cast<uint64_t>(mss::ddr5::ODY_DQS_TRACKING_COUNT_START_ADDRESS));
         const uint64_t l_address_odd = mss::ody::phy::convert_synopsys_to_ibm_reg_addr(
                                            static_cast<uint64_t>(mss::ddr5::ODY_DQS_TRACKING_COUNT_START_ADDRESS + 1));
 
+        FAPI_TRY(fapi2::getScom(i_target, l_address, l_recal_count));
+        l_recal_count += 1;
+        FAPI_TRY(fapi2::getScom(i_target, l_address_odd, l_dummy));
+
         FAPI_TRY(fapi2::putScom(i_target, l_address, l_recal_count));
         // Required to write even+odd addresses on PHY imem
         FAPI_TRY(fapi2::putScom(i_target, l_address_odd, 0));
+
+        // Update the attr. This is for RAS testing
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_RECAL_COUNT, l_ocmb, static_cast<uint16_t>(l_recal_count)));
     }
 
     FAPI_TRY(mss::ody::phy::configure_phy_scom_access(i_target, mss::states::OFF_N, true));

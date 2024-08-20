@@ -63,6 +63,7 @@
 #include <ody_scom_mp_dbyte8_b0.H>
 #include <ody_scom_mp_dbyte9_b0.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
+#include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 
 namespace mss
 {
@@ -1010,7 +1011,6 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
         ((l_count >= l_count_threshold) &&
          (l_count_threshold != fapi2::ENUM_ATTR_ODY_DQS_TRACKING_COUNT_THRESHOLD_DISABLE)))
     {
-        uint16_t l_recal_count = 0;
         fapi2::buffer<uint16_t> l_deltas[mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_DELTA_COUNT] __attribute__ ((__aligned__(8))) = {0};
 
         // Check if steer or scrub is running
@@ -1105,11 +1105,6 @@ fapi2::ReturnCode ody_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP
 
         // Reset the "count since last recal" value
         l_count = 0;
-
-        // Update the number of recals performed
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_RECAL_COUNT, i_target, l_recal_count));
-        l_recal_count += 1;
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_DQS_TRACKING_RECAL_COUNT, i_target, l_recal_count));
 
         // Write the log and count into a port's imem area
         for(auto& l_port_target : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target) )
