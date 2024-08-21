@@ -87,18 +87,40 @@
     do                                                                  \
     {                                                                   \
         errlHndl_t& RUN_ODY_CHIPOP_errl = ERRL;                         \
+                                                                        \
         TRACISTEP(#CALLER ": run " #OP " on target HUID 0x%.8X (chipop)", get_huid(TARGET)); \
         RUN_ODY_CHIPOP_errl = sendExecHWPRequest(TARGET, OP);           \
-        /* A chipop response may include logs orthogonal to the
+        /* A chipop response may include logs orthogonal to the         \
            chipop's success, those should not cause a failure. */       \
         if (RUN_ODY_CHIPOP_errl                                         \
             && !(RUN_ODY_CHIPOP_errl->hasErrorTypeOtherThan(SBEIO_ERROR_TYPE_FFDC_PACKAGE))) \
         {                                                               \
             TRACISTEP(#CALLER ": PARTIAL SUCCESS running " #OP " chipop on target HUID 0x%.8X", \
                       get_huid(TARGET));                                \
-            /* @TODO-JIRA:PFHB-776 - Go through FSM here? */            \
-            errlCommit(RUN_ODY_CHIPOP_errl, ISTEP_COMP_ID);             \
-            collectOdyScratchData(TARGET,RUN_ODY_CHIPOP_errl);          \
+            /* If there are visible logs, send through FSM for possible update*/        \
+            if(RUN_ODY_CHIPOP_errl->isSevVisible())                                     \
+            {                                                                           \
+                ocmbupd::ody_upd_event_t M_update_event = ocmbupd::OCMB_HWP_FAIL_OTHER; \
+                TARGETING::Target* const M_ocmb = TARGET;                               \
+                errlOwner M_errl(RUN_ODY_CHIPOP_errl);                                  \
+                if (auto M_upd_errl = ocmbupd::ody_upd_process_event(M_ocmb,            \
+                                            M_update_event,                             \
+                                            std::move(M_errl)))                         \
+                {                                                                       \
+                    TRACISTEP(ERR_MRK #OP ": ody_upd_process_event(0x%08x) "            \
+                        "failed following a partially successful chipop "               \
+                        TRACE_ERR_FMT,                                  \
+                        get_huid(M_ocmb),                               \
+                        TRACE_ERR_ARGS(M_upd_errl));                    \
+                    collectOdyScratchData(TARGET,RUN_ODY_CHIPOP_errl);  \
+                    errlCommit(RUN_ODY_CHIPOP_errl, ISTEP_COMP_ID);     \
+                }                                                       \
+            }                                                           \
+            else                                                        \
+            {                                                           \
+                collectOdyScratchData(TARGET,RUN_ODY_CHIPOP_errl);          \
+                errlCommit(RUN_ODY_CHIPOP_errl, ISTEP_COMP_ID);             \
+            }                                                           \
         }                                                               \
         /* A chipop execution failure. */                               \
         else if (RUN_ODY_CHIPOP_errl)                                   \
