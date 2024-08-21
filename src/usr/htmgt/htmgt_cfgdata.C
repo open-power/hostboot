@@ -1133,7 +1133,7 @@ uint8_t ocmbPowerData(Occ *i_occ,
                 uint16_t lastUtil = 0;
                 for (size_t pointIndex = 0; pointIndex < numUtilPoints; ++pointIndex)
                 {
-                    if ((pointIndex > 0) && (utilPoints[pointIndex] <= lastUtil))
+                    if (utilPoints[pointIndex] <= lastUtil)
                     {
                         // ignore invalid entries
                         break;
@@ -1548,7 +1548,7 @@ void getPowerCapMessageData(uint8_t* o_data, uint64_t & o_size)
         if ((!sys->tryGetAttr<ATTR_MIN_PROC_POWER_PER_CHIP>(l_min_proc_power_per_chip)) ||
             (l_min_proc_power_per_chip == 0))
         {
-            TMGT_ERR("getPowerCapMessageData: Failed to read EKB ATTR_MIN_PROC_POWER_PER_CHIP");
+            TMGT_INF("getPowerCapMessageData: Unable to read EKB ATTR_MIN_PROC_POWER_PER_CHIP");
 
             if ((!sys->tryGetAttr<ATTR_DEFAULT_MIN_PROC_POWER_PER_CHIP>(l_min_proc_power_per_chip))
                     || (l_min_proc_power_per_chip == 0))

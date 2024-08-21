@@ -411,9 +411,7 @@ void updateDimmPowerUtil(Target *sys)
         {
             TMGT_ERR("updateDimmPowerUtil: Failed to read DIMM_POWER_UTIL_INTERMEDIATE_POINTS");
         }
-        // First point is always 0% utilization
-        utilPoints[numPoints++] = 0;
-        // Add any valid intermediate points
+        // Add any valid points
         uint8_t lastPoint = 0;
         for (const auto & utilValue : utilPointsIntermediate)
         {
@@ -583,8 +581,7 @@ errlHndl_t memPowerPreheat(Target *sys,
     for (size_t point = 0; point < utilPoints.size(); ++point)
     {
         const uint8_t utilValue = utilPoints[point];
-        // First point can be 0
-        if ((point == 0) || (utilValue > 0))
+        if (utilValue > 0)
         {
             err = call_utils_to_throttle(i_fapi_target_list, utilValue);
             if (nullptr == err)
