@@ -172,7 +172,7 @@ void read_dts_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_tar
     for (uint8_t l_idx = 0; l_idx < NUM_DTS_LOG_ENTRIES; l_idx++)
     {
         FAPI_TRY(getScomHost(i_ocmb_target, DTS_ADDRESS_MAP[l_idx], l_data));
-        io_dts_data[l_idx] = l_data;
+        memcpy(&io_dts_data[l_idx], &l_data, sizeof(l_data));
     }
 
 fapi_try_exit:
