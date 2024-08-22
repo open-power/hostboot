@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <targeting/common/utilFilter.H>
 #include <attributeenums.H>
 #include <i2c/eepromif.H>
+#include <i2c/tpmddif.H>
 
 using namespace ERRORLOG;
 using namespace HWAS;
@@ -102,12 +103,25 @@ I2cDevInfos::I2cDevInfos()
         }
         // try for a TPM
         {
+            // Rather than porting tpmReadAttributes() into runtime code, this
+            // code will read ATTR_TPM_INFO directly and will override the
+            // device address returned if the TPM Model is 75x
             TARGETING::ATTR_TPM_INFO_type t;
             if (l_tgt->tryGetAttr<TARGETING::ATTR_TPM_INFO>(t))
             {
+                // Default device address to Locality 0
+                uint8_t l_devAddr = t.devAddrLocality0;
+
+                // Update device address if TPM Model is 75x
+                if (l_tgt->getAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>() ==
+                    TPMDD::TPM_MODEL_75x)
+                {
+                    l_devAddr = TPMDD::TPM_MODEL_75X_DEV_ADDR;
+                }
+
                 // String literal is used for comparison below, must stay sync'd
                 iv_i2cdvs.push_back({t.i2cMasterPath, t.engine, t.port,
-                                     t.devAddrLocality0, 0,
+                                     l_devAddr, 0,
                                      EEPROM::INVALID_CHIP_TYPE, l_tgt,
                                      getDepth(l_tgt)});
             }

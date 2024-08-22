@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -127,10 +127,22 @@ class TPMDDTest: public CxxTest::TestSuite
                     break;
                 }
 
-                if ( !(testTarget->tryGetAttr<ATTR_TPM_MODEL>(tpmModel)) )
+                if ( !(testTarget->tryGetAttr<ATTR_TPM_MODEL_DETERMINED>
+                                       (tpmModel)) )
                 {
-                    TS_FAIL("Unable to read ATTR_TPM_MODEL for %.8X target",
-                      get_huid(testTarget));
+                    TS_FAIL("Unable to read ATTR_TPM_MODEL_DETERMINED for "
+                            "%.8X target",
+                            get_huid(testTarget));
+                    break;
+                }
+
+                // By the time the testcases are run, the TPM Model should
+                // be determined (65x or 75x)
+                if (TPM_MODEL_UNDETERMINED == tpmModel)
+                {
+                    TS_FAIL("ATTR_TPM_MODEL_DETERMINED is UNDETERMINED for "
+                            "%.8X target",
+                            get_huid(testTarget));
                     break;
                 }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,10 @@ enum tpm_model_t : uint8_t
     TPM_MODEL_65x          = 0x01,
     TPM_MODEL_75x          = 0x02,
 };
+
+// In the case of a TPM Model 75x being in the system, must hardcode
+// its device address to this value
+constexpr uint8_t TPM_MODEL_75X_DEV_ADDR = 0x5C;
 
 /**
  * @brief Structure of common parameters needed by different parts of
@@ -153,10 +157,21 @@ struct tpm_info_t
 bool tpmPresence (TARGETING::Target* i_pTpm);
 
 /**
- * @brief this function will read all of the associated attributes needed
+ * @brief This function will read all of the associated attributes needed
  *      to access the intended TPM.  These attributes will be used to
  *      determine the type of I2C device as well as how to address it via
  *      the I2C device driver.
+ *
+ * @note This function should be used for accesses to ATTR_TPM_INFO as it
+ *       will correctly return information based on if there is a 65x or 75x
+ *       model TPM in the system. Once the model is determined,
+ *       ATTR_TPM_MODEL_DETERMINED will be set and the i_try_model input
+ *       parameter will be ignored.
+ *
+ * @note Only one type of TPM Model is allowed in the system. The default
+ *       TPM Model is 65x. Systems with 1 TPM might have TPM Model 75x.
+ *       No current plan to have systems with multiple TPMs to have
+ *       TPM Model 75x.
  *
  * @param[in] i_target target node.
  *
@@ -165,13 +180,18 @@ bool tpmPresence (TARGETING::Target* i_pTpm);
  *
  * @param[in] i_locality TPM locality to address
  *
+ * @param[in] i_try_model - value of 0 to return values for TPM MODEL 65x
+ *                        - value of 1 to return values for TPM_MODEL_75x
+ *                        - This parameter is ignored once
+ *                          ATTR_TPM_MODEL_DETERMINED is set
+ *
  * @return errlHndl_t NULL if successful, otherwise a pointer to the
  *      error log.
  */
 errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                                tpm_info_t & io_tpmInfo,
-                               tpm_locality_t i_locality);
-
+                               tpm_locality_t i_locality,
+                               bool i_try_model = 0);
 
 };  // end namespace TPMDD
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -5561,9 +5561,10 @@ void getDeviceInfo( TARGETING::Target* i_i2cMaster,
                            "?unknwon,unknown,tpm,host");
                 }
 
-                TRACUCOMP(g_trac_i2c,"TPM 0x%X is Model %d using label %s",
+                TRACFCOMP(g_trac_i2c,"TPM 0x%X is Model %d, deviceType=0x%X, "
+                          "using label %s",
                           TARGETING::get_huid(pTpm),
-                          tpmInfo.model,
+                          tpmInfo.model, l_currentDI.deviceType,
                           l_currentDI.deviceLabel);
                 o_deviceInfo.push_back(l_currentDI);
 
@@ -5815,10 +5816,13 @@ void addHwCalloutsI2c(errlHndl_t i_err,
             const auto l_tpmInfo = tpm->getAttr<
                                           TARGETING::ATTR_TPM_INFO>();
 
+            // i_args.devAddr could be l_tpmInfo.devAddrLocality0 for
+            // TPM Model 65x or might be hardcoded to 0x5C for TPM Model 75x
             if (l_tpmInfo.i2cMasterPath == l_physPath &&
                 l_tpmInfo.engine == i_args.engine &&
                 l_tpmInfo.port == i_args.port &&
-                l_tpmInfo.devAddrLocality0 == i_args.devAddr)
+                ((l_tpmInfo.devAddrLocality0 == i_args.devAddr) ||
+                 (TPMDD::TPM_MODEL_75X_DEV_ADDR == i_args.devAddr)))
             {
                 TRACFCOMP(g_trac_i2c,
                     "Unresponsive TPM found: "

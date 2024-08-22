@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2024                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -1645,6 +1645,7 @@
   <attribute>
     <id>TPM_MODEL</id>
     <description>
+       (deprecated in favor of TPM_MODEL_DETERMINED)
         Indicates TPM Model (or family) for a TPM Target
             0x00 = Undetermined (reserved if actively detected in the future)
             0x01 = Nuvoton 65x (default)
@@ -1657,6 +1658,28 @@
     </simpleType>
     <persistency>non-volatile</persistency>
     <readable/>
+  </attribute>
+
+  <attribute>
+    <id>TPM_MODEL_DETERMINED</id>
+    <description>
+        In an attmept to avoid complications changing the existing attribute
+        TPM_MODEL to writeable and volatile-zero, this new attribute
+        TPM_MODEL_DETERMINED will be used to reserve the state for when the
+        TPM Model of the system has been determined.
+
+        Indicates TPM Model (or family) for a TPM Target
+            0x00 = Undetermined (default - code must determine it dynamically)
+            0x01 = Nuvoton 65x
+            0x02 = Nuvoton 75x
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <hbOnly/>
   </attribute>
 
   <enumerationType>

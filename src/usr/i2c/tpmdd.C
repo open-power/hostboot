@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -362,6 +362,7 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
     // targets), enforced by call to tpmReadAttributes
 
     errlHndl_t pError = nullptr;
+    errlHndl_t pError_loop0 = nullptr;
     bool present = false;
 
     const auto forceTrace = false; // For debug
@@ -370,11 +371,26 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
 
     tpm_info_t tpmInfo;
 
-    do
+    // tpmPresence will be used to determine if the TPM Model is
+    // TPM_MODEL_65x (loop==0) or TPM_MODEL_75x (loop==1), so loop through twice
+    size_t loop = 0;
+    for (; loop <=1; loop++)
     {
+        // If on loop1, save off any previous error
+        if ((loop == 1) && (pError != nullptr))
+        {
+            pError_loop0 = pError;
+            pError = nullptr;
+            TRACFCOMP(g_trac_tpmdd,INFO_MRK
+                      "tpmPresence: Saving off loop0 error: PLID=0x%08X",
+                      pError_loop0->plid());
+        }
+
         pError = tpmReadAttributes(i_pTpm,
                                    tpmInfo,
-                                   TPM_LOCALITY_0);
+                                   TPM_LOCALITY_0,
+                                   // first time through try 65x; then 75x
+                                   !!loop);
         if(pError)
         {
             TRACFCOMP(g_trac_tpmdd,ERR_MRK
@@ -383,6 +399,8 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 TRACE_ERR_FMT,
                 get_huid(i_pTpm),
                 TRACE_ERR_ARGS(pError));
+
+            // break don't continue - this won't be fixed on another attempt
             break;
         }
 
@@ -397,6 +415,8 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 "in the object model blueprint but is flagged as "
                 "disabled/ignored.",
                 get_huid(i_pTpm));
+
+            // break don't continue - this won't be fixed on another attempt
             break;
         }
 
@@ -417,6 +437,8 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                     "is not XSCOM accessible",
                     get_huid(i_pTpm),
                     get_huid(tpmInfo.i2cTarget));
+
+                // break don't continue - this won't be fixed on another attempt
                 break;
             }
         }
@@ -447,7 +469,9 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                     static_cast<uint64_t>(tpmInfo.devAddr),
                     TRACE_ERR_ARGS(pError));
             }
-            break;
+
+            // continue (might work for different TPM model)
+            continue;
 
         }
         else if ((TPMDD::TPM_VENDORID_MASK & vendorId)
@@ -495,10 +519,11 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 TWO_UINT32_TO_UINT64(tpmInfo.vendorId,vendorId),
                 get_huid(i_pTpm),
                 ERRORLOG::ErrlEntry::NO_SW_CALLOUT);
-            break;
+
+
+            // continue (might work for different TPM model)
+            continue;
         }
-
-
 
         // TPM Nuvoton Model 75x does not support the familyId, and requires
         // some additional setup for locality
@@ -538,6 +563,8 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                     "tpmPresence: Error on 1st cmd to set up Locality for 75x "
                     "TPM HUID=0x%08X. Treat TPM as not present",
                     TARGETING::get_huid(i_pTpm));
+
+                // break, because in the 75x loop which is the last attempt
                 break;
             }
 
@@ -558,9 +585,15 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
             }
 
             present = true;
+
+            // Set ATTR_TPM_MODEL_DETERMINED to 75x here since TPM was found
+            // present with TPM Model 75x settings
+            i_pTpm->setAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>(TPM_MODEL_75x);
         }
         else
         {
+            // TPM Model 65x Support
+
             // Verify the TPM is supported by this driver by reading and
             // comparing the family ID
             uint8_t familyId = 0;
@@ -615,6 +648,7 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                         static_cast<uint64_t>(tpmInfo.devAddr),
                         familyId,
                         TPMDD::TPM_FAMILYID_65x);
+
 
                     // Printing mux info separately, if combined,
                     // nothing is displayed
@@ -673,29 +707,92 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
                 l_muxPath = nullptr;
 
                 present = true;
+
+                // Set ATTR_TPM_MODEL_DETERMINED to 65x here since TPM was found
+                // present with TPM Model 65x settings
+                i_pTpm->setAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>(TPM_MODEL_65x);
+
+                // break from the loop since a TPM Model 65x has been found
+                break;
             }
         }
 
-    } while( 0 );
+    } // end of for loop to determine if TPM is present and model 65x or 75x
 
-    if(pError)
+
+    if ((pError != nullptr) || (pError_loop0 != nullptr))
     {
-        // If a TPM is required to boot the system, then escalate TPM
-        // presence failure as an unrecoverable error log, and link its PLID to
-        // a new log explicitly indicating the TPM was not detected properly.
-        if(tpmRequired)
+        // If present is set to true, then ignore any errors
+        // (This will be the case where errors were found looking for
+        //  TPM Model 65x, but it turns out the TPM Model is 75x)
+        // Also, if TPM is not required, then ignore any errors
+        if ((present == true) || (tpmRequired==false))
         {
-            pError->collectTrace(TPMDD_COMP_NAME);
-            pError->collectTrace(SECURE_COMP_NAME);
-            pError->collectTrace(TRBOOT_COMP_NAME);
-            pError->collectTrace(I2C_COMP_NAME);
+            if (pError)
+            {
+                delete pError;
+                pError = nullptr;
+            }
 
-            ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
+            if (pError_loop0)
+            {
+                delete pError_loop0;
+                pError_loop0 = nullptr;
+            }
+        }
 
-            const auto original_eid  = pError->eid();
-            const auto original_plid = pError->plid();
-            pError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
-            errlCommit(pError,TPMDD_COMP_ID);
+        // If a TPM is required to boot the system, then escalate TPM
+        // presence failure(s) as unrecoverable error log(s), and link its PLID
+        // to a new log explicitly indicating the TPM was not detected properly.
+        else if(tpmRequired)
+        {
+            // Save off original EID and PLID to connect it to the
+            // failing error log created below
+            uint32_t original_eid  = 0;
+            uint32_t original_plid = 0;
+
+            // First commit pError_loop0 if it's valid, as it should have
+            // happened first
+            if (pError_loop0 != nullptr)
+            {
+                pError_loop0->collectTrace(TPMDD_COMP_NAME);
+                pError_loop0->collectTrace(SECURE_COMP_NAME);
+                pError_loop0->collectTrace(TRBOOT_COMP_NAME);
+                pError_loop0->collectTrace(I2C_COMP_NAME);
+
+                ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError_loop0);
+
+                original_eid  = pError_loop0->eid();
+                original_plid = pError_loop0->plid();
+
+                pError_loop0->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                errlCommit(pError_loop0,TPMDD_COMP_ID);
+            }
+
+            // Now commit pError if its valid
+            if (pError != nullptr)
+            {
+                pError->collectTrace(TPMDD_COMP_NAME);
+                pError->collectTrace(SECURE_COMP_NAME);
+                pError->collectTrace(TRBOOT_COMP_NAME);
+                pError->collectTrace(I2C_COMP_NAME);
+
+                ERRORLOG::ErrlUserDetailsTarget(i_pTpm).addToLog(pError);
+
+                // don't overwrite original_eid or original_plid if set above
+                if (original_eid == 0)
+                {
+                    original_eid  = pError->eid();
+                }
+
+                if (original_plid ==0)
+                {
+                    original_plid = pError->plid();
+                }
+
+                pError->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                errlCommit(pError,TPMDD_COMP_ID);
+            }
 
             /*@
              * @errortype
@@ -748,11 +845,6 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
             pError->collectTrace(I2C_COMP_NAME);
 
             errlCommit(pError,TPMDD_COMP_ID);
-        }
-        else
-        {
-            delete pError;
-            pError = nullptr;
         }
     }
 
@@ -1564,12 +1656,14 @@ errlHndl_t tpmPrepareAddress ( void * io_buffer,
 // ------------------------------------------------------------------
 errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                                tpm_info_t & io_tpmInfo,
-                               tpm_locality_t i_locality )
+                               tpm_locality_t i_locality,
+                               bool i_try_model )
 {
     errlHndl_t err = NULL;
 
-    TRACDCOMP( g_trac_tpmdd,
-               ENTER_MRK"tpmReadAttributes()" );
+    TRACFCOMP( g_trac_tpmdd,
+               ENTER_MRK"tpmReadAttributes(): tgt=0x%08X, i_try_model=%d ",
+               TARGETING::get_huid(i_target), i_try_model );
 
     // These variables will be used to hold the TPM attribute data
     TARGETING::TpmInfo tpmData;
@@ -1623,14 +1717,13 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
 
         if( !( i_target->
-               tryGetAttr<TARGETING::ATTR_TPM_MODEL>
+               tryGetAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>
                ( tpmModel ) ) )
-
         {
             const auto type = i_target->getAttr<TARGETING::ATTR_TYPE>();
 
             TRACFCOMP(g_trac_tpmdd,ERR_MRK
-                "tpmReadAttributes: Failed to read TPM_MODEL "
+                "tpmReadAttributes: Failed to read TPM_MODEL_DETERMINED "
                 "attribute from target HUID=0x%08X of type=0x%08X.",
                 TARGETING::get_huid(i_target),
                 type);
@@ -1663,12 +1756,26 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
                 break;
         }
+        else
+        {
+            TRACUCOMP(g_trac_tpmdd,INFO_MRK
+                "tpmReadAttributes: ATTR_TPM_MODEL_DETERMINED=%d for "
+                "target HUID=0x%08X",
+                tpmModel, TARGETING::get_huid(i_target));
+        }
+
 
         // Hostboot code only supports Nuvoton 65x and 75x Models at this time
         // so set model-specific attributes appropriately
-        if (tpmModel == TPM_MODEL_65x)
+        // if tpmModel is TPM_MODEL_UNDETERMINED (which is likely on the first
+        // call since the ATTR_MODEL_TPM is volatile-zeroed), then use
+        // i_try_model value to determine what settings to return:
+        //     if i_try_model == 0, try TPM_MODEL_65x;
+        //     if i_try_model == 1, try TPM_MODEL_75x
+        if ((tpmModel == TPM_MODEL_65x) ||
+            ((tpmModel == TPM_MODEL_UNDETERMINED) && i_try_model == 0))
         {
-            io_tpmInfo.model          = tpmModel;
+            io_tpmInfo.model          = TPM_MODEL_65x;
             io_tpmInfo.sts            = TPM_REG_65x_STS;
             io_tpmInfo.burstCount     = TPM_REG_65x_BURSTCOUNT;
             io_tpmInfo.tpmHash        = TPM_REG_65x_TPM_HASH;
@@ -1677,9 +1784,10 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
             io_tpmInfo.vendorIdOffset = TPM_REG_65x_VENDOR_ID_OFFSET;
             io_tpmInfo.vendorId       = TPM_VENDORID_65x;
         }
-        else if (tpmModel == TPM_MODEL_75x)
+        else if ((tpmModel == TPM_MODEL_75x) ||
+                 ((tpmModel == TPM_MODEL_UNDETERMINED) && i_try_model == 1))
         {
-            io_tpmInfo.model          = tpmModel;
+            io_tpmInfo.model          = TPM_MODEL_75x;
             io_tpmInfo.sts            = TPM_REG_75x_STS;
             io_tpmInfo.burstCount     = TPM_REG_75x_BURSTCOUNT;
             io_tpmInfo.tpmHash        = TPM_REG_75x_TPM_HASH;
@@ -1744,10 +1852,11 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
         }
 
         // Nuvoton 75x only supports one locality i2c address
+        // and it is hardcoded to 0x5C
         // (i.e. locality is handled differently)
-        if (tpmModel == TPM_MODEL_75x)
+        if (io_tpmInfo.model == TPM_MODEL_75x)
         {
-            io_tpmInfo.devAddr = tpmData.devAddrLocality0;
+            io_tpmInfo.devAddr = TPMDD::TPM_MODEL_75X_DEV_ADDR;
         }
 
         io_tpmInfo.engine        = tpmData.engine;
@@ -1850,11 +1959,12 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
     } while( 0 );
 
-    TRACUCOMP(g_trac_tpmdd,"tpmReadAttributes() tgt=0x%X, e/p/dA=%d/%d/0x%X, "
-              "En=%d, aS=%d, aO=%d",
+    TRACFCOMP(g_trac_tpmdd,EXIT_MRK"tpmReadAttributes() tgt=0x%X, "
+              "e/p/dA=%d/%d/0x%X, "
+              "Enabled=%d, Model=%d (attr model=%d), aS=%d, aO=%d",
               TARGETING::get_huid(i_target),
               io_tpmInfo.engine, io_tpmInfo.port, io_tpmInfo.devAddr,
-              io_tpmInfo.tpmEnabled,
+              io_tpmInfo.tpmEnabled, io_tpmInfo.model, tpmModel,
               io_tpmInfo.addrSize, tpmData.byteAddrOffset);
 
     // Printing mux info separately, if combined, nothing is displayed

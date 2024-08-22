@@ -1187,6 +1187,9 @@ void tpmMarkFailed(TpmTarget* const i_pTpm,
     TARGETING::TargetHandleList l_procList;
     getAllChips(l_procList,TARGETING::TYPE_PROC,false);
 
+    // No need to call tpmReadAttributes() here because only
+    // i2cMasterPath is needed, and that can't change between
+    // TPM Model 65x versus TPM Model 75x
     auto l_tpmInfo = l_tpm->getAttr<TARGETING::ATTR_TPM_INFO>();
 
     for(auto it : l_procList)

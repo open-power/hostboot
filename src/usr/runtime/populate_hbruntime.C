@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -84,6 +84,7 @@
 #include <secureboot/smf_utils.H>
 #include <secureboot/smf.H>
 #include <isteps/istep_reasoncodes.H>
+#include <i2c/tpmddif.H>
 
 namespace RUNTIME
 {
@@ -2034,6 +2035,99 @@ errlHndl_t populate_hbSecurebootData ( void )
     return (l_elog);
 } // end populate_hbRuntime
 
+
+/**
+ *  @brief This function determines if a TPM's I2C Device Info section in
+ *         HDAT needs to be overriden with the TPM Model 75x that Hostboot
+ *         dynamically determined was in the system.  This is necessary since
+ *         the FSP will be unaware of the presence of the TPM Model 75x in the
+ *         system when it builds this part of HDAT.
+ *         Here are the three checks that are required to pass before
+ *         performing the override on the TPM's I2C Device Info:
+ *         (1) check if running on a FSP-based system
+ *         (2) check that there is only 1 TPM in the system
+ *         (3) check if HB dynamically discovered the TPM Model 75x in the
+ *             system earlier in the IPL
+ *
+ *  @param[in] i_i2cDev  Pointer to TPM I2C Device section in HDAT
+ *  @return N/A  (All Error handles are handled internally)
+ */
+void checkForTpmI2cDevInfoOverride(HDAT::hdatI2cData_t* i_i2cDev)
+{
+    TRACFCOMP( g_trac_runtime, ENTER_MRK "checkForTpmI2cDevInfoOverride: "
+               "type=0x%X: e%d/p%d/devAddr=0x%X, label=%s",
+               i_i2cDev->hdatI2cSlaveDevType,
+               i_i2cDev->hdatI2cEngine, i_i2cDev->hdatI2cMasterPort,
+               i_i2cDev->hdatI2cSlaveDevAddr,i_i2cDev->hdatI2cLabel);
+
+    errlHndl_t l_elog = nullptr;
+
+    do
+    {
+        // (1) check if running on a FSP-based system
+        if( INITSERVICE::spBaseServicesEnabled() )
+        {
+            // Get all TPMs in the system
+            TARGETING::TargetHandleList tpmList;
+            TRUSTEDBOOT::getTPMs(tpmList);
+            TPMDD::tpm_info_t tpmData;
+
+            // (2) check that there is only 1 TPM in the system
+            if (tpmList.size() != 1)
+            {
+                TRACFCOMP( g_trac_runtime,"checkForTpmI2cDevInfoOverride: More "
+                           "than 1 TPM in the system, so no TPM I2C Override");
+                break;
+            }
+
+            auto tpm = tpmList.front();
+            TPMDD::tpm_info_t tpmInfo;
+
+            // Lookup i2c info for the TPM
+            l_elog = TPMDD::tpmReadAttributes(tpm,
+                                             tpmInfo,
+                                             TPMDD::TPM_LOCALITY_0);
+
+            if(l_elog != NULL)
+            {
+                TRACFCOMP( g_trac_runtime,"checkForTpmI2cDevInfoOverride: "
+                           "tpmReadAttributes failed, so no TPM I2C Override. "
+                           "deleting error log");
+
+                delete l_elog;
+                l_elog = nullptr;
+                break;
+            }
+
+            // (3) check if HB dynamically discovered the TPM Model 75x
+            if (tpmInfo.model == TPMDD::TPM_MODEL_75x)
+            {
+                // Update I2C HDAT Sctruct Information to 75x
+                TRACFCOMP( g_trac_runtime,"checkForTpmI2cDevInfoOverride: "
+                           "Override I2C info for TPM Model 75x");
+
+                strcpy(i_i2cDev->hdatI2cLabel,"?tcg,tpm_i2c_ptp,tpm,host");
+                i_i2cDev->hdatI2cSlaveDevType =
+                        TARGETING::HDAT_I2C_DEVICE_TYPE_TCG_I2C_TPM;
+                i_i2cDev->hdatI2cSlaveDevAddr = TPMDD::TPM_MODEL_75X_DEV_ADDR;
+            }
+            else
+            {
+                TRACFCOMP( g_trac_runtime,"checkForTpmI2cDevInfoOverride: No "
+                       "TPM Model 75x in the system, so no TPM I2C Override");
+            }
+        }
+        else
+        {
+            TRACFCOMP( g_trac_runtime,"checkForTpmI2cDevInfoOverride: Not "
+                       "running on a FSP-based system, so no TPM I2C Override");
+        }
+
+    } while(0);
+
+    return;
+}
+
 errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 {
     errlHndl_t l_elog = nullptr;
@@ -2290,6 +2384,8 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
         // save for second pass SRTM/DRTM log offset fixups
         fixList.push_back(std::make_pair(pTpm, l_tpmInstInfo));
 
+        // No need to call tpmReadAttributes() since the code below does not
+        // use values that depend on if a TPM Model is 65x or 75x
         auto l_tpmInfo = pTpm->getAttr<TARGETING::ATTR_TPM_INFO>();
 
         TARGETING::PredicateAttrVal<TARGETING::ATTR_PHYS_PATH>
@@ -2751,6 +2847,13 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 
                 l_pLinkId = &l_physInter->i2cLinkIdPhysicalPresence;
                 break;
+
+            case TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM:
+                // Special case where if a TPM Model 75x was dynamically found
+                // need to override the TPM Model 65x information that FSP put
+                // into HDAT
+                checkForTpmI2cDevInfoOverride(const_cast<HDAT::hdatI2cData_t*>(l_i2cDev));
+                continue;
 
             default:
                 // Physical Presence Info not supported for this I2c device

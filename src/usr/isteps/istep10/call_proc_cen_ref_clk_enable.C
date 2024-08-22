@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -393,6 +393,8 @@ void validateSecuritySettings()
         {
             auto l_physPath = (*pProcItr)->getAttr<TARGETING::ATTR_PHYS_PATH>();
 
+            // NOTE: Because we only need the i2cMasterPath info, this access
+            // of ATTR_TPM_INFO does not need to go through tpmReadAttributes()
             auto l_tpmInfo = itpm->getAttr<TARGETING::ATTR_TPM_INFO>();
 
             if (l_tpmInfo.i2cMasterPath == l_physPath)
