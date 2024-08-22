@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -45,6 +45,18 @@
       <priority>HIGH</priority>
     </callout>
   </hwpError>
+ <!-- ******************************************************************** -->
+<hwpError>
+    <rc>RC_OCC_SANDBOX_SIZE_ERROR</rc>
+    <description>
+        ATTR_PROC_OCC_SANDBOX_SIZE contains an invalid size value.
+    </description>
+    <ffdc>OCC_SANDBOX_SIZE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+</hwpError>
  <!-- ******************************************************************** -->
   <hwpError>
     <rc>RC_OCC_START_TIMEOUT</rc>
