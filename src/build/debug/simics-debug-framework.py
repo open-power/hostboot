@@ -1058,6 +1058,7 @@ def magic_instruction_callback(user_arg, cpu, arg):
         pel_phys_addr = cpu.r4
         pel_size = cpu.r5
         pel_id = cpu.r6
+        reasoncode = cpu.r7
         # see NODE_OFFSET in memorymap.H
         per_node = 0x400000000000   #64TB
         per_chip = 0x40000000000    #4TB
@@ -1124,8 +1125,8 @@ def magic_instruction_callback(user_arg, cpu, arg):
                                    hb_hrmor -
                                     (per_node*node_num))
 
-        # Save the PEL buffer to a file named pel.<pelid>.bin in current dir
-        pel_filename = "pel.%X.bin"%(pel_id)
+        # Save the PEL buffer to a file named "pel.<pelid>.<rc>.bin" in current dir
+        pel_filename = "pel.%X.%04X.bin"%(pel_id,reasoncode)
         cmd1 = "(%s)->image.save %s 0x%x %d -overwrite"%(
                     mem_object,\
                     pel_filename,\

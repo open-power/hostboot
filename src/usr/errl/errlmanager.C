@@ -961,7 +961,8 @@ void ErrlManager::saveErrLogEntry( errlHndl_t& io_err )
             void* l_flatbuf = PageManager::allocatePage(ALIGN_PAGE(l_cbflat)/PAGESIZE,true);
             io_err->flatten( l_flatbuf, l_cbflat );
             uint64_t l_pelid = io_err->eid();
-            MAGIC_INST_SAVE_PEL( l_flatbuf, l_cbflat, l_pelid );
+            uint64_t l_reasoncode = io_err->reasonCode();
+            MAGIC_INST_SAVE_PEL( l_flatbuf, l_cbflat, l_pelid, l_reasoncode );
             PageManager::freePage(l_flatbuf);
         }
 

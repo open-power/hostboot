@@ -273,9 +273,9 @@ inline bool magic_check_dce_enabled()
  * @param[in]  Size of PEL in bytes (uint64_t)
  * @param[in]  ID of PEL (uint64_t)
  */
-#define MAGIC_INST_SAVE_PEL(_addr, _size, _id) \
-    asm volatile("mr 4, %0; mr 5, %1; mr 6, %2;" :: \
-                 "r" (_addr), "r" (_size), "r" (_id) : "4", "5", "6"); \
+#define MAGIC_INST_SAVE_PEL(_addr, _size, _id, _rc) \
+    asm volatile("mr 4, %0; mr 5, %1; mr 6, %2; mr 7, %3;" :: \
+                 "r" (_addr), "r" (_size), "r" (_id), "r" (_rc) : "4", "5", "6", "7"); \
     MAGIC_INSTRUCTION(MAGIC_SAVE_PEL); \
 
 
