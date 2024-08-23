@@ -113,16 +113,22 @@ Note : You should provide information on the meaning of the indices inside of th
 
 ### default
 Specifies a default value for this attribute.  The default serves different purposes depending on what other tags are used.
-* Without mrwHide / platInit=mrw : Provides an initial value that is shown to the MRW owner.  Once any value is saved into the MRW, the default is no longer used.
-* With mrwHide / platInit=usedefault : Determines the final value of this attribute
+* Without mrwHide / platInit=mrw : Provides an initial value that is shown to the MRW owner.
+  * *IMPORTANT* - Once any value is saved into the MRW, the value from the ekb xml is no longer used.
+* With mrwHide / platInit=usedefault : Determines the final value of this attribute, no MRW inclusion
+* With overrideOnly : Determines the final value of this attribute, no MRW inclusion
+* A lack of a default is equivalent to zero
 
 `<default>42</default>`
 
 ### enum
 Specifies a set of enumerations/constants that should be used to read/write the attribute.  You are not required to use the enum for access but it is strongly encouraged.  The enumeration name will appear in MRW menus.
+
 The constant will have a value of : fapi2::ENUM_ATTR_<name of attribute>_<enum string>.
 
 `<enum>FIRSTVALUE = 0, ANOTHERONE = 1, SKIPPEDSOME = 10</enum>`
+
+Note that the list should not end with a trailing comma.
 
 ### initToZero
 Indicates that this attribute has a default value of zero.
@@ -131,7 +137,7 @@ Note : This has a positive memory usage effect in firmware compared to using an 
 `<initToZero/>`
 
 ### mrwHide
-Indicates that this attribute should not be shown as configurable parameter in the MRW.  Instead the attribute value is entirely controlled by the default value specified in the xml.
+Indicates that this attribute should not be shown as a configurable parameter in the MRW.  Instead the attribute value is entirely controlled by the default value specified in the xml.
 Note : must have a default tag.
 
 `<mrwHide/>`
@@ -157,7 +163,23 @@ Types
 * vpd :: Value comes directly from VPD (live lookup)
 
 `<platInit>Type</platInit>`
+
 `<platInit/>` is equivalent to `<platInit>mrw</platInit>` (*Note : Will be deprecated once platforms support the various platInit tags*)
+
+### sbeAttrSync
+
+Indicates that this attribute should be included in the attribute exchange between the CEC firmware and the SPPE.
+
+- toSBE = value is pushed into the SPPE
+- fromSBE = value is pulled from the SPPE
+- chipTypes = specifies which kinds of SBE/SPPE should be involved
+- targetTypes = filters which target types are involved, must be a subset of the targets defined for the attribute itself
+
+```
+<sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+  <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
+</sbeAttrSync>
+```
 
 ### writeable
 Indicates that the attribute can be written to a new value by a Hardware Procedure (HWP).  By default, attributes are read-only.
@@ -174,7 +196,29 @@ Indicates that the attribute cannot be updated from outside by attribute update 
 ## Ignored/Deprecated Tags
 The following tags may exist in legacy xml files but they are not consumed by any code.
 
-`odmChangeable`
-`odmVisible`
-`persistent`
-`persistRuntime`
+- `odmChangeable`
+- `odmVisible`
+- `persistent`
+- `persistRuntime`
+
+## Persistency / Attribute Lifetime
+
+### CEC Firmware (Hostboot, FSP, BMC).
+
+- Non-writeable attributes will refresh to new values on every new IPL.  They will also be updated to new defaults as part of a concurrent code update.
+- Non-platInit attributes will refresh to their defaults on every IPL.  The exception is a memory-preserving IPL where they will retain their value from the previous boot and runtime changes
+- The only attributes that persist across IPLs are platInit + writeable.  Note that there is typically no easy way to reset these values once they are set so care should be taken, especially for any value involved in the initial boot of the system.
+
+### Processor SBE
+
+- All attributes refresh to their defaults on CBS start.  There is explicit logic to update some attributes based on customization but any additions / changes require software changes.
+- Modified values will never migrate out to the rest of the firmware directly.
+- There is no MRW support so all defaults will come from the ekb xmls.  The value in p10_sbe_attributes.xml takes precedence over the default in the attribute definition.
+- Attributes must be added to p10_sbe_attributes.xml to be included in the SBE firmware image.
+
+### Odyssey SPPE
+
+- All attributes refresh to their defaults on CBS start.
+- Modified values will be pulled from the SPPE into the CEC firmware during the IPL.
+- There is no MRW support so all defaults will come from the ekb xmls.  The value in sbe_ody_attributes.xml takes precedence over the default in the attribute definition.
+- Attributes must be added to sbe_ody_attributes.xml to be included in the SBE firmware image.
