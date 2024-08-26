@@ -52,6 +52,7 @@
 
 #include <errl/hberrltypes.H>
 #include <errl/errludstring.H>
+#include <errl/errludattribute.H>
 
 #include <hwpThreadHelper.H>
 
@@ -808,7 +809,8 @@ void create_firmware_update_log(Target* const i_ocmb,
                                 const state_t& i_state,
                                 const state_transitions_t& i_state_pattern,
                                 const state_transition_t& i_transition,
-                                const ody_upd_event_t i_event)
+                                const ody_upd_event_t i_event,
+                                const ody_cur_version_new_image_t& i_newLevel)
 {
     /*@
      *@moduleid         MOD_ODY_UPD_FSM
@@ -830,7 +832,27 @@ void create_firmware_update_log(Target* const i_ocmb,
     auto errl = capture_state_in_errlog(ERRL_SEV_INFORMATIONAL, MOD_ODY_UPD_FSM, ODY_UPD_FIRMWARE_UPDATED,
                                         ErrlEntry::NO_SW_CALLOUT, i_ocmb, i_state, i_state_pattern, i_transition, i_event);
 
+    // Note that we are using the callout infrastructure to add a Location Code to the log
     errl->addHwCallout(i_ocmb, HWAS::SRCI_PRIORITY_LOW, HWAS::NO_DECONFIG, HWAS::GARD_NULL);
+
+    // Add more build tags
+    SBEIO::UdSPPECodeLevels(i_ocmb).addToLog(errl);
+
+    // Add the entire hash value from the new level into the log
+    for( auto img : i_newLevel )
+    {
+        ErrlUserDetailsString(reinterpret_cast<const char*>(img.second->version_string))
+          .addToLog(errl);
+        uint8_t hashdata[sizeof(img.second->image_hash)+1];
+        hashdata[0] = img.second->image_type;
+        memcpy(hashdata+1,img.second->image_hash,sizeof(img.second->image_hash));
+        errl->addFFDC( SBE_COMP_ID,
+                       hashdata,
+                       sizeof(hashdata),
+                       1,                 // Version
+                       SBEIO::SBEIO_HASH_DATA,
+                       false );           // no merge
+    }
 
     errlCommit(errl, OCMBUPD_COMP_ID);
 }
@@ -899,6 +921,7 @@ errlOwner execute_actions(Target* const i_ocmb,
                 manually_set_errl_sev = true;
                 break;
             case perform_code_update:
+                { //lets us declare locally scoped variables for this case
                 /* The fact that we're doing a code update means that any errors we hit prior
                    to this are from a downlevel version. Therefore none of these logs should
                    show up as visible errors.
@@ -957,7 +980,10 @@ errlOwner execute_actions(Target* const i_ocmb,
                     }
                 }
 
-                if (auto update_err = odysseyUpdateImages(i_ocmb, i_on_update_force_all))
+                ody_cur_version_new_image_t l_versionInfo;
+                if (auto update_err = odysseyUpdateImages(i_ocmb,
+                                                          i_on_update_force_all,
+                                                          l_versionInfo))
                 {
                     TRACF(ERR_MRK"ody_upd_fsm/execute_actions(0x%08X): odysseyUpdateImages failed: "
                           TRACE_ERR_FMT,
@@ -970,10 +996,13 @@ errlOwner execute_actions(Target* const i_ocmb,
                                                  o_restart_needed);
                 }
 
-                create_firmware_update_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event);
+                create_firmware_update_log(i_ocmb, i_state,
+                                           i_state_pattern, i_transition,
+                                           i_event, l_versionInfo);
                 i_ocmb->setAttr<ATTR_OCMB_CODE_UPDATED>(1);
 
                 break;
+                }
             case switch_to_side_0:
                 if (i_errlog && !manually_set_errl_sev)
                 {

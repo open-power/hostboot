@@ -226,6 +226,7 @@ enum UserDetailsTypes
         SBEIO_UDT_LOC              = 0x5, //reserved for future/offline parsing
         SBEIO_UDT_PMIC_HEALTH      = 0x6, //reserved for future/offline parsing
         SBEIO_UDT_SBE_RESPONSE     = 0x7, // SBE Response details
+        SBEIO_HASH_DATA            = 0x8, // SBE image hash
 };
 
 

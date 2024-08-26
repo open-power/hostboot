@@ -44,6 +44,8 @@ namespace SBEIO
                   (SBEIO_UDT_SPPE_FORMAT);
                 registerParser<SBEIO::UdParserSBEResponse>
                   (SBEIO_UDT_SBE_RESPONSE);
+                registerParser<SBEIO::UdParserSbeHashData>
+                  (SBEIO_HASH_DATA);
             }
 
         private:

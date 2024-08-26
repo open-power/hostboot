@@ -649,6 +649,9 @@ private:
     }
 };
 
+
+//==== Below code is NOT shared with the FSP ====
+
 /**
  * @class UdParserSPPECodeLevels
  *
@@ -801,6 +804,58 @@ private:
     // Disabled
     UdParserSBEResponse(const UdParserSBEResponse&);
     UdParserSBEResponse & operator=(const UdParserSBEResponse&);
+};
+
+/**
+ * @class UdParserSbeHashData
+ *
+ * Parses SBEIO_HASH_DATA
+ */
+class UdParserSbeHashData : public ERRORLOG::ErrlUserDetailsParser
+{
+public:
+    /**
+     *  @brief Constructor
+     */
+    UdParserSbeHashData() {}
+
+    /**
+     *  @brief Destructor
+     */
+    virtual ~UdParserSbeHashData() {}
+
+    /**
+     *  @brief Parses string user detail data from an error log
+     *
+     *  @param  i_version Version of the data
+     *  @param  i_parse   ErrlUsrParser object for outputting information
+     *  @param  i_pBuffer Pointer to buffer containing detail data
+     *  @param  i_buflen  Length of the buffer
+     */
+    virtual void parse(errlver_t i_version,
+                       ErrlUsrParser & i_parser,
+                       void * i_pBuffer,
+                       const uint32_t i_buflen) const
+    {
+        char* l_databuf = static_cast<char*>(i_pBuffer);
+        i_parser.PrintHeading("SPPE Code Levels");
+
+        //***** Memory Layout *****
+        //  1 byte  : Image Type
+        // 64 bytes : Hash Value
+
+        i_parser.PrintNumber("SBE Image Type",
+                             "%.2lX", *l_databuf);
+        l_databuf += sizeof(uint8_t);
+
+        i_parser.PrintHeading("SBE Image Hash");
+        i_parser.PrintHexDump(l_databuf, i_buflen-sizeof(uint8_t));
+    }
+
+private:
+    // Disabled
+    UdParserSbeHashData(const UdParserSbeHashData&);
+    UdParserSbeHashData & operator=(const UdParserSbeHashData&);
 };
 
 

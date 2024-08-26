@@ -3304,7 +3304,9 @@ sub writeAttrErrlCFile {
          "HUID",
          "BOOT_PAU_DPLL_BYPASS",
          "MEM_EFF_DRAM_MFG_ID",
-         "MASTER_MBOX_SCRATCH"
+         "MASTER_MBOX_SCRATCH",
+         "SBE_RUNTIME_CODELEVEL",
+         "SBE_BOOTLOADER_CODELEVEL"
     );
 
     # loop through every attribute to make the switch/case

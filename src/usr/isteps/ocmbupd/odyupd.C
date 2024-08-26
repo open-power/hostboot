@@ -308,7 +308,9 @@ void add_odyssey_callouts(errlHndl_t& i_errl, const Target* const i_ocmb)
 /**
  * @brief Update Odyssey OCMB firmware on the given target if necessary.
  */
-errlHndl_t odysseyUpdateImages(Target* const i_ocmb, const bool i_force_update_all)
+errlHndl_t odysseyUpdateImages(Target* const i_ocmb,
+                               const bool i_force_update_all,
+                               ody_cur_version_new_image_t& o_newLevel)
 {
     errlHndl_t errl = nullptr;
 
@@ -320,10 +322,8 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb, const bool i_force_update_a
 
     if (UTIL::isOdysseyChip(i_ocmb))
     {
-        ody_cur_version_new_image_t images_to_update;
-
         errl = check_for_odyssey_codeupdate_needed(i_ocmb,
-                                                   images_to_update,
+                                                   o_newLevel,
                                                    nullptr,
                                                    nullptr,
                                                    i_force_update_all);
@@ -333,7 +333,7 @@ errlHndl_t odysseyUpdateImages(Target* const i_ocmb, const bool i_force_update_a
             break;
         }
 
-        errl = odyssey_update_code(i_ocmb, images_to_update);
+        errl = odyssey_update_code(i_ocmb, o_newLevel);
 
         if (errl)
         {

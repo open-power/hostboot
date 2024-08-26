@@ -78,10 +78,13 @@ using ocmbfw_owning_ptr_t = std::unique_ptr<const ocmbfw_ext_pnor_section_header
  * @param[in] i_force_update_all       Whether to update all of the code images
  *                                     on the chip regardless of whether they're
  *                                     out of date or not.
+ * @param[in] o_newLevel               Information about the images that will
+ *                                     be updated (for logging)..
  * @return                             Error if any, otherwise nullptr.
  */
 errlHndl_t odysseyUpdateImages(TARGETING::Target* i_ocmb,
-                               bool i_force_update_all);
+                               bool i_force_update_all,
+                               ody_cur_version_new_image_t& o_newLevel);
 
 /**
  * @brief Check which Odyssey images need to be updated in the given chip, compared

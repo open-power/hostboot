@@ -128,6 +128,19 @@ class errludP_sbeio:
         jsonStr = json.dumps(d)
         return jsonStr
 
+    def SbeIoUserDetailsParserHash(ver, data, subType):
+        # 1  byte   : Image type
+        # 64 bytes  : HASH value
+        d = dict()
+        subd = dict()
+        subd['SBE Image Type'], memConcat(data, 0, 1)
+        subd['SBE Image Hash'], memConcat(data, 1, len(data))
+
+        jsonStr = json.dumps(d)
+        return jsonStr
+
+
+
 #Dictionary with parser functions for each subtype
 #Values are from UserDetailsTypes enum
 #in src/include/usr/sbeio/sbeioreasoncodes.H
@@ -138,7 +151,8 @@ SbeIoUserDetailDataSubSection = { 0: "SbeIoUserDetailsParserNoFormat",
                                   4: "SbeIoUserDetailsParserNoFormat",
                                   5: "SbeIoUserDetailsParserNoFormat",
                                   6: "SbeIoUserDetailsParserNoFormat",
-                                  7: "SbeIoUserDetailsSBEResponse" }
+                                  7: "SbeIoUserDetailsSBEResponse",
+                                  8: "SbeIoUserDetailsParserHash" }
 
 def parseUDToJson(subType, ver, data):
     args = (ver, data, subType)
