@@ -453,6 +453,18 @@ struct msg_block_vars
 } __attribute__ ((aligned (8))) ;
 
 ///
+/// @class bad_bits_mc
+/// @brief Structure of bad bits for rank0 and rank1 in MC perspective
+///
+struct bad_bits_per_rank_mc
+{
+    uint32_t iv_bad_bits_byte0_3[mss::ody::HW_MAX_MRANK_PER_PORT];
+    uint32_t iv_bad_bits_byte4_7[mss::ody::HW_MAX_MRANK_PER_PORT];
+    uint16_t iv_bad_bits_byte8_9[mss::ody::HW_MAX_MRANK_PER_PORT];
+} __attribute__ ((aligned (8)));
+
+
+///
 /// @brief Configures the sequence control based upon attributes and requested sequences
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_sequence_ctrl user requested sequence control attributes
@@ -3672,6 +3684,51 @@ fapi2::ReturnCode configure_msg_block_for_dq_errors(const fapi2::Target<fapi2::T
 fapi2::ReturnCode disable_dram_with_bad_dq0(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
         PMU_SMB_DDR5U_1D_t& io_struct);
+
+
+///
+/// @brief Perform swizzle and compute the bad_bit_flag and update the
+///        start_bit and new_bit structures
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_dq_bad_bits_attr value of ATTR_BAD_DQ_BITMAP
+/// @param[in] i_current_bad_bits_phy the lane disable data in PHY perspective
+/// @param[in] i_start_bad_bits_phy starting bad bits in PHY perspective
+/// @param[out] o_bad_bit_flag cumulative bad bit flag that is computed
+/// @param[out] o_new_bad_bits_per_rank_mc structure for the bytes after the swizzle for new bad bits
+/// @param[out] o_start_bad_bits_per_rank_mc structure for the bytes after the swizzle for the start bad bits
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode swizzle_and_compute_bad_bit_flag_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t (&i_dq_bad_bits_attr)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        const uint8_t (&i_current_bad_bits_phy)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        const uint8_t (&i_start_bad_bits_phy)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        bool& o_bad_bit_flag,
+        bad_bits_per_rank_mc& o_new_bad_bits_per_rank_mc,
+        bad_bits_per_rank_mc& o_start_bad_bits_per_rank_mc);
+
+///
+/// @brief Setup the bytes using the bad bits arrays
+/// @param[in] i_rank_infos vector of rank infos
+/// @param[in] i_bad_bits_mc the bad array that has the swizzled bytes in mc perspective
+/// @param[out] o_bad_bits_per_rank_mc structure that has the bytes that need to be assigned
+/// @return none
+///
+void setup_bad_bit_bytes(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
+                         const uint8_t (&i_bad_bits_phy)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                         bad_bits_per_rank_mc& o_bad_bits_per_rank_mc);
+
+///
+/// @brief Compute bad bits flag from the new bad bit found and the attribute value
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_current_bad_bits_mc the lane disable data swizzled to MC perspective
+/// @param[in] i_start_bad_bits_mc starting bad bits in mc perspective
+/// @param[in] i_bad_bit_attr attribute bad bit value
+/// @param[in,out] io_bad_bit_flag cumulative bad bit flag that is computed
+/// @return none
+///
+void compute_bad_bit_flag(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                          const uint8_t i_current_bad_bits_mc, const uint8_t i_start_bad_bits_mc,
+                          const uint8_t i_bad_bit_attr, bool& io_bad_bit_flag);
 
 ///
 /// @brief Handles any DQ errors found in the prior run

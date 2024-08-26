@@ -4708,19 +4708,6 @@ fapi2::ReturnCode disable_dram_with_bad_dq0(const fapi2::Target<fapi2::TARGET_TY
         uint8_t (&io_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
         PMU_SMB_DDR5U_1D_t& io_struct)
 {
-    static constexpr uint8_t PHY_TO_MC_BYTE[mss::ody::MAX_BYTES_PER_PORT]__attribute__ ((aligned (8))) =
-    {
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE0,
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE1,
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE2,
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE3,
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE4,
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE5,
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE6,
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE7,
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE8,
-        mss::ody::phy_swizzle::PHY_TO_MC_BYTE9
-    };
 
     // Note: the bits are from the IBM perspective (0 on the left), while the masks are from the Synopsys perspective (0 on the right)
     // The PHY treats the DRAM's bit 0 as the necessary bit to receive feedback. If the DRAM's bit 0 is disabled but the rest of the DRAM is good,
@@ -4737,6 +4724,7 @@ fapi2::ReturnCode disable_dram_with_bad_dq0(const fapi2::Target<fapi2::TARGET_TY
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
 
     uint8_t l_has_swizzle_detect_passed = 0;
+
     // If swizzle detect has passed, knock out DRAM with a bad DQ0
     // No need to count these as bad at this time, the algorithm will do that below
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT, i_target, l_has_swizzle_detect_passed));
@@ -4756,7 +4744,7 @@ fapi2::ReturnCode disable_dram_with_bad_dq0(const fapi2::Target<fapi2::TARGET_TY
     {
         for(uint8_t l_phy_byte = 0; l_phy_byte < mss::ody::MAX_BYTES_PER_PORT; ++l_phy_byte)
         {
-            const auto l_mc_byte = PHY_TO_MC_BYTE[l_phy_byte];
+            const auto l_mc_byte = mss::ody::PHY_TO_MC_BYTE[l_phy_byte];
             uint8_t l_disables_mc = 0;
             FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_target,
                                                 l_rank_info.get_phy_rank(),
@@ -4816,6 +4804,182 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Perform swizzle and compute the bad_bit_flag and update the
+///        start_bit and new_bit structures
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_dq_bad_bits_attr value of ATTR_BAD_DQ_BITMAP
+/// @param[in] i_current_bad_bits_phy the lane disable data in PHY perspective
+/// @param[in] i_start_bad_bits_phy starting bad bits in which the ranks and bits are in PHY perspective
+/// @param[in,out] io_bad_bit_flag cumulative bad bit flag that is computed
+/// @param[out] o_new_bad_bits_per_rank_mc structure for the bytes after the swizzle for new bad bits
+/// @param[out] o_start_bad_bits_per_rank_mc structure for the bytes after the swizzle for the start bad bits
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode swizzle_and_compute_bad_bit_flag_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t (&i_dq_bad_bits_attr)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        const uint8_t (&i_current_bad_bits_phy)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        const uint8_t (&i_start_bad_bits_phy)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        bool& io_bad_bit_flag,
+        bad_bits_per_rank_mc& o_new_bad_bits_per_rank_mc,
+        bad_bits_per_rank_mc& o_start_bad_bits_per_rank_mc)
+{
+    std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+
+    // Intermediate arrays to get the start and new bad bits
+    uint8_t l_start_bad_bits_mc[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]__attribute__ ((aligned (8))) = {};
+    uint8_t l_current_bad_bits_mc[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]__attribute__ ((aligned (8))) = {};
+
+    memset(&o_new_bad_bits_per_rank_mc, 0, sizeof(bad_bits_per_rank_mc));
+    memset(&o_start_bad_bits_per_rank_mc, 0, sizeof(bad_bits_per_rank_mc));
+
+    // Get the rank infos
+    FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(i_target, l_rank_infos));
+
+    // Loops over all configured ranks
+    for(const auto& l_rank_info : l_rank_infos)
+    {
+        const auto& l_phy_rank = l_rank_info.get_phy_rank();
+        const auto& l_dimm_rank = l_rank_info.get_dimm_rank();
+
+        for(uint8_t l_phy_byte = 0; l_phy_byte < mss::ody::MAX_BYTES_PER_PORT; ++l_phy_byte)
+        {
+            // Convert the phy_byte to mc_byte
+            const auto l_mc_byte = mss::ody::PHY_TO_MC_BYTE[l_phy_byte];
+            // Swizzle the array to mc perspective and save it in a local array
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_target,
+                                                l_phy_rank,
+                                                l_phy_byte,
+                                                i_current_bad_bits_phy[l_phy_rank][l_mc_byte],
+                                                l_current_bad_bits_mc[l_phy_rank][l_mc_byte]));
+
+            FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_target,
+                                                l_phy_rank,
+                                                l_phy_byte,
+                                                i_start_bad_bits_phy[l_phy_rank][l_mc_byte],
+                                                l_start_bad_bits_mc[l_phy_rank][l_mc_byte]));
+
+            // Compute bad bits flag from the new bad bit found and the attribute value
+            // 1. Check if either l_current_bad_bits_mc or the l_start_bad_bits_mc has bad bits
+            // 2. Then compute the bad_bit_flag from the new bad bit and the attribute value
+            compute_bad_bit_flag(i_target,
+                                 l_current_bad_bits_mc[l_phy_rank][l_mc_byte],
+                                 l_start_bad_bits_mc[l_phy_rank][l_mc_byte],
+                                 i_dq_bad_bits_attr[l_dimm_rank][l_mc_byte],
+                                 io_bad_bit_flag);
+        }
+    }
+
+    // Get the bytes into uint32_t for rank0 and rank1 for start bad bits
+    setup_bad_bit_bytes(l_rank_infos, l_start_bad_bits_mc, o_start_bad_bits_per_rank_mc);
+
+    // Note: Synopsys uses R2 when the chips are in redundant CS mode
+    // Pushing this up as is due to program timelines and will fix it up to incorporate redundant CS mode in a future commit
+    // R1 is ok for the IBM side as IBM uses R0 and R1
+    // Get the bytes into uint32_t for rank0 and rank1 (IBM perpsective) for new bad bits
+    setup_bad_bit_bytes(l_rank_infos, l_current_bad_bits_mc, o_new_bad_bits_per_rank_mc);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Setup the bytes using the bad bits arrays
+/// @param[in] i_rank_infos vector of rank infos
+/// @param[in] i_bad_bits_mc the bad array that has the swizzled bytes in mc perspective
+/// @param[out] o_bad_bits_per_rank_mc structure that has the bytes that need to be assigned
+/// @return none
+/// @note the ranks are in the PHY perspective
+///
+void setup_bad_bit_bytes(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
+                         const uint8_t (&i_bad_bits_mc)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                         bad_bits_per_rank_mc& o_bad_bits_per_rank_mc)
+{
+    for(const auto& l_rank_info : i_rank_infos)
+    {
+        // Since we are doing 1 rank per dimm: index 0 is dimm0 and index 2 is dimm1
+        const auto& l_phy_rank = l_rank_info.get_phy_rank();
+        const auto& l_port_rank = l_rank_info.get_port_rank();
+
+        o_bad_bits_per_rank_mc.iv_bad_bits_byte0_3[l_port_rank] = i_bad_bits_mc[l_phy_rank][0] << (BITS_PER_BYTE * 3) |
+                i_bad_bits_mc[l_phy_rank][1] << (BITS_PER_BYTE * 2) |
+                i_bad_bits_mc[l_phy_rank][2] << BITS_PER_BYTE  |
+                i_bad_bits_mc[l_phy_rank][3];
+        o_bad_bits_per_rank_mc.iv_bad_bits_byte4_7[l_port_rank] = i_bad_bits_mc[l_phy_rank][4] << (BITS_PER_BYTE * 3) |
+                i_bad_bits_mc[l_phy_rank][5] << (BITS_PER_BYTE * 2) |
+                i_bad_bits_mc[l_phy_rank][6] << BITS_PER_BYTE  |
+                i_bad_bits_mc[l_phy_rank][7];
+        o_bad_bits_per_rank_mc.iv_bad_bits_byte8_9[l_port_rank] = i_bad_bits_mc[l_phy_rank][8] << BITS_PER_BYTE  |
+                i_bad_bits_mc[l_phy_rank][9];
+    }
+}
+
+
+///
+/// @brief Compute bad bits flag from the new bad bit found and the attribute value
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_current_bad_bits_mc the lane disable data swizzled to MC perspective
+/// @param[in] i_start_bad_bits_mc starting bad bits in mc perspective
+/// @param[in] i_bad_bit_attr attribute bad bit value
+/// @param[in,out] io_bad_bit_flag cumulative bad bit flag that is computed
+/// @return none
+///
+void compute_bad_bit_flag(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                          const uint8_t i_current_bad_bits_mc, const uint8_t i_start_bad_bits_mc,
+                          const uint8_t i_bad_bit_attr, bool& io_bad_bit_flag)
+{
+    // If the flag is true the XOR would always be true which means
+    // once we have a new bad bit no need to check further
+    if(io_bad_bit_flag)
+    {
+        // No need to check if the flag is already set
+        return;
+    }
+
+    // Inverse the attr value
+    const uint8_t l_inv_bad_bits_attr = ~(i_bad_bit_attr);
+
+    // Check if either i_current_bad_bits_mc or the i_start_bad_bits_mc has bad bits
+    //----------------------------------------------------------------------
+    // i_current_bad_bits_mc | i_start_bad_bits_mc | l_new_bad_bit(XOR)    |
+    //----------------------------------------------------------------------
+    //                 0     |           0         | (no bad bits)         |
+    //                 0     |           1         | *(new bad bits found) |
+    //                 1     |           0         | *(new bad bits found) |
+    //                 1     |           1         | (no new bad bits)     |
+    //----------------------------------------------------------------------
+    // 1. If both have bad bits set then it not a new bad bit
+    // 2. If both do not have bad bits set there are no bad bits
+    const uint8_t l_new_bad_bit = i_current_bad_bits_mc ^ i_start_bad_bits_mc;
+
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " i_current_bad_bits_mc: 0x%02x, i_start_bad_bits_mc: 0x%02x, l_new_bad_bit: 0x%02x",
+                    TARGTID,
+                    i_current_bad_bits_mc, i_start_bad_bits_mc, l_new_bad_bit);
+
+    //------------------------------------------------------------------------------------
+    //i_bad_bit_attr      | ~i_bad_bit_attr     | l_new_bad_bit | io_bad_bit_flag(AND)   |
+    //------------------------------------------------------------------------------------
+    //        0           |          1          |       0       |           0            |
+    //        1           |          0          |       0       |           0            |
+    //        0           |          1          |       1       |           1            |
+    //        1           |          0          |       1       |           0            |
+    //------------------------------------------------------------------------------------
+    // 1. If new_bad_bit is found and there is no bad bit set
+    //    in the attr then we have a new bad bit
+    // 2. If new_bad_bit is found and there is already bad bit
+    //    set in the attr then we have no new bad bits
+    // 3. If new_bad_bit is not found then we have no new bad bits
+    //
+    // Compute the bad bit flag cumulative
+    io_bad_bit_flag |= l_new_bad_bit & l_inv_bad_bits_attr;
+
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " i_bad_bit_attr: 0x%02x, ~i_bad_bit_attr: 0x%02x, l_new_bad_bit: 0x%02x", TARGTID,
+                    i_bad_bit_attr, ~i_bad_bit_attr, l_new_bad_bit);
+
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " io_bad_bit_flag: %d", TARGTID, io_bad_bit_flag);
+
+}
+
+///
 /// @brief Handles any DQ errors found in the prior run
 /// @param[in] i_target the memory port on which to operate
 /// @param[in,out] io_status the status of the last training run
@@ -4830,53 +4994,51 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                                    PMU_SMB_DDR5U_1D_t& io_struct,
                                    fapi2::hwp_data_ostream& o_log_data)
 {
+    uint8_t l_current_bad_bits_phy[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]__attribute__ ((aligned (8))) = {};
+    uint8_t l_dq_bad_bits_attr[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]__attribute__ ((aligned (8))) = {};
+    bad_bits_per_rank_mc l_start_bad_bits_per_rank_mc;
+    bad_bits_per_rank_mc l_new_bad_bits_per_rank_mc;
+    bool l_bad_bit_flag = false;
+
+    // Get the attribute dq_bad_bits into an array
+    for ( const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target) )
+    {
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_BAD_DQ_BITMAP, l_dimm, l_dq_bad_bits_attr) );
+    }
+
+    // If io_start_bits and io_struct are not matching that means there is a new bad bit
+    // So prepare the bad bit for swizzle
     if(has_new_bad_bits(io_start_bad_bits, io_struct))
     {
-        // Get the bytes into uint32_t for rank0 and rank1 for start bad bits
-        uint32_t l_start_bad_bits_r0_byte0_3 = io_start_bad_bits[0][0] << 24 | io_start_bad_bits[0][1] << 16 |
-                                               io_start_bad_bits[0][2] << 8 | io_start_bad_bits[0][3];
-        uint32_t l_start_bad_bits_r0_byte4_7 = io_start_bad_bits[0][4] << 24 | io_start_bad_bits[0][5] << 16 |
-                                               io_start_bad_bits[0][6] << 8 | io_start_bad_bits[0][7];
-        uint16_t l_start_bad_bits_r0_byte8_9 = io_start_bad_bits[0][8] << 8 | io_start_bad_bits[0][9];
-        uint32_t l_start_bad_bits_r1_byte0_3 = io_start_bad_bits[1][0] << 24 | io_start_bad_bits[1][1] << 16 |
-                                               io_start_bad_bits[1][2] << 8 | io_start_bad_bits[1][3];
-        uint32_t l_start_bad_bits_r1_byte4_7 = io_start_bad_bits[1][4] << 24 | io_start_bad_bits[1][5] << 16 |
-                                               io_start_bad_bits[1][6] << 8 | io_start_bad_bits[1][7];
-        uint16_t l_start_bad_bits_r1_byte8_9 = io_start_bad_bits[1][8] << 8 | io_start_bad_bits[1][9];
+        // Extract the io_struct into an array
+        extract_disable_bits(io_struct, l_current_bad_bits_phy);
 
-        // Note: Synopsys uses R2 when the chips are in redundant CS mode
-        // Pushing this up as is due to program timelines and will fix it up to incorporate redundant CS mode in a future commit
-        // R1 is ok for the IBM side as IBM uses R0 and R1
-        // Get the bytes into uint32_t for rank0 and rank1 (IBM perpsective) for new bad bits
-        uint32_t l_new_bad_bits_r0_byte0_3 = io_struct.DisabledDB0LaneR0 << 24 | io_struct.DisabledDB1LaneR0 << 16 |
-                                             io_struct.DisabledDB2LaneR0 << 8 | io_struct.DisabledDB3LaneR0;
-        uint32_t l_new_bad_bits_r0_byte4_7 = io_struct.DisabledDB4LaneR0 << 24 | io_struct.DisabledDB5LaneR0 << 16 |
-                                             io_struct.DisabledDB6LaneR0 << 8 | io_struct.DisabledDB7LaneR0;
-        uint16_t l_new_bad_bits_r0_byte8_9 = io_struct.DisabledDB8LaneR0 << 8 | io_struct.DisabledDB9LaneR0;
-
-        uint32_t l_new_bad_bits_r1_byte0_3 = io_struct.DisabledDB0LaneR2 << 24 | io_struct.DisabledDB1LaneR2 << 16 |
-                                             io_struct.DisabledDB2LaneR2 << 8 | io_struct.DisabledDB3LaneR2;
-        uint32_t l_new_bad_bits_r1_byte4_7 = io_struct.DisabledDB4LaneR2 << 24 | io_struct.DisabledDB5LaneR2 << 16 |
-                                             io_struct.DisabledDB6LaneR2 << 8 | io_struct.DisabledDB7LaneR2;
-        uint16_t l_new_bad_bits_r1_byte8_9 = io_struct.DisabledDB8LaneR2 << 8 | io_struct.DisabledDB9LaneR2;
-
+        // Swizzle and compute bad bit flag and update the
+        // l_start_bad_bits_per_rank_mc and l_start_bad_bits_per_rank_mc
+        FAPI_TRY(swizzle_and_compute_bad_bit_flag_helper(i_target,
+                 l_dq_bad_bits_attr,
+                 l_current_bad_bits_phy,
+                 io_start_bad_bits,
+                 l_bad_bit_flag,
+                 l_start_bad_bits_per_rank_mc,
+                 l_new_bad_bits_per_rank_mc));
 
         // When running training with all options, new bad_bit disables found
-        FAPI_ASSERT_NOEXIT(false,
+        FAPI_ASSERT_NOEXIT(l_bad_bit_flag,
                            fapi2::ODY_DRAMINIT_NEW_BAD_BITS_FOUND(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                            .set_PORT_TARGET(i_target)
-                           .set_START_BAD_BITS_R0_BYTE0_3(l_start_bad_bits_r0_byte0_3)
-                           .set_START_BAD_BITS_R0_BYTE4_7(l_start_bad_bits_r0_byte4_7)
-                           .set_START_BAD_BITS_R0_BYTE8_9(l_start_bad_bits_r0_byte8_9)
-                           .set_START_BAD_BITS_R1_BYTE0_3(l_start_bad_bits_r1_byte0_3)
-                           .set_START_BAD_BITS_R1_BYTE4_7(l_start_bad_bits_r1_byte4_7)
-                           .set_START_BAD_BITS_R1_BYTE8_9(l_start_bad_bits_r1_byte8_9)
-                           .set_NEW_BAD_BITS_R0_BYTE0_3(l_new_bad_bits_r0_byte0_3)
-                           .set_NEW_BAD_BITS_R0_BYTE4_7(l_new_bad_bits_r0_byte4_7)
-                           .set_NEW_BAD_BITS_R0_BYTE8_9(l_new_bad_bits_r0_byte8_9)
-                           .set_NEW_BAD_BITS_R1_BYTE0_3(l_new_bad_bits_r1_byte0_3)
-                           .set_NEW_BAD_BITS_R1_BYTE4_7(l_new_bad_bits_r1_byte4_7)
-                           .set_NEW_BAD_BITS_R1_BYTE8_9(l_new_bad_bits_r1_byte8_9),
+                           .set_START_BAD_BITS_R0_BYTE0_3(l_start_bad_bits_per_rank_mc.iv_bad_bits_byte0_3[0])
+                           .set_START_BAD_BITS_R0_BYTE4_7(l_start_bad_bits_per_rank_mc.iv_bad_bits_byte4_7[0])
+                           .set_START_BAD_BITS_R0_BYTE8_9(l_start_bad_bits_per_rank_mc.iv_bad_bits_byte8_9[0])
+                           .set_START_BAD_BITS_R1_BYTE0_3(l_start_bad_bits_per_rank_mc.iv_bad_bits_byte0_3[1])
+                           .set_START_BAD_BITS_R1_BYTE4_7(l_start_bad_bits_per_rank_mc.iv_bad_bits_byte4_7[1])
+                           .set_START_BAD_BITS_R1_BYTE8_9(l_start_bad_bits_per_rank_mc.iv_bad_bits_byte8_9[1])
+                           .set_NEW_BAD_BITS_R0_BYTE0_3(l_new_bad_bits_per_rank_mc.iv_bad_bits_byte0_3[0])
+                           .set_NEW_BAD_BITS_R0_BYTE4_7(l_new_bad_bits_per_rank_mc.iv_bad_bits_byte4_7[0])
+                           .set_NEW_BAD_BITS_R0_BYTE8_9(l_new_bad_bits_per_rank_mc.iv_bad_bits_byte8_9[0])
+                           .set_NEW_BAD_BITS_R1_BYTE0_3(l_new_bad_bits_per_rank_mc.iv_bad_bits_byte0_3[1])
+                           .set_NEW_BAD_BITS_R1_BYTE4_7(l_new_bad_bits_per_rank_mc.iv_bad_bits_byte4_7[1])
+                           .set_NEW_BAD_BITS_R1_BYTE8_9(l_new_bad_bits_per_rank_mc.iv_bad_bits_byte8_9[1]),
                            TARGTIDFORMAT "New bad_bit disables found ", TARGTID
                           );
     }

@@ -339,6 +339,20 @@ enum phy_swizzle
     PHY_TO_MC_BYTE9 = 9,
 };
 
+static constexpr uint8_t PHY_TO_MC_BYTE[mss::ody::MAX_BYTES_PER_PORT]__attribute__ ((aligned (8))) =
+{
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE0,
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE1,
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE2,
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE3,
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE4,
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE5,
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE6,
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE7,
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE8,
+    mss::ody::phy_swizzle::PHY_TO_MC_BYTE9
+};
+
 } // namespace ody
 
 } // namespace mss
