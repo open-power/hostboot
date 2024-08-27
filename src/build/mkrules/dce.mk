@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2023
+# Contributors Listed Below - COPYRIGHT 2021,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -33,6 +33,12 @@ else
 DCE_LISTING_FILE := %.dce.lid.debug
 DCE_TEST_LISTING_FILE := %.dce.test.lid.debug
 endif
+
+# Contains all the .C and .H files listed as extra files. This is used to create dependencies for make rules so if a
+# .C or .H changes the make invocation will fire again properly.
+DCE_EXTRA_FILES_C_H := $(filter %.C %.H, $(DCE_EXTRA_FILES))
+# Contains only the .C files listed as extra files. Passed to dce-compile to generate the lid.
+DCE_EXTRA_FILES_C := $(filter %.C, $(DCE_EXTRA_FILES_C_H))
 
 # Rules for testing if DCE has all required dependencies to make a particular target
 
@@ -78,13 +84,13 @@ $(HB_TEST_DEPENDENCIES):
 # Test image versions of the above rules, for standalone SIMICS.
 
 .PRECIOUS: %.dce.test.lid.debug
-%.dce.test.lid.debug: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(HB_TEST_DEPENDENCIES)
-	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -gz" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@ $(INCFLAGS) >/dev/null 2>&1
+%.dce.test.lid.debug: %.C $(DCE_EXTRA_FILES_C_H) $(HB_TEST_DEPENDENCIES)
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -gz" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter-out %$<, $(DCE_EXTRA_FILES_C)) -o $@ $(INCFLAGS) >/dev/null 2>&1
 	$(OBJDUMP) --source -d -C $@ > $@.list
 
 .PRECIOUS: %.dce.test.lid.intermediate
-%.dce.test.lid.intermediate: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(HB_TEST_DEPENDENCIES)
-	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -s" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@ $(INCFLAGS)
+%.dce.test.lid.intermediate: %.C $(DCE_EXTRA_FILES_C_H) $(HB_TEST_DEPENDENCIES)
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -s" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter-out %$<, $(DCE_EXTRA_FILES_C)) -o $@ $(INCFLAGS)
 	HB_DCE_TEST_IMAGE=1 $(ROOTPATH)/src/build/tools/dce/preplib.py $@
 
 %.dce.test.lid: %.dce.test.lid.intermediate $(DCE_TEST_LISTING_FILE)

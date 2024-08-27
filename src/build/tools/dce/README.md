@@ -362,13 +362,26 @@ needed. This file is not automatically sourced, it must be manually sourced by t
 users accidentally committing their personalized version of the file. If an update to dce_rc is required for all users
 then be sure to include the file in the commit with `git add -f`.
 
-If you are going to source this file, you must not place your main DCE file in the same location as
-DCE_EXTRA_FILES_LOCATION as this will cause compile issues. (multiple definition errors from being included in the
-compile twice).
-
 There a few helpful env vars but DCE_EXTRA_FILES should be left alone. It's defaulted to populate itself with
 all additional files required for the main .C file. All you need to do is update DCE_EXTRA_FILES_LOCATION if you want
 to locate your files elsewhere from the default.
+
+Here are a few helpful aliases which can make compiling with extra files less cumbersome:
+
+# For standalone simics
+alias dmkt='. $PROJECT_ROOT/src/build/tools/dce/dce-extra-files/dce_rc; make $DCE_MAIN_FILE.dce.test.lid -j32 && \cp $DCE_MAIN_FILE.dce.test.lid $PROJECT_ROOT/standalone/simics'
+
+# For hardware
+alias dmk='. $PROJECT_ROOT/src/build/tools/dce/dce-extra-files/dce_rc; make $DCE_MAIN_FILE.dce.lid'
+
+Both of these aliases source the dce_rc each time the alias is called to compile a DCE lid so that any additions to the
+extra files folder, incdirs, etc are always picked up before the compile. These aliases require you define DCE_MAIN_FILE
+which is simply the file with the main function in it. From the above multi-file example you'd define it as:
+
+export DCE_MAIN_FILE=foo
+
+The simics alias will copy the DCE lid to the standalone simics directory for you so you don't have to remember or type
+in the file path to the lid. Instead you can just type 'hb-executeDCELid foo.dce.test.lid'
 
 #### Symlinking hostboot code into DCE_EXTRA_FILES_LOCATION
 
