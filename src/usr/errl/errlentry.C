@@ -532,21 +532,20 @@ void ErrlEntry::collectTrace(std::list<const char*>      &i_comps,
 
 ////////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::collectThreadTrace(std::list<const char*> &i_comps,
-                                            const uint64_t i_max)
+                                   std::list<tid_t> &i_tids,
+                                   const uint64_t i_max)
 {
     ErrlUD                     *l_udSection{nullptr};
     TRACE::trace_buf_head_v2_t *l_tbh;
     char                       *l_buf;
     uint64_t                    l_size{0};
-    std::list<tid_t>            l_tids;
 
     l_buf  = new char[i_max];
     l_tbh  = reinterpret_cast<TRACE::trace_buf_head_v2_t*>(l_buf);
 
-    task_gettids(l_tids);
 
     // get the traces for i_comps into l_buf
-    l_size = TRACE::getBuffer(i_comps, l_tids, l_buf, i_max);
+    l_size = TRACE::getBuffer(i_comps, i_tids, l_buf, i_max);
 
     // Save the trace buffer as a UD section on this.
     l_udSection = new ErrlUD(l_tbh->getBufPtr(),
@@ -562,13 +561,51 @@ void ErrlEntry::collectThreadTrace(std::list<const char*> &i_comps,
 
     return;
 }
+////////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::collectThreadTrace(const tid_t i_tid,
+                                   const uint64_t i_max)
+{
+        std::list<const char*> l_comps;
+        std::list<tid_t> l_tids{i_tid};
 
+        collectThreadTrace(l_comps,l_tids,i_max);
+
+        return;
+}
+////////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::collectThreadTrace(std::list<const char*> &i_comps,
+                                   const uint64_t i_max)
+{
+        std::list<tid_t>        l_tids;
+
+        task_gettids(l_tids);
+
+        collectThreadTrace(i_comps, l_tids, i_max);
+
+        return;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void ErrlEntry::collectThreadTrace(const char i_name[], const uint64_t i_max)
+{
+        std::list<tid_t> l_tids;
+        std::list<const char*> l_comps{i_name};
+
+        task_gettids(l_tids);
+
+        collectThreadTrace(l_comps,l_tids,i_max);
+
+        return;
+}
 ////////////////////////////////////////////////////////////////////////////////
 void ErrlEntry::collectThreadTrace(const uint64_t i_max)
 {
     std::list<const char*> l_comps;
+    std::list<tid_t>     l_tids;
 
-    collectThreadTrace(l_comps, i_max);
+    task_gettids(l_tids);
+
+    collectThreadTrace(l_comps, l_tids, i_max);
 
     return;
 }

@@ -820,6 +820,61 @@ public:
                                      const uint64_t i_max = KILOBYTE);
 
     /**
+     *  @brief Collect component trace and filter by Thread IDs
+     *
+     *  The trace buffer named is collected and added to the error
+     *  log, after filtering by Thread IDs.  The amount of traces is controlled
+     *  by the i_max parameter. The i_max value must be big enough to hold a trace
+     *  buffer header (40 bytes) plus some trace data. For example, a trace
+     *  entry with n bytes of data is n+28 bytes in size.
+     *
+     *  @param[in]  i_name[]  Trace buffer name
+     *  @param[in]  i_max   Size limit of trace to capture
+     */
+
+    void collectThreadTrace(const char i_name[],
+                            const uint64_t i_max = KILOBYTE);
+    /*
+     *  @brief Collect component traces and filter by Thread ID
+     *
+     *  The trace buffers are collected and added to the error
+     *  log, after filtering by the named Thread ID.  The amount of traces is controlled
+     *  by the i_max parameter. The i_max value must be big enough to hold a trace
+     *  buffer header (40 bytes) plus some trace data. For example, a trace
+     *  entry with n bytes of data is n+28 bytes in size.
+     *
+     *  @param[in]  i_tid   Thread id
+     *  @param[in]  i_max   Size limit of trace to capture
+     */
+    void collectThreadTrace(const tid_t i_tid,
+                            const uint64_t i_max = KILOBYTE);
+
+    /*
+     *  @brief Collect component traces for specific Thread IDs
+     *
+     *  The trace buffers named are collected and added to the error
+     *  log, after filtering by the Thread IDs passed in. The amount of
+     *  traces is controlled by the i_max parameter. The i_max value
+     *  must be big enough to hold a trace buffer header (40 bytes)
+     *  plus some trace data. For example, a trace entry with n bytes
+     *  of data is n+28 bytes in size.
+     *
+     *  The traces from this thread and the parent threads are collected from
+     *  the first component in the list, then the second, and so on until i_max
+     *  is reached. They are then sorted by timestamps.
+     *
+     *  Note that component names given in hbotcompid.H do not necessarily
+     *  map to the names of trace buffers created by that component.
+     *  Trace buffer names are case insensitive.
+     *
+     *  @param[in]  i_comps  List of components to capture
+     *  @param[in]  i_tids    List of Thread IDs to filter by
+     *  @param[in]  i_max    Size limit of trace to capture
+     */
+    void collectThreadTrace(std::list<const char*> &i_comps,
+                            std::list<tid_t> &i_tids,
+                            const uint64_t i_max = KILOBYTE);
+    /**
      *  @brief Get the flattened size of the errl entry and the max possible
      *  size of the errl entry.  Function also rmeoves duplicate traces.
      *

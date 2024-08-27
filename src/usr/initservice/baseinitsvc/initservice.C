@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -315,6 +315,8 @@ errlHndl_t InitService::startTask(
                                     l_tidretrc, l_childsts, hbSwError,
                                     hbDump);
 
+            l_errl->collectThreadTrace(l_tidretrc);
+
             // Add Printk Buffer for FFDC.
             ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
 
@@ -450,6 +452,9 @@ errlHndl_t InitService::executeFn(
                                     l_tidretrc, l_childsts, hbSwError,
                                     hbDump);
 
+            // Identify failing threads and tracing
+
+            l_errl->collectThreadTrace(l_tidretrc);
             // Add Printk Buffer for FFDC.
             ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
 
