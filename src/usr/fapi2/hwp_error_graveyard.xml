@@ -1,0 +1,56 @@
+<!-- IBM_PROLOG_BEGIN_TAG                                                   -->
+<!-- This is an automatically generated prolog.                             -->
+<!--                                                                        -->
+<!-- $Source: src/usr/fapi2/hwp_error_graveyard.xml $                       -->
+<!--                                                                        -->
+<!-- OpenPOWER HostBoot Project                                             -->
+<!--                                                                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2024                             -->
+<!-- [+] International Business Machines Corp.                              -->
+<!--                                                                        -->
+<!--                                                                        -->
+<!-- Licensed under the Apache License, Version 2.0 (the "License");        -->
+<!-- you may not use this file except in compliance with the License.       -->
+<!-- You may obtain a copy of the License at                                -->
+<!--                                                                        -->
+<!--     http://www.apache.org/licenses/LICENSE-2.0                         -->
+<!--                                                                        -->
+<!-- Unless required by applicable law or agreed to in writing, software    -->
+<!-- distributed under the License is distributed on an "AS IS" BASIS,      -->
+<!-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or        -->
+<!-- implied. See the License for the specific language governing           -->
+<!-- permissions and limitations under the License.                         -->
+<!--                                                                        -->
+<!-- IBM_PROLOG_END_TAG                                                     -->
+<!-- ********************************************************************   -->
+<!-- This file contains HWP RC definitons that have been removed from the   -->
+<!-- most current version of the code. The definitons will be kept here to  -->
+<!-- ensure that the most current version of the PEL parsing tools can      -->
+<!-- understand errors logged by older levels of code.                      -->
+<!-- RC defintions included in this file were discovered through comparing  -->
+<!-- the branches main-p11(most recent) to release-fw1060.                  -->
+<hwpErrors>
+<!-- ******************************************************************** -->
+    <hwpError>
+        <sbeError/>
+        <rc>RC_POZ_IMMEDIATE_CLOCKSTOP_ON_XSTOP</rc>
+        <description>Immediate clock stop on xstop</description>
+    </hwpError>
+<!-- ******************************************************************** -->
+    <hwpError>
+        <sbeError/>
+        <rc>RC_ODY_DRAMINIT_HARDCODE_UNSUPPORTED</rc>
+        <description>Ody draminit using hardcoded values is unsupported on the SBE.</description>
+        <ffdc>PORT_TARGET</ffdc>
+    </hwpError>
+<!-- ******************************************************************** -->
+    <hwpError>
+        <sbeError/>
+        <rc>RC_POZ_STREAM_GET_FAILED</rc>
+        <description>SBE stream get failed</description>
+        <ffdc>WORDS_LEFT</ffdc>
+        <ffdc>DATA_IS_NULL</ffdc>
+   </hwpError>
+
+<!-- ******************************************************************** -->
+</hwpErrors>

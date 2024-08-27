@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -131,7 +131,8 @@ FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/chips/p10/procedures/xml/error_info/*.xml)
 FAPI2_ERROR_XML += $(wildcard \
   $(ROOTPATH)/src/import/hwpf/sbe_utils/xml/error_info/*.xml)
-
+FAPI2_ERROR_XML += $(wildcard \
+  $(ROOTPATH)/src/usr/fapi2/hwp_error_graveyard.xml)
 
 # Attribute XML files.
 FAPI2_ATTR_XML += $(wildcard \

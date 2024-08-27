@@ -182,16 +182,15 @@ foreach my $argnum (1 .. $#ARGV)
         my $errHash128Bit = md5_hex($err->{rc});
         my $errHash24Bit = substr($errHash128Bit, 0, 6);
 
-        print TGFILE "    case 0x$errHash24Bit:\n";
-        print TGFILE "        i_parser.PrintString(\"HwpReturnCode\", \"$err->{rc}\");\n";
-        print TGFILE "        i_parser.PrintString(\"HWP Error description\", \"$desc\");\n";
-        print TGFILE "        break;\n";
 
+        #--------------------------------------------------------------------
+        # Save error enum value, description, and return code to be sorted
+        # and printed next.
+        #--------------------------------------------------------------------
         $rcData{hex($errHash24Bit)} = { hash => $errHash24Bit,
                                         rc   => $err->{rc},
                                         desc => $desc         };
 
-        print EDISFILE "    { 0x$errHash24Bit, \"$err->{rc}\", \"$desc\" },\n";
     }
 
 }
@@ -203,6 +202,13 @@ foreach my $key (sort {$a <=> $b} keys %rcData)
     my %record = %{$rcData{$key}};
     print TGFILEPY "            0x$record{hash}: [ \"$record{rc}\",\n";
     print TGFILEPY "                        \"$record{desc}\" ],\n";
+
+    print TGFILE "    case 0x$record{hash}:\n";
+    print TGFILE "        i_parser.PrintString(\"HwpReturnCode\", \"$record{rc}\");\n";
+    print TGFILE "        i_parser.PrintString(\"HWP Error description\", \"$record{desc}\");\n";
+    print TGFILE "        break;\n";
+
+    print EDISFILE "    { 0x$record{hash}, \"$record{rc}\", \"$record{desc}\" },\n";
 }
 
 #------------------------------------------------------------------------------
@@ -258,6 +264,14 @@ close(EDISFILE);
 
 close(TGFILEPY);
 close(EDISFILEPY);
+
+#------------------------------------------------------------------------------
+# Open output files for writing
+#------------------------------------------------------------------------------
+my $rcFile = $ARGV[0];
+$rcFile .= "/";
+my $rcFilePY = $rcFile;
+
 
 #------------------------------------------------------------------------------
 # Open output files for writing
@@ -634,14 +648,6 @@ print EDISFILE "}\n\n";
 print TGFILEPY "    # if nothing is in dictionary yet, then ffdcId was not found\n";
 print TGFILEPY "    if len(d) == 0:\n";
 print TGFILEPY "        d[\"Unrecognized FFDC\"] = f\'0x{ffdcId:X}\'\n";
-print TGFILEPY "        if (len(data) - i):\n";
-print TGFILEPY "            d[\"Hex Dump\"]=hexDump(data, i, len(data))\n\n";
-print TGFILEPY "    jsonStr = json.dumps(d)\n";
-print TGFILEPY "    return jsonStr\n";
-
-#------------------------------------------------------------------------------
-# Print end of file info
-#------------------------------------------------------------------------------
 print TGFILE "}\n\n";
 print TGFILE "#endif\n";
 print TGFILE "#endif\n";
