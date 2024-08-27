@@ -72,13 +72,14 @@ fapi2::ReturnCode insert_des<mss::mc_type::ODYSSEY>(
 
     // Grab port index and first inst
 
-    FAPI_ASSERT(io_inst_count <= TT::MAX_INST_DEPTH,
+    FAPI_ASSERT(io_inst_count < TT::CCS_ARRAY_LEN,
                 fapi2::MSS_CONCURRENT_CCS_EXCEEDS_INSTRUCTION_LIMIT()
                 .set_MC_TARGET(i_target)
                 .set_REQUESTED_INSTRUCTIONS(io_inst_count)
-                .set_MAX_INSTRUCTIONS(TT::MAX_INST_DEPTH),
-                TARGTIDFORMAT "Over CCS concurrent instructions limit, requested %d instructions", TARGTID,
-                io_inst_count);
+                .set_MAX_INSTRUCTIONS(TT::CCS_ARRAY_LEN),
+                TARGTIDFORMAT "Over CCS concurrent instructions limit, received: %d instructions, MAX: %d instructions", TARGTID,
+                io_inst_count,
+                TT::CCS_ARRAY_LEN);
 
     // If first instruction pass delay of trfc, otherwise assume its last and pass delay of 1
     if(io_inst_count == 0)

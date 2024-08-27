@@ -235,24 +235,6 @@ inline void parity_after_cmd( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& 
 }
 
 ///
-/// @brief DDr calibration counter
-/// @tparam MC the memory controller type which executes the CCS instruction
-/// @tparam T the target type of the chiplet which executes the CCS instruction
-/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
-/// @param[in] the target to effect
-/// @param[in,out] io_buffer the buffer representing the mode register
-/// @param[in] i_count the count to wait for DDR cal to complete.
-/// @param[in] i_mult the DDR calibration time multiplaction factor
-///
-template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
-inline void cal_count( const fapi2::Target<T>&, fapi2::buffer<uint64_t>& io_buffer,
-                       const uint64_t i_count, const uint64_t i_mult)
-{
-    io_buffer.insertFromRight<TT::DDR_CAL_TIMEOUT_CNT, TT::DDR_CAL_TIMEOUT_CNT_LEN>(i_count);
-    io_buffer.insertFromRight<TT::DDR_CAL_TIMEOUT_CNT_MULT, TT::DDR_CAL_TIMEOUT_CNT_MULT_LEN>(i_mult);
-}
-
-///
 /// @brief Copy CKE signals to CKE Spare on both ports NOTE: DOESN'T APPLY FOR NIMBUS. NO
 ///        SPARE CHIPS TO COPY TO. 0 - Spare CKEs not copied with values from CKE(0:1) and
 ///         CKE(4:5) 1 - Port A CKE(0:1) copied to Port A CKE(2:3), Port A CKE(4:5) copied
@@ -650,12 +632,13 @@ fapi_try_exit:
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC>, typename IT = typename std::vector< mss::ccs::instruction_t<MC> >::iterator >
 static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& i_target,
-        IT io_inst_iter,
+        IT& io_inst_iter,
         ccs::program<MC>& io_program,
         const fapi2::Target<P>& i_port)
 {
     // Subtract one for the idle we insert at the end
     constexpr size_t CCS_INSTRUCTION_DEPTH = TT::MAX_INST_DEPTH;
+    constexpr size_t CCS_ARRAY_LEN = TT::CCS_ARRAY_LEN;
     constexpr uint64_t CCS_ARR0_ZERO = TT::CCS_ARR0_START;
     constexpr uint64_t CCS_ARR1_ZERO = TT::CCS_ARR1_START;
 
@@ -677,8 +660,8 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
 
     // Shove the instructions into the CCS engine, in 32 instruction chunks, and execute them
     // NOTE: For concurrent CCS the CCS_INSTRUCTION_DEPTH of 32 will never be hit
-    for (; io_inst_iter != io_program.iv_instructions.end()
-         && l_inst_count < CCS_INSTRUCTION_DEPTH; ++l_inst_count, ++io_inst_iter)
+    for (; io_inst_iter < io_program.iv_instructions.end()
+         && l_inst_count <= CCS_INSTRUCTION_DEPTH; ++l_inst_count, ++io_inst_iter)
     {
         // First, update the current instruction's chip selects for the current port
         FAPI_TRY(io_inst_iter->configure_rank(i_port, l_rank_configs[l_port_index]),
@@ -700,13 +683,13 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
         // Check that we have less than the maximum CCS instructions
         l_inst_offset_count = l_inst_count + io_inst_iter->iv_goto_instr_offset;
         FAPI_ASSERT(l_inst_offset_count >= 0 &&
-                    size_t(l_inst_offset_count) < CCS_INSTRUCTION_DEPTH,
+                    size_t(l_inst_offset_count) < CCS_ARRAY_LEN,
                     fapi2::MSS_INVALID_CCS_INSTR_OFFSET()
                     .set_MC_TARGET(i_target)
                     .set_INVALID_OFFSET(l_inst_offset_count)
                     .set_INST_COUNT(l_inst_count)
                     .set_OFFSET(io_inst_iter->iv_goto_instr_offset)
-                    .set_MAX_INSTRUCTIONS(CCS_INSTRUCTION_DEPTH),
+                    .set_MAX_INSTRUCTIONS(CCS_ARRAY_LEN),
                     TARGTIDFORMAT " CCS instruction offset points at invalid instruction index, current instruction: %d, offset: %d",
                     TARGTID, l_inst_count, l_inst_count + io_inst_iter->iv_goto_instr_offset);
 
@@ -714,8 +697,6 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
         (l_inst_offset_count);
         FAPI_TRY( mss::putScom(i_target, CCS_ARR0_ZERO + l_inst_count, io_inst_iter->arr0) );
         FAPI_TRY( mss::putScom(i_target, CCS_ARR1_ZERO + l_inst_count, io_inst_iter->arr1) );
-
-
 
         // arr1 contains a specification of the delay and repeat after this instruction, as well
         // as a repeat. Total up the delays as we go so we know how long to wait before polling
@@ -743,7 +724,6 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
     FAPI_TRY(workarounds::insert_des<MC>(i_target, i_port, l_inst_count, l_current_cke, l_rank_configs[l_port_index]));
 
 fapi_try_exit:
-    io_program.iv_instructions.clear();
     return fapi2::current_err;
 }
 
@@ -776,7 +756,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
               "Error setting up ccs engine before execution on " TARGTIDFORMAT, TARGTID );
 
     // Execute via standalone CCS
-    while (l_inst_iter != io_program.iv_instructions.end())
+    while (l_inst_iter < io_program.iv_instructions.end())
     {
         // Kick off the CCS engine - per port. No broadcast mode for CCS (per Shelton 9/23/15)
         for (const auto& p : i_ports)

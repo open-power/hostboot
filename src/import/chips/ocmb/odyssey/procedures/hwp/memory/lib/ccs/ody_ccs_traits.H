@@ -113,6 +113,7 @@ class ccsTraits<mss::mc_type::ODYSSEY>
 
             // CCS STATQ
             CCS_IN_PROGRESS = scomt::ody::ODC_MCBIST_SCOM_CCS_STATQ_CCS_IP,
+            CCS_DONE = scomt::ody::ODC_MCBIST_SCOM_CCS_STATQ_CCS_DONE,
 
             // ARR0
             ARR0_CMD0_ADDRESS_0_13 = scomt::ody::ODC_MCBIST_CCS_INST_ARR0_00_CMD0_ADDRESS,
