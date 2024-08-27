@@ -1139,6 +1139,39 @@
   </hwpError>
 
   <hwpError>
+    <rc>RC_MSS_PORT_SUPPORTS_NO_FREQUENCIES</rc>
+    <description>
+        The VPD on this memory port (EFD blocks in DDIMM SPD) does not indicate
+        support for any system-supported memory frequencies. This error could
+        also be caused by problems reading the SPD.
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>SYSTEM_SUPPORTED_FREQ0</ffdc>
+    <ffdc>SYSTEM_SUPPORTED_FREQ1</ffdc>
+    <ffdc>SYSTEM_SUPPORTED_FREQ2</ffdc>
+    <ffdc>SYSTEM_SUPPORTED_FREQ3</ffdc>
+    <ffdc>SYSTEM_SUPPORTED_FREQ4</ffdc>
+    <callout>
+      <procedure>MEMORY_PLUGGING_ERROR</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <callout>
+      <hw>
+        <hwid>VPD_PART</hwid>
+        <refTarget>PORT_TARGET</refTarget>
+      </hw>
+      <priority>LOW</priority>
+    </callout>
+  </hwpError>
+
+  <hwpError>
     <sbeError/>
     <rc>RC_MSS_PORT_DOES_NOT_SUPPORT_MAJORITY_FREQ</rc>
     <description>

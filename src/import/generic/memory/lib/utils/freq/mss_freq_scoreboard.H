@@ -705,6 +705,13 @@ fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_T
                                     const std::vector<std::vector<uint32_t>>& i_hw_freqs,
                                     freq_scoreboard& io_scoreboard)
 {
+    // Declaring temporary variables to avoid linker errors associated with FAPI_ASSERT
+    const auto FREQ0 = TT::SUPPORTED_FREQ0;
+    const auto FREQ1 = TT::SUPPORTED_FREQ1;
+    const auto FREQ2 = TT::SUPPORTED_FREQ2;
+    const auto FREQ3 = TT::SUPPORTED_FREQ3;
+    const auto FREQ4 = TT::SUPPORTED_FREQ4;
+
     const auto PORTS_PER_FREQ_DOMAIN = TT::PORTS_PER_FREQ_DOMAIN;
     FAPI_ASSERT(i_hw_freqs.size() == TT::PORTS_PER_FREQ_DOMAIN,
                 fapi2::MSS_INVALID_VPD_FREQ_LIST_PASSED()
@@ -718,12 +725,16 @@ fapi2::ReturnCode limit_freq_by_vpd(const fapi2::Target<TT::FREQ_DOMAIN_TARGET_T
         const auto l_port_pos = mss::relative_pos<MC, TT::FREQ_DOMAIN_TARGET_TYPE>(p);
         const auto& l_port_freqs = i_hw_freqs[l_port_pos];
 
-        // This is the list of supported frequencies for VPD
+        // Assert out if we have a port configured that doesn't support any frequencies
         FAPI_ASSERT( !l_port_freqs.empty(),
-                     fapi2::MSS_EMPTY_VECTOR().
-                     set_FUNCTION(LIMIT_FREQ_BY_VPD).
-                     set_TARGET(p),
-                     "Supported system freqs from VPD are empty for %s",
+                     fapi2::MSS_PORT_SUPPORTS_NO_FREQUENCIES().
+                     set_PORT_TARGET(p).
+                     set_SYSTEM_SUPPORTED_FREQ0(FREQ0).
+                     set_SYSTEM_SUPPORTED_FREQ1(FREQ1).
+                     set_SYSTEM_SUPPORTED_FREQ2(FREQ2).
+                     set_SYSTEM_SUPPORTED_FREQ3(FREQ3).
+                     set_SYSTEM_SUPPORTED_FREQ4(FREQ4),
+                     "%s VPD does not support any frequencies",
                      mss::c_str(p));
 
         for( const auto& freq : l_port_freqs )
