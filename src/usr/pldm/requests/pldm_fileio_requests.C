@@ -291,7 +291,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
             reinterpret_cast<const pldm_read_write_file_by_type_resp*>( pldm_response->payload  ));
 
         read_counter += le32toh(read_response->length);
-        if ((read_counter >= i_size) && (i_size != 0))
+        if ((read_counter > i_size) && (i_size != 0))
         {
             PLDM_ERR("getLidFileFromOffset: Size read (read_counter=%d) exceeds the callers buffer (i_size)=%d", read_counter, i_size);
             /*@
