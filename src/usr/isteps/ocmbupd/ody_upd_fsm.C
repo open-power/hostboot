@@ -1016,7 +1016,10 @@ errlOwner execute_actions(Target* const i_ocmb,
             case deconfigure_ocmb:
                 if (i_errlog && !manually_set_errl_sev)
                 {
-                    i_errlog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    if(!i_errlog->isSevVisible())
+                    {
+                        i_errlog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    }
                 }
 
                 errl = create_and_commit_ocmb_deconfigure_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event, i_errlog, apply_gard_record);
@@ -1037,7 +1040,10 @@ errlOwner execute_actions(Target* const i_ocmb,
             case delayed_deconfigure_ocmb:
                 if (i_errlog && !manually_set_errl_sev)
                 {
-                    i_errlog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    if(!i_errlog->isSevVisible())
+                    {
+                        i_errlog->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+                    }
                 }
 
                 create_and_commit_ocmb_delayed_deconfigure_log(i_ocmb, i_state, i_state_pattern, i_transition, i_event, i_errlog, apply_gard_record);
