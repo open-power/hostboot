@@ -42,6 +42,8 @@ namespace SBEIO
                   (SBEIO_UDT_SPPE_CODE_LEVELS);
                 registerParser<SBEIO::SbeIoOdyFfdcErrlParser>
                   (SBEIO_UDT_SPPE_FORMAT);
+                registerParser<SBEIO::UdParserSBEResponse>
+                  (SBEIO_UDT_SBE_RESPONSE);
             }
 
         private:
