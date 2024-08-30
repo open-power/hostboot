@@ -1960,7 +1960,7 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
     } while( 0 );
 
     TRACFCOMP(g_trac_tpmdd,EXIT_MRK"tpmReadAttributes() tgt=0x%X, "
-              "e/p/dA=%d/%d/0x%X, "
+              "e%d/p%d/dA=0x%X, "
               "Enabled=%d, Model=%d (attr model=%d), aS=%d, aO=%d",
               TARGETING::get_huid(i_target),
               io_tpmInfo.engine, io_tpmInfo.port, io_tpmInfo.devAddr,
