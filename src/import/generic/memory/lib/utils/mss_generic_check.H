@@ -282,8 +282,10 @@ inline fapi2::ReturnCode blame_firs( const fapi2::Target<T>& i_target, bool& o_f
 
     return fapi2::FAPI2_RC_SUCCESS;
 
+#if defined(__HOSTBOOT_MODULE) || defined(__PPE__)
 fapi_try_exit:
     return fapi2::current_err;
+#endif
 }
 
 ///
