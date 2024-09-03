@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,6 +60,7 @@
 #include <generic/memory/lib/utils/mc/gen_mss_port.H>
 #include <generic/memory/lib/utils/mc/gen_mss_restore_repairs.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
+#include <generic/memory/lib/utils/mcbist/gen_mss_mcbist_amap_config.H>
 
 namespace mss
 {

@@ -80,22 +80,7 @@ void configure_port(uint64_t& io_current_bit_index,
 template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode  configure_bank(const fapi2::Target<T>& i_target,
                                   uint64_t& io_current_bit_index,
-                                  mcbist::program<MC>& io_program)
-{
-    uint8_t l_attr_bank[2] = {};
-
-    // There are 2 bank address: BA0, BA1, BA2
-    FAPI_TRY(mss::attr::get_dram_bank_bits(i_target, l_attr_bank));
-    FAPI_DBG(TARGTIDFORMAT "l_attr_bank: %d", TARGTID, l_attr_bank[0]);
-    io_program.change_bank2_bit(l_attr_bank[0] > 2 ? io_current_bit_index-- : 0);
-    io_program.change_bank1_bit(l_attr_bank[0] > 1 ? io_current_bit_index-- : 0);
-    io_program.change_bank0_bit(l_attr_bank[0] > 0 ? io_current_bit_index-- : 0);
-    FAPI_DBG(TARGTIDFORMAT "After configure_bank() the current bit index: %d", TARGTID, io_current_bit_index);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
+                                  mcbist::program<MC>& io_program);
 
 ///
 /// @brief Configure the mranks
@@ -125,21 +110,7 @@ fapi2::ReturnCode configure_mranks(const fapi2::Target<T>& i_target,
 template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode configure_bank_groups(const fapi2::Target<T>& i_target,
                                         uint64_t& io_current_bit_index,
-                                        mcbist::program<MC>& io_program)
-{
-    uint8_t l_attr_bg_bits[2] = {};
-    // Get the attr for bank groups ATTR_MEM_EFF_DRAM_BANK_GROUP_BITS
-    // There are 3 bank groups: BG0, BG1, BG2
-    FAPI_TRY(mss::attr::get_dram_bank_group_bits(i_target, l_attr_bg_bits));
-    FAPI_DBG(TARGTIDFORMAT "l_attr_bg_bits: %d", TARGTID, l_attr_bg_bits[0]);
-    io_program.change_bank_group2_bit(l_attr_bg_bits[0] > 2 ? io_current_bit_index-- : 0);
-    io_program.change_bank_group1_bit(l_attr_bg_bits[0] > 1 ? io_current_bit_index-- : 0);
-    io_program.change_bank_group0_bit(l_attr_bg_bits[0] > 0 ? io_current_bit_index-- : 0);
-    FAPI_DBG(TARGTIDFORMAT "After configure_bank_groups() the current bit index: %d", TARGTID, io_current_bit_index);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
+                                        mcbist::program<MC>& io_program);
 
 ///
 /// @brief Configure the columns helper to handle special cases based on MC type

@@ -189,6 +189,61 @@ fapi2::ReturnCode configure_col_helper<mss::mc_type::ODYSSEY>(const fapi2::Targe
     return fapi2::current_err;
 
 }
+
+///
+/// @brief Configure the banks
+/// @param[in] i_target port target
+/// @param[in,out] io_current_bit_index bit index that is updated
+/// @param[in,out] io_program mcbist program
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template<>
+fapi2::ReturnCode configure_bank<mss::mc_type::ODYSSEY >(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        uint64_t& io_current_bit_index,
+        mcbist::program<mss::mc_type::ODYSSEY>& io_program)
+{
+    uint8_t l_attr_bank[2] = {};
+
+    // There are 3 bank address: BA0, BA1, BA2
+    FAPI_TRY(mss::attr::get_dram_bank_bits(i_target, l_attr_bank));
+    FAPI_DBG(TARGTIDFORMAT "l_attr_bank: %d", TARGTID, l_attr_bank[0]);
+    // There is some endiness difference b/w the IBM appdress map and JEDEC bit mapping, hence the mapping are swapped
+    io_program.change_bank0_bit(l_attr_bank[0] > 1 ? io_current_bit_index-- : 0);
+    io_program.change_bank1_bit(l_attr_bank[0] > 0 ? io_current_bit_index-- : 0);
+    FAPI_DBG(TARGTIDFORMAT "After configure_bank() the current bit index: %d", TARGTID, io_current_bit_index);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Configure the bank groups to handle special cases based on MC type
+/// @param[in] i_target port target
+/// @param[in,out] io_current_bit_index bit index that is updated
+/// @param[in,out] io_program mcbist program
+/// @return FAPI2_RC_SUCCESS iff everything ok
+///
+template<>
+fapi2::ReturnCode configure_bank_groups<mss::mc_type::ODYSSEY >(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>&
+        i_target,
+        uint64_t& io_current_bit_index,
+        mcbist::program<mss::mc_type::ODYSSEY>& io_program)
+{
+    uint8_t l_attr_bg_bits[2] = {};
+    // Get the attr for bank groups ATTR_MEM_EFF_DRAM_BANK_GROUP_BITS
+    // There are 3 bank groups address: BG0, BG1, BG2
+    FAPI_TRY(mss::attr::get_dram_bank_group_bits(i_target, l_attr_bg_bits));
+    FAPI_DBG(TARGTIDFORMAT "l_attr_bg_bits: %d", TARGTID, l_attr_bg_bits[0]);
+    // There is some endiness difference b/w the IBM appdress map and JEDEC bit mapping, hence the mapping are swapped
+    io_program.change_bank_group0_bit(l_attr_bg_bits[0] > 2 ? io_current_bit_index-- : 0);
+    io_program.change_bank_group1_bit(l_attr_bg_bits[0] > 1 ? io_current_bit_index-- : 0);
+    io_program.change_bank_group2_bit(l_attr_bg_bits[0] > 0 ? io_current_bit_index-- : 0);
+    FAPI_DBG(TARGTIDFORMAT "After configure_bank_groups() the current bit index: %d", TARGTID, io_current_bit_index);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 #endif
 
 ///
