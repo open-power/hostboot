@@ -738,17 +738,17 @@ void collect_additional_dt_data(mss::pmic::ddr5::target_info_redundancy_ddr5& io
             mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::OPS_STATE, l_dt_buffer);
             io_additional_info.iv_dt[l_dt_count].iv_r90_ops_state = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
 
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FAULTS_STATUS_0, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_r92_faults_status_0 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
-
-            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FAULTS_STATUS_1, l_dt_buffer);
-            io_additional_info.iv_dt[l_dt_count].iv_r94_faults_status_1 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
-
             mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FIRST_FAULT_STATUS_0, l_dt_buffer);
             io_additional_info.iv_dt[l_dt_count].iv_r96_first_faults_status_0 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
 
             mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FIRST_FAULT_STATUS_1, l_dt_buffer);
             io_additional_info.iv_dt[l_dt_count].iv_r98_first_faults_status_1 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+
+            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FAULTS_STATUS_0, l_dt_buffer);
+            io_additional_info.iv_dt[l_dt_count].iv_r92_faults_status_0 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
+
+            mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::FAULTS_STATUS_1, l_dt_buffer);
+            io_additional_info.iv_dt[l_dt_count].iv_r94_faults_status_1 = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];
 
             mss::pmic::ddr5::dt_reg_read_contiguous(io_target_info.iv_pmic_dt_map[l_dt_count], DT_REGS::INFET_POWER_MTP_ADDR, l_dt_buffer);
             io_additional_info.iv_dt[l_dt_count].iv_ra6_infet_mpt_addr = (l_dt_buffer[0] << BITS_PER_BYTE) | l_dt_buffer[1];

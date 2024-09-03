@@ -286,10 +286,10 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
 
     // dt_additional_n_mode_telemetry_data iv_dt[CONSTS::NUM_DTS_4U];
     // uint16_t iv_r90_ops_state
-    // uint16_t iv_r92_faults_status_0
-    // uint16_t iv_r94_faults_status_1
     // uint16_t iv_r96_first_faults_status_0
     // uint16_t iv_r98_first_faults_status_1
+    // uint16_t iv_r92_faults_status_0
+    // uint16_t iv_r94_faults_status_1
     // uint16_t iv_ra6_infet_mpt_addr
     // uint16_t iv_ra8_nvm_data
     // uint16_t iv_rb4_vcc_vin_vinp
