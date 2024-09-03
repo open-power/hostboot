@@ -82,7 +82,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> periodic_2U_telemetry_data_struc
     // uint64_t iv_dqs_tracking_log[24]
     // uint64_t iv_dts_data[5]
     { 29, 8},
-
     //pmic_periodic_2u_telemetry_data iv_pmic[CONSTS::NUM_PMICS_2U]
     // uint8_t iv_pmic0_iv_r04
     // uint8_t iv_pmic0_iv_r05
@@ -104,7 +103,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> periodic_2U_telemetry_data_struc
     { 8, 1}, { 6, 2}, { 2, 1}, { 1, 2}, //PMIC0
     { 8, 1}, { 6, 2}, { 2, 1}, { 1, 2}, //PMIC1
 };
-
 
 ///
 /// @brief periodic_telemetry_data struct meta data
@@ -129,7 +127,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> periodic_telemetry_data_struct_m
     // uint64_t iv_dqs_tracking_log[24]
     // uint64_t iv_dts_data[5]
     { 29, 8},
-
     //adc_periodic_telemetry_data iv_adc
     // uint16_t iv_max_ch0_mV
     // uint16_t iv_max_ch1_mV
@@ -156,7 +153,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> periodic_telemetry_data_struct_m
     // uint16_t iv_recent_ch6_mV
     // uint16_t iv_recent_ch7_mV
     { 24, 2},
-
     //pmic_periodic_telemetry_data iv_pmic[CONSTS::NUM_PMICS_4U]
     // uint8_t iv_r08
     // uint8_t iv_r09
@@ -179,7 +175,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> periodic_telemetry_data_struct_m
     { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC1
     { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC2
     { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC3
-
     //dt_periodic_telemetry_data iv_dt[CONSTS::NUM_DTS_4U]
     // uint16_t iv_r9a_iin
     // uint16_t iv_r9b_vcc
@@ -220,7 +215,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     { 2, 1},
     // uint16_t reserved
     { 1, 2},
-
     // dt_health_check_telemetry iv_dt[CONSTS::NUM_DTS_4U]
     // uint8_t  iv_breadcrumb
     // uint8_t  reserved0
@@ -231,7 +225,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     { 2, 1}, { 3, 2},  //PMIC1
     { 2, 1}, { 3, 2},  //PMIC2
     { 2, 1}, { 3, 2},  //PMIC3
-
     // pmic_health_check_telemetry iv_pmic[CONSTS::NUM_PMICS_4U]
     // uint8_t iv_r04
     // uint8_t iv_r05
@@ -252,7 +245,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     { 8, 1}, { 4, 2}, { 2, 1}, { 1, 2}, //PMIC1
     { 8, 1}, { 4, 2}, { 2, 1}, { 1, 2}, //PMIC2
     { 8, 1}, { 4, 2}, { 2, 1}, { 1, 2}, //PMIC3
-
     //additional_n_mode_telemetry_data iv_additional_data
     // adc_additional_n_mode_telemetry_data iv_adc
     // uint8_t iv_system_status
@@ -272,7 +264,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     // uint8_t iv_dummy_4
     // uint8_t iv_dummy_5
     { 16, 1},
-
     // pmic_additional_n_mode_telemetry_data iv_pmic[CONSTS::NUM_PMICS_4U];
     // uint8_t iv_r2f_pmic_config
     // uint8_t iv_r32_pmic_enable
@@ -282,14 +273,12 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     { 4, 1}, //PMIC1
     { 4, 1}, //PMIC2
     { 4, 1}, //PMIC3
-
-
     // dt_additional_n_mode_telemetry_data iv_dt[CONSTS::NUM_DTS_4U];
     // uint16_t iv_r90_ops_state
-    // uint16_t iv_r92_faults_status_0
-    // uint16_t iv_r94_faults_status_1
     // uint16_t iv_r96_first_faults_status_0
     // uint16_t iv_r98_first_faults_status_1
+    // uint16_t iv_r92_faults_status_0
+    // uint16_t iv_r94_faults_status_1
     // uint16_t iv_ra6_infet_mpt_addr
     // uint16_t iv_ra8_nvm_data
     // uint16_t iv_rb4_vcc_vin_vinp
@@ -297,7 +286,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     { 8, 2}, //PMIC1
     { 8, 2}, //PMIC2
     { 8, 2}, //PMIC3
-
     //periodic_telemetry_data iv_periodic_telemetry_data;
     // uint8_t iv_revision
     // uint8_t iv_aggregate_pmic_state
@@ -314,7 +302,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     // uint64_t iv_dqs_tracking_log[24]
     // uint64_t iv_dts_data[5]
     { 29, 8},
-
     // adc_periodic_telemetry_data iv_adc
     // uint16_t iv_max_ch0_mV
     // uint16_t iv_max_ch1_mV
@@ -341,7 +328,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     // uint16_t iv_recent_ch6_mV
     // uint16_t iv_recent_ch7_mV
     { 24, 2},
-
     // pmic_periodic_telemetry_data iv_pmic[CONSTS::NUM_PMICS_4U]
     // uint8_t iv_r08
     // uint8_t iv_r09
@@ -364,7 +350,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC1
     { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC2
     { 4, 1}, { 6, 2}, { 6, 1}, { 1, 2}, //PMIC3
-
     // dt_periodic_telemetry_data iv_dt[CONSTS::NUM_DTS_4U]
     // uint16_t iv_r9a_iin
     // uint16_t iv_r9b_vcc
@@ -389,7 +374,6 @@ const std::vector<std::pair<uint16_t, uint8_t>> consolidated_health_check_data_s
     { 12, 2}, { 6, 1}, { 1, 2}, //PMIC1
     { 12, 2}, { 6, 1}, { 1, 2}, //PMIC2
     { 12, 2}, { 6, 1}, { 1, 2}, //PMIC3
-
     // uint8_t iv_pmic0_errors
     // uint8_t iv_pmic1_errors
     // uint8_t iv_pmic2_errors

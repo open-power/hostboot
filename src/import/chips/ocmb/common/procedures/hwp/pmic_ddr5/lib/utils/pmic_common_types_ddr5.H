@@ -211,6 +211,10 @@ struct __attribute__((__packed__)) pmic_health_check_telemetry
 ///           "Redundant PoD5 - Functional Specification dated 20230421 version 0.10"
 ///           document provided by the Power team
 ///     0x52: Added ADC i2c error state to consolidated structure
+///     0x53: Swapped reading of regs R96 and R98 with regs R92 and R94 in struct
+///           dt_additional_n_mode_telemetry_data as reading R96 and R98 after R92 and
+///           R94 was causing R96 and R98 regs to get cleared causing potential loss of
+///           data.
 ///
 struct __attribute__((__packed__)) health_check_telemetry_data
 {
@@ -218,7 +222,7 @@ struct __attribute__((__packed__)) health_check_telemetry_data
 
     // Revision of this struct formatting, to be updated
     // when the structure changes
-    uint8_t iv_revision = 0x52;
+    uint8_t iv_revision = 0x53;
     uint16_t reserved   = 0;
 
     dt_health_check_telemetry iv_dt[CONSTS::NUM_DTS_4U];
@@ -269,12 +273,12 @@ struct __attribute__ ((__packed__)) pmic_additional_n_mode_telemetry_data
 struct __attribute__ ((__packed__)) dt_additional_n_mode_telemetry_data
 {
     uint16_t iv_r90_ops_state              = 0;
-    uint16_t iv_r92_faults_status_0        = 0;
-
-    uint16_t iv_r94_faults_status_1        = 0;
     uint16_t iv_r96_first_faults_status_0  = 0;
 
     uint16_t iv_r98_first_faults_status_1  = 0;
+    uint16_t iv_r92_faults_status_0        = 0;
+
+    uint16_t iv_r94_faults_status_1        = 0;
     uint16_t iv_ra6_infet_mpt_addr         = 0;
 
     uint16_t iv_ra8_nvm_data               = 0;
