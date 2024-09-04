@@ -626,7 +626,24 @@
     <writeable/>
     <group>enablement</group>
   </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Frequency value of the fastest part in the system that establishes max
+    operating freq. For P11 max freq is set to default 5050MHz.But
+    for P10, max of CF7 will be set.
 
+    Producer: p10_pm_set_system_freq.C
+
+    Consumers: p10_pstate_parameter_build
+    </description>
+    <valueType>uint32</valueType>
+    <initToZero/>
+    <writeable/>
+    <group>pstates</group>
+  </attribute>
   <!-- ********************************************************************* -->
   <attribute>
     <id>ATTR_SYSTEM_PSTATE0_FREQ_MHZ</id>

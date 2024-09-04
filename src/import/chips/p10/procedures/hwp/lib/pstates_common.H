@@ -199,7 +199,7 @@ typedef uint8_t Pstate_t;
 /// needed to ensure that any underflows in the Pstate computation doesn't
 /// result in negative values which the DPPL will interpret as a very high
 /// frequency.
-#define MAX_PSTATE0_FREQ_MHZ 4250
+#define MAX_OPER_FREQ_MHZ 4250
 
 /// A DPLL frequency code
 ///

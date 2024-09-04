@@ -1324,7 +1324,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
             if ( (iv_attrs.attr_extended_freq_mode == ENUM_ATTR_EXTENDED_FREQ_MODE_OLD_FREQ) &&
                    !iv_extended_freq_enable)
             {
-                pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
+                pstatef = (float)(iv_attrs.attr_max_oper_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
             }
             else
             {
@@ -1334,7 +1334,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
          }
          else
          {
-            pstatef = (float)(iv_attrs.attr_pstate0_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
+            pstatef = (float)(iv_attrs.attr_max_oper_freq_mhz * 1000) /(float)(iv_frequency_step_khz);
             io_globalppb->base.dpll_pstate0_value = revle32((Pstate)internal_round(pstatef));
          }
 
@@ -1596,7 +1596,7 @@ fapi2::ReturnCode PlatPmPPB::oppb_init(
         i_occppb->spare_core_count = iv_spare_count;
 
         // frequency_max_khz - Value from max pstate0
-        i_occppb->frequency_max_khz = iv_attrs.attr_pstate0_freq_mhz * 1000;
+        i_occppb->frequency_max_khz = iv_attrs.attr_max_oper_freq_mhz * 1000;
         i_occppb->frequency_max_khz = revle32(i_occppb->frequency_max_khz);
         FAPI_INF("frequency_max_khz %08x",i_occppb->frequency_max_khz);
 
@@ -1959,7 +1959,7 @@ void PlatPmPPB::attr_init( void )
     FAPI_INF("%-51s[1][7] = 0x%08x %d", #attr_name, iv_attrs.attr_assign[1][7], iv_attrs.attr_assign[1][7]);
 
     // Frequency attributes
-    PPB_GET_ATTR(ATTR_SYSTEM_PSTATE0_FREQ_MHZ,              FAPI_SYSTEM,  attr_pstate0_freq_mhz);
+    PPB_GET_ATTR(ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,              FAPI_SYSTEM,  attr_max_oper_freq_mhz);
     PPB_GET_ATTR(ATTR_NOMINAL_FREQ_MHZ,                     FAPI_SYSTEM,  attr_nominal_freq_mhz);
     PPB_GET_ATTR(ATTR_FREQ_PAU_MHZ,                         FAPI_SYSTEM,  attr_pau_frequency_mhz);
     PPB_GET_ATTR(ATTR_FREQ_BIAS,                            FAPI_SYSTEM,  attr_freq_bias);
@@ -4853,15 +4853,15 @@ fapi2::ReturnCode PlatPmPPB::set_reference_freq(fapi2::ATTR_WOF_TABLE_DATA_Type*
 
     if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
     {
-        iv_attrs.attr_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+        iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
                     FAPI_SYSTEM,
-                    iv_attrs.attr_pstate0_freq_mhz));
+                    iv_attrs.attr_max_oper_freq_mhz));
         FAPI_INF("Extended frequency mode detected.  Moving Pstate 0 frequency to %d MHz",
-                iv_attrs.attr_pstate0_freq_mhz);
+                iv_attrs.attr_max_oper_freq_mhz);
     }
 
-    iv_reference_frequency_mhz = iv_attrs.attr_pstate0_freq_mhz;
+    iv_reference_frequency_mhz = iv_attrs.attr_max_oper_freq_mhz;
     iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
     FAPI_INF("Pstate0 reference frequency %d MHz",
             iv_reference_frequency_mhz);
@@ -4968,15 +4968,15 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
 
     if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
     {
-        iv_attrs.attr_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+        iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
                                FAPI_SYSTEM,
-                               iv_attrs.attr_pstate0_freq_mhz));
+                               iv_attrs.attr_max_oper_freq_mhz));
         FAPI_INF("Extended frequency mode detected.  Moving Pstate 0 frequency to %d MHz",
-                                iv_attrs.attr_pstate0_freq_mhz);
+                                iv_attrs.attr_max_oper_freq_mhz);
     }
 
-    iv_reference_frequency_mhz = iv_attrs.attr_pstate0_freq_mhz;
+    iv_reference_frequency_mhz = iv_attrs.attr_max_oper_freq_mhz;
     iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
     FAPI_INF("Pstate0 reference frequency %d MHz",
                 iv_reference_frequency_mhz);
@@ -5141,7 +5141,7 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
     fapi2::ATTR_SAFE_MODE_FREQUENCY_MHZ_Type l_safe_mode_freq_mhz;
     fapi2::ATTR_SAFE_MODE_VOLTAGE_MV_Type    l_safe_mode_mv;
-    fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
+    fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ_Type l_sys_max_oper_freq_mhz = 0;
     uint32_t                                 l_safe_mode_op_ps2freq_khz;
     uint32_t                                 l_safe_op_freq_mhz;
     uint8_t                                  l_safe_op_ps;
@@ -5473,11 +5473,11 @@ fapi2::ReturnCode PlatPmPPB::safe_mode_computation()
                     bias_adjust_mv(iv_attrs.attr_pm_safe_voltage_mv[VCS], iv_attrs.attr_boot_voltage_biase_0p5pct);
         }
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
-                    FAPI_SYSTEM, l_sys_pstate0_freq_mhz));
-        if (!l_sys_pstate0_freq_mhz)
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
+                    FAPI_SYSTEM, l_sys_max_oper_freq_mhz));
+        if (!l_sys_max_oper_freq_mhz)
         {
-            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
             FAPI_SYSTEM, iv_attrs.attr_pm_safe_frequency_mhz));
         }
 
@@ -6955,9 +6955,9 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     FAPI_INF("PlatPmPPB::pm_set_frequency >>>>>");
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
-    uint32_t l_max_pstate0_freq_mhz = MAX_PSTATE0_FREQ_MHZ;
+    uint32_t l_max_oper_freq_mhz = MAX_OPER_FREQ_MHZ;
 
-    fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_pstate0_freq_mhz = 0;
+    fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ_Type l_sys_max_oper_freq_mhz = 0;
 
     fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled;
     auto sys_target = iv_procChip.getParent<fapi2::TARGET_TYPE_SYSTEM>();
@@ -6981,35 +6981,35 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
 
     if (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable)
     {
-        l_max_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
-        iv_attrs.attr_pstate0_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+        l_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
+        iv_attrs.attr_max_oper_freq_mhz = EXTENDED_MAX_FREQUENCY_MHZ;
         FAPI_INF("Extended frequency mode detected.  Moving Pstate 0 frequency to %d MHz",
-                                iv_attrs.attr_pstate0_freq_mhz);
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+                                iv_attrs.attr_max_oper_freq_mhz);
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
                                FAPI_SYSTEM,
-                               iv_attrs.attr_pstate0_freq_mhz));
+                               iv_attrs.attr_max_oper_freq_mhz));
     }
     else
     {
-        l_max_pstate0_freq_mhz = MAX_PSTATE0_FREQ_MHZ;
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+        l_max_oper_freq_mhz = MAX_OPER_FREQ_MHZ;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
                                 FAPI_SYSTEM,
-                                l_sys_pstate0_freq_mhz));
-        iv_attrs.attr_pstate0_freq_mhz = l_sys_pstate0_freq_mhz;
+                                l_sys_max_oper_freq_mhz));
+        iv_attrs.attr_max_oper_freq_mhz = l_sys_max_oper_freq_mhz;
     }
 
 
-    if (iv_attrs.attr_pstate0_freq_mhz > l_max_pstate0_freq_mhz)
+    if (iv_attrs.attr_max_oper_freq_mhz > l_max_oper_freq_mhz)
     {
         FAPI_INF("Clamping the Pstate0 frequency from %dMHz to %d MHz as the limit of legal Pstates",
-                    l_sys_pstate0_freq_mhz, l_max_pstate0_freq_mhz);
-        iv_attrs.attr_pstate0_freq_mhz = l_max_pstate0_freq_mhz;
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+                    l_sys_max_oper_freq_mhz, l_max_oper_freq_mhz);
+        iv_attrs.attr_max_oper_freq_mhz = l_max_oper_freq_mhz;
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
                                FAPI_SYSTEM,
-                               iv_attrs.attr_pstate0_freq_mhz));
+                               iv_attrs.attr_max_oper_freq_mhz));
     }
 
-    iv_reference_frequency_mhz = iv_attrs.attr_pstate0_freq_mhz;
+    iv_reference_frequency_mhz = iv_attrs.attr_max_oper_freq_mhz;
     iv_reference_frequency_khz = iv_reference_frequency_mhz * 1000;
     FAPI_INF("Pstate0 reference frequency %d MHz",
                     iv_reference_frequency_mhz);

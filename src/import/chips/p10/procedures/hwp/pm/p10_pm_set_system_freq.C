@@ -114,7 +114,7 @@ fapi2::ReturnCode pm_set_frequency(
     fapi2::ATTR_MRW_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_mrw_freq_core_floor_mhz;
     fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_Type l_sys_freq_core_floor_mhz = 0;
     fapi2::ATTR_FREQ_CORE_FLOOR_MHZ_Type l_floor_freq_mhz = 0;
-    fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ_Type l_sys_max_freq_mhz = 0;
+    fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ_Type l_sys_max_freq_mhz = 0;
     fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ_Type l_sys_compat_freq_mhz = 0;
     fapi2::ATTR_NOMINAL_FREQ_MHZ_Type l_sys_nominal_freq_mhz = 0;
     fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_Type l_sys_freq_core_ceil_mhz = 0;
@@ -155,7 +155,7 @@ fapi2::ReturnCode pm_set_frequency(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PDV_VALIDATION_MODE,
                 i_sys_target, l_sys_pdv_mode));
 
-        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,
                 i_sys_target, l_sys_max_freq_mhz));
 
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ,
@@ -552,7 +552,7 @@ fapi2::ReturnCode pm_set_frequency(
                     l_sys_freq_core_floor_mhz_ovr);
         }
         // Write out attributes with the results
-        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_PSTATE0_FREQ_MHZ,     i_sys_target, l_sys_max_freq_mhz));
+        FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_MAX_OPERATING_FREQ_MHZ,i_sys_target, l_sys_max_freq_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_SYSTEM_COMPAT_FREQ_MHZ,      i_sys_target, l_sys_compat_freq_mhz));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_NOMINAL_FREQ_MHZ,            i_sys_target, l_part_freq));
         FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,i_sys_target, l_sys_freq_core_ceil_mhz));
