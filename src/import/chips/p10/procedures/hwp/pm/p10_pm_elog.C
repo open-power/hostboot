@@ -55,6 +55,16 @@
 #include "p10_pm_elog.H"
 
 typedef uint64_t elogTableHdr;
+enum
+{
+    ELOG_ID_SRC_MASK    =  0x00FF000000000000ull,
+    ELOG_ID_LEN_MASK    =  0x0000FFFF00000000ull,
+    ELOG_ID_ADDR_MASK   =  0x00000000FFFFFFFFull,
+    ELOG_ID_BIT_SHIFT   =  56,
+    ELOG_ID_SRC_SHIFT   =  48,
+    ELOG_ID_LENGTH_SHIFT = 32,
+
+};
 
 //------------------------------------------------------------------------------
 // Function prototypes
@@ -114,19 +124,30 @@ fapi2::ReturnCode assertElogEntry (
     PPE_TYPES ppeType = PPE_TYPE_IO;
     uint32_t ppeInstance = 0;
     uint8_t idx = 0;
+    uint32_t l_error_log_id = 0;
+    uint32_t l_err_source = 0;
+    uint32_t l_err_len = 0;
+    uint32_t l_err_addr = 0;
+    uint64_t l_temp = 0;
+    l_temp = ( i_elog_entry >> ELOG_ID_BIT_SHIFT );
+    l_error_log_id = (uint8_t)l_temp;
+    l_temp = (( i_elog_entry & ELOG_ID_SRC_MASK ) >> ELOG_ID_SRC_SHIFT );
+    l_err_source = (uint8_t)l_temp;
+    l_temp = (( i_elog_entry & ELOG_ID_LEN_MASK ) >> ELOG_ID_LENGTH_SHIFT );
+    l_err_len = (uint16_t)l_temp;
+    l_temp = ( i_elog_entry & ELOG_ID_ADDR_MASK );
+    l_err_addr = (uint32_t) l_temp;
 
-    hcode_elog_entry_t elogEntry;
-    elogEntry.dw0.value = i_elog_entry;
     *o_perv_chiplet_id = 0;
 
     FAPI_DBG (">> assertElogEntry-Id %d Src 0x%02X Len %d Addr 0x%08X Local %d",
-              elogEntry.dw0.fields.errlog_id,
-              elogEntry.dw0.fields.errlog_src,
-              elogEntry.dw0.fields.errlog_len,
-              elogEntry.dw0.fields.errlog_addr,
+              l_error_log_id,
+              l_err_source,
+              l_err_len,
+              l_err_addr,
               i_local);
 
-    switch (elogEntry.dw0.fields.errlog_src)
+    switch (l_err_source)
     {
         case ERRL_SOURCE_PGPE:
             ppeType = PPE_TYPE_GPE;
@@ -144,7 +165,7 @@ fapi2::ReturnCode assertElogEntry (
             if (i_local == true)
             {
                 // @TODO split QME eid range
-                ppeInstance = elogEntry.dw0.fields.errlog_id / 32;
+                ppeInstance = l_error_log_id / 32;
                 *o_perv_chiplet_id = EQ0_PERV_CHIPLET_ID + ppeInstance;
             }
 
@@ -161,17 +182,17 @@ fapi2::ReturnCode assertElogEntry (
                   &elogTbl,
                   o_sram_addr ));
 
-    for (idx = 0; idx < elogTbl.dw0.fields.total_log_slots; ++idx)
+    for ( idx = 0; idx < elogTbl.dw0.fields.total_log_slots; idx++ )
     {
         FAPI_DBG ("From SRAM 0x%08X%08X vs I/P 0x%08X%08X",
                   htobe32(elogTbl.elog[idx].dw0.words.high_order),
                   htobe32(elogTbl.elog[idx].dw0.words.low_order),
-                  htobe32(elogEntry.dw0.words.high_order),
-                  htobe32(elogEntry.dw0.words.low_order));
+                  (uint32_t) ( i_elog_entry >> 32),
+                  (uint32_t) ( i_elog_entry ));
 
-        if (elogTbl.elog[idx].dw0.value == elogEntry.dw0.value)
+        if ( htobe64(elogTbl.elog[idx].dw0.value) == i_elog_entry )
         {
-            if (o_sram_addr != NULL)
+            if ( o_sram_addr != NULL )
             {
                 // point to address of this entry
                 *o_sram_addr += sizeof (elogTableHdr) +
@@ -190,8 +211,8 @@ fapi2::ReturnCode assertElogEntry (
                   .set_LOCAL (i_local)
                   .set_ENTRIES (idx),
                   "Elog Entry 0x%08X%08X not found!",
-                  htobe32(elogEntry.dw0.words.high_order),
-                  htobe32( elogEntry.dw0.words.low_order));
+                  (i_elog_entry >> 32),
+                  (uint32_t) i_elog_entry );
 
 fapi_try_exit:
     FAPI_DBG ("<< assertElogEntry @0x%08X", (o_sram_addr) ? (*o_sram_addr) : 0);
@@ -212,7 +233,7 @@ fapi2::ReturnCode getElogTbl (
 
     fapi2::ReturnCode rc;
     uint32_t pervChipletId = 0;                   // default for OCC SRAM
-    uint32_t maxEntries = 20;                     // default for global table
+    uint32_t maxEntries = 12;                     // default for global table
     uint32_t addr = 0;
     uint64_t hdrDword = 0;                        // dword in engine hdr containing elog table addr
     const uint8_t mode = 0x60;                    // OCC Normal Mode, OCB_CHAN3
@@ -221,7 +242,7 @@ fapi2::ReturnCode getElogTbl (
     if ((PPE_TYPE_QME == i_ppe_type) && (true == i_local))
     {
         // Read from QME local table
-        maxEntries = 2;
+        maxEntries = 1;
 
         // Read from QME SRAM
         pervChipletId = EQ0_PERV_CHIPLET_ID + i_ppe_instance;
@@ -336,7 +357,7 @@ fapi2::ReturnCode p10_pm_elog_list (
     FAPI_DBG ("MAX ENTRIES IN TABLE TO LOOP: %d", maxEntries);
 
     // Walk the elog table to filter return data based on request
-    for (uint8_t idx = 0; idx < maxEntries; ++idx, idxRet = 0)
+    for ( uint8_t idx = 0; idx < maxEntries; idx++, idxRet = 0 )
     {
         bool found = false;
 
@@ -384,8 +405,7 @@ fapi2::ReturnCode p10_pm_elog_list (
                         break;
 
                     case ERRL_SOURCE_QME:
-                        if ((i_ppe_type == PPE_TYPE_QME) &&
-                            (i_ppe_instance == (idx / 2))) // @TODO
+                        if ( i_ppe_type == PPE_TYPE_QME )
                         {
                             found = true;
                         }
@@ -438,6 +458,7 @@ fapi2::ReturnCode p10_pm_elog_read (
     uint32_t addr = 0;
     uint32_t bytes = 0;
     uint8_t mode = 0x60; // OCC Normal Read, OCB Channel 3
+    uint64_t l_temp = 0;
 
     FAPI_DBG (">> p10_pm_elog_read: Entry 0x%016lx Offset %d Len %d Local %d",
               i_elog_entry,
@@ -451,10 +472,9 @@ fapi2::ReturnCode p10_pm_elog_read (
                    &addr) );
 
     // Found the error entry in table
-    hcode_elog_entry_t elogEntry;
-    elogEntry.dw0.value = i_elog_entry;
-    addr = htobe32(elogEntry.dw0.fields.errlog_addr);
-    bytes = htobe16(elogEntry.dw0.fields.errlog_len);
+    addr = (uint32_t) (i_elog_entry & 0x00000000FFFFFFFF);
+    l_temp = (( i_elog_entry & 0x0000FFFF00000000 ) >> 32 );
+    bytes = (uint32_t) l_temp;
 
     FAPI_DBG ("ELog Addr: 0x%08X Elog Len: %d", addr, bytes);
 
@@ -527,5 +547,28 @@ fapi2::ReturnCode p10_pm_elog_purge (
 
 fapi_try_exit:
     FAPI_DBG ("<< p10_pm_elog_purge");
+    return fapi2::current_err;
+}
+
+fapi2::ReturnCode p10_pm_elog_dissect( uint8_t* i_elogBuf, ElogDissectionSum& o_elogDissectionSum )
+{
+    ErrlEntry_t* l_pErrl = ( ErrlEntry_t* ) i_elogBuf;
+
+    FAPI_ASSERT ( ( i_elogBuf != NULL ),
+                  fapi2::CORRUPT_ELOG_BUF()
+                  .set_LOG_BUF ( i_elogBuf ),
+                  "Bad Or Corrupt Hcode Error Log Buffer" );
+
+    o_elogDissectionSum.iv_reasonCode = l_pErrl->iv_reasonCode;
+    o_elogDissectionSum.iv_moduleId = htobe16( l_pErrl->iv_userDetails.iv_modId );
+    o_elogDissectionSum.iv_severity = l_pErrl->iv_severity;
+    o_elogDissectionSum.iv_extReasonCode = htobe16( l_pErrl->iv_extendedRC );
+    o_elogDissectionSum.iv_entrySize = htobe16( l_pErrl->iv_userDetails.iv_entrySize );
+    o_elogDissectionSum.iv_userData1 = htobe32( l_pErrl->iv_userDetails.iv_userData1 );
+    o_elogDissectionSum.iv_userData2 = htobe32( l_pErrl->iv_userDetails.iv_userData2 );
+    o_elogDissectionSum.iv_userData3 = htobe32( l_pErrl->iv_userDetails.iv_userData3 );
+    o_elogDissectionSum.iv_version   = l_pErrl->iv_userDetails.iv_version;
+
+fapi_try_exit:
     return fapi2::current_err;
 }

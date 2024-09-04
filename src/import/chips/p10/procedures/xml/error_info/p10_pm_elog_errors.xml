@@ -66,4 +66,10 @@
     </callout>
   </hwpError>
   <!-- ******************************************************************** -->
+  <hwpError>
+    <rc>RC_CORRUPT_ELOG_BUF</rc>
+    <description>Bad or corrupt hcode error log buffer </description>
+    <ffdc>LOG_BUF</ffdc>
+  </hwpError>
+  <!-- ******************************************************************** -->
 </hwpErrors>

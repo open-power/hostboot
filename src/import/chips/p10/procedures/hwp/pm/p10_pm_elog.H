@@ -22,7 +22,6 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
-// EKB-Mirror-To: hostboot
 ///
 /// @file p10_pm_elog.H
 /// @brief This hardware procedure allows users to:
@@ -73,6 +72,23 @@ typedef fapi2::ReturnCode(*p10_pm_elog_purge_FP_t) (
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
     const uint64_t,
     const bool);
+
+struct ElogDissectionSum
+{
+    uint32_t iv_userData1;
+    uint32_t iv_userData2;
+    uint32_t iv_userData3;
+    uint16_t iv_entrySize;
+    uint16_t iv_extReasonCode;
+    uint8_t  iv_reasonCode;
+    uint16_t iv_moduleId;
+    uint8_t  iv_severity;
+    uint8_t  iv_version;
+    uint8_t  iv_reserve[3];
+};
+
+typedef struct ElogDissectionSum ElogDissectionSum_t;
+
 
 //------------------------------------------------------------------------------
 // Function prototype
@@ -150,6 +166,15 @@ extern "C" {
         const uint64_t i_elog_entry,
         const bool i_local = false );
 
+
+/// @brief Dissects error log binary to extract key constituents
+///
+/// @param[in]  i_elogBuf           error log binary
+/// @param[in]  o_elogDissectionSum struct containing info pertaining to its origin
+///
+/// @return FAPI_RC_SUCCESS if success, else error code
+///
+    fapi2::ReturnCode p10_pm_elog_dissect( uint8_t* i_elogBuf, ElogDissectionSum& o_elogDissectionSum );
 } // extern "C"
 
 #endif // _P10_PM_ELOG_H_
