@@ -35,6 +35,7 @@
 /// *HWP Team        : PM
 /// *HWP Consumed by : SBE, Cronus
 /// *HWP Level       : 2
+//  EKB-Mirror-To: hostboot
 ///
 //------------------------------------------------------------------------------
 // Includes

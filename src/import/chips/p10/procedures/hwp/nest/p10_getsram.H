@@ -31,6 +31,7 @@
 /// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
 /// *HWP Consumed by: HB, Cronus, SBE
 ///
+//  EKB-Mirror-To: hostboot
 
 #ifndef _P10_GETSRAM_H_
 #define _P10_GETSRAM_H_

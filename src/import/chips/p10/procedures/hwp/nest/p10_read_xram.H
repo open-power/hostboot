@@ -30,6 +30,7 @@
 /// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
 /// *HWP Consumed by: Cronus
 ///
+//  EKB-Mirror-To: hostboot
 
 #ifndef _p10_read_xram_H_
 #define _p10_read_xram_H_

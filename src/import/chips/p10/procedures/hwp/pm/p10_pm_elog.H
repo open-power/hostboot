@@ -22,6 +22,7 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+// EKB-Mirror-To: hostboot
 ///
 /// @file p10_pm_elog.H
 /// @brief This hardware procedure allows users to:
@@ -36,6 +37,7 @@
 /// *HWP Consumed by : SBE, Cronus
 /// *HWP Level       : 2
 ///
+//  EKB-Mirror-To: hostboot
 
 #ifndef _P10_PM_ELOG_H_
 #define _P10_PM_ELOG_H_

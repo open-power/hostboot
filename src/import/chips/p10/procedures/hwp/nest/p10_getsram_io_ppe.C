@@ -30,6 +30,7 @@
 /// *HWP FW Maintainer: Ilya Smirnov <ismirno@us.ibm.com>
 /// *HWP Consumed by: HB, SBE, Cronus
 ///
+//  EKB-Mirror-To: hostboot
 
 //------------------------------------------------------------------------------
 // Includes
