@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -213,6 +213,11 @@ void* call_mss_getecid(void* io_pArgs)
 {
     IStepError l_StepError;
     errlHndl_t l_err = nullptr;
+    constexpr uint64_t CHIPLET1_REGISTER  = 0x010f001e;
+    constexpr uint64_t UNMASK_BIT12 = 0xFFF7FFFFFFFFFFFF;
+    size_t l_numBytes = 8;
+    uint8_t l_buf[8] = {0};
+    uint64_t l_data = 0ULL;
 
     TRACISTEP(ENTER_MRK"call_mss_getecid entry" );
 
@@ -227,10 +232,52 @@ void* call_mss_getecid(void* io_pArgs)
     {
         if (TARGETING::UTIL::isOdysseyChip(l_ocmb_target))
         {
-            TRACISTEP("Running ody_getecid HWP on target HUID 0x%.8X l_runOdyHwpFromHost:%d",
+            TRACISTEP("ody_getecid: UNMASKING 12th bit for target HUID 0x%.8X l_runOdyHwpFromHost:%d",
                       get_huid(l_ocmb_target), l_runOdyHwpFromHost);
 
-            RUN_ODY_HWP(CONTEXT, l_StepError, l_err, l_ocmb_target, ody_getecid, { l_ocmb_target });
+            // To prevent undesirable SBE updates, we need to unmask (bit 12 of 0x010F001E).
+            // To unmask we need to set that bit to 0 (as MASK bit is 1). We will do a
+            // read modify write to set the 12th bit to 0.
+
+            // First read the value...
+            l_err = DeviceFW::deviceOp(DeviceFW::READ, l_ocmb_target, l_buf, l_numBytes,
+                                       DEVICE_SCOM_ADDRESS(CHIPLET1_REGISTER));
+            if (!l_err)
+            {
+                // Unmask the 12th bit
+                l_data = *(reinterpret_cast<uint64_t *>(l_buf));
+                TRACISTEP("ody_getecid: Read value=0x%llx from target=0x%.8X", l_data,
+                           get_huid(l_ocmb_target));
+
+                l_data &= UNMASK_BIT12;
+                TRACISTEP("ody_getecid: Value after Anding with unmask value=0x%llx", l_data);
+
+                // Now write the data back to the register
+                l_err = DeviceFW::deviceOp(DeviceFW::WRITE, l_ocmb_target,
+                                   reinterpret_cast<uint8_t *>(&l_data),
+                                   l_numBytes,
+                                   DEVICE_SCOM_ADDRESS(CHIPLET1_REGISTER));
+                if (!l_err)
+                {
+                    TRACISTEP("ody_getecid: Wrote value=0x%llx to target=0x%.8X", l_data,
+                               get_huid(l_ocmb_target));
+                    TRACISTEP("Running ody_getecid HWP on target HUID 0x%.8X l_runOdyHwpFromHost:%d",
+                               get_huid(l_ocmb_target), l_runOdyHwpFromHost);
+                    RUN_ODY_HWP(CONTEXT, l_StepError, l_err, l_ocmb_target,
+                                ody_getecid, { l_ocmb_target });
+                }
+                else
+                {
+                    TRACISTEP(ERR_MRK"ERROR from ody_getecid: Scom write to target HUID 0x%.8X"
+                              "Address=0x%x Data=0x%16x",
+                              get_huid(l_ocmb_target), CHIPLET1_REGISTER, l_data);
+                }
+            }
+            else
+            {
+                TRACISTEP(ERR_MRK"ERROR from ody_getecid: Scom Read from target HUID 0x%.8X"
+                          "Address=0x%x", get_huid(l_ocmb_target), CHIPLET1_REGISTER);
+            }
 
         ERROR_EXIT: // used by RUN_ODY_HWP
             if (l_err)
