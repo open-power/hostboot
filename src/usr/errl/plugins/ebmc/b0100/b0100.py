@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -456,6 +456,46 @@ class errludP_errl:
         jsonStr = json.dumps(d)
         return jsonStr
 
+    def ErrlUserDetailsParserPrintK(ver, data):
+        ''' Parses User data collected from the Printk buffers.
+            The user data converted from a hex values to ASCII strings.
+            Any Hex value above 0x7F is translated as '.' to avoid invalid or
+            unexpected translations.
+            '''
+        lastAsciiChar = 127        # the last valid ascii character's value in decimal, 0x7F
+        printkStr = ""
+        count=0
+        d = dict()
+        printkudEntry =[]
+
+        # divide data by byte to handle individually
+        for byte in data:
+            # convert byte to equivalent printable ascii character
+            if byte <= lastAsciiChar:
+                dataChar = struct.unpack_from('1s', data, count)[0].decode('utf-8')
+                if dataChar == "\t":          # remove tab charcters
+                # remove tab charcters and add four blank spaces inplace of \t for readability
+                    printkStr+= "    "
+                elif dataChar == "\n":
+                    # determine if end of a line and add current line to the user data entry list
+                    printkudEntry.append(printkStr)
+                    printkStr = "" # reset string variable for a clean new line
+                else:
+                    printkStr+= dataChar
+
+            else:
+                dataChar = '.'
+                printkStr+= dataChar
+
+
+            count = count+1
+
+        label = "PrintK User Data"
+        d[label]= printkudEntry
+
+        jsonStr = json.dumps(d)
+        return jsonStr
+
     def ErrlUserDetailsParserStringSet(ver, data):
         # The input buffer contains N sequentially packed pairs of variable
         # length, NULL terminated strings, where each string pair is also
@@ -565,7 +605,7 @@ class errludP_errl:
             wofOverrideCompareData_t - last entry rejected for possible match
             ...
             wofOverrideCompareData_t - 1st entry rejected for possible match
-        NOTE: format must match addWofOverrideSearchEntriesToErrl() in plat_wof_access.C and
+            NOTE: format must match addWofOverrideSearchEntriesToErrl() in plat_wof_access.C and
               ErrlUserDetailsParserWofData in errludwofdata.H
         '''
 
@@ -643,6 +683,7 @@ errlUserDetailDataSubsection = { 1: "ErrlUserDetailsParserString",
                                  4: "ErrlUserDetailsParserAttribute", #Generated
                                  5: "ErrlUserDetailsParserLogRegister",
                                  6: "ErrlUserDetailsParserCallout", #Uses generated function
+                                 7: "ErrlUserDetailsParserPrintK",
                                  9: "ErrlUserDetailsParserStringSet",
                                  10: "ErrlUserDetailsParserBuild",
                                  11: "ErrlUserDetailsParserSysState",
