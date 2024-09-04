@@ -99,7 +99,8 @@ namespace HWAS
         RC_FAILED_MSL_EC_VALIDATION              = HWAS_COMP_ID | 0x27,
         RC_EMPTY_MRW_MSL_ARRAY                   = HWAS_COMP_ID | 0x28,
         RC_UNEVEN_SPARE_CORE_COUNT               = HWAS_COMP_ID | 0x29,
-        RC_NOT_ENOUGH_CORES                      = HWAS_COMP_ID | 0x29,
+        RC_NOT_ENOUGH_CORES                      = HWAS_COMP_ID | 0x2A,
+        RC_INVALID_SPARE_STATE                   = HWAS_COMP_ID | 0x2B,
     };
 
     enum HwasPlatUserDetailsTypes

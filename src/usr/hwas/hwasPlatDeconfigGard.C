@@ -1799,6 +1799,53 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
                         }
                     });
 
+            // Before proceeding with selection, check that there are no spare cores currently selected.
+            // The main reason this could happen is in an MPIPL scenario where the attributes were not reset
+            // properly but there could be other reasons as well (code bugs).
+            size_t spareCoreCount = 0;
+            for (auto & core : cores)
+            {
+                if (core->getAttr<ATTR_CORE_IS_SPARE>())
+                {
+                    ++spareCoreCount;
+                }
+            }
+            // Also check the FCs for this chip
+            size_t spareFcCount = 0;
+            for (auto & fc : composable(getNonEcoFcs)(chip, false))
+            {
+                if (fc->getAttr<ATTR_CORE_IS_SPARE>())
+                {
+                    ++spareFcCount;
+                }
+            }
+            // If either of these counts are non-zero then this chip has had its spare attrs left in a bad state.
+            if (spareCoreCount || spareFcCount)
+            {
+                HWAS_ERR("selectSpareCores: spare core=%d fc=%d were non-zero", spareCoreCount, spareFcCount);
+                /*@
+                 * @errortype
+                 * @moduleid     MOD_SELECT_SPARE_CORES
+                 * @reasoncode   RC_INVALID_SPARE_STATE
+                 * @devdesc      Chip had spare core attributes set prior to spare selection taking place
+                 * @custdesc     Host Firmware encountered an internal error
+                 * @userdata1         Chip Huid
+                 * @userdata2[00:31]  Number of Spare COREs
+                 * @userdata2[32:64]  Number of Spare FCs
+                 */
+                errlHndl_t l_errl = hwasError(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               HWAS::MOD_SELECT_SPARE_CORES,
+                                               HWAS::RC_INVALID_SPARE_STATE,
+                                               get_huid(chip),
+                                               TWO_UINT32_TO_UINT64(spareCoreCount, spareFcCount));
+                l_errl->addProcedureCallout(HWAS::EPUB_PRC_HB_CODE,
+                                            HWAS::SRCI_PRIORITY_HIGH);
+                errlCommit(l_errl, HWAS_COMP_ID);
+                // move on to the next chip.
+                continue;
+
+            }
+
             // This loop will process COREs and assign spares from that granularity.
             for (int i = 0; i < numSpareCores; ++i)
             {
@@ -1867,6 +1914,7 @@ void selectSpareCores(FCO::fcoRestrictMetadata_t & io_fcoData)
                     }
                 }
             }
+
         }
     }
     HWAS_INF(EXIT_MRK"selectSpareCores");

@@ -124,23 +124,26 @@ void printSystem(const systemList_t & i_list, bool i_printSpares = false)
                 pProc->procId,
                 pProc->availableCores,
                 bitString);
-        for (const auto & spare : composable(findSpareCores)(pProc->target))
+        if (i_printSpares)
         {
-            auto hwasState = spare->getAttr<ATTR_HWAS_STATE>();
-            TS_INFO("SPARE %s CHIP_UNIT=%d, P=%d, F=%d",
-                    spare->getAttr<ATTR_TYPE>() == TYPE_FC ? "FC" : "CORE",
-                    spare->getAttr<ATTR_CHIP_UNIT>(),
-                    hwasState.present,
-                    hwasState.functional);
-            if (spare->getAttr<ATTR_TYPE>() == TYPE_FC)
+            for (const auto & spare : composable(findSpareCores)(pProc->target))
             {
-                for (const auto & core : composable(getChildChiplets)(spare, TYPE_CORE, false))
+                auto hwasState = spare->getAttr<ATTR_HWAS_STATE>();
+                TS_INFO("SPARE %s CHIP_UNIT=%d, P=%d, F=%d",
+                        spare->getAttr<ATTR_TYPE>() == TYPE_FC ? "FC" : "CORE",
+                        spare->getAttr<ATTR_CHIP_UNIT>(),
+                        hwasState.present,
+                        hwasState.functional);
+                if (spare->getAttr<ATTR_TYPE>() == TYPE_FC)
                 {
-                    auto hwasState = core->getAttr<ATTR_HWAS_STATE>();
-                    TS_INFO("    Core CU=%d, P=%d, F=%d, Spare=%d", core->getAttr<ATTR_CHIP_UNIT>(),
-                            hwasState.present,
-                            hwasState.functional,
-                            core->getAttr<ATTR_CORE_IS_SPARE>());
+                    for (const auto & core : composable(getChildChiplets)(spare, TYPE_CORE, false))
+                    {
+                        auto hwasState = core->getAttr<ATTR_HWAS_STATE>();
+                        TS_INFO("    Core CU=%d, P=%d, F=%d, Spare=%d", core->getAttr<ATTR_CHIP_UNIT>(),
+                                hwasState.present,
+                                hwasState.functional,
+                                core->getAttr<ATTR_CORE_IS_SPARE>());
+                    }
                 }
             }
         }
