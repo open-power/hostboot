@@ -36,6 +36,7 @@
 #include <sbeio/sbeioreasoncodes.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/odyutil.H>
+#include <util/misc.H>
 #include "sbe_getCodeLevels.H"
 
 //  FAPI support
@@ -312,6 +313,15 @@ namespace SBEIO
                                         SbeFifo::SBE_FIFO_CMD_SYNC_CODE_LEVELS);
             if(errl)
             {
+                break;
+            }
+
+            // The odysseylab image we use in standalone simics has this
+            // function removed.
+            if( Util::isSimicsRunning()
+                && UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_STANDALONE>() )
+            {
+                SBE_TRACF("sendSyncCodeLevels skipped in standalone simics");
                 break;
             }
 
