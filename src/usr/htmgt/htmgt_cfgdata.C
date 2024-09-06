@@ -1201,70 +1201,64 @@ void getMemPowerMessageData(Occ *i_occ,
     Target* sys = UTIL::assertGetToplevelTarget();
     ConstTargetHandle_t proc = getParentChip(i_occ->getTarget());
 
-    auto maxDimmPower = sys->getAttr<ATTR_MAX_DIMM_POWER>();
+    auto maxDDIMMPower = sys->getAttr<ATTR_MAX_DIMM_POWER>();
     auto chipFanCfm = proc->getAttr<ATTR_CHIP_FAN_CFM>();
     uint16_t thermalCredit = 0;
     if (chipFanCfm > 0)
     {
         thermalCredit = 1.8 / chipFanCfm * 10000;
     }
-    TMGT_INF("getMemPowerMessageData: thermalCreditFactor=%d (CFM=%d, maxDIMMpower=%dcW)",
-             thermalCredit, chipFanCfm, maxDimmPower);
+    TMGT_INF("getMemPowerMessageData: thermalCreditFactor=%d (CFM=%d, maxDDIMMPower=%dcW)",
+             thermalCredit, chipFanCfm, maxDDIMMPower);
 
-    // Get list of potential OCMBs associated with this processor
+    // Get list of all potential OCMBs associated with this processor (not just FUNCTIONAL)
     TargetHandleList ocmb_list;
-    getChildAffinityTargets(ocmb_list, proc, CLASS_CHIP, TYPE_OCMB_CHIP);
-    TMGT_INF("getMemPowerMessageData: p%d has %d functional OCMBs",
-             i_occ->getInstance(), ocmb_list.size());
+    getChildAffinityTargets(ocmb_list, proc, CLASS_CHIP, TYPE_OCMB_CHIP, false);
+    const size_t potentialOCMBs = ocmb_list.size();
+    TMGT_INF("getMemPowerMessageData: p%d has %d potential OCMBs",
+             i_occ->getInstance(), potentialOCMBs);
     uint32_t maxProcPreheatPower = 0;
     for(const auto & ocmb_target : ocmb_list)
     {
-        // OCMB instance comes from the parent (OMI target)
-        uint8_t l_ocmb_pos = 0xFF;
-        TARGETING::Target * omi_target = getImmediateParentByAffinity(ocmb_target);
-        if (omi_target != nullptr)
-        {
-            // get relative OCMB per processor
-            l_ocmb_pos = omi_target->getAttr<ATTR_CHIP_UNIT>();
-        }
-        else
-        {
-            uint32_t ocmb_huid = get_huid(ocmb_target);
-            TMGT_ERR("getMemPowerMessageData: Unable to determine OCMB parent"
-                     " for HUID 0x%04X", ocmb_huid);
-            continue;
-        }
         // Read the preheat percent for DIMMs uner this OCMB (PREHEAT in 0.01%)
-        double dimmPreheatPercent = ocmb_target->getAttr<ATTR_PREHEAT_PERCENT>() / 10000.0;
-
-        // Get list of potential DIMMs associated with this OCMB
-        TargetHandleList dimm_list;
-        getChildAffinityTargets(dimm_list, ocmb_target, CLASS_LOGICAL_CARD, TYPE_DIMM, false);
-        TMGT_INF("getMemPowerMessageData: OCMB%d preheat: %.2f percent (and %d possible DIMMs)",
-                 l_ocmb_pos, dimmPreheatPercent*100, dimm_list.size());
-        uint32_t maxOcmbPreheatPower = 0;
-        for(const auto & dimmTarget : dimm_list)
-        {
-            uint32_t dimm_huid = get_huid(dimmTarget); // DEBUG
-            auto dimmPreheatPower = maxDimmPower * dimmPreheatPercent;
-            TMGT_INF("getMemPowerMessageData:   OCMB%d/DIMM 0x%08X : preheat power: %dcW",
-                     l_ocmb_pos, dimm_huid, uint32_t(dimmPreheatPower));
-            // add the perheat power power for this DIMM
-            maxOcmbPreheatPower += dimmPreheatPower;
-        }
-        TMGT_INF("getMemPowerMessageData:   OCMB%d max preheat: %dcW",
-                 l_ocmb_pos, maxOcmbPreheatPower);
+        double ocmbPreheatPercent = ocmb_target->getAttr<ATTR_PREHEAT_PERCENT>() / 10000.0;
+        uint32_t maxOcmbPreheatPower = maxDDIMMPower * ocmbPreheatPercent;
+        // Add this potential OCMB preheat power to max processor preheat power
         maxProcPreheatPower += maxOcmbPreheatPower;
+
+        if (ocmb_target->getAttr<ATTR_HWAS_STATE>().functional)
+        {
+            uint8_t l_ocmb_pos = 0xFF;
+            // OCMB instance comes from the parent (OMI target)
+            TARGETING::Target * omi_target = getImmediateParentByAffinity(ocmb_target);
+            if (omi_target != nullptr)
+            {
+                // get relative OCMB per processor
+                l_ocmb_pos = omi_target->getAttr<ATTR_CHIP_UNIT>();
+            }
+            else
+            {
+                uint32_t ocmb_huid = get_huid(ocmb_target);
+                TMGT_ERR("getMemPowerMessageData: Unable to determine OCMB parent"
+                         " for HUID 0x%04X", ocmb_huid);
+                continue;
+            }
+            TargetHandleList dimm_list;
+            getChildAffinityTargets(dimm_list, ocmb_target, CLASS_LOGICAL_CARD, TYPE_DIMM);
+            TMGT_INF("getMemPowerMessageData: OCMB%d preheat: %.2f percent, max preheat: %dcW "
+                     "(%d functional DRAMs)",
+                     l_ocmb_pos, ocmbPreheatPercent*100, maxOcmbPreheatPower, dimm_list.size());
+        }
     }
     TMGT_INF("getMemPowerMessageData: proc%d has max preheat: %dcW)",
              i_occ->getInstance(), maxProcPreheatPower);
 
     o_data[index++] = thermalCredit >> 8;
     o_data[index++] = thermalCredit & 0xFF;
-    o_data[index++] = (maxDimmPower >> 24) & 0xFF;
-    o_data[index++] = (maxDimmPower >> 16) & 0xFF;
-    o_data[index++] = (maxDimmPower >>  8) & 0xFF;
-    o_data[index++] = maxDimmPower & 0xFF;
+    o_data[index++] = (maxDDIMMPower >> 24) & 0xFF;
+    o_data[index++] = (maxDDIMMPower >> 16) & 0xFF;
+    o_data[index++] = (maxDDIMMPower >>  8) & 0xFF;
+    o_data[index++] = maxDDIMMPower & 0xFF;
     o_data[index++] = (maxProcPreheatPower >> 24) & 0xFF;
     o_data[index++] = (maxProcPreheatPower >> 16) & 0xFF;
     o_data[index++] = (maxProcPreheatPower >>  8) & 0xFF;
@@ -1274,7 +1268,7 @@ void getMemPowerMessageData(Occ *i_occ,
     size_t offsetNumOcmbs = index++; // fill in at end
 
     size_t numOcmbs = 0;
-    if ((chipFanCfm > 0) && (maxDimmPower > 0) && (maxProcPreheatPower > 0))
+    if ((chipFanCfm > 0) && (maxDDIMMPower > 0) && (maxProcPreheatPower > 0))
     {
         // fill in details of the memory config
         numOcmbs = ocmbPowerData(i_occ, o_data, index);
@@ -1283,7 +1277,7 @@ void getMemPowerMessageData(Occ *i_occ,
     {
         TMGT_INF("getMemPowerMessageData: CHIP_FAN_CFM=%d, MAX_DIMM_POWER=%d "
                  "MAX_PREHEAT_POWER=%d (WOF Memory power credit disabled)",
-                 chipFanCfm, maxDimmPower, maxProcPreheatPower);
+                 chipFanCfm, maxDDIMMPower, maxProcPreheatPower);
     }
 
     o_data[offsetNumOcmbs] = numOcmbs;
