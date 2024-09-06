@@ -277,6 +277,8 @@ if ($secureboot)
     }
 }
 
+print "Check Signing and Dev key directory location set via env vars\n";
+
 # Signing and Dev key directory location set via env vars
 my $SIGNING_DIR = $ENV{'SIGNING_DIR'};
 my $DEV_KEY_DIR = $ENV{'DEV_KEY_DIR'};
@@ -284,7 +286,9 @@ my $DEV_KEY_DIR = $ENV{'DEV_KEY_DIR'};
 if ($secureboot)
 {
     # Check all components needed for developer signing
+    print "...Check developer signing dir: $SIGNING_DIR\n";
     die "Signing Dir = $SIGNING_DIR DNE" if(! -d $SIGNING_DIR);
+    print "...Check developer signing dir: $DEV_KEY_DIR\n";
     die "Dev Key Dir = $DEV_KEY_DIR DNE" if(! -d $DEV_KEY_DIR);
     die "hw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_a*"));
     die "hw_key_b DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_b*"));
