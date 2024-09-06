@@ -4619,7 +4619,9 @@ errlHndl_t verifyAndMovePayload(const bool i_payloadAlreadyVerified)
     if (SECUREBOOT::hashSignMode() == TARGETING::SB_SIGNING_V3_CONTAINER)
     {
         // For the HLL we want to initialize only the TOC of the temporary memory space
-        // and leave the larger temp space with the lids untouched
+        // and leave the larger temp space with the lids untouched.
+        // If during the initHLL the TOC memory space has already been read it will skip
+        // the memory read of the HLL LID.
         HLL::groupIdToString(HLL::g_HLLPowerVM, l_HLLStr);
         bool l_toc_only = true;
         l_hll = new HLL::HLLMgr(l_toc_only);

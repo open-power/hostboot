@@ -59,6 +59,9 @@ const GroupID g_HLLGroup {"FWSBHLL"};
 const GroupID g_HLLPowerVM {"POWERVM"};
 const GroupID g_HLLPreVerified {"PREVERIFY"};
 
+#define V1_SIZE (4*KILOBYTE)  // 4 KB
+#define V2_SIZE (16*KILOBYTE) // 16 KB
+
 void groupIdToString(const GroupID i_groupId, GroupIdString o_groupIdStr)
 {
     memcpy(o_groupIdStr,
@@ -198,13 +201,14 @@ void GroupInfo::print() const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// MasterContainerLidMgr
+// HLLMgr
 ////////////////////////////////////////////////////////////////////////////////
 
 HLLMgr::HLLMgr(const bool i_toc_only)
 : iv_HLLSize(MTOC_SIZE), iv_tmpSize(TOC_TMP_SIZE), iv_maxSize(0),
   iv_pHLLVaddr(nullptr), iv_pTempVaddr(nullptr), iv_pVaddr(nullptr),
-  iv_groupInfoCache{}, iv_hasHeader(true), iv_version(0), iv_toc_only(i_toc_only)
+  iv_groupInfoCache{}, iv_hasHeader(true), iv_version(0),
+  iv_toc_only(i_toc_only), iv_initMetaData_required(false), iv_initTempSpace_required(false)
 {
     // Need to make Memory spaces HRMOR-relative
     const uint64_t hostboot_base_address = RUNTIME::getHbBaseAddrWithNodeOffset();
@@ -218,7 +222,8 @@ HLLMgr::HLLMgr(const bool i_toc_only)
 HLLMgr::HLLMgr(const void* i_pHLL, const size_t i_size)
 : iv_HLLSize(MTOC_SIZE), iv_tmpSize(TOC_TMP_SIZE), iv_maxSize(0),
   iv_pHLLVaddr(nullptr), iv_pTempVaddr(nullptr), iv_pVaddr(nullptr),
-  iv_groupInfoCache{}, iv_hasHeader(false), iv_version(0), iv_toc_only(false)
+  iv_groupInfoCache{}, iv_hasHeader(false), iv_version(0),
+  iv_toc_only(false), iv_initMetaData_required(false), iv_initTempSpace_required(false)
 {
     // Used for test cases where no iv_hasHeader
     // Need to make Memory spaces HRMOR-relative
@@ -268,15 +273,19 @@ void HLLMgr::initHLL(const void* i_pHLL, const size_t i_HLLSize)
     {
         // No custom HLL, load default way
         // The following call will load the HLL lid into memory for TOC to be built from
-        l_errl = initMetaData(g_HLLGroup,
-                                  iv_groupInfoCache.at(g_HLLGroup));
-        if (l_errl)
+        if (iv_initMetaData_required)
         {
-            uint64_t l_reasonCode = l_errl->reasonCode();
-            UTIL_FT(ERR_MRK"HLLMgr::initHLL failed to process HLL shutting down rc=0x%08X",
-                    l_reasonCode);
-            errlCommit(l_errl,UTIL_COMP_ID);
-            INITSERVICE::doShutdown(l_reasonCode);
+            l_errl = initMetaData(g_HLLGroup,
+                                    iv_groupInfoCache.at(g_HLLGroup));
+            if (l_errl)
+            {
+                uint64_t l_reasonCode = l_errl->reasonCode();
+                UTIL_FT(ERR_MRK"HLLMgr::initHLL failed to process HLL shutting down rc=0x%08X",
+                        l_reasonCode);
+                errlCommit(l_errl,UTIL_COMP_ID);
+                INITSERVICE::doShutdown(l_reasonCode);
+            }
+            iv_initMetaData_required = false;
         }
     }
 
@@ -291,16 +300,12 @@ void HLLMgr::initHLL(const void* i_pHLL, const size_t i_HLLSize)
         INITSERVICE::doShutdown(l_reasonCode);
     }
 
-    // We do not want to initialize the entire iv_tmpSize for cases where we need to only initialize the MTOC_SIZE
-    if (!iv_toc_only)
-    {
-        // Initialize temporary space for processing other groups
-        initMem(iv_tmpAddr, iv_tmpSize, iv_pTempVaddr);
+    // Initialize temporary space for processing other groups
+    initMem(iv_tmpAddr, iv_tmpSize, iv_pTempVaddr);
 
-        // Switch to temp address and size for all other groups
-        iv_pVaddr = iv_pTempVaddr;
-        iv_maxSize = iv_tmpSize;
-    }
+    // Switch to temp address and size for all other groups
+    iv_pVaddr = iv_pTempVaddr;
+    iv_maxSize = iv_tmpSize;
 }
 
 void HLLMgr::releaseMem(const uint64_t i_physAddr,
@@ -359,6 +364,7 @@ void HLLMgr::initMem(const uint64_t i_physAddr,
 
     do {
     //Check if we already initialized vm space
+    // io_pVaddr is mapped to the iv instance variables by the caller
     if (io_pVaddr == nullptr)
     {
         io_pVaddr = mm_block_map(reinterpret_cast<void*>(i_physAddr), i_size);
@@ -385,7 +391,41 @@ void HLLMgr::initMem(const uint64_t i_physAddr,
             l_errl->collectTrace(UTIL_COMP_NAME);
             break;
         }
-        memset(io_pVaddr, 0, i_size);
+
+        // Depending on the call sequence to initMem, first entry is for the TOC iv_pHLLVaddr which will allow the
+        // mapping of the TOC space to see if we have already read the HLL LID, even on the second entry to initMem,
+        // the instance variable iv_pHLLVaddr will be appropriately mapped to also validate the memory signature
+        // of the TOC space.
+        auto l_pHLL = reinterpret_cast<const uint8_t*>(iv_pHLLVaddr);
+        // When class constructor is called with a real TOC sets iv_hasHeader
+        if (iv_hasHeader)
+        {
+            l_pHLL += V1_SIZE;
+        }
+        auto l_pHdr = reinterpret_cast<const HLLHeader*>(l_pHLL);
+        if (l_pHdr->EyeCatcher != HLL_EYE_CATCHER)
+        {
+            // We have to use the memory footprint to drive the decision making, not the newly created class instance vars
+            // Only the first time when initMetaData is performed will the verifyContainer and tpmExtend functions be run.
+            // Any future re-designs need to assure that the proper requirements are maintained to only verify and
+            // tpmExtend the HLL once per IPL.
+            iv_initMetaData_required = true;
+            if (!iv_toc_only)
+            {
+                // iv_initTempSpace_required is flipped to false when the initMem is called upon the temp space
+                // (so two passes go thru initMem, one time for the HLL and one time for the temp space
+                iv_initTempSpace_required = true;
+            }
+            memset(io_pVaddr, 0, i_size);
+        }
+        else
+        {
+            if (iv_initTempSpace_required)
+            {
+                memset(io_pVaddr, 0, i_size);
+                iv_initTempSpace_required = false;
+            }
+        }
     }
     } while(0);
 
@@ -608,7 +648,7 @@ void HLLMgr::printGroupInfoCache()
     UTIL_FT("> HLLMgr::printGroupInfoCache:");
     for (const auto &i : iv_groupInfoCache)
     {
-        GroupIdString l_curGroupIdStr;
+        GroupIdString l_curGroupIdStr = {};
         groupIdToString(i.first, l_curGroupIdStr);
         UTIL_FT("Group Name=%s", l_curGroupIdStr);
         i.second.print();
@@ -618,8 +658,9 @@ void HLLMgr::printGroupInfoCache()
 errlHndl_t HLLMgr::verifyPowerVM(void * i_payload)
 {
     errlHndl_t l_errl = nullptr;
-    GroupIdString l_curGroupIdStr;
+    GroupIdString l_curGroupIdStr = {};
     groupIdToString(g_HLLPowerVM, l_curGroupIdStr);
+    UTIL_FT(ENTER_MRK"HLLMgr::verifyPowerVM");
     uint8_t* l_pLidVaddr = reinterpret_cast<uint8_t*>(i_payload);
     auto groupInfoPairItr = iv_groupInfoCache.find(g_HLLPowerVM);
     if(groupInfoPairItr != iv_groupInfoCache.end())
@@ -651,18 +692,20 @@ errlHndl_t HLLMgr::verifyPowerVM(void * i_payload)
                 SECUREBOOT::handleSecurebootFailure(l_errl);
                 assert(false,"Bug! handleSecurebootFailure shouldn't return!");
             }
+            UTIL_FT("HLLMgr::verifyPowerVM lidInfo.id=0x%X passed HashCalc", lidInfo.id);
             l_pLidVaddr += lidInfo.size;
         }
     }
+    UTIL_FT(EXIT_MRK"HLLMgr::verifyPowerVM");
     return l_errl;
 }
 
-errlHndl_t HLLMgr::tpmExtend(const GroupID& i_groupId,
-                            const LidInfo& i_lidInfo)
+errlHndl_t HLLMgr::tpmExtendContainer(const GroupID& i_groupId,
+                            const SECUREBOOT::ContainerHeader& i_conHdr)
 {
-    UTIL_FT(ENTER_MRK"HLLMgr::tpmExtend i_lidInfo.id=0x%X sizeof(GroupID)=%d",
-        i_lidInfo.id, sizeof(GroupID));
-
+    GroupIdString l_HLLStr = {};
+    groupIdToString(i_groupId, l_HLLStr);
+    UTIL_FT(ENTER_MRK"HLLMgr::tpmExtendContainer=%s", l_HLLStr);
     errlHndl_t l_errl = nullptr;
 
     // PCR 4 Message <Group ID>
@@ -683,31 +726,31 @@ errlHndl_t HLLMgr::tpmExtend(const GroupID& i_groupId,
     // Extend protected payload hash
     l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_4,
               TRUSTEDBOOT::EV_COMPACT_HASH,
-              reinterpret_cast<const uint8_t*>(&i_lidInfo.hllHash),
+              reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
               sizeof(HashEntry),
               reinterpret_cast<uint8_t*>(pcr4Msg),
               pcr4Len);
     if (l_errl)
     {
-        UTIL_FT(ERR_MRK "HLLMgr::tpmExtend - pcrExtend() (payload text hash) failed for group");
+        UTIL_FT(ERR_MRK "HLLMgr::tpmExtendContainer - pcrExtend() (payload text hash) failed for group");
         break;
     }
 
     // Extend SW keys hash
     l_errl = TRUSTEDBOOT::pcrExtend(TRUSTEDBOOT::PCR_5,
               TRUSTEDBOOT::EV_COMPACT_HASH,
-              reinterpret_cast<const uint8_t*>(&i_lidInfo.hllHash),
+              reinterpret_cast<const uint8_t*>(i_conHdr.payloadTextHash()),
               sizeof(HashEntry),
               reinterpret_cast<uint8_t*>(pcr5Msg),
               pcr5Len);
     if (l_errl)
     {
-        UTIL_FT(ERR_MRK "HLLMgr::tpmExtend - pcrExtend() (FW key hash) failed for group");
+        UTIL_FT(ERR_MRK "HLLMgr::tpmExtendContainer - pcrExtend() (FW key hash) failed for group");
         break;
     }
     } while(0);
 
-    UTIL_FT(EXIT_MRK"HLLMgr::tpmExtend");
+    UTIL_FT(EXIT_MRK"HLLMgr::tpmExtendContainer=%s", l_HLLStr);
 
     return l_errl;
 }
@@ -834,8 +877,8 @@ errlHndl_t HLLMgr::initMetaData(
     do {
 
     groupIdToString(i_groupId, iv_curGroupIdStr);
-    UTIL_FT(ENTER_MRK"HLLMgr::initMetaData %s iv_curGroupIdStr=%s",
-            iv_curGroupIdStr, iv_curGroupIdStr);
+    UTIL_FT(ENTER_MRK"HLLMgr::initMetaData iv_curGroupIdStr=%s",
+            iv_curGroupIdStr);
 
     // Total size of all LIDs in group reported by either the FSP or BMC.
     // The FSP and BMC load their lid content from different sources,
@@ -984,7 +1027,13 @@ errlHndl_t HLLMgr::initMetaData(
             SECUREBOOT::handleSecurebootFailure(l_errl);
             assert(false,"Bug! handleSecurebootFailure shouldn't return!");
         }
-
+        l_errl = tpmExtendContainer(i_groupId, l_conHdr);
+        if (l_errl)
+        {
+            UTIL_FT("HLLMgr::initMetaData failed to tpmExtend Group Name=%s", iv_curGroupIdStr);
+            SECUREBOOT::handleSecurebootFailure(l_errl);
+            assert(false,"Bug! handleSecurebootFailure shouldn't return!");
+        }
     }
 
     } while(0);
@@ -1304,6 +1353,7 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
                 SECUREBOOT::handleSecurebootFailure(l_errl);
                 assert(false,"Bug! handleSecurebootFailure shouldn't return!");
             }
+            UTIL_FT("HLLMgr::loadLids lidInfo.id=0x%X passed HashCalc", lidInfo.id);
         }
 
         // Store current LID load virtual address

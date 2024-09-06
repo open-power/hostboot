@@ -352,15 +352,15 @@ class HLLMgr
     errlHndl_t managePreVerifiedGroup();
 
     /**
-     * @brief TPM extend information for secure components
+     * @brief TPM extend container information for secure components
      *
      * @param[in] i_groupId - Group Id
-     * @param[in] i_lidInfo - lidInfo to process
+     * @param[in] i_conHdr  - Container header with information to extend
      *
      * @return Error handle if error
      */
-    static errlHndl_t tpmExtend(const GroupID& i_groupId,
-                                const LidInfo& i_lidInfo);
+    static errlHndl_t tpmExtendContainer(const GroupID& i_groupId,
+                                const SECUREBOOT::ContainerHeader& i_conHdr);
 
     protected:
 
@@ -503,6 +503,15 @@ class HLLMgr
 
     uint16_t iv_version = 0;
 
+    // When creating an instance the following instance
+    // variables are used to manage the temporary memory space.
+    // The memory management allows the HLL LID to be read
+    // only once and then subsequent callers can create a
+    // new instance and detect the memory has been initialized.
+    // The HLLMgr instances are used at different IPL steps
+    // and some isteps are not even executed on FSP systems,
+    // so dynamic memory detection is used to properly setup
+    // each new instance created.
     // For some isteps it is necessary to NOT touch the temp space
     // when the class is constructed, so the iv_toc_only means to
     // skip touching the initialization of the temp space where the lids
@@ -510,6 +519,8 @@ class HLLMgr
     // with the class constructor and then leverage the already populated
     // temp space with the lids later in the IPL.
     bool iv_toc_only = false;
+    bool iv_initMetaData_required = false;
+    bool iv_initTempSpace_required = false;
 
     // HLL hash entry size, i.e. SHA512_t or future changes
     uint16_t iv_HashEntrySize = 0;
