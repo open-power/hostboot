@@ -155,7 +155,7 @@ struct epubProcedureToIsolationProcedure_t
     epubProcedureID epub_procedure_id;
     char isolationProcedure[PEL_PART_NUM_SIZE];
 };
-static constexpr std::array<epubProcedureToIsolationProcedure_t, 23> EPUB_TO_ISOLATION_PROCEDURE =
+static constexpr std::array<epubProcedureToIsolationProcedure_t, 24> EPUB_TO_ISOLATION_PROCEDURE =
 {
     epubProcedureToIsolationProcedure_t
     { EPUB_PRC_NONE                   , "       "},
@@ -181,6 +181,7 @@ static constexpr std::array<epubProcedureToIsolationProcedure_t, 23> EPUB_TO_ISO
     { EPUB_PRC_TOD_CLOCK_ERR          , "HB00056"}, // FSPSP86
     { EPUB_PRC_FW_VERIFICATION_ERR    , "HB0005D"}, // FSPSP93
     { EPUB_PRC_SBE_CODE               , "HB00062"}, // FSPSP98
+    { EPUB_PRC_SPARE_RESOURCE         , "HB00063"}, // FSPSP99
 };
 
 template<typename Iterator>

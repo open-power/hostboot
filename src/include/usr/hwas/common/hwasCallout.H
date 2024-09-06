@@ -176,6 +176,9 @@ enum epubProcedureID
 
     EPUB_PRC_SBE_CODE               = 0x62,
     ///< Problem is in SBE code, upgrade your firmware
+
+    EPUB_PRC_SPARE_RESOURCE         = 0x63,
+    ///< This error was hidden due to spare resources
 };
 
 // from srci/fsp/srci.H

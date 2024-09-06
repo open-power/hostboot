@@ -112,6 +112,7 @@ public:
             case(EPUB_PRC_TOD_CLOCK_ERR          ):
             case(EPUB_PRC_FW_VERIFICATION_ERR    ):
             case(EPUB_PRC_SBE_CODE               ):
+            case(EPUB_PRC_SPARE_RESOURCE         ):
             // Below callouts are not supported on BMC systems
 #ifdef CONFIG_FSP_BUILD
             case(EPUB_PRC_POWER_ERROR            ):
