@@ -37,6 +37,7 @@
 #include <ody_host_draminit.H>
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/find.H>
+#include <generic/memory/lib/utils/index.H>
 #include <lib/phy/ody_phy_access.H>
 #include <lib/phy/host_ody_phy_access.H>
 #include <generic/memory/lib/utils/host_scom_abstraction.H>
@@ -56,6 +57,16 @@ extern "C"
         for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
         {
 #ifdef __PPE__
+
+            // The SBE where this runs does not take into account functional targets properly (read: at all)
+            // Should this be done in the platform code? yes, but that's a bit riskier for a non-trained engineer to update
+            // If the target is not functional skip it
+            if(fapi2::ATTR::TARGET_TYPE_MEM_PORT::ATTR_SPPE_TARGET_STATE[mss::index(l_port)] !=
+               fapi2::ENUM_ATTR_SPPE_TARGET_STATE_TARGET_STATE_FUNCTIONAL)
+            {
+                continue;
+            }
+
             const auto OFFSET = mss::ody::phy::get_port_addr_offset(l_port);
             const auto& l_target = i_target;
 #else
