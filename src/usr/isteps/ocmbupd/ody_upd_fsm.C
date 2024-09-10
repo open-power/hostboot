@@ -388,9 +388,9 @@ state_transitions_t ody_fsm_transitions[] =
 
 /** @brief Convert an event to a string for logs and traces.
  */
-std::array<char, 256> event_to_str(const ody_upd_event_t i_event)
+std::array<char, 512> event_to_str(const ody_upd_event_t i_event)
 {
-    std::array<char, 256> str = { };
+    std::array<char, 512> str = { };
 
     do
     {
