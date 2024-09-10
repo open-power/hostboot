@@ -44,6 +44,39 @@
 void * g_smallHeapPages[SMALL_HEAP_PAGES_TRACKED];
 #endif
 
+size_t HeapManager::iv_chunk_size[BUCKETS] =
+{
+    HeapManager::BUCKET_SIZE0,
+    HeapManager::BUCKET_SIZE1,
+    HeapManager::BUCKET_SIZE2,
+    HeapManager::BUCKET_SIZE3,
+    HeapManager::BUCKET_SIZE4,
+    HeapManager::BUCKET_SIZE5,
+    HeapManager::BUCKET_SIZE6,
+    HeapManager::BUCKET_SIZE7,
+    HeapManager::BUCKET_SIZE8,
+    HeapManager::BUCKET_SIZE9,
+    HeapManager::BUCKET_SIZE10,
+    HeapManager::BUCKET_SIZE11
+};
+
+uint64_t HeapManager::cv_free_bucket_counts  [HeapManager::BUCKETS] = {0,0,0,0,0,0,0,0,0,0,0,0};
+uint64_t HeapManager::cv_inuse_bucket_counts [HeapManager::BUCKETS] = {0,0,0,0,0,0,0,0,0,0,0,0};
+uint64_t HeapManager::cv_alloc_sizes         [HeapManager::BUCKETS] = {0,0,0,0,0,0,0,0,0,0,0,0};
+uint64_t HeapManager::cv_smallheap_coalesce_state{0};
+uint64_t HeapManager::cv_smallheap_coalesce_attempts{0};
+uint64_t HeapManager::cv_smallheap_coalesce_count{0};
+uint64_t HeapManager::cv_smallheap_coalesce_page{0};
+uint64_t HeapManager::cv_smallheap_page_count{0};
+uint64_t HeapManager::cv_largeheap_page_count{0};
+uint64_t HeapManager::cv_largeheap_page_max{0};
+uint64_t HeapManager::iv_hugeblock_allocated{0};
+uint64_t HeapManager::cv_hugeblock_page_count{0};
+uint64_t HeapManager::cv_hugeblock_page_max{0};
+uint64_t HeapManager::cv_smallheap_user_allocated{0};
+uint64_t HeapManager::cv_smallheap_allocated{0};
+uint64_t HeapManager::cv_smallheap_alloc_hw{0};
+
 void HeapManager::init()
 {
     Singleton<HeapManager>::instance();
@@ -609,230 +642,174 @@ size_t HeapManager::bucketIndex(size_t i_sz)
 }
 
 
+// all other processes must be quiesced
 void HeapManager::_coalesce()
 {
-    // ensure that only one thread is running a coalesce
-    int l_zero = __sync_bool_compare_and_swap(&cv_smallheap_coalesce_state,0,1);
-    if (!l_zero)
-    {
-        return; // another thread is running a coallesce
-    }
+    chunk_t* head = nullptr;
+    chunk_t* chunk = nullptr;
+
+    __sync_add_and_fetch(&cv_smallheap_coalesce_state,1);
     __sync_add_and_fetch(&cv_smallheap_coalesce_attempts,1);
 
-    chunk_list_t main_list;
-    chunk_list_t restore_list;
-    chunk_t     *chunk{nullptr};
-    chunk_t     *cur{nullptr};
-
-    // remove all the chunks from the free buckets, and put them into main_list
-    for (size_t bucket = 0; bucket < BUCKETS; ++bucket)
+    // make a chain out of all the free chunks
+    for(size_t bucket = 0; bucket < BUCKETS; ++bucket)
     {
-        while ((chunk = first_chunk[bucket].pop()))
+        chunk = nullptr;
+        while(nullptr != (chunk = first_chunk[bucket].pop()))
         {
             __sync_sub_and_fetch(&cv_free_bucket_counts[chunk->bucket],1);
 
-            kassert(chunk->free == 'F'); // ensure all chunks in the free buckets
-                                         // are marked free
+            kassert(chunk->free == 'F');
+
+            chunk->next = head;
             chunk->coalesce = 'C';
-            main_list.push(chunk);
+            head = chunk;
         }
     }
 
-    // On each iteration
-    //   -remove a chunk from main_list
-    //   -search main_list for other chunks in the same 4k page and try to merge them
-    //   -those chunks remaining after each 4k page merge are saved into restore_list
-    // When we are finished processing main_list, then put the chunks in restore_list
-    //  back into the free buckets
-
-    while ((chunk = main_list.pop()))
+    // Merge the chunks together until we fail to find a buddy.
+    bool mergedChunks = false;
+    do
     {
-        chunk_list_t page_list;
-        page_list.push(chunk);   // use the 4k page for this chunk in this iteration
+        mergedChunks = false;
+        chunk = head;
 
-        chunk_t *candidate = main_list.get_head();
-        chunk_t *prev      = &main_list.head;  // used to delete each candidate from main_list
-
-        // loop through the rest of main_list looking for candidate chunks in the same
-        // 4k page as the first chunk pushed onto page_list above
-        while (candidate)
+        // Iterate through the chain.
+        while(nullptr != chunk)
         {
-            if (ALIGN_PAGE_DOWN(reinterpret_cast<uint64_t>(candidate)) !=
-                ALIGN_PAGE_DOWN(reinterpret_cast<uint64_t>(chunk)))
+            bool incrementChunk = true;
+
+            do
             {
-                prev      = candidate;       // not in same page, move to next
-                candidate = candidate->next;
-                continue;
-            }
-            prev->next = candidate->next; // remove candidate from the main_list
-            page_list.push(candidate);    // save, since its in the same 4k page
-            candidate = prev->next;       // look at the next chunk in main_list
-        }
-
-        // add the sizes of the chunks in page_list
-        size_t sum{0};
-        cur = page_list.get_head();
-        while (cur)
-        {
-            sum += bucketByteSize(cur->bucket);
-            cur = cur->next;
-        }
-        if (sum == PAGESIZE) // the chunks in page_list are a full 4k page
-        {
-            void *page = (void*)(ALIGN_PAGE_DOWN(reinterpret_cast<uint64_t>(chunk)));
-            PageManager::freePage(page,1);  // return this page to PageManager
-            __sync_sub_and_fetch(&cv_smallheap_page_count,1);
-            __sync_add_and_fetch(&cv_smallheap_coalesce_page,1);
-            __sync_add_and_fetch(&cv_smallheap_coalesce_count,page_list.size);
-            continue; // the chunks in page_list are discarded, go process the next
-                      // chunk in the main_list
-        }
-
-        // loop through the chunks in page_list and attempt to coalesce
-        chunk_t *page_chunk = page_list.get_head();
-        while (page_chunk)
-        {
-            // calculate the addr of what the buddy chunk must be if page_chunk
-            //  is to be merged with its buddy.
-            // Each bucket has a specific size, so
-            //  buddy_addr = addr_of_page_chunk + bucket_size_of_page_chunk
-            // Search in page_list for buddy_addr, and if found then do a merge.
-            size_t   chunk_size = bucketByteSize(page_chunk->bucket);
-            uint64_t buddy_addr = reinterpret_cast<uint64_t>(page_chunk) + chunk_size;
-            chunk_t* buddy      = reinterpret_cast<chunk_t*>(buddy_addr);
-            chunk_t *cur        = page_list.get_head();
-            bool     any_merged{false};
-
-            prev = &page_list.head; // setup in case we need to delete a chunk
-
-            // search in page_list for buddy
-            while (cur)
-            {
-                if (cur != buddy)
+                // This chunk might already be combined with a chunk earlier
+                // in the loop.
+                if((chunk->coalesce != 'C') || (chunk->free != 'F'))
                 {
-                    // cur is not the addr following page_chunk
-                    prev = cur;
-                    cur  = cur->next;
-                    continue;
+                    break;
                 }
+
+                // Use the size of this chunk to find next chunk.
+                size_t size = bucketByteSize(chunk->bucket);
+                chunk_t* buddy = reinterpret_cast<chunk_t*>(
+                        reinterpret_cast<uint64_t>(chunk) + size);
+
+                // The two chunks have to be on the same page in order to
+                // be considered for merge.
+                if (ALIGN_PAGE_DOWN(reinterpret_cast<uint64_t>(buddy)) !=
+                    ALIGN_PAGE_DOWN(reinterpret_cast<uint64_t>(chunk)))
+                {
+                    break;
+                }
+
+                // Cannot merge if buddy is not free.
                 if ((buddy->free != 'F') || (buddy->coalesce != 'C'))
                 {
-                    // we found buddy, but cannot merge since buddy is not free
-                    prev = buddy;
-                    cur  = buddy->next;
-                    continue;
+                    break;
                 }
-                // we found buddy and we can try to merge with page_chunk
 
-                // Calculate the size of page_chunk + buddy
-                size_t newSize   = chunk_size + bucketByteSize(buddy->bucket);
+                // Calculate the size of a combined chunk.
+                size_t newSize = size + bucketByteSize(buddy->bucket);
                 size_t newBucket = bucketIndex(newSize);
 
-                if ((newBucket >= BUCKETS) || (bucketByteSize(newBucket) != newSize))
+                // If the combined chunk is not a bucket size, cannot merge.
+                if ((newBucket >= BUCKETS) ||
+                    (bucketByteSize(newBucket) != newSize))
                 {
-                    // combined chunk is not a bucket size, cannot merge
-                    prev = buddy;
-                    cur  = buddy->next;
-                    continue;
+                    break;
                 }
-                // page_chunk and buddy CAN be merged
+
+                // Do merge.
+                buddy->free = '\0'; buddy->coalesce = '\0';
+                chunk->bucket = newBucket;
+                incrementChunk = false;
+                mergedChunks = true;
 
                 __sync_add_and_fetch(&cv_smallheap_coalesce_count,1);
 
-                // update page_chunk and buddy as merged
-                buddy->free        = '\0';
-                buddy->coalesce    = '\0';
-                page_chunk->bucket = newBucket;
-                chunk_size         = bucketByteSize(newBucket);
-                any_merged         = true;
+            } while(0);
 
-                prev->next = buddy->next; // remove buddy from page_list
-                cur        = buddy->next;
-            }
-
-            if (any_merged)
+            if (incrementChunk)
             {
-                // we merged page_chunk and buddy
-                // look for another chunk in page_list to merge with page_chunk
-                //   go calc a new buddy addr and search for it in page_list
-                continue;
+                chunk = chunk->next;
             }
-            // we are done merging the current page_chunk
-            // move to the next page_chunk and try to merge it with any chunk in page_list
-            page_chunk = page_chunk->next;
         }
 
-        // we are done merging page_list
-        // move the remainging chunks in page_list to restore_list
-        while ((cur = page_list.pop()))
+        // Remove all the non-free (merged) chunks from the list.
+        chunk_t* newHead = nullptr;
+        chunk = head;
+        while (nullptr != chunk)
         {
-            if ((cur->free != 'F') || (cur->coalesce != 'C'))
+            if ((chunk->free == 'F') && (chunk->coalesce == 'C'))
             {
-                kassert(chunk == 0);  // print the chunk addr in the kassert
-                continue;
-            }
-            restore_list.push(cur);
-        }
-    }
+                chunk_t* temp = chunk->next;
+                chunk->next = newHead;
+                newHead = chunk;
 
-    // move the chunks in the restore_list back to the free buckets
-    while ((chunk = restore_list.pop()))
+                chunk=temp;
+            }
+            else
+            {
+                chunk = chunk->next;
+            }
+        }
+
+        head = newHead;
+
+    } while(mergedChunks);
+
+
+    // restore the free buckets
+    chunk = head;
+    while(chunk != nullptr)
     {
-        if ((chunk->free != 'F') || (chunk->coalesce != 'C'))
-        {
-            kassert(chunk == 0);  // print the chunk addr in the kassert
-        }
+        chunk_t * temp = chunk->next;
+
         chunk->coalesce = '\0';
-        chunk->free  = 'F';
-        chunk->size  = 0;
-        chunk->allocator = 0;
-        first_chunk[chunk->bucket].push(chunk);
-        __sync_add_and_fetch(&cv_free_bucket_counts[chunk->bucket],1);
+        push_bucket(chunk,chunk->bucket);
+
+        chunk = temp;
     }
-
-    test_pages();
-
+    KTRC1("HeapMgr coalesced total %ld\n",cv_smallheap_coalesce_count);
     __sync_sub_and_fetch(&cv_smallheap_coalesce_state, 1);
+    test_pages();
 }
 
 void HeapManager::get_stats(kmem_trc_data_t &o_stats)
 {
-    HeapManager& hmgr = Singleton<HeapManager>::instance();
-
     uint32_t l_free_chunks = 0;
     uint32_t l_free_bytes  = 0;
     for (size_t i=0; i<BUCKETS; ++i)
     {
-        l_free_chunks += hmgr.cv_free_bucket_counts[i];
-        l_free_bytes  += hmgr.cv_free_bucket_counts[i] * hmgr.iv_chunk_size[i];
+        l_free_chunks += cv_free_bucket_counts[i];
+        l_free_bytes  += cv_free_bucket_counts[i] * iv_chunk_size[i];
     }
     uint32_t l_inuse_chunks = 0;
     uint32_t l_inuse_bytes  = 0;
     for (size_t i=0; i<BUCKETS; ++i)
     {
-        l_inuse_chunks += hmgr.cv_inuse_bucket_counts[i];
-        l_inuse_bytes  += hmgr.cv_inuse_bucket_counts[i] * hmgr.iv_chunk_size[i];
+        l_inuse_chunks += cv_inuse_bucket_counts[i];
+        l_inuse_bytes  += cv_inuse_bucket_counts[i] * iv_chunk_size[i];
     }
 
     o_stats.cv_free_chunks                 = l_free_chunks;
     o_stats.cv_free_bytes                  = l_free_bytes;
     o_stats.cv_inuse_chunks                = l_inuse_chunks;
     o_stats.cv_inuse_bytes                 = l_inuse_bytes;
-    o_stats.cv_smallheap_coalesce_attempts = hmgr.cv_smallheap_coalesce_attempts;
-    o_stats.cv_smallheap_coalesce_count    = hmgr.cv_smallheap_coalesce_count;
-    o_stats.cv_smallheap_coalesce_page     = hmgr.cv_smallheap_coalesce_page;
-    o_stats.cv_smallheap_page_count        = hmgr.cv_smallheap_page_count;
-    o_stats.cv_largeheap_page_count        = hmgr.cv_largeheap_page_count;
-    o_stats.cv_largeheap_page_max          = hmgr.cv_largeheap_page_max;
-    o_stats.iv_hugeblock_allocated         = hmgr.iv_hugeblock_allocated;
-    o_stats.cv_hugeblock_page_count        = hmgr.cv_hugeblock_page_count;
-    o_stats.cv_hugeblock_page_max          = hmgr.cv_hugeblock_page_max;
-    o_stats.cv_smallheap_user_allocated    = hmgr.cv_smallheap_user_allocated;
-    o_stats.cv_smallheap_allocated         = hmgr.cv_smallheap_allocated;
-    o_stats.cv_smallheap_alloc_hw          = hmgr.cv_smallheap_alloc_hw;
+    o_stats.cv_smallheap_coalesce_attempts = cv_smallheap_coalesce_attempts;
+    o_stats.cv_smallheap_coalesce_count    = cv_smallheap_coalesce_count;
+    o_stats.cv_smallheap_coalesce_page     = cv_smallheap_coalesce_page;
+    o_stats.cv_smallheap_page_count        = cv_smallheap_page_count;
+    o_stats.cv_largeheap_page_count        = cv_largeheap_page_count;
+    o_stats.cv_largeheap_page_max          = cv_largeheap_page_max;
+    o_stats.iv_hugeblock_allocated         = iv_hugeblock_allocated;
+    o_stats.cv_hugeblock_page_count        = cv_hugeblock_page_count;
+    o_stats.cv_hugeblock_page_max          = cv_hugeblock_page_max;
+    o_stats.cv_smallheap_user_allocated    = cv_smallheap_user_allocated;
+    o_stats.cv_smallheap_allocated         = cv_smallheap_allocated;
+    o_stats.cv_smallheap_alloc_hw          = cv_smallheap_alloc_hw;
     for (int i=0; i<BUCKETS; i++)
     {
-        o_stats.cv_free_bucket_counts[i] = static_cast<uint32_t>(hmgr.cv_free_bucket_counts[i]);
+        o_stats.cv_free_bucket_counts[i] = static_cast<uint32_t>(cv_free_bucket_counts[i]);
     }
 }
 
@@ -967,9 +944,57 @@ bool HeapManager::_freeBig(void* i_ptr)
 
 void HeapManager::_addDebugPointers()
 {
-    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERINSTANCE,
-                             this,
-                             sizeof(HeapManager));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERHUGEPAGEALLOC,
+                             &iv_hugeblock_allocated,
+                             sizeof(HeapManager::iv_hugeblock_allocated));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERHUGEPAGECOUNT,
+                             &cv_hugeblock_page_count,
+                             sizeof(HeapManager::cv_hugeblock_page_count));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERHUGEEPAGEMAX,
+                             &cv_hugeblock_page_max,
+                             sizeof(HeapManager::cv_hugeblock_page_max));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERLARGEPAGECOUNT,
+                             &cv_largeheap_page_count,
+                             sizeof(HeapManager::cv_largeheap_page_count));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERLARGEPAGEMAX,
+                             &cv_largeheap_page_max,
+                             sizeof(HeapManager::cv_largeheap_page_max));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLPAGECOUNT,
+                             &cv_smallheap_page_count,
+                             sizeof(HeapManager::cv_smallheap_page_count));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLALLOCHW,
+                             &cv_smallheap_alloc_hw,
+                             sizeof(HeapManager::cv_smallheap_alloc_hw));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLALLOC,
+                             &cv_smallheap_allocated,
+                             sizeof(HeapManager::cv_smallheap_allocated));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLUSERALLOC,
+                             &cv_smallheap_user_allocated,
+                             sizeof(HeapManager::cv_smallheap_user_allocated));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLCOALSTATE,
+                             &cv_smallheap_coalesce_state,
+                             sizeof(HeapManager::cv_smallheap_coalesce_state));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLCOALATMPT,
+                             &cv_smallheap_coalesce_attempts,
+                             sizeof(HeapManager::cv_smallheap_coalesce_attempts));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLCOALCOUNT,
+                             &cv_smallheap_coalesce_count,
+                             sizeof(HeapManager::cv_smallheap_coalesce_count));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLCOALPAGE,
+                             &cv_smallheap_coalesce_page,
+                             sizeof(HeapManager::cv_smallheap_coalesce_page));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLFREEBUCKT,
+                             cv_free_bucket_counts,
+                             sizeof(HeapManager::cv_free_bucket_counts));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLINUSEBUCKT,
+                             cv_inuse_bucket_counts,
+                             sizeof(HeapManager::cv_inuse_bucket_counts));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLALLOCSIZES,
+                             cv_alloc_sizes,
+                             sizeof(HeapManager::cv_alloc_sizes));
+    DEBUG::add_debug_pointer(DEBUG::HEAPMANAGERSMALLCHUNKSIZES,
+                             iv_chunk_size,
+                             sizeof(HeapManager::iv_chunk_size));
 }
 
 void* HeapManager::_allocateHuge(size_t i_sz)

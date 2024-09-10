@@ -37,8 +37,6 @@ use Exporter;
 use Hostboot::SimpleTraceCommon;
 our @EXPORT_OK = ('main');
 
-use constant PAGEMGR_INSTANCE => "Singleton<PageManager>::instance()::instance";
-use constant HEAPMGR_INSTANCE => "Singleton<HeapManager>::instance()::instance";
 use constant PAGEMGR_NUMBER_OF_BUCKETS => 16;
 use constant HEAPMGR_NUMBER_OF_BUCKETS => 12;
 
@@ -56,21 +54,17 @@ sub helpInfo
 
 ################################################################################
 # read and dump bytes from the addr passed in, for debug
-sub st_dump_bytes
+sub dump_bytes
 {
     my $addr = shift @_;
-    my $num = shift @_;
     my $d;
     my $str;
-
-    ::userDisplay "---------------\n";
-
-    for (my $i=0; $i<$num; $i++)
+    for (my $i=0; $i<24; $i++)
     {
-        $d = ::read64 ($addr);
-        $str = sprintf("%2d %08x %016x\n", $i, $addr, $d);
+        $d = ::read32 ($addr);
+        $str = sprintf("%08x %08x\n", $addr, $d);
         ::userDisplay "$str";
-        $addr += 8;
+        $addr += 4;
     }
 }
 
@@ -82,20 +76,40 @@ sub display_header
     $hdr or return;
     ::userDisplay "$hdr\n";
 }
+################################################################################
+# print the istep/substep, if passed in
+sub display_istep
+{
+    my ($istep, $substep) = (@_);
+    $istep or return;
+    ::userDisplay "  IStep: $istep.$substep\n";
+}
 
 ################################################################################
-# print a msg for the tag passed in (defined in simpletrace.H)
+# print a msg for the tag passed in
 sub display_tag
 {
     my $tag = shift || 0;
     switch ($tag)
     {
-        case 0x1001 {::userDisplay "KMEM_STATS_SYSCALL                           ";}
-        case 0x1002 {::userDisplay "KMEM_STATS_ALLOC_PAGE_OOM_USR_GET_RES_FAIL   ";}
-        case 0x1003 {::userDisplay "KMEM_STATS_ALLOC_PAGE_OOM_USR_TIMEOUT_ASSERT ";}
-        case 0x1004 {::userDisplay "KMEM_STATS_ALLOC_PAGE_OOM_KERNEL_GET_RES_FAIL";}
-        case 0x1005 {::userDisplay "KMEM_STATS_ALLOC_PAGE_OOM_KERNEL_KASSERT     ";}
+        case 0x1001 {::userDisplay "KMEM_STATS_SYSCALL";}
+        case 0x1002 {::userDisplay "KMEM_ALLOC_PAGE_OOM";}
+        case 0x1003 {::userDisplay "KMEM_ALLOC_PAGE_OOM_COALESCE";}
+        case 0x1004 {::userDisplay "KMEM_ALLOC_PAGE_OOM_DEFRAG";}
+        case 0x1005 {::userDisplay "KMEM_ALLOC_PAGE_OOM_TIMEOUT";}
+        case 0x1006 {::userDisplay "KMEM_ALLOC_PAGE_OOM_FIRST_FAIL";}
+        case 0x1007 {::userDisplay "KMEM_ALLOC_PAGE_OOM_SECOND_FAIL";}
+        case 0x1008 {::userDisplay "KMEM_ALLOC_PAGE_OOM_KASSERT";}
     }
+}
+
+################################################################################
+# print a msg for the data, if passed in
+sub display_req_pages
+{
+    my $pages = shift || 0;
+    $pages or return;
+    ::userDisplay "  Pages: $pages\n";
 }
 
 ################################################################################
@@ -107,133 +121,71 @@ sub display_mem_stats
 
     if ($data{cv_pagesTotal} == 0)
     {
-        ::userDisplay "data is unavailable at this time\n";
+        ::userDisplay "data is unavailabe at this time\n";
         return;
     }
 
     $data{summary} or ::userDisplay "=========================================================\n";
     display_header($data{header});
     display_tag($data{tag});
-    $data{summary} or $data{tag} and ::userDisplay "\n";
-    Hostboot::SimpleTraceCommon::st_display_istep($data{istep}, $data{substep});
-    $data{summary} or $data{istep} and ::userDisplay "\n";
+    $data{summary} or ::userDisplay "\n";
+    display_istep($data{istep}, $data{substep});
     Hostboot::SimpleTraceCommon::st_display_tid($data{tid});
-    $data{summary} or $data{tid} and ::userDisplay "\n";
-    Hostboot::SimpleTraceCommon::st_display_req_pages($data{requested_pages});
-    $data{summary} or $data{requested_pages} and ::userDisplay "\n";
-    ::userDisplay "\n";
+    display_req_pages($data{requested_pages});
 
     $data{summary} and return;
+
+    ::userDisplay "\n";
 
     # pagemgr
     ::userDisplay "Page Memory Stats:\n";
     $str = sprintf("  %6d Total Pages\n", $data{cv_pagesTotal});
     ::userDisplay "$str";
-    $str = sprintf("  %6d Heap Available Pages\n", $data{cv_pagesAvail_heap});
+    $str = sprintf("  %6d Available Pages\n", $data{cv_pagesAvail});
     ::userDisplay "$str";
-    $str = sprintf("  %6d Heap Low Page Count\n", $data{cv_low_page_count_heap});
+    $str = sprintf("  %6d Low Page Count\n", $data{cv_low_page_count});
+    ::userDisplay "$str";
+    $str = sprintf("  %6d Kernel reserved pages available\n", $data{cv_reserved_pages_available});
     ::userDisplay "$str";
     if ($data{cv_coalesce_state})
     {
-        $str = sprintf("       Heap Coalesce is running\n");
+        $str = sprintf("  %8d Coalesce is running\n");
     }
     if ($data{cv_coalesce_attempts})
     {
-        $str = sprintf("  %6d Heap Coalesce Attempts\n", $data{cv_coalesce_attempts});
+        $str = sprintf("  %6d Coalesced Attempts\n", $data{cv_coalesce_attempts});
         ::userDisplay "$str";
     }
     if ($data{cv_coalesce_count})
     {
-        $str = sprintf("  %6d Heap Coalesce Pages\n", $data{cv_coalesce_count});
+        $str = sprintf("  %6d Coalesced Pages\n", $data{cv_coalesce_count});
         ::userDisplay "$str";
     }
     if ($data{cv_allocatePage_coalesce_wait})
     {
-        $str = sprintf("  %6d Heap allocatePage wait_loop\n", $data{cv_allocatePage_coalesce_wait});
+        $str = sprintf("  %6d Alloc Page Wait For Coalesce\n", $data{cv_allocatePage_coalesce_wait});
         ::userDisplay "$str";
     }
-    ::userDisplay "                    ";
+    ::userDisplay "free:";
     for (my $i=0; $i<PAGEMGR_NUMBER_OF_BUCKETS; $i++)
     {
-        if ($data{cv_free_bucket_count_heap}{$i} ||
-            $data{cv_alloc_sizes_heap}{$i})
+        if ($data{cv_free_bucket_count}{$i})
         {
-            my $field = sprintf("%ld/%ld", $i, 1<<$i);
+            my $field = sprintf("%ld/%ld", $i, $data{cv_free_bucket_count}{$i}*(1<<$i));
             $str = sprintf("%8s", $field);
             ::userDisplay "$str";
         }
     }
+    ::userDisplay "\n     ";
+    for (my $i=0; $i<PAGEMGR_NUMBER_OF_BUCKETS; $i++)
+    {
+        if ($data{cv_free_bucket_count}{$i})
+        {
+            $str = sprintf("%8ld", $data{cv_free_bucket_count}{$i});
+            ::userDisplay "$str";
+        }
+    }
     ::userDisplay "\n";
-    my $heap_nums;
-    my $heap_allocs;
-    for (my $i=0; $i<PAGEMGR_NUMBER_OF_BUCKETS; $i++)
-    {
-        # format these together to use the same heading above
-        if ($data{cv_free_bucket_count_heap}{$i} ||
-            $data{cv_alloc_sizes_heap}{$i})
-        {
-            $str = sprintf("%8ld", $data{cv_free_bucket_count_heap}{$i});
-            $heap_nums .= $str;
-            $str = sprintf("%8ld", $data{cv_alloc_sizes_heap}{$i});
-            $heap_allocs .= $str;
-        }
-    }
-    ::userDisplay "         Heap free: $heap_nums\n";
-    my $num_allocs=0;
-    for (my $i=0; $i<PAGEMGR_NUMBER_OF_BUCKETS; $i++)
-    {
-        $num_allocs += $data{cv_alloc_sizes_heap}{$i};
-    }
-    if ($num_allocs)
-    {
-        # trace elements dont have allocs, so dont print a line of zeroes
-        ::userDisplay "         Heap Alloc:$heap_allocs\n";
-    }
-
-    # iv_reserved
-    $str = sprintf("  %6d Reserved Available Pages\n", $data{cv_pagesAvail_res});
-    ::userDisplay "$str";
-    my $num_res_alloc=0;
-    for (my $i=0; $i<8; $i++)
-    {
-        $num_res_alloc += $data{cv_alloc_sizes_res}{$i};
-    }
-    my $res_nums_str;
-    my $res_allocs_str;
-    for (my $i=0; $i<8; $i++)
-    {
-        # format these together to use the same heading above
-        if ($data{cv_free_bucket_count_res}{$i} ||
-            $data{cv_alloc_sizes_res}{$i})
-        {
-            $str = sprintf("%8ld", $data{cv_free_bucket_count_res}{$i});
-            $res_nums_str .= $str;
-            $str = sprintf("%8ld", $data{cv_alloc_sizes_res}{$i});
-            $res_allocs_str .= $str;
-        }
-    }
-    if ($data{cv_low_page_count_res} != 128)
-    {
-        $str = sprintf("  %6d Reserved Low Page Count\n", $data{cv_low_page_count_res});
-        ::userDisplay "$str";
-        ::userDisplay "                    ";
-        for (my $i=0; $i<8; $i++)
-        {
-            if ($data{cv_free_bucket_count_res}{$i} ||
-                $data{cv_alloc_sizes_res}{$i})
-            {
-                my $field = sprintf("%ld/%ld", $i, (1<<$i));
-                $str = sprintf("%8s", $field);
-                ::userDisplay "$str";
-            }
-        }
-        ::userDisplay "\n";
-        ::userDisplay "         Res free:  $res_nums_str\n";
-        if ($num_res_alloc)
-        {
-            ::userDisplay "         Res Alloc: $res_allocs_str\n";
-        }
-    }
 
     # block
     ::userDisplay "\nBlock Stats:\n";
@@ -289,7 +241,7 @@ sub display_mem_stats
     }
     if ($data{cv_smallheap_coalesce_attempts})
     {
-        $str = sprintf("  %8d Coalesce Attempts\n", $data{cv_smallheap_coalesce_attempts});
+        $str = sprintf("  %8d Coalesced Attempts\n", $data{cv_smallheap_coalesce_attempts});
         ::userDisplay "$str";
     }
     if ($data{cv_smallheap_coalesce_count})
@@ -354,23 +306,16 @@ sub get_trace_data
 
     # pagemgr
     $data->{cv_pagesTotal}                 = ::read32 ($addr); $addr+=4;
-    $data->{cv_pagesAvail_heap}            = ::read32 ($addr); $addr+=4;
-    $data->{cv_low_page_count_heap}        = ::read32 ($addr); $addr+=4;
-    $data->{cv_coalesce_state}             = ::read32 ($addr); $addr+=4;
+    $data->{cv_pagesAvail}                 = ::read32 ($addr); $addr+=4;
+    $data->{cv_reserved_pages_available}   = ::read32 ($addr); $addr+=4;
+    $data->{cv_low_page_count}             = ::read32 ($addr); $addr+=4;
     $data->{cv_coalesce_attempts}          = ::read32 ($addr); $addr+=4;
     $data->{cv_coalesce_count}             = ::read32 ($addr); $addr+=4;
+    $data->{cv_allocatePage_coalesce_wait} = ::read32 ($addr); $addr+=4;
 
     for (my $i=0; $i<16; $i++)
     {
-        $data->{cv_free_bucket_count_heap}{$i} = ::read32 ($addr);
-        $addr += 4;
-    }
-    $data->{cv_allocatePage_coalesce_wait} = ::read32 ($addr); $addr+=4;
-    $data->{cv_pagesAvail_res}             = ::read32 ($addr); $addr+=4;
-    $data->{cv_low_page_count_res}         = ::read32 ($addr); $addr+=4;
-    for (my $i=0; $i<8; $i++)
-    {
-        $data->{cv_free_bucket_count_res}{$i} = ::read32 ($addr);
+        $data->{cv_free_bucket_count}{$i} = ::read32 ($addr);
         $addr += 4;
     }
 
@@ -412,52 +357,36 @@ sub get_pagemgr_data
 {
     my $data = shift @_;
 
-    my ($symAddr, $symSize) = ::findPointer("PAGEMINS", PAGEMGR_INSTANCE);
-    if (not defined $symAddr)
-    {
-        ::userDisplay "Couldn't find".PAGEMGR_INSTANCE."\n";
-        return;
-    }
-
-    $data->{cv_pagesTotal}                 = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_allocatePage_coalesce_wait} = ::read64($symAddr); $symAddr += 8;
-
-    ### read iv_heap data
-
+    $data->{cv_reserved_pages_available} = ::read64
+      ::findPointer("PAGEMKRA",
+                    "PageManager::cv_reserved_pages_available");
+    $data->{cv_pagesTotal} = ::read64
+      ::findPointer("PAGEMPGT",
+                    "PageManager::cv_pagesTotal");
+    $data->{cv_pagesAvail} = ::read64
+      ::findPointer("PAGEMPGA",
+                    "PageManager::cv_pagesAvail");
+    $data->{cv_low_page_count} = ::read64
+      ::findPointer("PAGEMLPC",
+                    "PageManager::cv_low_page_count");
+    $data->{cv_coalesce_state} = ::read64
+      ::findPointer("PAGEMCST",
+                    "PageManager::cv_coalesce_state");
+    $data->{cv_coalesce_attempts} = ::read64
+      ::findPointer("PAGEMCAT",
+                    "PageManager::cv_coalesce_attempts");
+    $data->{cv_coalesce_count} = ::read64
+      ::findPointer("PAGEMCNT",
+                    "PageManager::cv_coalesce_count");
+    $data->{cv_allocatePage_coalesce_wait} = ::read64
+      ::findPointer("PAGEMACC",
+                    "PageManager::cv_allocatePage_coalesce_wait");
+    my ($addr,$symsize) = ::findPointer("PAGEMFBK",
+                                        "PageManager::cv_free_bucket_count");
     for (my $i=0; $i<PAGEMGR_NUMBER_OF_BUCKETS; $i++)
     {
-        $data->{cv_free_bucket_count_heap}{$i} = ::read64($symAddr); $symAddr += 8;
+        $data->{cv_free_bucket_count}{$i} = ::read64($addr); $addr+=8;
     }
-    for (my $i=0; $i<PAGEMGR_NUMBER_OF_BUCKETS; $i++)
-    {
-        $data->{cv_alloc_sizes_heap}{$i} = ::read64($symAddr); $symAddr += 8;
-    }
-
-    $data->{cv_pagesAvail_heap}     = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_low_page_count_heap} = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_coalesce_state}      = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_coalesce_attempts}   = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_coalesce_count}      = ::read64($symAddr); $symAddr += 8;
-
-    $symAddr += (PAGEMGR_NUMBER_OF_BUCKETS*8); # iv_heap[BUCKETS]
-    $symAddr += 4;                             # iv_supports_coalesce
-    $symAddr += 4;                             # pad1
-    $symAddr += 24;                            # iv_spinlock
-    $symAddr += (PAGEMGR_NUMBER_OF_BUCKETS*4); # iv_ranges
-
-    ### read iv_reserved data
-
-    for (my $i=0; $i<PAGEMGR_NUMBER_OF_BUCKETS; $i++)
-    {
-        $data->{cv_free_bucket_count_res}{$i} = ::read64($symAddr); $symAddr += 8;
-    }
-    for (my $i=0; $i<PAGEMGR_NUMBER_OF_BUCKETS; $i++)
-    {
-        $data->{cv_alloc_sizes_res}{$i} = ::read64($symAddr); $symAddr += 8;
-    }
-
-    $data->{cv_pagesAvail_res}     = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_low_page_count_res} = ::read64($symAddr); $symAddr += 8;
 }
 
 ################################################################################
@@ -489,43 +418,74 @@ sub get_heapmgr_data
 {
     my $data = shift @_;
 
-    my ($symAddr, $symSize) = ::findPointer("HEAPMINS", HEAPMGR_INSTANCE);
-    if (not defined $symAddr)
-    {
-        ::userDisplay "Couldn't find".HEAPMGR_INSTANCE."\n";
-        return;
-    }
-    $data->{iv_hugeblock_allocated}         = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_hugeblock_page_count}        = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_hugeblock_page_max}          = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_largeheap_page_count}        = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_largeheap_page_max}          = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_smallheap_page_count}        = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_smallheap_alloc_hw}          = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_smallheap_allocated}         = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_smallheap_user_allocated}    = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_smallheap_coalesce_state}    = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_smallheap_coalesce_attempts} = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_smallheap_coalesce_count}    = ::read64($symAddr); $symAddr += 8;
-    $data->{cv_smallheap_coalesce_page}     = ::read64($symAddr); $symAddr += 8;
+    $data->{iv_hugeblock_allocated} = ::read64
+      ::findPointer("HEAPMHPA",
+                    "HeapManager::iv_hugeblock_allocated");
+    $data->{cv_hugeblock_page_count} = ::read64
+      ::findPointer("HEAPMHPC",
+                    "HeapManager::cv_hugeblock_page_count");
+    $data->{cv_hugeblock_page_max} = ::read64
+      ::findPointer("HEAPMHPM",
+                    "HeapManager::cv_hugeblock_page_max");
+    $data->{cv_largeheap_page_count} = ::read64
+      ::findPointer("HEAPMLPC",
+                    "HeapManager::cv_largeheap_page_count");
+    $data->{cv_largeheap_page_max} = ::read64
+      ::findPointer("HEAPMLPM",
+                    "HeapManager::cv_largeheap_page_max");
+    $data->{cv_smallheap_page_count} = ::read64
+      ::findPointer("HEAPMSPC",
+                    "HeapManager::cv_smallheap_page_count");
+    $data->{cv_smallheap_alloc_hw} = ::read64
+      ::findPointer("HEAPMSAH",
+                    "HeapManager::cv_smallheap_alloc_hw");
+    $data->{cv_smallheap_allocated} = ::read64
+      ::findPointer("HEAPMSAL",
+                    "HeapManager::cv_smallheap_allocated");
+    $data->{cv_smallheap_user_allocated} = ::read64
+      ::findPointer("HEAPMSUA",
+                    "HeapManager::cv_smallheap_user_allocated");
+    $data->{cv_smallheap_coalesce_state} = ::read64
+      ::findPointer("HEAPMCST",
+                    "HeapManager::cv_smallheap_coalesce_state");
+    $data->{cv_smallheap_coalesce_attempts} = ::read64
+      ::findPointer("HEAPMCAT",
+                    "HeapManager::cv_smallheap_coalesce_attempts");
+    $data->{cv_smallheap_coalesce_count} = ::read64
+      ::findPointer("HEAPMCNT",
+                    "HeapManager::cv_smallheap_coalesce_count");
+    $data->{cv_smallheap_coalesce_page} = ::read64
+      ::findPointer("HEAPMCPG",
+                    "HeapManager::cv_smallheap_coalesce_page");
 
+    my ($addr,$symsize) = ::findPointer("HEAPMFBT",
+                                        "HeapManager::cv_free_bucket_counts");
     for (my $i=0; $i<HEAPMGR_NUMBER_OF_BUCKETS; $i++)
     {
-        $data->{cv_free_bucket_counts}{$i} = ::read64($symAddr); $symAddr+=8;
+        $data->{cv_free_bucket_counts}{$i} = ::read64($addr); $addr+=8;
     }
+
+    ($addr,$symsize) = ::findPointer("HEAPMIBT",
+                                        "HeapManager::cv_inuse_bucket_counts");
     for (my $i=0; $i<HEAPMGR_NUMBER_OF_BUCKETS; $i++)
     {
-        $data->{cv_inuse_bucket_counts}{$i} = ::read64($symAddr); $symAddr+=8;
+        $data->{cv_inuse_bucket_counts}{$i} = ::read64($addr); $addr+=8;
     }
     $data->{INUSE_BUCKET_COUNTS} = 1;
+
+    ($addr,$symsize) = ::findPointer("HEAPASZ",
+                                        "HeapManager::cv_alloc_sizes");
     for (my $i=0; $i<HEAPMGR_NUMBER_OF_BUCKETS; $i++)
     {
-        $data->{cv_alloc_sizes}{$i} = ::read64($symAddr); $symAddr+=8;
+        $data->{cv_alloc_sizes}{$i} = ::read64($addr); $addr+=8;
     }
     $data->{ALLOC_BUCKET_COUNTS} = 1;
+
+    ($addr,$symsize) = ::findPointer("HEAPMCSZ",
+                                        "HeapManager::iv_chunk_size");
     for (my $i=0; $i<HEAPMGR_NUMBER_OF_BUCKETS; $i++)
     {
-        $data->{iv_chunk_size}{$i} = ::read64($symAddr); $symAddr+=8;
+        $data->{iv_chunk_size}{$i} = ::read64($addr); $addr+=8;
     }
 
     for (my $i=0; $i<HEAPMGR_NUMBER_OF_BUCKETS; $i++)

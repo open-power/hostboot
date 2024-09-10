@@ -30,28 +30,9 @@ package Hostboot::PageMgr;
 use Exporter;
 our @EXPORT_OK = ('main');
 
-use constant PAGEMGR_INSTANCE => "Singleton<PageManager>::instance()::instance";
+use constant PAGEMGR_BUCKETS_NAME => "PageManager::iv_heap";
 use constant PAGEMGR_NUMBER_OF_BUCKETS => 16;
 
-################################################################################
-# read and dump bytes from the addr passed in, for debug
-sub dump_bytes_32
-{
-    my $addr = shift @_;
-    my $num = shift @_;
-    my $d;
-    my $str;
-    ::userDisplay "-----------------------\n";
-    for (my $i=0; $i<$num; $i++)
-    {
-        $d = ::read32 ($addr);
-        $str = sprintf("%08x %08x\n", $addr, $d);
-        ::userDisplay "$str";
-        $addr += 4;
-    }
-}
-
-################################################################################
 sub main
 {
     my ($packName, $args) = @_;
@@ -68,121 +49,55 @@ sub main
         $showpages = 1;
     }
 
-    # Find the marker for the addr
-    my ($symAddr, $symSize) = ::findPointer("PAGEMINS", PAGEMGR_INSTANCE);
-    if (not defined $symAddr)
+    my ($addr,$symsize) = ::findPointer("PAGEMPGA",
+                                        "PageManager::cv_pagesAvail");
+    if (not defined $addr)
     {
-        ::userDisplay "Couldn't find".PAGEMGR_INSTANCE."\n";
+        ::userDisplay "Couldn't find "."PageManager::cv_pagesAvail";
         die;
     }
+    my $pagesAvail = ::read64($addr);
 
-    ##################
-    # PAGEMGR_INSTANCE
-
-    my $pagesTotal = ::read64($symAddr);
-    ::userDisplay "pagesTotal: $pagesTotal\n";
-
-    $symAddr += 8;      # cv_pagesTotal
-    $symAddr += 8;      # cv_allocatePage_coalesce_wait
-
-    ##################
-    # iv_heap
-
-    $symAddr += (PAGEMGR_NUMBER_OF_BUCKETS*8); # cv_free_bucket_count
-    $symAddr += (PAGEMGR_NUMBER_OF_BUCKETS*8); # cv_alloc_sizes
-
-    my $pagesAvail = ::read64($symAddr);
-    ::userDisplay " Heap\n";
-    ::userDisplay "   pagesAvail counter: $pagesAvail\n";
-
-    $symAddr += 8;      # cv_free_pages
-    $symAddr += 8;      # cv_low_page_count
-    $symAddr += 8;      # cv_coalesce_state
-    $symAddr += 8;      # cv_coalesce_attempts
-    $symAddr += 8;      # cv_coalesce_count
+    # Find the PageManager::iv_heap
+    my ($symAddr, $symSize) = ::findPointer("PAGEMBKT",
+                                          PAGEMGR_BUCKETS_NAME);
+    if (not defined $symAddr)
+    {
+        ::userDisplay "Couldn't find ".PAGEMGR_BUCKETS_NAME;
+        die;
+    }
+    $symAddr += 8;
 
     # Parse through buckets and count pages in buckets.
     my $pagesInBuckets = 0;
 
-    $pagesInBuckets = countBuckets($symAddr,
-                                   $debug,
-                                   $showpages);
-
-    ::userDisplay "   pages in buckets:   ".$pagesInBuckets."\n";
-
-    # Compare if they match.  Hopefully they do.
-    if ($pagesAvail != $pagesInBuckets)
-    {
-        my $difference = abs ($pagesAvail - $pagesInBuckets);
-        ::userDisplay "WARNING: Values differ by $difference!!\n";
-    }
-
-    $symAddr += (16*8); # iv_heap[BUCKETS]
-    $symAddr += 4;      # iv_supports_coalesce
-    $symAddr += 4;      # pad1
-    $symAddr += 24;     # iv_spinlock
-    $symAddr += (16*4); # iv_ranges
-
-    ##################
-    # iv_reserved
-
-    $symAddr += (16*8); # cv_free_bucket_count
-    $symAddr += (16*8); # cv_alloc_sizes
-
-    $pagesAvail = ::read64($symAddr);
-    ::userDisplay " Reserved\n";
-    ::userDisplay "   pagesAvail counter: $pagesAvail\n";
-
-    $symAddr += 8;      # cv_free_pages
-    $symAddr += 8;      # cv_low_page_count
-    $symAddr += 8;      # cv_coalesce_state
-    $symAddr += 8;      # cv_coalesce_attempts
-    $symAddr += 8;      # cv_coalesce_count
-
-    $pagesInBuckets = countBuckets($symAddr,
-                                   $debug,
-                                   $showpages);
-
-    ::userDisplay "   pages in buckets:   ".$pagesInBuckets."\n";
-
-    # Compare if they match.  Hopefully they do.
-    if ($pagesAvail != $pagesInBuckets)
-    {
-        my $difference = abs ($pagesAvail - $pagesInBuckets);
-        ::userDisplay "WARNING: Values differ by $difference!!\n";
-    }
-}
-
-################################################################################
-sub countBuckets
-{
-    my ($symAddr, $debug, $showpages) = (@_);
-
-    my $pagesInBuckets = 0;
-
-    for (my $bucket = 0; $bucket < PAGEMGR_NUMBER_OF_BUCKETS; $bucket++)
+    for (my $bucket = 0; $bucket <  PAGEMGR_NUMBER_OF_BUCKETS; $bucket++)
     {
         my $stackAddr = ::read32($symAddr + (8 * $bucket) + 4);
 
         my $stackCount = countItemsInStack($stackAddr);
-        my $count = (1 << $bucket) * $stackCount;
+        my $size = (1 << $bucket) * $stackCount;
 
-        $pagesInBuckets += $count;
-        my $size         = 1<<$bucket;
+        $pagesInBuckets = $pagesInBuckets + $size;
 
-        if ($count)
-        {
-            ::userDisplay "      Bucket $bucket/$size has $stackCount blocks for ".
-                          "$count pages.\n" if $debug;
-        }
+        ::userDisplay "Bucket $bucket has $stackCount blocks for ".
+                      "$size pages.\n" if $debug;
+
         if( $debug && $showpages ) {
             showPagesInStack($stackAddr,(1 << $bucket));
         }
     }
-    return $pagesInBuckets;
+
+    ::userDisplay "Pages in buckets: ".$pagesInBuckets."\n";
+
+    # Compare if they match.  Hopefully they do.
+    if ($pagesAvail != $pagesInBuckets)
+    {
+        my $difference = abs ($pagesAvail - $pagesInBuckets);
+        ::userDisplay "WARNING: Values differ by $difference!!\n";
+    }
 }
 
-################################################################################
 sub countItemsInStack
 {
     my $stack = shift;
@@ -193,7 +108,6 @@ sub countItemsInStack
     return 1 + countItemsInStack(::read32($stack + 4));
 }
 
-################################################################################
 sub showPagesInStack
 {
     my $stack = shift;
@@ -208,7 +122,6 @@ sub showPagesInStack
     return 1 + showPagesInStack(::read32($stack+4),$bucketsize);
 }
 
-################################################################################
 sub helpInfo
 {
     my %info = (

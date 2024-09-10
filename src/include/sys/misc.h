@@ -318,11 +318,6 @@ void set_topology_mode(uint8_t i_topologyMode);
  */
 void save_mem_stats(uint64_t istep, uint64_t substep);
 
-/** @fn coalesce_heap_memory
- *  @brief Run a coalesce for the PageMgr and HeapMgr
- */
-void coalesce_heap_memory();
-
 #ifdef __cplusplus
 }
 #endif

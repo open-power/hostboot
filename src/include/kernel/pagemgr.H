@@ -59,7 +59,7 @@ class PageManagerCore
          * @param[in] i_supports_coalesce, Does this instance support coalesce
          */
         PageManagerCore(bool i_supports_coalesce)
-            : iv_supports_coalesce(i_supports_coalesce), iv_spinlock() {}
+            : iv_supports_coalesce(i_supports_coalesce) {}
 
         /**
          * Add memory to the page manager
@@ -107,33 +107,11 @@ class PageManagerCore
             return ALIGN_PAGE(VFS_LAST_ADDRESS);
         }
 
-        uint64_t cv_free_bucket_count[BUCKETS] = {};
-        uint64_t cv_alloc_sizes      [BUCKETS] = {};
-        uint64_t cv_free_pages{0};         //!< sum of pages in free buckets
-        uint64_t cv_low_page_count{999999};//!< lowest page count
-        uint64_t cv_coalesce_state{0};     //!< 1 if coalesce is running, else 0
-        uint64_t cv_coalesce_attempts{0};  //!< num times a coalesce has run
-        uint64_t cv_coalesce_count{0};     //!< num times pages were merged
-
     private:
 
-        Util::Lockfree::Stack<page_t> iv_heap[BUCKETS]; //!< The free heap memory
+        bool iv_supports_coalesce;    //!< coalesce supported for this instance
 
-        bool     iv_supports_coalesce;   //!< true if coalesce is supported
-        uint32_t iv_pad1{0xF11DF11D};    // compiler adds this anyway, so put it here
-
-        // The allocator was designed to be lockless. We have ran into a problem
-        // in Brazos where all threads (over 256) were trying to allocate a page
-        // at the same time.  This resulted in many of them trying to break a large
-        // page chunk into smaller fragments.  The later threads ended up seeing
-        // no chunks available and claimed we were out of memory.
-        //
-        // All calls to the functions using iv_spinlock must be running
-        // in kernel space so we dont run into any deadlock situations
-        //
-        // RTC: 98271
-        Spinlock iv_spinlock; //!< lock for the iv_heap buckets
-                              //     used in allocatePage and coalesce
+        Util::Lockfree::Stack<page_t> iv_heap[BUCKETS]; //!< The heap
 
         //!< Starting address of a heap memory range
         using rangeAddr_t = uint64_t;
@@ -242,22 +220,27 @@ class PageManager
 
         enum
         {
-            HEAP_RESERVED          = 128,             // free pages reserved
-            HEAP_RESERVED_MIN_SIZE = 9,               // smallest size to re-fill iv_reserved
-            HEAP_RESERVED_LOW_MARK = HEAP_RESERVED/4, // low mark to re-fill iv_reserved
-                                                      // with any size
+            // Always keep this many free pages for the kernel to use
+            KERNEL_HEAP_RESERVED_PAGES = 10,
+
             // Triggers a NORMAL page castout
 #ifdef CONFIG_P9_VPO_COMPILE // VPO has constrained mem env -> higher threshold
             LOWMEM_NORM_LIMIT = 32,
 #else
             LOWMEM_NORM_LIMIT = 16,
 #endif
+
             // Triggers CRITICAL page castout
-            LOWMEM_CRIT_LIMIT = 8,
+            LOWMEM_CRIT_LIMIT = KERNEL_HEAP_RESERVED_PAGES+1,
         };
 
-        static constexpr size_t KMEMSTATS_SIZE = 4096;
-        static constexpr size_t KALLOC_SIZE    = 512;
+        static constexpr size_t   KMEMSTATS_SIZE   = 4096;
+        static constexpr size_t   KALLOC_SIZE      = 1024;
+
+        static uint64_t cv_free_bucket_count[PageManagerCore::BUCKETS];
+        static uint64_t cv_coalesce_state;     //!< 1 if coalesce is running, else 0
+        static uint64_t cv_coalesce_attempts;  //!< iv_heap coalesce attempts
+        static uint64_t cv_coalesce_count;     //!< iv_heap coalesced page count
 
     protected:
 
@@ -267,16 +250,16 @@ class PageManager
     private:
         void _initialize();
 
-        void* _allocatePage(size_t,bool,bool); //!< see allocatePage()
-        void _freePage(void*, size_t);         //!< see freePage()
-        void _coalesce( void );                //!< see coalesce()
-        void _addMemory(size_t, size_t);       //!< see addMemory()
-        void _addDebugPointers();              //!< see addDebugPointers()
+        void* _allocatePage(size_t,bool,bool);//!< see allocatePage()
+        void _freePage(void*, size_t);       //!< see freePage()
+        void _coalesce( void );              //!< see coalesce()
+        void _addMemory(size_t, size_t);     //!< see addMemory()
+        void _addDebugPointers();           //!< see addDebugPointers()
 
         /** see queryAvail() */
         ALWAYS_INLINE uint64_t _queryAvail() const
         {
-            return (100*iv_heap.cv_free_pages)/cv_pagesTotal;
+            return (100*cv_pagesAvail)/cv_pagesTotal;
         }
 
         ALWAYS_INLINE uint64_t firstPageAddr( void ) const
@@ -287,7 +270,7 @@ class PageManager
         /** see availPages() */
         ALWAYS_INLINE uint64_t _availPages() const
         {
-            return iv_heap.cv_free_pages;
+            return cv_pagesAvail;
         }
 
         /** see isSmallMemEnv() */
@@ -296,11 +279,16 @@ class PageManager
             return (cv_pagesTotal < 0xE00 /*14MB*/);
         }
 
-        uint64_t cv_pagesTotal{0};                 //!< Total iv_heap + iv_reserved pages
-        uint64_t cv_allocatePage_coalesce_wait{0}; //!< num times a usr alloc had to wait
+        static uint64_t cv_pagesTotal;                  //!< Total iv_heap + iv_heapKernel pages
+        static uint64_t cv_pagesAvail;                  //!< free iv_heap + iv_heapKernel pages
+        static uint64_t cv_low_page_count;              //!< lowest page count
+        static uint64_t cv_allocatePage_coalesce_wait;  //!< number of repeat allocs
+        static uint64_t cv_reserved_pages_available;    //!< iv_heapKernel pages
 
-        PageManagerCore iv_heap    { true };  //!< Main heap, allow coalesce
-        PageManagerCore iv_reserved{ false }; //!< reserved heap, no coalesce
+        Spinlock iv_lock;               //!< lock for allocating
+
+        PageManagerCore iv_heap{ true };        //!< Main heap, allow coalesce
+        PageManagerCore iv_heapKernel{ false }; //!< kernel heap for out-of-mem, no coalesce
 };
 
 #endif

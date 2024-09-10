@@ -1207,15 +1207,6 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
             istepPauseSet(i_istep, i_substep);
         }
 
-        if ( ((i_istep == 6) && (i_substep > 3)) ||
-              (i_istep > 6) )
-        {
-            // call in istep 6 for each substep after 3 AND
-            // call for every substep after istep 6
-            save_mem_stats(i_istep, i_substep); // save a trace for MemStats
-            coalesce_heap_memory(); // run coalesce in PageManager and HeapManager
-        }
-
         //---------------------------------------------------------
         // Run the Istep
         err = InitService::getTheInstance().executeFn(theStep, NULL);
@@ -1223,6 +1214,11 @@ errlHndl_t IStepDispatcher::doIstep(uint32_t i_istep,
         {
             TRACFCOMP(g_trac_initsvc,"Error returned from istep : %.8X=%.4X",
                       err->eid(), err->reasonCode());
+        }
+
+        if ((i_istep == 6 && i_substep == 4) || i_substep == 1)
+        {
+            save_mem_stats(i_istep, i_substep);
         }
 
         //  flush contTrace immediately after each i_istep/substep  returns

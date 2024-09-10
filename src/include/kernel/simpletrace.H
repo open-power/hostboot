@@ -48,29 +48,25 @@
  */
 enum kalloc_trc_tag_t : uint16_t
 {
-    K_ALLOC_USR_FIRST      = 0x1001,  // usr thread first failure in allocatePage,
-                                      // so log it and retry until timeout
-    K_ALLOC_USR_PERIODIC   = 0x1002,  // usr thread is in the failure loop in allocatePage,
-                                      // and runs forceMemoryPeriodic
-    K_ALLOC_USR_GET_RES    = 0x1003,  // usr thread multiple fails at allocatePage,
-                                      // so get memory from iv_reserve
-    K_ALLOC_KERNEL_GET_RES = 0x1004,  // kernel thread fails at allocatePage,
-                                      // so get memory from iv_reserve
+    K_ALLOC_PAGES_FAIL  = 0x1001,
 };
 
 /**
  *******************************************************************************
- *  @brief Define the data in each kalloc entry. This trace provides general
- *         information for page allocation problems in the PageManager.
+ *  @brief Define the data in each kalloc entry. This trace logs the page allocs
+ *         which fail in PageManagerCore::allocatePage that are greater than one
+ *         page. These are the allocs which hit the OOM TI.
  */
 typedef struct kalloc_trc_data
 {
-    // Do not change the order of these variables,
-    //  the perl debug scripts depend upon the order when reading the memory
-    uint16_t istep;
-    uint16_t substep;
+    uint32_t which_bucket;
+    uint32_t bucket_size;
+    uint32_t page_count;
+    uint32_t stats_count;
+    uint32_t coalesce_state;
+    void    *first;
     tid_t    tid;
-    uint16_t requested_pages;
+
 }  __attribute__((packed)) kalloc_trc_data_t;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,11 +79,14 @@ typedef struct kalloc_trc_data
  */
 enum kmem_trc_tag_t : uint16_t
 {
-    KMEM_STATS_SYSCALL                            = 0x1001, // each istep logs a trace
-    KMEM_STATS_ALLOC_PAGE_OOM_USR_GET_RES_FAIL    = 0x1002, // usr thread get iv_reserved fails
-    KMEM_STATS_ALLOC_PAGE_OOM_USR_TIMEOUT_ASSERT  = 0x1003, // usr thread times out with OOM
-    KMEM_STATS_ALLOC_PAGE_OOM_KERNEL_GET_RES_FAIL = 0x1004, // kernel thread get iv_reserved fails
-    KMEM_STATS_ALLOC_PAGE_OOM_KERNEL_KASSERT      = 0x1005, // kernel thread hits OOM kassert
+    KMEM_STATS_SYSCALL                    = 0x1001,
+    KMEM_STATS_ALLOC_PAGE_OOM             = 0x1002,
+    KMEM_STATS_ALLOC_PAGE_OOM_COALESCE    = 0x1003,
+    KMEM_STATS_ALLOC_PAGE_OOM_DEFRAG      = 0x1004,
+    KMEM_STATS_ALLOC_PAGE_OOM_TIMEOUT     = 0x1005,
+    KMEM_STATS_ALLOC_PAGE_OOM_FIRST_FAIL  = 0x1006,
+    KMEM_STATS_ALLOC_PAGE_OOM_SECOND_FAIL = 0x1007,
+    KMEM_STATS_ALLOC_PAGE_OOM_KASSERT     = 0x1008,
 };
 
 /**
@@ -97,8 +96,6 @@ enum kmem_trc_tag_t : uint16_t
  */
 typedef struct kmem_trc_data
 {
-    // Do not change the order of the variables in this struct,
-    //  the perl debug scripts depend upon the order when reading the memory
     uint16_t istep;
     uint16_t substep;
     tid_t    tid;
@@ -109,16 +106,13 @@ typedef struct kmem_trc_data
 
     // pagemgr
     uint32_t cv_pagesTotal;
-    uint32_t cv_pagesAvail_heap;
-    uint32_t cv_low_page_count_heap;
-    uint32_t cv_coalesce_state;
+    uint32_t cv_pagesAvail;
+    uint32_t cv_reserved_pages_available;
+    uint32_t cv_low_page_count;
     uint32_t cv_coalesce_attempts;
     uint32_t cv_coalesce_count;
-    uint32_t cv_free_bucket_count_heap[16];
     uint32_t cv_allocatePage_coalesce_wait;
-    uint32_t cv_pagesAvail_res;
-    uint32_t cv_low_page_count_res;
-    uint32_t cv_free_bucket_count_res[8];
+    uint32_t cv_free_bucket_count[16];
 
     // block
     uint32_t cv_pages_allocated;
@@ -394,13 +388,10 @@ void STRC_KALLOC_INIT(uint32_t i_size, simple_trace_format_t i_format);
 /**
  *******************************************************************************
  *  @brief Add a trace entry to g_kalloc_trace
- *  @param[in]  i_lvl   trace level
  *  @param[in]  i_tag   tag for the new trace entry
  *  @param[in]  i_data  data for the new trace entry
  */
-void STRC_KALLOC(simple_trace_level_t i_lvl,
-                     kalloc_trc_tag_t i_tag,
-                   kalloc_trc_data_t &i_data);
+void STRC_KALLOC(kalloc_trc_tag_t i_tag, kalloc_trc_data_t &i_data);
 
 /**
  *******************************************************************************
@@ -413,12 +404,24 @@ void STRC_KMEM_INIT(uint32_t i_size, simple_trace_format_t i_format);
 /**
  *******************************************************************************
  *  @brief Add a trace entry to g_kmem_trace
- *  @param[in]  i_lvl   trace level
- *  @param[in]  i_tag   tag for the new trace entry
- *  @param[in]  i_data  struct to add into the trace
+ *  @param[in]  i_lvl              trace level
+ *  @param[in]  i_tag              tag for the new trace entry
+ *  @param[in]  i_requested_pages  number of pages requested in the alloc
  */
 void STRC_KMEM(simple_trace_level_t i_lvl,
                      kmem_trc_tag_t i_tag,
-                   kmem_trc_data_t &i_data);
+                           uint16_t i_requested_pages);
 
+/**
+ *******************************************************************************
+ *  @brief Add a trace entry to g_kmem_trace
+ *  @param[in]  i_lvl      trace level
+ *  @param[in]  i_tag      tag for the new trace entry
+ *  @param[in]  i_step     Istep when this trace is called
+ *  @param[in]  i_substep  Istep substep when this trace is called
+ */
+void STRC_KMEM(simple_trace_level_t i_lvl,
+                     kmem_trc_tag_t i_tag,
+                           uint16_t i_istep,
+                           uint16_t i_substep);
 #endif

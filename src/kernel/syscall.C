@@ -49,11 +49,6 @@
 #include <kernel/ipc.H>
 #include <kernel/simpletrace.H>
 
-// these istep indicators are set in SaveMemStats, below
-// and are used in kernel tracing for Memory Management and OOM FFDC
-extern int g_istep;
-extern int g_substep;
-
 extern "C"
 void kernel_execute_hyp_doorbell()
 {
@@ -167,7 +162,6 @@ namespace Systemcalls
     void SetTopologyMode(task_t *t);
 
     void SaveMemStats(task_t *t);
-    void CoalesceHeapMemory(task_t *t);
 
     syscall syscalls[] =
     {
@@ -215,8 +209,7 @@ namespace Systemcalls
         &UpdateRemoteIpcAddr, // UPDATE_REMOTE_IPC_ADDR
         &QryLocalIpcInfo,  // QRY_LOCAL_IPC_INFO
         &SetTopologyMode,  // MISC_SET_TOPOLOGY_MODE
-        &SaveMemStats,     // SAVE_MEM_STATS
-        &CoalesceHeapMemory// COALESCE_HEAP_MEMORY
+        &SaveMemStats      // SAVE_MEM_STATS
     };
 };
 
@@ -946,6 +939,27 @@ namespace Systemcalls
         // Attempt to allocate the page(s).
         void* page = PageManager::allocatePage(pages, true);
         TASK_SETRTN(t, reinterpret_cast<uint64_t>(page));
+
+        // If we are low on memory, call into the VMM to free some up.
+        uint64_t pcntAvail = PageManager::queryAvail();
+        if (pcntAvail < PageManager::LOWMEM_NORM_LIMIT)
+        {
+            static uint64_t one_at_a_time = 0;
+            if (!__sync_lock_test_and_set(&one_at_a_time, 1))
+            {
+                VmmManager::flushPageTable();
+                VmmManager::castout_t sev =
+                    (pcntAvail < PageManager::LOWMEM_CRIT_LIMIT) ?
+                        VmmManager::CRITICAL : VmmManager::NORMAL;
+                VmmManager::castOutPages(sev);
+                __sync_lock_release(&one_at_a_time);
+            }
+        }
+        else if ((page == NULL) && (pages > 1))
+        {
+            CpuManager::forceMemoryPeriodic();
+        }
+
     }
 
      /**
@@ -1057,23 +1071,7 @@ namespace Systemcalls
         uint16_t istep   = (uint16_t)(TASK_GETARG0(t));
         uint16_t substep = (uint16_t)(TASK_GETARG1(t));
 
-        // always save the isteps for kernel tracing
-        g_istep   = istep;
-        g_substep = substep;
-
-        if (g_substep == 1)
-        {
-            kmem_trc_data_t l_data{0};
-            l_data.istep   = istep;
-            l_data.substep = substep;
-            STRC_KMEM(STRC_L0, KMEM_STATS_SYSCALL, l_data);
-        }
-    }
-
-    void CoalesceHeapMemory(task_t *t)
-    {
-        HeapManager::coalesce();
-        PageManager::coalesce();
+        STRC_KMEM(STRC_L0, KMEM_STATS_SYSCALL, istep, substep);
     }
 };
 

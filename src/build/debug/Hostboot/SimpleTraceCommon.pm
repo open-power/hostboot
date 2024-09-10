@@ -63,31 +63,12 @@ sub st_display_string
 }
 
 ################################################################################
-# print the istep/substep, if passed in
-sub st_display_istep
-{
-    my ($istep, $substep) = (@_);
-    $istep or return;
-    ::userDisplay "  IStep: $istep";
-    $substep and ::userDisplay ".$substep";
-}
-
-################################################################################
 # print the tid, if one was passed in
 sub st_display_tid
 {
     my $tid = shift || 0;
     $tid or return;
-    ::userDisplay "  TID:   $tid";
-}
-
-################################################################################
-# print a msg for the data, if passed in
-sub st_display_req_pages
-{
-    my $pages = shift || 0;
-    $pages or return;
-    ::userDisplay "  Pages: $pages";
+    ::userDisplay "  TID:   $tid\n";
 }
 
 ################################################################################
