@@ -294,6 +294,7 @@ TESTCASE_MODULES += testmmio
 TESTCASE_MODULES += testeeprom
 TESTCASE_MODULES += testdump
 TESTCASE_MODULES += $(if $(CONFIG_PLDM)$(CONFIG_PLDM_TESTCASES),testpldm_extended)
+TESTCASE_MODULES += testmemorymgr
 endif
 
 #******************************************************************

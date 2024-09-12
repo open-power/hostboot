@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,12 +48,17 @@
 #include <kernel/doorbell.H>
 #include <arch/pvrformat.H>
 #include <arch/magic.H>
+#include <kernel/simpletrace.H>
+
+extern int g_istep;   // used in STRC_KMEM, STRC_KALLOC
+extern int g_substep; // used in STRC_KMEM, STRC_KALLOC
 
 cpu_t* CpuManager::cv_cpus[KERNEL_MAX_SUPPORTED_CPUS_PER_INST] = {nullptr};
 bool CpuManager::cv_shutdown_requested = false;
 uint64_t CpuManager::cv_shutdown_status = 0;
 size_t CpuManager::cv_cpuSeq = 0;
 uint8_t CpuManager::cv_forcedMemPeriodic = 0;
+VmmManager::castout_t CpuManager::cv_castOutPagesType = VmmManager::NORMAL;
 InteractiveDebug CpuManager::cv_interactive_debug;
 
 const uint64_t WAKEUP_MSR_VALUE  = 0x9000000000001000;
@@ -120,12 +125,6 @@ void CpuManager::requestShutdown(uint64_t i_status, uint32_t i_error_data)
         public:
             void masterPreWork()
             {
-                // The stats can be retrieved from global variables as needed.
-                // This can be uncommented for debug if desired
-                #ifdef __MEMSTATS__
-                if(c->master)
-                    HeapManager::stats();
-                #endif
             }
 
             void activeMainWork()
@@ -319,37 +318,21 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
             cv_interactive_debug.startDebugTask();
         }
 
-        bool forceMemoryPeriodic = __sync_fetch_and_and(&cv_forcedMemPeriodic,
-                                                        0);
-
         ++(i_cpu->periodic_count);
-        if((0 == (i_cpu->periodic_count % CPU_PERIODIC_CHECK_MEMORY)) ||
-           (forceMemoryPeriodic))
-        {
-            uint64_t pcntAvail = PageManager::queryAvail();
-            if((pcntAvail < PageManager::LOWMEM_NORM_LIMIT) ||
-               (forceMemoryPeriodic))
-            {
-                VmmManager::flushPageTable();
-                ++(i_cpu->periodic_count);   // prevent another flush below
-                if(pcntAvail < PageManager::LOWMEM_CRIT_LIMIT)
-                {
-                    VmmManager::castOutPages(VmmManager::CRITICAL);
-                }
-                else
-                {
-                    VmmManager::castOutPages(VmmManager::NORMAL);
-                }
-            }
-        }
-        if(0 == (i_cpu->periodic_count % CPU_PERIODIC_FLUSH_PAGETABLE))
+        if (0 == (i_cpu->periodic_count % CPU_PERIODIC_FLUSH_PAGETABLE))
         {
             VmmManager::flushPageTable();
         }
-        if(((0 == (i_cpu->periodic_count % CPU_PERIODIC_DEFRAG))
-            && PageManager::isSmallMemEnv()) // only defrag if in small mem env
-           || (forceMemoryPeriodic))
+
+        bool forceMemoryPeriodic = __sync_fetch_and_and(&cv_forcedMemPeriodic, 0);
+        if (forceMemoryPeriodic)
         {
+            VmmManager::flushPageTable();
+
+            VmmManager::castout_t castOutPagesType{VmmManager::NORMAL};
+            castOutPagesType = __sync_fetch_and_and(&cv_castOutPagesType, 0);
+            VmmManager::castOutPages(castOutPagesType);
+
             class MemoryCoalesce : public DeferredWork
             {
                 public:
@@ -365,11 +348,13 @@ void CpuManager::executePeriodics(cpu_t * i_cpu)
             };
 
             DeferredQueue::insert(new MemoryCoalesce());
+
+            STRC1_KMEM(KMEM_STATS_FORCE_MEMORY_PERIODIC,
+                       g_istep, g_substep, castOutPagesType);
         }
     }
 
     DeferredQueue::execute();
-
 }
 
 void CpuManager::startCore(uint64_t pir,uint64_t i_threads)
@@ -466,9 +451,38 @@ size_t CpuManager::getThreadCount()
     return threads;
 }
 
-void CpuManager::forceMemoryPeriodic()
+uint64_t g_forceMemoryNormal_ticks{0};
+uint64_t g_forceMemoryCritical_ticks{0};
+
+void CpuManager::forceMemoryPeriodic(VmmManager::castout_t i_castOutPagesType)
 {
-    cv_forcedMemPeriodic = 1;
+    // Analyze the seconds since the last forceMemoryPeriodic.
+    // This allows us to apply a threshold, and prevent too many periodics.
+    uint64_t cur_ticks = getTB();
+    uint64_t secs{0};
+    uint64_t nsecs{0};
+
+    TimeManager::convertTicksToSec(cur_ticks - g_forceMemoryNormal_ticks, secs, nsecs);
+
+    if ( (i_castOutPagesType == VmmManager::NORMAL) &&
+         (secs > PageManager::CASTOUT_NORMAL_DELAY) )
+    {
+        __sync_fetch_and_or(&cv_forcedMemPeriodic, 1);
+        g_forceMemoryNormal_ticks = cur_ticks;
+        STRC1_KLONG(KDBG_SET_FORCE_PERIODIC, i_castOutPagesType, 0);
+    }
+
+    TimeManager::convertTicksToSec(cur_ticks - g_forceMemoryCritical_ticks, secs, nsecs);
+
+    if ( (i_castOutPagesType == VmmManager::CRITICAL) &&
+         (secs > PageManager::CASTOUT_CRITICAL_DELAY) )
+    {
+        __sync_fetch_and_or(&cv_castOutPagesType, i_castOutPagesType);
+        __sync_fetch_and_or(&cv_forcedMemPeriodic, 1);
+        g_forceMemoryNormal_ticks   = cur_ticks; // also reset NORMAL
+        g_forceMemoryCritical_ticks = cur_ticks;
+        STRC1_KLONG(KDBG_SET_FORCE_PERIODIC, i_castOutPagesType, 0);
+    }
 }
 
 

@@ -1,7 +1,7 @@
 /* IBM_PROLOG_BEGIN_TAG                                                   */
 /* This is an automatically generated prolog.                             */
 /*                                                                        */
-/* $Source: src/usr/testcore/kernel/memorymgr.H $                         */
+/* $Source: src/usr/testcore/memorymgr/memorymgr.H $                      */
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
@@ -114,7 +114,7 @@ class MemoryMgrTest : public CxxTest::TestSuite
         static constexpr size_t   NUM_PAGES  = 15;     // 4k pages to allocate for
                                                        //  a max of 32 threads
         static constexpr size_t   NUM_CHUNKS = 100;    // structs per thread
-        static constexpr int      NUM_LOOPS  = 50000;  // loops per thread
+        static constexpr int      NUM_LOOPS  = 80000;  // loops per thread
 
         struct chunk_test_t  // struct used to push/pop onto the freeQ
         {
@@ -138,7 +138,7 @@ class MemoryMgrTest : public CxxTest::TestSuite
          */
         ~ThreadSafeStackTest()
         {
-            assert(nullptr != test_chunks);
+            assert(test_chunks);
             PageManager::freePage(test_chunks, NUM_PAGES);
         }
 
@@ -227,7 +227,7 @@ class MemoryMgrTest : public CxxTest::TestSuite
     class ThreadSafePageMgrTest
     {
       public:
-        static constexpr int NUM_LOOPS  = 1000;  // loops per thread
+        static constexpr int NUM_LOOPS  = 50000;  // loops per thread
 
         /**
          *  @brief Each thread loops calling allocatePage, freePage, and coalesce
@@ -332,7 +332,7 @@ class MemoryMgrTest : public CxxTest::TestSuite
     class ThreadSafeSmallHeapTest
     {
       public:
-        static constexpr int NUM_LOOPS = 5000;  // loops per thread
+        static constexpr int NUM_LOOPS = 50000;  // loops per thread
 
         /**
          *  @brief Each thread loops calling new, delete, and PageManager::coalesce
@@ -418,15 +418,15 @@ class MemoryMgrTest : public CxxTest::TestSuite
      *          stress environment.
      *
      *         Each loop:  malloc N bytes from the Small heap, and write a byte
-     *                     realloc N+32 bytes from the small heap and write a byte
+     *                     realloc N+Y bytes from the small heap and write a byte
      *                     free all memory
      *                     validate that all memory was freed
-     *                     malloc alloc_bytes_big from the Big heap, and write a byte
-     *                     realloc 2*alloc_bytes_big from the small heap and write a byte
+     *                     malloc N bytes from the Big heap, and write a byte
+     *                     realloc N+Y bytes from the small heap and write a byte
      *                     free all memory
      *                     validate that all memory was freed
-     *                     malloc alloc_bytes_big from the Huge heap, and write a byte
-     *                     realloc 2*alloc_bytes_huge from the small heap and write a byte
+     *                     malloc N bytes from the Huge heap, and write a byte
+     *                     realloc N+Y bytes from the small heap and write a byte
      *                     free all memory
      *                     validate that all memory was freed
      *                     run a PageManager coalesce
@@ -443,7 +443,7 @@ class MemoryMgrTest : public CxxTest::TestSuite
     class ThreadSafeSmallBigHugeTest
     {
       public:
-        static constexpr int NUM_LOOPS = 700;  // loops per thread
+        static constexpr int NUM_LOOPS = 1500;  // loops per thread
 
         /**
          *  @brief Each thread loops calling new, realloc, delete for small, big,

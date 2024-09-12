@@ -140,6 +140,12 @@ namespace Systemcalls
            /** SaveMemStats() */
         SAVE_MEM_STATS,
 
+        /** MmFreePages() */
+        MM_FREE_PAGES,
+
+        /** MmAllocReservedPages() */
+        MM_ALLOC_RESERVED_PAGES,
+
         SYSCALL_MAX
     };
 

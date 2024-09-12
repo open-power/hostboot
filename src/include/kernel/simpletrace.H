@@ -44,10 +44,10 @@
 #include <kernel/misc.H>
 #include <arch/ppc.H>
 
-static constexpr size_t KSHORT_SIZE    = 20480;//!> size of kshort trace in bytes
-static constexpr size_t KLONG_SIZE     = 2048; //!> size of klong  trace in bytes
+static constexpr size_t KSHORT_SIZE    = 81920;//!> size of kshort trace in bytes
+static constexpr size_t KLONG_SIZE     = 4096; //!> size of klong  trace in bytes
 static constexpr size_t KMEMSTATS_SIZE = 20480;//!> size of kmem   trace in bytes
-static constexpr size_t KALLOC_SIZE    = 2048; //!> size of kalloc trace in bytes
+static constexpr size_t KALLOC_SIZE    = 4096; //!> size of kalloc trace in bytes
 
 // Do not reuse or delete trace enums - always create a new enum for a new trace.
 // This ensures backward compatibility.
@@ -63,6 +63,7 @@ enum kdebug_trc_tag_t : uint16_t
     KDBG_PM_COALESCE_EXIT          = 0x1007,
     KDBG_PM_ALLOC_KER_ENTER        = 0x1008,
     KDBG_PM_ALLOC_KER_EXIT         = 0x1009,
+    KDBG_PM_ADD_MEMORY             = 0x100A,
 
     KDBG_HM_ALLOC                  = 0x2001,
     KDBG_HM_REALLOC                = 0x2002,
@@ -82,6 +83,8 @@ enum kdebug_trc_tag_t : uint16_t
     KDBG_HM_FREE_CRASH_NOT_V       = 0x2010,
     KDBG_HM_COALESCE_ASSERT_NOT_F  = 0x2011,
     KDBG_HM_COALESCE_ASSERT_NOT_C  = 0x2012,
+    KDBG_HM_HUGE_ALLOC_BLOCK_ERROR = 0x2013,
+    KDBG_HM_HUGE_SETPERM_ERROR     = 0x2014,
 
     KDBG_BK_SET_PERM_EINVAL        = 0x3000,
     KDBG_BK_SET_PERM_SPTE_EINVAL_1 = 0x3001,
@@ -90,6 +93,8 @@ enum kdebug_trc_tag_t : uint16_t
     KDBG_BK_SET_PERM_SPTE_EINVAL_4 = 0x3004,
     KDBG_BK_SET_PERM_SPTE_EINVAL_5 = 0x3005,
     KDBG_BK_REMOVE_PAGES_EINVAL    = 0x3006,
+
+    KDBG_SET_FORCE_PERIODIC        = 0xE000,
 
     KDBG_TEMP_TRACE                = 0xF000, // temp trace used for quick debug
 
@@ -130,7 +135,14 @@ typedef struct kdebug_trc_data
  */
 enum kalloc_trc_tag_t : uint16_t
 {
-    K_ALLOC_PAGES_FAIL  = 0x1001,
+    K_ALLOC_USR_FIRST      = 0x1001,  // usr thread first failure in allocatePage,
+                                      // so log it and retry until timeout
+    K_ALLOC_USR_PERIODIC   = 0x1002,  // usr thread is in the failure loop in allocatePage,
+                                      // and runs forceMemoryPeriodic
+    K_ALLOC_USR_GET_RES    = 0x1003,  // usr thread multiple fails at allocatePage,
+                                      // so get memory from iv_reserve
+    K_ALLOC_KER_GET_RES    = 0x1004,  // kernel thread fails at allocatePage,
+                                      // so get memory from iv_reserve
 };
 
 /**
@@ -146,6 +158,9 @@ typedef struct kalloc_trc_data
     uint16_t substep;
     tid_t    tid;
     uint16_t requested_pages;
+    uint32_t cv_pagesAvail_heap;
+    uint32_t cv_low_page_count_heap;
+    uint32_t cv_pagesAvail_res;
 }  __attribute__((packed)) kalloc_trc_data_t;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -158,15 +173,18 @@ typedef struct kalloc_trc_data
  */
 enum kmem_trc_tag_t : uint16_t
 {
-    KMEM_STATS_SYSCALL                    = 0x1001,
-    KMEM_STATS_ALLOC_PAGE_OOM             = 0x1002,
-    KMEM_STATS_ALLOC_PAGE_OOM_COALESCE    = 0x1003,
-    KMEM_STATS_ALLOC_PAGE_OOM_DEFRAG      = 0x1004,
-    KMEM_STATS_ALLOC_PAGE_OOM_TIMEOUT     = 0x1005,
-    KMEM_STATS_ALLOC_PAGE_OOM_FIRST_FAIL  = 0x1006,
-    KMEM_STATS_ALLOC_PAGE_OOM_SECOND_FAIL = 0x1007,
-    KMEM_STATS_ALLOC_PAGE_OOM_KASSERT     = 0x1008,
+    KMEM_STATS_SYSCALL                     = 0x1001, // each istep logs a trace
+    KMEM_STATS_ALLOC_PG_USR_GET_RES_FAIL   = 0x1002, // usr thread get iv_reserved fails
+    KMEM_STATS_ALLOC_PG_USR_TIMEOUT_ASSERT = 0x1003, // usr thread times out with OOM
+    KMEM_STATS_ALLOC_PG_KER_GET_RES_FAIL   = 0x1004, // kernel thread get iv_reserved fails
+    KMEM_STATS_ALLOC_PG_KER_KASSERT        = 0x1005, // kernel thread hits OOM kassert
+    KMEM_STATS_FORCE_MEMORY_PERIODIC       = 0x1006, // force castout and coalesce
+    KMEM_STATS_ALLOC_BIG_KASSERT_1         = 0x1007, // allocateBig hits OOM kassert
+    KMEM_STATS_ALLOC_BIG_KASSERT_2         = 0x1008, // allocateBig hits OOM kassert
 };
+
+constexpr int BUCKETS     = 12;
+constexpr int BUCKETS_RES = 9; // max is 256, so only use 9 buckets
 
 /**
  *******************************************************************************
@@ -187,13 +205,16 @@ typedef struct kmem_trc_data
 
     // pagemgr
     uint32_t cv_pagesTotal;
-    uint32_t cv_pagesAvail;
-    uint32_t cv_reserved_pages_available;
-    uint32_t cv_low_page_count;
+    uint32_t cv_pagesAvail_heap;
+    uint32_t cv_low_page_count_heap;
+    uint32_t cv_coalesce_state;
     uint32_t cv_coalesce_attempts;
     uint32_t cv_coalesce_count;
-    uint32_t cv_allocatePage_coalesce_wait;
-    uint32_t cv_free_bucket_count[16];
+    uint32_t cv_free_bucket_count_heap[BUCKETS];
+    uint32_t cv_allocatePage_usr_wait;
+    uint32_t cv_pagesAvail_res;
+    uint32_t cv_low_page_count_res;
+    uint32_t cv_free_bucket_count_res[BUCKETS_RES];
 
     // block
     uint32_t cv_pages_allocated;
@@ -219,7 +240,7 @@ typedef struct kmem_trc_data
     uint32_t cv_smallheap_user_allocated;
     uint32_t cv_smallheap_allocated;
     uint32_t cv_smallheap_alloc_hw;
-    uint32_t cv_free_bucket_counts[12];
+    uint32_t cv_free_bucket_counts[BUCKETS];
 
 }  __attribute__((packed)) kmem_trc_data_t;
 

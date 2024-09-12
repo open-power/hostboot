@@ -167,6 +167,8 @@ namespace Systemcalls
     void SetTopologyMode(task_t *t);
 
     void SaveMemStats(task_t *t);
+    void MmFreePages(task_t *t);
+    void MmAllocReservedPages(task_t *t);
 
     syscall syscalls[] =
     {
@@ -214,7 +216,9 @@ namespace Systemcalls
         &UpdateRemoteIpcAddr, // UPDATE_REMOTE_IPC_ADDR
         &QryLocalIpcInfo,  // QRY_LOCAL_IPC_INFO
         &SetTopologyMode,  // MISC_SET_TOPOLOGY_MODE
-        &SaveMemStats      // SAVE_MEM_STATS
+        &SaveMemStats,     // SAVE_MEM_STATS
+        &MmFreePages,      // MM_FREE_PAGES
+        &MmAllocReservedPages,// MM_ALLOC_RESERVED_PAGES
     };
 };
 
@@ -942,32 +946,37 @@ namespace Systemcalls
         ssize_t pages = TASK_GETARG0(t);
 
         // Attempt to allocate the page(s).
-        void* page = PageManager::allocatePage(pages, true);
+        void* page = PageManager::allocatePage_syscall(pages);
         TASK_SETRTN(t, reinterpret_cast<uint64_t>(page));
-
-        // If we are low on memory, call into the VMM to free some up.
-        uint64_t pcntAvail = PageManager::queryAvail();
-        if (pcntAvail < PageManager::LOWMEM_NORM_LIMIT)
-        {
-            static uint64_t one_at_a_time = 0;
-            if (!__sync_lock_test_and_set(&one_at_a_time, 1))
-            {
-                VmmManager::flushPageTable();
-                VmmManager::castout_t sev =
-                    (pcntAvail < PageManager::LOWMEM_CRIT_LIMIT) ?
-                        VmmManager::CRITICAL : VmmManager::NORMAL;
-                VmmManager::castOutPages(sev);
-                __sync_lock_release(&one_at_a_time);
-            }
-        }
-        else if ((page == NULL) && (pages > 1))
-        {
-            CpuManager::forceMemoryPeriodic();
-        }
-
     }
 
-     /**
+    /**
+     * Call PageManager to allocate a number of reserved pages
+     * @param[in] t: The task used.
+     */
+    void MmAllocReservedPages(task_t* t)
+    {
+        ssize_t pages = TASK_GETARG0(t);
+
+        // Attempt to allocate the page(s).
+        void* page = PageManager::allocateReservedPage_syscall(pages);
+        TASK_SETRTN(t, reinterpret_cast<uint64_t>(page));
+    }
+
+    /**
+     * Call PageManager to free pages
+     * @param[in] page addr
+     * @param[in] number of pages
+     */
+    void MmFreePages(task_t* t)
+    {
+        void*    pages = reinterpret_cast<void*>(TASK_GETARG0(t));
+        uint64_t size  = reinterpret_cast<uint64_t>(TASK_GETARG1(t));
+
+        PageManager::freePage(pages, size);
+    }
+
+    /**
       * Return the physical address backing a virtual address
       * @param[in] t: The task used
       */

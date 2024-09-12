@@ -1,7 +1,7 @@
 # IBM_PROLOG_BEGIN_TAG
 # This is an automatically generated prolog.
 #
-# $Source: src/usr/testcore/makefile $
+# $Source: src/usr/testcore/memorymgr/makefile $
 #
 # OpenPOWER HostBoot Project
 #
@@ -22,15 +22,9 @@
 # permissions and limitations under the License.
 #
 # IBM_PROLOG_END_TAG
-ROOTPATH = ../../..
+ROOTPATH = ../../../..
 
-SUBDIRS += lib.d
-SUBDIRS += kernel.d
-SUBDIRS += rtloader.d
-SUBDIRS += memoize.d
-SUBDIRS += pir.d
-SUBDIRS += tlsmod.d
-SUBDIRS += memorymgr.d
+MODULE = testmemorymgr
+TESTS = *.H
 
 include ${ROOTPATH}/config.mk
-

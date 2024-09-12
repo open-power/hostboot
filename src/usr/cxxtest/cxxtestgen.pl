@@ -6,7 +6,9 @@
 #
 # OpenPOWER HostBoot Project
 #
-# COPYRIGHT International Business Machines Corp. 2011,2014
+# Contributors Listed Below - COPYRIGHT 2011,2024
+# [+] International Business Machines Corp.
+#
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -691,6 +693,8 @@ sub writeHostBootSuites() {
     ##dynamicSuite() ? writeSuitePointer() : writeSuiteObject();
 
     print   "\n\n";
+    printf "\t$suitevar->setUp();\n\n";
+
     ##  run each of the tests in the list
     foreach (@{suiteTests()}) {
         $test = $_;
@@ -702,6 +706,8 @@ sub writeHostBootSuites() {
         printf "\t$suitevar->%s();\n\n", testName();
         $testcount++;
     }
+
+    printf "\t$suitevar->tearDown();\n\n";
 
     ## $$TODO print "\n";
     ## $$TODO print "\tif  ( pTaskArgs )\n";

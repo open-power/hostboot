@@ -177,10 +177,13 @@ void STRC_KALLOC(simple_trace_level_t i_lvl,
 {
     if (g_kalloc_trace.get_trace_level() >= i_lvl)
     {
-        kalloc_trc_data_t l_data = {};
-        l_data.istep           = i_step;
-        l_data.substep         = i_substep;
-        l_data.requested_pages = i_data;
+        kalloc_trc_data_t l_data      = {};
+        l_data.istep                  = i_step;
+        l_data.substep                = i_substep;
+        l_data.requested_pages        = i_data;
+        l_data.cv_pagesAvail_heap     = PageManager::availPages();
+        l_data.cv_low_page_count_heap = PageManager::lowPageCount();
+        l_data.cv_pagesAvail_res      = PageManager::availPagesRes();
         g_kalloc_trace.add(i_tag, l_data);
     }
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -96,15 +96,27 @@ class vpdEccApiTest: public CxxTest::TestSuite
                     updateRecordEccDataTest();
                     validateAllRecordEccDataTest();
                 }
-
-                // Clean up after ourselves
-                tearDown();
             } while (0);
 
             TRACFCOMP( g_trac_vpd, EXIT_MRK"testVpdEccApi()" );
 
 #endif // #ifndef __HOSTBOOT_RUNTIME
         }
+
+#ifndef __HOSTBOOT_RUNTIME
+        /**
+         * @brief Clean up any allocated memory
+         */
+        void tearDown()
+        {
+            restoreKeyword();
+            if (m_buffer)
+            {
+                free (m_buffer);
+                m_buffer = nullptr;
+            }
+        }
+#endif // #ifndef __HOSTBOOT_RUNTIME
 
     private:  // private methods
 
@@ -197,19 +209,6 @@ class vpdEccApiTest: public CxxTest::TestSuite
 
             return saveKeywordData();
         } // setUp
-
-        /**
-         * @brief Clean up any allocated memory
-         */
-        void tearDown()
-        {
-            restoreKeyword();
-            if (m_buffer)
-            {
-                free (m_buffer);
-                m_buffer = nullptr;
-            }
-        } // tearDown
 
         /**
          * @brief Save a copy of the keyword before manipulating it for test purposes.
@@ -386,7 +385,7 @@ class vpdEccApiTest: public CxxTest::TestSuite
 
     private: // private members
 
-        TARGETING::Target * m_procTarget;
+        TARGETING::Target *m_procTarget;
 
         VPD::vpdRecord        m_record;
         VPD::vpdKeyword       m_keyword;
@@ -394,7 +393,7 @@ class vpdEccApiTest: public CxxTest::TestSuite
 
         int8_t m_randomKeywordData;
 
-        uint8_t* m_buffer;
+        uint8_t *m_buffer{nullptr};
         size_t   m_bufferSize;
 }; // class vpdEccApiTest
 

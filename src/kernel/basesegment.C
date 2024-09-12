@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -264,46 +264,48 @@ int BaseSegment::_mmExtend(void)
     // VMM - the size of the cache (how much the memory needs to be extended by)
     uint64_t l_size = VMM_MEMORY_SIZE - l_cacheSizeBytes;
 
-    // Call to allocate a block passing in the requested address of where the
-    // SPTEs should be created
-    int rc =  _mmAllocBlock(NULL, reinterpret_cast<void *>(l_vaddr), l_size,
-                            false, reinterpret_cast<uint64_t *>(l_vaddr));
-
-    if (rc)
+    if (l_size) // if there is memory to extend
     {
-        printk("Got an error in mmAllocBlock\n");
-        return rc;
+        // Call to allocate a block passing in the requested address of where the
+        // SPTEs should be created
+        int rc =  _mmAllocBlock(NULL, reinterpret_cast<void *>(l_vaddr), l_size,
+                                false, reinterpret_cast<uint64_t *>(l_vaddr));
+
+        if (rc)
+        {
+            printk("Got an error in mmAllocBlock\n");
+            return rc;
+        }
+
+        // Set default page permissions on block.
+        for (uint64_t i = l_vaddr; i < l_vaddr + l_size; i += PAGESIZE)
+        {
+            iv_block->setPhysicalPage(i, i, WRITABLE);
+        }
+
+        // Now need to take the pages past the SPTE and add them to the heap.
+
+        //get the number of pages needed to hold the SPTE entries.
+        uint64_t spte_pages = (ALIGN_PAGE
+                               (ALIGN_PAGE(l_size)/PAGESIZE*sizeof(ShadowPTE)))
+                              /PAGESIZE;
+
+        printkd("Number of SPTE pages %ld\n", spte_pages);
+
+        // Need to setup the starting address of the memory we need to add to the
+        // heap to be the address of the block + the number of pages that are being
+        // used for the SPTE.
+
+        // Call Add Memory with the starting address , size.. it will put the pages
+        // on the heap call this with the address being the first page past the
+        // SPTE.
+        PageManager::addMemory(l_vaddr + (spte_pages*PAGESIZE),
+                               l_size/PAGESIZE - spte_pages);
+
+        // Update the physical Memory size to now include some mainstore by adding
+        // the extended block size to the physical mem size.
+        iv_physMemSize += l_size;
     }
-
-    // Set default page permissions on block.
-    for (uint64_t i = l_vaddr; i < l_vaddr + l_size; i += PAGESIZE)
-    {
-        iv_block->setPhysicalPage(i, i, WRITABLE);
-    }
-
-    // Now need to take the pages past the SPTE and add them to the heap.
-
-    //get the number of pages needed to hold the SPTE entries.
-    uint64_t spte_pages = (ALIGN_PAGE
-                           (ALIGN_PAGE(l_size)/PAGESIZE*sizeof(ShadowPTE)))
-                          /PAGESIZE;
-
-    printkd("Number of SPTE pages %ld\n", spte_pages);
-
-    // Need to setup the starting address of the memory we need to add to the
-    // heap to be the address of the block + the number of pages that are being
-    // used for the SPTE.
-
-    // Call Add Memory with the starting address , size.. it will put the pages
-    // on the heap call this with the address being the first page past the
-    // SPTE.
-    PageManager::addMemory(l_vaddr + (spte_pages*PAGESIZE),
-                           l_size/PAGESIZE - spte_pages);
-
-    // Update the physical Memory size to now include some mainstore by adding
-    // the extended block size to the physical mem size.
-    iv_physMemSize += VMM_MEMORY_SIZE - l_cacheSizeBytes;
-
 
     // Call to set the Hostboot MemSize and location needed for DUMP.
     KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_MS,

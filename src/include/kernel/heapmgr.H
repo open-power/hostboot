@@ -195,6 +195,45 @@ class HeapManager
                 : addr(i_ptr), page_count(i_pages), next(nullptr) {}
         };
 
+        /**
+         * @brief used in coalesce for temp list of chunks
+         */
+        struct chunk_list_t
+        {
+            chunk_t head;
+            int     size;
+
+            chunk_list_t() {clear();}
+            void clear()
+            {
+                head.next = nullptr;
+                size      = 0;
+            }
+            chunk_t* get_head()
+            {
+                return head.next;
+            }
+            void push(chunk_t *c)
+            {
+                size++;
+                c->next   = head.next;
+                head.next = c;
+            }
+            chunk_t* pop()
+            {
+                if (head.next == nullptr)
+                {
+                    return nullptr;
+                }
+                chunk_t *save{nullptr};
+                size--;
+                save       = head.next;
+                head.next  = head.next->next;
+                save->next = nullptr;
+                return save;
+            }
+        };
+
         void* _allocate(size_t);        //!< see allocate
         void* _allocateBig(size_t);     //!< see allocate
         void* _allocateHuge(size_t);    //!< see allocate
@@ -254,23 +293,34 @@ class HeapManager
          */
         void _addDebugPointers();
 
-        static uint64_t iv_hugeblock_allocated;          //!< Huge Block allocated
-        static uint64_t cv_hugeblock_page_count;         //!< # of pages being used
-        static uint64_t cv_hugeblock_page_max;           //!< Max # of pages used
-        static uint64_t cv_largeheap_page_count;         //!< # of pages being used
-        static uint64_t cv_largeheap_page_max;           //!< Max # of pages used
-        static uint64_t cv_smallheap_page_count;         //!< # of pages being used
-        static uint64_t cv_smallheap_alloc_hw;           //!< allocated high water
-        static uint64_t cv_smallheap_allocated;          //!< sum of currently allocated
-        static uint64_t cv_smallheap_user_allocated;     //!< sum of user data size allocated
-        static uint64_t cv_smallheap_coalesce_state;     //!< 1 if a coalesce is running, else 0
-        static uint64_t cv_smallheap_coalesce_attempts;  //!< coalesced attempts
-        static uint64_t cv_smallheap_coalesce_count;     //!< coalesced chunk count
-        static uint64_t cv_smallheap_coalesce_page;      //!< coalesced page count
-        static uint64_t cv_free_bucket_counts  [BUCKETS];//!< free chunks
-        static uint64_t cv_inuse_bucket_counts [BUCKETS];//!< allocated chunks currently in use
-        static uint64_t cv_alloc_sizes         [BUCKETS];//!< total allocated chunks since boot
-        static uint64_t iv_chunk_size          [BUCKETS];//!< The bucket sizes
+        uint64_t iv_hugeblock_allocated{0};          //!< Huge Block allocated
+        uint64_t cv_hugeblock_page_count{0};         //!< # of pages being used
+        uint64_t cv_hugeblock_page_max{0};           //!< Max # of pages used
+        uint64_t cv_largeheap_page_count{0};         //!< # of pages being used
+        uint64_t cv_largeheap_page_max{0};           //!< Max # of pages used
+        uint64_t cv_smallheap_page_count{0};         //!< # of pages being used
+        uint64_t cv_smallheap_alloc_hw{0};           //!< allocated high water
+        uint64_t cv_smallheap_allocated{0};          //!< sum of chunk bytes allocated
+        uint64_t cv_smallheap_user_allocated{0};     //!< sum of user bytes allocated
+        uint64_t cv_smallheap_coalesce_state{0};     //!< 1 if a coalesce is running, else 0
+        uint64_t cv_smallheap_coalesce_attempts{0};  //!< coalesced attempts
+        uint64_t cv_smallheap_coalesce_count{0};     //!< coalesced chunk count
+        uint64_t cv_smallheap_coalesce_page{0};      //!< coalesced page count
+        uint64_t cv_free_bucket_counts [BUCKETS]={}; //!< free chunks
+        uint64_t cv_inuse_bucket_counts[BUCKETS]={}; //!< alloc chunks in use
+        uint64_t cv_alloc_sizes        [BUCKETS]={}; //!< total alloc chunks
+        uint64_t iv_chunk_size         [BUCKETS]={HeapManager::BUCKET_SIZE0,
+                                                  HeapManager::BUCKET_SIZE1,
+                                                  HeapManager::BUCKET_SIZE2,
+                                                  HeapManager::BUCKET_SIZE3,
+                                                  HeapManager::BUCKET_SIZE4,
+                                                  HeapManager::BUCKET_SIZE5,
+                                                  HeapManager::BUCKET_SIZE6,
+                                                  HeapManager::BUCKET_SIZE7,
+                                                  HeapManager::BUCKET_SIZE8,
+                                                  HeapManager::BUCKET_SIZE9,
+                                                  HeapManager::BUCKET_SIZE10,
+                                                  HeapManager::BUCKET_SIZE11};
 
         Util::Lockfree::Stack<chunk_t> first_chunk[BUCKETS]; //!< free pool
         Util::Lockfree::Stack<big_chunk_t> big_chunk_stack;  //!< big chunk dir

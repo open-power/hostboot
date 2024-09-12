@@ -59,62 +59,84 @@
 extern int g_istep;   // used in STRC_KMEM, STRC_KALLOC
 extern int g_substep; // used in STRC_KMEM, STRC_KALLOC
 
-void PageManager::resetIStepStats()
+size_t get_bucket(size_t i_pageCount)
 {
-    // reset these at the start of each IStep so they tell us the lowest page
-    // count hit in each IStep
-    cv_low_page_count = cv_pagesAvail;
+    // return the bucket number for i_pageCount
+
+    // bucket 0 - memory of only 1 page
+    // bucket 1 - memory of only 2 pages
+    // bucket 2 - memory of 3..4   pages
+    // bucket 3 - memory of 5..8   pages
+    // bucket 4 - memory of 9..16  pages
+    // etc
+    // bucket 11 queues memory of 1025 pages or more
+    if      (i_pageCount <= 1)      return 0;
+    else if (i_pageCount == 2)      return 1;
+    else if (i_pageCount <= 4)      return 2;
+    else if (i_pageCount <= 8)      return 3;
+    else if (i_pageCount <= 16)     return 4;
+    else if (i_pageCount <= 32)     return 5;
+    else if (i_pageCount <= 64)     return 6;
+    else if (i_pageCount <= 128)    return 7;
+    else if (i_pageCount <= 256)    return 8;
+    else if (i_pageCount <= 512)    return 9;
+    else if (i_pageCount <= 1024)   return 10;
+    else                            return 11;
 }
 
-uint64_t PageManager::cv_reserved_pages_available{0};
-uint64_t PageManager::cv_pagesTotal{0};
-uint64_t PageManager::cv_pagesAvail{0};
-uint64_t PageManager::cv_coalesce_state{0};
-uint64_t PageManager::cv_coalesce_attempts{0};
-uint64_t PageManager::cv_coalesce_count = 0;
-uint64_t PageManager::cv_low_page_count = -1;
-uint64_t PageManager::cv_allocatePage_coalesce_wait = 0;
-uint64_t PageManager::cv_free_bucket_count[PageManagerCore::BUCKETS]=
-                                              {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+void PageManager::resetIStepStats()
+{
+    PageManager& pmgr = Singleton<PageManager>::instance();
+
+    // reset these at the start of each IStep so they tell us the lowest page
+    // count hit in each IStep
+    pmgr.iv_heap.cv_low_page_count     = pmgr.iv_heap.cv_free_pages;
+    pmgr.iv_reserved.cv_low_page_count = pmgr.iv_reserved.cv_free_pages;
+}
 
 void PageManager::get_stats(struct kmem_trc_data &o_stats)
 {
-    o_stats.cv_pagesTotal                 = cv_pagesTotal;
-    o_stats.cv_pagesAvail                 = cv_pagesAvail;
-    o_stats.cv_coalesce_attempts          = cv_coalesce_attempts;
-    o_stats.cv_coalesce_count             = cv_coalesce_count;
-    o_stats.cv_low_page_count             = cv_low_page_count;
-    o_stats.cv_allocatePage_coalesce_wait = cv_allocatePage_coalesce_wait;
-    o_stats.cv_reserved_pages_available   = cv_reserved_pages_available;
+    PageManager& pmgr = Singleton<PageManager>::instance();
+
+    o_stats.cv_pagesTotal          = pmgr.cv_pagesTotal;
+    o_stats.cv_pagesAvail_heap     = pmgr.iv_heap.cv_free_pages;
+    o_stats.cv_low_page_count_heap = pmgr.iv_heap.cv_low_page_count;
+    o_stats.cv_coalesce_state      = pmgr.iv_heap.cv_coalesce_state;
+    o_stats.cv_coalesce_attempts   = pmgr.iv_heap.cv_coalesce_attempts;
+    o_stats.cv_coalesce_count      = pmgr.iv_heap.cv_coalesce_count;
     for (int i=0; i<PageManagerCore::BUCKETS; i++)
     {
-        o_stats.cv_free_bucket_count[i] = static_cast<uint32_t>(cv_free_bucket_count[i]);
+        o_stats.cv_free_bucket_count_heap[i] =
+                    static_cast<uint32_t>(pmgr.iv_heap.cv_free_bucket_count[i]);
+    }
+
+    o_stats.cv_allocatePage_usr_wait = pmgr.cv_allocatePage_usr_wait;
+
+    o_stats.cv_pagesAvail_res     = pmgr.iv_reserved.cv_free_pages;
+    o_stats.cv_low_page_count_res = pmgr.iv_reserved.cv_low_page_count;
+
+    for (int i=0; i<BUCKETS_RES; i++)
+    {
+        o_stats.cv_free_bucket_count_res[i] =
+                static_cast<uint32_t>(pmgr.iv_reserved.cv_free_bucket_count[i]);
     }
 }
 
 void PageManagerCore::addMemory( size_t i_addr, size_t i_pageCount )
 {
-    size_t length = i_pageCount;
-    page_t* page = reinterpret_cast<page_t *>(ALIGN_PAGE(i_addr));
+    size_t  align = ALIGN_PAGE(i_addr);
+    page_t *page  = reinterpret_cast<page_t *>(align);
 
-    KTRC1("PageManagerCore::addMemory: i_addr:%lx i_pageCount:%ld\n",
-            i_addr, i_pageCount);
+    if (i_pageCount == 0) {return;}        // dont add zero pages
+    if (i_addr < align)   {--i_pageCount;} // we rounded up to align, so now its one less page
+    if (i_pageCount == 0) {return;}        // dont add zero pages
+
+    STRC1_KLONG(KDBG_PM_ADD_MEMORY, i_addr, i_pageCount);
 
     // Allocate pages to buckets.
-    size_t page_length = BUCKETS-1;
-    while(length > 0)
-    {
-        while (length < (size_t)(1 << page_length))
-        {
-            page_length--;
-        }
-
-        __sync_add_and_fetch(&PageManager::cv_free_bucket_count[page_length],1);
-
-        iv_heap[page_length].push(page);
-        page = (page_t*)((uint64_t)page + (1 << page_length)*PAGESIZE);
-        length -= (1 << page_length);
-    }
+    iv_spinlock.lock();
+    push_bucket(page, i_pageCount);
+    iv_spinlock.unlock();
 
     // Only check range if coalesce is allowed
     if (iv_supports_coalesce)
@@ -129,98 +151,73 @@ void PageManagerCore::addMemory( size_t i_addr, size_t i_pageCount )
             // ever start the heap at an address of 0.
             if(!range.first)
             {
-                range.first=i_addr;
+                range.first=align;
                 range.second=i_pageCount*PAGE_SIZE;
                 break;
             }
 
             // Can't ever start a range at/below that of an existing range.
-            if (i_addr <= range.first)
+            if (align <= range.first)
             {
-                KTRC0("i_addr <= range.first 0x%lx <= 0x%lx\n", i_addr, (size_t)range.first);
+                KTRC0("PageManagerCore::addMemory: ERROR i_addr <= range.first 0x%lx <= 0x%lx\n",
+                        align, reinterpret_cast<size_t>(range.first));
             }
-            crit_assert(i_addr > range.first);
+            crit_assert(align > range.first);
         }
     }
+    __sync_add_and_fetch(&cv_free_pages, i_pageCount);
+    return;
 }
 
 
 
 PageManagerCore::page_t * PageManagerCore::allocatePage( size_t i_pageCount )
 {
-    size_t which_bucket = ((sizeof(size_t)*8 - 1) -
-                                __builtin_clzl(i_pageCount));
-    size_t bucket_size = ((size_t)1) << which_bucket;
+    size_t  which_bucket = get_bucket(i_pageCount);
+    page_t *page;
 
-    if (bucket_size != i_pageCount)
+    page = pop_bucket(i_pageCount);
+    if (page)
     {
-        ++which_bucket;
-        bucket_size <<= 1;
-    }
-
-    page_t* page = (page_t*)NULL;
-    int retries = 0;
-    while ((page == NULL) && (retries < 6))
-    {
-        page = pop_bucket(which_bucket);
-        retries++;
-    }
-
-    // Update statistics.
-    if(page)
-    {
-        // Buckets are 2^k in size so if i_pageCount is not 2^k we have some
-        // extra pages allocated.  ie. the non-2^k portion of i_pageCount.
-        // Return that portion by freeing.
-        if (bucket_size != i_pageCount)
+        __sync_sub_and_fetch(&cv_free_pages, i_pageCount);
+        __sync_add_and_fetch(&cv_alloc_sizes[which_bucket], 1);
+        if (cv_free_pages < cv_low_page_count)
         {
-            freePage(reinterpret_cast<void*>(
-                            reinterpret_cast<uintptr_t>(page) +
-                            (i_pageCount*PAGESIZE)),
-                     bucket_size - i_pageCount,true);
-        }
-    }
-    else
-    {
-        if (i_pageCount > 1)
-        {
-            STRC1_KALLOC(K_ALLOC_PAGES_FAIL, g_istep, g_substep, i_pageCount);
+            cv_low_page_count = cv_free_pages;
         }
     }
     return page;
 }
 
-
-
 void PageManagerCore::freePage(void*  i_page,
-                               size_t i_pageCount,
-                               bool   i_overAllocated)
+                               size_t i_pageCount)
 {
     STRC1_KSHORT(KDBG_PM_FREE_ENTER, PTR_TO_u32(i_page), i_pageCount);
 
     crit_assert(i_page);
     crit_assert(i_pageCount);
 
-    size_t which_bucket = ((sizeof(size_t)*8 - 1) -
-                                __builtin_clzl(i_pageCount));
-    size_t bucket_size = ((size_t)1) << which_bucket;
+    size_t  which_bucket = get_bucket(i_pageCount);
+    page_t *page = reinterpret_cast<page_t*>(i_page);
 
-    push_bucket(
-           (page_t*)(reinterpret_cast<uintptr_t>(i_page)
-         + (i_overAllocated ? ((i_pageCount-bucket_size)*PAGESIZE) : 0)),
-         which_bucket);
+    page->set_key(i_pageCount); // set so PQueue can sort by size
 
-    // Buckets are 2^k in size so if i_pageCount is not 2^k we have some
-    // spare pages to free.  ie. the non-2^k portion of i_pageCount.
-    if (bucket_size != i_pageCount)
+    if (which_bucket < BUCKETS_LOWER)
     {
-        freePage(
-            reinterpret_cast<void*>(
-                  reinterpret_cast<uintptr_t>(i_page)
-                + (i_overAllocated ? 0 : (bucket_size*PAGESIZE))),
-            i_pageCount - bucket_size, i_overAllocated);
+        iv_heap_lower[which_bucket].push(page);
+    }
+    else
+    {
+        iv_spinlock.lock();
+        iv_heap_upper[which_bucket].insert(page);
+        iv_spinlock.unlock();
     }
 
+    // Update statistics.
+    __sync_add_and_fetch(&cv_free_bucket_count[which_bucket],1);
+    __sync_add_and_fetch(&cv_free_pages, i_pageCount);
+
+    STRC1_KSHORT(KDBG_PM_FREE_EXIT, cv_free_pages, 0);
     return;
 }
 
@@ -229,100 +226,133 @@ void PageManager::init()
     Singleton<PageManager>::instance();
 }
 
+void* PageManager::allocatePage_syscall(size_t n)
+{
+    return  Singleton<PageManager>::instance()._allocatePage(n, true, false);
+}
+
+void* PageManager::allocateReservedPage_syscall(size_t n)
+{
+    return  Singleton<PageManager>::instance().iv_reserved.allocatePage(n);
+}
+
 void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
 {
-    void* page = NULL;
+    PageManager &l_pmgr = Singleton<PageManager>::instance();
+    void        *page{nullptr};
 
-    // In non-kernel mode, make a system-call to allocate in kernel-mode.
-    if (!KernelMisc::in_kernel_mode())
-    {
-        STRC1_KSHORT(KDBG_PM_ALLOC_USR_ENTER, n, 0);
-
-        page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
-                         reinterpret_cast<void*>(n));
-        if (NULL == page)
-        {
-            KTRC1("PageManager::allocatePage: WAIT size:%ld tid:%d\n", n, task_gettid());
-
-            // The alloc pages syscall failed, so loop and retry the syscall
-            // until success or until timeoutSecs.
-            // At every coalesceSecs, do a coalesce.
-            // At every evictSecs, do a forceMemoryPeriodic.
-
-            uint64_t timeoutSecs   = 180; // total seconds to retry
-            uint64_t coalesceSecs  = 5;   // interval to invoke a coalesce
-            uint64_t evictSecs     = 20;  // interval to invoke an evict
-            uint64_t curTicks      = 0;   // ticks taken at every loop iteration
-            uint64_t timeoutTicks  = 0;   // tick count when the timeout hits
-            uint64_t coalesceTicks = 0;   // tick count when a coalesce is invoked
-            uint64_t evictTicks    = 0;   // tick count when an evict is invoked
-
-            curTicks      = getTB();
-            timeoutTicks  = curTicks + TimeManager::convertSecToTicks(timeoutSecs,0);
-            coalesceTicks = curTicks + TimeManager::convertSecToTicks(coalesceSecs,0);
-            evictTicks    = curTicks + TimeManager::convertSecToTicks(evictSecs,0);
-
-            while (NULL == page)
-            {
-                // Didn't successfully allocate, so yield in hopes that memory
-                // will eventually free up (ex. VMM flushes).
-                task_yield();
-
-                curTicks = getTB();
-
-                // TIMEOUT
-                // Check the maximum time allowed for retry
-                if (curTicks > timeoutTicks)
-                {
-                    KTRC0( "PageManager::allocatePage: TIMEOUT size:%ld tid:%d\n",
-                            n, task_gettid() );
-                    STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_TIMEOUT,
-                               g_istep, g_substep, n);
-                    MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
-                    KernelMisc::printkBacktrace(nullptr);
-                    crit_assert(0);
-                }
-                // DEFRAG
-                // Check to force a defrag of the memory
-                if (curTicks > coalesceTicks)
-                {
-                    KTRC0( "PageManager::allocatePage: COALESCE size:%ld tid:%d\n",
-                             n, task_gettid() );
-                    coalesce();
-                    ++PageManager::cv_allocatePage_coalesce_wait;
-                    coalesceTicks += TimeManager::convertSecToTicks(coalesceSecs,0);
-                    STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_COALESCE, g_istep, g_substep, n);
-                }
-                // EVICT
-                // Check to evict some pages
-                if (curTicks > evictTicks)
-                {
-                    KTRC0( "PageManager::allocatePage: PERIODICS size:%ld tid:%d!\n",
-                             n, task_gettid() );
-                    CpuManager::forceMemoryPeriodic();
-                    evictTicks += TimeManager::convertSecToTicks(evictSecs,0);
-                    STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_DEFRAG, g_istep, g_substep, n);
-                }
-
-                page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
-                                 reinterpret_cast<void*>(n));
-            }
-        }
-        STRC1_KSHORT(KDBG_PM_ALLOC_USR_EXIT, (uintptr_t)page, n);
-    }
-    else
+    if (KernelMisc::in_kernel_mode())
     {
         if (!userspace)
         {
             STRC1_KSHORT(KDBG_PM_ALLOC_KER_ENTER, n, 0);
         }
-        page = Singleton<PageManager>::instance()._allocatePage(n, userspace, kAllowOom);
+        page = l_pmgr._allocatePage(n, userspace, kAllowOom);
         if (!userspace)
         {
-            STRC1_KSHORT(KDBG_PM_ALLOC_KER_EXIT, PTR_TO_u32(page), n);
+            STRC1_KSHORT(KDBG_PM_ALLOC_KER_EXIT, (uintptr_t)page, n);
+        }
+        return page;
+    }
+
+    // This section is for requests originating in userspace and running in usr-mode
+
+    STRC1_KSHORT(KDBG_PM_ALLOC_USR_ENTER, n, 0);
+
+    // syscall to run allocatePage in kernel-mode
+    page = _syscall1(Systemcalls::MM_ALLOC_PAGES, reinterpret_cast<void*>(n));
+
+    if (NULL == page)
+    {
+        // The alloc pages syscall failed, so loop and retry the syscall
+        //  until success or until timeoutSecs.
+        //
+        // At reserveSecs,  one-time:           forceMemoryPeriodic, try iv_reserved
+        // At criticalSecs, repeat at interval: forceMemoryPeriodic, try iv_reserved
+        // At timeoutSecs,  fail:               assert
+        //
+        // forceMemoryPeriodic
+        //   -does flushPageTable, castOutPages, and PageMgr/HeapMgr coalesce
+
+        const uint64_t reserveSecs  = USR_ALLOC_WAIT_RESERVED;
+        const uint64_t criticalSecs = USR_ALLOC_CRIT_PERIODIC;
+        const uint64_t timeoutSecs  = USR_ALLOC_WAIT_TIMEOUT;
+
+        uint64_t reserveTicks  = 0;   // ticks to first try the iv_reserved
+        uint64_t criticalTicks = 0;   // ticks interval to try the iv_reserved
+        uint64_t timeoutTicks  = 0;   // ticks for the timeout
+
+        timeoutTicks  = getTB() + TimeManager::convertSecToTicks(timeoutSecs,0);
+        criticalTicks = getTB() + TimeManager::convertSecToTicks(criticalSecs,0);
+        reserveTicks  = getTB() + TimeManager::convertSecToTicks(reserveSecs,0);
+
+        // remember each time an allocatePage had to wait
+        __sync_add_and_fetch(&l_pmgr.cv_allocatePage_usr_wait, 1);
+
+        CpuManager::forceMemoryPeriodic(VmmManager::NORMAL);
+
+        while (NULL == page) // usr-mode wait loop
+        {
+            // Didn't successfully allocate, so yield in hopes that memory
+            // will eventually free up (ex. VMM flushes).
+            task_yield();
+
+            // RESERVE
+            // One-time attempt a few seconds after entering the wait loop.
+            // Send a Critical Periodic and try the iv_reserved
+            if (getTB() > reserveTicks)
+            {
+                CpuManager::forceMemoryPeriodic(VmmManager::CRITICAL);
+                page = _syscall1(Systemcalls::MM_ALLOC_RESERVED_PAGES,
+                                 reinterpret_cast<void*>(n));
+                if (page)
+                {
+                    STRC1_KALLOC(K_ALLOC_USR_GET_RES, g_istep, g_substep, n);
+                    return page;
+                }
+                STRC1_KMEM(KMEM_STATS_ALLOC_PG_USR_GET_RES_FAIL,
+                           g_istep, g_substep, n);
+                // add timeoutSecs so this section does not run again in the loop
+                reserveTicks += TimeManager::convertSecToTicks(timeoutSecs,0);
+            }
+            // CRITICAL
+            // Run this at a larger time interval
+            // Send a Critical Periodic and retry the iv_reserved
+            if (getTB() > criticalTicks)
+            {
+                CpuManager::forceMemoryPeriodic(VmmManager::CRITICAL);
+                page = _syscall1(Systemcalls::MM_ALLOC_RESERVED_PAGES,
+                                 reinterpret_cast<void*>(n));
+                if (page)
+                {
+                    STRC1_KALLOC(K_ALLOC_USR_GET_RES, g_istep, g_substep, n);
+                    return page;
+                }
+                STRC1_KMEM(KMEM_STATS_ALLOC_PG_USR_GET_RES_FAIL,
+                           g_istep, g_substep, n);
+                // set to run at the next time interval
+                criticalTicks += TimeManager::convertSecToTicks(criticalSecs,0);
+            }
+            // TIMEOUT
+            // Check the maximum time allowed for retry
+            if (getTB() > timeoutTicks)
+            {
+                KTRC0("KMEM_STATS_ALLOC_PG_USR_TIMEOUT_ASSERT size: %ld tid:%d\n",
+                        n, task_gettid());
+                STRC1_KMEM(KMEM_STATS_ALLOC_PG_USR_TIMEOUT_ASSERT,
+                           g_istep, g_substep, n);
+                MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
+                KernelMisc::printkBacktrace(nullptr);
+                crit_assert(0);
+            }
+
+            //  syscall to run allocatePage in kernel-mode
+            page = _syscall1(Systemcalls::MM_ALLOC_PAGES, reinterpret_cast<void*>(n));
         }
     }
 
+    STRC1_KSHORT(KDBG_PM_ALLOC_USR_EXIT, (uintptr_t)page, n);
+    crit_assert(page); // only do this check in usr-mode
     return page;
 }
 
@@ -331,9 +361,17 @@ void PageManager::freePage(void* p, size_t n)
     crit_assert(n);
     crit_assert(p);
 
-    PageManager& pmgr = Singleton<PageManager>::instance();
-    pmgr._freePage(p, n);
-    STRC1_KSHORT(KDBG_PM_FREE_EXIT, cv_pagesAvail, 0);
+    if (KernelMisc::in_kernel_mode() || n <= 2)
+    {
+        // In kernel mode OR p is going into a lower bucket
+        // so, its ok to just call and free the page
+        Singleton<PageManager>::instance()._freePage(p, n);
+        return;
+    }
+    // In non-kernel mode, make a system-call to freePage in kernel-mode.
+    // Do freePage in kernel-mode because it needs iv_spinlock for iv_heap_upper.
+    // Do not grab the iv_spinlock in usr space, to avoid deadlock situations
+    _syscall2(Systemcalls::MM_FREE_PAGES, p, reinterpret_cast<void*>(n));
 }
 
 uint64_t PageManager::queryAvail()
@@ -344,6 +382,16 @@ uint64_t PageManager::queryAvail()
 uint64_t PageManager::availPages()
 {
     return Singleton<PageManager>::instance()._availPages();
+}
+
+uint64_t PageManager::availPagesRes()
+{
+    return Singleton<PageManager>::instance()._availPagesRes();
+}
+
+uint64_t PageManager::lowPageCount()
+{
+    return Singleton<PageManager>::instance()._lowPageCount();
 }
 
 bool PageManager::isSmallMemEnv()
@@ -359,39 +407,12 @@ void PageManager::addDebugPointers()
 
 void PageManager::_addDebugPointers()
 {
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERBUCKETS,
-                             &this->iv_heap,
-                             sizeof(this->iv_heap));
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERKERNRESAVAIL,
-                             &PageManager::cv_reserved_pages_available,
-                             sizeof(PageManager::cv_reserved_pages_available));
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERPAGESTOTAL,
-                             &PageManager::cv_pagesTotal,
-                             sizeof(PageManager::cv_pagesTotal));
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERPAGESAVAIL,
-                             &PageManager::cv_pagesAvail,
-                             sizeof(PageManager::cv_pagesAvail));
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERLOWPAGECOUNT,
-                             &PageManager::cv_low_page_count,
-                             sizeof(PageManager::cv_low_page_count));
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERCOALSTATE,
-                             &PageManager::cv_coalesce_state,
-                             sizeof(PageManager::cv_coalesce_state));
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERCOALATTEMPTS,
-                             &PageManager::cv_coalesce_attempts,
-                             sizeof(PageManager::cv_coalesce_attempts));
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERCOALESCECOUNT,
-                             &PageManager::cv_coalesce_count,
-                             sizeof(PageManager::cv_coalesce_count));
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERALLOCCOUNT,
-                             &PageManager::cv_allocatePage_coalesce_wait,
-                             sizeof(PageManager::cv_allocatePage_coalesce_wait));
-    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERFREEBUCKETS,
-                             PageManager::cv_free_bucket_count,
-                             sizeof(PageManager::cv_free_bucket_count));
+    DEBUG::add_debug_pointer(DEBUG::PAGEMANAGERINSTANCE,
+                             this,
+                             sizeof(PageManager));
 }
 
-PageManager::PageManager() : iv_lock()
+PageManager::PageManager()
 {
     this->_initialize();
 }
@@ -456,18 +477,21 @@ void PageManager::_initialize()
     totalPages += pages;
 #endif
 
-    // Reserve pages for the kernel.
-    iv_heapKernel.addMemory(reinterpret_cast<uint64_t>(
-                            iv_heap.allocatePage(KERNEL_HEAP_RESERVED_PAGES)),
-                            KERNEL_HEAP_RESERVED_PAGES);
-    cv_reserved_pages_available = KERNEL_HEAP_RESERVED_PAGES;
-
     // Statistics
-    cv_pagesTotal     = totalPages;
-    cv_pagesAvail     = totalPages - KERNEL_HEAP_RESERVED_PAGES;
-    cv_low_page_count = cv_pagesAvail;
+    cv_pagesTotal             = totalPages;
+    iv_heap.cv_low_page_count = iv_heap.cv_free_pages;
 
-    printk("%ld pages.\n", totalPages);
+    // allocate pages to iv_reserved
+    PageManagerCore::page_t *page = iv_heap.allocatePage(HEAP_RESERVED);
+    iv_reserved.freePage(page, HEAP_RESERVED); // add pages into iv_reserved
+    iv_reserved.cv_low_page_count = iv_reserved.cv_free_pages;
+
+    KTRC0("Total Pages:       %ld\n"
+          "iv_heap Pages:     %ld\n"
+          "iv_reserved Pages: %ld\n",
+            cv_pagesTotal,
+            iv_heap.cv_free_pages,
+            iv_reserved.cv_free_pages);
 
     KernelMemState::setMemScratchReg(KernelMemState::MEM_CONTAINED_L3,
                                      g_BlToHbDataManager.getHbCacheSizeMb());
@@ -475,66 +499,56 @@ void PageManager::_initialize()
 
 void* PageManager::_allocatePage(size_t n, bool userspace, bool allowOom)
 {
-    // The allocator was designed to be lockless.  We have ran into a problem
-    // in Brazos where all threads (over 256) were trying to allocate a page
-    // at the same time.  This resulted in many of them trying to break a large
-    // page chunk into smaller fragments.  The later threads ended up seeing
-    // no chunks available and claimed we were out of memory.
-    //
-    // Simple solution is to just put a lock around the page allocation.  All
-    // calls to this function are guaranteed, by PageManager::allocatePage, to
-    // be from kernel space so we cannot run into any dead lock situations by
-    // using a spinlock here.
-    //
-    // RTC: 98271
-    iv_lock.lock();
-
     PageManagerCore::page_t* page = iv_heap.allocatePage(n);
-
-    iv_lock.unlock();
-
     if (page)
     {
-        // Update statistics
-        __sync_sub_and_fetch(&cv_pagesAvail, n);
-        if(cv_pagesAvail < cv_low_page_count)
-        {
-            cv_low_page_count = cv_pagesAvail;
-        }
+        return page;
     }
 
-    // If the allocation came from kernel-space and normal allocation
-    // was unsuccessful, pull a page off the reserve heap.
-    if ((NULL == page) && (!userspace))
+    if (!userspace) // this request originated in kernel-space
     {
-        STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_FIRST_FAIL, g_istep, g_substep, n);
-        printkd("PAGEMANAGER: kernel heap used\n");
-        page = iv_heapKernel.allocatePage(n);
+        // we are nearly OOM, so do Critical-level Periodics
+        //  (flushPageTable, castOutPages, PageMgr/HeapMgr coalesce)
+        CpuManager::forceMemoryPeriodic(VmmManager::CRITICAL);
+
+        // Enter a retry loop and hope the periodics free some memory
+
+        const uint64_t timeoutSecs = KER_ALLOC_WAIT_RESERVED; // total secs to retry
+
+        uint64_t timeoutTicks = 0; // tick count when the timeout hits
+
+        timeoutTicks = getTB() + TimeManager::convertSecToTicks(timeoutSecs,0);
+
+        while (getTB() < timeoutTicks) // retry enough times for the Periodics to help
+        {
+            page = iv_heap.allocatePage(n);
+            if (page)
+            {
+                return page;
+            }
+        }
+
+        // normal allocation failed, so pull a page off the reserve heap
+        page = iv_reserved.allocatePage(n);
         if (page)
         {
-            __sync_sub_and_fetch(&cv_reserved_pages_available, n);
+            STRC1_KALLOC(K_ALLOC_KER_GET_RES, g_istep, g_substep, n);
+            return page;
         }
-        // Any time we dip into the kernel heap we should start
-        //  evicting user pages
-        CpuManager::forceMemoryPeriodic();
-    }
 
-    // If still not successful, we're out of memory.  Assert as long as the
-    // caller doesn't want to allow OOM (_pteMiss uses this to avoid deadlocks).
-    if ((NULL == page) && (!userspace))
-    {
-        register task_t* t;
-        asm volatile("mr %0, 13" : "=r"(t));
-        printk("Insufficient memory for alloc %zd pages on tid=%d!\n",
-               n, t->tid);
-        printk("Pages available=%ld\n",cv_pagesAvail);
-
-        STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_SECOND_FAIL, g_istep, g_substep, n);
+        // still not successful, we're out of memory.  Assert as long as the
+        // caller doesn't want to allow OOM (_pteMiss uses this to avoid deadlocks).
+        STRC1_KMEM(KMEM_STATS_ALLOC_PG_KER_GET_RES_FAIL,
+                   g_istep, g_substep, n);
 
         if (!allowOom)
         {
-            STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_KASSERT,
-                       g_istep, g_substep, n);
+            register task_t* t;
+            asm volatile("mr %0, 13" : "=r"(t));
+            KTRC0("Insufficient memory for alloc %zd pages on tid=%d!\n", n, t->tid);
+            KTRC0("Pages available=%ld\n", iv_heap.cv_free_pages);
+            KTRC0("KMEM_STATS_ALLOC_PG_KER_KASSERT size: %ld tid:%d\n", n, t->tid);
+            STRC1_KMEM(KMEM_STATS_ALLOC_PG_KER_KASSERT, g_istep, g_substep, n);
             crit_assert(0);
         }
     }
@@ -544,68 +558,91 @@ void* PageManager::_allocatePage(size_t n, bool userspace, bool allowOom)
 
 void PageManager::_freePage(void* p, size_t n)
 {
-    iv_heap.freePage(p,n);
-
-    // Keep the reserved page count for the kernel full
-    size_t ks = cv_reserved_pages_available;
-    if(ks < KERNEL_HEAP_RESERVED_PAGES)
+    if (iv_reserved.cv_free_pages < HEAP_RESERVED_LOW_MARK/2) // iv_reserved is VERY low
     {
-        // Only request single page at a time to assure
-        // page is reclaimed, if too many pages requested
-        // the proper bucket size may not have availability
-        // during high pressure memory demands
-        ks = 1;
-        PageManagerCore::page_t * page = iv_heap.allocatePage(ks);
-        if(page)
+        // add any sized p to iv_reserved, because we must have some pages
+        // reserved to satisfy a PTE miss.
+        // AND, if the pages are in iv_reserved rather than the free buckets,
+        //  then each allocatePage adds a delay to help survive an OOM.
+        iv_reserved.freePage(p,n);  // add p to iv_reserved
+        return;
+    }
+
+    if (iv_heap.cv_free_pages < HEAP_RESERVED) // iv_heap is very low
+    {
+        iv_heap.freePage(p,n); // very low memory in the free buckets,
+        return;                // so put p in the free buckets before iv_reserved
+    }
+
+    if (iv_reserved.cv_free_pages < HEAP_RESERVED)  // iv_reserved needs pages
+    {
+        if (n >= HEAP_RESERVED_MIN_SIZE) // p is a larger size
         {
-            iv_heapKernel.addMemory(reinterpret_cast<size_t>(page), ks);
-            __sync_add_and_fetch(&cv_reserved_pages_available, ks);
+            iv_reserved.freePage(p,n); // add p to iv_reserved
+            return;
+        }
+        if (iv_reserved.cv_free_pages < HEAP_RESERVED_LOW_MARK) // iv_reserved is low
+        {
+            // add any sized p to iv_reserved, because we must have some pages
+            // reserved to satisfy a PTE miss.
+            iv_reserved.freePage(p,n); // add p to iv_reserved
+            return;
         }
     }
-    else
-    {
-        // Update statistics.
-        __sync_add_and_fetch(&cv_pagesAvail, n);
-    }
+
+    iv_heap.freePage(p,n); // otherwise add p to a free bucket
 
     return;
 }
 
-PageManagerCore::page_t* PageManagerCore::pop_bucket(size_t i_n)
+PageManagerCore::page_t* PageManagerCore::pop_bucket(size_t i_pageCount)
 {
-    if (i_n >= BUCKETS) return NULL;
+    size_t  which_bucket = get_bucket(i_pageCount);
+    page_t *p{nullptr};
 
-    page_t* p = iv_heap[i_n].pop();
-
-    if (NULL == p)
+    if (which_bucket < BUCKETS_LOWER)
     {
-        // Couldn't allocate from the correct size bucket, so split up an
-        // item from the next sized bucket.
-        p = pop_bucket(i_n+1);
-        if (NULL != p)
-        {
-            push_bucket((page_t*) (((uint64_t)p) + (PAGESIZE * (1 << i_n))),
-                        i_n);
-        }
+        p = pop_bucket_lower(i_pageCount);
     }
-    else
+    if (!p)
     {
-        __sync_sub_and_fetch(&PageManager::cv_free_bucket_count[i_n],1);
+        // Either no page exists for i_pageCount in bucket 0 or 1,
+        // or i_pageCount is larger than 2,
+        // Go search the buckets under a lock
+        // Use a lock to prevent fragmentation, caused when multiple threads
+        //  simultaneously pull memory from the upper buckets and split it
+        //  into smaller pieces.
+        p = pop_bucket_upper(i_pageCount);
     }
     return p;
 }
 
-void PageManagerCore::push_bucket(page_t* i_p, size_t i_n)
+// Note: caller must hold iv_spinlock, if i_pageCount is in an upper bucket
+void PageManagerCore::push_bucket(page_t* i_p, size_t i_pageCount)
 {
-    if (i_n >= BUCKETS) return;
-    __sync_add_and_fetch(&PageManager::cv_free_bucket_count[i_n],1);
+    size_t which_bucket = get_bucket(i_pageCount);
 
-    iv_heap[i_n].push(i_p);
+    i_p->set_key(i_pageCount); // set key to the size so PQueue will sort by size
+
+    if (which_bucket < BUCKETS_LOWER)
+    {
+        iv_heap_lower[which_bucket].push(i_p);
+    }
+    else
+    {
+        iv_heap_upper[which_bucket].insert(i_p);
+    }
+    __sync_add_and_fetch(&cv_free_bucket_count[which_bucket],1);
 }
 
 void PageManager::coalesce( void )
 {
-    Singleton<PageManager>::instance()._coalesce();
+    if (KernelMisc::in_kernel_mode())
+    {
+        Singleton<PageManager>::instance()._coalesce();
+        return;
+    }
+    // else, noop
 }
 
 void PageManager::_coalesce( void )
@@ -613,7 +650,68 @@ void PageManager::_coalesce( void )
     iv_heap.coalesce();
 }
 
-// Coalsesce adjacent free memory blocks
+// Note: caller must hold iv_spinlock to protect iv_heap_upper
+void PageManagerCore::do_coalesce(Util::Locked::Queue<page_t> q)
+{
+    // q contains pages in an iv_range to be merged
+    // The page_t addrs in q are sorted, so it is simple to check the sequential
+    //  elements in q and see if they can be merged
+
+    // foreach p in q
+    //   pull off a buddy from q
+    //   if p and buddy can be merged
+    //     merge them
+    //   if p was not merged OR q is empty
+    //     put p into a free bucket
+    //     p = q.remove()
+    //
+    //   else, p was merged with buddy, try to merge p with the next page in q
+    page_t   *p;
+    page_t   *p_seek;  // start addr of the memory following p
+    page_t   *p_buddy; // addr we pulled off q, comparing to p_seek
+    size_t    which_bucket;
+    uintptr_t addr{0};
+    bool      merged{false};
+    p = q.remove();
+    while (p)
+    {
+        merged = false;
+        addr   = reinterpret_cast<uintptr_t>(p);
+        addr  += p->size * PAGESIZE;
+        p_seek = reinterpret_cast<page_t*>(addr);
+        p_buddy = q.front();
+        if ( (p_buddy) && (p_buddy == p_seek) )
+        {
+            // merge p and buddy
+            p->size = p->size + p_buddy->size;
+            p->key  = p->size;
+            q.remove(); // remove merged buddy
+            merged = true;
+            __sync_add_and_fetch(&cv_coalesce_count,1);
+        }
+
+        if ( (!merged) || (q.size() == 0) )
+        {
+            // p could not be merged OR we are done merging,
+            // so place p into a free bucket
+
+            which_bucket = get_bucket(p->size);
+            p->key       = p->size; // set key to size so PQueue can sort by size
+
+            if (which_bucket < BUCKETS_LOWER)
+            {
+                iv_heap_lower[which_bucket].push(p);
+            }
+            else
+            {
+                iv_heap_upper[which_bucket].insert(p);
+            }
+            __sync_add_and_fetch(&cv_free_bucket_count[which_bucket],1);
+            p = q.remove();
+        }
+    }
+}
+
 void PageManagerCore::coalesce( void )
 {
     if (!iv_supports_coalesce)
@@ -621,103 +719,92 @@ void PageManagerCore::coalesce( void )
         return;
     }
 
-    STRC1_KSHORT(KDBG_PM_COALESCE_ENTER, PageManager::cv_coalesce_attempts,
-                                         PageManager::cv_coalesce_count);
+    STRC1_KSHORT(KDBG_PM_COALESCE_ENTER, cv_coalesce_attempts, cv_coalesce_state);
 
-    __sync_add_and_fetch(&PageManager::cv_coalesce_state, 1);
-    __sync_add_and_fetch(&PageManager::cv_coalesce_attempts, 1);
-    KTRC1("PageManagerCore: RUN COALESCE\n");
+    if (cv_free_pages <= 1) {return;}
 
-    STRC1_KSHORT(KDBG_PM_COALESCE_START, PageManager::cv_coalesce_attempts,
-                                         PageManager::cv_coalesce_count);
-
-    // Look at all the "free buckets" and find blocks to merge
-    // Since this is binary, all merges will be from the same free bucket
-    // Each bucket is a stack of non-allocated memory blocks of the same size
-    // Once two blocks are merged they become a single block twice the size.
-    // The source blocks must be removed from the current bucket (stack) and
-    // the new block needs to be pushed onto the next biggest stack.
-    for(size_t bucket = 0; bucket < (BUCKETS-1); ++bucket)
+    if (!KernelMisc::in_kernel_mode())
     {
-        // Move the this stack bucket into a priority queue
-        // sorted by address, highest to lowest
-        Util::Locked::PQueue<page_t,page_t*> pq;
-        page_t * p = NULL;
-        while(NULL != (p = iv_heap[bucket].pop()))
-        {
-            p->key = p;
-            pq.insert(p);
-
-            __sync_sub_and_fetch(&PageManager::cv_free_bucket_count[bucket],1);
-        }
-
-        while(NULL != (p = pq.remove()))
-        {
-            // p needs to be the even buddy to prevent merging of wrong blocks.
-            // To determine this, get the index of the block as if the whole
-            // page memory space were blocks of this size.  Note: have to
-            // take into account the page manager "hole" in the middle of the
-            // initial memory allocation.  Also have to ignore the OCC
-            // bootloader page at the start of the third memory range (which
-            // accounts for the rest of the initial cache), and the SPTE entries
-            // at the start of the 4th memory range (which accounts for the rest
-            // of the Hostboot memory footprint).
-            uint64_t p_idx = 0;
-            const auto addr = reinterpret_cast<uint64_t>(p);
-            bool found=false;
-            for(const auto& range : iv_ranges)
-            {
-                if(   (addr >= range.first)
-                   && (addr < (range.first + range.second)) )
-                {
-                    p_idx = (addr - range.first) / ((1 << bucket)*PAGESIZE);
-                    found=true;
-                    break;
-                }
-            }
-            // Critical error if we didn't map into a known/registered address
-            // range.
-            crit_assert(found);
-
-            if(0 != (p_idx % 2))  // odd index
-            {
-                push_bucket(p,bucket);
-            }
-            else // it's even
-            {
-                // If p can be merged then the next block in pq will be the
-                // match.  The address of p also can't be greater than what's
-                // in pq or something is really messed up, therefore if
-                // pq.remove_if() returns something then it's a match.
-                page_t * p_seek = (page_t*)((uint64_t)p +
-                                            (1 << bucket)*PAGESIZE);
-                page_t * p_next = pq.remove_if(p_seek);
-                if(p_next == p_seek)
-                {
-                    // new block is twice the size and goes into the next
-                    // bucket size
-                    push_bucket(p,bucket+1);
-                    ++PageManager::cv_coalesce_count;
-                }
-                else
-                {
-                    // Can't merge p
-                    push_bucket(p,bucket);
-
-                    if(p_next) // This should be null - if then overlaping mem
-                    {
-                        iv_heap[bucket].push(p_next);
-                        KTRC0("pagemgr::coalesce Expected %p, got %p\n",
-                               p_seek, p_next);
-                    }
-                }
-            }
-        }
+        return;
     }
 
-    STRC1_KSHORT(KDBG_PM_COALESCE_EXIT, PageManager::cv_coalesce_attempts,
-                                        PageManager::cv_coalesce_count);
-    __sync_sub_and_fetch(&PageManager::cv_coalesce_state, 1);
+    int l_running = __sync_val_compare_and_swap(&cv_coalesce_state,0,1);
+    if (l_running)
+    {
+        // a coalesce is already running,
+        //  so rather than queueing up another thread to run another coalesce
+        //  after the one in progress, kick this thread out
+        return;
+    }
+
+    // Calculate the ending addrs of the ranges
+    // Do this before we grab the iv_spinlock, because vector will allocate
+    // from the heap and cause a deadlock
+    std::vector<uint64_t> ranges;
+    for (auto &range : iv_ranges)
+    {
+        if (!range.first) continue;
+        ranges.push_back(range.first+range.second-1);
+    }
+    std::sort(ranges.begin(), ranges.end());
+
+    // grab lock
+    // move all free memory from lower buckets to pq
+    // move all free memory from upper buckets to pq
+    // foreach range in iv_range
+    //   pull off memory from pq in the addr range and insert into q_range
+    //   call do_coalesce to merge the memory in q_range
+    // free lock
+
+    iv_spinlock.lock(); // mutex with allocatePage
+
+    STRC1_KSHORT(KDBG_PM_COALESCE_START, cv_coalesce_attempts, cv_coalesce_count);
+
+    __sync_add_and_fetch(&cv_coalesce_attempts, 1);
+
+    Util::Locked::PQueue<page_t,uint64_t> pq;
+    page_t *p;
+    size_t bucket{0};
+    do // put lower bucket pages into q
+    {
+        while ((p=iv_heap_lower[bucket].pop()))
+        {
+            // set key and size differently for the coalesce
+            // pqueue does the sort using key, so move size from key and set key to addr of p
+            p->size = p->key;  // move the size from key to size
+            p->set_key(p);     // set key to addr of p, so pqueue sorts by addr
+            pq.insert(p);      // insert and sort by key
+            __sync_sub_and_fetch(&cv_free_bucket_count[bucket],1);
+        }
+    } while (++bucket < BUCKETS_LOWER);
+    do // put upper bucket pages into q
+    {
+        while ((p=iv_heap_upper[bucket].remove()))
+        {
+            // set key and size differently for the coalesce
+            // pqueue does the sort using key, so move size from key and set key to addr of p
+            p->size = p->key;  // move the size from key to size
+            p->set_key(p);     // set key to addr of p, so pqueue sorts by addr
+            pq.insert(p);      // insert and sort by key
+            __sync_sub_and_fetch(&cv_free_bucket_count[bucket],1);
+        }
+    } while (++bucket < BUCKETS_UPPER);
+
+    // colaesce the different ranges separately
+    for (auto &range : ranges)
+    {
+        Util::Locked::Queue<page_t> q_range; // dont need a PQueue to sort again, already sorted
+        while ((p=pq.remove_if(range)))      // remove tail if less than range,
+        {                                    // which means the page is inside this iv_range
+            q_range.insert(p);
+        }
+        do_coalesce(q_range);
+    }
+
+    STRC1_KSHORT(KDBG_PM_COALESCE_EXIT, cv_coalesce_attempts, cv_coalesce_count);
+
+    iv_spinlock.unlock();
+    __sync_sub_and_fetch(&cv_coalesce_state, 1);
 }
 
 void PageManager::addMemory(size_t i_addr, size_t i_pageCount)
@@ -732,11 +819,81 @@ void PageManager::_addMemory(size_t i_addr, size_t i_pageCount)
     iv_heap.addMemory(i_addr,i_pageCount);
 
     // Update statistics.
-    __sync_add_and_fetch(&cv_pagesAvail, i_pageCount);
-
-    // Update statistics.
     __sync_add_and_fetch(&cv_pagesTotal, i_pageCount);
 
     return;
 }
 
+// Note: caller must hold iv_spinlock, if size_remaining is in an upper bucket
+void PageManagerCore::check_remain(page_t *i_page, size_t i_pageCount)
+{
+    size_t size_of_page = i_page->key;
+    if (size_of_page > i_pageCount)
+    {
+        // there are extra pages, so chop them off and add into a free bucket
+        uintptr_t addr = reinterpret_cast<uintptr_t>(i_page);
+        addr += i_pageCount * PAGESIZE;
+        page_t *page_remaining = reinterpret_cast<page_t*>(addr);
+        size_t  size_remaining = size_of_page - i_pageCount;
+        push_bucket(page_remaining, size_remaining);
+    }
+}
+
+PageManagerCore::page_t* PageManagerCore::pop_bucket_lower(size_t i_pageCount)
+{
+    size_t  which_bucket = get_bucket(i_pageCount);
+    page_t *page{nullptr};
+
+    while ( (!page) && (which_bucket < BUCKETS_LOWER) )
+    {
+        page = iv_heap_lower[which_bucket].pop();
+        if (!page)
+        {
+            ++which_bucket;
+        }
+    }
+    if (page)
+    {
+        __sync_sub_and_fetch(&cv_free_bucket_count[which_bucket],1);
+        check_remain(page, i_pageCount);
+        page->set_key(i_pageCount); // ensure size is correct, in case there was extra
+    }
+    return page;
+}
+
+PageManagerCore::page_t* PageManagerCore::pop_bucket_upper(size_t i_pageCount)
+{
+    size_t  which_bucket = get_bucket(i_pageCount);
+    page_t *page{nullptr};
+
+    iv_spinlock.lock();
+
+    if (which_bucket < BUCKETS_LOWER)
+    {
+        // retry the lower buckets, since the initial attempt in pop_bucket() could
+        // have found the lower buckets empty, but now memory might be there
+        page = pop_bucket_lower(i_pageCount);
+    }
+
+    while (!page && which_bucket < BUCKETS_UPPER)
+    {
+        // Either no page exists for i_pageCount in bucket 0 or 1,
+        // or i_pageCount is larger than 2,
+        // Search the upper buckets
+        page = iv_heap_upper[which_bucket].remove_match(i_pageCount);
+        if (page)
+        {
+            __sync_sub_and_fetch(&cv_free_bucket_count[which_bucket],1);
+        }
+        ++which_bucket;
+    }
+
+    if (page)
+    {
+        check_remain(page, i_pageCount);
+        page->set_key(i_pageCount); // ensure size is correct, in case there was extra
+    }
+
+    iv_spinlock.unlock();
+    return page;
+}

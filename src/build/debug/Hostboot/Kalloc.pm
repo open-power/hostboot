@@ -41,7 +41,10 @@ sub display_tag
     my $tag = shift || 0;
     switch ($tag)
     {
-        case 0x1001 {::userDisplay "K_ALLOC_PAGES_FAIL";}
+        case 0x1001 {::userDisplay "K_ALLOC_USR_FIRST                      ";}
+        case 0x1002 {::userDisplay "K_ALLOC_USR_PERIODIC                   ";}
+        case 0x1003 {::userDisplay "K_ALLOC_USR_GET_RES                    ";}
+        case 0x1004 {::userDisplay "K_ALLOC_KER_GET_RES                    ";}
     }
 }
 
@@ -62,6 +65,7 @@ sub display_trace_data
     $data{summary} or $data{istep} and ::userDisplay "\n";
     $data{summary} or Hostboot::SimpleTraceCommon::st_display_tid($data{tid});
     $data{summary} or ::userDisplay "\n";
+    $data{summary} and Hostboot::SimpleTraceCommon::st_display_pages_summary(\%data);
     Hostboot::SimpleTraceCommon::st_display_req_pages($data{requested_pages});
     ::userDisplay "\n";
 
@@ -87,10 +91,13 @@ sub get_trace_data
     $data->{sec}             = ::read32 ($addr); $addr+=4;
     $data->{nsec}            = ::read32 ($addr); $addr+=4;
 
-    $data->{istep}           = ::read16 ($addr); $addr+=2;
-    $data->{substep}         = ::read16 ($addr); $addr+=2;
-    $data->{tid}             = ::read16 ($addr); $addr+=2;
-    $data->{requested_pages} = ::read16 ($addr); $addr+=2;
+    $data->{istep}                  = ::read16 ($addr); $addr+=2;
+    $data->{substep}                = ::read16 ($addr); $addr+=2;
+    $data->{tid}                    = ::read16 ($addr); $addr+=2;
+    $data->{requested_pages}        = ::read16 ($addr); $addr+=2;
+    $data->{cv_pagesAvail_heap}     = ::read32 ($addr); $addr+=4;
+    $data->{cv_low_page_count_heap} = ::read32 ($addr); $addr+=4;
+    $data->{cv_pagesAvail_res}      = ::read32 ($addr); $addr+=4;
 
     return 1;
 }

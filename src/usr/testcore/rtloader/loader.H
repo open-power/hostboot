@@ -53,6 +53,9 @@
 #include <vmmconst.h>
 #include <runtime/runtime.H>
 #include <chipids.H>
+#include <sys/misc.h>
+#include <kernel/simpletrace.H>
+#include <kernel/cpumgr.H>
 
 trace_desc_t* g_trac_hbrt = NULL;
 TRAC_INIT(&g_trac_hbrt, "HBRT_TEST", 12*KILOBYTE);
@@ -62,8 +65,12 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
     public:
         void testLoader()
         {
+            STRC_KSHORT_SET_LEVEL(STRC_L1); // ensure the KSHORT trace is enabled
+
             static const uint64_t HEADER_OFFSET = 0x2000;
             errlHndl_t l_errl = nullptr;
+
+            save_mem_stats(99, 40); // save a trace for MemStats
 
 #ifdef CONFIG_SECUREBOOT
             l_errl = loadSecureSection(PNOR::HB_RUNTIME);
@@ -75,6 +82,8 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 return;
             }
 #endif
+            save_mem_stats(99, 50); // save a trace for MemStats
+
             PNOR::SectionInfo_t runtimeSection;
 
             l_errl = PNOR::getSectionInfo(PNOR::HB_RUNTIME, runtimeSection);
@@ -127,6 +136,7 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             mm_icache_invalidate(imageArea,
                    ALIGN_PAGE(imageSize) / sizeof(uint64_t));
 
+            save_mem_stats(99, 60); // save a trace for MemStats
 
             mm_set_permission(imageArea, HEADER_OFFSET, EXECUTABLE);
 
@@ -207,12 +217,20 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 }
 
             } while(0);
+            save_mem_stats(99, 70); // save a trace for MemStats
 
             mm_set_permission(imageArea, imageSize, WRITABLE);
+
             if (mm_remove_pages(RELEASE, imageArea, ALIGN_PAGE(imageSize)) != 0)
             {
                 TS_FAIL("Couldn't remove pages for HBRT");
             }
+            else
+            {
+                TRACFCOMP(g_trac_hbrt, "Runtime image unloaded @ %x", imageArea);
+            }
+
+            save_mem_stats(99, 80); // save a trace for MemStats
 
 #ifdef CONFIG_SECUREBOOT
             l_errl = unloadSecureSection(PNOR::HB_RUNTIME);
@@ -230,26 +248,6 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
             SBEIO::SbePsu::getTheInstance().ignoreInterrupts(false);
 #endif //#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
 
-        }
-
-    private:
-        void resetOdysseyOcmbFifoState()
-        {
-            using namespace TARGETING;
-            TargetHandleList l_ocmbs;
-            getAllChips(l_ocmbs, TYPE_OCMB_CHIP, true /*functional only*/);
-            for(auto l_ocmb : l_ocmbs)
-            {
-                // Set up OCMB SCOM switches such that by default runtime tests
-                // use inband SCOMs. In order to use FIFO SCOMs, the tests will
-                // have to explicitly set the SCOM flags.
-                auto l_scomSwitches = l_ocmb->getAttr<ATTR_SCOM_SWITCHES>();
-                l_scomSwitches.useInbandScom = 1;
-                l_scomSwitches.useSbeScom = 0;
-                l_scomSwitches.useI2cScom = 0;
-                l_ocmb->setAttr<ATTR_SCOM_SWITCHES>(l_scomSwitches);
-                l_ocmb->setAttr<ATTR_USE_PIPE_FIFO>(1);
-            }
         }
 
         void tearDown()
@@ -290,6 +288,28 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                         proc.second);
                     proc.second = 0;
                 }
+            }
+            save_mem_stats(99, 90); // save a trace for MemStats
+        }
+
+
+    private:
+        void resetOdysseyOcmbFifoState()
+        {
+            using namespace TARGETING;
+            TargetHandleList l_ocmbs;
+            getAllChips(l_ocmbs, TYPE_OCMB_CHIP, true /*functional only*/);
+            for(auto l_ocmb : l_ocmbs)
+            {
+                // Set up OCMB SCOM switches such that by default runtime tests
+                // use inband SCOMs. In order to use FIFO SCOMs, the tests will
+                // have to explicitly set the SCOM flags.
+                auto l_scomSwitches = l_ocmb->getAttr<ATTR_SCOM_SWITCHES>();
+                l_scomSwitches.useInbandScom = 1;
+                l_scomSwitches.useSbeScom = 0;
+                l_scomSwitches.useI2cScom = 0;
+                l_ocmb->setAttr<ATTR_SCOM_SWITCHES>(l_scomSwitches);
+                l_ocmb->setAttr<ATTR_USE_PIPE_FIFO>(1);
             }
         }
 

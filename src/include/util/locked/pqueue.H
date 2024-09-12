@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2010,2014              */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -36,6 +38,7 @@ namespace Util
                 public:
                     void insert(_T*);
                     _T* remove_if(_K&);
+                    _T* remove_match(_K);
                     _T* front();
 
                 private:
@@ -87,6 +90,8 @@ namespace Util
                     bubbleUp(item);
                 }
 
+                this->count++;
+
                 this->__unlock();
             }
 
@@ -107,6 +112,7 @@ namespace Util
 
                     if (item->prev)
                         item->prev->next = NULL;
+                    this->count--;
                 }
 
                 this->__unlock();
@@ -114,6 +120,34 @@ namespace Util
                 return item;
             }
 
+
+        template <typename _T, typename _K, bool locked, typename _S>
+            _T* PQueue<_T,_K,locked,_S>::remove_match(_K i_key)
+            {
+                // search tail to head for an item with its key >= i_key,
+                // if found, remove it from the queue
+
+                _T* item = this->tail;
+
+                this->__lock();
+
+                while ( (item != NULL) && (item->key < i_key) )
+                {
+                    item = item->prev;
+                }
+                if (item)
+                {
+                    if (item->next)         {item->next->prev = item->prev;}
+                    if (item->prev)         {item->prev->next = item->next;}
+                    if (this->head == item) {this->head = item->next;}
+                    if (this->tail == item) {this->tail = item->prev;}
+                    this->count--;
+                }
+
+                this->__unlock();
+
+                return item;
+            }
 
         template <typename _T, typename _K, bool locked, typename _S>
             void PQueue<_T,_K,locked,_S>::bubbleUp(_T* item)

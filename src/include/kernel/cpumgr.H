@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -75,14 +75,7 @@ class CpuManager
     public:
         enum
         {
-#ifdef CONFIG_P9_VPO_COMPILE // VPO has constrained mem env -> check sooner
-            CPU_PERIODIC_CHECK_MEMORY = 64,
-#else
-            CPU_PERIODIC_CHECK_MEMORY = 128,    // Is this even needed anymore?
-#endif
             CPU_PERIODIC_FLUSH_PAGETABLE = 256,
-            CPU_PERIODIC_DEFRAG = 200,  // TODO Any bigger than 400 not
-                                        // currently hit
         };
 
         /** @fn getCurrentCPU
@@ -190,8 +183,9 @@ class CpuManager
         /** @fn forceMemoryPeriodic()
          * Force the memory free / coalesce operations to be performed on the
          * next "periodic" interval.
+         * @param[in]  type of castout, NORMAL or CRITICAL
          */
-        static void forceMemoryPeriodic();
+        static void forceMemoryPeriodic(VmmManager::castout_t i_castOutPagesType);
 
 
         /** @fn critAssert()
@@ -232,6 +226,7 @@ class CpuManager
         static uint64_t cv_cpuSeq;
 
         static uint8_t cv_forcedMemPeriodic;       //!<  force free / coalesce.
+        static VmmManager::castout_t cv_castOutPagesType; //!<  NORMAL or CRITICAL
 
         // If a shutdown of all CPUs is requested
         static bool cv_shutdown_requested;

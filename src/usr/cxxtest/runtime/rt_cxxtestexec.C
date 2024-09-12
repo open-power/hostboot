@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,7 +40,7 @@ void vfs_module_fini();
 #endif
 
 trace_desc_t *g_trac_cxxtest = NULL;
-TRAC_INIT(&g_trac_cxxtest, CXXTEST_COMP_NAME, KILOBYTE );
+TRAC_INIT(&g_trac_cxxtest, CXXTEST_COMP_NAME, 4*KILOBYTE );
 
 namespace CxxTest
 {

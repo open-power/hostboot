@@ -124,8 +124,8 @@ class TestSuite
 public:
     TestSuite();
     virtual ~TestSuite();
-    virtual void setUp();
-    virtual void tearDown();
+    virtual void setUp();    // the setup/tearDown is for the derived class, not
+    virtual void tearDown(); // for each individual test*() method in the class
 
     bool isRunLevelMed(void)   {return(CI_RUN_LEVEL_MED   == iv_run_level ||
                                        CI_RUN_LEVEL_MAX   == iv_run_level);}

@@ -59,7 +59,7 @@ std::vector<const char *> CxxSerialTests{ "libtesthwas.so",
                                           "libtestmmio.so",
                                           "libtestmmio_rt.so",
                                           "libtesterrl.so",
-                                          "libtestkernel.so"};
+                                          "libtestmemorymgr.so"};
 //
 // TestSuite members
 //
@@ -129,6 +129,8 @@ void sortTests(std::vector<const char *> & i_list,
                std::vector<const char *> & o_serial_list,
                std::vector<const char *> & o_parallel_list)
 {
+    bool l_found_testrtloader{false};
+
     o_serial_list.clear();
     o_serial_list.reserve(32);
     o_parallel_list.clear();
@@ -139,6 +141,12 @@ void sortTests(std::vector<const char *> & i_list,
         i != i_list.end(); ++i)
     {
         bool is_serial  = false;
+
+        if (0 == strcmp(*i, "libtestrtloader.so"))
+        {
+            l_found_testrtloader = true;
+            continue;
+        }
 
         for(std::vector<const char *>::const_iterator j = CxxSerialTests.begin();
             j !=  CxxSerialTests.end(); ++j)
@@ -159,6 +167,12 @@ void sortTests(std::vector<const char *> & i_list,
             TRACFCOMP( g_trac_test, "%s is a parallel test",*i);
             o_parallel_list.push_back(*i);
         }
+    }
+
+    if (l_found_testrtloader)
+    {
+        // run this last, since it uses so much memory
+        o_serial_list.push_back("libtestrtloader.so");
     }
 }
 

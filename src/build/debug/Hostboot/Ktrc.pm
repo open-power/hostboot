@@ -56,6 +56,7 @@ use constant
     KDBG_PM_COALESCE_EXIT        => 0x1007,
     KDBG_PM_ALLOC_KER_ENTER      => 0x1008,
     KDBG_PM_ALLOC_KER_EXIT       => 0x1009,
+    KDBG_PM_ADD_MEMORY           => 0x100A,
     # HeapManager
     KDBG_HM_ALLOC                => 0x2001,
     KDBG_HM_REALLOC              => 0x2002,
@@ -75,6 +76,8 @@ use constant
     KDBG_HM_FREE_CRASH_NOT_V     => 0x2010,
     KDBG_HM_COALESCE_ASSERT_NOT_F=> 0x2011,
     KDBG_HM_COALESCE_ASSERT_NOT_C=> 0x2012,
+    KDBG_HM_HUGE_ALLOC_BLOCK_ERROR=>0x2013,
+    KDBG_HM_HUGE_SETPERM_ERROR   => 0x2014,
     # Block
     KDBG_BK_SET_PERM_EINVAL        => 0x3000,
     KDBG_BK_SET_PERM_SPTE_EINVAL_1 => 0x3001,
@@ -83,6 +86,8 @@ use constant
     KDBG_BK_SET_PERM_SPTE_EINVAL_4 => 0x3004,
     KDBG_BK_SET_PERM_SPTE_EINVAL_5 => 0x3005,
     KDBG_BK_REMOVE_PAGES_EINVAL    => 0x3006,
+
+    KDBG_SET_FORCE_PERIODIC      => 0xE000,
 
     KDBG_TEMP_TRACE              => 0xF000,
     KDBG_FREEZE_TRACE            => 0xFFFF,
@@ -110,84 +115,93 @@ sub display_tag
     switch ($tag)
     {
         case 0
-             {::userDisplay "NO_TAG                        ";}
+             {::userDisplay "NO_TAG                                 ";}
         # PageManager
         case KDBG_PM_ALLOC_USR_ENTER
-             {::userDisplay "KDBG_PM_ALLOC_USR_ENTER       ";}
+             {::userDisplay "KDBG_PM_ALLOC_USR_ENTER                ";}
         case KDBG_PM_ALLOC_USR_EXIT
-             {::userDisplay "KDBG_PM_ALLOC_USR_EXIT        ";}
+             {::userDisplay "KDBG_PM_ALLOC_USR_EXIT                 ";}
         case KDBG_PM_ALLOC_KER_ENTER
-             {::userDisplay "KDBG_PM_ALLOC_KER_ENTER       ";}
+             {::userDisplay "KDBG_PM_ALLOC_KER_ENTER                ";}
         case KDBG_PM_ALLOC_KER_EXIT
-             {::userDisplay "KDBG_PM_ALLOC_KER_EXIT        ";}
+             {::userDisplay "KDBG_PM_ALLOC_KER_EXIT                 ";}
+        case KDBG_PM_ADD_MEMORY
+             {::userDisplay "KDBG_PM_ADD_MEMORY                     ";}
         case KDBG_PM_FREE_ENTER
-             {::userDisplay "KDBG_PM_FREE_ENTER            ";}
+             {::userDisplay "KDBG_PM_FREE_ENTER                     ";}
         case KDBG_PM_FREE_EXIT
-             {::userDisplay "KDBG_PM_FREE_EXIT             ";}
+             {::userDisplay "KDBG_PM_FREE_EXIT                      ";}
         case KDBG_PM_COALESCE_ENTER
-             {::userDisplay "KDBG_PM_COALESCE_ENTER        ";}
+             {::userDisplay "KDBG_PM_COALESCE_ENTER                 ";}
         case KDBG_PM_COALESCE_START
-             {::userDisplay "KDBG_PM_COALESCE_START        ";}
+             {::userDisplay "KDBG_PM_COALESCE_START                 ";}
         case KDBG_PM_COALESCE_EXIT
-             {::userDisplay "KDBG_PM_COALESCE_EXIT         ";}
+             {::userDisplay "KDBG_PM_COALESCE_EXIT                  ";}
         # HeapManager
         case KDBG_HM_ALLOC
-             {::userDisplay "KDBG_HM_ALLOC                 ";}
+             {::userDisplay "KDBG_HM_ALLOC                          ";}
         case KDBG_HM_REALLOC
-             {::userDisplay "KDBG_HM_REALLOC               ";}
+             {::userDisplay "KDBG_HM_REALLOC                        ";}
         case KDBG_HM_FREE
-             {::userDisplay "KDBG_HM_FREE                  ";}
+             {::userDisplay "KDBG_HM_FREE                           ";}
         case KDBG_HM_FREE_CRASH_NOT_V
-             {::userDisplay "KDBG_HM_FREE_CRASH_NOT_V      ";}
+             {::userDisplay "KDBG_HM_FREE_CRASH_NOT_V               ";}
         case KDBG_HM_COALESCE_ASSERT_NOT_F
-             {::userDisplay "KDBG_HM_COALESCE_ASSERT_NOT_F ";}
+             {::userDisplay "KDBG_HM_COALESCE_ASSERT_NOT_F          ";}
         case KDBG_HM_COALESCE_ASSERT_NOT_C
-             {::userDisplay "KDBG_HM_COALESCE_ASSERT_NOT_C ";}
+             {::userDisplay "KDBG_HM_COALESCE_ASSERT_NOT_C          ";}
         case KDBG_HM_COALESCE
-             {::userDisplay "KDBG_HM_COALESCE              ";}
+             {::userDisplay "KDBG_HM_COALESCE                       ";}
         case KDBG_HM_NEW_PAGE
-             {::userDisplay "KDBG_HM_NEW_PAGE              ";}
+             {::userDisplay "KDBG_HM_NEW_PAGE                       ";}
         case KDBG_HM_ALLOC_BIG
-             {::userDisplay "KDBG_HM_ALLOC_BIG             ";}
+             {::userDisplay "KDBG_HM_ALLOC_BIG                      ";}
         case KDBG_HM_REALLOC_BIG
-             {::userDisplay "KDBG_HM_REALLOC_BIG           ";}
+             {::userDisplay "KDBG_HM_REALLOC_BIG                    ";}
         case KDBG_HM_FREE_BIG
-             {::userDisplay "KDBG_HM_FREE_BIG              ";}
+             {::userDisplay "KDBG_HM_FREE_BIG                       ";}
         case KDBG_HM_ALLOC_HUGE
-             {::userDisplay "KDBG_HM_ALLOC_HUGE            ";}
+             {::userDisplay "KDBG_HM_ALLOC_HUGE                     ";}
         case KDBG_HM_ALLOC_HUGE_NO_CHUNKS
-             {::userDisplay "KDBG_HM_ALLOC_HUGE_NO_CHUNKS  ";}
+             {::userDisplay "KDBG_HM_ALLOC_HUGE_NO_CHUNKS           ";}
+        case KDBG_HM_HUGE_ALLOC_BLOCK_ERROR
+             {::userDisplay "KDBG_HM_HUGE_ALLOC_BLOCK_ERROR         ";}
+        case KDBG_HM_HUGE_SETPERM_ERROR
+             {::userDisplay "KDBG_HM_HUGE_SETPERM_ERROR             ";}
         case KDBG_HM_REALLOC_HUGE
-             {::userDisplay "KDBG_HM_REALLOC_HUGE          ";}
+             {::userDisplay "KDBG_HM_REALLOC_HUGE                   ";}
         case KDBG_HM_FREE_HUGE
-             {::userDisplay "KDBG_HM_FREE_HUGE             ";}
+             {::userDisplay "KDBG_HM_FREE_HUGE                      ";}
         case KDBG_HM_ALLOC_ASSERT_NOT_F
-             {::userDisplay "KDBG_HM_ALLOC_ASSERT_NOT_F    ";}
+             {::userDisplay "KDBG_HM_ALLOC_ASSERT_NOT_F             ";}
         case KDBG_HM_FREE_ASSERT_NOT_A
-             {::userDisplay "KDBG_HM_FREE_ASSERT_NOT_A     ";}
+             {::userDisplay "KDBG_HM_FREE_ASSERT_NOT_A              ";}
 
         case KDBG_BK_SET_PERM_EINVAL
-             {::userDisplay "BK_SET_PERM_EINVAL            ";}
+             {::userDisplay "BK_SET_PERM_EINVAL                     ";}
         case KDBG_BK_SET_PERM_SPTE_EINVAL_1
-             {::userDisplay "BK_SET_PERM_SPTE_EINVAL_1     ";}
+             {::userDisplay "BK_SET_PERM_SPTE_EINVAL_1              ";}
         case KDBG_BK_SET_PERM_SPTE_EINVAL_2
-             {::userDisplay "BK_SET_PERM_SPTE_EINVAL_2     ";}
+             {::userDisplay "BK_SET_PERM_SPTE_EINVAL_2              ";}
         case KDBG_BK_SET_PERM_SPTE_EINVAL_3
-             {::userDisplay "KDBG_BK_SET_PERM_SPTE_EINVAL_3";}
+             {::userDisplay "KDBG_BK_SET_PERM_SPTE_EINVAL_3         ";}
         case KDBG_BK_SET_PERM_SPTE_EINVAL_4
-             {::userDisplay "KDBG_BK_SET_PERM_SPTE_EINVAL_4";}
+             {::userDisplay "KDBG_BK_SET_PERM_SPTE_EINVAL_4         ";}
         case KDBG_BK_SET_PERM_SPTE_EINVAL_5
-             {::userDisplay "KDBG_BK_SET_PERM_SPTE_EINVAL_5";}
+             {::userDisplay "KDBG_BK_SET_PERM_SPTE_EINVAL_5         ";}
         case KDBG_BK_REMOVE_PAGES_EINVAL
-             {::userDisplay "BK_REMOVE_PAGES_EINVAL        ";}
+             {::userDisplay "BK_REMOVE_PAGES_EINVAL                 ";}
+
+        case KDBG_SET_FORCE_PERIODIC
+             {::userDisplay "KDBG_SET_FORCE_PERIODIC                ";}
 
         case KDBG_TEMP_TRACE
-             {::userDisplay "KDBG_TEMP_TRACE               ";}
+             {::userDisplay "KDBG_TEMP_TRACE                        ";}
         case KDBG_FREEZE_TRACE
-             {::userDisplay "KDBG_FREEZE_TRACE             ";}
+             {::userDisplay "KDBG_FREEZE_TRACE                      ";}
         else
         {
-            my $str = sprintf("UNKNOWN tag:0x%04x          ", $tag);
+            my $str = sprintf("UNKNOWN tag:0x%04x                    ", $tag);
             ::userDisplay "$str";
         }
     }
@@ -227,11 +241,20 @@ sub display_trace_data
         $str = sprintf(" pagesAvail: %d", $data{first32});
         ::userDisplay "$str";
     }
-    elsif ($data{tag} == KDBG_PM_COALESCE_ENTER ||
-           $data{tag} == KDBG_PM_COALESCE_START ||
+    elsif ($data{tag} == KDBG_PM_COALESCE_ENTER)
+    {
+        $str = sprintf(" attempts:%d state:%d", $data{first32},$data{second32});
+        ::userDisplay "$str";
+    }
+    elsif ($data{tag} == KDBG_PM_COALESCE_START ||
            $data{tag} == KDBG_PM_COALESCE_EXIT)
     {
         $str = sprintf(" attempts:%d count:%d", $data{first32},$data{second32});
+        ::userDisplay "$str";
+    }
+    elsif ($data{tag} == KDBG_PM_ADD_MEMORY)
+    {
+        $str = sprintf(" addr: %08x sz:%d", $data{first32},$data{second32});
         ::userDisplay "$str";
     }
     elsif ($data{tag} == KDBG_HM_ALLOC)
@@ -264,7 +287,7 @@ sub display_trace_data
     }
     elsif ($data{tag} == KDBG_HM_COALESCE)
     {
-        $str = sprintf(" attempts:%d state:%d", $data{first32}, $data{second32});
+        $str = sprintf(" attempts:%d", $data{first32});
         ::userDisplay "$str";
     }
     elsif ($data{tag} == KDBG_HM_NEW_PAGE)
@@ -284,9 +307,15 @@ sub display_trace_data
         ::userDisplay "$str";
     }
     elsif ($data{tag} == KDBG_HM_ALLOC_HUGE ||
-           $data{tag} == KDBG_HM_ALLOC_HUGE_NO_CHUNKS)
+           $data{tag} == KDBG_HM_HUGE_SETPERM_ERROR)
     {
         $str = sprintf(" chunk:%08x pages:%d", $data{first32},$data{second32});
+        ::userDisplay "$str";
+    }
+    elsif ($data{tag} == KDBG_HM_ALLOC_HUGE_NO_CHUNKS ||
+           $data{tag} == KDBG_HM_HUGE_ALLOC_BLOCK_ERROR)
+    {
+        $str = sprintf(" pages:%d", $data{first32});
         ::userDisplay "$str";
     }
     elsif ($data{tag} == KDBG_HM_REALLOC_HUGE)
@@ -322,6 +351,12 @@ sub display_trace_data
     elsif ($data{tag} == KDBG_BK_REMOVE_PAGES_EINVAL)
     {
         $str = sprintf(" max_va:%08x max_base:%08x", $data{first32}, $data{second32});
+        ::userDisplay "$str";
+    }
+    elsif ($data{tag} == KDBG_SET_FORCE_PERIODIC)
+    {
+        if ($data{first32}) {$str = "CRITICAL";}
+        else                {$str = "NORMAL";}
         ::userDisplay "$str";
     }
     elsif ($data{tag} == KDBG_TEMP_TRACE)
