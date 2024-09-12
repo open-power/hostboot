@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2023
+# Contributors Listed Below - COPYRIGHT 2023,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -181,9 +181,19 @@ sub print_fcn_from_addr
 my ($hbi_fh, $tmp_file) = tempfile("xlate_stackXXXXXX", DIR => '/tmp/', UNLINK => 1);
 my ($dce_fh, $tmp_dce_file) = tempfile("xlate_stack_dceXXXXXX", DIR => '/tmp/', UNLINK => 1);
 
+# unzip the listing to a temp file
+my $hbicore_list_file = $hbicore_list;
+if ( $hbicore_list =~ /.bz2/ )
+{
+    print "Unzipping $hbicore_list\n";
+    my ($list_fh, $tmpfile) = tempfile("xlate_stack_listXXXXXX", DIR => '/tmp/', UNLINK => 1);
+    system("bzip2 -d $hbicore_list --stdout > $tmpfile");
+    $hbicore_list_file = $tmpfile;
+}
+
 # pull all of the functions from the HBI listing into a temp file
 # This file lists all functions and their addrs in ascending order
-system("grep ^00000000 $hbicore_list > $tmp_file");
+system("grep ^00000000 $hbicore_list_file > $tmp_file");
 ($? eq 0) or die("Error pulling functions from HBI list file: $hbicore_list");
 
 # pull all of the functions from the DCE listing into a temp file
