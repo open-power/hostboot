@@ -950,4 +950,60 @@
     <default>FREQ_4800</default>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MSS_MRW_MIN_DOMAIN_REDUCTION_TIME_FOR_POWER_CONTROL_OFF</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Min domain reduction time in IDLE intervals for power control request OFF</description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <default>64</default>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+    </sbeAttrSync>
+  </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_MIN_DOMAIN_REDUCTION_TIME</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Default min domain reduction time in IDLE intervals</description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <default>4</default>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+    </sbeAttrSync>
+  </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_ENTER_STR_TIME</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Default STR entry time in IDLE intervals</description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <default>8</default>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+    </sbeAttrSync>
+  </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_IDLE_PSMODE_MIN_DOMAIN_REDUCTION_TIME</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Min domain reduction time in IDLE intervals for IDLE power save mode</description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <default>1</default>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+    </sbeAttrSync>
+  </attribute>
+  <attribute>
+    <id>ATTR_MSS_MRW_IDLE_PSMODE_ENTER_STR_TIME</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>STR entry time in IDLE intervals for IDLE power save mode</description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <default>4</default>
+    <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+      <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+    </sbeAttrSync>
+  </attribute>
+
 </attributes>
