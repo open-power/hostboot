@@ -586,9 +586,17 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
 
             present = true;
 
-            // Set ATTR_TPM_MODEL_DETERMINED to 75x here since TPM was found
-            // present with TPM Model 75x settings
-            i_pTpm->setAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>(TPM_MODEL_75x);
+            // Due to a bug (STGD 327918) on a MPIPL HB might not support this new
+            // attribute, so check before trying to set it
+            uint8_t tmp_tpmModel = 0;
+            if(  i_pTpm->
+                   tryGetAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>
+                   ( tmp_tpmModel ) )
+            {
+                // Set ATTR_TPM_MODEL_DETERMINED to 75x here since TPM was found
+                // present with TPM Model 75x settings
+                i_pTpm->setAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>(TPM_MODEL_75x);
+            }
         }
         else
         {
@@ -708,12 +716,21 @@ bool tpmPresence (TARGETING::Target* i_pTpm)
 
                 present = true;
 
-                // Set ATTR_TPM_MODEL_DETERMINED to 65x here since TPM was found
-                // present with TPM Model 65x settings
-                i_pTpm->setAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>(TPM_MODEL_65x);
 
-                // break from the loop since a TPM Model 65x has been found
-                break;
+                // Due to a bug (STGD 327918) on a MPIPL HB might not support this new
+                // attribute, so check before trying to set it
+                uint8_t tmp_tpmModel = 0;
+                if(  i_pTpm->
+                       tryGetAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>
+                       ( tmp_tpmModel ) )
+                {
+                    // Set ATTR_TPM_MODEL_DETERMINED to 65x here since TPM was found
+                    // present with TPM Model 65x settings
+                    i_pTpm->setAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>(TPM_MODEL_65x);
+
+                    // break from the loop since a TPM Model 65x has been found
+                    break;
+                }
             }
         }
 
@@ -1671,7 +1688,6 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
 
     do
     {
-
         if( !( i_target->
                tryGetAttr<TARGETING::ATTR_TPM_INFO>
                ( tpmData ) ) )
@@ -1716,31 +1732,66 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
         }
 
 
-        if( !( i_target->
+        if(  i_target->
                tryGetAttr<TARGETING::ATTR_TPM_MODEL_DETERMINED>
-               ( tpmModel ) ) )
+               ( tpmModel ) )
         {
-            const auto type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+            TRACUCOMP(g_trac_tpmdd,INFO_MRK
+                "tpmReadAttributes: ATTR_TPM_MODEL_DETERMINED=%d for "
+                "target HUID=0x%08X",
+                tpmModel, TARGETING::get_huid(i_target));
+        }
+        else
+        {
 
-            TRACFCOMP(g_trac_tpmdd,ERR_MRK
-                "tpmReadAttributes: Failed to read TPM_MODEL_DETERMINED "
-                "attribute from target HUID=0x%08X of type=0x%08X.",
-                TARGETING::get_huid(i_target),
-                type);
+            // Due to a bug (STGD 327918) on a MPIPL HB might not support
+            // this new attribute, so check for a MPIPL.
+            // Get Target Service, and the system target.
+            TARGETING::TargetService& tS = TARGETING::targetService();
+            TARGETING::Target* sys = NULL;
+            (void) tS.getTopLevelTarget( sys );
+            assert(sys, "updateProcessorSbeSeeproms() system target is NULL");
 
-                /*@
-                 * @errortype
-                 * @reasoncode TPM_ATTR_MODEL_NOT_FOUND
-                 * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
-                 * @moduleid   TPMDD_READATTRIBUTES
-                 * @userdata1  HUID of target
-                 * @userdata2  Type of target
-                 * @devdesc    TPM_MODEL attribute was not found for the
-                 *     requested target
-                 * @custdesc   Unexpected trusted boot related failure
-                 */
-                err = new ERRORLOG::ErrlEntry(
-                                              ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+            if(sys->getAttr<TARGETING::ATTR_IS_MPIPL_HB>() == true)
+            {
+                // If the new ATTR_TPM_MODEL_DETERMINED isn't
+                // available then it must be a MPIPL on a system with a
+                // TPM model 65x.  This is because installing a TPM Model 75x
+                // would require the system to be powered off and then IPLed
+                // with code to support 75x, which would include
+                // ATTR_TPM_MODEL_DETERMINED
+                tpmModel = TPM_MODEL_65x;
+                TRACFCOMP(g_trac_tpmdd,INFO_MRK
+                          "tpmReadAttributes: ATTR_TPM_MODEL_DETERMINED was "
+                          "not found but since this is a MPIPL using "
+                          "TPM_MODEL_65x (%d) for target HUID=0x%08X",
+                          tpmModel, TARGETING::get_huid(i_target));
+            }
+            else
+            {
+                // couldn't find TPM_MODEL_DETERMINED and not a MPIPL
+                // fail because can't support the possibility of TPM_MODEL_75x
+                // without this attribute
+                const auto type = i_target->getAttr<TARGETING::ATTR_TYPE>();
+
+                TRACFCOMP(g_trac_tpmdd,ERR_MRK
+                    "tpmReadAttributes: Failed to read TPM_MODEL_DETERMINED "
+                    "attribute from target HUID=0x%08X of type=0x%08X.",
+                    TARGETING::get_huid(i_target),
+                    type);
+
+                    /*@
+                     * @errortype
+                     * @reasoncode TPM_ATTR_MODEL_NOT_FOUND
+                     * @severity   ERRORLOG::ERRL_SEV_UNRECOVERABLE
+                     * @moduleid   TPMDD_READATTRIBUTES
+                     * @userdata1  HUID of target
+                     * @userdata2  Type of target
+                     * @devdesc    TPM_MODEL attribute was not found for the
+                     *     requested target
+                     * @custdesc   Unexpected trusted boot related failure
+                     */
+                err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
                                               TPMDD_READATTRIBUTES,
                                               TPM_ATTR_MODEL_NOT_FOUND,
                                               TARGETING::get_huid(i_target),
@@ -1755,13 +1806,7 @@ errlHndl_t tpmReadAttributes ( TARGETING::Target * i_target,
                 err->collectTrace( TPMDD_COMP_NAME );
 
                 break;
-        }
-        else
-        {
-            TRACUCOMP(g_trac_tpmdd,INFO_MRK
-                "tpmReadAttributes: ATTR_TPM_MODEL_DETERMINED=%d for "
-                "target HUID=0x%08X",
-                tpmModel, TARGETING::get_huid(i_target));
+            }
         }
 
 

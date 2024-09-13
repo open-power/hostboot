@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2019                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -104,7 +104,7 @@ i2cEngineSelect find_proc_i2c_engines_for_tpm ( void )
     // engines then we know that there are different proc/engine combinations
     // and we'd need a I2C reset intferace to support that.  This check here
     // makes sure we add that support when its necessary.
-    assert(__builtin_popcount(engineSelect)==1, "find_proc_i2c_engines_for_tpm: Only one engine should be found");
+    assert(__builtin_popcount(engineSelect)==1, "find_proc_i2c_engines_for_tpm: Only one engine should be found: 0x%X", engineSelect);
 
 #endif
     return static_cast<i2cEngineSelect>(engineSelect);
