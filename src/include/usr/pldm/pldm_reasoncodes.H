@@ -117,6 +117,7 @@ namespace PLDM
         MOD_GET_POWER_SUPPLY_CONFIG                  = 0x4C, // parse_hb_ps_config
         MOD_APPEND_KEYWORDS                          = 0x4D, // append_keywords
         MOD_SEND_GET_NUMERIC_EFFECTER_VALUE_REQUEST  = 0x4E, // sendGetNumericEffecterValueRequest
+        MOD_SEND_GET_STATE_SENSOR_STATES_REQUEST     = 0x4F, // sendGetStateSensorStatesRequest
     };
 
     enum PLDMReasonCode

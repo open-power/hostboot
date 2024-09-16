@@ -397,6 +397,27 @@ errlHndl_t updateTargetEntityIdAttribute(Target* const i_target,
                 // We only use this value when performing an Odyssey dump
                 // This value is populated in PDRs for both Explorer and Odyssey systems
                 i_target->setAttr<TARGETING::ATTR_SBE_DUMP_EFFECTER_ID>(sbe_dump_effecter);
+
+                const uint16_t PLDM_OEM_IBM_ODY_SBE_DUMP_STATE = 32777;
+
+                const auto l_target = getAffinityParent(i_target, TYPE_OCMB_CHIP);
+
+                ATTR_SBE_DUMP_SENSOR_ID_type sbe_dump_sensor =
+                            thePdrManager().findSensorStateSensorStateId(ent,
+                               [](state_sensor_possible_states const * const state_sensor)
+                               {
+                                   return (le16toh(state_sensor->state_set_id) ==
+                                            PLDM_OEM_IBM_ODY_SBE_DUMP_STATE);
+                               });
+
+                if((sbe_dump_sensor != 0) && (sbe_dump_sensor != 0xFFFF))
+                {
+                    l_target->setAttr<TARGETING::ATTR_SBE_DUMP_SENSOR_ID>(sbe_dump_sensor);
+                }
+                PLDM_INF("updateTargetEntityIdAttribute setAttr ODY HUID=0x%X "
+                                "SBE_DUMP_SENSOR=0x%X (%d)   ",
+                                get_huid(i_target), sbe_dump_sensor, sbe_dump_sensor);
+
             }
 
             i_target->setAttr<ATTR_PLDM_ENTITY_ID_INFO>(entity_info.generic);
