@@ -61,6 +61,9 @@
       <id>ODY_RECOVERY_STATE</id>
     </attribute>
     <attribute>
+      <id>SBE_DUMP_SENSOR_ID</id>
+    </attribute>
+    <attribute>
       <id>SBE_FIFO_MUTEX</id>
     </attribute>
     <attribute>

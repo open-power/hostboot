@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -527,6 +527,24 @@ public:
     effecter_id_t findNumericEffecterId(const pldm_entity & i_target_entity,
                                         F&& i_func);
 
+    /**
+     * @brief Searches for the sensor id matching the given target entity and semantic id.
+     *
+     * @param[in] i_target_entity A reference to the pldm entity struct which can be retrieved by
+     *                            calling targeting_to_pldm_entity_id on the target's
+     *                            ATTR_PLDM_ENTITY_ID_INFO.
+     *
+     * @param[in]  i_func         The comparator function. Can be any object with an operator() that
+     *                            is compatible with the signature:
+     *                              bool i_func(pldm_numeric_effecter_value_pdr*)
+     *                            Its required that the functor return true in order to idenify that
+     *                            the PDR was found. The functor will be called for each numeric
+     *                            effecter that is associated with i_target_entity.
+     * @return sensor_id_t      The BMC's sensor ID for the given entity id, or 0 if not found.
+     */
+    template<typename F>
+    sensor_id_t findSensorStateSensorStateId(const pldm_entity & i_target_entity, F&& i_func);
+
 private:
     std::unique_ptr<pldm_pdr, void(*)(pldm_pdr*)> iv_pdr_repo;
     mutable mutex_t iv_access_mutex;
@@ -704,6 +722,46 @@ effecter_id_t PdrManager::findNumericEffecterId(const pldm_entity & i_target_ent
     return effecter_id;
 }
 
+template<typename F>
+sensor_id_t PdrManager::findSensorStateSensorStateId(const pldm_entity &i_target_entity, F&& i_comp)
+{
+    sensor_id_t sensor_id = 0;
+
+    thePdrManager()
+        .foreachPdrOfType(PLDM_STATE_SENSOR_PDR,
+        [&sensor_id, i_target_entity, &i_comp]
+        (uint8_t const * const pdr_data, const uint32_t pdr_data_size)
+        {
+            const auto sensor_pdr =
+                reinterpret_cast<const pldm_state_sensor_pdr*>(pdr_data);
+            // The following three ids comprise the entity id.
+            // It is necessary for the type+instance to match with their
+            // respective pdr values, but the container_id isn't required
+            // as we have specific values to search for regardless of their
+            // location in the hierarachy.
+            if (entity_id_component_equal(sensor_pdr->entity_type,
+                                          i_target_entity.entity_type)
+                && entity_id_component_equal(sensor_pdr->entity_instance,
+                                             i_target_entity.entity_instance_num)
+                // Skip sensor_pdr->container_id==i_target_entity.entity_container_id
+                )
+            {
+                // State sensors don't have a specific id to uniquely identify them among other
+                // state sensors on the same entity. So, caller has provided a way to identify
+                // the numeric effecter they are looking for. This could be a semantic id, base unit
+                // , or anything else that is unique to the state sensor being searched for.
+                const auto sensor_state_pdr =
+                 reinterpret_cast<const state_sensor_possible_states*>(sensor_pdr->possible_states);
+                if(i_comp(sensor_state_pdr))
+                {
+                    sensor_id = le16toh(sensor_pdr->sensor_id);
+                    return true; // Stop searching
+                }
+            }
+            return false; // This isn't the state sensor we're looking for, move along.
+        });
+    return sensor_id;
+}
 }
 
 #endif

@@ -2830,11 +2830,11 @@ errlHndl_t getCdmPolicies(std::vector<uint8_t>& io_string_table,
     PLDM_INF(ENTER_MRK"PLDM::getCdmPolicy");
 
     uint64_t policy_val = 0; // default to 0
-    errl = systemIntAttrLookup(io_string_table, 
-                               io_attr_table, 
-                               PLDM_BIOS_HB_CDM_POLICIES, 
+    errl = systemIntAttrLookup(io_string_table,
+                               io_attr_table,
+                               PLDM_BIOS_HB_CDM_POLICIES,
                                policy_val);
-    
+
     if (errl) {
         PLDM_ERR("PLDM::getCdmPolicy failed to get policy value. Error=%d", errl->reasonCode());
     }

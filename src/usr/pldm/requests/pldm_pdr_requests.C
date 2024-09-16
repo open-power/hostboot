@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -378,6 +378,30 @@ int encode_get_numeric_effecter_value_req_hb(uint8_t i_instance_id,
 {
     return encode_get_numeric_effecter_value_req(i_instance_id,
                                                  i_effecter_id,
+                                                 o_msg);
+}
+
+/* @brief A wrapper around encode_get_state_sensor_readings_req that takes
+ * in an additional size parameter to accommodate Hostboot PLDM APIs.  The size
+ * parameter is actually unused.
+ *
+ * @param[in]  i_instance_id - the PLDM instance ID
+ * @param[in]  i_state_sensor_id - the sensor id
+ * @param[out] o_msg         - the encoded PLDM message
+ * @param[in]  i_unused_payload_length - payload size
+ *
+ */
+int encode_get_state_sensor_readings_req_hb(uint8_t i_instance_id,
+                                          uint16_t i_state_sensor_id,
+                                          pldm_msg* const o_msg,
+                                          const size_t i_unused_payload_length)
+{
+    bitfield8_t sensor_rearm;
+    uint8_t reserved = 0;
+    return encode_get_state_sensor_readings_req(i_instance_id,
+                                                 i_state_sensor_id,
+                                                 sensor_rearm,
+                                                 reserved,
                                                  o_msg);
 }
 
@@ -988,6 +1012,102 @@ errlHndl_t sendSetNumericEffecterValueRequest(const effecter_id_t i_effecter_id,
     addPldmFrData(errl);
 
     PLDM_EXIT("sendSetNumericEffecterValueRequest");
+
+    return errl;
+}
+
+errlHndl_t sendGetStateSensorValueRequest(const uint16_t i_state_sensor_id,
+                                        uint32_t& io_value,
+                                        uint8_t& io_byte_data_size)
+{
+    errlHndl_t errl = nullptr;
+    io_byte_data_size = 0; // Will be properly set later, ignored if INVALID_VALUE
+    io_value = INVALID_VALUE; // set to an invalid value in case something fails we just ignore
+
+    pldm_get_state_sensor_states_req  get_req
+    {
+        .sensor_id = i_state_sensor_id,
+    };
+
+    do
+    {
+
+    std::vector<uint8_t> response_bytes;
+    errl = sendrecv_pldm_request<PLDM_GET_STATE_SENSOR_READINGS_REQ_BYTES>
+                        (response_bytes,
+                        g_outboundPldmReqMsgQ,
+                        encode_get_state_sensor_readings_req_hb,
+                        DEFAULT_INSTANCE_ID,
+                        get_req.sensor_id);
+
+    if (errl)
+    {
+        PLDM_ERR("sendGetStateSensorValueRequest: failed to send/recv PLDM request; "
+                 TRACE_ERR_FMT,
+                 TRACE_ERR_ARGS(errl));
+        break;
+    }
+
+    pldm_get_sensor_reading_resp  response { };
+
+    uint8_t sensor_count_to_read = 1;
+    uint8_t *comp_sensor_count = &sensor_count_to_read;
+    get_sensor_state_field stateField;
+
+    errl = decode_pldm_response(decode_get_state_sensor_readings_resp,
+                                response_bytes,
+                                &response.completion_code,
+                                comp_sensor_count,
+                                &stateField);
+
+    if (errl)
+    {
+        PLDM_ERR("sendGetStateSensorValueRequest: failed to decode PLDM response; "
+                 TRACE_ERR_FMT,
+                 TRACE_ERR_ARGS(errl));
+        break;
+    }
+
+    if (response.completion_code == PLDM_ERROR_UNSUPPORTED_PLDM_CMD)
+    {
+        PLDM_INF("sendGetStateSensorValueRequest: PLDM_ERROR_UNSUPPORTED_PLDM_CMD io_value=0x%X",
+                    io_value);
+        break;
+    }
+    else
+    {
+        /*@
+          * @moduleid   MOD_SEND_GET_STATE_SENSOR_STATES_REQUEST
+          * @reasoncode RC_BAD_COMPLETION_CODE
+          * @userdata1  Actual Completion Code
+          * @userdata2  Expected Completion Code
+          * @devdesc    Software problem, bad PLDM response from BMC
+          * @custdesc   A software error occurred during system boot
+          */
+        errl = validate_resp(response.completion_code, PLDM_SUCCESS,
+                             MOD_SEND_GET_STATE_SENSOR_STATES_REQUEST,
+                             RC_BAD_COMPLETION_CODE, response_bytes);
+        if(errl)
+        {
+            PLDM_INF("sendGetStateSensorValueRequest validate_resp RC_BAD_COMPLETION_CODE "
+                    "Will addPldmFrData");
+            break;
+        }
+
+        PLDM_INF("sendGetStateSensorValueRequest  op_state(%d) present_state(%d) Previous_state(%d)"
+                " event_state(%d)",
+                 stateField.sensor_op_state, stateField.present_state,
+                 stateField.previous_state, stateField.event_state);
+
+        io_value = stateField.event_state;
+        io_byte_data_size = sensor_count_to_read;
+    }
+
+    } while (false);
+
+    PLDM_EXIT("sendGetStateSensorValueRequest i_state_sensor_id=0x%X (%d) SEEDING with "
+                "io_value=0x%X (%d) io_byte_data_size=%d",
+                 i_state_sensor_id, i_state_sensor_id, io_value, io_value, io_byte_data_size);
 
     return errl;
 }

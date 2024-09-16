@@ -850,6 +850,14 @@ struct pldm_set_state_effecter_states_req {
 	set_effecter_state_field field[8];
 } __attribute__((packed));
 
+/** @struct pldm_get_state_sensor_states_req
+ *
+ *  structure representing GetStateSensorStates request packet
+ */
+struct pldm_get_state_sensor_states_req {
+        uint16_t sensor_id;
+} __attribute__((packed));
+
 /** @struct pldm_get_pdr_repository_info_resp
  *
  *  Structure representing GetPDRRepositoryInfo response packet
@@ -1321,6 +1329,19 @@ int encode_get_numeric_effecter_value_resp(
 	uint8_t effecter_data_size, uint8_t effecter_oper_state,
 	const uint8_t *pending_value, const uint8_t *present_value,
 	struct pldm_msg *msg, size_t payload_length);
+
+/* GetStateSensorStates */
+
+/** @brief Decode GetStateSensorStates request data
+ *
+ *  @param[in] msg - Request message
+ *  @param[in] payload_length - Length of request message payload
+ *  @param[out] sensor_id - used to identify and access the sensor
+ *  @return pldm_completion_codes
+ */
+int decode_get_state_sensor_states_req(const struct pldm_msg *msg,
+                    size_t payload_length,
+                    uint16_t *sensor_id);
 
 /* GetSensorReading */
 
@@ -1906,6 +1927,21 @@ int decode_numeric_sensor_pdr_data(
 int encode_get_numeric_effecter_value_req(uint8_t instance_id,
 					  uint16_t effecter_id,
 					  struct pldm_msg *msg);
+
+/* GetStateSensorStates */
+
+/** @brief Create a PLDM request message for GetStateSensorStates
+ *
+ *  @param[in] instance_id - Message's instance id
+ *  @param[in] sensor_id - used to identify and access the sensor
+ *  @param[out] msg - Message will be written to this
+ *  @return pldm_completion_codes
+ *  @note  Caller is responsible for memory alloc and dealloc of param
+ *         'msg.payload'
+ */
+int encode_get_state_sensor_states_req(uint8_t instance_id,
+                    uint16_t sensor_id,
+                    struct pldm_msg *msg);
 
 /** @brief Create a PLDM response message for GetNumericEffecterValue
  *

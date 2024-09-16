@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -154,6 +154,17 @@ errlHndl_t sendFruFunctionalStateChangedEvent(const TARGETING::Target* i_target,
 errlHndl_t sendSetNumericEffecterValueRequest(effecter_id_t i_effecter_id,
                                               uint32_t i_effecter_value,
                                               uint8_t i_value_size);
+
+/**
+ * @brief Retrieves the Odyssey SBE Dump state from PLDM.
+ *
+ * @param[in] i_state_sensor_id      ID to access the sensor state
+ * @param[[in/out] io_value          Output data
+ * @param[in/out]  io_byte_data_size Output data size
+ */
+errlHndl_t sendGetStateSensorValueRequest(const uint16_t i_state_sensor_id,
+                                        uint32_t& io_value,
+                                        uint8_t& io_byte_data_size);
 
 /**
  * @brief Send a PLDM request to set the state of a state effecter
