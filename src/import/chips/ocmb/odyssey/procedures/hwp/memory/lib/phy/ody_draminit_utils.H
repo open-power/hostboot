@@ -1875,14 +1875,22 @@ class msg_block_params
         {
             // Need to set ReservedF6[6] (counting right-to-left) to get per-DRAM CK/CS/CA ODT
             constexpr uint8_t PER_DRAM_ODT = 1;
-
             fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_ReservedF6);
 
-            l_buffer.setBit<PER_DRAM_ODT>();
+            uint8_t l_dimm_type = 0;
+            FAPI_TRY(mss::attr::get_dimm_type(iv_dimm, l_dimm_type));
+
+            // Only impacts DDIMM
+            // Note: doing an if around the setBit to preserve the original value, just in case
+            if(fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM == l_dimm_type)
+            {
+                l_buffer.setBit<PER_DRAM_ODT>();
+            }
 
             io_msg_block.ReservedF6 = l_buffer;
 
-            return fapi2::FAPI2_RC_SUCCESS;
+        fapi_try_exit:
+            return fapi2::current_err;
         }
 
         ///
