@@ -91,6 +91,7 @@ namespace SECUREBOOT
         // Report if secure boot is disabled
         #ifdef CONFIG_SECUREBOOT
         // String to hold version representing secureboot signing mode
+        // Supported values should align with attribute enum SB_SIGNING
         char l_sbsm_string[10] = {};
         switch (l_sb_signing_mode)
         {
@@ -99,6 +100,9 @@ namespace SECUREBOOT
                 break;
             case 0x1: // V2
                 strcpy(l_sbsm_string,"V2");
+                break;
+            case 0x2: // V3
+                strcpy(l_sbsm_string,"V3");
                 break;
             default:
                 strcpy(l_sbsm_string,"Undefined");

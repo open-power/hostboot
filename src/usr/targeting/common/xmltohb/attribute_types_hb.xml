@@ -1665,6 +1665,7 @@
     <description>
         Enumeration used for SB_SIGNING_MODE, as defined in the
         HDAT specification
+        NOTE: SYSTEM_CONTAINER value will be used internally in Hostboot code
     </description>
     <enumerator>
       <description>
@@ -1679,6 +1680,20 @@
       </description>
       <name>V2_CONTAINER</name>
       <value>0x01</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        V3 Container Signing
+      </description>
+      <name>V3_CONTAINER</name>
+      <value>0x02</value>
+    </enumerator>
+    <enumerator>
+      <description>
+        System Container Signing - Use whatever value the system is using for the IPL
+      </description>
+      <name>SYSTEM_CONTAINER</name>
+      <value>0xFF</value>
     </enumerator>
   </enumerationType>
 
