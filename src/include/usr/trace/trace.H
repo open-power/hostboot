@@ -79,7 +79,7 @@ namespace TRACE
         uint16_t len_string;
         uint16_t len_file;
         uint32_t __padding;
-        const char string[768];
+        const char string[1024];
         const char file[256];
     } __attribute__((packed));
 #else
@@ -88,7 +88,7 @@ namespace TRACE
         uint16_t len_string;
         uint16_t len_file;
         uint32_t __padding;
-        const char string[768];
+        const char string[1024];
         const char file[256];
         traceCodeInfo* code;
     };
