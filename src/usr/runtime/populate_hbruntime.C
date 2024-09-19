@@ -1310,7 +1310,7 @@ errlHndl_t populate_HbRsvMem(uint64_t i_nodeId,
                           l_pcrdInstance,l_pcrd->hdatChipData.hdatPcrdProcChipId,l_procOrdinalId);
 
                 TRACDCOMP(g_trac_runtime, " get_host_data_section():PCRD Instance=%d  l_pcrdAddr=0x%.16llx"
-                "after mm_virt_to_phys()=0x%.16llx() and l_pcrdSizeMax=0x%.16llx " l_procNum,l_pcrdAddr,
+                "after mm_virt_to_phys()=0x%.16llx() and l_pcrdSizeMax=0x%.16llx ", l_procNum,l_pcrdAddr,
                 mm_virt_to_phys( reinterpret_cast<void*>(l_pcrdAddr)),l_pcrdSizeMax);
 
                 l_pcrd->hdatChipData.hdatPcrdMPIPLMetadataAddr = l_addr;

@@ -1215,10 +1215,12 @@ errlHndl_t updateExistingEecacheEntry(
             //    in this case but doing it won't hurt anything.
             TRACFCOMP( g_trac_eeprom, "updateExistingEecacheEntry(): %.8X is not in sync, updating cache",
                        TARGETING::get_huid(i_target) );
+
             TRACDBIN( g_trac_eeprom, "EECACHE Contents",
-                      reinterpret_cast<void *>(l_eepromCacheAddr), i_eepromBuflen );
+                      reinterpret_cast<void *>(lookupEepromCacheAddr(*io_recordFromPnorToUpdate)), i_eepromBuflen );
             TRACDBIN( g_trac_eeprom, "Buffer Contents",
                       i_eepromBuffer, i_eepromBuflen );
+
             l_err = updateEecacheContentsFromBuffer(i_target,
                                                     i_eepromType,
                                                     i_eepromBuffer,

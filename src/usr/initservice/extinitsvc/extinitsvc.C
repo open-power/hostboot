@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -161,7 +161,7 @@ errlHndl_t ExtInitSvc::executeUnitTests ( void )
     TARGETING::targetService().setAllowPersistAttrUpdateFlag(allowPersistAttrUpdate);
 
     TRACDCOMP(g_trac_initsvc,
-              INFO_MRK"Allow Persistent Attr update=%d before running CXX testcases",
+              INFO_MRK"Allow Persistent Attr update=%d before running CXX testcases ",
               allowPersistAttrUpdate);
     do
     {

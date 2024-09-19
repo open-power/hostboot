@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -194,8 +194,8 @@ namespace DeviceFW
             (i_target == MASTER_PROCESSOR_CHIP_TARGET_SENTINEL) ?
             TYPE_PROC : i_target->getAttr<ATTR_TYPE>();
 
-        TRACDCOMP(g_traceBuffer, "Device op requested for (%d, %d, %d)",
-                  i_opType, i_accessType, l_devType);
+        // TRACDCOMP(g_traceBuffer, "Device op requested for (%d, %d, %d)",
+        //           i_opType, i_accessType, l_devType);
 
         mutex_lock(&iv_mutex);
 

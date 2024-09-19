@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -227,7 +227,7 @@ namespace HTMGT
                              const uint16_t i_pollResponseSize)
     {
         static uint32_t L_elog_retry_count = 0;
-        TMGT_DBG("OCC Poll Response", i_pollResponse, i_pollResponseSize);
+        TMGT_DBG("OCC Poll Response: %X size: %d", i_pollResponse, i_pollResponseSize);
 
         const occPollRspStruct_t *pollRsp =
             (occPollRspStruct_t *) i_pollResponse;

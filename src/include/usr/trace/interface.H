@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -150,7 +150,7 @@ const uint32_t TRACE_FIELD   = 0;       //Indicates trace is field
 /* a macro w/o the param number suffix. number is calculated from printf string */
 #define TRACDCOMP(des,printf_string,args...) \
     { \
-        TRAC_CHECK_ARGS(printf_string, args);    \
+        TRAC_CHECK_ARGS(false, printf_string, args);    \
         __TRACE_HASH_STRUCTURES(printf_string); \
         TRACE::trace_adal_write_all((des), \
                                     &__traceData_codeInfo, \
