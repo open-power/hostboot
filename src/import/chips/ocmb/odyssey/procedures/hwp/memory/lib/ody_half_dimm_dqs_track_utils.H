@@ -165,9 +165,11 @@ fapi2::ReturnCode setup_ccs_halfdimm_dqs_instructions(const mss::rank::info<mss:
 ///
 /// @brief Configures the CCS engine to run the next test
 /// @param[in] i_target the OCMB chip on which to operate
+/// @param[in] i_ports the ports for the target in question
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode configure_ccs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+fapi2::ReturnCode configure_ccs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports);
 
 ///
 /// @brief Sets up the initial CCS test and the addressing for the cleanup command
@@ -179,9 +181,11 @@ fapi2::ReturnCode setup_ccs_initial(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
 ///
 /// @brief Setsup the CCS array for the next execution
 /// @param[in] i_target the OCMB chip on which to operate
+/// @param[in] i_ports the ports for the target in question
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode setup_ccs_next_run(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+fapi2::ReturnCode setup_ccs_next_run(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports);
 
 ///
 /// @brief Configures the MCBIST and CCS execution for the second run within the chip op

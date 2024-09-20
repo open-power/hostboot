@@ -40,7 +40,7 @@
 
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <ody_dqs_track_utils.H>
-#include <lib/ody_half_dimm_dqs_track_utils.H>
+#include <ody_half_dimm_dqs_track_utils.H>
 #include <lib/dimm/ody_rank.H>
 #include <ody_scom_ody_odc.H>
 #include <lib/shared/ody_consts.H>
@@ -253,20 +253,21 @@ fapi_try_exit:
 ///
 /// @brief Configures the CCS engine to run the next test
 /// @param[in] i_target the OCMB chip on which to operate
+/// @param[in] i_ports the ports for the target in question
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode configure_ccs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode configure_ccs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
 {
     mss::rank::info<mss::mc_type::ODYSSEY> l_rank_info;
     mss::ccs::channel_select l_channel;
     drift_track_mr l_mr;
     mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
-    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
     uint8_t l_current = 0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_HALF_DIMM_TARGET, i_target, l_current));
 
     // Gets the target information for the port/channel/rank
-    FAPI_TRY(get_port_channel_rank_info(l_ports, l_current, l_rank_info, l_channel, l_mr));
+    FAPI_TRY(get_port_channel_rank_info(i_ports, l_current, l_rank_info, l_channel, l_mr));
 
     // Sets up the instructions
     FAPI_TRY(setup_ccs_halfdimm_dqs_instructions(l_rank_info, l_mr, l_program));
@@ -312,7 +313,7 @@ fapi2::ReturnCode setup_ccs_initial(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
     }
 
     // Configures the CCS engine
-    FAPI_TRY(configure_ccs(i_target));
+    FAPI_TRY(configure_ccs(i_target, mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)));
 
     // Sets up the MCBIST addressing
     {
@@ -345,15 +346,17 @@ fapi_try_exit:
 ///
 /// @brief Setsup the CCS array for the next execution
 /// @param[in] i_target the OCMB chip on which to operate
+/// @param[in] i_ports the ports for the target in question
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode setup_ccs_next_run(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode setup_ccs_next_run(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
 {
     // Advances to the next valid port/channel/rank target
-    FAPI_TRY(next_port_channel_rank_info(i_target, mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)));
+    FAPI_TRY(next_port_channel_rank_info(i_target, i_ports));
 
     // Configures the CCS engine
-    FAPI_TRY(configure_ccs(i_target));
+    FAPI_TRY(configure_ccs(i_target, i_ports));
 
     // Masks of SRQ LFIR[28] as this is a latch to help communicate and avoid a false quiesce state
     {
@@ -410,7 +413,6 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
     mss::ccs::channel_select l_channel;
     drift_track_mr l_mr;
 
-    mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
     const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
     uint8_t l_current = 0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_HALF_DIMM_TARGET, i_target, l_current));
@@ -461,6 +463,7 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
 
         // Conducts the first MCBIST/CCS run
         {
+
             // Asserts the snoop for this run
             FAPI_TRY(assert_mr_snoop(l_ocmb, l_mr));
 
@@ -473,8 +476,12 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
             // Mask MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] to avoid unnecessary attentions
             FAPI_TRY(mss::memdiags::mask_program_complete<mss::mc_type::ODYSSEY>(l_ocmb, l_fir_mask_save) );
 
-            FAPI_TRY(mss::ccs::setup_to_execute<mss::mc_type::ODYSSEY>(l_ocmb, l_single_port, l_program, l_periodics_reg,
-                     l_power_cntl_reg));
+            // Note: scoping the use of the program to reduce the number of active vectors at a time to avoid SBE crashes
+            {
+                mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
+                FAPI_TRY(mss::ccs::setup_to_execute<mss::mc_type::ODYSSEY>(l_ocmb, l_single_port, l_program, l_periodics_reg,
+                         l_power_cntl_reg));
+            }
 
             // Run CCS via MCBIST for Concurrent CCS
             // Note: false notes that we will NOT check the data compare logs
@@ -483,8 +490,12 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
 
         // Cleans up and sets up the next run
         {
-            FAPI_TRY(( mss::ccs::cleanup_from_execute<mss::mc_type::ODYSSEY>(l_ocmb, l_program, l_single_port, l_periodics_reg,
-                       l_power_cntl_reg)));
+            // Note: scoping the use of the program to reduce the number of active vectors at a time to avoid SBE crashes
+            {
+                mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
+                FAPI_TRY(( mss::ccs::cleanup_from_execute<mss::mc_type::ODYSSEY>(l_ocmb, l_program, l_single_port, l_periodics_reg,
+                           l_power_cntl_reg)));
+            }
 
             // Clear MCBISTFIRQ[MCBIST_PROGRAM_COMPLETE] and restore the mask
             FAPI_TRY( mss::memdiags::clear_and_restore_program_complete<mss::mc_type::ODYSSEY>(l_ocmb, l_fir_mask_save) );
@@ -496,7 +507,7 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
             FAPI_TRY(disable_mr_snoop(l_ocmb));
 
             // Sets up the next CCS run
-            FAPI_TRY(setup_ccs_next_run(l_ocmb));
+            FAPI_TRY(setup_ccs_next_run(l_ocmb, l_ports));
         }
 
         // Compute and log the DQS tracking information
