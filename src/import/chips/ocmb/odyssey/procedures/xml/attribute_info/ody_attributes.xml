@@ -1622,5 +1622,24 @@
         </sbeAttrSync>
     </attribute>
 
+    <attribute>
+        <id>ATTR_ODY_DISABLE_DRAM_WITH_BAD_DQ0</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>
+            By default, draminit will disable a whole DRAM when its DQ0 fails training.
+            This attribute can be used for testing purposes to skip this behavior.
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            SKIP_DISABLE = 1,
+            DISABLE_DRAM = 0
+        </enum>
+        <default>DISABLE_DRAM</default>
+        <writeable/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+        </sbeAttrSync>
+    </attribute>
+
 
 </attributes>

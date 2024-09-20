@@ -4723,14 +4723,25 @@ fapi2::ReturnCode disable_dram_with_bad_dq0(const fapi2::Target<fapi2::TARGET_TY
 
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
 
-    uint8_t l_has_swizzle_detect_passed = 0;
 
+    uint8_t l_has_swizzle_detect_passed = 0;
+    uint8_t l_skip_disable = 0;
     // If swizzle detect has passed, knock out DRAM with a bad DQ0
     // No need to count these as bad at this time, the algorithm will do that below
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT, i_target, l_has_swizzle_detect_passed));
 
     if(l_has_swizzle_detect_passed == fapi2::ENUM_ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT_NOT_RUN)
     {
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Skip the disable_dram_with_bad_dq0() if the attribute is set
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_DISABLE_DRAM_WITH_BAD_DQ0, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_skip_disable) );
+
+    if (l_skip_disable == fapi2::ENUM_ATTR_ODY_DISABLE_DRAM_WITH_BAD_DQ0_SKIP_DISABLE)
+    {
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " l_skip_disable: %d, Skipping disable_dram_with_bad_dq0().", TARGTID, l_skip_disable);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -4751,6 +4762,7 @@ fapi2::ReturnCode disable_dram_with_bad_dq0(const fapi2::Target<fapi2::TARGET_TY
                                                 l_phy_byte,
                                                 io_start_bad_bits[l_rank_info.get_phy_rank()][l_mc_byte],
                                                 l_disables_mc));
+
             fapi2::buffer<uint8_t> l_temp(l_disables_mc);
 
             // DRAM0
