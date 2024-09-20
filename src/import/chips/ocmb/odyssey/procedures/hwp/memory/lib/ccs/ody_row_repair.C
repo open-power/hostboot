@@ -44,7 +44,7 @@
 #include <generic/memory/lib/ccs/ccs_ddr5_commands.H>
 #include <lib/mcbist/ody_mcbist_traits.H>
 #include <lib/dimm/ody_rank.H>
-
+#include <lib/ccs/ody_ccs_read_processing.H>
 #include <generic/memory/lib/utils/buffer_ops.H>
 #include <generic/memory/lib/utils/fir/gen_mss_unmask.H>
 #include <mss_generic_attribute_getters.H>
@@ -873,7 +873,6 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
 #endif
 
                     // TODO:ZEN:MST-2622 Fix CCS read and PPR resource unavailable code when fix is available
-#if 0
                     // Check if we have PPR resources available for the repair
                     // If we don't, assert out since this is manufacturing mode
                     bool l_resource_available = true;
@@ -897,7 +896,6 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                                 GENTARGTID(l_dimm), DRAM_POS, l_dimm_rank
 #endif
                                );
-#endif
 
                     FAPI_TRY( standalone_row_repair(l_rank_info, l_repair),
                               "Failed standalone_row_repair on " GENTARGTIDFORMAT " rank %d",
@@ -1276,10 +1274,12 @@ fapi2::ReturnCode deploy_mapped_repairs(
                     GENTARGTID(l_dimm), l_repair.iv_dram, l_dimm_rank, l_repair.iv_srank, l_repair.iv_bg, l_repair.iv_bank,
                     l_repair.iv_row);
 
-                // TODO:ZEN:MST-2622 Fix CCS read and PPR resource unavailable code when fix is available
+                // The RAS team decided checking for PPR resources is only necessary during MFG test
+                // to screen for DRAMs with too many hPPR repairs applied.
+                // Checking these during row repair is unnecessary since the DRAM will ignore an sPPR sequence
+                // to an address where resources are unavailable, and the RAS FW will later rediscover the failing address
+                // and apply a chipmark if an sPPR is not successful.
 #if 0
-                // Check if we have PPR resources available for the repair
-                // If we don't, log the error as RECOVERED and continue to the next repair
                 bool l_resource_available = true;
                 FAPI_TRY(get_ppr_available(l_rank_info, l_repair, i_runtime, l_resource_available));
 
