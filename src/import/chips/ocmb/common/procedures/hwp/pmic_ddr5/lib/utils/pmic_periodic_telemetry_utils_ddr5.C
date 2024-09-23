@@ -85,6 +85,8 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
     uint64_t l_syn_addr = 0;
     uint64_t l_address = 0;
     uint8_t l_dqs_period = 0;
+    uint8_t l_half_dimm_attr = 0;
+    uint8_t l_override_attr = 0;
 
     uint16_t l_log_16[CONSTS::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES * CONSTS::ATTR_ODY_DQS_TRACKING_LOG_HWORDS_PER_ENTRY] = {0};
 
@@ -94,7 +96,14 @@ uint16_t read_dqs_drift_tracking_log(const fapi2::Target<fapi2::TARGET_TYPE_OCMB
                                i_ocmb_target,
                                l_dqs_period));
 
-        if(l_dqs_period)
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, i_ocmb_target, l_half_dimm_attr));
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, i_ocmb_target, l_override_attr));
+
+        // Only run if the DQS drift tracking is enabled by default
+        // This occurrs if the DQS period is set OR the card is in half-DIMM mode
+        if(l_dqs_period ||
+           l_half_dimm_attr == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_HALF_DIMM ||
+           l_override_attr == fapi2::ENUM_ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE_OVERRIDE_HALF_DIMM)
         {
             FAPI_TRY(suspend_dqs_track(i_ocmb_target));
             FAPI_TRY(host_configure_phy_scom_access(l_port_target, mss::states::ON_N, true));
