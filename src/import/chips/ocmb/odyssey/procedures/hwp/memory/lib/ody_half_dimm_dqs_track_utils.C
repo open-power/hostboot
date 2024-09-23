@@ -426,6 +426,10 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
         FAPI_TRY(get_port_channel_rank_info(l_ports, l_current, l_rank_info, l_channel, l_mr));
         const auto& l_port_target = l_rank_info.get_port_target();
 
+        // get_port_channel_rank_info checks for an out of bounds port, indexing here is sufficient
+        // The PMIC telemetry code reads the logging information only out of port 0, so we need to grab port 0 here
+        const auto& l_telemtry_log_port = l_ports[0];
+
         std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> > l_single_port;
         l_single_port.push_back(l_rank_info.get_port_target());
 
@@ -435,7 +439,7 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
         // Only log the data on one of the MR
         // We need to read out two MR as the deltas are 16-bits. The second MR read will cause the PHY to update
         // As such, we only need to log data on the second MR
-        // Why split this up? timing. We only have 200us to do the CCS and
+        // Why split this up? timing. We only have 200us to do the CCS and cleanup afterwards
         if(LOG_DATA_MR == l_mr)
         {
             // Clear out deltas
@@ -444,7 +448,7 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
                 l_deltas[l_idx] = 0;
             }
 
-            // Record the current DQS offsets
+            // Record the current DQS offsets - Offsets should be for the port under test
             FAPI_TRY(ody_get_dqs_offsets(l_port_target, RECORD_OFFSETS, l_offsets, l_deltas));
         }
 
@@ -517,7 +521,7 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
         // Why split this up? timing. We only have 200us to do the CCS and
         if(LOG_DATA_MR == l_mr)
         {
-            // Compute the DQS offset deltas
+            // Compute the DQS offset deltas - use the port under test as these values should have updated
             FAPI_TRY(ody_get_dqs_offsets(l_port_target, COMPUTE_DELTAS, l_offsets, l_deltas));
 
             // Log the tracking info
@@ -527,8 +531,8 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
                                        UNUSED_LOGGING_INFO,
                                        l_deltas));
 
-            // Write the log and count into a port's imem area
-            FAPI_TRY(ody_putscom_dqs_track_log(l_port_target));
+            // Write the log and count into a port's imem area - use the telemetry log port
+            FAPI_TRY(ody_putscom_dqs_track_log(l_telemtry_log_port));
         }
     }
 
