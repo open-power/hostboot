@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -336,6 +336,7 @@ void* call_host_start_payload (void *io_pArgs)
         {
             break;
         }
+
         //  - Run CXX testcases
         l_errl = INITSERVICE::executeUnitTests();
 

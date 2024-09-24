@@ -2807,7 +2807,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             // this is inefficient but the numbers involved are tiny
             l_gardRecords.insert(l_gardRecords.begin(),rec);
         }
-             
+
 
         // Apply ALL gard records (NO Resource Recovery Support)
         for (GardRecordsCItr_t l_itr = l_gardRecords.begin();
@@ -2859,7 +2859,7 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
                 continue;
             }
 
-#ifdef __HOSTBOOT_MODULE            
+#ifdef __HOSTBOOT_MODULE
             // Before we apply any guard records for core-related targets
             // check if we have any spares and modify the record if so.
             // This is required because the SP may add guard records for
@@ -3929,6 +3929,13 @@ bool DeconfigGard::reduceSpareCores( TARGETING::Target* i_target )
 {
     bool l_usedSpare = false;
     bool l_alreadySpared = false;
+
+    if ((i_target == nullptr)
+       || (TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_SPARE_CORE_ACTIONS_DISABLED>()))
+    {
+        return false;
+    }
+
     auto l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
     TARGETING::Target* l_parentProc = getParent(i_target,TARGETING::TYPE_PROC);
 

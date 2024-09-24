@@ -35,6 +35,7 @@
 #include <initservice/taskargs.H>
 #include <cxxtest/TestSuite.H>
 #include <console/consoleif.H>
+#include <targeting/common/targetservice.H>
 
 namespace CxxTest
 {
@@ -99,6 +100,11 @@ void    cxxinit( errlHndl_t    &io_taskRetErrl )
     VFS::find_test_modules(module_list);
 
     CxxTest::sortTests(module_list, serial_module_list, parallel_module_list);
+
+    // When running tests we need to allow spare actions to occur at this point on because HBRT is what ordinarilly
+    // switches it back on but that will not occur in time for some tests to not fail.
+    TRACFCOMP(g_trac_cxxtest, "Spare Actions have been enabled.");
+    TARGETING::UTIL::assertGetToplevelTarget()->setAttr<TARGETING::ATTR_SPARE_CORE_ACTIONS_DISABLED>(0);
 
     //  start executing the CxxTest modules
     TRACFCOMP( g_trac_cxxtest, ENTER_MRK "Execute CxxTestExec, totalparallelmodules=%d, totalserialmodules=%d (overall total:%d)",

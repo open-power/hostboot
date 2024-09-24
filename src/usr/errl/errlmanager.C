@@ -36,6 +36,7 @@
 #include <trace/interface.H>
 #include <errl/errlentry.H>
 #include <errl/errlmanager.H>
+#include <errl/errlreasoncodes.H>
 #include <initservice/taskargs.H>
 #include <sys/task.h>
 #include <arch/ppc.H>
@@ -59,6 +60,8 @@
 #include <util/misc.H>
 #include <arch/magic.H>
 #include <kernel/pagemgr.H>
+#include <targeting/common/mfgFlagAccessors.H>
+#include <hwas/common/deconfigGard.H>
 
 namespace ERRORLOG
 {
@@ -75,6 +78,7 @@ uint8_t ErrlManager::iv_hiddenErrLogsEnable =
 
 extern trace_desc_t* g_trac_errl;
 
+#define TRACM(args...) TRACFCOMP(g_trac_errl, args)
 
 /**
 * @brief
@@ -838,18 +842,173 @@ void ErrlManager::sendErrLogToFSP ( errlHndl_t& io_err )
     TRACFCOMP( g_trac_errl, EXIT_MRK"ErrlManager::sendErrLogToFSP" );
 } // sendErrLogToFSP
 
+uint8_t hasServiceActions(const HWAS::callout_ud_t & i_callout)
+{
+    static_assert(HWAS::LAST_CALLOUT == HWAS::VRM_CALLOUT, "New callout added, hasServiceActions needs update");
+    using serviceAction_t = ErrlEntry::callout_search_criteria;
+    using deconfig_t = HWAS::DeconfigEnum;
+    using gard_t = HWAS::GARD_ErrorType;
+
+    deconfig_t deconfigState = deconfig_t::NO_DECONFIG;
+    gard_t gardErrorType = gard_t::GARD_NULL;
+
+    if(i_callout.type == HWAS::HW_CALLOUT)
+    {
+        deconfigState = i_callout.deconfigState;
+        gardErrorType = i_callout.gardErrorType;
+    }
+    else if (i_callout.type == HWAS::CLOCK_CALLOUT)
+    {
+        deconfigState = i_callout.clkDeconfigState;
+        gardErrorType = i_callout.clkGardErrorType;
+    }
+    else if(i_callout.type == HWAS::PART_CALLOUT)
+    {
+        deconfigState = i_callout.partDeconfigState;
+        gardErrorType = i_callout.partGardErrorType;
+    }
+    uint8_t serviceActions = serviceAction_t::NO_MATCH;
+    if (deconfigState != deconfig_t::NO_DECONFIG)
+    {
+        serviceActions |= serviceAction_t::DECONFIG_FOUND;
+    }
+    if (gardErrorType != gard_t::GARD_NULL)
+    {
+        serviceActions |= serviceAction_t::GARD_FOUND;
+    }
+    return serviceActions;
+}
+
 void ErrlManager::commitErrLogAggregate(errlHndl_t& io_err, const compId_t i_committerComp)
 {
     const char* l_sevString = errl_sev_str_map.at(io_err->sev());
-
     TRACFCOMP(g_trac_errl, "commitErrLog() called by %.4X for eid=%.8x, Reasoncode=%.4X, Sev=%s",
               i_committerComp, io_err->eid(), io_err->reasonCode(), l_sevString );
 
-    if ( (io_err->sev() != ERRORLOG::ERRL_SEV_INFORMATIONAL) &&
-         (io_err->sev() != ERRORLOG::ERRL_SEV_RECOVERED) )
+    // Check if this was a spare-able error.
+    bool spareError = false,
+         nonSpareServiceAction = false;
+    HWAS::callOutPriority highestCalloutPriority      = HWAS::SRCI_PRIORITY_NONE,
+                          highestSpareCalloutPriority = HWAS::SRCI_PRIORITY_NONE;
+    bool targetingIsReady = Util::isTargetingLoaded() && TARGETING::targetService().isInitialized();
+    // Check if this log's callouts could interact with spare cores. If there are spares left to use then
+    // we need to reduce the severity of the error log if it's visible
+    if ( targetingIsReady
+         && !TARGETING::isTestSpareCoresSet() // Mfg will set this when they want to treat spares as normal
+         && io_err->isSevVisible()) // Only act on visible logs
+    {
+        static_assert(HWAS::LAST_CALLOUT == HWAS::VRM_CALLOUT, "New callout added, commitErrLogAggregate needs update");
+        for (const auto ud_callout : io_err->getUDSections(ERRL_COMP_ID, ERRORLOG::ERRL_UDT_CALLOUT))
+        {
+            const auto callout = reinterpret_cast<HWAS::callout_ud_t *>(ud_callout);
+            using serviceAction_t = ErrlEntry::callout_search_criteria;
+            using deconfig_t = HWAS::DeconfigEnum;
+            uint8_t calloutHasServiceActions = hasServiceActions(*callout);
+
+            if ((callout->type == HWAS::PROCEDURE_CALLOUT)
+                || (callout->type == HWAS::SENSOR_CALLOUT)
+                || (callout->type == HWAS::BUS_CALLOUT))
+            {
+                // Do nothing. Sensor callouts are deprecated and procedure and bus callouts dont interact with sparing
+                continue;
+            }
+            // All other callout types come with at least one target associated with the callout.
+            Target * target = nullptr;
+            uint8_t * target_location = reinterpret_cast<uint8_t *>(callout) + sizeof(HWAS::callout_ud_t);
+            if (HWAS::retrieveTarget(target_location, target, io_err))
+            {
+                // Couldn't get a target
+                target = nullptr;
+            }
+            // If this error has service actions and we've reduced the number of spares then we need to update
+            // some pieces of the log. Note that we check for service actions before calling reduceSpareCores
+            // to short circuit the statement if there aren't any service actions since we don't want to
+            // accidentally change the state of the attributes by calling reduceSpareCores first. Only callouts
+            // with service actions should have the ability to knock out cores.
+            if (calloutHasServiceActions && HWAS::theDeconfigGard().reduceSpareCores(target))
+            {
+                // Used later to decide if we need to switch off the gard/deconfig bits.
+                spareError = true;
+                // Add the symbolic callout to indicate a spare resource was used.
+                io_err->addProcedureCallout(HWAS::EPUB_PRC_SPARE_RESOURCE,
+                                            HWAS::SRCI_PRIORITY_LOW);
+                // Change the gard type to spare in the error, if exists. Do not propagate to other errors because they
+                // may not be spareable errors.
+                io_err->setGardType(target,
+                                    HWAS::GARD_Spare,
+                                    HWAS::ALL_STYLE,  // Change gard type for all callouts, if existing
+                                    HWAS::HW_CALLOUT, // noop, must specify to set NO_PROPAGATE
+                                    propagation_t::NO_PROPAGATE);
+#ifndef __HOSTBOOT_RUNTIME
+                // If the callout has a guard but no deconfig then add a deconfig to force a reconfig loop.
+                // Guards by themselves do not trigger a reconfig loop during the IPL. Only on a reboot would the
+                // guarded target stop being used. Some error path behaviors may expect the guarded part to not be used
+                // at runtime, e.g. spare cores.
+                if ((calloutHasServiceActions & serviceAction_t::GARD_FOUND)
+                    && !(calloutHasServiceActions & serviceAction_t::DECONFIG_FOUND))
+                {
+                    TRACFCOMP(g_trac_errl,
+                              "commitErrLogAggregate(): eid=%.8X RC=%.4X and Sev=%s, callout[%d]=%X has guard with no deconfig. Adding deconfig",
+                              io_err->eid(), io_err->reasonCode(), l_sevString,
+                              callout->type,
+                              calloutHasServiceActions);
+                    if(callout->type == HWAS::HW_CALLOUT)
+                    {
+                        callout->deconfigState = deconfig_t::DECONFIG;
+                    }
+                    else if (callout->type == HWAS::CLOCK_CALLOUT)
+                    {
+                        callout->clkDeconfigState = deconfig_t::DECONFIG;
+                    }
+                    else if(callout->type == HWAS::PART_CALLOUT)
+                    {
+                        callout->partDeconfigState = deconfig_t::DECONFIG;
+                    }
+                    calloutHasServiceActions |= serviceAction_t::DECONFIG_FOUND;
+                }
+#endif
+                highestSpareCalloutPriority = highestSpareCalloutPriority > callout->priority
+                                            ? highestSpareCalloutPriority : callout->priority;
+            }
+            else
+            {
+                highestCalloutPriority = highestCalloutPriority > callout->priority
+                                       ? highestCalloutPriority : callout->priority;
+                if (calloutHasServiceActions)
+                {
+                    nonSpareServiceAction = true;
+                }
+            }
+        }
+    }
+
+    // Only want to change the severity if the spare callout is the highest priority and it is the only callout with
+    // service actions. This is so we don't hide logs with other service actions.
+    if (highestSpareCalloutPriority > highestCalloutPriority && !nonSpareServiceAction)
+    {
+        TRACFCOMP(g_trac_errl,
+                  "commitErrLogAggregate(): Spareable error detected, reducing severity from %s to RECOVERED",
+                   l_sevString);
+        io_err->setSev(ERRORLOG::ERRL_SEV_RECOVERED,
+                       true, // This setting is final, i.e. cannot be changed anymore after this
+                       propagation_t::NO_PROPAGATE); // This is a recursive function already
+                                                     // we're handling each as they come.
+    }
+
+    if ( io_err->isSevVisible())
     {
         iv_nonInfoCommitted = true;
         lwsync();
+    }
+    else if (!spareError)
+    {
+        // The error isn't visible and wasn't changed to non-visible as a result of spare actions.
+        // Unset the deconfig and gard bits in the SRC since no actions will be taken for this log.
+        // Below sendErrlogToMessageQueue will call processCallout on this error which will make the decision
+        // to take actions or not based on these settings and severity.
+        io_err->iv_Src.iv_deconfig = false;
+        io_err->iv_Src.iv_gard = false;
+        // @TODO PFHB-628 need lwsync here?
     }
 
     // Ask ErrlEntry to check for any special deferred deconfigure callouts

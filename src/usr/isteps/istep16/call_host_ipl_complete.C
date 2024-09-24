@@ -144,12 +144,17 @@ void* call_host_ipl_complete(void* const io_pArgs)
             }
         }
 
+        TARGETING::Target* sys =TARGETING::UTIL::assertGetToplevelTarget();
+
+        // Disable spare core actions from this point until we jump to runtime since
+        // doing reconfig loops are not supported.
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                  "call_host_ipl_complete: Spare core actions are now disabled.");
+        sys->setAttr<ATTR_SPARE_CORE_ACTIONS_DISABLED>(1);
+
         // Initialize the RUNTIME DATA attributes
         // that HDAT needs to allocate memory for us.
         // -----------------------------------------
-        TARGETING::Target* sys = nullptr;
-        TARGETING::targetService().getTopLevelTarget(sys);
-        assert(sys != nullptr);
 
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                   "Initialize the runtime data attributes for HDAT consumption");

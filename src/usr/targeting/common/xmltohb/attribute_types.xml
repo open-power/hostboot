@@ -8923,6 +8923,21 @@
   </attribute>
 
   <attribute>
+    <description>Spare actions will be disabled at the start of istep 16 because this is the end of per-node IPL
+          and it's much more difficult to do reconfig loops after this point which are required for sparing. Spare
+          actions will be turned back on before jumping to PHYP</description>
+    <id>SPARE_CORE_ACTIONS_DISABLED</id>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+    <writeable/>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <complexType>
       <description>Structure to define the addressing for an attached SPI
           eeprom device that contains SPARE info.

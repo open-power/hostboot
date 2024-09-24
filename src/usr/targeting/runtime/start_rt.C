@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -120,13 +120,17 @@ namespace RT_TARG
                 // Check if there any mutex attributes we need to reset on this target
                 l_numberMutexAttrsReset += l_targetService.resetMutexAttributes(l_target);
 
-                // Check if there is any PEER_TARAGET attribute to update on this target
+                // Check if there is any PEER_TARGET attribute to update on this target
                 if(l_targetService.updatePeerTarget(l_target))
                 {
                     l_updatedCount++;
                 }
             }
         }
+
+        TARGETING::UTIL::assertGetToplevelTarget()->setAttr<ATTR_SPARE_CORE_ACTIONS_DISABLED>(0);
+        TRACFCOMP(g_trac_targeting, "Spare Actions have been enabled.");
+
         TRACFCOMP(g_trac_targeting,
                   "adjustTargetingForRuntime: %d peer target addresses "
                   "translated on %d nodes",

@@ -54,6 +54,7 @@
 #include <runtime/hbrt_utilities.H>        // HBRT_TRACE_NAME
 #include <util/misc.H>                     // isSimicsRunning()
 #include <targeting/odyutil.H>             // isOdysseyChip
+#include <hwas/common/deconfigGard.H>
 
 using namespace TARGETING;
 using namespace RUNTIME;
@@ -712,6 +713,13 @@ void deallocateResource(const hostInterfaces::deallocate_t & i_deallocated)
         if (l_err)
         {
             break;
+        }
+
+        if (HWAS::theDeconfigGard().reduceSpareCores(l_deallocTarget))
+        {
+            TRACFCOMP(g_trac_runtime,
+                      INFO_MRK"deallocateResource: target 0x%.8X to be replaced by spare.",
+                      get_huid(l_deallocTarget));
         }
 
         if (!l_deallocTarget->trySetAttr<ATTR_DEALLOCATED>(1))

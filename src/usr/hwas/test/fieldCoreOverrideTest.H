@@ -362,6 +362,25 @@ void setHwasFunctional(bool i_functional, Target * i_target)
 
 }
 
+void resetSpareCoreAttrs(Target * i_chip)
+{
+    // Reset the number of spares deployed for the chip.
+    i_chip->setAttr<ATTR_SPARE_CORES_DEPLOYED>(0);
+
+    // Get all the cores for this chip and reset their attrs
+    for (const auto & fc : composable(getChildChiplets)(i_chip, TYPE_FC, false))
+    {
+        fc->setAttr<ATTR_CORE_IS_SPARE>(0);
+        for (const auto & core : composable(getChildChiplets)(fc, TYPE_CORE, false))
+        {
+            core->setAttr<ATTR_CORE_IS_SPARE>(0);
+            core->setAttr<ATTR_REPLACED_BY_SPARE>(0);
+        }
+    }
+
+
+}
+
 // Resets the systemList markedForFcoDeconfig flags and unsets any fcs/cores which may have been marked as spare.
 // Does not touch HWAS state for targets.
 void resetSimicsSystem(const systemBitStringList_t & i_originalSystemBits, systemList_t & o_sysList)
@@ -371,13 +390,7 @@ void resetSimicsSystem(const systemBitStringList_t & i_originalSystemBits, syste
     // Walk through all the cores under each proc to unset the spare core flag.
     for (auto & [pProc, pCores] : o_sysList)
     {
-        // Get a list of the spares and reset to not spare. FCO doesn't deal directly with FC targets but this
-        // will ensure regardless of fused_mode that the FC/CORE targets will have their attr set.
-        for (auto & spare : composable(findSpareCores)(pProc->target))
-        {
-            // Clear spare
-            spare->setAttr<ATTR_CORE_IS_SPARE>(0);
-        }
+        resetSpareCoreAttrs(pProc->target);
     }
 }
 
@@ -868,18 +881,14 @@ public:
         // system configuration.
         systemList_t sysList = buildSimicsSystem(fcoList, originalSystemConfig);
 
-        // Clear all the spare settings from the targets before the test. This isn't touching the saved value.
-        for (auto & [coreUnit, originalSpareSetting]  : originalSpares )
-        {
-            coreUnit->setAttr<ATTR_CORE_IS_SPARE>(0);
-        }
-
         // Get the total functional cores available to test with. These will be used to select FCO values for testing a
         // few scenarios below.
         size_t coreCount = 0;
         for (auto & [pProc, pCores] : sysList)
         {
             coreCount += pProc->availableCores;
+            // Also clear all the spare settings from the targets before the test.
+            resetSpareCoreAttrs(pProc->target);
         }
         const size_t totalCoresAvailable = coreCount;
 
