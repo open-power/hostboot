@@ -224,7 +224,7 @@ class repair_state
 /// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< mss::mc_type MC, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 class chip_and_symbol_mark : public repair_state<MC, T>
 {
     public:
@@ -257,8 +257,8 @@ class chip_and_symbol_mark : public repair_state<MC, T>
                                      fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
             // repairs exceeded
-            const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+            const auto& l_port = mss::find_target<TT::PORT_TYPE>(i_target);
+            const uint8_t l_rel_pos = mss::relative_pos<MC, TT::MC_TARGET_TYPE>(l_port);
             FAPI_TRY( io_repairs_exceeded.setBit(l_rel_pos) );
             FAPI_INF_NO_SBE(TARGTIDFORMAT " Repairs exceeded (chip mark and symbol mark exist, plus one bad DQ) on rank:%d DQ:%d",
                             TARGTID, i_port_rank, i_dq);
@@ -287,8 +287,8 @@ class chip_and_symbol_mark : public repair_state<MC, T>
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
             // repairs exceeded
-            const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+            const auto& l_port = mss::find_target<TT::PORT_TYPE>(i_target);
+            const uint8_t l_rel_pos = mss::relative_pos<MC, TT::MC_TARGET_TYPE>(l_port);
             FAPI_TRY( io_repairs_exceeded.setBit(l_rel_pos) );
             FAPI_INF_NO_SBE(TARGTIDFORMAT
                             " Repairs exceeded (chip mark and symbol mark exist, plus one bad nibble) on rank:%d DQ:%d",
@@ -305,7 +305,7 @@ class chip_and_symbol_mark : public repair_state<MC, T>
 /// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< mss::mc_type MC, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 class symbol_mark_plus_unrepaired_dq : public repair_state<MC, T>
 {
     public:
@@ -337,8 +337,8 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<MC, T>
                                      fapi2::buffer<uint8_t>& io_repairs_applied,
                                      fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
-            const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+            const auto& l_port = mss::find_target<TT::PORT_TYPE>(i_target);
+            const uint8_t l_rel_pos = mss::relative_pos<MC, TT::MC_TARGET_TYPE>(l_port);
 
             // repairs exceeded
             FAPI_INF_NO_SBE(TARGTIDFORMAT " Repairs exceeded (symbol mark and unrepaired DQ exist, plus bad DQ) on rank:%d DQ:%d",
@@ -368,8 +368,8 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<MC, T>
                                           fapi2::buffer<uint8_t>& io_repairs_applied,
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
-            const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+            const auto& l_port = mss::find_target<TT::PORT_TYPE>(i_target);
+            const uint8_t l_rel_pos = mss::relative_pos<MC, TT::MC_TARGET_TYPE>(l_port);
 
             // place a chip mark, but also repairs exceeded
             FAPI_TRY( place_chip_mark<MC>(i_target, i_port_rank, i_dq, i_width) );
@@ -394,7 +394,7 @@ class symbol_mark_plus_unrepaired_dq : public repair_state<MC, T>
 /// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< mss::mc_type MC, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 class symbol_mark_only : public repair_state<MC, T>
 {
     public:
@@ -428,8 +428,8 @@ class symbol_mark_only : public repair_state<MC, T>
         {
             // leave an unrepaired DQ
             const auto new_state = std::make_shared< symbol_mark_plus_unrepaired_dq<MC, T> >();
-            const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+            const auto& l_port = mss::find_target<TT::PORT_TYPE>(i_target);
+            const uint8_t l_rel_pos = mss::relative_pos<MC, TT::MC_TARGET_TYPE>(l_port);
             mss::repair_state<MC, T>::set_state(io_machine, new_state);
 
             uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
@@ -487,7 +487,7 @@ class symbol_mark_only : public repair_state<MC, T>
 /// @tparam MC the memory controller type
 /// @tparam T, the fapi2 target type of the DIMM
 ///
-template< mss::mc_type MC, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
 class chip_mark_only : public repair_state<MC, T>
 {
     public:
@@ -550,8 +550,8 @@ class chip_mark_only : public repair_state<MC, T>
                                           fapi2::buffer<uint8_t>& io_repairs_exceeded)
         {
             // repairs exceeded
-            const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
-            const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+            const auto& l_port = mss::find_target<TT::PORT_TYPE>(i_target);
+            const uint8_t l_rel_pos = mss::relative_pos<MC, TT::MC_TARGET_TYPE>(l_port);
             FAPI_TRY( io_repairs_exceeded.setBit(l_rel_pos) );
             FAPI_INF_NO_SBE(TARGTIDFORMAT " Repairs exceeded (chip mark exists, plus bad nibble) on rank:%d DQ:%d",
                             TARGTID, i_port_rank, i_dq);
@@ -797,7 +797,7 @@ inline uint64_t get_dq_for_deployed_spare(const uint64_t i_spare_dq,
 /// @param[in,out] io_repairs_exceeded 2-bit mask, where a bit set means that DIMM had more bad bits than could be repaired
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC>
+template< mss::mc_type MC, typename TT = portTraits<MC> >
 fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
         const uint8_t i_bad_bits[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
         const uint8_t i_width,
@@ -811,8 +811,8 @@ fapi2::ReturnCode restore_repairs_helper(const fapi2::Target<fapi2::TARGET_TYPE_
     std::vector<mss::rank::info<MC>> l_ranks;
     uint8_t l_dimm_spare[MAX_RANK_PER_DIMM_ATTR] = {0};
     std::vector<uint8_t> l_nonspare_dram;
-    const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(i_dimm);
-    const uint8_t l_rel_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+    const auto& l_port = mss::find_target<TT::PORT_TYPE>(i_dimm);
+    const uint8_t l_rel_pos = mss::relative_pos<MC, TT::MC_TARGET_TYPE>(l_port);
 
     // gets spare availability
     FAPI_TRY(mss::attr::get_dimm_spare(i_dimm, l_dimm_spare));
