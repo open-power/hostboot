@@ -2314,6 +2314,13 @@ errlHndl_t DeconfigGard::applyGardRecord(Target *i_pTarget,
         uint32_t l_errlogEid =
                 (i_gardRecord.iv_errorType == GARD_User_Manual) ?
                     DECONFIGURED_BY_MANUAL_GARD : i_gardRecord.iv_errlogEid;
+        // handle manual guard of a spare
+        // Only manual guards will have a zero Eid field
+        if( (i_gardRecord.iv_errorType == GARD_Spare)
+            && (i_gardRecord.iv_errlogEid == 0) )
+        {
+            l_errlogEid = DECONFIGURED_BY_MANUAL_GARD;
+        }
 
         // all ok - do the work
         HWAS_MUTEX_LOCK(iv_mutex);
