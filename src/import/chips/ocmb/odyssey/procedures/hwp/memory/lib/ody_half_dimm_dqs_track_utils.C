@@ -398,6 +398,7 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
     constexpr drift_track_mr LOG_DATA_MR = drift_track_mr::MSB_MR;
     constexpr uint8_t UNUSED_LOGGING_INFO = 0;
     constexpr bool TEMP_TRIGGER = false;
+    constexpr uint8_t MISSED_QUIESCE_THRESHOLD = 10;
     bool l_has_quiesced = false;
     // Consts for readability
     constexpr bool RECORD_OFFSETS = false;
@@ -415,6 +416,7 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
 
     const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
     uint8_t l_current = 0;
+    uint8_t l_missed_quiesce_count = 0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_HALF_DIMM_TARGET, i_target, l_current));
 
     // The odyssey has a chip bug where an internal array error happens in half-dimm mode
@@ -460,10 +462,26 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
 
         if(!l_has_quiesced)
         {
-            // Just exiting. We can try again later
             FAPI_INF_NO_SBE("Bus did not quiesce in time. skipping procedure on " TARGTIDFORMAT, TARGTID);
+
+            // Update our "missed quiesce" counter and return a fail if we hit the threshold
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_MISSED_QUIESCE_COUNT, i_target, l_missed_quiesce_count));
+            l_missed_quiesce_count += 1;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_ODY_DQS_TRACKING_MISSED_QUIESCE_COUNT, i_target, l_missed_quiesce_count));
+
+            FAPI_ASSERT(l_missed_quiesce_count < MISSED_QUIESCE_THRESHOLD,
+                        fapi2::MSS_ODY_DQS_DRIFT_TRACK_UNABLE_TO_QUIESCE_BUS().
+                        set_MC_TARGET(i_target).
+                        set_MISSED_QUIESCE_COUNT(l_missed_quiesce_count).
+                        set_MISSED_QUIESCE_THRESHOLD(MISSED_QUIESCE_THRESHOLD),
+                        GENTARGTIDFORMAT " DQS drift track unable to detect bus quiesce state for %d attempts",
+                        GENTARGTID(i_target), l_missed_quiesce_count);
+
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+        // Reset the "missed quiesce" counter since we see the bus quiesced
+        FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_ODY_DQS_TRACKING_MISSED_QUIESCE_COUNT, i_target, 0));
 
         // Conducts the first MCBIST/CCS run
         {

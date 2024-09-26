@@ -356,6 +356,19 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_DQS_TRACKING_MISSED_QUIESCE_COUNT</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            Count of times in a row ody_half_dimm_dqs_track chip-op was run and
+            was unable to detect memory bus quiesce.
+            Updated in DQS tracking procedure.
+        </description>
+        <valueType>uint8</valueType>
+        <initToZero></initToZero>
+        <writeable/>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_DQS_TRACKING_FAILED</id>
         <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
         <description>
