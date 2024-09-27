@@ -2980,7 +2980,7 @@ errlHndl_t IStepDispatcher::sendProgressCode(bool i_needsLock)
     {
         TRACDCOMP(g_trac_initsvc,
                   "sendProgressCode cur.sec[%llx] cur.ns[%llx] last.sec[%llx] last.ns [%llx]",
-                  l_curTime.tv_sec, l_curTime.tv_nsec, lastBMCUpdateTime.tv_sec+3,
+                  l_curTime.tv_sec, l_curTime.tv_nsec, lastBMCUpdateTime.tv_sec,
                   lastBMCUpdateTime.tv_nsec);
         lastBMCUpdateTime = l_curTime;
         l_sendToBMC = true;
