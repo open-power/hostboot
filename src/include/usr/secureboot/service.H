@@ -31,6 +31,10 @@
 #include <cstdint>
 #include <securerom/sha512.H>
 #include <securerom/ROM.H>
+#include <attributeenums.H>
+
+using namespace TARGETING;
+
 
 /*
  * @brief Used to capture the first 4 bytes of the hash for tracing purposes
@@ -285,16 +289,23 @@ namespace SECUREBOOT
      *                         [default = nullptr, use current hw hash key]
      *
      * @param[in] i_secureVersion  Custom FW Secure Version to test against
-     *                             [default = INVALID_SECURE_VERSION, use internal
-     *                              FW Minimum Secure Version;
-     *                              otherwise, use i_secureVersion]
+     *                             [default = INVALID_SECURE_VERSION, use
+     *                             internal FW Minimum Secure Version;
+     *                             otherwise, use i_secureVersion]
+     *
+     * @param[in] i_signMode Specifies version (like V1 or V3) of i_container
+     *                       [default = SB_SIGNING_SYSTEM_CONTAINER, use
+     *                       whatever version the system is using to IPL;
+     *                       otherwise, use i_signMode]
+     *
      *
      * @return errlHndl_t  NULL on success
      */
     errlHndl_t verifyContainer(void * i_container,
                                const RomVerifyIds& i_ids = RomVerifyIds(),
                                const SHA512_t* i_hwKeyHash = nullptr,
-                               const uint8_t i_secureVersion = INVALID_SECURE_VERSION);
+                               const uint8_t i_secureVersion = INVALID_SECURE_VERSION,
+                               const ATTR_SB_SIGNING_MODE_type i_signMode = SB_SIGNING_SYSTEM_CONTAINER);
 
     /**
      * @brief Verify component ID in a container header against a reference
@@ -317,13 +328,21 @@ namespace SECUREBOOT
     /**
      * @brief Hash Signed Blob
      *
-     * @param[in]  i_blob    Void pointer to effective address of blob
-     * @param[in]  i_size    Size of blob in bytes
-     * @param[out] o_hash    SHA512 hash
+     * @param[in]  i_blob     Void pointer to effective address of blob
+     * @param[in]  i_size     Size of blob in bytes
+     * @param[out] o_hash     SHA512 hash
+     * @param[in]  i_signMode Specifies hash algorithm (aka version,
+     *                        like V1 or V3) to use
+     *                        [default = SB_SIGNING_SYSTEM_CONTAINER, use
+     *                        whatever version the system is using to IPL;
+     *                        otherwise, use i_signMode]
      *
      * @return N/A
      */
-    void hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf);
+    void hashBlob(const void * i_blob,
+                  size_t i_size,
+                  SHA512_t o_buf,
+                  const ATTR_SB_SIGNING_MODE_type i_signMode = SB_SIGNING_SYSTEM_CONTAINER);
 
     /**
      * @brief Retrieve the internal hardware keys' hash used to validate
@@ -331,7 +350,7 @@ namespace SECUREBOOT
      * @param[out] o_hash  Reference to the SHA512_t array to copy the
      *                     hash to.
      */
-     void getHwKeyHash(SHA512_t o_hash);
+    void getHwKeyHash(SHA512_t o_hash);
 
     /**
      * @brief Retrieve the internal Minimum FW Secure Version used to validate
@@ -339,21 +358,29 @@ namespace SECUREBOOT
      *
      * @return uint8_t    secure_version
      */
-     uint8_t getMinimumSecureVersion(void);
+    uint8_t getMinimumSecureVersion(void);
 
-     /*
-      * @brief Hash the concatenation of N Blobs
-      *
-      *  Asserts if any blob pointer is NULL
-      *
-      * @param[in]  i_blobs     Vector of pairs composed of a void
-      *                         pointer to effective address and size
-      *                         of the blob to concatenate
-      * @param[out] o_buf       SHA512 hash
-      *
-      * @return N/A
-      */
-    void hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf);
+    /*
+     * @brief Hash the concatenation of N Blobs
+     *
+     *  Asserts if any blob pointer is NULL
+     *
+     * @param[in]  i_blobs     Vector of pairs composed of a void
+     *                         pointer to effective address and size
+     *                         of the blob to concatenate
+     * @param[out] o_buf       SHA512 hash
+     * @param[in]  i_signMode  Specifies hash algorithm (aka version,
+     *                         like V1 or V3) to use
+     *                         [default = SB_SIGNING_SYSTEM_CONTAINER, use
+     *                         whatever version the system is using to IPL;
+     *                         otherwise, use i_signMode]
+     *
+     *
+     * @return N/A
+     */
+    void hashConcatBlobs(const blobPair_t &i_blobs,
+                         SHA512_t o_buf,
+                         const ATTR_SB_SIGNING_MODE_type i_signMode = SB_SIGNING_SYSTEM_CONTAINER);
 
     /**
      * @brief Common secureboot handler for secureboot failures.

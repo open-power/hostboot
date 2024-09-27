@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -69,9 +69,11 @@ errlHndl_t initializeSecureRomManager(void)
 /**
  * @brief Verify Signed Container
  */
-errlHndl_t verifyContainer(void * i_container,  const RomVerifyIds& i_ids,
+errlHndl_t verifyContainer(      void * i_container,
+                           const RomVerifyIds& i_ids,
                            const SHA512_t* i_hwKeyHash,
-                           const uint8_t i_secureVersion)
+                           const uint8_t i_secureVersion,
+                           const ATTR_SB_SIGNING_MODE_type i_signMode)
 {
     errlHndl_t l_errl = nullptr;
 
@@ -79,7 +81,8 @@ errlHndl_t verifyContainer(void * i_container,  const RomVerifyIds& i_ids,
                                        verifyContainer(i_container,
                                                        i_ids,
                                                        i_hwKeyHash,
-                                                       i_secureVersion);
+                                                       i_secureVersion,
+                                                       i_signMode);
 
     return l_errl;
 }
@@ -143,20 +146,33 @@ errlHndl_t verifyComponentId(
  * @brief Hash Signed Blob
  *
  */
-void hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf)
+void hashBlob(const void * i_blob,
+                    size_t i_size,
+                    SHA512_t o_buf,
+              const ATTR_SB_SIGNING_MODE_type i_signMode)
 {
     return Singleton<SecureRomManager>::instance().
-                                               hashBlob(i_blob, i_size, o_buf);
+                                               hashBlob(i_blob,
+                                                        i_size,
+                                                        o_buf,
+                                                        i_signMode);
+
 }
 
 /**
  * @brief Hash concatenation of 2 Blobs
  *
  */
-void hashConcatBlobs(const blobPair_t &i_blobs, SHA512_t o_buf)
+void hashConcatBlobs(const blobPair_t &i_blobs,
+                           SHA512_t o_buf,
+                     const ATTR_SB_SIGNING_MODE_type i_signMode)
+
 {
         return Singleton<SecureRomManager>::instance().
-                                                hashConcatBlobs(i_blobs, o_buf);
+                                                hashConcatBlobs(i_blobs,
+                                                                o_buf,
+                                                                i_signMode);
+
 }
 
 /*
@@ -330,11 +346,13 @@ errlHndl_t SecureRomManager::initialize()
 /**
  * @brief Verify Container against system hash keys
  */
-errlHndl_t SecureRomManager::verifyContainer(void * i_container,
+errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
                                              const RomVerifyIds& i_ids,
                                              const SHA512_t* i_hwKeyHash,
-                                             const uint8_t i_secureVersion)
+                                             const uint8_t i_secureVersion,
+                                             const ATTR_SB_SIGNING_MODE_type i_signMode)
 {
+// MAB update trace to include last 2 parms, and make TRACF
     TRACDCOMP(g_trac_secure,ENTER_MRK"SecureRomManager::verifyContainer(): "
               "i_container=%p", i_container);
 
@@ -491,7 +509,10 @@ errlHndl_t SecureRomManager::verifyContainer(void * i_container,
 /**
  * @brief Hash Blob
  */
-void SecureRomManager::hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf) const
+void SecureRomManager::hashBlob(const void * i_blob,
+                                      size_t i_size,
+                                      SHA512_t o_buf,
+                                const ATTR_SB_SIGNING_MODE_type i_signMode) const
 {
 
     TRACDCOMP(g_trac_secure,INFO_MRK"SecureRomManager::hashBlob()");
@@ -523,7 +544,8 @@ void SecureRomManager::hashBlob(const void * i_blob, size_t i_size, SHA512_t o_b
  * @brief Hash concatenation of N Blobs
  */
 void SecureRomManager::hashConcatBlobs(const blobPair_t &i_blobs,
-                                      SHA512_t o_buf) const
+                                             SHA512_t o_buf,
+                                       const ATTR_SB_SIGNING_MODE_type i_signMode) const
 {
     std::vector<uint8_t> concatBuf;
     for (const auto &it : i_blobs)
@@ -536,7 +558,7 @@ void SecureRomManager::hashConcatBlobs(const blobPair_t &i_blobs,
     }
 
     // Call hash blob on new concatenated buffer
-    hashBlob(concatBuf.data(),concatBuf.size(),o_buf);
+    hashBlob(concatBuf.data(),concatBuf.size(),o_buf, i_signMode);
 }
 
 /********************

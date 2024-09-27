@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -810,7 +810,6 @@ enum ocmbsInSystem : int
 /**
  * @brief Checks to see if a specific ocmbsInSystem value (i_check) is contained in the
  *        enum that might hold multiple values (i_source)
- *        MAB: I admit this could be better written ^^^)
  *
  * @param[in] i_source    A version of ocmbsInSystem that might hold multiple values
  * @param[in] i_check     A value of ocmbsInSystem that is checked to see if it is in i_source

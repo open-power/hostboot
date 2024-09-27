@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,8 @@
 #include <map>
 
 typedef std::vector< std::pair<void*,size_t> > blobPair_t;
+
+using namespace TARGETING;
 
 /** @class SecureRomManager
  *  @brief Class for loading and interacting with SecureROM in memory
@@ -64,13 +66,17 @@ class SecureRomManager
          *                             [default = INVALID_SECURE_VERSION, use internal
          *                             FW Minimum Secure Version;
          *                             otherwise, use i_secureVersion]
-         *
+         * @param[in] i_signMode Specifies version (like V1 or V3) of i_container
+         *                       [default = SB_SIGNING_SYSTEM_CONTAINER, use
+         *                       whatever version the system is using to IPL;
+         *                       otherwise, use i_signMode]
          * @return errlHndl_t NULL on success
          */
         errlHndl_t verifyContainer(void * i_container,
                                    const RomVerifyIds& i_ids = RomVerifyIds(),
                                    const SHA512_t* i_hwKeyHash = nullptr,
-                                   const uint8_t i_secureVersion = INVALID_SECURE_VERSION);
+                                   const uint8_t i_secureVersion = INVALID_SECURE_VERSION,
+                                   const ATTR_SB_SIGNING_MODE_type i_signMode = SB_SIGNING_SYSTEM_CONTAINER);
 
         /**
          * @brief Hash Blob
@@ -79,10 +85,16 @@ class SecureRomManager
          *                              of blob
          * @param[in] i_size        Size of blob in bytes
          * @param[out] o_buf        Resulting hash buffer
-         *
+         * @param[in] i_signMode    Specifies version (like V1 or V3) of i_container
+         *                          [default = SB_SIGNING_SYSTEM_CONTAINER, use
+         *                          whatever version the system is using to IPL;
+         *                          otherwise, use i_signMode]
          * @return N/A
          */
-        void hashBlob(const void * i_blob, size_t i_size, SHA512_t o_buf) const;
+        void hashBlob(const void * i_blob,
+                      size_t i_size,
+                      SHA512_t o_buf,
+                      const ATTR_SB_SIGNING_MODE_type i_signMode = SB_SIGNING_SYSTEM_CONTAINER) const;
 
         /**
          * @brief Retrieve the internal hardware keys' hash from secure ROM
@@ -110,10 +122,15 @@ class SecureRomManager
          *                         pointer to effective address and size
          *                         of the blob to concatenate
          * @param[out] o_buf       SHA512 hash
-         *
+         * @param[in] i_signMode   Specifies version (like V1 or V3) of i_container
+         *                         [default = SB_SIGNING_SYSTEM_CONTAINER, use
+         *                         whatever version the system is using to IPL;
+         *                         otherwise, use i_signMode]
          * @return N/A
          */
-        void hashConcatBlobs (const blobPair_t &i_blobs, SHA512_t o_buf) const;
+        void hashConcatBlobs (const blobPair_t &i_blobs,
+                              SHA512_t o_buf,
+                              const ATTR_SB_SIGNING_MODE_type i_signMode = SB_SIGNING_SYSTEM_CONTAINER) const;
 
         /*
          * @brief Get offset of function from the start of the SecureROM
