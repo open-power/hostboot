@@ -51,6 +51,7 @@ EXTRAINCDIR += ${PERV_HWP_PATH}
 # for attnsvc in pm_common.C
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/diag/
 EXTRAINCDIR += ${ROOTPATH}/src/usr/diag/attn/
+EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/ppe/powmanlib/
 
 ## pointer to already consumed procedures.
 
@@ -102,6 +103,13 @@ OBJS += p10_qme_customize.o
 OBJS += p10_check_proc_config.o
 OBJS += p10_core_checkstop_handler.o
 OBJS += p10_pm_callout.o
+OBJS += p10_pm_elog.o
+OBJS += p10_getsram.o
+OBJS += p10_getsram_io_ppe.o
+OBJS += p10_read_xram.o
+OBJS += p10_qme_sram_access.o
+OBJS += p10_getputsram_utils.o
+OBJS += p10_pm_generate_elog.o
 
 ##  NOTE: add a new directory onto the vpaths when you add a new HWP
 VPATH += ${HWP_PM_PATH}

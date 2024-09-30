@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2023
+# Contributors Listed Below - COPYRIGHT 2016,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -35,5 +35,6 @@ EXTRAINCDIR += ${ROOTPATH}/src/include/usr/ocmbupd
 OBJS += ../istepHelperFuncs.o
 ## Objects common to HB IPL and HBRT
 include pm.mk
+
 
 include ${ROOTPATH}/config.mk

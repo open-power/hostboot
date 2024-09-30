@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2020
+# Contributors Listed Below - COPYRIGHT 2016,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -35,6 +35,11 @@ MODULE = pm_rt
 ## Objects unique to HBRT
 OBJS += rt_pm.o
 OBJS += smf_utils.o
+OBJS += p10_io_ppe_utils.o
+OBJS += p10_iop_xram_utils.o
+OBJS += p10_putsram.o
+OBJS += p10_write_xram.o
+OBJS += p10_putsram_io_ppe.o
 
 SUBDIRS += test.d
 

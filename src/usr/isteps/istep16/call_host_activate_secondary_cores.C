@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,9 @@
 #include <fapi2/plat_hwp_invoker.H>
 #include <p10_query_core_stop_state.H>
 #include <p10_core_special_wakeup.H>
+#include <p10_pm_elog.H>
+#include <p10_hcd_memmap_base.H>
+#include <p10_pm_generate_elog.H>
 
 #include <pm/pm_common.H>
 #include <scom/scomif.H>
@@ -56,6 +59,7 @@
 #include <sys/misc.h>
 #include <algorithm>
 #include <scom/wakeup.H>
+#include <stdio.h>
 
 #ifdef CONFIG_PLDM
 #include <pldm/requests/pldm_pdr_requests.H>
@@ -66,17 +70,86 @@ using namespace TARGETING;
 using namespace ISTEP;
 using namespace ISTEP_ERROR;
 
-// 15 is the deepest sleep state, used because it loses state and forces the
-// core to reload all hardware settings.
-const int EXPECTED_STOP_STATE = 15;
+const int ELOG_BUF_SIZE  = 3072;
+const int SECTN_HCODE_LOG_IN_HB = 0x01;
 
 namespace ISTEP_16
 {
 
+/**
+ * @brief   finds error log in PM engine's SRAM and reproduces it in HB context
+ * @param[in]   i_procChip      fapi2 target for processor chip
+ * @param[in]   i_coreTgt       HB target handle for failing core
+ * @param[out]  o_stepError     an instance of IStepError
+ * @return      none
+ */
+void lookup_and_commit_pm_elog( fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_procChip, 
+        TargetHandle_t i_coreTgt, IStepError  &o_stepError )
+{
+    // 1)    first let us determine if  there is an error log waiting to be collected
+    // 2)    Once an error log is found, identify its source
+    // 3)    create an error log  instance and package the PM elog as user data payload
+    // 4)    creator should be PM Complex component.
+    fapi2::ReturnCode rc_fapi( fapi2::FAPI2_RC_SUCCESS );
+    ERRORLOG::ErrlEntry* l_errl = nullptr;
+    ERRORLOG::ErrlEntry* l_hwpErrl = nullptr;
+    ElogDissectionSum l_elogDissectionSum;
+    uint32_t l_logLength = ELOG_BUF_SIZE;
+    uint8_t * l_pHcdLogBuf = new uint8_t[ ELOG_BUF_SIZE ];
+
+    do
+    {
+        const auto l_coreId = i_coreTgt->getAttr<TARGETING::ATTR_CHIP_UNIT>();
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Core Pos %d", l_coreId );
+
+        FAPI_INVOKE_HWP( l_hwpErrl, p10_pm_generate_elog, i_procChip, l_coreId, l_elogDissectionSum, 
+                         l_pHcdLogBuf, l_logLength );
+        if( l_hwpErrl )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK "Failed to read hcode elog" );
+            l_hwpErrl->setSev( ERRORLOG::ERRL_SEV_INFORMATIONAL );
+            errlCommit( l_hwpErrl, HWPF_COMP_ID );
+            break;
+        }
+
+        uint64_t l_elogUsrdata12 = l_elogDissectionSum.iv_userData1;
+        l_elogUsrdata12 = l_elogUsrdata12 << 32;
+        l_elogUsrdata12 = l_elogUsrdata12 | l_elogDissectionSum.iv_userData2;
+        uint64_t l_elogUsrdata3 = l_elogDissectionSum.iv_userData3;
+        l_elogUsrdata3 = l_elogUsrdata3 << 32;
+            
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Creating Log On Behalf of QME" );
+
+        l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                          l_elogDissectionSum.iv_moduleId,
+                                          l_elogDissectionSum.iv_compId | l_elogDissectionSum.iv_reasonCode,
+                                          l_elogUsrdata12,
+                                          l_elogUsrdata3,
+                                          SECTN_HCODE_LOG_IN_HB );
+
+        TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "Adding FFDC" );
+
+        // Add OCC response data to user details
+        l_errl->addFFDC( l_elogDissectionSum.iv_compId,
+                         l_pHcdLogBuf,
+                         l_logLength,
+                         l_elogDissectionSum.iv_version,  // version
+                         0 );
+
+        l_errl->collectTrace( ISTEP_COMP_NAME,256 );
+        l_errl->collectTrace( FAPI_TRACE_NAME, 512 );
+        l_errl->addHwCallout( i_coreTgt, HWAS::SRCI_PRIORITY_HIGH, HWAS::DECONFIG, HWAS::GARD_Fatal ); 
+        o_stepError.addErrorDetails( l_errl );
+        errlCommit( l_errl, l_elogDissectionSum.iv_compId );
+
+    }while( 0 );
+
+    delete[] l_pHcdLogBuf;
+}
+
 void* call_host_activate_secondary_cores(void* const io_pArgs)
 {
     IStepError  l_stepError;
-    errlHndl_t  l_timeout_errl =   nullptr;
     errlHndl_t  l_errl         =   nullptr;
 
     TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace,
@@ -232,46 +305,17 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                           "call_host_activate_secondary_cores: "
-                          "Time out rc from kernel %d on core 0x%016llX",
+                          "Time out rc from kernel %d on core Id: 0x%016llX",
                           rc,
-                          pir);
+                          coreId );
 
                 // only called if the core doesn't report in
                 const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>
                   l_fapi2ProcTarget(l_processor);
 
-                TARGETING::ATTR_FAPI_NAME_type l_targName { };
-                fapi2::toString(l_fapi2ProcTarget,
-                                l_targName,
-                                sizeof(l_targName));
+                lookup_and_commit_pm_elog( l_fapi2ProcTarget, l_core, l_stepError );
 
-                TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                          "Call p10_check_idle_stop_done on processor %s",
-                          l_targName);
 
-                FAPI_INVOKE_HWP(l_timeout_errl,
-                                p10_query_core_stop_state,
-                                l_fapi2_coreTarget,
-                                EXPECTED_STOP_STATE);
-
-                if (l_timeout_errl)
-                {
-                    TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                              "ERROR : p10_check_idle_stop_done: "
-                              TRACE_ERR_FMT,
-                              TRACE_ERR_ARGS(l_timeout_errl));
-
-                    // Add chip target info
-                    ErrlUserDetailsTarget(l_processor).addToLog(l_timeout_errl);
-
-                    // Create IStep error log
-                    l_stepError.addErrorDetails(l_timeout_errl);
-
-                    l_checkidle_eid = l_timeout_errl->eid();
-
-                    // Commit error
-                    errlCommit(l_timeout_errl, HWPF_COMP_ID);
-                }
             } // End of handle time out error
 
             // Create unrecoverable error log ourselves to knock out the
@@ -312,13 +356,13 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
                                      HWAS::GARD_Predictive);
 
                 // Could be an interrupt issue
-                l_errl->collectTrace(INTR_TRACE_NAME,256);
+                l_errl->collectTrace(INTR_TRACE_NAME,512);
 
                 // Throw printk in there too in case it is a kernel issue
                 ERRORLOG::ErrlUserDetailsPrintk().addToLog(l_errl);
 
                 // Add interesting ISTEP traces
-                l_errl->collectTrace(ISTEP_COMP_NAME,256);
+                l_errl->collectTrace(FAPI_TRACE_NAME, 512);
 
                 l_stepError.addErrorDetails(l_errl);
                 errlCommit(l_errl, HWPF_COMP_ID);
@@ -440,5 +484,6 @@ void* call_host_activate_secondary_cores(void* const io_pArgs)
     // end task, returning any errorlogs to IStepDisp
     return l_stepError.getErrorHandle();
 } // end call_host_activate_secondary_cores
+
 
 } // end namespace ISTEP_16
