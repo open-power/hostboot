@@ -191,8 +191,9 @@ fapi2::ReturnCode get_ppr_resources(
     for (uint8_t l_dram = 0; l_dram < ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4; l_dram++)
     {
         const uint8_t l_even_bg = mss::is_odd(l_repair.iv_bg) ? (l_repair.iv_bg - 1) : l_repair.iv_bg;
-        FAPI_INF_NO_SBE(GENTARGTIDFORMAT " PPR Resources for DRAM%d: 0x%02X (BG%d BA[3:0], BG%d BA[3:0]) 1=available",
-                        GENTARGTID(l_ocmb), l_dram, o_data[l_dram], l_even_bg + 1, l_even_bg);
+        FAPI_INF_NO_SBE(GENTARGTIDFORMAT
+                        " PPR Resources for port rank%d, srank%d, DRAM%d: 0x%02X (BG%d BA[3:0], BG%d BA[3:0]) 1=available",
+                        GENTARGTID(l_port), i_rank_info.get_port_rank(), l_repair.iv_srank, l_dram, o_data[l_dram], l_even_bg + 1, l_even_bg);
     }
 
 #endif
@@ -271,6 +272,8 @@ fapi2::ReturnCode get_all_ppr_resources(const fapi2::Target<fapi2::TARGET_TYPE_M
                     uint8_t l_data[ccsTraits<mss::mc_type::ODYSSEY>::NUM_DRAM_X4] = {};
                     mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair(REPAIR_VALID, l_dimm_rank, DRAM_POS, l_srank, l_bg,
                             BANK_POS, ROW_POS);
+                    // Swizzle our repair entry from logical to SPD order
+                    swizzle_repair_entry(l_repair);
 
                     FAPI_TRY(get_ppr_resources(l_rank_info, l_repair, false, l_data));
 
