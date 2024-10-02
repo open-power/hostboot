@@ -721,10 +721,30 @@ hb_startsimics()
             STARTSIMCMD+=(sbe_boot_mem=pibmem)
         fi
 
+        # This is the file used by vexec to determine which site the current machine belongs to
+        # We use this to find the path to the files vexec used to allow other machines to vexec
+        # into them. If the machine is not allowed to vexec we skip it below
+        whichLab=$(cat /etc/pfd/site)
+        if [ $whichLab = "rch" ] ; then
+            if $(grep -q $(hostname -s) /afs/rchland/projects/esw/gfwcs/data/auth*); then
+                skipVexec=false;
+            else
+                skipVexec=true;
+            fi
+        elif [ $whichLab = "aus" ] ; then
+            if $(grep -q $(hostname -s) /afs/austin/projects/esw/gfwcs/data/auth*); then
+                skipVexec=false;
+            else
+                skipVexec=true;
+            fi
+        else
+            skipVexec=false;
+        fi
+
         # If '-nre' was passed in as a flag, then do not vexec
         # also, if $POOL is defined, this indicates are already in
         # a vexec shell so do not vexec
-        if [ "$*" = "-nre" ] || [ ! -z ${POOL} ]; then
+        if [ "$*" = "-nre" ] || [ ! -z ${POOL} ] || [ $skipVexec = true ]; then
             VEXEC_STR=""
         else
             VEXEC_STR=" vexec"
