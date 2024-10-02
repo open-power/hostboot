@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2017                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,7 @@ public:
     //**************************************************************************
     // tankTest1. Test AttributeTank functions with empty tank
     //**************************************************************************
-    void tankTest1(void)
+    void testTank1(void)
     {
         do
         {
@@ -57,13 +57,13 @@ public:
             // Check that tank is empty
             if (l_tank.attributesExist())
             {
-                TS_FAIL("tankTest1: Error. AttributeTank is not empty (1)");
+                TS_FAIL("testTank1: Error. AttributeTank is not empty (1)");
                 break;
             }
 
             if (l_tank.attributeExists(5))
             {
-                TS_FAIL("tankTest1: Error. AttributeTank is not empty (2)");
+                TS_FAIL("testTank1: Error. AttributeTank is not empty (2)");
                 break;
             }
 
@@ -86,7 +86,7 @@ public:
                                     AttributeTank::ATTR_NODE_NA,
                                     &l_val))
             {
-                TS_FAIL("tankTest1: Error. Got attr from empty tank (3)");
+                TS_FAIL("testTank1: Error. Got attr from empty tank (3)");
                 break;
             }
 
@@ -97,13 +97,13 @@ public:
 
             if (l_attributes.size())
             {
-                TS_FAIL("tankTest1: Error. Got attrs from empty tank (4)");
+                TS_FAIL("testTank1: Error. Got attrs from empty tank (4)");
                 break;
             }
 
         } while (0);
 
-        TS_TRACE("tankTest1 complete" );
+        TS_TRACE("testTank1 complete" );
     }
 
     //**************************************************************************

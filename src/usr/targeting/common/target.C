@@ -745,7 +745,11 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
         case (TARGETING::CLASS_SYS):
             if ((o_pos != AttributeTank::ATTR_POS_NA) ||
                 (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
-                (o_node != AttributeTank::ATTR_NODE_NA)) {
+                (o_node != AttributeTank::ATTR_NODE_NA))
+            {
+                TRACFCOMP(g_trac_targeting,
+                          "getAttrTankTargetPosData: o_pos[%d], o_unitPos[%d] o_node[%d]",
+                          o_pos, o_unitPos, o_node);
                 targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
             }
             break;
@@ -761,7 +765,11 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
         case (TARGETING::CLASS_ASIC):
             if ((o_pos == AttributeTank::ATTR_POS_NA) ||
                 (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
-                (o_node == AttributeTank::ATTR_NODE_NA)) {
+                (o_node == AttributeTank::ATTR_NODE_NA))
+            {
+                TRACFCOMP(g_trac_targeting,
+                          "getAttrTankTargetPosData: o_pos[%d], o_unitPos[%d] o_node[%d]",
+                          o_pos, o_unitPos, o_node);
                 targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
             }
             break;
@@ -770,10 +778,11 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
         case (TARGETING::CLASS_UNIT):
             if ((o_pos == AttributeTank::ATTR_POS_NA) ||
                 (o_unitPos == AttributeTank::ATTR_UNIT_POS_NA) ||
-                (o_node == AttributeTank::ATTR_NODE_NA)) {
+                (o_node == AttributeTank::ATTR_NODE_NA))
+            {
                 TRACFCOMP(g_trac_targeting,
-                          "o_pos[%d], o_unitPos[%d] o_node[%d]", o_pos,
-                          o_unitPos, o_node);
+                          "getAttrTankTargetPosData: o_pos[%d], o_unitPos[%d] o_node[%d]",
+                          o_pos, o_unitPos, o_node);
                 targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
             }
             break;
@@ -782,7 +791,11 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
         case (TARGETING::CLASS_ENC):
             if ((o_pos != AttributeTank::ATTR_POS_NA) ||
                 (o_unitPos != AttributeTank::ATTR_UNIT_POS_NA) ||
-                (o_node == AttributeTank::ATTR_NODE_NA)) {
+                (o_node == AttributeTank::ATTR_NODE_NA))
+            {
+                TRACFCOMP(g_trac_targeting,
+                          "getAttrTankTargetPosData: o_pos[%d], o_unitPos[%d] o_node[%d]",
+                          o_pos, o_unitPos, o_node);
                 targAssert(GET_ATTR_TANK_TARGET_POS_DATA, l_class);
             }
             break;

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2023
+# Contributors Listed Below - COPYRIGHT 2011,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -76,6 +76,7 @@ TESTS += testTargetUtil.H
 TESTS += ${COMMON_TESTCASE_REL_PATHS}
 TESTS += testattrrules.H
 TESTS += testTargPlatUtil.H
+TESTS += testTextAttrOvd.H
 
 OBJS += attributestrings.o
 

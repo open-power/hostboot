@@ -362,6 +362,14 @@
         <default>pu:k0:n0:s0:p00</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>PROC_MASTER_TYPE</id>
         <default>ACTING_MASTER</default>
     </attribute>
@@ -458,6 +466,14 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu:k0:n0:s0:p01</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>1</default>
     </attribute>
     <attribute>
         <id>PROC_MASTER_TYPE</id>
@@ -4697,6 +4713,18 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p01:c7</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_UNIT</id>
+        <default>7</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -16686,6 +16714,14 @@
         <default>temp_sensor:k0:n0:s0:p01</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>1</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
         <default>1</default>
     </attribute>
@@ -17643,6 +17679,14 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>power_ic:k0:n0:s0:p02</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>2</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -19208,6 +19252,14 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pmic:k0:n0:s0:p03</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>3</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -23348,6 +23400,14 @@
         <default>dimm:k0:n0:s0:p00</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
         <default>0</default>
     </attribute>
@@ -23427,6 +23487,14 @@
         <default>dimm:k0:n0:s0:p02</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>2</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
         <default>2</default>
     </attribute>
@@ -23504,6 +23572,14 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p04</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>4</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -23972,6 +24048,14 @@
         <default>dimm:k0:n0:s0:p16</default>
     </attribute>
     <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>16</default>
+    </attribute>
+    <attribute>
         <id>FAPI_POS</id>
         <default>16</default>
     </attribute>
@@ -24124,6 +24208,14 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p20</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
+        <default>20</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -39680,6 +39772,18 @@
     </attribute>
     <attribute>
         <id>POSITION</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPI_NAME</id>
+        <default>tpm:k0:n0:s0:p00</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_NODE</id>
+        <default>0</default>
+    </attribute>
+    <attribute>
+        <id>FAPINAME_POS</id>
         <default>0</default>
     </attribute>
     <attribute>
