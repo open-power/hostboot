@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -778,20 +778,6 @@ namespace INTR
              * @return an error handle on error
              */
             errlHndl_t hw_resetIRSNregs(TARGETING::Target * i_proc);
-
-            /**
-             * Build a list of "functional" processors.  This needs to be
-             * done without targeting support (just blueprint) since
-             * on MPIPL the targeting information is obtained in
-             * discover_targets -- much later in the IPL.
-             *
-
-             * @param o_proc  List of "functional" processors on SMP
-             * @param o_cores List of cores under functional processors
-             * @return an error handle on error
-             */
-            errlHndl_t findProcs_Cores(TARGETING::TargetHandleList & o_procs,
-                                       TARGETING::TargetHandleList& o_cores);
 
             /**
              * disableHwMpIpl

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2302,130 +2302,6 @@ void IntrRp::shutDown(uint64_t i_status)
 #endif
 
     TRACFCOMP(g_trac_intr,INFO_MRK"INTR is shutdown");
-}
-
-//----------------------------------------------------------------------------
-
-errlHndl_t IntrRp::findProcs_Cores(TARGETING::TargetHandleList & o_procs,
-                                   TARGETING::TargetHandleList& o_cores)
-{
-    errlHndl_t err = NULL;
-
-    do
-    {
-        //Build a list of "functional" processors.  This needs to be
-        //done without targeting support (just blueprint) since
-        //on MPIPL the targeting information is obtained in
-        //discover_targets -- much later in the IPL.
-
-        //Since this is MPIPL we will rely on two things:
-        // 1) FSI will be active to present chips
-        // 2) The MPIPL HW bit in CFAM 2839 will be set
-
-        //force FSI to init so we can rely on slave data
-        err = FSI::initializeHardware();
-        if(err)
-        {
-            break;
-        }
-
-        TARGETING::TargetHandleList procChips;
-        TARGETING::PredicateCTM predProc( TARGETING::CLASS_CHIP,
-                                          TARGETING::TYPE_PROC );
-
-        TARGETING::TargetService& tS = TARGETING::targetService();
-        TARGETING::Target * sysTarget = nullptr;
-        tS.getTopLevelTarget( sysTarget );
-        assert( sysTarget != nullptr );
-
-        TARGETING::Target* masterProcTarget = nullptr;
-        TARGETING::targetService().masterProcChipTargetHandle(
-                                                        masterProcTarget );
-
-        tS.getAssociated( procChips,
-                          sysTarget,
-                          TARGETING::TargetService::CHILD,
-                          TARGETING::TargetService::ALL,
-                          &predProc );
-
-        for(TARGETING::TargetHandleList::iterator proc = procChips.begin();
-            proc != procChips.end();
-            ++proc)
-        {
-            //if master proc -- just add it as we are running on it
-            if (*proc == masterProcTarget)
-            {
-                o_procs.push_back(*proc);
-                continue;
-            }
-
-            //First see if present
-            if(FSI::isSlavePresent(*proc))
-            {
-                TRACFCOMP(g_trac_intr,"Proc %x detected via FSI", TARGETING::get_huid(*proc));
-
-                //Second check to see if MPIPL bit is on cfam "2839" which
-                //Note 2839 is ecmd addressing, real address is 0x28E4 (byte)
-                uint64_t l_addr = 0x28E4;
-                uint32_t l_data = 0;
-                size_t l_size = sizeof(uint32_t);
-                err = deviceRead(*proc,
-                                   &l_data,
-                                   l_size,
-                                   DEVICE_FSI_ADDRESS(l_addr));
-                if (err)
-                {
-                    TRACFCOMP(g_trac_intr,"Failed to read CFAM 2839 on %x",
-                              TARGETING::get_huid(*proc));
-                    break;
-                }
-
-                TRACFCOMP(g_trac_intr,"Proc %x 2839 val [%x]", TARGETING::get_huid(*proc),
-                          l_data);
-
-                if(l_data & 0x80000000)
-                {
-                    //Chip is present and functional -- add it to our list
-                    o_procs.push_back(*proc);
-
-                    //Also need to force it to use Xscom
-                    //Note that it has to support (ie it is part of the SMP)
-                    ScomSwitches l_switches =
-                                     (*proc)->getAttr<ATTR_SCOM_SWITCHES>();
-
-                    l_switches.useSbeScom = 0;
-                    l_switches.useFsiScom = 0;
-                    l_switches.useXscom = 1;
-
-                    (*proc)->setAttr<ATTR_SCOM_SWITCHES>(l_switches);
-                }
-            }
-        }
-        if (err)
-        {
-            break;
-        }
-
-
-        //Build up a list of all possible cores (don't care if func/present,
-        //just that they exist in the blueprint
-        TARGETING::TargetHandleList l_cores;
-        for(TARGETING::TargetHandleList::iterator proc = o_procs.begin();
-            proc != o_procs.end();
-            ++proc)
-        {
-            l_cores.clear();
-            getChildChiplets(l_cores, *proc, TYPE_CORE, false);
-            for(TARGETING::TargetHandleList::iterator core = l_cores.begin();
-                core != l_cores.end();
-                ++core)
-            {
-                o_cores.push_back(*core);
-            }
-        }
-    }while(0);
-
-    return err;
 }
 
 void IntrRp::allowAllInterrupts(TARGETING::Target* i_core)
