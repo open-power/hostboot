@@ -38,6 +38,7 @@
 #include <lib/power_thermal/ody_thermal_init_utils.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/ody_half_dimm_dqs_track_utils.H>
+#include <lib/workarounds/ody_temp_sensor_workarounds.H>
 
 extern "C"
 {
@@ -69,6 +70,9 @@ extern "C"
 
         // Clear the emergency mode throttle bit
         FAPI_TRY (mss::ody::thermal::mc::disable_safe_mode_throttles(i_target));
+
+        // Initialize the PMU for use with the sensor cache workaround
+        FAPI_TRY(mss::ody::workarounds::start_pmu_counts(i_target));
 
         // Init SPPE polling attributes
         FAPI_TRY(mss::ody::thermal::init_sppe_polling_attr(i_target));

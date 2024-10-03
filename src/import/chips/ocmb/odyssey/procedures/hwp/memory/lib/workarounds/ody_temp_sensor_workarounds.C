@@ -379,7 +379,48 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Reads the sensor cache regs and repackaged into scratch registers
+/// @brief Reset the PMU counters used in the workaround
+/// @param[in] i_target ocmb target on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode reset_pmu_counts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::buffer<uint64_t> l_pmu_cfg;
+
+    // To reset the counts, we first stop the PMU then hit the start/reset bit
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
+    l_pmu_cfg.clearBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_START_RESET>()
+    .setBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_STOP>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
+
+    l_pmu_cfg.setBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_START_RESET>()
+    .clearBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_STOP>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Start the PMU counters used in the workaround
+/// @param[in] i_target ocmb target on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode start_pmu_counts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    fapi2::buffer<uint64_t> l_pmu_cfg;
+
+    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
+    l_pmu_cfg.setBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_START_RESET>()
+    .clearBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_STOP>();
+    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Reads the sensor cache regs and repackaged into scratch registers, then reset counts
 /// @param[in] i_target ocmb target on which to operate
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 ///
@@ -388,6 +429,7 @@ fapi2::ReturnCode write_sensor_cache_into_scratch_regs(const fapi2::Target<fapi2
     FAPI_TRY(wr_data_to_scratch0(i_target));
     FAPI_TRY(wr_data_to_scratch1(i_target));
     FAPI_TRY(wr_data_to_scratch2(i_target));
+    FAPI_TRY(reset_pmu_counts(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;

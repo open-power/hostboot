@@ -126,6 +126,20 @@ fapi2::ReturnCode wr_data_to_scratch1(const fapi2::Target<fapi2::TARGET_TYPE_OCM
 fapi2::ReturnCode wr_data_to_scratch2(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 ///
+/// @brief Reset the PMU counters used in the workaround
+/// @param[in] i_target ocmb target on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode reset_pmu_counts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
+/// @brief Start the PMU counters used in the workaround
+/// @param[in] i_target ocmb target on which to operate
+/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
+///
+fapi2::ReturnCode start_pmu_counts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
 /// @brief Reads the sensor cache regs and repackaged into scratch registers
 /// @param[in] i_target ocmb target on which to operate
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
