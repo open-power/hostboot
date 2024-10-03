@@ -57,7 +57,8 @@ std::vector<const char *> CxxSerialTests{ "libtesthwas.so",
                                           "libtestsbeio.so",
                                           "libtestrtloader.so",
                                           "libtestmmio.so",
-                                          "libtestmmio_rt.so"};
+                                          "libtestmmio_rt.so",
+                                          "libtesterrl.so"};
 
 //
 // TestSuite members

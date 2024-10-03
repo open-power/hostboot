@@ -78,8 +78,6 @@ uint8_t ErrlManager::iv_hiddenErrLogsEnable =
 
 extern trace_desc_t* g_trac_errl;
 
-#define TRACM(args...) TRACFCOMP(g_trac_errl, args)
-
 /**
 * @brief
 * In storage, the flattened error logs are interspersed with "markers."
@@ -666,7 +664,6 @@ void ErrlManager::errlogMsgHndlr ()
                         l_err->traceLogEntry();
                     }
 #endif
-
                     //Ask the ErrlEntry to process any callouts
                     l_err->processCallout();
 
@@ -886,8 +883,7 @@ void ErrlManager::commitErrLogAggregate(errlHndl_t& io_err, const compId_t i_com
               i_committerComp, io_err->eid(), io_err->reasonCode(), l_sevString );
 
     // Check if this was a spare-able error.
-    bool spareError = false,
-         nonSpareServiceAction = false;
+    bool nonSpareServiceAction = false;
     HWAS::callOutPriority highestCalloutPriority      = HWAS::SRCI_PRIORITY_NONE,
                           highestSpareCalloutPriority = HWAS::SRCI_PRIORITY_NONE;
     bool targetingIsReady = Util::isTargetingLoaded() && TARGETING::targetService().isInitialized();
@@ -927,11 +923,12 @@ void ErrlManager::commitErrLogAggregate(errlHndl_t& io_err, const compId_t i_com
             // with service actions should have the ability to knock out cores.
             if (calloutHasServiceActions && HWAS::theDeconfigGard().reduceSpareCores(target))
             {
-                // Used later to decide if we need to switch off the gard/deconfig bits.
-                spareError = true;
                 // Add the symbolic callout to indicate a spare resource was used.
                 io_err->addProcedureCallout(HWAS::EPUB_PRC_SPARE_RESOURCE,
                                             HWAS::SRCI_PRIORITY_LOW);
+                TRACFCOMP(g_trac_errl,
+                          "commitErrLogAggregate(): eid=%.8X RC=%.4X and Sev=%s is a SPARE error",
+                          io_err->eid(), io_err->reasonCode(), l_sevString);
                 // Change the gard type to spare in the error, if exists. Do not propagate to other errors because they
                 // may not be spareable errors.
                 io_err->setGardType(target,
@@ -947,11 +944,6 @@ void ErrlManager::commitErrLogAggregate(errlHndl_t& io_err, const compId_t i_com
                 if ((calloutHasServiceActions & serviceAction_t::GARD_FOUND)
                     && !(calloutHasServiceActions & serviceAction_t::DECONFIG_FOUND))
                 {
-                    TRACFCOMP(g_trac_errl,
-                              "commitErrLogAggregate(): eid=%.8X RC=%.4X and Sev=%s, callout[%d]=%X has guard with no deconfig. Adding deconfig",
-                              io_err->eid(), io_err->reasonCode(), l_sevString,
-                              callout->type,
-                              calloutHasServiceActions);
                     if(callout->type == HWAS::HW_CALLOUT)
                     {
                         callout->deconfigState = deconfig_t::DECONFIG;
@@ -972,8 +964,13 @@ void ErrlManager::commitErrLogAggregate(errlHndl_t& io_err, const compId_t i_com
             }
             else
             {
+                // Either no sparing occurred or the callout does not have service actions.
+                // Keep track of the highest callout priority because later we use it to determine if we should
+                // turn this log into a spare log.
                 highestCalloutPriority = highestCalloutPriority > callout->priority
                                        ? highestCalloutPriority : callout->priority;
+                // Also need to know if the log has non-spare related service actions because we do not want to hide
+                // a log with those since that would obfuscate other problems.
                 if (calloutHasServiceActions)
                 {
                     nonSpareServiceAction = true;
@@ -993,22 +990,18 @@ void ErrlManager::commitErrLogAggregate(errlHndl_t& io_err, const compId_t i_com
                        true, // This setting is final, i.e. cannot be changed anymore after this
                        propagation_t::NO_PROPAGATE); // This is a recursive function already
                                                      // we're handling each as they come.
+        // Regardless of the error type this log had, set it to identify as spare. Since we are in the commit path code
+        // which would have cared about error type will have already seen the existing type and from this point forward
+        // the commit path needs a way to identify a log being committed as a spare-type log. We do this so later the
+        // deconfig gard bits will be set properly for these kinds of logs but other non-visible logs won't have those
+        // bits set. The bits indicate whether or not service actions occurred as a result of the log.
+        io_err->setErrorType(ERRL_SPARE_ERROR_TYPE);
     }
 
     if ( io_err->isSevVisible())
     {
         iv_nonInfoCommitted = true;
         lwsync();
-    }
-    else if (!spareError)
-    {
-        // The error isn't visible and wasn't changed to non-visible as a result of spare actions.
-        // Unset the deconfig and gard bits in the SRC since no actions will be taken for this log.
-        // Below sendErrlogToMessageQueue will call processCallout on this error which will make the decision
-        // to take actions or not based on these settings and severity.
-        io_err->iv_Src.iv_deconfig = false;
-        io_err->iv_Src.iv_gard = false;
-        // @TODO PFHB-628 need lwsync here?
     }
 
     // Ask ErrlEntry to check for any special deferred deconfigure callouts

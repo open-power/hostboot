@@ -1309,39 +1309,60 @@ void ErrlEntry::addPartIdInfoToErrLog
 
 void ErrlEntry::checkForDeconfigAndGard()
 {
-    //Loop through each section of the errorlog
-    for(auto & section : iv_SectionVector)
+    TRACFCOMP(g_trac_errl, "checkForDeconfigAndGard(): "
+              "eid=%.8X RC=%.4X has error type =%X",
+              eid(), reasonCode(), iv_errorType);
+    if (!isSevVisible() && (iv_errorType != ERRL_SPARE_ERROR_TYPE))
     {
-        if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
+        TRACFCOMP(g_trac_errl, "checkForDeconfigAndGard(): "
+                  "eid=%.8X RC=%.4X is non-visable non-spare error. Unsetting gard/deconfig bits...",
+                  eid(), reasonCode());
+        // The error isn't visible and wasn't changed to non-visible as a result of spare actions.
+        // Unset the deconfig and gard bits in the SRC since no actions will be taken for this log.
+        // Below sendErrlogToMessageQueue will call processCallout on this error which will make the decision
+        // to take actions or not based on these settings and severity.
+        iv_Src.iv_deconfig = false;
+        iv_Src.iv_gard = false;
+    }
+    else
+    {
+        TRACFCOMP(g_trac_errl, "checkForDeconfigAndGard(): "
+                  "eid=%.8X RC=%.4X is setting bits",
+                  eid(), reasonCode());
+        //Loop through each section of the errorlog
+        for(auto & section : iv_SectionVector)
         {
-            const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
-            // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
-            // entry that follows the UDT callout entry
-            if(callout_ud->type == HWAS::HW_CALLOUT)
+            if (section->compId() == ERRL_COMP_ID && section->subSect() == ERRORLOG::ERRL_UDT_CALLOUT)
             {
-                if(callout_ud->deconfigState != HWAS::NO_DECONFIG)
+                const auto callout_ud = reinterpret_cast<HWAS::callout_ud_t*>(section->iv_pData);
+                // Looking at hwasCallout.H only the HW, CLOCK, and PART Callouts will have a target
+                // entry that follows the UDT callout entry
+                if(callout_ud->type == HWAS::HW_CALLOUT)
                 {
-                    setDeconfigBit();
-                }
-                if(callout_ud->gardErrorType != HWAS::GARD_NULL)
-                {
-                    if(!skipPredictiveGard(callout_ud->gardErrorType))
+                    if(callout_ud->deconfigState != HWAS::NO_DECONFIG)
                     {
-                        setGardBit();
+                        setDeconfigBit();
+                    }
+                    if(callout_ud->gardErrorType != HWAS::GARD_NULL)
+                    {
+                        if(!skipPredictiveGard(callout_ud->gardErrorType))
+                        {
+                            setGardBit();
+                        }
                     }
                 }
-            }
-            else if(callout_ud->type == HWAS::PART_CALLOUT)
-            {
-                if(callout_ud->partDeconfigState != HWAS::NO_DECONFIG)
+                else if(callout_ud->type == HWAS::PART_CALLOUT)
                 {
-                    setDeconfigBit();
-                }
-                if(callout_ud->partGardErrorType != HWAS::GARD_NULL)
-                {
-                    if(!skipPredictiveGard(callout_ud->gardErrorType))
+                    if(callout_ud->partDeconfigState != HWAS::NO_DECONFIG)
                     {
-                        setGardBit();
+                        setDeconfigBit();
+                    }
+                    if(callout_ud->partGardErrorType != HWAS::GARD_NULL)
+                    {
+                        if(!skipPredictiveGard(callout_ud->gardErrorType))
+                        {
+                            setGardBit();
+                        }
                     }
                 }
             }
@@ -2568,12 +2589,14 @@ epubSubSystem_t ErrlEntry::getSubSystem( HWAS::partTypeEnum i_partType ) const
 // for use by ErrlManager
 void ErrlEntry::processCallout()
 {
-    TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::processCallout");
-
-    // Skip all callouts if this is a non-visible log
-    if( !isSevVisible() )
+    // Skip all callouts if this is a non-visible log unless the gard/deconfig bits are set.
+    bool gard_or_deconfig_set = (iv_Src.iv_gard || iv_Src.iv_deconfig);
+    if( !isSevVisible() && !gard_or_deconfig_set)
     {
-        TRACDCOMP(g_trac_errl, "Error log is non-visible - skipping callouts");
+        TRACFCOMP(g_trac_errl,
+                  "ErrlEntry::processCallout(): eid=%.8X RC=%.4X Error log is non-visible - skipping callouts",
+                  this->eid(),
+                  this->reasonCode());
         return;
     }
 

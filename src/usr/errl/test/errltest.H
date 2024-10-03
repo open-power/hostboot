@@ -1175,17 +1175,17 @@ public:
         // Find a non-master core that is currently functional
         TARGETING::TargetHandleList l_cores;
         TARGETING::getAllChiplets( l_cores, TARGETING::TYPE_CORE, true );
-        TARGETING::Target* l_victim = nullptr;
+        TARGETING::Target* l_core = nullptr;
         const TARGETING::Target* l_bootcore = TARGETING::getBootCore();
         for( auto c : l_cores )
         {
             if( c != l_bootcore )
             {
-                l_victim = c;
+                l_core = c;
                 break;
             }
         }
-        if( l_victim == nullptr )
+        if( l_core == nullptr )
         {
             TS_FAIL( "Could not find a non-master core" );
             return;
@@ -1198,19 +1198,23 @@ public:
                                         ERRORLOG::ERRL_TEST_MOD_ID,
                                         ERRORLOG::ERRL_TEST_REASON_CODE,
                                         0x494E464F, //INFO
-                                        0 );
+                                        get_huid(l_core) );
         // Add a callout with deconfig and gard
-        l_err->addHwCallout( l_victim,
+        l_err->addHwCallout( l_core,
                              HWAS::SRCI_PRIORITY_HIGH,
                              HWAS::DECONFIG,
                              HWAS::GARD_Fatal );
         // Commit the log
         errlCommit(l_err,CXXTEST_COMP_ID);
 
+        // Flush out errorlogs so we make sure deconfigs/gards are logged
+        // before we check for them
+        ERRORLOG::ErrlManager::callFlushErrorLogs();
+
         // Verify that the target wasn't actually deconfigured
-        TARGETING::ATTR_HWAS_STATE_type l_state =
-          l_victim->getAttr<TARGETING::ATTR_HWAS_STATE>();
-        if( !l_state.functional )
+        TARGETING::ATTR_HWAS_STATE_type l_coreState =
+          l_core->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        if( !l_coreState.functional )
         {
             TS_FAIL( "Info log incorrectly caused deconfig" );
         }
@@ -1222,22 +1226,78 @@ public:
                                         ERRORLOG::ERRL_TEST_MOD_ID,
                                         ERRORLOG::ERRL_TEST_REASON_CODE,
                                         0x52454300, //REC
-                                        0 );
+                                        get_huid(l_core) );
         // Add a callout with deconfig and gard
-        l_err->addHwCallout( l_victim,
+        l_err->addHwCallout( l_core,
                              HWAS::SRCI_PRIORITY_HIGH,
                              HWAS::DECONFIG,
                              HWAS::GARD_Fatal );
         // Commit the log
         errlCommit(l_err,CXXTEST_COMP_ID);
 
-        // Verify that the target wasn't actually deconfigured
-        l_state =
-          l_victim->getAttr<TARGETING::ATTR_HWAS_STATE>();
-        if( !l_state.functional )
+        // Flush out errorlogs so we make sure deconfigs/gards are logged
+        // before we check for them
+        ERRORLOG::ErrlManager::callFlushErrorLogs();
+
+        // Verify the proper actions were taken.
+        l_coreState = l_core->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        auto chip = getParent(l_core, TARGETING::TYPE_PROC);
+        bool chipHasSpares = chip->getAttr<ATTR_SPARE_CORES>() != 0;
+        if (chipHasSpares)
+        {
+            if( !l_coreState.functional )
+            {
+                TS_INFO( "Recovered log w/ service actions for core caused it to become non-functional as expected." );
+                // Reset the state of the effected targets
+                chip->setAttr<ATTR_SPARE_CORES_DEPLOYED>(0);
+
+                auto fc = getParent(l_core, TARGETING::TYPE_FC);
+                theDeconfigGard().clearGardRecords(fc);
+                theDeconfigGard().clearDeconfigureRecords(fc);
+
+                for (auto coreChild : composable(getChildChiplets)(fc, TARGETING::TYPE_CORE, false))
+                {
+                    theDeconfigGard().clearGardRecords(coreChild);
+                    theDeconfigGard().clearDeconfigureRecords(coreChild);
+                    coreChild->setAttr<ATTR_REPLACED_BY_SPARE>(0);
+                }
+            }
+            else
+            {
+                TS_FAIL("Recovered log w/ core deconfig/gard did not cause core to become non-functional.");
+            }
+        }
+        else if( !l_coreState.functional )
+        {
+            TS_FAIL("Recovered log w/ core deconfig/gard caused core to become non-functional when chip has no spares set.");
+        }
+
+        // Cores are the exception regarding recovered log service actions since spares need to be able to apply
+        // guards/deconfigs for the feature to work. Test another target to verify recovered logs for other targets
+        // do not trigger service actions
+        l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_RECOVERED,
+                                        ERRORLOG::ERRL_TEST_MOD_ID,
+                                        ERRORLOG::ERRL_TEST_REASON_CODE,
+                                        0x52454300, //REC
+                                        get_huid(chip) );
+        // Add a callout with deconfig and gard
+        l_err->addHwCallout( chip,
+                             HWAS::SRCI_PRIORITY_HIGH,
+                             HWAS::DECONFIG,
+                             HWAS::GARD_Fatal );
+        // Commit the log
+        errlCommit(l_err,CXXTEST_COMP_ID);
+
+        // Flush out errorlogs so we make sure deconfigs/gards are logged
+        // before we check for them
+        ERRORLOG::ErrlManager::callFlushErrorLogs();
+
+        TARGETING::ATTR_HWAS_STATE_type chipState = chip->getAttr<TARGETING::ATTR_HWAS_STATE>();
+        if( !chipState.functional )
         {
             TS_FAIL( "Recovered log incorrectly caused deconfig" );
         }
+
     }
 
     /**

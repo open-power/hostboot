@@ -71,6 +71,9 @@ namespace ERRORLOG
         ERRL_MARKER_LID_INVALID_BUFFER      = ERRL_COMP_ID | 0x0D,
         ERRL_RT_NULL_FIRMWARE_REQUEST_PTR   = ERRL_COMP_ID | 0x0E,
         ERRL_RT_GARD_RESOURCE_ID_NOT_FOUND  = ERRL_COMP_ID | 0x0F,
+        // Error Types, working backward from the last reason code to keep
+        // them from mixing in with actual reason codes.
+        ERRL_SPARE_ERROR_TYPE               = ERRL_COMP_ID | 0xFE,
         //........
         ERRL_LAST_ERR                       = ERRL_COMP_ID | 0xFF
     };
