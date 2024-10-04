@@ -29,6 +29,7 @@
 //        same way as an error being reported by the OCC.
 // @note  Refer section 3.2 of the 'OCC Firmware Interface Specifictaion for
 //        POWER10' for details on the OCC assisted error logging mechanism.
+//  EKB-Mirror-To: hostboot
 
 #ifndef _HCODE_ERRL_TABLE_H
 #define _HCODE_ERRL_TABLE_H

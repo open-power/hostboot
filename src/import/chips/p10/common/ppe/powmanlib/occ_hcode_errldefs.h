@@ -28,6 +28,7 @@
 //        Mechanism
 // @note  Refer section 3.3 of the 'OCC Firmware Interface Specification for
 //        POWER10' for definition of the error log format in SRAM
+//  EKB-Mirror-To: hostboot
 
 #ifndef _OCC_HCODE_ERRLDEFS_H
 #define _OCC_HCODE_ERRLDEFS_H
@@ -270,7 +271,8 @@ struct ErrlEntry
 
 typedef struct ErrlEntry ErrlEntry_t;
 
-/* Error Log Handle */
-typedef ErrlEntry_t* errlHndl_t;
-
+#ifndef __HOSTBOOT_MODULE
+    /* Error Log Handle */
+    typedef ErrlEntry_t* errlHndl_t;
+#endif //__HOSTBOOT_MODULE
 #endif //_OCC_HCODE_ERRLDEFS_H
