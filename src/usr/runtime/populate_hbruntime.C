@@ -2035,7 +2035,7 @@ errlHndl_t populate_hbSecurebootData ( void )
     return (l_elog);
 } // end populate_hbRuntime
 
-
+#ifdef CONFIG_TPMDD
 /**
  *  @brief This function determines if a TPM's I2C Device Info section in
  *         HDAT needs to be overriden with the TPM Model 75x that Hostboot
@@ -2121,6 +2121,7 @@ void checkForTpmI2cDevInfoOverride(HDAT::hdatI2cData_t* i_i2cDev)
 
     return;
 }
+#endif // CONFIG_TPMDD
 
 errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
 {
@@ -2842,12 +2843,14 @@ errlHndl_t populate_TpmInfoByNode(const uint64_t i_instance)
                 l_pLinkId = &l_physInter->i2cLinkIdPhysicalPresence;
                 break;
 
+#ifdef CONFIG_TPMDD
             case TARGETING::HDAT_I2C_DEVICE_PURPOSE_TPM:
                 // Special case where if a TPM Model 75x was dynamically found
                 // need to override the TPM Model 65x information that FSP put
                 // into HDAT
                 checkForTpmI2cDevInfoOverride(const_cast<HDAT::hdatI2cData_t*>(l_i2cDev));
                 continue;
+#endif // CONFIG_TPMDD
 
             default:
                 // Physical Presence Info not supported for this I2c device
