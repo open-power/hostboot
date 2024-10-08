@@ -86,7 +86,7 @@ fapi2::ReturnCode poll_for_quiesced(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
     // Waiting a LONG time as it can take 8ms for the chip op to filter through the Odyssey
     // The processor will wait 8ms, then set the FIR bit and the quiesce window
     mss::poll_parameters l_params;
-    l_params.iv_poll_count = 10000000;
+    l_params.iv_poll_count = 10000;
 
     // The quiesce has a two stage latching to avoid finding a false quiesce state
     // The MCU sets SRQ LRFIR bit 28 first to show that this is not a false quiesce
