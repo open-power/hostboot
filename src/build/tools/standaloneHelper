@@ -54,7 +54,7 @@ assemble_setup()
         export CONFIG_SECUREBOOT="1"
     fi
 
-    if [[ ! -d ${STANDALONE_DIR}/pnor ]];then
+    if [[ ! -d ${STANDALONE_DIR}/pnor/V3 ]];then
         mkdir -p ${STANDALONE_DIR}/pnor
     fi
 
@@ -65,6 +65,9 @@ assemble_setup()
     # Removing previously assembled items
     rm -rf ${STANDALONE_DIR}/pnor/*
     rm -rf ${STANDALONE_DIR}/staging/*
+    # ... but put back V3 sub-directory
+    mkdir -p ${STANDALONE_DIR}/pnor/V3
+
 
 }
 

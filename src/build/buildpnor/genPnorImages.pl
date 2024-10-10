@@ -101,6 +101,8 @@ use constant ENTERPRISE_KEYS_FLAG => 0x40000000;
 use constant LAB_SECURITY_OVERRIDE_FLAG => 0x00080000;
 use constant KEY_TRANSITION_FLAG => 0x00000001;
 # Size of HW keys' Hash and Secure Version
+# NOTE: HW_KEYS_HASH_SIZE and SECURE_VERSION_SIZE have the same values
+#       for V1 and V3 headers
 use constant HW_KEYS_HASH_SIZE => 64;
 use constant SECURE_VERSION_SIZE => 1;
 
@@ -119,6 +121,7 @@ my $DEVELOPMENT = "development";
 my $IMPRINT = "imprint";
 my $PRODUCTION = "production";
 my $INDEPENDENT = "independent";
+
 
 ################################################################################
 # I/O parsing
@@ -280,20 +283,59 @@ if ($secureboot)
 print "Check Signing and Dev key directory location set via env vars\n";
 
 # Signing and Dev key directory location set via env vars
-my $SIGNING_DIR = $ENV{'SIGNING_DIR'};
+# NOTE: Currently signing directories are the same
+my $SIGNING_DIR_V1 = $ENV{'SIGNING_DIR'};
+my $SIGNING_DIR_V3 = $ENV{'SIGNING_DIR'};
+
+# Add relative path to the dev key directory
 my $DEV_KEY_DIR = $ENV{'DEV_KEY_DIR'};
+
+# For FSP builds must add "/test" at the end to line up
+# with the new V1 and V3 sub-directories
+if ($buildType eq "fspbuild")
+{
+    $DEV_KEY_DIR = "$DEV_KEY_DIR/test";
+}
+# temporary workaround for open-power builds to find the right directory
+# will remove once https://github.ibm.com/open-power/pnor/pull/51 gets merged
+else
+{
+    if (!-d "${DEV_KEY_DIR}/v3_keys")
+    {
+        $DEV_KEY_DIR = "$DEV_KEY_DIR/..";
+    }
+}
+
+my $DEV_KEY_DIR_V1 = "$DEV_KEY_DIR/keys";
+my $DEV_KEY_DIR_V3 = "$DEV_KEY_DIR/v3_keys";
+
+# Create V3 sub-directory for the output files if it's not already there
+run_command("mkdir -p $bin_dir/V3");
+
 
 if ($secureboot)
 {
     # Check all components needed for developer signing
-    print "...Check developer signing dir: $SIGNING_DIR\n";
-    die "Signing Dir = $SIGNING_DIR DNE" if(! -d $SIGNING_DIR);
-    print "...Check developer signing dir: $DEV_KEY_DIR\n";
-    die "Dev Key Dir = $DEV_KEY_DIR DNE" if(! -d $DEV_KEY_DIR);
-    die "hw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_a*"));
-    die "hw_key_b DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_b*"));
-    die "hw_key_c DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/hw_key_c*"));
-    die "sw_key_a DNE in $DEV_KEY_DIR" if(!glob("$DEV_KEY_DIR/sw_key_a*"));
+    print "...input parameter Bin Dir: $bin_dir\n";
+    print "...env variable DEV_KEY_DIR: $DEV_KEY_DIR\n";
+    # V1
+    print "...Check developer signing dir V1: $SIGNING_DIR_V1\n";
+    die "Signing Dir = $SIGNING_DIR_V1 DNE" if(! -d $SIGNING_DIR_V1);
+    print "...Check developer signing key dir V1: $DEV_KEY_DIR_V1\n";
+    die "Dev Key Dir = $DEV_KEY_DIR_V1 DNE" if(! -d $DEV_KEY_DIR_V1);
+    die "hw_key_a DNE in $DEV_KEY_DIR_V1" if(!glob("$DEV_KEY_DIR_V1/hw_key_a*"));
+    die "hw_key_b DNE in $DEV_KEY_DIR_V1" if(!glob("$DEV_KEY_DIR_V1/hw_key_b*"));
+    die "hw_key_c DNE in $DEV_KEY_DIR_V1" if(!glob("$DEV_KEY_DIR_V1/hw_key_c*"));
+    die "sw_key_a DNE in $DEV_KEY_DIR_V1" if(!glob("$DEV_KEY_DIR_V1/sw_key_a*"));
+    # V3
+    print "...Check developer signing dir V3: $SIGNING_DIR_V3\n";
+    die "Signing Dir = $SIGNING_DIR_V3 DNE" if(! -d $SIGNING_DIR_V3);
+    print "...Check developer signing key dir V3: $DEV_KEY_DIR_V3\n";
+    die "Dev Key Dir = $DEV_KEY_DIR_V3 DNE" if(! -d $DEV_KEY_DIR_V3);
+    die "runtime_hw_key_a DNE in $DEV_KEY_DIR_V3" if(!glob("$DEV_KEY_DIR_V3/runtime_hw_key_a*"));
+    die "runtime_hw_key_d DNE in $DEV_KEY_DIR_V3" if(!glob("$DEV_KEY_DIR_V3/runtime_hw_key_d*"));
+    die "runtime_sw_key_p DNE in $DEV_KEY_DIR_V3" if(!glob("$DEV_KEY_DIR_V3/runtime_sw_key_p*"));
+    die "runtime_sw_key_s DNE in $DEV_KEY_DIR_V3" if(!glob("$DEV_KEY_DIR_V3/runtime_sw_key_s*"));
 }
 
 ### Open POWER signing
@@ -303,8 +345,11 @@ if(!$ENV{'SB_KEEP_CACHE'})
     $ENV{'SB_KEEP_CACHE'} = "true";
 }
 
-my $OPEN_SIGN_REQUEST=
-    "$SIGNING_DIR/crtSignedContainer.sh --scratchDir $bin_dir ";
+my $OPEN_SIGN_REQUEST_V1=
+    "$SIGNING_DIR_V1/crtSignedContainer.sh --scratchDir $bin_dir -V 1";
+
+my $OPEN_SIGN_REQUEST_V3=
+    "$SIGNING_DIR_V3/crtSignedContainer.sh --scratchDir $bin_dir/V3/ -V 3 ";
 
 # Check if secure version parameter was passed in and add it to the signing command, if necessary
 if ($secureVersionStr eq "")
@@ -319,11 +364,12 @@ else
     $secureVersionHbbl = sprintf("%02X",$secureVersionStr);
 
     # Pass this parameter to the signing tool
-    $OPEN_SIGN_REQUEST .= " --security-version $secureVersionStr ";
+    $OPEN_SIGN_REQUEST_V1 .= " --security-version $secureVersionStr ";
+    $OPEN_SIGN_REQUEST_V3 .= " --security-version $secureVersionStr ";
 }
 
 # By default key transition container is unused
-my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST;
+my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST_V1;
 
 # Production signing parameters
 my $OPEN_PRD_SIGN_PARAMS = "--mode production "
@@ -334,14 +380,21 @@ my $OPEN_PRD_SIGN_PARAMS = "--mode production "
 
 # Imprint key signing parameters.  In a non-secure compile, omit the keys to
 # generate a secure header without signatures
-my $OPEN_DEV_SIGN_PARAMS = "";
+my $OPEN_DEV_SIGN_PARAMS_V1 = "";
+my $OPEN_DEV_SIGN_PARAMS_V3 = "";
 if($secureboot)
 {
-    $OPEN_DEV_SIGN_PARAMS = "--mode $sign_mode "
-    . "--hwKeyA $DEV_KEY_DIR/hw_key_a.key "
-    . "--hwKeyB $DEV_KEY_DIR/hw_key_b.key "
-    . "--hwKeyC $DEV_KEY_DIR/hw_key_c.key "
-    . "--swKeyP $DEV_KEY_DIR/sw_key_a.key";
+    $OPEN_DEV_SIGN_PARAMS_V1 = "--mode $sign_mode "
+    . "--hwKeyA $DEV_KEY_DIR_V1/hw_key_a.key "
+    . "--hwKeyB $DEV_KEY_DIR_V1/hw_key_b.key "
+    . "--hwKeyC $DEV_KEY_DIR_V1/hw_key_c.key "
+    . "--swKeyP $DEV_KEY_DIR_V1/sw_key_a.key";
+
+    $OPEN_DEV_SIGN_PARAMS_V3 = "--mode $sign_mode "
+    . "--hwKeyA $DEV_KEY_DIR_V3/runtime_hw_key_a.key "
+    . "--hwKeyD $DEV_KEY_DIR_V3/runtime_hw_key_d.key "
+    . "--swKeyP $DEV_KEY_DIR_V3/runtime_sw_key_p.key "
+    . "--swKeyS $DEV_KEY_DIR_V3/runtime_sw_key_s.key";
 }
 
 # Handle key transition and production signing logic
@@ -351,12 +404,12 @@ if($secureboot)
 if ($signMode{$PRODUCTION})
 {
     # Production to Production key transition not supported yet
-    $OPEN_SIGN_REQUEST .= $OPEN_PRD_SIGN_PARAMS;
+    $OPEN_SIGN_REQUEST_V1 .= $OPEN_PRD_SIGN_PARAMS;
     $OPEN_SIGN_KEY_TRANS_REQUEST = "";
 }
 elsif ($keyTransition{enabled} && $signMode{$DEVELOPMENT})
 {
-    $OPEN_SIGN_REQUEST .= $OPEN_DEV_SIGN_PARAMS;
+    $OPEN_SIGN_REQUEST_V1 .= $OPEN_DEV_SIGN_PARAMS_V1;
 
     # Since this request signs 4k of random data for SBKT, but is not a named
     # section, we'll make up a component ID of "SBKTRAND"
@@ -364,7 +417,7 @@ elsif ($keyTransition{enabled} && $signMode{$DEVELOPMENT})
     if ($keyTransition{$IMPRINT})
     {
         $OPEN_SIGN_KEY_TRANS_REQUEST .=
-            "$OPEN_DEV_SIGN_PARAMS $sbktDataComponentIdArg";
+            "$OPEN_DEV_SIGN_PARAMS_V1 $sbktDataComponentIdArg";
     }
     elsif ($keyTransition{$PRODUCTION})
     {
@@ -374,7 +427,8 @@ elsif ($keyTransition{enabled} && $signMode{$DEVELOPMENT})
 }
 else
 {
-    $OPEN_SIGN_REQUEST .= $OPEN_DEV_SIGN_PARAMS;
+    $OPEN_SIGN_REQUEST_V1 .= $OPEN_DEV_SIGN_PARAMS_V1;
+    $OPEN_SIGN_REQUEST_V3 .= $OPEN_DEV_SIGN_PARAMS_V3;
     $OPEN_SIGN_KEY_TRANS_REQUEST = "";
 }
 
@@ -548,6 +602,14 @@ sub manipulateImage
         targetHrmor => 0,
         instructionStartStackPointer => 0);
 
+    # Because totalContainerSize can be different for V3, need a separate one
+    my %callerHwHdrFields_V3 = (
+        configure => 0,
+        totalContainerSize => 0,
+        targetHrmor => 0,
+        instructionStartStackPointer => 0);
+
+
     my $layoutKey = findLayoutKeyByEyeCatch($key, \%$i_pnorLayoutRef);
 
     # Skip if binary file isn't included in the PNOR layout file
@@ -567,7 +629,16 @@ sub manipulateImage
         VFS_MODULE_TABLE => => "$bin_dir/$parallelPrefix.$eyeCatch.vfs_module_table.bin",
         TEMP_BIN => "$bin_dir/$parallelPrefix.$eyeCatch.temp.bin",
         PAYLOAD_TEXT => "$bin_dir/$parallelPrefix.$eyeCatch.payload_text.bin",
-        PROTECTED_PAYLOAD => "$bin_dir/$parallelPrefix.$eyeCatch.protected_payload.bin"
+        PROTECTED_PAYLOAD => "$bin_dir/$parallelPrefix.$eyeCatch.protected_payload.bin",
+        # duplicate for V3
+        HDR_PHASE_V3 => "$bin_dir/V3/$parallelPrefix.$eyeCatch.temp.hdr.bin",
+        TEMP_SHA_IMG_V3 => "$bin_dir/V3/$parallelPrefix.$eyeCatch.temp.sha.bin",
+        PAD_PHASE_V3 => "$bin_dir/V3/$parallelPrefix.$eyeCatch.temp.pad.bin",
+        ECC_PHASE_V3 => "$bin_dir/V3/$parallelPrefix.$eyeCatch.temp.bin.ecc",
+        VFS_MODULE_TABLE_V3 => => "$bin_dir/V3/$parallelPrefix.$eyeCatch.vfs_module_table.bin",
+        TEMP_BIN_V3 => "$bin_dir/V3/$parallelPrefix.$eyeCatch.temp.bin",
+        PAYLOAD_TEXT_V3 => "$bin_dir/V3/$parallelPrefix.$eyeCatch.payload_text.bin",
+        PROTECTED_PAYLOAD_V3 => "$bin_dir/V3/$parallelPrefix.$eyeCatch.protected_payload.bin"
         );
 
     my $size = $sectionHash{$layoutKey}{physicalRegionSize};
@@ -623,14 +694,18 @@ sub manipulateImage
 
     my $openSigningFlags = OP_SIGNING_FLAG.$header->{flags};
 
-    my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST $openSigningFlags";
+    my $CUR_OPEN_SIGN_REQUEST_V1 = "$OPEN_SIGN_REQUEST_V1 $openSigningFlags";
+    my $CUR_OPEN_SIGN_REQUEST_V3 = "$OPEN_SIGN_REQUEST_V3 $openSigningFlags";
+
     my $componentId = convertEyecatchToCompId($eyeCatch);
-    $CUR_OPEN_SIGN_REQUEST .= " --sign-project-FW-token $componentId ";
+    $CUR_OPEN_SIGN_REQUEST_V1 .= " --sign-project-FW-token $componentId ";
+    $CUR_OPEN_SIGN_REQUEST_V3 .= " --sign-project-FW-token $componentId ";
 
     # Used for corrupting partitions. By default all protected offsets start
     # immediately after the container header which is size = PAGE_SIZE.
     # *Note: this is before ECC.
     my $protectedOffset = PAGE_SIZE;
+    my $protectedOffset_V3 = PAGE_SIZE;
 
     # Get bin file(s) associated with PNOR section
     my $bin_files = $$i_binFilesRef{$eyeCatch};
@@ -695,12 +770,22 @@ sub manipulateImage
         }
 
         # Check if bin file is system specific and prefix target to the front
+        # V1:
         my $final_bin_file = ($system_target eq "")? "$bin_dir/$eyeCatch$nodeIDstr.bin":
             "$bin_dir/$system_target.$eyeCatch$nodeIDstr.bin";
+        # V3:
+        my $final_bin_file_V3 = ($system_target eq "")? "$bin_dir/V3/$eyeCatch$nodeIDstr.bin":
+            "$bin_dir/V3/$system_target.$eyeCatch$nodeIDstr.bin";
 
         # Check if bin file is system specific and prefix target to the front
+        # V1:
         my $final_header_file = ($system_target eq "")? "$bin_dir/$eyeCatch$nodeIDstr.header":
             "$bin_dir/$system_target.$eyeCatch$nodeIDstr.header";
+
+        # V3
+        my $final_header_file_V3 = ($system_target eq "")? "$bin_dir/V3/$eyeCatch$nodeIDstr.header":
+            "$bin_dir/V3/$system_target.$eyeCatch$nodeIDstr.header";
+
 
         # Handle partitions that have an input binary.
         if (-e $bin_file)
@@ -709,6 +794,7 @@ sub manipulateImage
             # to emit eccless outputs, if requested
             my $eccless_file = $bin_file;
             my $eccless_prefix = "";
+            my $eccless_file_V3 = $bin_file;
 
             # HBBL + ROM combination
             if ($eyeCatch eq "HBBL")
@@ -724,7 +810,8 @@ sub manipulateImage
                 # Pad HBBL to max size before Header Phase
                 run_command("cp $bin_file $tempImages{TEMP_BIN}");
                 run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
-
+                run_command("cp $bin_file $tempImages{TEMP_BIN_V3}");
+                run_command("dd if=$tempImages{TEMP_BIN_V3} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
             }
 
             # Header Phase
@@ -735,17 +822,21 @@ sub manipulateImage
                 if ($secureboot && $isSpecialSecure)
                 {
                     $callerHwHdrFields{configure} = 1;
+                    $callerHwHdrFields_V3{configure} = 1;
                     if (exists $hashPageTablePartitions{$eyeCatch})
                     {
                         if ($eyeCatch eq "HBI")
                         {
                             # Pass HBB sw signatures as the salt entry.
-                            $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch,
+                            $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch,$bin_dir,
                                                                           getBinDataFromFile($preReqImages->{HBB_SW_SIG_FILE}));
+                            $tempImages{hashPageTable_V3} = genHashPageTable($bin_file, $eyeCatch,"$bin_dir/V3/",
+                                                                          getBinDataFromFile($preReqImages->{HBB_SW_SIG_FILE_V3}));
                         }
                         else
                         {
-                            $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch);
+                            $tempImages{hashPageTable} = genHashPageTable($bin_file, $eyeCatch,$bin_dir);
+                            $tempImages{hashPageTable_V3} = genHashPageTable($bin_file, $eyeCatch,"$bin_dir/V3/");
                         }
                     }
                     # Add hash page table
@@ -754,59 +845,103 @@ sub manipulateImage
                         trace(1,"Adding hash page table for $eyeCatch");
                         my $hashPageTableSize = -s $tempImages{hashPageTable};
                         die "hashPageTable size undefined: errno = $!" unless(defined $hashPageTableSize);
+
+                        my $hashPageTableSize_V3 = -s $tempImages{hashPageTable_V3};
+                        die "hashPageTable size undefined: errno = $!" unless(defined $hashPageTableSize_V3);
+
                         # Move protected offset after hash page table.
                         $protectedOffset += $hashPageTableSize;
+                        $protectedOffset_V3 += $hashPageTableSize_V3;
+
+
                         if ($eyeCatch eq "HBI")
                         {
                             # Add the VFS module table to the payload text section.
                             run_command("dd if=$bin_file of=$tempImages{VFS_MODULE_TABLE} count=".VFS_EXTENDED_MODULE_MAX." ibs=".VFS_MODULE_TABLE_ENTRY_SIZE);
+                            # Same VFS module table for V3
+                            run_command("cp $tempImages{VFS_MODULE_TABLE} $tempImages{VFS_MODULE_TABLE_V3}");
+
                             # Remove VFS module table from bin file
                             run_command("dd if=$bin_file of=$tempImages{TEMP_BIN} skip=".VFS_EXTENDED_MODULE_MAX." ibs=".VFS_MODULE_TABLE_ENTRY_SIZE);
                             run_command("cp $tempImages{TEMP_BIN} $bin_file");
+                            # no need to sync $tempImages{TEMP_BIN} to $tempImages{TEMP_BIN_V3}
+                            # here as $tempImages{TEMP_BIN} was just used to add and remove the
+                            # VFS table in the above commands.  $tempImages{TEMP_BIN} will get
+                            # reset/reused later in this function for a different purpose
+
                             # Pad after hash page table to have the VFS module table end at a 4K boundary
                             my $padSize = PAGE_SIZE - (($hashPageTableSize + VFS_MODULE_TABLE_MAX_SIZE) % PAGE_SIZE);
                             run_command("dd if=/dev/zero bs=$padSize count=1 | tr \"\\000\" \"\\377\" >> $tempImages{hashPageTable} ");
 
+                            my $padSize_V3 = PAGE_SIZE - (($hashPageTableSize_V3 + VFS_MODULE_TABLE_MAX_SIZE) % PAGE_SIZE);
+                            run_command("dd if=/dev/zero bs=$padSize_V3 count=1 | tr \"\\000\" \"\\377\" >> $tempImages{hashPageTable_V3} ");
+
+
                             # Move protected offset after padding of hash page table.
                             $protectedOffset += $padSize;
+                            $protectedOffset_V3 += $padSize_V3;
 
                             # Payload text section
                             run_command("cat $tempImages{hashPageTable} $tempImages{VFS_MODULE_TABLE} > $tempImages{PAYLOAD_TEXT} ");
+                            run_command("cat $tempImages{hashPageTablei_V3} $tempImages{VFS_MODULE_TABLE_V3} > $tempImages{PAYLOAD_TEXT_V3} ");
+
                         }
                         else
                         {
                             run_command("cp $tempImages{hashPageTable} $tempImages{PAYLOAD_TEXT}");
+                            run_command("cp $tempImages{hashPageTable_V3} $tempImages{PAYLOAD_TEXT_V3}");
+
                             # Hash table generated so need to set sw-flags
                             my $hex_sw_flag = sprintf("0x%08X", SW_FLAG_HAS_A_HPT);
-                            $CUR_OPEN_SIGN_REQUEST .= " --sw-flags $hex_sw_flag ";
+                            $CUR_OPEN_SIGN_REQUEST_V1 .= " --sw-flags $hex_sw_flag ";
+                            $CUR_OPEN_SIGN_REQUEST_V3 .= " --sw-flags $hex_sw_flag ";
                         }
 
-                        run_command("$CUR_OPEN_SIGN_REQUEST "
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
                                     . "--protectedPayload $tempImages{PAYLOAD_TEXT} "
                                     . "--contrHdrOut $final_header_file "
                                     . "--out $tempImages{PROTECTED_PAYLOAD}");
-
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file > $tempImages{HDR_PHASE}");
+
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                                    . "--protectedPayload $tempImages{PAYLOAD_TEXT_V3} "
+                                    . "--contrHdrOut $final_header_file_V3 "
+                                    . "--out $tempImages{PROTECTED_PAYLOAD_V3}");
+                        run_command("cat $tempImages{PROTECTED_PAYLOAD_V3} $bin_file > $tempImages{HDR_PHASE_V3}");
+
                     }
                     # Handle COMBO RO and RW payload
                     elsif ($eyeCatch eq "HBD")
                     {
-                        run_command("$CUR_OPEN_SIGN_REQUEST "
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
                                     . "--protectedPayload $bin_file.protected "
                                     . "--contrHdrOut $final_header_file "
                                     . "--out $tempImages{PROTECTED_PAYLOAD}");
 
                         run_command("cat $tempImages{PROTECTED_PAYLOAD} $bin_file.unprotected > $tempImages{HDR_PHASE}");
+
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                                    . "--protectedPayload $bin_file.protected "
+                                    . "--contrHdrOut $final_header_file_V3 "
+                                    . "--out $tempImages{PROTECTED_PAYLOAD_V3}");
+
+                        run_command("cat $tempImages{PROTECTED_PAYLOAD_V3} $bin_file.unprotected > $tempImages{HDR_PHASE_V3}");
                     }
                     else
                     {
                         my $codeStartOffset = ($eyeCatch eq "HBB") ?
                             "--code-start-offset 0x00000180" : "";
-                        run_command("$CUR_OPEN_SIGN_REQUEST "
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
                                     . "$codeStartOffset "
                                     . "--protectedPayload $bin_file "
                                     . "--contrHdrOut $final_header_file "
                                     . "--out $tempImages{HDR_PHASE}");
+
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                                    . "$codeStartOffset "
+                                    . "--protectedPayload $bin_file "
+                                    . "--contrHdrOut $final_header_file_V3 "
+                                    . "--out $tempImages{HDR_PHASE_V3}");
                     }
 
                     # Customize secureboot prefix header with container size,
@@ -819,6 +954,11 @@ sub manipulateImage
                         = BASE_IMAGE_TARGET_HRMOR;
                         $callerHwHdrFields{instructionStartStackPointer}
                         = BASE_IMAGE_INSTRUCTION_START_STACK_POINTER;
+                        $callerHwHdrFields_V3{targetHrmor}
+                        = BASE_IMAGE_TARGET_HRMOR;
+                        $callerHwHdrFields_V3{instructionStartStackPointer}
+                        = BASE_IMAGE_INSTRUCTION_START_STACK_POINTER;
+
                         # Save off HBB sw signatures for use by HBI
                         open (HBB_SW_SIG_FILE, ">",
                               $preReqImages->{HBB_SW_SIG_FILE}) or die "Error opening file $preReqImages->{HBB_SW_SIG_FILE}: $!\n";
@@ -827,32 +967,57 @@ sub manipulateImage
                         die "Error writing to $preReqImages->{HBB_SW_SIG_FILE} failed" if $!;
                         close HBB_SW_SIG_FILE;
                         die "Error closing of $preReqImages->{HBB_SW_SIG_FILE} failed" if $!;
+
+                        # V3: Save off HBB sw signatures for use by HBI
+                        open (HBB_SW_SIG_FILE_V3, ">",
+                              $preReqImages->{HBB_SW_SIG_FILE_V3}) or die "Error opening file $preReqImages->{HBB_SW_SIG_FILE_V3}: $!\n";
+                        binmode HBB_SW_SIG_FILE_V3;
+                        print HBB_SW_SIG_FILE_V3 getSwSignatures($tempImages{HDR_PHASE_V3});
+                        die "Error writing to $preReqImages->{HBB_SW_SIG_FILE_V3} failed" if $!;
+                        close HBB_SW_SIG_FILE_V3;
+                        die "Error closing of $preReqImages->{HBB_SW_SIG_FILE_V3} failed" if $!;
+
                     }
                 }
                 elsif($secureboot && $isNormalSecure)
                 {
                     $callerHwHdrFields{configure} = 1;
-                    run_command("$CUR_OPEN_SIGN_REQUEST "
+                    $callerHwHdrFields_V3{configure} = 1;
+                    run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
                                 . "--protectedPayload $bin_file "
                                 . "--contrHdrOut $final_header_file "
                                 . "--out $tempImages{HDR_PHASE}");
+
+                    run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                                . "--protectedPayload $bin_file "
+                                . "--contrHdrOut $final_header_file_V3 "
+                                . "--out $tempImages{HDR_PHASE_V3}");
+
+
                 }
                 # Add non-secure version header
                 else
                 {
                     # Attach signature-less secure header for OpenPOWER builds
-                    run_command("$CUR_OPEN_SIGN_REQUEST "
+                    run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
                                 . "--protectedPayload $bin_file "
                                 . "--contrHdrOut $final_header_file "
                                 . "--out $tempImages{HDR_PHASE}");
+
+                    run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                                . "--protectedPayload $bin_file "
+                                . "--contrHdrOut $final_header_file_V3 "
+                                . "--out $tempImages{HDR_PHASE_V3}");
                 }
             }
             else
             {
                 run_command("cp $bin_file $tempImages{HDR_PHASE}");
+                run_command("cp $bin_file $tempImages{HDR_PHASE_V3}");
             }
 
             setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
+            setCallerHwHdrFields(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE});
             # If so instructed, take the ecc-less, unpadded file, make it
             # 4KB byte aligned in size and emit it as EYE_CATCH.ipllid
             # This will be used in op-build as the ipl time lids for PLDM
@@ -865,10 +1030,20 @@ sub manipulateImage
                 {
                     $file_size += (4096 - ($file_size % 4096));
                 }
+
+                my $file_size_V3 = -s $tempImages{HDR_PHASE_V3};
+                if(($file_size_V3 % 4096) ne 0)
+                {
+                    $file_size_V3 += (4096 - ($file_size_V3 % 4096));
+                }
+
                 # Create an empty file of all 0xFF's of $file_size
                 run_command("dd if=/dev/zero bs=$file_size count=1 | tr \"\\000\" \"\\377\" > $bin_dir/$eyeCatch.ipllid");
+                run_command("dd if=/dev/zero bs=$file_size_V3 count=1 | tr \"\\000\" \"\\377\" > $bin_dir/V3/$eyeCatch.ipllid");
+
                 # Write the contents of tempImages[HDR_PHASE} to the begining of the file we just made
                 run_command("dd if=$tempImages{HDR_PHASE} conv=notrunc of=$bin_dir/$eyeCatch.ipllid");
+                run_command("dd if=$tempImages{HDR_PHASE_V3} conv=notrunc of=$bin_dir/V3/$eyeCatch.ipllid");
             }
 
             # store binary file size + header size in hash
@@ -877,14 +1052,21 @@ sub manipulateImage
             if( ($sectionHash{$layoutKey}{ecc} eq "yes") )
             {
                 $partitionUtilHash{$eyeCatch}{logicalFileSize} = $callerHwHdrFields{totalContainerSize} * (9/8);
+                $partitionUtilHash{$eyeCatch}{logicalFileSize_V3} = $callerHwHdrFields_V3{totalContainerSize} * (9/8);
             }
             else
             {
                 $partitionUtilHash{$eyeCatch}{logicalFileSize} = $callerHwHdrFields{totalContainerSize};
+                $partitionUtilHash{$eyeCatch}{logicalFileSize_V3} = $callerHwHdrFields_V3{totalContainerSize};
             }
+            # V1:
             $partitionUtilHash{$eyeCatch}{pctUtilized} = sprintf("%.2f", $partitionUtilHash{$eyeCatch}{logicalFileSize} / $physicalRegionSize * 100);
             $partitionUtilHash{$eyeCatch}{freeBytes} = $physicalRegionSize - $partitionUtilHash{$eyeCatch}{logicalFileSize};
             $partitionUtilHash{$eyeCatch}{physicalRegionSize} = $physicalRegionSize;
+            # V3:
+            $partitionUtilHash{$eyeCatch}{pctUtilized_V3} = sprintf("%.2f", $partitionUtilHash{$eyeCatch}{logicalFileSize_V3} / $physicalRegionSize * 100);
+            $partitionUtilHash{$eyeCatch}{freeBytes_V3} = $physicalRegionSize - $partitionUtilHash{$eyeCatch}{logicalFileSize_v3};
+            $partitionUtilHash{$eyeCatch}{physicalRegionSize_V3} = $physicalRegionSize;
 
             # Padding Phase
             if ($eyeCatch eq "HBI" && $testRun)
@@ -893,15 +1075,18 @@ sub manipulateImage
                 # possibly larger than partition size and does not need to be
                 # fully padded. Size adjustments made in checkSpaceConstraints
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
+                run_command("dd if=$tempImages{HDR_PHASE_V3} of=$tempImages{PAD_PHASE_V3} ibs=4k conv=sync");
             }
             # HBBL was already padded
             elsif ($eyeCatch eq "HBBL")
             {
                 run_command("cp $tempImages{HDR_PHASE} $tempImages{PAD_PHASE}");
+                run_command("cp $tempImages{HDR_PHASE_V3} $tempImages{PAD_PHASE_V3}");
             }
             else
             {
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
+                run_command("dd if=$tempImages{HDR_PHASE_V3} of=$tempImages{PAD_PHASE_V3} ibs=$size conv=sync");
             }
 
             # If so instructed, retain pre-ECC versions of the output files
@@ -911,6 +1096,10 @@ sub manipulateImage
                 my($file,$dirs,$suffix) = fileparse($eccless_file);
                 $file =~ s/(\.\w+)$/$eccless_prefix$1/;
                 run_command("cp $tempImages{PAD_PHASE} $bin_dir/$file");
+
+                my($file,$dirs,$suffix) = fileparse($eccless_file_V3);
+                $file =~ s/(\.\w+)$/$eccless_prefix$1/;
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/V3/$file");
             }
 
             # Corrupt section if user specified to do so, before ECC injection.
@@ -923,6 +1112,10 @@ sub manipulateImage
                 corrupt_partition($eyeCatch, $protectedOffset,
                                   $tempImages{PAYLOAD_TEXT},
                                   $tempImages{PAD_PHASE});
+
+                corrupt_partition($eyeCatch, $protectedOffset,
+                                  $tempImages{PAYLOAD_TEXT_V3},
+                                  $tempImages{PAD_PHASE_V3});
             }
         }
         # Handle partitions that have no input binary. Simply zero or random
@@ -935,6 +1128,9 @@ sub manipulateImage
                 $callerHwHdrFields{configure} = 1;
                 create_sb_key_transition_container($tempImages{PAD_PHASE});
                 setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE});
+
+                create_sb_key_transition_container($tempImages{PAD_PHASE_V3});
+                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{PAD_PHASE_V3});
             }
             else
             {
@@ -942,11 +1138,14 @@ sub manipulateImage
                 if ($eyeCatch eq "TEST" || $eyeCatch eq "TESTRO")
                 {
                     run_command("dd if=/dev/urandom of=$tempImages{PAD_PHASE} count=1 bs=$size");
+                    run_command("dd if=/dev/urandom of=$tempImages{PAD_PHASE_V3} count=1 bs=$size");
+
                 }
                 # Other partitions fill with FF's if no empty bin file provided
                 else
                 {
                     run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE}");
+                    run_command("dd if=/dev/zero bs=$size count=1 | tr \"\\000\" \"\\377\" > $tempImages{PAD_PHASE_V3}");
                 }
 
                 # Add secure container header
@@ -962,24 +1161,42 @@ sub manipulateImage
                         unless(defined $fileSize);
                     run_command("dd if=$tempImages{PAD_PHASE} of=$tempImages{TEMP_BIN} count=1 bs=$fileSize");
 
+                    my $fileSize_V3 = (-s $tempImages{PAD_PHASE_V3}) - PAGE_SIZE;
+                    die "fileSize undefined: errno = $!"
+                        unless(defined $fileSize_V3);
+                    run_command("dd if=$tempImages{PAD_PHASE_V3} of=$tempImages{TEMP_BIN_V3} count=1 bs=$fileSize");
+
                     if ($secureboot && $secureSupported)
                     {
                         $callerHwHdrFields{configure} = 1;
-                        run_command("$CUR_OPEN_SIGN_REQUEST "
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
                                     . "--protectedPayload $tempImages{TEMP_BIN} "
                                     . "--contrHdrOut $final_header_file "
                                     . "--out $tempImages{PAD_PHASE}");
                         setCallerHwHdrFields(\%callerHwHdrFields,
                                              $tempImages{PAD_PHASE});
+
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                                    . "--protectedPayload $tempImages{TEMP_BIN_V3} "
+                                    . "--contrHdrOut $final_header_file "
+                                    . "--out $tempImages{PAD_PHASE_V3}");
+                        setCallerHwHdrFields(\%callerHwHdrFields,
+                                             $tempImages{PAD_PHASE_V3});
+
                     }
                     # Add non-secure version header
                     else
                     {
                         # Attach signature-less secure header for OpenPOWER builds
-                        run_command("$CUR_OPEN_SIGN_REQUEST "
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
                                     . "--protectedPayload $tempImages{TEMP_BIN} "
                                     . "--contrHdrOut $final_header_file "
                                     . "--out $tempImages{PAD_PHASE}");
+
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                                    . "--protectedPayload $tempImages{TEMP_BIN_V3} "
+                                    . "--contrHdrOut $final_header_file_V3 "
+                                    . "--out $tempImages{PAD_PHASE_V3}");
                     }
 
                     # Save a copy of the original binary to package later,
@@ -988,6 +1205,11 @@ sub manipulateImage
                     my $staged_bin_file = ($system_target eq "")? "$bin_dir/$eyeCatch$nodeIDstr.staged":
                         "$bin_dir/$system_target.$eyeCatch$nodeIDstr.staged";
                     run_command("cp -n $tempImages{TEMP_BIN} $staged_bin_file");
+
+                    my $staged_bin_file_V3 = ($system_target eq "")? "$bin_dir/V3/$eyeCatch$nodeIDstr.staged":
+                        "$bin_dir/V3/$system_target.$eyeCatch$nodeIDstr.staged";
+                    run_command("cp -n $tempImages{TEMP_BIN_V3} $staged_bin_file_V3");
+
                 }
                 # Corrupt section if user specified to do so, before ECC injection.
                 if ($secureboot && exists $partitionsToCorrupt{$eyeCatch})
@@ -999,6 +1221,10 @@ sub manipulateImage
                     corrupt_partition($eyeCatch, $protectedOffset,
                                       $tempImages{PAYLOAD_TEXT},
                                       $tempImages{PAD_PHASE});
+
+                    corrupt_partition($eyeCatch, $protectedOffset,
+                                      $tempImages{PAYLOAD_TEXT_V3},
+                                      $tempImages{PAD_PHASE_V3});
                 }
             }
             # if we are requested to emit ipl lid artifacts ensure that the generated binary
@@ -1015,10 +1241,24 @@ sub manipulateImage
                 run_command("dd if=/dev/zero bs=$file_size count=1 | tr \"\\000\" \"\\377\" > $bin_dir/$eyeCatch.ipllid");
                 # Write the contents of tempImages[HDR_PHASE} to the begining of the file we just made
                 run_command("dd if=$tempImages{PAD_PHASE} conv=notrunc of=$bin_dir/$eyeCatch.ipllid");
+
+                my $file_size_V3 = -s $tempImages{PAD_PHASE_V3};
+                if(($file_size_V3 % 4096) ne 0)
+                {
+                    $file_size_V3 += (4096 - ($file_size_V3 % 4096));
+                }
+                # Create an empty file of all 0xFF's of $file_size
+                run_command("dd if=/dev/zero bs=$file_size count=1 | tr \"\\000\" \"\\377\" > $bin_dir/$eyeCatch.ipllid");
+                run_command("dd if=/dev/zero bs=$file_size_V3 count=1 | tr \"\\000\" \"\\377\" > $bin_dir/V3/$eyeCatch.ipllid");
+
+                # Write the contents of tempImages[HDR_PHASE} to the begining of the file we just made
+                run_command("dd if=$tempImages{PAD_PHASE} conv=notrunc of=$bin_dir/$eyeCatch.ipllid");
+                run_command("dd if=$tempImages{PAD_PHASE_V3} conv=notrunc of=$bin_dir/V3/$eyeCatch.ipllid");
             }
             if ($eyeCatch eq "SBKT" && $emitEccless)
             {
                 run_command("cp $tempImages{PAD_PHASE} $bin_dir/sbkt.bin");
+                run_command("cp $tempImages{PAD_PHASE_V3} $bin_dir/V3/sbkt.bin");
             }
         }
 
@@ -1026,10 +1266,12 @@ sub manipulateImage
         if( ($sectionHash{$layoutKey}{ecc} eq "yes") )
         {
             run_command("$jailcmd ecc --inject $tempImages{PAD_PHASE} --output $tempImages{ECC_PHASE} --p8");
+            run_command("$jailcmd ecc --inject $tempImages{PAD_PHASE_V3} --output $tempImages{ECC_PHASE_V3} --p8");
         }
         else
         {
             run_command("cp $tempImages{PAD_PHASE} $tempImages{ECC_PHASE}");
+            run_command("cp $tempImages{PAD_PHASE_V3} $tempImages{ECC_PHASE_V3}");
         }
 
         # Compression phase
@@ -1040,6 +1282,8 @@ sub manipulateImage
 
         # Move content to final bin filename
         run_command("cp $tempImages{ECC_PHASE} $final_bin_file");
+        run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file_V3");
+
 
         # Clean up temp images
         foreach my $image (keys %tempImages)
@@ -1067,7 +1311,8 @@ sub manipulateImages
     my $parallelPrefix = RAND_PREFIX.POSIX::ceil(rand(0xFFFFFFFF)).$system_target;
 
     my %preReqImages = (
-        HBB_SW_SIG_FILE => "$bin_dir/$parallelPrefix.hbb_sw_sig.bin"
+        HBB_SW_SIG_FILE => "$bin_dir/$parallelPrefix.hbb_sw_sig.bin",
+        HBB_SW_SIG_FILE_V3 => "$bin_dir/V3/$parallelPrefix.hbb_sw_sig.bin"
         );
 
     my @todo = keys %{$i_binFilesRef};
@@ -1250,10 +1495,10 @@ sub truncate_sha
 ################################################################################
 sub genHashPageTable
 {
-    my ($bin_file, $eyeCatch, $saltData) = @_;
+    my ($bin_file, $eyeCatch, $hashPageTableDir, $saltData) = @_;
 
     # Open the file
-    my $hashPageTableFile = "$bin_dir/$eyeCatch.page_hash_table";
+    my $hashPageTableFile = "$hashPageTableDir/$eyeCatch.page_hash_table";
     open (INBINFILE, "<", $bin_file) or die "Error opening file $bin_file: $!\n";
     open (OUTBINFILE, ">", $hashPageTableFile) or die "Error opening file $hashPageTableFile: $!\n";
     # set stream to binary mode
@@ -1309,7 +1554,7 @@ sub genHashPageTable
     close OUTBINFILE or die "Error closing $hashPageTableFile: $!\n";
 
     # Pad hash page table to a multiple of page size (4K)
-    my $temp_file = "$bin_dir/$eyeCatch.page_hash_table.temp";
+    my $temp_file = "$hashPageTableDir/$eyeCatch.page_hash_table.temp";
     run_command("cp $hashPageTableFile $temp_file");
     run_command("dd if=$temp_file of=$hashPageTableFile ibs=4k conv=sync");
     run_command("rm $temp_file");
@@ -1338,7 +1583,9 @@ sub gen_test_containers
 
     my $openSigningFlags = OP_SIGNING_FLAG.$header->{flags};
 
-    my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST $openSigningFlags";
+    # At this time this file will only support V1 signed test containers
+    my $CUR_OPEN_SIGN_REQUEST = "$OPEN_SIGN_REQUEST_V1 $openSigningFlags";
+
     my $componentId = "TESTCONT";
     $CUR_OPEN_SIGN_REQUEST .= " --sign-project-FW-token $componentId ";
 
@@ -1352,7 +1599,7 @@ sub gen_test_containers
     # name = secureboot_hash_page_table_container (no prefix in hb cacheadd)
     $test_container = "$bin_dir/secureboot_hash_page_table_container";
     run_command("dd if=/dev/urandom count=5 ibs=4096 | tr \"\\000\" \"\\377\" > $tempImages{TEST_CONTAINER_DATA}");
-    $tempImages{hashPageTable} = genHashPageTable($tempImages{TEST_CONTAINER_DATA}, "secureboot_test");
+    $tempImages{hashPageTable} = genHashPageTable($tempImages{TEST_CONTAINER_DATA}, "secureboot_test", $bin_dir);
     run_command("$CUR_OPEN_SIGN_REQUEST --protectedPayload $tempImages{hashPageTable} --out $tempImages{PROTECTED_PAYLOAD}");
     run_command("cat $tempImages{PROTECTED_PAYLOAD} $tempImages{TEST_CONTAINER_DATA} > $test_container ");
 
@@ -1394,9 +1641,12 @@ sub create_sb_key_transition_container
     run_command("$OPEN_SIGN_KEY_TRANS_REQUEST".OP_SIGNING_FLAG
         . "$sb_hdrs{SBKT}{inner}{flags} --protectedPayload $tempImages{RAND_BLOB} "
         . "--out $tempImages{PRD_KEY_FILE}");
+
     # Sign new production key container with imprint keys
+    # At this time only signing with V1 algorithm.
+    # @TODO PFHB-686 will add V3 support
     my $sbktComponentIdArg = "--sign-project-FW-token SBKT ";
-    run_command("$OPEN_SIGN_REQUEST ".$sbktComponentIdArg.OP_SIGNING_FLAG
+    run_command("$OPEN_SIGN_REQUEST_V1 ".$sbktComponentIdArg.OP_SIGNING_FLAG
         . "$sb_hdrs{SBKT}{outer}{flags} --protectedPayload $tempImages{PRD_KEY_FILE} "
         . "--out $o_file");
 
