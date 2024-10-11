@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -349,7 +349,6 @@ void* call_host_cbs_start(void *io_pArgs)
             // responsible for examining which clocks are available and
             // determining whether it's possible to boot.
 #ifdef CONFIG_FSP_BUILD
-            l_errl->addHwCallout(l_cpu_target, SRCI_PRIORITY_LOW, DELAYED_DECONFIG, GARD_NULL);
             captureError(l_errl, l_stepError, HWPF_COMP_ID, l_cpu_target);
 #else
             // Search the error log for callouts to determine which clock is at
