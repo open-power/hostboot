@@ -61,13 +61,13 @@ $(HB_TEST_DEPENDENCIES):
 # Rules for creating the DCE lid and the debug listing file.
 
 .PRECIOUS: %.dce.lid.debug
-%.dce.lid.debug: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(HB_DEPENDENCIES)
-	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -gz" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@ $(INCFLAGS) >/dev/null 2>&1
+%.dce.lid.debug: %.C $(DCE_EXTRA_FILES_C_H) $(HB_DEPENDENCIES)
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -gz" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter-out %$<, $(DCE_EXTRA_FILES_C)) -o $@ $(INCFLAGS) >/dev/null 2>&1
 	$(OBJDUMP) --source -d -C $@ > $@.list
 
 .PRECIOUS: %.dce.lid.intermediate
-%.dce.lid.intermediate: %.C $(filter %.C %.H, $(DCE_EXTRA_FILES)) $(HB_DEPENDENCIES)
-	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -s" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter %.C, $(DCE_EXTRA_FILES)) -o $@ $(INCFLAGS)
+%.dce.lid.intermediate: %.C $(DCE_EXTRA_FILES_C_H) $(HB_DEPENDENCIES)
+	CXXFLAGS="$(filter-out -D__HOSTBOOT_MODULE=% -Werror, $(CXXFLAGS)) $(CXXFLAGS_DCE) -s" $(ROOTPATH)/src/build/tools/dce/dce-compile "$<" $(filter-out %$<, $(DCE_EXTRA_FILES_C)) -o $@ $(INCFLAGS)
 	$(ROOTPATH)/src/build/tools/dce/preplib.py $@
 
 %.dce.lid: %.dce.lid.intermediate $(DCE_LISTING_FILE)
