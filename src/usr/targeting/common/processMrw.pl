@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -2448,6 +2448,8 @@ sub processTpm
     $targetObj->setAttribute($target, "ORDINAL_ID",    $tpmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $tpmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $tpmFapiName);
+    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
+    $targetObj->setAttribute($target, "FAPINAME_POS",  $tpmPosPerSystem);
     $targetObj->setAttribute($target, "PHYS_PATH",     $tpmPhysical);
 
     # Build up data for the EEPROM_VPD_PRIMARY_INFO attribute. Since the VPD is collected via
