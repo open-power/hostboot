@@ -168,7 +168,7 @@ namespace SBEIO
             for (const auto & l_p : l_memPorts)
             {
                 SBE_TRACF( "queryMemPortsFromCallouts: port=0x%x", get_huid(l_p));
-                getParentAffinityTargets(l_ocmbList, l_p, CLASS_UNIT, TYPE_OCMB_CHIP);
+                getParentAffinityTargets(l_ocmbList, l_p, CLASS_CHIP, TYPE_OCMB_CHIP);
                 if ((l_ocmbList.size() == 1) && (l_ocmbList[0] == i_target))
                 {
                     // save & report back this mem port
@@ -229,7 +229,7 @@ namespace SBEIO
                       SBE_TRACF( "queryMemPortsFromCallouts: port=0x%x", get_huid(l_p));
                       l_ocmbList.clear();
 
-                      getParentAffinityTargets(l_ocmbList, l_p, CLASS_UNIT, TYPE_OCMB_CHIP);
+                      getParentAffinityTargets(l_ocmbList, l_p, CLASS_CHIP, TYPE_OCMB_CHIP);
                       if ((l_ocmbList.size() == 1) && (l_ocmbList[0] == i_target))
                       {
                          // save & report back this mem port if not already in the list
