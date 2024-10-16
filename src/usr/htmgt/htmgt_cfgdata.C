@@ -981,7 +981,7 @@ void getMemConfigMessageData(Occ *i_occ,
     assert(o_data != nullptr);
 
     o_data[index++] = OCC_CFGDATA_MEM_CONFIG;
-    o_data[index++] = 0x31; // version
+    o_data[index++] = 0x32; // version
 
     //System reference needed for these ATTR.
     Target* sys = UTIL::assertGetToplevelTarget();
@@ -997,23 +997,30 @@ void getMemConfigMessageData(Occ *i_occ,
 
     if( is_sapphire_load() )//if OPAL then no "Power Control Default" support.
     {
-        //Byte 3:   Memory Power Control Default.
+        //Byte 5:   Memory Power Control Default.
         o_data[index++] = 0xFF;
 
-        //Byte 4:   Idle Power Memory Power Control.
+        //Byte 6:   Idle Power Memory Power Control.
         o_data[index++] = 0xFF;
     }
     else                    //else read in attr.
     {
-        //Byte 3:   Memory Power Control Default.
+        //Byte 5:   Memory Power Control Default.
         o_data[index++] = sys->getAttr<ATTR_MSS_MRW_POWER_CONTROL_REQUESTED>();
 
-        //Byte 4:   Idle Power Memory Power Control.
+        //Byte 6:   Idle Power Memory Power Control.
         o_data[index++] =
                     sys->getAttr<ATTR_MSS_MRW_IDLE_POWER_CONTROL_REQUESTED>();
     }
 
-    //Byte 5:   Number of data sets.
+    //Byte 7-11: New data for version 0x32
+    o_data[index++] = sys->getAttr<ATTR_MSS_MRW_MIN_DOMAIN_REDUCTION_TIME_FOR_POWER_CONTROL_OFF>();
+    o_data[index++] = sys->getAttr<ATTR_MSS_MRW_MIN_DOMAIN_REDUCTION_TIME>();
+    o_data[index++] = sys->getAttr<ATTR_MSS_MRW_IDLE_PSMODE_MIN_DOMAIN_REDUCTION_TIME>();
+    o_data[index++] = sys->getAttr<ATTR_MSS_MRW_ENTER_STR_TIME>();
+    o_data[index++] = sys->getAttr<ATTR_MSS_MRW_IDLE_PSMODE_ENTER_STR_TIME>();
+
+    //Byte 12:   Number of data sets.
     size_t numSetsOffset = index++; //Will fill in numSets at the end
     const uint32_t disabledSize = index; // config data size when monitoring disabled
     // fill in details of the memory config
