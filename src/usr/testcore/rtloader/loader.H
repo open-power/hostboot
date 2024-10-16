@@ -606,8 +606,11 @@ class RuntimeLoaderTest : public CxxTest::TestSuite
                 l_errl = lidmgr->getLidSize(*size);
                 if (l_errl) break;
 
-                *buffer = malloc(*size);
-                l_errl = lidmgr->getLid(*buffer, *size);
+                if (*size)
+                {
+                    *buffer = malloc(*size);
+                    l_errl = lidmgr->getLid(*buffer, *size);
+                }
                 if (l_errl) break;
 
             } while(0);

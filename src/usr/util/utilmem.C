@@ -5,7 +5,9 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* COPYRIGHT International Business Machines Corp. 2003,2014              */
+/* Contributors Listed Below - COPYRIGHT 2003,2024                        */
+/* [+] International Business Machines Corp.                              */
+/*                                                                        */
 /*                                                                        */
 /* Licensed under the Apache License, Version 2.0 (the "License");        */
 /* you may not use this file except in compliance with the License.       */
@@ -100,7 +102,7 @@ UtilMem & UtilMem::operator = ( const UtilMem & i_right )
         iv_autoGrow = i_right.iv_autoGrow;
         iv_autoCleanup = i_right.iv_autoCleanup;
 
-        if ( i_right.iv_autoCleanup )
+        if ( i_right.iv_autoCleanup && i_right.iv_size)
         {
             iv_memStart = static_cast<uint8_t*>(malloc( i_right.iv_size ));
             memcpy(iv_memStart,i_right.iv_memStart,iv_size);
@@ -112,12 +114,13 @@ UtilMem & UtilMem::operator = ( const UtilMem & i_right )
             iv_memStart = i_right.iv_memStart;
         }
 
-
-        // Trace
-        UTIL_DT("I> UtilMem: dst=%p,offset=%i,size=%i,autogrow=%s,autoclean=%s",
-                iv_memStart,iv_offset,iv_size,UTIL_BOOL_ALPHA(iv_autoGrow),
-                UTIL_BOOL_ALPHA(iv_autoCleanup));
-
+        if (iv_memStart)
+        {
+            // Trace
+            UTIL_DT("I> UtilMem: dst=%p,offset=%i,size=%i,autogrow=%s,autoclean=%s",
+                    iv_memStart,iv_offset,iv_size,UTIL_BOOL_ALPHA(iv_autoGrow),
+                    UTIL_BOOL_ALPHA(iv_autoCleanup));
+        }
     }
 
     return *this;

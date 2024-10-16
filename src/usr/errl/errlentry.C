@@ -447,8 +447,10 @@ bool ErrlEntry::collectTrace(const char i_name[],
             l_cbBuffer = i_max;
         }
 
+        if (l_cbBuffer == 0) {break;}
         // allocate the buffer
         l_pBuffer = new char[ l_cbBuffer ];
+        if (l_pBuffer == 0) {break;}
 
         // Get the data into the buffer.
         l_cbOutput = TRACE::getBuffer( i_name, l_pBuffer, l_cbBuffer );
@@ -508,21 +510,24 @@ void ErrlEntry::collectTrace(std::list<const char*>      &i_comps,
     // get the traces for i_comps into l_buf
     l_size = TRACE::getBuffer(i_comps, l_tids, l_buf, i_max);
 
-    // Save the trace buffer as a UD section on this.
-    l_udSection = new ErrlUD(l_tbh->getBufPtr(),
-                             l_size,
-                             FIPS_ERRL_COMP_ID,
-                             FIPS_ERRL_UDV_DEFAULT_VER_1,
-                             FIPS_ERRL_UDT_HB_TRACE);
-
-    // Add the trace section to the vector of sections for this error log.
-    iv_SectionVector.push_back(l_udSection);
-
-    if (i_propagate == propagation_t::PROPAGATE)
+    if (l_size)
     {
-        for (const auto err : iv_aggregate_errors)
+        // Save the trace buffer as a UD section on this.
+        l_udSection = new ErrlUD(l_tbh->getBufPtr(),
+                                 l_size,
+                                 FIPS_ERRL_COMP_ID,
+                                 FIPS_ERRL_UDV_DEFAULT_VER_1,
+                                 FIPS_ERRL_UDT_HB_TRACE);
+
+        // Add the trace section to the vector of sections for this error log.
+        iv_SectionVector.push_back(l_udSection);
+
+        if (i_propagate == propagation_t::PROPAGATE)
         {
-            err->collectTrace(i_comps, i_max, propagation_t::PROPAGATE);
+            for (const auto err : iv_aggregate_errors)
+            {
+                err->collectTrace(i_comps, i_max, propagation_t::PROPAGATE);
+            }
         }
     }
 
@@ -548,15 +553,18 @@ void ErrlEntry::collectThreadTrace(std::list<const char*> &i_comps,
     // get the traces for i_comps into l_buf
     l_size = TRACE::getBuffer(i_comps, i_tids, l_buf, i_max);
 
-    // Save the trace buffer as a UD section on this.
-    l_udSection = new ErrlUD(l_tbh->getBufPtr(),
-                             l_size,
-                             FIPS_ERRL_COMP_ID,
-                             FIPS_ERRL_UDV_DEFAULT_VER_1,
-                             FIPS_ERRL_UDT_HB_TRACE);
+    if (l_size)
+    {
+        // Save the trace buffer as a UD section on this.
+        l_udSection = new ErrlUD(l_tbh->getBufPtr(),
+                                 l_size,
+                                 FIPS_ERRL_COMP_ID,
+                                 FIPS_ERRL_UDV_DEFAULT_VER_1,
+                                 FIPS_ERRL_UDT_HB_TRACE);
 
-    // Add the trace section to the vector of sections for this error log.
-    iv_SectionVector.push_back(l_udSection);
+        // Add the trace section to the vector of sections for this error log.
+        iv_SectionVector.push_back(l_udSection);
+    }
 
     delete[] l_buf;
 
@@ -3816,13 +3824,16 @@ void ErrlEntry::removeDuplicateTraces()
         }
         header->next_free = l_pos;
 
-        ErrlUD* l_udSection = new ErrlUD( l_pBuffer,
-                                          uniqueSize,
-                                          FIPS_ERRL_COMP_ID,
-                                          FIPS_ERRL_UDV_DEFAULT_VER_1,
-                                          FIPS_ERRL_UDT_HB_TRACE );
+        if (uniqueSize)
+        {
+            ErrlUD* l_udSection = new ErrlUD( l_pBuffer,
+                                              uniqueSize,
+                                              FIPS_ERRL_COMP_ID,
+                                              FIPS_ERRL_UDV_DEFAULT_VER_1,
+                                              FIPS_ERRL_UDT_HB_TRACE );
 
-        l_uniqueTraceUDVector.push_back(l_udSection);
+            l_uniqueTraceUDVector.push_back(l_udSection);
+        }
 
         delete[] l_pBuffer;
         delete it.second;
