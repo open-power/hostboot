@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2019
+# Contributors Listed Below - COPYRIGHT 2015,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -137,6 +137,26 @@ print AIFILE "#ifndef ATTRIBUTEIDS_H_\n";
 print AIFILE "#define ATTRIBUTEIDS_H_\n\n";
 print AIFILE "namespace fapi2\n";
 print AIFILE "{\n\n";
+print AIFILE "// Undefine macros to avoid compiler warning\n";
+print AIFILE "#undef ATTR_EC_SETMACRO\n";
+print AIFILE "#undef ATTR_IS_MPIPL_SETMACRO\n";
+print AIFILE "#undef ATTR_ISTEP_MODE_SETMACRO\n";
+print AIFILE "#undef ATTR_BACKUP_SEEPROM_SELECT_SETMACRO\n";
+print AIFILE "#undef ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT_SETMACRO\n";
+print AIFILE "#undef ATTR_SECURITY_MODE_SETMACRO\n";
+print AIFILE "#undef ATTR_HB_FALLBACK_CORES_SETMACRO\n";
+print AIFILE "#undef ATTR_PG_MVPD_SETMACRO\n";
+print AIFILE "#undef ATTR_LPC_CONSOLE_CNFG_SETMACRO\n";
+print AIFILE "#undef ATTR_PROC_FABRIC_PRESENT_GROUPS_SETMACRO\n";
+print AIFILE "#undef ATTR_PROC_FAVOR_AGGRESSIVE_PREFETCH_SETMACRO\n";
+print AIFILE "#undef ATTR_PROC_LCO_MODE_DISABLE_SETMACRO\n";
+print AIFILE "#undef ATTR_PROC_MEMORY_ENCRYPTION_ENABLED_SETMACRO\n";
+print AIFILE "#undef ATTR_SYS_CLK_NE_TERMINATION_STRENGTH_SETMACRO\n";
+print AIFILE "#undef ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ_OVERRIDE_SETMACRO\n";
+print AIFILE "#undef ATTR_SYSTEM_RESCLK_DISABLE_SETMACRO\n";
+print AIFILE "#undef ATTR_MEM_THERMAL_INIT_COMPLETE_SETMACRO\n";
+print AIFILE "#undef ATTR_MSS_CHECK_FOR_READY_TIMEOUT_SETMACRO\n";
+print AIFILE "#undef ATTR_MSS_EXP_OMI_SETUP_POLL_COUNT_SETMACRO\n\n";
 print AIFILE "\/**\n";
 print AIFILE " * \@brief Enumeration of attribute IDs\n";
 print AIFILE " *\/\n";
