@@ -110,7 +110,7 @@ namespace Systemcalls
            /** mm_set_permission() */
         MM_SET_PERMISSION,
 
-           /** mm_alloc_pages() */
+           /** MmAllocPages() */
         MM_ALLOC_PAGES,
 
            /** mm_virt_to_phys() */

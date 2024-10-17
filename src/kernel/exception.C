@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <kernel/misc.H>
 #include <kernel/cpumgr.H>
 #include <kernel/scheduler.H>
+#include <kernel/simpletrace.H>
 #include <arch/magic.H>
 
 
@@ -66,6 +67,7 @@ void kernel_execute_prog_ex()
     }
     if (!handled)
     {
+        STRC_FREEZE(KDBG_PROG_EX);
         printk( "Program exception, killing task %d, SRR0=0x%lX, SRR1=0x%lX\n",
                 t->tid, getSRR0(), getSRR1() );
         MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
@@ -106,6 +108,7 @@ void kernel_execute_data_storage()
     }
     if (!handled)
     {
+        STRC_FREEZE(KDBG_DSI, getDAR());
 
         printk("Data Storage exception! \n"
                "TID: %d\nBad Address: %lx\n"
@@ -121,6 +124,8 @@ void kernel_execute_data_storage()
 extern "C"
 void kernel_execute_data_segment()
 {
+    STRC_FREEZE(KDBG_DATA_SEGMENT_EX);
+
     task_t* t = TaskManager::getCurrentTask();
     printk("Data Segment exception!\n"
            "TID: %d\n"
@@ -149,6 +154,7 @@ void kernel_execute_inst_storage()
     }
     if (!handled)
     {
+        STRC_FREEZE(KDBG_INST_STORAGE_EX);
         printk("Inst Storage exception on %d: %lx, %lx\n",
                t->tid, getSRR0(), getSRR1());
         KernelMisc::printkBacktrace(t);
@@ -160,6 +166,8 @@ void kernel_execute_inst_storage()
 extern "C"
 void kernel_execute_inst_segment()
 {
+    STRC_FREEZE(KDBG_INST_SEGMENT_EX);
+
     task_t* t = TaskManager::getCurrentTask();
     printk("Inst Segment exception on %d: %p\n", t->tid, t->context.nip);
     MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
@@ -169,6 +177,8 @@ void kernel_execute_inst_segment()
 extern "C"
 void kernel_execute_alignment()
 {
+    STRC_FREEZE(KDBG_ALIGNMENT_EX);
+
     task_t* t = TaskManager::getCurrentTask();
     printk("Alignment exception, killing task %d\n", t->tid);
     MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
@@ -179,6 +189,7 @@ extern "C"
 void kernel_execute_hype_emu_assist()
 {
     task_t* t = TaskManager::getCurrentTask();
+    STRC_FREEZE(KDBG_ILLEGAL_INST);
     printk("HypeEmu: Illegal instruction in task %d\n"
            "\tHSSR0 = %lx, HEIR = %lx\n", t->tid, getHSRR0(), getHEIR());
     MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
@@ -268,6 +279,7 @@ void kernel_execute_fp_unavail()
 
     if (t->fp_context)
     {
+        STRC_FREEZE(KDBG_FP_UNAVAILABLE);
         printk("Error: FP unavailable while task has FP-context.\n");
         kassert(t->fp_context == NULL);
     }
@@ -294,6 +306,7 @@ void kernel_execute_softpatch()
     {
         if (t->fp_context == NULL)
         {
+            STRC_FREEZE(KDBG_SOFTPATCH);
             printk("Error: Task took Denorm-assist without FP active.\n");
             kassert(t->fp_context != NULL);
         }
@@ -324,6 +337,7 @@ void kernel_execute_machine_check()
     //  Which indicates kernel mode in Hostboot env.
     if(!(getSRR1() & EXCEPTION_MSR_PR_BIT_MASK))
     {
+        STRC_FREEZE(KDBG_MACHINE_CHECK);
         //Not much we can do to recover in Kernel, just assert
         printk("Kernel Space Machine check in %d on %ld:\n"
                "\tSRR0 = %lx, SRR1 = %lx\n"
@@ -385,6 +399,7 @@ void kernel_execute_machine_check()
 
     if (!handled)
     {
+        STRC_FREEZE(KDBG_USR_MACHNE_CHECK);
         //User Space MC
         printk("User Space Machine check in %d on %ld:\n"
                 "\tSRR0 = %lx, SRR1 = %lx\n"
@@ -429,6 +444,8 @@ void kernel_execute_hyp_external()
 extern "C"
 void kernel_execute_unhandled_exception()
 {
+    STRC_FREEZE(KDBG_UNHANDLED_EX);
+
     task_t* t = TaskManager::getCurrentTask();
     uint64_t exception = getSPRG2();
 

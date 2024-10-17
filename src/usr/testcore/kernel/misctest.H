@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -30,6 +30,8 @@
 #include <targeting/common/targetservice.H>
 #include <secureboot/smf_utils.H>
 #include <util/misc.H>
+#include <vfs/vfs.H>
+#include <errl/errlmanager.H>
 
 /** @file misctest.H
  *
@@ -43,6 +45,15 @@ class MiscTest : public CxxTest::TestSuite
         /** Tests for cpu_spr_value() */
         void testCpuSprValue()
         {
+            errlHndl_t l_errl = nullptr;
+            l_errl = VFS::module_load("libsmf.so");
+            if(l_errl)
+            {
+                TS_FAIL("testCpuSprValue(): could not load libsmf.so");
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+                return;
+            }
+
             const auto smfEnabled = SECUREBOOT::SMF::isSmfEnabled();
             uint64_t smfMsrBit = smfEnabled ? MSR_SMF_MASK : 0;
 

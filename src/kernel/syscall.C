@@ -49,6 +49,11 @@
 #include <kernel/ipc.H>
 #include <kernel/simpletrace.H>
 
+// these istep indicators are set in SaveMemStats, below
+// and are used in kernel tracing for Memory Management and OOM FFDC
+extern int g_istep;
+extern int g_substep;
+
 extern "C"
 void kernel_execute_hyp_doorbell()
 {
@@ -1071,7 +1076,12 @@ namespace Systemcalls
         uint16_t istep   = (uint16_t)(TASK_GETARG0(t));
         uint16_t substep = (uint16_t)(TASK_GETARG1(t));
 
-        STRC_KMEM(STRC_L0, KMEM_STATS_SYSCALL, istep, substep);
+        // always save the isteps for kernel tracing
+        g_istep   = istep;
+        g_substep = substep;
+
+        STRC1_KMEM(KMEM_STATS_SYSCALL, istep, substep, 0);
+        PageManager::resetIStepStats();
     }
 };
 

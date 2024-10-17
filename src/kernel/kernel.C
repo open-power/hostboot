@@ -51,7 +51,9 @@
 
 #include <stdlib.h>
 
-int g_kernel_trace_level{0};
+int g_kernel_trace_level{0}; // trace level for printk
+int g_istep{0};              // current istep,   set by SaveMemStats syscall
+int g_substep{0};            // current substep, set by SaveMemStats syscall
 
 uint64_t NO_FORCE_ENABLE_MACHINE_CHECK_EXCEPTIONS = 0;
 
@@ -150,6 +152,13 @@ int main()
     }
 
     kernel.memBootstrap();
+
+    // init these after memBootstrap, they do mallocs for their buffers
+    STRC_KSHORT_INIT (KSHORT_SIZE,    TIME_FORMAT);
+    STRC_KLONG_INIT  (KLONG_SIZE,     TIME_FORMAT);
+    STRC_KMEM_INIT   (KMEMSTATS_SIZE, TIME_FORMAT);
+    STRC_KALLOC_INIT (KALLOC_SIZE,    TIME_FORMAT);
+
     kernel.cpuBootstrap();
 
     // Let FSP/BMC know that Hostboot is now running

@@ -545,9 +545,12 @@ int Block::mmSetPermission(uint64_t i_va, uint64_t i_size,
 
     if(!isContained(l_aligned_va))
     {
-        return (iv_nextBlock ?
-                iv_nextBlock->mmSetPermission(i_va,i_size,i_access_type) :
-                -EINVAL);
+        if (iv_nextBlock)
+        {
+            return iv_nextBlock->mmSetPermission(i_va,i_size,i_access_type);
+        }
+        STRC1_KSHORT(KDBG_BK_SET_PERM_EINVAL, i_va, i_size);
+        return -EINVAL;
     }
 
     //printk("\n             aligned VA = 0x%.lX aligned size = %ld access_type = 0x%.lX\n", l_aligned_va,	l_aligned_size, i_access_type);
@@ -600,6 +603,7 @@ int Block::setPermSPTE( ShadowPTE* i_spte, uint64_t i_access_type)
             (i_access_type & WRITE_TRACKED) ||
             (i_access_type & ALLOCATE_FROM_ZERO))
         {
+            STRC1_KSHORT(KDBG_BK_SET_PERM_SPTE_EINVAL_1, PTR_TO_u32(i_spte), i_access_type);
             return -EINVAL;
         }
 
@@ -616,6 +620,7 @@ int Block::setPermSPTE( ShadowPTE* i_spte, uint64_t i_access_type)
     {
         if (i_access_type & EXECUTABLE)
         {
+            STRC1_KSHORT(KDBG_BK_SET_PERM_SPTE_EINVAL_2, PTR_TO_u32(i_spte), i_access_type);
             return -EINVAL;
         }
 
@@ -638,10 +643,12 @@ int Block::setPermSPTE( ShadowPTE* i_spte, uint64_t i_access_type)
         // you cannot set to WRITE_TRACKED
         if (getPermission(i_spte) == READ_ONLY)
         {
+            STRC1_KSHORT(KDBG_BK_SET_PERM_SPTE_EINVAL_3, PTR_TO_u32(i_spte), i_access_type);
             return -EINVAL;
         }
         else if (NULL == iv_writeMsgHdlr)
         {
+            STRC1_KSHORT(KDBG_BK_SET_PERM_SPTE_EINVAL_4, PTR_TO_u32(i_spte), i_access_type);
             return -EINVAL;
         }
 
@@ -659,6 +666,7 @@ int Block::setPermSPTE( ShadowPTE* i_spte, uint64_t i_access_type)
         // you cannot set to ALLOCATE_FROM_ZERO
         if (getPermission(i_spte) == READ_ONLY)
         {
+            STRC1_KSHORT(KDBG_BK_SET_PERM_SPTE_EINVAL_5, PTR_TO_u32(i_spte), i_access_type);
             return -EINVAL;
         }
 
@@ -748,6 +756,8 @@ int Block::removePages(VmmManager::PAGE_REMOVAL_OPS i_op, void* i_vaddr,
     }
     else if ((l_aligned_va+l_aligned_size) > (this->iv_baseAddr+this->iv_size))
     {
+        STRC1_KSHORT(KDBG_BK_REMOVE_PAGES_EINVAL, (l_aligned_va+l_aligned_size),
+                                                  (this->iv_baseAddr+this->iv_size));
         return -EINVAL;
     }
 

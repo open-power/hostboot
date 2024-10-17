@@ -44,6 +44,23 @@
 void * g_smallHeapPages[SMALL_HEAP_PAGES_TRACKED];
 #endif
 
+/* @brief From the user data pointer, get the addr of the chunk_t struct
+ */
+#define chunk_ptr(_p) \
+    (reinterpret_cast<chunk_t*>(reinterpret_cast<uint8_t*>(_p) - CHUNK_HDR_SZ))
+
+/* @brief From the chunk_t pointer, get the addr of the user data
+ */
+#define chunk_data_ptr(_p) \
+    (reinterpret_cast<chunk_t*>(reinterpret_cast<uint8_t*>(_p) + CHUNK_HDR_SZ))
+
+/* @brief From the pointer of the chunk_t struct, get the addr of the last byte,
+ *        which is a check byte set to ascii V
+ */
+#define chunk_V_ptr(_p,_s) (reinterpret_cast<uint8_t*>(_p) + _s - 1)
+
+/* @brief Sizes in bytes for each bucket
+ */
 size_t HeapManager::iv_chunk_size[BUCKETS] =
 {
     HeapManager::BUCKET_SIZE0,
@@ -168,7 +185,7 @@ void* _enforceSmallFence(
     auto * const pFence=reinterpret_cast<fence_t*>(pOrigAddr);
     if( pFence->begin != CHECK::BEGIN )
     {
-        printk("i=%p,o=%p\n",i_pAddr,pOrigAddr);
+        KTRC0("i=%p,o=%p\n",i_pAddr,pOrigAddr);
         crit_assert(pFence->begin == CHECK::BEGIN);
     }
     uint32_t endVal=0;
@@ -272,9 +289,9 @@ void* _enforceBigFence(void* const i_pAddr)
 
 void * HeapManager::allocate(size_t i_sz)
 {
-
-    HeapManager& hmgr = Singleton<HeapManager>::instance();
-    size_t overhead = 0;
+    HeapManager &hmgr = Singleton<HeapManager>::instance();
+    size_t       overhead = 0;
+    void        *ptr{nullptr};
 
 #ifdef CONFIG_MALLOC_FENCING
     overhead = offsetof(fence_t,data) + sizeof(CHECK::END);
@@ -286,9 +303,8 @@ void * HeapManager::allocate(size_t i_sz)
         && (i_sz + overhead <= HC_SLOT_SIZE)
         && !(KernelMisc::in_kernel_mode()))
     {
-
-        printkd("allocateHuge=%ld [%d]\n", i_sz, task_gettid());
-        void* ptr = hmgr._allocateHuge(i_sz);
+        KTRC1("allocateHuge=%ld [%d]\n", i_sz, task_gettid());
+        ptr = hmgr._allocateHuge(i_sz);
         if( ptr )
         {
             return ptr;
@@ -296,21 +312,27 @@ void * HeapManager::allocate(size_t i_sz)
         else
         {
             // default to using regular allocations if huge doesn't work
-            return hmgr._allocateBig(i_sz);
+            ptr = hmgr._allocateBig(i_sz);
+            return ptr;
         }
     }
     else if(i_sz + overhead > MAX_SMALL_ALLOC_SIZE)
     {
-        return hmgr._allocateBig(i_sz);
+        ptr = hmgr._allocateBig(i_sz);
+        return ptr;
     }
 
-    void* result = hmgr._allocate(i_sz + overhead);
+    ptr = hmgr._allocate(i_sz + overhead);
 
 #ifdef CONFIG_MALLOC_FENCING
-    result = _applySmallFence(result,i_sz);
+    ptr = _applySmallFence(ptr,i_sz);
 #endif
 
-    return result;
+    STRC1_KSHORT(KDBG_HM_ALLOC, PTR_TO_u32(chunk_ptr(ptr)), i_sz);
+
+    crit_assert(ptr);
+
+    return ptr;
 }
 
 void HeapManager::free(void * i_ptr)
@@ -353,13 +375,18 @@ void* HeapManager::_allocate(size_t i_sz)
             cv_smallheap_alloc_hw = cv_smallheap_allocated;
         // test_pages();
 
-        crit_assert(chunk->free == 'F');
+        if (unlikely(chunk->free != 'F'))
+        {
+            STRC1_KSHORT(KDBG_HM_ALLOC_ASSERT_NOT_F, PTR_TO_u32(chunk), chunk->free);
+            KTRC0("chunk->free is not F in HeapManager::_allocate\n");
+            crit_assert(chunk->free == 'F');
+        }
 
         // Use the size of this chunk get to the end.
         size_t size = bucketByteSize(chunk->bucket);
 
         // set the last byte of the chunk to 'V' => valid
-        *(reinterpret_cast<uint8_t*>(chunk) + size - 1 ) = 'V';
+        *(chunk_V_ptr(chunk, size)) = 'V';
 
         // mark chunk as allocated
         chunk->free = 'A';
@@ -372,6 +399,14 @@ void* HeapManager::_allocate(size_t i_sz)
 
 void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
 {
+    if (unlikely(!i_ptr || ! i_sz))
+    {
+        STRC1_KSHORT(KDBG_HM_REALLOC, PTR_TO_u32(i_ptr), i_sz);
+        KTRC0("bad parms in HeapManager::_realloc i_ptr:%p i_sz:%ld\n", i_ptr,i_sz);
+        crit_assert(i_ptr);
+        crit_assert(i_sz);
+    }
+
     // do some range checks
     //
     // Logic for all these are conditional on falling thru
@@ -379,6 +414,7 @@ void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
     if (reinterpret_cast<uint64_t>(i_ptr) >= VMM_VADDR_MALLOC)
     {
         void* new_ptr = _reallocHuge(i_ptr,i_sz);
+        crit_assert(new_ptr);
         return new_ptr;
     }
 
@@ -394,11 +430,18 @@ void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
     new_ptr = _enforceSmallFence(i_ptr,userSize);
 #endif
 
-    chunk_t* chunk = reinterpret_cast<chunk_t*>(((uint64_t*)new_ptr)-1);
+    chunk_t* chunk = chunk_ptr(new_ptr);
+
+    if (unlikely(chunk->free != 'A'))
+    {
+        STRC1_KSHORT(KDBG_HM_FREE_ASSERT_NOT_A, PTR_TO_u32(chunk), chunk->free);
+        KTRC0("chunk->free is not A in HeapManager::_realloc\n");
+        crit_assert(chunk->free == 'A');
+    }
 
     // take into account the 8 byte header and valid byte
     size_t asize = bucketByteSize(chunk->bucket) - CHUNK_HEADER_PLUS_RESERVED;
-    if(asize < i_sz + overhead)
+    if(asize < i_sz + overhead) // i_ptr is too small, so get a new chunk
     {
         // fyi.. MAX_SMALL_ALLOCATION_SIZE = BUCKET11 - 9 bytes
         new_ptr = (i_sz + overhead > MAX_SMALL_ALLOC_SIZE) ?
@@ -427,11 +470,14 @@ void* HeapManager::_realloc(void* i_ptr, size_t i_sz)
     }
 #endif
 
-    if (new_ptr == nullptr)
+    if (unlikely(new_ptr == nullptr))
     {
-        printk("_realloc RETURN nullptr\n");
+        KTRC0("new_ptr == nullptr in HeapManager::_realloc\n");
         crit_assert(0);
     }
+
+    STRC1_KSHORT(KDBG_HM_REALLOC, PTR_TO_u32(chunk_ptr(i_ptr)),
+                                  PTR_TO_u32(chunk_ptr(new_ptr)));
     return new_ptr;
 }
 
@@ -442,7 +488,7 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
     if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
        reinterpret_cast<uint64_t>(i_ptr))
     {
-        printkd("_reallocBig RETURN nullptr\n");
+        KTRC4("_reallocBig: small heap i_ptr:%p\n", i_ptr);
         return nullptr;
     }
 
@@ -461,6 +507,10 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
 #ifdef CONFIG_MALLOC_FENCING
            new_size+=BIG_MALLOC_EXTRA_PAGES;
 #endif
+
+           STRC1_KSHORT(KDBG_HM_REALLOC_BIG, PTR_TO_u32(i_ptr), bc->page_count);
+
+           crit_assert(bc->page_count);
 
            if(new_size > bc->page_count)
            {
@@ -490,34 +540,47 @@ void* HeapManager::_reallocBig(void* i_ptr, size_t i_sz)
     new_ptr=_applyBigFence(new_ptr,i_sz);
 #endif
 
-   return new_ptr;
+    STRC1_KSHORT(KDBG_HM_REALLOC_BIG, PTR_TO_u32(i_ptr), PTR_TO_u32(new_ptr));
+
+    crit_assert(new_ptr);
+
+    return new_ptr;
 }
 
 void HeapManager::_free(void * i_ptr)
 {
-    if (nullptr == i_ptr) return;
+    crit_assert(i_ptr);
 
     if(!_freeHuge(i_ptr) && !_freeBig(i_ptr))
     {
-
 #ifdef CONFIG_MALLOC_FENCING
         size_t userSize=0;
         i_ptr = _enforceSmallFence(i_ptr,userSize);
 #endif
 
-        chunk_t* chunk = reinterpret_cast<chunk_t*>(((uint64_t*)i_ptr)-1);
+        chunk_t* chunk = chunk_ptr(i_ptr);
 
         __sync_sub_and_fetch(&cv_smallheap_allocated,bucketByteSize(chunk->bucket));
         __sync_sub_and_fetch(&cv_smallheap_user_allocated, chunk->size);
         __sync_sub_and_fetch(&cv_inuse_bucket_counts[chunk->bucket],1);
-        crit_assert(chunk->free != 'F');
+
+        STRC1_KSHORT(KDBG_HM_FREE, PTR_TO_u32(chunk), chunk->size);
+
+        if (unlikely(chunk->free != 'A'))
+        {
+            STRC1_KSHORT(KDBG_HM_FREE_ASSERT_NOT_A, PTR_TO_u32(chunk), chunk->free);
+            KTRC0("chunk->free is not A in HeapManager::_free\n");
+            crit_assert(chunk->free == 'A');
+        }
 
         // Use the size of this chunk to find next chunk.
         size_t size = bucketByteSize(chunk->bucket);
 
         // make sure the next block is still valid
-        if( *(reinterpret_cast<uint8_t*>(chunk) + size - 1 ) != 'V')
+        if (unlikely(*(chunk_V_ptr(chunk, size)) != 'V'))
         {
+            STRC1_KSHORT(KDBG_HM_FREE_CRASH_NOT_V, PTR_TO_u32(chunk),
+                                                   *(chunk_V_ptr(chunk, size)));
             MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
             // force a storage exception
             task_crash();
@@ -579,10 +642,12 @@ void HeapManager::push_bucket(chunk_t* i_chunk, size_t i_bucket)
 void HeapManager::newPage()
 {
     void* page = PageManager::allocatePage();
+    __sync_add_and_fetch(&cv_smallheap_page_count,1);
+
+    STRC1_KSHORT(KDBG_HM_NEW_PAGE, PTR_TO_u32(page), cv_smallheap_page_count);
+
     chunk_t * c = reinterpret_cast<chunk_t*>(page);
     size_t remaining = PAGESIZE;
-
-    __sync_add_and_fetch(&cv_smallheap_page_count,1);
 
     while(remaining >= MIN_BUCKET_SIZE)
     {
@@ -648,6 +713,8 @@ void HeapManager::_coalesce()
     chunk_t* head = nullptr;
     chunk_t* chunk = nullptr;
 
+    STRC1_KSHORT(KDBG_HM_COALESCE, cv_smallheap_coalesce_attempts, 0);
+
     __sync_add_and_fetch(&cv_smallheap_coalesce_state,1);
     __sync_add_and_fetch(&cv_smallheap_coalesce_attempts,1);
 
@@ -659,8 +726,13 @@ void HeapManager::_coalesce()
         {
             __sync_sub_and_fetch(&cv_free_bucket_counts[chunk->bucket],1);
 
-            kassert(chunk->free == 'F');
-
+            if (unlikely(chunk->free != 'F'))
+            {
+                STRC1_KSHORT(KDBG_HM_COALESCE_ASSERT_NOT_F, PTR_TO_u32(chunk), chunk->free);
+                KTRC0("chunk->free is not F in HeapManager::coalesce\n");
+                crit_assert(chunk->free == 'F'); // ensure all chunks in the free buckets
+                                                 // are marked free
+            }
             chunk->next = head;
             chunk->coalesce = 'C';
             head = chunk;
@@ -764,6 +836,18 @@ void HeapManager::_coalesce()
     {
         chunk_t * temp = chunk->next;
 
+        if (unlikely(chunk->free != 'F'))
+        {
+            STRC1_KSHORT(KDBG_HM_COALESCE_ASSERT_NOT_F, PTR_TO_u32(chunk), chunk->free);
+            KTRC0("chunk->free is not F in HeapManager::coalesce\n");
+            crit_assert(chunk->free == 'F'); // ensure its still marked free
+        }
+        if (unlikely(chunk->coalesce != 'C'))
+        {
+            STRC1_KSHORT(KDBG_HM_COALESCE_ASSERT_NOT_C, PTR_TO_u32(chunk), chunk->coalesce);
+            KTRC0("chunk->coalesce is not C in HeapManager::coalesce\n");
+            crit_assert(chunk->coalesce == 'C'); // ensure its still marked coalesce
+        }
         chunk->coalesce = '\0';
         push_bucket(chunk,chunk->bucket);
 
@@ -771,6 +855,7 @@ void HeapManager::_coalesce()
     }
     KTRC1("HeapMgr coalesced total %ld\n",cv_smallheap_coalesce_count);
     __sync_sub_and_fetch(&cv_smallheap_coalesce_state, 1);
+    STRC1_KSHORT(KDBG_HM_COALESCE, cv_smallheap_coalesce_attempts, cv_smallheap_coalesce_state);
     test_pages();
 }
 
@@ -839,7 +924,7 @@ void HeapManager::test_pages()
             }
             else
             {
-                printk("Heaptest: Corruption at %p on page %p."
+                KTRC0("Heaptest: Corruption at %p on page %p."
                        " Owner of %p may have scribbled on it\n",
                        c,g_smallHeapPages[i],c_prev+8);
                 sum = PAGESIZE;
@@ -848,7 +933,7 @@ void HeapManager::test_pages()
         }
         if(sum > PAGESIZE)
         {
-            printk("Heaptest: Page %p failed consistancy test\n",g_smallHeapPages[i]);
+            KTRC0("Heaptest: Page %p failed consistancy test\n",g_smallHeapPages[i]);
         }
     }
 #endif
@@ -863,6 +948,9 @@ void* HeapManager::_allocateBig(size_t i_sz)
 #endif
 
     void* v = PageManager::allocatePage(pages);
+    crit_assert(v);
+
+    STRC1_KSHORT(KDBG_HM_ALLOC_BIG, PTR_TO_u32(v), pages);
 
     __sync_add_and_fetch(&cv_largeheap_page_count,pages);
     if(cv_largeheap_page_max < cv_largeheap_page_count)
@@ -901,14 +989,18 @@ bool HeapManager::_freeBig(void* i_ptr)
 {
     // Currently all large allocations fall on a page boundary,
     // but small allocations never do
-    if(ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
-       reinterpret_cast<uint64_t>(i_ptr))
+    if (unlikely( ALIGN_PAGE(reinterpret_cast<uint64_t>(i_ptr)) !=
+                  reinterpret_cast<uint64_t>(i_ptr))
+       )
+    {
         return false;
+    }
 
 #ifdef CONFIG_MALLOC_FENCING
     i_ptr=_enforceBigFence(i_ptr);
 #endif
 
+    size_t page_count{0};
     bool result = false;
     big_chunk_t * bc = big_chunk_stack.first();
     while(bc)
@@ -917,10 +1009,12 @@ bool HeapManager::_freeBig(void* i_ptr)
         {
             __sync_sub_and_fetch(&cv_largeheap_page_count,bc->page_count);
 
-            size_t page_count = bc->page_count;
+            page_count = bc->page_count;
             bc->page_count = 0;
             bc->addr = nullptr;
             lwsync();
+
+            STRC1_KSHORT(KDBG_HM_FREE_BIG, PTR_TO_u32(i_ptr), page_count);
 
             PageManager::freePage(i_ptr,page_count);
 
@@ -937,7 +1031,12 @@ bool HeapManager::_freeBig(void* i_ptr)
     // If we did not find a large allocation in the list (result == false)
     // then either we have a double-free or someone trying to free something
     // that doesn't belong on the heap.
-    crit_assert(result);
+    if (unlikely(!result))
+    {
+        STRC1_KSHORT(KDBG_HM_FREE_BIG_ASSERT, PTR_TO_u32(i_ptr), page_count);
+        KTRC0("bad result in HeapManager::_freeBig\n");
+        crit_assert(result);
+    }
 
     return result;
 }
@@ -1000,12 +1099,15 @@ void HeapManager::_addDebugPointers()
 void* HeapManager::_allocateHuge(size_t i_sz)
 {
     size_t pages = ALIGN_PAGE(i_sz)/PAGESIZE;
-    if( (pages*PAGESIZE) > HC_SLOT_SIZE )
+
+    if (unlikely((pages*PAGESIZE) > HC_SLOT_SIZE))
     {
-        printk( "_allocateHuge> Request too large, bytes=%ld > HC_SLOT_SIZE=%d\n",
+        KTRC0( "_allocateHuge> Request too large, bytes=%ld > HC_SLOT_SIZE=%d\n",
             i_sz, HC_SLOT_SIZE );
-        return nullptr;
+        crit_assert(0);
     }
+
+    crit_assert(pages);
 
     // Values for iv_hugeblock_allocated
     //  0=nothing done
@@ -1017,11 +1119,11 @@ void* HeapManager::_allocateHuge(size_t i_sz)
         int rc = mm_alloc_block( nullptr,
                                  reinterpret_cast<void*>(VMM_VADDR_MALLOC),
                                  HC_TOTAL_SIZE );
-        if(rc != 0)
+        if (unlikely(rc))
         {
-            printk( "_allocateHuge> mm_alloc_block failed for %lX\n",
+            KTRC0( "_allocateHuge> mm_alloc_block failed for %lX\n",
                     VMM_VADDR_MALLOC );
-            return nullptr;
+            crit_assert(0);
         }
 
         // Prepopulate list with the available addresses
@@ -1046,37 +1148,39 @@ void* HeapManager::_allocateHuge(size_t i_sz)
         }
     }
 
-
     // Find an unused chunk
     huge_chunk_t * hc = huge_chunk_stack.first();
     while(hc)
     {
         if( hc->page_count == 0 )
         {
-            printkd( "_allocateHuge> Found hole at %p pages=%ld i_sz=%ld\n", hc->addr, pages, i_sz);
+            KTRC1( "_allocateHuge> Found hole at %p pages=%ld i_sz=%ld\n", hc->addr, pages, i_sz);
         }
 
         // atomically set the page_count
         if(__sync_bool_compare_and_swap(&hc->page_count,0,pages))
         {
+            // found an unused chunk, atomically set the page_count
             break;
         }
         hc = reinterpret_cast<huge_chunk_t *> (reinterpret_cast<uint64_t>(hc->next) & 0x00000000FFFFFFFF);
     }
-    if(!hc)
+    if (unlikely(!hc))
     {
-        printk( "_allocateHuge> No chunks left for requested size=%ld!!\n", i_sz );
+        STRC1_KSHORT(KDBG_HM_ALLOC_HUGE_NO_CHUNKS, 0, pages);
+        KTRC0( "_allocateHuge> No huge_chunk_t left for requested size=%ld!!\n", pages );
         MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
-        return nullptr;
+        crit_assert(0);
     }
 
     int rc = mm_set_permission(hc->addr,
                                pages*PAGESIZE,
                                WRITABLE | ALLOCATE_FROM_ZERO );
-
-    if(rc != 0)
+    if (unlikely(rc))
     {
-        printk( "_allocateHuge> mm_set_permission failed for requested size=%ld!!\n", i_sz );
+        STRC1_KSHORT(KDBG_HM_ALLOC_HUGE, PTR_TO_u32(hc->addr), pages);
+        KTRC0("_allocateHuge: mm_set_permission failed! addr:%p pages=%ld\n", hc->addr, pages);
+        crit_assert(0);
     }
 
     __sync_add_and_fetch(&cv_hugeblock_page_count,pages);
@@ -1084,6 +1188,11 @@ void* HeapManager::_allocateHuge(size_t i_sz)
     {
         cv_hugeblock_page_max = cv_hugeblock_page_count;
     }
+
+    STRC1_KSHORT(KDBG_HM_ALLOC_HUGE, PTR_TO_u32(hc->addr), pages);
+
+    crit_assert(hc->addr);
+
     return hc->addr;
 }
 
@@ -1091,12 +1200,14 @@ void* HeapManager::_allocateHuge(size_t i_sz)
 bool HeapManager::_freeHuge(void* i_ptr)
 {
     // Huge allocations are within the allocated VMM space
-    if( (reinterpret_cast<uint64_t>(i_ptr) < VMM_VADDR_MALLOC)
-        || (reinterpret_cast<uint64_t>(i_ptr)
-            >= (VMM_VADDR_MALLOC+VMM_MALLOC_SIZE)) )
+    if (unlikely(
+            (reinterpret_cast<uint64_t>(i_ptr) < VMM_VADDR_MALLOC) ||
+            (reinterpret_cast<uint64_t>(i_ptr) >= (VMM_VADDR_MALLOC+VMM_MALLOC_SIZE)) )
+       )
     {
         return false;
     }
+    STRC1_KSHORT(KDBG_HM_FREE_HUGE, PTR_TO_u32(i_ptr), 0);
 
     // Find the relevant chunk
     huge_chunk_t * hc = huge_chunk_stack.first();
@@ -1108,9 +1219,9 @@ bool HeapManager::_freeHuge(void* i_ptr)
         }
         hc = reinterpret_cast<huge_chunk_t *> (reinterpret_cast<uint64_t>(hc->next) & 0x00000000FFFFFFFF);
     }
-    if(!hc)
+    if (unlikely(!hc))
     {
-        printk( "_freeHuge> Cannot find chunk for i_ptr=%p!!\n", i_ptr );
+        KTRC0( "_freeHuge> Cannot find chunk for i_ptr=%p!!\n", i_ptr );
         return false;
     }
 
@@ -1118,20 +1229,22 @@ bool HeapManager::_freeHuge(void* i_ptr)
     rc = mm_remove_pages(RELEASE,
                          i_ptr,
                          hc->page_count*PAGESIZE);
-    if(rc != 0)
+    if (unlikely(rc))
     {
-        printk( "_freeHuge> mm_remove_pages failed for i_ptr=%p (hc->page_count=%ld)\n", i_ptr, hc->page_count);
-        return false;
+        KTRC0( "_freeHuge> mm_remove_pages failed for i_ptr=%p (hc->page_count=%ld)\n",
+                i_ptr, hc->page_count);
+        crit_assert(0);
     }
 
     // Set permissions back to "no_access"
     rc = mm_set_permission(i_ptr,
                            hc->page_count*PAGESIZE,
                            NO_ACCESS | ALLOCATE_FROM_ZERO );
-    if(rc != 0)
+    if (unlikely(rc))
     {
-        printk( "_freeHuge> mm_set_permission failed for i_ptr=%p (hc->page_count=%ld)\n", i_ptr, hc->page_count);
-        return false;
+        KTRC0( "_freeHuge> mm_set_permission failed for i_ptr=%p (hc->page_count=%ld)\n",
+                i_ptr, hc->page_count);
+        crit_assert(0);
     }
 
     __sync_sub_and_fetch(&cv_hugeblock_page_count,hc->page_count);
@@ -1145,20 +1258,22 @@ bool HeapManager::_freeHuge(void* i_ptr)
 void* HeapManager::_reallocHuge(void* i_ptr, size_t i_sz)
 {
     // Huge allocations are within the allocated VMM space
-
-    if( (reinterpret_cast<uint64_t>(i_ptr) < VMM_VADDR_MALLOC)
-        || (reinterpret_cast<uint64_t>(i_ptr) >=
-            (VMM_VADDR_MALLOC+VMM_MALLOC_SIZE)) )
+    if (unlikely(
+            (reinterpret_cast<uint64_t>(i_ptr) < VMM_VADDR_MALLOC) ||
+            (reinterpret_cast<uint64_t>(i_ptr) >= (VMM_VADDR_MALLOC+VMM_MALLOC_SIZE)) )
+       )
     {
-        printk("_reallocHuge RANGE CHECK i_ptr=%p i_sz=%ld\n", i_ptr, i_sz);
+        KTRC0("_reallocHuge RANGE CHECK i_ptr=%p i_sz=%ld\n", i_ptr, i_sz);
         crit_assert(0);
     }
 
-    if( i_sz > HC_SLOT_SIZE )
+    if (unlikely( i_sz > HC_SLOT_SIZE ))
     {
-        printk("_reallocHuge i_sz > HC_SLOT_SIZE i_ptr=%p i_sz=%ld\n", i_ptr, i_sz);
+        KTRC0("_reallocHuge i_sz > HC_SLOT_SIZE i_ptr=%p i_sz=%ld\n", i_ptr, i_sz);
         crit_assert(0);
     }
+
+    size_t new_size = ALIGN_PAGE(i_sz)/PAGESIZE;
 
     // Find the chunk in question
     huge_chunk_t * hc = huge_chunk_stack.first();
@@ -1166,8 +1281,6 @@ void* HeapManager::_reallocHuge(void* i_ptr, size_t i_sz)
     {
         if( hc->addr == i_ptr )
         {
-            size_t new_size = ALIGN_PAGE(i_sz)/PAGESIZE;
-
             __sync_add_and_fetch(&cv_hugeblock_page_count, new_size-hc->page_count);
             if (cv_hugeblock_page_max < cv_hugeblock_page_count)
             {
@@ -1177,32 +1290,36 @@ void* HeapManager::_reallocHuge(void* i_ptr, size_t i_sz)
             int rc = mm_set_permission(hc->addr,
                               hc->page_count*PAGESIZE,
                               WRITABLE | ALLOCATE_FROM_ZERO );
-
-            if(rc != 0)
+            if (unlikely(rc))
             {
-                printk( "_reallocHuge> mm_set_permission failed for i_ptr=%p (hc->page_count=%ld)\n", i_ptr, hc->page_count);
-                return nullptr;
+                KTRC0( "_reallocHuge> mm_set_permission failed for i_ptr=%p (hc->page_count=%ld)\n",
+                        i_ptr, hc->page_count);
+                crit_assert(0);
             }
 
             rc = mm_set_permission( (reinterpret_cast<char*>(hc->addr)+(hc->page_count*PAGESIZE)),
                               (HC_SLOT_SIZE - (hc->page_count*PAGESIZE)),
                               NO_ACCESS | ALLOCATE_FROM_ZERO );
-
-            if(rc != 0)
+            if (unlikely(rc))
             {
-                printk( "_reallocHuge> mm_set_permission failed for i_ptr=%p (hc->page_count=%ld)\n", i_ptr, hc->page_count);
-                return nullptr;
+                KTRC0( "_reallocHuge> mm_set_permission failed for i_ptr=%p (hc->page_count=%ld)\n",
+                        i_ptr, hc->page_count);
+                crit_assert(0);
             }
             break;
         }
         hc = reinterpret_cast<huge_chunk_t *> (reinterpret_cast<uint64_t>(hc->next) & 0x00000000FFFFFFFF);
     }
-    if(!hc)
+    if (unlikely(!hc))
     {
-        printk( "_reallocHuge> No chunk for %p!!\n", i_ptr );
+        KTRC0( "_reallocHuge> No chunk for %p!!\n", i_ptr );
         MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
-        return nullptr;
+        crit_assert(0);
     }
+
+    STRC1_KSHORT(KDBG_HM_REALLOC_HUGE, PTR_TO_u32(i_ptr), new_size);
+
+    crit_assert(i_ptr);
 
     return i_ptr;
 }

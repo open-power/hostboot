@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <sys/misc.h>
 #include <kernel/kernel_reasoncodes.H>
 #include <kernel/taskmgr.H>
+#include <kernel/simpletrace.H>
 
 /** Hook location for trace module to set up when loaded. */
 namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
@@ -45,6 +46,7 @@ namespace TRACE { void (*traceCallback)(void*, size_t) = NULL; };
 extern "C" void __assert(AssertBehavior i_assertb, const char* i_file,
                          int i_line)
 {
+    STRC_FREEZE(KDBG_ASSERT);
 
     task_t* task = NULL;
 

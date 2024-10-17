@@ -53,23 +53,20 @@ sub display_trace_data
     my $str;
 
     $data{summary} or ::userDisplay "=========================================================\n";
+    $data{summary} and Hostboot::SimpleTraceCommon::st_display_time($data{sec},$data{nsec});
+    $data{summary} and Hostboot::SimpleTraceCommon::st_display_tid_summary($data{tid});
     display_tag($data{tag});
+    $data{summary} and Hostboot::SimpleTraceCommon::st_display_cpuid_summary($data{cpuid});
+    $data{summary} or $data{tag} and ::userDisplay "\n";
+    Hostboot::SimpleTraceCommon::st_display_istep($data{istep}, $data{substep});
+    $data{summary} or $data{istep} and ::userDisplay "\n";
+    $data{summary} or Hostboot::SimpleTraceCommon::st_display_tid($data{tid});
     $data{summary} or ::userDisplay "\n";
-    Hostboot::SimpleTraceCommon::st_display_tid($data{tid});
+    Hostboot::SimpleTraceCommon::st_display_req_pages($data{requested_pages});
+    ::userDisplay "\n";
 
     $data{summary} and return;
 
-    $str = sprintf("  %6d which_bucket\n", $data{which_bucket});
-    ::userDisplay "$str";
-    $str = sprintf("  %6d bucket_size\n", $data{bucket_size});
-    ::userDisplay "$str";
-    $str = sprintf("  %6d page_count\n", $data{page_count});
-    ::userDisplay "$str";
-    $str = sprintf("  %6d stats_count\n", $data{stats_count});
-    ::userDisplay "$str";
-    $str = sprintf("  %6d coalesce_state\n", $data{coalesce_state});
-    ::userDisplay "$str";
-    $str = sprintf("  %08x  <= first\n", $data{first});
     ::userDisplay "$str";
 }
 
@@ -86,14 +83,14 @@ sub get_trace_data
     {
         return 0;
     }
+    $data->{cpuid}           = ::read16 ($addr); $addr+=2;
+    $data->{sec}             = ::read32 ($addr); $addr+=4;
+    $data->{nsec}            = ::read32 ($addr); $addr+=4;
 
-    $data->{which_bucket}   = ::read32 ($addr); $addr+=4;
-    $data->{bucket_size}    = ::read32 ($addr); $addr+=4;
-    $data->{page_count}     = ::read32 ($addr); $addr+=4;
-    $data->{stats_count}    = ::read32 ($addr); $addr+=4;
-    $data->{coalesce_state} = ::read32 ($addr); $addr+=4;
-    $data->{first}          = ::read64 ($addr); $addr+=8;
-    $data->{tid}            = ::read16 ($addr);
+    $data->{istep}           = ::read16 ($addr); $addr+=2;
+    $data->{substep}         = ::read16 ($addr); $addr+=2;
+    $data->{tid}             = ::read16 ($addr); $addr+=2;
+    $data->{requested_pages} = ::read16 ($addr); $addr+=2;
 
     return 1;
 }

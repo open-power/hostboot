@@ -47,6 +47,10 @@ class PageManagerCore
             BUCKETS = 16,
         };
 
+        /**
+         * @brief Used as an addr to memory the size of 1 or more 4k pages
+         *        Used to manage free pages in the bucket lists and for coalescing
+         */
         struct page_t
         {
             page_t* next;       //!< Next block of pages
@@ -129,14 +133,14 @@ class PageManagerCore
         std::array<range_t,MAX_HEAP_RANGES> iv_ranges;
 
         /**
-         * Find a page of proper size
+         * @brief Find a page of proper size
          * @param[in] the Size
          * @return a page ptr to a page of size pages
          */
         page_t* pop_bucket(size_t);
 
         /**
-         * Add a pages to the page manager
+         * @brief Add memory into a page manager bucket
          * @param[in] ptr to the allocation
          * @param[in] The number of pages
          */
@@ -181,9 +185,7 @@ class PageManager
         static uint64_t queryAvail();
 
         /**
-         * Coalesce adjacent free memory blocks
-         * @pre This function can only be called from kernel space and
-         * requires that all other processes are quiesced
+         * @brief Coalesce the memory in the free buckets
          */
         static void coalesce( void );
 
@@ -213,8 +215,13 @@ class PageManager
         static void addDebugPointers();
 
         /**
-         * @brief Copy statistics data from memory to o_stats
-         * @param[out] o_stats  The memory block to copy statistics data into
+         * Reset statistics used to analyze each IStep
+         */
+        static void resetIStepStats();
+
+        /**
+         * @brief      Copy statistics data from memory to o_stats
+         * @param[out] The memory block to copy statistics data into
          */
         static void get_stats(struct kmem_trc_data &o_stats);
 
@@ -234,9 +241,6 @@ class PageManager
             LOWMEM_CRIT_LIMIT = KERNEL_HEAP_RESERVED_PAGES+1,
         };
 
-        static constexpr size_t   KMEMSTATS_SIZE   = 4096;
-        static constexpr size_t   KALLOC_SIZE      = 1024;
-
         static uint64_t cv_free_bucket_count[PageManagerCore::BUCKETS];
         static uint64_t cv_coalesce_state;     //!< 1 if coalesce is running, else 0
         static uint64_t cv_coalesce_attempts;  //!< iv_heap coalesce attempts
@@ -250,11 +254,11 @@ class PageManager
     private:
         void _initialize();
 
-        void* _allocatePage(size_t,bool,bool);//!< see allocatePage()
-        void _freePage(void*, size_t);       //!< see freePage()
-        void _coalesce( void );              //!< see coalesce()
-        void _addMemory(size_t, size_t);     //!< see addMemory()
-        void _addDebugPointers();           //!< see addDebugPointers()
+        void* _allocatePage(size_t,bool,bool); //!< see allocatePage()
+        void _freePage(void*, size_t);         //!< see freePage()
+        void _coalesce( void );                //!< see coalesce()
+        void _addMemory(size_t, size_t);       //!< see addMemory()
+        void _addDebugPointers();              //!< see addDebugPointers()
 
         /** see queryAvail() */
         ALWAYS_INLINE uint64_t _queryAvail() const

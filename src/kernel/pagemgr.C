@@ -54,6 +54,17 @@
 #include <kernel/spte.H>
 #include <kernel/timemgr.H>
 #include <kernel/simpletrace.H>
+#include <vector>
+
+extern int g_istep;   // used in STRC_KMEM, STRC_KALLOC
+extern int g_substep; // used in STRC_KMEM, STRC_KALLOC
+
+void PageManager::resetIStepStats()
+{
+    // reset these at the start of each IStep so they tell us the lowest page
+    // count hit in each IStep
+    cv_low_page_count = cv_pagesAvail;
+}
 
 uint64_t PageManager::cv_reserved_pages_available{0};
 uint64_t PageManager::cv_pagesTotal{0};
@@ -111,7 +122,7 @@ void PageManagerCore::addMemory( size_t i_addr, size_t i_pageCount )
         // Update set of registered heap memory ranges to support heap coalescing.
         // It is a critical error for the last range to already be registered when
         // this API is invoked.
-        kassert(!iv_ranges.back().first);
+        crit_assert(!iv_ranges.back().first);
         for(auto& range : iv_ranges)
         {
             // Range value of 0 indicates a free range to use, since Hostboot cannot
@@ -126,9 +137,9 @@ void PageManagerCore::addMemory( size_t i_addr, size_t i_pageCount )
             // Can't ever start a range at/below that of an existing range.
             if (i_addr <= range.first)
             {
-                printk("i_addr <= range.first 0x%lx <= 0x%lx\n", i_addr, (size_t)range.first);
+                KTRC0("i_addr <= range.first 0x%lx <= 0x%lx\n", i_addr, (size_t)range.first);
             }
-            kassert(i_addr > range.first);
+            crit_assert(i_addr > range.first);
         }
     }
 }
@@ -173,14 +184,7 @@ PageManagerCore::page_t * PageManagerCore::allocatePage( size_t i_pageCount )
     {
         if (i_pageCount > 1)
         {
-            kalloc_trc_data_t l_data{0};
-            l_data.bucket_size    = bucket_size;
-            l_data.which_bucket   = which_bucket;
-            l_data.page_count     = i_pageCount;
-            l_data.stats_count    = PageManager::cv_free_bucket_count[which_bucket];
-            l_data.coalesce_state = PageManager::cv_coalesce_state;
-            l_data.first          = iv_heap[which_bucket].first();
-            STRC_KALLOC(K_ALLOC_PAGES_FAIL, l_data);
+            STRC1_KALLOC(K_ALLOC_PAGES_FAIL, g_istep, g_substep, i_pageCount);
         }
     }
     return page;
@@ -188,12 +192,14 @@ PageManagerCore::page_t * PageManagerCore::allocatePage( size_t i_pageCount )
 
 
 
-void PageManagerCore::freePage(
-    void*  i_page,
-    size_t i_pageCount,
-    bool   i_overAllocated)
+void PageManagerCore::freePage(void*  i_page,
+                               size_t i_pageCount,
+                               bool   i_overAllocated)
 {
-    if ((NULL == i_page) || (0 == i_pageCount)) return;
+    STRC1_KSHORT(KDBG_PM_FREE_ENTER, PTR_TO_u32(i_page), i_pageCount);
+
+    crit_assert(i_page);
+    crit_assert(i_pageCount);
 
     size_t which_bucket = ((sizeof(size_t)*8 - 1) -
                                 __builtin_clzl(i_pageCount));
@@ -218,14 +224,9 @@ void PageManagerCore::freePage(
     return;
 }
 
-
-
 void PageManager::init()
 {
     Singleton<PageManager>::instance();
-
-    STRC_KMEM_INIT   (KMEMSTATS_SIZE, BASE_FORMAT);
-    STRC_KALLOC_INIT (KALLOC_SIZE,    BASE_FORMAT);
 }
 
 void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
@@ -235,6 +236,8 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
     // In non-kernel mode, make a system-call to allocate in kernel-mode.
     if (!KernelMisc::in_kernel_mode())
     {
+        STRC1_KSHORT(KDBG_PM_ALLOC_USR_ENTER, n, 0);
+
         page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
                          reinterpret_cast<void*>(n));
         if (NULL == page)
@@ -273,7 +276,8 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
                 {
                     KTRC0( "PageManager::allocatePage: TIMEOUT size:%ld tid:%d\n",
                             n, task_gettid() );
-                    STRC_KMEM(STRC_L0, KMEM_STATS_ALLOC_PAGE_OOM_TIMEOUT, n);
+                    STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_TIMEOUT,
+                               g_istep, g_substep, n);
                     MAGIC_INSTRUCTION(MAGIC_BREAK_ON_ERROR);
                     KernelMisc::printkBacktrace(nullptr);
                     crit_assert(0);
@@ -287,7 +291,7 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
                     coalesce();
                     ++PageManager::cv_allocatePage_coalesce_wait;
                     coalesceTicks += TimeManager::convertSecToTicks(coalesceSecs,0);
-                    STRC_KMEM(STRC_L1, KMEM_STATS_ALLOC_PAGE_OOM_COALESCE, n);
+                    STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_COALESCE, g_istep, g_substep, n);
                 }
                 // EVICT
                 // Check to evict some pages
@@ -297,19 +301,26 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
                              n, task_gettid() );
                     CpuManager::forceMemoryPeriodic();
                     evictTicks += TimeManager::convertSecToTicks(evictSecs,0);
-                    STRC_KMEM(STRC_L1, KMEM_STATS_ALLOC_PAGE_OOM_DEFRAG, n);
+                    STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_DEFRAG, g_istep, g_substep, n);
                 }
 
                 page = _syscall1(Systemcalls::MM_ALLOC_PAGES,
                                  reinterpret_cast<void*>(n));
             }
         }
+        STRC1_KSHORT(KDBG_PM_ALLOC_USR_EXIT, (uintptr_t)page, n);
     }
     else
     {
-        // In kernel mode.  Do a normal call to the PageManager.
-        PageManager& pmgr = Singleton<PageManager>::instance();
-        page = pmgr._allocatePage(n, userspace, kAllowOom);
+        if (!userspace)
+        {
+            STRC1_KSHORT(KDBG_PM_ALLOC_KER_ENTER, n, 0);
+        }
+        page = Singleton<PageManager>::instance()._allocatePage(n, userspace, kAllowOom);
+        if (!userspace)
+        {
+            STRC1_KSHORT(KDBG_PM_ALLOC_KER_EXIT, PTR_TO_u32(page), n);
+        }
     }
 
     return page;
@@ -317,8 +328,12 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
 
 void PageManager::freePage(void* p, size_t n)
 {
+    crit_assert(n);
+    crit_assert(p);
+
     PageManager& pmgr = Singleton<PageManager>::instance();
-    return pmgr._freePage(p, n);
+    pmgr._freePage(p, n);
+    STRC1_KSHORT(KDBG_PM_FREE_EXIT, cv_pagesAvail, 0);
 }
 
 uint64_t PageManager::queryAvail()
@@ -383,7 +398,7 @@ PageManager::PageManager() : iv_lock()
 
 void PageManager::_initialize()
 {
-    printk("Hostboot base image ends at 0x%lX...\n", firstPageAddr());
+    KTRC0("Hostboot base image ends at 0x%lX...\n", firstPageAddr());
 
     uint64_t totalPages = 0;
     // Extend memory footprint
@@ -398,12 +413,12 @@ void PageManager::_initialize()
     uint64_t l_pageTableOffset = VmmManager::pageTableOffset();
     uint64_t l_endPageTable = l_pageTableOffset + VmmManager::PTSIZE;
 
-    printk("PageManager end of preserved area at 0X%lX\n", l_endPreservedArea);
-    printk("PageManager page table offset at 0X%lX\n", l_pageTableOffset);
+    KTRC0("PageManager end of preserved area at 0X%lX\n", l_endPreservedArea);
+    KTRC0("PageManager page table offset at 0X%lX\n", l_pageTableOffset);
 #ifdef CONFIG_AGGRESSIVE_LRU
-    printk("CastOutPages AGGRESSIVE LRU\n");
+    KTRC0("CastOutPages AGGRESSIVE LRU\n");
 #else
-    printk("CastOutPages NORMAL LRU\n");
+    KTRC0("CastOutPages NORMAL LRU\n");
 #endif
 
     // Populate half the cache after the preserved area
@@ -492,7 +507,7 @@ void* PageManager::_allocatePage(size_t n, bool userspace, bool allowOom)
     // was unsuccessful, pull a page off the reserve heap.
     if ((NULL == page) && (!userspace))
     {
-        STRC_KMEM(STRC_L0, KMEM_STATS_ALLOC_PAGE_OOM_FIRST_FAIL, n);
+        STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_FIRST_FAIL, g_istep, g_substep, n);
         printkd("PAGEMANAGER: kernel heap used\n");
         page = iv_heapKernel.allocatePage(n);
         if (page)
@@ -514,12 +529,13 @@ void* PageManager::_allocatePage(size_t n, bool userspace, bool allowOom)
                n, t->tid);
         printk("Pages available=%ld\n",cv_pagesAvail);
 
-        STRC_KMEM(STRC_L0, KMEM_STATS_ALLOC_PAGE_OOM_SECOND_FAIL, n);
+        STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_SECOND_FAIL, g_istep, g_substep, n);
 
         if (!allowOom)
         {
-            STRC_KMEM(STRC_L0, KMEM_STATS_ALLOC_PAGE_OOM_KASSERT, n);
-            kassert(false);
+            STRC1_KMEM(KMEM_STATS_ALLOC_PAGE_OOM_KASSERT,
+                       g_istep, g_substep, n);
+            crit_assert(0);
         }
     }
 
@@ -602,12 +618,18 @@ void PageManagerCore::coalesce( void )
 {
     if (!iv_supports_coalesce)
     {
-        KTRC1("PageManagerCore::coalesce: not supported for this instance\n");
         return;
     }
+
+    STRC1_KSHORT(KDBG_PM_COALESCE_ENTER, PageManager::cv_coalesce_attempts,
+                                         PageManager::cv_coalesce_count);
+
     __sync_add_and_fetch(&PageManager::cv_coalesce_state, 1);
     __sync_add_and_fetch(&PageManager::cv_coalesce_attempts, 1);
     KTRC1("PageManagerCore: RUN COALESCE\n");
+
+    STRC1_KSHORT(KDBG_PM_COALESCE_START, PageManager::cv_coalesce_attempts,
+                                         PageManager::cv_coalesce_count);
 
     // Look at all the "free buckets" and find blocks to merge
     // Since this is binary, all merges will be from the same free bucket
@@ -655,7 +677,7 @@ void PageManagerCore::coalesce( void )
             }
             // Critical error if we didn't map into a known/registered address
             // range.
-            kassert(found);
+            crit_assert(found);
 
             if(0 != (p_idx % 2))  // odd index
             {
@@ -692,6 +714,9 @@ void PageManagerCore::coalesce( void )
             }
         }
     }
+
+    STRC1_KSHORT(KDBG_PM_COALESCE_EXIT, PageManager::cv_coalesce_attempts,
+                                        PageManager::cv_coalesce_count);
     __sync_sub_and_fetch(&PageManager::cv_coalesce_state, 1);
 }
 

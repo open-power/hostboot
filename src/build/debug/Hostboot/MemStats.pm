@@ -53,22 +53,6 @@ sub helpInfo
 }
 
 ################################################################################
-# read and dump bytes from the addr passed in, for debug
-sub dump_bytes
-{
-    my $addr = shift @_;
-    my $d;
-    my $str;
-    for (my $i=0; $i<24; $i++)
-    {
-        $d = ::read32 ($addr);
-        $str = sprintf("%08x %08x\n", $addr, $d);
-        ::userDisplay "$str";
-        $addr += 4;
-    }
-}
-
-################################################################################
 # print the header, if passed in
 sub display_header
 {
@@ -76,17 +60,9 @@ sub display_header
     $hdr or return;
     ::userDisplay "$hdr\n";
 }
-################################################################################
-# print the istep/substep, if passed in
-sub display_istep
-{
-    my ($istep, $substep) = (@_);
-    $istep or return;
-    ::userDisplay "  IStep: $istep.$substep\n";
-}
 
 ################################################################################
-# print a msg for the tag passed in
+# print a msg for the tag passed in (defined in simpletrace.H)
 sub display_tag
 {
     my $tag = shift || 0;
@@ -100,16 +76,12 @@ sub display_tag
         case 0x1006 {::userDisplay "KMEM_ALLOC_PAGE_OOM_FIRST_FAIL";}
         case 0x1007 {::userDisplay "KMEM_ALLOC_PAGE_OOM_SECOND_FAIL";}
         case 0x1008 {::userDisplay "KMEM_ALLOC_PAGE_OOM_KASSERT";}
+        else
+        {
+            my $str = sprintf("0x%04x                                       ", $tag);
+            ::userDisplay "$str";
+        }
     }
-}
-
-################################################################################
-# print a msg for the data, if passed in
-sub display_req_pages
-{
-    my $pages = shift || 0;
-    $pages or return;
-    ::userDisplay "  Pages: $pages\n";
 }
 
 ################################################################################
@@ -121,31 +93,38 @@ sub display_mem_stats
 
     if ($data{cv_pagesTotal} == 0)
     {
-        ::userDisplay "data is unavailabe at this time\n";
+        ::userDisplay "data is unavailable at this time\n";
         return;
     }
 
     $data{summary} or ::userDisplay "=========================================================\n";
     display_header($data{header});
-    display_tag($data{tag});
-    $data{summary} or ::userDisplay "\n";
-    display_istep($data{istep}, $data{substep});
-    Hostboot::SimpleTraceCommon::st_display_tid($data{tid});
-    display_req_pages($data{requested_pages});
+    $data{summary} and Hostboot::SimpleTraceCommon::st_display_time($data{sec},$data{nsec});
+    $data{summary} and Hostboot::SimpleTraceCommon::st_display_tid_summary($data{tid});
+    $data{tag}     and display_tag($data{tag});
+    $data{summary} and Hostboot::SimpleTraceCommon::st_display_cpuid_summary($data{cpuid});
+    $data{summary} or $data{trace} and ::userDisplay "\n";
+    $data{istep}   and Hostboot::SimpleTraceCommon::st_display_istep($data{istep}, $data{substep});
+    $data{summary} or $data{trace} and ::userDisplay "\n";
+    $data{trace}   and Hostboot::SimpleTraceCommon::st_display_tid($data{tid});
+    $data{summary} or $data{trace} and ::userDisplay "\n";
+    $data{summary} and Hostboot::SimpleTraceCommon::st_display_pages_summary(\%data);
+    $data{summary} and Hostboot::SimpleTraceCommon::st_display_BigHuge_summary(\%data);
+    Hostboot::SimpleTraceCommon::st_display_req_pages($data{requested_pages});
+    $data{summary} or $data{requested_pages} and ::userDisplay "\n";
+    ::userDisplay "\n";
 
     $data{summary} and return;
-
-    ::userDisplay "\n";
 
     # pagemgr
     ::userDisplay "Page Memory Stats:\n";
     $str = sprintf("  %6d Total Pages\n", $data{cv_pagesTotal});
     ::userDisplay "$str";
-    $str = sprintf("  %6d Available Pages\n", $data{cv_pagesAvail});
+    $str = sprintf("  %6d Available Pages\n", $data{cv_pagesAvail_heap});
     ::userDisplay "$str";
-    $str = sprintf("  %6d Low Page Count\n", $data{cv_low_page_count});
+    $str = sprintf("  %6d Low Page Count\n", $data{cv_low_page_count_heap});
     ::userDisplay "$str";
-    $str = sprintf("  %6d Kernel reserved pages available\n", $data{cv_reserved_pages_available});
+    $str = sprintf("  %6d Kernel reserved pages available\n", $data{cv_pagesAvail_res});
     ::userDisplay "$str";
     if ($data{cv_coalesce_state})
     {
@@ -241,7 +220,7 @@ sub display_mem_stats
     }
     if ($data{cv_smallheap_coalesce_attempts})
     {
-        $str = sprintf("  %8d Coalesced Attempts\n", $data{cv_smallheap_coalesce_attempts});
+        $str = sprintf("  %8d Coalesce Attempts\n", $data{cv_smallheap_coalesce_attempts});
         ::userDisplay "$str";
     }
     if ($data{cv_smallheap_coalesce_count})
@@ -298,6 +277,9 @@ sub get_trace_data
     {
         return 0;
     }
+    $data->{cpuid}           = ::read16 ($addr); $addr+=2;
+    $data->{sec}             = ::read32 ($addr); $addr+=4;
+    $data->{nsec}            = ::read32 ($addr); $addr+=4;
 
     $data->{istep}           = ::read16 ($addr); $addr+=2;
     $data->{substep}         = ::read16 ($addr); $addr+=2;
@@ -306,9 +288,9 @@ sub get_trace_data
 
     # pagemgr
     $data->{cv_pagesTotal}                 = ::read32 ($addr); $addr+=4;
-    $data->{cv_pagesAvail}                 = ::read32 ($addr); $addr+=4;
-    $data->{cv_reserved_pages_available}   = ::read32 ($addr); $addr+=4;
-    $data->{cv_low_page_count}             = ::read32 ($addr); $addr+=4;
+    $data->{cv_pagesAvail_heap}            = ::read32 ($addr); $addr+=4;
+    $data->{cv_pagesAvail_res}             = ::read32 ($addr); $addr+=4;
+    $data->{cv_low_page_count_heap}        = ::read32 ($addr); $addr+=4;
     $data->{cv_coalesce_attempts}          = ::read32 ($addr); $addr+=4;
     $data->{cv_coalesce_count}             = ::read32 ($addr); $addr+=4;
     $data->{cv_allocatePage_coalesce_wait} = ::read32 ($addr); $addr+=4;
@@ -357,16 +339,16 @@ sub get_pagemgr_data
 {
     my $data = shift @_;
 
-    $data->{cv_reserved_pages_available} = ::read64
+    $data->{cv_pagesAvail_res} = ::read64
       ::findPointer("PAGEMKRA",
                     "PageManager::cv_reserved_pages_available");
     $data->{cv_pagesTotal} = ::read64
       ::findPointer("PAGEMPGT",
                     "PageManager::cv_pagesTotal");
-    $data->{cv_pagesAvail} = ::read64
+    $data->{cv_pagesAvail_heap} = ::read64
       ::findPointer("PAGEMPGA",
                     "PageManager::cv_pagesAvail");
-    $data->{cv_low_page_count} = ::read64
+    $data->{cv_low_page_count_heap} = ::read64
       ::findPointer("PAGEMLPC",
                     "PageManager::cv_low_page_count");
     $data->{cv_coalesce_state} = ::read64
@@ -535,7 +517,7 @@ sub print_kmem_trace
         return;
     }
 
-   # do not print the trace for these options
+   # only print the elements for the trace option
    (defined $args->{"summary"} || defined $args->{"trace"}) or return;
 
     my $hdr = ::read64 ($addr);

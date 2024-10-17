@@ -167,6 +167,7 @@ class HeapManager
 
             chunk_t* next;      //!< Next chunk (for unallocated chunks only)
         };
+        static constexpr uint32_t CHUNK_HDR_SZ = 8; // size in bytes of chunk_t header
 
         /**
          * big chunk directory entry

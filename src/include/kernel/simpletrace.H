@@ -26,7 +26,10 @@
 /**
  * @file simpletrace.H
  * @brief Define class SimpleTrace, which is a ring trace buffer of a fixed
- *        size, where each trace element is a struct of data.
+ *        size, where each trace element is a struct of data. The trace element
+ *        is made up of base data + user data.
+ *         ie,    element = { simple_trace_base_entry_t,  kmem_trc_data_t   }
+ *            or  element = { simple_trace_timed_entry_t, kshort_trc_data_t }
  */
 
 #ifndef __KERNEL_SIMPLETRACE_H
@@ -37,6 +40,85 @@
 #include <builtins.h>
 #include <kernel/types.h>
 #include <kernel/console.H>
+#include <kernel/timemgr.H>
+#include <kernel/misc.H>
+#include <arch/ppc.H>
+
+static constexpr size_t KSHORT_SIZE    = 20480;//!> size of kshort trace in bytes
+static constexpr size_t KLONG_SIZE     = 2048; //!> size of klong  trace in bytes
+static constexpr size_t KMEMSTATS_SIZE = 20480;//!> size of kmem   trace in bytes
+static constexpr size_t KALLOC_SIZE    = 2048; //!> size of kalloc trace in bytes
+
+// Do not reuse or delete trace enums - always create a new enum for a new trace.
+// This ensures backward compatibility.
+
+enum kdebug_trc_tag_t : uint16_t
+{
+    KDBG_PM_ALLOC_USR_ENTER        = 0x1001,
+    KDBG_PM_ALLOC_USR_EXIT         = 0x1002,
+    KDBG_PM_FREE_ENTER             = 0x1003,
+    KDBG_PM_FREE_EXIT              = 0x1004,
+    KDBG_PM_COALESCE_ENTER         = 0x1005,
+    KDBG_PM_COALESCE_START         = 0x1006,
+    KDBG_PM_COALESCE_EXIT          = 0x1007,
+    KDBG_PM_ALLOC_KER_ENTER        = 0x1008,
+    KDBG_PM_ALLOC_KER_EXIT         = 0x1009,
+
+    KDBG_HM_ALLOC                  = 0x2001,
+    KDBG_HM_REALLOC                = 0x2002,
+    KDBG_HM_FREE                   = 0x2003,
+    KDBG_HM_COALESCE               = 0x2004,
+    KDBG_HM_NEW_PAGE               = 0x2005,
+    KDBG_HM_ALLOC_BIG              = 0x2006,
+    KDBG_HM_REALLOC_BIG            = 0x2007,
+    KDBG_HM_FREE_BIG               = 0x2008,
+    KDBG_HM_ALLOC_HUGE             = 0x2009,
+    KDBG_HM_REALLOC_HUGE           = 0x200A,
+    KDBG_HM_FREE_HUGE              = 0x200B,
+    KDBG_HM_ALLOC_ASSERT_NOT_F     = 0x200C,
+    KDBG_HM_FREE_ASSERT_NOT_A      = 0x200D,
+    KDBG_HM_FREE_BIG_ASSERT        = 0x200E,
+    KDBG_HM_ALLOC_HUGE_NO_CHUNKS   = 0x200F,
+    KDBG_HM_FREE_CRASH_NOT_V       = 0x2010,
+    KDBG_HM_COALESCE_ASSERT_NOT_F  = 0x2011,
+    KDBG_HM_COALESCE_ASSERT_NOT_C  = 0x2012,
+
+    KDBG_BK_SET_PERM_EINVAL        = 0x3000,
+    KDBG_BK_SET_PERM_SPTE_EINVAL_1 = 0x3001,
+    KDBG_BK_SET_PERM_SPTE_EINVAL_2 = 0x3002,
+    KDBG_BK_SET_PERM_SPTE_EINVAL_3 = 0x3003,
+    KDBG_BK_SET_PERM_SPTE_EINVAL_4 = 0x3004,
+    KDBG_BK_SET_PERM_SPTE_EINVAL_5 = 0x3005,
+    KDBG_BK_REMOVE_PAGES_EINVAL    = 0x3006,
+
+    KDBG_TEMP_TRACE                = 0xF000, // temp trace used for quick debug
+
+    KDBG_TRACE_FREEZE              = 0xFFFF,
+};
+
+enum kdebug_freeze_t
+{
+    KDBG_PROG_EX            = 0x0001,
+    KDBG_DSI                = 0x0002,
+    KDBG_DATA_SEGMENT_EX    = 0x0003,
+    KDBG_INST_STORAGE_EX    = 0x0004,
+    KDBG_INST_SEGMENT_EX    = 0x0005,
+    KDBG_ALIGNMENT_EX       = 0x0006,
+    KDBG_ILLEGAL_INST       = 0x0007,
+    KDBG_FP_UNAVAILABLE     = 0x0008,
+    KDBG_SOFTPATCH          = 0x0009,
+    KDBG_MACHINE_CHECK      = 0x000A,
+    KDBG_USR_MACHNE_CHECK   = 0x000B,
+    KDBG_UNHANDLED_EX       = 0x000C,
+    KDBG_ASSERT             = 0x000D,
+};
+
+typedef struct kdebug_trc_data
+{
+    tid_t    tid;
+    uint32_t u32_1;
+    uint32_t u32_2;
+}  __attribute__((packed)) kdebug_trc_data_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Definitions for g_kalloc_trace
@@ -53,20 +135,17 @@ enum kalloc_trc_tag_t : uint16_t
 
 /**
  *******************************************************************************
- *  @brief Define the data in each kalloc entry. This trace logs the page allocs
- *         which fail in PageManagerCore::allocatePage that are greater than one
- *         page. These are the allocs which hit the OOM TI.
+ *  @brief Define the data in each kalloc entry. This trace provides general
+ *         information for page allocation problems in the PageManager.
  */
 typedef struct kalloc_trc_data
 {
-    uint32_t which_bucket;
-    uint32_t bucket_size;
-    uint32_t page_count;
-    uint32_t stats_count;
-    uint32_t coalesce_state;
-    void    *first;
+    // Do not change the order of these variables,
+    //  the perl debug scripts depend upon the order when reading the memory
+    uint16_t istep;
+    uint16_t substep;
     tid_t    tid;
-
+    uint16_t requested_pages;
 }  __attribute__((packed)) kalloc_trc_data_t;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -96,6 +175,8 @@ enum kmem_trc_tag_t : uint16_t
  */
 typedef struct kmem_trc_data
 {
+    // Do not change the order of the variables in this struct,
+    //  the perl debug scripts depend upon the order when reading the memory
     uint16_t istep;
     uint16_t substep;
     tid_t    tid;
@@ -152,11 +233,12 @@ typedef struct kmem_trc_data
  */
 enum simple_trace_level_t
 {
-    STRC_L0  = 0,
-    STRC_L1  = 1,
-    STRC_L2  = 2,
-    STRC_L3  = 3,
-    STRC_L4  = 4
+    STRC_OFF   = 0,
+    STRC_FORCE = 0, // force the trace even if it is OFF
+    STRC_L1    = 1,
+    STRC_L2    = 2,
+    STRC_L3    = 3,
+    STRC_L4    = 4,
 };
 
 /**
@@ -166,7 +248,7 @@ enum simple_trace_level_t
 enum simple_trace_format_t : uint16_t
 {
     BASE_FORMAT  = 0x0001,
-    TIMED_FORMAT = 0x0002
+    TIME_FORMAT  = 0x0002
 };
 
 /**
@@ -181,17 +263,30 @@ typedef struct simple_trace_entry
 
 /**
  *******************************************************************************
- *  @brief Define the TIMED_FORMAT entry
+ *  @brief Define the TIME_FORMAT entry
  */
 typedef struct simple_trace_timed_entry
 {
     uint16_t iv_tag;
-    uint32_t iv_tbu;
-    uint32_t iv_tbl;
+    uint16_t iv_cpuid;
+    uint32_t iv_sec;
+    uint32_t iv_nsec;
     void set(uint16_t i_tag)
     {
-        iv_tag = i_tag;
-        // TO DO - get time base
+        uint64_t sec{0};
+        uint64_t nsec{0};
+        TimeManager::convertTicksToSec(getTB(), sec, nsec);
+        iv_sec   = static_cast<uint32_t>(sec);
+        iv_nsec  = static_cast<uint32_t>(nsec);
+        iv_tag   = i_tag;
+        if (KernelMisc::in_kernel_mode())
+        {
+            iv_cpuid = static_cast<uint16_t>(getCpuId());
+        }
+        else
+        {
+            iv_cpuid = static_cast<uint16_t>(task_getcpuid());
+        }
     }
 } __attribute__((packed)) simple_trace_timed_entry_t;
 
@@ -204,7 +299,8 @@ typedef struct simple_trace_timed_entry
 template <typename BASE_DATA, typename USER_DATA>
 class SimpleTrace
 {
-    static constexpr uint32_t EMPTY_TAG = 0xDEAD;
+    static constexpr uint32_t EMPTY_TAG  = 0xDEAD;
+    static constexpr uint32_t EYECATCHER = 0xABCDDCBA;
 
     /**
      ***************************************************************************
@@ -220,20 +316,20 @@ class SimpleTrace
      ***************************************************************************
      *  @brief Define the header for each SimpleTrace array
      */
-    struct simple_trace_hdr_t
+    typedef struct simple_trace_hdr
     {
         // Do not change the order of these variables,
         //  the perl debug scripts depend upon the order when reading the memory
+        uint32_t               iv_eyecatcher;//!< const tag for this struct
         simple_trace_version_t iv_version;   //!< version of this SimpleTrace
         uint16_t               iv_format;    //!< specifies the format of each entry
         uint32_t               iv_level;     //!< trace level
         uint32_t               iv_e_size;    //!< byte size of a trace entry
         uint32_t               iv_size;      //!< byte size of the entire memory buffer
         uint32_t               iv_max;       //!< number of traces which fit in this buffer
-        uint32_t               iv_pad;
         volatile uint64_t      iv_idx;       //!< count used for the next entry
         uint8_t                iv_data[];    //!< the array of trace entries
-    };
+    } __attribute__((packed)) simple_trace_hdr_t;
 
     /**
      ***************************************************************************
@@ -288,49 +384,22 @@ class SimpleTrace
 
     /**
      ***************************************************************************
-     *  @brief Allocate the buffer and initialize it
-     *  @param[in]  i_size    number of bytes to allocate
-     *  @param[in]  i_format  format of each trace entry
-     */
-    void init(uint32_t i_size, simple_trace_format_t i_format)
-    {
-        iv_hdr = (simple_trace_hdr_t*) new uint8_t[i_size];
-        if (!iv_hdr) {return;}
-
-        iv_hdr->iv_version = SIMPLE_TRACE_VERSION_1;
-        iv_hdr->iv_format  = i_format;
-        iv_hdr->iv_level   = 0;
-        iv_hdr->iv_size    = i_size;
-        iv_hdr->iv_e_size  = sizeof(simple_trace_entry_t);
-        iv_hdr->iv_idx     = 0;
-        iv_hdr->iv_max     = (i_size - sizeof(simple_trace_hdr_t)) / iv_hdr->iv_e_size;
-
-        if (iv_hdr->iv_max == 0)
-        {
-            printkd("simpletrace::ctor: i_size:%d e_size:%d iv_max:%d\n",
-                    i_size, iv_hdr->iv_e_size, iv_hdr->iv_max);
-            return;
-        }
-
-        simple_trace_entry_t *e = (simple_trace_entry_t*)iv_hdr->iv_data;
-
-        for (uint32_t i=0; i<iv_hdr->iv_max; i++)
-        {
-            e->iv_base.set(EMPTY_TAG);
-            e++;
-        }
-    }
-
-    /**
-     ***************************************************************************
      *  @brief  Set the trace level
      *  @param[in]  i_lvl   trace level to set
      */
-    void set_trace_level(uint32_t &i_lvl)
+    void set_trace_level(uint32_t i_lvl)
     {
         if (!iv_hdr) {return;}
         iv_hdr->iv_level = i_lvl;
     }
+
+    /**
+     ***************************************************************************
+     *  @brief Allocate the buffer and initialize it
+     *  @param[in]  i_size    number of bytes to allocate
+     *  @param[in]  i_format  format of each trace entry
+     */
+    void init(uint32_t i_size, simple_trace_format_t i_format);
 
     /**
      ***************************************************************************
@@ -379,6 +448,76 @@ void SimpleTrace_addDebugPointers();
 
 /**
  *******************************************************************************
+ *  @brief Convert a 64-bit addr to a uint32_t
+ */
+#define PTR_TO_u32(_p) (static_cast<uint32_t>(reinterpret_cast<uintptr_t>(_p)))
+
+/**
+ *******************************************************************************
+ *  @brief Initialize the SimpleTrace named g_kshort_trace
+ *  @param[in]  i_size    number of bytes to allocate
+ *  @param[in]  i_format  format for each entry in this trace
+ */
+void STRC_KSHORT_INIT(uint32_t i_size, simple_trace_format_t i_format);
+
+/**
+ *******************************************************************************
+ *  @brief Add a trace entry to g_kshort_trace
+ *  @param[in]  i_lvl   trace level
+ *  @param[in]  i_tag   tag for the new trace entry
+ *  @param[in]  i_d1    data for the new trace entry
+ *  @param[in]  i_d2    data for the new trace entry
+ */
+void STRC_KSHORT(simple_trace_level_t i_lvl,
+                     kdebug_trc_tag_t i_tag,
+                             uint32_t i_d1,
+                             uint32_t i_d2);
+
+#define STRC1_KSHORT(_tag, _d1, _d2) \
+         STRC_KSHORT(STRC_L1, _tag, static_cast<uint32_t>(_d1), static_cast<uint32_t>(_d2))
+#define STRC2_KSHORT(_tag, _d1, _d2) \
+         STRC_KSHORT(STRC_L2, _tag, static_cast<uint32_t>(_d1), static_cast<uint32_t>(_d2))
+#define STRC3_KSHORT(_tag, _d1, _d2) \
+         STRC_KSHORT(STRC_L3, _tag, static_cast<uint32_t>(_d1), static_cast<uint32_t>(_d2))
+#define STRC4_KSHORT(_tag, _d1, _d2) \
+         STRC_KSHORT(STRC_L4, _tag, static_cast<uint32_t>(_d1), static_cast<uint32_t>(_d2))
+
+void STRC_KSHORT_SET_LEVEL(simple_trace_level_t i_lvl);
+
+/**
+ *******************************************************************************
+ *  @brief Initialize the SimpleTrace named g_kslow_trace
+ *  @param[in]  i_size    number of bytes to allocate
+ *  @param[in]  i_format  format for each entry in this trace
+ */
+void STRC_KLONG_INIT(uint32_t i_size, simple_trace_format_t i_format);
+
+/**
+ *******************************************************************************
+ *  @brief Add a trace entry to g_klong_trace
+ *  @param[in]  i_lvl   trace level
+ *  @param[in]  i_tag   tag for the new trace entry
+ *  @param[in]  i_d1    data for the new trace entry
+ *  @param[in]  i_d2    data for the new trace entry
+ */
+void STRC_KLONG(simple_trace_level_t i_lvl,
+                    kdebug_trc_tag_t i_tag,
+                            uint32_t i_d1,
+                            uint32_t i_d2);
+
+#define STRC1_KLONG(_tag, _d1, _d2) \
+         STRC_KLONG(STRC_L1, _tag, static_cast<uint32_t>(_d1), static_cast<uint32_t>(_d2))
+
+/**
+ *******************************************************************************
+ *  @brief Freeze the SimpleTrace. Do not allow any more entries.
+ *         Use to ensure FFDC, by stopping a trace at the time a fatal error is detected.
+ *         Currently in use for exceptions like DSI, and for assert.
+ */
+void STRC_FREEZE(uint32_t i_d1=0, uint32_t i_d2=0);
+
+/**
+ *******************************************************************************
  *  @brief Initialize the SimpleTrace named g_kalloc_trace
  *  @param[in]  i_size    number of bytes to allocate
  *  @param[in]  i_format  format for each entry in this trace
@@ -388,10 +527,45 @@ void STRC_KALLOC_INIT(uint32_t i_size, simple_trace_format_t i_format);
 /**
  *******************************************************************************
  *  @brief Add a trace entry to g_kalloc_trace
+ *  @param[in]  i_lvl   trace level
  *  @param[in]  i_tag   tag for the new trace entry
  *  @param[in]  i_data  data for the new trace entry
  */
-void STRC_KALLOC(kalloc_trc_tag_t i_tag, kalloc_trc_data_t &i_data);
+void STRC_KALLOC(simple_trace_level_t i_lvl,
+                     kalloc_trc_tag_t i_tag,
+                   kalloc_trc_data_t &i_data);
+
+/**
+ *******************************************************************************
+ *  @brief Add a trace entry to g_kalloc_trace
+ *  @param[in]  trace level
+ *  @param[in]  tag for the new trace entry
+ *  @param[in]  step
+ *  @param[in]  substep
+ *  @param[in]  data
+ */
+void STRC_KALLOC(simple_trace_level_t i_lvl,
+                     kalloc_trc_tag_t i_tag,
+                     uint16_t         i_step,
+                     uint16_t         i_substep,
+                     uint16_t         i_data);
+
+#define STRC1_KALLOC(_tag, _step, _substep, _u16)                   \
+        STRC_KALLOC(STRC_L1, _tag, static_cast<uint16_t>(_step),    \
+                                   static_cast<uint16_t>(_substep), \
+                                   static_cast<uint16_t>(_u16))
+#define STRC2_KALLOC(_tag, _step, _substep, _u16)                   \
+        STRC_KALLOC(STRC_L2, _tag, static_cast<uint16_t>(_step),    \
+                                   static_cast<uint16_t>(_substep), \
+                                   static_cast<uint16_t>(_u16))
+#define STRC3_KALLOC(_tag, _step, _substep, _u16)                   \
+        STRC_KALLOC(STRC_L3, _tag, static_cast<uint16_t>(_step),    \
+                                   static_cast<uint16_t>(_substep), \
+                                   static_cast<uint16_t>(_u16))
+#define STRC4_KALLOC(_tag, _step, _substep, _u16)                   \
+        STRC_KALLOC(STRC_L4, _tag, static_cast<uint16_t>(_step),    \
+                                   static_cast<uint16_t>(_substep), \
+                                   static_cast<uint16_t>(_u16))
 
 /**
  *******************************************************************************
@@ -404,24 +578,44 @@ void STRC_KMEM_INIT(uint32_t i_size, simple_trace_format_t i_format);
 /**
  *******************************************************************************
  *  @brief Add a trace entry to g_kmem_trace
- *  @param[in]  i_lvl              trace level
- *  @param[in]  i_tag              tag for the new trace entry
- *  @param[in]  i_requested_pages  number of pages requested in the alloc
+ *  @param[in]  i_lvl   trace level
+ *  @param[in]  i_tag   tag for the new trace entry
+ *  @param[in]  i_data  struct to add into the trace
  */
 void STRC_KMEM(simple_trace_level_t i_lvl,
                      kmem_trc_tag_t i_tag,
-                           uint16_t i_requested_pages);
+                   kmem_trc_data_t &i_data);
 
 /**
  *******************************************************************************
  *  @brief Add a trace entry to g_kmem_trace
- *  @param[in]  i_lvl      trace level
- *  @param[in]  i_tag      tag for the new trace entry
- *  @param[in]  i_step     Istep when this trace is called
- *  @param[in]  i_substep  Istep substep when this trace is called
+ *  @param[in]  trace level
+ *  @param[in]  tag for the new trace entry
+ *  @param[in]  step
+ *  @param[in]  substep
+ *  @param[in]  data
  */
 void STRC_KMEM(simple_trace_level_t i_lvl,
                      kmem_trc_tag_t i_tag,
-                           uint16_t i_istep,
-                           uint16_t i_substep);
+                     uint16_t       i_step,
+                     uint16_t       i_substep,
+                     uint16_t       i_data);
+
+#define STRC1_KMEM(_tag, _step, _substep, _u16)                     \
+        STRC_KMEM(STRC_L1, _tag, static_cast<uint16_t>(_step),      \
+                                   static_cast<uint16_t>(_substep), \
+                                   static_cast<uint16_t>(_u16))
+#define STRC2_KMEM(_tag, _step, _substep, _u16)                     \
+        STRC_KMEM(STRC_L2, _tag, static_cast<uint16_t>(_step),      \
+                                   static_cast<uint16_t>(_substep), \
+                                   static_cast<uint16_t>(_u16))
+#define STRC3_KMEM(_tag, _step, _substep, _u16)                     \
+        STRC_KMEM(STRC_L3, _tag, static_cast<uint16_t>(_step),      \
+                                   static_cast<uint16_t>(_substep), \
+                                   static_cast<uint16_t>(_u16))
+#define STRC4_KMEM(_tag, _step, _substep, _u16)                     \
+        STRC_KMEM(STRC_L4, _tag, static_cast<uint16_t>(_step),      \
+                                   static_cast<uint16_t>(_substep), \
+                                   static_cast<uint16_t>(_u16))
+
 #endif
