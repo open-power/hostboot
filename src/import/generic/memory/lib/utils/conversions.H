@@ -280,12 +280,42 @@ inline uint64_t cycles_to_ps(const fapi2::Target<T>& i_target, const uint64_t i_
     uint64_t l_freq = 0;
     uint64_t l_clock_period = 0;
 
-    // Each OCMB only has one MEM_PORT
+    // Frequency is stored on the MEM_PORT target
     for (const auto l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, l_port, l_freq),
                  "%s Can't get a valid MSS_FREQ - stopping", mss::c_str(i_target));
     }
+
+    FAPI_TRY( freq_to_ps(l_freq, l_clock_period),
+              "%s Failed to convert memory frequency to a valid clock period (%d) - stopping",
+              mss::c_str(i_target), l_freq);
+    return cycles_to_ps(l_clock_period, i_cycles);
+
+fapi_try_exit:
+    o_rc = fapi2::current_err;
+
+    // Keeps compiler happy
+    return 0;
+}
+
+///
+/// @brief Return the number of ps contained in a count of cycles - specialization for MEM_PORT
+/// @param[in] i_target target for the frequency attribute
+/// @param[in] i_cycles the number of cycles to convert
+/// @param[out] o_rc a return code used to handle an error
+/// @return uint64_t, the number of picoseconds
+///
+template<>
+inline uint64_t cycles_to_ps(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target, const uint64_t i_cycles,
+                             fapi2::ReturnCode& o_rc)
+{
+    // The frequency in MHZ
+    uint64_t l_freq = 0;
+    uint64_t l_clock_period = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, l_freq),
+             "%s Can't get a valid MSS_FREQ - stopping", mss::c_str(i_target));
 
     FAPI_TRY( freq_to_ps(l_freq, l_clock_period),
               "%s Failed to convert memory frequency to a valid clock period (%d) - stopping",
