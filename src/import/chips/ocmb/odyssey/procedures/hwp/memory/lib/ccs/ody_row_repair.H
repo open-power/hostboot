@@ -51,7 +51,7 @@ namespace ody
 namespace row_repair
 {
 
-typedef mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> REPAIR_ARR[mss::ody::MAX_RANK_PER_DIMM];
+typedef mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> REPAIR_ARR[mss::ody::HW_MAX_RANK_PER_DIMM];
 typedef REPAIR_ARR REPAIR_MAP[mss::ody::MAX_DIMM_PER_OCMB];
 
 ///

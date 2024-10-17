@@ -105,7 +105,7 @@ fapi2::buffer<uint64_t> select_all_drams_for_repair()
 ///
 void init_repair_entry_arr( REPAIR_ARR& io_repairs_per_dimm)
 {
-    for(uint8_t l_dimm_rank = 0; l_dimm_rank < mss::ody::MAX_RANK_PER_DIMM; l_dimm_rank++)
+    for(uint8_t l_dimm_rank = 0; l_dimm_rank < mss::ody::HW_MAX_RANK_PER_DIMM; l_dimm_rank++)
     {
         io_repairs_per_dimm[l_dimm_rank] = mss::row_repair::repair_entry<mss::mc_type::ODYSSEY>();
     }
@@ -986,7 +986,7 @@ fapi2::ReturnCode clear_row_repairs_on_bad_dram(const fapi2::Target<fapi2::TARGE
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ROW_REPAIR_DATA, i_target, o_row_repair_data) );
 
     // Loops through all of the possible ranks on this DIMM and checks the repair data
-    for(uint8_t l_rank = 0; l_rank < mss::ody::MAX_RANK_PER_DIMM; ++l_rank)
+    for(uint8_t l_rank = 0; l_rank < mss::ody::HW_MAX_RANK_PER_DIMM; ++l_rank)
     {
         const fapi2::buffer<uint8_t> l_repair_valid_data(o_row_repair_data[l_rank][ROW_REPAIR_VALID_BYTE]);
 
@@ -1014,6 +1014,14 @@ fapi2::ReturnCode clear_row_repairs_on_bad_dram(const fapi2::Target<fapi2::TARGE
         {
             std::fill(std::begin(o_row_repair_data[l_rank]), std::end(o_row_repair_data[l_rank]), ROW_REPAIR_CLEAR_VALUE);
         }
+    }
+
+    // Odyssey can at max have 2 (mss::ody::HW_MAX_RANK_PER_DIMM) ranks,
+    // but o_row_repair_data contains mss::ody::MAX_RANK_PER_DIMM entries to align with the ATTR_ROW_REPAIR_DATA structure
+    // We clear these additional entries
+    for (uint8_t l_rank = mss::ody::HW_MAX_RANK_PER_DIMM; l_rank < mss::ody::MAX_RANK_PER_DIMM; l_rank++)
+    {
+        std::fill(std::begin(o_row_repair_data[l_rank]), std::end(o_row_repair_data[l_rank]), ROW_REPAIR_CLEAR_VALUE);
     }
 
     // Sets the row repair data
@@ -1059,7 +1067,7 @@ fapi2::ReturnCode map_repairs_per_dimm( const fapi2::Target<fapi2::TARGET_TYPE_O
         const auto& l_port = mss::find_target<fapi2::TARGET_TYPE_MEM_PORT>(l_dimm);
         uint8_t l_port_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
 
-        for(uint8_t l_dimm_rank = 0; l_dimm_rank < mss::ody::MAX_RANK_PER_DIMM; l_dimm_rank++)
+        for(uint8_t l_dimm_rank = 0; l_dimm_rank < mss::ody::HW_MAX_RANK_PER_DIMM; l_dimm_rank++)
         {
             o_repair_map[l_port_pos][l_dimm_rank] = l_repairs_per_dimm[l_dimm_rank];
         }
