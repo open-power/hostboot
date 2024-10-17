@@ -96,12 +96,6 @@ const char PLDM_BIOS_HB_PS1_INPUT_VOLTAGE[]                = "hb_power_PS1_input
 const char PLDM_BIOS_HB_PS2_INPUT_VOLTAGE[]                = "hb_power_PS2_input_voltage";
 const char PLDM_BIOS_HB_PS3_INPUT_VOLTAGE[]                = "hb_power_PS3_input_voltage";
 
-// TODO JIRA: PFHB-478 remove when BMC PLDM is refreshed from upstream.
-const char PLDM_BIOS_HB_PS0_FUNCTIONAL[]                   = "hb_power_PS0_functional";
-const char PLDM_BIOS_HB_PS1_FUNCTIONAL[]                   = "hb_power_PS1_functional";
-const char PLDM_BIOS_HB_PS2_FUNCTIONAL[]                   = "hb_power_PS2_functional";
-const char PLDM_BIOS_HB_PS3_FUNCTIONAL[]                   = "hb_power_PS3_functional";
-
 const char PLDM_BIOS_HB_PS0_PRESENT[]                   = "hb_power_PS0_present";
 const char PLDM_BIOS_HB_PS1_PRESENT[]                   = "hb_power_PS1_present";
 const char PLDM_BIOS_HB_PS2_PRESENT[]                   = "hb_power_PS2_present";
@@ -2283,13 +2277,6 @@ errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
     o_CcinOfPowerSupplies = 0;
     errlHndl_t errl = nullptr;
 
-    // TODO JIRA: PFHB-478 remove this when BMC PLDM is refreshed from upstream.
-    static const char* const ps_functional_attr_string[] = {
-                                                 PLDM_BIOS_HB_PS0_FUNCTIONAL,
-                                                 PLDM_BIOS_HB_PS1_FUNCTIONAL,
-                                                 PLDM_BIOS_HB_PS2_FUNCTIONAL,
-                                                 PLDM_BIOS_HB_PS3_FUNCTIONAL};
-
     static const char* const ps_present_attr_string[] = {
                                                  PLDM_BIOS_HB_PS0_PRESENT,
                                                  PLDM_BIOS_HB_PS1_PRESENT,
@@ -2321,24 +2308,6 @@ errlHndl_t getPowerSupplyConfig(std::vector<uint8_t>& string_table,
                             ps_present_attr_string[j],
                             POSSIBLE_HB_PS_PRESENT_STRINGS,
                             l_decodedValue);
-
-        if(errl)// BEGIN TODO JIRA: PFHB-478 remove this when BMC PLDM is refreshed from upstream.
-        {
-            delete errl;
-            errl = nullptr;
-            l_decodedValue = {};
-
-            PLDM_ERR("getPowerSupplyConfig() Failed to lookup value for %s reading %s",
-                        ps_present_attr_string[j],
-                        ps_functional_attr_string[j]);
-
-            errl = getDecodedEnumAttr(string_table,
-                    attr_table,
-                    ps_functional_attr_string[j],
-                    POSSIBLE_HB_PS_PRESENT_STRINGS,
-                    l_decodedValue);
-        }// END TODO JIRA: PFHB-478 remove this when BMC PLDM is refreshed from upstream.
-
         if(errl)
         {
             PLDM_ERR("getPowerSupplyConfig() Failed to lookup value for %s",
