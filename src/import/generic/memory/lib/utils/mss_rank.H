@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -332,19 +332,17 @@ class info
 } __attribute__ ((aligned (8)));
 
 ///
-/// @brief Obtains all DIMM ranks on a given port target
+/// @brief Helper function to get the dimm ranks on a given port
 /// @tparam MC the memory controller type
 /// @tparam TT the class traits for the port
 /// @param[in] i_port_target port target
-/// @param[out] o_vect vector of ranks
+/// @param[in,out] io_vect vector of ranks
 /// @return FAPI2_RC_SUCCESS iff success
 ///
 template <mss::mc_type MC, typename TT = rankTraits<MC>>
-fapi2::ReturnCode ranks_on_port(const fapi2::Target<TT::MEM_PORT_TARGET_TYPE>& i_port_target,
-                                std::vector<info<MC>>& o_vect)
+fapi2::ReturnCode ranks_on_port_helper(const fapi2::Target<TT::MEM_PORT_TARGET_TYPE>& i_port_target,
+                                       std::vector<info<MC>>& io_vect)
 {
-    o_vect.clear();
-
     uint8_t l_master_ranks_per_dimm[TT::MAX_DIMMS_PER_PORT] __attribute__ ((aligned (4))) = {0};
     FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_port_target, l_master_ranks_per_dimm));
 
@@ -367,7 +365,7 @@ fapi2::ReturnCode ranks_on_port(const fapi2::Target<TT::MEM_PORT_TARGET_TYPE>& i
         for (uint8_t l_index = l_port_index_start; l_index < (l_port_index_start + l_master_ranks_per_dimm[l_dimm_index]);
              ++l_index)
         {
-            o_vect.push_back(mss::rank::info<MC>(i_port_target, l_index, l_rc));
+            io_vect.push_back(mss::rank::info<MC>(i_port_target, l_index, l_rc));
             FAPI_TRY(l_rc);
         }
     }
@@ -375,6 +373,52 @@ fapi2::ReturnCode ranks_on_port(const fapi2::Target<TT::MEM_PORT_TARGET_TYPE>& i
 fapi_try_exit:
     return fapi2::current_err;
 }
+
+///
+/// @brief Obtains all DIMM ranks on a given port target
+/// @tparam MC the memory controller type
+/// @tparam TT the class traits for the port
+/// @param[in] i_port_target port target
+/// @param[out] o_vect vector of ranks
+/// @return FAPI2_RC_SUCCESS iff success
+///
+template <mss::mc_type MC, typename TT = rankTraits<MC>>
+fapi2::ReturnCode ranks_on_port(const fapi2::Target<TT::MEM_PORT_TARGET_TYPE>& i_port_target,
+                                std::vector<info<MC>>& o_vect)
+{
+    o_vect.clear();
+    FAPI_TRY(ranks_on_port_helper(i_port_target, o_vect));
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief Obtains all the ranks on a given MC's ocmb target
+/// @tparam MC the memory controller type
+/// @tparam TT the class traits for the port
+/// @param[in] i_ocmb_target ocmb target
+/// @param[out] o_vect vector of ranks
+/// @return FAPI2_RC_SUCCESS iff success
+///
+template <mss::mc_type MC, typename TT = rankTraits<MC>>
+fapi2::ReturnCode ranks_on_mc(const fapi2::Target<TT::MC_TARGET_TYPE>& i_ocmb_target,
+                              std::vector<info<MC>>& o_vect)
+{
+    o_vect.clear();
+
+    for(const auto& l_port : mss::find_targets<TT::MEM_PORT_TARGET_TYPE>(i_ocmb_target))
+    {
+        FAPI_TRY(ranks_on_port_helper(l_port, o_vect));
+    }
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
 
 ///
 /// @brief Obtains all ranks on a given DIMM target
