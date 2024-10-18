@@ -339,19 +339,14 @@ fapi_try_exit:
 /// @brief Configures the chip to properly execute CCS instructions
 /// @tparam MC the MC type on which to operate
 /// @tparam T  the MC chip type for this CCS engine - derived from i_target
-/// @tparam P  the port type for this CCS engine - derived from i_ports
 /// @param[in] i_target The MCBIST containing the CCS engine
-/// @param[in] i_ports the vector of ports
-/// @param[in] i_program the vector of instructions
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @param[out] o_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Code location for pre CCS execute workarounds
 ///
-template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P>
+template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode setup_to_execute(const fapi2::Target<T>& i_target,
-                                   const std::vector< fapi2::Target<P> >& i_ports,
-                                   const ccs::program<MC>& i_program,
                                    fapi2::buffer<uint64_t>& o_periodics_reg,
                                    fapi2::buffer<uint64_t>& o_power_cntl_reg);
 
@@ -359,19 +354,14 @@ fapi2::ReturnCode setup_to_execute(const fapi2::Target<T>& i_target,
 /// @brief Cleans up the chip from executing CCS instructions
 /// @tparam MC the MC type on which to operate
 /// @tparam T  the MC chip type for this CCS engine - derived from i_target
-/// @tparam P  the port type for this CCS engine - derived from i_ports
 /// @param[in] i_target The MCBIST containing the CCS engine
-/// @param[in] i_program the vector of instructions
-/// @param[in] i_ports the vector of ports
 /// @param[in] i_periodics_reg the register used to enable periodic calibrations
 /// @param[in] i_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
 /// @note Code location for post CCS execute workarounds
 ///
-template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P>
+template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode cleanup_from_execute(const fapi2::Target<T>& i_target,
-                                       const ccs::program<MC>& i_program,
-                                       const std::vector< fapi2::Target<P> >& i_ports,
                                        const fapi2::buffer<uint64_t> i_periodics_reg,
                                        const fapi2::buffer<uint64_t> i_power_cntl_reg);
 
@@ -423,7 +413,7 @@ fapi2::ReturnCode fail_type( const fapi2::Target<T>& i_target,
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
 /// @param[in] i_ports the ports under test
 /// @param[in] i_program the MCBIST ccs program - to get the polling parameters
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType P, typename TT = ccsTraits<MC> >
 fapi2::ReturnCode check_channel_selects( const std::vector< fapi2::Target<P> >& i_ports,
@@ -542,30 +532,30 @@ fapi_try_exit:
 ///
 /// @brief Updates the initial delays based upon the total delays passed in
 /// @tparam MC the memory controller type running CCS
-/// @tparam fapi2::TargetType T the type of the target running CCS
+/// @tparam T the type of the target running CCS
 /// @param[in] i_target the target type on which to operate
 /// @param[in] i_delay the calculated delays from CCS
-/// @param[in,out] io_program the program for which to update the delays
+/// @param[in,out] io_poll the poll class for which to update the delays
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T  >
 fapi2::ReturnCode update_initial_delays( const fapi2::Target<T>& i_target,
         const uint64_t i_delay,
-        ccs::program<MC>& io_program)
+        poll_parameters& io_poll)
 {
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
 
     // Check our program for any delays. If there isn't a iv_initial_delay configured, then
     // we use the delay we just summed from the instructions.
-    if (io_program.iv_poll.iv_initial_delay == 0)
+    if (io_poll.iv_initial_delay == 0)
     {
-        io_program.iv_poll.iv_initial_delay = cycles_to_ns<T>(i_target, i_delay, l_rc);
+        io_poll.iv_initial_delay = cycles_to_ns<T>(i_target, i_delay, l_rc);
         FAPI_TRY(l_rc, TARGTIDFORMAT " cycles_to_ns failed", TARGTID);
     }
 
-    if (io_program.iv_poll.iv_initial_sim_delay == 0)
+    if (io_poll.iv_initial_sim_delay == 0)
     {
-        io_program.iv_poll.iv_initial_sim_delay = cycles_to_simcycles(i_delay);
+        io_poll.iv_initial_sim_delay = cycles_to_simcycles(i_delay);
     }
 
     return fapi2::FAPI2_RC_SUCCESS;
@@ -599,7 +589,7 @@ static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_
 
 
     // Pre CCS execution configuration
-    FAPI_TRY(setup_to_execute<MC>(i_target, i_ports, io_program, o_periodics_reg, o_power_cntl_reg));
+    FAPI_TRY(setup_to_execute<MC>(i_target, o_periodics_reg, o_power_cntl_reg));
 
     // Stop the CCS engine just for giggles - it might be running ...
     FAPI_TRY( start_stop<MC>(i_target, mss::states::STOP),
@@ -624,16 +614,19 @@ fapi_try_exit:
 /// @tparam T the target type of the chiplet which executes the CCS instruction
 /// @tparam P  the port type for this CCS engine
 /// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam IT the iterator type for the CCS instructions
 /// @param[in] i_target the target to effect
 /// @param[in, out] io_inst_iter the iterator for the ccs instructions
-/// @param[in, out] io_program the vector of instructions
+/// @param[in, out] io_instructions the vector of instructions
+/// @param[in, out] io_poll the polling parameters to setup
 /// @param[in] i_port the port target to effect
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC>, typename IT = typename std::vector< mss::ccs::instruction_t<MC> >::iterator >
 static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& i_target,
         IT& io_inst_iter,
-        ccs::program<MC>& io_program,
+        std::vector< instruction_t<MC> >& io_instructions,
+        poll_parameters& io_poll,
         const fapi2::Target<P>& i_port)
 {
     // Subtract one for the idle we insert at the end
@@ -649,22 +642,19 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
     uint8_t l_current_cke = 0;
     int8_t l_inst_offset_count = 0;
 
-    // Grab port index and first inst
-    const auto l_port_index = mss::relative_pos<MC, T>(i_port);
-
-    std::vector<rank_configuration> l_rank_configs;
-    FAPI_TRY(get_rank_config<MC>(i_target, l_rank_configs));
+    rank_configuration l_rank_config;
+    FAPI_TRY(get_rank_config<MC>(i_port, l_rank_config));
 
     // ODY needs insert of DES at first arr index with TRFC delay does nothing for EXP
-    FAPI_TRY(workarounds::insert_des<MC>(i_target, i_port, l_inst_count, l_current_cke, l_rank_configs[l_port_index]));
+    FAPI_TRY(workarounds::insert_des<MC>(i_target, i_port, l_inst_count, l_current_cke, l_rank_config));
 
     // Shove the instructions into the CCS engine, in 32 instruction chunks, and execute them
     // NOTE: For concurrent CCS the CCS_INSTRUCTION_DEPTH of 32 will never be hit
-    for (; io_inst_iter < io_program.iv_instructions.end()
+    for (; io_inst_iter < io_instructions.end()
          && l_inst_count <= CCS_INSTRUCTION_DEPTH; ++l_inst_count, ++io_inst_iter)
     {
         // First, update the current instruction's chip selects for the current port
-        FAPI_TRY(io_inst_iter->configure_rank(i_port, l_rank_configs[l_port_index]),
+        FAPI_TRY(io_inst_iter->configure_rank(i_port, l_rank_config),
                  "Error configuring rank in ccs::execute on port " TARGTIDFORMAT, GENTARGTID(i_port));
 
         // Now, configure the idles and repeats within this instruction
@@ -672,7 +662,7 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
                  "Error configuring idles and repeats in ccs::execute on port " TARGTIDFORMAT, GENTARGTID(i_port));
 
         // Finally, configure the parity if needed
-        FAPI_TRY(io_inst_iter->compute_parity(i_port, l_rank_configs[l_port_index]),
+        FAPI_TRY(io_inst_iter->compute_parity(i_port, l_rank_config),
                  "Error computing and configuring parity in ccs::execute on port " TARGTIDFORMAT, GENTARGTID(i_port));
 
         io_inst_iter->get_cke_helper(l_current_cke);
@@ -713,20 +703,41 @@ static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& 
     }
 
     // Updates the initial delays
-    FAPI_TRY(update_initial_delays<MC>(i_target, l_total_delay, io_program),
+    FAPI_TRY(update_initial_delays<MC>(i_port, l_total_delay, io_poll),
              "Failed in update_initial_delays for ccs::setup_ccs_instructions on " TARGTIDFORMAT, TARGTID);
 
     FAPI_INF_NO_SBE("executing ccs instructions via MCBIST (%d:%d, %ull) for " TARGTIDFORMAT,
-                    io_program.iv_instructions.size(), l_inst_count, io_program.iv_poll.iv_initial_delay, TARGTID);
+                    io_instructions.size(), l_inst_count, io_poll.iv_initial_delay, TARGTID);
 
     // Deselect
     // Ody des insert with delay 1, Exp default
-    FAPI_TRY(workarounds::insert_des<MC>(i_target, i_port, l_inst_count, l_current_cke, l_rank_configs[l_port_index]));
+    FAPI_TRY(workarounds::insert_des<MC>(i_target, i_port, l_inst_count, l_current_cke, l_rank_config));
 
 fapi_try_exit:
     return fapi2::current_err;
 }
 
+///
+/// @brief Setup all the CCS registers for CCS instructions passed in
+/// @tparam MC the memory controller type running CCS
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam P  the port type for this CCS engine
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @tparam IT the iterator type for the CCS instructions
+/// @param[in] i_target the target to effect
+/// @param[in, out] io_inst_iter the iterator for the ccs instructions
+/// @param[in, out] io_program the vector of instructions
+/// @param[in] i_port the port target to effect
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC>, typename IT = typename std::vector< mss::ccs::instruction_t<MC> >::iterator >
+static inline fapi2::ReturnCode setup_ccs_instructions( const fapi2::Target<T>& i_target,
+        IT& io_inst_iter,
+        ccs::program<MC>& io_program,
+        const fapi2::Target<P>& i_port)
+{
+    return setup_ccs_instructions( i_target, io_inst_iter, io_program.iv_instructions, io_program.iv_poll, i_port);
+}
 
 ///
 /// @brief Execute a set of CCS instructions - multiple ports
@@ -778,7 +789,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<MC>(i_target, io_program, i_ports, l_periodics_reg, l_power_cntl_reg)));
+    FAPI_TRY((cleanup_from_execute<MC>(i_target, l_periodics_reg, l_power_cntl_reg)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();
@@ -890,6 +901,22 @@ template<mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode post_execute_via_mcbist(const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_value);
 
 ///
+/// @brief Setup after running concurrent CCS
+/// @tparam MC the memory controller type running CCS
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam P the target type of the memory port being tested
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_ports the ports for this ocmb chip target
+/// @param[in] i_value value of FARB0Q to be restored
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P>
+fapi2::ReturnCode post_execute_via_mcbist(
+    const fapi2::Target<T>& i_target,
+    const std::vector<fapi2::Target<P>>& i_ports,
+    const fapi2::buffer<uint64_t>& i_value);
+
+///
 /// @brief Configures registers for concurrent CCS execution
 /// @tparam MC the memory controller type which executes the CCS instruction
 /// @tparam T the target type of the chiplet which executes the CCS instruction
@@ -993,7 +1020,7 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<MC>(i_target, io_program, i_ports, l_periodics_reg, l_power_cntl_reg)));
+    FAPI_TRY((cleanup_from_execute<MC>(i_target, l_periodics_reg, l_power_cntl_reg)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();

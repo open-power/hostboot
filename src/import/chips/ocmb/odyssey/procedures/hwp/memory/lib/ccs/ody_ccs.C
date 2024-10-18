@@ -474,17 +474,13 @@ fapi2::ReturnCode instruction_t<mss::mc_type::ODYSSEY>::compute_parity(const fap
 ///
 /// @brief Configures the chip to properly execute CCS instructions - ODYSSEY specialization
 /// @param[in] i_target The MCBIST containing the CCS engine
-/// @param[in] i_ports the vector of ports
-/// @param[in] i_program the vector of instructions
 /// @param[out] o_periodics_reg the register used to enable periodic calibrations
 /// @param[out] o_power_cntl_reg the register used for power control
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode setup_to_execute<mss::mc_type::ODYSSEY>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
-    const ccs::program<mss::mc_type::ODYSSEY>& i_program,
     fapi2::buffer<uint64_t>& o_periodics_reg,
     fapi2::buffer<uint64_t>& o_power_cntl_reg)
 {
@@ -520,17 +516,13 @@ fapi_try_exit:
 ///
 /// @brief Cleans up from a CCS execution - multiple ports - ODYSSEY specialization
 /// @param[in] i_target The MCBIST containing the CCS engine
-/// @param[in] i_program the vector of instructions
-/// @param[in] i_ports the vector of ports
 /// @param[in] i_periodics_reg the register used to enable periodic calibrations
 /// @param[in] i_power_cntl_reg the register used for power control
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode cleanup_from_execute<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>&
         i_target,
-        const ccs::program<mss::mc_type::ODYSSEY>& i_program,
-        const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
         const fapi2::buffer<uint64_t> i_periodics_reg,
         const fapi2::buffer<uint64_t> i_power_cntl_reg)
 {
@@ -546,7 +538,7 @@ fapi_try_exit:
 /// @brief Setup before running concurrent CCS - ODYSSEY specialization
 /// @param[in] i_target the ocmb chip target
 /// @param[out] o_value returns the original value of ODC_SRQ_MBA_FARB0Q
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode pre_execute_via_mcbist<mss::mc_type::ODYSSEY>(
@@ -593,18 +585,19 @@ fapi_try_exit:
 ///
 /// @brief Setup after running concurrent CCS - ODYSSEY specialization
 /// @param[in] i_target the ocmb chip target
-/// @param[in] i_value value of ODC_SRQ_MBA_FARB0Q to be restored
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @param[in] i_ports the ports for this ocmb chip target
+/// @param[in] i_value value of FARB0Q to be restored
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode post_execute_via_mcbist<mss::mc_type::ODYSSEY>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports,
     const fapi2::buffer<uint64_t>& i_value)
 {
     bool l_recov;
     bool l_has_rcd = false;
     mss::fir::reg2<scomt::ody::ODC_SRQ_LFIR_RW_WCLEAR> l_srq_reg(i_target);
-    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
     // Check the recovery bit status before making pre_execute_via_mcbist changes
     l_recov = i_value.getBit<scomt::ody::ODC_SRQ_MBA_FARB0Q_CFG_DISABLE_RCD_RECOVERY>();
@@ -615,11 +608,11 @@ fapi2::ReturnCode post_execute_via_mcbist<mss::mc_type::ODYSSEY>(
     {
         // Port specific errors
         // Set the RCD errors to recoverable based upon the port
-        FAPI_TRY(mss::unmask::set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN04>(l_ports,
+        FAPI_TRY(mss::unmask::set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN04>(i_ports,
                  mss::unmask::IDX_PORT0,
                  mss::fir::action::RECOV,
                  l_srq_reg));
-        FAPI_TRY(mss::unmask::set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN33>(l_ports,
+        FAPI_TRY(mss::unmask::set_fir_bit_if_port_has_rcd<scomt::ody::ODC_SRQ_LFIR_IN33>(i_ports,
                  mss::unmask::IDX_PORT1,
                  mss::fir::action::RECOV,
                  l_srq_reg));
@@ -631,6 +624,21 @@ fapi2::ReturnCode post_execute_via_mcbist<mss::mc_type::ODYSSEY>(
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
     return fapi2::current_err;
+}
+
+///
+/// @brief Setup after running concurrent CCS - ODYSSEY specialization
+/// @param[in] i_target the ocmb chip target
+/// @param[in] i_value value of ODC_SRQ_MBA_FARB0Q to be restored
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode post_execute_via_mcbist<mss::mc_type::ODYSSEY>(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const fapi2::buffer<uint64_t>& i_value)
+{
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
+    return post_execute_via_mcbist<mss::mc_type::ODYSSEY>(i_target, l_ports, i_value);
 }
 
 ///
@@ -846,7 +854,7 @@ fapi_try_exit:
 /// @param[in, out] io_program the vector of instructions
 /// @param[in] i_port the port to execute on
 /// @param[in] i_runtime true if at runtime requiring dynamic
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode setup_execute_restore<mss::mc_type::ODYSSEY>(
@@ -944,7 +952,7 @@ fapi_try_exit:
 /// @brief Checks the channel selects before executing the CCS instance - Odyssey specialization
 /// @param[in] i_ports the ports under test
 /// @param[in] i_program the MCBIST ccs program - to get the polling parameters
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 template<>
 fapi2::ReturnCode check_channel_selects<mss::mc_type::ODYSSEY>( const
@@ -989,7 +997,7 @@ namespace workarounds
 /// @brief Configures read/write address workaround bits in FARB2
 /// @param[in] i_target the target on which to operate
 /// @param[in] i_port_rank the port rank to set
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode configure_ccs_farb2(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                                       const uint64_t i_port_rank)
@@ -1045,7 +1053,7 @@ fapi_try_exit:
 /// @param[in] i_ports the vector of ports
 /// @param[in] i_program the vector of instructions
 /// @note this function will fail if CCS program contains read/write commands that target different ranks
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode setup_ccs_rdwr(
     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
