@@ -389,10 +389,13 @@ fapi2::ReturnCode reset_pmu_counts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 
     // To reset the counts, we first stop the PMU then hit the start/reset bit
     FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
+
+    // To stop it we do START_RESET=0, STOP=1
     l_pmu_cfg.clearBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_START_RESET>()
     .setBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_STOP>();
     FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
 
+    // To reset and start it we do START_RESET=1, STOP=0
     l_pmu_cfg.setBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_START_RESET>()
     .clearBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_STOP>();
     FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
@@ -410,6 +413,7 @@ fapi2::ReturnCode start_pmu_counts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_C
 {
     fapi2::buffer<uint64_t> l_pmu_cfg;
 
+    // To reset and start the PMU we do START_RESET=1, STOP=0
     FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
     l_pmu_cfg.setBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_START_RESET>()
     .clearBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_STOP>();
