@@ -656,8 +656,6 @@ errlHndl_t convertToHbTarget(uint64_t i_resourceId,
     return l_err;
 }
 
-#ifndef CONFIG_FSP_BUILD
-
 /**
  * @brief Deallocate the resource and report to BMC
  *
@@ -722,6 +720,7 @@ void deallocateResource(const hostInterfaces::deallocate_t & i_deallocated)
                       get_huid(l_deallocTarget));
         }
 
+#ifndef CONFIG_FSP_BUILD
         if (!l_deallocTarget->trySetAttr<ATTR_DEALLOCATED>(1))
         {
             TRACFCOMP(g_trac_runtime,
@@ -765,7 +764,7 @@ void deallocateResource(const hostInterfaces::deallocate_t & i_deallocated)
             PLDM::sendFruFunctionalStateChangedEvent(l_deallocTarget, l_sensor_id, 0);
 #endif
         }
-
+#endif
     } while (0);
 
     // Commit any error log that occurred.
@@ -777,7 +776,6 @@ void deallocateResource(const hostInterfaces::deallocate_t & i_deallocated)
 
     TRACFCOMP(g_trac_runtime, EXIT_MRK"deallocateResource");
 }
-#endif
 
 /**
  *  @brief Log the gard event from PHYP
@@ -799,7 +797,6 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
                        i_gardEvent.i_plid,
                        i_gardEvent.i_sub_unit_mask,
                        i_gardEvent.i_recovery_level);
-
     errlHndl_t l_err{nullptr};
 
     do
@@ -863,6 +860,7 @@ void logGardEvent(const hostInterfaces::gard_event_t& i_gardEvent)
         {
             l_resourceType = hostInterfaces::ResourceNxUnit;
         }
+
         l_err = convertToHbTarget(i_gardEvent.i_procId, l_resourceType, l_gardTarget);
         if (l_err)
         {
