@@ -108,6 +108,7 @@ uint32_t getMemConfigInfo(const TargetHandle_t i_pProc,
  *  @return nullptr if no error else an error log
  */
 errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
+                                       uint8_t i_reset_dqs_recal_count_flag,
                                        bool i_ddr5_health_not_telemetry_check,
                                        const TARGETING::TargetHandleList& i_OCMBs,
                                        const uint32_t i_plid = 0)
@@ -320,7 +321,8 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                 FAPI_INVOKE_HWP(l_err,
                                 pmic_periodic_telemetry_ddr5,
                                 l_fapi2_ocmb_target,
-                                l_pmic_data_ddr5 );
+                                l_pmic_data_ddr5,
+                                i_reset_dqs_recal_count_flag);
                 l_version_loc = DDR5_TELEMETRY_LOC_VERSION;
                 l_version_data = DDR5_TELEMETRY_FFDC_VERSION;
             }
@@ -645,7 +647,7 @@ void get4uDdimmPmicHealthCheckData(Target * i_ocmb, const uint32_t i_plid)
                 TargetHandleList l_first_TargetList;
                 l_first_TargetList.push_back( i_ocmb);
                 bool l_ddr5_health_check = false; // DDR5 Health Check flag, we are doing Telemetry calls here so set false
-                errl = getMultiPmicHealthCheckData(l_proc, l_ddr5_health_check, l_first_TargetList, i_plid);
+                errl = getMultiPmicHealthCheckData(l_proc, DONT_RESET_RECAL_COUNT, l_ddr5_health_check, l_first_TargetList, i_plid);
                 if (errl)
                 {
                     // This function is collecting additional "nice to have" data.
@@ -726,7 +728,7 @@ errlHndl_t getPmicHealthCheckData(TargetHandle_t i_target_proc, bool i_ddr5_heal
             // else we have a list with less than group_size
 
             // Call this with list beginning until the end. count.
-            l_err = getMultiPmicHealthCheckData(i_target_proc, i_ddr5_health_not_telemetry_check, { l_ocmb_list.begin(), end_chunk });
+            l_err = getMultiPmicHealthCheckData(i_target_proc, RESET_RECAL_COUNT, i_ddr5_health_not_telemetry_check, { l_ocmb_list.begin(), end_chunk });
 
             // Set target list to end to get out of loop.
             //     or to the end of the last OCMB for next pass
