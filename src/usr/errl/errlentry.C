@@ -64,6 +64,7 @@
 #include <targeting/common/targetservice.H>
 #include <initservice/initserviceif.H>
 #include <attributeenums.H>
+#include <errl/hberrltypes.H>
 #include "errlentry_consts.H"
 #include <util/misc.H>
 #include <limits.h>

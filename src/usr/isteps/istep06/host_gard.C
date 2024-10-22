@@ -24,6 +24,7 @@
 /* IBM_PROLOG_END_TAG                                                     */
 
 // Hwas
+#include <errl/hberrltypes.H>
 #include <cstdint>
 #include <hwas/common/hwas.H>
 #include <hwas/common/hwasCommon.H>
@@ -499,7 +500,7 @@ void* host_gard( void *io_pArgs )
                     }
                 }
 
-                l_err->updateActionFlags(ERRORLOG::ERRL_ACTIONS_CALL_HOME);
+                l_err->updateActionFlags(ERRORLOG::ERRL_ACTIONS_HMC_CALL_HOME);
 
                 errlCommit(l_err, ISTEP_COMP_ID);
             }

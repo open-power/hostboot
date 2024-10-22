@@ -27,6 +27,7 @@
 * @brief Send Memory configuration information, for a PROC, to the SBE
 */
 
+#include "errl/hberrltypes.H"
 #include "targeting/common/util.H"
 #include <errl/errlentry.H>
 #include <targeting/common/target.H>
@@ -232,6 +233,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                     l_err_log = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                                                SBEIO_PSU_PMIC_HEALTH_CHECK,
                                                                SBEIO_PMIC_HEALTH_CHECK_DATA_DDR5);
+                    l_err_log->setActionFlagsBasedOnSev(ERRORLOG::ERRL_ACTIONS_HMC_CALL_HOME);
 
                     // We have this here to only set the flag first time when the initial error log is created
                     // Later we will flip this true if DDR5 Health Check returns a payload that is needed to be logged
@@ -254,6 +256,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                     l_err_log = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                                                SBEIO_PSU_PMIC_HEALTH_CHECK,
                                                                SBEIO_PMIC_HEALTH_CHECK_DATA);
+                    l_err_log->setActionFlagsBasedOnSev(ERRORLOG::ERRL_ACTIONS_HMC_CALL_HOME);
                 }
                 // HWP for DDR5 Health Check has already been caught in the first conditional logic check
                 // DDR4's are caught in above cases, so the ONLY case left is the DDR5 2U and 4U Telemetry check
@@ -274,6 +277,7 @@ errlHndl_t getMultiPmicHealthCheckData(Target * i_proc,
                     l_err_log = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_INFORMATIONAL,
                                                                SBEIO_PSU_PMIC_HEALTH_CHECK,
                                                                SBEIO_PMIC_TELEMETRY_DATA_DDR5);
+                    l_err_log->setActionFlagsBasedOnSev(ERRORLOG::ERRL_ACTIONS_HMC_CALL_HOME);
                 }
                 else
                 {

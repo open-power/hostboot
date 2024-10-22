@@ -211,6 +211,7 @@ enum errlActions_t
     ERRL_ACTIONS_CALL_HOME        = 0x0800, // Call Home Required
     ERRL_ACTIONS_FNM_REQ          = 0x0400, // Further Analysis Required
     ERRL_ACTIONS_SP_CALL_HOME     = 0x0100, // The service processor should call home
+    ERRL_ACTIONS_HMC_CALL_HOME    = 0x0020, // Include log in periodic HMC Heartbeat
 
     // The Following are internal actions and should NOT
     // be used by callers unless explicitly allowed.
