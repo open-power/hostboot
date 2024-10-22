@@ -37,6 +37,7 @@ OBJS += bufferpage.o
 OBJS += daemonif.o
 OBJS += debug.o
 OBJS += assert.o
+OBJS += complist.o
 
 # We need the client interfaces for console available in the base image,
 # similar to the client interfaces for trace.  Putting 'console.o' from the

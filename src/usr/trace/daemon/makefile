@@ -28,7 +28,6 @@ MODULE = tracedaemon
 EXTRAINCDIR += ${ROOTPATH}/src/usr/
 
 OBJS += daemon.o
-OBJS += complist.o
 
 #SUBDIRS = test.d
 
