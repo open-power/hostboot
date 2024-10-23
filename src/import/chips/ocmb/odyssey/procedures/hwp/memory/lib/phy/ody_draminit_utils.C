@@ -239,11 +239,16 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
                                        200,
                                        i_training_poll_count);
     fapi2::buffer<uint64_t> l_mail;
-    bool l_poll_return ;
+    bool l_poll_return;
+    fapi2::buffer<uint32_t> l_mail_tracker;
 
     fapi2::ATTR_PHY_GET_MAIL_TIMEOUT_Type l_mailbox_poll_count;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PHY_GET_MAIL_TIMEOUT, i_target , l_mailbox_poll_count));
-    l_poll_return = mss::poll(i_target, l_poll_params, [&i_target, &l_mailbox_poll_count, &l_mail, &o_log_data]()->bool
+    // we start a fresh poll so clear the old mail messages.
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MAIL_MESSAGE_BITMAP, i_target , 0));
+
+    l_poll_return = mss::poll(i_target, l_poll_params, [&i_target, &l_mailbox_poll_count, &l_mail, &o_log_data,
+                              &l_mail_tracker] ()->bool
     {
         uint8_t l_mode = MAJOR_MSG_MODE; // 16 bit mode to read major message.
         bool l_loop_end = false;
@@ -251,7 +256,8 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
         FAPI_TRY_LAMBDA(mss::ody::phy::get_mail(i_target, l_mode, l_mailbox_poll_count, l_mail));
 
         // Process and decode 'major' messages, and handle SMBus and streaming message protocol if necessary
-        FAPI_TRY_LAMBDA(check_for_completion_and_decode(i_target, l_mail, o_log_data, l_loop_end));
+        // update bitmap for respective mail messages received
+        FAPI_TRY_LAMBDA(check_for_completion_and_decode(i_target, l_mail, o_log_data, l_loop_end, l_mail_tracker));
 
         if (l_loop_end)
         {
@@ -272,10 +278,13 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
     FAPI_ASSERT(l_poll_return,
                 fapi2::ODY_DRAMINIT_TRAINING_TIMEOUT().
                 set_PORT_TARGET(i_target).
-                set_mail(l_mail),
+                set_MAIL(l_mail).
+                set_MAIL_BITMAP(l_mail_tracker),
                 TARGTIDFORMAT " poll for draminit training completion timed out", TARGTID);
 
     o_status = l_mail;
+    // save the mail messages bitmap for later ffdc prints
+    FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MAIL_MESSAGE_BITMAP, i_target , l_mail_tracker));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -288,12 +297,13 @@ fapi_try_exit:
 /// @param[in] i_mail mail content to check for completion
 /// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @param[out] o_loop_end flags that completion was detected, ending polling loop and skipping delay.
+/// @param[in,out] io_mail_tracker bitmap representing all mail messages received during polling.
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const fapi2::buffer<uint64_t>& i_mail,
         fapi2::hwp_data_ostream& o_log_data,
-        bool& o_loop_end)
+        bool& o_loop_end, fapi2::buffer<uint32_t>& io_mail_tracker)
 {
     o_loop_end = false;
     bool l_log_msg = true;
@@ -306,94 +316,115 @@ fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TAR
         case SUCCESSFUL_COMPLETION:
             o_loop_end = true;
             l_log_msg = false;
+            io_mail_tracker.setBit<mailbox_bitmap::SUCCESSFUL_COMPLETION>();
             FAPI_INF(TARGTIDFORMAT" Successful completion, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case FAILED_COMPLETION:
             o_loop_end = true;
             l_log_msg = false;
+            io_mail_tracker.setBit<mailbox_bitmap::FAILED_COMPLETION>();
             FAPI_INF(TARGTIDFORMAT" Failed completion, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_INITILIAZATION:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_INITILIAZATION>();
             FAPI_INF(TARGTIDFORMAT" End of initialization, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_FINE_WRITE_LEVELING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_FINE_WRITE_LEVELING>();
             FAPI_INF(TARGTIDFORMAT" End of fine write leveling, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT, i_target,
                                          fapi2::ENUM_ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT_PASSED));
             break;
 
         case END_OF_READ_ENABLE_TRAINING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_READ_ENABLE_TRAINING>();
             FAPI_INF(TARGTIDFORMAT" End of read enable training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_RD_DLY_CNTR_OPT:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_RD_DLY_CNTR_OPT>();
             FAPI_INF(TARGTIDFORMAT" End of read delay center optimization, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_WR_DLY_CNTR_OPT:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_WR_DLY_CNTR_OPT>();
             FAPI_INF(TARGTIDFORMAT" End of write delay center optimization, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_2D_RD_DLY_V_CNTR_OPT:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_2D_RD_DLY_V_CNTR_OPT>();
             FAPI_INF(TARGTIDFORMAT" End of 2D read delay /voltage center optimization, code: " UINT64FORMAT, TARGTID,
                      UINT64_VALUE(i_mail));
             break;
 
         case END_OF_2D_WR_DLY_V_CNTR_OPT:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_2D_WR_DLY_V_CNTR_OPT>();
             FAPI_INF(TARGTIDFORMAT" End of 2D write delay /voltage center optimization, code: " UINT64FORMAT, TARGTID,
                      UINT64_VALUE(i_mail));
             break;
 
         case END_OF_MAX_RD_LAT_TRAINING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_MAX_RD_LAT_TRAINING>();
             FAPI_INF(TARGTIDFORMAT" End of max read latency training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_RD_DQ_DSKEW_TRAINING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_RD_DQ_DSKEW_TRAINING>();
             FAPI_INF(TARGTIDFORMAT" End of read DQ deskew training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case TRAINING_STAGE_RESERVED:
+            io_mail_tracker.setBit<mailbox_bitmap::TRAINING_STAGE_RESERVED>();
             FAPI_INF(TARGTIDFORMAT" Reserved, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_CS_CA_TRAINING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_CS_CA_TRAINING>();
             FAPI_INF(TARGTIDFORMAT" End of CS/CA training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_RCD_QCS_QCA_TRAINING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_RCD_QCS_QCA_TRAINING>();
             FAPI_INF(TARGTIDFORMAT" End of RCD QCS/QCA training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_LRDIMM_MREP_TRAINING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_LRDIMM_MREP_TRAINING>();
             FAPI_INF(TARGTIDFORMAT" End of LRDIMM MREP training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_LRDIMM_DWL_TRAINING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_LRDIMM_DWL_TRAINING>();
             FAPI_INF(TARGTIDFORMAT" End of LRDIMM DWL training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_LRDIMM_MRD_TRAINING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_LRDIMM_MRD_TRAINING>();
             FAPI_INF(TARGTIDFORMAT" End of LRDIMM MRD training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case END_OF_LRDIMM_MWD_TRAINING:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_LRDIMM_MWD_TRAINING>();
             FAPI_INF(TARGTIDFORMAT" End of LRDIMM MWD training, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
         case GEN_WRT_NOISE_SYN:
+            io_mail_tracker.setBit<mailbox_bitmap::GEN_WRT_NOISE_SYN>();
             FAPI_INF(TARGTIDFORMAT" Generate write noise synchronization Stage, code: " UINT64FORMAT, TARGTID,
                      UINT64_VALUE(i_mail));
             break;
 
         case END_OF_MPR_RD_DLY_CNTR_OPT:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_MPR_RD_DLY_CNTR_OPT>();
             FAPI_INF(TARGTIDFORMAT" End of MPR read delay center optimization Stage, code: " UINT64FORMAT, TARGTID,
                      UINT64_VALUE(i_mail));
             break;
 
         case END_OF_WR_LVL_COARSE_DLY:
+            io_mail_tracker.setBit<mailbox_bitmap::END_OF_WR_LVL_COARSE_DLY>();
             FAPI_INF(TARGTIDFORMAT" End of write level coarse delay Stage, code: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
 
@@ -406,11 +437,12 @@ fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TAR
         case SMBUS_MSG:
             l_log_msg = false;
             // Processes and handles the SMBus messages including sending out the RCW over i2c
-            FAPI_TRY(process_smbus_message(i_target));
+            FAPI_TRY(process_smbus_message(i_target, io_mail_tracker));
             break;
 
         default:
             l_log_msg = false;
+            io_mail_tracker.setBit<mailbox_bitmap::UNKNOWN_MAJOR_MESSAGE>();
             FAPI_INF(TARGTIDFORMAT" Unknown major message: " UINT64FORMAT, TARGTID, UINT64_VALUE(i_mail));
             break;
     }
@@ -919,10 +951,12 @@ void  assemble_rcw_i2c_data(const rcw_id& i_rcw_info, std::vector<uint8_t>& o_rc
 ///
 /// @brief Processes an SMBus message request (aka runs an RCW via i2c)
 /// @param[in] i_target the target on which to operate
+/// @param[in] i_mail_tracker bitmap representing all mail messages received during polling.
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note This function only handles the message interface for right now
 ///
-fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
+fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        const fapi2::buffer<uint32_t>& i_mail_tracker)
 {
     // Grabbing an SMBUS message should be relatively quick
     // Only using a loop count of 10 (10 ms) to hopefully allow draminit to run quickly
@@ -971,6 +1005,7 @@ fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_M
     FAPI_ASSERT(l_mail == SMBUS_SYNC,
                 fapi2::ODY_DRAMINIT_SMBUS_SYNC_MSG_NOT_FOUND()
                 .set_PORT_TARGET(i_target)
+                .set_MAIL_BITMAP(i_mail_tracker)
                 .set_SYNOPSYS_MESSAGE(l_mail),
                 TARGTIDFORMAT " sees a message of 0x%x instead of 0x51 (SMBUS_SYNC)", TARGTID, uint16_t(l_mail));
 
@@ -4134,6 +4169,7 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     bool l_fir_error = false;
     uint8_t l_fir_check_enable = 0;
+    fapi2::buffer<uint32_t> l_mail_tracker;
 
     mss::ody::phy::bad_bit_interface l_interface(i_target, i_msg_block_response, l_rc);
     FAPI_TRY(l_rc, TARGTIDFORMAT " bad_bit_interface constructor failed", TARGTID);
@@ -4146,11 +4182,14 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
 
     // Check for catastrophic training failure. No need to check FIRs if training failed completely
     // Check training complete mail message
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MAIL_MESSAGE_BITMAP, i_target , l_mail_tracker));
     FAPI_ASSERT((i_status == SUCCESSFUL_COMPLETION),
                 fapi2::ODY_DRAMINIT_TRAINING_FAILURE_MAIL()
                 .set_PORT_TARGET(i_target)
                 .set_TRAINING_STATUS(i_status)
                 .set_EXPECTED_STATUS(SUCCESSFUL_COMPLETION)
+                .set_MAIL_BITMAP(l_mail_tracker)
                 .set_PMU_REVISION(i_msg_block_response.PmuRevision),
                 TARGTIDFORMAT " DRAM training returned a non-success status "
                 "mail message: 0x%02x (expected 0x%02x)",
@@ -4160,6 +4199,7 @@ fapi2::ReturnCode check_training_result(const fapi2::Target<fapi2::TARGET_TYPE_M
     FAPI_ASSERT((i_msg_block_response.CsTestFail == MSG_BLOCK_TRAIN_PASS),
                 fapi2::ODY_DRAMINIT_TRAINING_FAILURE_MSG_BLOCK()
                 .set_PORT_TARGET(i_target)
+                .set_MAIL_BITMAP(l_mail_tracker)
                 .set_ACTUAL_CSTESTFAIL(i_msg_block_response.CsTestFail)
                 .set_EXPECTED_CSTESTFAIL(MSG_BLOCK_TRAIN_PASS)
                 .set_PMU_REVISION(i_msg_block_response.PmuRevision),

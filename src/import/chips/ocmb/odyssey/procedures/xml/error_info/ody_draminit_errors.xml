@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -200,9 +200,35 @@
   <hwpError>
     <sbeError/>
     <rc>RC_ODY_DRAMINIT_TRAINING_TIMEOUT</rc>
-    <description>Ody draminit training poll timed out.</description>
+    <description>
+    Ody draminit training poll timed out. mail message bitmap info
+    [mail_message  :           bit no (left to right)]
+    END_OF_INITILIAZATION         : 0
+    END_OF_FINE_WRITE_LEVELING    : 1
+    END_OF_READ_ENABLE_TRAINING   : 2
+    END_OF_RD_DLY_CNTR_OPT        : 3
+    END_OF_WR_DLY_CNTR_OPT        : 4
+    END_OF_2D_RD_DLY_V_CNTR_OPT   : 5
+    END_OF_2D_WR_DLY_V_CNTR_OPT   : 6
+    END_OF_MAX_RD_LAT_TRAINING    : 7
+    END_OF_RD_DQ_DSKEW_TRAINING   : 8
+    TRAINING_STAGE_RESERVED       : 9
+    END_OF_CS_CA_TRAINING        : 10
+    END_OF_RCD_QCS_QCA_TRAINING  : 11
+    END_OF_LRDIMM_MREP_TRAINING  : 12
+    END_OF_LRDIMM_DWL_TRAINING   : 13
+    END_OF_LRDIMM_MRD_TRAINING   : 14
+    END_OF_LRDIMM_MWD_TRAINING   : 15
+    GEN_WRT_NOISE_SYN            : 16
+    END_OF_MPR_RD_DLY_CNTR_OPT   : 17
+    END_OF_WR_LVL_COARSE_DLY     : 18
+    UNKNOWN_MAJOR_MESSAGE        : 19
+    SUCCESSFUL_COMPLETION        : 20
+    FAILED_COMPLETION            : 21
+    </description>
     <ffdc>PORT_TARGET</ffdc>
-    <ffdc>mail</ffdc>
+    <ffdc>MAIL</ffdc>
+    <ffdc>MAIL_BITMAP</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -246,13 +272,37 @@
     <sbeError/>
     <rc>RC_ODY_DRAMINIT_TRAINING_FAILURE_MAIL</rc>
     <description>
-        Ody draminit training mailbox message indicated a
-        training failure.
+    Ody draminit training mailbox message indicated a training failure.
+    mail message bitmap info
+    [mail_message  :           bit no (left to right)]
+    END_OF_INITILIAZATION         : 0
+    END_OF_FINE_WRITE_LEVELING    : 1
+    END_OF_READ_ENABLE_TRAINING   : 2
+    END_OF_RD_DLY_CNTR_OPT        : 3
+    END_OF_WR_DLY_CNTR_OPT        : 4
+    END_OF_2D_RD_DLY_V_CNTR_OPT   : 5
+    END_OF_2D_WR_DLY_V_CNTR_OPT   : 6
+    END_OF_MAX_RD_LAT_TRAINING    : 7
+    END_OF_RD_DQ_DSKEW_TRAINING   : 8
+    TRAINING_STAGE_RESERVED       : 9
+    END_OF_CS_CA_TRAINING        : 10
+    END_OF_RCD_QCS_QCA_TRAINING  : 11
+    END_OF_LRDIMM_MREP_TRAINING  : 12
+    END_OF_LRDIMM_DWL_TRAINING   : 13
+    END_OF_LRDIMM_MRD_TRAINING   : 14
+    END_OF_LRDIMM_MWD_TRAINING   : 15
+    GEN_WRT_NOISE_SYN            : 16
+    END_OF_MPR_RD_DLY_CNTR_OPT   : 17
+    END_OF_WR_LVL_COARSE_DLY     : 18
+    UNKNOWN_MAJOR_MESSAGE        : 19
+    SUCCESSFUL_COMPLETION        : 20
+    FAILED_COMPLETION            : 21
     </description>
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>TRAINING_STATUS</ffdc>
     <ffdc>EXPECTED_STATUS</ffdc>
     <ffdc>PMU_REVISION</ffdc>
+    <ffdc>MAIL_BITMAP</ffdc>
     <callout>
       <procedure>CODE</procedure>
       <priority>MEDIUM</priority>
@@ -273,11 +323,35 @@
     <sbeError/>
     <rc>RC_ODY_DRAMINIT_TRAINING_FAILURE_MSG_BLOCK</rc>
     <description>
-        Ody draminit training message block indicated a
-        training failure.
+    Ody draminit training message block indicated a training failure.
+    mail message bitmap info
+    [mail_message  :           bit no (left to right)]
+    END_OF_INITILIAZATION         : 0
+    END_OF_FINE_WRITE_LEVELING    : 1
+    END_OF_READ_ENABLE_TRAINING   : 2
+    END_OF_RD_DLY_CNTR_OPT        : 3
+    END_OF_WR_DLY_CNTR_OPT        : 4
+    END_OF_2D_RD_DLY_V_CNTR_OPT   : 5
+    END_OF_2D_WR_DLY_V_CNTR_OPT   : 6
+    END_OF_MAX_RD_LAT_TRAINING    : 7
+    END_OF_RD_DQ_DSKEW_TRAINING   : 8
+    TRAINING_STAGE_RESERVED       : 9
+    END_OF_CS_CA_TRAINING        : 10
+    END_OF_RCD_QCS_QCA_TRAINING  : 11
+    END_OF_LRDIMM_MREP_TRAINING  : 12
+    END_OF_LRDIMM_DWL_TRAINING   : 13
+    END_OF_LRDIMM_MRD_TRAINING   : 14
+    END_OF_LRDIMM_MWD_TRAINING   : 15
+    GEN_WRT_NOISE_SYN            : 16
+    END_OF_MPR_RD_DLY_CNTR_OPT   : 17
+    END_OF_WR_LVL_COARSE_DLY     : 18
+    UNKNOWN_MAJOR_MESSAGE        : 19
+    SUCCESSFUL_COMPLETION        : 20
+    FAILED_COMPLETION            : 21
     </description>
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>ACTUAL_CSTESTFAIL</ffdc>
+    <ffdc>MAIL_BITMAP</ffdc>
     <ffdc>EXPECTED_CSTESTFAIL</ffdc>
     <ffdc>PMU_REVISION</ffdc>
     <callout>
@@ -320,9 +394,35 @@
   <hwpError>
     <sbeError/>
     <rc>RC_ODY_DRAMINIT_SMBUS_SYNC_MSG_NOT_FOUND</rc>
-    <description>A Synopsys SMBus message was not followed by the sync message. This should be marked as recovered</description>
+    <description>A Synopsys SMBus message was not followed by the sync message. This should be marked as recovered
+    mail message bitmap info
+    [mail_message  :           bit no (left to right)]
+    END_OF_INITILIAZATION         : 0
+    END_OF_FINE_WRITE_LEVELING    : 1
+    END_OF_READ_ENABLE_TRAINING   : 2
+    END_OF_RD_DLY_CNTR_OPT        : 3
+    END_OF_WR_DLY_CNTR_OPT        : 4
+    END_OF_2D_RD_DLY_V_CNTR_OPT   : 5
+    END_OF_2D_WR_DLY_V_CNTR_OPT   : 6
+    END_OF_MAX_RD_LAT_TRAINING    : 7
+    END_OF_RD_DQ_DSKEW_TRAINING   : 8
+    TRAINING_STAGE_RESERVED       : 9
+    END_OF_CS_CA_TRAINING        : 10
+    END_OF_RCD_QCS_QCA_TRAINING  : 11
+    END_OF_LRDIMM_MREP_TRAINING  : 12
+    END_OF_LRDIMM_DWL_TRAINING   : 13
+    END_OF_LRDIMM_MRD_TRAINING   : 14
+    END_OF_LRDIMM_MWD_TRAINING   : 15
+    GEN_WRT_NOISE_SYN            : 16
+    END_OF_MPR_RD_DLY_CNTR_OPT   : 17
+    END_OF_WR_LVL_COARSE_DLY     : 18
+    UNKNOWN_MAJOR_MESSAGE        : 19
+    SUCCESSFUL_COMPLETION        : 20
+    FAILED_COMPLETION            : 21
+    </description>
     <ffdc>PORT_TARGET</ffdc>
     <ffdc>SYNOPSYS_MESSAGE</ffdc>
+    <ffdc>MAIL_BITMAP</ffdc>
     <callout>
       <target>PORT_TARGET</target>
       <priority>MEDIUM</priority>

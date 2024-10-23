@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -507,6 +507,17 @@
         <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
           <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
         </sbeAttrSync>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MAIL_MESSAGE_BITMAP</id>
+        <targetType>TARGET_TYPE_MEM_PORT</targetType>
+        <description>
+            BITMAP for tracking all mail messages received during dram training poll.
+        </description>
+        <valueType>uint32</valueType>
+        <default>0</default>
+        <writeable/>
     </attribute>
 
     <!-- phyinit structure inputs section below -->

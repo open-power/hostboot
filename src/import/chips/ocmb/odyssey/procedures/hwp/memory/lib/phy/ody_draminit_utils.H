@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -3328,12 +3328,13 @@ fapi2::ReturnCode poll_for_completion(const fapi2::Target<fapi2::TARGET_TYPE_MEM
 /// @param[in] i_mail mail content to check for completion
 /// @param[out] o_log_data hwp_data_ostream of streaming log
 /// @param[out] o_loop_end flags that completion was detected, ending polling loop and skipping delay.
+/// @param[in,out] io_mail_tracker bitmap representing all mail messages received during polling.
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode check_for_completion_and_decode(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const fapi2::buffer<uint64_t>& i_mail,
         fapi2::hwp_data_ostream& o_log_data,
-        bool& o_loop_end);
+        bool& o_loop_end, fapi2::buffer<uint32_t>& io_mail_tracker);
 
 ///
 /// @brief Configures the msg block on to snps phy
@@ -3386,10 +3387,12 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
 ///
 /// @brief Processes an SMBus message request (aka runs an RCW via i2c)
 /// @param[in] i_target the target on which to operate
+/// @param[in] i_mail_tracker bitmap representing all mail messages received during polling.
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note This function only handles the message interface for right now
 ///
-fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        const fapi2::buffer<uint32_t>& i_mail_tracker);
 
 ///
 /// @brief Starts the firmware draminit training
@@ -3467,6 +3470,37 @@ enum mailbox_consts
     ACK_MESSAGE = 1,
 };
 
+namespace mailbox_bitmap
+{
+// Bitmap to store the mail messages received during polling
+enum mailbox_consts
+{
+    // Stage completion Major messaging
+    END_OF_INITILIAZATION = 0,
+    END_OF_FINE_WRITE_LEVELING = 1,
+    END_OF_READ_ENABLE_TRAINING = 2,
+    END_OF_RD_DLY_CNTR_OPT = 3,
+    END_OF_WR_DLY_CNTR_OPT = 4,
+    END_OF_2D_RD_DLY_V_CNTR_OPT = 5,
+    END_OF_2D_WR_DLY_V_CNTR_OPT = 6,
+    END_OF_MAX_RD_LAT_TRAINING = 7,
+    END_OF_RD_DQ_DSKEW_TRAINING = 8,
+    TRAINING_STAGE_RESERVED = 9,
+    END_OF_CS_CA_TRAINING = 10,
+    END_OF_RCD_QCS_QCA_TRAINING = 11,
+    END_OF_LRDIMM_MREP_TRAINING = 12,
+    END_OF_LRDIMM_DWL_TRAINING = 13,
+    END_OF_LRDIMM_MRD_TRAINING = 14,
+    END_OF_LRDIMM_MWD_TRAINING = 15,
+    GEN_WRT_NOISE_SYN = 16,
+    END_OF_MPR_RD_DLY_CNTR_OPT = 17,
+    END_OF_WR_LVL_COARSE_DLY = 18,
+    UNKNOWN_MAJOR_MESSAGE = 19,
+    SUCCESSFUL_COMPLETION = 20,
+    FAILED_COMPLETION = 21
+};
+
+}
 ///
 /// @brief Calculates the end addr of IMEM/DMEM image
 /// @param[in] i_start_addr starting address of the image
