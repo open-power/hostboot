@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2023
+# Contributors Listed Below - COPYRIGHT 2013,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -50,6 +50,7 @@ OBJS += DmiScomWorkaround.o
 OBJS += ibscom_retry.o
 OBJS += handleSpecialWakeup.o
 OBJS += ibscom.o
+OBJS += ScomParityErrorWorkaround.o
 
 # Objects From Import Directory
 OBJS += p10_scominfo.o
