@@ -22,12 +22,14 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+//File:P11_Link_Power_0.9vio_v4.xlsx
+//
 #ifndef __P10_IO_PWR_H__
 #define __P10_IO_PWR_H__
-
 #include <p10_io_pwr_types.H>
 
-
+//static uint64_t io_powr_sheet_version = 0x550B56494f5604;//P11VIOV04
+static char io_powr_sheet_version_str[64] = "P11_Link_Power_0.9vio_v4.xlsx";
 
 static io_link_powers_data_t link_powers[] =
 {
@@ -47,8 +49,8 @@ static io_link_powers_data_t link_powers[] =
             20,                     // Pgated  mv
         },
         1948,                       // Max to Min  mv
-        608,                        // PLSF  mv
-        0x9B,                       // PSLF encode
+        593,                        // PLSF  mv
+        0x97,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -68,8 +70,8 @@ static io_link_powers_data_t link_powers[] =
             20,                     // Pgated  mv
         },
         2221,                       // Max to Min  mv
-        693,                        // PLSF  mv
-        0xB1,                       // PSLF encode
+        675,                        // PLSF  mv
+        0xAC,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -81,16 +83,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3390,                   // Full Width  mv
-            2270,                   // 1/2 Width  mv
-            2144,                   // 1/4 Width  mv
-            2017,                   // 1Lane  mv
-            787,                    // Disable  mv
+            3618,                   // Full Width  mv
+            2473,                   // 1/2 Width  mv
+            2321,                   // 1/4 Width  mv
+            2169,                   // 1Lane  mv
+            933,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        2602,                       // Max to Min  mv
-        812,                        // PLSF  mv
-        0xCF,                       // PSLF encode
+        2685,                       // Max to Min  mv
+        817,                        // PLSF  mv
+        0xD0,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -110,8 +112,8 @@ static io_link_powers_data_t link_powers[] =
             20,                     // Pgated  mv
         },
         2394,                       // Max to Min  mv
-        747,                        // PLSF  mv
-        0xBF,                       // PSLF encode
+        728,                        // PLSF  mv
+        0xBA,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -131,8 +133,8 @@ static io_link_powers_data_t link_powers[] =
             20,                     // Pgated  mv
         },
         2719,                       // Max to Min  mv
-        848,                        // PLSF  mv
-        0xD8,                       // PSLF encode
+        827,                        // PLSF  mv
+        0xD3,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -144,17 +146,17 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            4008,                   // Full Width  mv
-            2616,                   // 1/2 Width  mv
-            2489,                   // 1/4 Width  mv
-            2362,                   // 1Lane  mv
-            804,                    // Disable  mv
+            4236,                   // Full Width  mv
+            2818,                   // 1/2 Width  mv
+            2666,                   // 1/4 Width  mv
+            2514,                   // 1Lane  mv
+            950,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        3204,                       // Max to Min  mv
+        3286,                       // Max to Min  mv
         1000,                       // PLSF  mv
         0xFF,                       // PSLF encode
-        0x8,                        // 1/2 Width
+        0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
     {
@@ -165,18 +167,18 @@ static io_link_powers_data_t link_powers[] =
         18,                         // #AC lanes
         {
             // power_mv
-            1984,                   // Full Width  mv
-            1155,                   // 1/2 Width  mv
-            786,                    // 1/4 Width  mv
-            786,                    // 1Lane  mv
-            151,                    // Disable  mv
+            2004,                   // Full Width  mv
+            1173,                   // 1/2 Width  mv
+            803,                    // 1/4 Width  mv
+            803,                    // 1Lane  mv
+            951,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        1832,                       // Max to Min  mv
-        572,                        // PLSF  mv
-        0x92,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x5,                        // 1/4 Width
+        1053,                       // Max to Min  mv
+        320,                        // PLSF  mv
+        0x52,                       // PSLF encode
+        0x3,                        // 1/2 Width
+        0x0,               // 1/4 Width
     },
     {
         PWR_AX,                     // IO Power Type
@@ -186,18 +188,18 @@ static io_link_powers_data_t link_powers[] =
         18,                         // #AC lanes
         {
             // power_mv
-            2258,                   // Full Width  mv
-            1306,                   // 1/2 Width  mv
-            883,                    // 1/4 Width  mv
-            883,                    // 1Lane  mv
-            169,                    // Disable  mv
+            2282,                   // Full Width  mv
+            1328,                   // 1/2 Width  mv
+            904,                    // 1/4 Width  mv
+            904,                    // 1Lane  mv
+            1008,                   // Disable  mv
             20,                     // Pgated  mv
         },
-        2089,                       // Max to Min  mv
-        652,                        // PLSF  mv
-        0xA6,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x5,                        // 1/4 Width
+        1273,                       // Max to Min  mv
+        387,                        // PLSF  mv
+        0x63,                       // PSLF encode
+        0x4,                        // 1/2 Width
+        0x0,                        // 1/4 Width
     },
     {
         PWR_AX,                     // IO Power Type
@@ -207,18 +209,18 @@ static io_link_powers_data_t link_powers[] =
         18,                         // #AC lanes
         {
             // power_mv
-            2494,                   // Full Width  mv
-            1439,                   // 1/2 Width  mv
-            970,                    // 1/4 Width  mv
-            970,                    // 1Lane  mv
-            169,                    // Disable  mv
+            2513,                   // Full Width  mv
+            1457,                   // 1/2 Width  mv
+            988,                    // 1/4 Width  mv
+            988,                    // 1Lane  mv
+            968,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        2325,                       // Max to Min  mv
-        725,                        // PLSF  mv
-        0xB9,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x5,                        // 1/4 Width
+        1545,                       // Max to Min  mv
+        470,                        // PLSF  mv
+        0x78,                       // PSLF encode
+        0x5,                        // 1/2 Width
+        0x0,                        // 1/4 Width
     },
     {
         PWR_AX,                     // IO Power Type
@@ -228,18 +230,18 @@ static io_link_powers_data_t link_powers[] =
         18,                         // #AC lanes
         {
             // power_mv
-            2835,                   // Full Width  mv
-            1625,                   // 1/2 Width  mv
-            1087,                   // 1/4 Width  mv
-            1087,                   // 1Lane  mv
-            186,                    // Disable  mv
+            2859,                   // Full Width  mv
+            1647,                   // 1/2 Width  mv
+            1109,                   // 1/4 Width  mv
+            1109,                   // 1Lane  mv
+            1025,                   // Disable  mv
             20,                     // Pgated  mv
         },
-        2649,                       // Max to Min  mv
-        826,                        // PLSF  mv
-        0xD3,                       // PSLF encode
-        0x8,                        // 1/2 Width
-        0x5,                        // 1/4 Width
+        1833,                       // Max to Min  mv
+        558,                        // PLSF  mv
+        0x8E,                       // PSLF encode
+        0x5,                        // 1/2 Width
+        0x1,                        // 1/4 Width
     },
     {
         PWR_OC,                     // IO Power Type
@@ -249,16 +251,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            2880,                   // Full Width  mv
-            2009,                   // 1/2 Width  mv
-            1876,                   // 1/4 Width  mv
-            1742,                   // 1Lane  mv
-            831,                    // Disable  mv
+            3067,                   // Full Width  mv
+            2174,                   // 1/2 Width  mv
+            2020,                   // 1/4 Width  mv
+            1866,                   // 1Lane  mv
+            951,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        2049,                       // Max to Min  mv
-        639,                        // PLSF  mv
-        0xA3,                       // PSLF encode
+        2116,                       // Max to Min  mv
+        644,                        // PLSF  mv
+        0xA4,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -270,18 +272,18 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3335,                   // Full Width  mv
-            2323,                   // 1/2 Width  mv
-            2157,                   // 1/4 Width  mv
-            1991,                   // 1Lane  mv
-            960,                    // Disable  mv
+            3559,                   // Full Width  mv
+            2520,                   // 1/2 Width  mv
+            2328,                   // 1/4 Width  mv
+            2136,                   // 1Lane  mv
+            1099,                   // Disable  mv
             20,                     // Pgated  mv
         },
-        2375,                       // Max to Min  mv
-        741,                        // PLSF  mv
-        0xBD,                       // PSLF encode
+        2459,                       // Max to Min  mv
+        748,                        // PLSF  mv
+        0xBF,                       // PSLF encode
         0x9,                        // 1/2 Width
-        0x8,                        // 1/4 Width
+        0x7,                        // 1/4 Width
     },
     {
         PWR_OC,                     // IO Power Type
@@ -291,16 +293,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3340,                   // Full Width  mv
-            2269,                   // 1/2 Width  mv
-            2135,                   // 1/4 Width  mv
-            2002,                   // 1Lane  mv
-            848,                    // Disable  mv
+            3527,                   // Full Width  mv
+            2434,                   // 1/2 Width  mv
+            2280,                   // 1/4 Width  mv
+            2125,                   // 1Lane  mv
+            968,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        2491,                       // Max to Min  mv
-        777,                        // PLSF  mv
-        0xC6,                       // PSLF encode
+        2559,                       // Max to Min  mv
+        778,                        // PLSF  mv
+        0xC7,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -312,16 +314,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3855,                   // Full Width  mv
-            2613,                   // 1/2 Width  mv
-            2448,                   // 1/4 Width  mv
-            2282,                   // 1Lane  mv
-            977,                    // Disable  mv
+            4079,                   // Full Width  mv
+            2810,                   // 1/2 Width  mv
+            2618,                   // 1/4 Width  mv
+            2427,                   // 1Lane  mv
+            1116,                   // Disable  mv
             20,                     // Pgated  mv
         },
-        2878,                       // Max to Min  mv
-        898,                        // PLSF  mv
-        0xE5,                       // PSLF encode
+        2962,                       // Max to Min  mv
+        901,                        // PLSF  mv
+        0xE6,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -333,37 +335,37 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            537,                    // Full Width  mv
-            456,                    // 1/2 Width  mv
-            375,                    // 1/4 Width  mv
-            294,                    // 1Lane  mv
-            294,                    // Disable  mv
-            20,                     // Pgated  mv
-        },
-        242,                        // Max to Min  mv
-        75,                         // PLSF  mv
-        0x13,                       // PSLF encode
-        0xA,                        // 1/2 Width
-        0x5,                        // 1/4 Width
-    },
-    {
-        PWR_AXO_Base,             // IO Power Type
-        AXO_Base,                 // Sub Type
-        S_32G,                      // Speed
-        900,                        // VIO
-        16,                         // #AC lanes
-        {
-            // power_mv
-            641,                    // Full Width  mv
-            541,                    // 1/2 Width  mv
-            440,                    // 1/4 Width  mv
+            620,                    // Full Width  mv
+            527,                    // 1/2 Width  mv
+            434,                    // 1/4 Width  mv
             340,                    // 1Lane  mv
             340,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        300,                        // Max to Min  mv
-        93,                         // PLSF  mv
-        0x18,                       // PSLF encode
+        279,                        // Max to Min  mv
+        85,                         // PLSF  mv
+        0x16,                       // PSLF encode
+        0xA,                        // 1/2 Width
+        0x5,                        // 1/4 Width
+    },
+    {
+        PWR_AXO_Base,             // IO Power Type
+        AXO_Base,                 // Sub Type
+        S_32G,                      // Speed
+        900,                        // VIO
+        16,                         // #AC lanes
+        {
+            // power_mv
+            741,                    // Full Width  mv
+            625,                    // 1/2 Width  mv
+            509,                    // 1/4 Width  mv
+            393,                    // 1Lane  mv
+            393,                    // Disable  mv
+            20,                     // Pgated  mv
+        },
+        347,                        // Max to Min  mv
+        105,                        // PLSF  mv
+        0x1B,                       // PSLF encode
         0xA,                        // 1/2 Width
         0x5,                        // 1/4 Width
     },
@@ -375,16 +377,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            537,                    // Full Width  mv
-            456,                    // 1/2 Width  mv
-            375,                    // 1/4 Width  mv
-            294,                    // 1Lane  mv
-            294,                    // Disable  mv
+            620,                    // Full Width  mv
+            527,                    // 1/2 Width  mv
+            434,                    // 1/4 Width  mv
+            340,                    // 1Lane  mv
+            340,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        242,                        // Max to Min  mv
-        75,                         // PLSF  mv
-        0x13,                       // PSLF encode
+        279,                        // Max to Min  mv
+        85,                         // PLSF  mv
+        0x16,                       // PSLF encode
         0xA,                        // 1/2 Width
         0x5,                        // 1/4 Width
     },
@@ -396,16 +398,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            641,                    // Full Width  mv
-            541,                    // 1/2 Width  mv
-            440,                    // 1/4 Width  mv
-            340,                    // 1Lane  mv
-            340,                    // Disable  mv
+            741,                    // Full Width  mv
+            625,                    // 1/2 Width  mv
+            509,                    // 1/4 Width  mv
+            393,                    // 1Lane  mv
+            393,                    // Disable  mv
             20,                     // Pgated  mv
         },
-        300,                        // Max to Min  mv
-        93,                         // PLSF  mv
-        0x18,                       // PSLF encode
+        347,                        // Max to Min  mv
+        105,                        // PLSF  mv
+        0x1B,                       // PSLF encode
         0xA,                        // 1/2 Width
         0x5,                        // 1/4 Width
     },
@@ -417,16 +419,16 @@ static io_link_powers_data_t link_powers[] =
         8,                          // #AC lanes
         {
             // power_mv
-            4014,                   // Full Width  mv
-            4014,                   // 1/2 Width  mv
-            2560,                   // 1/4 Width  mv
-            1198,                   // 1Lane  mv
-            827,                    // Disable  mv
-            105,                    // Pgated  mv
+            4392,                   // Full Width  mv
+            4392,                   // 1/2 Width  mv
+            2749,                   // 1/4 Width  mv
+            1231,                   // 1Lane  mv
+            843,                    // Disable  mv
+            122,                    // Pgated  mv
         },
-        3186,                       // Max to Min  mv
-        994,                        // PLSF  mv
-        0xFE,                       // PSLF encode
+        3548,                       // Max to Min  mv
+        1079,                       // PLSF  mv
+        0x0,                        // PSLF encode
         0xF,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -438,15 +440,15 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            4738,                   // Full Width  mv
-            2911,                   // 1/2 Width  mv
-            1938,                   // 1/4 Width  mv
-            1177,                   // 1Lane  mv
-            827,                    // Disable  mv
-            105,                    // Pgated  mv
+            5182,                   // Full Width  mv
+            3132,                   // 1/2 Width  mv
+            2049,                   // 1/4 Width  mv
+            1210,                   // 1Lane  mv
+            843,                    // Disable  mv
+            122,                    // Pgated  mv
         },
-        3911,                       // Max to Min  mv
-        1220,                       // PLSF  mv
+        4338,                       // Max to Min  mv
+        1320,                       // PLSF  mv
         0x0,                        // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
@@ -459,16 +461,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3876,                   // Full Width  mv
-            2630,                   // 1/2 Width  mv
-            1807,                   // 1/4 Width  mv
-            1254,                   // 1Lane  mv
-            895,                    // Disable  mv
-            174,                    // Pgated  mv
+            4203,                   // Full Width  mv
+            2821,                   // 1/2 Width  mv
+            1907,                   // 1/4 Width  mv
+            1302,                   // 1Lane  mv
+            923,                    // Disable  mv
+            201,                    // Pgated  mv
         },
-        2980,                       // Max to Min  mv
-        930,                        // PLSF  mv
-        0xED,                       // PSLF encode
+        3280,                       // Max to Min  mv
+        998,                        // PLSF  mv
+        0xFF,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x5,                        // 1/4 Width
     },
@@ -480,16 +482,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3608,                   // Full Width  mv
-            2313,                   // 1/2 Width  mv
-            1643,                   // 1/4 Width  mv
-            1243,                   // 1Lane  mv
-            895,                    // Disable  mv
-            174,                    // Pgated  mv
+            3905,                   // Full Width  mv
+            2462,                   // 1/2 Width  mv
+            1722,                   // 1/4 Width  mv
+            1291,                   // 1Lane  mv
+            923,                    // Disable  mv
+            201,                    // Pgated  mv
         },
-        2712,                       // Max to Min  mv
-        846,                        // PLSF  mv
-        0xD8,                       // PSLF encode
+        2982,                       // Max to Min  mv
+        907,                        // PLSF  mv
+        0xE7,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
     },
@@ -501,16 +503,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3301,                   // Full Width  mv
-            2149,                   // 1/2 Width  mv
-            1555,                   // 1/4 Width  mv
-            1232,                   // 1Lane  mv
-            895,                    // Disable  mv
-            174,                    // Pgated  mv
+            3562,                   // Full Width  mv
+            2279,                   // 1/2 Width  mv
+            1626,                   // 1/4 Width  mv
+            1280,                   // 1Lane  mv
+            923,                    // Disable  mv
+            201,                    // Pgated  mv
         },
-        2405,                       // Max to Min  mv
-        750,                        // PLSF  mv
-        0xBF,                       // PSLF encode
+        2639,                       // Max to Min  mv
+        803,                        // PLSF  mv
+        0xCD,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
     },
@@ -522,16 +524,16 @@ static io_link_powers_data_t link_powers[] =
         8,                          // #AC lanes
         {
             // power_mv
-            4014,                   // Full Width  mv
-            4014,                   // 1/2 Width  mv
-            2560,                   // 1/4 Width  mv
-            1198,                   // 1Lane  mv
-            827,                    // Disable  mv
-            105,                    // Pgated  mv
+            4392,                   // Full Width  mv
+            4392,                   // 1/2 Width  mv
+            2749,                   // 1/4 Width  mv
+            1231,                   // 1Lane  mv
+            843,                    // Disable  mv
+            122,                    // Pgated  mv
         },
-        3186,                       // Max to Min  mv
-        994,                        // PLSF  mv
-        0xFE,                       // PSLF encode
+        3548,                       // Max to Min  mv
+        1079,                       // PLSF  mv
+        0x0,                        // PSLF encode
         0xF,                        // 1/2 Width
         0x8,                        // 1/4 Width
     },
@@ -543,15 +545,15 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            4738,                   // Full Width  mv
-            2911,                   // 1/2 Width  mv
-            1938,                   // 1/4 Width  mv
-            1177,                   // 1Lane  mv
-            827,                    // Disable  mv
-            105,                    // Pgated  mv
+            5182,                   // Full Width  mv
+            3132,                   // 1/2 Width  mv
+            2049,                   // 1/4 Width  mv
+            1210,                   // 1Lane  mv
+            843,                    // Disable  mv
+            122,                    // Pgated  mv
         },
-        3911,                       // Max to Min  mv
-        1220,                       // PLSF  mv
+        4338,                       // Max to Min  mv
+        1320,                       // PLSF  mv
         0x0,                        // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
@@ -564,16 +566,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3876,                   // Full Width  mv
-            2630,                   // 1/2 Width  mv
-            1807,                   // 1/4 Width  mv
-            1254,                   // 1Lane  mv
-            895,                    // Disable  mv
-            174,                    // Pgated  mv
+            4203,                   // Full Width  mv
+            2821,                   // 1/2 Width  mv
+            1907,                   // 1/4 Width  mv
+            1302,                   // 1Lane  mv
+            923,                    // Disable  mv
+            201,                    // Pgated  mv
         },
-        2980,                       // Max to Min  mv
-        930,                        // PLSF  mv
-        0xED,                       // PSLF encode
+        3280,                       // Max to Min  mv
+        998,                        // PLSF  mv
+        0xFF,                       // PSLF encode
         0x9,                        // 1/2 Width
         0x5,                        // 1/4 Width
     },
@@ -585,16 +587,16 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3608,                   // Full Width  mv
-            2313,                   // 1/2 Width  mv
-            1643,                   // 1/4 Width  mv
-            1243,                   // 1Lane  mv
-            895,                    // Disable  mv
-            174,                    // Pgated  mv
+            3905,                   // Full Width  mv
+            2462,                   // 1/2 Width  mv
+            1722,                   // 1/4 Width  mv
+            1291,                   // 1Lane  mv
+            923,                    // Disable  mv
+            201,                    // Pgated  mv
         },
-        2712,                       // Max to Min  mv
-        846,                        // PLSF  mv
-        0xD8,                       // PSLF encode
+        2982,                       // Max to Min  mv
+        907,                        // PLSF  mv
+        0xE7,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
     },
@@ -606,18 +608,20 @@ static io_link_powers_data_t link_powers[] =
         16,                         // #AC lanes
         {
             // power_mv
-            3301,                   // Full Width  mv
-            2149,                   // 1/2 Width  mv
-            1555,                   // 1/4 Width  mv
-            1232,                   // 1Lane  mv
-            895,                    // Disable  mv
-            174,                    // Pgated  mv
+            3562,                   // Full Width  mv
+            2279,                   // 1/2 Width  mv
+            1626,                   // 1/4 Width  mv
+            1280,                   // 1Lane  mv
+            923,                    // Disable  mv
+            201,                    // Pgated  mv
         },
-        2405,                       // Max to Min  mv
-        750,                        // PLSF  mv
-        0xBF,                       // PSLF encode
+        2639,                       // Max to Min  mv
+        803,                        // PLSF  mv
+        0xCD,                       // PSLF encode
         0x8,                        // 1/2 Width
         0x4,                        // 1/4 Width
     },
+
 };
+
 #endif

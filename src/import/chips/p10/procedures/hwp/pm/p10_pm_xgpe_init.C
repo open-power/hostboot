@@ -1312,7 +1312,7 @@ fapi2::ReturnCode iodlr_pgated_validation(
                                 l_gnd_links),
                   "Error getting ATTR_IO_GROUNDED_LINKS");
 
-        l_static_data.io_magic = htobe32(0x53540000);
+        l_static_data.io_magic = htobe32(0x53540001);
         l_static_data.io_disable_links = 0;
         l_static_data.io_disable_links = (g_io_omi_disable_link | (g_io_pci_disable_link >> 16)
                                           | (g_io_iohs_ax_disable_link >> 22 ) | (g_io_iohs_oc_disable_link >> 38));
@@ -1504,6 +1504,19 @@ fapi2::ReturnCode iodlr_pgated_validation(
                                                l_ocb_length_act,
                                                (uint8_t*)g_link_data));
         FAPI_INF("Actual length %08X %08x after writing link data", xgpe_sram_base_addr, l_ocb_length_act);
+
+        xgpe_sram_base_addr = xgpe_sram_base_addr + l_ocb_length_act;
+
+        FAPI_TRY(p10_pm_ocb_indir_access_bytes(i_target,
+                                               ocb::OCB_CHAN2,
+                                               ocb::OCB_PUT,
+                                               sizeof(io_powr_sheet_version_str),
+                                               false,
+                                               xgpe_sram_base_addr,
+                                               l_ocb_length_act,
+                                               (uint8_t*)&io_powr_sheet_version_str));
+        FAPI_INF("Actual length %08X %08x after writing link data", xgpe_sram_base_addr, l_ocb_length_act);
+
 
 
         FAPI_INF("  Set XGPE_IODLR_ACTIVE in OCC Flag3 Register...");
