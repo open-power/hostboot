@@ -5036,7 +5036,7 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                  l_new_bad_bits_per_rank_mc));
 
         // When running training with all options, new bad_bit disables found
-        FAPI_ASSERT_NOEXIT(l_bad_bit_flag,
+        FAPI_ASSERT_NOEXIT(!l_bad_bit_flag,
                            fapi2::ODY_DRAMINIT_NEW_BAD_BITS_FOUND(fapi2::FAPI2_ERRL_SEV_RECOVERED)
                            .set_PORT_TARGET(i_target)
                            .set_START_BAD_BITS_R0_BYTE0_3(l_start_bad_bits_per_rank_mc.iv_bad_bits_byte0_3[0])
