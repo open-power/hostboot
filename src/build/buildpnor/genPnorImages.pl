@@ -992,8 +992,6 @@ sub manipulateImage
                                 . "--protectedPayload $bin_file "
                                 . "--contrHdrOut $final_header_file_V3 "
                                 . "--out $tempImages{HDR_PHASE_V3}");
-
-
                 }
                 # Add non-secure version header
                 else
@@ -1122,8 +1120,27 @@ sub manipulateImage
         # fill the partition.
         elsif (!-e $bin_file)
         {
+            if ($eyeCatch eq "HB_HLL")
+            {
+                # Create HB_HLL container with header and padding
+                # - only need to create for V3.
+                create_hb_hll($tempImages{HDR_PHASE_V3},$CUR_OPEN_SIGN_REQUEST_V3);
 
-            if ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
+                # Copy V3 file over to V1 file, as some shared logic below
+                # might look for the V1 file
+                run_command("cp $tempImages{HDR_PHASE_V3} $tempImages{HDR_PHASE}");
+
+                # Pad the images
+                run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=$size conv=sync");
+                run_command("dd if=$tempImages{HDR_PHASE_V3} of=$tempImages{PAD_PHASE_V3} ibs=$size conv=sync");
+
+                # Process HDR info
+                $callerHwHdrFields{configure} = 1;
+                setCallerHwHdrFields(\%callerHwHdrFields, $tempImages{HDR_PHASE});
+                setCallerHwHdrFields(\%callerHwHdrFields_V3, $tempImages{HDR_PHASE_V3});
+
+            }
+            elsif ($eyeCatch eq "SBKT" && $secureboot && $keyTransition{enabled})
             {
                 $callerHwHdrFields{configure} = 1;
                 create_sb_key_transition_container($tempImages{PAD_PHASE});
@@ -1162,9 +1179,9 @@ sub manipulateImage
                     run_command("dd if=$tempImages{PAD_PHASE} of=$tempImages{TEMP_BIN} count=1 bs=$fileSize");
 
                     my $fileSize_V3 = (-s $tempImages{PAD_PHASE_V3}) - PAGE_SIZE;
-                    die "fileSize undefined: errno = $!"
+                    die "fileSize_V3 undefined: errno = $!"
                         unless(defined $fileSize_V3);
-                    run_command("dd if=$tempImages{PAD_PHASE_V3} of=$tempImages{TEMP_BIN_V3} count=1 bs=$fileSize");
+                    run_command("dd if=$tempImages{PAD_PHASE_V3} of=$tempImages{TEMP_BIN_V3} count=1 bs=$fileSize_V3");
 
                     if ($secureboot && $secureSupported)
                     {
@@ -1178,7 +1195,7 @@ sub manipulateImage
 
                         run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
                                     . "--protectedPayload $tempImages{TEMP_BIN_V3} "
-                                    . "--contrHdrOut $final_header_file "
+                                    . "--contrHdrOut $final_header_file_V3 "
                                     . "--out $tempImages{PAD_PHASE_V3}");
                         setCallerHwHdrFields(\%callerHwHdrFields,
                                              $tempImages{PAD_PHASE_V3});
@@ -1281,11 +1298,25 @@ sub manipulateImage
         }
 
         # Move content to final bin filename
-        run_command("cp $tempImages{ECC_PHASE} $final_bin_file");
-        run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file_V3");
-
+        if ($eyeCatch eq "HB_HLL")
+        {
+            # No need for V1 HB_HLL, so overwrite it with V3 HB_HLL
+            # This will also put the V3 HB_HLL in the base $bin_dir
+            # so it can be more easily found by some build tools.
+            # In other words, by doing this, build tools won't have to
+            # be updated to look for the HB_HLL in the different V3/
+            # sub-directory versus where it picks up all of the other binaries
+            run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file");
+            run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file_V3");
+        }
+        else
+        {
+            run_command("cp $tempImages{ECC_PHASE} $final_bin_file");
+            run_command("cp $tempImages{ECC_PHASE_V3} $final_bin_file_V3");
+        }
 
         # Clean up temp images
+
         foreach my $image (keys %tempImages)
         {
             system("rm -f $tempImages{$image}");
@@ -1333,6 +1364,12 @@ sub manipulateImages
     # criteria of "all dependencies satisfied."
     # Repeat this process until the @todo list contains the same
     # number of elements as the %done list.
+    # NOTE: HB_HLL must be processed last since it requires all of the other
+    #       images to have already been processed such that the HB_HLL can
+    #       incorporate the other images' V3 security headers.  Therefore,
+    #       HB_HLL will be skipped in this loop and processed after the loop
+    #       is done with the other images (aka keys).
+    my $key_hb_hll = "HB_HLL";
     while (scalar(@todo) != scalar(keys %done))
     {
         my @pids = ();
@@ -1341,6 +1378,14 @@ sub manipulateImages
         # on now
         foreach my $key (@todo)
         {
+            if ($key eq $key_hb_hll)
+            {
+                # Since HB_HLL must be processed last, put it on the done list
+                # It will be processed after the outer while() loop is completed
+                $done{$key} = 1;
+                next;
+            }
+
             if (exists($done{$key}))
             {
                 next;
@@ -1384,6 +1429,12 @@ sub manipulateImages
             $done{$key} = 1;
         }
     }
+
+    # Process HB_HLL last here since it requires all of the other images to
+    # have already been processed such that the HB_HLL can incorporate the
+    # other images' V3 security headers
+    manipulateImage($key_hb_hll, $i_pnorLayoutRef, $i_binFilesRef, $parallelPrefix, \%preReqImages, $system_target);
+
 
     # Clean up prerequisite images
     foreach my $image (keys %preReqImages)
@@ -1657,6 +1708,190 @@ sub create_sb_key_transition_container
         die "Failed deleting $tempImages{$image}" if ($?);
     }
 }
+
+
+################################################################################
+# create_hb_hll
+#       Generate the HB_HLL lid based on all of the other sections/keys having
+#       already been processed. This function finds the existing V3 *.header
+#       files, pulls out the vital information, and builds up the HB_HLL lid.
+#
+#       HB HLL Format:
+#           Must be synced with definitions in spnorrp.H
+#
+#       struct HB_HLL_Header
+#       {
+#           uint64_t EyeCatcher; <-- "HB_HLL" <-- 8 bytes
+#           uint16_t version; <-- start at 1
+#           uint16_t CompatibleVersion; <-- start at 1
+#           uint16_t NumberOfEntries; // Count of the SectionEntry
+#           uint16_t hashSignMode; // SHA3_512 <-- 0x0001
+#           uint16_t HashEntryStructSize; <-- 96 bytes for version 1
+#           uint16_t OffsetToHashListEntries; <-- 128 bytes
+#           uint8_t  reserved[108];
+#       } __attribute__ ((packed));
+#
+#       struct HB_HLL_SectionEntry
+#       {
+#           uint8_t  PartName[16];
+#           uint64_t ProtectedSize;
+#           uint64_t SectionSize;
+#           uint8_t  Hash[64];
+#       } __attribute__ ((packed));
+#
+#       Steps:
+#           1. Generate section entries for all *.header files in /V3/ subdir
+#              and combine them into one HB_HLL.entries file
+#           2. Create HB_HLL Header (aka TOC) based on number of section entries
+#           3. Combine (cat) the HB_HLL Header TOC and HB_HLL.entries file
+#           4. Sign with V3 algorithm
+################################################################################
+sub create_hb_hll
+{
+    my ($o_file, $CUR_OPEN_SIGN_REQUEST_V3) = @_;
+
+    my $v3_dir = "$bin_dir/V3/";
+    my %hbHllTempImages = (
+        HB_HLL_Entries => "$v3_dir/HB_HLL.entries",
+        HB_HLL_TOC => "$v3_dir/HB_HLL.toc",
+    );
+    # Leave these 2 files in the V3 directory
+    my $HB_HLL_BIN = "$v3_dir/HB_HLL.bin";
+    my $HB_HLL_HDR = "$v3_dir/HB_HLL.header";
+
+    # this is the file that will be returned
+    my $HB_HLL_TEMP_HDR_BIN = "$v3_dir/HB_HLL.temp.hdr.bin";
+
+    # @TODO JIRA:PFHB-802 use static asserts in spnorrp.H to confirm these values
+    #       and add offsets from other run_command's below
+    # NOTE: Did not make these constants as that would still require creating a
+    #       variable to use them below. So just directly created the variables here
+    my $HB_HLL_SIZE_OF_HEADER_TOC = 128, #128 bytes
+    my $HB_HLL_EYE_CATCHER = "HB_HLL",
+    my $HB_HLL_VERSION = 1,
+    my $HB_HLL_COMPATIBLE_VERSION = 1,
+    my $HB_HLL_HASH_SIGN_MODE = 1, # SHA3_512
+    my $HB_HLL_HASH_ENTRY_STRUCT_SIZE = 96, # 96 bytes
+    my $HB_HLL_OFFSET_TO_LIST_ENTRIES = 128, #128 bytes
+
+    # Generate section entries from the existing *.header files and then
+    # combine them into the single HB_HLL_Entries file
+
+    # This returns the full path and name for the existing .header files
+    my @files = glob( $v3_dir . '/*.header' );
+    my $num_of_entries = scalar(@files);
+
+    foreach my $v3_header_file (@files)
+    {
+        my $basename = $v3_header_file;
+        # Remove file path and .header extension
+        $basename =~ s{^.*/|\.[^.]+$}{}g;
+        my $entry_file = "$v3_dir/${basename}.entry";
+
+        # @TODO JIRA:PFHB-802 Consider updating the run_command calls to
+        #       perl binary File I/O operations
+        #       If "dd" calls remain, then investigate need for ibs=1 and
+        #       obs=1 when bs=1 has already been set
+
+        # If there is an old HB_HLL.header file in the directory,
+        # skip processing it
+        # @TODO JIRA:PFHB-802 Consider a better location to find and cleanup
+        # an old HB_HLL header file
+        if ($basename eq "HB_HLL")
+        {
+            # reduce the count of entries and skip
+            $num_of_entries--;
+            next;
+        }
+
+        # Create and clear new .entry file
+        run_command("dd if=/dev/zero bs=96 count=1 > $entry_file");
+
+        # Get and set the partname - string left-justified (ie starts at bit0)
+        # NOTE: this comes from Component ID
+        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc ibs=1 obs=1 seek=0 skip=10347 of=$entry_file");
+
+        # Get and set the ProtectedSize;
+        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc ibs=1 obs=1 seek=16 skip=10360 of=$entry_file");
+
+        # Get and set the overall SectionSize
+        run_command("dd if=$v3_header_file bs=1 count=8 conv=notrunc ibs=1 obs=1 seek=24 skip=6 of=$entry_file");
+
+        # Get and set the hash value
+        run_command("dd if=$v3_header_file bs=1 count=64 conv=notrunc ibs=1 obs=1 seek=32 skip=10376 of=$entry_file");
+
+        # Uncomment next line for debug
+        #run_command("hexdump -C $entry_file");
+
+        # Append this entry file to the overall HB_HLL entries file
+        run_command("cat $entry_file >> $hbHllTempImages{HB_HLL_Entries}");
+    }
+
+    # Uncomment next line for debug
+    #run_command("hexdump -C $hbHllTempImages{HB_HLL_Entries}");
+
+    # Create HB_HLL Header Section (aka TOC)
+    my $FILEHANDLE;
+    open( $FILEHANDLE, ">:raw", $hbHllTempImages{HB_HLL_TOC})
+        or die "Error opening file $hbHllTempImages{HB_HLL_TOC}: $!\n";
+
+    # - set EyeCatcher - "HB_HLL\0\0" in ASCII - 8 bytes
+    my @charArray = split //, $HB_HLL_EYE_CATCHER;
+    my $curChar;
+    foreach $curChar (@charArray)
+    {
+        print $FILEHANDLE pack('C', ord($curChar));
+    }
+
+    # - pad 2 null characters after HB_HLL (8 bytes were reserved for
+    print $FILEHANDLE pack("C[2]", map { 0 } 1..2);
+
+    # - set version (uint16_t)
+    print $FILEHANDLE pack("n", $HB_HLL_VERSION);
+
+    # - set compatible version (uint16_t)
+    print $FILEHANDLE pack("n", $HB_HLL_COMPATIBLE_VERSION);
+
+    # - set number of entries (uint16_t)
+    print $FILEHANDLE pack("n", $num_of_entries);
+
+    # - set hashSignMode (uint16_t)
+    print $FILEHANDLE pack("n", $HB_HLL_HASH_SIGN_MODE);
+
+    # - set hash entry struct size (uint16_t)
+    print $FILEHANDLE pack("n", $HB_HLL_HASH_ENTRY_STRUCT_SIZE);
+
+    # - set offset to list entries (uint16_t)
+    print $FILEHANDLE pack("n", $HB_HLL_OFFSET_TO_LIST_ENTRIES);
+
+    # - pad the remaining "reserved" 108 bytes with null characters
+    print $FILEHANDLE pack("C[108]", map { 0 } 1..108);
+
+    close $FILEHANDLE or die "Error closing $hbHllTempImages{HB_HLL_TOC}: $!\n";
+
+    # Uncomment next line for debug
+    #run_command("hexdump -C $hbHllTempImages{HB_HLL_TOC}");
+
+    # Combine (cat) the two files (TOC and Entries file)
+    run_command("cat $hbHllTempImages{HB_HLL_TOC} $hbHllTempImages{HB_HLL_Entries} > $HB_HLL_BIN");
+
+    # Uncomment for debug
+    #run_command("hexdump -C $HB_HLL_BIN");
+
+    # Sign the binary to create the .header file
+    run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                . "--protectedPayload $HB_HLL_BIN "
+                . "--contrHdrOut $HB_HLL_HDR "
+                . "--out $o_file ");
+
+    # Clean up temp images
+    foreach my $image (keys %hbHllTempImages)
+    {
+        system("rm -f $hbHllTempImages{$image}");
+        die "Failed deleting $hbHllTempImages{$image}" if ($?);
+    }
+}
+
 
 ################################################################################
 # convertEyecatchToCompId
