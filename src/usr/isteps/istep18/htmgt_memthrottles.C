@@ -428,8 +428,6 @@ void updateDimmPowerUtil(Target *sys)
                 lastPoint = utilValue;
             }
         }
-        // Last point is the max utilization (100%)
-        utilPoints[numPoints++] = 100;
     }
     else
     {

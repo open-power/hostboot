@@ -1130,6 +1130,11 @@ uint8_t ocmbPowerData(Occ *i_occ,
                              l_ocmb_num);
                     break;
                 }
+
+                // Determine number of functional ports for this OCMB
+                TargetHandleList port_list;
+                getChildAffinityTargets(port_list, ocmb, CLASS_UNIT, TYPE_MEM_PORT);
+
                 const size_t entryStartIndex = io_index;
                 o_data[io_index++] = l_ocmb_num;
                 bzero(&o_data[io_index], 6); // reserved
@@ -1145,10 +1150,17 @@ uint8_t ocmbPowerData(Occ *i_occ,
                         // ignore invalid entries
                         break;
                     }
-                    const uint16_t utilCpercent = utilPoints[pointIndex] * 100;
-                    TMGT_INF("ocmbPowerData: OCMB%d util: %3d percent, preheat: %4dcW, full: %4dcW",
-                             l_ocmb_num, utilPoints[pointIndex],
-                             dimmPreheatPower[pointIndex], dimmFullPower[pointIndex]);
+                    uint16_t utilCpercent = utilPoints[pointIndex] * 100;
+                    if (port_list.size() > 1)
+                    {
+                        // The util percent is per-port, but OCC is using per-OCMB, so
+                        // send double when there are 2 ports on the OCMB
+                        utilCpercent *= 2;
+                    }
+                    TMGT_INF("ocmbPowerData: OCMB%d util: %3d percent, preheat: %4dcW, full: %4dcW"
+                             " (%d ports)", l_ocmb_num, utilPoints[pointIndex],
+                             dimmPreheatPower[pointIndex], dimmFullPower[pointIndex],
+                             port_list.size());
                     o_data[io_index++] = utilCpercent >> 8;
                     o_data[io_index++] = utilCpercent & 0xFF;
                     o_data[io_index++] = 0; // reserved
