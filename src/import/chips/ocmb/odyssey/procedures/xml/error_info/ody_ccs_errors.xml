@@ -304,6 +304,31 @@
 
   <hwpError>
     <sbeError/>
+    <rc>RC_MSS_ODY_DQS_DRIFT_TRACK_CHIPOP_NOT_HALF_DIMM</rc>
+    <description>
+        Odyssey chip-op DQS drift track only supports XMETA mode.
+    </description>
+    <ffdc>MC_TARGET</ffdc>
+    <ffdc>HALF_DIMM_MODE</ffdc>
+    <ffdc>OVERRIDE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>MEDIUM</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+    <gard>
+        <target>MC_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
     <rc>RC_MSS_ODY_DQS_DRIFT_TRACK_UNABLE_TO_QUIESCE_BUS</rc>
     <description>
         Odyssey manual DQS drift track chip-op was unable to detect bus

@@ -197,14 +197,21 @@ fapi2::ReturnCode configure_mcbist_test(const fapi2::Target<fapi2::TARGET_TYPE_O
 ///
 /// @brief Execute CCS program in concurrent mode
 /// @param[in] i_target the OCMB chip on which to operate
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 ///
+/// @brief Return an error if ody_half_dimm_dqs_track is run on a FULL_DIMM config
+/// @param[in] i_target the OCMB chip on which to operate
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode check_half_dimm_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
+
+///
 /// @brief Wrapper that checks if the DQS tracking operation has failed. If not, runs the DQS tracking operation
 /// @param[in] i_target the OCMB chip on which to operate
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @return FAPI2_RC_SUCCESS iff ok
 ///
 fapi2::ReturnCode ody_half_dimm_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 

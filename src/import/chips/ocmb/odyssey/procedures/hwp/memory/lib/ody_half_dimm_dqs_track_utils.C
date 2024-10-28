@@ -549,6 +549,32 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Return an error if ody_half_dimm_dqs_track is run on a FULL_DIMM config
+/// @param[in] i_target the OCMB chip on which to operate
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+fapi2::ReturnCode check_half_dimm_mode(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+{
+    uint8_t l_half_dimm_attr = 0;
+    uint8_t l_override_attr = 0;
+    bool l_half_dimm_mode = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE, i_target, l_half_dimm_attr));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_OCMB_HALF_DIMM_MODE_OVERRIDE, i_target, l_override_attr));
+    FAPI_TRY(mss::ody::half_dimm_mode_helper(i_target, l_half_dimm_attr, l_override_attr, l_half_dimm_mode));
+    FAPI_ASSERT(l_half_dimm_mode,
+                fapi2::MSS_ODY_DQS_DRIFT_TRACK_CHIPOP_NOT_HALF_DIMM().
+                set_MC_TARGET(i_target).
+                set_HALF_DIMM_MODE(l_half_dimm_attr).
+                set_OVERRIDE(l_override_attr),
+                GENTARGTIDFORMAT " chip-op DQS drift track can only run in half-DIMM mode (mode:0x%02X override:0x%02X",
+                GENTARGTID(i_target), l_half_dimm_attr, l_override_attr);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Wrapper that checks if the DQS tracking operation has failed. If not, runs the DQS tracking operation
 /// @param[in] i_target the OCMB chip on which to operate
 /// @return FAPI2_RC_SUCCESS iff ok
@@ -556,8 +582,9 @@ fapi_try_exit:
 fapi2::ReturnCode ody_half_dimm_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
 
-    // If the procedure failed before, skip it
     uint8_t l_has_failed = 0;
+
+    // If the procedure failed before, skip it
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_FAILED, i_target, l_has_failed));
 
     if (l_has_failed == fapi2::ENUM_ATTR_ODY_DQS_TRACKING_FAILED_YES)
@@ -566,6 +593,8 @@ fapi2::ReturnCode ody_half_dimm_dqs_track(const fapi2::Target<fapi2::TARGET_TYPE
                         GENTARGTID(i_target));
         return fapi2::FAPI2_RC_SUCCESS;
     }
+
+    FAPI_TRY(check_half_dimm_mode(i_target));
 
     FAPI_TRY(execute_half_dimm_concurrent_ccs(i_target));
 
