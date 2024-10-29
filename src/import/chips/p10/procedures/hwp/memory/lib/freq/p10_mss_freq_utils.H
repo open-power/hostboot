@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -140,6 +140,102 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Helper for limit_freq_by_processor_p10; determines the mem frequency limit for the system
+/// @tparam MC mss:mc_type memory controller type
+/// @param[in] i_port mem port
+/// @param[in] i_limited_omi_freq ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ value
+/// @param[in] i_slow_mem_test ATTR_SLOW_MEM_POOL_TEST value
+/// @param[in] i_system_type ATTR_PVR_82_MODE value
+/// @param[in] i_interposer_rev value of ATTR_INTERPOSER_REV
+/// @param[in] i_is_ioSCM value of ATTR_IS_IOSCM
+/// @param[in] i_ioSCM_freq_limit value of ATTR_MRW_MAX_DDR_FREQ_ON_IOSCM
+/// @param[in] i_is_apollo value of ATTR_MSS_IS_APOLLO
+/// @param[in] i_override value of ATTR_MEM_OVERRIDE_FREQ_LIMITATION, overrides mem freq limitations
+/// @param[in,out] io_scoreboard vector to hold converted/limited omi frequencies
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<mss::mc_type MC>
+fapi2::ReturnCode limit_freq_helper(
+    const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+    const fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ_Type& i_limited_omi_freq,
+    const fapi2::ATTR_SLOW_MEM_POOL_TEST_Type& i_slow_mem_test,
+    const fapi2:: ATTR_PVR_82_MODE_Type& i_system_type,
+    const fapi2::ATTR_INTERPOSER_REV_Type& i_interposer_rev,
+    const fapi2::ATTR_IS_IOSCM_Type& i_is_ioSCM,
+    const uint16_t& i_ioSCM_freq_limit,
+    const fapi2::ATTR_MSS_IS_APOLLO_Type& i_is_apollo,
+    const fapi2::ATTR_MEM_OVERRIDE_FREQ_LIMITATION_Type& i_override,
+    freq_scoreboard& io_scoreboard )
+{
+    const auto l_port_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_PROC_CHIP>(i_port);
+
+    std::vector<uint64_t> l_converted_ddr_freqs;
+    std::vector<uint64_t> l_omi_freqs = P10_LIMITED_OMI_FREQS;
+
+    // check for OMI frequency limitation
+    // PVR_82_MODE | DD1_LIMITED_OMI_FREQ | SLOW_MEM_POOL | ISC rev | ioSCM | Freq
+    // ------------|----------------------|---------------|---------|-------|-----------
+    // OFF         |   yes                |       x       |   x     |   x   | 21330
+    // OFF         |   no                 |      yes      |   x     |   x   | 21330
+    // OFF         |   no                 |      no       |   x     |   x   | 21330-38400
+    // ON          |    x                 |      yes      |   x     |   x   | 21330
+    // ON          |    x                 |      no       |  none   |   x   | 21330-32000
+    // ON          |    x                 |      no       |  DD1    |   x   | 21330-32000
+    // ON          |    x                 |      no       |  >DD1   |  yes  | limit to ATTR_MRW_MAX_DDR_FREQ_ON_IOSCM
+    // ON          |    x                 |      no       |  >DD1   |  no   | 21330-38400
+    //
+    // NOTE: ATTR_IS_APOLLO and ATTR_MEM_OVERRIDE_FREQ_LIMITATION will override the above table to run at max frequency
+    if ( i_is_apollo || i_override)
+    {
+        l_omi_freqs = P10_OMI_FREQS;
+    }
+    else if (i_system_type == fapi2::ENUM_ATTR_PVR_82_MODE_ON
+             && i_slow_mem_test == fapi2::ENUM_ATTR_SLOW_MEM_POOL_TEST_DISABLE)
+    {
+        if (  i_interposer_rev == fapi2::ENUM_ATTR_INTERPOSER_REV_NONE
+              || i_interposer_rev == fapi2::ENUM_ATTR_INTERPOSER_REV_REV1)
+        {
+            l_omi_freqs = P11_4000_LIMITED_OMI_FREQS;
+        }
+        else if (i_is_ioSCM)
+        {
+            // PVR_82 mode with ioSCMs
+            uint32_t l_omi_freq = 0;
+            FAPI_TRY(convert_ddr_freq_to_omi_freq(i_port, i_ioSCM_freq_limit, l_omi_freq));
+
+            l_omi_freqs = P10_OMI_FREQS;
+
+            while (!l_omi_freqs.empty() && l_omi_freqs.back() > l_omi_freq)
+            {
+                l_omi_freqs.pop_back();
+            }
+        }
+        else
+        {
+            l_omi_freqs = P10_OMI_FREQS;
+        }
+    }
+    else if (i_system_type == fapi2::ENUM_ATTR_PVR_82_MODE_OFF
+             && i_slow_mem_test == fapi2::ENUM_ATTR_SLOW_MEM_POOL_TEST_DISABLE
+             && !i_limited_omi_freq )
+    {
+        l_omi_freqs = P10_OMI_FREQS;
+    }
+
+    for (const auto l_omi_freq : l_omi_freqs)
+    {
+        uint64_t l_ddr_freq = 0;
+        FAPI_TRY(convert_omi_freq_to_ddr_freq(i_port, l_omi_freq, l_ddr_freq));
+        l_converted_ddr_freqs.push_back(l_ddr_freq);
+    }
+
+    FAPI_TRY(io_scoreboard.remove_freqs_not_on_list(l_port_pos, l_converted_ddr_freqs));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Update supported frequency scoreboard according to processor limits - helper for PROC_P10 specializations
 /// @tparam MC mss:mc_type memory controller type
 /// @param[in] i_target processor frequency domain
@@ -153,6 +249,12 @@ fapi2::ReturnCode limit_freq_by_processor_p10(
 {
     fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ_Type l_limited_omi_freq;
     fapi2::ATTR_SLOW_MEM_POOL_TEST_Type l_slow_mem_test;
+    uint8_t l_pvr_82_sys;
+    fapi2::ATTR_INTERPOSER_REV_Type l_interposer_rev;
+    fapi2::ATTR_IS_IOSCM_Type l_is_ioSCM;
+    uint16_t l_ioSCM_freq_limit;
+    fapi2::ATTR_MSS_IS_APOLLO_Type l_is_apollo;
+    fapi2::ATTR_MEM_OVERRIDE_FREQ_LIMITATION_Type l_override;
 
     // Set omi frequency limit flag based on whether the system is DD1
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_DD1_LIMITED_OMI_FREQ, i_target, l_limited_omi_freq),
@@ -162,26 +264,31 @@ fapi2::ReturnCode limit_freq_by_processor_p10(
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SLOW_MEM_POOL_TEST, i_target, l_slow_mem_test),
              "%s failed to read ATTR_SLOW_MEM_POOL_TEST", mss::c_str(i_target));
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_PVR_82_MODE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_pvr_82_sys),
+             "%s failed to read ATTR_PVR_82_MODE", mss::c_str(i_target));
+
+    // Get revision and ioSCM presence to determine mem freq limits
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INTERPOSER_REV, i_target, l_interposer_rev),
+             "%s failed to read ATTR_INTERPOSER_REV", mss::c_str(i_target));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IS_IOSCM, i_target, l_is_ioSCM),
+             "%s failed to read ATTR_IS_IOSCM", mss::c_str(i_target));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MRW_MAX_DDR_FREQ_ON_IOSCM, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_ioSCM_freq_limit),
+             "%s failed to read ATTR_MRW_MAX_DDR_FREQ_ON_IOSCM", mss::c_str(i_target));
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_IS_APOLLO, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(), l_is_apollo),
+             "%s failed to read ATTR_MSS_IS_APOLLO", mss::c_str(i_target));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_OVERRIDE_FREQ_LIMITATION, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                           l_override),
+             "%s failed to read ATTR_MEM_OVERRIDE_FREQ_LIMITATION", mss::c_str(i_target));
 
     // OCMB always needs to be in sync between OMI and DDR, by the given ratio
     // so we convert the supported OMI freqs and remove every other DDR freq
     // from the scoreboard
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
     {
-        const auto l_port_pos = mss::relative_pos<MC, fapi2::TARGET_TYPE_PROC_CHIP>(l_port);
-
-        std::vector<uint64_t> l_converted_omi_freqs;
-
-        // Check for DD1 OMI frequency limitation - if exists use 21330 MHz
-        for (const auto l_omi_freq : ((l_limited_omi_freq || l_slow_mem_test)
-                                      ? P10_LIMITED_OMI_FREQS : P10_OMI_FREQS))
-        {
-            uint64_t l_ddr_freq = 0;
-            FAPI_TRY(convert_omi_freq_to_ddr_freq(l_port, l_omi_freq, l_ddr_freq));
-            l_converted_omi_freqs.push_back(l_ddr_freq);
-        }
-
-        FAPI_TRY(io_scoreboard.remove_freqs_not_on_list(l_port_pos, l_converted_omi_freqs));
+        limit_freq_helper<MC>(l_port, l_limited_omi_freq, l_slow_mem_test, l_pvr_82_sys, l_interposer_rev,
+                              l_is_ioSCM, l_ioSCM_freq_limit, l_is_apollo, l_override, io_scoreboard);
     }
 
 fapi_try_exit:

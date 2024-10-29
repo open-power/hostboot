@@ -1009,4 +1009,13 @@
     </sbeAttrSync>
   </attribute>
 
+  <attribute>
+    <id>ATTR_MRW_MAX_DDR_FREQ_ON_IOSCM</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>Max frequency of the ioSCM memory</description>
+    <valueType>uint16</valueType>
+    <platInit/>
+    <default>4000</default>
+  </attribute>
+
 </attributes>

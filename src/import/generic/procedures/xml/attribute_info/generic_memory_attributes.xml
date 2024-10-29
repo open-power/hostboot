@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -494,6 +494,18 @@
     <enum>FALSE = 0, TRUE = 1</enum>
     <platInit/>
     <initToZero/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_MEM_OVERRIDE_FREQ_LIMITATION</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+      Set to YES if you want to override processor-driven memory frequency limitations.
+    </description>
+    <initToZero></initToZero>
+    <valueType>uint8</valueType>
+    <writeable/>
+    <enum>NO = 0, YES = 1</enum>
   </attribute>
 
   <attribute>
