@@ -192,6 +192,7 @@ namespace PLDM
         RC_DUMP_TARGET_NOT_FOUND      = PLDM_COMP_ID | 0x44,
         RC_SBE_DUMP_FAILED            = PLDM_COMP_ID | 0x45,
         RC_READ_TOO_BIG               = PLDM_COMP_ID | 0x46,
+        RC_OCMB_SBE_DUMP_FAILED       = PLDM_COMP_ID | 0x47,
     };
 
     /**
@@ -245,6 +246,16 @@ namespace PLDM
     * @userdata2   Unused
     * @devdesc     Software problem, PS input Voltage Data from BMC not found.
     * @custdesc    A software error occurred during system boot
+    */
+
+    /*@
+    *@moduleid         MOD_SBE_DUMP
+    *@reasoncode       RC_SBE_DUMP_TIMED_OUT
+    *@userdata1        Dump target HUID
+    *@userdata2[0:31]  BMC's SBE start-dump effecter ID
+    *@userdata2[32:63] Host's SBE dump-complete effecter ID
+    *@devdesc          BMC failed to respond to dump request.
+    *@custdesc         Error occurred during failure-data capture.
     */
 
 #endif

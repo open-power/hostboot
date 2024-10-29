@@ -374,7 +374,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
 
             /*@
             *@moduleid         MOD_SBE_DUMP
-            *@reasoncode       RC_SBE_DUMP_TIMED_OUT
+            *@reasoncode       RC_SBE_DUMP_FAILED
             *@userdata1        Dump target HUID
             *@userdata2[0:31]  BMC's SBE start-dump effecter ID
             *@userdata2[32:63] Host's SBE dump-complete effecter ID
@@ -383,7 +383,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
             */
             errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                 MOD_SBE_DUMP,
-                                RC_SBE_DUMP_TIMED_OUT,
+                                RC_SBE_DUMP_FAILED,
                                 get_huid(dump_target),
                                 TWO_UINT32_TO_UINT64(sbe_dump_effecter,
                                                     dump_complete_effecter),
@@ -397,7 +397,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
         // HBRT does NOT have access to all of the PLDM semantics, so just do a simple timeout.
         uint64_t sbe_dump_window = (DUMP_TIMEOUT_INTERVAL_SECONDS * DUMP_TIMEOUT_RETRIES) * NS_PER_SEC; // 10 minutes
         nanosleep(0, sbe_dump_window);
-#endif 
+#endif
     } // end if TYPE_PROC
 
     // *** Odyssey SBE DUMP ***
@@ -473,16 +473,16 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
 
             /*@
             *@moduleid         MOD_SBE_DUMP
-            *@reasoncode       RC_SBE_DUMP_FAILED
+            *@reasoncode       RC_OCMB_SBE_DUMP_FAILED
             *@userdata1        Dump target HUID
             *@userdata2[0:31]  OCMB SBE SensorStateId
-            *@userdata2[32:63] Host's SBE dump-complete effecter ID
+            *@userdata2[32:63] Host's SBE dump-complete SensorState ID
             *@devdesc          SBE dump request failed.
             *@custdesc         Error occurred during failure-data capture.
             */
             errl = new ErrlEntry(ERRL_SEV_INFORMATIONAL,
                                  MOD_SBE_DUMP,
-                                 RC_SBE_DUMP_FAILED,
+                                 RC_OCMB_SBE_DUMP_FAILED,
                                  get_huid(dump_target),
                                  TWO_UINT32_TO_UINT64(OCMB_dump_SensorStateId,
                                                       return_value),
