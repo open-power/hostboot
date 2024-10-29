@@ -224,13 +224,25 @@ class mr2_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2. RD preamble train: %u. burst length: %u. 2N mode (read only) %u", TARGTID,
-                            iv_rd_preamble_train, iv_wr_leveling, iv_2n_mode_read_only);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2. MPSM: %u. CS during MPC: %u. device 15 MPSM %u", TARGTID, iv_mpsm,
-                            iv_cs_during_mpc,
-                            iv_device15_mpsm);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2. internal WR timing %u", TARGTID, iv_internal_wr_timing);
+            FAPI_INF_NO_SBE("MR 2: Functional Modes " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2 |                   Field              |     Register Type   |    Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "          ----------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2 | ReadPreamble Training                |          R/W        |     %u",
+                            TARGTID, iv_rd_preamble_train);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2 | WriteLeveling                        |          R/W        |     %u",
+                            TARGTID, iv_wr_leveling);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2 | 2N Mode                              |          R          |     %u",
+                            TARGTID, iv_2n_mode_read_only);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2 | Max Power Saving Mode                |          R/W        |     %u",
+                            TARGTID, iv_mpsm);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2 | CS Assertion Duration(MPC)           |          R/W        |     %u",
+                            TARGTID, iv_cs_during_mpc);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2 | Device 15 MaximumPower Savings Mode  |          R/W        |     %u",
+                            TARGTID, iv_device15_mpsm);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR2 | Internal Write Timing                |          R/W        |     %u",
+                            TARGTID, iv_internal_wr_timing);
         }
 };
 
