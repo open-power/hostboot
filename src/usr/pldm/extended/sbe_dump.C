@@ -397,7 +397,7 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
         // HBRT does NOT have access to all of the PLDM semantics, so just do a simple timeout.
         uint64_t sbe_dump_window = (DUMP_TIMEOUT_INTERVAL_SECONDS * DUMP_TIMEOUT_RETRIES) * NS_PER_SEC; // 10 minutes
         nanosleep(0, sbe_dump_window);
-#endif 
+#endif
     } // end if TYPE_PROC
 
     // *** Odyssey SBE DUMP ***
@@ -413,6 +413,12 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
 
         while (retryCounter++ < DUMP_TIMEOUT_RETRIES)
         {
+
+#ifndef __HOSTBOOT_RUNTIME
+            // Reset the watchdog timer
+            INITSERVICE::sendProgressCode();
+#endif
+
             // BMC State Sensor ID
             OCMB_dump_SensorStateId = getSbeDumpStateSensorId(i_target);
 
@@ -428,7 +434,16 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
 
                 // Just in case the dump did get kicked off, wait the maximum
                 // remaining time before giving up
-                nanosleep(wait_time*(DUMP_TIMEOUT_RETRIES-retryCounter), 0);
+                size_t holdCounter = 0;
+                uint64_t MAX_REMAINING_TIMEOUT= DUMP_TIMEOUT_RETRIES - retryCounter;
+                while (holdCounter++ < MAX_REMAINING_TIMEOUT)
+                {
+#ifndef __HOSTBOOT_RUNTIME
+                    // Reset the watchdog timer every 60 Seconds
+                    INITSERVICE::sendProgressCode();
+#endif
+                    nanosleep(wait_time, 0);
+                }  // end while DUMP_TIMEOUT_RETRIES#
 
                 break;
             }
