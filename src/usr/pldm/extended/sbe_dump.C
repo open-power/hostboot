@@ -413,6 +413,12 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
 
         while (retryCounter++ < DUMP_TIMEOUT_RETRIES)
         {
+
+#ifndef __HOSTBOOT_RUNTIME
+            // Reset the watchdog timer
+            INITSERVICE::sendProgressCode();
+#endif
+
             // BMC State Sensor ID
             OCMB_dump_SensorStateId = getSbeDumpStateSensorId(i_target);
 
@@ -428,7 +434,16 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
 
                 // Just in case the dump did get kicked off, wait the maximum
                 // remaining time before giving up
-                nanosleep(wait_time*(DUMP_TIMEOUT_RETRIES-retryCounter), 0);
+                size_t holdCounter = 0;
+                uint64_t MAX_REMAINING_TIMEOUT= DUMP_TIMEOUT_RETRIES - retryCounter;
+                while (holdCounter++ < MAX_REMAINING_TIMEOUT)
+                {
+#ifndef __HOSTBOOT_RUNTIME
+                    // Reset the watchdog timer every 60 Seconds
+                    INITSERVICE::sendProgressCode();
+#endif
+                    nanosleep(wait_time, 0);
+                }  // end while DUMP_TIMEOUT_RETRIES#
 
                 break;
             }
@@ -447,13 +462,13 @@ errlHndl_t PLDM::dumpSbe(Target* const i_target, const uint32_t i_plid)
             }
             else if(return_value == SBE_RETRY_REQUIRED)
             {
-                PLDM_ERR("Dump in Progress(2) Waiting Time(%d Sec.) CountDown(%D of %d)",
+                PLDM_ERR("Dump in Progress(2) Waiting Time(%d Sec.) CountDown(%d of %d)",
                          wait_time, retryCounter, DUMP_TIMEOUT_RETRIES);
                 nanosleep(wait_time, 0);
             }
             else
             {
-                PLDM_ERR("Unknown status (=%d) Waiting Time(%d Sec.) CountDown(%D of %d)",
+                PLDM_ERR("Unknown status (=%d) Waiting Time(%d Sec.) CountDown(%d of %d)",
                          return_value, wait_time, retryCounter, DUMP_TIMEOUT_RETRIES);
                 nanosleep(wait_time, 0);
             }
