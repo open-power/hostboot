@@ -881,25 +881,27 @@ fapi2::ReturnCode odyssey_scom(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8011022ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_0 );
-            l_scom_buffer.insert<32, 3, 61, uint64_t>(literal_5 );
+            l_scom_buffer.insert<0, 1, 63, uint64_t>(literal_1 );
+            l_scom_buffer.insert<32, 3, 61, uint64_t>(literal_0 );
             l_scom_buffer.insert<35, 1, 63, uint64_t>(literal_0 );
+            l_scom_buffer.insert<16, 2, 62, uint64_t>(literal_2 );
             l_scom_buffer.insert<18, 2, 62, uint64_t>(literal_2 );
-            l_scom_buffer.insert<26, 2, 62, uint64_t>(literal_3 );
+            l_scom_buffer.insert<20, 2, 62, uint64_t>(literal_3 );
+            l_scom_buffer.insert<22, 2, 62, uint64_t>(literal_2 );
+            l_scom_buffer.insert<24, 2, 62, uint64_t>(literal_1 );
+            l_scom_buffer.insert<26, 2, 62, uint64_t>(literal_1 );
+            l_scom_buffer.insert<28, 2, 62, uint64_t>(literal_1 );
+            l_scom_buffer.insert<30, 2, 62, uint64_t>(literal_1 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011022ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8011023ull, l_scom_buffer ));
 
-            l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_5 );
-            l_scom_buffer.insert<40, 8, 56, uint64_t>(literal_6 );
+            l_scom_buffer.insert<0, 8, 56, uint64_t>(literal_5 );
+            l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_6 );
+            l_scom_buffer.insert<16, 8, 56, uint64_t>(literal_0 );
+            l_scom_buffer.insert<24, 8, 56, uint64_t>(literal_23 );
             FAPI_TRY(fapi2::putScom(TGT0, 0x8011023ull, l_scom_buffer));
-        }
-        {
-            FAPI_TRY(fapi2::getScom( TGT0, 0x8011024ull, l_scom_buffer ));
-
-            l_scom_buffer.insert<8, 8, 56, uint64_t>(literal_23 );
-            FAPI_TRY(fapi2::putScom(TGT0, 0x8011024ull, l_scom_buffer));
         }
         {
             FAPI_TRY(fapi2::getScom( TGT0, 0x8011029ull, l_scom_buffer ));

@@ -252,28 +252,24 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Reads the dts2, dts3, srq_pmu2q and writes to the scratch buffer
+/// @brief Reads the dts2 and dts3 to the scratch buffer
 /// @param[in] i_target ocmb target on which to operate
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
 /// @note The proposed workaround is the following:
-/// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-/// | REGISTER  |      DTS2      |         DTS3        |         SR Cycle Count           |
-/// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-/// | 0x8011027 | 0 1 2 3  4:19  | 20 21 22 23  24:39  |             40:63                |
-/// |           | 0 P V E <temp> | 0  P  V  E   <temp> |       (side 0 + side 1)          |
-/// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/// ++++++++++++++++++++++++++++++++++++++++++++++++++++
+/// | REGISTER  |      DTS2      |         DTS3        |
+/// ++++++++++++++++++++++++++++++++++++++++++++++++++++
+/// | 0x8011027 | 0 1 2 3  4:19  | 20 21 22 23  24:39  |
+/// |           | 0 P V E <temp> | 0  P  V  E   <temp> |
+/// ++++++++++++++++++++++++++++++++++++++++++++++++++++
 ///
 fapi2::ReturnCode wr_data_to_scratch1(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
     static const uint64_t SCRATCH_REG1 = 0x8011027ull;
     fapi2::buffer<uint64_t> l_scratch_buffer;
     fapi2::buffer<uint64_t> l_snsc_therm_data;
-    uint32_t l_data_from_scom_reg = 0;
 
     using TT = mss::temp_sensor_traits<mss::mc_type::ODYSSEY>;
-
-    // Overflow data for 24 bit data
-    const uint64_t OVERFLOW_DATA = 0xFFC00000;
 
     // Get the DTS2 register value
     FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_MMIO_SNSC_D2THERM, l_snsc_therm_data));
@@ -291,114 +287,9 @@ fapi2::ReturnCode wr_data_to_scratch1(const fapi2::Target<fapi2::TARGET_TYPE_OCM
     FAPI_INF_NO_SBE(" scratch buffer after DTS3: 0x%016llx for target: " GENTARGTIDFORMAT, l_scratch_buffer,
                     GENTARGTID(i_target) );
 
-    // Get the SR Cycle Count register value
-    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_PMU2Q, l_snsc_therm_data));
-
-    // The PMU registers are configured to monitor and sum the read/write/SR counts from side 0 and side 1.
-    // The result will be stored in 0:31 of the 3 PMU registers. The granularity of the PMU monitor is that it counts every 4
-    // events so in order to provide an accurate count to the OCC we have to multiply whatever is in 0:31 by 4 before we copy it into the
-    // 0x8011027 reg, if there's an overflow when you do the multiply, the end value is set to max
-    l_snsc_therm_data.extractToRight<scomt::ody::ODC_SRQ_PMU2Q_EVENT0_COUNTER, 32>(l_data_from_scom_reg);
-    l_data_from_scom_reg = l_data_from_scom_reg >= OVERFLOW_DATA ? 0xffffffff : l_data_from_scom_reg << 2;
-
-    // Write the register data to the buffer
-    l_scratch_buffer.insertFromRight<mss::ody::scratch_fields::SR_CYCLE_COUNT_START, mss::ody::scratch_fields::SR_CYCLE_COUNT_LEN>
-    (l_data_from_scom_reg);
-    l_data_from_scom_reg = 0;
-
-    FAPI_INF_NO_SBE(" scratch buffer after ODC_SRQ_PMU2Q: 0x%016llx for target: " GENTARGTIDFORMAT, l_scratch_buffer,
-                    GENTARGTID(i_target) );
-
     // Write to the scratch register
     FAPI_TRY(fapi2::putScom(i_target, SCRATCH_REG1, l_scratch_buffer));
 
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Reads the srq_pmu0q and srq_pmu1q and writes to the scratch buffer
-/// @param[in] i_target ocmb target on which to operate
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-/// @note The proposed workaround is the following:
-/// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-/// | REGISTER  |             Reads               |                Writes                 |
-/// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-/// | 0x8011028 |          (0:31)                 |                (0:31)                 |
-/// |           |    (side 0 + side 1)            |          (side 0 + side 1)            |
-/// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-///
-fapi2::ReturnCode wr_data_to_scratch2(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
-{
-    static const uint64_t SCRATCH_REG2 = 0x8011028ull;
-    fapi2::buffer<uint64_t> l_scratch_buffer;
-    fapi2::buffer<uint64_t> l_snsc_therm_data;
-    uint32_t l_data_from_scom_reg = 0;
-
-    // Overflow data for 32 bit data
-    const uint32_t OVERFLOW_DATA = 0xC0000000;
-
-    // Get the ODC_SRQ_PMU0Q data
-    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_PMU0Q, l_snsc_therm_data));
-
-    l_snsc_therm_data.extractToRight<scomt::ody::ODC_SRQ_PMU0Q_EVENT0_COUNTER, mss::ody::scratch_fields::PMU0_READ_COUNT_LEN>
-    (l_data_from_scom_reg);
-    // The PMU registers are configured to monitor and sum the read/write/SR counts from side 0 and side 1.
-    // The result will be stored in 0:31 of the 3 PMU registers. The granularity of the PMU monitor is that it counts every 4
-    // events so in order to provide an accurate count to the OCC we have to multiply whatever is in 0:31 by 4 before we copy it into the
-    // 0x8011028 reg, if there's an overflow when you do the multiply, the end value is set to max
-    l_data_from_scom_reg = l_data_from_scom_reg >= OVERFLOW_DATA ? 0xffffffff : l_data_from_scom_reg << 2;
-    l_scratch_buffer.insertFromRight<mss::ody::scratch_fields::PMU0_READ_COUNT_START, mss::ody::scratch_fields::PMU0_READ_COUNT_LEN>
-    (l_data_from_scom_reg);
-    l_data_from_scom_reg = 0;
-
-    FAPI_INF_NO_SBE(" scratch buffer after ODC_SRQ_PMU0Q: 0x%016llx for target: " GENTARGTIDFORMAT, l_scratch_buffer,
-                    GENTARGTID(i_target) );
-
-    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_PMU1Q, l_snsc_therm_data));
-    l_snsc_therm_data.extractToRight<scomt::ody::ODC_SRQ_PMU1Q_EVENT0_COUNTER, mss::ody::scratch_fields::PMU1_WRITE_COUNT_LEN>
-    (l_data_from_scom_reg);
-    // The PMU registers are configured to monitor and sum the read/write/SR counts from side 0 and side 1.
-    // The result will be stored in 0:31 of the 3 PMU registers. The granularity of the PMU monitor is that it counts every 4
-    // events so in order to provide an accurate count to the OCC we have to multiply whatever is in 0:31 by 4 before we copy it into the
-    // 0x8011028 reg, if there's an overflow when you do the multiply, the end value is set to max
-    l_data_from_scom_reg = l_data_from_scom_reg >= OVERFLOW_DATA ? 0xffffffff : l_data_from_scom_reg << 2;
-    l_scratch_buffer.insertFromRight<mss::ody::scratch_fields::PMU1_WRITE_COUNT_START, mss::ody::scratch_fields::PMU1_WRITE_COUNT_LEN>
-    (l_data_from_scom_reg);
-    l_data_from_scom_reg = 0;
-
-    FAPI_INF_NO_SBE(" scratch buffer after ODC_SRQ_PMU1Q: 0x%016llx for target: " GENTARGTIDFORMAT, l_scratch_buffer,
-                    GENTARGTID(i_target) );
-
-    // Write to the scratch register
-    FAPI_TRY(fapi2::putScom(i_target, SCRATCH_REG2, l_scratch_buffer));
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Reset the PMU counters used in the workaround
-/// @param[in] i_target ocmb target on which to operate
-/// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success
-///
-fapi2::ReturnCode reset_pmu_counts(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
-{
-    fapi2::buffer<uint64_t> l_pmu_cfg;
-
-    // To reset the counts, we first stop the PMU then hit the start/reset bit
-    FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
-
-    // To stop it we do START_RESET=0, STOP=1
-    l_pmu_cfg.clearBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_START_RESET>()
-    .setBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_STOP>();
-    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
-
-    // To reset and start it we do START_RESET=1, STOP=0
-    l_pmu_cfg.setBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_START_RESET>()
-    .clearBit<scomt::ody::ODC_SRQ_PMUCFGQ_CFG_PMU_STOP>();
-    FAPI_TRY(fapi2::putScom(i_target, scomt::ody::ODC_SRQ_PMUCFGQ, l_pmu_cfg));
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -432,8 +323,6 @@ fapi2::ReturnCode write_sensor_cache_into_scratch_regs(const fapi2::Target<fapi2
 {
     FAPI_TRY(wr_data_to_scratch0(i_target));
     FAPI_TRY(wr_data_to_scratch1(i_target));
-    FAPI_TRY(wr_data_to_scratch2(i_target));
-    FAPI_TRY(reset_pmu_counts(i_target));
 
 fapi_try_exit:
     return fapi2::current_err;
