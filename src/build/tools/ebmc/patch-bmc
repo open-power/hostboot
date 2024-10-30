@@ -186,17 +186,15 @@ function PATCH_HBRT () {
     HBRT_PATCH_DIR=/tmp/hbrt_patch_`date +%Y%m%H%M%S`/
     rm -rf $HBRT_PATCH_DIR
     mkdir -p $HBRT_PATCH_DIR
-    cp $IMG_DIR/hbirt.bin $HBRT_PATCH_DIR
-    echo "HBRT  hbirt.bin  $HBRT_RT.lid  80d00009.lid" > $HBRT_PATCH_DIR/lidnumbers.txt
-    if ! SSHPASS_RC $COPY "$HOSTNAME":/usr/local/share/hostfw/running/81e002ff.lid $HBRT_PATCH_DIR >/dev/null ; then
-	SSHPASS $COPY "$HOSTNAME":/media/hostfw/running-ro/81e002ff.lid $HBRT_PATCH_DIR
-	checkstatus "download master LID list"
-    fi
+    cp $IMG_DIR/hbirt.bin $HBRT_PATCH_DIR/$HBRT_RT.lid
     echo Building LIDs...
-    echo /afs/rch/usr5/dcrowell/public/bin/makelids $HBRT_PATCH_DIR
-    /afs/rch/usr5/dcrowell/public/bin/makelids $HBRT_PATCH_DIR
-    checkstatus "makelids"
-    SSHPASS $COPY $HBRT_PATCH_DIR/lids_to_patch/*.lid "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+    export PASSWORD=$PASSWORD
+    # pull out the host part from $HOSTNAME, i.e. service@rain104bmc, bmc_host=rain104bmc
+    bmc_host="$( cut -d '@' -f 2 <<< "$HOSTNAME" )"
+    echo "$bmc_host"
+    echo /afs/rchland.ibm.com/usr6/d4a3/tools/lidupdate2 -host $bmc_host -dir $HBRT_PATCH_DIR -passenv PASSWORD
+    /afs/rchland.ibm.com/usr6/d4a3/tools/lidupdate2 -host $bmc_host -dir $HBRT_PATCH_DIR -passenv PASSWORD
+    checkstatus "lidupdate2"
 }
 
 function PATCH_HBBL () {
@@ -440,4 +438,5 @@ else   # Apply the data to the BMC
    CHECK_STATE
 
    SHOW_PATCHES_ON_BMC
+
 fi
