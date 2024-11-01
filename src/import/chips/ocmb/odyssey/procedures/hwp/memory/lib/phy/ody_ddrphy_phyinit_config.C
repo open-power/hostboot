@@ -1387,7 +1387,7 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
         int DfiRdDataCs2VrefDACSel = 0;
         int VrefDACSelCtrl = 0;
         int UI_pre = 0;
-        // TODO Zen:MST-2037 Remove floats in this code
+        // NOTE: Need to remove floats in this code if we add support for this FW version
         float UI_ps = 0;
         float UI_pre_ps = 0;
 
@@ -2773,7 +2773,6 @@ fapi2::ReturnCode init_phy_config( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
             p_addr = pstate << 20;
             mr_cl = ( i_user_input_dram_config.MR0_A0 & 0x7c) >> 2;
 
-            // TODO:ZEN:MST-1598 Fix ODY PHY init to allow for 80 bit wide UDIMM bus
             // Note: UDIMM
             if(i_user_input_basic.DimmType == UDIMM)
             {
@@ -4397,7 +4396,6 @@ fapi2::ReturnCode setup_dram_input_struct(const fapi2::Target<fapi2::TARGET_TYPE
     io_user_input_dram_config.X16Present = 0;
 
     // RCW00_ChA_D0
-    // TODO: Zen:MST-1732 Fill in RCW fields in ody_draminit message block from attributes
     io_user_input_dram_config.RCW00_ChA_D0 = 0x00;
 
     // DisabledDbyte

@@ -136,8 +136,6 @@ inline uint64_t calculate_initial_delay(const fapi2::Target<T>& i_target,
                                         fapi2::ReturnCode& o_rc,
                                         const bool i_64B_per = mss::YES)
 {
-    // TODO RTC: 164104 Update MCBIST delay calculator. As we learn more about what
-    // the lab really needs, we can probably make this function better.
     const uint64_t l_bytes_per_cmd = (i_64B_per == mss::YES) ? 64 : 128;
 
     // Best case is a command takes 4 cycles. Given the number of commands and address space size

@@ -86,7 +86,6 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
         // Mark shadow register (port specific - scom using MEM_PORT target)
         static constexpr uint64_t MARK_SHADOW_REG = scomt::ody::ODC_RDF0_SCOM_MSR;
 
-        // TODO:ZEN-MST:1781  Verify the number of ranks for the ECC traits
         static constexpr uint64_t ECC_MAX_MRANK_PER_PORT = ody::MAX_MRANK_PER_PORT;
         static constexpr uint64_t ECC_MAX_DQ_BITS = ody::MAX_DQ_BITS_PER_PORT;
         static constexpr uint64_t ECC_MAX_SYMBOLS = ody::MAX_SYMBOLS_PER_PORT;
@@ -197,7 +196,6 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
 
         // Symbol to Galois code mapping table for Odyssey x4
         // Note: in x8 mode, we don't use symbols 8-39
-        // TODO Zen:MST-1420 Create specialization of restore_repairs for x8 if we need it
         constexpr static const uint8_t symbol2galois[] =
         {
             0x80, 0xa0, 0x90, 0xf0,
@@ -249,7 +247,6 @@ class eccTraits<mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
         // Note that in x8 mode each symbol is for 2 DQ bits, so we encode only the higher of the two here
         // For example, symbol0 is for DQ47 and DQ46
         // Also, we ignore symbols 8-39 just like in the symbol2galois table
-        // TODO Zen:MST-1420 Create specialization of restore_repairs for x8 if we need it
         constexpr static const uint8_t symbol2dq_x8[] =
         {
             47, 45, 43, 41,

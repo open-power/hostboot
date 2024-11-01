@@ -86,7 +86,6 @@ fapi2::ReturnCode setup_dt(const target_info_redundancy_ddr5& i_target_info);
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 /// @note There is no support for 1U in DDR5
 ///
-// TODO: ZEN:MST-1890 Implement pmic_enable() for 2U
 fapi2::ReturnCode power_down_sequence_2u(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target);
 
 ///

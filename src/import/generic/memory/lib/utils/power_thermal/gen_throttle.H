@@ -86,6 +86,7 @@ enum throttle_const : size_t
 template<typename T1, typename T2>
 inline uint32_t calc_n_from_dram_util(const T1 i_dram_util, const T2 i_throttle_m)
 {
+    // Note: The conversion factor used here is the same for BL8 and BL16
     constexpr uint64_t CONVERT_ADDR_UTIL_TO_DATA_UTIL = 4;
 
     const T1 l_numerator = i_dram_util * static_cast<T1>(i_throttle_m);

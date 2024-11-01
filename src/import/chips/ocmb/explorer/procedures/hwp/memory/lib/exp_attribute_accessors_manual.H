@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -181,7 +181,6 @@ fapi_try_exit:
 /// @param[in] i_target const ref to the TARGET_TYPE_OCMB_CHIP
 /// @param[in] i_value value to set
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
-//TODO: Remove this once we have auto-generated attr setters
 ///
 template< fapi2::TargetType T >
 inline fapi2::ReturnCode set_volt_vddr(const fapi2::Target<T>& i_target, uint32_t i_value)
@@ -203,7 +202,6 @@ fapi_try_exit:
 /// @param[in] i_target const ref to the TARGET_TYPE_OCMB_CHIP
 /// @param[in] i_value value to set
 /// @return fapi2::ReturnCode - FAPI2_RC_SUCCESS iff set is OK
-//TODO: Remove this once we have auto-generated attr setters
 ///
 template< fapi2::TargetType T >
 inline fapi2::ReturnCode set_volt_vpp(const fapi2::Target<T>& i_target, uint32_t i_value)

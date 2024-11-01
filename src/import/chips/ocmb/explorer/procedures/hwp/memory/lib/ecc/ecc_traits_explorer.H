@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -232,7 +232,6 @@ class eccTraits<mc_type::EXPLORER, fapi2::TARGET_TYPE_MEM_PORT>
         // Note that in x8 mode each symbol is for 2 DQ bits, so we encode only the higher of the two here
         // For example, symbol0 is for DQ47 and DQ46
         // Also, we ignore symbols 8-39 just like in the symbol2galois table
-        // TODO Zen:MST-1420 Create specialization of restore_repairs for x8 if we need it
         // Values are copied over from Odyssey X8 for the sake of compilation . No such values exist for explorer.
         constexpr static const uint8_t symbol2dq_x8[] =
         {

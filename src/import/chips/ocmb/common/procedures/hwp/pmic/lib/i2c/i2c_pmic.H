@@ -166,7 +166,6 @@ inline fapi2::ReturnCode reg_write_helper(const fapi2::Target<fapi2::TARGET_TYPE
     uint8_t l_dram_gen = 0;
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    // TODO: ZEN-MST:2632 Replace indexed DRAM gen reading with DRAM gen accessor
     // Get the dram generation
     for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_ocmb))
     {
@@ -382,7 +381,6 @@ inline fapi2::ReturnCode reg_read_helper(const fapi2::Target<fapi2::TARGET_TYPE_
     uint8_t l_dram_gen = 0;
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_target);
 
-    // TODO: ZEN-MST:2632 Replace indexed DRAM gen reading with DRAM gen accessor
     // Get the dram generation
     for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(l_ocmb))
     {

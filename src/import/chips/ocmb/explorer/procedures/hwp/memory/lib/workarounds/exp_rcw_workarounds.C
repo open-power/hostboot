@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -105,7 +105,6 @@ fapi2::ReturnCode f0rc08_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>
 
     FAPI_TRY(mss::is_a17_needed<mss::mc_type::EXPLORER>(i_target, l_is_a17_needed));
 
-    // TODO Zen:MST-2369 Add support for 3DS if necessary (QxC enables)
     // Bits DA[3:0] taken from RCD spec JESD82-31A
     // 3 : 1/0 = DA17 Input Buffer and QxA17 outputs disabled(1)/enabled(0)
     // 2 : 0 = QxPAR outputs enabled

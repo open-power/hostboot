@@ -728,8 +728,6 @@ class ddimm_0_0 : public mss::spd::module_specific_base
             return fapi2::current_err;
         }
 
-        // TODO: MST-1997: ATTR_MEM_SI_MC_RCV_IMP_ALERT_N need to be updated
-        //                 to read from either efd byte 59 or byte 364
         ///
         /// @brief Set the memory alert pull up field
         ///

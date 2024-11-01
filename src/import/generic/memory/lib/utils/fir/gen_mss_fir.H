@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -58,7 +58,6 @@ struct firTraits;
 ///
 /// @brief FIR Register Traits, with newer register setup (discrete registers for each action type)
 /// @tparam R FIR Register
-/// TODO MST-1389 Create fir::reg class for this struct
 ///
 template <uint64_t R>
 struct firTraits2;

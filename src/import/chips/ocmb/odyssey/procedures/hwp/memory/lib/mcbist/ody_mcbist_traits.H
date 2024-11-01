@@ -308,7 +308,6 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
         static constexpr uint64_t LFSR_REG = scomt::ody::ODC_MCBIST_SCOM_MCBLFSRA0Q;
         static const uint64_t LFSR_MASK_VALUES[37];
 
-        // TODO:ZEN-MST1396 Update Odyssey MCBIST fixed data and patten size
         // All of the pattern registers are calculated off of this base
         static constexpr uint64_t PATTERN0_REG = scomt::ody::ODC_MCBIST_SCOM_MCBFD0Q;
         static constexpr uint64_t PATTERN1_REG = scomt::ody::ODC_MCBIST_SCOM_MCBFD1Q;
@@ -615,7 +614,6 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
             MBSTRQ_CFG_THRESH_MAG_NCE_SOFT_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSTRQ_CFG_THRESH_MAG_NCE_SOFT_LEN,
             MBSTRQ_CFG_THRESH_MAG_NCE_HARD = scomt::ody::ODC_MCBIST_SCOM_MBSTRQ_CFG_THRESH_MAG_NCE_HARD,
             MBSTRQ_CFG_THRESH_MAG_NCE_HARD_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSTRQ_CFG_THRESH_MAG_NCE_HARD_LEN,
-            // TODO:MST-1672 find out if RCE is now IUE
             MBSTRQ_CFG_THRESH_MAG_RCE = scomt::ody::ODC_MCBIST_SCOM_MBSTRQ_CFG_THRESH_MAG_IUE,
             MBSTRQ_CFG_THRESH_MAG_RCE_LEN = scomt::ody::ODC_MCBIST_SCOM_MBSTRQ_CFG_THRESH_MAG_IUE_LEN,
             MBSTRQ_CFG_THRESH_MAG_ICE = scomt::ody::ODC_MCBIST_SCOM_MBSTRQ_CFG_THRESH_MAG_ICE,
@@ -724,7 +722,6 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_MEM_PORT>
             RMW_WRT_BUFFER_SEL = 0,
             RMW_WRT_ADDRESS = 0,
 
-            // TODO:ZEN-MST1459 Create ody_lab_mcbist_wrap
             XLTATE_SLOT0_VALID = 0,
             XLTATE_SLOT1_VALID = 0,
 

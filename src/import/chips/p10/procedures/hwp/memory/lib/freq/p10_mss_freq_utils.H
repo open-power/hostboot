@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -62,7 +62,7 @@ namespace mss
 /// @param[out] o_is_lr_dimm true if LRDIMM, else false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success
 ///
-// TODO Zen:MST-1901 Move this function to generic_attribute_accessors_manual.H for general use
+// TODO JIRA:MSWT-203 Move this function to generic_attribute_accessors_manual.H for general use
 fapi2::ReturnCode is_lr_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, bool& o_is_lr_dimm);
 
 ///
@@ -73,7 +73,7 @@ fapi2::ReturnCode is_lr_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_tar
 /// @param[out] o_is_supported true if VPD supports the proposed frequency
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-// TODO Zen:MST-1901 Break up this function into smaller parts and add UTs
+// TODO JIRA:MSWT-203 Break up this function into smaller parts and add UTs
 template<mss::mc_type MC>
 fapi2::ReturnCode check_freq_support_vpd_p10(
     const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,

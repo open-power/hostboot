@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,7 +42,6 @@ namespace mss
 /// @param[in] i_end ending point
 /// @return inclusive range calculation
 ///
-// TODO RTC:174277 - create unit test structure for generic/memory
 template<typename T >
 inline constexpr T inclusive_range( const T i_start, const T i_end )
 {

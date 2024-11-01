@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,7 +47,6 @@ namespace mss
 {
 
 // Thread local storage for the string we're going to create.
-//TODO RTC:153924 Remove the else case when issue is resolved
 #if !defined(PLAT_NO_THREAD_LOCAL_STORAGE) && !defined(__PPE__)
     thread_local char c_str_storage[fapi2::MAX_ECMD_STRING_LEN];
 #else

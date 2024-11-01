@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -53,7 +53,6 @@ namespace rdimm
 enum raw_card_rev : uint8_t
 {
 
-    // TODO:RTC178807 - Update how NVDIMMs are handled once more are up and running in the lab
     // NVDIMM's have the same RC value as custom DIMMs, but are defined by SPD byte 03 differently
     NVDIMM = 0x1F,
 

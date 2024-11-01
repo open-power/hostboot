@@ -111,7 +111,6 @@ class portTraits< mss::mc_type::ODYSSEY >
 
         // This number includes the two spare nibbles, it is compared against
         // the actual nibble index we're at
-        // TODO Zen:MST-1404 Verify this for Odyssey
         static constexpr uint8_t MAX_NIBBLE_IDX = 19;
         static constexpr uint8_t MAX_BYTE_IDX = 9;
 
@@ -160,7 +159,7 @@ class portTraits< mss::mc_type::ODYSSEY >
             CFG_DDR_RESETN = scomt::ody::ODC_SRQ_MBA_FARB5Q_CFG_DDR_RESETN,
             CFG_CCS_ADDR_MUX_SEL = scomt::ody::ODC_SRQ_MBA_FARB5Q_CFG_CCS_ADDR_MUX_SEL,
 
-            // TODO Zen:MST-1406 Check with design team if we have an "init complete" indicator in Odyssey.
+            // "init complete" indicator
             // This was assigned to an unused (and unnamed) bit on Explorer PMU8Q.
             CFG_INIT_COMPLETE = 63,
 

@@ -329,7 +329,7 @@ fapi2::ReturnCode get_dram_byte_mask(
 /// @param[out] o_dram_bitmap the DRAM bitmap on which to conduct row repairs
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-// TODO:ZEN:MST-2263 Update Odyssey row repair to support x8 DIMM
+// TODO: JIRA:MSWT-388 Update Odyssey row repair to support x8 DIMM
 fapi2::ReturnCode create_dram_bitmap(const uint64_t i_dram, fapi2::buffer<uint64_t>& o_dram_bitmap)
 {
     o_dram_bitmap.flush<1>();
@@ -875,7 +875,6 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                     FAPI_INF_NO_SBE(" bg %d, bank %d, row 0x%05x", l_bg, BANK_POS, l_row);
 #endif
 
-                    // TODO:ZEN:MST-2622 Fix CCS read and PPR resource unavailable code when fix is available
                     // Check if we have PPR resources available for the repair
                     // If we don't, assert out since this is manufacturing mode
                     bool l_resource_available = true;

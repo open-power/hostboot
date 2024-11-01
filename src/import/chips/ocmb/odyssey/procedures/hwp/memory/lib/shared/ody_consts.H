@@ -90,17 +90,6 @@ enum sizes
 
     NUM_PSTATES = 4,
 
-    // Enumerations for the Odyssey serial number attribute
-    // The hostboot team requested that we only use enumerations for attribute values
-    // These are attribute positions in an array, so moving them here
-    // TODO: Zen:MST-1413 Update these for Odyssey
-    SERIAL_PART_NUMBER = 3,
-    SERIAL_PART_NUMBER_LEN = 7,
-    SERIAL_RAW_CARD = 12,
-    SERIAL_RAW_CARD_LEN = 2,
-    SERIAL_SERIAL_NUMBER = 14,
-    SERIAL_SERIAL_NUMBER_LEN = 12,
-
     // Synopsys PUB revision version
     PUB_REV = 0x350,
 
@@ -268,7 +257,6 @@ enum scratch_fields
 
 ///
 /// @brief constants for getecid procedure
-/// TODO: Zen:MST-1414 Update these when we do ody_getidec
 ///
 enum ecid_consts
 {

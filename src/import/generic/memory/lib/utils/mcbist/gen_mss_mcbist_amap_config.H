@@ -44,7 +44,7 @@
 #include <generic/memory/lib/utils/mcbist/gen_mss_mcbist.H>
 #include <generic/memory/lib/mss_generic_attribute_getters.H>
 
-// TODO:MST-ZEN2572 Create a constant for DIMM per port for attributes and update code
+// TODO:JIRA:MSWT-149 Create a constant for DIMM per port for attributes and update code
 
 namespace mss
 {
@@ -91,7 +91,7 @@ fapi2::ReturnCode  configure_bank(const fapi2::Target<T>& i_target,
 /// @param[in,out] io_program mcbist program
 /// @return FAPI2_RC_SUCCESS iff everything ok
 ///
-// TODO: Zen:MST-2564: Specialize address map configuration for Explorer
+// TODO: JIRA:MSWT-382: Specialize address map configuration for Explorer
 template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode configure_mranks(const fapi2::Target<T>& i_target,
                                    uint64_t& io_current_bit_index,
@@ -126,7 +126,7 @@ fapi2::ReturnCode configure_bank_groups(const fapi2::Target<T>& i_target,
 ///       For col2 in explorer set if burst chop 8 mode is selected for BC8_OTF
 /// @return FAPI2_RC_SUCCESS iff everything ok
 ///
-// TODO: Zen:MST-2564: Specialize address map configuration for Explorer
+// TODO: JIRA:MSWT-382: Specialize address map configuration for Explorer
 template< mss::mc_type MC, fapi2::TargetType T>
 fapi2::ReturnCode configure_col_helper(const fapi2::Target<T>& i_target,
                                        const uint8_t i_attr_col_bits,

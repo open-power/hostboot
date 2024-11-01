@@ -604,10 +604,6 @@ class msg_block_params
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PLL_BYPASS_EN, i_target, iv_msg_block_vars.iv_PllBypassEn));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, iv_msg_block_vars.iv_DRAMFreq));
 
-            // TODO: Zen:MST-1668 RCW05_next and RCW06_next: need to decide how to set these
-            //FAPI_TRY(mss::attr::get_rcw05_next(i_target, iv_msg_block_vars.iv_RCW05_next));
-            //FAPI_TRY(mss::attr::get_rcw06_next(i_target, iv_msg_block_vars.iv_RCW06_next));
-
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_RXEN_ADJ, i_target, iv_msg_block_vars.iv_RXEN_ADJ));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_RX2D_DFE_MISC, i_target, iv_msg_block_vars.iv_RX2D_DFE_Misc));
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_PHY_VREF_RD, i_target, iv_msg_block_vars.iv_PhyVref));
@@ -663,7 +659,7 @@ class msg_block_params
 
             for (const auto& l_rank_info : iv_rank_infos)
             {
-                // TODO Zen:MST-1782 Create API to walk through DRAM/nibble indexes
+                // TODO: JIRA:MSWT-216 Create API to walk through DRAM/nibble indexes
                 const uint8_t l_nibble_increment = (l_dram_width[0] / 4);
                 const uint8_t l_max_drams = mss::ody::MAX_NIBBLES_PER_PORT / l_nibble_increment;
                 const auto l_phy_rank = l_rank_info.get_phy_rank();
@@ -3392,7 +3388,6 @@ fapi2::ReturnCode process_streaming_message(const fapi2::Target<fapi2::TARGET_TY
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note This function only handles the message interface for right now
-/// TODO:ZEN:MST-1541 Add DDR5 RCW writes using i2c when SMBus message is received
 ///
 fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
 

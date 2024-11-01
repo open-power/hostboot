@@ -920,7 +920,6 @@ void  assemble_rcw_i2c_data(const rcw_id& i_rcw_info, std::vector<uint8_t>& o_rc
 /// @param[in] i_target the target on which to operate
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note This function only handles the message interface for right now
-/// TODO:ZEN:MST-1541 Add DDR5 RCW writes using i2c when SMBus message is received
 ///
 fapi2::ReturnCode process_smbus_message(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
@@ -4401,7 +4400,7 @@ fapi2::ReturnCode handle_address_errors_internal(const mss::rank::info<mss::mc_t
     constexpr uint8_t MSG_BLOCK_TRAIN_PASS = 0x00;
     const auto& l_port = i_rank_info.get_port_target();
 
-    // TODO:ZEN:MST-2298 Update the Odyssey draminit train clean algorithm to support x8
+    // TODO: JIRA:MSWT-392 Update the Odyssey draminit train clean algorithm to support x8
     const uint8_t i_dram_bit_pos = 31 - i_dram;
     const auto l_byte = i_dram / 2;
     const uint8_t l_inject = (i_dram % 2 == 0) ? 0xf0 : 0x0f;
@@ -4558,7 +4557,7 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
         FAPI_INF(TARGTIDFORMAT " testing port rank:%u", TARGTID, l_rank_info.get_port_rank());
         uint8_t l_bad_dram_on_rank = 0;
 
-        // TODO:ZEN:MST-2298 Update the Odyssey draminit train clean algorithm to support x8
+        // TODO: JIRA:MSWT-392 Update the Odyssey draminit train clean algorithm to support x8
         for(uint32_t l_dram = 0; l_dram < mss::ody::MAX_NIBBLES_PER_PORT && l_bad_dram_on_rank <= MAX_NIBBLE_REPAIRS; ++l_dram)
         {
             FAPI_TRY(handle_address_errors_internal(l_rank_info, l_dram, l_nibble_enables,
@@ -4660,7 +4659,7 @@ fapi2::ReturnCode check_for_dq_repairs_exceeded(const fapi2::Target<fapi2::TARGE
         }
 
         // Loop over and count the bad nibbles
-        // TODO:ZEN:MST-2298 Update the Odyssey draminit train clean algorithm to support x8
+        // TODO: JIRA:MSWT-392 Update the Odyssey draminit train clean algorithm to support x8
         for(uint8_t l_byte = 0; l_byte < BAD_DQ_BYTE_COUNT && l_num_bad_nibbles <= MAX_NIBBLE_REPAIRS; ++l_byte)
         {
             // Using the synopsys nomenclature here

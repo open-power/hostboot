@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -410,7 +410,6 @@ static fapi2::buffer<uint64_t> read_cmd_boilerplate( const uint64_t i_port_rank,
         const fapi2::buffer<uint64_t>& i_bank_group_addr = 0,
         const fapi2::buffer<uint64_t>& i_column_addr = 0)
 {
-    // TODO - RTC 166175 Encapsulate command truth table in a subclass for ccs.H
     fapi2::buffer<uint64_t> l_boilerplate_arr0;
 
     // CKE is high Note: P8 set all 4 of these high - not sure if that's correct. AAM

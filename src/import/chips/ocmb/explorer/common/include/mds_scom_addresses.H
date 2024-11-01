@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -52,10 +52,6 @@ static const uint32_t MDS_I2C_RCW_BURST_ORDER_MODE           = 0x00040027ul;
 static const uint32_t MDS_I2C_RCW_F2RC00                     = 0x00020008ul;
 static const uint32_t MDS_I2C_RCW_F2RC02                     = 0x00020009ul;
 
-
-// TODO: Fix the below register values
-//       All below are placeholder names/values
-//       Spec/scripts have missing values/duplicates
 
 static const uint32_t MDS_RCW_LTB_SA_RDDQ18_VOLT_CODE        = 0x000A0024ul;
 static const uint32_t MDS_RCW_LTB_SA_RDDQ8_VOLT_CODE_EN      = 0x000A0027ul;

@@ -73,9 +73,8 @@ extern "C"
                   TARGTIDFORMAT " Failed to enable power management",
                   TARGTID );
 
-        // TODO Zen:MST-1406 Check with design team if we have an "init complete" indicator in Odyssey.
+        // NOTE: we don't use an "init complete" indicator in Odyssey.
         // This was assigned to an unused (and unnamed) bit on Explorer PMU8Q.
-        // Set the IML Complete bit. Steve Powell to find a bit in the SRQ to use for this purpose
         // FAPI_TRY( mss::change_iml_complete<mss::mc_type::ODYSSEY>(i_target, mss::HIGH),  TARGTIDFORMAT " Failed to set_ipm_complete",
         //           TARGTID);
 

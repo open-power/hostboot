@@ -743,7 +743,6 @@ fapi2::ReturnCode setup_emergency_throttles(const fapi2::Target<fapi2::TARGET_TY
     FAPI_TRY(fapi2::getScom(i_target, scomt::ody::ODC_SRQ_MBA_FARB3Q, l_data), "Error in setup_emergency_throttles" );
 
     // Calculate Nslot and Nport throttles and set l_data
-    // TODO: Zen:MST-1818 Will need to call MC-specific version of this once BL16 is supported
     l_n_safemode_throttle_value = mss::power_thermal::calc_n_from_dram_util(l_safemode_util_value, l_m_throttle_value);
     l_nslot_safe = (l_optimize_nslot) ? l_n_safemode_throttle_value * l_port_count : l_n_safemode_throttle_value;
     l_nport_safe = l_n_safemode_throttle_value * l_port_count;

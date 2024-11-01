@@ -125,7 +125,6 @@ fapi2::ReturnCode place_symbol_mark(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>
 
     // For symbol marks, we set the appropriate Firmware Mark Store reg, with the symbol's
     // Galois code, mark_type=SYMBOL, mark_region=MRANK, and the address of the DIMM+MRANK
-    // TODO RTC:165133 Remove static_cast once Galois API is updated to accept uint64_t input
     FAPI_TRY( mss::ecc::dq_to_galois<MC>(static_cast<uint8_t>(i_dq), i_width, l_galois) );
 
     // Note that for Odyssey, the DIMM and MRANK[0] bits should always be 0
@@ -147,7 +146,6 @@ fapi_try_exit:
 template< mss::mc_type MC, fapi2::TargetType T >
 class repair_state_machine;
 
-/// TODO: Zenhub#597 Clean up state parameters and constructor
 ///
 /// @class mss::repair_state
 /// @brief A class for keeping track of bad bit repair states in a repair_state_machine

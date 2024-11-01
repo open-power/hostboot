@@ -511,11 +511,6 @@ fapi2::ReturnCode get_steer_mux(
     o_dram_spare1_symbol = genSteerTraits<MC>::INVALID_SYMBOL;
 
     // Check for i_port_rank out of range
-    // TODO:ZEN306 Add HWP support for planar OCMB
-    // Update this function to decode the port rank to be 0-3 for dual drop cases
-    //    As of right now, dual drop should be 0,1,4,5
-    //    We cannot use DIMM rank as we would have overlap on ranks 0/1
-    //    We cannot use PHY rank due to rank swizzling caused by JIRA355
     FAPI_TRY( check::rank<MC>(i_target, i_port_rank) );
 
     // updates rank index for multi port ocmbs
@@ -606,11 +601,6 @@ fapi2::ReturnCode put_steer_mux(
     FAPI_TRY(l_rc, TARGTIDFORMAT " failed to obtain rank info", TARGTID);
 
     // Check for i_port_rank or i_steer_type or i_symbol out of range
-    // TODO:ZEN306 Add HWP support for planar OCMB
-    // Update this function to decode the port rank to be 0-3 for dual drop cases
-    //    As of right now, dual drop should be 0,1,4,5
-    //    We cannot use DIMM rank as we would have overlap on ranks 0/1
-    //    We cannot use PHY rank due to rank swizzling caused by JIRA355
     FAPI_TRY( check::rank<MC>(i_target, i_port_rank) );
 
     update_steer_mux_instance<MC>(i_target, l_steer_mux_index);

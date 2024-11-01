@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,8 +66,6 @@ void setup_mds_write_command(const fapi2::Target<fapi2::TARGET_TYPE_MDS_CTLR>& i
     o_cmd_vector.clear();
 
     // Build the cmd vector for the write
-    // TODO: Zenhub #1177 Check for variable data size if needed
-    //       Currently removed due to conversation with lab
     o_cmd_vector.push_back(mss::mds::MDS_I2C_REG_WRITE);          // Byte 0 = 0xC6 (MDS_I2C_REG_WRITE)
     o_cmd_vector.push_back(mss::mds::MDS_WRITE_REG_DATA_SIZE);    // Byte 1 = 0x05 (MDS_WRITE_REG_DATA_SIZE)
 
@@ -96,8 +94,6 @@ void setup_mds_read_command(const fapi2::Target<fapi2::TARGET_TYPE_MDS_CTLR>& i_
     o_cmd_vector.clear();
 
     // Build the cmd vector for the write
-    // TODO: Zenhub #1177 Check for variable data size if needed
-    //       Currently removed due to conversation with lab
     o_cmd_vector.push_back(mss::mds::MDS_I2C_REG_READ);         // Byte 0 = 0xC2 (MDS_I2C_REG_READ)
     o_cmd_vector.push_back(mss::mds::MDS_READ_REG_DATA_SIZE);   // Byte 1 = 0x04 (MDS_READ_REG_DATA_SIZE)
 
@@ -259,7 +255,6 @@ fapi2::ReturnCode mds_i2c_response( const fapi2::Target<fapi2::TARGET_TYPE_MDS_C
     l_status_code = i_rsp_data[1];
 
     // Check that MDS gave a successful return code
-    // TODO: Zenhub #1177 Confirm the correct response to fails
     FAPI_ASSERT( (l_status_code == mss::mds::i2c_handling::MDS_I2C_SUCCESS),
                  fapi2::MSS_MDS_I2C_CMD_FAIL().
                  set_MDS_MDIA_CTL_TARGET(i_target).

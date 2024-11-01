@@ -65,8 +65,6 @@ class throttle_traits<mss::mc_type::ODYSSEY>
         // Traits values
         //////////////////////////////////////////////////////////////
 
-        // TODO Zenhub #1509: These values have been transferred from Explorer and
-        //                    may need updating once real power values are known
         // MIN_UTIL is  in c%
         // This will need to be overriden with an MRW attribute
         static const uint64_t MIN_UTIL = 250;
@@ -90,8 +88,6 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             SIZE_OF_CURRENT_CURVE_WITH_LIMIT_ATTR = 25,
         };
 
-        // TODO Zenhub #1509: These values have been transferred from Explorer and
-        //                    may need updating once real power values are known
         enum default_power
         {
             //Values are the worst case defaults for power curves
@@ -131,8 +127,6 @@ class throttle_traits<mss::mc_type::ODYSSEY>
             ENCODING_START = 0,
             ENCODING_LENGTH = 32,
 
-            // TODO Zenhub #1509: These values have been transferred from Explorer and
-            //                    may need updating once real power values are known
             // Thermal total power (OCMB+DRAM)
             THERMAL_START = 32,
             THERMAL_LENGTH = 16,
@@ -208,8 +202,6 @@ class throttle_traits<mss::mc_type::ODYSSEY>
 #endif //endif for __PPE__
 
         // Throttle values
-        // TODO Zenhub #1509: These values have been transferred from Explorer and
-        //                    may need updating once real power values are known
         static constexpr uint64_t NM_RAS_WEIGHT = 0b000;
         static constexpr uint64_t NM_CAS_WEIGHT = 0b001;
 

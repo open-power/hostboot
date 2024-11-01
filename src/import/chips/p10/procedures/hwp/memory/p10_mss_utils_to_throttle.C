@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,7 +103,6 @@ extern "C"
 
                 FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_SAFEMODE_DRAM_DATABUS_UTIL, l_port, l_safemode_util));
 
-                // TODO: Zen:MST-1818 Will need to call MC-specific version of this once BL16 is supported
                 l_safemode_throttle_per_port = mss::power_thermal::calc_n_from_dram_util(l_safemode_util, l_dram_clocks);
 
                 // Util attribute set by OCC

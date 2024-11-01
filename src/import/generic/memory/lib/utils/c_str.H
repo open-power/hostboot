@@ -83,7 +83,6 @@ namespace mss
 {
 
 // Thread local storage for the string we're going to create.
-//TODO RTC:153924 Remove the else case when issue is resolved
 #ifndef PLAT_NO_THREAD_LOCAL_STORAGE
     extern thread_local char c_str_storage[fapi2::MAX_ECMD_STRING_LEN];
 #else

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,7 +48,7 @@ namespace dimm
 /// @param[in] i_target ocmb chip target
 /// @return number of the dimms
 ///
-/// TODO: ZEN:MST-2250: Count the ports for ISDIMM applications
+/// TODO: JIRA:MSWT-391: Count the ports for ISDIMM applications
 template<>
 size_t count_num_dimms<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {

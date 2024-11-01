@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -528,9 +528,6 @@ fapi2::ReturnCode readCrctEndianArray(const std::vector<uint8_t>& i_input, const
 /// @param[in,out] io_data little endian data to process
 /// @param[out] o_calib_params app_fw_ddr_calibration_data_struct structure
 /// @return fapi2::ReturnCode. FAPI2_RC_SUCCESS if success, else error code.
-/// TODO:ZEN-MST909: Fix SPI flash reader once microchip re-adds support and do the following before saving the struct:
-///                  1. Correct endianness of the data received
-///                  2. Exit out if calculated crc not equal to received crc
 ///
 fapi2::ReturnCode app_fw_ddr_calibration_data_struct_from_little_endian(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,

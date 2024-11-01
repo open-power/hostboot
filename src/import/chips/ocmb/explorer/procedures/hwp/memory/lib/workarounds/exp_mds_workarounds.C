@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -4806,7 +4806,6 @@ fapi2::ReturnCode mds_i2c_media_enable(const fapi2::Target<fapi2::TARGET_TYPE_OC
     for( const auto& l_media_target : mss::find_targets<fapi2::TARGET_TYPE_MDS_CTLR>(i_target))
     {
         // Run through each of the mds i2c scoms from lab media_enable
-        // TODO: Zenhub #1177 Confirm what each does and confirm registers if permanent workaround
         l_data_buffer = 0x0000000A;
         FAPI_TRY(mss::mds::i2c::i2c_put_scom( l_media_target, MDS_I2C_RCW_FCRCDX, l_data_buffer ));
         l_data_buffer = 0x00000004;
@@ -5031,7 +5030,6 @@ fapi2::ReturnCode mds_i2c_media_enable(const fapi2::Target<fapi2::TARGET_TYPE_OC
         FAPI_TRY( fapi2::delay(2 * mss::DELAY_1MS, mss::DELAY_1MS) );
 
         // Train done check
-        // TODO: Zenhub #1177 Add check for correct value once documented and if permanent
         FAPI_TRY(mss::mds::i2c::i2c_get_scom( l_media_target, MDS_I2C_RCW_F2RC02, l_scom_buffer ));
         FAPI_MFG("%s Checking train done, getscom 0x00020009 results: %d", mss::c_str(i_target), uint32_t(l_scom_buffer));
 

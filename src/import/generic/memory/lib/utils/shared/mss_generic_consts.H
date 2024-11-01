@@ -84,7 +84,6 @@ enum mcbist_common_consts
     // but not to avoid any actual hardware timeouts
     // Note: ~0 is not used as that would cause MCBIST to never timeout even if the hardware is in an infinite loop
     // You can't get greater than ~0, so you'd never timeout
-    // TODO RTC:166340 - Clean up MCBIST polling
     OVERLY_LARGE_NUMBER_OF_POLLS = 5000000000000,
 };
 

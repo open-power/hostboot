@@ -914,7 +914,7 @@ fapi2::ReturnCode check_all_breadcrumbs(const target_info_redundancy_ddr5& i_tar
                 // The below function is throwing error in simics as the DT and PMIC regs read from health_check()
                 // are throwing errors and entering n-mode which is cauing the HWP to crash at the end.
                 // This check has been skipped for now.
-                // TODO: ZEN:MST-2454 Get simics support for DT, PMIC and ADC regs for health_check
+                // TODO: JIRA:MSWT-159 Get simics support for DT, PMIC and ADC regs for health_check
 
                 // PMIC_ENABLE_FAIL_DDR5_4U error needs to be recovered as we don't want customer to act on this error.
                 // Subsequent functions will take care of marking the errors as un-recoverable if needed

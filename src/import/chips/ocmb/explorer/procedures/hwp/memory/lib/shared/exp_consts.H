@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -493,8 +493,6 @@ enum fw_ddr_phy_init_status
     FW_DDR_PHY_INIT_USER_MSDG_FLAG_ERR  = 0x03,
     // Misc user_input_msdg error
     FW_DDR_PHY_INIT_USER_MSDG_ERROR     = 0x04,
-    // TODO: Training fail error will need to be split
-    // Todo awaiting follow up RC meetings
     // Training returned as a fail
     FW_DDR_PHY_INIT_TRAINING_FAIL       = 0x05,
 };
@@ -603,7 +601,6 @@ enum i2c_handling
     MDS_WRITE_REG_DATA_SIZE = 0x05,
     MDS_READ_REG_DATA_SIZE = 6,
     MDS_READ_RSP_SIZE = 6,
-    // TODO: Awaiting confirmation on success and more codes
     MDS_I2C_SUCCESS      = 0x01,
 };
 

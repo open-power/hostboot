@@ -178,7 +178,6 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
                 mss::mcbist::subtest_t<MC> l_fw_subtest =
                     mss::mcbist::write_subtest<MC>();
 
-                // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
                 l_fw_subtest.enable_port(mss::relative_pos<MC, T>(p));
                 l_fw_subtest.change_addr_sel(l_rank_address_pair);
                 l_fw_subtest.enable_dimm(mss::rank::get_dimm_from_rank<MC>(*r));
@@ -195,7 +194,6 @@ fapi2::ReturnCode sf_init( const fapi2::Target<T>& i_target, const uint64_t i_pa
                 mss::mcbist::subtest_t<MC> l_fr_subtest =
                     mss::mcbist::read_subtest<MC>();
 
-                // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
                 l_fr_subtest.enable_port(mss::relative_pos<MC, T>(p));
                 l_fr_subtest.change_addr_sel(l_rank_address_pair);
                 l_fr_subtest.enable_dimm(mss::rank::get_dimm_from_rank<MC>(*r));
@@ -812,7 +810,7 @@ struct sf_init_operation : public operation<MC>
 /// @tparam T fapi2::TargetType of the MCBIST engine
 /// @tparam TT the mcbistTraits associated with T
 ///
-// TODO:ZEN:MST-2579 Fix implementation of single rank sf_init memdiags operation
+// TODO:JIRA:MSWT-40 Fix implementation of single rank sf_init memdiags operation
 template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, fapi2::TargetType T1 = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
 struct sf_init_per_srank_operation : public operation<MC>
 {
@@ -1093,7 +1091,6 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
             // Don't destroy the subtest passed in, copy it
             auto l_subtest = operation<MC>::iv_subtest;
 
-            // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
             l_subtest.enable_port(mss::relative_pos<MC, T>(p));
             l_subtest.enable_dimm(mss::index(d));
             operation<MC>::iv_program.iv_subtests.push_back(l_subtest);
@@ -1139,7 +1136,6 @@ continuous_scrub_operation<MC, T, TT>::continuous_scrub_operation(
                   operation<MC>::iv_const.iv_end_address) );
 
         // We need to use this address range. We know it's ok to write to element 0 as we pushed it on above
-        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
         l_subtest.change_addr_sel(1);
         l_subtest.enable_port(l_port);
         l_subtest.enable_dimm(l_dimm);
@@ -1307,7 +1303,6 @@ continuous_steer_operation<MC, T, TT>::continuous_steer_operation(
             // Don't destroy the subtest passed in, copy it
             auto l_subtest = operation<MC>::iv_subtest;
 
-            // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
             l_subtest.enable_port(mss::relative_pos<MC, T>(p));
             l_subtest.enable_dimm(mss::index(d));
             operation<MC>::iv_program.iv_subtests.push_back(l_subtest);
@@ -1353,7 +1348,6 @@ continuous_steer_operation<MC, T, TT>::continuous_steer_operation(
                   operation<MC>::iv_const.iv_end_address) );
 
         // We need to use this address range. We know it's ok to write to element 0 as we pushed it on above
-        // ZEN:MST-2063 Update to the API that handles port/DIMM seleciton in maint addressing
         l_subtest.change_addr_sel(1);
         l_subtest.enable_port(l_port);
         l_subtest.enable_dimm(l_dimm);
@@ -1600,7 +1594,7 @@ fapi_try_exit:
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 ///
-// TODO:ZEN:MST-2579 Fix implementation of single rank sf_init memdiags operation
+// TODO:JIRA:MSWT-40 Fix implementation of single rank sf_init memdiags operation
 template<  mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode sf_init_per_srank( const fapi2::Target<T>& i_target,
                                      const uint8_t i_port_rank,
@@ -1913,9 +1907,6 @@ fapi2::ReturnCode continue_cmd( const fapi2::Target<T>& i_target,
     fapi2::buffer<uint64_t> l_status;
 
     FAPI_INF_NO_SBE("continue_cmd for " TARGTIDFORMAT, TARGTID);
-
-    // TODO RTC:155518 Check for stop or in progress before allowing continue. Not critical
-    // as the caller should know and can check the in-progress bit in the event they don't
 
     if (i_end != end_boundary::DONT_CHANGE)
     {

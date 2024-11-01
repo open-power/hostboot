@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -240,7 +240,7 @@ fapi_try_exit:
 /// @param[out] o_is_lr_dimm true if LRDIMM, else false
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS if success
 ///
-// TODO Zen:MST-1901 Move this function to generic_attribute_accessors_manual.H for general use
+// TODO JIRA:MSWT-203 Move this function to generic_attribute_accessors_manual.H for general use
 fapi2::ReturnCode is_lr_dimm(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, bool& o_is_lr_dimm)
 {
     uint8_t l_dimm_type = 0;

@@ -286,7 +286,6 @@ fapi2::ReturnCode build_row_repair_table(const fapi2::Target<fapi2::TARGET_TYPE_
     // Determine repair data bounds
     mss::dimm::kind<mss::mc_type::EXPLORER> l_kind(i_target, l_rc);
     FAPI_TRY(l_rc, "%s Failed to create dimm::kind instance", mss::c_str(i_target));
-    // TODO: Move to helper function Zen#646
     l_num_dram = l_kind.iv_dram_width == fapi2::ENUM_ATTR_MEM_EFF_DRAM_WIDTH_X4 ?
                  mss::exp::generic_consts::EXP_NUM_DRAM_X4 : mss::exp::generic_consts::EXP_NUM_DRAM_X8;
 
@@ -1022,7 +1021,6 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
         // Get dimm information ranks per DIMM is simply the number of total ranks divided by the number of master ranks
         if (l_num_mranks > 0)
         {
-            // TODO: Add to helper function Zen#646
             l_num_sranks = l_num_ranks / l_num_mranks;
         }
 
@@ -1093,7 +1091,6 @@ fapi2::ReturnCode get_num_bad_bits(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>&
     FAPI_TRY( mss::attr::get_dram_width(i_target, l_dram_width) );
 
     // Grabs the numeric DRAM instance and ensures that the DRAM is inbounds
-    // TODO: Move to helper function Zen#646
     l_byte = (l_dram_width == fapi2::ENUM_ATTR_EFF_DRAM_WIDTH_X8) ?
              l_dram :
              l_dram / mss::NIBBLES_PER_BYTE;
