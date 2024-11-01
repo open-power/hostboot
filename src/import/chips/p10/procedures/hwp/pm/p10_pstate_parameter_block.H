@@ -918,7 +918,7 @@ class PlatPmPPB
         uint8_t                   iv_eco_count;
         uint8_t                   iv_spare_count;
         uint32_t                  iv_core_count;
-        int8_t                    iv_curr_scale[8];
+        uint8_t                    iv_curr_scale[8];
         uint32_t                  iv_safe_mode_throt_idx;
 
         PoundVOpPoint_t           iv_operating_points[NUM_VPD_PTS_SET][NUM_PV_POINTS];

@@ -1403,7 +1403,7 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
         io_globalppb->base.vcs_vdd_offset_mv= revle16(uint16_t(iv_attrs.attr_vcs_vdd_offset_mv & 0xFF));//Attribute is 1-byte only so truncate it
         io_globalppb->base.vcs_floor_mv  = revle16(iv_attrs.attr_vcs_floor_mv);
         io_globalppb->pgpe_flags[PGPE_FLAG_NEGATIVE_SLOPE_SUPPORT] = (iv_attrs.attr_extended_freq_mode || iv_extended_freq_enable) ? 1 : 0;
-        io_globalppb->pgpe_flags[PGPE_FLAG_USE_RDP] = (iv_attrs.attr_extended_freq_mode == 3 || iv_extended_freq_enable) ? 1 : 0;
+        io_globalppb->pgpe_flags[PGPE_FLAG_USE_RDP] = (iv_attrs.attr_extended_freq_mode == 3 ) ? 1 : 0;
         io_globalppb->pgpe_flags[PGPE_FLAG_SLOPE_FIX_8_8] = 1;
 
         //WOV parameters
@@ -4924,13 +4924,12 @@ fapi2::ReturnCode PlatPmPPB::compute_vpd_pts()
         {
             if (iv_curr_scale[p] )
             {
+                double val = (double)iv_curr_scale[p]/(double)100;
                 iv_attr_mvpd_poundV_biased[p].idd_rdp_ac_10ma =
-                    (double)iv_attr_mvpd_poundV_raw[p].idd_rdp_ac_10ma *
-                    ((double)iv_curr_scale[p]/100);
+                    iv_attr_mvpd_poundV_raw[p].idd_rdp_ac_10ma * val;
 
                 iv_attr_mvpd_poundV_biased[p].idd_rdp_dc_10ma =
-                    (double)iv_attr_mvpd_poundV_raw[p].idd_rdp_dc_10ma *
-                    ((double)iv_curr_scale[p]/100);
+                    iv_attr_mvpd_poundV_raw[p].idd_rdp_dc_10ma * val;
             }
 
             FAPI_INF("iv_curr_scale[%d], %u",p, iv_curr_scale[p] );
