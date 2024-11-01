@@ -1136,7 +1136,7 @@ fapi2::ReturnCode omi_iodlr_static_config(
                                 l_wof_pwr_mode),
                   "Error getting ATTR_WOF_IO_POWER_MODE");
 
-        if (l_omi_freq < 25600)
+        if (l_omi_freq <= 25600)
         {
             l_sub_speed_type = OMI_25G_VIO_PT_9V;
 
@@ -1145,7 +1145,7 @@ fapi2::ReturnCode omi_iodlr_static_config(
                 l_sub_speed_type = OMI_25G_VIO_1V;
             }
         }
-        else if (l_omi_freq < 32000)
+        else if (l_omi_freq <= 32000)
         {
             l_sub_speed_type = OMI_32G_VIO_PT_9V;
 

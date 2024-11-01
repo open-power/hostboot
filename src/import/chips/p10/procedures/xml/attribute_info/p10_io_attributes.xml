@@ -97,6 +97,7 @@
     <valueType>uint32</valueType>
     <initToZero/>
     <writeable/>
+    <platInit/>
   </attribute>
 
   <attribute>
