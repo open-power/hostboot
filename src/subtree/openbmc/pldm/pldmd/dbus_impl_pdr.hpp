@@ -39,25 +39,23 @@ class Pdr : public PdrIntf
      *  @param[in] repo - pointer to BMC's primary PDR repo
      */
     Pdr(sdbusplus::bus_t& bus, const std::string& path, const pldm_pdr* repo) :
-        PdrIntf(bus, path.c_str()), pdrRepo(repo){};
+        PdrIntf(bus, path.c_str()), pdrRepo(repo) {};
 
     /** @brief Implementation for PdrIntf.FindStateEffecterPDR
      *  @param[in] tid - PLDM terminus ID.
      *  @param[in] entityID - entity that can be associated with PLDM State set.
      *  @param[in] stateSetId - value that identifies PLDM State set.
      */
-    std::vector<std::vector<uint8_t>>
-        findStateEffecterPDR(uint8_t tid, uint16_t entityID,
-                             uint16_t stateSetId) override;
+    std::vector<std::vector<uint8_t>> findStateEffecterPDR(
+        uint8_t tid, uint16_t entityID, uint16_t stateSetId) override;
 
     /** @brief Implementation for PdrIntf.FindStateSensorPDR
      *  @param[in] tid - PLDM terminus ID.
      *  @param[in] entityID - entity that can be associated with PLDM State set.
      *  @param[in] stateSetId - value that identifies PLDM State set.
      */
-    std::vector<std::vector<uint8_t>>
-        findStateSensorPDR(uint8_t tid, uint16_t entityID,
-                           uint16_t stateSetId) override;
+    std::vector<std::vector<uint8_t>> findStateSensorPDR(
+        uint8_t tid, uint16_t entityID, uint16_t stateSetId) override;
 
   private:
     /** @brief pointer to BMC's primary PDR repo */

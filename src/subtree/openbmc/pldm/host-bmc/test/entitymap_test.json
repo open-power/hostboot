@@ -1,0 +1,19 @@
+{
+    "Description": {
+        "_comment": [
+            "This file serves as a crucial tool for testing JSON parsing capabilities, facilitating the population of the Entitymap by harnessing its data."
+        ]
+    },
+    "EntityTypeToDbusStringMap": {
+        "45": "chassis",
+        "60": "io_board",
+        "63": "system_management_module",
+        "64": "motherboard",
+        "67": "dcm",
+        "80": "io_module",
+        "135": "cpu",
+        "190": "socket",
+        "32813": "system",
+        "32903": "core"
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "entries": [
+        {
+            "mctp_eid": 9,
+            "effecter_info": {
+                "containerID": 0,
+                "entityType": 32801,
+                "entityInstance": 0,
+                "compositeEffecterCount": 1
+            },
+            "effecters": [
+                {
+                    "dbus_info": {
+                        "object_path": "/xyz/openbmc_project/state/hypervisor0",
+                        "interface": "xyz.openbmc_project.State.Host",
+                        "property_name": "RequestedHostTransition",
+                        "property_type": "string",
+                        "property_values": [
+                            "xyz.openbmc_project.State.Host.Transition.On"
+                        ]
+                    },
+                    "state": {
+                        "id": 196,
+                        "state_values": [2]
+                    }
+                }
+            ]
+        }
+    ]
+}

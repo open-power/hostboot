@@ -1,0 +1,30 @@
+#!/usr/bin/sh
+set -eu
+
+BUILD="$(mktemp --directory --tmpdir=.)"
+trap 'rm -rf "$BUILD"' EXIT
+
+meson format --recursive --inplace || true
+git diff --quiet
+
+# Ensure the test suite passes in the default configuration. Note
+# that we don't specify -Dabi=... - the default is equivalent to
+# -Dabi=deprecated,stable,testing.
+CFLAGS=-fanalyzer meson setup -Dabi-compliance-check=disabled "$BUILD"
+meson compile -C "$BUILD"
+meson test -C "$BUILD"
+
+# Ensure the test suite passes in release mode. libpldm specifies
+# -Db_ndebug=if-release by default, so building with --buildtype=release passes
+# -DNDEBUG to the compiler for the library implementation. This build
+# configuration will catch any unexpected changes in the library implementation
+# and incorrect test case implementations.
+meson configure --buildtype=release "$BUILD"
+meson compile -C "$BUILD"
+meson test -C "$BUILD" --timeout-multiplier 10 --wrapper 'valgrind --error-exitcode=1'
+
+# Ensure the test suite links when testing symbols are removed from the ABI
+meson configure --buildtype=debug "$BUILD"
+meson configure -Dabi=deprecated,stable "$BUILD"
+meson compile -C "$BUILD"
+meson test -C "$BUILD"

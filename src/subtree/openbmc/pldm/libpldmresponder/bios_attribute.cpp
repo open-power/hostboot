@@ -3,7 +3,6 @@
 #include "bios_config.hpp"
 #include "common/utils.hpp"
 
-#include <iostream>
 #include <variant>
 
 using namespace pldm::utils;
@@ -17,15 +16,15 @@ namespace bios
 
 BIOSAttribute::BIOSAttribute(const Json& entry,
                              DBusHandler* const dbusHandler) :
-    name(entry.at("attribute_name")),
-    readOnly(false), displayName(entry.at("displayName")),
-    helpText(entry.at("helpText")), dbusHandler(dbusHandler)
+    name(entry.at("attribute_name")), readOnly(false),
+    displayName(entry.at("display_name")), helpText(entry.at("help_text")),
+    dbusHandler(dbusHandler)
 {
     try
     {
-        readOnly = entry.at("readOnly");
+        readOnly = entry.at("read_only");
     }
-    catch (const std::exception& e)
+    catch (const std::exception&)
     {
         // No action required, readOnly is initialised to false
     }
@@ -39,9 +38,9 @@ BIOSAttribute::BIOSAttribute(const Json& entry,
 
         dBusMap = {objectPath, interface, propertyName, propertyType};
     }
-    catch (const std::exception& e)
+    catch (const std::exception&)
     {
-        // No action required, dBusMap whill have no value
+        // No action required, dBusMap will have no value
     }
 }
 

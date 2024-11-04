@@ -53,8 +53,7 @@ class DeviceUpdater
                            const ComponentInfo& compInfo,
                            uint32_t maxTransferSize,
                            UpdateManager* updateManager) :
-        eid(eid),
-        package(package), fwDeviceIDRecord(fwDeviceIDRecord),
+        eid(eid), package(package), fwDeviceIDRecord(fwDeviceIDRecord),
         compImageInfos(compImageInfos), compInfo(compInfo),
         maxTransferSize(maxTransferSize), updateManager(updateManager)
     {}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pldmd/instance_id.hpp"
+#include "common/instance_id.hpp"
 #include "requester/handler.hpp"
 
 #include <libpldm/platform.h>
@@ -73,14 +73,12 @@ class DbusToFileHandler
                                     const uint16_t type);
 
     /** @brief report failure that a resource dump has failed
+     *  @param[in] str - Resource dump failure type
      */
-    void reportResourceDumpFailure();
+    void reportResourceDumpFailure(const std::string_view& str);
 
     /** @brief method to get the acf file contents */
     std::string getAcfFileContent();
-
-    /** @brief fd of MCTP communications socket */
-    int mctp_fd;
 
     /** @brief MCTP EID of host firmware */
     uint8_t mctp_eid;

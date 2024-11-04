@@ -1,14 +1,14 @@
+#include "common/instance_id.hpp"
 #include "common/utils.hpp"
 #include "libpldmresponder/base.hpp"
-#include "pldmd/instance_id.hpp"
 #include "test/test_instance_id.hpp"
 
 #include <libpldm/base.h>
-#include <string.h>
 
 #include <sdeventplus/event.hpp>
 
 #include <array>
+#include <cstring>
 
 #include <gtest/gtest.h>
 
@@ -17,12 +17,8 @@ using namespace pldm::responder;
 class TestBaseCommands : public testing::Test
 {
   protected:
-    TestBaseCommands() :
-        instanceIdDb(), event(sdeventplus::Event::get_default())
-    {}
+    TestBaseCommands() : event(sdeventplus::Event::get_default()) {}
 
-    uint8_t mctpEid = 0;
-    TestInstanceIdDb instanceIdDb;
     sdeventplus::Event event;
 };
 
@@ -32,7 +28,7 @@ TEST_F(TestBaseCommands, testPLDMTypesGoodRequest)
     auto request = reinterpret_cast<pldm_msg*>(requestPayload.data());
     // payload length will be 0 in this case
     size_t requestPayloadLength = 0;
-    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
+    base::Handler handler(event);
     auto response = handler.getPLDMTypes(request, requestPayloadLength);
     // Need to support OEM type.
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
@@ -49,7 +45,7 @@ TEST_F(TestBaseCommands, testGetPLDMCommandsGoodRequest)
         requestPayload{};
     auto request = reinterpret_cast<pldm_msg*>(requestPayload.data());
     size_t requestPayloadLength = requestPayload.size() - sizeof(pldm_msg_hdr);
-    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
+    base::Handler handler(event);
     auto response = handler.getPLDMCommands(request, requestPayloadLength);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
     uint8_t* payload_ptr = responsePtr->payload;
@@ -66,7 +62,7 @@ TEST_F(TestBaseCommands, testGetPLDMCommandsBadRequest)
 
     request->payload[0] = 0xFF;
     size_t requestPayloadLength = requestPayload.size() - sizeof(pldm_msg_hdr);
-    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
+    base::Handler handler(event);
     auto response = handler.getPLDMCommands(request, requestPayloadLength);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
     uint8_t* payload_ptr = responsePtr->payload;
@@ -86,12 +82,12 @@ TEST_F(TestBaseCommands, testGetPLDMVersionGoodRequest)
     uint8_t retFlag = PLDM_START_AND_END;
     ver32_t version = {0x00, 0xF0, 0xF0, 0xF1};
 
-    auto rc = encode_get_version_req(0, transferHandle, flag, pldmType,
-                                     request);
+    auto rc =
+        encode_get_version_req(0, transferHandle, flag, pldmType, request);
 
     ASSERT_EQ(0, rc);
 
-    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
+    base::Handler handler(event);
     auto response = handler.getPLDMVersion(request, requestPayloadLength);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
 
@@ -117,12 +113,12 @@ TEST_F(TestBaseCommands, testGetPLDMVersionBadRequest)
     uint32_t transferHandle = 0x0;
     uint8_t flag = PLDM_GET_FIRSTPART;
 
-    auto rc = encode_get_version_req(0, transferHandle, flag, pldmType,
-                                     request);
+    auto rc =
+        encode_get_version_req(0, transferHandle, flag, pldmType, request);
 
     ASSERT_EQ(0, rc);
 
-    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
+    base::Handler handler(event);
     auto response = handler.getPLDMVersion(request, requestPayloadLength - 1);
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());
 
@@ -147,7 +143,8 @@ TEST_F(TestBaseCommands, testGetTIDGoodRequest)
     auto request = reinterpret_cast<pldm_msg*>(requestPayload.data());
     size_t requestPayloadLength = 0;
 
-    base::Handler handler(mctpEid, instanceIdDb, event, nullptr, nullptr);
+    base::Handler handler(event);
+    handler.setOemPlatformHandler(nullptr);
     auto response = handler.getTID(request, requestPayloadLength);
 
     auto responsePtr = reinterpret_cast<pldm_msg*>(response.data());

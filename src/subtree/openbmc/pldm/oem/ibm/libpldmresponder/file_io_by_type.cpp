@@ -4,23 +4,23 @@
 #include "file_io_type_cert.hpp"
 #include "file_io_type_dump.hpp"
 #include "file_io_type_lid.hpp"
+#include "file_io_type_pcie.hpp"
 #include "file_io_type_pel.hpp"
 #include "file_io_type_progress_src.hpp"
 #include "file_io_type_vpd.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <libpldm/base.h>
-#include <libpldm/file_io.h>
-#include <stdint.h>
+#include <libpldm/oem/ibm/file_io.h>
 #include <unistd.h>
 
 #include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Logging/Entry/server.hpp>
 
+#include <cstdint>
 #include <exception>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <vector>
 
 PHOSPHOR_LOG2_USING;
@@ -47,8 +47,8 @@ int FileHandler::transferFileData(int32_t fd, bool upstream, uint32_t offset,
         length -= dma::maxSize;
         address += dma::maxSize;
     }
-    auto rc = xdmaInterface.transferDataHost(fd, offset, length, address,
-                                             upstream);
+    auto rc =
+        xdmaInterface.transferDataHost(fd, offset, length, address, upstream);
     return rc < 0 ? PLDM_ERROR : PLDM_SUCCESS;
 }
 
@@ -58,8 +58,8 @@ int FileHandler::transferFileDataToSocket(int32_t fd, uint32_t& length,
     dma::DMA xdmaInterface;
     while (length > dma::maxSize)
     {
-        auto rc = xdmaInterface.transferHostDataToSocket(fd, dma::maxSize,
-                                                         address);
+        auto rc =
+            xdmaInterface.transferHostDataToSocket(fd, dma::maxSize, address);
         if (rc < 0)
         {
             return PLDM_ERROR;
@@ -81,8 +81,7 @@ int FileHandler::transferFileData(const fs::path& path, bool upstream,
         fileExists = fs::exists(path);
         if (!fileExists)
         {
-            error("File does not exist. PATH={FILE_PATH}", "FILE_PATH",
-                  path.c_str());
+            error("File '{PATH}' does not exist.", "PATH", path);
             return PLDM_INVALID_FILE_HANDLE;
         }
 
@@ -90,9 +89,8 @@ int FileHandler::transferFileData(const fs::path& path, bool upstream,
         if (offset >= fileSize)
         {
             error(
-                "Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE}, FILE_HANDLE={FILE_HANDLE}",
-                "OFFSET", offset, "FILE_SIZE", fileSize, "FILE_HANDLE",
-                fileHandle);
+                "Offset '{OFFSET}' exceeds file size '{SIZE}' for file handle {FILE_HANDLE}",
+                "OFFSET", offset, "SIZE", fileSize, "FILE_HANDLE", fileHandle);
             return PLDM_DATA_OUT_OF_RANGE;
         }
         if (offset + length > fileSize)
@@ -117,8 +115,7 @@ int FileHandler::transferFileData(const fs::path& path, bool upstream,
     int file = open(path.string().c_str(), flags);
     if (file == -1)
     {
-        error("File does not exist, PATH = {FILE_PATH}", "FILE_PATH",
-              path.string());
+        error("File '{PATH}' does not exist.", "PATH", path);
         return PLDM_ERROR;
     }
     utils::CustomFD fd(file);
@@ -126,8 +123,8 @@ int FileHandler::transferFileData(const fs::path& path, bool upstream,
     return transferFileData(fd(), upstream, offset, length, address);
 }
 
-std::unique_ptr<FileHandler> getHandlerByType(uint16_t fileType,
-                                              uint32_t fileHandle)
+std::unique_ptr<FileHandler>
+    getHandlerByType(uint16_t fileType, uint32_t fileHandle)
 {
     switch (fileType)
     {
@@ -173,6 +170,11 @@ std::unique_ptr<FileHandler> getHandlerByType(uint16_t fileType,
         {
             return std::make_unique<keywordHandler>(fileHandle, fileType);
         }
+        case PLDM_FILE_TYPE_PCIE_TOPOLOGY:
+        case PLDM_FILE_TYPE_CABLE_INFO:
+        {
+            return std::make_unique<PCIeInfoHandler>(fileHandle, fileType);
+        }
         default:
         {
             throw InternalFailure();
@@ -187,8 +189,8 @@ int FileHandler::readFile(const std::string& filePath, uint32_t offset,
 {
     if (!fs::exists(filePath))
     {
-        error("File does not exist, HANDLE={FILE_HANDLE} PATH={FILE_PATH}",
-              "FILE_HANDLE", fileHandle, "FILE_PATH", filePath.c_str());
+        error("File '{PATH}' and handle {FILE_HANDLE} does not exist", "PATH",
+              filePath, "FILE_HANDLE", fileHandle);
         return PLDM_INVALID_FILE_HANDLE;
     }
 
@@ -196,8 +198,8 @@ int FileHandler::readFile(const std::string& filePath, uint32_t offset,
     if (offset >= fileSize)
     {
         error(
-            "Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE} FILE_HANDLE={FILE_HANDLE}",
-            "OFFSET", offset, "FILE_SIZE", fileSize, "FILE_HANDLE", fileHandle);
+            "Offset '{OFFSET}' exceeds file size '{SIZE}' and file handle '{FILE_HANDLE}'",
+            "OFFSET", offset, "SIZE", fileSize, "FILE_HANDLE", fileHandle);
         return PLDM_DATA_OUT_OF_RANGE;
     }
 
@@ -217,8 +219,9 @@ int FileHandler::readFile(const std::string& filePath, uint32_t offset,
         stream.read(filePos, length);
         return PLDM_SUCCESS;
     }
-    error("Unable to read file, FILE={FILE_PATH}", "FILE_PATH",
-          filePath.c_str());
+    error(
+        "Unable to read file '{PATH}' at offset '{OFFSET}' for length '{LENGTH}'",
+        "PATH", filePath, "OFFSET", offset, "LENGTH", length);
     return PLDM_ERROR;
 }
 

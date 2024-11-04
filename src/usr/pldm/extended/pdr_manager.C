@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <pldm/pldm_errl.H>
 #include <pldm/pldm_response.H>
 #include <pldm/pldm_trace.H>
+#include <pldm/base/hb_patch.H>
 
 #include <util/singleton.H>
 
@@ -676,7 +677,7 @@ void PdrManager::addStateSensorPdr(Target* const i_target,
     /* Add the PDR to the PDR repository. */
 
     uint32_t record_handle = PDR_AUTO_CALCULATE_RECORD_HANDLE;
-    assert(pldm_pdr_add_check(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
+    assert(pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
                               PDR_IS_NOT_REMOTE, hostbootTerminusId(), &record_handle)
            == PLDM_SUCCESS);
 
@@ -764,7 +765,7 @@ void PdrManager::addStateEffecterPdr(Target* const i_target,
            "Failed to encode state effecter PDR");
 
     uint32_t record_handle = PDR_AUTO_CALCULATE_RECORD_HANDLE;
-    assert(pldm_pdr_add_check(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
+    assert(pldm_pdr_add(iv_pdr_repo.get(), encoded_pdr, actual_pdr_size,
                               PDR_IS_NOT_REMOTE, hostbootTerminusId(), &record_handle)
            == PLDM_SUCCESS);
 
@@ -826,7 +827,7 @@ void PdrManager::addTerminusLocatorPDR()
 
     uint32_t record_handle = PDR_AUTO_CALCULATE_RECORD_HANDLE;
     generateTerminusLocatorPDR(&l_pdr);
-    assert(pldm_pdr_add_check(iv_pdr_repo.get(),
+    assert(pldm_pdr_add(iv_pdr_repo.get(),
                               reinterpret_cast<const uint8_t*>(&l_pdr),
                               sizeof(l_pdr),
                               PDR_IS_NOT_REMOTE,
@@ -1234,7 +1235,7 @@ void PdrManager::addFruRecordSetPdr(const fru_record_set_id_t i_rsid,
     const auto NEXT_RECORD_HANDLE = 0;
 
     uint32_t record_handle = NEXT_RECORD_HANDLE;
-    assert(pldm_pdr_add_fru_record_set_check(iv_pdr_repo.get(),
+    assert(pldm_pdr_add_fru_record_set(iv_pdr_repo.get(),
                                              hostbootTerminusId(),
                                              i_rsid,
                                              i_entity.entity_type,

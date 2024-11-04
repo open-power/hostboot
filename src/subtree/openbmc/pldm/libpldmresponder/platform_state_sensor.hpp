@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/utils.hpp"
+#include "host-bmc/dbus_to_event_handler.hpp"
 #include "libpldmresponder/pdr.hpp"
 #include "pdr_utils.hpp"
 #include "pldmd/handler.hpp"
@@ -54,9 +55,8 @@ uint8_t getStateSensorEventState(
     catch (const std::exception& e)
     {
         error(
-            "Get StateSensor EventState from dbus Error, interface : {DBUS_OBJ_PATH}, exception : {ERR_EXCEP}",
-            "DBUS_OBJ_PATH", dbusMapping.objectPath.c_str(), "ERR_EXCEP",
-            e.what());
+            "Failed to get state sensor event state from dbus interface '{PATH}', error - {ERROR}.",
+            "PATH", dbusMapping.objectPath, "ERROR", e);
     }
 
     return PLDM_SENSOR_UNKNOWN;
@@ -76,13 +76,14 @@ uint8_t getStateSensorEventState(
  *  @param[out] stateField - The state field data for each of the states,
  *              equal to composite sensor count in number
  *  @return - Success or failure in setting the states. Returns failure in
- * terms of PLDM completion codes if atleast one state fails to be set
+ * terms of PLDM completion codes if at least one state fails to be set
  */
 template <class DBusInterface, class Handler>
 int getStateSensorReadingsHandler(
     const DBusInterface& dBusIntf, Handler& handler, uint16_t sensorId,
     uint8_t sensorRearmCnt, uint8_t& compSensorCnt,
-    std::vector<get_sensor_state_field>& stateField)
+    std::vector<get_sensor_state_field>& stateField,
+    const stateSensorCacheMaps& sensorCache)
 {
     using namespace pldm::responder::pdr;
     using namespace pldm::utils;
@@ -100,7 +101,7 @@ int getStateSensorReadingsHandler(
     getRepoByType(handler.getRepo(), stateSensorPDRs, PLDM_STATE_SENSOR_PDR);
     if (stateSensorPDRs.empty())
     {
-        error("Failed to get record by PDR type");
+        error("Failed to get StateSensorPDR record.");
         return PLDM_PLATFORM_INVALID_SENSOR_ID;
     }
 
@@ -121,8 +122,8 @@ int getStateSensorReadingsHandler(
         if (sensorRearmCnt > compSensorCnt)
         {
             error(
-                "The requester sent wrong sensorRearm count for the sensor, SENSOR_ID={SENSOR_ID} SENSOR_REARM_COUNT={SENSOR_REARM_CNT}",
-                "SENSOR_ID", sensorId, "SENSOR_REARM_CNT", sensorRearmCnt);
+                "The requester sent wrong sensor rearm count '{SENSOR_REARM_COUNT}' for the sensor ID '{SENSORID}'",
+                "SENSORID", sensorId, "SENSOR_REARM_COUNT", sensorRearmCnt);
             return PLDM_PLATFORM_REARM_UNAVAILABLE_IN_PRESENT_STATE;
         }
 
@@ -146,28 +147,59 @@ int getStateSensorReadingsHandler(
         const auto& [dbusMappings, dbusValMaps] = handler.getDbusObjMaps(
             sensorId, pldm::responder::pdr_utils::TypeId::PLDM_SENSOR_ID);
 
-        stateField.clear();
-        for (size_t i = 0; i < sensorRearmCnt; i++)
+        if (dbusMappings.empty() || dbusValMaps.empty())
         {
-            auto& dbusMapping = dbusMappings[i];
+            error("DbusMappings for sensor ID '{SENSOR_ID}' is missing",
+                  "SENSOR_ID", sensorId);
+            return PLDM_ERROR;
+        }
+        pldm::responder::pdr_utils::EventStates sensorCacheforSensor{};
+        if (sensorCache.contains(sensorId))
+        {
+            sensorCacheforSensor = sensorCache.at(sensorId);
+        }
+        stateField.clear();
+        for (std::size_t offset{0};
+             offset < sensorRearmCnt && offset < dbusMappings.size() &&
+             offset < dbusValMaps.size();
+             offset++)
+        {
+            auto& dbusMapping = dbusMappings[offset];
 
             uint8_t sensorEvent = getStateSensorEventState<DBusInterface>(
-                dBusIntf, dbusValMaps[i], dbusMapping);
+                dBusIntf, dbusValMaps[offset], dbusMapping);
 
+            uint8_t previousState = PLDM_SENSOR_UNKNOWN;
+
+            // if sensor cache is empty, then its the first
+            // get_state_sensor_reading on this sensor, set the previous state
+            // as the current state
+
+            if (sensorCacheforSensor.at(offset) == PLDM_SENSOR_UNKNOWN)
+            {
+                previousState = sensorEvent;
+                handler.updateSensorCache(sensorId, offset, previousState);
+            }
+            else
+            {
+                // sensor cache is not empty, so get the previous state from
+                // the sensor cache
+                previousState = sensorCacheforSensor[offset];
+            }
             uint8_t opState = PLDM_SENSOR_ENABLED;
             if (sensorEvent == PLDM_SENSOR_UNKNOWN)
             {
                 opState = PLDM_SENSOR_UNAVAILABLE;
             }
 
-            stateField.push_back({opState, PLDM_SENSOR_NORMAL,
-                                  PLDM_SENSOR_UNKNOWN, sensorEvent});
+            stateField.push_back(
+                {opState, PLDM_SENSOR_NORMAL, previousState, sensorEvent});
         }
     }
     catch (const std::out_of_range& e)
     {
-        error("the sensorId does not exist. sensor id: {SENSOR_ID} {ERR_EXCEP}",
-              "SENSOR_ID", sensorId, "ERR_EXCEP", e.what());
+        error("The sensor ID '{SENSORID}' does not exist, error - {ERROR}",
+              "SENSORID", sensorId, "ERROR", e);
         rc = PLDM_ERROR;
     }
 

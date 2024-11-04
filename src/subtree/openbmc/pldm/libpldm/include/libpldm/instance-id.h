@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef INSTANCE_ID_H
 #define INSTANCE_ID_H
 
@@ -5,7 +6,8 @@
 extern "C" {
 #endif
 
-#include "libpldm/base.h"
+#include "base.h"
+
 #include <stdint.h>
 
 typedef uint8_t pldm_instance_id_t;

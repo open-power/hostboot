@@ -124,7 +124,7 @@ class FruParser
      */
     void setupDefaultDBusLookup(const std::filesystem::path& fruMasterJsonPath);
 
-    /** @brief Build the default FRU record informations
+    /** @brief Build the default FRU record information
      */
     void setupDefaultFruRecordMap();
 

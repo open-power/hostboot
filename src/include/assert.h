@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -47,6 +47,12 @@
 #define _ASSERT_H
 
 #include <builtins.h>
+
+
+#ifndef __cplusplus
+#define static_assert(expr,message) \
+    _Static_assert(expr,message);
+#endif
 
 #ifdef __cplusplus
 #ifdef __HOSTBOOT_MODULE // Only allow traced assert in module code.
@@ -147,6 +153,7 @@ void __assert(AssertBehavior i_assertb, const char* i_file, int i_line);
                  __FILE__, __LINE__);\
     }\
 }
+
 #else
 
 // Do the assert but ignore the trace

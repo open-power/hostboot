@@ -38,6 +38,7 @@
 #include <openbmc/pldm/libpldm/include/libpldm/base.h>
 #include <pldm/pldm_request.H>
 #include <pldm/pldm_trace.H>
+#include <pldm/base/hb_patch.H>
 #include "../common/pldm_utils.H"
 #include <pldm/pldmif.H>
 #include <hbotcompid.H>
@@ -69,7 +70,7 @@ errlHndl_t getFileTable(std::vector<uint8_t>& o_table)
     std::vector<uint8_t>l_responseBytes;
 
     do {
-    l_errl = sendrecv_pldm_request<PLDM_GET_FILE_TABLE_REQ_BYTES>(
+    l_errl = sendrecv_pldm_request_no_payload_size<PLDM_GET_FILE_TABLE_REQ_BYTES>(
                 l_responseBytes,
                 g_outboundPldmReqMsgQ,
                 encode_get_file_table_req,
@@ -264,7 +265,7 @@ errlHndl_t getLidFileFromOffset(const uint32_t i_fileHandle,
     for(size_t i = 0; i < l_numTransfers; ++i)
     {
         l_req.offset = i_offset + (i * MAX_TRANSFER_SIZE_BYTES);
-        l_errl = sendrecv_pldm_request<PLDM_RW_FILE_BY_TYPE_REQ_BYTES>(
+        l_errl = sendrecv_pldm_request_no_payload_size<PLDM_RW_FILE_BY_TYPE_REQ_BYTES>(
                     l_responseBytes,
                     g_outboundPldmReqMsgQ,
                     encode_rw_file_by_type_req,
@@ -479,7 +480,7 @@ errlHndl_t writeFileByType(pldm_read_write_file_by_type_req & io_request,
                     response_bytes,
                     io_request.length,
                     msgQ,
-                    encode_write_file_by_type_req,
+                    hb_encode_write_file_by_type_req,
                     DEFAULT_INSTANCE_ID,
                     PLDM_WRITE_FILE_BY_TYPE ,
                     io_request.file_type,

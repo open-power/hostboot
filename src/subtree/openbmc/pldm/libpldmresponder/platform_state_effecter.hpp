@@ -32,7 +32,7 @@ namespace platform_state_effecter
  *  @param[in] stateField - The state field data for each of the states,
  * equal to composite effecter count in number
  *  @return - Success or failure in setting the states. Returns failure in
- * terms of PLDM completion codes if atleast one state fails to be set
+ * terms of PLDM completion codes if at least one state fails to be set
  */
 template <class DBusInterface, class Handler>
 int setStateEffecterStatesHandler(
@@ -60,7 +60,7 @@ int setStateEffecterStatesHandler(
                   PLDM_STATE_EFFECTER_PDR);
     if (stateEffecterPDRs.empty())
     {
-        error("Failed to get record by PDR type");
+        error("Failed to get StateEffecterPDR record");
         return PLDM_PLATFORM_INVALID_EFFECTER_ID;
     }
 
@@ -81,8 +81,9 @@ int setStateEffecterStatesHandler(
         if (compEffecterCnt > pdr->composite_effecter_count)
         {
             error(
-                "The requester sent wrong composite effecter count for the effecter, EFFECTER_ID={EFFECTER_ID} COMP_EFF_CNT={COMP_EFF_CNT}",
-                "EFFECTER_ID", effecterId, "COMP_EFF_CNT", compEffecterCnt);
+                "The requester sent wrong composite effecter count '{COMPOSITE_EFFECTER_COUNT}' for the effecter ID '{EFFECTERID}'",
+                "EFFECTERID", effecterId, "COMPOSITE_EFFECTER_COUNT",
+                compEffecterCnt);
             return PLDM_ERROR_INVALID_DATA;
         }
         break;
@@ -96,9 +97,19 @@ int setStateEffecterStatesHandler(
     int rc = PLDM_SUCCESS;
     try
     {
-        const auto& [dbusMappings,
-                     dbusValMaps] = handler.getDbusObjMaps(effecterId);
-        for (uint8_t currState = 0; currState < compEffecterCnt; ++currState)
+        const auto& [dbusMappings, dbusValMaps] =
+            handler.getDbusObjMaps(effecterId);
+        if (dbusMappings.empty() || dbusValMaps.empty())
+        {
+            error("DbusMappings for effecter ID '{EFFECTER_ID}' is missing",
+                  "EFFECTER_ID", effecterId);
+            return PLDM_ERROR;
+        }
+
+        for (uint8_t currState = 0;
+             currState < compEffecterCnt && currState < dbusMappings.size() &&
+             currState < dbusValMaps.size();
+             ++currState)
         {
             std::vector<StateSetNum> allowed{};
             // computation is based on table 79 from DSP0248 v1.1.1
@@ -108,13 +119,13 @@ int setStateEffecterStatesHandler(
             if (states->possible_states_size < bitfieldIndex ||
                 !(states->states[bitfieldIndex].byte & (1 << bit)))
             {
-                error(
-                    "Invalid state set value, EFFECTER_ID={EFFECTER_ID} VALUE={EFFECTER_STATE} COMPOSITE_EFFECTER_ID={CURR_STATE} DBUS_PATH={DBUS_OBJ_PATH}",
-                    "EFFECTER_ID", effecterId, "EFFECTER_STATE",
-                    stateField[currState].effecter_state, "CURR_STATE",
-                    currState, "DBUS_OBJ_PATH",
-                    dbusMappings[currState].objectPath.c_str());
                 rc = PLDM_PLATFORM_SET_EFFECTER_UNSUPPORTED_SENSORSTATE;
+                error(
+                    "Invalid state set value for effecter ID '{EFFECTER_ID}', effecter state '{EFFECTER_STATE}', composite effecter ID '{COMPOSITE_EFFECTER_ID}' and path '{PATH}', response code '{RC}'",
+                    "EFFECTER_ID", effecterId, "EFFECTER_STATE",
+                    stateField[currState].effecter_state,
+                    "COMPOSITE_EFFECTER_ID", currState, "PATH",
+                    dbusMappings[currState].objectPath, "RC", rc);
                 break;
             }
             const DBusMapping& dbusMapping = dbusMappings[currState];
@@ -132,11 +143,10 @@ int setStateEffecterStatesHandler(
                 catch (const std::exception& e)
                 {
                     error(
-                        "Error setting property, ERROR={ERR_EXCEP} PROPERTY={DBUS_PROP} INTERFACE={DBUS_INTF} PATH={DBUS_OBJ_PATH}",
-                        "ERR_EXCEP", e.what(), "DBUS_PROP",
-                        dbusMapping.propertyName, "DBUS_INTF",
-                        dbusMapping.interface, "DBUS_OBJ_PATH",
-                        dbusMapping.objectPath.c_str());
+                        "Failed to set property '{PROPERTY}', interface '{INTERFACE}' and path '{PATH}', error - '{ERROR}'",
+                        "PROPERTY", dbusMapping.propertyName, "INTERFACE",
+                        dbusMapping.interface, "PATH", dbusMapping.objectPath,
+                        "ERROR", e);
                     return PLDM_ERROR;
                 }
             }
@@ -151,8 +161,8 @@ int setStateEffecterStatesHandler(
     }
     catch (const std::out_of_range& e)
     {
-        error("Unknown effecter ID : {EFFECTER_ID} {ERR_EXCEP}", "EFFECTER_ID",
-              effecterId, "ERR_EXCEP", e.what());
+        error("Unknown effecter ID '{EFFECTERID}', error - {ERROR}",
+              "EFFECTERID", effecterId, "ERROR", e);
         return PLDM_ERROR;
     }
 

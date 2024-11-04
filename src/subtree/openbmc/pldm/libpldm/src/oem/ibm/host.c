@@ -1,9 +1,10 @@
-#include "base.h"
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
+#include <libpldm/base.h>
+#include <libpldm/oem/ibm/host.h>
+
 #include <endian.h>
 #include <stdint.h>
 #include <string.h>
-
-#include "libpldm/host.h"
 
 LIBPLDM_ABI_STABLE
 int encode_get_alert_status_req(uint8_t instance_id, uint8_t version_id,

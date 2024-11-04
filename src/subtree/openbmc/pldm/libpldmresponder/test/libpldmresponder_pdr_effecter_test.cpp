@@ -30,8 +30,9 @@ TEST(GeneratePDRByStateEffecter, testGoodJson)
     auto outPDRRepo = pldm_pdr_init();
     Repo outRepo(outPDRRepo);
     auto event = sdeventplus::Event::get_default();
-    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", inPDRRepo,
-                    nullptr, nullptr, nullptr, nullptr, event);
+    Handler handler(&mockedUtils, 0, nullptr, "./pdr_jsons/state_effecter/good",
+                    inPDRRepo, nullptr, nullptr, nullptr, nullptr, nullptr,
+                    event);
     Repo inRepo(inPDRRepo);
     getRepoByType(inRepo, outRepo, PLDM_STATE_EFFECTER_PDR);
 
@@ -68,8 +69,8 @@ TEST(GeneratePDRByStateEffecter, testGoodJson)
     bf1.byte = 2;
     ASSERT_EQ(states->states[0].byte, bf1.byte);
 
-    const auto& [dbusMappings1,
-                 dbusValMaps1] = handler.getDbusObjMaps(pdr->effecter_id);
+    const auto& [dbusMappings1, dbusValMaps1] =
+        handler.getDbusObjMaps(pdr->effecter_id);
     ASSERT_EQ(dbusMappings1[0].objectPath, "/foo/bar");
 
     // Check second PDR
@@ -108,8 +109,8 @@ TEST(GeneratePDRByStateEffecter, testGoodJson)
     ASSERT_EQ(states->states[0].byte, bf2[0].byte);
     ASSERT_EQ(states->states[1].byte, bf2[1].byte);
 
-    const auto& [dbusMappings2,
-                 dbusValMaps2] = handler.getDbusObjMaps(pdr->effecter_id);
+    const auto& [dbusMappings2, dbusValMaps2] =
+        handler.getDbusObjMaps(pdr->effecter_id);
     ASSERT_EQ(dbusMappings2[0].objectPath, "/foo/bar");
     ASSERT_EQ(dbusMappings2[1].objectPath, "/foo/bar");
 
@@ -130,8 +131,9 @@ TEST(GeneratePDRByNumericEffecter, testGoodJson)
     auto outPDRRepo = pldm_pdr_init();
     Repo outRepo(outPDRRepo);
     auto event = sdeventplus::Event::get_default();
-    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", inPDRRepo,
-                    nullptr, nullptr, nullptr, nullptr, event);
+    Handler handler(&mockedUtils, 0, nullptr, "./pdr_jsons/state_effecter/good",
+                    inPDRRepo, nullptr, nullptr, nullptr, nullptr, nullptr,
+                    event);
     Repo inRepo(inPDRRepo);
     getRepoByType(inRepo, outRepo, PLDM_NUMERIC_EFFECTER_PDR);
 
@@ -155,8 +157,8 @@ TEST(GeneratePDRByNumericEffecter, testGoodJson)
     EXPECT_EQ(pdr->effecter_id, 3);
     EXPECT_EQ(pdr->effecter_data_size, 4);
 
-    const auto& [dbusMappings,
-                 dbusValMaps] = handler.getDbusObjMaps(pdr->effecter_id);
+    const auto& [dbusMappings, dbusValMaps] =
+        handler.getDbusObjMaps(pdr->effecter_id);
     EXPECT_EQ(dbusMappings[0].objectPath, "/foo/bar");
     EXPECT_EQ(dbusMappings[0].interface, "xyz.openbmc_project.Foo.Bar");
     EXPECT_EQ(dbusMappings[0].propertyName, "propertyName");
@@ -177,8 +179,9 @@ TEST(GeneratePDR, testMalformedJson)
     auto outPDRRepo = pldm_pdr_init();
     Repo outRepo(outPDRRepo);
     auto event = sdeventplus::Event::get_default();
-    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", inPDRRepo,
-                    nullptr, nullptr, nullptr, nullptr, event);
+    Handler handler(&mockedUtils, 0, nullptr, "./pdr_jsons/state_effecter/good",
+                    inPDRRepo, nullptr, nullptr, nullptr, nullptr, nullptr,
+                    event);
     Repo inRepo(inPDRRepo);
     getRepoByType(inRepo, outRepo, PLDM_STATE_EFFECTER_PDR);
 
@@ -199,8 +202,9 @@ TEST(findStateEffecterId, goodJson)
 
     auto inPDRRepo = pldm_pdr_init();
     auto event = sdeventplus::Event::get_default();
-    Handler handler(&mockedUtils, "./pdr_jsons/state_effecter/good", inPDRRepo,
-                    nullptr, nullptr, nullptr, nullptr, event);
+    Handler handler(&mockedUtils, 0, nullptr, "./pdr_jsons/state_effecter/good",
+                    inPDRRepo, nullptr, nullptr, nullptr, nullptr, nullptr,
+                    event);
     uint16_t entityType = 33;
     uint16_t entityInstance = 0;
     uint16_t containerId = 0;

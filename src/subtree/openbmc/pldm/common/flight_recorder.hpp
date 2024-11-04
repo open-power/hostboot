@@ -61,7 +61,7 @@ class FlightRecorder
 
     /** @brief Add records to the flightRecorder
      *
-     *  @param[in] buffer  - The request/respose byte buffer
+     *  @param[in] buffer  - The request/response byte buffer
      *  @param[in] isRequest - bool that captures if it is a request message or
      *                         a response message
      *
@@ -77,8 +77,8 @@ class FlightRecorder
             int currentIndex = index++;
             tapeRecorder[currentIndex] = std::make_tuple(
                 pldm::utils::getCurrentSystemTime(), isRequest, buffer);
-            index = (currentIndex == FLIGHT_RECORDER_MAX_ENTRIES - 1) ? 0
-                                                                      : index;
+            index =
+                (currentIndex == FLIGHT_RECORDER_MAX_ENTRIES - 1) ? 0 : index;
         }
     }
 
@@ -96,8 +96,8 @@ class FlightRecorder
                  flightRecorderDumpPath);
             for (const auto& message : tapeRecorder)
             {
-                recorderOutputFile << std::get<FlightRecorderTimeStamp>(message)
-                                   << " : ";
+                recorderOutputFile
+                    << std::get<FlightRecorderTimeStamp>(message) << " : ";
                 if (std::get<ReqOrResponse>(message))
                 {
                     recorderOutputFile << "Tx : \n";

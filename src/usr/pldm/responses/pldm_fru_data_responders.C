@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,7 +45,7 @@
 #include <openbmc/pldm/libpldm/include/libpldm/base.h>
 #include <openbmc/pldm/libpldm/include/libpldm/fru.h>
 
-#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/fru_oem_ibm.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/fru.h>
 
 // Targeting
 #include <targeting/common/utilFilter.H>

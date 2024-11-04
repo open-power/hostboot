@@ -1,6 +1,11 @@
 #pragma once
 
-#include "instance_id.hpp"
+#include "common/instance_id.hpp"
+
+#include <unistd.h>
+
+#include <cstring>
+#include <filesystem>
 
 static constexpr uintmax_t pldmMaxInstanceIds = 32;
 

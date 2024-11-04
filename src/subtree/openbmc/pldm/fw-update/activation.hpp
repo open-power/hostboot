@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fw-update/update_manager.hpp"
-
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/Object/Delete/server.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
@@ -14,6 +12,8 @@ namespace pldm
 
 namespace fw_update
 {
+
+class UpdateManager;
 
 using ActivationIntf = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Software::server::Activation>;
@@ -63,10 +63,7 @@ class Delete : public DeleteIntf
     {}
 
     /** @brief Delete the Activation D-Bus object for the FW update package */
-    void delete_() override
-    {
-        updateManager->clearActivationInfo();
-    }
+    void delete_() override;
 
   private:
     UpdateManager* updateManager;
@@ -104,24 +101,7 @@ class Activation : public ActivationIntf
 
     /** @brief Overriding Activation property setter function
      */
-    Activations activation(Activations value) override
-    {
-        if (value == Activations::Activating)
-        {
-            deleteImpl.reset();
-            updateManager->activatePackage();
-        }
-        else if (value == Activations::Active || value == Activations::Failed)
-        {
-            if (!deleteImpl)
-            {
-                deleteImpl = std::make_unique<Delete>(bus, objPath,
-                                                      updateManager);
-            }
-        }
-
-        return ActivationIntf::activation(value);
-    }
+    Activations activation(Activations value) override;
 
     /** @brief Overriding RequestedActivations property setter function
      */

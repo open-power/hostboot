@@ -33,11 +33,10 @@ TEST_F(TestBIOSStringAttribute, CtorTest)
             "string_type" : "ASCII",
             "minimum_string_length" : 1,
             "maximum_string_length" : 100,
-            "default_string_length" : 2,
             "default_string" : "ef",
-            "readOnly" : true,
-            "helpText" : "HelpText",
-            "displayName" : "DisplayName"
+            "read_only" : true,
+            "help_text" : "HelpText",
+            "display_name" : "DisplayName"
         })"_json;
     BIOSStringAttribute stringReadOnly{jsonStringReadOnly, nullptr};
     EXPECT_EQ(stringReadOnly.name, "str_example3");
@@ -51,29 +50,15 @@ TEST_F(TestBIOSStringAttribute, CtorTest)
     EXPECT_EQ(stringInfo.defLength, 2);
     EXPECT_EQ(stringInfo.defString, "ef");
 
-    auto jsonStringReadOnlyError = R"(  {
-            "attribute_name" : "str_example3",
-            "string_type" : "ASCII",
-            "minimum_string_length" : 1,
-            "maximum_string_length" : 100,
-            "default_string" : "ef",
-            "helpText" : "HelpText",
-            "displayName" : "DisplayName"
-        })"_json; // missing default_string_length
-
-    EXPECT_THROW((BIOSStringAttribute{jsonStringReadOnlyError, nullptr}),
-                 Json::exception);
-
     auto jsonStringReadWrite = R"({
             "attribute_name" : "str_example1",
             "string_type" : "ASCII",
             "minimum_string_length" : 1,
             "maximum_string_length" : 100,
-            "default_string_length" : 3,
             "default_string" : "abc",
-            "readOnly" : false,
-            "helpText" : "HelpText",
-            "displayName" : "DisplayName",
+            "read_only" : false,
+            "help_text" : "HelpText",
+            "display_name" : "DisplayName",
             "dbus" : {
                 "object_path" : "/xyz/abc/def",
                 "interface" : "xyz.openbmc_project.str_example1.value",
@@ -97,11 +82,10 @@ TEST_F(TestBIOSStringAttribute, ConstructEntry)
             "string_type" : "ASCII",
             "minimum_string_length" : 1,
             "maximum_string_length" : 100,
-            "default_string_length" : 3,
             "default_string" : "abc",
-            "readOnly" : true,
-            "helpText" : "HelpText",
-            "displayName" : "DisplayName"
+            "read_only" : true,
+            "help_text" : "HelpText",
+            "display_name" : "DisplayName"
         })"_json;
 
     std::vector<uint8_t> expectedAttrEntry{
@@ -119,7 +103,7 @@ TEST_F(TestBIOSStringAttribute, ConstructEntry)
         0,    0,        /* attr handle */
         0x81,           /* attr type string read-only */
         3,    0,        /* current string length */
-        'a',  'b', 'c', /* defaut value string handle index */
+        'a',  'b', 'c', /* default value string handle index */
     };
 
     ON_CALL(biosStringTable, findHandle(StrEq("str_example1")))
@@ -134,11 +118,10 @@ TEST_F(TestBIOSStringAttribute, ConstructEntry)
             "string_type" : "ASCII",
             "minimum_string_length" : 1,
             "maximum_string_length" : 100,
-            "default_string_length" : 3,
             "default_string" : "abc",
-            "readOnly" : false,
-            "helpText" : "HelpText",
-            "displayName" : "DisplayName",
+            "read_only" : false,
+            "help_text" : "HelpText",
+            "display_name" : "DisplayName",
             "dbus" : {
                 "object_path" : "/xyz/abc/def",
                 "interface" : "xyz.openbmc_project.str_example1.value",
@@ -171,7 +154,7 @@ TEST_F(TestBIOSStringAttribute, ConstructEntry)
         0,   0,             /* attr handle */
         1,                  /* attr type string read-write */
         4,   0,             /* current string length */
-        'a', 'b', 'c', 'd', /* defaut value string handle index */
+        'a', 'b', 'c', 'd', /* default value string handle index */
     };
 
     checkConstructEntry(stringReadWrite, biosStringTable, expectedAttrEntry,
@@ -185,11 +168,10 @@ TEST_F(TestBIOSStringAttribute, setAttrValueOnDbus)
             "string_type" : "ASCII",
             "minimum_string_length" : 1,
             "maximum_string_length" : 100,
-            "default_string_length" : 3,
             "default_string" : "abc",
-            "readOnly" : false,
-            "helpText" : "HelpText",
-            "displayName" : "DisplayName",
+            "read_only" : false,
+            "help_text" : "HelpText",
+            "display_name" : "DisplayName",
             "dbus" : {
                 "object_path" : "/xyz/abc/def",
                 "interface" : "xyz.openbmc_project.str_example1.value",
@@ -209,7 +191,7 @@ TEST_F(TestBIOSStringAttribute, setAttrValueOnDbus)
         0,   0,             /* attr handle */
         1,                  /* attr type string read-write */
         4,   0,             /* current string length */
-        'a', 'b', 'c', 'd', /* defaut value string handle index */
+        'a', 'b', 'c', 'd', /* default value string handle index */
     };
     auto entry = reinterpret_cast<pldm_bios_attr_val_table_entry*>(
         attrValueEntry.data());

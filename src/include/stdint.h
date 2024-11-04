@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -23,11 +23,15 @@
 /* permissions and limitations under the License.                         */
 /*                                                                        */
 /* IBM_PROLOG_END_TAG                                                     */
+
+/* This is a workaround for some defined constants and structures used in C23.
+ Some subtrees' newer releases use C23 and Hostboot has yet to update to C23. */
+// TODO: PFHB-51
 #ifndef __STDINT_H
 #define __STDINT_H
 
 #include <stddef.h>
-
+/*    Types    */
 typedef signed char         int8_t;
 typedef short int           int16_t;
 typedef int                 int32_t;
@@ -70,9 +74,15 @@ typedef ssize_t             ptrdiff_t;
 #define UINT64_MAX (18446744073709551615U)
 #define SIZE_MAX   UINT64_MAX
 #define INT64_MAX  (9223372036854775807U)
+#define INTMAX_MIN (-INT64_MAX)
+#define INTMAX_MAX INT64_MAX
+#define INTMAX_WIDTH (64)     /* from C23*/
+#define UINTPTR_MAX UINT64_MAX
 
 //  add (u)intptr_t support
 typedef long int            intptr_t;
 typedef unsigned long int   uintptr_t;
-
+// add intmax_t support
+typedef long int            intmax_t;
+typedef unsigned long int   uintmax_t;
 #endif

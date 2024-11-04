@@ -4,12 +4,12 @@
 #include "common/utils.hpp"
 
 #include <libpldm/pdr.h>
-#include <stdint.h>
 
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -38,6 +38,22 @@ enum class TypeId
     PLDM_SENSOR_ID
 };
 
+struct FruTLV
+{
+    uint8_t fruFieldType;
+    uint8_t fruFieldLen;
+    std::vector<uint8_t> fruFieldValue;
+};
+
+struct FruRecordDataFormat
+{
+    uint16_t fruRSI;
+    uint8_t fruRecType;
+    uint8_t fruNum;
+    uint8_t fruEncodeType;
+    std::vector<FruTLV> fruTLV;
+};
+
 /** @struct PdrEntry
  *  PDR entry structure that acts as a PDR record structure in the PDR
  *  repository to handle PDR APIs.
@@ -63,6 +79,7 @@ using PossibleValues = std::vector<uint8_t>;
 using StatestoDbusVal = std::map<State, pldm::utils::PropertyValue>;
 using DbusMappings = std::vector<pldm::utils::DBusMapping>;
 using DbusValMaps = std::vector<StatestoDbusVal>;
+using EventStates = std::array<uint8_t, 8>;
 
 /** @brief Parse PDR JSON file and output Json object
  *
@@ -81,8 +98,7 @@ inline Json readJson(const std::string& path)
     std::ifstream jsonFile(path);
     if (!jsonFile.is_open())
     {
-        error("Error opening PDR JSON file, PATH={JSON_PATH}", "JSON_PATH",
-              path);
+        error("Error opening PDR JSON file at '{PATH}'", "PATH", path);
         return {};
     }
 
@@ -145,9 +161,8 @@ class RepoInterface
      *  @return opaque pointer acting as PDR record handle, will be NULL if
      *          record was not found
      */
-    virtual const pldm_pdr_record*
-        getNextRecord(const pldm_pdr_record* currRecord,
-                      PdrEntry& pdrEntry) = 0;
+    virtual const pldm_pdr_record* getNextRecord(
+        const pldm_pdr_record* currRecord, PdrEntry& pdrEntry) = 0;
 
     /** @brief Get record handle of a PDR record
      *
@@ -213,6 +228,26 @@ class Repo : public RepoInterface
 std::tuple<pldm::pdr::TerminusHandle, pldm::pdr::SensorID,
            pldm::pdr::SensorInfo>
     parseStateSensorPDR(const std::vector<uint8_t>& stateSensorPdr);
+
+/** @brief Parse FRU record table and return the vector of the FRU record data
+ *         format structure
+ *
+ *  @param[in] fruData - fru data
+ *  @param[in] fruLen  - fru len
+ *
+ *  @return std::vector<FruRecordDataFormat> - the vector of the FRU record data
+ *          format structure
+ */
+std::vector<FruRecordDataFormat>
+    parseFruRecordTable(const uint8_t* fruData, size_t fruLen);
+
+/** @brief Return the size of data type based on the effecterDataSize enum value
+ *
+ *  @param[in] effecterDataSize - Bitwidth and format of setting effecter value
+ *  @return[out] Map the effecterDataSize enum value to datatype and return the
+ *               size of dataType
+ */
+size_t getEffecterDataSize(uint8_t effecterDataSize);
 
 } // namespace pdr_utils
 } // namespace responder

@@ -1,5 +1,7 @@
-#include "utils.h"
-#include "base.h"
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
+#include <libpldm/base.h>
+#include <libpldm/utils.h>
+
 #include <limits.h>
 #include <stdio.h>
 
@@ -106,7 +108,7 @@ uint8_t crc8(const void *data, size_t size)
 }
 
 #define BCD_H(v)       (((v) >> 4) & 0xf)
-#define BCD_L(v)       ((v)&0xf)
+#define BCD_L(v)       ((v) & 0xf)
 #define AS_CHAR(digit) ((digit) + '0')
 #define INSERT_CHAR(c, b, n)                                                   \
 	{                                                                      \
@@ -199,6 +201,37 @@ uint32_t dec2bcd32(uint32_t dec)
 	       ((uint32_t)(dec2bcd16(dec / 10000)) << 16);
 }
 
+static int day_map(uint8_t month)
+{
+	switch (month) {
+	case 1:
+		return 31;
+	case 2:
+		return 28;
+	case 3:
+		return 31;
+	case 4:
+		return 30;
+	case 5:
+		return 31;
+	case 6:
+		return 30;
+	case 7:
+	case 8:
+		return 31;
+	case 9:
+		return 30;
+	case 10:
+		return 31;
+	case 11:
+		return 30;
+	case 12:
+		return 31;
+	default:
+		return 0;
+	}
+}
+
 LIBPLDM_ABI_STABLE
 bool is_time_legal(uint8_t seconds, uint8_t minutes, uint8_t hours, uint8_t day,
 		   uint8_t month, uint16_t year)
@@ -206,9 +239,7 @@ bool is_time_legal(uint8_t seconds, uint8_t minutes, uint8_t hours, uint8_t day,
 	if (month < 1 || month > 12) {
 		return false;
 	}
-	static const int days[13] = { 0,  31, 28, 31, 30, 31, 30,
-				      31, 31, 30, 31, 30, 31 };
-	int rday = days[month];
+	int rday = day_map(month);
 	if (month == 2 &&
 	    ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))) {
 		rday += 1;

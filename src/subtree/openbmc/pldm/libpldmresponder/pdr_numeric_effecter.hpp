@@ -48,18 +48,16 @@ void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
         pdr->hdr.version = 1;
         pdr->hdr.type = PLDM_NUMERIC_EFFECTER_PDR;
         pdr->hdr.record_change_num = 0;
-        pdr->hdr.length = sizeof(pldm_numeric_effecter_value_pdr) -
-                          sizeof(pldm_pdr_hdr);
+        pdr->hdr.length =
+            sizeof(pldm_numeric_effecter_value_pdr) - sizeof(pldm_pdr_hdr);
 
         pdr->terminus_handle = e.value("terminus_handle", 0);
-        pdr->effecter_id = handler.getNextEffecterId();
 
         try
         {
             std::string entity_path = e.value("entity_path", "");
             auto& associatedEntityMap = handler.getAssociateEntityMap();
-            if (entity_path != "" && associatedEntityMap.find(entity_path) !=
-                                         associatedEntityMap.end())
+            if (entity_path != "" && associatedEntityMap.contains(entity_path))
             {
                 pdr->entity_type =
                     associatedEntityMap.at(entity_path).entity_type;
@@ -78,13 +76,11 @@ void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
                 // present
                 if (!pdr->entity_type)
                 {
-                    std::cerr << "The entity path for the FRU is not present."
-                              << std::endl;
                     continue;
                 }
             }
         }
-        catch (const std::exception& ex)
+        catch (const std::exception&)
         {
             pdr->entity_type = e.value("type", 0);
             pdr->entity_instance = e.value("instance", 0);
@@ -103,15 +99,15 @@ void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
         pdr->aux_oem_unit_handle = e.value("aux_oem_unit_handle", 0);
         pdr->aux_rate_unit = e.value("aux_rate_unit", 0);
         pdr->is_linear = e.value("is_linear", true);
-        pdr->effecter_data_size = e.value("effecter_data_size",
-                                          PLDM_EFFECTER_DATA_SIZE_UINT8);
+        pdr->effecter_data_size =
+            e.value("effecter_data_size", PLDM_EFFECTER_DATA_SIZE_UINT8);
         pdr->resolution = e.value("effecter_resolution_init", 1.00);
         pdr->offset = e.value("offset", 0.00);
         pdr->accuracy = e.value("accuracy", 0);
         pdr->plus_tolerance = e.value("plus_tolerance", 0);
         pdr->minus_tolerance = e.value("minus_tolerance", 0);
-        pdr->state_transition_interval = e.value("state_transition_interval",
-                                                 0.00);
+        pdr->state_transition_interval =
+            e.value("state_transition_interval", 0.00);
         pdr->transition_interval = e.value("transition_interval", 0.00);
         switch (pdr->effecter_data_size)
         {
@@ -143,8 +139,8 @@ void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
                 break;
         }
 
-        pdr->range_field_format = e.value("range_field_format",
-                                          PLDM_RANGE_FIELD_FORMAT_UINT8);
+        pdr->range_field_format =
+            e.value("range_field_format", PLDM_RANGE_FIELD_FORMAT_UINT8);
         pdr->range_field_support.byte = e.value("range_field_support", 0);
         switch (pdr->range_field_format)
         {
@@ -212,8 +208,8 @@ void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
         pldm::utils::DBusMapping dbusMapping{};
         try
         {
-            auto service = dBusIntf.getService(objectPath.c_str(),
-                                               interface.c_str());
+            auto service =
+                dBusIntf.getService(objectPath.c_str(), interface.c_str());
 
             dbusMapping = pldm::utils::DBusMapping{objectPath, interface,
                                                    propertyName, propertyType};
@@ -221,11 +217,12 @@ void generateNumericEffecterPDR(const DBusInterface& dBusIntf, const Json& json,
         catch (const std::exception& e)
         {
             error(
-                "D-Bus object path does not exist, effecter ID: {EFFECTER_ID}",
-                "EFFECTER_ID", static_cast<uint16_t>(pdr->effecter_id));
+                "D-Bus object path does not exist for effecter ID '{EFFECTER_ID}', error - {ERROR}",
+                "EFFECTER_ID", static_cast<uint16_t>(pdr->effecter_id), "ERROR",
+                e);
         }
         dbusMappings.emplace_back(std::move(dbusMapping));
-
+        pdr->effecter_id = handler.getNextEffecterId();
         handler.addDbusObjMaps(
             pdr->effecter_id,
             std::make_tuple(std::move(dbusMappings), std::move(dbusValMaps)));

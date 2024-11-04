@@ -1,7 +1,10 @@
-#include "libpldm/transport.h"
-#include "base.h"
-#include "libpldm/requester/pldm.h"
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
+#include "compiler.h"
 #include "transport.h"
+
+#include <libpldm/transport.h>
+#include <libpldm/base.h>
+#include <libpldm/pldm.h>
 
 #include <errno.h>
 #include <limits.h>
@@ -21,15 +24,15 @@ struct pollfd {
 	short revents; /* returned events */
 };
 
-static inline int poll(struct pollfd *fds __attribute__((unused)),
-		       int nfds __attribute__((unused)),
-		       int timeout __attribute__((unused)))
+static inline int poll(struct pollfd *fds LIBPLDM_CC_UNUSED,
+		       int nfds LIBPLDM_CC_UNUSED,
+		       int timeout LIBPLDM_CC_UNUSED)
 {
 	return 0;
 }
 #endif
 
-LIBPLDM_ABI_TESTING
+LIBPLDM_ABI_STABLE
 int pldm_transport_poll(struct pldm_transport *transport, int timeout)
 {
 	struct pollfd pollfd;
@@ -57,42 +60,41 @@ int pldm_transport_poll(struct pldm_transport *transport, int timeout)
 	return rc;
 }
 
-LIBPLDM_ABI_TESTING
+LIBPLDM_ABI_STABLE
 pldm_requester_rc_t pldm_transport_send_msg(struct pldm_transport *transport,
 					    pldm_tid_t tid,
-					    const void *pldm_req_msg,
-					    size_t req_msg_len)
+					    const void *pldm_msg,
+					    size_t msg_len)
 {
-	if (!transport || !pldm_req_msg) {
+	if (!transport || !pldm_msg) {
 		return PLDM_REQUESTER_INVALID_SETUP;
 	}
 
-	if (req_msg_len < sizeof(struct pldm_msg_hdr)) {
+	if (msg_len < sizeof(struct pldm_msg_hdr)) {
 		return PLDM_REQUESTER_NOT_REQ_MSG;
 	}
 
-	return transport->send(transport, tid, pldm_req_msg, req_msg_len);
+	return transport->send(transport, tid, pldm_msg, msg_len);
 }
 
-LIBPLDM_ABI_TESTING
+LIBPLDM_ABI_STABLE
 pldm_requester_rc_t pldm_transport_recv_msg(struct pldm_transport *transport,
-					    pldm_tid_t tid,
-					    void **pldm_resp_msg,
-					    size_t *resp_msg_len)
+					    pldm_tid_t *tid, void **pldm_msg,
+					    size_t *msg_len)
 {
-	if (!transport || !resp_msg_len) {
+	if (!transport || !msg_len) {
 		return PLDM_REQUESTER_INVALID_SETUP;
 	}
 
 	pldm_requester_rc_t rc =
-		transport->recv(transport, tid, pldm_resp_msg, resp_msg_len);
+		transport->recv(transport, tid, pldm_msg, msg_len);
 	if (rc != PLDM_REQUESTER_SUCCESS) {
 		return rc;
 	}
 
-	if (*resp_msg_len < sizeof(struct pldm_msg_hdr)) {
-		free(*pldm_resp_msg);
-		*pldm_resp_msg = NULL;
+	if (*msg_len < sizeof(struct pldm_msg_hdr)) {
+		free(*pldm_msg);
+		*pldm_msg = NULL;
 		return PLDM_REQUESTER_INVALID_RECV_LEN;
 	}
 	return PLDM_REQUESTER_SUCCESS;
@@ -141,7 +143,7 @@ static int clock_gettimeval(clockid_t clockid, struct timeval *tv)
 	return 0;
 }
 
-LIBPLDM_ABI_TESTING
+LIBPLDM_ABI_STABLE
 pldm_requester_rc_t
 pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 			     const void *pldm_req_msg, size_t req_msg_len,
@@ -170,10 +172,15 @@ pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 
 	req_hdr = pldm_req_msg;
 
+	if (!req_hdr->request) {
+		return PLDM_REQUESTER_NOT_REQ_MSG;
+	}
+
 	for (cnt = 0; cnt <= (PLDM_INSTANCE_MAX + 1) * PLDM_MAX_TIDS &&
 		      pldm_transport_poll(transport, 0) == 1;
 	     cnt++) {
-		rc = pldm_transport_recv_msg(transport, tid, pldm_resp_msg,
+		pldm_tid_t l_tid;
+		rc = pldm_transport_recv_msg(transport, &l_tid, pldm_resp_msg,
 					     resp_msg_len);
 		if (rc == PLDM_REQUESTER_SUCCESS) {
 			/* This isn't the message we wanted */
@@ -199,32 +206,37 @@ pldm_transport_send_recv_msg(struct pldm_transport *transport, pldm_tid_t tid,
 		return PLDM_REQUESTER_POLL_FAIL;
 	}
 
-	do {
+	while (timercmp(&now, &end, <)) {
+		pldm_tid_t src_tid;
+
 		timersub(&end, &now, &remaining);
+
 		/* 0 <= `timeval_to_msec()` <= 4800, and 4800 < INT_MAX */
 		ret = pldm_transport_poll(transport,
 					  (int)(timeval_to_msec(&remaining)));
 		if (ret <= 0) {
-			break;
-		}
-
-		rc = pldm_transport_recv_msg(transport, tid, pldm_resp_msg,
-					     resp_msg_len);
-		if (rc == PLDM_REQUESTER_SUCCESS) {
-			const struct pldm_msg_hdr *resp_hdr = *pldm_resp_msg;
-			if (req_hdr->instance_id == resp_hdr->instance_id) {
-				return rc;
-			}
-
-			/* This isn't the message we wanted */
-			free(*pldm_resp_msg);
+			return PLDM_REQUESTER_RECV_FAIL;
 		}
 
 		ret = clock_gettimeval(CLOCK_MONOTONIC, &now);
 		if (ret < 0) {
 			return PLDM_REQUESTER_POLL_FAIL;
 		}
-	} while (timercmp(&now, &end, <));
+
+		rc = pldm_transport_recv_msg(transport, &src_tid, pldm_resp_msg,
+					     resp_msg_len);
+		if (rc != PLDM_REQUESTER_SUCCESS) {
+			continue;
+		}
+
+		if (src_tid != tid || !pldm_msg_hdr_correlate_response(
+					      pldm_req_msg, *pldm_resp_msg)) {
+			free(*pldm_resp_msg);
+			continue;
+		}
+
+		return PLDM_REQUESTER_SUCCESS;
+	}
 
 	return PLDM_REQUESTER_RECV_FAIL;
 }

@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef PLDM_TYPES_H
 #define PLDM_TYPES_H
 

@@ -27,21 +27,21 @@ int ProgressCodeHandler::setRawBootProperty(
 
     try
     {
-        auto service = pldm::utils::DBusHandler().getService(RawObjectPath,
-                                                             RawInterface);
+        auto service =
+            pldm::utils::DBusHandler().getService(RawObjectPath, RawInterface);
         auto method = bus.new_method_call(service.c_str(), RawObjectPath,
                                           FreedesktopInterface, SetMethod);
         method.append(RawInterface, RawProperty,
                       std::variant<std::tuple<uint64_t, std::vector<uint8_t>>>(
                           progressCodeBuffer));
 
-        bus.call_noreply(method);
+        bus.call_noreply(method, dbusTimeout);
     }
     catch (const std::exception& e)
     {
         error(
-            "failed to make a d-bus call to host-postd daemon, ERROR={ERR_EXCEP}",
-            "ERR_EXCEP", e.what());
+            "Failed to make a d-bus call to host-postd daemon, error - {ERROR}",
+            "ERROR", e);
         return PLDM_ERROR;
     }
 

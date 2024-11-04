@@ -40,7 +40,7 @@
 #include <pldm/pldm_reasoncodes.H>
 #include <pldm/pldm_util.H>
 #include <openbmc/pldm/libpldm/include/libpldm/platform.h>
-#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/state_set_oem_ibm.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/state_set.h>
 
 #include <initservice/istepdispatcherif.H>
 

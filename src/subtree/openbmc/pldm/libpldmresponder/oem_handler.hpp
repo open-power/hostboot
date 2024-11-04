@@ -22,20 +22,23 @@ class Handler : public CmdHandler
      *
      *  @param[in] entityType - entity type corresponding to the sensor
      *  @param[in] entityInstance - entity instance number
+     *  @param[in] entityContainerID - container id
      *  @param[in] stateSetId - state set id
      *  @param[in] compSensorCnt - composite sensor count
+     *  @param[in] sensorId - sensor ID
      *  @param[out] stateField - The state field data for each of the states,
      *                           equal to composite sensor count in number
      *
      *  @return - Success or failure in getting the states. Returns failure in
-     *            terms of PLDM completion codes if fetching atleast one state
+     *            terms of PLDM completion codes if fetching at least one state
      *            fails
      */
     virtual int getOemStateSensorReadingsHandler(
         pldm::pdr::EntityType entityType,
         pldm::pdr::EntityInstance entityInstance,
+        pldm::pdr::ContainerID entityContainerId,
         pldm::pdr::StateSetId stateSetId,
-        pldm::pdr::CompositeCount compSensorCnt,
+        pldm::pdr::CompositeCount compSensorCnt, uint16_t sensorId,
         std::vector<get_sensor_state_field>& stateField) = 0;
 
     /** @brief Interface to set the effecter requested by pldm requester
@@ -51,7 +54,7 @@ class Handler : public CmdHandler
      *  @param[in] effecterId - Effecter id
      *
      *  @return - Success or failure in setting the states.Returns failure in
-     *            terms of PLDM completion codes if atleast one state fails to
+     *            terms of PLDM completion codes if at least one state fails to
      *            be set
      */
     virtual int oemSetStateEffecterStatesHandler(
@@ -90,6 +93,37 @@ class Handler : public CmdHandler
     /** @brief Interface to check the BMC state */
     virtual int checkBMCState() = 0;
 
+    /** @brief update the dbus object paths */
+    virtual void updateOemDbusPaths(std::string& dbusPath) = 0;
+
+    /** @brief Interface to fetch the last BMC record from the PDR repository
+     *
+     *  @param[in] repo - pointer to BMC's primary PDR repo
+     *
+     *  @return the last BMC record from the repo
+     */
+    virtual const pldm_pdr_record* fetchLastBMCRecord(const pldm_pdr* repo) = 0;
+
+    /** @brief Interface to check if the record handle passed is in remote PDR
+     *         record handle range
+     *
+     *  @param[in] record_handle - record handle of the PDR
+     *
+     *  @return true if record handle passed is in host PDR record handle range
+     */
+    virtual bool checkRecordHandleInRange(const uint32_t& record_handle) = 0;
+
+    /** @brief Interface to the process setEventReceiver*/
+    virtual void processSetEventReceiver() = 0;
+
+    /** @brief Interface to monitor the surveillance pings from remote terminus
+     *
+     * @param[in] tid - TID of the remote terminus
+     * @param[in] value - true or false, to indicate if the timer is
+     *                   running or not
+     * */
+    virtual void setSurvTimer(uint8_t tid, bool value) = 0;
+
     virtual ~Handler() = default;
 
   protected:
@@ -98,19 +132,44 @@ class Handler : public CmdHandler
 
 } // namespace oem_platform
 
-namespace oem_bios
+namespace oem_fru
 {
-/** Interface to the oem bios Handler class*/
+
+class Handler : public CmdHandler
+{
+  public:
+    Handler() {}
+
+    /** @brief Process OEM FRU record
+     *
+     * @param[in] fruData - the data of the fru
+     *
+     * @return success or failure
+     */
+    virtual int processOEMFRUTable(const std::vector<uint8_t>& fruData) = 0;
+
+    virtual ~Handler() = default;
+};
+
+} // namespace oem_fru
+
+namespace oem_utils
+{
+using namespace pldm::utils;
+
 class Handler : public CmdHandler
 {
   public:
     Handler(const pldm::utils::DBusHandler* dBusIntf) : dBusIntf(dBusIntf) {}
 
-    /** @brief Interface to get the system type information
+    /** @brief Collecting core count data and setting to Dbus properties
      *
-     *  @return - the system type information
+     *  @param[in] associations - the data of entity association
+     *  @param[in] entityMaps - the mapping of entity to DBus string
+     *
      */
-    virtual std::optional<std::string> getPlatformName() = 0;
+    virtual int setCoreCount(const EntityAssociations& associations,
+                             const EntityMaps entityMaps) = 0;
 
     virtual ~Handler() = default;
 
@@ -118,7 +177,7 @@ class Handler : public CmdHandler
     const pldm::utils::DBusHandler* dBusIntf;
 };
 
-} // namespace oem_bios
+} // namespace oem_utils
 
 } // namespace responder
 

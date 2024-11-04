@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -43,7 +43,11 @@
 #define EINVAL          22      // Invalid argument
 #define ENFILE          23      // Too many open files in system
 #define EDEADLK         35      // Operation would cause deadlock.
+#define ENOMSG          42      // No message of desired type.
 #define ETIME           62      // Time expired.
+#define EPROTO          71      // Protocol Error
+#define EBADMSG         74      // Bad message.
+#define EOVERFLOW       75      // Value too large for defined data type.
 #define EMSGSIZE        90      // Message too long
 #define EHOSTDOWN       112     // Host is down
 #define EALREADY        114     // Operation already in progress

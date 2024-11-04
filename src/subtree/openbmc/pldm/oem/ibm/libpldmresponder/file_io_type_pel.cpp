@@ -4,19 +4,19 @@
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <libpldm/base.h>
-#include <libpldm/file_io.h>
-#include <stdint.h>
+#include <libpldm/oem/ibm/file_io.h>
 #include <systemd/sd-bus.h>
 #include <unistd.h>
 
+#include <org/open_power/Logging/PEL/server.hpp>
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Logging/Entry/server.hpp>
 
+#include <cstdint>
 #include <exception>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <vector>
 
 PHOSPHOR_LOG2_USING;
@@ -26,6 +26,7 @@ namespace pldm
 namespace responder
 {
 using namespace sdbusplus::xyz::openbmc_project::Logging::server;
+using namespace sdbusplus::org::open_power::Logging::server;
 
 namespace detail
 {
@@ -81,8 +82,7 @@ Entry::Level getEntryLevelFromPEL(const std::string& pelFileName)
         }
         else
         {
-            error("Unable to open PEL file {PEL_FILE_NAME}", "PEL_FILE_NAME",
-                  pelFileName);
+            error("Unable to open PEL file '{FILE}'", "FILE", pelFileName);
         }
     }
 
@@ -90,7 +90,7 @@ Entry::Level getEntryLevelFromPEL(const std::string& pelFileName)
 }
 } // namespace detail
 
-int PelHandler::readIntoMemory(uint32_t offset, uint32_t& length,
+int PelHandler::readIntoMemory(uint32_t offset, uint32_t length,
                                uint64_t address,
                                oem_platform::Handler* /*oemPlatformHandler*/)
 {
@@ -101,14 +101,12 @@ int PelHandler::readIntoMemory(uint32_t offset, uint32_t& length,
 
     try
     {
-        auto service = pldm::utils::DBusHandler().getService(logObjPath,
-                                                             logInterface);
+        auto service =
+            pldm::utils::DBusHandler().getService(logObjPath, logInterface);
         auto method = bus.new_method_call(service.c_str(), logObjPath,
                                           logInterface, "GetPEL");
         method.append(fileHandle);
-        auto reply = bus.call(
-            method,
-            std::chrono::duration_cast<microsec>(sec(DBUS_TIMEOUT)).count());
+        auto reply = bus.call(method, dbusTimeout);
         sdbusplus::message::unix_fd fd{};
         reply.read(fd);
         auto rc = transferFileData(fd, true, offset, length, address);
@@ -117,8 +115,8 @@ int PelHandler::readIntoMemory(uint32_t offset, uint32_t& length,
     catch (const std::exception& e)
     {
         error(
-            "GetPEL D-Bus call failed, PEL id = 0x{FILE_HANDLE}, error ={ERR_EXCEP}",
-            "FILE_HANDLE", lg2::hex, fileHandle, "ERR_EXCEP", e.what());
+            "Failed to get PEL D-Bus call for PEL ID '{FILE_HANDLE}', error - {ERROR}",
+            "FILE_HANDLE", lg2::hex, fileHandle, "ERROR", e);
         return PLDM_ERROR;
     }
 
@@ -134,29 +132,26 @@ int PelHandler::read(uint32_t offset, uint32_t& length, Response& response,
 
     try
     {
-        auto service = pldm::utils::DBusHandler().getService(logObjPath,
-                                                             logInterface);
+        auto service =
+            pldm::utils::DBusHandler().getService(logObjPath, logInterface);
         auto method = bus.new_method_call(service.c_str(), logObjPath,
                                           logInterface, "GetPEL");
         method.append(fileHandle);
-        auto reply = bus.call(
-            method,
-            std::chrono::duration_cast<microsec>(sec(DBUS_TIMEOUT)).count());
+        auto reply = bus.call(method, dbusTimeout);
         sdbusplus::message::unix_fd fd{};
         reply.read(fd);
 
         off_t fileSize = lseek(fd, 0, SEEK_END);
         if (fileSize == -1)
         {
-            error("file seek failed");
+            error("File lseek failed");
             return PLDM_ERROR;
         }
         if (offset >= fileSize)
         {
             error(
-                "Offset exceeds file size, OFFSET={OFFSET} FILE_SIZE={FILE_SIZE} FILE_HANDLE{FILE_HANDLE}",
-                "OFFSET", offset, "FILE_SIZE", fileSize, "FILE_HANDLE",
-                fileHandle);
+                "Offset '{OFFSET}' exceeds file size {SIZE}, file handle {FILE_HANDLE}",
+                "OFFSET", offset, "SIZE", fileSize, "FILE_HANDLE", fileHandle);
             return PLDM_DATA_OUT_OF_RANGE;
         }
         if (offset + length > fileSize)
@@ -166,7 +161,8 @@ int PelHandler::read(uint32_t offset, uint32_t& length, Response& response,
         auto rc = lseek(fd, offset, SEEK_SET);
         if (rc == -1)
         {
-            error("file seek failed");
+            error("Failed to do file lseek at offset '{OFFSET}'", "OFFSET",
+                  offset);
             return PLDM_ERROR;
         }
         size_t currSize = response.size();
@@ -176,22 +172,24 @@ int PelHandler::read(uint32_t offset, uint32_t& length, Response& response,
         rc = ::read(fd, filePos, length);
         if (rc == -1)
         {
-            error("file read failed");
+            error(
+                "Failed to do file read of length '{LENGTH}' at offset '{OFFSET}'",
+                "LENGTH", length, "OFFSET", filePos);
             return PLDM_ERROR;
         }
         if (rc != length)
         {
             error(
-                "mismatch between number of characters to read and the length read, LENGTH={LEN} COUNT={CNT}",
-                "LEN", length, "CNT", rc);
+                "Mismatch between number of characters to read and the read length '{LENGTH}' and count '{RC}'",
+                "LENGTH", length, "RC", rc);
             return PLDM_ERROR;
         }
     }
     catch (const std::exception& e)
     {
         error(
-            "GetPEL D-Bus call failed on PEL ID 0x{FILE_HANDLE}, error ={ERR_EXCEP}",
-            "FILE_HANDLE", lg2::hex, fileHandle, "ERR_EXCEP", e.what());
+            "Failed to get PEL D-Bus call on PEL ID {FILE_HANDLE}, error - {ERROR}",
+            "FILE_HANDLE", lg2::hex, fileHandle, "ERROR", e);
         return PLDM_ERROR;
     }
     return PLDM_SUCCESS;
@@ -205,7 +203,8 @@ int PelHandler::writeFromMemory(uint32_t offset, uint32_t length,
     int fd = mkstemp(tmpFile);
     if (fd == -1)
     {
-        error("failed to create a temporary pel, ERROR={ERR}", "ERR", errno);
+        error("Failed to create a temporary pel, error number - {ERROR_NUM}",
+              "ERROR_NUM", errno);
         return PLDM_ERROR;
     }
     close(fd);
@@ -219,27 +218,82 @@ int PelHandler::writeFromMemory(uint32_t offset, uint32_t length,
     return rc;
 }
 
-int PelHandler::fileAck(uint8_t /*fileStatus*/)
+int PelHandler::fileAck(uint8_t fileStatus)
 {
     static constexpr auto logObjPath = "/xyz/openbmc_project/logging";
     static constexpr auto logInterface = "org.open_power.Logging.PEL";
+    static std::string service;
     auto& bus = pldm::utils::DBusHandler::getBus();
 
-    try
+    if (service.empty())
     {
-        auto service = pldm::utils::DBusHandler().getService(logObjPath,
-                                                             logInterface);
-        auto method = bus.new_method_call(service.c_str(), logObjPath,
-                                          logInterface, "HostAck");
-        method.append(fileHandle);
-        bus.call_noreply(method);
+        try
+        {
+            service =
+                pldm::utils::DBusHandler().getService(logObjPath, logInterface);
+        }
+        catch (const sdbusplus::exception_t& e)
+        {
+            error(
+                "Failed to do mapper call when trying to find logging service "
+                "to ack PEL ID '{FILE_HANDLE}', error - {ERROR}",
+                "FILE_HANDLE", lg2::hex, fileHandle, "ERROR", e);
+            return PLDM_ERROR;
+        }
     }
-    catch (const std::exception& e)
+
+    if (fileStatus == PLDM_SUCCESS)
     {
-        error(
-            "HostAck D-Bus call failed on PEL ID 0x{FILE_HANDLE}, error ={ERR_EXCEP}",
-            "FILE_HANDLE", lg2::hex, fileHandle, "ERR_EXCEP", e.what());
-        return PLDM_ERROR;
+        try
+        {
+            auto method = bus.new_method_call(service.c_str(), logObjPath,
+                                              logInterface, "HostAck");
+            method.append(fileHandle);
+            bus.call_noreply(method, dbusTimeout);
+        }
+        catch (const std::exception& e)
+        {
+            error(
+                "Failure in HostReject ack D-Bus call on PEL ID '{FILE_HANDLE}', error - {ERROR}",
+                "FILE_HANDLE", lg2::hex, fileHandle, "ERROR", e);
+            return PLDM_ERROR;
+        }
+    }
+    else
+    {
+        PEL::RejectionReason reason{};
+        if (fileStatus == PLDM_FULL_FILE_DISCARDED)
+        {
+            reason = PEL::RejectionReason::HostFull;
+        }
+        else if (fileStatus == PLDM_ERROR_FILE_DISCARDED)
+        {
+            reason = PEL::RejectionReason::BadPEL;
+        }
+        else
+        {
+            error(
+                "Invalid file status '{STATUS}' in PEL file ack response for PEL '{FILE_HANDLE}'",
+                "STATUS", lg2::hex, fileStatus, "FILE_HANDLE", lg2::hex,
+                fileHandle);
+            return PLDM_ERROR;
+        }
+
+        try
+        {
+            auto method = bus.new_method_call(service.c_str(), logObjPath,
+                                              logInterface, "HostReject");
+            method.append(fileHandle, reason);
+            bus.call_noreply(method, dbusTimeout);
+        }
+        catch (const std::exception& e)
+        {
+            error("Failure in HostReject D-Bus call on PEL ID '{FILE_HANDLE}', "
+                  "error - {ERROR}, status - {STATUS}",
+                  "FILE_HANDLE", lg2::hex, fileHandle, "ERROR", e, "STATUS",
+                  lg2::hex, fileStatus);
+            return PLDM_ERROR;
+        }
     }
 
     return PLDM_SUCCESS;
@@ -254,8 +308,8 @@ int PelHandler::storePel(std::string&& pelFileName)
 
     try
     {
-        auto service = pldm::utils::DBusHandler().getService(logObjPath,
-                                                             logInterface);
+        auto service =
+            pldm::utils::DBusHandler().getService(logObjPath, logInterface);
         using namespace sdbusplus::xyz::openbmc_project::Logging::server;
         std::map<std::string, std::string> addlData{};
         auto severity =
@@ -267,12 +321,13 @@ int PelHandler::storePel(std::string&& pelFileName)
                                           logInterface, "Create");
         method.append("xyz.openbmc_project.Host.Error.Event", severity,
                       addlData);
-        bus.call_noreply(method);
+        bus.call_noreply(method, dbusTimeout);
     }
     catch (const std::exception& e)
     {
-        error("failed to make a d-bus call to PEL daemon, ERROR={ERR_EXCEP}",
-              "ERR_EXCEP", e.what());
+        error(
+            "Failed to make a d-bus call to PEL daemon, PEL file name '{FILE}', ERROR - {ERROR}",
+            "FILE", pelFileName, "ERROR", e);
         return PLDM_ERROR;
     }
 
@@ -286,7 +341,7 @@ int PelHandler::write(const char* buffer, uint32_t offset, uint32_t& length,
 
     if (offset > 0)
     {
-        error("Offset is non zero");
+        error("Offset '{OFFSET}' is non zero", "OFFSET", offset);
         return PLDM_ERROR;
     }
 
@@ -294,7 +349,8 @@ int PelHandler::write(const char* buffer, uint32_t offset, uint32_t& length,
     auto fd = mkstemp(tmpFile);
     if (fd == -1)
     {
-        error("failed to create a temporary pel, ERROR={ERR}", "ERR", errno);
+        error("Failed to create a temporary PEL, error number - {ERROR_NUM}",
+              "ERROR_NUM", errno);
         return PLDM_ERROR;
     }
 
@@ -312,8 +368,9 @@ int PelHandler::write(const char* buffer, uint32_t offset, uint32_t& length,
 
     if (rc == -1)
     {
-        error("file write failed, ERROR={ERR}, LENGTH={LEN}, OFFSET={OFFSET}",
-              "ERR", errno, "LEN", length, "OFFSET", offset);
+        error(
+            "Failed to do file write of length '{LENGTH}' at offset '{OFFSET}', error number - {ERROR_NUM}",
+            "LENGTH", length, "OFFSET", offset, "ERROR_NUM", errno);
         fs::remove(tmpFile);
         return PLDM_ERROR;
     }
@@ -324,8 +381,9 @@ int PelHandler::write(const char* buffer, uint32_t offset, uint32_t& length,
         rc = storePel(path.string());
         if (rc != PLDM_SUCCESS)
         {
-            error("save PEL failed, ERROR = {RC} tmpFile = {TMP_FILE}", "RC",
-                  rc, "TMP_FILE", tmpFile);
+            error(
+                "Failed to save PEL in temp file '{FILE}', response code '{RC}'",
+                "RC", rc, "FILE", tmpFile);
         }
     }
 

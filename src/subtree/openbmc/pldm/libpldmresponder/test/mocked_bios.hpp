@@ -1,3 +1,4 @@
+#include "bios_attribute.hpp"
 #include "libpldmresponder/bios_table.hpp"
 
 #include <gmock/gmock.h>

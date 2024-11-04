@@ -50,7 +50,7 @@
  **/
 
 #include <openbmc/pldm/libpldm/include/libpldm/bios_table.h>
-#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/file_io.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/file_io.h>
 #include <pnor/pnor_const.H>
 #include <attributetraits.H>
 #include <attributeenums.H>
@@ -526,7 +526,7 @@ namespace PLDM
     /**
      * @brief Retrieve the current value of the hb_cdm_policies PLDM bios attribute and return
      * if no error.
-     * 
+     *
      * @param[in,out] io_string_table     See brief at the top of this file.
      * @param[in,out] io_attr_table       See brief at the top of this file.
      * @param[out]    o_cdm_policy        If no error occurs will contain the value

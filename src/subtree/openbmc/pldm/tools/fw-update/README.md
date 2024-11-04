@@ -4,13 +4,13 @@ pldm_fwup_pkg_creator.py is a python script that can package one or more
 firmware image blobs into a PLDM firmware update package, as per the DSP0267
 specification v1.1.0 - Section 7.
 
-# Requirements
+## Requirements
 
 - Python 3.6+
 - Python bitarray module
   - For example on Ubuntu: sudo pip3 install bitarray
 
-# Usage
+## Usage
 
     pldm_fwup_pkg_creator.py [-h]
                                 pldmfwuppkgname metadatafile images
@@ -30,7 +30,7 @@ specification v1.1.0 - Section 7.
   order_ as the entries in the "ComponentImageInformationArea" list in the
   metadata json
 
-# Metadata JSON file
+## Metadata JSON file
 
 Some fields corresponding to the PLDM firmware update package must be specified
 in an input metadata file (see the section 'Mapping fields to DSP0267') that's
@@ -42,7 +42,7 @@ json file included - metadata-example.json, which has example entries for
 preparing a PLDM firmware update package that targets three devices, and there
 are a total of three component images.
 
-# Mapping fields to DSP0267
+## Mapping fields to DSP0267
 
 This section describes the following:
 

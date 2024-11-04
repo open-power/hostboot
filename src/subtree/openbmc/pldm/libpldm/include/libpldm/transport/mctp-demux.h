@@ -2,8 +2,8 @@
 #ifndef LIBPLDM_DEMUX_H
 #define LIBPLDM_DEMUX_H
 
-#include "libpldm/base.h"
-#include "libpldm/pldm.h"
+#include <libpldm/base.h>
+#include <libpldm/pldm.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,7 +24,7 @@ pldm_transport_mctp_demux_core(struct pldm_transport_mctp_demux *ctx);
 #ifdef PLDM_HAS_POLL
 struct pollfd;
 /* Init pollfd for async calls */
-int pldm_transport_mctp_demux_init_pollfd(struct pldm_transport_mctp_demux *ctx,
+int pldm_transport_mctp_demux_init_pollfd(struct pldm_transport *t,
 					  struct pollfd *pollfd);
 #endif
 

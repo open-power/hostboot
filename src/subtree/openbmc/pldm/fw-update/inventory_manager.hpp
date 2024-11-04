@@ -1,10 +1,8 @@
 #pragma once
 
+#include "common/instance_id.hpp"
 #include "common/types.hpp"
-#include "pldmd/instance_id.hpp"
 #include "requester/handler.hpp"
-
-#include <libpldm/pldm.h>
 
 namespace pldm
 {
@@ -34,7 +32,7 @@ class InventoryManager
      *
      *  @param[in] handler - PLDM request handler
      *  @param[in] instanceIdDb - Managing instance ID for PLDM requests
-     *  @param[out] descriptorMap - Populate the firmware identifers for the
+     *  @param[out] descriptorMap - Populate the firmware identifiers for the
      *                              FDs managed by the BMC.
      *  @param[out] componentInfoMap - Populate the component info for the FDs
      *                                 managed by the BMC.
@@ -43,9 +41,8 @@ class InventoryManager
         pldm::requester::Handler<pldm::requester::Request>& handler,
         InstanceIdDb& instanceIdDb, DescriptorMap& descriptorMap,
         ComponentInfoMap& componentInfoMap) :
-        handler(handler),
-        instanceIdDb(instanceIdDb), descriptorMap(descriptorMap),
-        componentInfoMap(componentInfoMap)
+        handler(handler), instanceIdDb(instanceIdDb),
+        descriptorMap(descriptorMap), componentInfoMap(componentInfoMap)
     {}
 
     /** @brief Discover the firmware identifiers and component details of FDs

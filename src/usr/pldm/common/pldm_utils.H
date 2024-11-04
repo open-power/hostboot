@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -34,7 +34,7 @@
 #ifndef PLDM_UTILS_H
 #define PLDM_UTILS_H
 
-#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/file_io.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/file_io.h>
 #include <errl/errlentry.H>
 
 // There is no "invalid file type" enumerator so to denote an invalid

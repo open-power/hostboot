@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef FRU_H
 #define FRU_H
 
@@ -5,12 +6,12 @@
 extern "C" {
 #endif
 
+#include "base.h"
+#include "utils.h"
+
 #include <asm/byteorder.h>
 #include <stddef.h>
 #include <stdint.h>
-
-#include "base.h"
-#include "utils.h"
 
 #define PLDM_GET_FRU_RECORD_TABLE_METADATA_REQ_BYTES  0
 #define PLDM_GET_FRU_RECORD_TABLE_METADATA_RESP_BYTES 19
@@ -32,48 +33,48 @@ enum pldm_fru_completion_codes {
 /** @brief PLDM FRU commands
  */
 enum pldm_fru_commands {
-	PLDM_GET_FRU_RECORD_TABLE_METADATA = 0X01,
-	PLDM_GET_FRU_RECORD_TABLE = 0X02,
-	PLDM_SET_FRU_RECORD_TABLE = 0X03,
-	PLDM_GET_FRU_RECORD_BY_OPTION = 0X04
+	PLDM_GET_FRU_RECORD_TABLE_METADATA = 0x01,
+	PLDM_GET_FRU_RECORD_TABLE = 0x02,
+	PLDM_SET_FRU_RECORD_TABLE = 0x03,
+	PLDM_GET_FRU_RECORD_BY_OPTION = 0x04
 };
 
 /** @brief FRU record types
  */
 enum pldm_fru_record_type {
-	PLDM_FRU_RECORD_TYPE_GENERAL = 0X01,
-	PLDM_FRU_RECORD_TYPE_OEM = 0XFE,
+	PLDM_FRU_RECORD_TYPE_GENERAL = 0x01,
+	PLDM_FRU_RECORD_TYPE_OEM = 0xfe,
 };
 
 /** @brief Encoding type for FRU fields
  */
 enum pldm_fru_field_encoding {
-	PLDM_FRU_ENCODING_UNSPECIFIED = 0X00,
-	PLDM_FRU_ENCODING_ASCII = 0X01,
-	PLDM_FRU_ENCODING_UTF8 = 0X02,
-	PLDM_FRU_ENCODING_UTF16 = 0X03,
-	PLDM_FRU_ENCODING_UTF16LE = 0X04,
-	PLDM_FRU_ENCODING_UTF16BE = 0X05,
+	PLDM_FRU_ENCODING_UNSPECIFIED = 0x00,
+	PLDM_FRU_ENCODING_ASCII = 0x01,
+	PLDM_FRU_ENCODING_UTF8 = 0x02,
+	PLDM_FRU_ENCODING_UTF16 = 0x03,
+	PLDM_FRU_ENCODING_UTF16LE = 0x04,
+	PLDM_FRU_ENCODING_UTF16BE = 0x05,
 };
 
 /** @brief FRU field types
  */
 enum pldm_fru_field_type {
-	PLDM_FRU_FIELD_TYPE_CHASSIS = 0X01,
-	PLDM_FRU_FIELD_TYPE_MODEL = 0X02,
-	PLDM_FRU_FIELD_TYPE_PN = 0X03,
-	PLDM_FRU_FIELD_TYPE_SN = 0X04,
-	PLDM_FRU_FIELD_TYPE_MANUFAC = 0X05,
-	PLDM_FRU_FIELD_TYPE_MANUFAC_DATE = 0X06,
-	PLDM_FRU_FIELD_TYPE_VENDOR = 0X07,
-	PLDM_FRU_FIELD_TYPE_NAME = 0X08,
-	PLDM_FRU_FIELD_TYPE_SKU = 0X09,
-	PLDM_FRU_FIELD_TYPE_VERSION = 0X0A,
-	PLDM_FRU_FIELD_TYPE_ASSET_TAG = 0X0B,
-	PLDM_FRU_FIELD_TYPE_DESC = 0X0C,
-	PLDM_FRU_FIELD_TYPE_EC_LVL = 0X0D,
-	PLDM_FRU_FIELD_TYPE_OTHER = 0X0E,
-	PLDM_FRU_FIELD_TYPE_IANA = 0X0F,
+	PLDM_FRU_FIELD_TYPE_CHASSIS = 0x01,
+	PLDM_FRU_FIELD_TYPE_MODEL = 0x02,
+	PLDM_FRU_FIELD_TYPE_PN = 0x03,
+	PLDM_FRU_FIELD_TYPE_SN = 0x04,
+	PLDM_FRU_FIELD_TYPE_MANUFAC = 0x05,
+	PLDM_FRU_FIELD_TYPE_MANUFAC_DATE = 0x06,
+	PLDM_FRU_FIELD_TYPE_VENDOR = 0x07,
+	PLDM_FRU_FIELD_TYPE_NAME = 0x08,
+	PLDM_FRU_FIELD_TYPE_SKU = 0x09,
+	PLDM_FRU_FIELD_TYPE_VERSION = 0x0a,
+	PLDM_FRU_FIELD_TYPE_ASSET_TAG = 0x0b,
+	PLDM_FRU_FIELD_TYPE_DESC = 0x0c,
+	PLDM_FRU_FIELD_TYPE_EC_LVL = 0x0d,
+	PLDM_FRU_FIELD_TYPE_OTHER = 0x0e,
+	PLDM_FRU_FIELD_TYPE_IANA = 0x0f,
 };
 
 /** @struct pldm_get_fru_record_table_metadata_resp
@@ -303,7 +304,7 @@ int decode_get_fru_record_by_option_req(
  *  @param[in] transfer_flag - The transfer flag that indicates what part of the
  *             transfer this response represents
  *  @param[in] fru_structure_data - FRU Structure Data
- *  @param[in] data_size - Size of FRU Structrue Data
+ *  @param[in] data_size - Size of FRU Structure Data
  *  @param[in,out] msg - Message will be written to this
  *  @return pldm_completion_codes
  *  @note  Caller is responsible for memory alloc and dealloc of param 'msg',
@@ -405,6 +406,7 @@ int decode_get_fru_record_table_resp_safe(
  *
  *  @return pldm_completion_codes
  */
+
 int encode_fru_record(uint8_t *fru_table, size_t total_size, size_t *curr_size,
 		      uint16_t record_set_id, uint8_t record_type,
 		      uint8_t num_frus, uint8_t encoding, uint8_t *tlvs,
@@ -464,9 +466,10 @@ int decode_get_fru_record_by_option_resp(
  *  @return PLDM_SUCCESS if no error occurs. PLDM_ERROR_INVALID_LENGTH if record_size lacks capacity
  *  	    to encode the relevant records.
  */
-int get_fru_record_by_option_check(const uint8_t *table, size_t table_size,
-				   uint8_t *record_table, size_t *record_size,
-				   uint16_t rsi, uint8_t rt, uint8_t ft);
+int get_fru_record_by_option(const uint8_t *table, size_t table_size,
+			     uint8_t *record_table, size_t *record_size,
+			     uint16_t rsi, uint8_t rt, uint8_t ft);
+
 /* SetFruRecordTable */
 
 /** @brief Decode SetFruRecordTable request data

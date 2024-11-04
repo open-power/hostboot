@@ -1,4 +1,1 @@
-libpldm_sources += files(
-  'instance-id.c',
-  'pldm.c'
-  )
+libpldm_sources += files('instance-id.c', 'pldm.c')

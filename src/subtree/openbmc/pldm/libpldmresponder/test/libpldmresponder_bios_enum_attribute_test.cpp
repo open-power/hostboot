@@ -37,10 +37,11 @@ TEST_F(TestBIOSEnumAttribute, CtorTest)
     auto jsonEnumReadOnly = R"({
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
+         "value_names" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Concurrent" ],
-         "readOnly" : true,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName"
+         "read_only" : true,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName"
       })"_json;
 
     BIOSEnumAttribute enumReadOnly{jsonEnumReadOnly, nullptr};
@@ -53,10 +54,11 @@ TEST_F(TestBIOSEnumAttribute, CtorTest)
     auto jsonEnumReadOnlyError = R"({
          "attribute_name" : "CodeUpdatePolicy",
          "possible_value" : [ "Concurrent", "Disruptive" ],
+         "value_names" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Concurrent" ],
-         "readOnly" : true,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName"
+         "read_only" : true,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName"
       })"_json; // possible_value -> possible_values
     EXPECT_THROW((BIOSEnumAttribute{jsonEnumReadOnlyError, nullptr}),
                  Json::exception);
@@ -64,10 +66,11 @@ TEST_F(TestBIOSEnumAttribute, CtorTest)
     auto jsonEnumReadWrite = R"({
          "attribute_name" : "FWBootSide",
          "possible_values" : [ "Perm", "Temp" ],
+         "value_names" : [ "Perm", "Temp" ],
          "default_values" : [ "Perm" ],
-         "readOnly" : false,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName",
+         "read_only" : false,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName",
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -91,10 +94,11 @@ TEST_F(TestBIOSEnumAttribute, ConstructEntry)
     auto jsonEnumReadOnly = R"({
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
+         "value_names" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Disruptive" ],
-         "readOnly" : true,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName"
+         "read_only" : true,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName"
       })"_json;
 
     std::vector<uint8_t> expectedAttrEntry{
@@ -105,7 +109,7 @@ TEST_F(TestBIOSEnumAttribute, ConstructEntry)
         2,    0, /* possible value handle */
         3,    0, /* possible value handle */
         1,       /* number of default value */
-        1        /* defaut value string handle index */
+        1        /* default value string handle index */
     };
 
     std::vector<uint8_t> expectedAttrValueEntry{
@@ -130,10 +134,11 @@ TEST_F(TestBIOSEnumAttribute, ConstructEntry)
     auto jsonEnumReadWrite = R"({
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
+         "value_names" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Disruptive" ],
-         "readOnly" : false,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName",
+         "read_only" : false,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName",
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -182,10 +187,11 @@ TEST_F(TestBIOSEnumAttribute, setAttrValueOnDbus)
     auto jsonEnumReadWrite = R"({
          "attribute_name" : "CodeUpdatePolicy",
          "possible_values" : [ "Concurrent", "Disruptive" ],
+         "value_names" : [ "Concurrent", "Disruptive" ],
          "default_values" : [ "Disruptive" ],
-         "readOnly" : false,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName",
+         "read_only" : false,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName",
          "dbus":
             {
                "object_path" : "/xyz/abc/def",
@@ -208,7 +214,7 @@ TEST_F(TestBIOSEnumAttribute, setAttrValueOnDbus)
         2, 0, /* possible value handle */
         3, 0, /* possible value handle */
         1,    /* number of default value */
-        1     /* defaut value string handle index */
+        1     /* default value string handle index */
     };
 
     ON_CALL(biosStringTable, findString(2))

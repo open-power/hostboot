@@ -2,8 +2,6 @@
 
 #include "libpldmresponder/pdr.hpp"
 
-#include <libpldm/pldm.h>
-
 #include <phosphor-logging/lg2.hpp>
 
 PHOSPHOR_LOG2_USING;
@@ -21,9 +19,8 @@ namespace state_sensor
 const std::vector<uint8_t> pdrTypes{PLDM_STATE_SENSOR_PDR};
 
 DbusToPLDMEvent::DbusToPLDMEvent(
-    int mctp_fd, uint8_t mctp_eid, pldm::InstanceIdDb& instanceIdDb,
+    int /* mctp_fd */, uint8_t mctp_eid, pldm::InstanceIdDb& instanceIdDb,
     pldm::requester::Handler<pldm::requester::Request>* handler) :
-    mctp_fd(mctp_fd),
     mctp_eid(mctp_eid), instanceIdDb(instanceIdDb), handler(handler)
 {}
 
@@ -31,9 +28,9 @@ void DbusToPLDMEvent::sendEventMsg(uint8_t eventType,
                                    const std::vector<uint8_t>& eventDataVec)
 {
     auto instanceId = instanceIdDb.next(mctp_eid);
-    std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
-                                    PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES +
-                                    eventDataVec.size());
+    std::vector<uint8_t> requestMsg(
+        sizeof(pldm_msg_hdr) + PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES +
+        eventDataVec.size());
     auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
 
     auto rc = encode_platform_event_message_req(
@@ -43,13 +40,15 @@ void DbusToPLDMEvent::sendEventMsg(uint8_t eventType,
     if (rc != PLDM_SUCCESS)
     {
         instanceIdDb.free(mctp_eid, instanceId);
-        error("Failed to encode_platform_event_message_req, rc = {RC}", "RC",
-              rc);
+        error(
+            "Failed to encode platform event message request, response code '{RC}'",
+            "RC", rc);
         return;
     }
 
-    auto platformEventMessageResponseHandler =
-        [](mctp_eid_t /*eid*/, const pldm_msg* response, size_t respMsgLen) {
+    auto platformEventMessageResponseHandler = [](mctp_eid_t /*eid*/,
+                                                  const pldm_msg* response,
+                                                  size_t respMsgLen) {
         if (response == nullptr || !respMsgLen)
         {
             error("Failed to receive response for platform event message");
@@ -62,8 +61,8 @@ void DbusToPLDMEvent::sendEventMsg(uint8_t eventType,
         if (rc || completionCode)
         {
             error(
-                "Failed to decode_platform_event_message_resp: rc = {RC}, cc = {CC}",
-                "RC", rc, "CC", static_cast<unsigned>(completionCode));
+                "Failed to decode response of platform event message, response code '{RC}' and completion code '{CC}'",
+                "RC", rc, "CC", completionCode);
         }
     };
 
@@ -72,7 +71,8 @@ void DbusToPLDMEvent::sendEventMsg(uint8_t eventType,
         std::move(requestMsg), std::move(platformEventMessageResponseHandler));
     if (rc)
     {
-        error("Failed to send the platform event message");
+        error("Failed to send the platform event message, response code '{RC}'",
+              "RC", rc);
     }
 }
 
@@ -93,7 +93,7 @@ void DbusToPLDMEvent::sendStateSensorEvent(SensorId sensorId,
 
     size_t sensorEventSize = PLDM_SENSOR_EVENT_DATA_MIN_LENGTH + 1;
     const auto& [dbusMappings, dbusValMaps] = dbusMaps.at(sensorId);
-    for (uint8_t offset = 0; offset < dbusMappings.size(); ++offset)
+    for (size_t offset = 0; offset < dbusMappings.size(); ++offset)
     {
         std::vector<uint8_t> sensorEventDataVec{};
         sensorEventDataVec.resize(sensorEventSize);
@@ -101,7 +101,7 @@ void DbusToPLDMEvent::sendStateSensorEvent(SensorId sensorId,
             sensorEventDataVec.data());
         eventData->sensor_id = sensorId;
         eventData->sensor_event_class_type = PLDM_STATE_SENSOR_STATE;
-        eventData->event_class[0] = offset;
+        eventData->event_class[0] = static_cast<uint8_t>(offset);
         eventData->event_class[1] = PLDM_SENSOR_UNKNOWN;
         eventData->event_class[2] = PLDM_SENSOR_UNKNOWN;
 
@@ -111,52 +111,66 @@ void DbusToPLDMEvent::sendStateSensorEvent(SensorId sensorId,
             pldm::utils::DBusHandler::getBus(),
             propertiesChanged(dbusMapping.objectPath.c_str(),
                               dbusMapping.interface.c_str()),
-            [this, sensorEventDataVec, dbusValueMapping,
-             dbusMapping](auto& msg) mutable {
-            DbusChangedProps props{};
-            std::string intf;
-            msg.read(intf, props);
-            if (!props.contains(dbusMapping.propertyName))
-            {
-                return;
-            }
-            for (const auto& itr : dbusValueMapping)
-            {
-                bool findValue = false;
-                if (dbusMapping.propertyType == "string")
+            [this, sensorEventDataVec, dbusValueMapping, dbusMapping, sensorId,
+             offset](auto& msg) mutable {
+                DbusChangedProps props{};
+                std::string intf;
+                uint8_t previousState = PLDM_SENSOR_UNKNOWN;
+                msg.read(intf, props);
+                if (!props.contains(dbusMapping.propertyName))
                 {
-                    std::string src = std::get<std::string>(itr.second);
-                    std::string dst = std::get<std::string>(
-                        props.at(dbusMapping.propertyName));
-
-                    auto values = pldm::utils::split(src, "||", " ");
-                    for (auto& value : values)
+                    return;
+                }
+                for (const auto& itr : dbusValueMapping)
+                {
+                    bool findValue = false;
+                    if (dbusMapping.propertyType == "string")
                     {
-                        if (value == dst)
+                        std::string src = std::get<std::string>(itr.second);
+                        std::string dst = std::get<std::string>(
+                            props.at(dbusMapping.propertyName));
+
+                        auto values = pldm::utils::split(src, "||", " ");
+                        for (const auto& value : values)
                         {
-                            findValue = true;
-                            break;
+                            if (value == dst)
+                            {
+                                findValue = true;
+                                break;
+                            }
                         }
                     }
-                }
-                else
-                {
-                    findValue = itr.second == props.at(dbusMapping.propertyName)
-                                    ? true
-                                    : false;
-                }
+                    else
+                    {
+                        findValue =
+                            itr.second == props.at(dbusMapping.propertyName)
+                                ? true
+                                : false;
+                    }
 
-                if (findValue)
-                {
-                    auto eventData =
-                        reinterpret_cast<struct pldm_sensor_event_data*>(
-                            sensorEventDataVec.data());
-                    eventData->event_class[1] = itr.first;
-                    eventData->event_class[2] = itr.first;
-                    this->sendEventMsg(PLDM_SENSOR_EVENT, sensorEventDataVec);
-                    break;
+                    if (findValue)
+                    {
+                        auto eventData =
+                            reinterpret_cast<struct pldm_sensor_event_data*>(
+                                sensorEventDataVec.data());
+                        eventData->event_class[1] = itr.first;
+                        if (sensorCacheMap.contains(sensorId) &&
+                            sensorCacheMap[sensorId][offset] !=
+                                PLDM_SENSOR_UNKNOWN)
+                        {
+                            previousState = sensorCacheMap[sensorId][offset];
+                        }
+                        else
+                        {
+                            previousState = itr.first;
+                        }
+                        eventData->event_class[2] = previousState;
+                        this->sendEventMsg(PLDM_SENSOR_EVENT,
+                                           sensorEventDataVec);
+                        updateSensorCacheMaps(sensorId, offset, previousState);
+                        break;
+                    }
                 }
-            }
             });
         stateSensorMatchs.emplace_back(std::move(stateSensorMatch));
     }
@@ -168,7 +182,7 @@ void DbusToPLDMEvent::listenSensorEvent(const pdr_utils::Repo& repo,
     const std::map<Type, sensorEvent> sensorHandlers = {
         {PLDM_STATE_SENSOR_PDR,
          [this](SensorId sensorId, const DbusObjMaps& dbusMaps) {
-        this->sendStateSensorEvent(sensorId, dbusMaps);
+             this->sendStateSensorEvent(sensorId, dbusMaps);
          }}};
 
     pldm_state_sensor_pdr* pdr = nullptr;

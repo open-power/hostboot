@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "base.h"
-#include "oem/ibm/libpldm/host.h"
+#include "oem/ibm/host.h"
 
 #include <gtest/gtest.h>
 

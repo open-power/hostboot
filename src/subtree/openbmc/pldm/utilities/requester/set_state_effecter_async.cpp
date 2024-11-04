@@ -1,6 +1,7 @@
+#include "common/transport.hpp"
+
 #include <libpldm/base.h>
 #include <libpldm/platform.h>
-#include <libpldm/pldm.h>
 
 #include <CLI/CLI.hpp>
 #include <phosphor-logging/lg2.hpp>
@@ -8,7 +9,6 @@
 #include <sdeventplus/source/io.hpp>
 
 #include <array>
-#include <iostream>
 
 using namespace sdeventplus;
 using namespace sdeventplus::source;
@@ -25,11 +25,13 @@ int main(int argc, char** argv)
     app.add_option("-s,--state", state, "New state value")->required();
     CLI11_PARSE(app, argc, argv);
 
+    pldm_tid_t dstTid = static_cast<pldm_tid_t>(mctpEid);
+
     // Encode PLDM Request message
     uint8_t effecterCount = 1;
-    std::array<uint8_t, sizeof(pldm_msg_hdr) + sizeof(effecterId) +
-                            sizeof(effecterCount) +
-                            sizeof(set_effecter_state_field)>
+    std::array<uint8_t,
+               sizeof(pldm_msg_hdr) + sizeof(effecterId) +
+                   sizeof(effecterCount) + sizeof(set_effecter_state_field)>
         requestMsg{};
     auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
     set_effecter_state_field stateField{PLDM_REQUEST_SET, state};
@@ -37,52 +39,56 @@ int main(int argc, char** argv)
                                                    &stateField, request);
     if (rc != PLDM_SUCCESS)
     {
-        error("Message encode failure. PLDM error code = {RC}", "RC", lg2::hex,
-              rc);
+        error(
+            "Failed to encode set state effecter states request, response code '{RC}'",
+            "RC", lg2::hex, rc);
         return -1;
     }
 
-    // Get fd of MCTP socket
-    int fd = pldm_open();
-    if (-1 == fd)
-    {
-        error("Failed to init mctp");
-        return -1;
-    }
+    PldmTransport pldmTransport{};
 
     // Create event loop and add a callback to handle EPOLLIN on fd
     auto event = Event::get_default();
-    auto callback = [=](IO& io, int fd, uint32_t revents) {
+    auto callback = [=,
+                     &pldmTransport](IO& io, int fd, uint32_t revents) mutable {
         if (!(revents & EPOLLIN))
         {
             return;
         }
 
-        uint8_t* responseMsg = nullptr;
-        size_t responseMsgSize{};
-        auto rc = pldm_recv(mctpEid, fd, request->hdr.instance_id, &responseMsg,
-                            &responseMsgSize);
-        if (!rc)
+        if (pldmTransport.getEventSource() != fd)
         {
-            // We've got the response meant for the PLDM request msg that was
-            // sent out
-            io.set_enabled(Enabled::Off);
-            pldm_msg* response = reinterpret_cast<pldm_msg*>(responseMsg);
-            info("Done. PLDM RC = {RC}", "RC", lg2::hex,
-                 static_cast<uint16_t>(response->payload[0]));
-            free(responseMsg);
-            exit(EXIT_SUCCESS);
+            return;
         }
-    };
-    IO io(event, fd, EPOLLIN, std::move(callback));
 
-    // Send PLDM Request message - pldm_send doesn't wait for response
-    rc = pldm_send(mctpEid, fd, requestMsg.data(), requestMsg.size());
+        void* responseMsg = nullptr;
+        size_t responseMsgSize{};
+        pldm_tid_t srcTid;
+        auto rc = pldmTransport.recvMsg(srcTid, responseMsg, responseMsgSize);
+        pldm_msg* response = reinterpret_cast<pldm_msg*>(responseMsg);
+        if (rc || dstTid != srcTid ||
+            !pldm_msg_hdr_correlate_response(&request->hdr, &response->hdr))
+        {
+            return;
+        }
+
+        // We've got the response meant for the PLDM request msg that was sent
+        // out
+        io.set_enabled(Enabled::Off);
+        info(
+            "Done! Got the response for PLDM request message, response code '{RC}'",
+            "RC", lg2::hex, response->payload[0]);
+        free(responseMsg);
+        exit(EXIT_SUCCESS);
+    };
+    IO io(event, pldmTransport.getEventSource(), EPOLLIN, std::move(callback));
+
+    rc = pldmTransport.sendMsg(dstTid, requestMsg.data(), requestMsg.size());
     if (0 > rc)
     {
         error(
-            "Failed to send message/receive response. RC = {RC} errno = {ERR}",
-            "RC", rc, "ERR", errno);
+            "Failed to send message/receive response, response code '{RC}' and error - {ERROR}",
+            "RC", rc, "ERROR", errno);
         return -1;
     }
 

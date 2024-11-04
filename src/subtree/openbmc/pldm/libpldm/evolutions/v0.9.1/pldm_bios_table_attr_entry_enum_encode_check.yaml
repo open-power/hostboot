@@ -1,0 +1,2 @@
+- QualifiedName: pldm_bios_table_attr_entry_enum_encode_check
+  NewName: pldm_bios_table_attr_entry_enum_encode

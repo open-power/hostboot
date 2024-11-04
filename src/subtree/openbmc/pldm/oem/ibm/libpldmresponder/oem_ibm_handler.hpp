@@ -1,5 +1,7 @@
 #pragma once
 
+#include "collect_slot_vpd.hpp"
+#include "common/utils.hpp"
 #include "inband_code_update.hpp"
 #include "libpldmresponder/oem_handler.hpp"
 #include "libpldmresponder/pdr_utils.hpp"
@@ -7,8 +9,12 @@
 #include "requester/handler.hpp"
 
 #include <libpldm/entity.h>
+#include <libpldm/oem/ibm/state_set.h>
 #include <libpldm/platform.h>
-#include <libpldm/state_set_oem_ibm.h>
+
+#include <sdbusplus/bus/match.hpp>
+#include <sdeventplus/event.hpp>
+#include <sdeventplus/utility/timer.hpp>
 
 typedef ibm_oem_pldm_state_set_firmware_update_state_values CodeUpdateState;
 
@@ -16,10 +22,21 @@ namespace pldm
 {
 namespace responder
 {
+using ObjectPath = std::string;
+using AssociatedEntityMap = std::map<ObjectPath, pldm_entity>;
 namespace oem_ibm_platform
 {
 constexpr uint16_t ENTITY_INSTANCE_0 = 0;
 constexpr uint16_t ENTITY_INSTANCE_1 = 1;
+
+constexpr uint32_t BMC_PDR_START_RANGE = 0x00000000;
+constexpr uint32_t BMC_PDR_END_RANGE = 0x00FFFFFF;
+constexpr uint32_t HOST_PDR_START_RANGE = 0x01000000;
+constexpr uint32_t HOST_PDR_END_RANGE = 0x01FFFFFF;
+
+const pldm::pdr::TerminusID HYPERVISOR_TID = 208;
+
+static constexpr uint8_t HEARTBEAT_TIMEOUT_DELTA = 10;
 
 enum SetEventReceiverCount
 {
@@ -30,14 +47,18 @@ class Handler : public oem_platform::Handler
 {
   public:
     Handler(const pldm::utils::DBusHandler* dBusIntf,
-            pldm::responder::CodeUpdate* codeUpdate, int mctp_fd,
+            pldm::responder::CodeUpdate* codeUpdate,
+            pldm::responder::SlotHandler* slotHandler, int mctp_fd,
             uint8_t mctp_eid, pldm::InstanceIdDb& instanceIdDb,
             sdeventplus::Event& event,
             pldm::requester::Handler<pldm::requester::Request>* handler) :
-        oem_platform::Handler(dBusIntf),
-        codeUpdate(codeUpdate), platformHandler(nullptr), mctp_fd(mctp_fd),
+        oem_platform::Handler(dBusIntf), codeUpdate(codeUpdate),
+        slotHandler(slotHandler), platformHandler(nullptr), mctp_fd(mctp_fd),
         mctp_eid(mctp_eid), instanceIdDb(instanceIdDb), event(event),
-        handler(handler)
+        handler(handler),
+        timer(event, std::bind(std::mem_fn(&Handler::setSurvTimer), this,
+                               HYPERVISOR_TID, false)),
+        hostTransitioningToOff(true)
     {
         codeUpdate->setVersions();
         setEventReceiverCnt = 0;
@@ -48,33 +69,91 @@ class Handler : public oem_platform::Handler
             propertiesChanged("/xyz/openbmc_project/state/host0",
                               "xyz.openbmc_project.State.Host"),
             [this](sdbusplus::message_t& msg) {
-            pldm::utils::DbusChangedProps props{};
-            std::string intf;
-            msg.read(intf, props);
-            const auto itr = props.find("CurrentHostState");
-            if (itr != props.end())
-            {
-                pldm::utils::PropertyValue value = itr->second;
-                auto propVal = std::get<std::string>(value);
-                if (propVal == "xyz.openbmc_project.State.Host.HostState.Off")
+                pldm::utils::DbusChangedProps props{};
+                std::string intf;
+                msg.read(intf, props);
+                const auto itr = props.find("CurrentHostState");
+                if (itr != props.end())
                 {
-                    hostOff = true;
-                    setEventReceiverCnt = 0;
-                    disableWatchDogTimer();
+                    pldm::utils::PropertyValue value = itr->second;
+                    auto propVal = std::get<std::string>(value);
+                    if (propVal ==
+                        "xyz.openbmc_project.State.Host.HostState.Off")
+                    {
+                        hostOff = true;
+                        setEventReceiverCnt = 0;
+                        disableWatchDogTimer();
+                        startStopTimer(false);
+                    }
+                    else if (propVal ==
+                             "xyz.openbmc_project.State.Host.HostState.Running")
+                    {
+                        hostOff = false;
+                        hostTransitioningToOff = false;
+                    }
+                    else if (
+                        propVal ==
+                        "xyz.openbmc_project.State.Host.HostState.TransitioningToOff")
+                    {
+                        hostTransitioningToOff = true;
+                    }
                 }
-                else if (propVal ==
-                         "xyz.openbmc_project.State.Host.HostState.Running")
+            });
+
+        powerStateOffMatch = std::make_unique<sdbusplus::bus::match_t>(
+            pldm::utils::DBusHandler::getBus(),
+            propertiesChanged("/xyz/openbmc_project/state/chassis0",
+                              "xyz.openbmc_project.State.Chassis"),
+            [](sdbusplus::message_t& msg) {
+                pldm::utils::DbusChangedProps props{};
+                std::string intf;
+                msg.read(intf, props);
+                const auto itr = props.find("CurrentPowerState");
+                if (itr != props.end())
                 {
-                    hostOff = false;
+                    pldm::utils::PropertyValue value = itr->second;
+                    auto propVal = std::get<std::string>(value);
+                    if (propVal ==
+                        "xyz.openbmc_project.State.Chassis.PowerState.Off")
+                    {
+                        static constexpr auto searchpath =
+                            "/xyz/openbmc_project/inventory/system/chassis/motherboard";
+                        int depth = 0;
+                        std::vector<std::string> powerInterface = {
+                            "xyz.openbmc_project.State.Decorator.PowerState"};
+                        pldm::utils::GetSubTreeResponse response =
+                            pldm::utils::DBusHandler().getSubtree(
+                                searchpath, depth, powerInterface);
+                        for (const auto& [objPath, serviceMap] : response)
+                        {
+                            pldm::utils::DBusMapping dbusMapping{
+                                objPath,
+                                "xyz.openbmc_project.State.Decorator.PowerState",
+                                "PowerState", "string"};
+                            value =
+                                "xyz.openbmc_project.State.Decorator.PowerState.State.Off";
+                            try
+                            {
+                                pldm::utils::DBusHandler().setDbusProperty(
+                                    dbusMapping, value);
+                            }
+                            catch (const std::exception& e)
+                            {
+                                error(
+                                    "Unable to set the slot power state to Off error - {ERROR}",
+                                    "ERROR", e);
+                            }
+                        }
+                    }
                 }
-            }
             });
     }
 
     int getOemStateSensorReadingsHandler(
-        EntityType entityType, pldm::pdr::EntityInstance entityInstance,
-        pldm::pdr::StateSetId stateSetId,
-        pldm::pdr::CompositeCount compSensorCnt,
+        pldm::pdr::EntityType entityType,
+        pldm::pdr::EntityInstance entityInstance,
+        pldm::pdr::ContainerID containerId, pldm::pdr::StateSetId stateSetId,
+        pldm::pdr::CompositeCount compSensorCnt, uint16_t sensorId,
         std::vector<get_sensor_state_field>& stateField);
 
     int oemSetStateEffecterStatesHandler(
@@ -106,6 +185,17 @@ class Handler : public oem_platform::Handler
     virtual uint16_t getNextSensorId()
     {
         return platformHandler->getNextSensorId();
+    }
+
+    /** @brief Get std::map associated with the entity
+     *         key: object path
+     *         value: pldm_entity
+     *
+     *  @return std::map<ObjectPath, pldm_entity>
+     */
+    virtual const AssociatedEntityMap& getAssociateEntityMap()
+    {
+        return platformHandler->getAssociateEntityMap();
     }
 
     /** @brief Method to Generate the OEM PDRs
@@ -181,9 +271,54 @@ class Handler : public oem_platform::Handler
     /** @brief to check the BMC state*/
     int checkBMCState();
 
+    /** @brief update the dbus object paths */
+    void updateOemDbusPaths(std::string& dbusPath);
+
+    /** @brief Method to fetch the last BMC record from the PDR repo
+     *
+     * @param[in] repo - pointer to BMC's primary PDR repo
+     *
+     * @return the last BMC record from the repo
+     */
+    const pldm_pdr_record* fetchLastBMCRecord(const pldm_pdr* repo);
+
+    /** @brief Method to check if the record handle passed is in remote PDR
+     *         record handle range
+     *
+     *  @param[in] record_handle - record handle of the PDR
+     *
+     *  @return true if record handle passed is in host PDR record handle range
+     */
+    bool checkRecordHandleInRange(const uint32_t& record_handle);
+
+    /** *brief Method to call the setEventReceiver command*/
+    void processSetEventReceiver();
+
+    /** @brief Method to call the setEventReceiver through the platform
+     *   handler
+     */
+    virtual void setEventReceiver()
+    {
+        platformHandler->setEventReceiver();
+    }
+
+    /** @brief Method to Enable/Disable timer to see if remote terminus sends
+     *  the surveillance ping and logs informational error if remote terminus
+     *  fails to send the surveillance pings
+     *
+     * @param[in] tid - TID of the remote terminus
+     * @param[in] value - true or false, to indicate if the timer is
+     *                    running or not
+     */
+    void setSurvTimer(uint8_t tid, bool value);
+
     ~Handler() = default;
 
     pldm::responder::CodeUpdate* codeUpdate; //!< pointer to CodeUpdate object
+
+    pldm::responder::SlotHandler*
+        slotHandler; //!< pointer to SlotHandler object
+
     pldm::responder::platform::Handler*
         platformHandler; //!< pointer to PLDM platform handler
 
@@ -201,12 +336,23 @@ class Handler : public oem_platform::Handler
     std::unique_ptr<sdeventplus::source::Defer> startUpdateEvent;
     std::unique_ptr<sdeventplus::source::Defer> systemRebootEvent;
 
+    /** @brief Effecterid to dbus object path map
+     */
+    std::unordered_map<uint16_t, std::string> effecterIdToDbusMap;
+
     /** @brief reference of main event loop of pldmd, primarily used to schedule
      *  work
      */
     sdeventplus::Event& event;
 
   private:
+    /** @brief Method to reset or stop the surveillance timer
+     *
+     * @param[in] value - true or false, to indicate if the timer
+     *                    should be reset or turned off
+     */
+    void startStopTimer(bool value);
+
     /** @brief D-Bus property changed signal match for CurrentPowerState*/
     std::unique_ptr<sdbusplus::bus::match_t> chassisOffMatch;
 
@@ -216,7 +362,15 @@ class Handler : public oem_platform::Handler
     /** @brief D-Bus property changed signal match */
     std::unique_ptr<sdbusplus::bus::match_t> hostOffMatch;
 
+    /** @brief D-Bus property changed signal match */
+    std::unique_ptr<sdbusplus::bus::match_t> powerStateOffMatch;
+
+    /** @brief Timer used for monitoring surveillance pings from host */
+    sdeventplus::utility::Timer<sdeventplus::ClockId::Monotonic> timer;
+
     bool hostOff = true;
+
+    bool hostTransitioningToOff;
 
     int setEventReceiverCnt = 0;
 };

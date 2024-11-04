@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -78,7 +78,7 @@ errlHndl_t getBiosTable(const pldm_bios_table_types i_type,
 
         {
             errl =
-              sendrecv_pldm_request<PLDM_GET_BIOS_TABLE_REQ_BYTES> (
+              sendrecv_pldm_request_no_payload_size<PLDM_GET_BIOS_TABLE_REQ_BYTES> (
                   response_bytes,
                   g_outboundPldmReqMsgQ,
                   encode_get_bios_table_req,
@@ -219,7 +219,7 @@ errlHndl_t getBiosAttrFromHandle(const bios_handle_t i_bios_attr_handle,
 
         {
             errl =
-              sendrecv_pldm_request<PLDM_GET_BIOS_ATTR_CURR_VAL_BY_HANDLE_REQ_BYTES> (
+              sendrecv_pldm_request_no_payload_size<PLDM_GET_BIOS_ATTR_CURR_VAL_BY_HANDLE_REQ_BYTES> (
                   response_bytes,
                   g_outboundPldmReqMsgQ,
                   encode_get_bios_attribute_current_value_by_handle_req,
@@ -471,3 +471,4 @@ errlHndl_t setBiosAttrByHandle(const bios_handle_t i_attribute_handle,
 }
 
 }
+

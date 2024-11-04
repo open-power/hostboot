@@ -1,0 +1,39 @@
+{
+    "Description": {
+        "_comment": [
+            "This JSON file defines the entity type and entity name required for generating D-Bus paths.",
+            "Upon parsing the file, a lookup table is created. This lookup table efficiently maps entity types to their respective names, forming a crucial reference for path generation.",
+            "When the PLDM daemon initializes, it retrieves Platform Descriptor Records (PDRs) from remote terminus. Utilizing the information gleaned from these PDRs alongside the data extracted from the lookup table and the PLDM constructs D-Bus paths.",
+            "These paths play a vital role in exposing the intricate system connection architecture to the Redfish client, facilitating streamlined communication and system interaction.",
+            "For Example:",
+            "PDRType : Entity Association PDR",
+            "containerEntityType    :  [Physical] System (Logical)",
+            "containedEntityType[1] :  [Physical] System chassis (main enclosure)",
+            "containedEntityType[1] :  [Physical] Socket",
+            "containedEntityType[1] :  [Physical] Memory Board",
+            "containedEntityType[1] :  [Physical] Processor Module",
+            "The PLDM will generate path '/xyz/openbmc_project/inventory/system/chassis/motherboard/dcm0' for above Entity Association PDR."
+        ]
+    },
+    "EntityTypeToDbusStringMap": {
+        "5": "temp_sensor",
+        "45": "chassis",
+        "60": "io_board",
+        "61": "adapter",
+        "63": "system_management_module",
+        "64": "motherboard",
+        "67": "dcm",
+        "69": "panel",
+        "80": "io_module",
+        "90": "cooling_device",
+        "93": "fan",
+        "120": "powersupply",
+        "123": "power_converter",
+        "135": "cpu",
+        "185": "connector",
+        "186": "slot",
+        "190": "socket",
+        "32813": "system",
+        "32903": "core"
+    }
+}

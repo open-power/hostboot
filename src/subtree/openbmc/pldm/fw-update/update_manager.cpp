@@ -40,8 +40,8 @@ int UpdateManager::processPackage(const std::filesystem::path& packageFilePath)
             software::Activation::Activations::Activating)
         {
             error(
-                "Activation of PLDM FW update package already in progress, PACKAGE_VERSION={PKG_VERS}",
-                "PKG_VERS", parser->pkgVersion);
+                "Activation of PLDM fw update package for version '{VERSION}' already in progress.",
+                "VERSION", parser->pkgVersion);
             std::filesystem::remove(packageFilePath);
             return -1;
         }
@@ -56,8 +56,8 @@ int UpdateManager::processPackage(const std::filesystem::path& packageFilePath)
     if (!package.good())
     {
         error(
-            "Opening the PLDM FW update package failed, ERR={ERR}, PACKAGEFILE={PKG_FILE}",
-            "ERR", unsigned(errno), "PKG_FILE", packageFilePath.c_str());
+            "Failed to open the PLDM fw update package file '{FILE}', error - {ERROR}.",
+            "ERROR", errno, "FILE", packageFilePath);
         package.close();
         std::filesystem::remove(packageFilePath);
         return -1;
@@ -67,8 +67,9 @@ int UpdateManager::processPackage(const std::filesystem::path& packageFilePath)
     if (packageSize < sizeof(pldm_package_header_information))
     {
         error(
-            "PLDM FW update package length less than the length of the package header information, PACKAGESIZE={PKG_SIZE}",
-            "PKG_SIZE", packageSize);
+            "PLDM fw update package length {SIZE} less than the length of the package header information '{PACKAGE_HEADER_INFO_SIZE}'.",
+            "SIZE", packageSize, "PACKAGE_HEADER_INFO_SIZE",
+            sizeof(pldm_package_header_information));
         package.close();
         std::filesystem::remove(packageFilePath);
         return -1;
@@ -113,7 +114,7 @@ int UpdateManager::processPackage(const std::filesystem::path& packageFilePath)
     }
     catch (const std::exception& e)
     {
-        error("Invalid PLDM package header");
+        error("Invalid PLDM package header, error - {ERROR}", "ERROR", e);
         activation = std::make_unique<Activation>(
             pldm::utils::DBusHandler::getBus(), objPath,
             software::Activation::Activations::Invalid, this);
@@ -207,7 +208,7 @@ void UpdateManager::updateDeviceCompletion(mctp_eid_t eid, bool status)
         auto dur =
             std::chrono::duration<double, std::milli>(endTime - startTime)
                 .count();
-        error("Firmware update time: {DURATION}ms", "DURATION", dur);
+        info("Firmware update time: {DURATION}ms", "DURATION", dur);
         activation->activation(software::Activation::Activations::Active);
     }
     return;

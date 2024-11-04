@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2023
+# Contributors Listed Below - COPYRIGHT 2020,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -30,12 +30,13 @@ MODULE = pldm_extended
 # that is used to configure which libpldm APIs can be compiled (stable,
 # deprecated, undergoing testing).  Only needed by libpldm files.
 CFLAGS += -include ${ROOTPATH}/src/include/usr/pldm/libpldm_config.h
-
+CFLAGS += -include ${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/src/compiler.h
 include ../common/common.mk
 
 OBJS += ${PLDM_EXTENDED_COMMON_OBJS}
 OBJS += pldm_extended_init.o
 OBJS += pldm_entity_ids.o
+
 
 SUBDIRS += test.d
 

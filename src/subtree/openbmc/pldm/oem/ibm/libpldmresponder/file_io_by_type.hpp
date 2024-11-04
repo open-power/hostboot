@@ -36,13 +36,13 @@ class FileHandler
      *  file types need to override this method to do the file specific
      *  processing
      *  @param[in] offset - offset to read
-     *  @param[in/out] length - length to be read mentioned by Host
+     *  @param[in] length - length to be read mentioned by Host
      *  @param[in] address - DMA address
      *  @param[in] oemPlatformHandler - oem handler for PLDM platform related
      *                                  tasks
      *  @return PLDM status code
      */
-    virtual int readIntoMemory(uint32_t offset, uint32_t& length,
+    virtual int readIntoMemory(uint32_t offset, uint32_t length,
                                uint64_t address,
                                oem_platform::Handler* oemPlatformHandler) = 0;
 
@@ -130,7 +130,7 @@ class FileHandler
  *  @param[in] fileHandle - file handle
  */
 
-std::unique_ptr<FileHandler> getHandlerByType(uint16_t fileType,
-                                              uint32_t fileHandle);
+std::unique_ptr<FileHandler>
+    getHandlerByType(uint16_t fileType, uint32_t fileHandle);
 } // namespace responder
 } // namespace pldm

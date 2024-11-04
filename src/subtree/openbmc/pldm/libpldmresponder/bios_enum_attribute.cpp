@@ -4,8 +4,6 @@
 
 #include <phosphor-logging/lg2.hpp>
 
-#include <iostream>
-
 PHOSPHOR_LOG2_USING;
 
 using namespace pldm::utils;
@@ -33,6 +31,12 @@ BIOSEnumAttribute::BIOSEnumAttribute(const Json& entry,
     {
         defaultValues.emplace_back(val);
     }
+
+    Json vdn = entry.at("value_names");
+    for (auto& val : vdn)
+    {
+        valueDisplayNames.emplace_back(val);
+    }
     assert(defaultValues.size() == 1);
     defaultValue = defaultValues[0];
     if (dBusMap.has_value())
@@ -45,8 +49,9 @@ BIOSEnumAttribute::BIOSEnumAttribute(const Json& entry,
 uint8_t BIOSEnumAttribute::getValueIndex(const std::string& value,
                                          const std::vector<std::string>& pVs)
 {
-    auto iter = std::find_if(pVs.begin(), pVs.end(),
-                             [&value](const auto& v) { return v == value; });
+    auto iter = std::find_if(pVs.begin(), pVs.end(), [&value](const auto& v) {
+        return v == value;
+    });
     if (iter == pVs.end())
     {
         throw std::invalid_argument("value must be one of possible value");
@@ -115,7 +120,7 @@ void BIOSEnumAttribute::buildValMap(const Json& dbusVals)
         }
         else
         {
-            error("Unknown D-Bus property type, TYPE={PROP_TYPE}", "PROP_TYPE",
+            error("Unknown D-Bus property type '{TYPE}'", "TYPE",
                   dBusMap->propertyType);
             throw std::invalid_argument("Unknown D-BUS property type");
         }
@@ -144,7 +149,7 @@ uint8_t BIOSEnumAttribute::getAttrValueIndex()
         auto currentValue = iter->second;
         return getValueIndex(currentValue, possibleValues);
     }
-    catch (const std::exception& e)
+    catch (const std::exception&)
     {
         return defaultValueIndex;
     }
@@ -156,7 +161,7 @@ uint8_t BIOSEnumAttribute::getAttrValueIndex(const PropertyValue& propValue)
     {
         return getValueIndex(std::get<std::string>(propValue), possibleValues);
     }
-    catch (const std::exception& e)
+    catch (const std::exception&)
     {
         return getValueIndex(defaultValue, possibleValues);
     }
@@ -179,8 +184,8 @@ void BIOSEnumAttribute::setAttrValueOnDbus(
 
     auto it = std::find_if(valMap.begin(), valMap.end(),
                            [&valueString](const auto& typePair) {
-        return typePair.second == valueString;
-    });
+                               return typePair.second == valueString;
+                           });
     if (it == valMap.end())
     {
         return;
@@ -189,25 +194,34 @@ void BIOSEnumAttribute::setAttrValueOnDbus(
     dbusHandler->setDbusProperty(*dBusMap, it->first);
 }
 
+void BIOSEnumAttribute::populateValueDisplayNamesMap(uint16_t attrHandle)
+{
+    for (auto& vdn : valueDisplayNames)
+    {
+        valueDisplayNamesMap[attrHandle].push_back(vdn);
+    }
+}
+
 void BIOSEnumAttribute::constructEntry(
     const BIOSStringTable& stringTable, Table& attrTable, Table& attrValueTable,
     std::optional<std::variant<int64_t, std::string>> optAttributeValue)
 {
-    auto possibleValuesHandle = getPossibleValuesHandle(stringTable,
-                                                        possibleValues);
+    auto possibleValuesHandle =
+        getPossibleValuesHandle(stringTable, possibleValues);
     std::vector<uint8_t> defaultIndices(1, 0);
     defaultIndices[0] = getValueIndex(defaultValue, possibleValues);
 
     pldm_bios_table_attr_entry_enum_info info = {
         stringTable.findHandle(name),         readOnly,
         (uint8_t)possibleValuesHandle.size(), possibleValuesHandle.data(),
-        (uint8_t)defaultIndices.size(),       defaultIndices.data(),
-    };
+        (uint8_t)defaultIndices.size(),       defaultIndices.data()};
 
-    auto attrTableEntry = table::attribute::constructEnumEntry(attrTable,
-                                                               &info);
+    auto attrTableEntry =
+        table::attribute::constructEnumEntry(attrTable, &info);
     auto [attrHandle, attrType,
           _] = table::attribute::decodeHeader(attrTableEntry);
+
+    populateValueDisplayNamesMap(attrHandle);
 
     std::vector<uint8_t> currValueIndices(1, 0);
 
@@ -240,8 +254,8 @@ int BIOSEnumAttribute::updateAttrVal(Table& newValue, uint16_t attrHdl,
     auto iter = valMap.find(newPropVal);
     if (iter == valMap.end())
     {
-        error("Could not find index for new BIOS enum, value={PROP_VAL}",
-              "PROP_VAL", std::get<std::string>(newPropVal));
+        error("Failed to find index for new BIOS enum value '{VALUE}'", "VALUE",
+              std::get<std::string>(newPropVal));
         return PLDM_ERROR;
     }
     auto currentValue = iter->second;

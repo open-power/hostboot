@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+# SPDX-License-Identifier: LGPL-2.1-or-later
+#
+# Copyright (C) 2013-2020 Andrey Ponomarenko's ABI Laboratory
+# Copyright (C) 2024 Code Construct
+
+# Copied from abi-dumper
+# Written by Andrey Ponomarenko
+sub dumpSorting($)
+{
+    my $Hash = $_[0];
+    return [] if(not $Hash);
+    my @Keys = keys(%{$Hash});
+    return [] if($#Keys<0);
+    if($Keys[0]=~/\A\d+\Z/)
+    { # numbers
+        return [sort {$a<=>$b} @Keys];
+    }
+    else
+    { # strings
+        return [sort {$a cmp $b} @Keys];
+    }
+}
+
+use Data::Dumper;
+
+# Prevent key lengths from changing the indentation
+$Data::Dumper::Indent = 1;
+$Data::Dumper::Sortkeys = \&dumpSorting;
+$/ = undef;
+print Dumper(eval(<>));

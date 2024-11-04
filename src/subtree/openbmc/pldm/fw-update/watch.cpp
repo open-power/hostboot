@@ -35,8 +35,8 @@ Watch::Watch(sd_event* loop, std::function<int(std::string&)> imageCallback) :
         // Store a copy of errno, because the string creation below will
         // invalidate errno due to one more system calls.
         auto error = errno;
-        throw std::runtime_error("inotify_init1 failed, errno="s +
-                                 std::strerror(error));
+        throw std::runtime_error(
+            "inotify_init1 failed, errno="s + std::strerror(error));
     }
 
     wd = inotify_add_watch(fd, "/tmp/images", IN_CLOSE_WRITE);
@@ -44,15 +44,15 @@ Watch::Watch(sd_event* loop, std::function<int(std::string&)> imageCallback) :
     {
         auto error = errno;
         close(fd);
-        throw std::runtime_error("inotify_add_watch failed, errno="s +
-                                 std::strerror(error));
+        throw std::runtime_error(
+            "inotify_add_watch failed, errno="s + std::strerror(error));
     }
 
     auto rc = sd_event_add_io(loop, nullptr, fd, EPOLLIN, callback, this);
     if (0 > rc)
     {
-        throw std::runtime_error("failed to add to event loop, rc="s +
-                                 std::strerror(-rc));
+        throw std::runtime_error(
+            "failed to add to event loop, rc="s + std::strerror(-rc));
     }
 }
 
@@ -82,8 +82,8 @@ int Watch::callback(sd_event_source* /* s */, int fd, uint32_t revents,
     if (0 > bytes)
     {
         auto error = errno;
-        throw std::runtime_error("failed to read inotify event, errno="s +
-                                 std::strerror(error));
+        throw std::runtime_error(
+            "failed to read inotify event, errno="s + std::strerror(error));
     }
 
     auto offset = 0;

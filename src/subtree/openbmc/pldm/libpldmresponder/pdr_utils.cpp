@@ -1,5 +1,6 @@
 #include "pdr.hpp"
 
+#include <libpldm/fru.h>
 #include <libpldm/platform.h>
 
 #include <phosphor-logging/lg2.hpp>
@@ -16,6 +17,15 @@ namespace responder
 {
 namespace pdr_utils
 {
+// Refer: DSP0257_1.0.0 Table 2
+// 7: uint16_t(FRU Record Set Identifier), uint8_t(FRU Record Type),
+// uint8_t(Number of FRU fields), uint8_t(Encoding Type for FRU fields),
+// uint8_t(FRU Field Type), uint8_t(FRU Field Length)
+static constexpr uint8_t fruRecordDataFormatLength = 7;
+
+// // 2: 1byte FRU Field Type, 1byte FRU Field Length
+static constexpr uint8_t fruFieldTypeLength = 2;
+
 pldm_pdr* Repo::getPdr() const
 {
     return repo;
@@ -24,8 +34,8 @@ pldm_pdr* Repo::getPdr() const
 RecordHandle Repo::addRecord(const PdrEntry& pdrEntry)
 {
     uint32_t handle = pdrEntry.handle.recordHandle;
-    int rc = pldm_pdr_add_check(repo, pdrEntry.data, pdrEntry.size, false,
-                                TERMINUS_HANDLE, &handle);
+    int rc = pldm_pdr_add(repo, pdrEntry.data, pdrEntry.size, false,
+                          TERMINUS_HANDLE, &handle);
     if (rc)
     {
         // pldm_pdr_add() assert()ed on failure to add PDR
@@ -38,9 +48,9 @@ const pldm_pdr_record* Repo::getFirstRecord(PdrEntry& pdrEntry)
 {
     constexpr uint32_t firstNum = 0;
     uint8_t* pdrData = nullptr;
-    auto record = pldm_pdr_find_record(getPdr(), firstNum, &pdrData,
-                                       &pdrEntry.size,
-                                       &pdrEntry.handle.nextRecordHandle);
+    auto record =
+        pldm_pdr_find_record(getPdr(), firstNum, &pdrData, &pdrEntry.size,
+                             &pdrEntry.handle.nextRecordHandle);
     if (record)
     {
         pdrEntry.data = pdrData;
@@ -53,9 +63,9 @@ const pldm_pdr_record* Repo::getNextRecord(const pldm_pdr_record* currRecord,
                                            PdrEntry& pdrEntry)
 {
     uint8_t* pdrData = nullptr;
-    auto record = pldm_pdr_get_next_record(getPdr(), currRecord, &pdrData,
-                                           &pdrEntry.size,
-                                           &pdrEntry.handle.nextRecordHandle);
+    auto record =
+        pldm_pdr_get_next_record(getPdr(), currRecord, &pdrData, &pdrEntry.size,
+                                 &pdrEntry.handle.nextRecordHandle);
     if (record)
     {
         pdrEntry.data = pdrData;
@@ -88,8 +98,9 @@ StatestoDbusVal populateMapping(const std::string& type, const Json& dBusValues,
     if (dBusValues.size() != pv.size())
     {
         error(
-            "dBusValues size is not equal to pv size, dBusValues Size: {DBUS_VAL_SIZE}, pv Size: {PV_SIZE}",
-            "DBUS_VAL_SIZE", dBusValues.size(), "PV_SIZE", pv.size());
+            "DBusValues size '{DBUS_VALUE_SIZE}' is not equal to pv size'{PROPERTY_VALUE_SIZE}'.",
+            "DBUS_VALUE_SIZE", dBusValues.size(), "PROPERTY_VALUE_SIZE",
+            pv.size());
         return {};
     }
 
@@ -137,8 +148,7 @@ StatestoDbusVal populateMapping(const std::string& type, const Json& dBusValues,
         }
         else
         {
-            error("Unknown D-Bus property type, TYPE={OTHER_TYPE}",
-                  "OTHER_TYPE", type.c_str());
+            error("Unknown D-Bus property type '{TYPE}'", "TYPE", type);
             return {};
         }
 
@@ -156,6 +166,7 @@ std::tuple<TerminusHandle, SensorID, SensorInfo>
     CompositeSensorStates sensors{};
     auto statesPtr = pdr->possible_states;
     auto compositeSensorCount = pdr->composite_sensor_count;
+    std::vector<StateSetId> stateSetIds{};
 
     while (compositeSensorCount--)
     {
@@ -163,8 +174,8 @@ std::tuple<TerminusHandle, SensorID, SensorInfo>
             reinterpret_cast<const state_sensor_possible_states*>(statesPtr);
         PossibleStates possibleStates{};
         uint8_t possibleStatesPos{};
-        auto updateStates =
-            [&possibleStates, &possibleStatesPos](const bitfield8_t& val) {
+        auto updateStates = [&possibleStates,
+                             &possibleStatesPos](const bitfield8_t& val) {
             for (int i = 0; i < CHAR_BIT; i++)
             {
                 if (val.byte & (1 << i))
@@ -179,6 +190,8 @@ std::tuple<TerminusHandle, SensorID, SensorInfo>
                       updateStates);
 
         sensors.emplace_back(std::move(possibleStates));
+        stateSetIds.emplace_back(state->state_set_id);
+
         if (compositeSensorCount)
         {
             statesPtr += sizeof(state_sensor_possible_states) +
@@ -190,10 +203,86 @@ std::tuple<TerminusHandle, SensorID, SensorInfo>
         std::make_tuple(static_cast<ContainerID>(pdr->container_id),
                         static_cast<EntityType>(pdr->entity_type),
                         static_cast<EntityInstance>(pdr->entity_instance));
-    auto sensorInfo = std::make_tuple(std::move(entityInfo),
-                                      std::move(sensors));
+    auto sensorInfo = std::make_tuple(std::move(entityInfo), std::move(sensors),
+                                      std::move(stateSetIds));
     return std::make_tuple(pdr->terminus_handle, pdr->sensor_id,
                            std::move(sensorInfo));
+}
+
+std::vector<FruRecordDataFormat>
+    parseFruRecordTable(const uint8_t* fruData, size_t fruLen)
+{
+    // Refer: DSP0257_1.0.0 Table 2
+    // 7: uint16_t(FRU Record Set Identifier), uint8_t(FRU Record Type),
+    // uint8_t(Number of FRU fields), uint8_t(Encoding Type for FRU fields),
+    // uint8_t(FRU Field Type), uint8_t(FRU Field Length)
+    if (fruLen < fruRecordDataFormatLength)
+    {
+        error("Invalid FRU length '{LENGTH}' while parsing FRU record table",
+              "LENGTH", fruLen);
+        return {};
+    }
+
+    std::vector<FruRecordDataFormat> frus;
+
+    size_t index = 0;
+    while (index < fruLen)
+    {
+        FruRecordDataFormat fru;
+
+        auto record = reinterpret_cast<const pldm_fru_record_data_format*>(
+            fruData + index);
+        fru.fruRSI = (int)le16toh(record->record_set_id);
+        fru.fruRecType = record->record_type;
+        fru.fruNum = record->num_fru_fields;
+        fru.fruEncodeType = record->encoding_type;
+
+        index += 5;
+
+        std::ranges::for_each(
+            std::views::iota(0, (int)record->num_fru_fields),
+            [fruData, &fru, &index](int) {
+                auto tlv = reinterpret_cast<const pldm_fru_record_tlv*>(
+                    fruData + index);
+                FruTLV frutlv;
+                frutlv.fruFieldType = tlv->type;
+                frutlv.fruFieldLen = tlv->length;
+                frutlv.fruFieldValue.resize(tlv->length);
+                for (const auto& i : std::views::iota(0, (int)tlv->length))
+                {
+                    memcpy(frutlv.fruFieldValue.data() + i, tlv->value + i, 1);
+                }
+                fru.fruTLV.push_back(frutlv);
+
+                // 2: 1byte FRU Field Type, 1byte FRU Field Length
+                index += fruFieldTypeLength + (unsigned)tlv->length;
+            });
+
+        frus.push_back(fru);
+    }
+
+    return frus;
+}
+
+size_t getEffecterDataSize(uint8_t effecterDataSize)
+{
+    switch (effecterDataSize)
+    {
+        case PLDM_EFFECTER_DATA_SIZE_UINT8:
+            return sizeof(uint8_t);
+        case PLDM_EFFECTER_DATA_SIZE_SINT8:
+            return sizeof(int8_t);
+        case PLDM_EFFECTER_DATA_SIZE_UINT16:
+            return sizeof(uint16_t);
+        case PLDM_EFFECTER_DATA_SIZE_SINT16:
+            return sizeof(int16_t);
+        case PLDM_EFFECTER_DATA_SIZE_UINT32:
+            return sizeof(uint32_t);
+        case PLDM_EFFECTER_DATA_SIZE_SINT32:
+            return sizeof(int32_t);
+        default:
+            return 0;
+    }
 }
 
 } // namespace pdr_utils

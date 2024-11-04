@@ -30,16 +30,18 @@ class Invoker
 
     /** @brief Invoke a PLDM command handler
      *
+     *  @param[in] tid - PLDM request TID
      *  @param[in] pldmType - PLDM type code
      *  @param[in] pldmCommand - PLDM command code
      *  @param[in] request - PLDM request message
      *  @param[in] reqMsgLen - PLDM request message size
      *  @return PLDM response message
      */
-    Response handle(Type pldmType, Command pldmCommand, const pldm_msg* request,
-                    size_t reqMsgLen)
+    Response handle(pldm_tid_t tid, Type pldmType, Command pldmCommand,
+                    const pldm_msg* request, size_t reqMsgLen)
     {
-        return handlers.at(pldmType)->handle(pldmCommand, request, reqMsgLen);
+        return handlers.at(pldmType)->handle(tid, pldmCommand, request,
+                                             reqMsgLen);
     }
 
   private:

@@ -69,6 +69,7 @@ class BIOSEnumAttribute : public BIOSAttribute
 
   private:
     std::vector<std::string> possibleValues;
+    std::vector<std::string> valueDisplayNames;
     std::string defaultValue;
 
     /** @brief Get index of the given value in possible values
@@ -87,6 +88,11 @@ class BIOSEnumAttribute : public BIOSAttribute
     std::vector<uint16_t>
         getPossibleValuesHandle(const BIOSStringTable& stringTable,
                                 const std::vector<std::string>& pVs);
+
+    /** @brief Method to populate the valueDisplayNamesMap
+     *  @param[in] attrHandle - attribute handle
+     */
+    void populateValueDisplayNamesMap(uint16_t attrHandle);
 
     using ValMap = std::map<pldm::utils::PropertyValue, std::string>;
 

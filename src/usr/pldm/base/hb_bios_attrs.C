@@ -204,6 +204,18 @@ constexpr uint8_t PLDM_BIOS_STRING_TYPE_HEX = 0x2;
 constexpr size_t MFG_FLAGS_CONVERT_STRING_SIZE = 8;
 constexpr size_t STRTOUL_BASE_VALUE_HEX = 16;
 
+/** @struct attr_table_integer_entry_fields    // copied over from libpldm/bios_table.h was removed in latest libpldm update
+ *
+ *  Fields of an attribute entry of type integer
+ *
+ */
+struct attr_table_integer_entry_fields {
+        uint64_t lower_bound;
+        uint64_t upper_bound;
+        uint32_t scalar_increment;
+        uint64_t default_value;
+} __attribute__((packed));
+
 
 /** @brief Given a size_t s, and a string ptr c,
 *          determine if the strlen of the string pointed
@@ -287,7 +299,7 @@ static std::vector<char> decode_string_handle(const std::vector<uint8_t>& i_stri
     {
         const uint16_t string_length = pldm_bios_table_string_entry_decode_string_length(string_entry);
         string_contents.resize(string_length + 1);
-        assert(pldm_bios_table_string_entry_decode_string_check(string_entry, string_contents.data(), string_contents.size())
+        assert(pldm_bios_table_string_entry_decode_string(string_entry, string_contents.data(), string_contents.size())
                == PLDM_SUCCESS);
     }
 
@@ -543,11 +555,11 @@ errlHndl_t lookupEnumAttrValuesInStringTable(const std::vector<uint8_t>& i_strin
     {
 
     uint8_t num_possible_values = 0;
-    assert(pldm_bios_table_attr_entry_enum_decode_pv_num_check(i_attr_entry, &num_possible_values) == PLDM_SUCCESS);
+    assert(pldm_bios_table_attr_entry_enum_decode_pv_num(i_attr_entry, &num_possible_values) == PLDM_SUCCESS);
     uint16_t possible_values[num_possible_values] = {0};
-    assert(pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(i_attr_entry,
-                                                                possible_values,
-                                                                num_possible_values)
+    assert(pldm_bios_table_attr_entry_enum_decode_pv_hdls(i_attr_entry,
+                                                          possible_values,
+                                                          num_possible_values)
            == PLDM_SUCCESS);
 
     if(i_attr_value[0] != i_attr_value.size() - 1)
@@ -824,7 +836,7 @@ errlHndl_t getDecodedEnumAttr(std::vector<uint8_t>& io_string_table,
     assert(max_possible_value_length > 1, "getDecodedEnumAttr: Passed possible string vector has incorrect size");
     o_decoded_value.resize(max_possible_value_length);
 
-    assert(pldm_bios_table_string_entry_decode_string_check(cur_val_string_entry_ptr,
+    assert(pldm_bios_table_string_entry_decode_string(cur_val_string_entry_ptr,
                                                             o_decoded_value.data(),
                                                             max_possible_value_length)
            == PLDM_SUCCESS);
@@ -1382,7 +1394,7 @@ errlHndl_t systemStringAttrLookup(std::vector<uint8_t>& io_string_table,
     if (stringLength == 0)
     {
         // Get the default string length of the bios attribute
-        assert(pldm_bios_table_attr_entry_string_decode_def_string_length_check(attr_entry_ptr, &stringLength)
+        assert(pldm_bios_table_attr_entry_string_decode_def_string_length(attr_entry_ptr, &stringLength)
                == PLDM_SUCCESS);
         useDefault = true;
     }
@@ -2083,9 +2095,9 @@ errlHndl_t setBiosEnumAttrValue(std::vector<uint8_t>& io_string_table,
     // The values for the enums are the indicies of this possible_values[] array for the
     // coresponding table handles
     uint8_t num_possible_values = 0;
-    assert(pldm_bios_table_attr_entry_enum_decode_pv_num_check(attr_entry_ptr, &num_possible_values) == PLDM_SUCCESS);
+    assert(pldm_bios_table_attr_entry_enum_decode_pv_num(attr_entry_ptr, &num_possible_values) == PLDM_SUCCESS);
     uint16_t possible_values[num_possible_values] = {0};
-    assert(pldm_bios_table_attr_entry_enum_decode_pv_hdls_check(attr_entry_ptr,
+    assert(pldm_bios_table_attr_entry_enum_decode_pv_hdls(attr_entry_ptr,
                                                                 possible_values,
                                                                 num_possible_values)
            == PLDM_SUCCESS);

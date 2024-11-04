@@ -35,9 +35,9 @@ TEST_F(TestBIOSIntegerAttribute, CtorTest)
          "upper_bound" : 15,
          "scalar_increment" : 1,
          "default_value" : 2,
-         "readOnly" : true,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName"
+         "read_only" : true,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName"
       })"_json;
 
     BIOSIntegerAttribute integerReadOnly{jsonIntegerReadOnly, nullptr};
@@ -55,9 +55,9 @@ TEST_F(TestBIOSIntegerAttribute, CtorTest)
          "upper_bound" : 15,
          "scalar_increment" : 1,
          "default_valu" : 2,
-         "readOnly" : true,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName"
+         "read_only" : true,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName"
       })"_json; // default_valu -> default_value
     EXPECT_THROW((BIOSIntegerAttribute{jsonIntegerReadOnlyError, nullptr}),
                  Json::exception);
@@ -68,9 +68,9 @@ TEST_F(TestBIOSIntegerAttribute, CtorTest)
          "upper_bound" : 15,
          "scalar_increment" : 1,
          "default_value" : 0,
-         "readOnly" : false,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName",
+         "read_only" : false,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName",
          "dbus":{
             "object_path" : "/xyz/openbmc_project/avsbus",
             "interface" : "xyz.openbmc.AvsBus.Manager",
@@ -95,9 +95,9 @@ TEST_F(TestBIOSIntegerAttribute, ConstructEntry)
          "upper_bound" : 15,
          "scalar_increment" : 1,
          "default_value" : 2,
-         "readOnly" : true,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName"
+         "read_only" : true,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName"
       })"_json;
 
     std::vector<uint8_t> expectedAttrEntry{
@@ -107,7 +107,7 @@ TEST_F(TestBIOSIntegerAttribute, ConstructEntry)
         1,    0, 0, 0, 0, 0, 0, 0, /* lower bound */
         15,   0, 0, 0, 0, 0, 0, 0, /* upper bound */
         1,    0, 0, 0,             /* scalar increment */
-        2,    0, 0, 0, 0, 0, 0, 0, /* defaut value */
+        2,    0, 0, 0, 0, 0, 0, 0, /* default value */
     };
     std::vector<uint8_t> expectedAttrValueEntry{
         0,    0,                   /* attr handle */
@@ -129,9 +129,9 @@ TEST_F(TestBIOSIntegerAttribute, ConstructEntry)
          "upper_bound" : 15,
          "scalar_increment" : 1,
          "default_value" : 2,
-         "readOnly" : false,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName",
+         "read_only" : false,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName",
          "dbus":{
             "object_path" : "/xyz/openbmc_project/avsbus",
             "interface" : "xyz.openbmc.AvsBus.Manager",
@@ -181,9 +181,9 @@ TEST_F(TestBIOSIntegerAttribute, setAttrValueOnDbus)
          "upper_bound" : 15,
          "scalar_increment" : 1,
          "default_value" : 2,
-         "readOnly" : false,
-         "helpText" : "HelpText",
-         "displayName" : "DisplayName",
+         "read_only" : false,
+         "help_text" : "HelpText",
+         "display_name" : "DisplayName",
          "dbus":{
             "object_path" : "/xyz/openbmc_project/avsbus",
             "interface" : "xyz.openbmc.AvsBus.Manager",

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "common/flight_recorder.hpp"
+#include "common/transport.hpp"
 #include "common/types.hpp"
 #include "common/utils.hpp"
 
 #include <libpldm/base.h>
-#include <libpldm/pldm.h>
 #include <sys/socket.h>
 
 #include <phosphor-logging/lg2.hpp>
@@ -48,8 +48,7 @@ class RequestRetryTimer
     explicit RequestRetryTimer(sdeventplus::Event& event, uint8_t numRetries,
                                std::chrono::milliseconds timeout) :
 
-        event(event),
-        numRetries(numRetries), timeout(timeout),
+        event(event), numRetries(numRetries), timeout(timeout),
         timer(event.get(), std::bind_front(&RequestRetryTimer::callback, this))
     {}
 
@@ -75,8 +74,8 @@ class RequestRetryTimer
         }
         catch (const std::runtime_error& e)
         {
-            error("Failed to start the request timer. RC = {ERR_EXCEP}",
-                  "ERR_EXCEP", e.what());
+            error("Failed to start the request timer, error - {ERROR}", "ERROR",
+                  e);
             return PLDM_ERROR;
         }
 
@@ -89,8 +88,8 @@ class RequestRetryTimer
         auto rc = timer.stop();
         if (rc)
         {
-            error("Failed to stop the request timer. RC = {RC}", "RC",
-                  static_cast<int>(rc));
+            error("Failed to stop the request timer, response code '{RC}'",
+                  "RC", rc);
         }
     }
 
@@ -98,8 +97,8 @@ class RequestRetryTimer
     sdeventplus::Event& event; //!< reference to PLDM daemon's main event loop
     uint8_t numRetries;        //!< number of request retries
     std::chrono::milliseconds
-        timeout;           //!< time to wait between each retry in milliseconds
-    phosphor::Timer timer; //!< manages starting timers and handling timeouts
+        timeout;            //!< time to wait between each retry in milliseconds
+    sdbusplus::Timer timer; //!< manages starting timers and handling timeouts
 
     /** @brief Sends the PLDM request message
      *
@@ -142,7 +141,7 @@ class Request final : public RequestRetryTimer
 
     /** @brief Constructor
      *
-     *  @param[in] fd - fd of the MCTP communication socket
+     *  @param[in] pldm_transport - PLDM transport object
      *  @param[in] eid - endpoint ID of the remote MCTP endpoint
      *  @param[in] currrentSendbuffSize - the current send buffer size
      *  @param[in] event - reference to PLDM daemon's main event loop
@@ -151,21 +150,20 @@ class Request final : public RequestRetryTimer
      *  @param[in] timeout - time to wait between each retry in milliseconds
      *  @param[in] verbose - verbose tracing flag
      */
-    explicit Request(int fd, mctp_eid_t eid, sdeventplus::Event& event,
-                     pldm::Request&& requestMsg, uint8_t numRetries,
-                     std::chrono::milliseconds timeout, int currentSendbuffSize,
+    explicit Request(PldmTransport* pldmTransport, mctp_eid_t eid,
+                     sdeventplus::Event& event, pldm::Request&& requestMsg,
+                     uint8_t numRetries, std::chrono::milliseconds timeout,
                      bool verbose) :
         RequestRetryTimer(event, numRetries, timeout),
-        fd(fd), eid(eid), requestMsg(std::move(requestMsg)),
-        currentSendbuffSize(currentSendbuffSize), verbose(verbose)
+        pldmTransport(pldmTransport), eid(eid),
+        requestMsg(std::move(requestMsg)), verbose(verbose)
     {}
 
   private:
-    int fd;                   //!< file descriptor of MCTP communications socket
-    mctp_eid_t eid;           //!< endpoint ID of the remote MCTP endpoint
-    pldm::Request requestMsg; //!< PLDM request message
-    mutable int currentSendbuffSize; //!< current Send Buffer size
-    bool verbose;                    //!< verbose tracing flag
+    PldmTransport* pldmTransport; //!< PLDM transport
+    mctp_eid_t eid;               //!< endpoint ID of the remote MCTP endpoint
+    pldm::Request requestMsg;     //!< PLDM request message
+    bool verbose;                 //!< verbose tracing flag
 
     /** @brief Sends the PLDM request message on the socket
      *
@@ -177,30 +175,28 @@ class Request final : public RequestRetryTimer
         {
             pldm::utils::printBuffer(pldm::utils::Tx, requestMsg);
         }
-        if (currentSendbuffSize >= 0 &&
-            (size_t)currentSendbuffSize < requestMsg.size())
-        {
-            int oldSendbuffSize = currentSendbuffSize;
-            currentSendbuffSize = requestMsg.size();
-            int res = setsockopt(fd, SOL_SOCKET, SO_SNDBUF,
-                                 &currentSendbuffSize,
-                                 sizeof(currentSendbuffSize));
-            if (res == -1)
-            {
-                error(
-                    "Requester : Failed to set the new send buffer size [bytes] : {CURR_SND_BUF_SIZE} from current size [bytes]: {OLD_BUF_SIZE} , Error : {ERR}",
-                    "CURR_SND_BUF_SIZE", currentSendbuffSize, "OLD_BUF_SIZE",
-                    oldSendbuffSize, "ERR", strerror(errno));
-                return PLDM_ERROR;
-            }
-        }
         pldm::flightrecorder::FlightRecorder::GetInstance().saveRecord(
             requestMsg, true);
-        auto rc = pldm_send(eid, fd, requestMsg.data(), requestMsg.size());
+        const struct pldm_msg_hdr* hdr =
+            (struct pldm_msg_hdr*)(requestMsg.data());
+        if (!hdr->request)
+        {
+            return PLDM_REQUESTER_NOT_REQ_MSG;
+        }
+
+        if (pldmTransport == nullptr)
+        {
+            error("Invalid transport: Unable to send PLDM request");
+            return PLDM_ERROR;
+        }
+
+        auto rc = pldmTransport->sendMsg(static_cast<pldm_tid_t>(eid),
+                                         requestMsg.data(), requestMsg.size());
         if (rc < 0)
         {
-            error("Failed to send PLDM message. RC = {RC}, errno = {ERR}", "RC",
-                  static_cast<int>(rc), "ERR", errno);
+            error(
+                "Failed to send pldmTransport message, response code '{RC}' and error - {ERROR}",
+                "RC", rc, "ERROR", errno);
             return PLDM_ERROR;
         }
         return PLDM_SUCCESS;

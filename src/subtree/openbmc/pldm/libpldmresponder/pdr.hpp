@@ -3,7 +3,7 @@
 #include "common/utils.hpp"
 #include "libpldmresponder/pdr_utils.hpp"
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace pldm
 {
@@ -13,8 +13,6 @@ namespace responder
 
 namespace pdr
 {
-
-constexpr uint8_t BmcMctpEid = 8;
 
 /** @brief Build (if not built already) and retrieve PDR by the PDR types
  *

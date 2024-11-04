@@ -2,8 +2,9 @@
 
 #include "bios_attribute.hpp"
 #include "bios_table.hpp"
+#include "common/instance_id.hpp"
 #include "oem_handler.hpp"
-#include "pldmd/instance_id.hpp"
+#include "platform_config.hpp"
 #include "requester/handler.hpp"
 
 #include <libpldm/bios_table.h>
@@ -47,7 +48,9 @@ using CurrentValue = std::variant<int64_t, std::string>;
 using DefaultValue = std::variant<int64_t, std::string>;
 using OptionString = std::string;
 using OptionValue = std::variant<int64_t, std::string>;
-using Option = std::vector<std::tuple<OptionString, OptionValue>>;
+using ValueDisplayName = std::string;
+using Option =
+    std::vector<std::tuple<OptionString, OptionValue, ValueDisplayName>>;
 using BIOSTableObj =
     std::tuple<AttributeType, ReadonlyStatus, DisplayName, Description,
                MenuPath, CurrentValue, DefaultValue, Option>;
@@ -55,6 +58,7 @@ using BaseBIOSTable = std::map<AttributeName, BIOSTableObj>;
 
 using PendingObj = std::tuple<AttributeType, CurrentValue>;
 using PendingAttributes = std::map<AttributeName, PendingObj>;
+using Callback = std::function<void()>;
 
 /** @class BIOSConfig
  *  @brief Manager BIOS Attributes
@@ -77,14 +81,17 @@ class BIOSConfig
      *  @param[in] eid - MCTP EID of host firmware
      *  @param[in] instanceIdDb - pointer to an InstanceIdDb object
      *  @param[in] handler - PLDM request handler
-     *  @param[in] oemBiosHandler - pointer to oem Bios Handler
+     *  @param[in] platformConfigHandler - pointer to platform config Handler
+     *  @param[in] requestPLDMServiceName - Callback for claiming the PLDM
+     *             service name Called only after building BIOS tables.
      */
     explicit BIOSConfig(
         const char* jsonDir, const char* tableDir,
         pldm::utils::DBusHandler* const dbusHandler, int fd, uint8_t eid,
         pldm::InstanceIdDb* instanceIdDb,
         pldm::requester::Handler<pldm::requester::Request>* handler,
-        pldm::responder::oem_bios::Handler* oemBiosHandler);
+        pldm::responder::platform_config::Handler* platformConfigHandler,
+        pldm::responder::bios::Callback requestPLDMServiceName);
 
     /** @brief Set attribute value on dbus and attribute value table
      *  @param[in] entry - attribute value entry
@@ -123,6 +130,16 @@ class BIOSConfig
     int setBIOSTable(uint8_t tableType, const Table& table,
                      bool updateBaseBIOSTable = true);
 
+    /** @brief Construct the BIOS Attributes and build the tables
+     *         after receiving system type from entity manager.
+     *         Also register the Service Name only if
+     *         System specific Bios attributes are supported
+     *  @param[in] String - System Type
+     *  @param[in] bool - flag to register service name
+     *  @return void
+     */
+    void initBIOSAttributes(const std::string& sysType, bool registerService);
+
   private:
     /** @enum Index into the fields in the BaseBIOSTable
      */
@@ -143,9 +160,6 @@ class BIOSConfig
     pldm::utils::DBusHandler* const dbusHandler;
     BaseBIOSTable baseBIOSTableMaps;
 
-    /** @brief socket descriptor to communicate to host */
-    int fd;
-
     /** @brief MCTP EID of host firmware */
     uint8_t eid;
 
@@ -157,8 +171,11 @@ class BIOSConfig
     /** @brief PLDM request handler */
     pldm::requester::Handler<pldm::requester::Request>* handler;
 
-    /** @brief oem Bios Handler*/
-    pldm::responder::oem_bios::Handler* oemBiosHandler;
+    /** @brief platform config Handler*/
+    pldm::responder::platform_config::Handler* platformConfigHandler;
+
+    /** @brief Callback for registering the PLDM service name */
+    pldm::responder::bios::Callback requestPLDMServiceName;
 
     // vector persists all attributes
     using BIOSAttributes = std::vector<std::unique_ptr<BIOSAttribute>>;
@@ -186,6 +203,13 @@ class BIOSConfig
     void processBiosAttrChangeNotification(
         const DbusChObjProperties& chProperties, uint32_t biosAttrIndex);
 
+    /** @brief Method is used to initiate bios attributes only if system type
+     *  is already populated by entity manager.
+     *  Register the callback if system type is yet to be populated by Entity
+     * manager
+     */
+    void checkSystemTypeAvailability();
+
     /** @brief Construct an attribute and persist it
      *  @tparam T - attribute type
      *  @param[in] entry - json entry
@@ -208,10 +232,11 @@ class BIOSConfig
                         propertiesChanged(dBusMap->objectPath,
                                           dBusMap->interface),
                         [this, biosAttrIndex](sdbusplus::message_t& msg) {
-                    DbusChObjProperties props;
-                    std::string iface;
-                    msg.read(iface, props);
-                    processBiosAttrChangeNotification(props, biosAttrIndex);
+                            DbusChObjProperties props;
+                            std::string iface;
+                            msg.read(iface, props);
+                            processBiosAttrChangeNotification(props,
+                                                              biosAttrIndex);
                         }));
 
                 biosAttrMatch.push_back(
@@ -220,23 +245,23 @@ class BIOSConfig
                         interfacesAdded() + argNpath(0, dBusMap->objectPath),
                         [this, biosAttrIndex, interface = dBusMap->interface](
                             sdbusplus::message_t& msg) {
-                    sdbusplus::message::object_path path;
-                    DbusIfacesAdded interfaces;
+                            sdbusplus::message::object_path path;
+                            DbusIfacesAdded interfaces;
 
-                    msg.read(path, interfaces);
-                    auto ifaceIt = interfaces.find(interface);
-                    if (ifaceIt != interfaces.end())
-                    {
-                        processBiosAttrChangeNotification(ifaceIt->second,
-                                                          biosAttrIndex);
-                    }
+                            msg.read(path, interfaces);
+                            auto ifaceIt = interfaces.find(interface);
+                            if (ifaceIt != interfaces.end())
+                            {
+                                processBiosAttrChangeNotification(
+                                    ifaceIt->second, biosAttrIndex);
+                            }
                         }));
             }
         }
         catch (const std::exception& e)
         {
-            error("Constructs Attribute Error, {ERR_EXCEP}", "ERR_EXCEP",
-                  e.what());
+            error("Failed to construct an attribute, error - {ERROR}", "ERROR",
+                  e);
         }
     }
 

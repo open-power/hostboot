@@ -1,14 +1,12 @@
 #pragma once
 
 #include "libpldmresponder/platform.hpp"
-#include "pldmd/handler.hpp"
-#include "requester/handler.hpp"
 
 #include <libpldm/base.h>
-#include <stdint.h>
 
 #include <sdeventplus/source/event.hpp>
 
+#include <cstdint>
 #include <vector>
 
 using namespace pldm::responder;
@@ -22,30 +20,28 @@ namespace base
 class Handler : public CmdHandler
 {
   public:
-    Handler(uint8_t eid, pldm::InstanceIdDb& instanceIdDb,
-            sdeventplus::Event& event,
-            pldm::responder::oem_platform::Handler* oemPlatformHandler,
-            pldm::requester::Handler<pldm::requester::Request>* handler) :
-        eid(eid),
-        instanceIdDb(instanceIdDb), event(event),
-        oemPlatformHandler(oemPlatformHandler), handler(handler)
+    Handler(sdeventplus::Event& event) : event(event)
     {
-        handlers.emplace(PLDM_GET_PLDM_TYPES,
-                         [this](const pldm_msg* request, size_t payloadLength) {
-            return this->getPLDMTypes(request, payloadLength);
-        });
-        handlers.emplace(PLDM_GET_PLDM_COMMANDS,
-                         [this](const pldm_msg* request, size_t payloadLength) {
-            return this->getPLDMCommands(request, payloadLength);
-        });
-        handlers.emplace(PLDM_GET_PLDM_VERSION,
-                         [this](const pldm_msg* request, size_t payloadLength) {
-            return this->getPLDMVersion(request, payloadLength);
-        });
-        handlers.emplace(PLDM_GET_TID,
-                         [this](const pldm_msg* request, size_t payloadLength) {
-            return this->getTID(request, payloadLength);
-        });
+        handlers.emplace(
+            PLDM_GET_PLDM_TYPES,
+            [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+                return this->getPLDMTypes(request, payloadLength);
+            });
+        handlers.emplace(
+            PLDM_GET_PLDM_COMMANDS,
+            [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+                return this->getPLDMCommands(request, payloadLength);
+            });
+        handlers.emplace(
+            PLDM_GET_PLDM_VERSION,
+            [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+                return this->getPLDMVersion(request, payloadLength);
+            });
+        handlers.emplace(
+            PLDM_GET_TID,
+            [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+                return this->getTID(request, payloadLength);
+            });
     }
 
     /** @brief Handler for getPLDMTypes
@@ -78,7 +74,7 @@ class Handler : public CmdHandler
      *
      *  @param[in] source - sdeventplus event source
      */
-    void processSetEventReceiver(sdeventplus::source::EventBase& source);
+    void _processSetEventReceiver(sdeventplus::source::EventBase& source);
 
     /** @brief Handler for getTID
      *
@@ -88,23 +84,24 @@ class Handler : public CmdHandler
      */
     Response getTID(const pldm_msg* request, size_t payloadLength);
 
+    /* @brief Method to set the oem platform handler in base handler class
+     *
+     * @param[in] handler - oem platform handler
+     */
+    inline void
+        setOemPlatformHandler(pldm::responder::oem_platform::Handler* handler)
+    {
+        oemPlatformHandler = handler;
+    }
+
   private:
-    /** @brief MCTP EID of host firmware */
-    uint8_t eid;
-
-    /** @brief An instance ID database for allocating instance IDs. */
-    InstanceIdDb& instanceIdDb;
-
     /** @brief reference of main event loop of pldmd, primarily used to schedule
      *  work
      */
     sdeventplus::Event& event;
 
     /** @brief OEM platform handler */
-    pldm::responder::oem_platform::Handler* oemPlatformHandler;
-
-    /** @brief PLDM request handler */
-    pldm::requester::Handler<pldm::requester::Request>* handler;
+    pldm::responder::oem_platform::Handler* oemPlatformHandler = nullptr;
 
     /** @brief sdeventplus event source */
     std::unique_ptr<sdeventplus::source::Defer> survEvent;

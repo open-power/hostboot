@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023                             */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -31,7 +31,7 @@
  */
 
 #ifndef LIBPLDM_CONFIG_H
-
+#include <openbmc/pldm/libpldm/include/libpldm/compiler.h>
 // To prevent compiling any of these interfaces add:
 //     __attribute__((error("<type> APIs are not allowed")))
 // where <type> is one of Stable | Testing | Deprecated
@@ -39,5 +39,6 @@
 #define LIBPLDM_ABI_STABLE
 #define LIBPLDM_ABI_TESTING
 #define LIBPLDM_ABI_DEPRECATED
+#define LIBPLDM_ABI_DEPRECATED_UNSAFE
 
 #endif // LIBPLDM_CONFIG_H

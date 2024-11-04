@@ -166,7 +166,7 @@ errlHndl_t getPDR(const PLDM::pldm_outbound_req_msgq_t i_msgQ,
          * decoder again, this time with the real buffer so that it can fill it
          * with data from the message. */
 
-        get_pdr_response response { };
+ get_pdr_response response { };
         uint8_t* payload_buffer = nullptr;
 
         for (int i = 0; i < 2; ++i)
@@ -274,7 +274,6 @@ errlHndl_t getPDR(const PLDM::pldm_outbound_req_msgq_t i_msgQ,
             addBmcErrorCallouts(errl);
             break;
         }
-
         // Used to abort the IPL if PLDM PDRs are marked as having
         // already been seen (integrity check the getPDR flow)
         // If in the future any caller desires to -NOT- do a uniqueness check here
@@ -416,7 +415,7 @@ errlHndl_t getRemotePdrRepository(pldm_pdr* const io_repo)
         for (const auto& pdr : pdrs)
         {
             uint32_t record_handle = pdr.record_handle;
-            assert(pldm_pdr_add_check(io_repo,
+            assert(pldm_pdr_add(io_repo,
                                       pdr.data.data(),
                                       pdr.data.size(),
                                       false,
@@ -1154,7 +1153,7 @@ errlHndl_t sendSetStateEffecterStatesRequest(
         std::vector<uint8_t> response_bytes;
 
         errl =
-            sendrecv_pldm_request<PLDM_SET_STATE_EFFECTER_STATES_REQ_BYTES> (
+            sendrecv_pldm_request_no_payload_size<PLDM_SET_STATE_EFFECTER_STATES_REQ_BYTES> (
               response_bytes,
               g_outboundPldmReqMsgQ,
               encode_set_state_effecter_states_req,

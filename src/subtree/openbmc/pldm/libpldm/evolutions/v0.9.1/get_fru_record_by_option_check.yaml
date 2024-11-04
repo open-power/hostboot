@@ -1,0 +1,2 @@
+- QualifiedName: get_fru_record_by_option_check
+  NewName: get_fru_record_by_option

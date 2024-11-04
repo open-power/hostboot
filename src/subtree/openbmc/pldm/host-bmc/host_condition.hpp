@@ -25,7 +25,7 @@ class Host : public HostIntf
     virtual ~Host() = default;
 
     Host(sdbusplus::bus_t& bus, const std::string& path) :
-        HostIntf(bus, path.c_str()){};
+        HostIntf(bus, path.c_str()) {};
 
     /** @brief Override reads to CurrentFirmwareCondition */
     FirmwareCondition currentFirmwareCondition() const override;

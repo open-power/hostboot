@@ -4,12 +4,13 @@
 #include "libpldmresponder/file_io_type_cert.hpp"
 #include "libpldmresponder/file_io_type_dump.hpp"
 #include "libpldmresponder/file_io_type_lid.hpp"
+#include "libpldmresponder/file_io_type_pcie.hpp"
 #include "libpldmresponder/file_io_type_pel.hpp"
 #include "libpldmresponder/file_table.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
 #include <libpldm/base.h>
-#include <libpldm/file_io.h>
+#include <libpldm/oem/ibm/file_io.h>
 
 #include <nlohmann/json.hpp>
 
@@ -619,8 +620,8 @@ TEST_F(TestFileTable, ReadFileBadPath)
         requestMsg{};
     auto requestMsgPtr = reinterpret_cast<pldm_msg*>(requestMsg.data());
     auto payload_length = requestMsg.size() - sizeof(pldm_msg_hdr);
-    auto request = reinterpret_cast<pldm_read_file_req*>(requestMsg.data() +
-                                                         sizeof(pldm_msg_hdr));
+    auto request = reinterpret_cast<pldm_read_file_req*>(
+        requestMsg.data() + sizeof(pldm_msg_hdr));
 
     request->file_handle = fileHandle;
     request->offset = offset;
@@ -667,8 +668,8 @@ TEST_F(TestFileTable, ReadFileGoodPath)
         requestMsg{};
     auto requestMsgPtr = reinterpret_cast<pldm_msg*>(requestMsg.data());
     auto payload_length = requestMsg.size() - sizeof(pldm_msg_hdr);
-    auto request = reinterpret_cast<pldm_read_file_req*>(requestMsg.data() +
-                                                         sizeof(pldm_msg_hdr));
+    auto request = reinterpret_cast<pldm_read_file_req*>(
+        requestMsg.data() + sizeof(pldm_msg_hdr));
 
     request->file_handle = fileHandle;
     request->offset = offset;
@@ -705,8 +706,8 @@ TEST_F(TestFileTable, ReadFileGoodPath)
     stream.read(buffer.data(), (fileSize - request->offset));
 
     responseMsg = handler.readFile(requestMsgPtr, payload_length);
-    response = reinterpret_cast<pldm_read_file_resp*>(responseMsg.data() +
-                                                      sizeof(pldm_msg_hdr));
+    response = reinterpret_cast<pldm_read_file_resp*>(
+        responseMsg.data() + sizeof(pldm_msg_hdr));
     ASSERT_EQ(response->completion_code, PLDM_SUCCESS);
     ASSERT_EQ(response->length, (fileSize - request->offset));
     ASSERT_EQ(0, memcmp(response->file_data, buffer.data(),
@@ -723,12 +724,12 @@ TEST_F(TestFileTable, WriteFileBadPath)
     uint8_t host_eid = 0;
     int hostSocketFd = 0;
 
-    std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
-                                    PLDM_WRITE_FILE_REQ_BYTES + length);
+    std::vector<uint8_t> requestMsg(
+        sizeof(pldm_msg_hdr) + PLDM_WRITE_FILE_REQ_BYTES + length);
     auto requestMsgPtr = reinterpret_cast<pldm_msg*>(requestMsg.data());
     auto payload_length = requestMsg.size() - sizeof(pldm_msg_hdr);
-    auto request = reinterpret_cast<pldm_write_file_req*>(requestMsg.data() +
-                                                          sizeof(pldm_msg_hdr));
+    auto request = reinterpret_cast<pldm_write_file_req*>(
+        requestMsg.data() + sizeof(pldm_msg_hdr));
 
     using namespace pldm::filetable;
     // Initialise the file table with 2 valid file handles 0 & 1.
@@ -772,12 +773,12 @@ TEST_F(TestFileTable, WriteFileGoodPath)
     uint8_t host_eid = 0;
     int hostSocketFd = 0;
 
-    std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
-                                    PLDM_WRITE_FILE_REQ_BYTES + length);
+    std::vector<uint8_t> requestMsg(
+        sizeof(pldm_msg_hdr) + PLDM_WRITE_FILE_REQ_BYTES + length);
     auto requestMsgPtr = reinterpret_cast<pldm_msg*>(requestMsg.data());
     auto payload_length = requestMsg.size() - sizeof(pldm_msg_hdr);
-    auto request = reinterpret_cast<pldm_write_file_req*>(requestMsg.data() +
-                                                          sizeof(pldm_msg_hdr));
+    auto request = reinterpret_cast<pldm_write_file_req*>(
+        requestMsg.data() + sizeof(pldm_msg_hdr));
 
     using namespace pldm::filetable;
     // Initialise the file table with 2 valid file handles 0 & 1.
@@ -883,6 +884,14 @@ TEST(getHandlerByType, allPaths)
     certType = dynamic_cast<CertHandler*>(handler.get());
     ASSERT_TRUE(certType != nullptr);
 
+    handler = getHandlerByType(PLDM_FILE_TYPE_PCIE_TOPOLOGY, fileHandle);
+    auto pcieTopologyType = dynamic_cast<PCIeInfoHandler*>(handler.get());
+    ASSERT_TRUE(pcieTopologyType != nullptr);
+
+    handler = getHandlerByType(PLDM_FILE_TYPE_CABLE_INFO, fileHandle);
+    auto cableInfoType = dynamic_cast<PCIeInfoHandler*>(handler.get());
+    ASSERT_TRUE(cableInfoType != nullptr);
+
     handler = getHandlerByType(PLDM_FILE_TYPE_ROOT_CERT, fileHandle);
     certType = dynamic_cast<CertHandler*>(handler.get());
     ASSERT_TRUE(certType != nullptr);
@@ -980,6 +989,7 @@ TEST(readFileByType, testReadFile)
     auto fd = mkstemp(tmplt);
     std::vector<uint8_t> in = {100, 10, 56, 78, 34, 56, 79, 235, 111};
     rc = write(fd, in.data(), in.size());
+    ASSERT_NE(rc, PLDM_ERROR);
     close(fd);
     length = in.size() + 1000;
     rc = handler.readFile(tmplt, 0, length, response);

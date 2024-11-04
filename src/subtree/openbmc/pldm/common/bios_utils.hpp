@@ -64,7 +64,7 @@ class BIOSTableIter
 
         /** @brief Get the entry pointed by the iterator
          *
-         *  @return Poiner to the entry
+         *  @return Pointer to the entry
          */
         const T* operator*() const
         {

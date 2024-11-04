@@ -1,8 +1,7 @@
 #include "libpldmresponder/bios_table.hpp"
 
-#include <stdlib.h>
-
 #include <algorithm>
+#include <cstdlib>
 #include <vector>
 
 #include <gtest/gtest.h>

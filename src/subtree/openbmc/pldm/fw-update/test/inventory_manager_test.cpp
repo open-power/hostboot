@@ -16,7 +16,7 @@ class InventoryManagerTest : public testing::Test
   protected:
     InventoryManagerTest() :
         event(sdeventplus::Event::get_default()), instanceIdDb(),
-        reqHandler(fd, event, instanceIdDb, false, 90000, seconds(1), 2,
+        reqHandler(nullptr, event, instanceIdDb, false, seconds(1), 2,
                    milliseconds(100)),
         inventoryManager(reqHandler, instanceIdDb, outDescriptorMap,
                          outComponentInfoMap)

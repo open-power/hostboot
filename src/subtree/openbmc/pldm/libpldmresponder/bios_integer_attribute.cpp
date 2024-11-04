@@ -37,10 +37,10 @@ BIOSIntegerAttribute::BIOSIntegerAttribute(const Json& entry,
     if (rc != PLDM_SUCCESS)
     {
         error(
-            "Wrong filed for integer attribute, ATTRIBUTE_NAME={ATTR_NAME} ERRMSG= {ERR_MSG} LOWER_BOUND={LOW_BOUND} UPPER_BOUND={UPPER_BOUND} DEFAULT_VALUE={DEF_VAL} SCALAR_INCREMENT={SCALAR_INCREMENT}",
-            "ATTR_NAME", attr.c_str(), "ERR_MSG", errmsg, "LOW_BOUND",
+            "Wrong field for integer attribute '{ATTRIBUTE}', error '{ERROR}', lower bound '{LOW_BOUND}', upper bound '{UPPER_BOUND}', default value '{DEFAULT_VALUE}' and scalar increment '{SCALAR_INCREMENT}'",
+            "ATTRIBUTE", attr, "ERROR", errmsg, "LOW_BOUND",
             integerInfo.lowerBound, "UPPER_BOUND", integerInfo.upperBound,
-            "DEF_VAL", integerInfo.defaultValue, "SCALAR_INCREMENT",
+            "DEFAULT_VALUE", integerInfo.defaultValue, "SCALAR_INCREMENT",
             integerInfo.scalarIncrement);
         throw std::invalid_argument("Wrong field for integer attribute");
     }
@@ -97,7 +97,7 @@ void BIOSIntegerAttribute::setAttrValueOnDbus(
                                             static_cast<double>(currentValue));
     }
 
-    error("Unsupported property type on dbus: {DBUS_PROP}", "DBUS_PROP",
+    error("Unsupported property type '{TYPE}' on dbus", "TYPE",
           dBusMap->propertyType);
     throw std::invalid_argument("dbus type error");
 }
@@ -112,8 +112,8 @@ void BIOSIntegerAttribute::constructEntry(
         integerInfo.scalarIncrement,  integerInfo.defaultValue,
     };
 
-    auto attrTableEntry = table::attribute::constructIntegerEntry(attrTable,
-                                                                  &info);
+    auto attrTableEntry =
+        table::attribute::constructIntegerEntry(attrTable, &info);
 
     auto [attrHandle, attrType,
           _] = table::attribute::decodeHeader(attrTableEntry);
@@ -177,8 +177,8 @@ uint64_t BIOSIntegerAttribute::getAttrValue(const PropertyValue& propertyValue)
     }
     else
     {
-        error("Unsupported property type for getAttrValue: {DBUS_PROP}",
-              "DBUS_PROP", dBusMap->propertyType);
+        error("Unsupported property type '{TYPE}' for getAttrValue", "TYPE",
+              dBusMap->propertyType);
         throw std::invalid_argument("dbus type error");
     }
     return value;
@@ -201,8 +201,10 @@ uint64_t BIOSIntegerAttribute::getAttrValue()
     }
     catch (const std::exception& e)
     {
-        error("Get Integer Attribute Value Error: AttributeName = {ATTR_NAME}",
-              "ATTR_NAME", name);
+        error(
+            "Error getting integer attribute '{ATTRIBUTE}' at path '{PATH}' and interface '{INTERFACE}' for property '{PROPERTY}', error - {ERROR}",
+            "ATTRIBUTE", name, "PATH", dBusMap->objectPath, "INTERFACE",
+            dBusMap->interface, "PROPERTY", dBusMap->propertyName, "ERROR", e);
         return integerInfo.defaultValue;
     }
 }
@@ -221,8 +223,8 @@ void BIOSIntegerAttribute::generateAttributeEntry(
     const std::variant<int64_t, std::string>& attributevalue,
     Table& attrValueEntry)
 {
-    attrValueEntry.resize(sizeof(pldm_bios_attr_val_table_entry) +
-                          sizeof(int64_t) - 1);
+    attrValueEntry.resize(
+        sizeof(pldm_bios_attr_val_table_entry) + sizeof(int64_t) - 1);
 
     auto entry = reinterpret_cast<pldm_bios_attr_val_table_entry*>(
         attrValueEntry.data());

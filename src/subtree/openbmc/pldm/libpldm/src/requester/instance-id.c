@@ -1,7 +1,8 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 // NOLINTNEXTLINE(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp)
-#define _GNU_SOURCE
-#include "libpldm/instance-id.h"
-#include "libpldm/pldm.h"
+#include <libpldm/instance-id.h>
+#include <libpldm/pldm.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -97,20 +98,28 @@ int pldm_instance_db_destroy(struct pldm_instance_db *ctx)
 	return 0;
 }
 
+static const struct flock pldm_instance_id_cfls = {
+	.l_type = F_RDLCK,
+	.l_whence = SEEK_SET,
+	.l_len = 1,
+};
+
+static const struct flock pldm_instance_id_cflx = {
+	.l_type = F_WRLCK,
+	.l_whence = SEEK_SET,
+	.l_len = 1,
+};
+
+static const struct flock pldm_instance_id_cflu = {
+	.l_type = F_UNLCK,
+	.l_whence = SEEK_SET,
+	.l_len = 1,
+};
+
 LIBPLDM_ABI_STABLE
 int pldm_instance_id_alloc(struct pldm_instance_db *ctx, pldm_tid_t tid,
 			   pldm_instance_id_t *iid)
 {
-	static const struct flock cfls = {
-		.l_type = F_RDLCK,
-		.l_whence = SEEK_SET,
-		.l_len = 1,
-	};
-	static const struct flock cflx = {
-		.l_type = F_WRLCK,
-		.l_whence = SEEK_SET,
-		.l_len = 1,
-	};
 	uint8_t l_iid;
 
 	if (!iid) {
@@ -136,7 +145,7 @@ int pldm_instance_id_alloc(struct pldm_instance_db *ctx, pldm_tid_t tid,
 		loff = tid * PLDM_INST_ID_MAX + l_iid;
 
 		/* Reserving the TID's IID. Done via a shared lock */
-		flop = cfls;
+		flop = pldm_instance_id_cfls;
 		flop.l_start = loff;
 		rc = fcntl(ctx->lock_db_fd, F_OFD_SETLK, &flop);
 		if (rc < 0) {
@@ -158,14 +167,16 @@ int pldm_instance_id_alloc(struct pldm_instance_db *ctx, pldm_tid_t tid,
 		 * practice because this is prevented by the lock database being
 		 * opened O_RDONLY.
 		 */
-		flop = cflx;
+		flop = pldm_instance_id_cflx;
 		flop.l_start = loff;
 		rc = fcntl(ctx->lock_db_fd, F_OFD_GETLK, &flop);
 		if (rc < 0) {
 			if (errno == EAGAIN || errno == EINTR) {
-				return -EAGAIN;
+				rc = -EAGAIN;
+				goto release_cfls;
 			}
-			return -EPROTO;
+			rc = -EPROTO;
+			goto release_cfls;
 		}
 
 		/* F_UNLCK is the type of the lock if we could successfully
@@ -176,8 +187,23 @@ int pldm_instance_id_alloc(struct pldm_instance_db *ctx, pldm_tid_t tid,
 			*iid = l_iid;
 			return 0;
 		}
+
 		if (flop.l_type != F_RDLCK) {
+			rc = -EPROTO;
+		}
+
+	release_cfls:
+		flop = pldm_instance_id_cflu;
+		flop.l_start = loff;
+		if (fcntl(ctx->lock_db_fd, F_OFD_SETLK, &flop) < 0) {
+			if (errno == EAGAIN || errno == EINTR) {
+				return -EAGAIN;
+			}
 			return -EPROTO;
+		}
+
+		if (rc < 0) {
+			return rc;
 		}
 	}
 
@@ -190,11 +216,6 @@ LIBPLDM_ABI_STABLE
 int pldm_instance_id_free(struct pldm_instance_db *ctx, pldm_tid_t tid,
 			  pldm_instance_id_t iid)
 {
-	static const struct flock cflu = {
-		.l_type = F_UNLCK,
-		.l_whence = SEEK_SET,
-		.l_len = 1,
-	};
 	struct flock flop;
 	int rc;
 
@@ -203,7 +224,7 @@ int pldm_instance_id_free(struct pldm_instance_db *ctx, pldm_tid_t tid,
 		return -EINVAL;
 	}
 
-	flop = cflu;
+	flop = pldm_instance_id_cflu;
 	flop.l_start = tid * PLDM_INST_ID_MAX + iid;
 	rc = fcntl(ctx->lock_db_fd, F_OFD_SETLK, &flop);
 	if (rc < 0) {

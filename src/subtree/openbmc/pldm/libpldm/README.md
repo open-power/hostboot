@@ -48,8 +48,13 @@ meson setup builddir && meson test -C builddir
 
 ## Working with `libpldm`
 
-The ABIs (symbols, generally functions) exposed by the library are separated
-into three categories:
+Components of the library ABI[^1] (loosely, functions) are separated into three
+categories:
+
+[^1]: ["library API + compiler ABI = library ABI"][libstdc++-library-abi]
+
+[libstdc++-library-abi]:
+  https://gcc.gnu.org/onlinedocs/libstdc++/manual/abi.html
 
 1. Stable
 2. Testing
@@ -59,6 +64,25 @@ Applications depending on `libpldm` should aim to only use functions from the
 stable category. However, this may not always be possible. What to do when
 required functions fall into the deprecated or testing categories is outlined
 below.
+
+### What does it mean to mark a function as stable?
+
+Marking a function as stable makes the following promise to users of the
+library:
+
+> We will not remove or change the symbol name, argument count, argument types,
+> return type, or interpretation of relevant values for the function before
+> first marking it as `LIBPLDM_ABI_DEPRECATED` and then subsequently creating a
+> tagged release
+
+Marking a function as stable does _not_ promise that it is free of
+implementation bugs. It is just a promise that the prototype won't change
+without notice.
+
+Given this, it is always okay to implement functions marked stable in terms of
+functions marked testing inside of libpldm. If we remove or change the prototype
+of a function marked testing the only impact is that we need to fix up any call
+sites of that function in the same patch.
 
 ### The ABI lifecycle
 
@@ -123,9 +147,9 @@ These annotations go immediately before your function signature:
 ```c
 LIBPLDM_ABI_TESTING
 pldm_requester_rc_t pldm_transport_send_msg(struct pldm_transport *transport,
-					    pldm_tid_t tid,
-					    const void *pldm_req_msg,
-					    size_t req_msg_len)
+                                            pldm_tid_t tid,
+                                            const void *pldm_req_msg,
+                                            size_t req_msg_len)
 {
     ...
 }
@@ -153,7 +177,7 @@ Use of `libpldm` as a subproject is both supported and encouraged.
 subproject configuration syntax:
 
 ```shell
-$ meson setup ... -Dlibpldm:abi=deprecated,stable,testing ...
+meson setup ... -Dlibpldm:abi=deprecated,stable,testing ...
 ```
 
 ## OEM/vendor-specific functions
@@ -164,7 +188,7 @@ Following directory structure has to be used:
 ```text
  libpldm
     |---- include/libpldm
-    |        |---- oem/<oem_name>/libpldm
+    |        |---- oem/<oem_name>
     |                    |----<oem based .h files>
     |---- src
     |        |---- oem/<oem_name>
@@ -183,23 +207,11 @@ should be placed under the respective folder hierarchy as mentioned in the above
 figure. They must be adhering to the rules mentioned under the libpldm section
 above.
 
-Once the above is done a meson option has to be created in
-`libpldm/meson_options.txt` with its mapped compiler flag to enable conditional
-compilation.
+Once the above is done a meson option has to be created in `meson.options` with
+its mapped compiler flag to enable conditional compilation.
 
 For consistency would recommend using "oem-<oem_name>".
 
-The `libpldm/meson.build` and the corresponding source file(s) will need to
-incorporate the logic of adding its mapped compiler flag to allow conditional
-compilation of the code.
-
-## Requester APIs
-
-The pldm requester API's are present in `src/requester` folder and they are
-intended to provide API's to interact with the desired underlying transport
-layer to send/receive pldm messages.
-
-**NOTE** : In the current state, the requester API's in the repository only
-works with [specific transport mechanism](https://github.com/openbmc/libmctp) &
-these are going to change in future & probably aren't appropriate to be writing
-code against.
+The `meson.build` and the corresponding source file(s) will need to incorporate
+the logic of adding its mapped compiler flag to allow conditional compilation of
+the code.

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/instance_id.hpp"
 #include "common/utils.hpp"
 
 #include <err.h>
@@ -26,7 +27,6 @@ namespace helper
 {
 
 constexpr uint8_t PLDM_ENTITY_ID = 8;
-constexpr uint8_t MCTP_MSG_TYPE_PLDM = 1;
 using ordered_json = nlohmann::ordered_json;
 
 /** @brief print the input message if pldmverbose is enabled
@@ -60,11 +60,11 @@ static inline void DisplayInJson(const ordered_json& data)
     std::cout << data.dump(4) << std::endl;
 }
 
-/** @brief MCTP socket read/recieve
+/** @brief MCTP socket read/receive
  *
  *  @param[in]  requestMsg - Request message to compare against loopback
- *              message recieved from mctp socket
- *  @param[out] responseMsg - Response buffer recieved from mctp socket
+ *              message received from mctp socket
+ *  @param[out] responseMsg - Response buffer received from mctp socket
  *  @param[in]  pldmVerbose - verbosity flag - true/false
  *
  *  @return -   0 on success.
@@ -78,12 +78,13 @@ class CommandInterface
   public:
     explicit CommandInterface(const char* type, const char* name,
                               CLI::App* app) :
-        pldmType(type),
-        commandName(name), mctp_eid(PLDM_ENTITY_ID), pldmVerbose(false),
-        instanceId(0)
+        pldmType(type), commandName(name), mctp_eid(PLDM_ENTITY_ID),
+        pldmVerbose(false), instanceId(0)
     {
         app->add_option("-m,--mctp_eid", mctp_eid, "MCTP endpoint ID");
         app->add_flag("-v, --verbose", pldmVerbose);
+        app->add_option("-n, --retry-count", numRetries,
+                        "Number of retry when PLDM request message is failed");
         app->callback([&]() { exec(); });
     }
 
@@ -137,6 +138,8 @@ class CommandInterface
 
   protected:
     uint8_t instanceId;
+    pldm::InstanceIdDb instanceIdDb;
+    uint8_t numRetries = 0;
 };
 
 } // namespace helper

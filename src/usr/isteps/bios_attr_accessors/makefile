@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2023
+# Contributors Listed Below - COPYRIGHT 2021,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -24,7 +24,7 @@
 # IBM_PROLOG_END_TAG
 ROOTPATH = ../../../..
 
-EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/include/libpldm
+EXTRAINCDIR += ${ROOTPATH}/src/subtree/openbmc/pldm/libpldm/include/libpldm/oem/ibm/
 
 OBJS += bios_attr_parsers.o
 OBJS += bios_attr_setters.o

@@ -32,7 +32,7 @@
 
 #include <errl/errlentry.H>
 #include <vector>
-#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/file_io.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/file_io.h>
 
 namespace PLDM {
 

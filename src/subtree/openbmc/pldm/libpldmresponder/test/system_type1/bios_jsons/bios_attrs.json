@@ -1,0 +1,148 @@
+{
+    "entries": [
+        {
+            "attribute_type": "enum",
+            "attribute_name": "HMCManagedState",
+            "possible_values": ["On", "Off"],
+            "default_values": ["On"],
+            "read_only": false,
+            "help_text": "HMCManagedState HelpText",
+            "display_name": "HMCManagedState DisplayName",
+            "dbus": {
+                "object_path": "/xyz/abc/def",
+                "interface": "xyz.openbmc_project.HMCManaged.State",
+                "property_name": "State",
+                "property_type": "string",
+                "property_values": [
+                    "xyz.openbmc_project.State.On",
+                    "xyz.openbmc_project.State.Off"
+                ]
+            }
+        },
+        {
+            "attribute_type": "enum",
+            "attribute_name": "FWBootSide",
+            "possible_values": ["Perm", "Temp"],
+            "default_values": ["Temp"],
+            "read_only": false,
+            "help_text": "FWBootSide HelpText",
+            "display_name": "FWBootSide DisplayName",
+            "dbus": {
+                "object_path": "/xyz/abc/def",
+                "interface": "xyz.openbmc.FWBoot.Side",
+                "property_name": "Side",
+                "property_type": "bool",
+                "property_values": [true, false]
+            }
+        },
+        {
+            "attribute_type": "enum",
+            "attribute_name": "InbandCodeUpdate",
+            "possible_values": ["Allowed", "NotAllowed"],
+            "default_values": ["Allowed"],
+            "read_only": false,
+            "help_text": "InbandCodeUpdate HelpText",
+            "display_name": "InbandCodeUpdate DisplayName",
+            "dbus": {
+                "object_path": "/xyz/abc/def",
+                "interface": "xyz.openbmc.InBandCodeUpdate",
+                "property_name": "Policy",
+                "property_type": "uint8_t",
+                "property_values": [0, 1]
+            }
+        },
+        {
+            "attribute_type": "enum",
+            "attribute_name": "CodeUpdatePolicy",
+            "possible_values": ["Concurrent", "Disruptive"],
+            "default_values": ["Concurrent"],
+            "read_only": true,
+            "help_text": "CodeUpdatePolicy HelpText",
+            "display_name": "CodeUpdatePolicy DisplayName"
+        },
+        {
+            "attribute_type": "integer",
+            "attribute_name": "VDD_AVSBUS_RAIL",
+            "lower_bound": 0,
+            "upper_bound": 15,
+            "scalar_increment": 1,
+            "default_value": 0,
+            "read_only": false,
+            "help_text": "VDD_AVSBUS_RAIL HelpText",
+            "display_name": "VDD_AVSBUS_RAIL DisplayName",
+            "dbus": {
+                "object_path": "/xyz/openbmc_project/avsbus",
+                "interface": "xyz.openbmc.AvsBus.Manager",
+                "property_type": "uint8_t",
+                "property_name": "Rail"
+            }
+        },
+        {
+            "attribute_type": "integer",
+            "attribute_name": "SBE_IMAGE_MINIMUM_VALID_ECS",
+            "lower_bound": 1,
+            "upper_bound": 30,
+            "scalar_increment": 1,
+            "default_value": 2,
+            "read_only": true,
+            "help_text": "SBE_IMAGE_MINIMUM_VALID_ECS HelpText",
+            "display_name": "SBE_IMAGE_MINIMUM_VALID_ECS DisplayName"
+        },
+        {
+            "attribute_type": "integer",
+            "attribute_name": "INTEGER_INVALID_CASE",
+            "lower_bound": 1,
+            "upper_bound": 15,
+            "scalar_increment": 2,
+            "default_value": 3,
+            "read_only": true,
+            "help_text": "INTEGER_INVALID_CASE HelpText",
+            "display_name": "INTEGER_INVALID_CASE DisplayName"
+        },
+        {
+            "attribute_type": "string",
+            "attribute_name": "str_example1",
+            "string_type": "ASCII",
+            "minimum_string_length": 1,
+            "maximum_string_length": 100,
+            "default_string": "abc",
+            "read_only": false,
+            "help_text": "str_example1 HelpText",
+            "display_name": "str_example1 DisplayName",
+            "dbus": {
+                "object_path": "/xyz/abc/def",
+                "interface": "xyz.openbmc_project.str_example1.value",
+                "property_name": "Str_example1",
+                "property_type": "string"
+            }
+        },
+        {
+            "attribute_type": "string",
+            "attribute_name": "str_example2",
+            "string_type": "Hex",
+            "minimum_string_length": 0,
+            "maximum_string_length": 200,
+            "default_string": "",
+            "read_only": false,
+            "help_text": "str_example2 HelpText",
+            "display_name": "str_example2 DisplayName",
+            "dbus": {
+                "object_path": "/xyz/abc/def",
+                "interface": "xyz.openbmc_project.str_example2.value",
+                "property_name": "Str_example2",
+                "property_type": "string"
+            }
+        },
+        {
+            "attribute_type": "string",
+            "attribute_name": "str_example3",
+            "string_type": "Unknown",
+            "minimum_string_length": 1,
+            "maximum_string_length": 100,
+            "default_string": "ef",
+            "read_only": true,
+            "help_text": "str_example3 HelpText",
+            "display_name": "str_example3 DisplayName"
+        }
+    ]
+}

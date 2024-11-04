@@ -22,6 +22,35 @@ inline bool operator==(const DBusMapping& lhs, const DBusMapping& rhs)
 } // namespace utils
 } // namespace pldm
 
+class GetManagedEmptyObject
+{
+  public:
+    static pldm::utils::ObjectValueTree
+        getManagedObj(const char* /*service*/, const char* /*path*/)
+    {
+        return pldm::utils::ObjectValueTree{};
+    }
+};
+
+class GetManagedObject
+{
+  public:
+    static pldm::utils::ObjectValueTree
+        getManagedObj(const char* /*service*/, const char* /*path*/)
+    {
+        return pldm::utils::ObjectValueTree{
+            {sdbusplus::message::object_path("/foo/bar"),
+             {{"foo.bar",
+               {{"Functional", true},
+                {"Enabled", true},
+                {"PrettyName", "System"},
+                {"Present", true},
+                {"SerialNumber", "abc123z"},
+                {"Model", "1234 - 00Z"},
+                {"SubModel", "S0"}}}}}};
+    }
+};
+
 class MockdBusHandler : public pldm::utils::DBusHandler
 {
   public:
@@ -37,6 +66,10 @@ class MockdBusHandler : public pldm::utils::DBusHandler
                 (const char*, const char*, const char*), (const override));
 
     MOCK_METHOD(pldm::utils::GetSubTreeResponse, getSubtree,
+                (const std::string&, int, const std::vector<std::string>&),
+                (const override));
+
+    MOCK_METHOD(pldm::utils::GetSubTreePathsResponse, getSubTreePaths,
                 (const std::string&, int, const std::vector<std::string>&),
                 (const override));
 };

@@ -4,7 +4,6 @@
 
 #include <phosphor-logging/lg2.hpp>
 
-#include <iostream>
 #include <tuple>
 #include <variant>
 
@@ -26,17 +25,17 @@ BIOSStringAttribute::BIOSStringAttribute(const Json& entry,
     auto iter = strTypeMap.find(strTypeTmp);
     if (iter == strTypeMap.end())
     {
-        error(
-            "Wrong string type, STRING_TYPE={STR_TYPE} ATTRIBUTE_NAME={ATTR_NAME}",
-            "STR_TYP", strTypeTmp, "ATTR_NAME", name);
+        error("Wrong string type '{TYPE}' for attribute '{ATTRIBUTE}'", "TYPE",
+              strTypeTmp, "ATTRIBUTE", name);
         throw std::invalid_argument("Wrong string type");
     }
     stringInfo.stringType = static_cast<uint8_t>(iter->second);
 
     stringInfo.minLength = entry.at("minimum_string_length");
     stringInfo.maxLength = entry.at("maximum_string_length");
-    stringInfo.defLength = entry.at("default_string_length");
     stringInfo.defString = entry.at("default_string");
+    stringInfo.defLength =
+        static_cast<uint16_t>((stringInfo.defString).length());
 
     pldm_bios_table_attr_entry_string_info info = {
         0,
@@ -53,10 +52,11 @@ BIOSStringAttribute::BIOSStringAttribute(const Json& entry,
     if (rc != PLDM_SUCCESS)
     {
         error(
-            "Wrong field for string attribute, ATTRIBUTE_NAME={ATTR_NAME} ERRMSG={ERR_MSG} MINIMUM_STRING_LENGTH={MIN_LEN} MAXIMUM_STRING_LENGTH={MAX_LEN} DEFAULT_STRING_LENGTH={DEF_LEN} DEFAULT_STRING={DEF_STR}",
-            "ATTR_NAME", name, "ERR_MSG", errmsg, "MIN_LEN",
-            stringInfo.minLength, "MAX_LEN", stringInfo.maxLength, "DEF_LEN",
-            stringInfo.defLength, "DEF_STR", stringInfo.defString);
+            "Wrong field for string attribute '{ATTRIBUTE}', error '{ERROR}', minimum string length '{MINIMUM_STRING_LENGTH}', maximum string length '{MAXIMUM_STRING_LENGTH}', default string length '{DEFAULT_STRING_LENGTH}' and default string '{DEFAULT_STRING}'",
+            "ATTRIBUTE", name, "ERROR", errmsg, "MINIMUM_STRING_LENGTH",
+            stringInfo.minLength, "MAXIMUM_STRING_LENGTH", stringInfo.maxLength,
+            "DEFAULT_STRING_LENGTH", stringInfo.defLength, "DEFAULT_STRING",
+            stringInfo.defString);
         throw std::invalid_argument("Wrong field for string attribute");
     }
 }
@@ -89,8 +89,10 @@ std::string BIOSStringAttribute::getAttrValue()
     }
     catch (const std::exception& e)
     {
-        error("Get String Attribute Value Error: AttributeName = {ATTR_NAME}",
-              "ATTR_NAME", name);
+        error(
+            "Failed to get string attribute '{ATTRIBUTE}' at path '{PATH}' and interface '{INTERFACE}' for property '{PROPERTY}', error - {ERROR}",
+            "ATTRIBUTE", name, "PATH", dBusMap->objectPath, "INTERFACE",
+            dBusMap->interface, "PROPERTY", dBusMap->propertyName, "ERROR", e);
         return stringInfo.defString;
     }
 }
@@ -106,8 +108,8 @@ void BIOSStringAttribute::constructEntry(
         stringInfo.defString.data(),
     };
 
-    auto attrTableEntry = table::attribute::constructStringEntry(attrTable,
-                                                                 &info);
+    auto attrTableEntry =
+        table::attribute::constructStringEntry(attrTable, &info);
     auto [attrHandle, attrType,
           _] = table::attribute::decodeHeader(attrTableEntry);
 
@@ -145,8 +147,7 @@ int BIOSStringAttribute::updateAttrVal(Table& newValue, uint16_t attrHdl,
     }
     catch (const std::bad_variant_access& e)
     {
-        error("invalid value passed for the property, error: {ERR_EXCEP}",
-              "ERR_EXCEP", e.what());
+        error("Invalid value passed for the property - {ERROR}", "ERROR", e);
         return PLDM_ERROR;
     }
     return PLDM_SUCCESS;
@@ -159,8 +160,8 @@ void BIOSStringAttribute::generateAttributeEntry(
     std::string value = std::get<std::string>(attributevalue);
     uint16_t len = value.size();
 
-    attrValueEntry.resize(sizeof(pldm_bios_attr_val_table_entry) +
-                          sizeof(uint16_t) + len - 1);
+    attrValueEntry.resize(
+        sizeof(pldm_bios_attr_val_table_entry) + sizeof(uint16_t) + len - 1);
 
     auto entry = reinterpret_cast<pldm_bios_attr_val_table_entry*>(
         attrValueEntry.data());

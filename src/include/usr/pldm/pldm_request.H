@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -139,6 +139,21 @@ errlHndl_t sendrecv_pldm_request_impl(pldm_outbound_req_msgq_t i_msgQ,
                                       std::unique_ptr<MCTP::outgoing_mctp_msg> i_msg,
                                       std::vector<uint8_t>& o_response_pldm_body);
 #endif
+/** @brief pldm_request_handler
+ *
+ *        Encode and send a PLDM request with a fixed-size payload section and a
+ *        subsequent variable-size payload section to the BMC, and then receive
+ *        a reply.
+ *
+ * @param[out] o_response_body   Array of bytes of the response from the BMC
+ * @param[in] i_msgQ             Handle to the outgoing PLDM request message queue
+ * @param[in] msgbuf            pointer to the outgoing request
+ * @return errlHndl_t                Error if any, otherwise nullptr
+ */
+
+errlHndl_t pldm_request_handler(std::vector<uint8_t>& o_response_body,
+                                 pldm_outbound_req_msgq_t i_msgQ,
+                                 std::unique_ptr<MCTP::outgoing_mctp_msg> msgbuf);
 
 /* @brief sendrecv_pldm_request
  *
@@ -182,44 +197,72 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_body,
 
     const auto pldm_request = reinterpret_cast<pldm_msg*>(msgbuf->data);
 
+
     const int encoder_rc = i_encoder(i_args...,
-                                     pldm_request,
-                                     MsgSize + i_payload_size);
+                                    pldm_request,
+                                    MsgSize + i_payload_size);
+    assert(encoder_rc == PLDM_SUCCESS,
+        "PLDM message encoder at address %p failed with code %d",
+        i_encoder,
+        encoder_rc);
+
+
+    errl = pldm_request_handler(o_response_body, i_msgQ, move(msgbuf));
+
+    return errl;
+}
+
+/* @brief sendrecv_pldm_request_no_payload_size
+ *
+ *        Encode and send a PLDM request with a fixed-size payload section and a
+ *        subsequent variable-size payload section to the BMC, and then receive
+ *        a reply.
+ *
+ * @param[out] o_response_body   Array of bytes of the response from the BMC
+ * @param[in] i_payload_size     Length of the variable length payload
+ * @param[in] i_msgQ             Handle to the outgoing PLDM request message queue
+ * @param[in] i_encoder          Message encoder function
+ * @param[in] i_args...          Arguments to the encoder function, not including the
+ *                               pldm_msg* and payload size.
+ * @return errlHndl_t            Error if any, otherwise nullptr.
+ */
+template<size_t MsgSize, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request_no_payload_size(std::vector<uint8_t>& o_response_body,
+                                 const size_t i_payload_size,
+                                 pldm_outbound_req_msgq_t i_msgQ,
+                                 const Encoder i_encoder,
+                                 Args... i_args)
+{
+    using pldm_mctp_msgbuf_t = pldm_mctp_msgbuf<MsgSize>;
+
+    errlHndl_t errl = nullptr;
+    o_response_body.clear();
+
+    const size_t total_buffer_size = sizeof(pldm_mctp_msgbuf_t) + i_payload_size;
+
+    std::unique_ptr<MCTP::outgoing_mctp_msg> msgbuf {
+        reinterpret_cast<MCTP::outgoing_mctp_msg*>(new uint8_t[total_buffer_size])
+    };
+
+    msgbuf->data_size = total_buffer_size - sizeof(pldm_mctp_msgbuf_t::mctp_msg);
+    msgbuf->hdr.tag_owner = true; // Hostboot is originating a new request
+    msgbuf->hdr.msg_tag = 0;      // message so tag owner = 0b1.  Lower layer of
+                                  // MCTP stack will create a unique tag at the
+                                  // message serialization point, since message
+                                  // retries/etc. can change the tag.
+    msgbuf->hdr.mctp_msg_type = MCTP::MCTP_MSG_TYPE_PLDM;
+
+    const auto pldm_request = reinterpret_cast<pldm_msg*>(msgbuf->data);
+
+    const int encoder_rc = i_encoder(i_args...,
+                                     pldm_request);
 
     assert(encoder_rc == PLDM_SUCCESS,
            "PLDM message encoder at address %p failed with code %d",
            i_encoder,
            encoder_rc);
 
-#ifdef __HOSTBOOT_RUNTIME
-    PLDM::set_waiting_for_response(true);
-    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
-
-    errl = sendrecv_pldm_request_impl(msgbuf.get(), o_response_body);
-
-    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
-    PLDM::set_waiting_for_response(false);
-
-    // If a request message was queued while waiting for a response,
-    // clear out that request as HBRT will never do a host_callback
-    // for incoming MCTP packets that we aren't ready to handle.
-    // Hostboot will rely on BMC to send the requests again.
-    // Doing a PLDM host callback on a non-empty next request has
-    // caused an mctp queue overrun
-    const auto& skipReqMsg = PLDM::get_next_request();
-
-    if (!skipReqMsg.empty())
-    {
-        PLDM_INF("sendrecv_pldm_request: discarding queued PLDM request as "
-                 "new one arrived while hostboot was busy handling another request.");
-        PLDM_INF_BIN("Discarded PLDM request msg header",
-                     skipReqMsg.pldm_data.data(),
-                     std::min(skipReqMsg.pldm_data.size(), sizeof(pldm_msg_hdr)));
-        PLDM::clear_next_request();
-    }
-#else
-    errl = sendrecv_pldm_request_impl(i_msgQ, move(msgbuf), o_response_body);
-#endif
+    errl = pldm_request_handler(o_response_body, i_msgQ, move(msgbuf));
 
     return errl;
 }
@@ -251,7 +294,70 @@ errlHndl_t sendrecv_pldm_request(std::vector<uint8_t>& o_response_body,
                                           i_encoder,
                                           i_args...);
 }
-
+/* @brief sendrecv_pldm_request_no_payload_size
+ *
+ *        Encode and send a PLDM request with a fixed-size payload section and a
+ *        subsequent variable-size payload section to the BMC, and then receive
+ *        a reply.
+ *
+ * @param[out] o_response_body   Array of bytes of the response from the BMC
+ * @param[in] i_payload_bytes    Variable-length payload for the message
+ * @param[in] i_msgQ             Handle to the outgoing PLDM request message queue
+ * @param[in] i_encoder          Message encoder function
+ * @param[in] i_args...          Arguments to the encoder function, not including the
+ *                               pldm_msg* and payload size.
+ * @return errlHndl_t            Error if any, otherwise nullptr.
+ */
+template<size_t MsgSize, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request_no_payload_size(std::vector<uint8_t>& o_response_body,
+                                 const std::vector<uint8_t>& i_payload_bytes,
+                                 const pldm_outbound_req_msgq_t i_msgQ,
+                                 const Encoder i_encoder,
+                                 Args... i_args)
+{
+    return sendrecv_pldm_request_no_payload_size<MsgSize>(o_response_body,
+                                          i_payload_bytes.size(),
+                                          i_msgQ,
+                                          i_encoder,
+                                          i_args...);
+}
+/* @brief Makes a PLDM request with a fixed-size payload to the BMC, and returns
+ *        the bytes making up the response.
+ *
+ * Explicit template parameters:
+ *
+ * size_t      MsgSize           The size of the PLDM message payload
+ *                               (e.g. PLDM_GET_PDR_REQ_BYTES)
+ *
+ * Runtime parameters:
+ *
+ * @param[out] o_response_body   The bytes of the response. Cleared before
+ *                               storing response (i.e. does not concatenate).
+ * @param[in]  i_msgQ            The PLDM message queue.
+ * @param[in]  i_encoder         The function to encode the PLDM request with
+ *                               the given arguments.
+ * @param[in]  i_args            The arguments to i_encoder which comprise the
+ *                               request (not including the last two pldm_msg
+ *                               or message size parameters).
+ * @return errlHndl_t            Contains error log if one occurred otherwise
+ *                               returns nullptr
+ *
+ * @note                         If message encoding fails, assert triggers.
+ */
+template<size_t MsgSize, typename Encoder, typename... Args>
+errlHndl_t sendrecv_pldm_request_no_payload_size(std::vector<uint8_t>& o_response_body,
+                                 const pldm_outbound_req_msgq_t i_msgQ,
+                                 const Encoder i_encoder,
+                                 Args... i_args)
+{
+    return sendrecv_pldm_request_no_payload_size<MsgSize>(o_response_body,
+                                          std::vector<uint8_t> { }, // Empty variable-size payload
+                                          // portion (this does not make any
+                                          // dynamic allocation at runtime)
+                                          i_msgQ,
+                                          i_encoder,
+                                          i_args...);
+}
 /* @brief Makes a PLDM request with a fixed-size payload to the BMC, and returns
  *        the bytes making up the response.
  *
@@ -318,7 +424,7 @@ errlHndl_t decode_pldm_response(const Decoder i_decoder,
     if(decoder_rc != PLDM_SUCCESS)
     {
         const uint64_t response_hdr_data = pldmHdrToUint64(*pldm_response);
-
+        PLDM_ERR("decode_pldm_response: %d is the response size used by the decoder", (i_data.size() - sizeof(pldm_msg_hdr)) );
         /*@
          * @errortype  ERRL_SEV_UNRECOVERABLE
          * @moduleid   MOD_DECODE_RESPONSE
@@ -344,3 +450,4 @@ errlHndl_t decode_pldm_response(const Decoder i_decoder,
 }
 
 #endif
+

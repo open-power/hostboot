@@ -1,0 +1,49 @@
+#!/usr/bin/bash
+
+set -eou pipefail
+
+# Path to the meson build directory
+: "${BUILD:=build}"
+
+ABSPATH="$(command -v "$0" | xargs realpath)"
+
+# Deal with relative paths
+: "${LIBPLDM_ROOT:="${ABSPATH%scripts/apply-renames}"}"
+
+# Deal with clang including its version in all the tool names
+: "${CLANG_VERSION:=18}"
+: "${CLANG_RENAME:="$(command -v clang-rename-"${CLANG_VERSION}")"}"
+: "${CLANG_APPLY_REPLACEMENTS:="$(command -v clang-apply-replacements-"${CLANG_VERSION}")"}"
+
+# Make it parallel
+: "${JOBS:="$(nproc)"}"
+
+# Allow clang-rename to pick up the per-file flags from the compile command
+# database
+: "${CRFLAGS:="-p=."}"
+
+CRINPUT=$(realpath --relative-to "$BUILD" "$1")
+
+# Deal with clang-rename segfaulting when file paths from the compile command
+# database don't resolve properly
+cd "$BUILD"
+
+# We export the fixes to yaml files so we can apply them all in one hit later
+trap "rm -f fixes.*.yaml" EXIT
+
+# See `man 7 gitglossary` for some explanation of the pathspec provided to `git
+# ls-files`, which, separately, is also subject to bash's brace expansion. See
+# "Brace Expansion" in `man bash`.
+# shellcheck disable=SC2016
+git ls-files -- ':/:*.[ch]'{,pp} |
+xargs -I '{}' -n 1 -P "$JOBS" -- \
+    bash -c '"$0" --force --input="$1" --export-fixes="$(mktemp fixes.XXXXX.yaml)" "$2" "$3"' \
+    "$CLANG_RENAME" "$CRINPUT" "$CRFLAGS" '{}'
+
+# Now apply the generated fixes
+"$CLANG_APPLY_REPLACEMENTS" ..
+
+# Deal with subsequent runs of clang-rename bailing out because it's modified
+# the symbol declaration in the headers, and then is surprised by the lack of a
+# declaration for the as-yet un-renamed symbol in the implementation
+git -C "$LIBPLDM_ROOT" restore -- include

@@ -1,10 +1,12 @@
-#include "config.h"
-
 #include "pldm_cmd_helper.hpp"
 
+#include "common/transport.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
-#include <libpldm/pldm.h>
+#include <libpldm/transport.h>
+#include <libpldm/transport/af-mctp.h>
+#include <libpldm/transport/mctp-demux.h>
+#include <poll.h>
 #include <systemd/sd-bus.h>
 
 #include <sdbusplus/server.hpp>
@@ -18,147 +20,14 @@ namespace pldmtool
 {
 namespace helper
 {
-/*
- * Initialize the socket, send pldm command & recieve response from socket
- *
- */
-int mctpSockSendRecv(const std::vector<uint8_t>& requestMsg,
-                     std::vector<uint8_t>& responseMsg, bool pldmVerbose)
-{
-    const char devPath[] = "\0mctp-mux";
-    int returnCode = 0;
-
-    int sockFd = socket(AF_UNIX, SOCK_SEQPACKET, 0);
-    if (-1 == sockFd)
-    {
-        returnCode = -errno;
-        std::cerr << "Failed to create the socket : RC = " << sockFd << "\n";
-        return returnCode;
-    }
-    Logger(pldmVerbose, "Success in creating the socket : RC = ", sockFd);
-
-    struct sockaddr_un addr
-    {};
-    addr.sun_family = AF_UNIX;
-
-    memcpy(addr.sun_path, devPath, sizeof(devPath) - 1);
-
-    CustomFD socketFd(sockFd);
-    int result = connect(socketFd(), reinterpret_cast<struct sockaddr*>(&addr),
-                         sizeof(devPath) + sizeof(addr.sun_family) - 1);
-    if (-1 == result)
-    {
-        returnCode = -errno;
-        std::cerr << "Failed to connect to socket : RC = " << returnCode
-                  << "\n";
-        return returnCode;
-    }
-    Logger(pldmVerbose, "Success in connecting to socket : RC = ", returnCode);
-
-    auto pldmType = MCTP_MSG_TYPE_PLDM;
-    result = write(socketFd(), &pldmType, sizeof(pldmType));
-    if (-1 == result)
-    {
-        returnCode = -errno;
-        std::cerr << "Failed to send message type as pldm to mctp : RC = "
-                  << returnCode << "\n";
-        return returnCode;
-    }
-    Logger(
-        pldmVerbose,
-        "Success in sending message type as pldm to mctp : RC = ", returnCode);
-
-    result = send(socketFd(), requestMsg.data(), requestMsg.size(), 0);
-    if (-1 == result)
-    {
-        returnCode = -errno;
-        std::cerr << "Write to socket failure : RC = " << returnCode << "\n";
-        return returnCode;
-    }
-    Logger(pldmVerbose, "Write to socket successful : RC = ", result);
-
-    // Read the response from socket
-    ssize_t peekedLength = recv(socketFd(), nullptr, 0, MSG_TRUNC | MSG_PEEK);
-    if (0 == peekedLength)
-    {
-        std::cerr << "Socket is closed : peekedLength = " << peekedLength
-                  << "\n";
-        return returnCode;
-    }
-    else if (peekedLength <= -1)
-    {
-        returnCode = -errno;
-        std::cerr << "recv() system call failed : RC = " << returnCode << "\n";
-        return returnCode;
-    }
-    else
-    {
-        auto reqhdr = reinterpret_cast<const pldm_msg_hdr*>(&requestMsg[2]);
-        do
-        {
-            ssize_t peekedLength = recv(socketFd(), nullptr, 0,
-                                        MSG_PEEK | MSG_TRUNC);
-            responseMsg.resize(peekedLength);
-            auto recvDataLength =
-                recv(socketFd(), reinterpret_cast<void*>(responseMsg.data()),
-                     peekedLength, 0);
-            auto resphdr =
-                reinterpret_cast<const pldm_msg_hdr*>(&responseMsg[2]);
-            if (recvDataLength == peekedLength &&
-                resphdr->instance_id == reqhdr->instance_id &&
-                resphdr->request != PLDM_REQUEST)
-            {
-                Logger(pldmVerbose, "Total length:", recvDataLength);
-                break;
-            }
-            else if (recvDataLength != peekedLength)
-            {
-                std::cerr << "Failure to read response length packet: length = "
-                          << recvDataLength << "\n";
-                return returnCode;
-            }
-        } while (1);
-    }
-
-    returnCode = shutdown(socketFd(), SHUT_RDWR);
-    if (-1 == returnCode)
-    {
-        returnCode = -errno;
-        std::cerr << "Failed to shutdown the socket : RC = " << returnCode
-                  << "\n";
-        return returnCode;
-    }
-
-    Logger(pldmVerbose, "Shutdown Socket successful :  RC = ", returnCode);
-    return PLDM_SUCCESS;
-}
 
 void CommandInterface::exec()
 {
-    static constexpr auto pldmObjPath = "/xyz/openbmc_project/pldm";
-    static constexpr auto pldmRequester = "xyz.openbmc_project.PLDM.Requester";
-    auto& bus = pldm::utils::DBusHandler::getBus();
-    try
-    {
-        auto service = pldm::utils::DBusHandler().getService(pldmObjPath,
-                                                             pldmRequester);
-        auto method = bus.new_method_call(service.c_str(), pldmObjPath,
-                                          pldmRequester, "GetInstanceId");
-        method.append(mctp_eid);
-        auto reply = bus.call(
-            method,
-            std::chrono::duration_cast<microsec>(sec(DBUS_TIMEOUT)).count());
-        reply.read(instanceId);
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "GetInstanceId D-Bus call failed, MCTP id = "
-                  << (unsigned)mctp_eid << ", error = " << e.what() << "\n";
-        return;
-    }
+    instanceId = instanceIdDb.next(mctp_eid);
     auto [rc, requestMsg] = createRequestMsg();
     if (rc != PLDM_SUCCESS)
     {
+        instanceIdDb.free(mctp_eid, instanceId);
         std::cerr << "Failed to encode request message for " << pldmType << ":"
                   << commandName << " rc = " << rc << "\n";
         return;
@@ -169,24 +38,19 @@ void CommandInterface::exec()
 
     if (rc != PLDM_SUCCESS)
     {
+        instanceIdDb.free(mctp_eid, instanceId);
         std::cerr << "pldmSendRecv: Failed to receive RC = " << rc << "\n";
         return;
     }
 
     auto responsePtr = reinterpret_cast<struct pldm_msg*>(responseMsg.data());
     parseResponseMsg(responsePtr, responseMsg.size() - sizeof(pldm_msg_hdr));
+    instanceIdDb.free(mctp_eid, instanceId);
 }
 
 int CommandInterface::pldmSendRecv(std::vector<uint8_t>& requestMsg,
                                    std::vector<uint8_t>& responseMsg)
 {
-    // Insert the PLDM message type and EID at the beginning of the
-    // msg.
-    requestMsg.insert(requestMsg.begin(), MCTP_MSG_TYPE_PLDM);
-    requestMsg.insert(requestMsg.begin(), mctp_eid);
-
-    bool mctpVerbose = pldmVerbose;
-
     // By default enable request/response msgs for pldmtool raw commands.
     if (CommandInterface::pldmType == "raw")
     {
@@ -199,25 +63,30 @@ int CommandInterface::pldmSendRecv(std::vector<uint8_t>& requestMsg,
         printBuffer(Tx, requestMsg);
     }
 
-    if (mctp_eid != PLDM_ENTITY_ID)
+    auto tid = mctp_eid;
+    PldmTransport pldmTransport{};
+    uint8_t retry = 0;
+    int rc = PLDM_ERROR;
+
+    while (PLDM_REQUESTER_SUCCESS != rc && retry <= numRetries)
     {
-        int fd = pldm_open();
-        if (-1 == fd)
-        {
-            std::cerr << "failed to init mctp "
-                      << "\n";
-            return -1;
-        }
-        uint8_t* responseMessage = nullptr;
+        void* responseMessage = nullptr;
         size_t responseMessageSize{};
-        pldm_send_recv(mctp_eid, fd, requestMsg.data() + 2,
-                       requestMsg.size() - 2, &responseMessage,
-                       &responseMessageSize);
+
+        rc =
+            pldmTransport.sendRecvMsg(tid, requestMsg.data(), requestMsg.size(),
+                                      responseMessage, responseMessageSize);
+        if (rc)
+        {
+            std::cerr << "[" << unsigned(retry) << "] pldm_send_recv error rc "
+                      << rc << std::endl;
+            retry++;
+            continue;
+        }
 
         responseMsg.resize(responseMessageSize);
         memcpy(responseMsg.data(), responseMessage, responseMsg.size());
 
-        shutdown(fd, SHUT_RDWR);
         free(responseMessage);
 
         if (pldmVerbose)
@@ -226,18 +95,13 @@ int CommandInterface::pldmSendRecv(std::vector<uint8_t>& requestMsg,
             printBuffer(Rx, responseMsg);
         }
     }
-    else
+
+    if (rc)
     {
-        mctpSockSendRecv(requestMsg, responseMsg, mctpVerbose);
-        if (pldmVerbose)
-        {
-            std::cout << "pldmtool: ";
-            printBuffer(Rx, responseMsg);
-        }
-        responseMsg.erase(responseMsg.begin(),
-                          responseMsg.begin() + 2 /* skip the mctp header */);
+        std::cerr << "failed to pldm send recv error rc " << rc << std::endl;
     }
-    return PLDM_SUCCESS;
+
+    return rc;
 }
 } // namespace helper
 } // namespace pldmtool

@@ -1,13 +1,15 @@
 #include "file_io_type_vpd.hpp"
 
-#include "libpldm/base.h"
-#include "libpldm/file_io.h"
-
 #include "common/utils.hpp"
 
-#include <stdint.h>
+#include <libpldm/base.h>
+#include <libpldm/oem/ibm/file_io.h>
 
-#include <iostream>
+#include <phosphor-logging/lg2.hpp>
+
+#include <cstdint>
+
+PHOSPHOR_LOG2_USING;
 
 typedef uint8_t byte;
 
@@ -30,25 +32,25 @@ int keywordHandler::read(uint32_t offset, uint32_t& length, Response& response,
         auto& bus = pldm::utils::DBusHandler::getBus();
         auto service = pldm::utils::DBusHandler().getService(keywrdObjPath,
                                                              keywrdInterface);
-        auto method = bus.new_method_call(service.c_str(), keywrdObjPath,
-                                          "org.freedesktop.DBus.Properties",
-                                          "Get");
+        auto method =
+            bus.new_method_call(service.c_str(), keywrdObjPath,
+                                "org.freedesktop.DBus.Properties", "Get");
         method.append(keywrdInterface, keywrdPropName);
-        auto reply = bus.call(method);
+        auto reply = bus.call(method, dbusTimeout);
         reply.read(keywrd);
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Get keyword error from dbus interface : "
-                  << keywrdInterface << " ERROR= " << e.what() << std::endl;
+        error(
+            "Get keyword error from dbus interface {INTERFACE}, error - {ERROR}",
+            "INTERFACE", keywrdInterface, "ERROR", e);
     }
 
     uint32_t keywrdSize = std::get<std::vector<byte>>(keywrd).size();
-
     if (length < keywrdSize)
     {
-        std::cerr << "length requested is less the keyword size, length: "
-                  << length << " keyword size: " << keywrdSize << std::endl;
+        error("Length '{LENGTH}' requested is less than keyword size '{SIZE}'",
+              "LENGTH", length, "SIZE", keywrdSize);
         return PLDM_ERROR_INVALID_DATA;
     }
 
@@ -67,8 +69,9 @@ int keywordHandler::read(uint32_t offset, uint32_t& length, Response& response,
     auto fd = open(keywrdFilePath, std::ios::out | std::ofstream::binary);
     if (!keywrdFile)
     {
-        std::cerr << "VPD keyword file open error: " << keywrdFilePath
-                  << " errno: " << errno << std::endl;
+        error(
+            "Failed to open VPD keyword file '{PATH}', error number - {ERROR_NUM}",
+            "PATH", keywrdFilePath, "ERROR_NUM", errno);
         pldm::utils::reportError(
             "xyz.openbmc_project.PLDM.Error.readKeywordHandler.keywordFileOpenError");
         return PLDM_ERROR;
@@ -76,20 +79,21 @@ int keywordHandler::read(uint32_t offset, uint32_t& length, Response& response,
 
     if (offset > keywrdSize)
     {
-        std::cerr << "Offset exceeds file size, OFFSET=" << offset
-                  << " FILE_SIZE=" << keywrdSize << std::endl;
+        error("Offset '{OFFSET}' exceeds file size '{SIZE}'", "OFFSET", offset,
+              "SIZE", keywrdSize);
         return PLDM_DATA_OUT_OF_RANGE;
     }
 
-    // length of keyword data should be same as keyword data size in dbus object
+    // length of keyword data should be same as keyword data size in dbus
+    // object
     length = static_cast<uint32_t>(keywrdSize) - offset;
 
     auto returnCode = lseek(fd, offset, SEEK_SET);
     if (returnCode == -1)
     {
-        std::cerr
-            << "Could not find keyword data at given offset. File Seek failed"
-            << std::endl;
+        error(
+            "Could not find keyword data of length '{LENGTH}' at given offset '{OFFSET}'. File Seek failed with response code '{RC}'",
+            "LENGTH", length, "OFFSET", offset, "RC", returnCode);
         return PLDM_ERROR;
     }
 
@@ -97,8 +101,7 @@ int keywordHandler::read(uint32_t offset, uint32_t& length, Response& response,
                      keywrdSize);
     if (keywrdFile.bad())
     {
-        std::cerr << "Error while writing to file: " << keywrdFilePath
-                  << std::endl;
+        error("Error while writing to file '{PATH}'", "PATH", keywrdFilePath);
     }
     keywrdFile.close();
 
@@ -106,8 +109,8 @@ int keywordHandler::read(uint32_t offset, uint32_t& length, Response& response,
     fs::remove(keywrdFilePath);
     if (rc)
     {
-        std::cerr << "Read error for keyword file with size: " << keywrdSize
-                  << std::endl;
+        error("Read error for keyword file with size '{SIZE}'", "SIZE",
+              keywrdSize);
         pldm::utils::reportError(
             "xyz.openbmc_project.PLDM.Error.readKeywordHandler.keywordFileReadError");
         return PLDM_ERROR;

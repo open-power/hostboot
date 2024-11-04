@@ -34,17 +34,20 @@
 owners:
 - deepak.kodihalli.83@gmail.com
 - rushtotom@gmail.com
-- sampmisr@in.ibm.com
 - manojkiran.eda@gmail.com
 
 reviewers:
-- liuxiwei@inspur.com
+- liuxiwei@ieisystem.com
+- pavithrabarithaya07@gmail.com
+- thu@os.amperecomputing.com
 
 matchers:
 - partial_regex: ibm
   owners:
-  - sampmisr@in.ibm.com
   - manojkiran.eda@gmail.com
+- partial_regex: meta/
+  owners:
+  - patrick@stwcx.xyz
 - partial_regex: tools/visualize-pdr
   owners:
   - manojkiran.eda@gmail.com
@@ -54,14 +57,20 @@ openbmc:
   email: deepak.kodihalli.83@gmail.com
   discord: dkodihal
 - name: George Liu
-  email: liuxiwei@inspur.com
+  email: liuxiwei@ieisystem.com
   discord: George Liu
 - name: Manojkiran Eda
   email: manojkiran.eda@gmail.com
   discord: manojkiran
-- name: Sampa Misra
-  email: sampmisr@in.ibm.com
-  discord: sampmisr
+- name: Patrick Williams
+  email: patrick@stwcx.xyz
+  discord: stwcx
 - name: Tom Joseph
   email: rushtotom@gmail.com
   discord: tomjose
+- name: Pavithra Barithaya
+  email: pavithrabarithaya07@gmail.com
+  discord: Pavithra B
+- name: Thu Nguyen
+  email: thu@os.amperecomputing.com
+  discord: Thu Nguyen

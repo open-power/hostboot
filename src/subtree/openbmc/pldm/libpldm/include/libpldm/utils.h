@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef LIBPLDM_UTILS_H
 #define LIBPLDM_UTILS_H
 
@@ -6,6 +7,7 @@ extern "C" {
 #endif
 
 #include "pldm_types.h"
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

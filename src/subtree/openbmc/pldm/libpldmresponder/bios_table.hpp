@@ -2,8 +2,8 @@
 
 #include <libpldm/bios.h>
 #include <libpldm/bios_table.h>
-#include <stdint.h>
 
+#include <cstdint>
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -164,8 +164,8 @@ std::string decodeString(const pldm_bios_string_table_entry* entry);
  *  @param[in] str - string itself
  *  @return pointer to the constructed entry
  */
-const pldm_bios_string_table_entry* constructEntry(Table& table,
-                                                   const std::string& str);
+const pldm_bios_string_table_entry*
+    constructEntry(Table& table, const std::string& str);
 
 } // namespace string
 
@@ -193,16 +193,16 @@ TableHeader decodeHeader(const pldm_bios_attr_table_entry* entry);
  *  @param[in] handle - attribute handle
  *  @return Pointer to the attribute table entry
  */
-const pldm_bios_attr_table_entry* findByHandle(const Table& table,
-                                               uint16_t handle);
+const pldm_bios_attr_table_entry*
+    findByHandle(const Table& table, uint16_t handle);
 
 /** @brief Find attribute entry by string handle
  *  @param[in] table - attribute table
  *  @param[in] handle - string handle
  *  @return Pointer to the attribute table entry
  */
-const pldm_bios_attr_table_entry* findByStringHandle(const Table& table,
-                                                     uint16_t handle);
+const pldm_bios_attr_table_entry*
+    findByStringHandle(const Table& table, uint16_t handle);
 
 /** @struct StringField
  *  @brief String field of attribute table
@@ -228,9 +228,8 @@ StringField decodeStringEntry(const pldm_bios_attr_table_entry* entry);
  *  @param[in] info - string info
  *  @return pointer to the constructed entry
  */
-const pldm_bios_attr_table_entry*
-    constructStringEntry(Table& table,
-                         pldm_bios_table_attr_entry_string_info* info);
+const pldm_bios_attr_table_entry* constructStringEntry(
+    Table& table, pldm_bios_table_attr_entry_string_info* info);
 
 /** @struct IntegerField
  *  @brief Integer field of attribute table
@@ -249,9 +248,8 @@ struct IntegerField
  *  @param[in] info - integer info
  *  @return pointer to the constructed entry
  */
-const pldm_bios_attr_table_entry*
-    constructIntegerEntry(Table& table,
-                          pldm_bios_table_attr_entry_integer_info* info);
+const pldm_bios_attr_table_entry* constructIntegerEntry(
+    Table& table, pldm_bios_table_attr_entry_integer_info* info);
 
 /** @brief decode integer entry of attribute table
  *  @param[in] entry - Pointer to an attribute table entry
@@ -280,9 +278,8 @@ EnumField decodeEnumEntry(const pldm_bios_attr_table_entry* entry);
  *  @param[in] info - enum info
  *  @return pointer to the constructed entry
  */
-const pldm_bios_attr_table_entry*
-    constructEnumEntry(Table& table,
-                       pldm_bios_table_attr_entry_enum_info* info);
+const pldm_bios_attr_table_entry* constructEnumEntry(
+    Table& table, pldm_bios_table_attr_entry_enum_info* info);
 
 } // namespace attribute
 
@@ -343,10 +340,8 @@ const pldm_bios_attr_val_table_entry*
  *  @param[in] value - The integer
  *  @return Pointer to the constructed entry
  */
-const pldm_bios_attr_val_table_entry* constructIntegerEntry(Table& table,
-                                                            uint16_t attrHandle,
-                                                            uint8_t attrType,
-                                                            uint64_t value);
+const pldm_bios_attr_val_table_entry* constructIntegerEntry(
+    Table& table, uint16_t attrHandle, uint8_t attrType, uint64_t value);
 
 /** @brief Construct enum entry of attribute value table at the end of
  *         the given table

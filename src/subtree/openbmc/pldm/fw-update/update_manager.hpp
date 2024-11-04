@@ -1,14 +1,14 @@
 #pragma once
 
+#include "common/instance_id.hpp"
 #include "common/types.hpp"
 #include "device_updater.hpp"
+#include "fw-update/activation.hpp"
 #include "package_parser.hpp"
-#include "pldmd/instance_id.hpp"
 #include "requester/handler.hpp"
 #include "watch.hpp"
 
 #include <libpldm/base.h>
-#include <libpldm/pldm.h>
 
 #include <chrono>
 #include <filesystem>
@@ -31,9 +31,6 @@ using DeviceUpdaterInfo = std::pair<mctp_eid_t, DeviceIDRecordOffset>;
 using DeviceUpdaterInfos = std::vector<DeviceUpdaterInfo>;
 using TotalComponentUpdates = size_t;
 
-class Activation;
-class ActivationProgress;
-
 class UpdateManager
 {
   public:
@@ -49,11 +46,11 @@ class UpdateManager
         pldm::requester::Handler<pldm::requester::Request>& handler,
         InstanceIdDb& instanceIdDb, const DescriptorMap& descriptorMap,
         const ComponentInfoMap& componentInfoMap) :
-        event(event),
-        handler(handler), instanceIdDb(instanceIdDb),
+        event(event), handler(handler), instanceIdDb(instanceIdDb),
         descriptorMap(descriptorMap), componentInfoMap(componentInfoMap),
         watch(event.get(),
-              std::bind_front(&UpdateManager::processPackage, this))
+              std::bind_front(&UpdateManager::processPackage, this)),
+        totalNumComponentUpdates(0), compUpdateCompletedCount(0)
     {}
 
     /** @brief Handle PLDM request for the commands in the FW update

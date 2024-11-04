@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] 867314078@qq.com                                                   */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -60,7 +60,7 @@
 #include <pldm/pldm_trace.H>
 #include <pldm/pldmif.H>
 #include <pldm/requests/pldm_fileio_requests.H>
-#include <oem/ibm/libpldm/file_io.h>
+#include <oem/ibm/file_io.h>
 
 // libpldm subtree headers
 #include <openbmc/pldm/libpldm/include/libpldm/fru.h>

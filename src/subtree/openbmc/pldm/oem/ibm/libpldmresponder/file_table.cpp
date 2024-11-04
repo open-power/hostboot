@@ -5,7 +5,6 @@
 #include <phosphor-logging/lg2.hpp>
 
 #include <fstream>
-#include <iostream>
 
 PHOSPHOR_LOG2_USING;
 
@@ -18,15 +17,16 @@ FileTable::FileTable(const std::string& fileTableConfigPath)
     std::ifstream jsonFile(fileTableConfigPath);
     if (!jsonFile.is_open())
     {
-        error("File table config file does not exist, FILE={TABLE_CONFIG_PATH}",
-              "TABLE_CONFIG_PATH", fileTableConfigPath.c_str());
+        error("File table config file '{PATH}' does not exist", "PATH",
+              fileTableConfigPath);
         return;
     }
 
     auto data = Json::parse(jsonFile, nullptr, false);
     if (data.is_discarded())
     {
-        error("Parsing config file failed");
+        error("Failed to parse config file '{PATH}'", "PATH",
+              fileTableConfigPath);
         return;
     }
 
@@ -134,7 +134,7 @@ FileTable& buildFileTable(const std::string& fileTablePath)
     static FileTable table;
     if (table.isEmpty())
     {
-        table = std::move(FileTable(fileTablePath));
+        table = FileTable(fileTablePath);
     }
     return table;
 }

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022                             */
+/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -252,6 +252,40 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(MCTP::outgoing_mctp_msg* const msgbu
     return errl;
 }
 
+errlHndl_t PLDM::pldm_request_handler(std::vector<uint8_t>& o_response_body,
+                                 pldm_outbound_req_msgq_t i_msgQ,
+                                 std::unique_ptr<MCTP::outgoing_mctp_msg> msgbuf){
+
+    errlHndl_t errl = nullptr;
+
+    PLDM::set_waiting_for_response(true);
+    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_ENABLED);
+
+    errl = sendrecv_pldm_request_impl(msgbuf.get(), o_response_body);
+
+    setMctpBridgeState(hostInterfaces::MCTP_BRIDGE_DISABLED);
+    PLDM::set_waiting_for_response(false);
+
+    // If a request message was queued while waiting for a response,
+    // clear out that request as HBRT will never do a host_callback
+    // for incoming MCTP packets that we aren't ready to handle.
+    // Hostboot will rely on BMC to send the requests again.
+    // Doing a PLDM host callback on a non-empty next request has
+    // caused an mctp queue overrun
+    const auto& skipReqMsg = PLDM::get_next_request();
+
+    if (!skipReqMsg.empty())
+    {
+        PLDM_INF("sendrecv_pldm_request: discarding queued PLDM request as "
+                 "new one arrived while hostboot was busy handling another request.");
+        PLDM_INF_BIN("Discarded PLDM request msg header",
+                     skipReqMsg.pldm_data.data(),
+                     std::min(skipReqMsg.pldm_data.size(), sizeof(pldm_msg_hdr)));
+        PLDM::clear_next_request();
+    }
+    return errl;
+}
+
 #else
 
 errlHndl_t PLDM::sendrecv_pldm_request_impl(pldm_outbound_req_msgq_t i_msgQ,
@@ -303,4 +337,15 @@ errlHndl_t PLDM::sendrecv_pldm_request_impl(pldm_outbound_req_msgq_t i_msgQ,
     return errl;
 }
 
+errlHndl_t PLDM::pldm_request_handler(std::vector<uint8_t>& o_response_body,
+                                 pldm_outbound_req_msgq_t i_msgQ,
+                                 std::unique_ptr<MCTP::outgoing_mctp_msg> msgbuf){
+
+    errlHndl_t errl = nullptr;
+    errl = sendrecv_pldm_request_impl(i_msgQ, move(msgbuf), o_response_body);
+
+    return errl;
+}
+
 #endif
+

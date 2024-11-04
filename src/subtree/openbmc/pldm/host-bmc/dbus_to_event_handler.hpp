@@ -1,7 +1,7 @@
 #pragma once
 
+#include "common/instance_id.hpp"
 #include "libpldmresponder/pdr_utils.hpp"
-#include "pldmd/instance_id.hpp"
 #include "requester/handler.hpp"
 
 #include <libpldm/platform.h>
@@ -17,6 +17,8 @@ using DbusObjMaps =
                                   pldm::responder::pdr_utils::DbusValMaps>>;
 using sensorEvent =
     std::function<void(SensorId sensorId, const DbusObjMaps& dbusMaps)>;
+using stateSensorCacheMaps =
+    std::map<pldm::pdr::SensorID, pldm::responder::pdr_utils::EventStates>;
 
 namespace state_sensor
 {
@@ -52,6 +54,24 @@ class DbusToPLDMEvent
     void listenSensorEvent(const pldm::responder::pdr_utils::Repo& repo,
                            const DbusObjMaps& dbusMaps);
 
+    /** @brief get the sensor state cache */
+    inline const stateSensorCacheMaps& getSensorCache()
+    {
+        return sensorCacheMap;
+    }
+
+    /** @brief function to update the sensor cache
+     *  @param[in] sensorId - sensor Id of the corresponding sensor
+     *  @param[in] sensorRearm - sensor rearm value with in the sensor
+     *  @param[in] previousState - previous state of the sensor
+     */
+    inline void updateSensorCacheMaps(pldm::pdr::SensorID sensorId,
+                                      size_t sensorRearm, uint8_t previousState)
+    {
+        // update the sensor cache
+        sensorCacheMap[sensorId][sensorRearm] = previousState;
+    }
+
   private:
     /** @brief Send state sensor event msg when a D-Bus property changes
      *  @param[in] sensorId - sensor id
@@ -64,9 +84,6 @@ class DbusToPLDMEvent
      */
     void sendEventMsg(uint8_t eventType,
                       const std::vector<uint8_t>& eventDataVec);
-
-    /** @brief fd of MCTP communications socket */
-    int mctp_fd;
 
     /** @brief MCTP EID of host firmware */
     uint8_t mctp_eid;
@@ -81,6 +98,9 @@ class DbusToPLDMEvent
 
     /** @brief PLDM request handler */
     pldm::requester::Handler<pldm::requester::Request>* handler;
+
+    /** @brief sensor cache */
+    stateSensorCacheMaps sensorCacheMap;
 };
 
 } // namespace state_sensor

@@ -1,10 +1,11 @@
 #include "softoff.hpp"
 
+#include "common/instance_id.hpp"
+#include "common/transport.hpp"
 #include "common/utils.hpp"
 
 #include <libpldm/entity.h>
 #include <libpldm/platform.h>
-#include <libpldm/pldm.h>
 #include <libpldm/state_set.h>
 
 #include <phosphor-logging/lg2.hpp>
@@ -15,7 +16,8 @@
 #include <sdeventplus/source/time.hpp>
 
 #include <array>
-#include <iostream>
+#include <filesystem>
+#include <fstream>
 
 PHOSPHOR_LOG2_USING;
 
@@ -23,41 +25,60 @@ namespace pldm
 {
 using namespace sdeventplus;
 using namespace sdeventplus::source;
+namespace fs = std::filesystem;
 constexpr auto clockId = sdeventplus::ClockId::RealTime;
 using Clock = Clock<clockId>;
 using Timer = Time<clockId>;
 
-constexpr pldm::pdr::TerminusID TID = 0; // TID will be implemented later.
+using sdbusplus::exception::SdBusError;
+
+// Shutdown effecter terminus ID, set when we look up the effecter
+pldm::pdr::TerminusID TID = 0;
+
 namespace sdbusRule = sdbusplus::bus::match::rules;
 
-SoftPowerOff::SoftPowerOff(sdbusplus::bus_t& bus, sd_event* event) :
-    bus(bus), timer(event)
+SoftPowerOff::SoftPowerOff(sdbusplus::bus_t& bus, sd_event* event,
+                           pldm::InstanceIdDb& instanceIdDb) :
+    bus(bus), timer(event), instanceIdDb(instanceIdDb)
 {
+    auto jsonData = parseConfig();
+
+    if (jsonData.is_discarded())
+    {
+        error("Failed to parse softoff config JSON file");
+        return;
+    }
+
     getHostState();
     if (hasError || completed)
     {
         return;
     }
+    const std::vector<Json> emptyJsonList{};
+    auto entries = jsonData.value("entries", emptyJsonList);
+    for (const auto& entry : entries)
+    {
+        TID = entry.value("tid", 0);
+        pldm::pdr::EntityType entityType = entry.value("entityType", 0);
+        pldm::pdr::StateSetId stateSetId = entry.value("stateSetId", 0);
 
-    auto rc = getEffecterID();
-    if (completed)
-    {
-        error("pldm-softpoweroff: effecter to initiate softoff not found");
-        return;
-    }
-    else if (rc != PLDM_SUCCESS)
-    {
-        hasError = true;
-        return;
-    }
-
-    rc = getSensorInfo();
-    if (rc != PLDM_SUCCESS)
-    {
-        error("Message get Sensor PDRs error. PLDM error code = {RC}", "RC",
-              lg2::hex, static_cast<int>(rc));
-        hasError = true;
-        return;
+        bool effecterFound = getEffecterID(entityType, stateSetId);
+        if (effecterFound)
+        {
+            auto rc = getSensorInfo(entityType, stateSetId);
+            if (rc != PLDM_SUCCESS)
+            {
+                error("Failed to get Sensor PDRs, response code '{RC}'", "RC",
+                      lg2::hex, rc);
+                hasError = true;
+                return;
+            }
+            break;
+        }
+        else
+        {
+            continue;
+        }
     }
 
     // Matches on the pldm StateSensorEvent signal
@@ -91,7 +112,9 @@ int SoftPowerOff::getHostState()
     }
     catch (const std::exception& e)
     {
-        error("PLDM host soft off: Can't get current host state.");
+        error(
+            "PLDM remote terminus soft off. Can't get current remote terminus state, error - {ERROR}",
+            "ERROR", e);
         hasError = true;
         return PLDM_ERROR;
     }
@@ -112,14 +135,15 @@ void SoftPowerOff::hostSoftOffComplete(sdbusplus::message_t& msg)
              msgPreviousEventState);
 
     if (msgSensorID == sensorID && msgSensorOffset == sensorOffset &&
-        msgEventState == PLDM_SW_TERM_GRACEFUL_SHUTDOWN)
+        msgEventState == PLDM_SW_TERM_GRACEFUL_SHUTDOWN && msgTID == TID)
     {
         // Receive Graceful shutdown completion event message. Disable the timer
         auto rc = timer.stop();
         if (rc < 0)
         {
-            error("PLDM soft off: Failure to STOP the timer. ERRNO={RC}", "RC",
-                  rc);
+            error(
+                "Failure to STOP the timer of PLDM soft off, response code '{RC}'",
+                "RC", rc);
         }
 
         // This marks the completion of pldm soft power off.
@@ -127,107 +151,62 @@ void SoftPowerOff::hostSoftOffComplete(sdbusplus::message_t& msg)
     }
 }
 
-int SoftPowerOff::getEffecterID()
+Json SoftPowerOff::parseConfig()
+{
+    fs::path softoffConfigJson(
+        fs::path(SOFTOFF_CONFIG_JSON) / "softoff_config.json");
+
+    if (!fs::exists(softoffConfigJson) || fs::is_empty(softoffConfigJson))
+    {
+        error(
+            "Failed to parse softoff config JSON file '{PATH}', file does not exist",
+            "PATH", softoffConfigJson);
+        return PLDM_ERROR;
+    }
+
+    std::ifstream jsonFile(softoffConfigJson);
+    return Json::parse(jsonFile);
+}
+
+bool SoftPowerOff::getEffecterID(pldm::pdr::EntityType& entityType,
+                                 pldm::pdr::StateSetId& stateSetId)
 {
     auto& bus = pldm::utils::DBusHandler::getBus();
-
-    // VMM is a logical entity, so the bit 15 in entity type is set.
-    pdr::EntityType entityType = PLDM_ENTITY_VIRTUAL_MACHINE_MANAGER | 0x8000;
-
     try
     {
-        std::vector<std::vector<uint8_t>> VMMResponse{};
-        auto VMMMethod = bus.new_method_call(
+        std::vector<std::vector<uint8_t>> response{};
+        auto method = bus.new_method_call(
             "xyz.openbmc_project.PLDM", "/xyz/openbmc_project/pldm",
             "xyz.openbmc_project.PLDM.PDR", "FindStateEffecterPDR");
-        VMMMethod.append(TID, entityType,
-                         (uint16_t)PLDM_STATE_SET_SW_TERMINATION_STATUS);
+        method.append(TID, entityType, stateSetId);
+        auto responseMsg = bus.call(method, dbusTimeout);
 
-        auto VMMResponseMsg = bus.call(
-            VMMMethod,
-            std::chrono::duration_cast<microsec>(sec(DBUS_TIMEOUT)).count());
-
-        VMMResponseMsg.read(VMMResponse);
-        if (VMMResponse.size() != 0)
+        responseMsg.read(response);
+        if (response.size())
         {
-            for (auto& rep : VMMResponse)
+            for (auto& rep : response)
             {
-                auto VMMPdr =
+                auto softoffPdr =
                     reinterpret_cast<pldm_state_effecter_pdr*>(rep.data());
-                effecterID = VMMPdr->effecter_id;
+                effecterID = softoffPdr->effecter_id;
             }
         }
         else
         {
-            VMMPdrExist = false;
+            return false;
         }
     }
     catch (const sdbusplus::exception_t& e)
     {
-        error("PLDM soft off: Error get VMM PDR,ERROR={ERR_EXCEP}", "ERR_EXCEP",
-              e.what());
-        VMMPdrExist = false;
+        error("Failed to get softPowerOff PDR, error - {ERROR}", "ERROR", e);
+        return false;
     }
-
-    if (VMMPdrExist)
-    {
-        return PLDM_SUCCESS;
-    }
-
-    // If the Virtual Machine Manager PDRs doesn't exist, go find the System
-    // Firmware PDRs.
-    // System Firmware is a logical entity, so the bit 15 in entity type is set
-    entityType = PLDM_ENTITY_SYS_FIRMWARE | 0x8000;
-    try
-    {
-        std::vector<std::vector<uint8_t>> sysFwResponse{};
-        auto sysFwMethod = bus.new_method_call(
-            "xyz.openbmc_project.PLDM", "/xyz/openbmc_project/pldm",
-            "xyz.openbmc_project.PLDM.PDR", "FindStateEffecterPDR");
-        sysFwMethod.append(TID, entityType,
-                           (uint16_t)PLDM_STATE_SET_SW_TERMINATION_STATUS);
-
-        auto sysFwResponseMsg = bus.call(
-            sysFwMethod,
-            std::chrono::duration_cast<microsec>(sec(DBUS_TIMEOUT)).count());
-
-        sysFwResponseMsg.read(sysFwResponse);
-
-        if (sysFwResponse.size() == 0)
-        {
-            error("No effecter ID has been found that matches the criteria");
-            return PLDM_ERROR;
-        }
-
-        for (auto& rep : sysFwResponse)
-        {
-            auto sysFwPdr =
-                reinterpret_cast<pldm_state_effecter_pdr*>(rep.data());
-            effecterID = sysFwPdr->effecter_id;
-        }
-    }
-    catch (const sdbusplus::exception_t& e)
-    {
-        error("PLDM soft off: Error get system firmware PDR,ERROR={ERR_EXCEP}",
-              "ERR_EXCEP", e.what());
-        completed = true;
-        return PLDM_ERROR;
-    }
-
-    return PLDM_SUCCESS;
+    return true;
 }
 
-int SoftPowerOff::getSensorInfo()
+int SoftPowerOff::getSensorInfo(pldm::pdr::EntityType& entityType,
+                                pldm::pdr::StateSetId& stateSetId)
 {
-    pldm::pdr::EntityType entityType;
-
-    entityType = VMMPdrExist ? PLDM_ENTITY_VIRTUAL_MACHINE_MANAGER
-                             : PLDM_ENTITY_SYS_FIRMWARE;
-
-    // The Virtual machine manager/System firmware is logical entity, so bit 15
-    // need to be set.
-    entityType = entityType | 0x8000;
-
     try
     {
         auto& bus = pldm::utils::DBusHandler::getBus();
@@ -235,12 +214,9 @@ int SoftPowerOff::getSensorInfo()
         auto method = bus.new_method_call(
             "xyz.openbmc_project.PLDM", "/xyz/openbmc_project/pldm",
             "xyz.openbmc_project.PLDM.PDR", "FindStateSensorPDR");
-        method.append(TID, entityType,
-                      (uint16_t)PLDM_STATE_SET_SW_TERMINATION_STATUS);
+        method.append(TID, entityType, stateSetId);
 
-        auto ResponseMsg = bus.call(
-            method,
-            std::chrono::duration_cast<microsec>(sec(DBUS_TIMEOUT)).count());
+        auto ResponseMsg = bus.call(method, dbusTimeout);
 
         ResponseMsg.read(Response);
 
@@ -279,14 +255,14 @@ int SoftPowerOff::getSensorInfo()
                 sensorOffset = offset;
                 break;
             }
-            possibleStatesStart += possibleStateSize + sizeof(setId) +
-                                   sizeof(possibleStateSize);
+            possibleStatesStart +=
+                possibleStateSize + sizeof(setId) + sizeof(possibleStateSize);
         }
     }
     catch (const sdbusplus::exception_t& e)
     {
-        error("PLDM soft off: Error get State Sensor PDR,ERROR={ERR_EXCEP}",
-              "ERR_EXCEP", e.what());
+        error("Failed to get state sensor PDR during soft-off, error - {ERROR}",
+              "ERROR", e);
         return PLDM_ERROR;
     }
 
@@ -296,64 +272,41 @@ int SoftPowerOff::getSensorInfo()
 int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
 {
     constexpr uint8_t effecterCount = 1;
-    uint8_t mctpEID;
+    PldmTransport pldmTransport{};
     uint8_t instanceID;
+    uint8_t mctpEID;
 
     mctpEID = pldm::utils::readHostEID();
+    // TODO: fix mapping to work around OpenBMC ecosystem deficiencies
+    pldm_tid_t pldmTID = static_cast<pldm_tid_t>(mctpEID);
 
-    // Get instanceID
-    try
-    {
-        auto& bus = pldm::utils::DBusHandler::getBus();
-        auto method = bus.new_method_call(
-            "xyz.openbmc_project.PLDM", "/xyz/openbmc_project/pldm",
-            "xyz.openbmc_project.PLDM.Requester", "GetInstanceId");
-        method.append(mctpEID);
-
-        auto ResponseMsg = bus.call(
-            method,
-            std::chrono::duration_cast<microsec>(sec(DBUS_TIMEOUT)).count());
-
-        ResponseMsg.read(instanceID);
-    }
-    catch (const sdbusplus::exception_t& e)
-    {
-        error("PLDM soft off: Error get instanceID,ERROR={ERR_EXCEP}",
-              "ERR_EXCEP", e.what());
-        return PLDM_ERROR;
-    }
-
-    std::array<uint8_t, sizeof(pldm_msg_hdr) + sizeof(effecterID) +
-                            sizeof(effecterCount) +
-                            sizeof(set_effecter_state_field)>
+    std::array<uint8_t,
+               sizeof(pldm_msg_hdr) + sizeof(effecterID) +
+                   sizeof(effecterCount) + sizeof(set_effecter_state_field)>
         requestMsg{};
     auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
     set_effecter_state_field stateField{
         PLDM_REQUEST_SET, PLDM_SW_TERM_GRACEFUL_SHUTDOWN_REQUESTED};
+    instanceID = instanceIdDb.next(pldmTID);
     auto rc = encode_set_state_effecter_states_req(
         instanceID, effecterID, effecterCount, &stateField, request);
     if (rc != PLDM_SUCCESS)
     {
-        error("Message encode failure. PLDM error code = {RC}", "RC", lg2::hex,
-              static_cast<int>(rc));
-        return PLDM_ERROR;
-    }
-
-    // Open connection to MCTP socket
-    int fd = pldm_open();
-    if (-1 == fd)
-    {
-        error("Failed to connect to mctp demux daemon");
+        instanceIdDb.free(pldmTID, instanceID);
+        error(
+            "Failed to encode set state effecter states request message, response code '{RC}'",
+            "RC", lg2::hex, rc);
         return PLDM_ERROR;
     }
 
     // Add a timer to the event loop, default 30s.
-    auto timerCallback =
-        [=, this](Timer& /*source*/, Timer::TimePoint /*time*/) {
+    auto timerCallback = [=, this](Timer& /*source*/,
+                                   Timer::TimePoint /*time*/) mutable {
         if (!responseReceived)
         {
+            instanceIdDb.free(pldmTID, instanceID);
             error(
-                "PLDM soft off: ERROR! Can't get the response for the PLDM request msg. Time out! Exit the pldm-softpoweroff");
+                "PLDM soft off failed, can't get the response for the PLDM request msg. Time out! Exit the pldm-softpoweroff");
             exit(-1);
         }
         return;
@@ -362,35 +315,54 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
                std::chrono::seconds{1}, std::move(timerCallback));
 
     // Add a callback to handle EPOLLIN on fd
-    auto callback = [=, this](IO& io, int fd, uint32_t revents) {
+    auto callback = [=, &pldmTransport,
+                     this](IO& io, int fd, uint32_t revents) mutable {
+        if (fd != pldmTransport.getEventSource())
+        {
+            return;
+        }
+
         if (!(revents & EPOLLIN))
         {
             return;
         }
 
-        uint8_t* responseMsg = nullptr;
+        void* responseMsg = nullptr;
         size_t responseMsgSize{};
+        pldm_tid_t srcTID = pldmTID;
 
-        auto rc = pldm_recv(mctpEID, fd, request->hdr.instance_id, &responseMsg,
-                            &responseMsgSize);
+        auto rc = pldmTransport.recvMsg(pldmTID, responseMsg, responseMsgSize);
         if (rc)
         {
-            error("Soft off: failed to recv pldm data. PLDM RC = {RC}", "RC",
-                  static_cast<int>(rc));
+            error(
+                "Failed to receive pldm data during soft-off, response code '{RC}'",
+                "RC", rc);
             return;
         }
 
-        std::unique_ptr<uint8_t, decltype(std::free)*> responseMsgPtr{
+        std::unique_ptr<void, decltype(std::free)*> responseMsgPtr{
             responseMsg, std::free};
 
         // We've got the response meant for the PLDM request msg that was
         // sent out
         io.set_enabled(Enabled::Off);
         auto response = reinterpret_cast<pldm_msg*>(responseMsgPtr.get());
+
+        if (srcTID != pldmTID ||
+            !pldm_msg_hdr_correlate_response(&request->hdr, &response->hdr))
+        {
+            /* This isn't the response we were looking for */
+            return;
+        }
+
+        /* We have the right response, release the instance ID and process */
+        io.set_enabled(Enabled::Off);
+        instanceIdDb.free(pldmTID, instanceID);
+
         if (response->payload[0] != PLDM_SUCCESS)
         {
-            error("Getting the wrong response. PLDM RC = {RC}", "RC",
-                  (unsigned)response->payload[0]);
+            error("Getting the wrong response, response code '{RC}'", "RC",
+                  response->payload[0]);
             exit(-1);
         }
 
@@ -405,27 +377,28 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
         if (ret < 0)
         {
             error(
-                "Failure to start Host soft off wait timer, ERRNO = {RET}. Exit the pldm-softpoweroff",
-                "RET", ret);
+                "Failure to start remote terminus soft off wait timer, Exit the pldm-softpoweroff with response code:{NUM}",
+                "NUM", ret);
             exit(-1);
         }
         else
         {
             error(
-                "Timer started waiting for host soft off, TIMEOUT_IN_SEC = {TIMEOUT_SEC}",
+                "Timer started waiting for remote terminus soft off, timeout in sec '{TIMEOUT_SEC}'",
                 "TIMEOUT_SEC", SOFTOFF_TIMEOUT_SECONDS);
         }
         return;
     };
-    IO io(event, fd, EPOLLIN, std::move(callback));
+    IO io(event, pldmTransport.getEventSource(), EPOLLIN, std::move(callback));
 
-    // Send PLDM Request message - pldm_send doesn't wait for response
-    rc = pldm_send(mctpEID, fd, requestMsg.data(), requestMsg.size());
+    // Asynchronously send the PLDM request
+    rc = pldmTransport.sendMsg(pldmTID, requestMsg.data(), requestMsg.size());
     if (0 > rc)
     {
+        instanceIdDb.free(pldmTID, instanceID);
         error(
-            "Failed to send message/receive response. RC = {RC}, errno = {ERR}",
-            "RC", static_cast<int>(rc), "ERR", errno);
+            "Failed to send message/receive response, response code '{RC}' and error - {ERROR}",
+            "RC", rc, "ERROR", errno);
         return PLDM_ERROR;
     }
 
@@ -438,9 +411,10 @@ int SoftPowerOff::hostSoftOff(sdeventplus::Event& event)
         }
         catch (const sdeventplus::SdEventError& e)
         {
+            instanceIdDb.free(pldmTID, instanceID);
             error(
-                "PLDM host soft off: Failure in processing request.ERROR= {ERR_EXCEP}",
-                "ERR_EXCEP", e.what());
+                "Failed to process request while remote terminus soft off, error - {ERROR}",
+                "ERROR", e);
             return PLDM_ERROR;
         }
     }

@@ -1,0 +1,2 @@
+- QualifiedName: pldm_bios_table_attr_entry_string_decode_def_string_length_check
+  NewName: pldm_bios_table_attr_entry_string_decode_def_string_length

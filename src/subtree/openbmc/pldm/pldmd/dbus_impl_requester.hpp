@@ -1,6 +1,6 @@
 #pragma once
 
-#include "instance_id.hpp"
+#include "common/instance_id.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 #include "xyz/openbmc_project/PLDM/Requester/server.hpp"
 
@@ -42,8 +42,7 @@ class Requester : public RequesterIntf
      */
     Requester(sdbusplus::bus_t& bus, const std::string& path,
               InstanceIdDb& db) :
-        RequesterIntf(bus, path.c_str()),
-        pldmInstanceIdDb(db){};
+        RequesterIntf(bus, path.c_str()), pldmInstanceIdDb(db) {};
 
     /** @brief Implementation for RequesterIntf.GetInstanceId */
     uint8_t getInstanceId(uint8_t eid) override

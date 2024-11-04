@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
 #ifndef STATE_SET_H
 #define STATE_SET_H
 
@@ -41,6 +42,7 @@ enum pldm_state_set_ids {
 	PLDM_STATE_SET_HUMIDITY_STATE = 65,
 	PLDM_STATE_SET_DOOR_STATE = 66,
 	PLDM_STATE_SET_SWITCH_STATE = 67,
+	PLDM_STATE_SET_DEVICE_FILE = 68,
 
 	/* Table 4 - Security-Related State Sets */
 	PLDM_STATE_SET_LOCK_STATE = 96,
@@ -53,6 +55,10 @@ enum pldm_state_set_ids {
 	PLDM_STATE_SET_PASSWORD_PROTECTED_ACCESS_SECURITY = 103,
 	PLDM_STATE_SET_SECURITY_ACCESS_PRIVILEGE_LEVEL = 104,
 	PLDM_STATE_SET_SESSION_AUDIT = 105,
+	PLDM_STATE_SET_SUPPLY_VOLTAGE_GLITCH_DETECTION_SENSOR = 106,
+	PLDM_STATE_SET_CLOCK_GLITCH_DETECTION_SENSOR = 107,
+	PLDM_STATE_SET_SIGNAL_GLITCH_DETECTION_SENSOR = 108,
+	PLDM_STATE_SET_TEMPERATURE_GLITCH_DETECTION_SENSOR = 109,
 
 	/* Table 5 - Software-Related State Sets */
 	PLDM_STATE_SET_SW_TERMINATION_STATUS = 129,
@@ -68,6 +74,7 @@ enum pldm_state_set_ids {
 	PLDM_STATE_SET_BOOT_PROGRESS = 196,
 	PLDM_STATE_SET_SYS_FIRMWARE_HANG = 197,
 	PLDM_STATE_SET_POST_ERRORS = 198,
+	PLDM_STATE_SET_EMBEDDED_PROCESSOR_OS_STATES = 199,
 
 	/* Table 8 - Monitored System-Related State Sets */
 	PLDM_STATE_SET_LOG_FILL_STATUS = 225,
@@ -149,18 +156,18 @@ enum pldm_state_set_availability_values {
 	PLDM_STATE_SET_AVAILABILITY_REBOOTING = 8
 };
 
-/* @brief List of states for the Operational Fault status (ID 10).
- */
-enum pldm_state_set_operational_fault_status_values {
-	PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_NORMAL = 1,
-	PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_STRESSED = 2,
-};
-
 /* @brief List of states for the Operational Stress status (ID 9).
  */
 enum pldm_state_set_operational_stress_status_values {
 	PLDM_STATE_SET_OPERATIONAL_STRESS_STATUS_NORMAL = 1,
 	PLDM_STATE_SET_OPERATIONAL_STRESS_STATUS_STRESSED = 2,
+};
+/* @brief List of states for Operational Fault status (ID 10).
+ */
+enum pldm_state_set_operational_fault_status_values {
+	PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_NORMAL = 1,
+	PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_ERROR = 2,
+	PLDM_STATE_SET_OPERATIONAL_FAULT_STATUS_NON_RECOVERABLE_ERROR = 3,
 };
 
 /* @brief List of states for the Operational Running Status state set (ID 11).
@@ -186,6 +193,13 @@ enum pldm_state_set_identify_state_values {
 enum pldm_state_set_thermal_trip_values {
 	PLDM_STATE_SET_THERMAL_TRIP_STATUS_NORMAL = 1,
 	PLDM_STATE_SET_THERMAL_TRIP_STATUS_THERMAL_TRIP = 2,
+};
+
+/* @brief List of states for the Set Link state (ID 33).
+ */
+enum pldm_state_set_link_state_values {
+	PLDM_STATE_SET_LINK_STATE_CONNECTED = 1,
+	PLDM_STATE_SET_LINK_STATE_DISCONNECTED = 2,
 };
 
 /* @brief List of states for the Software-related state set (ID 129).
@@ -230,7 +244,29 @@ enum pldm_state_set_boot_progress_state_values {
 /* @brief List of states for the System Power State set (ID 260).
  */
 enum pldm_state_set_system_power_state_values {
-	PLDM_STATE_SET_SYS_POWER_STATE_OFF_SOFT_GRACEFUL = 9
+	PLDM_STATE_SET_SYS_POWER_STATE_ON = 1,
+	PLDM_STATE_SET_SYS_POWER_STATE_HIBERNATE = 2,
+	PLDM_STATE_SET_SYS_POWER_STATE_SLEEP_LIGHT = 3,
+	PLDM_STATE_SET_SYS_POWER_STATE_SLEEP_DEEP = 4,
+	PLDM_STATE_SET_SYS_POWER_CYCLE_SOFT = 5,
+	PLDM_STATE_SET_SYS_POWER_CYCLE_HARD = 6,
+	PLDM_STATE_SET_SYS_POWER_CYCLE_OFF_SOFT_GRACEFUL = 7,
+	PLDM_STATE_SET_SYS_POWER_CYCLE_OFF_HARD_GRACEFUL = 8,
+	PLDM_STATE_SET_SYS_POWER_STATE_OFF_SOFT_GRACEFUL = 9,
+	PLDM_STATE_SET_SYS_POWER_STATE_OFF_HARD_GRACEFUL = 10,
+	PLDM_STATE_SET_SYS_POWER_STATE_MASTER_BUS_RESET = 11,
+	PLDM_STATE_SET_SYS_POWER_STATE_MASTER_BUS_RESET_GRACEFUL = 12,
+	PLDM_STATE_SET_SYS_POWER_STATE_NMI = 13,
+};
+
+/* @brief List of states for Device Power State set (ID 257).
+ */
+enum pldm_state_set_device_power_state_values {
+	PLDM_STATE_SET_ACPI_DEVICE_POWER_STATE_UNKNOWN = 0,
+	PLDM_STATE_SET_ACPI_DEVICE_POWER_STATE_FULLY_ON = 1,
+	PLDM_STATE_SET_ACPI_DEVICE_POWER_STATE_INTERMEDIATE_1 = 2,
+	PLDM_STATE_SET_ACPI_DEVICE_POWER_STATE_INTERMEDIATE_2 = 3,
+	PLDM_STATE_SET_ACPI_DEVICE_POWER_STATE_OFF = 4,
 };
 
 /* OEM ranges */

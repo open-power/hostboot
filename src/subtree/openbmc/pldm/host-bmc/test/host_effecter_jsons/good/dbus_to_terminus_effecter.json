@@ -1,0 +1,57 @@
+{
+    "entries": [
+        {
+            "mctp_eid": 9,
+            "effecter_info": {
+                "effecterID": 4,
+                "containerID": 0,
+                "entityType": 33,
+                "entityInstance": 0,
+                "compositeEffecterCount": 1
+            },
+            "effecters": [
+                {
+                    "dbus_info": {
+                        "object_path": "/xyz/openbmc_project/control/host0/boot",
+                        "interface": "xyz.openbmc_project.Control.Boot.Mode",
+                        "property_name": "BootMode",
+                        "property_type": "string",
+                        "property_values": [
+                            "xyz.openbmc_project.Control.Boot.Mode.Modes.Regular"
+                        ]
+                    },
+                    "state": {
+                        "id": 196,
+                        "state_values": [2]
+                    }
+                }
+            ]
+        },
+        {
+            "mctp_eid": 20,
+            "effecter_info": {
+                "effecterPdrType": 9,
+                "effecterID": 155,
+                "entityType": 32903,
+                "entityInstance": 6,
+                "containerID": 4,
+                "compositeEffecterCount": 1,
+                "checkHostState": false
+            },
+            "effecters": [
+                {
+                    "dbus_info": {
+                        "object_path": "/xyz/openbmc_project/effecters/power/PLimit",
+                        "interface": "xyz.openbmc_project.Effecter.Value",
+                        "property_name": "Value",
+                        "property_type": "double"
+                    },
+                    "effecterDataSize": 5,
+                    "resolution": 1,
+                    "offset": 0,
+                    "unitModifier": -3
+                }
+            ]
+        }
+    ]
+}

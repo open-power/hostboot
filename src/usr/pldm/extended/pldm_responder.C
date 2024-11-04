@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,7 @@
 #include <base.h>
 #include <platform.h>
 #include <fru.h>
-#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/libpldm/file_io.h>
+#include <openbmc/pldm/libpldm/include/libpldm/oem/ibm/file_io.h>
 
 // Message handler headers
 #include <pldm/responses/pldm_discovery_control_responders.H>

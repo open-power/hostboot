@@ -31,7 +31,7 @@ class CertHandler : public FileHandler
     virtual int writeFromMemory(uint32_t offset, uint32_t length,
                                 uint64_t address,
                                 oem_platform::Handler* /*oemPlatformHandler*/);
-    virtual int readIntoMemory(uint32_t offset, uint32_t& length,
+    virtual int readIntoMemory(uint32_t offset, uint32_t length,
                                uint64_t address,
                                oem_platform::Handler* /*oemPlatformHandler*/);
     virtual int read(uint32_t offset, uint32_t& length, Response& response,
@@ -47,17 +47,14 @@ class CertHandler : public FileHandler
 
     virtual int newFileAvailable(uint64_t length);
 
-    virtual int fileAckWithMetaData(uint8_t /*fileStatus*/,
-                                    uint32_t /*metaDataValue1*/,
-                                    uint32_t /*metaDataValue2*/,
-                                    uint32_t /*metaDataValue3*/,
-                                    uint32_t /*metaDataValue4*/);
+    virtual int fileAckWithMetaData(
+        uint8_t /*fileStatus*/, uint32_t /*metaDataValue1*/,
+        uint32_t /*metaDataValue2*/, uint32_t /*metaDataValue3*/,
+        uint32_t /*metaDataValue4*/);
 
-    virtual int newFileAvailableWithMetaData(uint64_t length,
-                                             uint32_t metaDataValue1,
-                                             uint32_t /*metaDataValue2*/,
-                                             uint32_t /*metaDataValue3*/,
-                                             uint32_t /*metaDataValue4*/);
+    virtual int newFileAvailableWithMetaData(
+        uint64_t length, uint32_t metaDataValue1, uint32_t /*metaDataValue2*/,
+        uint32_t /*metaDataValue3*/, uint32_t /*metaDataValue4*/);
 
     /** @brief CertHandler destructor
      */

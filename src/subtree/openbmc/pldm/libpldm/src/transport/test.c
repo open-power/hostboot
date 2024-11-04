@@ -1,8 +1,12 @@
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
+/* NOLINTNEXTLINE(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp) */
+#include "array.h"
 #include "container-of.h"
 #include "transport.h"
 #include "test.h"
 
 #include <errno.h>
+#include <poll.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -59,12 +63,25 @@ int pldm_transport_test_init_pollfd(struct pldm_transport *ctx,
 		test->cursor++;
 	} else if (desc->type == PLDM_TRANSPORT_TEST_ELEMENT_MSG_RECV) {
 		/* Expire the timer immediately so it appears ready */
+		static const struct timespec ensure_ready = {
+			.tv_sec = 0,
+			.tv_nsec = 2,
+		};
 		static const struct itimerspec ready = {
 			.it_value = { 0, 1 },
 			.it_interval = { 0, 0 },
 		};
+		struct pollfd pfds[] = {
+			{ .fd = test->timerfd, .events = POLLIN },
+		};
+
 		rc = timerfd_settime(test->timerfd, 0, &ready, NULL);
 		if (rc < 0) {
+			return PLDM_REQUESTER_POLL_FAIL;
+		}
+
+		rc = ppoll(pfds, ARRAY_SIZE(pfds), &ensure_ready, NULL);
+		if (rc < 1) {
 			return PLDM_REQUESTER_POLL_FAIL;
 		}
 
@@ -81,15 +98,13 @@ int pldm_transport_test_init_pollfd(struct pldm_transport *ctx,
 #endif
 
 static pldm_requester_rc_t pldm_transport_test_recv(struct pldm_transport *ctx,
-						    pldm_tid_t tid,
+						    pldm_tid_t *tid,
 						    void **pldm_resp_msg,
 						    size_t *resp_msg_len)
 {
 	struct pldm_transport_test *test = transport_to_test(ctx);
 	const struct pldm_transport_test_descriptor *desc;
 	void *msg;
-
-	(void)tid;
 
 	if (test->cursor >= test->count) {
 		return PLDM_REQUESTER_RECV_FAIL;
@@ -109,6 +124,7 @@ static pldm_requester_rc_t pldm_transport_test_recv(struct pldm_transport *ctx,
 	memcpy(msg, desc->recv_msg.msg, desc->recv_msg.len);
 	*pldm_resp_msg = msg;
 	*resp_msg_len = desc->recv_msg.len;
+	*tid = desc->recv_msg.src;
 
 	test->cursor++;
 

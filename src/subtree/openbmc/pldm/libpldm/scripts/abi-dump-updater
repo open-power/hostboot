@@ -1,0 +1,18 @@
+#!/usr/bin/sh
+
+set -x
+
+set -eu
+
+UPDATE_BUILDDIR="$(mktemp -d)"
+
+trap "rm -rf $UPDATE_BUILDDIR" EXIT
+
+export CC=gcc
+export CXX=g++;
+
+[ $(uname -m) = 'x86_64' ]
+
+meson setup -Dabi=deprecated,stable "$UPDATE_BUILDDIR"
+meson compile -C "$UPDATE_BUILDDIR" abi-dump
+./scripts/abi-dump-formatter < "$UPDATE_BUILDDIR"/src/current.dump > abi/x86_64/gcc.dump

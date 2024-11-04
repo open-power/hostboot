@@ -2,14 +2,11 @@
 
 #include "common/utils.hpp"
 
-#include <time.h>
-
 #include <phosphor-logging/lg2.hpp>
 
 #include <array>
 #include <chrono>
 #include <ctime>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <variant>
@@ -36,11 +33,11 @@ void epochToBCDTime(uint64_t timeSec, uint8_t& seconds, uint8_t& minutes,
     minutes = pldm::utils::decimalToBcd(time->tm_min);
     hours = pldm::utils::decimalToBcd(time->tm_hour);
     day = pldm::utils::decimalToBcd(time->tm_mday);
-    month = pldm::utils::decimalToBcd(time->tm_mon +
-                                      1); // The number of months in the range
-                                          // 0 to 11.PLDM expects range 1 to 12
-    year = pldm::utils::decimalToBcd(time->tm_year +
-                                     1900); // The number of years since 1900
+    month = pldm::utils::decimalToBcd(
+        time->tm_mon + 1);     // The number of months in the range
+                               // 0 to 11.PLDM expects range 1 to 12
+    year = pldm::utils::decimalToBcd(
+        time->tm_year + 1900); // The number of years since 1900
 }
 
 std::time_t timeToEpoch(uint8_t seconds, uint8_t minutes, uint8_t hours,
@@ -69,40 +66,46 @@ using EpochTimeUS = uint64_t;
 
 DBusHandler dbusHandler;
 
-Handler::Handler(int fd, uint8_t eid, pldm::InstanceIdDb* instanceIdDb,
-                 pldm::requester::Handler<pldm::requester::Request>* handler,
-                 pldm::responder::oem_bios::Handler* oemBiosHandler) :
+Handler::Handler(
+    int fd, uint8_t eid, pldm::InstanceIdDb* instanceIdDb,
+    pldm::requester::Handler<pldm::requester::Request>* handler,
+    pldm::responder::platform_config::Handler* platformConfigHandler,
+    pldm::responder::bios::Callback requestPLDMServiceName) :
     biosConfig(BIOS_JSONS_DIR, BIOS_TABLES_DIR, &dbusHandler, fd, eid,
-               instanceIdDb, handler, oemBiosHandler)
+               instanceIdDb, handler, platformConfigHandler,
+               requestPLDMServiceName)
 {
-    biosConfig.removeTables();
-    biosConfig.buildTables();
-
-    handlers.emplace(PLDM_SET_DATE_TIME,
-                     [this](const pldm_msg* request, size_t payloadLength) {
-        return this->setDateTime(request, payloadLength);
-    });
-    handlers.emplace(PLDM_GET_DATE_TIME,
-                     [this](const pldm_msg* request, size_t payloadLength) {
-        return this->getDateTime(request, payloadLength);
-    });
-    handlers.emplace(PLDM_GET_BIOS_TABLE,
-                     [this](const pldm_msg* request, size_t payloadLength) {
-        return this->getBIOSTable(request, payloadLength);
-    });
-    handlers.emplace(PLDM_SET_BIOS_TABLE,
-                     [this](const pldm_msg* request, size_t payloadLength) {
-        return this->setBIOSTable(request, payloadLength);
-    });
-    handlers.emplace(PLDM_GET_BIOS_ATTRIBUTE_CURRENT_VALUE_BY_HANDLE,
-                     [this](const pldm_msg* request, size_t payloadLength) {
-        return this->getBIOSAttributeCurrentValueByHandle(request,
-                                                          payloadLength);
-    });
-    handlers.emplace(PLDM_SET_BIOS_ATTRIBUTE_CURRENT_VALUE,
-                     [this](const pldm_msg* request, size_t payloadLength) {
-        return this->setBIOSAttributeCurrentValue(request, payloadLength);
-    });
+    handlers.emplace(
+        PLDM_SET_DATE_TIME,
+        [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+            return this->setDateTime(request, payloadLength);
+        });
+    handlers.emplace(
+        PLDM_GET_DATE_TIME,
+        [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+            return this->getDateTime(request, payloadLength);
+        });
+    handlers.emplace(
+        PLDM_GET_BIOS_TABLE,
+        [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+            return this->getBIOSTable(request, payloadLength);
+        });
+    handlers.emplace(
+        PLDM_SET_BIOS_TABLE,
+        [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+            return this->setBIOSTable(request, payloadLength);
+        });
+    handlers.emplace(
+        PLDM_GET_BIOS_ATTRIBUTE_CURRENT_VALUE_BY_HANDLE,
+        [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+            return this->getBIOSAttributeCurrentValueByHandle(request,
+                                                              payloadLength);
+        });
+    handlers.emplace(
+        PLDM_SET_BIOS_ATTRIBUTE_CURRENT_VALUE,
+        [this](pldm_tid_t, const pldm_msg* request, size_t payloadLength) {
+            return this->setBIOSAttributeCurrentValue(request, payloadLength);
+        });
 }
 
 Response Handler::getDateTime(const pldm_msg* request, size_t /*payloadLength*/)
@@ -128,9 +131,8 @@ Response Handler::getDateTime(const pldm_msg* request, size_t /*payloadLength*/)
     catch (const sdbusplus::exception_t& e)
     {
         error(
-            "Error getting time, PATH={BMC_TIME_PATH} TIME INTERACE={TIME_INTERFACE}",
-            "BMC_TIME_PATH", bmcTimePath, "TIME_INTERFACE", timeInterface);
-
+            "Error getting time from Elapsed property at path '{PATH}' on interface '{INTERFACE}': {ERROR}",
+            "PATH", bmcTimePath, "INTERFACE", timeInterface, "ERROR", e);
         return CmdHandler::ccOnlyResponse(request, PLDM_ERROR);
     }
 
@@ -183,9 +185,9 @@ Response Handler::setDateTime(const pldm_msg* request, size_t payloadLength)
     catch (const std::exception& e)
     {
         error(
-            "Error getting the time sync property, PATH={TIME_SYNC_PATH} INTERFACE={SYNC_INTERFACE} PROPERTY={SYNC_PROP} ERROR={ERR_EXCEP}",
+            "Failed to get the time sync property from path {TIME_SYNC_PATH}, interface '{SYNC_INTERFACE}' and property '{SYNC_PROPERTY}', error - '{ERROR}'",
             "TIME_SYNC_PATH", timeSyncPath, "SYNC_INTERFACE", timeSyncInterface,
-            "SYNC_PROP", timeSyncProperty, "ERR_EXCEP", e.what());
+            "SYNC_PROPERTY", timeSyncProperty, "ERROR", e);
     }
 
     constexpr auto setTimeInterface = "xyz.openbmc_project.Time.EpochTime";
@@ -213,9 +215,9 @@ Response Handler::setDateTime(const pldm_msg* request, size_t payloadLength)
     catch (const std::exception& e)
     {
         error(
-            "Error Setting time,PATH={SET_TIME_PATH} TIME INTERFACE={TIME_INTERFACE} ERROR={ERR_EXCEP}",
+            "Failed to set time at {SET_TIME_PATH}, interface '{TIME_INTERFACE}' and error - {ERROR}",
             "SET_TIME_PATH", setTimePath, "TIME_INTERFACE", setTimeInterface,
-            "ERR_EXCEP", e.what());
+            "ERROR", e);
         return ccOnlyResponse(request, PLDM_ERROR);
     }
 

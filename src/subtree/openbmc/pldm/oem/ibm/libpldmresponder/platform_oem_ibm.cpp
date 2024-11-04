@@ -3,13 +3,11 @@
 #include "common/utils.hpp"
 #include "libpldmresponder/pdr.hpp"
 
-#include <libpldm/platform_oem_ibm.h>
-#include <libpldm/pldm.h>
+#include <libpldm/oem/ibm/platform.h>
 
 #include <phosphor-logging/lg2.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
-
-#include <iostream>
+#include <xyz/openbmc_project/State/Boot/Progress/client.hpp>
 
 PHOSPHOR_LOG2_USING;
 
@@ -24,29 +22,31 @@ int sendBiosAttributeUpdateEvent(
     const std::vector<uint16_t>& handles,
     pldm::requester::Handler<pldm::requester::Request>* handler)
 {
+    using BootProgress =
+        sdbusplus::client::xyz::openbmc_project::state::boot::Progress<>;
+
     constexpr auto hostStatePath = "/xyz/openbmc_project/state/host0";
-    constexpr auto hostStateInterface =
-        "xyz.openbmc_project.State.Boot.Progress";
     constexpr auto hostStateProperty = "BootProgress";
 
     try
     {
         auto propVal = pldm::utils::DBusHandler().getDbusPropertyVariant(
-            hostStatePath, hostStateProperty, hostStateInterface);
-        const auto& currHostState = std::get<std::string>(propVal);
-        if ((currHostState != "xyz.openbmc_project.State.Boot.Progress."
-                              "ProgressStages.SystemInitComplete") &&
-            (currHostState != "xyz.openbmc_project.State.Boot.Progress."
-                              "ProgressStages.OSRunning") &&
-            (currHostState != "xyz.openbmc_project.State.Boot.Progress."
-                              "ProgressStages.SystemSetup"))
+            hostStatePath, hostStateProperty, BootProgress::interface);
+
+        using Stages = BootProgress::ProgressStages;
+        auto currHostState = sdbusplus::message::convert_from_string<Stages>(
+                                 std::get<std::string>(propVal))
+                                 .value();
+
+        if (currHostState != Stages::SystemInitComplete &&
+            currHostState != Stages::OSRunning &&
+            currHostState != Stages::SystemSetup)
         {
             return PLDM_SUCCESS;
         }
     }
     catch (
-        const sdbusplus::xyz::openbmc_project::Common::Error::ResourceNotFound&
-            e)
+        const sdbusplus::xyz::openbmc_project::Common::Error::ResourceNotFound&)
     {
         /* Exception is expected to happen in the case when state manager is
          * started after pldm, this is expected to happen in reboot case
@@ -57,8 +57,8 @@ int sendBiosAttributeUpdateEvent(
     catch (const sdbusplus::exception_t& e)
     {
         error(
-            "Error in getting current host state, {EXCEP_NAME} Continue sending the bios attribute update event ...",
-            "EXCEP_NAME", e.name());
+            "Error in getting current remote terminus state, error - '{ERROR}' Continue sending the bios attribute update event ...",
+            "ERROR", e);
     }
 
     auto instanceId = instanceIdDb->next(eid);
@@ -77,14 +77,15 @@ int sendBiosAttributeUpdateEvent(
     if (rc != PLDM_SUCCESS)
     {
         error(
-            "BIOS Attribute update event message encode failure. PLDM error code = {RC}",
+            "Failed to encode BIOS Attribute update event message, response code '{RC}'",
             "RC", lg2::hex, rc);
         instanceIdDb->free(eid, instanceId);
         return rc;
     }
 
-    auto platformEventMessageResponseHandler =
-        [](mctp_eid_t /*eid*/, const pldm_msg* response, size_t respMsgLen) {
+    auto platformEventMessageResponseHandler = [](mctp_eid_t /*eid*/,
+                                                  const pldm_msg* response,
+                                                  size_t respMsgLen) {
         if (response == nullptr || !respMsgLen)
         {
             error("Failed to receive response for platform event message");
@@ -97,8 +98,8 @@ int sendBiosAttributeUpdateEvent(
         if (rc || completionCode)
         {
             error(
-                "Failed to decode BIOS Attribute update platform_event_message_resp: rc = {RC}, cc= {CC}",
-                "RC", rc, "CC", static_cast<unsigned>(completionCode));
+                "Failed to decode BIOS Attribute update platform event message response with response code '{RC}' and completion code '{CC}'",
+                "RC", rc, "CC", completionCode);
         }
     };
     rc = handler->registerRequest(
@@ -107,7 +108,8 @@ int sendBiosAttributeUpdateEvent(
     if (rc)
     {
         error(
-            "Failed to send BIOS Attribute update the platform event message");
+            "Failed to send BIOS Attribute update the platform event message, response code '{RC}'",
+            "RC", rc);
     }
 
     return rc;

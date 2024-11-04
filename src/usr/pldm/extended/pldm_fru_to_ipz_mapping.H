@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] 867314078@qq.com                                                   */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -35,7 +35,7 @@
  *        PLDM FRU IPZ Keyword Mapping Doc
  */
 
-#include <oem/ibm/libpldm/file_io.h>
+#include <oem/ibm/file_io.h>
 
 namespace PLDM
 {

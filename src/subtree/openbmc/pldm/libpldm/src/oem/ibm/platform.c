@@ -1,5 +1,8 @@
-#include "libpldm/platform.h"
-#include "libpldm/platform_oem_ibm.h"
+/* SPDX-License-Identifier: Apache-2.0 OR GPL-2.0-or-later */
+#include <libpldm/base.h>
+#include <libpldm/platform.h>
+#include <libpldm/oem/ibm/platform.h>
+
 #include <string.h>
 
 LIBPLDM_ABI_STABLE
@@ -22,9 +25,18 @@ int encode_bios_attribute_update_event_req(uint8_t instance_id,
 		return PLDM_ERROR_INVALID_DATA;
 	}
 
-	if (payload_length !=
-	    (PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES + sizeof(num_handles) +
-	     (num_handles * sizeof(uint16_t)))) {
+	if (SIZE_MAX / num_handles < sizeof(uint16_t)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	if (payload_length <
+	    PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES + sizeof(num_handles)) {
+		return PLDM_ERROR_INVALID_LENGTH;
+	}
+
+	if (payload_length - (PLDM_PLATFORM_EVENT_MESSAGE_MIN_REQ_BYTES +
+			      sizeof(num_handles)) <
+	    num_handles * sizeof(uint16_t)) {
 		return PLDM_ERROR_INVALID_LENGTH;
 	}
 

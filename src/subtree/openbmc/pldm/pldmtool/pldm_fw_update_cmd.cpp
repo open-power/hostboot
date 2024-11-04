@@ -41,7 +41,7 @@ const std::map<uint8_t, const char*> fdAuxStateStatus{
     {PLDM_FD_AUX_STATE_IN_PROGRESS_OR_SUCCESS,
      "AuxState is In Progress or Success"},
     {PLDM_FD_TIMEOUT, "Timeout occurred while performing action"},
-    {PLDM_FD_GENERIC_ERROR, "Generic Error has occured"}};
+    {PLDM_FD_GENERIC_ERROR, "Generic Error has occurred"}};
 
 const std::map<uint8_t, const char*> fdReasonCode{
     {PLDM_FD_INITIALIZATION, "Initialization of firmware device has occurred"},
@@ -86,8 +86,8 @@ class GetStatus : public CommandInterface
 
     std::pair<int, std::vector<uint8_t>> createRequestMsg() override
     {
-        std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
-                                        PLDM_GET_STATUS_REQ_BYTES);
+        std::vector<uint8_t> requestMsg(
+            sizeof(pldm_msg_hdr) + PLDM_GET_STATUS_REQ_BYTES);
         auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
         auto rc = encode_get_status_req(instanceId, request,
                                         PLDM_GET_STATUS_REQ_BYTES);
@@ -176,8 +176,8 @@ class GetFwParams : public CommandInterface
 
     std::pair<int, std::vector<uint8_t>> createRequestMsg() override
     {
-        std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
-                                        PLDM_GET_FIRMWARE_PARAMETERS_REQ_BYTES);
+        std::vector<uint8_t> requestMsg(
+            sizeof(pldm_msg_hdr) + PLDM_GET_FIRMWARE_PARAMETERS_REQ_BYTES);
         auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
         auto rc = encode_get_firmware_parameters_req(
             instanceId, PLDM_GET_FIRMWARE_PARAMETERS_REQ_BYTES, request);
@@ -397,9 +397,9 @@ class GetFwParams : public CommandInterface
 
             compParamPtr += sizeof(pldm_component_parameter_entry) +
                             activeCompVerStr.length + pendingCompVerStr.length;
-            compParamTableLen -= sizeof(pldm_component_parameter_entry) +
-                                 activeCompVerStr.length +
-                                 pendingCompVerStr.length;
+            compParamTableLen -=
+                sizeof(pldm_component_parameter_entry) +
+                activeCompVerStr.length + pendingCompVerStr.length;
             compDataEntries.push_back(compData);
         }
         data["ComponentParameterEntries"] = compDataEntries;
@@ -493,9 +493,9 @@ void QueryDeviceIdentifiers::updateDescriptor(
             }
         }
         // Entry is not present, add type and value to json response
-        ordered_json descriptor =
-            ordered_json::object({{"Type", descriptorName.at(descriptorType)},
-                                  {"Value", ordered_json::array()}});
+        ordered_json descriptor = ordered_json::object(
+            {{"Type", descriptorName.at(descriptorType)},
+             {"Value", ordered_json::array()}});
         if (descriptorType != PLDM_FWUP_VENDOR_DEFINED)
         {
             descriptor["Value"].emplace_back(descDataStream.str());
@@ -517,8 +517,8 @@ void QueryDeviceIdentifiers::updateDescriptor(
 }
 std::pair<int, std::vector<uint8_t>> QueryDeviceIdentifiers::createRequestMsg()
 {
-    std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
-                                    PLDM_QUERY_DEVICE_IDENTIFIERS_REQ_BYTES);
+    std::vector<uint8_t> requestMsg(
+        sizeof(pldm_msg_hdr) + PLDM_QUERY_DEVICE_IDENTIFIERS_REQ_BYTES);
     auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
     auto rc = encode_query_device_identifiers_req(
         instanceId, PLDM_QUERY_DEVICE_IDENTIFIERS_REQ_BYTES, request);
@@ -613,8 +613,8 @@ void QueryDeviceIdentifiers::parseResponseMsg(pldm_msg* responsePtr,
 
 void registerCommand(CLI::App& app)
 {
-    auto fwUpdate = app.add_subcommand("fw_update",
-                                       "firmware update type commands");
+    auto fwUpdate =
+        app.add_subcommand("fw_update", "firmware update type commands");
     fwUpdate->require_subcommand(1);
 
     auto getStatus = fwUpdate->add_subcommand("GetStatus", "Status of the FD");

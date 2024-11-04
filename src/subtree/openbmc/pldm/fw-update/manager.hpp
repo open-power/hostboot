@@ -1,14 +1,13 @@
 #pragma once
 
 #include "activation.hpp"
+#include "common/instance_id.hpp"
 #include "common/types.hpp"
 #include "device_updater.hpp"
 #include "inventory_manager.hpp"
-#include "pldmd/instance_id.hpp"
 #include "requester/handler.hpp"
+#include "requester/mctp_endpoint_discovery.hpp"
 #include "update_manager.hpp"
-
-#include <libpldm/pldm.h>
 
 #include <unordered_map>
 #include <vector>
@@ -24,7 +23,7 @@ namespace fw_update
  * This class handles all the aspects of the PLDM FW update specification for
  * the MCTP devices
  */
-class Manager
+class Manager : public pldm::MctpDiscoveryHandlerIntf
 {
   public:
     Manager() = delete;
@@ -46,16 +45,30 @@ class Manager
                       componentInfoMap)
     {}
 
-    /** @brief Discover MCTP endpoints that support the PLDM firmware update
-     *         specification
+    /** @brief Helper function to invoke registered handlers for
+     *         the added MCTP endpoints
      *
-     *  @param[in] eids - Array of MCTP endpoints
-     *
-     *  @return return PLDM_SUCCESS on success and PLDM_ERROR otherwise
+     *  @param[in] mctpInfos - information of discovered MCTP endpoints
      */
-    void handleMCTPEndpoints(const std::vector<mctp_eid_t>& eids)
+    void handleMctpEndpoints(const MctpInfos& mctpInfos)
     {
+        std::vector<mctp_eid_t> eids;
+        for (const auto& mctpInfo : mctpInfos)
+        {
+            eids.emplace_back(std::get<mctp_eid_t>(mctpInfo));
+        }
+
         inventoryMgr.discoverFDs(eids);
+    }
+
+    /** @brief Helper function to invoke registered handlers for
+     *         the removed MCTP endpoints
+     *
+     *  @param[in] mctpInfos - information of removed MCTP endpoints
+     */
+    void handleRemovedMctpEndpoints(const MctpInfos&)
+    {
+        return;
     }
 
     /** @brief Handle PLDM request for the commands in the FW update

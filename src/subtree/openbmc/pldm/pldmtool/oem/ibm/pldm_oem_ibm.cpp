@@ -3,8 +3,8 @@
 #include "../../pldm_cmd_helper.hpp"
 
 #include <endian.h>
-#include <libpldm/file_io.h>
-#include <libpldm/host.h>
+#include <libpldm/oem/ibm/file_io.h>
+#include <libpldm/oem/ibm/host.h>
 #include <libpldm/pldm_types.h>
 
 #include <iostream>
@@ -50,8 +50,8 @@ class GetAlertStatus : public CommandInterface
 
     std::pair<int, std::vector<uint8_t>> createRequestMsg() override
     {
-        std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
-                                        PLDM_GET_ALERT_STATUS_REQ_BYTES);
+        std::vector<uint8_t> requestMsg(
+            sizeof(pldm_msg_hdr) + PLDM_GET_ALERT_STATUS_REQ_BYTES);
         auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
 
         auto rc = encode_get_alert_status_req(instanceId, versionId, request,
@@ -64,9 +64,9 @@ class GetAlertStatus : public CommandInterface
         uint8_t completionCode = 0;
         uint32_t rack_entry = 0;
         uint32_t pri_cec_node = 0;
-        auto rc = decode_get_alert_status_resp(responsePtr, payloadLength,
-                                               &completionCode, &rack_entry,
-                                               &pri_cec_node);
+        auto rc = decode_get_alert_status_resp(
+            responsePtr, payloadLength, &completionCode, &rack_entry,
+            &pri_cec_node);
 
         if (rc != PLDM_SUCCESS || completionCode != PLDM_SUCCESS)
         {
@@ -111,8 +111,8 @@ class GetFileTable : public CommandInterface
     void parseResponseMsg(pldm_msg*, size_t) override {}
     void exec() override
     {
-        std::vector<uint8_t> requestMsg(sizeof(pldm_msg_hdr) +
-                                        PLDM_GET_FILE_TABLE_REQ_BYTES);
+        std::vector<uint8_t> requestMsg(
+            sizeof(pldm_msg_hdr) + PLDM_GET_FILE_TABLE_REQ_BYTES);
 
         auto request = reinterpret_cast<pldm_msg*>(requestMsg.data());
 
@@ -152,8 +152,8 @@ class GetFileTable : public CommandInterface
             return;
         }
 
-        auto tableData = reinterpret_cast<uint8_t*>((responsePtr->payload) +
-                                                    table_data_start_offset);
+        auto tableData = reinterpret_cast<uint8_t*>(
+            (responsePtr->payload) + table_data_start_offset);
         printFileAttrTable(tableData, fileTableDataLength);
     }
 
@@ -208,8 +208,8 @@ void registerCommand(CLI::App& app)
     commands.push_back(std::make_unique<GetAlertStatus>(
         "oem_ibm", "getAlertStatus", getAlertStatus));
 
-    auto getFileTable = oem_ibm->add_subcommand("GetFileTable",
-                                                "get file table");
+    auto getFileTable =
+        oem_ibm->add_subcommand("GetFileTable", "get file table");
 
     commands.push_back(std::make_unique<GetFileTable>("oem_ibm", "getFileTable",
                                                       getFileTable));
