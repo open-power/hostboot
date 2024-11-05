@@ -307,7 +307,15 @@ class mr6_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR6. WR recovery time %u. tRTP: %u", TARGTID, iv_wr_recovery, iv_trtp);
+            FAPI_INF_NO_SBE("MR 6: Write Recovery Time & tRTP " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR6 |           Field             |     Register Type    | Operand |  Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "          ----------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR6 |        WR recovery time     |          R/W         | OP[3:0] | %unCK",
+                            TARGTID, iv_wr_recovery);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR6 |             tRTP            |          R/W         | OP[7:4] | %unCK",
+                            TARGTID, iv_trtp);
         }
 };
 

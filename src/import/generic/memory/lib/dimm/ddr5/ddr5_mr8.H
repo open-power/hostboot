@@ -322,9 +322,16 @@ class mr8_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8. RD preamble:  %u. WR preamble:  %u", TARGTID, iv_rd_preamble,
+            FAPI_INF_NO_SBE("MR 8: Preamble/Postamble " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |      Field          |     Register Type    | Operand |   Data", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "          ---------------------------------------------------------------", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |    RD preamble      |          R/W         | OP[2:0] |  %u   ", TARGTID,
+                            iv_rd_preamble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |    WR preamble      |          R/W         | OP[4:3] |  %u   ", TARGTID,
                             iv_wr_preamble);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8. RD postamble: %u. WR postamble: %u", TARGTID, iv_rd_postamble,
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |    RD postamble     |          R/W         | OP[6]   |  %u   ", TARGTID,
+                            iv_rd_postamble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |    WR postamble     |          R/W         | OP[7]   |  %u   ", TARGTID,
                             iv_wr_postamble);
         }
 };

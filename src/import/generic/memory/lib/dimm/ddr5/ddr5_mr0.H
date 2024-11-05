@@ -289,8 +289,8 @@ class mr0_data : public mr_base_data<MC>
 
         enum
         {
-            CAS_LATENCY = 1,
-            CAS_LATENCY_LEN = 5,
+            CAS_LATENCY = 0,
+            CAS_LATENCY_LEN = 6,
 
             BURST_LENGTH = 6,
             BURST_LENGTH_LEN = 2,
@@ -308,12 +308,13 @@ class mr0_data : public mr_base_data<MC>
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
             FAPI_INF_NO_SBE("MR 0: Burst Length and Cas Latency " TARGTIDFORMAT, TARGTID );
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | Field         |     Register Type   |    Data", TARGTID);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT "          -----------------------------------------------", TARGTID);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | CAS latency   |          R/W        |     %u", TARGTID, iv_cas_latency);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | Burst length  |          R/W        |     %u", TARGTID, iv_burst_length);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | Field         |     Register Type   |   Operand   |  Data", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "          -----------------------------------------------------------", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | Burst length  |          R/W        |    OP[1:0]  |  %u", TARGTID,
+                            iv_burst_length);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | CAS latency   |          R/W        |    OP[7:2]  |  %u", TARGTID,
+                            iv_cas_latency);
         }
-
 };
 
 } // ns ddr5

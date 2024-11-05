@@ -271,9 +271,21 @@ class mr4_data : public mr_base_data<MC>
         ///
         void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
         {
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4. min refresh rate %u. refresh interval rate %u. tRFC mode: %u", TARGTID,
-                            iv_min_refresh_rate_read_only, iv_refresh_interval_rate, iv_refresh_trfc_mode);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4. wide range %u. TUF %u", TARGTID, iv_wide_range_read_only, iv_tuf_read_only);
+            FAPI_INF_NO_SBE("MR 4: Refresh Settings " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4 |           Field                 |     Register Type   | Operand  |   Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "          ---------------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4 |     Min. Refresh Rate           |          R          |  OP[2:0] |   %u",
+                            TARGTID, iv_min_refresh_rate_read_only);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4 | Refresh Interval Rate Indicator |          SR/W       |  OP[3]   |   %u",
+                            TARGTID, iv_refresh_interval_rate);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4 |         Refresh tRFC mode       |          R/W        |  OP[4]   |   %u",
+                            TARGTID, iv_refresh_interval_rate);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4 |      Wide Range(Optional)       |          R          |  OP[5]   |   %u",
+                            TARGTID, iv_wide_range_read_only);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR4 |   TUF(Temperature Update Flag)  |          R          |  OP[7]   |   %u",
+                            TARGTID, iv_tuf_read_only);
         }
 };
 
