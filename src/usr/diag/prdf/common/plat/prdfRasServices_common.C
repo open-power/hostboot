@@ -358,6 +358,14 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
                        ERRL_ACTION_REPORT    | // Report to HMC and hypervisor.
                        ERRL_ACTION_CALL_HOME;  // Call home.
 
+    #ifdef __HOSTBOOT_MODULE
+    // For all Hostboot/HBRT logs, add the periodic/heartbeat call home
+    // error log action flag. This is for periodically sending telemetry and
+    // recoverable error logs, ones that are informational but seen as relevant
+    // to monitor the health of the system.
+    iv_errl->updateActionFlags(ERRORLOG::ERRL_ACTIONS_HMC_CALL_HOME);
+    #endif
+
     if ( MACHINE_CHECK != i_attnType ) // Anything other that a system checkstop
     {
         if ( io_sdc.queryServiceCall() ) // still a serviceable event
