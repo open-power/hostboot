@@ -470,8 +470,10 @@ MAX_HBIRT_SIZE = 16252928
 
 
 imgsizecheck: ${IMGDIR}/hbicore.bin ${IMGDIR}/hbibl.bin ${IMGDIR}/hbirt.bin
-#Comment out below line if yor HBIRTLID exeeds the threshold and open a JIRA/Defect to track the issue when this fails in CI
+#Comment out line below if your HBIRTLID exceeds the threshold and open a JIRA/Defect to track the issue when this fails in CI
+ifndef HOSTBOOT_PROFILE
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbirt.bin; echo $(THRESH_HBIRT_SIZE)) | sort -n | tail -n1), $(THRESH_HBIRT_SIZE)),true, @echo WARNING: ${IMGDIR}/hbirt.bin is $(shell (stat -c%s ${IMGDIR}/hbirt.bin)) bytes which is close to the max size.  Search "HBIRTLID" in src/makefile for instructions to disable this warning; false)
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbirt.bin; echo $(MAX_HBIRT_SIZE)) | sort -n | tail -n1), $(MAX_HBIRT_SIZE)),true, @echo ERROR: ${IMGDIR}/hbirt.bin too large.  Max allowed size is $(MAX_HBIRT_SIZE); false)
+endif
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbicore.bin; echo $(MAX_BASE_SIZE)) | sort -n | tail -n1), $(MAX_BASE_SIZE)),true, @echo ERROR: ${IMGDIR}/hbicore.bin too large.  Max allowed size is $(MAX_BASE_SIZE); false)
 	$(if $(findstring $(shell (stat -c%s ${IMGDIR}/hbibl.bin; echo $(MAX_BTLDR_SIZE)) | sort -n | tail -n1), $(MAX_BTLDR_SIZE)),true, @echo ERROR: ${IMGDIR}/hbibl.bin too large.  Max allowed size is $(MAX_BTLDR_SIZE); false)
