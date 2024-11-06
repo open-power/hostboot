@@ -967,8 +967,12 @@ void ErrDataService::deallocateDimms( const SDC_MRU_LIST & i_mruList )
         // Check whether the DISABLE_PREDICTIVE_MEM_GUARD attribute option is
         // set to disable predictive memory deallocation..
         TargetHandle_t system = getSystemTarget();
-        if (0 != system->getAttr<ATTR_DISABLE_PREDICTIVE_MEM_GUARD>())
+        ATTR_DISABLE_PREDICTIVE_MEM_GUARD_type noguard = 0;
+        if ( system->tryGetAttr<ATTR_DISABLE_PREDICTIVE_MEM_GUARD>(noguard)
+             && noguard )
+        {
             break;
+        }
 
         TargetHandleList dimmList;
         for ( SDC_MRU_LIST::const_iterator it = i_mruList.begin();

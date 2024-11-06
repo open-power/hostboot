@@ -1060,8 +1060,11 @@ errlHndl_t createPmicHealthCheckCallback(bool i_firstCall, uint8_t i_processor)
                                         getAttr<ATTR_PMIC_HEALTH_CHECK_TIMER>();
         // Get the health check starting staggered time for processor
         // callback delay
-        auto l_host_stagger_delay = UTIL::assertGetToplevelTarget()->
-                                        getAttr<ATTR_PMIC_CALLBACK_STAGGER_TIME>();
+        // To handle a failed concurrent update, need to handle the case where
+        // the new attribute doesn't exist.
+        ATTR_PMIC_CALLBACK_STAGGER_TIME_type l_host_stagger_delay = 300000;
+        (void)!UTIL::assertGetToplevelTarget()->
+             tryGetAttr<ATTR_PMIC_CALLBACK_STAGGER_TIME>(l_host_stagger_delay);
 
         // First check for callback disabled
         if (l_host_callback_timer == HOST_CALLBACK_TIMER_DISABLED)
@@ -1193,8 +1196,11 @@ errlHndl_t createPmicHealthCheckDDR5Callback(bool i_firstCall, uint8_t i_process
                                         getAttr<ATTR_PMIC_HEALTH_CHECK_DDR5_TIMER>();
         // Get the health check starting staggered time for processor
         // callback delay
-        auto l_host_stagger_delay = UTIL::assertGetToplevelTarget()->
-                                        getAttr<ATTR_PMIC_CALLBACK_STAGGER_TIME>();
+        // To handle a failed concurrent update, need to handle the case where
+        // the new attribute doesn't exist.
+        ATTR_PMIC_CALLBACK_STAGGER_TIME_type l_host_stagger_delay = 300000;
+        (void)!UTIL::assertGetToplevelTarget()->
+             tryGetAttr<ATTR_PMIC_CALLBACK_STAGGER_TIME>(l_host_stagger_delay);
 
         // First check for callback disabled
         if (l_host_callback_timer == HOST_CALLBACK_TIMER_DISABLED)
