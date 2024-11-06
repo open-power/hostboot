@@ -126,25 +126,19 @@ fapi2::ReturnCode assertElogEntry (
     uint8_t idx = 0;
     uint32_t l_error_log_id = 0;
     uint32_t l_err_source = 0;
-    uint32_t l_err_len = 0;
-    uint32_t l_err_addr = 0;
     uint64_t l_temp = 0;
     l_temp = ( i_elog_entry >> ELOG_ID_BIT_SHIFT );
     l_error_log_id = (uint8_t)l_temp;
     l_temp = (( i_elog_entry & ELOG_ID_SRC_MASK ) >> ELOG_ID_SRC_SHIFT );
     l_err_source = (uint8_t)l_temp;
     l_temp = (( i_elog_entry & ELOG_ID_LEN_MASK ) >> ELOG_ID_LENGTH_SHIFT );
-    l_err_len = (uint16_t)l_temp;
     l_temp = ( i_elog_entry & ELOG_ID_ADDR_MASK );
-    l_err_addr = (uint32_t) l_temp;
 
     *o_perv_chiplet_id = 0;
 
-    FAPI_DBG (">> assertElogEntry-Id %d Src 0x%02X Len %d Addr 0x%08X Local %d",
+    FAPI_DBG (">> assertElogEntry-Id %d Src 0x%02X Local %d",
               l_error_log_id,
               l_err_source,
-              l_err_len,
-              l_err_addr,
               i_local);
 
     switch (l_err_source)
@@ -405,7 +399,8 @@ fapi2::ReturnCode p10_pm_elog_list (
                         break;
 
                     case ERRL_SOURCE_QME:
-                        if ( i_ppe_type == PPE_TYPE_QME )
+                        if ( ( i_ppe_type == PPE_TYPE_QME ) &&
+                             (i_ppe_instance == idx ) )
                         {
                             found = true;
                         }
