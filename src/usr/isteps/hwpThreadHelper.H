@@ -87,9 +87,10 @@
     do                                                                  \
     {                                                                   \
         errlHndl_t& RUN_ODY_CHIPOP_errl = ERRL;                         \
+        bool io_failHWP = false;                                        \
                                                                         \
         TRACISTEP(#CALLER ": run " #OP " on target HUID 0x%.8X (chipop)", get_huid(TARGET)); \
-        RUN_ODY_CHIPOP_errl = sendExecHWPRequest(TARGET, OP);           \
+        RUN_ODY_CHIPOP_errl = sendExecHWPRequest(TARGET, OP, io_failHWP); \
         /* A chipop response may include logs orthogonal to the         \
            chipop's success, those should not cause a failure. */       \
         if (RUN_ODY_CHIPOP_errl                                         \
@@ -123,7 +124,7 @@
             }                                                           \
         }                                                               \
         /* A chipop execution failure. */                               \
-        else if (RUN_ODY_CHIPOP_errl)                                   \
+        else if ((RUN_ODY_CHIPOP_errl) || (io_failHWP))                 \
         {                                                               \
             TRACISTEP(#CALLER ": FAILURE running " #OP " chipop on target HUID 0x%.8X", \
                       get_huid(TARGET));                                \

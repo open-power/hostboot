@@ -800,16 +800,25 @@ namespace SBEIO
     *
     * @param[in] i_chipTarget The Odyssey chip to perform the chipop on
     * @param[in] i_hwpNumber The HWP number, differs depending on class
+    * @param[i/o] io_failHWP   This flag indicates that the HWP call should
+    *                          be treated as a failure, despite the lack of
+    *                          an error log. This should only be set to true
+    *                          if there is an active attention that will be
+    *                          caught at the end of the istep or some other
+    *                          means of causing the istep to fail.
     *
     * @return errlHndl_t Error log handle on failure.
     *
     */
     errlHndl_t sendExecHWPRequest(TARGETING::Target                 *i_chipTarget,
-                                  fifoExecuteHardwareProcedureIo     i_hwpNumber);
+                                  fifoExecuteHardwareProcedureIo     i_hwpNumber,
+                                  bool   &io_failHWP);
     errlHndl_t sendExecHWPRequest(TARGETING::Target                 *i_chipTarget,
-                                  fifoExecuteHardwareProcedureMemory i_hwpNumber);
+                                  fifoExecuteHardwareProcedureMemory i_hwpNumber,
+                                  bool   &io_failHWP);
     errlHndl_t sendExecHWPRequest(TARGETING::Target                 *i_chipTarget,
-                                  fifoExecuteHardwareProcedureMisc   i_hwpNumber);
+                                  fifoExecuteHardwareProcedureMisc   i_hwpNumber,
+                                  bool   &io_failHWP);
 
     /**
      * @brief Send the request to update the attributes on SPPE with the generated

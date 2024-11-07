@@ -294,14 +294,22 @@ namespace SBEIO
      * @param[in]  i_chipTarget The Odyssey chip to perform the chipop on
      * @param[in]  i_hwpClass   The HWP class, either IO or MEM
      * @param[in]  i_hwpNumber  The specific HWP number to execute
+     * @param[i/o] io_failHWP   This flag indicates that the HWP call should
+     *                          be treated as a failure, despite the lack of
+     *                          an error log. This should only be set to true
+     *                          if there is an active attention that will be
+     *                          caught at the end of the istep or some other
+     *                          means of causing the istep to fail.
      *
      * @return errlHndl_t Error log handle on failure.
      */
     errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
                                   uint8_t i_hwpClass,
-                                  uint8_t i_hwpNumber)
+                                  uint8_t i_hwpNumber,
+                                  bool    &io_failHWP)
     {
         errlHndl_t errl = nullptr;
+        io_failHWP = false;
 
         do
         {
@@ -393,6 +401,12 @@ namespace SBEIO
                                    "target=0x%.8X, hwpClass=0x%X, hwpNumber=0x%X",
                                    TARGETING::get_huid(i_chipTarget),
                                    SBE_FIFO_EXEC_HWP_CLASS_IO, i_hwpNumber );
+
+                        // We committed the error so that PRD can interpret the fir bits.
+                        // But we still want this HWP to fail. So indicate that via the
+                        // flag.
+                        io_failHWP = true;
+                        SBE_TRACF( "sendExecHWPRequest: io_failHWP=%d", io_failHWP );
                     }
                     else
                     {
@@ -409,7 +423,7 @@ namespace SBEIO
                                    "target=0x%.8X, hwpClass=0x%X, hwpNumber=0x%X",
                                    TARGETING::get_huid(i_chipTarget),
                                    SBE_FIFO_EXEC_HWP_CLASS_IO, i_hwpNumber );
-                        
+
                         if (l_odyErrl != nullptr)
                         {
                             errl->aggregate(l_odyErrl);
@@ -432,7 +446,8 @@ namespace SBEIO
     // Wrapper for an Odyssey MISC HWP
     // See sbeioif.H for definition
     errlHndl_t sendExecHWPRequest(TARGETING::Target               *i_chipTarget,
-                                  fifoExecuteHardwareProcedureMisc i_hwpNumber)
+                                  fifoExecuteHardwareProcedureMisc i_hwpNumber,
+                                  bool  &io_failHWP)
     {
         errlHndl_t errl = nullptr;
 
@@ -450,7 +465,8 @@ namespace SBEIO
             // Send the HWP request
             errl = sendExecHWPRequest(i_chipTarget,
                                       SBE_FIFO_EXEC_HWP_CLASS_MISC,
-                                      i_hwpNumber);
+                                      i_hwpNumber,
+                                      io_failHWP);
             if(errl)
             {
                 break;
@@ -465,7 +481,8 @@ namespace SBEIO
     // Wrapper for an Odyssey IO HWP
     // See sbeioif.H for definition
     errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
-                                  fifoExecuteHardwareProcedureIo i_hwpNumber)
+                                  fifoExecuteHardwareProcedureIo i_hwpNumber,
+                                  bool  &io_failHWP)
     {
         errlHndl_t errl = nullptr;
 
@@ -492,7 +509,8 @@ namespace SBEIO
             // Send the HWP request
             errl = sendExecHWPRequest(i_chipTarget,
                                       SBE_FIFO_EXEC_HWP_CLASS_IO,
-                                      i_hwpNumber);
+                                      i_hwpNumber,
+                                      io_failHWP);
             if(errl)
             {
                 break;
@@ -507,7 +525,8 @@ namespace SBEIO
     // Wrapper for an Odyssey MEMORY HWP
     // See sbeioif.H for definition
     errlHndl_t sendExecHWPRequest(TARGETING::Target * i_chipTarget,
-                                  fifoExecuteHardwareProcedureMemory i_hwpNumber)
+                                  fifoExecuteHardwareProcedureMemory i_hwpNumber,
+                                  bool  &io_failHWP)
     {
         errlHndl_t errl = nullptr;
 
@@ -534,7 +553,8 @@ namespace SBEIO
             // Send the HWP request
             errl = sendExecHWPRequest(i_chipTarget,
                                       SBE_FIFO_EXEC_HWP_CLASS_MEMORY,
-                                      i_hwpNumber);
+                                      i_hwpNumber,
+                                      io_failHWP);
             if(errl)
             {
                 break;

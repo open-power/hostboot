@@ -277,11 +277,12 @@ void* call_host_secure_rng(void* const io_pArgs)
     {
         if (UTIL::isOdysseyChip(l_ocmb))
         {
+            bool io_failHWP = false;
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                 "call_host_secure_rng: running OCMB "
                 "HWP poz_exec_hwp_sequence_complete on "
                 "huid=0x%08X ", get_huid(l_ocmb));
-            l_err = sendExecHWPRequest(l_ocmb, MISC_ODY_HWP_SEQUENCE_COMPLETE);
+            l_err = sendExecHWPRequest(l_ocmb, MISC_ODY_HWP_SEQUENCE_COMPLETE, io_failHWP);
             if (l_err)
             {
                 TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
