@@ -186,6 +186,7 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
         }
         else if (l_chipId == POWER_CHIPID::ODYSSEY_16)
         {
+            bool io_failHWP = false;
 
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, INFO_MRK
                        "Running ody_thermal_init HWP call on Odyssey "
@@ -207,10 +208,11 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
             {
                 // Note - At the end of this HWP the polling loop on the SBE
                 // will be enabled
-                l_err = sendExecHWPRequest(l_ocmbTarget, MEM_ODY_THERMAL_INIT);
+                l_err = sendExecHWPRequest(l_ocmbTarget, MEM_ODY_THERMAL_INIT,
+                                           io_failHWP);
             }
 
-            if (l_err)
+            if ((l_err) || (io_failHWP))
             {
                 TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
                            "ERROR: ody_mss_thermal_init HWP call on Odyssey "
@@ -222,8 +224,20 @@ void p10_call_mss_thermal_init(IStepError & io_iStepError)
 
                 // We don't want to fail the IPL due to problems setting
                 //  up the temperature sensors on the DIMM, so just commit
-                //  the log here.
-                errlCommit(l_err, ISTEP_COMP_ID);
+                //  the log here. If there is no error log but if the io_failHWP
+                //  is set to true, trace it. Since we don't set the attribute
+                //  ATTR_MEM_THERMAL_INIT_COMPLETE in this path, it should prevent
+                //  other steps associated with this HWP to be executed.
+                if (l_err)
+                {
+                    errlCommit(l_err, ISTEP_COMP_ID);
+                }
+                else
+                {
+                    TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK
+                               "ERROR: ody_mss_thermal_init HWP call on Odyssey "
+                               "chip! io_failHWP=%d", io_failHWP );
+                }
             }
             else
             {
