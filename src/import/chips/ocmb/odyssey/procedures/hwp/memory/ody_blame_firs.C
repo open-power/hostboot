@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -74,6 +74,11 @@ extern "C"
                 break;
 
             case mss::ipl_substep::DRAMINIT:
+                FAPI_ASSERT(i_ports.size() != 0,
+                            fapi2::MISSING_PORT_INFO_DRAMINIT()
+                            .set_MC_TARGET(i_target),
+                            "ody_blame_firs call following the DRAMINIT HWP has empty MEM_PORT input vector");
+
                 for (const auto& l_port : i_ports)
                 {
                     fapi2::ReturnCode l_port_rc(l_rc);
@@ -144,6 +149,8 @@ extern "C"
         }
 
         return l_scom_error;
+    fapi_try_exit:
+        return fapi2::current_err;
 
     }
 

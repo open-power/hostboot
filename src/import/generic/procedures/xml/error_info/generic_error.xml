@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -560,6 +560,26 @@
       <procedure>CODE</procedure>
       <priority>HIGH</priority>
     </callout>
+  </hwpError>
+
+  <hwpError>
+    <rc>RC_MISSING_PORT_INFO_DRAMINIT</rc>
+    <description>No memory port info supplied by DRAM init while calling ody_blame_firs</description>
+    <ffdc>MC_TARGET</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>HIGH</priority>
+    </callout>
+    <callout>
+      <target>MC_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>MC_TARGET</target>
+    </deconfigure>
+   <gard>
+      <target>MC_TARGET</target>
+    </gard>
   </hwpError>
 
   <hwpError>
