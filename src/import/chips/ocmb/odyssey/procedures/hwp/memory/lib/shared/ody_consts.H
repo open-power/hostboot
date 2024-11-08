@@ -325,6 +325,26 @@ enum phy_swizzle
     PHY_TO_MC_BYTE7 = 8,
     PHY_TO_MC_BYTE8 = 4,
     PHY_TO_MC_BYTE9 = 9,
+    PHY_TO_MC_NIB0 = 0,
+    PHY_TO_MC_NIB1 = 1,
+    PHY_TO_MC_NIB2 = 2,
+    PHY_TO_MC_NIB3 = 3,
+    PHY_TO_MC_NIB4 = 4,
+    PHY_TO_MC_NIB5 = 5,
+    PHY_TO_MC_NIB6 = 6,
+    PHY_TO_MC_NIB7 = 7,
+    PHY_TO_MC_NIB8 = 10,
+    PHY_TO_MC_NIB9 = 11,
+    PHY_TO_MC_NIB10 = 12,
+    PHY_TO_MC_NIB11 = 13,
+    PHY_TO_MC_NIB12 = 14,
+    PHY_TO_MC_NIB13 = 15,
+    PHY_TO_MC_NIB14 = 16,
+    PHY_TO_MC_NIB15 = 17,
+    PHY_TO_MC_NIB16 = 8,
+    PHY_TO_MC_NIB17 = 9,
+    PHY_TO_MC_NIB18 = 18,
+    PHY_TO_MC_NIB19 = 19,
 };
 
 static constexpr uint8_t PHY_TO_MC_BYTE[mss::ody::MAX_BYTES_PER_PORT]__attribute__ ((aligned (8))) =
@@ -339,6 +359,30 @@ static constexpr uint8_t PHY_TO_MC_BYTE[mss::ody::MAX_BYTES_PER_PORT]__attribute
     mss::ody::phy_swizzle::PHY_TO_MC_BYTE7,
     mss::ody::phy_swizzle::PHY_TO_MC_BYTE8,
     mss::ody::phy_swizzle::PHY_TO_MC_BYTE9
+};
+
+static constexpr uint8_t PHY_TO_MC_NIBBLE[mss::ody::MAX_NIBBLES_PER_PORT]__attribute__ ((aligned (8))) =
+{
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB0,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB1,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB2,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB3,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB4,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB5,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB6,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB7,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB8,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB9,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB10,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB11,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB12,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB13,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB14,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB15,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB16,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB17,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB18,
+    mss::ody::phy_swizzle::PHY_TO_MC_NIB19
 };
 
 } // namespace ody

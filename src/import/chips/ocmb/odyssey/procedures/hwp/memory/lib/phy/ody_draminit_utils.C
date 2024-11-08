@@ -1477,7 +1477,9 @@ fapi2::ReturnCode read_mr_from_block(const fapi2::Target<fapi2::TARGET_TYPE_DIMM
 
             for(uint8_t l_phy_dram = 0; l_phy_dram < mss::ody::MAX_NIBBLES_PER_PORT; l_phy_dram += INDEX, ++l_mc_dram)
             {
-                FAPI_TRY(l_mr.read_from_data(l_rank_info, i_data_array[l_rank_info.get_phy_rank()][l_phy_dram], l_mc_dram));
+                FAPI_TRY(l_mr.read_from_data(l_rank_info,
+                                             i_data_array[l_rank_info.get_phy_rank()][l_phy_dram],
+                                             mss::ody::PHY_TO_MC_NIBBLE[l_mc_dram]));
             }
         }
     }
