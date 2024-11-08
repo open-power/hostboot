@@ -42,6 +42,10 @@
 #include <pmic_regs_fld.H>
 #include <ody_scom_ody_odc.H>
 
+#ifdef __PPE__
+    #include <zme_call_ocmb.H>
+#endif
+
 ///
 /// @brief Read and store serial number and CCIN number
 ///
@@ -188,6 +192,17 @@ void read_dts_data(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_ocmb_tar
         FAPI_TRY(getScomHost(i_ocmb_target, DTS_ADDRESS_MAP[l_idx], l_data));
         memcpy(&io_dts_data[l_idx], &l_data, sizeof(l_data));
     }
+
+    // PPE has some I2C arbitration issue. It has multiple devices issuing I2C commands (BMC/SBE)
+    // which can cause collisions on the bus resulting in undefined behavior.
+    // Hence the device using the bus locks that bus. The I2C locks are set before any PMIC procedure is called.
+    // The Tele HWP also performs some scoms along with I2C transactions. When scoms are performed the I2C bus
+    // control is lost to some other device. If the lock is not placed back, it might result in some other device
+    // (example BMC doing SPD checks for CRC issues) also trying to communicate on the bus resulting in wrong PMIC data.
+    // So we need to lock the bus again.
+#ifdef __PPE__
+    FAPI_TRY(i2c_arbitration_lock(i_ocmb_target));
+#endif
 
 fapi_try_exit:
     // We dont want to exit out of the HWP so we are just clearing error here.
