@@ -175,6 +175,29 @@ namespace Bootloader{
             // Get Secureboot Signing Mode
             g_blData->blToHbData.sb_signing_mode = l_blConfigData->sbSettings.sbMode;
         }
+
+        // Send system settings to console
+        uint8_t l_SAB = g_blData->blToHbData.secureAccessBit;
+        uint32_t l_system_hash = 0;
+        memcpy(&l_system_hash,
+               g_blData->blToHbData.hwKeysHashPtr,
+               sizeof(l_system_hash));
+        uint8_t l_system_min_version = g_blData->blToHbData.min_secure_version;
+        uint8_t l_mode = g_blData->blToHbData.sb_signing_mode;
+
+        bl_console::putString("\rSystem Settings: SAB: 0x");
+        bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_SAB),
+                               sizeof(l_SAB));
+        bl_console::putString(", Hash: 0x");
+        bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_system_hash),
+                               sizeof(l_system_hash));
+        bl_console::putString(", SV: 0x");
+        bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_system_min_version),
+                               sizeof(l_system_min_version));
+        bl_console::putString(", Mode: 0x");
+        bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_mode),
+                               sizeof(l_mode));
+        bl_console::putString("\r\n");
     }
 
     void setKeyAddrMapData(const void * i_pHbbSrc)
@@ -302,7 +325,14 @@ namespace Bootloader{
                 + SHA512_HASH_FUNCTION_OFFSET;
 
         // Check if Secure Access Bit is set
-        if (!g_blData->blToHbData.secureAccessBit)
+        // @TODO JIRA:PFHB-679 Also temporarily treat V3 signmode (==0x02)
+        // as unsecure until full V3 validation is ready.
+        // This temporary change will only work on imprint drivers.
+        // The presence of a security backdoor will be used to imply that
+        // the code is running for an imprint driver.
+        if (!g_blData->blToHbData.secureAccessBit ||
+            ((g_blData->blToHbData.sb_signing_mode == 0x02) &&
+             (g_blData->blToHbData.secBackdoorBit != 0 )))
         {
             BOOTLOADER_TRACE(BTLDR_TRC_MAIN_VERIFY_SAB_UNSET);
 
