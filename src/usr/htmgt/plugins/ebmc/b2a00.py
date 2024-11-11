@@ -43,10 +43,14 @@ occStateList = { "01": "STANDBY",
 occRoleList = { "00": "SLAVE",
                 "01": "MASTER" }
 occModeList = { "01": "STATIC",
+                "02": "Non Deterministic",
                 "03": "STATICFREQPOINT",
                 "04": "SAFE",
                 "05": "POWERSAVER",
+                "06": "Efficiency Favor Power",
+                "07": "Efficiency Favor Performance",
                 "09": "MAXFREQUENCY",
+                "0a": "Balanced",
                 "0b": "FIXEDFREQUENCY",
                 "0c": "MAXPERFORMANCE" }
 occUdTypeList = { "01": "TRACE",
@@ -116,10 +120,8 @@ class errludP_occ:
             lines.append("Invalid number of modes (using 2)")
             nummodes = 2
 
-        if version != 16:
+        if version < 16 or version > 17:
             lines.append("Unsupported Call Home Version")
-            i -= 11
-            return i, lines
 
         funcIdOffset = i
         i += 16
@@ -164,6 +166,8 @@ class errludP_occ:
             else:
                 lines.append("Previous Mode: "+dataToString(occModeList,mode)+" ("+str(int(value,16))+" samples)")
             lines.append(divider);
+            # List of call home sensors START
+            # enum list in : occ/src/occ_405/thread/chom.h
             lines.append("Total System Power:")
             i, line = errludP_occ.printSensor("CHOMPWR", data, i)
             lines.append(line)
@@ -255,11 +259,18 @@ class errludP_occ:
             else:
                 i, line = errludP_occ.printSensor("CHOMIPS", data, i)
             lines.append(line)
-            lines.append("Memory Bandwidth:")
-            for p in range(0,8):
-                for s in range(0,16):
-                    i, line = errludP_occ.printSensor("CHOMBWP"+str(p)+"M"+str(s).zfill(2), data, i)
-                    lines.append(line)
+            if version < 17: # this is for version 16 or below.
+                lines.append("Memory Bandwidth:")
+                for p in range(0,8):
+                    for s in range(0,16):
+                        i, line = errludP_occ.printSensor("CHOMBWP"+str(p)+"M"+str(s).zfill(2), data, i)
+                        lines.append(line)
+            else: # this is for version 17 and above.
+                lines.append("Memory Utilization (0.01 percent):")
+                for p in range(0,8):
+                    for s in range(0,16):
+                        i, line = errludP_occ.printSensor("CHOMMEMUTILP"+str(p)+"M"+str(s).zfill(2), data, i)
+                        lines.append(line)
             lines.append("Digital Droop Sensors:")
             for s in range(0,8):
                 i, line = errludP_occ.printSensor("CHOMDDSAVGP"+str(s), data, i)
@@ -292,6 +303,12 @@ class errludP_occ:
             for s in range(0,8):
                 i, line = errludP_occ.printSensor("CHOMPWRVCSP"+str(s), data, i)
                 lines.append(line)
+            if version > 16: # this is version 17 or above.
+                lines.append("MMA on (1.0 percent):")
+                for p in range(0,8):
+                    i, line = errludP_occ.printSensor("CHOMMMAONAVGP"+str(p), data, i)
+                    lines.append(line)
+        # List of call home sensors END
 
         return i, lines
 
