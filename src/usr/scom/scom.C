@@ -1064,11 +1064,13 @@ errlHndl_t doScomOp(DeviceFW::OperationType i_opType,
 
     uint32_t l_remainingAttempts{2};
     uint32_t l_retryCount{0};
-
+    size_t old_io_buflen = io_buflen;
     do
     {
         //number of max remaining attempts after the current attempt.
         --l_remainingAttempts;
+        // save io_bufflen to replace if io_bufflen is set to 0 during requestRetry()
+        io_buflen = old_io_buflen;
 
         do{
             TARGETING::ScomSwitches scomSetting;
