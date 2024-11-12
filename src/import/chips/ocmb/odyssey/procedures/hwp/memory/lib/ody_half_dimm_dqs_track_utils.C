@@ -300,19 +300,8 @@ fapi_try_exit:
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 /// @note exits if the DIMM is not in half-DIMM mode
 ///
-fapi2::ReturnCode setup_ccs_initial(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
+fapi2::ReturnCode setup_ccs(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target)
 {
-    bool l_is_half_dimm_mode = false;
-    FAPI_TRY(mss::ody::half_dimm_mode(i_target, l_is_half_dimm_mode));
-
-    // If the Odyssey is not in half-dimm mode, then skip running
-    // DQS drift track will be run via the internal polling mechanism
-    if(!l_is_half_dimm_mode)
-    {
-        FAPI_DBG(TARGTIDFORMAT " is not in half-dimm mode. Skipping setting up the initial CCS array", TARGTID);
-        return fapi2::FAPI2_RC_SUCCESS;
-    }
-
     // Configures the CCS engine
     FAPI_TRY(configure_ccs(i_target, mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target)));
 
@@ -345,19 +334,16 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Setsup the CCS array for the next execution
+/// @brief Setsup the the information for the next execution of the chip op
 /// @param[in] i_target the OCMB chip on which to operate
 /// @param[in] i_ports the ports for the target in question
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode setup_ccs_next_run(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-                                     const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
+fapi2::ReturnCode setup_next_run(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+                                 const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports)
 {
     // Advances to the next valid port/channel/rank target
     FAPI_TRY(next_port_channel_rank_info(i_target, i_ports));
-
-    // Configures the CCS engine
-    FAPI_TRY(configure_ccs(i_target, i_ports));
 
     // Masks of SRQ LFIR[28] as this is a latch to help communicate and avoid a false quiesce state
     {
@@ -415,10 +401,12 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
     mss::ccs::channel_select l_channel;
     drift_track_mr l_mr;
 
-    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
     uint8_t l_current = 0;
     uint8_t l_missed_quiesce_count = 0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DQS_TRACKING_HALF_DIMM_TARGET, i_target, l_current));
+
+    // Setup CCS for this execution
+    FAPI_TRY(setup_ccs(i_target));
 
     // The odyssey has a chip bug where an internal array error happens in half-dimm mode
     // The bus has to be cleaned up by running a mainline style read
@@ -426,6 +414,7 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
     // Due to the timing of the quiesce in the affected systems, only a single port/rank/channel/MR is conducted each time the procedure is called
     // An attribute is used to keep track of the next item to run
     {
+        const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
         FAPI_TRY(get_port_channel_rank_info(l_ports, l_current, l_rank_info, l_channel, l_mr));
         const auto& l_port_target = l_rank_info.get_port_target();
 
@@ -518,8 +507,8 @@ fapi2::ReturnCode execute_half_dimm_concurrent_ccs(const fapi2::Target<fapi2::TA
             // Clear the snoop bit
             FAPI_TRY(disable_mr_snoop(l_ocmb));
 
-            // Sets up the next CCS run
-            FAPI_TRY(setup_ccs_next_run(l_ocmb, l_ports));
+            // Sets up the next run
+            FAPI_TRY(setup_next_run(l_ocmb, l_ports));
         }
 
         // Compute and log the DQS tracking information
