@@ -576,7 +576,7 @@ rule rEQ_L2_FIR
 
 group gEQ_L2_FIR
     filter singlebit,
-           cs_root_cause(1,12,13,17,18,20,27)
+           cs_root_cause(1,12,13,17,18,20,24,27)
 {
     /** EQ_L2_FIR[0]
      *  L2 cache read CE
@@ -701,7 +701,7 @@ group gEQ_L2_FIR
     /** EQ_L2_FIR[24]
      *  RCDAT read parity error.
      */
-    (rEQ_L2_FIR, bit(24)) ? self_th_1;
+    (rEQ_L2_FIR, bit(24)) ? self_th_1_UERE;
 
     /** EQ_L2_FIR[25]
      *  L2 castout or CN cresp addr err
