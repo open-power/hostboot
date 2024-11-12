@@ -249,7 +249,7 @@ rule rL2FIR
 
 group gL2FIR
     filter singlebit,
-           cs_root_cause(1,17,18,20)
+           cs_root_cause(1,17,18,20,24)
 {
     /** L2FIR[0]
      *  L2 cache read CE
@@ -374,7 +374,7 @@ group gL2FIR
     /** L2FIR[24]
      *  PE on data from RCDAT
      */
-    (rL2FIR, bit(24)) ? self_th_1;
+    (rL2FIR, bit(24)) ? self_th_1_UERE;
 
     /** L2FIR[25]
      *  L2 castout or CN cresp addr err
