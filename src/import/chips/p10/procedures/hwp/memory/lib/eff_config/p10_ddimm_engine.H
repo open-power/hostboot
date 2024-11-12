@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -365,9 +365,9 @@ class ddimm_0_3 : public module_specific_base
         virtual bool check_pmic_rail_volt_off(const uint8_t i_field) const
         {
             // The value of rail volt offset had been reduced by 1 as we have to increase the value
-            // by 1 in case of 3200 frequency and VDD rail. The value will never reach 0x7F but this
-            // is for precaution in case we reach the boundary after incrementing by 1.
-            return (i_field <= 0x3E);
+            // by at most 6 in case of 3200 frequency and VDD rail. The value will never reach 0x7F but this
+            // is for precaution in case we reach the boundary after incrementing by 6.
+            return (i_field <= 0x39);
         }
 
         ///
@@ -1494,6 +1494,11 @@ class ddimm_0_3 : public module_specific_base
             uint8_t l_direction = 0;
             uint8_t l_module_height = 0;
             uint64_t l_freq = 0;
+            uint16_t l_pmic_vendor = 0;
+            uint16_t l_module_vendor = 0;
+
+            static const uint16_t IDT_ID = 0xB380;
+            uint8_t l_omi_vdd_uplift_applied = fapi2::ENUM_ATTR_MSS_OMI_VDD_UPLIFT_APPLIED_YES;
 
             int8_t l_field = 0;
 
@@ -1523,13 +1528,40 @@ class ddimm_0_3 : public module_specific_base
             // Grab the module-height attribute to determine 1U/2U vs 4U
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, iv_ocmb, l_module_height));
 
-            // Bump up Explorer VDD by 5mV for OMI degrade workaround
-            // PMIC0 SWA rail supports VDD for 2U
-            // The invalid_value() check has been decremented by 1 (i.e. set to 0x7E) now so that if the below
-            // criteria is met, we will still have the voltage setting at the maximum of 0x7F.
-            if ((l_module_height != fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U) && (l_freq == mss::DIMM_SPEED_3200))
+            // Grab PMIC MNFG ID to determine PMIC vendor info
+            FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_PMIC0_MFG_ID, iv_ocmb, l_pmic_vendor));
+
+            // Grab MODULE MNFG ID to determine DIMM vendor info
+            FAPI_TRY(mss::attr::get_module_mfg_id(iv_dimm, l_module_vendor));
+
+            // Workaround for Explorer VDD bumps:
+            // 1. For SMART 2U 3200Mbps with IDT PMICs with SPD = non-zero, increase VDD by +20mV
+            // 2. For SMART 2U 3200Mbps with IDT PMICs with SPD zero, increase VDD by +25mV
+            // 3. For SMART 2U 3200Mbps with TI PMICs with with SPD = non-zero, increase VDD by 15mV
+            // 4. For SMART 2U 3200Mbps with TI PMICs with with SPD zero, increase VDD by 30mV
+            // 5. All other combinations with 3200Mbps, increase VDD by 15mV
+            // We are removing DIMM_SIZE check from here as the attr does not get filled before this
+            // function is called. For 2U all SMART DIMMs are either 32 or 64GB.
+            if ((l_module_vendor == fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_SMART) &&
+                (l_module_height != fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U) &&
+                (l_freq == mss::DIMM_SPEED_3200))
             {
-                l_field++;
+                if (l_pmic_vendor == IDT_ID)
+                {
+                    (l_field != 0) ? (l_field += 4) : (l_field += 5);
+                }
+                // For TI PMICs
+                else
+                {
+                    (l_field != 0) ? (l_field += 3) : (l_field += 6);
+                }
+
+                FAPI_ATTR_SET(fapi2::ATTR_MSS_OMI_VDD_UPLIFT_APPLIED, iv_ocmb, l_omi_vdd_uplift_applied);
+            }
+            else if ((l_freq == mss::DIMM_SPEED_3200) && (l_module_height != fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U))
+            {
+                l_field += 3;
+                FAPI_ATTR_SET(fapi2::ATTR_MSS_OMI_VDD_UPLIFT_APPLIED, iv_ocmb, l_omi_vdd_uplift_applied);
             }
 
             FAPI_TRY(mss::attr::set_pmic0_swa_voltage_offset(iv_ocmb, l_field));
@@ -2402,8 +2434,10 @@ class ddimm_0_3 : public module_specific_base
             uint8_t l_direction = 0;
             uint8_t l_module_height = 0;
             uint64_t l_freq = 0;
+            uint16_t l_module_vendor = 0;
 
             int8_t l_field = 0;
+            uint8_t l_omi_vdd_uplift_applied = fapi2::ENUM_ATTR_MSS_OMI_VDD_UPLIFT_APPLIED_YES;
 
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_SWC_VOLT_OFF, i_spd, pmic::SET_PMIC1_SWC_VOLTAGE_OFFSET, l_offset));
             FAPI_TRY(get_field_spd(iv_ocmb, F::PMIC1_SWC_OFF_DIRECTION, i_spd, pmic::SET_PMIC1_SWC_VOLTAGE_OFFSET, l_direction));
@@ -2431,13 +2465,27 @@ class ddimm_0_3 : public module_specific_base
             // Grab the module-height attribute to determine 1U/2U vs 4U
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DRAM_MODULE_HEIGHT, iv_ocmb, l_module_height));
 
-            // Bump up Explorer VDD by 5mV for OMI degrade workaround
-            // PMIC1 SWC supports VDD for 4U
-            // The invalid_value() check has been decremented by 1 (i.e. set to 0x7E) now so that if the below
-            // criteria is met, we will still have the voltage setting at the maximum of 0x7F.
-            if ((l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U) && (l_freq == mss::DIMM_SPEED_3200))
+            // Grab MODULE MNFG ID to determine DIMM vendor info
+            FAPI_TRY(mss::attr::get_module_mfg_id(iv_dimm, l_module_vendor));
+
+            // Workaround for Explorer VDD bumps:
+            // 1. For SMART 4U 32GB/64GB, increase VDD by +25mV
+            // 2. For all other combinations with 3200Mbps, increase VDD by 15mV
+            // We are removing DIMM_SIZE check from here as the attr does not get filled before this
+            // function is called. Removing the DIMM_SIZE check will not affect the VDD bumps as
+            // all 4U SMART 3200 Mbps DDR4 DDIMMs would be 32GB or 64GB. There are 128GB 4U SMART
+            // DIMMs as well but they doesn't run at 3200 Mbps
+            if ((l_module_vendor == fapi2::ENUM_ATTR_MEM_EFF_MODULE_MFG_ID_SMART) &&
+                (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U) &&
+                (l_freq == mss::DIMM_SPEED_3200))
             {
-                l_field++;
+                l_field += 5;
+                FAPI_ATTR_SET(fapi2::ATTR_MSS_OMI_VDD_UPLIFT_APPLIED, iv_ocmb, l_omi_vdd_uplift_applied);
+            }
+            else if ((l_freq == mss::DIMM_SPEED_3200) && (l_module_height == fapi2::ENUM_ATTR_MEM_EFF_DRAM_MODULE_HEIGHT_4U))
+            {
+                l_field += 3;
+                FAPI_ATTR_SET(fapi2::ATTR_MSS_OMI_VDD_UPLIFT_APPLIED, iv_ocmb, l_omi_vdd_uplift_applied);
             }
 
             FAPI_TRY(mss::attr::set_pmic1_swc_voltage_offset(iv_ocmb, l_field));
@@ -3608,6 +3656,7 @@ class ddimm_0_3 : public module_specific_base
             FAPI_TRY(set_num_p_states(i_spd));
             FAPI_TRY(set_dimm_spare(i_spd));
             FAPI_TRY(set_spd_content_revision(i_spd));
+            FAPI_TRY(set_module_mfg_id(i_spd));
             FAPI_TRY(set_pmic0_sequence(i_spd));
             FAPI_TRY(set_pmic0_mfg_id(i_spd));
             FAPI_TRY(set_pmic0_rev(i_spd));
@@ -3678,7 +3727,6 @@ class ddimm_0_3 : public module_specific_base
             FAPI_TRY(set_therm_sensor_1_second_i2c_address(i_spd));
             FAPI_TRY(set_therm_sensor_0_second_location(i_spd));
             FAPI_TRY(set_therm_sensor_1_second_location(i_spd));
-            FAPI_TRY(set_module_mfg_id(i_spd));
             FAPI_TRY(set_dram_mfg_id(i_spd));
             FAPI_TRY(set_rcd_mfg_id(i_spd));
 

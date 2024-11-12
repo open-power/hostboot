@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2023                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -712,5 +712,23 @@
         <array>2</array>
         <writeable/>
         <mssAccessorName>dram_address_mirroring</mssAccessorName>
+    </attribute>
+
+    <attribute>
+        <id>ATTR_MSS_OMI_VDD_UPLIFT_APPLIED</id>
+        <targetType>TARGET_TYPE_OCMB_CHIP</targetType>
+        <description>
+            This attribute will be set when uplift to VDD is applied for fixing OMI degrade.
+            PRD would be able to read this attribute and return a new word 8 to reflect that uplift
+            was applied
+        </description>
+        <enum>
+            NO = 0,
+            YES = 1
+        </enum>
+        <default>NO</default>
+        <valueType>uint8</valueType>
+        <writeable/>
+        <noSBEAccessor/>
     </attribute>
 </attributes>
