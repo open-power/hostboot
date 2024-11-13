@@ -35,6 +35,7 @@ function errlog () {
 # Constants
 
 BMC_PATCH_DIRECTORY=/usr/local/share/hostfw/running/
+BMC_TMP_DIRECTORY=/tmp/hbpatch/
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 SSHPASS_SCRIPT="sshpass -p"
 
@@ -53,10 +54,11 @@ MGP_FILES_EXIST=1
 if [ -z "$SSH_PORT" ]
 then
     SSH_CMD="ssh"
-    COPY="rsync -zP --rsync-path=sudo\${IFS}rsync"
+    COPYCMD="rsync -zP --rsync-path=sudo\${IFS}rsync"
+    SSH_PORT=22
 else
     SSH_CMD="ssh -p $SSH_PORT"
-    COPY="scp -P $SSH_PORT"
+    COPYCMD="scp -r -P $SSH_PORT"
 fi
 
 #User might specify a different location for patches
@@ -153,9 +155,27 @@ function REMOTE_SUDO () {
     SSHPASS $SSH_CMD "$HOSTNAME" sudo bash -c "\"$CMD\""
 }
 
+function COPY_FILES_TO_BMC () {
+    # $1 = Local file/dir
+    LOCALFILE=$1
+    BASEFILE=`basename $LOCALFILE`
+    # $2 = Remote destination
+    REMOTEDIR=$2
+
+    # Create and clear out the working directory
+    REMOTE_SUDO "mkdir -p $BMC_TMP_DIRECTORY && chmod -R 777 $BMC_TMP_DIRECTORY/ && rm -rf $BMC_TMP_DIRECTORY/* && mkdir -p $BMC_TMP_DIRECTORY/$REMOTEDIR && chmod -R 777 $BMC_TMP_DIRECTORY/"
+
+    # Copy files into /tmp/hbpatch/ to avoid permission issues on some systems
+    SSHPASS $COPYCMD "$LOCALFILE" "$HOSTNAME":"$BMC_TMP_DIRECTORY/$REMOTEDIR"
+
+    # Move files to real location
+    REMOTE_SUDO "cp -r $BMC_TMP_DIRECTORY/$REMOTEDIR/$BASEFILE $BMC_PATCH_DIRECTORY/$REMOTEDIR/"
+}
+
 function PATCH_HBI_HBB () {
     # Copy files and create symlinks
-    SSHPASS $COPY "$PATCHES_DIR/HBI.bin" "$PATCHES_DIR/HBB.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+    COPY_FILES_TO_BMC "$PATCHES_DIR/HBI.bin" "/"
+    COPY_FILES_TO_BMC "$PATCHES_DIR/HBB.bin" "/"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin HBB && ln -sf HBI.bin HBI"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBB.bin $HBB.lid && ln -sf HBI.bin $HBI.lid"
 
@@ -164,9 +184,11 @@ function PATCH_HBI_HBB () {
         echo '*********************************************************************************'
         echo 'Copying the symbol files over for debug, set PATCH_BMC_NO_DEBUG=1 to skip copying.'
         echo '*********************************************************************************'
-        REMOTE_SUDO "mkdir -p $BMC_PATCH_DIRECTORY/hbdebug/"
         # Copy the symbol files over for debug
-        SSHPASS $COPY `find $IMG_DIR/hbotStringFile $IMG_DIR/*.list.bz2 $IMG_DIR/*.syms $IMG_DIR/*.bin.modinfo | grep -v _test` "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
+        COPYDIR=/tmp/hbdebug_`date +%Y%m%H%M%S`/hbdebug/
+        mkdir -p $COPYDIR
+        cp `find $IMG_DIR/hbotStringFile $IMG_DIR/*.list.bz2 $IMG_DIR/*.syms $IMG_DIR/*.bin.modinfo | grep -v _test` $COPYDIR
+        COPY_FILES_TO_BMC "$COPYDIR" "/"
         REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf hbdebug/hbotStringFile $HBOTSTRINGFILE.lid"
         REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf hbdebug/hbicore.syms $HBICORE_SYMS.lid"
     else
@@ -174,11 +196,12 @@ function PATCH_HBI_HBB () {
         echo 'PATCH_BMC_NO_DEBUG is set, so skip copying the symbol files over for debug, unset PATCH_BMC_NO_DEBUG to copy debug binaries.'
         echo '****************************************************************************************************************************'
     fi
+    REMOTE_SUDO "rm -rf $BMC_TMP_DIRECTORY"
 }
 
 function PATCH_HBD () {
     # Copy files and create symlink
-    SSHPASS $COPY "$PATCHES_DIR/HBD.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+    COPY_FILES_TO_BMC "$PATCHES_DIR/HBD.bin" "/"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBD.bin HBD && ln -sf HBD.bin $HBD.lid"
 }
 
@@ -192,14 +215,14 @@ function PATCH_HBRT () {
     # pull out the host part from $HOSTNAME, i.e. service@rain104bmc, bmc_host=rain104bmc
     bmc_host="$( cut -d '@' -f 2 <<< "$HOSTNAME" )"
     echo "$bmc_host"
-    echo /afs/rchland.ibm.com/usr6/d4a3/tools/lidupdate2 -host $bmc_host -dir $HBRT_PATCH_DIR -passenv PASSWORD
-    /afs/rchland.ibm.com/usr6/d4a3/tools/lidupdate2 -host $bmc_host -dir $HBRT_PATCH_DIR -passenv PASSWORD
+    echo /afs/rchland.ibm.com/usr6/d4a3/tools/lidupdate2 -host $bmc_host -dir $HBRT_PATCH_DIR -passenv PASSWORD -port $SSH_PORT
+    /afs/rchland.ibm.com/usr6/d4a3/tools/lidupdate2 -host $bmc_host -dir $HBRT_PATCH_DIR -passenv PASSWORD -port $SSH_PORT
     checkstatus "lidupdate2"
 }
 
 function PATCH_HBBL () {
     # Copy files and create symlink
-    SSHPASS $COPY "$PATCHES_DIR/HBBL.bin" "$HOSTNAME":"$BMC_PATCH_DIRECTORY"
+    COPY_FILES_TO_BMC "$PATCHES_DIR/HBBL.bin" "/"
     REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf HBBL.bin HBBL && ln -sf HBBL.bin $HBBL.lid"
 }
 
@@ -423,8 +446,7 @@ else   # Apply the data to the BMC
    fi
 
    if [ ${MGP_FILES_EXIST} -eq 1 ]; then
-       REMOTE_SUDO "mkdir -p $BMC_PATCH_DIRECTORY/hbdebug/"
-       SSHPASS $COPY "$COPYDIR"/ "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
+       COPY_FILES_TO_BMC "$COPYDIR"/ "hbdebug/"
    fi
 
    # Need slight delay for rsync to complete before rm
