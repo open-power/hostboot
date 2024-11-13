@@ -925,7 +925,8 @@ void logPlatformSecurityConfiguration(void)
      * @errortype
      * @moduleid          SECUREBOOT::MOD_SECURE_LOG_PLAT_SECURITY_CONFIG
      * @reasoncode        SECUREBOOT::RC_SECURE_LOG_PLAT_SECURITY_CONFIG
-     * @userdata1         Minimum FW Secure Version
+     * @userdata1[0:31]   SB Signing Mode
+     * @userdata1[32:63]  Minimum FW Secure Version
      * @userdata2[0:31]   Measurement Seeprom Version
      * @userdata2[32:63]  System HW Keys' Hash
      * @devdesc    Planar jumper configuration and other security info
@@ -935,7 +936,9 @@ void logPlatformSecurityConfiguration(void)
         ERRORLOG::ERRL_SEV_INFORMATIONAL,
         SECUREBOOT::MOD_SECURE_LOG_PLAT_SECURITY_CONFIG,
         SECUREBOOT::RC_SECURE_LOG_PLAT_SECURITY_CONFIG,
-        getMinimumSecureVersion(),
+        TWO_UINT32_TO_UINT64(
+            g_BlToHbDataManager.getSecurebootSigningMode(),
+            getMinimumSecureVersion()),
         TWO_UINT32_TO_UINT64(
             g_BlToHbDataManager.getMeasurementSeepromVersion(),
             sha512_to_u32(hash)));

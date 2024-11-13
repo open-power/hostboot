@@ -2639,8 +2639,8 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             l_latestSize = sbeSbhHbblImgSize;
 
             /*******************************************************/
-            /*  Update the HW Keys' Hash and Secure Version to the */
-            /*  "sb_settings" SBE section.                         */
+            /*  Update the HW Keys' Hash,  Secure Version and      */
+            /*  Signing Mode in "sb_settings" SBE section.         */
             /*  Then append P9_XIP_SECTION_SBE_SB_SETTINGS         */
             /*******************************************************/
             uint32_t sbeSbSettingsImgSize = l_latestSize + sizeof(sb_settings);
@@ -2651,6 +2651,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /*********************************************/
             SHA512_t pnor_sbe_hash = {0};
             uint8_t pnor_sbe_secure_version = 0;
+            uint8_t pnor_sbe_signing_mode = 0;
 
             err = getSecuritySettingsFromSbeImage(
                                          io_sbeState.target,  // ignored
@@ -2658,6 +2659,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                                          SBE_SEEPROM_INVALID, // ignored
                                          pnor_sbe_hash,
                                          pnor_sbe_secure_version,
+                                         pnor_sbe_signing_mode,
                                          sbeHbblImgPtr);
 
             if(err)
@@ -2814,7 +2816,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             sb_settings.minimum_secure_version = pnor_sbe_secure_version;
 
             /***********************************/
-            /*  Update the HW Key'Hash         */
+            /*  Update the HW Key's Hash       */
             /***********************************/
             // Create an 'all-zero' hash for comparison now and then use it
             // to save hash being put into image for comparison later
@@ -2867,6 +2869,52 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                         sizeof(SHA512_t));
             }
 
+            /***********************************/
+            /*  Update the Signing Mode        */
+            /***********************************/
+            // For production drivers only use the system's signing mode for
+            // the customized SBE image. Like previously in this function,
+            // the check will use lack of presence of a backdoor to assert
+            // we have a production driver.
+            // For imprint drivers ATTR_SB_SIGNING_MODE_OVERRIDE will determine
+            // how the signing mode should be set for the customized SBE image.
+            // The attribute defaults to using the system setting.
+            // @TODO JIRA:PFHB-686 Add support for transitioning Signing Mode
+            uint8_t system_signing_mode = SECUREBOOT::hashSignMode();
+            uint8_t attr_signing_mode_override =
+                UTIL::getCurrentNodeTarget()->getAttr<ATTR_SB_SIGNING_MODE_OVERRIDE>();
+
+            if (!SECUREBOOT::getSbeSecurityBackdoor())
+            {
+                // Use system's Signing Mode for production drivers
+                sb_settings.signing_mode = system_signing_mode;
+                TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
+                          "to System Setting 0x%.2X since this is a production "
+                          "driver",
+                          sb_settings.signing_mode);
+            }
+            else if (attr_signing_mode_override ==
+                         TARGETING::SB_SIGNING_SYSTEM_CONTAINER)
+            {
+                // Use system's Signing Mode
+                sb_settings.signing_mode = system_signing_mode;
+                TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
+                          "to System Setting 0x%.2X (pnor mode=0x%.2X, "
+                          "attr_ovrd=0x%.2X)",
+                          sb_settings.signing_mode, pnor_sbe_signing_mode,
+                          attr_signing_mode_override);
+            }
+            else
+            {
+                // Use Override value
+                sb_settings.signing_mode = attr_signing_mode_override;
+                TRACFCOMP(g_trac_sbe, "getSbeInfoState() - Set SB Signing Mode "
+                          "to ATTR_SB_SIGNING_MODE_OVERRIDE setting: 0x%.2X. "
+                          "Ignoring system mode 0x%.2X and PNOR SBE's mode: "
+                          "0x%.2X",
+                          attr_signing_mode_override, system_signing_mode,
+                          pnor_sbe_signing_mode);
+            }
 
             // Now append P9_XIP_SECTION_SBE_SB_SETTINGS
             err = modifySbeSection(P9_XIP_SECTION_SBE_SB_SETTINGS,
@@ -2994,15 +3042,19 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             }
 
 
-            // Retrieve the Secure Version and HW Key Hash included in customized image
+            // Retrieve the HW Keys' Hash, Secure Version, and Signing mode
+            // included in customized image to verify that the right values
+            // were set
             SHA512_t sbe_hash = {0};
             uint8_t sbe_secure_version = 0;
+            uint8_t sbe_signing_mode = 0;
             err = getSecuritySettingsFromSbeImage(
                                          io_sbeState.target,  // ignored
                                          EEPROM::SBE_PRIMARY, // ignored
                                          SBE_SEEPROM_INVALID, // ignored
                                          sbe_hash,
                                          sbe_secure_version,
+                                         sbe_signing_mode,
                                          pCustomizedBfr);
 
             if(err)
@@ -3111,6 +3163,7 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                 break;
             }
 
+            // @TODO JIRA:PFHB-802 Add check for SB signing mode
 
             // save off the hbbl id and remove it from the image
             void * pSearchBfr = pCustomizedBfr;
@@ -6532,6 +6585,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
                            const sbeSeepromSide_t i_bootSide,
                            SHA512_t o_hash,
                            uint8_t & o_secure_version,
+                           uint8_t & o_signing_mode,
                            const void * i_image_ptr) // defaults to nullptr
 {
     errlHndl_t err = nullptr;
@@ -6962,6 +7016,7 @@ errlHndl_t getSecuritySettingsFromSbeImage(
 
     // Copy to output variables
     o_secure_version = sb_settings.minimum_secure_version;
+    o_signing_mode = sb_settings.signing_mode;
     memcpy(o_hash,
            &sb_settings.hw_keys_hash,
            sizeof(SHA512_t));
@@ -6970,9 +7025,9 @@ errlHndl_t getSecuritySettingsFromSbeImage(
 
     TRACFCOMP( g_trac_sbe, EXIT_MRK"getSecuritySettingsFromSbeImage: "
                "err rc=0x%X, EID=0x%X, o_hash=0x%.8X, "
-               "o_secure_version=0x%.2X",
+               "o_secure_version=0x%.2X, o_signing_mode=0x%.2X",
                ERRL_GETRC_SAFE(err), ERRL_GETEID_SAFE(err),
-               sha512_to_u32(o_hash), o_secure_version);
+               sha512_to_u32(o_hash), o_secure_version, o_signing_mode);
 
     return err;
 }

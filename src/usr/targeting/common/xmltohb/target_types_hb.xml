@@ -279,6 +279,9 @@
       <id>SB_SIGNING_MODE</id>
     </attribute>
     <attribute>
+      <id>SB_SIGNING_MODE_OVERRIDE</id>
+    </attribute>
+    <attribute>
       <id>SERIAL_NUMBER</id>
     </attribute>
     <attribute>

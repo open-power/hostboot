@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -113,7 +113,9 @@ namespace SBE
      *
      * @param[out] o_hash     HW Key Hash returned from the SBE Image
      *
-     * @param[out] o_secure_Version Secure Version returned from the SBE Image
+     * @param[out] o_secure_version Secure Version returned from the SBE Image
+     *
+     * @param[out] o_signing_mode   Signing Mode returned from the SBE Image
      *
      * @param[in] i_image_ptr  Defaults to nullptr.
      *                         If nullptr, then read SBE Image from i_target
@@ -129,6 +131,7 @@ namespace SBE
                           sbeSeepromSide_t i_bootSide,
                           SHA512_t o_hash,
                           uint8_t & o_secure_version,
+                          uint8_t & o_signing_mode,
                           const void * i_image_ptr = nullptr);
 
     /**

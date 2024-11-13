@@ -1708,10 +1708,12 @@
     </enumerator>
     <enumerator>
       <description>
-        System Container Signing - Use whatever value the system is using for the IPL
+        System Container Signing - Use whatever value the system is using for
+        the IPL
+        NOTE: using 0xEE to not conflict with default "INVALID" value of 0xFF
       </description>
       <name>SYSTEM_CONTAINER</name>
-      <value>0xFF</value>
+      <value>0xEE</value>
     </enumerator>
   </enumerationType>
 
@@ -1728,7 +1730,27 @@
     <persistency>volatile-zeroed</persistency>
     <readable/>
     <writeable/>
-    <hbOnly/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
+    <id>SB_SIGNING_MODE_OVERRIDE</id>
+    <description>
+        Secureboot Signing Mode used to override the system setting when
+        doing the Processor SBE Update.
+        See SB_SIGNING enum for values, but using a uint8_t type because
+        attribute overriding does not support enums
+    </description>
+    <simpleType>
+      <uint8_t>
+        <!-- see SB_SIGNING enum value SYSTEM_CONTAINER above -->
+        <default>0xEE</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
   </attribute>
 
   <attribute>

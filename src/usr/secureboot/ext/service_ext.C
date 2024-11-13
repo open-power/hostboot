@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -124,12 +124,15 @@ struct HashNode
     const char* name; /** Name of the side: either primary or backup */
     uint8_t side; /** A uint8_t value of 0 for primary or 1 for backup */
     uint8_t secure_version; /** Secure Version for the named side */
+    uint8_t signing_mode; /** Secure Signing Mode for the named side **/
     HashNode(const char* i_name,
              uint8_t i_side,
              uint8_t i_secure_version)
              : name(i_name), side(i_side), secure_version(i_secure_version)
     {
         memset(hash, 0, SHA512_DIGEST_LENGTH);
+        // Default the signing_mode to the system settings
+        signing_mode = SB_SIGNING_SYSTEM_CONTAINER;
     }
 };
 
@@ -421,7 +424,8 @@ void validateSecuritySettings()
                                                EEPROM::SBE_PRIMARY,
                                                bootSide,
                                                l_primaryProcPrimarySBE.hash,
-                                               l_primaryProcPrimarySBE.secure_version);
+                                               l_primaryProcPrimarySBE.secure_version,
+                                               l_primaryProcPrimarySBE.signing_mode);
     if (err)
     {
         if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM0)
@@ -460,7 +464,8 @@ void validateSecuritySettings()
                                                EEPROM::SBE_BACKUP,
                                                bootSide,
                                                l_primaryProcSecondarySBE.hash,
-                                               l_primaryProcSecondarySBE.secure_version);
+                                               l_primaryProcSecondarySBE.secure_version,
+                                               l_primaryProcSecondarySBE.signing_mode);
 
     if (err)
     {
@@ -557,6 +562,7 @@ void validateSecuritySettings()
 
         break;
     }
+    // @TODO JIRA:PFHB-802 Add check for SB signing mode
 
     SB_INF("Primary proc Primary SBE HW keys' hash and Secure Version successfully match backup.");
 
@@ -636,8 +642,8 @@ void validateSecuritySettings()
                                                    EEPROM::SBE_PRIMARY,
                                                    bootSide,
                                                    l_secondaryProcPrimarySBE.hash,
-                                                   l_secondaryProcPrimarySBE.secure_version);
-
+                                                   l_secondaryProcPrimarySBE.secure_version,
+                                                   l_secondaryProcPrimarySBE.signing_mode);
         if (err)
         {
 
@@ -678,7 +684,8 @@ void validateSecuritySettings()
                                                    EEPROM::SBE_BACKUP,
                                                    bootSide,
                                                    l_secondaryProcBackupSBE.hash,
-                                                   l_secondaryProcBackupSBE.secure_version);
+                                                   l_secondaryProcBackupSBE.secure_version,
+                                                   l_secondaryProcBackupSBE.signing_mode);
         if (err)
         {
             if (!mnfg_mode && bootSide != SBE::SBE_SEEPROM1)

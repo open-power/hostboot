@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -788,11 +788,13 @@ class SBEUpdateTest: public CxxTest::TestSuite
             total++;
             SHA512_t hash = {0};
             uint8_t secure_version=0;
+            uint8_t signing_mode=0;
             err = getSecuritySettingsFromSbeImage(sbeState.target,
                                                   EEPROM::SBE_BACKUP,
                                                   SBE_SEEPROM_INVALID,
                                                   hash,
-                                                  secure_version);
+                                                  secure_version,
+                                                  signing_mode);
 
             if(err)
             {
@@ -818,6 +820,8 @@ class SBEUpdateTest: public CxxTest::TestSuite
 
                 break;
             }
+
+            // @TODO JIRA:PFHB-802 Add check for SB signing mode
 
         }while(0);
 
