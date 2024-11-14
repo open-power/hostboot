@@ -1800,7 +1800,6 @@ void firmware_notify( uint64_t i_len, void *i_data )
             }
             break;
 
-#ifndef CONFIG_FSP_BUILD
             case hostInterfaces::HBRT_FW_MSG_TYPE_DEALLOCATE:
             {
                 TRACFCOMP(g_trac_runtime,
@@ -1808,6 +1807,7 @@ void firmware_notify( uint64_t i_len, void *i_data )
                 deallocateResource(l_hbrt_fw_msg->deallocated);
             }
             break;
+#ifndef CONFIG_FSP_BUILD
 
             case hostInterfaces::HBRT_FW_MSG_TYPE_LOAD_START_PMC:
             {
