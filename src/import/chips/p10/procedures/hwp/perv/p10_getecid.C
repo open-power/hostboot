@@ -35,6 +35,7 @@
 #include "p10_getecid.H"
 #include "p10_scom_perv_1.H"
 #include "p10_scom_perv_7.H"
+#include "p10_scom_perv_8.H"
 #include "p10_scom_perv_b.H"
 #include "p10_scom_perv_d.H"
 
@@ -50,6 +51,7 @@ fapi2::ReturnCode p10_getecid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     fapi2::buffer<uint64_t> l_ecid_part1_data64 = 0;
     fapi2::buffer<uint64_t> l_ecid_part2_data64 = 0;
     fapi2::buffer<uint64_t> l_ecid_part3_data64 = 0;
+    fapi2::buffer<uint64_t> l_ecid_part5_data64 = 0;
     fapi2::variable_buffer l_fuseString(p10_getecid_fuseString_len);
     FAPI_INF("p10_getecid : Entering ...");
 
@@ -59,11 +61,13 @@ fapi2::ReturnCode p10_getecid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     FAPI_TRY(fapi2::getScom(i_target_chip, SINGLE_OTP_ROM_OTPROM_REG1, l_ecid_part1_data64));
     FAPI_TRY(fapi2::getScom(i_target_chip, SINGLE_OTP_ROM_OTPROM_REG2, l_ecid_part2_data64));
     FAPI_TRY(fapi2::getScom(i_target_chip, SINGLE_OTP_ROM_OTPROM_REG3, l_ecid_part3_data64));
+    FAPI_TRY(fapi2::getScom(i_target_chip, SINGLE_OTP_ROM_OTPROM_REG5, l_ecid_part5_data64));
 
     l_ecid_part0_data64.reverse();
     l_ecid_part1_data64.reverse();
     l_ecid_part2_data64.reverse();
     l_ecid_part3_data64.reverse();
+    l_ecid_part5_data64.reverse();
 
     attr_data[0] = l_ecid_part0_data64();
     attr_data[1] = l_ecid_part1_data64();
@@ -72,6 +76,7 @@ fapi2::ReturnCode p10_getecid(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
     FAPI_TRY(l_fuseString.insert(l_ecid_part1_data64(), 64, 64));
     FAPI_TRY(l_fuseString.insert(l_ecid_part2_data64(), 128, 64));
     FAPI_TRY(l_fuseString.insert(l_ecid_part3_data64(), 192, 64));
+    FAPI_TRY(l_fuseString.insert(l_ecid_part5_data64(), 256, 64));
 
     o_fuseString = l_fuseString;
 

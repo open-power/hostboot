@@ -40,7 +40,7 @@
 
 enum P10_GETECID_Public_Constants
 {
-    p10_getecid_fuseString_len = 256,       // fuse string length
+    p10_getecid_fuseString_len = 320,       // fuse string length
 };
 
 typedef fapi2::ReturnCode (*p10_getecid_FP_t)(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&,
