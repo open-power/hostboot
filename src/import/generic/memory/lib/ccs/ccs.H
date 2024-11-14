@@ -172,6 +172,23 @@ fapi2::ReturnCode select_ports( const fapi2::Target<T>& i_target,
                                 const uint64_t i_ports,
                                 const channel_select i_channel_select);
 
+
+///
+/// @brief Select the port(s) to be used by the CCS
+/// @tparam MC the memory controller type which executes the CCS instruction
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam P the port type for this CCS engine
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the target to effect
+/// @param[in] i_ports vector representing the ports on which to run CCS
+/// @param[in] i_channel_select the channels upon which to operate - DDR5+ only specific
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
+fapi2::ReturnCode select_ports( const fapi2::Target<T>& i_target,
+                                const std::vector< fapi2::Target<P> >& i_ports,
+                                const channel_select i_channel_select);
+
 ///
 /// @brief User sets to a '1'b to tell the Hdw to stop CCS whenever failure occurs. When a
 ///        '0'b, Hdw will continue CCS even if a failure occurs.

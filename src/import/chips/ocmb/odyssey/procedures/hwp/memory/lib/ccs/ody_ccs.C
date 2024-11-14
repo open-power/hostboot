@@ -766,6 +766,53 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Select the port(s) to be used by the CCS - ODYSSEY specialization
+/// @param[in] i_target the target to effect
+/// @param[in] i_ports vector representing the ports on which to run CCS
+/// @param[in] i_channel_select the channels upon which to operate - DDR5+ only specific
+/// @return fapi2::ReturnCode fapi2::FAPI2_RC_SUCCESS if ok
+/// @note The same channel and port selects will be used across the entire CCS program in a single execution
+/// Separate channel/port selects would need to be run on a different CCS execution call
+///
+template<>
+fapi2::ReturnCode select_ports<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+        const std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> >& i_ports,
+        const channel_select i_channel_select)
+{
+    typedef ccsTraits<mss::mc_type::ODYSSEY> TT;
+
+    if(i_ports.size() == 0)
+    {
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " No ports found", TARGTID);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Selects the ports given in the vector to run in parallel", TARGTID);
+    constexpr uint64_t PORT0_SHIFT = 2;
+    fapi2::buffer<uint64_t> l_data;
+    uint8_t l_port_value = 0b0000;
+    FAPI_TRY( mss::getScom(i_target, TT::MODEQ_REG, l_data) );
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " MODEQ REG before port selections: 0x%016lx", TARGTID, l_data);
+
+    // Get the relative position for each port and set the port bits accordingly
+    for (const auto& l_port : i_ports)
+    {
+        const auto l_port_pos = mss::relative_pos<mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
+        l_port_value |= l_port_pos == 0 ? (i_channel_select << PORT0_SHIFT) : i_channel_select;
+    }
+
+    // Write the value to the MODEQ register
+    l_data.insertFromRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(l_port_value);
+    FAPI_TRY( mss::putScom(i_target, TT::MODEQ_REG, l_data) );
+
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " MODEQ REG after port selections: 0x%016lx", TARGTID, l_data);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Determines our rank configuration type - Odyssey specialization
 /// @param[in] i_target the MCA target on which to operate
 /// @param[out] o_rank_config the rank configuration
