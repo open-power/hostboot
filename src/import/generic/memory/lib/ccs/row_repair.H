@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -436,6 +436,37 @@ struct repair_entry
         iv_bank(i_bank),
         iv_row(i_row)
     {
+    }
+
+    ///
+    /// @brief repair_entry ctor from chip-op input
+    /// @param[in] i_buffer the chip-op row repair data
+    ///
+    repair_entry( const fapi2::buffer<uint64_t>& i_buffer ):
+        iv_valid(true)
+    {
+        i_buffer.extractToRight<TT::ROW_REPAIR_CHIPOP_MRANK, TT::ROW_REPAIR_CHIPOP_MRANK_LEN>(iv_dimm_rank);
+        i_buffer.extractToRight<TT::ROW_REPAIR_CHIPOP_DRAM_POS, TT::ROW_REPAIR_CHIPOP_DRAM_POS_LEN>(iv_dram);
+        i_buffer.extractToRight<TT::ROW_REPAIR_CHIPOP_SRANK, TT::ROW_REPAIR_CHIPOP_SRANK_LEN>(iv_srank);
+
+        // srank, BG, BA, and row address are sent in reverse bit order in the chip-op, so need to swizzle these values
+        fapi2::buffer<uint32_t> l_data;
+        mss::swizzle < 32 - TT::ROW_REPAIR_CHIPOP_BANK_GROUP_LEN,
+            TT::ROW_REPAIR_CHIPOP_BANK_GROUP_LEN,
+            TT::ROW_REPAIR_CHIPOP_BANK_GROUP + TT::ROW_REPAIR_CHIPOP_BANK_GROUP_LEN - 1 > (i_buffer, l_data);
+        iv_bg = l_data;
+
+        l_data.flush<0>();
+        mss::swizzle < 32 - TT::ROW_REPAIR_CHIPOP_BANK_LEN,
+            TT::ROW_REPAIR_CHIPOP_BANK_LEN,
+            TT::ROW_REPAIR_CHIPOP_BANK + TT::ROW_REPAIR_CHIPOP_BANK_LEN - 1 > (i_buffer, l_data);
+        iv_bank = l_data;
+
+        l_data.flush<0>();
+        mss::swizzle < 32 - TT::ROW_REPAIR_CHIPOP_ROW_ADDR_LEN,
+            TT::ROW_REPAIR_CHIPOP_ROW_ADDR_LEN,
+            TT::ROW_REPAIR_CHIPOP_ROW_ADDR + TT::ROW_REPAIR_CHIPOP_ROW_ADDR_LEN - 1 > (i_buffer, l_data);
+        iv_row = l_data;
     }
 
     ///

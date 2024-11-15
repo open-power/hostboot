@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -318,6 +318,16 @@ fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::ODYSSEY>&
 fapi2::ReturnCode deploy_mapped_repairs( const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
         const REPAIR_MAP& i_repair_map,
         const bool i_runtime );
+
+///
+/// @brief Deploy a single sPPR at runtime (call via chip-op)
+/// @param[in] i_target ocmb target
+/// @param[in] i_repair_buf the repair data
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode sppe_dynamic_row_repair(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const fapi2::buffer<uint64_t> i_repair_buf );
 
 } // row repair
 } // ody

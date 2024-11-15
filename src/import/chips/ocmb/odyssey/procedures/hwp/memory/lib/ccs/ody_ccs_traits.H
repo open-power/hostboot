@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -188,6 +188,22 @@ class ccsTraits<mss::mc_type::ODYSSEY>
             ROW_REPAIR_ROW_ADDR = 13,
             ROW_REPAIR_ROW_ADDR_LEN = 18,
             ROW_REPAIR_VALID = 31,
+
+            // row repair chip-op data organization
+            ROW_REPAIR_CHIPOP_REVERSED = 0,
+            ROW_REPAIR_CHIPOP_PORT = 1,
+            ROW_REPAIR_CHIPOP_MRANK = 2,
+            ROW_REPAIR_CHIPOP_MRANK_LEN = 2,
+            ROW_REPAIR_CHIPOP_DRAM_POS = 4,
+            ROW_REPAIR_CHIPOP_DRAM_POS_LEN = 5,
+            ROW_REPAIR_CHIPOP_SRANK = 9,
+            ROW_REPAIR_CHIPOP_SRANK_LEN = 3,
+            ROW_REPAIR_CHIPOP_BANK_GROUP = 12,
+            ROW_REPAIR_CHIPOP_BANK_GROUP_LEN = 3,
+            ROW_REPAIR_CHIPOP_BANK = 15,
+            ROW_REPAIR_CHIPOP_BANK_LEN = 3,
+            ROW_REPAIR_CHIPOP_ROW_ADDR = 18,
+            ROW_REPAIR_CHIPOP_ROW_ADDR_LEN = 18,
         };
 
         ///
