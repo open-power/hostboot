@@ -179,6 +179,7 @@ function update_customrc()
         $(echo "###########################################################" >> $PROJECT_ROOT/customrc)
         $(echo "export CONFIG_FILE=$PROJECT_ROOT/$config_name"               >> $PROJECT_ROOT/customrc)
         $(echo "export BMC_STANDALONE_PATCHING=1"                            >> $PROJECT_ROOT/customrc)
+        $(echo "export HOSTBOOT_COMMIT_HASH=$HOSTBOOT_COMMIT_HASH"           >> $PROJECT_ROOT/customrc)
         # Try again
         customrcHeader=$(grep -in "$generation STANDALONE PATCHING" $PROJECT_ROOT/customrc | cut -f1 -d:)
         if [ -z "${customrcHeader}" ]; then
