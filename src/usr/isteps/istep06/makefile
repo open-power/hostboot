@@ -35,12 +35,14 @@ OBJS += dt_trim_read_restart_ddr5.o
 
 SUBDIRS += thread_activate.d
 
+NEST_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/nest
 PERV_HWP_PATH += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/perv
 PM_HWP_PATH   += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/pm
 LIB_HWP_PATH  += ${ROOTPATH}/src/import/chips/p10/procedures/hwp/lib
 PMLIB_PATH += ${ROOTPATH}/src/import/chips/p10/common/pmlib/
 DDR5_HWP_PATH += ${ROOTPATH}/src/import/chips/ocmb/common/procedures/hwp/pmic_ddr5/
 
+VPATH += ${NEST_HWP_PATH}
 VPATH += ${PERV_HWP_PATH}
 VPATH += ${PM_HWP_PATH}
 VPATH += ${LIB_HWP_PATH}
@@ -53,7 +55,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/usr/sbe
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/fapi2
 EXTRAINCDIR += ${ROOTPATH}/src/include/usr/secureboot
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
-#EXTRAINCDIR += ${NEST_HWP_PATH}
+EXTRAINCDIR += ${NEST_HWP_PATH}
 EXTRAINCDIR += ${PERV_HWP_PATH}
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils
 EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/imageProcs
@@ -85,6 +87,7 @@ include ${ROOTPATH}/procedure.rules.mk
 OBJS += p10_setup_sbe_config.o
 OBJS += p10_sbe_scratch_regs.o
 
+OBJS += p10_get_interposer_ecid.o
 #include $(PM_HWP_PATH)/p9_query_core_access_state.mk
 #include $(PM_HWP_PATH)/p9_query_cache_access_state.mk
 #include $(PM_HWP_PATH)/p9_quad_power_off.mk

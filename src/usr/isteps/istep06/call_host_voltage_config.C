@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,6 +37,7 @@
 #include <devicefw/userif.H>
 #include <fapi2.H>
 #include <fapi2/plat_hwp_invoker.H>
+#include <errl/hberrltypes.H>
 #include <isteps/bios_attr_accessors/bios_attr_setters.H>
 
 //Targeting
@@ -48,6 +49,7 @@
 //Hwp
 #include    <p10_setup_evid.H>
 #include    <p10_sbe_scratch_regs.H>
+#include    <p10_get_interposer_ecid.H>
 
 
 using namespace TARGETING;
@@ -70,10 +72,34 @@ void* call_host_voltage_config( void *io_pArgs )
         TARGETING::TargetHandleList l_procList;
         TARGETING::getAllChips(l_procList, TARGETING::TYPE_PROC);
 
+        //get the boot interposer rev
+        TARGETING::Target * boot_processor =   NULL;
+        TARGETING::targetService().masterProcChipTargetHandle( boot_processor );
+        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>fapi_boot_processor(boot_processor);
+        fapi2::variable_buffer l_ignored;
+
+        FAPI_INVOKE_HWP(l_err, p10_get_interposer_ecid, fapi_boot_processor, l_ignored);
+        if(l_err)
+        {
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                      "ERROR p10_get_interposer_ecid target %.8X"
+                      TRACE_ERR_FMT,
+                      get_huid(boot_processor),
+                      TRACE_ERR_ARGS(l_err));
+            l_stepError.addErrorDetails(l_err);
+            errlCommit( l_err, HWPF_COMP_ID );
+        }
+
+        auto boot_interposer_rev = boot_processor->getAttr<ATTR_INTERPOSER_REV>();
+
         // for each proc target
         for( const auto & l_proc : l_procList )
         {
             fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapiProc(l_proc);
+
+            //This applies the ATTR_INTERPOSER_REV from the boot processor on every proc target.
+            //This is required because the registers containing the data cannot be accessed until the processors are started in step8 but the data is needed in step7.
+            l_proc->setAttr<ATTR_INTERPOSER_REV>(boot_interposer_rev);
 
             // Sets up ATTR_FREQ_PAU_MHZ which is required by p10_setup_evid
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,

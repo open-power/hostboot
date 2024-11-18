@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -66,11 +66,18 @@ void * call_proc_attr_update( void * io_pArgs )
     TargetHandleList l_cpuTargetList;
     getAllChips(l_cpuTargetList, TYPE_PROC);
 
+    //get the boot interposer rev
+    TARGETING::Target * boot_processor =   NULL;
+    TARGETING::targetService().masterProcChipTargetHandle( boot_processor );
+    TARGETING::ATTR_INTERPOSER_REV_type boot_interposer_rev = boot_processor->getAttr<ATTR_INTERPOSER_REV>();
+
     // Loop through all processors including master
     for (const auto & l_cpu_target: l_cpuTargetList)
     {
         const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>l_fapi2_proc_target(
                   l_cpu_target);
+
+
 
         TRACFCOMP(g_trac_isteps_trace,
                   "Running p10_attr_update HWP on processor target %.8X",
@@ -85,6 +92,43 @@ void * call_proc_attr_update( void * io_pArgs )
                       get_huid(l_cpu_target),
                       TRACE_ERR_ARGS(l_err));
             captureError(l_err, l_stepError, HWPF_COMP_ID, l_cpu_target);
+        }
+
+        TARGETING::ATTR_INTERPOSER_REV_type proc_interposer_rev = l_cpu_target->getAttr<ATTR_INTERPOSER_REV>();
+        if (boot_interposer_rev != proc_interposer_rev)
+        {
+            TRACFCOMP(g_trac_isteps_trace,
+                      "ERROR interposer mismatch in this target %.8X. The boot interposer was %.8X and this target's interposer was %.8X",
+                      get_huid(l_cpu_target), boot_interposer_rev, proc_interposer_rev);
+            /*@ errorlog tag
+            * @moduleid        MOD_VOLTAGE_CONFIG
+            * @reasoncode      RC_SCRATCH_REG_ATTR_MISMATCH
+            * @userdata1       boot processor interposer value
+            * @userdata2       current processor interposer value
+            * @devdesc         Message from FSP. An invalid message queue ID
+            *                  or mesage type was sent to the FSP.
+            * @custdesc        An internal firmware error occurred
+            */
+            l_err = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_PREDICTIVE,
+                                   MOD_VOLTAGE_CONFIG,
+                                   RC_SCRATCH_REG_ATTR_MISMATCH,
+                                   boot_interposer_rev,
+                                   proc_interposer_rev,
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_stepError.addErrorDetails(l_err);
+
+            l_err->addHwCallout( l_cpu_target,
+            HWAS::SRCI_PRIORITY_HIGH,
+            HWAS::DELAYED_DECONFIG,
+            HWAS::GARD_NULL );
+
+            l_err->addHwCallout( boot_processor,
+            HWAS::SRCI_PRIORITY_LOW,
+            HWAS::NO_DECONFIG,
+            HWAS::GARD_NULL );
+
+            // Commit Error
+            errlCommit(l_err, HWPF_COMP_ID);
         }
     } // end of going through all processors
 
