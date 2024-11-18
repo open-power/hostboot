@@ -968,7 +968,7 @@ namespace HTMGT
     {
         errlHndl_t checkpointElog = nullptr;
 #ifdef CONFIG_HTMGT
-        // Wait up to 15 seconds for all OCCs to be ready (1200 * 100ms = 120s)
+        // Wait up to 2 minutes for all OCCs to be ready (1200 * 100ms = 120s)
         const size_t NS_BETWEEN_READ = 100 * NS_PER_MSEC;
         const size_t READ_RETRY_LIMIT = 1200;
 
@@ -1014,6 +1014,9 @@ namespace HTMGT
                                      occ->getInstance(), checkpoint);
                             lastCheckpoint = checkpoint;
                         }
+                        //00000000FFFBF000: 0000E100 03000EFF
+                        // byte 2 (response status) should contain OCC_RC_OCC_INIT_CHECKPOINT
+                        // and byte 6 and 7 will have the checkpoint 0x0EFF (COMM_INIT_COMPLETE)
                         if ( ( OCC_RC_OCC_INIT_CHECKPOINT == status ) &&
                              ( OCC_COMM_INIT_COMPLETE == checkpoint) )
                         {
@@ -1023,9 +1026,12 @@ namespace HTMGT
                             occReady = true;
                             break;
                         }
-                        if( ((checkpoint & OCC_INIT_FAILURE ) ==
-                                        OCC_INIT_FAILURE ) ||
-                            ( status == OCC_RC_INIT_FAILURE ) )
+                        // On failure:
+                        // Response status will be 0xE# (excluding 0xE1 INIT_CHECKPOINT)
+                        // or checkpoint will indicate initialization error: 0xE###
+                        if ( (((status & OCC_RC_OCC_EXCEPTION) == OCC_RC_OCC_EXCEPTION) &&
+                              (status != OCC_RC_OCC_INIT_CHECKPOINT)) ||
+                             ((checkpoint & OCC_INIT_FAILURE) == OCC_INIT_FAILURE ) )
                         {
                             TMGT_ERR("_waitForOccCheckpoint: OCC%d failed "
                                     "during initialization (0x%02X, 0x%04X)",
