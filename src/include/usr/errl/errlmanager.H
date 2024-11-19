@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -409,6 +409,18 @@ private:
      *  @note This function takes ownership of the given error log.
      */
     void commitErrLogAggregate(errlHndl_t& io_err, compId_t i_committerComp);
+
+    /**
+     * @brief Takes a given error log and determines if it has any spare core interactions. If
+     *        it does then it will take appropriate steps to handle it. Should only ever be called
+     *        once in the commitErrLogAggregate path for IPL and HBRT.
+     *
+     *        NOTE: This function is not and should not be made aggregate aware because it has to
+     *              handle each log on a case-by-case since there are attributes keeping track of
+     *              things which are made to expire after certain conditions are met. Being
+     *              aggregate aware would add a lot of unnecessary complexity to the logic.
+     */
+    void handleSpareCoreErrors(errlHndl_t & io_err);
 
     /**
      * @enum ERRLOG_MSG_TYPE

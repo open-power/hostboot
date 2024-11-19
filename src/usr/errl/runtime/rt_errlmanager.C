@@ -389,6 +389,8 @@ void ErrlManager::commitErrLogAggregate(errlHndl_t& io_err, const compId_t i_com
     // responsible for freeing them (which is done by sendMboxMsg)
     auto aggregate_errors = move(io_err->iv_aggregate_errors);
 
+    handleSpareCoreErrors(io_err);
+
     // Increment our persistent counter so we don't reuse EIDs
     //  after reboots or mpipl
     // ATTR_HOSTSVC_PLID = largest committed log id (usually last committed log)

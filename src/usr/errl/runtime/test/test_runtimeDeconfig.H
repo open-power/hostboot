@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,6 +33,8 @@
 #include <targeting/common/utilFilter.H>
 #include <runtime/interface.h>
 #include "errno.h"
+
+#include <targeting/common/mfgFlagAccessors.H>
 
 extern trace_desc_t* g_trac_runtime;
 
@@ -430,6 +432,13 @@ class deconfigureTargetAtRuntimeTest : public CxxTest::TestSuite
                     return missing_targets;
                 };
 
+            // These tests are validating runtime behavior but standalone uses ipl-time code as the back-end for
+            // error log commits. To avoid unintentional guard-to-deconfig promotion which won't happen in the real
+            // HBRT and since this code is not interested in testing spare core behaviors, set the manufacturing flag to
+            // disable spare core error logic. That way we can test only the notification behavior. This works because
+            // HBRT and HBI share a common attribute memory space.
+            TARGETING::setMfgFlag(TARGETING::MFG_FLAGS_MNFG_TEST_SPARE_CORES);
+
             { // Test deconfiguring 1 core.
                 TargetHandleList cores;
                 getAllChiplets(cores, TYPE_CORE);
@@ -504,6 +513,9 @@ class deconfigureTargetAtRuntimeTest : public CxxTest::TestSuite
 
             // Restore the original firmware request handler.
             g_hostInterfaces->firmware_request = original_fw_request;
+
+            // Unset flag to treat spares as normal cores.
+            TARGETING::clearMfgFlag(TARGETING::MFG_FLAGS_MNFG_TEST_SPARE_CORES);
 
             TRACFCOMP(g_trac_runtime, EXIT_MRK"testRuntimeGuardHypNotification");
         }
