@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2021
+# Contributors Listed Below - COPYRIGHT 2019,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -24,8 +24,10 @@
 # IBM_PROLOG_END_TAG
 PROCEDURE=p10_pm_xgpe_init
 $(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/lib)
+$(call ADD_MODULE_SRCDIR,$(PROCEDURE),$(ROOTPATH)/chips/p10/procedures/hwp/nest)
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_pba_init
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_ocb_indir_access
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_ocb_indir_setup_linear
+lib$(PROCEDURE)_DEPLIBS+=p10_phb_hv_access
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_sram_access_utils
 $(call BUILD_PROCEDURE)

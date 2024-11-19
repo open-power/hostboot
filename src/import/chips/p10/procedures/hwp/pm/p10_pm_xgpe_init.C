@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@
 #include <p10_scom_pec_f.H>
 #include <p10_scom_iohs_f.H>
 #include <multicast_group_defs.H>
+#include <p10_phb_hv_access.H>
 #include <vector>
 #ifndef __PPE__
     #include <p10_io_pwr.H>
@@ -123,6 +124,13 @@ static uint32_t g_pcie_past_reg[] = {0x08010915};
 #endif
 
 #define HALT    2
+
+//Indirect scom offset
+#define PCIE_DLP_TCR_ADDR 0x1A40
+
+//Bit that tells PCIE card is connected or not
+#define TL_EC10_LINKACTIVE 23
+
 
 // -----------------------------------------------------------------------------
 //  Function definitions
@@ -629,6 +637,7 @@ fapi2::ReturnCode pec_iodlr_static_config(
 #ifndef __PPE__
     fapi2::ReturnCode l_rc;
     fapi2::buffer<uint64_t> l_data64;
+    fapi2::buffer<uint64_t> l_data;
     fapi2::ATTR_WOF_IO_POWER_MODE_Type l_wof_pwr_mode;
     FAPI_IMP(">>> pec_iodlr_static_config");
     uint8_t l_pec_unit_pos = 0;
@@ -649,7 +658,7 @@ fapi2::ReturnCode pec_iodlr_static_config(
         //If VIO is 0 from attr, then will set to 1V
         if ( !l_attr_vio_boot_vlt)
         {
-            l_attr_vio_boot_vlt = 1000;
+            l_attr_vio_boot_vlt = 900;
         }
 
         FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_WOF_IO_POWER_MODE,
@@ -687,9 +696,16 @@ fapi2::ReturnCode pec_iodlr_static_config(
 
                 FAPI_INF("PHB target %d", l_phb_unit_pos);
 
+
+                FAPI_TRY(p10_phb_hv_access(l_phb_target,
+                                           PCIE_DLP_TCR_ADDR,
+                                           true, //Read op
+                                           false, //8byte access
+                                           l_data));
+
                 //If enable bit is not set just update
                 //link type and populate bits
-                if (!l_data64.getBit<DL_ENABLE_BIT>())
+                if (!l_data.getBit(TL_EC10_LINKACTIVE))
                 {
                     FAPI_INF("DISABLED PHB target %d", l_phb_unit_pos);
                     g_io_pci_disable_link |= BIT64(l_phb_unit_pos);
