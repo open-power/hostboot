@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -86,6 +86,13 @@ fapi2::ReturnCode p10_omi_ddr4_edpl(const fapi2::Target<fapi2::TARGET_TYPE_OCMB_
         }
 
         FAPI_TRY(fapi2::putScom(i_ocmb_target, EXPLR_DLX_DL0_CONFIG1, l_buffer));
+
+        if (!i_enable_edpl)
+        {
+            l_buffer.flush<1>();
+            l_buffer.clearBit<EXPLR_DLX_MC_OMI_FIR_REG_DL0_CRC_ERROR>();
+            FAPI_TRY(putScom(i_ocmb_target, EXPLR_DLX_MC_OMI_FIR_MASK_REG_AND, l_buffer)); // Clear the CRC Mask
+        }
     }
     while(0);
 
