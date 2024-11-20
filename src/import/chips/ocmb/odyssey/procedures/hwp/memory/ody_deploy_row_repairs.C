@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -45,6 +45,7 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/mss_buffer_utils.H>
 #include <generic/memory/lib/generic_attribute_accessors_manual.H>
+#include <lib/ody_dqs_track_host_utils.H>
 
 ///
 /// @brief Indicating runtime execution or not
@@ -109,8 +110,22 @@ extern "C"
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
+#ifndef __PPE__
+        // Suspend DQS drift tracking
+        FAPI_TRY(mss::ody::suspend_dqs_track(i_target_ocmb),
+                 GENTARGTIDFORMAT " Failed to suspend DQS drift tracking",
+                 GENTARGTID(i_target_ocmb));
+#endif
+
         FAPI_TRY( mss::ody::row_repair::deploy_mapped_repairs(i_target_ocmb, l_row_repairs, MAINT_REPAIR),
                   "Failed to deploy maint repairs from repair map for " GENTARGTIDFORMAT,  GENTARGTID(i_target_ocmb) );
+
+#ifndef __PPE__
+        // Resume DQS drift tracking
+        FAPI_TRY(mss::ody::resume_dqs_track(i_target_ocmb),
+                 GENTARGTIDFORMAT " Failed to resume DQS drift tracking",
+                 GENTARGTID(i_target_ocmb));
+#endif
 
     fapi_try_exit:
         return fapi2::current_err;
