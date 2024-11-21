@@ -402,6 +402,12 @@ namespace HTMGT
                         addOccTrace(l_errlHndl);
                     }
 
+                    if (l_occSrc == 0x2A01)
+                    {
+                        // 2A01 is Periodic OCC Telemetry / Call Home data
+                        l_errlHndl->updateActionFlags(ERRORLOG::ERRL_ACTIONS_HMC_CALL_HOME);
+                    }
+
                     ERRORLOG::errlCommit(l_errlHndl, HTMGT_COMP_ID);
                 }
             }
