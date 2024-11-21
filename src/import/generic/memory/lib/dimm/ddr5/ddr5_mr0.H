@@ -60,6 +60,7 @@ namespace ddr5
 /// @tparam MC the memory controller type
 ///
 template<mss::mc_type MC>
+
 class mr0_data : public mr_base_data<MC>
 {
     public:
@@ -213,7 +214,7 @@ class mr0_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            this->display(i_rank_info.get_dimm_target());
+            this->display(i_rank_info.get_dimm_target(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -303,17 +304,22 @@ class mr0_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_dram_number the input DRAM number
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint8_t i_dram_number) const
         {
             FAPI_INF_NO_SBE("MR 0: Burst Length and Cas Latency " TARGTIDFORMAT, TARGTID );
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | Field         |     Register Type   |   Operand   |  Data", TARGTID);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT "          -----------------------------------------------------------", TARGTID);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | Burst length  |          R/W        |    OP[1:0]  |  %u", TARGTID,
-                            iv_burst_length);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | CAS latency   |          R/W        |    OP[7:2]  |  %u", TARGTID,
-                            iv_cas_latency);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | DRAM   | Field         |     Register Type   |   Operand   |  Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "          --------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | %u      | Burst length  |          R/W        |    OP[1:0]  |  %u", TARGTID,
+                            i_dram_number, iv_burst_length);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR0 | %u      | CAS latency   |          R/W        |    OP[7:2]  |  %u", TARGTID,
+                            i_dram_number, iv_cas_latency);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 };
 

@@ -235,14 +235,13 @@ class mr12_data : public mr_base_data<MC>
             return fapi2::current_err;
         }
 
-        // All 8 bits are used, no need for bit enumerators
         uint8_t iv_vrefcs_value[mr::ATTR_RANKS][mr::ATTR_DRAM] = {};
 
     private:
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_rank the input rank to print
         /// @param[in] i_dram_number the input DRAM number
         ///
@@ -255,9 +254,14 @@ class mr12_data : public mr_base_data<MC>
             // As such, using pragmas to avoid the warning causing the error
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR12. rank%u, DRAM%u VREFCS: 0x%02lx",
-                            TARGTID, i_rank, i_dram_number, iv_vrefcs_value[i_rank][i_dram_number]);
+            FAPI_INF_NO_SBE("MR 12: Vref CS Calibration Value " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR12 | DRAM    | Field             |     Register Type   |   Operand   |  Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "           -------------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR12 | %u      | VrefCS Cal Value  |          R          |    OP[7:0]  |  %u  ",
+                            TARGTID, i_dram_number, iv_vrefcs_value[i_rank][i_dram_number]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
 #pragma GCC diagnostic pop
         }
 

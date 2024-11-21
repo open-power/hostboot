@@ -236,7 +236,7 @@ class mr6_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            display(i_rank_info.get_dimm_target());
+            display(i_rank_info.get_dimm_target(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -303,19 +303,26 @@ class mr6_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_dram_number the input DRAM number
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint8_t i_dram_number) const
         {
             FAPI_INF_NO_SBE("MR 6: Write Recovery Time & tRTP " TARGTIDFORMAT, TARGTID );
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR6 |           Field             |     Register Type    | Operand |  Data",
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR6 | DRAM      |          Field             |     Register Type    | Operand |  Data",
                             TARGTID);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT "          ----------------------------------------------------------------------",
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            "          ---------------------------------------------------------------------------------",
                             TARGTID);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR6 |        WR recovery time     |          R/W         | OP[3:0] | %unCK",
-                            TARGTID, iv_wr_recovery);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR6 |             tRTP            |          R/W         | OP[7:4] | %unCK",
-                            TARGTID, iv_trtp);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR6 | %u        |       WR recovery time     |          R/W         | OP[3:0] | %unCK",
+                            TARGTID, i_dram_number, iv_wr_recovery);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR6 | %u        |            tRTP            |          R/W         | OP[7:4] | %unCK",
+                            TARGTID, i_dram_number, iv_trtp);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 };
 

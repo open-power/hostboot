@@ -207,10 +207,10 @@ class mr11_data : public mr_base_data<MC>
             FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
             // Note: not checking the rank input as it is already checked by the rank info class
             FAPI_TRY(check_vref_value(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number, i_mr_data));
-
             // Check DRAM checks the boundaries for the array bounds below
             // Linux on power compiles do not acknowledge that the assert is doing this check
             // As such, using pragmas to avoid the warning causing the error
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
             iv_vrefca_value[i_rank_info.get_dimm_rank()][i_dram_number] = i_mr_data;
@@ -236,12 +236,11 @@ class mr11_data : public mr_base_data<MC>
 
         // All 8 bits are used, no need for bit enumerators
         uint8_t iv_vrefca_value[mr::ATTR_RANKS][mr::ATTR_DRAM] = {};
-
     private:
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_rank the input rank to print
         /// @param[in] i_dram_number the input DRAM number
         ///
@@ -254,9 +253,14 @@ class mr11_data : public mr_base_data<MC>
             // As such, using pragmas to avoid the warning causing the error
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR11. rank%u, DRAM%u VREFCA: 0x%02lx",
-                            TARGTID, i_rank, i_dram_number, iv_vrefca_value[i_rank][i_dram_number]);
+            FAPI_INF_NO_SBE("MR 11: Vref CA Calibration Value " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR11 | DRAM    | Field             |     Register Type   |   Operand   |  Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "           -------------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR11 | %u      | VrefCA Cal Value  |          R          |    OP[7:0]  |  %u  ",
+                            TARGTID, i_dram_number, iv_vrefca_value[i_rank][i_dram_number]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
 #pragma GCC diagnostic pop
         }
 

@@ -151,7 +151,7 @@ class mr13_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            this->display(i_rank_info.get_dimm_target());
+            this->display(i_rank_info.get_dimm_target(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -174,6 +174,9 @@ class mr13_data : public mr_base_data<MC>
             iv_tccd_l = l_tccd_l_field + TCCD_L_ATTR_MIN;
 
             FAPI_TRY(check_tccd_l(i_rank_info.get_dimm_target(), iv_tccd_l));
+
+            iv_cs_geardown_en = l_data.getBit<CS_GEARDOWN_EN>();
+            iv_srx_nop = l_data.getBit<SRX_NOP>();
 
             return fapi2::FAPI2_RC_SUCCESS;
         fapi_try_exit:
@@ -201,19 +204,37 @@ class mr13_data : public mr_base_data<MC>
             TCCD_L_ATTR_MAX = 16,
             TCCD_L = 4,
             TCCD_L_LEN = 4,
+            CS_GEARDOWN_EN = 3,
+            SRX_NOP = 2,
         };
 
         uint8_t iv_tccd_l = 0;
+        // We don't save them into attributes since it is not used in the code
+        uint8_t iv_cs_geardown_en = 0;
+        uint8_t iv_srx_nop = 0;
 
     private:
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_dram_number the input DRAM number
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint8_t i_dram_number) const
         {
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR13. tCCD_L: %u", TARGTID, iv_tccd_l);
+            FAPI_INF_NO_SBE("MR 13: tCCD_L/tCCD_L_WR " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR13 | DRAM    | Field             |     Register Type   |   Operand   |  Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "           --------------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR13 | %u      | tCCD_L             |          R          |    OP[3:0]  |  %u  ",
+                            TARGTID, i_dram_number, iv_tccd_l);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR13 | %u      | CS Geardown En     |         W/R         |    OP[4]    |  %u  ",
+                            TARGTID, i_dram_number, iv_cs_geardown_en);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR13 | %u      | SRX NOP clock sync |        SW/R         |    OP[5]    |  %u  ",
+                            TARGTID, i_dram_number, iv_srx_nop);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 
 };

@@ -256,7 +256,7 @@ class mr3_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_rank the input rank to print
         /// @param[in] i_dram_number the input DRAM number
         ///
@@ -270,16 +270,20 @@ class mr3_data : public mr_base_data<MC>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
             // Inputs were checked in the public display method
-            FAPI_INF_NO_SBE("MR 3: DQS Training " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE("MR 3: DQS Training for DRAM%u" TARGTIDFORMAT, i_dram_number, TARGTID );
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR3 |                  Field                     |     Register Type   | Operand |   Data", TARGTID);
+                            " DDR5 MR3 | DRAM     |                  Field                     |     Register Type   | Operand |   Data",
+                            TARGTID);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            "          -------------------------------------------------------------------------------------", TARGTID);
+                            "          ------------------------------------------------------------------------------------------------",
+                            TARGTID);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR3 | WR LVL internal cycle - lower byte         |          R/W        | OP[3:0] |    %u", TARGTID,
-                            iv_wr_lvl_internal_lower[i_rank][i_dram_number]);
+                            " DDR5 MR3 | %u       | WR LVL internal cycle - lower byte         |          R/W        | OP[3:0] |    %u ",
+                            TARGTID, i_dram_number, iv_wr_lvl_internal_lower[i_rank][i_dram_number]);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR3 | WR LVL internal cycle - upper byte (unused)|          R/W        | OP[7:4] |     0", TARGTID);
+                            " DDR5 MR3 | %u       | WR LVL internal cycle - upper byte (x16)   |          R/W        | OP[7:4] |     0 ",
+                            TARGTID, i_dram_number);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
 #pragma GCC diagnostic pop
         }
 

@@ -227,7 +227,7 @@ class mr5_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank());
+            display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -314,32 +314,38 @@ class mr5_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_dimm_rank the DIMM rank's value to print
+        /// @param[in] i_dram_number the input DRAM number
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint64_t i_dimm_rank,
+                     const uint8_t i_dram_number) const
         {
             FAPI_INF_NO_SBE("MR 5: IO Settings " TARGTIDFORMAT, TARGTID );
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR5 |                Field                    |     Register Type   | Operand |   Data", TARGTID);
+                            " DDR5 MR5 | DRAM       |                Field                    |     Register Type   | Operand |   Data", TARGTID);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            "          ----------------------------------------------------------------------------------", TARGTID);
+                            "          -----------------------------------------------------------------------------------------------", TARGTID);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR5 |          Data output disable            |          W          |  OP[0]  |   %u",  TARGTID,
-                            iv_data_output_disable);
+                            " DDR5 MR5 | %u         |          Data output disable            |          W          |  OP[0]  |    %u ", TARGTID,
+                            i_dram_number, iv_data_output_disable);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR5 |          PU drive impedance             |          R/W        |  OP[2:1]|   %u",  TARGTID,
-                            iv_pu_drv_imp[i_dimm_rank]);
+                            " DDR5 MR5 | %u         |          PU drive impedance             |          R/W        |  OP[2:1]|    %u ", TARGTID,
+                            i_dram_number, iv_pu_drv_imp[i_dimm_rank]);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR5 | Package Output Driver Test mode support |          R          |  OP[3]  |   %u",  TARGTID,
-                            iv_drv_test_mode_supported_read_only);
+                            " DDR5 MR5 | %u         | Package Output Driver Test mode support |          R          |  OP[3]  |    %u ", TARGTID,
+                            i_dram_number, iv_drv_test_mode_supported_read_only);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR5 |                 TDQS Enable             |          R/W        |  OP[4]  |   %u",  TARGTID, iv_tdqs_enable);
+                            " DDR5 MR5 | %u         |                 TDQS Enable             |          R/W        |  OP[4]  |    %u ", TARGTID,
+                            i_dram_number, iv_tdqs_enable);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR5 |                 DM Enable               |          R/W        |  OP[5]  |   %u",  TARGTID, iv_dm_enable);
+                            " DDR5 MR5 | %u         |                 DM Enable               |          R/W        |  OP[5]  |    %u ", TARGTID,
+                            i_dram_number, iv_dm_enable);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR5 |          PD drive impedance             |          R/W        |  OP[7:6]|   %u",  TARGTID,
-                            iv_pd_drv_imp[i_dimm_rank]);
+                            " DDR5 MR5 | %u         |            PD drive impedance           |          R/W        |  OP[7:6]|    %u ", TARGTID,
+                            i_dram_number, iv_pd_drv_imp[i_dimm_rank]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 };
 

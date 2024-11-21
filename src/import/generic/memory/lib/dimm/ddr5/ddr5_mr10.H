@@ -240,7 +240,7 @@ class mr10_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_rank the input rank to print
         /// @param[in] i_dram_number the input DRAM number
         ///
@@ -253,9 +253,15 @@ class mr10_data : public mr_base_data<MC>
             // As such, using pragmas to avoid the warning causing the error
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
+            FAPI_INF_NO_SBE("MR 10: VrefDQ Calibration Value " TARGTIDFORMAT, TARGTID);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR10. rank%u, DRAM%u VREFDQ: 0x%02lx",
-                            TARGTID, i_rank, i_dram_number, iv_vrefdq_value[i_rank][i_dram_number]);
+                            " DDR5 MR10 | DRAM     | Field             |     Register Type   |   Operand   |  Data   ", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            "           -----------------------------------------------------------------------------", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR10 | %u       | VrefDQ Cal Value  |          R/W        |    OP[7:0]  |  0x%02lx", TARGTID,
+                            i_dram_number, iv_vrefdq_value[i_rank][i_dram_number]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
 #pragma GCC diagnostic pop
         }
 

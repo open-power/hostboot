@@ -164,7 +164,7 @@ class mr15_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            this->display(i_rank_info.get_dimm_target());
+            this->display(i_rank_info.get_dimm_target(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -237,14 +237,30 @@ class mr15_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_dram_number the input DRAM number
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint8_t i_dram_number) const
         {
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR15. ECS error threshold: %u. ECS in STR: %u", TARGTID, iv_ecs_err_threshold,
-                            iv_ecs_in_str);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR15. ECS writeback: %u. ECS x4 writes: %u", TARGTID, iv_ecs_writeback,
-                            iv_x4_writes);
+            FAPI_INF_NO_SBE("MR 15: Transparency ECC Threshold and Automatic ECS in SR " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR15 | DRAM    | Field                 | Register Type |   Operand   |  Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            "           ---------------------------------------------------------------------------------", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR15 | %u      | ECS Error Threshold   |     R/W       |    OP[2:0]  |  %u  ",
+                            TARGTID,
+                            i_dram_number, iv_ecs_err_threshold);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR15 | %u      | Automatic ECS in SR   |      W        |    OP[3]    |  %u  ",
+                            TARGTID,
+                            i_dram_number, iv_ecs_in_str);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR15 | %u      | ECS writeback         |     R/W       |    OP[6]    |  %u  ",
+                            TARGTID,
+                            i_dram_number, iv_ecs_writeback);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR15 | %u      | ECS x4 writes         |     R/W       |    OP[7]    |  %u  ",
+                            TARGTID,
+                            i_dram_number, iv_x4_writes);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 
 };

@@ -161,7 +161,7 @@ class mr14_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            this->display(i_rank_info.get_dimm_target());
+            this->display(i_rank_info.get_dimm_target(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -229,12 +229,30 @@ class mr14_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_dram_number the input DRAM number
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint8_t i_dram_number) const
         {
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR14. ECS mode: %u. ECS reset counter: %u", TARGTID, iv_ecs_mode, iv_ecs_reset);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR14. ECS count mode: %u. ECS CID select: %u", TARGTID, iv_ecs_reset, iv_ecs_mode);
+            FAPI_INF_NO_SBE("MR 14: Transparency ECC Configuration " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR14 | DRAM    | Field             |     Register Type   |   Operand   |  Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "           -------------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR14 | %u      | CID               |        R/W          |    OP[3:0]  |  %u  ",
+                            TARGTID,
+                            i_dram_number, iv_ecs_reg_index);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR14 | %u      | ECS row count     |        R/W          |    OP[5]    |  %u  ",
+                            TARGTID,
+                            i_dram_number, iv_row_count);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR14 | %u      | ECS Reset Counter |        W            |    OP[6]    |  %u  ",
+                            TARGTID,
+                            i_dram_number, iv_ecs_reset);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR14 | %u      | ECS Mode          |        R/W          |    OP[7]    |  %u  ",
+                            TARGTID,
+                            i_dram_number, iv_ecs_mode);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 
 };

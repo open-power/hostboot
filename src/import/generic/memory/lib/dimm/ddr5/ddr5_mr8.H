@@ -241,7 +241,7 @@ class mr8_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            display(i_rank_info.get_dimm_target());
+            display(i_rank_info.get_dimm_target(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -318,21 +318,30 @@ class mr8_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_dram_number the input DRAM number
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint8_t i_dram_number) const
         {
             FAPI_INF_NO_SBE("MR 8: Preamble/Postamble " TARGTIDFORMAT, TARGTID );
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |      Field          |     Register Type    | Operand |   Data", TARGTID);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT "          ---------------------------------------------------------------", TARGTID);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |    RD preamble      |          R/W         | OP[2:0] |  %u   ", TARGTID,
-                            iv_rd_preamble);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |    WR preamble      |          R/W         | OP[4:3] |  %u   ", TARGTID,
-                            iv_wr_preamble);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |    RD postamble     |          R/W         | OP[6]   |  %u   ", TARGTID,
-                            iv_rd_postamble);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 |    WR postamble     |          R/W         | OP[7]   |  %u   ", TARGTID,
-                            iv_wr_postamble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 | DRAM       |     Field          |     Register Type    | Operand |   Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "          ---------------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 | %u         |   RD preamble      |          R/W         | OP[2:0] |  %u   ",
+                            TARGTID,
+                            i_dram_number, iv_rd_preamble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 | %u         |   WR preamble      |          R/W         | OP[4:3] |  %u   ",
+                            TARGTID,
+                            i_dram_number, iv_wr_preamble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 | %u         |   RD postamble     |          R/W         | OP[6]   |  %u   ",
+                            TARGTID,
+                            i_dram_number, iv_rd_postamble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR8 | %u         |   WR postamble     |          R/W         | OP[7]   |  %u   ",
+                            TARGTID,
+                            i_dram_number, iv_wr_postamble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 };
 
