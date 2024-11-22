@@ -1082,7 +1082,6 @@ sub processNode
     $targetObj->setAttribute($target, "ORDINAL_ID",    $nodePosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $nodePosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $nodeFapiName);
-    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodePosPerSystem);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $nodeAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $nodePhysical);
 
@@ -1179,8 +1178,6 @@ sub processProcessorAndChildren
     $targetObj->setAttribute($target, "ORDINAL_ID",    $procPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $procPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
-    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS", $procPosPerNode);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $procAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $procPhysical);
 
@@ -1397,8 +1394,6 @@ sub processDdimmAndChildren
         $targetObj->setAttribute($ldimm, "ORDINAL_ID",    $dimmPosPerSystem);
         $targetObj->setAttribute($ldimm, "FAPI_POS",      $dimmPosPerSystem);
         $targetObj->setAttribute($ldimm, "FAPI_NAME",     $dimmFapiName);
-        $targetObj->setAttribute($ldimm, "FAPINAME_NODE", $nodeParentPos);
-        $targetObj->setAttribute($ldimm, "FAPINAME_POS",  $dimmPosPerNode);
         $targetObj->setAttribute($ldimm, "REL_POS",       $dimmPosPerParent);
         $targetObj->setAttribute($ldimm, "AFFINITY_PATH", $dimmAffinity);
         $targetObj->setAttribute($ldimm, "PHYS_PATH",     $dimmPhysical);
@@ -1652,8 +1647,6 @@ sub processIsdimmAndChildren
     $targetObj->setAttribute($target, "ORDINAL_ID",    $dimmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $dimmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $dimmFapiName);
-    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS",  $dimmPosPerNode);
     $targetObj->setAttribute($target, "REL_POS",       $dimmPosPerParent);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $dimmAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $dimmPhysical);
@@ -1707,8 +1700,8 @@ sub processPmic
     # 1 OCMB per DDIMM so compute the number of my type per OCMB
     my $maxPerOcmb = getMaxInstPerParent($targetType);
 
-    # Set the PMIC's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
-    # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
+    # Set the PMIC's attributes HUID, POSITION, FAPI_POS, FAPI_NAME,
+    # ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
     setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
                                                      $dimmId, $targetType,
                                                      $maxPerOcmb);
@@ -1758,8 +1751,8 @@ sub processPowerIc
     # 1 OCMB per DDIMM so compute the number of my type per OCMB
     my $maxPerOcmb = getMaxInstPerParent($targetType);
 
-    # Set the POWER_IC's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
-    # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
+    # Set the POWER_IC's attributes HUID, POSITION, FAPI_POS, FAPI_NAME,
+    # ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
     setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
                                                      $dimmId, $targetType,
                                                      $maxPerOcmb);
@@ -1836,7 +1829,7 @@ sub processGenericI2cDevice
     my $maxPerOcmb = getMaxInstPerParent($targetType);
 
     # Set the GENERIC_I2C_DEVICES's attributes HUID, POSITION, FAPI_POS, FAPI_NAME,
-    # FAPINAME_NODE, FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
+    # ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
     setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
                                                      $dimmId, $targetType,
                                                      $maxPerOcmb);
@@ -1886,8 +1879,8 @@ sub processMdsCtlr
     # 1 OCMB per DDIMM so compute the number of my type per OCMB
     my $maxPerOcmb = getMaxInstPerParent($targetType);
 
-    # Set the MDS_CTLR's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
-    # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
+    # Set the MDS_CTLR's attributes HUID, POSITION, FAPI_POS, FAPI_NAME,
+    # ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
     setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
                                                      $dimmId, $targetType,
                                                      $maxPerOcmb);
@@ -1939,8 +1932,8 @@ sub processOcmbChipAndChildren
     my $ocmbPosPerNode = $targetObj->getAttribute($ddimmParent, "TEMP_DDIMM_OMI_POS_PER_NODE");
     print "-ocmbPosPerNode=$ocmbPosPerNode\n" if $targetObj->{debug};
 
-    # Set the OCMB's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
-    # FAPINAME_POS, ORDINAL_ID, AFFINITY_PATH and PHYS_PATH.
+    # Set the OCMB's attributes HUID, POSITION, FAPI_POS, FAPI_NAME,
+    # ORDINAL_ID, AFFINITY_PATH and PHYS_PATH.
     setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $ocmbTarget,
                                                      $ocmbPhysId, $type,
                                                      1); #1 OCMB per DDIMM
@@ -1979,7 +1972,7 @@ sub processOcmbChipAndChildren
 
         if ($childType eq "MEM_PORT")
         {
-            processMemPort($targetObj, $child);
+            processMemPort($targetObj, $child, $ocmbPosPerNode);
             $foundMemPort = true;
         }
         elsif ($childType eq "PERV")
@@ -1994,7 +1987,7 @@ sub processOcmbChipAndChildren
         elsif ($childType eq "TEMP_SENSOR")
         {
             print "Found TEMP_SENSOR $child\n" if $targetObj->{debug};
-            processTempSensor($targetObj, $child);
+            processTempSensor($targetObj, $child, $ocmbPosPerNode);
             $foundTempSensor = true;
         }
         else
@@ -2008,7 +2001,7 @@ sub processOcmbChipAndChildren
             if ($childInstanceName eq "i2c-ts")
             {
                 $targetObj->setAttribute($child, "TYPE", "TEMP_SENSOR");
-                processTempSensor($targetObj, $child);
+                processTempSensor($targetObj, $child, $ocmbPosPerNode);
                 $foundTempSensor = true;
             }
         }
@@ -2110,8 +2103,6 @@ sub processOcmbChipPlanarAndChildren
     $targetObj->setAttribute($target, "POSITION",      $targetInstancePos);
     $targetObj->setAttribute($target, "FAPI_POS",      $targetPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $targetFapiName);
-    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS",  $targetPosPerNode);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $targetPosPerSystem);
     # NOTE OCMB_CHIP *does not* set the attribute REL_POS as it is not a chipUnit or
     # a dimm, so it does not have this attribute
@@ -2154,7 +2145,7 @@ sub processOcmbChipPlanarAndChildren
     {
         if ( ($targetObj->getType($child)) eq "MEM_PORT")
         {
-            processMemPort($targetObj, $child);
+            processMemPort($targetObj, $child, $targetPosPerNode);
             $foundMemPort = true;
         }
         # Note - If Odyssey is supported as planar, need to handle PERV children
@@ -2179,6 +2170,7 @@ sub processTempSensor
 {
     my $targetObj         = shift;
     my $target            = shift;
+    my $ocmbParentPos     = shift;
     my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
     my $name = $targetObj->getInstanceName($target);
     print "processTempSensor($name,$path)\n"  if $targetObj->{debug};
@@ -2194,7 +2186,6 @@ sub processTempSensor
     my $nodeParent = $targetObj->findParentByType($target, "NODE");
     my $nodeParentPos = $targetObj->getAttribute($nodeParent, "ORDINAL_ID");
     my $ocmbParent = $targetObj->getTargetParent($target);
-    my $ocmbParentPos = $targetObj->getAttribute($ocmbParent, "FAPINAME_POS");
 
     # Get the instance number (position) of the temp sensor
     my $tempSensorInstancePos = $targetObj->getInstanceNum($target);
@@ -2203,8 +2194,8 @@ sub processTempSensor
     # position to compute the unique position per node.
     my $tempSensorPosPerNode = ($ocmbParentPos * getMaxInstPerParent($type)) + $tempSensorInstancePos;
 
-    # Set the TEMP_SENSOR's attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
-    # FAPINAME_POS, ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
+    # Set the TEMP_SENSOR's attributes HUID, POSITION, FAPI_POS, FAPI_NAME,
+    # ORDINAL_ID, REL_POS, AFFINITY_PATH and PHYS_PATH.
     setCommonAttributesForTargetsAssociatedWithDdimm($targetObj, $target,
                                                      $ocmbParentPos, $type,
                                                      getMaxInstPerParent($type));
@@ -2230,6 +2221,7 @@ sub processMemPort
 {
     my $targetObj         = shift;
     my $target            = shift;
+    my $ocmbParentPos     = shift;
     my $path = $targetObj->getAttribute($target,"INSTANCE_PATH");
     my $name = $targetObj->getInstanceName($target);
     print "processMemPort($name,$path)\n" if $targetObj->{debug};
@@ -2247,7 +2239,6 @@ sub processMemPort
     my $ocmbParent = $targetObj->getTargetParent($target);
     my $ocmbParentAffinity = $targetObj->getAttribute($ocmbParent, "AFFINITY_PATH");
     my $ocmbParentPhysical = $targetObj->getAttribute($ocmbParent, "PHYS_PATH");
-    my $ocmbParentPos = $targetObj->getAttribute($ocmbParent, "FAPINAME_POS");
 
     # Get the instance number (position) of the mem port
     my $memPortInstancePos = $targetObj->getInstanceNum($target);
@@ -2277,9 +2268,6 @@ sub processMemPort
     $targetObj->setHuid($target, $sysParentPos, $nodeParentPos, $memPortPosPerNode);
     $targetObj->setAttribute($target, "FAPI_POS",      $memPortPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $memPortFapiName);
-    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS",  $ocmbParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_UNIT", $memPortInstancePos);
     $targetObj->setAttribute($target, "REL_POS",       $memPortInstancePos);
     $targetObj->setAttribute($target, "AFFINITY_PATH", $memPortAffinity);
     $targetObj->setAttribute($target, "PHYS_PATH",     $memPortPhysical);
@@ -2437,7 +2425,7 @@ sub processTpm
     my $tpmPosPerSystem = $targetObj->getTargetPosition($target);
 
     # Get the FAPI_NAME
-    my $tpmFapiName  = $targetObj->getFapiName($type);
+    my $tpmFapiName  = $targetObj->getFapiName($type, $nodeParentPos, $tpmPosPerSystem);
 
     # Take advantage of previous work done on the NODEs.  Use the parent NODE's
     # physical path for our self and append tpm to the end.
@@ -2448,8 +2436,6 @@ sub processTpm
     $targetObj->setAttribute($target, "ORDINAL_ID",    $tpmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_POS",      $tpmPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $tpmFapiName);
-    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS",  $tpmPosPerSystem);
     $targetObj->setAttribute($target, "PHYS_PATH",     $tpmPhysical);
 
     # Build up data for the EEPROM_VPD_PRIMARY_INFO attribute. Since the VPD is collected via
@@ -2525,8 +2511,8 @@ sub processTpm
 # @brief Set common attributes for targets that are associated with a DDIMM.  Targets
 #        such as PMIC, GENERIC_I2C_DEVICE, OCMB_CHIP and MDS_CTLR
 #
-# @details The attributes HUID, POSITION, FAPI_POS, FAPI_NAME, FAPINAME_NODE,
-#          FAPINAME_POS, ORDINAL_ID, AFFINITY_PATH and PHYS_PATH are set for the targets.
+# @details The attributes HUID, POSITION, FAPI_POS, FAPI_NAME,
+#          ORDINAL_ID, AFFINITY_PATH and PHYS_PATH are set for the targets.
 #          The attribute REL_POS is set for the targets except the OCMB target.
 #          These attributes are set here because of commonality of setting them
 #          for the given targets.
@@ -2627,8 +2613,6 @@ sub setCommonAttributesForTargetsAssociatedWithDdimm
     $targetObj->setAttribute($target, "POSITION",      $targetId);
     $targetObj->setAttribute($target, "FAPI_POS",      $targetPosPerSystem);
     $targetObj->setAttribute($target, "FAPI_NAME",     $targetFapiName);
-    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodeParentPos);
-    $targetObj->setAttribute($target, "FAPINAME_POS",  $targetPosPerNode);
     $targetObj->setAttribute($target, "ORDINAL_ID",    $targetPosPerSystem);
 
     # Set this attribute for targets that are *not* OCMB_CHIP
@@ -2962,9 +2946,6 @@ sub setCommonAttrForChiplet
     $targetObj->setAttribute($target, "ORDINAL_ID",    $ordinalId);
     $targetObj->setAttribute($target, "FAPI_POS",      $ordinalId);
     $targetObj->setAttribute($target, "FAPI_NAME",     $fapiName);
-    $targetObj->setAttribute($target, "FAPINAME_NODE", $nodePos);
-    $targetObj->setAttribute($target, "FAPINAME_POS",  $procPos);
-    $targetObj->setAttribute($target, "FAPINAME_UNIT", $chipunit);
     $targetObj->setAttribute($target, "REL_POS",       $perParentNumValue);
     $targetObj->setAttribute($target, "PDR_ENTITY_INSTANCE", $chipunit);
 

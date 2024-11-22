@@ -687,50 +687,26 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
     o_unitPos = AttributeTank::ATTR_UNIT_POS_NA;
     o_node = AttributeTank::ATTR_NODE_NA;
 
-    // Get pointers to FAPINAME position elements
-    void * l_pAttr_pos = NULL;
-    void * l_pAttr_unitPos = NULL;
-    void * l_pAttr_node = NULL;
-    _getAttrPtr(ATTR_FAPINAME_POS, l_pAttr_pos);
-    _getAttrPtr(ATTR_FAPINAME_UNIT, l_pAttr_unitPos);
-    _getAttrPtr(ATTR_FAPINAME_NODE, l_pAttr_node);
+    // Get pointer to FAPINAME string
+    void * l_pAttr_FN = NULL;
+    _getAttrPtr(ATTR_FAPI_NAME, l_pAttr_FN);
 
-    // Check that each element exists and cast to correct type
-    if (l_pAttr_node) {
-        AttributeTraits<ATTR_FAPINAME_NODE>::Type & l_fapiname_node =
-            *(reinterpret_cast<AttributeTraits<ATTR_FAPINAME_NODE>::Type *>(
-                l_pAttr_node));
+    // Check that FN exists, casts to correct type, calls parsing function
+    if (l_pAttr_FN)
+    {
+        AttributeTraits<ATTR_FAPI_NAME>::Type & l_fapiname =
+            *(reinterpret_cast<AttributeTraits<ATTR_FAPI_NAME>::Type *>(l_pAttr_FN));
 
-        o_node = l_fapiname_node;
+        bool parse_result = getPosFromFapiName(l_fapiname, o_pos, o_unitPos, o_node);
 
-        // Because ATTR_FAPINAME_NODE is uint8_t o_node will be set as 0xFF
-        // when the attribute is not set even though this attribute
-        // is actually only 4 bits so we translate here if needed
-        if (o_node == AttributeTraits<ATTR_FAPINAME_NODE>::FAPINAME_NODE_INVALID) {
-            o_node = AttributeTank::ATTR_NODE_NA;
+        if (!parse_result)
+        {
+            TRACFCOMP(g_trac_targeting, "getAttrTankTargetPosData: failed to parse fapiname (%s)", l_fapiname);
         }
-    } else {
-        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_FAPINAME_NODE);
     }
-
-    if (l_pAttr_pos) {
-        AttributeTraits<ATTR_FAPINAME_POS>::Type & l_fapiname_pos =
-            *(reinterpret_cast<AttributeTraits<ATTR_FAPINAME_POS>::Type *>(
-                l_pAttr_pos));
-
-        o_pos = l_fapiname_pos;
-    } else {
-        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_FAPINAME_POS);
-    }
-
-    if (l_pAttr_unitPos) {
-        AttributeTraits<ATTR_FAPINAME_UNIT>::Type & l_fapiname_unitPos =
-            *(reinterpret_cast<AttributeTraits<ATTR_FAPINAME_UNIT>::Type *>(
-                l_pAttr_unitPos));
-
-        o_unitPos = l_fapiname_unitPos;
-    } else {
-        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_FAPINAME_UNIT);
+    else
+    {
+        targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_FAPI_NAME);
     }
 
     // Check that the correct values are returned
@@ -806,7 +782,9 @@ void Target::getAttrTankTargetPosData(uint16_t & o_pos,
         case (TARGETING::CLASS_INVALID):
             targAssert(GET_ATTR_TANK_TARGET_POS_DATA, ATTR_CLASS);
         } // end swtich(l_class)
-    } else {
+    }
+    else
+    {
         targAssert(GET_ATTR_TANK_TARGET_POS_DATA_ATTR, ATTR_CLASS);
     }
 }

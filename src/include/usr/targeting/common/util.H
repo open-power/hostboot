@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -89,6 +89,21 @@ namespace PROPERTIES
 }
 
 }
+
+/**
+ * @brief  Get position info from FAPI_NAME string
+ *
+ * @param[in] i_fapiname  ATTR_FAPI_NAME string
+ * @param[out] o_pos     FAPINAME_pos,  AttributeTank::ATTR_POS_NA by default
+ * @param[out] o_unitPos FAPINAME_unit, AttributeTank::ATTR_UNIT_POS_NA by default
+ * @param[out] o_node    FAPINAME_node, AttributeTank::ATTR_NODE_NA by default
+ *
+ * @return true if valid string, false otherwise
+ */
+bool getPosFromFapiName(ATTR_FAPI_NAME_type & i_fapiname,
+                        uint16_t & o_pos,
+                        uint8_t & o_unitPos,
+                        uint8_t & o_node);
 
 /**
  * @brief Checks to see if we are running in a hardware simulation

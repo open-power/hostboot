@@ -746,9 +746,11 @@ void AttrOverrideSync::triggerAttrSync(fapi2::TargetType i_type,
 
         // Determine the target location info using the fapiname
         // postioning attributes
-        auto l_pos = l_pTarget->getAttr<T::ATTR_FAPINAME_POS>();
-        auto l_unitPos = l_pTarget->getAttr<T::ATTR_FAPINAME_UNIT>();
-        auto l_node = l_pTarget->getAttr<T::ATTR_FAPINAME_NODE>();
+        uint16_t l_pos = 0xFFFF;
+        uint8_t l_unitPos = 0xFF;
+        uint8_t l_node = 0xFF;
+
+        l_pTarget->getAttrTankTargetPosData(l_pos, l_unitPos, l_node);
 
         char * l_physString = phys_path_ptr.toString();
         FAPI_INF("triggerAttrSync: HUID 0x%X, type num[%d] fapi type[%llx] [%s], [n%d:p%d:c%d]",

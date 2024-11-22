@@ -38,20 +38,25 @@
 #include <kernel/bltohbdatamgr.H>
 #include <targeting/common/attributeTank.H>
 #include <vector>
-
-#include "attributeenums.H"
-#include "attributetraits.H"
-#include "secureboot/service.H"
-#include "targeting/attrPlatOverride.H"
-#include "targeting/common/predicates/predicateattrval.H"
-#include "targeting/common/predicates/predicatebase.H"
-#include "targeting/common/predicates/predicatectm.H"
-#include "targeting/common/predicates/predicatepostfixexpr.H"
-#include "targeting/common/target.H"
-#include "targeting/common/util.H"
-#include "targeting/common/utilFilter.H"
+#include <targeting/common/target.H>
+#include <attributetraits.H>
+#include <secureboot/service.H>
+#include <targeting/attrPlatOverride.H>
+#include <targeting/common/util.H>
 
 using namespace TARGETING;
+
+#define POS_NA AttributeTank::ATTR_POS_NA
+#define UNIT_NA AttributeTank::ATTR_UNIT_POS_NA
+#define NODE_NA AttributeTank::ATTR_NODE_NA
+
+struct FAPINAME_test {
+    ATTR_FAPI_NAME_type string;
+    bool expctdResult;
+    uint8_t expctdNode{NODE_NA};
+    uint16_t expctdPos{POS_NA};
+    uint8_t expctdUnitPos{UNIT_NA};
+};
 
 class TextAttrOvdTest: public CxxTest::TestSuite
 {
@@ -96,6 +101,26 @@ public:
                             "target = k0:s0:n0:pmic:p3\n"
                             "ATTR_ISTEP_CALLOUT_INJECT_ACTION 0x7777777777777777\n";
 
+    static constexpr FAPINAME_test fapinameTestArr[] = {
+        {"k0",                      true, NODE_NA, POS_NA, UNIT_NA},
+        {"k0:s0",                   true, NODE_NA, POS_NA, UNIT_NA},
+        {"NA",                      false, NODE_NA, POS_NA, UNIT_NA},
+        {"ocmb:k0:n0:s0:p05",       true, 0, 5, UNIT_NA},
+        {"k0:s0:n0:ocmb:p05",       false, NODE_NA, POS_NA, UNIT_NA},
+        {"ocmb:k0:s0:n0:p05",       false, NODE_NA, POS_NA, UNIT_NA},
+        {"ocmb:k0:n0:s0:p05:d4",    false, NODE_NA, POS_NA, UNIT_NA},
+        {"pu.c:k0:n0:s0:p05:c7",    true, 0, 5, 7},
+        {"pu.c:k0:n0:s0:p05:c7:d4", false, NODE_NA, POS_NA, UNIT_NA},
+        {"c0:k0:n0:s0:p05",         false, NODE_NA, POS_NA, UNIT_NA},
+        {"node:k0:n1:s0",           true, 1, POS_NA, UNIT_NA},
+        {"tpm:k0:s0:n0:p320",       false, NODE_NA, POS_NA, UNIT_NA},
+        {"pu.c:k0:s0:n0:p320:c1",   false, NODE_NA, POS_NA, UNIT_NA},
+        {"pu.omi:k0:n0:s0:p20:c12", false, NODE_NA, POS_NA, UNIT_NA},
+        {"pu.omi:k0:n9:s0:p99:c8",  true, 9, 99, 8},
+        {"pu.omi:k0:n0:s0:c0",      false, NODE_NA, POS_NA, UNIT_NA},
+        {"pu.omi:k0:n0:s0:c01",     false, NODE_NA, POS_NA, UNIT_NA},
+    };
+
     /**
     * @brief Tests values of attribute overrides
     *
@@ -113,10 +138,8 @@ public:
 
         TargetHandle_t l_targ;
 
-        // target = target = k0:s0
-        l_targ = getTarget( AttributeTank::ATTR_NODE_NA,
-                            AttributeTank::ATTR_POS_NA,
-                            AttributeTank::ATTR_UNIT_POS_NA);
+        // target = k0:s0
+        l_targ = Target::getTargetFromHuid(0x00010000);
         if (l_targ)
         {
             // ATTR_SCRATCH_UINT8_1 0x12
@@ -169,7 +192,7 @@ public:
         }
 
         // target = k0:s0:n0:ocmb:p04
-        l_targ = getTarget(0, 4, AttributeTank::ATTR_UNIT_POS_NA, TARGETING::TYPE_OCMB_CHIP);
+        l_targ = Target::getTargetFromHuid(0x004B0004);
         if (l_targ)
         {
             // ATTR_MRU_ID 0x2328
@@ -187,7 +210,7 @@ public:
         }
 
         // target = ocmb:k0:n0:s0:p05
-        l_targ = getTarget(0, 5, AttributeTank::ATTR_UNIT_POS_NA, TARGETING::TYPE_OCMB_CHIP);
+        l_targ = Target::getTargetFromHuid(0x004B0005);
         if (l_targ)
         {
             // ATTR_MRU_ID 0x232C
@@ -205,9 +228,9 @@ public:
         }
 
         // target = k0:s0:n0:dimm:p16,20
-        for (ATTR_FAPINAME_POS_type pos: {16,20})
+        for (ATTR_HUID_type huid: {0x00030010,0x00030014})
         {
-            l_targ = getTarget(0, pos, AttributeTank::ATTR_UNIT_POS_NA, TARGETING::TYPE_DIMM);
+            l_targ = Target::getTargetFromHuid(huid);
             if (l_targ)
             {
                 // ATTR_ISTEP_CALLOUT_INJECT_ACTION 0xCC
@@ -216,17 +239,17 @@ public:
                 if (val != 0xCC)
                 {
                     TS_FAIL("Attribute override failed. (k0:s0:n0:dimm:p2,4 ATTR_ISTEP_CALLOUT_INJECT_ACTION) "
-                            "expctd: 0xCC actual: 0x%X HUID: 0x%08X", val, get_huid(l_targ));
+                            "expctd: 0xCC actual: 0x%X HUID: 0x%08X", val, huid);
                 }
             }
             else
             {
-                TS_FAIL("Unable to find dimm target (k0:s0:n0:dimm:p%d)", pos);
+                TS_FAIL("Unable to find dimm target (HUID 0x%08X)", huid);
             }
         }
 
         // target = k0:s0:n0:dimm:p16
-        l_targ = getTarget(0, 16, AttributeTank::ATTR_UNIT_POS_NA, TARGETING::TYPE_DIMM);
+        l_targ = Target::getTargetFromHuid(0x00030010);
         if (l_targ)
         {
             // check function of override arrays
@@ -257,10 +280,9 @@ public:
         }
 
         // target = k0:s0:n0:p10:pall
-        for (ATTR_FAPINAME_POS_type pos: {0,1})
+        for (ATTR_HUID_type huid: {0x00050000,0x00050001})
         {
-            //l_targ = getTargetFromHUID(huid);
-            l_targ = getTarget(0, pos, AttributeTank::ATTR_UNIT_POS_NA, TARGETING::TYPE_PROC);
+            l_targ = Target::getTargetFromHuid(huid);
             if (l_targ)
             {
                 // ATTR_SCRATCH_UINT32_1 0xDEADBEEF
@@ -269,17 +291,17 @@ public:
                 if (val != 0xDEADBEEF)
                 {
                     TS_FAIL("Attribute override failed. (k0:s0:n0:p10:pall ATTR_SCRATCH_UINT32_1) "
-                            "expctd: 0xDEADBEEF actual: 0x%X (HUID 0x%08X)", val, get_huid(l_targ));
+                            "expctd: 0xDEADBEEF actual: 0x%X (HUID 0x%08X)", val, huid);
                 }
             }
             else
             {
-                TS_FAIL("Unable to find proc (k0:s0:n0:p10:p%d)", pos);
+                TS_FAIL("Unable to find proc (HUID 0x%08X)", huid);
             }
         }
 
         // target = k0:s0:n0:tpm:p0
-        l_targ = getTarget(0, 0, AttributeTank::ATTR_UNIT_POS_NA, TARGETING::TYPE_TPM);
+        l_targ = Target::getTargetFromHuid(0x00310000);
         if (l_targ)
         {
             // ATTR_MRU_ID 0xBA
@@ -297,7 +319,7 @@ public:
         }
 
         // target = k0:s0:nall:pu.c:p01:c7
-        l_targ = getTarget(0, 1, 7, TARGETING::TYPE_CORE);
+        l_targ = Target::getTargetFromHuid(0x00070027);
         if (l_targ)
         {
             // ATTR_ISTEP_CALLOUT_INJECT_ACTION 0xC0FFEEBABE123456 CONST
@@ -315,7 +337,7 @@ public:
         }
 
         // target = k0:s0:n0:temp_sensor:p1
-        l_targ = getTarget(0, 1, AttributeTank::ATTR_UNIT_POS_NA, TARGETING::TYPE_TEMP_SENSOR);
+        l_targ = Target::getTargetFromHuid(0x00670001);
         if (l_targ)
         {
             // ATTR_ISTEP_CALLOUT_INJECT_ACTION 0x44
@@ -333,7 +355,7 @@ public:
         }
 
         // target = k0:s0:n0:power_ic:p2
-        l_targ = getTarget(0, 2, AttributeTank::ATTR_UNIT_POS_NA, TARGETING::TYPE_POWER_IC);
+        l_targ = Target::getTargetFromHuid(0x00660002);
         // only 4U systems have this target, skip if not
         if (l_targ)
         {
@@ -352,7 +374,7 @@ public:
         }
 
         // target = k0:s0:n0:pmic:p3
-        l_targ = getTarget(0, 3, AttributeTank::ATTR_UNIT_POS_NA, TARGETING::TYPE_PMIC);
+        l_targ = Target::getTargetFromHuid(0x004E0003);
         // only 4U systems have this target, skip if not
         if (l_targ)
         {
@@ -373,6 +395,42 @@ public:
         Target::theTargOverrideAttrTank().clearAllAttributes();
 
         TS_INFO(EXIT_MRK"testAttrOvd");
+    }
+
+    /**
+    * @brief Tests functions used to get position info
+    *
+    * Tests that getPosFromFapiName returns correct info
+    *
+    */
+    void testGetPosInfo(void)
+    {
+        TS_INFO(ENTER_MRK"testGetPosInfo");
+
+        bool result;
+        uint16_t o_pos;
+        uint8_t o_unitPos;
+        uint8_t o_node;
+
+        for (FAPINAME_test test: fapinameTestArr)
+        {
+            result = getPosFromFapiName(test.string, o_pos, o_unitPos, o_node);
+
+            if (result != test.expctdResult ||
+                o_pos != test.expctdPos ||
+                o_unitPos != test.expctdUnitPos ||
+                o_node != test.expctdNode)
+            {
+                TS_FAIL("getPosFromFapiName failed, input: %s "
+                        "expctd result: %s n%dp%dc%d "
+                        "actual result: %s n%dp%dc%d",
+                        test.string,
+                        test.expctdResult ? "true" : "false", test.expctdNode, test.expctdPos, test.expctdUnitPos,
+                        result ? "true" : "false", o_node, o_pos, o_unitPos);
+            }
+        }
+
+        TS_INFO(EXIT_MRK"testGetPosInfo");
     }
 
 private:
@@ -437,63 +495,6 @@ private:
         l_vaddr = nullptr;
 
         TS_INFO(EXIT_MRK"loadAttrText");
-    }
-
-    /**
-    * @brief Returns target handle for target at specified FAPINAME
-    *
-    * @param[i] i_node: FAPINAME node of desired target
-    * @param[i] i_pos: FAPINAME pos of desired target
-    * @param[i] i_unit: FAPINAME unit pos of desired target
-    * @param[i] i_type: Target type of desired target
-    * @param[i] i_class: Target class of desired target
-    *
-    * @return Target handle for target
-    */
-    TargetHandle_t getTarget(ATTR_FAPINAME_NODE_type i_node,
-                             ATTR_FAPINAME_POS_type i_pos,
-                             ATTR_FAPINAME_UNIT_type i_unit,
-                             TYPE i_type = TYPE_NA,
-                             CLASS i_class = CLASS_NA)
-    {
-        // Check if target is sys
-        if ((i_node == AttributeTank::ATTR_NODE_NA) &&
-            (i_pos == AttributeTank::ATTR_POS_NA) &&
-            (i_unit == AttributeTank::ATTR_UNIT_POS_NA))
-        {
-            TargetHandle_t l_sys(nullptr);
-            targetService().getTopLevelTarget(l_sys);
-            return l_sys;
-        }
-
-        PredicateCTM predType(i_class, i_type);
-        PredicateAttrVal<ATTR_FAPINAME_UNIT> unitAttr(i_unit);
-        PredicateAttrVal<ATTR_FAPINAME_POS> posAttr(i_pos);
-        PredicateAttrVal<ATTR_FAPINAME_NODE> nodeAttr(i_node);
-
-        PredicatePostfixExpr predAll;
-        predAll.push(&predType)
-               .push(&unitAttr).And()
-               .push(&posAttr).And()
-               .push(&nodeAttr).And();
-
-        TargetHandleList o_list;
-        TargetRangeFilter l_filter(targetService().begin(),
-                                   targetService().end(),
-                                   &predAll);
-        for( ; l_filter; ++l_filter )
-        {
-            o_list.push_back(*l_filter);
-        }
-
-        if (o_list.size() != 1)
-        {
-            TS_INFO("Wrong number of targets found (%d) type(0x%X) n%d:p%d:u%d",
-                    o_list.size(), i_type, i_node, i_pos, i_unit);
-            return nullptr;
-        }
-
-        return o_list.front();
     }
 };
 

@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2015,2023
+# Contributors Listed Below - COPYRIGHT 2015,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -912,10 +912,7 @@ sub getFapiName
     state %nonFapiTargets;
     if (not %nonFapiTargets)
     {
-        $nonFapiTargets{"NODE"}  = "NA";
-        $nonFapiTargets{"TPM"}   = "NA";
         $nonFapiTargets{"NVBUS"} = "NA";
-        $nonFapiTargets{"OCC"}   = "NA";
         $nonFapiTargets{"BMC"}   = "NA";
     }
 
@@ -927,12 +924,17 @@ sub getFapiName
     {
         return "k0";
     }
+    # Node
+    elsif ($targetType eq "NODE")
+    {
+        $fapiName = sprintf("node:k0:n%d:s0", $node);
+    }
     # First-level "chip" targets with their own chiptype
     elsif ($targetType eq "PROC"   || $targetType eq "DIMM" ||
            $targetType eq "MEMBUF" || $targetType eq "PMIC" ||
            $targetType eq "OCMB_CHIP" || $targetType eq "GENERIC_I2C_DEVICE" ||
            $targetType eq "MDS_CTLR"  || $targetType eq "POWER_IC" ||
-           $targetType eq "TEMP_SENSOR")
+           $targetType eq "TEMP_SENSOR" || $targetType eq "TPM" || $targetType eq "OCC")
     {
         if ($node eq "" || $chipPos eq "")
         {
