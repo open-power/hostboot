@@ -82,9 +82,10 @@ struct ElogDissectionSum
     uint16_t iv_extReasonCode;
     uint8_t  iv_reasonCode;
     uint16_t iv_moduleId;
+    uint16_t iv_compId;
     uint8_t  iv_severity;
     uint8_t  iv_version;
-    uint8_t  iv_reserve[3];
+    uint8_t  iv_reserve;
 };
 
 typedef struct ElogDissectionSum ElogDissectionSum_t;
