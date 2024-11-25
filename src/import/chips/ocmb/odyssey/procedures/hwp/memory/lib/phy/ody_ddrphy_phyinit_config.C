@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /* [+] Synopsys, Inc.                                                     */
 /*                                                                        */
@@ -4793,7 +4793,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ac(const fapi2::Target<fapi
         0xFBD, // 0b0110 15 Ohm Fast
         0xC8D, // 0b0111 20 Ohm Slow
         0xC8D, // 0b1000 20 Ohm Moderate/Fast
-        0x49C, // 0b1001 24 Ohm
+        0x489, // 0b1001 24 Ohm
         0xF3C  // 0b1010 30 Ohm
         // Rest are reserved
     };
@@ -4920,7 +4920,7 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_fall_ac(const fapi2::Target<fapi
         0xFBD, // 0b0110 15 Ohm Fast
         0xC8D, // 0b0111 20 Ohm Slow
         0xC8D, // 0b1000 20 Ohm Moderate/Fast
-        0x49C, // 0b1001 24 Ohm
+        0x489, // 0b1001 24 Ohm
         0xF3C  // 0b1010 30 Ohm
         // Rest are reserved
     };
@@ -5032,12 +5032,12 @@ fapi2::ReturnCode post_phyinit_override_tx_slew_rise_ck(const fapi2::Target<fapi
         0xFFF, // 0b0001 10 Ohm Slow/Moderate
         0xFFF, // 0b0010 10 Ohm Fast
         0x000, // 0b0000 Reserved
-        0xFBF, // 0b0100 15 Ohm Slow
+        0xFBE, // 0b0100 15 Ohm Slow
         0x000, // 0b0000 Reserved
         0xFBD, // 0b0110 15 Ohm Moderate/Fast
         0xC8D, // 0b0111 20 Ohm Slow
         0xC8D, // 0b1000 20 Ohm Moderate/Fast
-        0x49C, // 0b1001 24 Ohm
+        0x489, // 0b1001 24 Ohm
         0xF3C  // 0b1010 30 Ohm
         // Rest are reserved
     };

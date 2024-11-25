@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -72,12 +72,24 @@
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       [Channel]
-      Pull-up slew rate control for CAC transmitters.
-      Valid values are 0-255
+      ATX Slew Rate and Drive Strength Pull-Up / Pull-Down for AC
+      Determines CsrAtXSrc, ADrvStrenP, and ADrvStrenN settings in
+      Address/Command ANIBs (CH0)1,2,3,4 and (CH1)9,10,11,12
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
+    <enum>
+      OHM_10_SLOW_MODERATE = 1,
+      OHM_10_FAST = 2,
+      OHM_15_SLOW = 3,
+      OHM_15_MODERATE = 5,
+      OHM_15_FAST = 6,
+      OHM_20_SLOW = 7,
+      OHM_20_MODERATE_FAST = 8,
+      OHM_24 = 9,
+      OHM_30 = 10
+    </enum>
     <array>2</array>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
@@ -89,12 +101,24 @@
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       [Channel]
-      Pull-down slew rate control for CAC transmitters.
-      Valid values are 0-255
+      ATX Slew Rate and Drive Strength Pull-Up / Pull-Down for CS
+      Determines CsrAtXSrc, ADrvStrenP, and ADrvStrenN settings in
+      CS ANIBs (CH0)0 and (CH1)13
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
+    <enum>
+      OHM_10_SLOW_MODERATE = 1,
+      OHM_10_FAST = 2,
+      OHM_15_SLOW = 3,
+      OHM_15_MODERATE = 5,
+      OHM_15_FAST = 6,
+      OHM_20_SLOW = 7,
+      OHM_20_MODERATE_FAST = 8,
+      OHM_24 = 9,
+      OHM_30 = 10
+    </enum>
     <array>2</array>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>
@@ -106,12 +130,23 @@
     <targetType>TARGET_TYPE_MEM_PORT</targetType>
     <description>
       [Channel]
-      Pull-up slew rate control for clock.
-      Valid values are 0-255
+      ATX Slew Rate and Drive Strength Pull-Up / Pull-Down for CK
+      Determines CsrAtXSrc, ADrvStrenP, and ADrvStrenN settings in
+      CK ANIBs (CH0)5,7 and (CH1)6,8
     </description>
     <initToZero></initToZero>
     <valueType>uint8</valueType>
     <writeable/>
+    <enum>
+      OHM_10_SLOW_MODERATE = 1,
+      OHM_10_FAST = 2,
+      OHM_15_SLOW_MODERATE = 4,
+      OHM_15_FAST = 6,
+      OHM_20_SLOW = 7,
+      OHM_20_MODERATE_FAST = 8,
+      OHM_24 = 9,
+      OHM_30 = 10
+    </enum>
     <array>2</array>
     <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
       <targetTypes>TARGET_TYPE_MEM_PORT</targetTypes>

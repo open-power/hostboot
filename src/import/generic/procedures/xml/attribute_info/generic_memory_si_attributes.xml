@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2016,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2016,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -281,8 +281,7 @@
           Array[DIMM][RANK]
           Memory Controller side Drive Impedance for Address, Bank Address, Bank Group and Activate Lines in Ohms.
           DDR4 configs values are in Ohms.
-          DDR5 configs (SDR_ and DDR_) values are the possible SPD encoding for ATx impedance.
-          The CSR value is derived from the lookup table of byte 32 in DDR5 SPD spec in ody_ddrphy_phyinit
+          For DDR5 this byte still represents SPD EFD byte 32, but it is unused by the procedure code
         </description>
         <initToZero></initToZero>
         <valueType>uint8</valueType>
