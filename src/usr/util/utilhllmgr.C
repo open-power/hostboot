@@ -35,6 +35,7 @@
 #include <errl/hberrltypes.H> // SrcUserData
 #include <initservice/initserviceif.H>
 #include <secureboot/trustedbootif.H>
+#include <secureboot/service.H>
 #include <runtime/preverifiedlidmgr.H>
 #include <limits.h>
 #include <util/utiltce.H>
@@ -1315,7 +1316,16 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
                 }
             }
 
-            if (memcmp(hash.HashCalc, &lidInfo.hllHash, sizeof(HashEntry)) != 0)
+
+            // @TODO JIRA:PFHB-802 Skipping V3 verification for now
+            // (HLL is V3 based)
+            UTIL_FT(INFO_MRK"HLLMgr::loadLids - Skipping Hash Verification on "
+                "lidInfo.id=0x%X, lidInfo.size=%d l_reportedLidSize=%d, "
+                "hash=0x%08X",
+                lidInfo.id, lidInfo.size, l_reportedLidSize,
+                sha512_to_u32(hash.HashCalc));
+            //if (memcmp(hash.HashCalc, &lidInfo.hllHash, sizeof(HashEntry)) != 0)
+            if (0)
             {
                 /*@
                 * @moduleid          Util::UTIL_HLL_LOADLIDS

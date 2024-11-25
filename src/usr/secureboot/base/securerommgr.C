@@ -352,10 +352,9 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
                                              const uint8_t i_secureVersion,
                                              const ATTR_SB_SIGNING_MODE_type i_signMode)
 {
-// MAB update trace to include last 2 parms, and make TRACF
-    TRACDCOMP(g_trac_secure,ENTER_MRK"SecureRomManager::verifyContainer(): "
-              "i_container=%p", i_container);
-
+    TRACUCOMP(g_trac_secure,ENTER_MRK"SecureRomManager::verifyContainer(): "
+              "i_container=%p, i_sv=0x%02X, i_signMode=0x%02X",
+              i_container, i_secureVersion, i_signMode);
 
     errlHndl_t  l_errl = nullptr;
     uint64_t    l_rc   = 0;
@@ -399,6 +398,27 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
             l_hw_parms.log = i_secureVersion;
         }
 
+        // Determine which signing mode - V1 or V3 - is going to be used below
+        uint8_t l_signModeToUse = 0; // default to SB_SIGNING_SYSTEM_CONTAINER
+        uint8_t l_system_signing_mode = g_BlToHbDataManager.getSecurebootSigningMode();
+        if (i_signMode == TARGETING::SB_SIGNING_SYSTEM_CONTAINER)
+        {
+            // Use system's Signing Mode
+            l_signModeToUse = l_system_signing_mode;
+            TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                      "Using System SB Signing Mode 0x%.2X",
+                      l_signModeToUse);
+        }
+        else
+        {
+            // Use input value
+            l_signModeToUse = i_signMode;
+            TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                      "Using i_signMode SB Signing Mode 0x%.2X. "
+                      "Ignoring system mode 0x%.2X",
+                      l_signModeToUse, l_system_signing_mode);
+        }
+
         /*******************************************************************/
         /* Call ROM_verify() function via an assembly call                 */
         /*******************************************************************/
@@ -408,25 +428,36 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
                                 reinterpret_cast<uint64_t>(iv_securerom) +
                                 getSecRomFuncOffset(SB_FUNC_TYPES::ECDSA521);
 
-        TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
-                  " Calling ROM_verify() via call_rom_verify: l_rc=0x%x, "
-                  "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
-                  l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
-                 iv_securerom);
+        if (l_signModeToUse == TARGETING::SB_SIGNING_V3_CONTAINER)
+        {
+            // Skip V3 verification path for now
+            TRACFCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                      "Skipping V3 verification (l_signModeToUse = 0x%.2X)",
+                      l_signModeToUse);
+        }
+        else
+        {
+            // Normal V1 verification path
+            TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                     " Calling ROM_verify() via call_rom_verify: l_rc=0x%x, "
+                     "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
+                     l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
+                     iv_securerom);
 
-        ROM_container_raw* l_container = reinterpret_cast<ROM_container_raw*>(
-                                                                   i_container);
-        l_rc = call_rom_verify(reinterpret_cast<void*>
-                               (l_rom_verify_startAddr),
-                               l_container,
-                               &l_hw_parms);
+            ROM_container_raw* l_container =
+                                   reinterpret_cast<ROM_container_raw*>(
+                                                                 i_container);
+            l_rc = call_rom_verify(reinterpret_cast<void*>
+                                   (l_rom_verify_startAddr),
+                                   l_container,
+                                   &l_hw_parms);
 
-        TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
-                  "Back from ROM_verify() via call_rom_verify: l_rc=0x%x, "
-                  "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
-                   l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
-                   iv_securerom);
-
+            TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+                     "Back from ROM_verify() via call_rom_verify: l_rc=0x%x, "
+                     "l_hw_parms.log=0x%x (&l_hw_parms=%p) addr=%p (iv_d_p=%p)",
+                     l_rc, l_hw_parms.log, &l_hw_parms, l_rom_verify_startAddr,
+                     iv_securerom);
+        }
 
 
         if (l_rc != 0)
