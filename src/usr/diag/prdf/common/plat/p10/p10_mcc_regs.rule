@@ -81,6 +81,13 @@
         capture     group mc_dstl_fir_ffdc;
     };
 
+    register MC_DSTL_STATUS
+    {
+        name        "MC DSTL Status Register";
+        scomaddr    0x0C010D10;
+        capture     group mc_dstl_fir_ffdc;
+    };
+
     ###########################################################################
     # P10 target USTL_FIR
     ###########################################################################
