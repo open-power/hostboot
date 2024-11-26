@@ -170,9 +170,7 @@ bool find_key_from_value(const pair<T, OT> (&i_array_of_pairs)[N],
     if( (l_value_iterator == std::end(i_array_of_pairs)) || (i_value != l_value_iterator->second) )
     {
         // Static cast ensures that the below print will not fail at compile time
-#ifndef __PPE__
-        FAPI_INF("Did not find a mapping key to value: %d", static_cast<uint64_t>(i_value));
-#endif
+        FAPI_INF_NO_SBE("Did not find a mapping key to value: %d", static_cast<uint64_t>(i_value));
         return false;
     }
 

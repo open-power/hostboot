@@ -79,14 +79,10 @@
 #include <lib/workarounds/ody_phy_workarounds.H>
 
 #ifdef __PPE__
-    #ifdef FAPI_INF
-        #undef FAPI_INF
-    #endif
     #ifdef FAPI_DBG
         #undef FAPI_DBG
     #endif
 
-    #define FAPI_INF(_fmt_, _args_...)
     #define FAPI_DBG(_fmt_, _args_...)
 
 #endif
@@ -4359,7 +4355,7 @@ fapi2::ReturnCode setup_dram_input_struct(const fapi2::Target<fapi2::TARGET_TYPE
 
     if (l_dimms.size() == 0)
     {
-        FAPI_INF(TARGTIDFORMAT " No DIMM targets found. Skipping user_input_dram_config_t setup.", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " No DIMM targets found. Skipping user_input_dram_config_t setup.", TARGTID);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
@@ -4453,235 +4449,235 @@ void print_structs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
                    const user_input_advanced_t& i_user_input_advanced,
                    const user_input_dram_config_t& i_user_input_dram_config)
 {
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.ARdPtrInitVal: 0x%08x",
-             TARGTID, i_user_input_basic.ARdPtrInitVal[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.ARdPtrInitValOvr: 0x%08x",
-             TARGTID, i_user_input_basic.ARdPtrInitValOvr);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.DramType: 0x%08x",
-             TARGTID, (uint8_t)i_user_input_basic.DramType);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.DisPtrInitClrTxTracking: 0x%08x",
-             TARGTID, i_user_input_basic.DisPtrInitClrTxTracking[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.DimmType: 0x%08x",
-             TARGTID, (uint8_t)i_user_input_basic.DimmType);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.NumDbyte: 0x%08x",
-             TARGTID, i_user_input_basic.NumDbyte);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.NumActiveDbyteDfi0: 0x%08x",
-             TARGTID, i_user_input_basic.NumActiveDbyteDfi0);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.NumActiveDbyteDfi1: 0x%08x",
-             TARGTID, i_user_input_basic.NumActiveDbyteDfi1);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.NumAnib: 0x%08x",
-             TARGTID, i_user_input_basic.NumAnib);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.NumRank_dfi0: 0x%08x",
-             TARGTID, i_user_input_basic.NumRank_dfi0);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.NumRank_dfi1: 0x%08x",
-             TARGTID, i_user_input_basic.NumRank_dfi1);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.DramDataWidth[4]: 0x%08x 0x%08x 0x%08x 0x%08x",
-             TARGTID, i_user_input_basic.DramDataWidth[0],
-             i_user_input_basic.DramDataWidth[1],
-             i_user_input_basic.DramDataWidth[2],
-             i_user_input_basic.DramDataWidth[3]);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.NumPStates: 0x%08x",
-             TARGTID, i_user_input_basic.NumPStates);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.Frequency: 0x%08x",
-             TARGTID, i_user_input_basic.Frequency[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.PllBypass: 0x%08x",
-             TARGTID, i_user_input_basic.PllBypass[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.DfiFreqRatio: 0x%08x",
-             TARGTID, i_user_input_basic.DfiFreqRatio[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_basic.Dfi1Exists: 0x%08x",
-             TARGTID, i_user_input_basic.Dfi1Exists);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.D4RxPreambleLength: 0x%08x",
-             TARGTID, i_user_input_advanced.D4RxPreambleLength[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.D4TxPreambleLength: 0x%08x",
-             TARGTID, i_user_input_advanced.D4TxPreambleLength[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.ExtCalResVal: 0x%08x",
-             TARGTID, i_user_input_advanced.ExtCalResVal);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.ODTImpedance: 0x%08x",
-             TARGTID, i_user_input_advanced.ODTImpedance[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.ATxImpedance: 0x%08x",
-             TARGTID, i_user_input_advanced.ATxImpedance);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxImpedance: 0x%08x",
-             TARGTID, i_user_input_advanced.TxImpedance[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxImpedanceCtrl1: 0x%08x",
-             TARGTID, i_user_input_advanced.TxImpedanceCtrl1[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxImpedanceCtrl2: 0x%08x",
-             TARGTID, i_user_input_advanced.TxImpedanceCtrl2[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.MemAlertEn: 0x%08x",
-             TARGTID, i_user_input_advanced.MemAlertEn);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.MtestPUImp: 0x%08x",
-             TARGTID, i_user_input_advanced.MtestPUImp);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DisDynAdrTri: 0x%08x",
-             TARGTID, i_user_input_advanced.DisDynAdrTri[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.PhyMstrTrainInterval: 0x%08x",
-             TARGTID, i_user_input_advanced.PhyMstrTrainInterval[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.PhyMstrMaxReqToAck: 0x%08x",
-             TARGTID, i_user_input_advanced.PhyMstrMaxReqToAck[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.PhyMstrCtrlMode: 0x%08x",
-             TARGTID, i_user_input_advanced.PhyMstrCtrlMode[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.CalInterval: 0x%08x",
-             TARGTID, i_user_input_advanced.CalInterval);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.CalOnce: 0x%08x",
-             TARGTID, i_user_input_advanced.CalOnce);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DramByteSwap[4]: 0x%08x 0x%08x 0x%08x 0x%08x",
-             TARGTID, i_user_input_advanced.DramByteSwap[0],
-             i_user_input_advanced.DramByteSwap[1],
-             i_user_input_advanced.DramByteSwap[2],
-             i_user_input_advanced.DramByteSwap[3]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TrainSequenceCtrl: 0x%08x",
-             TARGTID, i_user_input_advanced.TrainSequenceCtrl);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.SnpsUmctlOpt: 0x%08x",
-             TARGTID, i_user_input_advanced.SnpsUmctlOpt);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.SnpsUmctlF0RC5x: 0x%08x",
-             TARGTID, i_user_input_advanced.SnpsUmctlF0RC5x[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxSlewRiseDQ: 0x%08x",
-             TARGTID, i_user_input_advanced.TxSlewRiseDQ[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxSlewFallDQ: 0x%08x",
-             TARGTID, i_user_input_advanced.TxSlewFallDQ[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxSlewRiseAC: 0x%08x",
-             TARGTID, i_user_input_advanced.TxSlewRiseAC);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxSlewFallAC: 0x%08x",
-             TARGTID, i_user_input_advanced.TxSlewFallAC);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.IsHighVDD: 0x%08x",
-             TARGTID, i_user_input_advanced.IsHighVDD);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxSlewRiseCK: 0x%08x",
-             TARGTID, i_user_input_advanced.TxSlewRiseCK);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxSlewFallCK: 0x%08x",
-             TARGTID, i_user_input_advanced.TxSlewFallCK);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.NvAnibRcvSel: 0x%08x",
-             TARGTID, i_user_input_advanced.NvAnibRcvSel[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.AnibRcvLaneSel: 0x%08x",
-             TARGTID, i_user_input_advanced.AnibRcvLaneSel[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.AnibRcvEn: 0x%08x",
-             TARGTID, i_user_input_advanced.AnibRcvEn[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTdqs2dqTrackingTg0: 0x%08x",
-             TARGTID, i_user_input_advanced.EnTdqs2dqTrackingTg0[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTdqs2dqTrackingTg1: 0x%08x",
-             TARGTID, i_user_input_advanced.EnTdqs2dqTrackingTg1[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTdqs2dqTrackingTg2: 0x%08x",
-             TARGTID, i_user_input_advanced.EnTdqs2dqTrackingTg2[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTdqs2dqTrackingTg3: 0x%08x",
-             TARGTID, i_user_input_advanced.EnTdqs2dqTrackingTg3[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DqsOscRunTimeSel: 0x%08x",
-             TARGTID, i_user_input_advanced.DqsOscRunTimeSel[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnRxDqsTracking: 0x%08x",
-             TARGTID, i_user_input_advanced.EnRxDqsTracking[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.D5TxDqPreambleCtrl: 0x%08x",
-             TARGTID, i_user_input_advanced.D5TxDqPreambleCtrl[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.D5DisableRetraining: 0x%08x",
-             TARGTID, i_user_input_advanced.D5DisableRetraining);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DisablePmuEcc: 0x%08x",
-             TARGTID, i_user_input_advanced.DisablePmuEcc);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnableMAlertAsync: 0x%08x",
-             TARGTID, i_user_input_advanced.EnableMAlertAsync);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.AlertRecoveryEnable: 0x%08x",
-             TARGTID, i_user_input_advanced.AlertRecoveryEnable);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.RstRxTrkState: 0x%08x",
-             TARGTID, i_user_input_advanced.RstRxTrkState);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.Apb32BitMode: 0x%08x",
-             TARGTID, i_user_input_advanced.Apb32BitMode);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.en_3DS: 0x%08x",
-             TARGTID, i_user_input_advanced.en_3DS);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.en_16LogicalRanks_3DS: 0x%08x",
-             TARGTID, i_user_input_advanced.en_16LogicalRanks_3DS);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.PhyInLP2En_Pwr_Saving: 0x%08x",
-             TARGTID, i_user_input_advanced.PhyInLP2En_Pwr_Saving);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.special_feature_1_en: 0x%08x",
-             TARGTID, i_user_input_advanced.special_feature_1_en);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.rtt_term_en: 0x%08x",
-             TARGTID, i_user_input_advanced.rtt_term_en);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.VREGCtrl_LP2_PwrSavings_En: 0x%08x",
-             TARGTID, i_user_input_advanced.VREGCtrl_LP2_PwrSavings_En);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.Nibble_ECC: 0x%08x",
-             TARGTID, i_user_input_advanced.Nibble_ECC);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DfiMode_Override_En: 0x%08x",
-             TARGTID, i_user_input_advanced.DfiMode_Override_En);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DfiMode_Override_Val: 0x%08x",
-             TARGTID, i_user_input_advanced.DfiMode_Override_Val);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.NoX4onUpperNibble_Override: 0x%08x",
-             TARGTID, i_user_input_advanced.NoX4onUpperNibble_Override);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.NoX4onUpperNibbleTg[4]: 0x%08x 0x%08x 0x%08x 0x%08x",
-             TARGTID, i_user_input_advanced.NoX4onUpperNibbleTg[0],
-             i_user_input_advanced.NoX4onUpperNibbleTg[1],
-             i_user_input_advanced.NoX4onUpperNibbleTg[2],
-             i_user_input_advanced.NoX4onUpperNibbleTg[3]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.Dfi1Active: 0x%08x",
-             TARGTID, i_user_input_advanced.Dfi1Active);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.Num_Logical_Ranks: 0x%08x",
-             TARGTID, i_user_input_advanced.Num_Logical_Ranks);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTxDqPreamblePatternU0: 0x%08x",
-             TARGTID, i_user_input_advanced.EnTxDqPreamblePatternU0[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTxDqPreamblePatternU1: 0x%08x",
-             TARGTID, i_user_input_advanced.EnTxDqPreamblePatternU1[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxDqPreamblePatternU0: 0x%08x",
-             TARGTID, i_user_input_advanced.TxDqPreamblePatternU0[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxDqPreamblePatternU1: 0x%08x",
-             TARGTID, i_user_input_advanced.TxDqPreamblePatternU1[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.EnTxDmPreamblePattern: 0x%08x",
-             TARGTID, i_user_input_advanced.EnTxDmPreamblePattern[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.TxDmPreamblePattern: 0x%08x",
-             TARGTID, i_user_input_advanced.TxDmPreamblePattern[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DFIPHYUPDCNT: 0x%08x",
-             TARGTID, i_user_input_advanced.DFIPHYUPDCNT);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DFIPHYUPDRESP: 0x%08x",
-             TARGTID, i_user_input_advanced.DFIPHYUPDRESP);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.PowerDownANIBs: 0x%08x",
-             TARGTID, i_user_input_advanced.PowerDownANIBs);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.PowerDownDBYTEs: 0x%08x",
-             TARGTID, i_user_input_advanced.PowerDownDBYTEs);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.VshAnalog_LP2_Override_En: 0x%08x",
-             TARGTID, i_user_input_advanced.VshAnalog_LP2_Override_En);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.VshAnalog_LP2_Override_Val: 0x%08x",
-             TARGTID, i_user_input_advanced.VshAnalog_LP2_Override_Val);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.VshCurrentLoad_LP2_Override_En: 0x%08x",
-             TARGTID, i_user_input_advanced.VshCurrentLoad_LP2_Override_En);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.VshCurrentLoad_LP2_Override_Val: 0x%08x",
-             TARGTID, i_user_input_advanced.VshCurrentLoad_LP2_Override_Val);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.LP2_PwrSavings_En: 0x%08x",
-             TARGTID, i_user_input_advanced.LP2_PwrSavings_En);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.special_offset_value: 0x%08x",
-             TARGTID, i_user_input_advanced.special_offset_value);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_En: 0x%08x",
-             TARGTID, i_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_En);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val: 0x%08x",
-             TARGTID, i_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_advanced.DfiRdDataCs2VrefDACSel: 0x%08x",
-             TARGTID, i_user_input_advanced.DfiRdDataCs2VrefDACSel[0]);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.MR0_A0: 0x%08x",
-             TARGTID, i_user_input_dram_config.MR0_A0);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.MR2_A0: 0x%08x",
-             TARGTID, i_user_input_dram_config.MR2_A0);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.MR8_A0: 0x%08x",
-             TARGTID, i_user_input_dram_config.MR8_A0);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.MR50_A0: 0x%08x",
-             TARGTID, i_user_input_dram_config.MR50_A0);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.PhyVref: 0x%08x",
-             TARGTID, i_user_input_dram_config.PhyVref);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.X16Present: 0x%08x",
-             TARGTID, i_user_input_dram_config.X16Present);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.RCW00_ChA_D0: 0x%08x",
-             TARGTID, i_user_input_dram_config.RCW00_ChA_D0);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.DisabledDbyte: 0x%08x",
-             TARGTID, i_user_input_dram_config.DisabledDbyte);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.CsPresentChA: 0x%08x",
-             TARGTID, i_user_input_dram_config.CsPresentChA);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.CsPresentChB: 0x%08x",
-             TARGTID, i_user_input_dram_config.CsPresentChB);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_A0: 0x%08x",
-             TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_A0);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_A1: 0x%08x",
-             TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_A1);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_A2: 0x%08x",
-             TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_A2);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_A3: 0x%08x",
-             TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_A3);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_B0: 0x%08x",
-             TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_B0);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_B1: 0x%08x",
-             TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_B1);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_B2: 0x%08x",
-             TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_B2);
-    FAPI_INF(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_B3: 0x%08x",
-             TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_B3);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.ARdPtrInitVal: 0x%08x",
+                    TARGTID, i_user_input_basic.ARdPtrInitVal[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.ARdPtrInitValOvr: 0x%08x",
+                    TARGTID, i_user_input_basic.ARdPtrInitValOvr);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.DramType: 0x%08x",
+                    TARGTID, (uint8_t)i_user_input_basic.DramType);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.DisPtrInitClrTxTracking: 0x%08x",
+                    TARGTID, i_user_input_basic.DisPtrInitClrTxTracking[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.DimmType: 0x%08x",
+                    TARGTID, (uint8_t)i_user_input_basic.DimmType);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.NumDbyte: 0x%08x",
+                    TARGTID, i_user_input_basic.NumDbyte);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.NumActiveDbyteDfi0: 0x%08x",
+                    TARGTID, i_user_input_basic.NumActiveDbyteDfi0);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.NumActiveDbyteDfi1: 0x%08x",
+                    TARGTID, i_user_input_basic.NumActiveDbyteDfi1);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.NumAnib: 0x%08x",
+                    TARGTID, i_user_input_basic.NumAnib);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.NumRank_dfi0: 0x%08x",
+                    TARGTID, i_user_input_basic.NumRank_dfi0);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.NumRank_dfi1: 0x%08x",
+                    TARGTID, i_user_input_basic.NumRank_dfi1);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.DramDataWidth[4]: 0x%08x 0x%08x 0x%08x 0x%08x",
+                    TARGTID, i_user_input_basic.DramDataWidth[0],
+                    i_user_input_basic.DramDataWidth[1],
+                    i_user_input_basic.DramDataWidth[2],
+                    i_user_input_basic.DramDataWidth[3]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.NumPStates: 0x%08x",
+                    TARGTID, i_user_input_basic.NumPStates);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.Frequency: 0x%08x",
+                    TARGTID, i_user_input_basic.Frequency[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.PllBypass: 0x%08x",
+                    TARGTID, i_user_input_basic.PllBypass[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.DfiFreqRatio: 0x%08x",
+                    TARGTID, i_user_input_basic.DfiFreqRatio[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_basic.Dfi1Exists: 0x%08x",
+                    TARGTID, i_user_input_basic.Dfi1Exists);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.D4RxPreambleLength: 0x%08x",
+                    TARGTID, i_user_input_advanced.D4RxPreambleLength[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.D4TxPreambleLength: 0x%08x",
+                    TARGTID, i_user_input_advanced.D4TxPreambleLength[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.ExtCalResVal: 0x%08x",
+                    TARGTID, i_user_input_advanced.ExtCalResVal);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.ODTImpedance: 0x%08x",
+                    TARGTID, i_user_input_advanced.ODTImpedance[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.ATxImpedance: 0x%08x",
+                    TARGTID, i_user_input_advanced.ATxImpedance);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxImpedance: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxImpedance[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxImpedanceCtrl1: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxImpedanceCtrl1[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxImpedanceCtrl2: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxImpedanceCtrl2[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.MemAlertEn: 0x%08x",
+                    TARGTID, i_user_input_advanced.MemAlertEn);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.MtestPUImp: 0x%08x",
+                    TARGTID, i_user_input_advanced.MtestPUImp);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DisDynAdrTri: 0x%08x",
+                    TARGTID, i_user_input_advanced.DisDynAdrTri[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.PhyMstrTrainInterval: 0x%08x",
+                    TARGTID, i_user_input_advanced.PhyMstrTrainInterval[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.PhyMstrMaxReqToAck: 0x%08x",
+                    TARGTID, i_user_input_advanced.PhyMstrMaxReqToAck[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.PhyMstrCtrlMode: 0x%08x",
+                    TARGTID, i_user_input_advanced.PhyMstrCtrlMode[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.CalInterval: 0x%08x",
+                    TARGTID, i_user_input_advanced.CalInterval);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.CalOnce: 0x%08x",
+                    TARGTID, i_user_input_advanced.CalOnce);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DramByteSwap[4]: 0x%08x 0x%08x 0x%08x 0x%08x",
+                    TARGTID, i_user_input_advanced.DramByteSwap[0],
+                    i_user_input_advanced.DramByteSwap[1],
+                    i_user_input_advanced.DramByteSwap[2],
+                    i_user_input_advanced.DramByteSwap[3]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TrainSequenceCtrl: 0x%08x",
+                    TARGTID, i_user_input_advanced.TrainSequenceCtrl);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.SnpsUmctlOpt: 0x%08x",
+                    TARGTID, i_user_input_advanced.SnpsUmctlOpt);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.SnpsUmctlF0RC5x: 0x%08x",
+                    TARGTID, i_user_input_advanced.SnpsUmctlF0RC5x[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxSlewRiseDQ: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxSlewRiseDQ[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxSlewFallDQ: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxSlewFallDQ[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxSlewRiseAC: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxSlewRiseAC);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxSlewFallAC: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxSlewFallAC);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.IsHighVDD: 0x%08x",
+                    TARGTID, i_user_input_advanced.IsHighVDD);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxSlewRiseCK: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxSlewRiseCK);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxSlewFallCK: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxSlewFallCK);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.NvAnibRcvSel: 0x%08x",
+                    TARGTID, i_user_input_advanced.NvAnibRcvSel[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.AnibRcvLaneSel: 0x%08x",
+                    TARGTID, i_user_input_advanced.AnibRcvLaneSel[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.AnibRcvEn: 0x%08x",
+                    TARGTID, i_user_input_advanced.AnibRcvEn[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.EnTdqs2dqTrackingTg0: 0x%08x",
+                    TARGTID, i_user_input_advanced.EnTdqs2dqTrackingTg0[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.EnTdqs2dqTrackingTg1: 0x%08x",
+                    TARGTID, i_user_input_advanced.EnTdqs2dqTrackingTg1[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.EnTdqs2dqTrackingTg2: 0x%08x",
+                    TARGTID, i_user_input_advanced.EnTdqs2dqTrackingTg2[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.EnTdqs2dqTrackingTg3: 0x%08x",
+                    TARGTID, i_user_input_advanced.EnTdqs2dqTrackingTg3[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DqsOscRunTimeSel: 0x%08x",
+                    TARGTID, i_user_input_advanced.DqsOscRunTimeSel[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.EnRxDqsTracking: 0x%08x",
+                    TARGTID, i_user_input_advanced.EnRxDqsTracking[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.D5TxDqPreambleCtrl: 0x%08x",
+                    TARGTID, i_user_input_advanced.D5TxDqPreambleCtrl[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.D5DisableRetraining: 0x%08x",
+                    TARGTID, i_user_input_advanced.D5DisableRetraining);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DisablePmuEcc: 0x%08x",
+                    TARGTID, i_user_input_advanced.DisablePmuEcc);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.EnableMAlertAsync: 0x%08x",
+                    TARGTID, i_user_input_advanced.EnableMAlertAsync);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.AlertRecoveryEnable: 0x%08x",
+                    TARGTID, i_user_input_advanced.AlertRecoveryEnable);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.RstRxTrkState: 0x%08x",
+                    TARGTID, i_user_input_advanced.RstRxTrkState);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.Apb32BitMode: 0x%08x",
+                    TARGTID, i_user_input_advanced.Apb32BitMode);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.en_3DS: 0x%08x",
+                    TARGTID, i_user_input_advanced.en_3DS);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.en_16LogicalRanks_3DS: 0x%08x",
+                    TARGTID, i_user_input_advanced.en_16LogicalRanks_3DS);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.PhyInLP2En_Pwr_Saving: 0x%08x",
+                    TARGTID, i_user_input_advanced.PhyInLP2En_Pwr_Saving);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.special_feature_1_en: 0x%08x",
+                    TARGTID, i_user_input_advanced.special_feature_1_en);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.rtt_term_en: 0x%08x",
+                    TARGTID, i_user_input_advanced.rtt_term_en);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.VREGCtrl_LP2_PwrSavings_En: 0x%08x",
+                    TARGTID, i_user_input_advanced.VREGCtrl_LP2_PwrSavings_En);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.Nibble_ECC: 0x%08x",
+                    TARGTID, i_user_input_advanced.Nibble_ECC);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DfiMode_Override_En: 0x%08x",
+                    TARGTID, i_user_input_advanced.DfiMode_Override_En);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DfiMode_Override_Val: 0x%08x",
+                    TARGTID, i_user_input_advanced.DfiMode_Override_Val);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.NoX4onUpperNibble_Override: 0x%08x",
+                    TARGTID, i_user_input_advanced.NoX4onUpperNibble_Override);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.NoX4onUpperNibbleTg[4]: 0x%08x 0x%08x 0x%08x 0x%08x",
+                    TARGTID, i_user_input_advanced.NoX4onUpperNibbleTg[0],
+                    i_user_input_advanced.NoX4onUpperNibbleTg[1],
+                    i_user_input_advanced.NoX4onUpperNibbleTg[2],
+                    i_user_input_advanced.NoX4onUpperNibbleTg[3]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.Dfi1Active: 0x%08x",
+                    TARGTID, i_user_input_advanced.Dfi1Active);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.Num_Logical_Ranks: 0x%08x",
+                    TARGTID, i_user_input_advanced.Num_Logical_Ranks);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.EnTxDqPreamblePatternU0: 0x%08x",
+                    TARGTID, i_user_input_advanced.EnTxDqPreamblePatternU0[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.EnTxDqPreamblePatternU1: 0x%08x",
+                    TARGTID, i_user_input_advanced.EnTxDqPreamblePatternU1[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxDqPreamblePatternU0: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxDqPreamblePatternU0[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxDqPreamblePatternU1: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxDqPreamblePatternU1[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.EnTxDmPreamblePattern: 0x%08x",
+                    TARGTID, i_user_input_advanced.EnTxDmPreamblePattern[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.TxDmPreamblePattern: 0x%08x",
+                    TARGTID, i_user_input_advanced.TxDmPreamblePattern[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DFIPHYUPDCNT: 0x%08x",
+                    TARGTID, i_user_input_advanced.DFIPHYUPDCNT);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DFIPHYUPDRESP: 0x%08x",
+                    TARGTID, i_user_input_advanced.DFIPHYUPDRESP);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.PowerDownANIBs: 0x%08x",
+                    TARGTID, i_user_input_advanced.PowerDownANIBs);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.PowerDownDBYTEs: 0x%08x",
+                    TARGTID, i_user_input_advanced.PowerDownDBYTEs);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.VshAnalog_LP2_Override_En: 0x%08x",
+                    TARGTID, i_user_input_advanced.VshAnalog_LP2_Override_En);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.VshAnalog_LP2_Override_Val: 0x%08x",
+                    TARGTID, i_user_input_advanced.VshAnalog_LP2_Override_Val);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.VshCurrentLoad_LP2_Override_En: 0x%08x",
+                    TARGTID, i_user_input_advanced.VshCurrentLoad_LP2_Override_En);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.VshCurrentLoad_LP2_Override_Val: 0x%08x",
+                    TARGTID, i_user_input_advanced.VshCurrentLoad_LP2_Override_Val);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.LP2_PwrSavings_En: 0x%08x",
+                    TARGTID, i_user_input_advanced.LP2_PwrSavings_En);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.special_offset_value: 0x%08x",
+                    TARGTID, i_user_input_advanced.special_offset_value);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_En: 0x%08x",
+                    TARGTID, i_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_En);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val: 0x%08x",
+                    TARGTID, i_user_input_advanced.DfiPositionRxPhaseVrefDACSel_Override_Val[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_advanced.DfiRdDataCs2VrefDACSel: 0x%08x",
+                    TARGTID, i_user_input_advanced.DfiRdDataCs2VrefDACSel[0]);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.MR0_A0: 0x%08x",
+                    TARGTID, i_user_input_dram_config.MR0_A0);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.MR2_A0: 0x%08x",
+                    TARGTID, i_user_input_dram_config.MR2_A0);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.MR8_A0: 0x%08x",
+                    TARGTID, i_user_input_dram_config.MR8_A0);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.MR50_A0: 0x%08x",
+                    TARGTID, i_user_input_dram_config.MR50_A0);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.PhyVref: 0x%08x",
+                    TARGTID, i_user_input_dram_config.PhyVref);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.X16Present: 0x%08x",
+                    TARGTID, i_user_input_dram_config.X16Present);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.RCW00_ChA_D0: 0x%08x",
+                    TARGTID, i_user_input_dram_config.RCW00_ChA_D0);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.DisabledDbyte: 0x%08x",
+                    TARGTID, i_user_input_dram_config.DisabledDbyte);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.CsPresentChA: 0x%08x",
+                    TARGTID, i_user_input_dram_config.CsPresentChA);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.CsPresentChB: 0x%08x",
+                    TARGTID, i_user_input_dram_config.CsPresentChB);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_A0: 0x%08x",
+                    TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_A0);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_A1: 0x%08x",
+                    TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_A1);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_A2: 0x%08x",
+                    TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_A2);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_A3: 0x%08x",
+                    TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_A3);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_B0: 0x%08x",
+                    TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_B0);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_B1: 0x%08x",
+                    TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_B1);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_B2: 0x%08x",
+                    TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_B2);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " user_input_dram_config.WR_RD_RTT_PARK_B3: 0x%08x",
+                    TARGTID, i_user_input_dram_config.WR_RD_RTT_PARK_B3);
 }
 #endif
 
@@ -5220,7 +5216,7 @@ fapi2::ReturnCode post_phyinit_configure_redundant_cs(const fapi2::Target<fapi2:
 
     if(l_redundant_cs[0] == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_DISABLE)
     {
-        FAPI_INF(TARGTIDFORMAT " has redundant CS mode disabled. Skipping configuration registers", TARGTID);
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has redundant CS mode disabled. Skipping configuration registers", TARGTID);
         return fapi2::FAPI2_RC_SUCCESS;
     }
 

@@ -67,7 +67,7 @@ inline fapi2::ReturnCode read( const fapi2::Target<T>& i_target, fapi2::buffer<u
     const auto& l_port = mss::relative_pos<MC, eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
 
     FAPI_TRY( mss::getScom(l_mcbist_target, (TT::ERROR_VECTOR_REGS[l_port]), o_data) );
-    FAPI_INF("%s read: 0x%016lx", mss::c_str(i_target), o_data);
+    FAPI_INF_NO_SBE("%s read: 0x%016lx", mss::c_str(i_target), o_data);
 fapi_try_exit:
     return fapi2::current_err;
 }
@@ -88,7 +88,7 @@ inline fapi2::ReturnCode write( const fapi2::Target<T>& i_target, const fapi2::b
     const auto& l_port = mss::relative_pos<MC, eccMCTraits<MC>::MC_TARGET_TYPE>(i_target);
 
     FAPI_TRY( mss::putScom(l_mcbist_target, (TT::ERROR_VECTOR_REGS[l_port]), i_data) );
-    FAPI_INF("%s write: 0x%016lx", mss::c_str(i_target), i_data);
+    FAPI_INF_NO_SBE("%s write: 0x%016lx", mss::c_str(i_target), i_data);
 fapi_try_exit:
     return fapi2::current_err;
 }

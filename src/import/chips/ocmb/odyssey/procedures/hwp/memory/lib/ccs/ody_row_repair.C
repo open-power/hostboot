@@ -809,7 +809,7 @@ fapi2::ReturnCode dynamic_row_repair( const mss::rank::info<mss::mc_type::ODYSSE
               "Failed sppr program setup for dynamic_row_repair on "
               GENTARGTIDFORMAT, GENTARGTID(l_port_target) );
 
-    FAPI_INF(GENTARGTIDFORMAT " Deploying dynamic row repair", GENTARGTID(l_ocmb_target));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying dynamic row repair", GENTARGTID(l_ocmb_target));
 
     FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target, DYNAMIC));
 
@@ -867,8 +867,8 @@ fapi2::ReturnCode activate_all_spare_rows(const fapi2::Target<fapi2::TARGET_TYPE
                             l_row);
                     swizzle_repair_entry(l_repair);
 #ifndef __PPE__
-                    FAPI_INF(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
-                             GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
+                    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d, bg %d, bank %d, row 0x%05x",
+                                    GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank, l_bg, BANK_POS, l_row);
 #else
                     FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying row repairs on rank %d, DRAM %d, subrank %d",
                                     GENTARGTID(l_dimm), l_dimm_rank, DRAM_POS, l_srank);
@@ -1162,7 +1162,7 @@ fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::ODYSSEY>&
     l_poll_result = mss::poll(l_ocmb_target, CCS::STATQ_REG, poll_parameters(),
                               [](const size_t poll_remaining, const fapi2::buffer<uint64_t>& stat_reg) -> bool
     {
-        FAPI_INF("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
+        FAPI_INF_NO_SBE("ccs statq (stop) " UINT64FORMAT ", remaining: %d", UINT64_VALUE(stat_reg), poll_remaining);
         // We're done polling when we see ccs is not in progress.
         return stat_reg.getBit<CCS::CCS_IN_PROGRESS>() != 1;
     });
@@ -1177,7 +1177,7 @@ fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::ODYSSEY>&
 
 
 
-    FAPI_INF(GENTARGTIDFORMAT " Deploying hPPR row repair", GENTARGTID(l_ocmb_target));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying hPPR row repair", GENTARGTID(l_ocmb_target));
 
     // Configure CCS regs for execution
     FAPI_TRY( mss::row_repair::config_ccs_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_port_target, l_modeq_reg ) );
@@ -1219,7 +1219,7 @@ fapi2::ReturnCode hppr_row_repair( const mss::rank::info<mss::mc_type::ODYSSEY>&
               "Failed hppr program setup, part 2 for hppr_row_repair on "
               GENTARGTIDFORMAT, GENTARGTID(l_port_target) );
 
-    FAPI_INF(GENTARGTIDFORMAT " Exiting hPPR row repair mode", GENTARGTID(l_ocmb_target));
+    FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Exiting hPPR row repair mode", GENTARGTID(l_ocmb_target));
 
     // Run CCS standalone execution
     FAPI_TRY( mss::ccs::execute<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target) );

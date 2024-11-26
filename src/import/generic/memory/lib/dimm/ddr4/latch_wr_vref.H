@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -157,8 +157,9 @@ fapi2::ReturnCode setup_latch_wr_vref_commands_by_rank( const fapi2::Target<fapi
     // Setup training range if the value is not the default
     if(i_train_range != wr_vref_override::USE_DEFAULT_WR_VREF_SETTINGS)
     {
-        FAPI_INF("%s Overriding vrefdq train %s data to be 0x%02x for rank %lu", mss::c_str(i_target), "range", i_train_value,
-                 i_port_rank);
+        FAPI_INF_NO_SBE("%s Overriding vrefdq train %s data to be 0x%02x for rank %lu", mss::c_str(i_target), "range",
+                        i_train_value,
+                        i_port_rank);
 
         // Sets up the MR information
         for(uint64_t i = 0; i < MAX_RANK_PER_DIMM; ++i)
@@ -170,8 +171,9 @@ fapi2::ReturnCode setup_latch_wr_vref_commands_by_rank( const fapi2::Target<fapi
     // Setup training value if the value is not the default
     if(i_train_value != wr_vref_override::USE_DEFAULT_WR_VREF_SETTINGS)
     {
-        FAPI_INF("%s Overriding vrefdq train %s data to be 0x%02x for rank %lu", mss::c_str(i_target), "value", i_train_value,
-                 i_port_rank);
+        FAPI_INF_NO_SBE("%s Overriding vrefdq train %s data to be 0x%02x for rank %lu", mss::c_str(i_target), "value",
+                        i_train_value,
+                        i_port_rank);
 
         // Sets up the MR information
         for(uint64_t i = 0; i < MAX_RANK_PER_DIMM; ++i)
