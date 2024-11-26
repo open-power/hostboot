@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2019,2023
+# Contributors Listed Below - COPYRIGHT 2019,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -78,6 +78,13 @@
     {
         name        "MC DSTL Error Report";
         scomaddr    0x0C010D0C;
+        capture     group mc_dstl_fir_ffdc;
+    };
+
+    register MC_DSTL_STATUS
+    {
+        name        "MC DSTL Status Register";
+        scomaddr    0x0C010D10;
         capture     group mc_dstl_fir_ffdc;
     };
 

@@ -9,6 +9,11 @@
         "description": "P10 MCC target DSTLFIR atomic OR",
         "name": "MC_DSTL_FIR_OR"
     },
+    "0x32b9": {
+        "address": "0x000000000c010d10",
+        "description": "MC DSTL Status Register",
+        "name": "MC_DSTL_STATUS"
+    },
     "0x374d": {
         "address": "0x000000000c010e0e",
         "description": "MC USTL Error Report 0",
