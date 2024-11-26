@@ -4553,6 +4553,9 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
     FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_nibbles_enables));
     l_nibble_enables = iv_nibbles_enables[0];
 
+    // Add a stream message to say we're starting address recovery
+    o_log_data.put(static_cast<fapi2::hwp_data_unit>(PER_DRAM_RECOVERY));
+
     // Loops through DRAM by DRAM disabling all other DRAM's
     for(const auto& l_rank_info : l_rank_infos)
     {
@@ -4598,6 +4601,9 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
     // Update for the discovered bad DRAMs
     FAPI_TRY(update_struct_for_bad_bits( i_target, io_start_bad_bits, io_struct));
     FAPI_TRY(load_msg_block(i_target, io_struct));
+
+    // Add a stream message to say we're running the final address recovery training
+    o_log_data.put(static_cast<fapi2::hwp_data_unit>(PER_DRAM_RECOVERY_FINAL_RUN));
 
     // Does another training run here
     FAPI_TRY(run_training_helper(i_target, io_status, io_start_bad_bits, io_struct, o_log_data));
@@ -5071,6 +5077,9 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
 
     // Reinitialize the message block
     FAPI_TRY(configure_msg_block_for_dq_errors(i_target, io_start_bad_bits, io_struct));
+
+    // Add a stream message to say we're starting DQ recovery
+    o_log_data.put(static_cast<fapi2::hwp_data_unit>(BAD_BIT_RECOVERY));
 
     // Just run the training here
     FAPI_TRY(run_training_helper(i_target, io_status, io_start_bad_bits, io_struct, o_log_data));

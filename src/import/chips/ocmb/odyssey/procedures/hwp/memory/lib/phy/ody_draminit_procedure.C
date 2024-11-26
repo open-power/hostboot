@@ -66,6 +66,10 @@ fapi2::ReturnCode draminit(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_t
     uint8_t l_draminit_step_enable = 0;
     fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT_Type l_poll_count;
 
+    // Add a stream message to say we're starting draminit on this port
+    o_log_data.put(static_cast<fapi2::hwp_data_unit>(mss::ody::phy::BEGINNING_OF_DRAMINIT_ON_PORT |
+                   mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_target)));
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_DRAMINIT_TRAINING_TIMEOUT, i_target , l_poll_count));
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_STEP_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                            l_draminit_step_enable));

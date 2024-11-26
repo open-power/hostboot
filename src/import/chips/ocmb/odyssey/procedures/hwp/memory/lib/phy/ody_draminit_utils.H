@@ -3450,6 +3450,13 @@ enum mailbox_consts
     END_OF_MPR_RD_DLY_CNTR_OPT = 0xFD,
     END_OF_WR_LVL_COARSE_DLY = 0xFE,
 
+    // IBM additional stream messages
+    // Note: BEGINNING_OF_DRAMINIT_ON_PORT gets the port's relative pos OR'd into it
+    BEGINNING_OF_DRAMINIT_ON_PORT = 0xFFFFFF00,
+    PER_DRAM_RECOVERY = 0xFFFFFF02,
+    PER_DRAM_RECOVERY_FINAL_RUN = 0xFFFFFF03,
+    BAD_BIT_RECOVERY = 0xFFFFFF04,
+
     // Mode for reading major message vs streaming msg/SMBus msg
     MAJOR_MSG_MODE = 16,
     STREAMING_SMBUS_MSG_MODE = 32,
