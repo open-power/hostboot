@@ -503,9 +503,6 @@ uint32_t rcTestErrorInfo()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-
-    //TODO RTC 143127:fapi2 ReturnCode support in hostboot
-    //l_rc.setPlatError(nullptr, FAPI2_RC_PLAT_ERR_SEE_DATA);
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
     TARGETING::Target * l_pTarget = nullptr;
@@ -769,8 +766,6 @@ uint32_t rcTestCopyConstructorwithErrorInfo()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    //TODO RTC 143127:fapi2 ReturnCode support in hostboot
-    //l_rc.setPlatError(nullptr, FAPI2_RC_PLAT_ERR_SEE_DATA);
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
     TARGETING::Target * l_pTarget = nullptr;
@@ -865,8 +860,6 @@ uint32_t rcTestAssignmentOperatorwithErrorInfo()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    //TODO RTC 143127:fapi2 ReturnCode support in hostboot
-    //l_rc.setPlatError(nullptr, FAPI2_RC_PLAT_ERR_SEE_DATA);
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
     TARGETING::Target * l_pTarget = nullptr;
@@ -965,8 +958,6 @@ uint32_t rcTestClearErrorInfo()
 
     // Create a ReturnCode
     ReturnCode l_rc;
-    //TODO RTC 143127:fapi2 ReturnCode support in hostboot
-    //l_rc.setPlatError(nullptr, FAPI2_RC_PLAT_ERR_SEE_DATA);
     l_rc._setHwpError(RC_FAPI2_SAMPLE);
 
     TARGETING::Target * l_pTarget = nullptr;

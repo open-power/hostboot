@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -248,7 +248,7 @@ class OCMBCommTest: public CxxTest::TestSuite
      */
     void  testOcmbInbandCmdRspOverMMIO( void )
     {
-#if 0 //@fixme-RTC:255444-Reenable (and fix expectations) when we get a new Simics level
+#if 0 //Would need an updated Simics level to test
         if (!iv_serializeTestMutex)
         {
             TS_FAIL("iv_serializedTestMutex is not setup, unable to continue");
@@ -267,7 +267,7 @@ class OCMBCommTest: public CxxTest::TestSuite
             mutex_unlock(iv_serializeTestMutex);
         }
 #else
-        TS_INFO("Skipping testOcmbInbandCmdRspOverMMIO - RTC:255444");
+        TS_INFO("Skipping testOcmbInbandCmdRspOverMMIO");
 #endif
     }
 
@@ -277,7 +277,7 @@ class OCMBCommTest: public CxxTest::TestSuite
      */
     void  testOcmbInbandCmdRspOverI2c_via_force( void )
     {
-#if 0 //@fixme-RTC:255444-Reenable (and fix expectations) when we get a new Simics level
+#if 0 //Would need an updated Simics level to test
         FAPI_INF("testOcmbInbandCmdRspOverI2c_via_force: entering");
         if (!iv_serializeTestMutex)
         {
@@ -309,7 +309,7 @@ class OCMBCommTest: public CxxTest::TestSuite
         }
         FAPI_INF("testOcmbInbandCmdRspOverI2c_via_force: exiting");
 #else
-        TS_INFO("Skipping testOcmbInbandCmdRspOverMMIO - RTC:255444");
+        TS_INFO("Skipping testOcmbInbandCmdRspOverMMIO");
 #endif
     }
 
@@ -319,7 +319,7 @@ class OCMBCommTest: public CxxTest::TestSuite
      */
     void  testOcmbInbandCmdRspOverI2c_via_scom_switch( void )
     {
-#if 0 //@fixme-RTC:255444-Reenable (and fix expectations) when we get a new Simics level
+#if 0 //Would need an updated Simics level to test
         FAPI_INF("testOcmbInbandCmdRspOverI2c_via_scom_switch: entering");
         if (!iv_serializeTestMutex)
         {
@@ -343,7 +343,7 @@ class OCMBCommTest: public CxxTest::TestSuite
         }
         FAPI_INF("testOcmbInbandCmdRspOverI2c_via_scom_switch: exiting");
 #else
-        TS_INFO("Skipping testOcmbInbandCmdRspOverMMIO - RTC:255444");
+        TS_INFO("Skipping testOcmbInbandCmdRspOverMMIO");
 #endif
     }
 

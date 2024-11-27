@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2020
+# Contributors Listed Below - COPYRIGHT 2011,2024
 # [+] International Business Machines Corp.
 #
 #
@@ -27,8 +27,8 @@ ROOTPATH = ../../../..
 MODULE = testsyslib
 
 TESTS = *.H
-#TODO RTC:204720
-#TESTS += synctest.H
+
+TESTS += synctest.H
 
 SUBDIRS += runtime.d
 

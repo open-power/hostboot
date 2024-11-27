@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -233,8 +233,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
     /**
      *  @brief Test Hostboot specific mutex attribute support
      */
-    // TODO RTC: 204720 when mutex issues are resolved reable this
-    void _testHbRecursiveMutexAttr()
+    void testHbRecursiveMutexAttr()
     {
         TS_TRACE(ENTER_MRK "testHbRecursiveMutexAttr" );
 
@@ -351,8 +350,7 @@ class TargetingTestSuite : public CxxTest::TestSuite
      *  @brief Test Hostboot specific mutex attribute support
      */
 
-    // TODO RTC: 204720 when mutex issues are resolved reable this
-    void _testHbMutexAttr()
+    void testHbMutexAttr()
     {
         TS_TRACE(ENTER_MRK "testHbMutexAttr" );
 
@@ -536,9 +534,6 @@ class TargetingTestSuite : public CxxTest::TestSuite
     void testSignedAttribute()
     {
         TS_TRACE(ENTER_MRK "testSignedAttribute");
-
-        // TODO RTC 144142
-
         TARGETING::Target* l_sys = NULL;
         TARGETING::targetService().getTopLevelTarget(l_sys);
         int8_t signedAttr = -5;

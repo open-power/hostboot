@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2015                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -49,13 +49,6 @@ void collectBacktrace ( std::vector<uint64_t> & o_addrVector )
 {
     o_addrVector.clear();
 
-    // TODO via RTC 124373
-    // During runtime, when OPAL application call us, we have a crash
-    // in this code. Reason is that OPAL apis are Little Endian where as
-    // HB apis are Big Endian. When we unwind stack and goes to OPAL API
-    // we crash. RTC 124373 will handle this.
-    #ifndef __HOSTBOOT_RUNTIME
-
     uint64_t* frame = static_cast<uint64_t*>(framePointer());
     bool first = true;
     while (frame != NULL)
@@ -68,7 +61,6 @@ void collectBacktrace ( std::vector<uint64_t> & o_addrVector )
         frame = reinterpret_cast<uint64_t*>(*frame);
         first = false;
     }
-    #endif //__HOSTBOOT_RUNTIME
 } // End collectBacktrace
 
 
