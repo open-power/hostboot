@@ -240,6 +240,9 @@ void* call_mss_getecid(void* io_pArgs)
             // read modify write to set the 12th bit to 0.
 
             // First read the value...
+            // Set the num of bytes correctly for each target in this loop as it could be
+            // set to 0 by a failed scom operation in the previous iteration.
+            l_numBytes = 8;
             l_err = DeviceFW::deviceOp(DeviceFW::READ, l_ocmb_target, l_buf, l_numBytes,
                                        DEVICE_SCOM_ADDRESS(CHIPLET1_REGISTER));
             if (!l_err)
@@ -249,6 +252,7 @@ void* call_mss_getecid(void* io_pArgs)
                 TRACISTEP("ody_getecid: Read value=0x%llx from target=0x%.8X", l_data,
                            get_huid(l_ocmb_target));
 
+                l_numBytes = 8;
                 l_data &= UNMASK_BIT12;
                 TRACISTEP("ody_getecid: Value after Anding with unmask value=0x%llx", l_data);
 
