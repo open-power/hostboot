@@ -73,10 +73,16 @@ namespace SECUREBOOT
         // save off the signing mode for usages during Hash Lid List (HLL) processing
         iv_hash_mode = l_sb_signing_mode;
 
-        SB_INF("getEnabled() state:%i, (minimum secure version=0x%.02X secureboot signing mode=0x%.02X)",
-               iv_enabled, l_min_secure_version, l_sb_signing_mode);
-        printk("SECUREBOOT::enabled() state:%i (minimum secure version=0x%.02X secureboot signing mode=0x%.02X)\n",
-               iv_enabled, l_min_secure_version, l_sb_signing_mode);
+        // trace and send to console HW Keys' Hash and backdoor bit
+        bool l_backdoor = getSbeSecurityBackdoor();
+        SHA512_t l_system_hash = {0};
+        getHwKeyHash(l_system_hash);
+        uint32_t l_hkh = sha512_to_u32(l_system_hash);
+
+        SB_INF("Security Settings: state:%i, msv=0x%.02X, sb signing mode=0x%.02X, backdoor=%d, system hash=0x%08X",
+               iv_enabled, l_min_secure_version, l_sb_signing_mode, l_backdoor, l_hkh);
+        printk("SECUREBOOT::enabled() state:%i msv=0x%.02X, sb signing mode=0x%.02X, backdoor=%d, system hash=0x%08X\n",
+               iv_enabled, l_min_secure_version, l_sb_signing_mode, l_backdoor, l_hkh);
 
         // Set SECURITY_MODE based on SAB.
         // If SAB is 0, then request SBE to disable security for other processors;
@@ -116,9 +122,9 @@ namespace SECUREBOOT
         {
             #ifdef CONFIG_CONSOLE
             CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME,
-                "Booting in non-secure mode (minimum secure version=0x%.02X)"
-                " sb signing mode is %s (0x%.02X)",
-                l_min_secure_version, l_sbsm_string, l_sb_signing_mode);
+                "Booting in non-secure mode (msv=0x%.02X, sb signing mode is "
+                "%s (0x%.02X), backdoor=%d, system hash=0x%08X)",
+                l_min_secure_version, l_sbsm_string, l_sb_signing_mode, l_backdoor, l_hkh);
             #endif
 
             uint64_t cbsValue = 0;
@@ -148,9 +154,9 @@ namespace SECUREBOOT
         {
             #ifdef CONFIG_CONSOLE
             CONSOLE::displayf(CONSOLE::DEFAULT, SECURE_COMP_NAME,
-                "Booting in secure mode (minimum secure version=0x%.02X)"
-                " sb signing mode is %s (0x%.02X)",
-                l_min_secure_version, l_sbsm_string, l_sb_signing_mode);
+                "Booting in secure mode (msv=0x%.02X, sb signing mode is %s "
+                "(0x%.02X), backdoor=%d, system hash=0x%08X)",
+                l_min_secure_version, l_sbsm_string, l_sb_signing_mode, l_backdoor, l_hkh);
             #endif
         }
         #endif

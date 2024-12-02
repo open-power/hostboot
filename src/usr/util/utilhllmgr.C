@@ -247,10 +247,9 @@ void HLLMgr::initHLL(const void* i_pHLL, const size_t i_HLLSize)
 {
     errlHndl_t l_errl = nullptr;
 
-    // Add HLL itself to Cache but don't add to group order
-    GroupInfo l_groupHdrInfo(HllEntryFlags::SIGNED_PRE_VERIFY);
-
+    // Add HLL itself to Cache with group g_HLLGroup
     LidInfo l_hdrLidInfo(Util::HLL_LIDID);
+    GroupInfo l_groupHdrInfo(HllEntryFlags::SIGNED_PRE_VERIFY);
     l_groupHdrInfo.lidIds.push_back(l_hdrLidInfo);
     iv_groupInfoCache.insert(std::make_pair(g_HLLGroup, l_groupHdrInfo));
 
@@ -459,6 +458,7 @@ bool HLLMgr::isValid()
         l_isValid, iv_version);
     return l_isValid;
 }
+
 errlHndl_t HLLMgr::parseHLL()
 {
     #define V1_SIZE (4*KILOBYTE)  // 4 KB
@@ -634,6 +634,26 @@ errlHndl_t HLLMgr::parseHLL()
         }
         l_pEntry = l_pEntry + iv_HashEntrySize;
     }
+
+    // Manually add HLL to l_HLLPreVerified.lidIds list
+    // Use max amount size for HLL for now, and mark it as both
+    // PreVerified and Unsigned.
+    // Everything else will remain the default values
+    LidInfo l_HllItselfLidInfo(Util::HLL_LIDID);
+    l_HllItselfLidInfo.size = iv_maxSize;
+    l_HllItselfLidInfo.PreVerified = 1;
+    l_HllItselfLidInfo.Unsigned = 0;
+
+    l_HLLPreVerified.lidIds.push_back(l_HllItselfLidInfo);
+    total_size += l_HllItselfLidInfo.size;
+
+    GroupIdString l_groupIdStr = {};
+    groupIdToString(g_HLLPreVerified, l_groupIdStr);
+    UTIL_FT("HLLMgr::parseHLL Add HLL LID (id=0x%X, max size=0x%X) "
+            "to Group %s. New Total Size=0x%X",
+            l_HllItselfLidInfo.id, l_HllItselfLidInfo.size, l_groupIdStr,
+            total_size);
+
     l_HLLPreVerified.totalSize = total_size;
     iv_groupInfoCache.insert(std::make_pair(g_HLLPreVerified, l_HLLPreVerified));
     iv_groupInfoCache.insert(std::make_pair(g_HLLPowerVM, l_HLLPowerVM));
