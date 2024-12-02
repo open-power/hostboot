@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -216,8 +216,8 @@ errlHndl_t ErrDataService::GenerateSrcPfa( ATTENTION_TYPE i_attnType,
             if ( MACHINE_CHECK == i_attnType && it->isDefault )
             {
                 #if !defined(__HOSTBOOT_MODULE) && !defined(ESW_SIM_COMPILE)
-                TargetHandle_t trgt = thiscallout.getTarget();
-                TargetHandle_t node = getConnectedParent( trgt, TYPE_NODE );
+                TargetHandle_t chip = getParentChip(thiscallout.getTarget());
+                TargetHandle_t node = getConnectedParent( chip, TYPE_NODE );
 
                 errlHndl_t errl = HWSV::HostSvc::setRegNodeBootStatus( node );
                 if ( nullptr != errl )
