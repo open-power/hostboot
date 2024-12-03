@@ -306,7 +306,7 @@ class mr34_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_dimm_rank the DIMM rank's value to print
         /// @param[in] i_dram_num the dram number that is currently being executed
         ///
@@ -320,11 +320,15 @@ class mr34_data : public mr_base_data<MC>
             const uint8_t CHANNEL = mss::ddr5::get_channel_a_or_b(i_dram_number);
 #endif
 
+            FAPI_INF_NO_SBE("MR 34: RTT_PARK and RTT_WR " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR34 | DRAM    | Field      | Register Type |   Operand   |  Data", TARGTID);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR34 rank%u. dram_num%u.", TARGTID, i_dimm_rank, i_dram_number);
-
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR34 RTT Park:%u. RTT WR:%u.", TARGTID, iv_rtt_park[i_dimm_rank][CHANNEL], iv_rtt_wr[i_dimm_rank][CHANNEL]);
+                            "           ---------------------------------------------------------------------------------------", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR34 | %u      | RTT Park   |     R         |    OP[2:0]  |  %u  ", TARGTID,
+                            i_dram_number, iv_rtt_park[i_dimm_rank][CHANNEL]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR34 | %u      | RTT WR     |     R/W       |    OP[5:3]  |  %u  ", TARGTID,
+                            i_dram_number, iv_rtt_wr[i_dimm_rank][CHANNEL]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 
 };

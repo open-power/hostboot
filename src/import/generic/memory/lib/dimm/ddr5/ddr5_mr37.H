@@ -232,7 +232,7 @@ class mr37_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank());
+            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -303,14 +303,24 @@ class mr37_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_dimm_rank the DIMM rank's value to print
+        /// @param[in] i_dram_number the dram number that is currently being executed
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank)  const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint64_t i_dimm_rank,
+                     const uint8_t i_dram_number)  const
         {
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR37 rank%u. ODTLon WR:%u. ODTLoff WR:%u.", TARGTID, i_dimm_rank, iv_odtlon_wr_offset[i_dimm_rank],
-                            iv_odtloff_wr_offset[i_dimm_rank]);
+            FAPI_INF_NO_SBE("MR 37: ODTL Write Control Offset " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR37 | DRAM    | Field             | Register Type |   Operand   |  Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "           -------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR37 | %u      | ODTLon_WR_Offset  |     R/W       |    OP[2:0]  |  %d  ", TARGTID,
+                            i_dram_number, iv_odtlon_wr_offset[i_dimm_rank]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR37 | %u      | ODTLoff_WR_Offset |     R/W       |    OP[5:3]  |  %d  ", TARGTID,
+                            i_dram_number, iv_odtloff_wr_offset[i_dimm_rank]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 
 };
