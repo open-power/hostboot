@@ -54,7 +54,7 @@ MGP_FILES_EXIST=1
 if [ -z "$SSH_PORT" ]
 then
     SSH_CMD="ssh"
-    COPYCMD="rsync -zP --rsync-path=sudo\${IFS}rsync"
+    COPYCMD="rsync -zPr --rsync-path=sudo\${IFS}rsync"
     SSH_PORT=22
 else
     SSH_CMD="ssh -p $SSH_PORT"
@@ -169,7 +169,12 @@ function COPY_FILES_TO_BMC () {
     SSHPASS $COPYCMD "$LOCALFILE" "$HOSTNAME":"$BMC_TMP_DIRECTORY/$REMOTEDIR"
 
     # Move files to real location
-    REMOTE_SUDO "cp -r $BMC_TMP_DIRECTORY/$REMOTEDIR/$BASEFILE $BMC_PATCH_DIRECTORY/$REMOTEDIR/"
+    if [ -d $LOCALFILE ]
+    then
+        REMOTE_SUDO "cp -r $BMC_TMP_DIRECTORY/$REMOTEDIR/ $BMC_PATCH_DIRECTORY/$REMOTEDIR/"
+    else
+        REMOTE_SUDO "cp -r $BMC_TMP_DIRECTORY/$REMOTEDIR/$BASEFILE $BMC_PATCH_DIRECTORY/$REMOTEDIR/"
+    fi
 }
 
 function PATCH_HBI_HBB () {
@@ -188,7 +193,7 @@ function PATCH_HBI_HBB () {
         COPYDIR=/tmp/hbdebug_`date +%Y%m%H%M%S`/hbdebug/
         mkdir -p $COPYDIR
         cp `find $IMG_DIR/hbotStringFile $IMG_DIR/*.list.bz2 $IMG_DIR/*.syms $IMG_DIR/*.bin.modinfo | grep -v _test` $COPYDIR
-        COPY_FILES_TO_BMC "$COPYDIR" "/"
+        COPY_FILES_TO_BMC "$COPYDIR" "hbdebug/"
         REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf hbdebug/hbotStringFile $HBOTSTRINGFILE.lid"
         REMOTE_SUDO "cd $BMC_PATCH_DIRECTORY && ln -sf hbdebug/hbicore.syms $HBICORE_SYMS.lid"
     else
