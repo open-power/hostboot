@@ -46,8 +46,16 @@
 
 static constexpr size_t KSHORT_SIZE    = 81920;//!> size of kshort trace in bytes
 static constexpr size_t KLONG_SIZE     = 4096; //!> size of klong  trace in bytes
-static constexpr size_t KMEMSTATS_SIZE = 20480;//!> size of kmem   trace in bytes
-static constexpr size_t KALLOC_SIZE    = 4096; //!> size of kalloc trace in bytes
+static constexpr size_t KMEMSTATS_SIZE = 24576;//!> size of kmem   trace in bytes
+static constexpr size_t KALLOC_SIZE    = 8192; //!> size of kalloc trace in bytes
+
+enum simple_trc_t      // enums for SET_TRACE_LEVEL
+{
+    SIMPLE_TRC_KMEM,
+    SIMPLE_TRC_KALLOC,
+    SIMPLE_TRC_KSHORT,
+    SIMPLE_TRC_KLONG
+};
 
 // Do not reuse or delete trace enums - always create a new enum for a new trace.
 // This ensures backward compatibility.
@@ -64,6 +72,9 @@ enum kdebug_trc_tag_t : uint16_t
     KDBG_PM_ALLOC_KER_ENTER        = 0x1008,
     KDBG_PM_ALLOC_KER_EXIT         = 0x1009,
     KDBG_PM_ADD_MEMORY             = 0x100A,
+    KDBG_PM_USR_GET_RES_FAIL       = 0x100B,
+    KDBG_PM_PERIODIC_RES_INTERVAL  = 0x100C,
+    KDBG_PM_PERIODIC_KER_MISS      = 0x100D,
 
     KDBG_HM_ALLOC                  = 0x2001,
     KDBG_HM_REALLOC                = 0x2002,
@@ -408,7 +419,7 @@ class SimpleTrace
      *  @brief  Set the trace level
      *  @param[in]  i_lvl   trace level to set
      */
-    void set_trace_level(uint32_t i_lvl)
+    void set_trace_level(simple_trace_level_t i_lvl)
     {
         if (!iv_hdr) {return;}
         iv_hdr->iv_level = i_lvl;
@@ -638,5 +649,13 @@ void STRC_KMEM(simple_trace_level_t i_lvl,
         STRC_KMEM(STRC_L4, _tag, static_cast<uint16_t>(_step),      \
                                    static_cast<uint16_t>(_substep), \
                                    static_cast<uint16_t>(_u16))
+
+/**
+ *******************************************************************************
+ *  @brief Set the trace level for a SimpleTrace
+ *  @param[in]  enum designating the trace object to modify
+ *  @param[in]  new trace level for the trace object
+ */
+void SET_TRACE_LEVEL(simple_trc_t i_trc, simple_trace_level_t i_lvl);
 
 #endif

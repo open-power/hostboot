@@ -264,11 +264,11 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
 
     if (NULL == page)
     {
-        // The alloc pages syscall failed, so loop and retry the syscall
+        // The _allocatePage syscall failed, so loop and retry the syscall
         //  until success or until timeoutSecs.
         //
-        // At reserveSecs,  one-time:           forceMemoryPeriodic, try iv_reserved
-        // At criticalSecs, repeat at interval: forceMemoryPeriodic, try iv_reserved
+        // At reserveSecs,  one-time:           try iv_reserved, forceMemoryPeriodic
+        // At criticalSecs, repeat at interval: try iv_reserved, forceMemoryPeriodic
         // At timeoutSecs,  fail:               assert
         //
         // forceMemoryPeriodic
@@ -289,20 +289,22 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
         // remember each time an allocatePage had to wait
         __sync_add_and_fetch(&l_pmgr.cv_allocatePage_usr_wait, 1);
 
+        // NORMAL PERIODIC
+        // we can call this as many times as we like, because this function
+        // limits how many periodics are actually run to one per time period
         CpuManager::forceMemoryPeriodic(VmmManager::NORMAL);
 
         while (NULL == page) // usr-mode wait loop
         {
             // Didn't successfully allocate, so yield in hopes that memory
-            // will eventually free up (ex. VMM flushes).
+            // will eventually free up
             task_yield();
 
-            // RESERVE
-            // One-time attempt a few seconds after entering the wait loop.
-            // Send a Critical Periodic and try the iv_reserved
+            // GET RESERVE
+            // One-time attempt shortly after entering the wait loop.
+            // Try the iv_reserved and if it fails then send a Critical Periodic
             if (getTB() > reserveTicks)
             {
-                CpuManager::forceMemoryPeriodic(VmmManager::CRITICAL);
                 page = _syscall1(Systemcalls::MM_ALLOC_RESERVED_PAGES,
                                  reinterpret_cast<void*>(n));
                 if (page)
@@ -310,17 +312,17 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
                     STRC1_KALLOC(K_ALLOC_USR_GET_RES, g_istep, g_substep, n);
                     return page;
                 }
-                STRC1_KMEM(KMEM_STATS_ALLOC_PG_USR_GET_RES_FAIL,
-                           g_istep, g_substep, n);
+                STRC1_KLONG(KDBG_PM_USR_GET_RES_FAIL, n, availPages());
+                CpuManager::forceMemoryPeriodic(VmmManager::CRITICAL);
                 // add timeoutSecs so this section does not run again in the loop
                 reserveTicks += TimeManager::convertSecToTicks(timeoutSecs,0);
             }
-            // CRITICAL
-            // Run this at a larger time interval
-            // Send a Critical Periodic and retry the iv_reserved
+            // CRITICAL PERIODIC
+            // Run this every few seconds
+            // Try the iv_reserved and if it fails then send a Critical Periodic
             if (getTB() > criticalTicks)
             {
-                CpuManager::forceMemoryPeriodic(VmmManager::CRITICAL);
+                STRC1_KLONG(KDBG_PM_PERIODIC_RES_INTERVAL, n, availPages());
                 page = _syscall1(Systemcalls::MM_ALLOC_RESERVED_PAGES,
                                  reinterpret_cast<void*>(n));
                 if (page)
@@ -328,8 +330,8 @@ void* PageManager::allocatePage(size_t n, bool userspace, bool kAllowOom)
                     STRC1_KALLOC(K_ALLOC_USR_GET_RES, g_istep, g_substep, n);
                     return page;
                 }
-                STRC1_KMEM(KMEM_STATS_ALLOC_PG_USR_GET_RES_FAIL,
-                           g_istep, g_substep, n);
+                STRC1_KMEM(KMEM_STATS_ALLOC_PG_USR_GET_RES_FAIL, g_istep, g_substep, n);
+                CpuManager::forceMemoryPeriodic(VmmManager::CRITICAL);
                 // set to run at the next time interval
                 criticalTicks += TimeManager::convertSecToTicks(criticalSecs,0);
             }
@@ -509,15 +511,14 @@ void* PageManager::_allocatePage(size_t n, bool userspace, bool allowOom)
     {
         // we are nearly OOM, so do Critical-level Periodics
         //  (flushPageTable, castOutPages, PageMgr/HeapMgr coalesce)
+        STRC1_KLONG(KDBG_PM_PERIODIC_KER_MISS, n, availPages());
         CpuManager::forceMemoryPeriodic(VmmManager::CRITICAL);
 
         // Enter a retry loop and hope the periodics free some memory
 
-        const uint64_t timeoutSecs = KER_ALLOC_WAIT_RESERVED; // total secs to retry
-
         uint64_t timeoutTicks = 0; // tick count when the timeout hits
 
-        timeoutTicks = getTB() + TimeManager::convertSecToTicks(timeoutSecs,0);
+        timeoutTicks = getTB() + TimeManager::convertSecToTicks(0,KER_ALLOC_WAIT_RESERVED);
 
         while (getTB() < timeoutTicks) // retry enough times for the Periodics to help
         {
@@ -538,8 +539,7 @@ void* PageManager::_allocatePage(size_t n, bool userspace, bool allowOom)
 
         // still not successful, we're out of memory.  Assert as long as the
         // caller doesn't want to allow OOM (_pteMiss uses this to avoid deadlocks).
-        STRC1_KMEM(KMEM_STATS_ALLOC_PG_KER_GET_RES_FAIL,
-                   g_istep, g_substep, n);
+        STRC1_KMEM(KMEM_STATS_ALLOC_PG_KER_GET_RES_FAIL, g_istep, g_substep, n);
 
         if (!allowOom)
         {

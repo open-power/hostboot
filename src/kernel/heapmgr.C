@@ -811,17 +811,6 @@ void HeapManager::_coalesce()
                     cur  = cur->next;
                     continue;
                 }
-
-                // Cannot merge if buddy is not free.
-                // This is here to skip those pages in page_list which have
-                //  already been marked as merged.
-                if ((buddy->free != 'F') || (buddy->coalesce != 'C'))
-                {
-                    // we found buddy, but cannot merge since buddy is not free
-                    prev = buddy;
-                    cur  = buddy->next;
-                    continue;
-                }
                 // we found buddy and we can try to merge with page_chunk
 
                 // Calculate the size of page_chunk + buddy

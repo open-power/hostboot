@@ -231,3 +231,25 @@ void STRC_KMEM(simple_trace_level_t i_lvl,
         STRC_KMEM(i_tag, l_data);
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+void SET_TRACE_LEVEL(simple_trc_t i_trc, simple_trace_level_t i_lvl)
+{
+    if (i_trc == SIMPLE_TRC_KMEM)
+    {
+        g_kmemstats_trace.set_trace_level(i_lvl);
+    }
+    else if (i_trc == SIMPLE_TRC_KALLOC)
+    {
+        g_kalloc_trace.set_trace_level(i_lvl);
+    }
+    else if (i_trc == SIMPLE_TRC_KSHORT)
+    {
+        g_kshort_trace.set_trace_level(i_lvl);
+    }
+    else if (i_trc == SIMPLE_TRC_KLONG)
+    {
+        g_klong_trace.set_trace_level(i_lvl);
+    }
+}
+

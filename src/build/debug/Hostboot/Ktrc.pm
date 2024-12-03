@@ -57,6 +57,9 @@ use constant
     KDBG_PM_ALLOC_KER_ENTER      => 0x1008,
     KDBG_PM_ALLOC_KER_EXIT       => 0x1009,
     KDBG_PM_ADD_MEMORY           => 0x100A,
+    KDBG_PM_USR_GET_RES_FAIL     => 0x100B,
+    KDBG_PM_PERIODIC_RES_INTERVAL=> 0x100C,
+    KDBG_PM_PERIODIC_KER_MISS    => 0x100D,
     # HeapManager
     KDBG_HM_ALLOC                => 0x2001,
     KDBG_HM_REALLOC              => 0x2002,
@@ -127,6 +130,12 @@ sub display_tag
              {::userDisplay "KDBG_PM_ALLOC_KER_EXIT                 ";}
         case KDBG_PM_ADD_MEMORY
              {::userDisplay "KDBG_PM_ADD_MEMORY                     ";}
+        case KDBG_PM_USR_GET_RES_FAIL
+             {::userDisplay "KDBG_PM_USR_GET_RES_FAIL               ";}
+        case KDBG_PM_PERIODIC_RES_INTERVAL
+             {::userDisplay "KDBG_PM_PERIODIC_RES_INTERVAL          ";}
+        case KDBG_PM_PERIODIC_KER_MISS
+             {::userDisplay "KDBG_PM_PERIODIC_KER_MISS              ";}
         case KDBG_PM_FREE_ENTER
              {::userDisplay "KDBG_PM_FREE_ENTER                     ";}
         case KDBG_PM_FREE_EXIT
@@ -201,7 +210,7 @@ sub display_tag
              {::userDisplay "KDBG_FREEZE_TRACE                      ";}
         else
         {
-            my $str = sprintf("UNKNOWN tag:0x%04x                    ", $tag);
+            my $str = sprintf("UNKNOWN tag:0x%04x                     ", $tag);
             ::userDisplay "$str";
         }
     }
@@ -255,6 +264,13 @@ sub display_trace_data
     elsif ($data{tag} == KDBG_PM_ADD_MEMORY)
     {
         $str = sprintf(" addr: %08x sz:%d", $data{first32},$data{second32});
+        ::userDisplay "$str";
+    }
+    elsif ($data{tag} == KDBG_PM_USR_GET_RES_FAIL      ||
+           $data{tag} == KDBG_PM_PERIODIC_RES_INTERVAL ||
+           $data{tag} == KDBG_PM_PERIODIC_KER_MISS)
+    {
+        $str = sprintf(" sz: %08x avail:%d", $data{first32},$data{second32});
         ::userDisplay "$str";
     }
     elsif ($data{tag} == KDBG_HM_ALLOC)
@@ -400,6 +416,11 @@ sub display_trace_data
         }
       }
       ::userDisplay "$str";
+    }
+    else
+    {
+        $str = sprintf(" %08x %08x", $data{first32}, $data{second32});
+        ::userDisplay "$str";
     }
     ::userDisplay "\n";
 }

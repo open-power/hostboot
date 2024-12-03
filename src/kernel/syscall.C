@@ -1089,6 +1089,7 @@ namespace Systemcalls
         g_istep   = istep;
         g_substep = substep;
 
+        PageManager::coalesce();
         STRC1_KMEM(KMEM_STATS_SYSCALL, istep, substep, 0);
         PageManager::resetIStepStats();
     }

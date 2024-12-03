@@ -337,12 +337,20 @@ class PageManager
                                                       //   with any size
         };
 
-        static constexpr size_t KER_ALLOC_WAIT_RESERVED  = 1;  //!> delay before using iv_reserved
-        static constexpr size_t USR_ALLOC_WAIT_RESERVED  = 2;  //!> delay before using iv_reserved
-        static constexpr size_t USR_ALLOC_CRIT_PERIODIC  = 10; //!> delay for critical periodic
-        static constexpr size_t USR_ALLOC_WAIT_TIMEOUT   = 180;//!> time until crit_assert
-        static constexpr size_t CASTOUT_NORMAL_DELAY     = 1;  //!> min delay for normal castout
-        static constexpr size_t CASTOUT_CRITICAL_DELAY   = 3;  //!> min delay for critical castout
+        // Notes:
+        // 1. The KER_ALLOC_WAIT_RESERVED should be < 1 second or else the IPL
+        //    times increase unnecessarily when running < 16MB
+        // 2. The USR_ALLOC_WAIT_RESERVED must be at least one second or else
+        //    on hw the usr-mode allocates of 2 pages take too much memory too
+        //    fast and can cause an OOM when running < 16MB
+        // 3. The Periodic delays must be greater than 1 second or else the VMM
+        //    thrashes with castouts when memory is < 16MB
+        static constexpr size_t KER_ALLOC_WAIT_RESERVED = 500000000;//!> ns delay for iv_reserved
+        static constexpr size_t USR_ALLOC_WAIT_RESERVED = 1;  //!> sec delay for iv_reserved
+        static constexpr size_t USR_ALLOC_CRIT_PERIODIC = 10; //!> sec delay for critical periodic
+        static constexpr size_t USR_ALLOC_WAIT_TIMEOUT  = 180;//!> sec delay until crit_assert
+        static constexpr size_t CASTOUT_NORMAL_DELAY    = 2;  //!> sec delay for normal castout
+        static constexpr size_t CASTOUT_CRITICAL_DELAY  = 3;  //!> sec delay for critical castout
 
     protected:
 
