@@ -161,7 +161,7 @@ class mr112_data : public mr_base_data<MC>
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
             // Note: not checking the rank input as it is already checked by the rank info class
-            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank());
+            this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -226,14 +226,24 @@ class mr112_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
         /// @param[in] i_dimm_rank the input rank to print
+        /// @param[in] i_dram_number the dram number that is currently being executed
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, const uint64_t i_dimm_rank) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint64_t i_dimm_rank,
+                     const uint8_t i_dram_number) const
         {
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR112 Rank%u. Gain Bias:%u Sign Bit:%u",
-                            TARGTID, i_dimm_rank, iv_dfe_gain_bias[i_dimm_rank], iv_dfe_sign_bit[i_dimm_rank]);
+            FAPI_INF_NO_SBE("MR 112: DFE Gain Bias " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR112 | DRAM    | Field               | Register Type |   Operand |  Data",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "            -------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR112 | %u      | DFE Gain Bias       |     R/W       |   OP[2:0]  |  %d ",
+                            TARGTID, i_dram_number, iv_dfe_gain_bias[i_dimm_rank]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR112 | %u      | Sign Bit Gain Bias  |     R/W       |   OP[3]  |  %d ",
+                            TARGTID, i_dram_number, iv_dfe_sign_bit[i_dimm_rank]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 
 };

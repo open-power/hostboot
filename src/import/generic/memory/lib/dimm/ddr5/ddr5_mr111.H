@@ -136,7 +136,7 @@ class mr111_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            this->display(i_rank_info.get_dimm_target());
+            this->display(i_rank_info.get_dimm_target(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -207,16 +207,29 @@ class mr111_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_dram_number the dram number that is currently being executed
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint8_t i_dram_number) const
         {
+            FAPI_INF_NO_SBE("MR 111: DFE Global Settings " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR111 | DRAM    | Field                   | Register Type |   Operand |  Data",
+                            TARGTID);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR111. DFE gain:%u DFE tap-1:%u DFE tap-2:%u",
-                            TARGTID, iv_global_dfe_gain_enable, iv_global_dfe1_enable, iv_global_dfe2_enable);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR111. DFE tap-3:%u DFE tap-4:%u",
-                            TARGTID, iv_global_dfe3_enable, iv_global_dfe4_enable);
+                            "           -------------------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR111 | %u      | Global DFE Gain Enable  |     R/W       |    OP[0]  |  %d  ",
+                            TARGTID, i_dram_number, iv_global_dfe_gain_enable);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR111 | %u      | Global DFE Tap-1 Enable |     R/W       |    OP[1]  |  %d  ",
+                            TARGTID, i_dram_number, iv_global_dfe1_enable);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR111 | %u      | Global DFE Tap-2 Enable |     R/W       |    OP[2]  |  %d  ",
+                            TARGTID, i_dram_number, iv_global_dfe2_enable);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR111 | %u      | Global DFE Tap-3 Enable |     R/W       |    OP[3]  |  %d  ",
+                            TARGTID, i_dram_number, iv_global_dfe3_enable);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR111 | %u      | Global DFE Tap-4 Enable |     R/W       |    OP[4]  |  %d  ",
+                            TARGTID, i_dram_number, iv_global_dfe4_enable);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 
 };

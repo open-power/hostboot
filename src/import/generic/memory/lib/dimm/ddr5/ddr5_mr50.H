@@ -142,7 +142,7 @@ class mr50_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
         {
-            this->display(i_rank_info.get_dimm_target());
+            this->display(i_rank_info.get_dimm_target(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
         }
 
@@ -212,16 +212,38 @@ class mr50_data : public mr_base_data<MC>
 
         ///
         /// @brief Displays the information that makes up the MR
-        /// @param[in] a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_target a fapi2::TARGET_TYPE_DIMM target
+        /// @param[in] i_dram_number the dram number that is currently being executed
         ///
-        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target) const
+        void display(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
+                     const uint8_t i_dram_number) const
         {
+            FAPI_INF_NO_SBE("MR 50: Write CRC Settings " TARGTIDFORMAT, TARGTID );
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR50. RD CRC enable: %u. WR CRC enable lower nibble: %u. WR CRC enable upper nibble: %u.",
-                            TARGTID, iv_rd_crc_enable, iv_wr_crc_enable_lower_nibble, iv_wr_crc_enable_upper_nibble);
+                            " DDR5 MR50 | DRAM    | Field                         | Register Type |   Operand   |  Data",
+                            TARGTID);
             FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR50. WR CRC error status: %u. WR CRC auto-disable enable: %u. WR CRC auto-disable status: %u.",
-                            TARGTID, iv_wr_crc_error_status, iv_wr_crc_autodisable_enable, iv_wr_crc_autodisable_status);
+                            "           -------------------------------------------------------------------------------",
+                            TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR50 | %u      | RD CRC enable                 |     R/W       |    OP[0]  |  %d  ",
+                            TARGTID, i_dram_number, iv_rd_crc_enable);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR50 | %u      | WR CRC enable lower nibble    |     R/W       |    OP[1]  |  %d  ",
+                            TARGTID, i_dram_number, iv_wr_crc_enable_lower_nibble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR50 | %u      | Write CRC enable upper nibble |     R/W       |    OP[2]  |  %d  ",
+                            TARGTID, i_dram_number, iv_wr_crc_enable_upper_nibble);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR50 | %u      | Write CRC error status        |     R/W       |    OP[3]  |  %d  ",
+                            TARGTID, i_dram_number, iv_wr_crc_error_status);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR50 | %u      | Write CRC auto-disable enable |     R/W       |    OP[4]  |  %d  ",
+                            TARGTID, i_dram_number, iv_wr_crc_autodisable_enable);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT
+                            " DDR5 MR50 | %u      | Write CRC auto-disable status |     R/W       |    OP[5]  |  %d  ",
+                            TARGTID, i_dram_number, iv_wr_crc_autodisable_status);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 
 };
