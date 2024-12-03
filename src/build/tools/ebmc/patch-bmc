@@ -156,9 +156,10 @@ function REMOTE_SUDO () {
 }
 
 function COPY_FILES_TO_BMC () {
-    # $1 = Local file/dir
-    LOCALFILE=$1
-    BASEFILE=`basename $LOCALFILE`
+    # $1, can be either a local file (such as HBI.bin) or it can be a directory
+    # with multiple files in it (such as hbdebug/) to be copied over to the BMC
+    LOCAL_FILE_OR_DIR=$1
+    LOCAL_BASENAME=`basename $LOCAL_FILE_OR_DIR`
     # $2 = Remote destination
     REMOTEDIR=$2
 
@@ -166,14 +167,15 @@ function COPY_FILES_TO_BMC () {
     REMOTE_SUDO "mkdir -p $BMC_TMP_DIRECTORY && chmod -R 777 $BMC_TMP_DIRECTORY/ && rm -rf $BMC_TMP_DIRECTORY/* && mkdir -p $BMC_TMP_DIRECTORY/$REMOTEDIR && chmod -R 777 $BMC_TMP_DIRECTORY/"
 
     # Copy files into /tmp/hbpatch/ to avoid permission issues on some systems
-    SSHPASS $COPYCMD "$LOCALFILE" "$HOSTNAME":"$BMC_TMP_DIRECTORY/$REMOTEDIR"
+    SSHPASS $COPYCMD "$LOCAL_FILE_OR_DIR" "$HOSTNAME":"$BMC_TMP_DIRECTORY/$REMOTEDIR"
 
     # Move files to real location
-    if [ -d $LOCALFILE ]
+    if [ -d $LOCAL_FILE_OR_DIR ]
     then
-        REMOTE_SUDO "cp -r $BMC_TMP_DIRECTORY/$REMOTEDIR/ $BMC_PATCH_DIRECTORY/$REMOTEDIR/"
+        REMOTE_SUDO "cp -r $BMC_TMP_DIRECTORY/$REMOTEDIR/ $BMC_PATCH_DIRECTORY/$REMOTEDIR"
+
     else
-        REMOTE_SUDO "cp -r $BMC_TMP_DIRECTORY/$REMOTEDIR/$BASEFILE $BMC_PATCH_DIRECTORY/$REMOTEDIR/"
+        REMOTE_SUDO "cp -r $BMC_TMP_DIRECTORY/$REMOTEDIR/$LOCAL_BASENAME $BMC_PATCH_DIRECTORY/$REMOTEDIR/"
     fi
 }
 
@@ -427,43 +429,49 @@ if [[ $COPY_ONLY = 1 ]] ; then
 
 else   # Apply the data to the BMC
 
-   FETCH_LID_IDS_FROM_BMC
+    FETCH_LID_IDS_FROM_BMC
 
-   # Copy patch files over too so we know what is being patched
-   COPYDIR=/tmp/hb_patches_`date +%Y%m%H%M%S`/
-   mkdir -p $COPYDIR
-   MAKE_GIT_PATCHFILES $COPYDIR
+    # Copy patch files over too so we know what is being patched
+    COPYDIR=/tmp/hb_patches_`date +%Y%m%H%M%S`/
+    mkdir -p $COPYDIR
 
-   if [[ $PATCH_HBI = 1 ]] ; then
-       PATCH_HBI_HBB
-   fi
+    if [[ $PATCH_HBI = 1 ]] ; then
+        PATCH_HBI_HBB
+    fi
 
-   if [[ $PATCH_HBD = 1 ]] ; then
-       PATCH_HBD
-   fi
+    if [[ $PATCH_HBD = 1 ]] ; then
+        PATCH_HBD
+    fi
 
-   if [[ $PATCH_HBRT = 1 ]] ; then
-       PATCH_HBRT
-   fi
+    if [[ $PATCH_HBRT = 1 ]] ; then
+        PATCH_HBRT
+    fi
 
-   if [[ $PATCH_HBBL = 1 ]] ; then
-       PATCH_HBBL
-   fi
+    if [[ $PATCH_HBBL = 1 ]] ; then
+        PATCH_HBBL
+    fi
 
-   if [ ${MGP_FILES_EXIST} -eq 1 ]; then
-       COPY_FILES_TO_BMC "$COPYDIR"/ "hbdebug/"
-   fi
+    MAKE_GIT_PATCHFILES $COPYDIR
 
-   # Need slight delay for rsync to complete before rm
-   sleep 2
-   rm -rf $COPYDIR
+    if [ ${MGP_FILES_EXIST} -eq 1 ]; then
+        # NOTE this cmd won't work without -r for rsync command, but then symbol
+        # files might be re-copied over:
+        #COPY_FILES_TO_BMC "$COPYDIR" "hbdebug/"
+        # So instead do these commands manually
+        REMOTE_SUDO "mkdir -p $BMC_PATCH_DIRECTORY/hbdebug/"
+        SSHPASS $COPYCMD "$COPYDIR"/* "$HOSTNAME":"$BMC_PATCH_DIRECTORY/hbdebug/"
+    fi
 
-   if [[ $RESTART_PLDMD = 1 ]] ; then
-       RESTART_PLDMD
-   fi
+    # Need slight delay for rsync to complete before rm
+    sleep 2
+    rm -rf $COPYDIR
 
-   CHECK_STATE
+    if [[ $RESTART_PLDMD = 1 ]] ; then
+        RESTART_PLDMD
+    fi
 
-   SHOW_PATCHES_ON_BMC
+    CHECK_STATE
+
+    SHOW_PATCHES_ON_BMC
 
 fi
