@@ -814,6 +814,63 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Execute a set of CCS instructions - multiple ports
+/// @tparam MC the memory controller type running CCS
+/// @tparam T the target type of the chiplet which executes the CCS instruction
+/// @tparam P  the port type for this CCS engine
+/// @tparam TT the CCS traits of the chiplet which executes the CCS instruction
+/// @param[in] i_target the target to effect
+/// @param[in] i_ports the vector of ports that need to be executed
+/// @param[in, out] io_program the vector of instructions
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
+static inline fapi2::ReturnCode execute_parallel_ports( const fapi2::Target<T>& i_target,
+        const std::vector< fapi2::Target<P> >& i_ports,
+        ccs::program<MC>& io_program)
+{
+    // Exit if we have empty vector of ports
+    if(i_ports.size() == 0)
+    {
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " No ports found", TARGTID);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    FAPI_INF_NO_SBE("Execution standalone CCS commands (%d) by running ports in parallel for " TARGTIDFORMAT,
+                    io_program.iv_instructions.size(),
+                    TARGTID);
+
+    auto l_inst_iter = io_program.iv_instructions.begin();
+
+    // Run prelude to execution
+    fapi2::buffer<uint64_t> l_periodics_reg;
+    fapi2::buffer<uint64_t> l_power_cntl_reg;
+    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports, l_periodics_reg, l_power_cntl_reg),
+              "Error setting up ccs engine before execution on " TARGTIDFORMAT, TARGTID );
+
+    // Execute via standalone CCS
+    while (l_inst_iter != io_program.iv_instructions.end())
+    {
+
+        FAPI_TRY( select_ports<MC>( i_target, i_ports, io_program.iv_channel_select),
+                  "Error in port select for ccs::execute_via_mcbist on " TARGTIDFORMAT, TARGTID );
+
+        // Run ccs instruction setup
+        FAPI_TRY( setup_ccs_instructions<MC>(i_target, l_inst_iter, io_program, i_ports[0]),
+                  "Error setting up ccs instructions in registers on " TARGTIDFORMAT, TARGTID);
+        FAPI_TRY( execute_inst_array<MC>(i_target, io_program, i_ports[0]),
+                  "Error in executing ccs array for " TARGTIDFORMAT, TARGTID);
+    }
+
+    // Cleans up after executing the CCS program (runs workarounds if needed)
+    FAPI_TRY((cleanup_from_execute<MC>(i_target, io_program, l_periodics_reg, l_power_cntl_reg)));
+
+fapi_try_exit:
+    io_program.iv_instructions.clear();
+    return fapi2::current_err;
+}
+
+///
 /// @brief Setup and Execute a set of CCS instructions, then Restore state after
 /// @tparam MC the memory controller type running CCS
 /// @tparam T the target type of the chiplet which executes the CCS instruction
