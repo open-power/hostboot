@@ -1088,7 +1088,8 @@ void ErrlEntry::checkHiddenLogsEnable( )
 
         case ERRL_SEV_RECOVERED:
 
-            if(hiddenLogFlags & ENABLE_RECOVERABLE_LOGS)
+            if ((hiddenLogFlags & ENABLE_RECOVERABLE_LOGS)
+                || hasErrorType(ERRORLOG::ERRL_SPARE_ERROR_TYPE))
             {
                 iv_skipProcessingLog = false;
             }
@@ -2653,7 +2654,8 @@ void ErrlEntry::deferredDeconfigure()
     TRACDCOMP(g_trac_errl, INFO_MRK"errlEntry::deferredDeconfigure");
 
     // Skip all callouts if this is a non-visible log
-    if( !isSevVisible() )
+    if( !isSevVisible() && hasErrorTypeOtherThan(ERRL_SPARE_ERROR_TYPE,
+                                                 propagation_t::NO_PROPAGATE))
     {
         TRACDCOMP(g_trac_errl, "Error log is non-visible - skipping callouts");
         return;
@@ -3410,13 +3412,13 @@ bool ErrlEntry::hasMaintenanceCallout(bool i_includeInfo)
         }
     }
     //Informational logs might have callouts but generally we don't care
-    if( !i_includeInfo && !isSevVisible() )
+    if( !i_includeInfo && !isSevVisible()
+        && hasErrorTypeOtherThan(ERRORLOG::ERRL_SPARE_ERROR_TYPE, propagation_t::NO_PROPAGATE))
     {
         maintenance_callout_found = false;
     }
     return maintenance_callout_found;
 }
-
 
 void ErrlEntry::setDeconfigState(TARGETING::Target* const i_target,
                                  const DeconfigEnum i_deconfigState,
