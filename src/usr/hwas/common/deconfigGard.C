@@ -3972,6 +3972,13 @@ bool DeconfigGard::reduceSpareCores( TARGETING::Target* i_target )
             }
         }
 
+        // Make sure we aren't dealing with an ECO core, these are not supported
+        // to be replaced with spares.
+        if (l_sparedCores.size() && l_sparedCores[0]->getAttr<TARGETING::ATTR_ECO_MODE>() == ECO_MODE_ENABLED)
+        {
+            return false;
+        }
+
         // Make sure we haven't already taken these cores into account
         for( auto core = l_sparedCores.begin();
              core != l_sparedCores.end(); )
