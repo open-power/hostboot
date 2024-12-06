@@ -172,6 +172,22 @@ const uint64_t RAWLANEAONN_DIG_ADPT_CTL_9[NUM_OF_INSTANCES] =
     0x800170490801153F,
 };
 
+const uint64_t RAWLANEAONN_DIG_ADPT_CTL_11[NUM_OF_INSTANCES] =
+{
+    0x8000704B0801113F,
+    0x8001704B0801113F,
+    0x8000704B0801153F,
+    0x8001704B0801153F,
+};
+
+const uint64_t RAWLANEAONN_DIG_ADPT_CTL_23[NUM_OF_INSTANCES] =
+{
+    0x800070570801113F,
+    0x800170570801113F,
+    0x800070570801153F,
+    0x800170570801153F,
+};
+
 ///-----------------------------------------------------------------------------
 /// Function definitions
 ///-----------------------------------------------------------------------------
@@ -340,22 +356,22 @@ fapi2::ReturnCode p10_load_iop_override(
             if ((l_fw_ver_0 == FW_VER_0_JUL_2020) && (l_fw_ver_1 == FW_VER_1_JUL_2020))
             {
                 l_data = 0;
-                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
+                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i], l_data),
                          "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
                 l_data.setBit<FAST_RX_CONT_CAL_ADAPT_BIT>();
                 FAPI_DBG("RAWLANEAONN_DIG_FAST_FLAGS_REG 0x%.0x", l_data);
-                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i] , l_data),
+                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_FAST_FLAGS_REG[i], l_data),
                          "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_FAST_FLAGS_REG[i]);
             }
             else if ((l_fw_ver_0 == FW_VER_0_DEC_2020) && (l_fw_ver_1 == FW_VER_1_DEC_2020))
             {
                 //This bit skips RX DFE slicer continuous calibration.
                 l_data = 0;
-                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i] , l_data),
+                FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i], l_data),
                          "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i]);
                 l_data.setBit<SKIP_RX_DFE_CAL_CONT>();
                 FAPI_DBG("RAWLANEAONN_DIG_RX_CONT_ALGO_CTL 0x%.0x", l_data);
-                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i] , l_data),
+                FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i], l_data),
                          "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_RX_CONT_ALGO_CTL[i]);
             }
 
@@ -363,18 +379,18 @@ fapi2::ReturnCode p10_load_iop_override(
             l_data = 0;
             l_data.setBit(SCRATCH_15_START, SCRATCH_15_LEN);
             FAPI_DBG("RAWLANEN_DIG_FSM_FW_SCRATCH_15 0x%.0x", l_data);
-            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEN_DIG_FSM_FW_SCRATCH_15[i] , l_data),
+            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEN_DIG_FSM_FW_SCRATCH_15[i], l_data),
                      "Error from putScom 0x%.16llX", RAWLANEN_DIG_FSM_FW_SCRATCH_15[i]);
 
             // GEN1/GEN2 workaround - Yield issue.
             // Step 1
             l_data = 0;
-            FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+            FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i], l_data),
                      "Error from getScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
             l_data.setBit<MPLLA_ANA_EN_OVRD_EN>();
             l_data.setBit<MPLLA_ANA_EN>();
             FAPI_DBG("Step1: SUP_DIG_ANA_MPLLA_OVRD_OUT0 0x%.0x", l_data);
-            FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+            FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i], l_data),
                      "Error from putScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
 
             FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
@@ -394,29 +410,29 @@ fapi2::ReturnCode p10_load_iop_override(
 
             // Step 3
             l_data = 0;
-            FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+            FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i], l_data),
                      "Error from getScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
             l_data.setBit<MPLLA_ANA_VREG_SPEEDUP_OVRD_EN>();
             l_data.clearBit<MPLLA_ANA_VREG_SPEEDUP>();
             FAPI_DBG("Step3: SUP_DIG_ANA_MPLLA_OVRD_OUT0 0x%.0x", l_data);
-            FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+            FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i], l_data),
                      "Error from putScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
 
             FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
 
             // Step 4
             l_data = 0;
-            FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+            FAPI_TRY(fapi2::getScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i], l_data),
                      "Error from getScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
             l_data.setBit<MPLLA_FDIV_EN_OVRD_EN>();
             l_data.setBit<MPLLA_FDIV_EN>();
             FAPI_DBG("Step4: SUP_DIG_ANA_MPLLA_OVRD_OUT0 0x%.0x", l_data);
-            FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i] , l_data),
+            FAPI_TRY(fapi2::putScom(l_pec_target, SUP_DIG_ANA_MPLLA_OVRD_OUT0[i], l_data),
                      "Error from putScom 0x%.16llX", SUP_DIG_ANA_MPLLA_OVRD_OUT0[i]);
 
             // Raise TX Vreg gain (from 2 to 2.3)
             l_data = 0x0000000000000004;
-            FAPI_TRY(fapi2::putScom(l_pec_target, TX_VREG_GAIN[i] , l_data),
+            FAPI_TRY(fapi2::putScom(l_pec_target, TX_VREG_GAIN[i], l_data),
                      "Error from putScom 0x%.16llX", TX_VREG_GAIN[i]);
 
             FAPI_TRY(fapi2::delay(MICRO_SEC_DELAY, SIM_CYC_DELAY), "fapiDelay error.");
@@ -426,6 +442,15 @@ fapi2::ReturnCode p10_load_iop_override(
             l_data.setBit<60>();
             l_data.setBit<63>();
             FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_9[i], l_data));
+
+            // set bit 15 in DIG_ADAPT_CTL_11
+            FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_11[i], l_data));
+            l_data.setBit<48>();
+            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_11[i], l_data));
+
+            // write entirety of DIG_ADAPT_CTL_23 = 0x954C
+            l_data = 0x000000000000954CULL;
+            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_ADPT_CTL_23[i], l_data));
         }
     }
 
@@ -553,11 +578,11 @@ fapi2::ReturnCode p10_load_rtrim_override(
             //Change RTRIM setting to reflect short channels for better AFE performance.
             //Needs to be set after a toggle of lane_reset.
             l_data = 0;
-            FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i] , l_data),
+            FAPI_TRY(fapi2::getScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i], l_data),
                      "Error from getScom 0x%.16llX", RAWLANEAONN_DIG_AFE_RTRIM[i]);
             l_data.insertFromRight(AFE_RTRIM_VAL, AFE_RTRIM_START, AFE_RTRIM_LEN);
             FAPI_DBG("RAWLANEAONN_DIG_AFE_RTRIM 0x%.0x", l_data);
-            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i] , l_data),
+            FAPI_TRY(fapi2::putScom(l_pec_target, RAWLANEAONN_DIG_AFE_RTRIM[i], l_data),
                      "Error from putScom 0x%.16llX", RAWLANEAONN_DIG_AFE_RTRIM[i]);
         }
     }
@@ -627,9 +652,9 @@ fapi2::ReturnCode p10_verify_iop_fw(
             fapi2::buffer<uint64_t> l_fw_ver_0_hw = 0;
             fapi2::buffer<uint64_t> l_fw_ver_1_hw = 0;
 
-            FAPI_TRY(fapi2::getScom(l_pec_target, RAWCMN_DIG_AON_FW_VERSION_0[i] , l_fw_ver_0_hw),
+            FAPI_TRY(fapi2::getScom(l_pec_target, RAWCMN_DIG_AON_FW_VERSION_0[i], l_fw_ver_0_hw),
                      "Error from getScom 0x%.16llX", RAWCMN_DIG_AON_FW_VERSION_0[i]);
-            FAPI_TRY(fapi2::getScom(l_pec_target, RAWCMN_DIG_AON_FW_VERSION_1[i] , l_fw_ver_1_hw),
+            FAPI_TRY(fapi2::getScom(l_pec_target, RAWCMN_DIG_AON_FW_VERSION_1[i], l_fw_ver_1_hw),
                      "Error from getScom 0x%.16llX", RAWCMN_DIG_AON_FW_VERSION_1[i]);
 
             FAPI_ASSERT(l_attr_is_simics ||
