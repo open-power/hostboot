@@ -305,8 +305,8 @@ enum VmmRestriction : uint64_t
  * (HRMOR+108MB)..(HRMOR+109MB): Arch reg data (1MB)
  * (HRMOR+109MB)..(HRMOR+110MB): HBRT Data TOC (hbrtTableOfContents_t)
  * (HRMOR+110MB): Reserved mem start
- * (HRMOR+(172MB-32KB)): Reserved mem end
- * (HRMOR+(172MB-32KB))..(HRMOR+172MB): TOC_ADDR (32KB)
+ * (HRMOR+(172MB-80KB)): Reserved mem end
+ * (HRMOR+(172MB-80KB))..(HRMOR+172MB): TOC_ADDR (32KB)
  * (HRMOR+172MB)..(HRMOR+236MB): TOC_TMP_ADDR (64MB + PAGESIZE)
  * (HRMOR+236MB)..(HRMOR+252MB): HDAT_TMP_ADDR (16MB)
  * (HRMOR+252MB)..(HRMOR+256MB): TCE Table (needs to be 4-byte aligned) (4MB)
@@ -320,10 +320,13 @@ enum VmmRestriction : uint64_t
 
 /** Two memory locations for TOC processing **/
 // Note: 2 spaces needed so the TOC can be initialized without wiping out PHYP
-// Location for the TOC itself to sit in.
-#define MTOC_SIZE (32*KILOBYTE)  // master TOC size to not conflict with other vars
+// (1) Location for the TOC itself to sit in.
+// Max Size TOC is when system is in V3 Secureboot Signing Mode:
+//  V3 Security Header (15KB) + HLL (max size of 64KB) = 79KB,
+//  then rounded up to a page (4KB) boundary: 80KB
+#define MTOC_SIZE (80*KILOBYTE)  // master TOC size to not conflict with other vars
 #define TOC_ADDR (TOC_TMP_ADDR - MTOC_SIZE)
-// Location for PHYP to be loaded into and reused for all Lids
+// (2) Location for PHYP to be loaded into and reused for all Lids
 // Verification is done in a temporary, non-secure area of mainstore memory,
 // then relocated to its final, secure location in mainstore.
 #define TOC_TMP_SIZE ((64 * MEGABYTE) + PAGESIZE)

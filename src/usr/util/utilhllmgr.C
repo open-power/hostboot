@@ -61,7 +61,7 @@ const GroupID g_HLLPowerVM {"POWERVM"};
 const GroupID g_HLLPreVerified {"PREVERIFY"};
 
 #define V1_SIZE (4*KILOBYTE)  // 4 KB
-#define V2_SIZE (16*KILOBYTE) // 16 KB
+#define V3_SIZE (15*KILOBYTE) // 15 KB
 
 void groupIdToString(const GroupID i_groupId, GroupIdString o_groupIdStr)
 {
@@ -247,6 +247,9 @@ void HLLMgr::initHLL(const void* i_pHLL, const size_t i_HLLSize)
 {
     errlHndl_t l_errl = nullptr;
 
+    UTIL_FT(ENTER_MRK"HLLMgr::initHLL: i_pHLL=%p, i_HLLSize=0x%X",
+            i_pHLL, i_HLLSize);
+
     // Add HLL itself to Cache with group g_HLLGroup
     LidInfo l_hdrLidInfo(Util::HLL_LIDID);
     GroupInfo l_groupHdrInfo(HllEntryFlags::SIGNED_PRE_VERIFY);
@@ -306,6 +309,9 @@ void HLLMgr::initHLL(const void* i_pHLL, const size_t i_HLLSize)
     // Switch to temp address and size for all other groups
     iv_pVaddr = iv_pTempVaddr;
     iv_maxSize = iv_tmpSize;
+
+    UTIL_FT(EXIT_MRK"HLLMgr::initHLL");
+
 }
 
 void HLLMgr::releaseMem(const uint64_t i_physAddr,
@@ -397,10 +403,12 @@ void HLLMgr::initMem(const uint64_t i_physAddr,
         // the instance variable iv_pHLLVaddr will be appropriately mapped to also validate the memory signature
         // of the TOC space.
         auto l_pHLL = reinterpret_cast<const uint8_t*>(iv_pHLLVaddr);
-        // When class constructor is called with a real TOC sets iv_hasHeader
+        // When class constructor is called with a real TOC it sets iv_hasHeader
+        // to true
         if (iv_hasHeader)
         {
-            l_pHLL += V1_SIZE;
+            // Only supporting HLL with a V3 Header going forward
+            l_pHLL += V3_SIZE;
         }
         auto l_pHdr = reinterpret_cast<const HLLHeader*>(l_pHLL);
         if (l_pHdr->EyeCatcher != HLL_EYE_CATCHER)
@@ -461,26 +469,8 @@ bool HLLMgr::isValid()
 
 errlHndl_t HLLMgr::parseHLL()
 {
-    #define V1_SIZE (4*KILOBYTE)  // 4 KB
-    #define V3_SIZE (16*KILOBYTE) // 16 KB
-
     errlHndl_t l_err = nullptr;
-    uint64_t l_algo_size = V1_SIZE;
-    switch (SECUREBOOT::hashSignMode())
-    {
-        case 0x0: // TARGETING::SB_SIGNING_V1_CONTAINER
-            l_algo_size = V1_SIZE;
-            break;
-        case 0x2: // TARGETING::SB_SIGNING_V3_CONTAINER
-            l_algo_size = V3_SIZE;
-            break;
-        // case 0x1 is V2 which is not used
-        default:
-            assert(false, "Unsupported hash algorithm");
-            break;
-    }
 
-    UTIL_FT(ENTER_MRK"HLLMgr::parseHLL l_algo_size=%d", l_algo_size);
     assert(iv_pHLLVaddr != nullptr);
     do {
     auto l_pHLL = reinterpret_cast<const uint8_t*>(iv_pHLLVaddr);
@@ -488,8 +478,10 @@ errlHndl_t HLLMgr::parseHLL()
     // When class constructor is called with a real TOC sets iv_hasHeader
     if (iv_hasHeader)
     {
-        l_pHLL += V1_SIZE;
+        // Only supporting HLL with a V3 Header going forward
+        l_pHLL += V3_SIZE;
     }
+
     auto l_pHdr = reinterpret_cast<const HLLHeader*>(l_pHLL);
     uint32_t l_offsetToPowerVM =  l_pHdr->OffsetToPowerVM;
     auto l_pPowerVMHdr = reinterpret_cast<const PowerVmHeader*>(l_pHLL+l_offsetToPowerVM);
@@ -982,7 +974,7 @@ errlHndl_t HLLMgr::initMetaData(
         memset(l_pUnused, 0, iv_maxSize - io_groupInfo.totalSize);
     }
 
-    // We are loading the HLL to the 30k buffer
+    // We are loading the HLL to the TOC_ADDR of MTOC_SIZE size
     auto l_curAddr =  reinterpret_cast<uint64_t>(iv_pVaddr);
     bool l_firstLid = true;
     for (auto & lidInfo : io_groupInfo.lidIds)
@@ -1019,7 +1011,10 @@ errlHndl_t HLLMgr::initMetaData(
         break;
     }
 
-    if (SECUREBOOT::enabled())
+    // @TODO JIRA:PFHB-802 Skipping V3 verification for now
+    // (HLL is V3 based)
+    // if (SECUREBOOT::enabled())
+    if (0)
     {
         // Parse the HLL Container Header
         SECUREBOOT::ContainerHeader l_conHdr;
@@ -1335,7 +1330,6 @@ errlHndl_t HLLMgr::loadLids(GroupInfo& io_groupInfo,
                     assert(false,"Bug! handleSecurebootFailure shouldn't return!");
                 }
             }
-
 
             // @TODO JIRA:PFHB-802 Skipping V3 verification for now
             // (HLL is V3 based)
