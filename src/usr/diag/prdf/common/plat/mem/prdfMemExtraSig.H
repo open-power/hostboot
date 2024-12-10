@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -133,10 +133,13 @@ PRDR_ERROR_SIGNATURE(DsdBadSpare,     0xbbbb0031, "", "DSD: DRAM spare is bad");
 PRDR_ERROR_SIGNATURE(RrdRowDeployed,  0xbbbb0032, "", "RRD: Spare row successfully deployed");
 PRDR_ERROR_SIGNATURE(RrdBadRow,       0xbbbb0033, "", "RRD: Bad spare row");
 
-PRDR_ERROR_SIGNATURE(OmiDegradeFix0,    0xcccc0000, "", "MC_OMI_DL_FIR[5]: OMI-DL0 running in degraded mode, KVCO=2");
-PRDR_ERROR_SIGNATURE(OmiDegradeFix1,    0xcccc0001, "", "MC_OMI_DL_FIR[25]: OMI-DL1 running in degraded mode, KVCO=2");
-PRDR_ERROR_SIGNATURE(OmiDegradeFixOcmb, 0xcccc0002, "", "OMIDLFIR[5]: OMI-DL0 running in degraded mode, KVCO=2");
+PRDR_ERROR_SIGNATURE(OmiDegradeFix0,    0xcccc0000, "MC_OMI_DL_FIR[5]", "OMI-DL0 running in degraded mode, KVCO=2");
+PRDR_ERROR_SIGNATURE(OmiDegradeFix1,    0xcccc0001, "MC_OMI_DL_FIR[25]", "OMI-DL1 running in degraded mode, KVCO=2");
+PRDR_ERROR_SIGNATURE(OmiDegradeFixOcmb, 0xcccc0002, "OMIDLFIR[5]", "OMI-DL0 running in degraded mode, KVCO=2");
 
+PRDR_ERROR_SIGNATURE(OmiDegradeVddUplift0,    0xcccc0003, "MC_OMI_DL_FIR[5]", "OMI-DL0 running in degraded mode, VDD Uplift Applied");
+PRDR_ERROR_SIGNATURE(OmiDegradeVddUplift1,    0xcccc0004, "MC_OMI_DL_FIR[25]", "OMI-DL1 running in degraded mode, VDD Uplift Applied");
+PRDR_ERROR_SIGNATURE(OmiDegradeVddUpliftOcmb, 0xcccc0005, "OMIDLFIR[5]", "OMI-DL0 running in degraded mode, VDD Uplift Applied");
 
 PRDR_ERROR_SIGNATURE(CrcRootCause,    0xffff009F, "", "Root cause of CRC error found in PAU_PHY_FIR");
 
