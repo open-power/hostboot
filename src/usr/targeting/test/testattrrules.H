@@ -127,6 +127,7 @@ public:
 
           ATTR_FW_RELEASE_VERSION, //ok,BMC only
           ATTR_RAW_MTM, //ok,BMC only
+          ATTR_PVR_82_MODE, //ok
           ATTR_DISABLE_PREDICTIVE_MEM_GUARD,
 #ifdef CONFIG_INCLUDE_XML_OPENPOWER
           ATTR_SYSTEM_BRAND_NAME, //ok,BMC only

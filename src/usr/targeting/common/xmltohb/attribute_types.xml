@@ -7301,6 +7301,22 @@
   </attribute>
 
   <attribute>
+    <description>There is a set of p10 machines within the PowerVS IBM Cloud
+                 that must run with FW1110 code in P10 mode. Hostboot controls
+                 this by applying the PVR dynamic init to force P10 mode based
+                 on the MTM. This is a two dimensional array of bytes. It is N
+                 array elements of 9 bytes each.
+    </description>
+    <id>POWERVS_P10_MTM</id>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <simpleType>
+      <array>3,9</array>
+      <uint8_t/>
+    </simpleType>
+  </attribute>
+
+  <attribute>
     <description>Hierarchical path to the target with respect to power</description>
     <id>POWER_PATH</id>
     <nativeType>

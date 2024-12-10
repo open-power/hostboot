@@ -1038,6 +1038,7 @@
     <attribute>
         <!-- Hide from MRW -->
         <id>ATTR_PVR_82_MODE</id>
+        <writeable/>
         <no_export/>
     </attribute>
 

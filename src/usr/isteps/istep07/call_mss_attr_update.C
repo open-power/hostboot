@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -771,6 +771,58 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
     } while(0);
 }
 
+/**
+ * @brief Check the RAW_MTM and set PVR_82_MODE to OFF if appropriate
+ *
+ * @param[in] pointer to the top-level target
+ *
+ */
+void check_PVR_82_MODE(Target *i_sys)
+{
+#ifndef CONFIG_FSP_BUILD
+    // HWSV code is responsible for setting the value on FSP systems since
+    // Hostboot doesn't have access to the MTM
+
+    // get the list of MTMs for the compare
+    ATTR_POWERVS_P10_MTM_type l_MTMArray = {0};
+    if (!i_sys->tryGetAttr<ATTR_POWERVS_P10_MTM>(l_MTMArray))
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "check_PVR_82_MODE: ERROR: getAttr POWERVS_P10_MTM");
+        return;
+    }
+    const int l_MTMArray_size = sizeof(l_MTMArray) / 9; // MTMs are 9 bytes
+
+    // get the MTM of the machine to compare
+    ATTR_RAW_MTM_type l_rawMTM = {0};
+    if (!i_sys->tryGetAttr<ATTR_RAW_MTM>(l_rawMTM))
+    {
+        TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                "check_PVR_82_MODE: ERROR: getAttr ATTR_RAW_MTM");
+        return;
+    }
+
+    // if the machine MTM is in the list of MTMs, then set PVR_82_MODE to OFF
+    bool l_match{false};
+    for (int i=0; i<l_MTMArray_size; i++)
+    {
+        if (memcmp(l_MTMArray[i], l_rawMTM,8) == 0)
+        {
+            // if a match is found, turn off PVR_82_MODE
+            TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
+                    "check_PVR_82_MODE: MATCH - set PVR_82_MODE to OFF");
+            l_match = true;
+            i_sys->setAttr<ATTR_PVR_82_MODE>(0);
+        }
+    }
+    if (!l_match)
+    {
+        // no match, ensure PVR_82_MODE is ON
+        i_sys->setAttr<ATTR_PVR_82_MODE>(1);
+    }
+#endif
+    return;
+}
 
 //
 //  Wrapper function to call mss_attr_update
@@ -785,6 +837,8 @@ void* call_mss_attr_update( void *io_pArgs )
     do
     {
         Target* l_sys = UTIL::assertGetToplevelTarget();
+
+        check_PVR_82_MODE(l_sys);
 
         //Get the master proc
         TargetHandle_t l_mProc;
