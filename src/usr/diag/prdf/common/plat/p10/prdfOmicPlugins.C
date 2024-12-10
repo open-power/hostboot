@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -414,6 +414,27 @@ int32_t CheckKvcoFix( ExtensibleChip * i_chip,
         {
             io_sc.service_data->setSignature(i_chip->getHuid(),
                                              PRDFSIG_OmiDegradeFix1);
+        }
+    }
+
+    // Another OMI degrade fix was applied to increase the VDD core voltage.
+    // Check ATTR_MSS_OMI_VDD_UPLIFT_APPLIED on the OCMB and adjust the
+    // signature if that is set to 1. A tryGetAttr is used here in case of
+    // a Hostboot bug that may not be fixed yet that could cause the attribute
+    // to be unavailable to read after a concurrent update.
+    fapi2::ATTR_MSS_OMI_VDD_UPLIFT_APPLIED_Type attr;
+    if (ocmb->tryGetAttr<ATTR_MSS_OMI_VDD_UPLIFT_APPLIED>(attr) &&
+        (fapi2::ENUM_ATTR_MSS_OMI_VDD_UPLIFT_APPLIED_YES == attr))
+    {
+        if (0 == i_dl)
+        {
+            io_sc.service_data->setSignature(i_chip->getHuid(),
+                                             PRDFSIG_OmiDegradeVddUplift0);
+        }
+        else
+        {
+            io_sc.service_data->setSignature(i_chip->getHuid(),
+                                             PRDFSIG_OmiDegradeVddUplift1);
         }
     }
 

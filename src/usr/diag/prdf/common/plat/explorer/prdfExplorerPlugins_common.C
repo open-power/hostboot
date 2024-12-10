@@ -545,6 +545,19 @@ int32_t CheckKvcoFix( ExtensibleChip * i_chip,
                                          PRDFSIG_OmiDegradeFixOcmb);
     }
 
+    // Another OMI degrade fix was applied to increase the VDD core voltage.
+    // Check ATTR_MSS_OMI_VDD_UPLIFT_APPLIED on the OCMB and adjust the
+    // signature if that is set to 1. A tryGetAttr is used here in case of
+    // a Hostboot bug that may not be fixed yet that could cause the attribute
+    // to be unavailable to read after a concurrent update.
+    fapi2::ATTR_MSS_OMI_VDD_UPLIFT_APPLIED_Type attr;
+    if (i_chip->getTrgt()->tryGetAttr<ATTR_MSS_OMI_VDD_UPLIFT_APPLIED>(attr) &&
+        (fapi2::ENUM_ATTR_MSS_OMI_VDD_UPLIFT_APPLIED_YES == attr))
+    {
+        io_sc.service_data->setSignature(i_chip->getHuid(),
+                                         PRDFSIG_OmiDegradeVddUpliftOcmb);
+    }
+
     return SUCCESS;
 }
 PRDF_PLUGIN_DEFINE( explorer_ocmb, CheckKvcoFix );
