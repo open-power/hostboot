@@ -359,100 +359,6 @@ get_rcw[NUM_SUPPORTED_RCW][mss::ddr5::mr::ATTR_NUM_CHANNELS][DIMM_NUMBER] =
 #endif
 
 ///
-/// @class msg_block_vars
-/// @brief Structure of attribute values used in the PHY message block
-///
-struct msg_block_vars
-{
-    uint8_t iv_AdvTrainOpt = 0;
-    uint8_t iv_MsgMisc = 0;
-    uint8_t iv_Pstate = 0;
-    uint8_t iv_PllBypassEn = 0;
-    uint64_t iv_DRAMFreq = 0;
-    uint8_t iv_RCW05_next = 0;
-    uint8_t iv_RCW06_next = 0;
-    uint8_t iv_RXEN_ADJ = 0;
-    uint8_t iv_RX2D_DFE_Misc = 0;
-    uint8_t iv_PhyVref = 0;
-    uint8_t iv_D5Misc = 0;
-    uint8_t iv_WL_ADJ = 0;
-    uint16_t iv_SequenceCtrl = 0;
-    uint8_t iv_HdtCtrl = 0;
-    uint8_t iv_PhyCfg = 0;
-    uint8_t iv_DFIMRLMargin = 0;
-    uint8_t iv_X16Present = 0;
-    uint8_t iv_UseBroadcastMR = 0;
-    uint8_t iv_D5Quickboot = 0;
-    uint8_t iv_DisabledDbyte = 0;
-    uint8_t iv_CATrainOpt = 0;
-    uint8_t iv_TX2D_DFE_Misc = 0;
-    uint8_t iv_RX2D_TrainOpt = 0;
-    uint8_t iv_TX2D_TrainOpt = 0;
-    uint8_t iv_Share2DVrefResult = 0;
-    uint8_t iv_MRE_MIN_PULSE = 0;
-    uint8_t iv_DWL_MIN_PULSE = 0;
-    uint16_t iv_PhyConfigOverride = 0;
-    uint8_t iv_EnabledDQsChA = 0;
-    uint8_t iv_EnabledDQsChB = 0;
-    uint8_t iv_CsPresentChA[mss::ody::MAX_DIMM_PER_PORT] = {0};
-    uint8_t iv_CsPresentChB[mss::ody::MAX_DIMM_PER_PORT] = {0};
-    uint8_t iv_MR0[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR2[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR3[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
-    uint8_t iv_MR4[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR5[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR6[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR32[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR32_ORG[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR8[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR10[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
-    uint8_t iv_MR11[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
-    uint8_t iv_MR12[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
-    uint8_t iv_MR13[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR14[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR15[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR111[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR33[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR33_ORG[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR33_per_dram[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
-    uint8_t iv_MR34[mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
-    uint8_t iv_MR35[mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
-    uint8_t iv_MR37[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR38[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR39[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR50[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR51[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_MR52[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_DFE_GainBias[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_ReservedF6 = 0;
-    uint8_t iv_ReservedF7 = 0;
-    uint8_t iv_ReservedF8 = 0;
-    uint8_t iv_ReservedF9 = 0;
-    uint8_t iv_RD_RTT_PARK_attr[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_WR_RTT_PARK_attr[mss::ody::MAX_RANK_PER_DIMM] = {0};
-    uint8_t iv_RD_RTT_PARK[mss::ody::MAX_RANK_PER_PHY] = {0};
-    uint8_t iv_WR_RTT_PARK[mss::ody::MAX_RANK_PER_PHY] = {0};
-    uint8_t iv_Reserved1E2 = 0;
-    uint8_t iv_Reserved1E3 = 0;
-    uint8_t iv_Reserved1E4 = 0;
-    uint8_t iv_Reserved1E5 = 0;
-    uint8_t iv_Reserved1E6 = 0;
-    uint8_t iv_Reserved1E7 = 0;
-    uint16_t iv_WL_ADJ_START = 0;
-    uint16_t iv_WL_ADJ_END = 0;
-#ifndef __PPE__
-    uint8_t iv_RCW[NUM_RCW][mss::ddr5::mr::ATTR_NUM_CHANNELS][DIMM_NUMBER] = {};
-#endif
-    uint32_t iv_nibbles_enables[mss::ody::MAX_DIMM_PER_PORT] = {0};
-    uint8_t iv_DisabledDB[mss::ody::MAX_BYTES_PER_PORT][mss::ody::MAX_RANK_PER_DIMM] = {};
-    uint8_t iv_VrefCS_Sweep_Min = 0;
-    uint8_t iv_VrefCS_Sweep_Max = 0;
-    uint8_t iv_VrefCA_Sweep_Min = 0;
-    uint8_t iv_VrefCA_Sweep_Max = 0;
-    uint8_t iv_MR32_per_dram[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] = {};
-} __attribute__ ((aligned (8))) ;
-
-///
 /// @class bad_bits_mc
 /// @brief Structure of bad bits for rank0 and rank1 in MC perspective
 ///
@@ -509,2671 +415,1649 @@ fapi_try_exit:
 }
 
 ///
-/// @class msg_block_params
-/// @brief Provides storage and methods for setting up message block structure
-/// @note Since this is a large class, here's a description of how it works:
-///  constructor:
-///   - read attributes into iv_msg_block_vars
-///   - set up MR values in iv_msg_block_vars
-///   - swizzle rank-based fields from port rank to phy rank
-///  setup_<field> functions:
-///   - force certain values required for RCD or non-RCD
-///   - force certain values required for sim
-///   - force RFU values as needed
-///   - copy values from iv_msg_block_vars into PMU_SMB_DDR5U_1D_t struct
+/// @brief msg_block structure setup for parameter AdvTrainOpt
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
 ///
-class msg_block_params
+inline fapi2::ReturnCode setup_AdvTrainOpt(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
 {
-    private:
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_ADV_TRAIN_OPT, i_target, io_msg_block.AdvTrainOpt));
 
-        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> iv_target;
-        fapi2::Target<fapi2::TARGET_TYPE_DIMM> iv_dimm;
-        msg_block_vars iv_msg_block_vars;
-        std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> iv_rank_infos;
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-    public:
+///
+/// @brief msg_block structure setup for parameter MsgMisc
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_MsgMisc(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                       PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_MSG_MISC, i_target, io_msg_block.MsgMisc));
 
-        /// default constructor is deleted
-        msg_block_params() = delete;
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-        ///
-        /// @brief Constructor to fetch attributes
-        ///
-        /// @brief fetch the attributes and initialize it to the params
-        /// @param[in] i_target the mem_port target
-        /// @param[out] ReturnCode to report error in class construction
-        ///
-        msg_block_params(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                         fapi2::ReturnCode& o_rc):
-            iv_target(i_target)
+///
+/// @brief msg_block structure setup for parameter PllBypassEn
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_PllBypassEn(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PLL_BYPASS_EN, i_target, io_msg_block.PllBypassEn));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter DRAMFreq
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_DRAMFreq(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    uint64_t l_DRAMFreq = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, l_DRAMFreq));
+    io_msg_block.DRAMFreq = static_cast<uint16_t>(l_DRAMFreq);
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter RXEN_ADJ
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_RXEN_ADJ(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_RXEN_ADJ, i_target, io_msg_block.RXEN_ADJ));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter RX2D_DFE_Misc
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_RX2D_DFE_Misc(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_RX2D_DFE_MISC, i_target, io_msg_block.RX2D_DFE_Misc));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter PhyVref
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_PhyVref(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                       PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_PHY_VREF_RD, i_target, io_msg_block.PhyVref));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter D5Misc
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_dimm the active DIMM target on the given memory port
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_D5Misc(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                      const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+                                      PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    fapi2::buffer<uint8_t> l_buffer;
+    uint8_t l_redundant_cs_en = 0;
+    constexpr uint8_t PARTIAL_RANK_OPTION = 6;
+
+    // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
+    constexpr uint8_t RFU5 = 2;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_D5MISC, i_target, l_buffer));
+    FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(i_dimm, l_redundant_cs_en));
+
+    // Update D5Misc[1] depending on redundant CS mode
+    l_buffer.writeBit<PARTIAL_RANK_OPTION>(l_redundant_cs_en == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE);
+
+    // Force RFU bit to be disabled
+    l_buffer.clearBit<RFU5>();
+
+    io_msg_block.D5Misc = l_buffer;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter WL_ADJ
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_WL_ADJ(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                      PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_WL_ADJ, i_target, io_msg_block.WL_ADJ));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter SequenceCtrl
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_SequenceCtrl(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    constexpr uint8_t RCD_CSCA = 1;
+    constexpr uint8_t LRDIMM_TESTS_START = 2;
+    constexpr uint8_t LRDIMM_TESTS_LEN = 4;
+    // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
+    constexpr uint8_t RFU8 = 7;
+    constexpr uint8_t RFU7 = 8;
+
+    fapi2::buffer<uint16_t> l_buffer;
+    bool l_has_rcd = false;
+
+    FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SEQUENCE_CTRL, i_target, l_buffer));
+
+    // Make sure Run RCD_CSCA is disabled for UDIMM
+    if (!l_has_rcd)
+    {
+        l_buffer.clearBit<RCD_CSCA>();
+    }
+
+    // Force LRDIMM tests to be disabled
+    l_buffer.clearBit<LRDIMM_TESTS_START, LRDIMM_TESTS_LEN>();
+
+    // Force RFU tests to be disabled
+    l_buffer.clearBit<RFU8>();
+    l_buffer.clearBit<RFU7>();
+
+    io_msg_block.SequenceCtrl = l_buffer;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter HdtCtrl
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_HdtCtrl(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                       PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_VERBOSITY, i_target, io_msg_block.HdtCtrl));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter PhyCfg
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_PhyCfg(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                      PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CFG, i_target, io_msg_block.PhyCfg));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter DFIMRLMargin
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_DFIMRLMargin(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DFIMRL_MARGIN, i_target, io_msg_block.DFIMRLMargin));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter UseBroadcastMR
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_UseBroadcastMR(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_USE_BROADCAST_MR, i_target, io_msg_block.UseBroadcastMR));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter DisabledDbyte
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_DisabledDbyte(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DISABLED_DBYTE, i_target, io_msg_block.DisabledDbyte));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter CATrainOpt
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_dimm the active DIMM target on the given memory port
+/// @param[in] i_sim value of ATTR_IS_SIMULATION
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_CATrainOpt(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        const uint8_t i_sim,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
+    constexpr uint8_t RFU6 = 1;
+    constexpr uint8_t CA13_TRAIN_SKIP = 3;
+    constexpr uint8_t CSCA_TRAINING_STEP_SIZE = 4;
+    constexpr uint8_t CSCA_TRAINING_STEP_SIZE_LEN = 2;
+    constexpr uint8_t CA_DFE_TRAINING = 6;
+    constexpr uint8_t CA_2D_TRAINING = 7;
+
+    fapi2::buffer<uint8_t> l_buffer;
+
+    bool l_has_rcd = false;
+    uint16_t l_stack_height = 0;
+    uint8_t l_density = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CA_TRAIN_OPTIONS, i_target, l_buffer));
+    FAPI_TRY(mss::has_rcd(i_target, l_has_rcd));
+    FAPI_TRY(mss::attr::get_3ds_height(i_dimm, l_stack_height));
+    FAPI_TRY(mss::attr::get_dram_density(i_dimm, l_density));
+
+    // Make sure RDIMM-only training options are disabled for UDIMM
+    if (!l_has_rcd)
+    {
+        l_buffer.clearBit<CA_DFE_TRAINING>()
+        .clearBit<CA_2D_TRAINING>();
+    }
+
+    // Set max step size for CS and CA training for sim
+    if (i_sim)
+    {
+        l_buffer.setBit<CSCA_TRAINING_STEP_SIZE, CSCA_TRAINING_STEP_SIZE_LEN>();
+    }
+
+    // Disable the reserved bit
+    l_buffer.clearBit<RFU6>();
+
+    // We want to run CA13 training if we're an 8H stack or greater OR if the DRAM density is 64Gb or greater
+    // Skip if we're less than an 8H stack and we're less than a 64Gb
+    l_buffer.writeBit<CA13_TRAIN_SKIP>(l_stack_height < fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H8
+                                       && l_density < fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_64G);
+
+    io_msg_block.CATrainOpt = l_buffer;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter TX2D_DFE_Misc
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_sim value of ATTR_IS_SIMULATION
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_TX2D_DFE_Misc(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_sim,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    constexpr uint8_t DSTEP_SIZE_X = 0;
+    constexpr uint8_t DSTEP_SIZE_X_LEN = 2;
+    constexpr uint8_t VSTEP_SIZE_X = 2;
+    constexpr uint8_t VSTEP_SIZE_X_LEN = 2;
+    constexpr uint8_t TAP_BIAS_STEP = 4;
+    constexpr uint8_t TAP_BIAS_STEP_LEN = 2;
+    constexpr uint8_t NB_TAP_M1 = 6;
+    constexpr uint8_t NB_TAP_M1_LEN = 2;
+
+    fapi2::buffer<uint8_t> l_buffer;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_TX2D_DFE_MISC, i_target, l_buffer));
+
+    // Set min NbTAP to train for sim
+    // Set max step size for voltage and delay training for sim
+    if (i_sim)
+    {
+        l_buffer.clearBit<NB_TAP_M1, NB_TAP_M1_LEN>()
+        .setBit<TAP_BIAS_STEP, TAP_BIAS_STEP_LEN>()
+        .setBit<DSTEP_SIZE_X, DSTEP_SIZE_X_LEN>()
+        .setBit<VSTEP_SIZE_X, VSTEP_SIZE_X_LEN>();
+    }
+
+    io_msg_block.TX2D_DFE_Misc = l_buffer;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter RX2D_TrainOpt
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_sim value of ATTR_IS_SIMULATION
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_RX2D_TrainOpt(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_sim,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
+    constexpr uint8_t RFU7 = 0;
+    constexpr uint8_t DELAY_STEP_SIZE = 3;
+    constexpr uint8_t DELAY_STEP_SIZE_LEN = 2;
+    constexpr uint8_t VOLTAGE_STEP_SIZE = 5;
+    constexpr uint8_t VOLTAGE_STEP_SIZE_LEN = 2;
+    constexpr uint8_t RX2D_DFE = 7;
+
+    fapi2::buffer<uint8_t> l_buffer;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_RX2D_TRAIN_OPT, i_target, l_buffer));
+
+    // Set min NbTAP to train for sim
+    // Set max step size for voltage and delay training for sim
+    if (i_sim)
+    {
+        l_buffer.clearBit<RX2D_DFE>()
+        .setBit<DELAY_STEP_SIZE, DELAY_STEP_SIZE_LEN>()
+        .setBit<VOLTAGE_STEP_SIZE, VOLTAGE_STEP_SIZE_LEN>();
+    }
+
+    // Disable the reserved bit
+    l_buffer.clearBit<RFU7>();
+
+    io_msg_block.RX2D_TrainOpt = l_buffer;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter TX2D_TrainOpt
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_sim value of ATTR_IS_SIMULATION
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_TX2D_TrainOpt(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_sim,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
+    constexpr uint8_t RFU7 = 0;
+    constexpr uint8_t DELAY_STEP_SIZE = 3;
+    constexpr uint8_t DELAY_STEP_SIZE_LEN = 2;
+    constexpr uint8_t VOLTAGE_STEP_SIZE = 5;
+    constexpr uint8_t VOLTAGE_STEP_SIZE_LEN = 2;
+    constexpr uint8_t TX2D_DFE = 7;
+
+    fapi2::buffer<uint8_t> l_buffer;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_TX2D_TRAIN_OPT, i_target, l_buffer));
+
+    // Set min NbTAP to train for sim
+    // Set max step size for voltage and delay training for sim
+    if (i_sim)
+    {
+        l_buffer.clearBit<TX2D_DFE>()
+        .setBit<DELAY_STEP_SIZE, DELAY_STEP_SIZE_LEN>()
+        .setBit<VOLTAGE_STEP_SIZE, VOLTAGE_STEP_SIZE_LEN>();
+    }
+
+    // Disable the reserved bit
+    l_buffer.clearBit<RFU7>();
+
+    io_msg_block.TX2D_TrainOpt = l_buffer;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter PhyConfigOverride
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_PhyConfigOverride(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    uint16_t l_PhyConfigOverride = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CONFIG_OVERRIDE, i_target, l_PhyConfigOverride));
+    io_msg_block.PhyConfigOverride = l_PhyConfigOverride;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter EnabledDQsChA
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_EnabledDQsChA(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHA, i_target, io_msg_block.EnabledDQsChA));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter EnabledDQsChB
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_EnabledDQsChB(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHB, i_target, io_msg_block.EnabledDQsChB));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter CsPresentChA
+/// @param[in] i_dimm the DIMM target on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_CsPresentChA(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    fapi2::buffer<uint8_t> l_ranks_configed_buf;
+    FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_dimm, l_ranks_configed_buf));
+
+    // Update the number of CS present based upon the number of DQ on each channel
+    if (io_msg_block.EnabledDQsChA == 0)
+    {
+        l_ranks_configed_buf = 0;
+    }
+
+    l_ranks_configed_buf.reverse();
+
+    io_msg_block.CsPresentChA = l_ranks_configed_buf;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter CsPresentChB
+/// @param[in] i_dimm the DIMM target on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_CsPresentChB(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    fapi2::buffer<uint8_t> l_ranks_configed_buf;
+    FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_dimm, l_ranks_configed_buf));
+
+    // Update the number of CS present based upon the number of DQ on each channel
+    if(io_msg_block.EnabledDQsChB == 0)
+    {
+        l_ranks_configed_buf = 0;
+    }
+
+    l_ranks_configed_buf.reverse();
+
+    io_msg_block.CsPresentChB = l_ranks_configed_buf;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter ReservedF6
+/// @param[in] i_dimm the DIMM target on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_ReservedF6(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    // Need to set ReservedF6[6] (counting right-to-left) to get per-DRAM CK/CS/CA ODT
+    constexpr uint8_t PER_DRAM_ODT = 1;
+    fapi2::buffer<uint8_t> l_buffer;
+
+    uint8_t l_dimm_type = 0;
+    FAPI_TRY(mss::attr::get_dimm_type(i_dimm, l_dimm_type));
+
+    // Only impacts DDIMM
+    // Note: doing an if around the setBit to preserve the original value, just in case
+    if(fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM == l_dimm_type)
+    {
+        l_buffer.setBit<PER_DRAM_ODT>();
+    }
+
+    io_msg_block.ReservedF6 = l_buffer;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameters WR_RD_RTT_PARK_A/B[RANK]
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_dimm the active DIMM target on the given memory port
+/// @param[in] i_rank_infos vector of rank infos representing all mranks on memory port
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_WR_RD_RTT_PARK(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    // Offset into PMU_SMB_DDR5U_1D_t for channel[A] on Rank[0]
+    // To get to channel[B]rank[R], add R and CHANNELB_OFFSET to the pointer
+    constexpr uint8_t FIRST_OFFSET = 0xfc;
+    constexpr uint8_t CHANNELB_OFFSET = 0xec;
+
+    uint8_t* const l_WR_RD_RTT_PARK_A0_p = (uint8_t*)&io_msg_block + FIRST_OFFSET;
+
+    constexpr uint8_t RD_SHIFT = 4;
+
+    uint8_t l_RD_RTT_PARK_attr[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_WR_RTT_PARK_attr[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_RD_RTT_PARK[mss::ody::MAX_RANK_PER_PHY] = {0};
+    uint8_t l_WR_RTT_PARK[mss::ody::MAX_RANK_PER_PHY] = {0};
+
+    FAPI_TRY(mss::attr::get_ddr5_rtt_park_rd(i_dimm, l_RD_RTT_PARK_attr));
+    FAPI_TRY(mss::attr::get_ddr5_rtt_park_wr(i_dimm, l_WR_RTT_PARK_attr));
+
+    // Swizzle DRAM index from port rank to phy rank
+    for (const auto& l_rank_info : i_rank_infos)
+    {
+        const auto l_port_rank = l_rank_info.get_port_rank();
+        const auto l_phy_rank = l_rank_info.get_phy_rank();
+
+        l_RD_RTT_PARK[l_phy_rank] = l_RD_RTT_PARK_attr[l_port_rank];
+        l_WR_RTT_PARK[l_phy_rank] = l_WR_RTT_PARK_attr[l_port_rank];
+    }
+
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_RD_RTT_PARK));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_WR_RTT_PARK));
+
+    for (uint8_t l_phy_rank = 0; l_phy_rank < mss::ody::MAX_RANK_PER_PHY; l_phy_rank++)
+    {
+        const uint8_t l_value = (l_RD_RTT_PARK[l_phy_rank] << RD_SHIFT) | l_WR_RTT_PARK[l_phy_rank];
+        uint8_t* l_msg_block_p = l_WR_RD_RTT_PARK_A0_p + l_phy_rank;
+        *l_msg_block_p = l_value;
+        *(l_msg_block_p + CHANNELB_OFFSET) = l_value;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter Reserved1E2
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_sim value of ATTR_IS_SIMULATION
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_Reserved1E2(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint8_t i_sim,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    constexpr uint8_t BIAS_STEP_SIZE = 4;
+    constexpr uint8_t BIAS_STEP_SIZE_LEN = 2;
+
+    fapi2::buffer<uint8_t> l_buffer;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CA_DFE_TRAIN_OPTIONS, i_target, l_buffer));
+
+    // Set max bias step size for sim
+    if (i_sim)
+    {
+        l_buffer.setBit<BIAS_STEP_SIZE, BIAS_STEP_SIZE_LEN>();
+    }
+
+    io_msg_block.Reserved1E2 = l_buffer;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter Reserved1E4
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_Reserved1E4(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DEBUG_TRAIN_OPTIONS, i_target, io_msg_block.Reserved1E4));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter WL_ADJ_START
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_WL_ADJ_START(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    uint16_t l_WL_ADJ_START = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_START, i_target, l_WL_ADJ_START));
+    io_msg_block.WL_ADJ_START = l_WL_ADJ_START;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameter WL_ADJ_END
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_WL_ADJ_END(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    uint16_t l_WL_ADJ_END = 0;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_END, i_target, l_WL_ADJ_END));
+    io_msg_block.WL_ADJ_END = l_WL_ADJ_END;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
+/// @brief msg_block structure setup for parameters DisabledDB[BYTE]LaneR[RANK]
+/// @param[in] i_dimm the DIMM target on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_DisabledDB(const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    // Offset into PMU_SMB_DDR5U_1D_t for DByte[0] on Rank[0]
+    // To get to DByte[i], add MAX_BYTES_PER_PORT*rank and i to the pointer
+    constexpr uint16_t FIRST_OFFSET = 0x740;
+
+    uint8_t* const l_DisabledDB0LaneR0_p = (uint8_t*)&io_msg_block + FIRST_OFFSET;
+
+    fapi2::buffer<uint32_t> l_nibble_enables;
+    uint8_t l_byte_disables[10] __attribute__ ((aligned (8))) = {};
+    FAPI_TRY(mss::attr::get_nibble_enables(i_dimm, l_nibble_enables));
+    FAPI_TRY(nibble_enable_db_disable(l_nibble_enables, l_byte_disables));
+
+    for (uint8_t l_phy_rank = 0; l_phy_rank < mss::ody::MAX_RANK_PER_PHY; l_phy_rank++)
+    {
+        for (uint8_t l_dbyte = 0; l_dbyte < mss::ody::MAX_BYTES_PER_PORT; l_dbyte++)
         {
-            const auto l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target);
-            uint8_t l_dram_width[mss::ody::MAX_DIMM_PER_PORT] = {0};
+            uint8_t* const l_msg_block_p = l_DisabledDB0LaneR0_p + (mss::ody::MAX_BYTES_PER_PORT * l_phy_rank) + l_dbyte;
+            *l_msg_block_p = l_byte_disables[l_dbyte];
+        }
+    }
 
-            if (l_dimms.size() == 0)
-            {
-                FAPI_INF_NO_SBE(TARGTIDFORMAT " No DIMM targets found on port target. Skipping message block setup.", TARGTID);
-                o_rc = fapi2::FAPI2_RC_SUCCESS;
-                return;
-            }
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-            iv_dimm = l_dimms[0];
+///
+/// @brief msg_block structure setup for Vref_Sweep parameters
+/// @param[in] i_target the memory port on which to operate
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+/// @note these are new in the M18 software
+///
+inline fapi2::ReturnCode setup_vref_sweeps(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MIN, i_target, io_msg_block.VrefCS_Sweep_Min));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MAX, i_target, io_msg_block.VrefCS_Sweep_Max));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MIN, i_target, io_msg_block.VrefCA_Sweep_Min));
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MAX, i_target, io_msg_block.VrefCA_Sweep_Max));
 
-            // Create MR data structs
-            fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-            const auto l_mr0 = mss::ddr5::mr0_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr2 = mss::ddr5::mr2_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr3 = mss::ddr5::mr3_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr4 = mss::ddr5::mr4_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr5 = mss::ddr5::mr5_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr6 = mss::ddr5::mr6_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr32 = mss::ddr5::mr32_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr32_per_dram = mss::ddr5::mr32_per_dram_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr8 = mss::ddr5::mr8_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr10 = mss::ddr5::mr10_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr11 = mss::ddr5::mr11_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr12 = mss::ddr5::mr12_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr13 = mss::ddr5::mr13_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr14 = mss::ddr5::mr14_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr15 = mss::ddr5::mr15_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr111 = mss::ddr5::mr111_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr33 = mss::ddr5::mr33_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr33_per_dram = mss::ddr5::mr33_per_dram_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr34 = mss::ddr5::mr34_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr35 = mss::ddr5::mr35_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr37 = mss::ddr5::mr37_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr38 = mss::ddr5::mr38_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr39 = mss::ddr5::mr39_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr50 = mss::ddr5::mr50_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr51 = mss::ddr5::mr51_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr52 = mss::ddr5::mr52_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
-            const auto l_mr112 = mss::ddr5::mr112_data<mss::mc_type::ODYSSEY>(iv_dimm, l_rc);
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
-            FAPI_TRY(l_rc, TARGTIDFORMAT " Failed attribute access during MR setup", TARGTID);
+///
+/// @brief Helper function to insert per-mrank MR data into the msg_block_params structure
+/// @param[in] i_MR_data the per-mrank MR data for both channels
+/// @param[in] i_offset byte offset into the PMU_SMB_DDR5U_1D_t struct for channel[A] mrank[0]
+/// @param[in] i_phy_rank mrank to insert data into
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+///
+inline void insert_MR_data_into_msg_block(const uint8_t i_MR_data,
+        const uint8_t i_offset,
+        const uint8_t i_phy_rank,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    constexpr uint8_t RANK_OFFSET = 0x26;
+    constexpr uint8_t CHANNELB_OFFSET = 0xec;
 
-            FAPI_TRY(mss::rank::ranks_on_port(i_target, iv_rank_infos));
+    uint8_t* l_msg_block_p = (uint8_t*)&io_msg_block + i_offset + (RANK_OFFSET * i_phy_rank);
+    *l_msg_block_p = i_MR_data;
+    *(l_msg_block_p + CHANNELB_OFFSET) = i_MR_data;
+}
 
+///
+/// @brief Helper function to insert per-channel MR data into the msg_block_params structure
+/// @param[in] i_MR_CHA_data the per-mrank MR data for channel A
+/// @param[in] i_MR_CHB_data the per-mrank MR data for channel B
+/// @param[in] i_offset byte offset into the PMU_SMB_DDR5U_1D_t struct for channel[A] mrank[0]
+/// @param[in] i_phy_rank mrank to insert data into
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+///
+inline void insert_per_channel_MR_data_into_msg_block(const uint8_t i_MR_CHA_data,
+        const uint8_t i_MR_CHB_data,
+        const uint8_t i_offset,
+        const uint8_t i_phy_rank,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    constexpr uint8_t RANK_OFFSET = 0x26;
+    constexpr uint8_t CHANNELB_OFFSET = 0xec;
 
-            // Fetch attributes and populate the member variables
-            // Note: doing this in field order to match PMU_SMB_DDR5U_1D_t definition
+    uint8_t* l_msg_block_p = (uint8_t*)&io_msg_block + i_offset + (RANK_OFFSET * i_phy_rank);
+    *l_msg_block_p = i_MR_CHA_data;
+    *(l_msg_block_p + CHANNELB_OFFSET) = i_MR_CHB_data;
+}
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_ADV_TRAIN_OPT, i_target, iv_msg_block_vars.iv_AdvTrainOpt));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_MSG_MISC, i_target, iv_msg_block_vars.iv_MsgMisc));
-            // Pstate is always zero for Odyssey
-            iv_msg_block_vars.iv_Pstate = 0;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PLL_BYPASS_EN, i_target, iv_msg_block_vars.iv_PllBypassEn));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_FREQ, i_target, iv_msg_block_vars.iv_DRAMFreq));
+///
+/// @brief Helper function to insert per-nibble MR data into the msg_block_params structure
+/// @param[in] i_MR_data the per-nibble MR data
+/// @param[in] i_offset byte offset into the PMU_SMB_DDR5U_1D_t struct for mrank[0] nibble[0]
+/// @param[in] i_phy_rank mrank to insert data into
+/// @param[in] i_nibble nibble to insert data into
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+///
+inline void insert_per_nibble_MR_data_into_msg_block(const uint8_t i_MR_data,
+        const uint16_t i_offset,
+        const uint8_t i_phy_rank,
+        const uint8_t i_nibble,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    constexpr uint8_t PER_NIBBLE_RANK_OFFSET = 0x14;
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_RXEN_ADJ, i_target, iv_msg_block_vars.iv_RXEN_ADJ));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_RX2D_DFE_MISC, i_target, iv_msg_block_vars.iv_RX2D_DFE_Misc));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_PHY_VREF_RD, i_target, iv_msg_block_vars.iv_PhyVref));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_D5MISC, i_target, iv_msg_block_vars.iv_D5Misc));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_WL_ADJ, i_target, iv_msg_block_vars.iv_WL_ADJ));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SEQUENCE_CTRL, i_target, iv_msg_block_vars.iv_SequenceCtrl));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_VERBOSITY, i_target, iv_msg_block_vars.iv_HdtCtrl));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CFG, i_target, iv_msg_block_vars.iv_PhyCfg));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DFIMRL_MARGIN, i_target, iv_msg_block_vars.iv_DFIMRLMargin));
-            // X16Present is always zero for Odyssey
-            iv_msg_block_vars.iv_X16Present = 0;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_USE_BROADCAST_MR, i_target, iv_msg_block_vars.iv_UseBroadcastMR));
-            // D5Quickboot is always zero for Odyssey
-            iv_msg_block_vars.iv_D5Quickboot = 0;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DISABLED_DBYTE, i_target, iv_msg_block_vars.iv_DisabledDbyte));
-            FAPI_TRY(mss::attr::get_nibble_enables(i_target, iv_msg_block_vars.iv_nibbles_enables));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CA_TRAIN_OPTIONS, i_target, iv_msg_block_vars.iv_CATrainOpt));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_TX2D_DFE_MISC, i_target, iv_msg_block_vars.iv_TX2D_DFE_Misc));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_RX2D_TRAIN_OPT, i_target, iv_msg_block_vars.iv_RX2D_TrainOpt));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_TX2D_TRAIN_OPT, i_target, iv_msg_block_vars.iv_TX2D_TrainOpt));
-            // Share2DVrefResult, MRE_MIN_PULSE, and DWL_MIN_PULSE are always zero for Odyssey
-            iv_msg_block_vars.iv_Share2DVrefResult = 0;
-            iv_msg_block_vars.iv_MRE_MIN_PULSE = 0;
-            iv_msg_block_vars.iv_DWL_MIN_PULSE = 0;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CONFIG_OVERRIDE, i_target, iv_msg_block_vars.iv_PhyConfigOverride));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHA, i_target, iv_msg_block_vars.iv_EnabledDQsChA));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_ENABLED_DQ_CHB, i_target, iv_msg_block_vars.iv_EnabledDQsChB));
-            FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_msg_block_vars.iv_CsPresentChA));
-            FAPI_TRY(mss::attr::get_dimm_ranks_configed(i_target, iv_msg_block_vars.iv_CsPresentChB));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MIN, i_target, iv_msg_block_vars.iv_VrefCS_Sweep_Min));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCS_SWEEP_MAX, i_target, iv_msg_block_vars.iv_VrefCS_Sweep_Max));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MIN, i_target, iv_msg_block_vars.iv_VrefCA_Sweep_Min));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_VREFCA_SWEEP_MAX, i_target, iv_msg_block_vars.iv_VrefCA_Sweep_Max));
+    uint8_t* l_msg_block_p = (uint8_t*)&io_msg_block + i_offset + (PER_NIBBLE_RANK_OFFSET * i_phy_rank) + i_nibble;
+    *l_msg_block_p = i_MR_data;
+}
 
-            // Update the number of CS present based upon the number of DQ on each channel
-            if(iv_msg_block_vars.iv_EnabledDQsChA == 0)
-            {
-                iv_msg_block_vars.iv_CsPresentChA[0] = 0;
-                iv_msg_block_vars.iv_CsPresentChA[1] = 0;
-            }
+///
+/// @brief msg_block structure setup for Mode Register related parameters
+/// @param[in] i_target the memory port on which to operate
+/// @param[in] i_dimm the active DIMM target on the given memory port
+/// @param[in] i_rank_infos vector of rank infos representing all mranks on memory port
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_msg_block_MRs(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_dimm,
+        const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_infos,
+        PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    // Offsets into PMU_SMB_DDR5U_1D_t for per-channel MR: channel[A] on Rank[0]
+    // To get to channel[B]rank[R], add (RANK_OFFSET * R) and CHANNELB_OFFSET to the pointer
+    constexpr uint8_t MR0_OFFSET = 0x5e;
+    constexpr uint8_t MR2_OFFSET = 0x5f;
+    constexpr uint8_t MR3_OFFSET = 0x60;
+    constexpr uint8_t MR4_OFFSET = 0x61;
+    constexpr uint8_t MR5_OFFSET = 0x62;
+    constexpr uint8_t MR6_OFFSET = 0x63;
+    constexpr uint8_t MR8_OFFSET = 0x65;
+    constexpr uint8_t MR10_OFFSET = 0x67;
+    constexpr uint8_t MR11_OFFSET = 0x68;
+    constexpr uint8_t MR12_OFFSET = 0x69;
+    constexpr uint8_t MR13_OFFSET = 0x6a;
+    constexpr uint8_t MR14_OFFSET = 0x6b;
+    constexpr uint8_t MR15_OFFSET = 0x6c;
+    constexpr uint8_t MR32_OFFSET = 0x6e;
+    constexpr uint8_t MR32_ORG_OFFSET = 0x72;
+    constexpr uint8_t MR33_OFFSET = 0x6f;
+    constexpr uint8_t MR33_ORG_OFFSET = 0x76;
+    constexpr uint8_t MR34_OFFSET = 0x70;
+    constexpr uint8_t MR35_OFFSET = 0x71;
+    constexpr uint8_t MR37_OFFSET = 0x73;
+    constexpr uint8_t MR38_OFFSET = 0x74;
+    constexpr uint8_t MR39_OFFSET = 0x75;
+    constexpr uint8_t MR50_OFFSET = 0x80;
+    constexpr uint8_t MR51_OFFSET = 0x81;
+    constexpr uint8_t MR52_OFFSET = 0x82;
+    constexpr uint8_t MR111_OFFSET = 0x6d;
+    constexpr uint8_t DFE_GainBias_OFFSET = 0x83;
 
-            if(iv_msg_block_vars.iv_EnabledDQsChB == 0)
-            {
-                iv_msg_block_vars.iv_CsPresentChB[0] = 0;
-                iv_msg_block_vars.iv_CsPresentChB[1] = 0;
-            }
+    // Offsets into PMU_SMB_DDR5U_1D_t for per-device MR: nibble[0] on Rank[0]
+    // To get to nibble[N]rank[R], add N and (PD_RANK_OFFSET * R) to the pointer
+    constexpr uint16_t VrefDqR0Nib0_OFFSET = 0x600;
+    constexpr uint16_t MR3R0Nib0_OFFSET = 0x650;
+    constexpr uint16_t VrefCSR0Nib0_OFFSET = 0x6a0;
+    constexpr uint16_t VrefCAR0Nib0_OFFSET = 0x6f0;
+    constexpr uint16_t MR32R0Nib0_OFFSET = 0x780;
 
-            FAPI_TRY(mss::attr::get_dram_width(i_target, l_dram_width));
-            FAPI_ASSERT((l_dram_width != 0),
-                        fapi2::ODY_DRAMINIT_ZERO_DRAM_WIDTH()
-                        .set_PORT_TARGET(i_target),
-                        TARGTIDFORMAT " saw a zero value in ATTR_MEM_EFF_DRAM_WIDTH", TARGTID);
+    uint8_t l_MR0[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR2[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR3[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] __attribute__ ((aligned (8))) = {};
+    uint8_t l_MR4[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR5[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR6[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR32[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR32_ORG[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR8[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR10[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] __attribute__ ((aligned (8))) = {};
+    uint8_t l_MR11[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] __attribute__ ((aligned (8))) = {};
+    uint8_t l_MR12[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] __attribute__ ((aligned (8))) = {};
+    uint8_t l_MR13[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR14[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR15[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR111[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR33[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR33_ORG[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR32_per_dram[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] __attribute__ ((aligned (8))) = {};
+    uint8_t l_MR33_per_dram[mss::ody::MAX_RANK_PER_DIMM][mss::ody::MAX_NIBBLES_PER_PORT] __attribute__ ((aligned (8))) = {};
+    uint8_t l_MR34[mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+    uint8_t l_MR35[mss::ody::MAX_RANK_PER_DIMM][mss::ddr5::mr::ATTR_NUM_CHANNELS] = {};
+    uint8_t l_MR37[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR38[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR39[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR50[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR51[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_MR52[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_DFE_GainBias[mss::ody::MAX_RANK_PER_DIMM] = {0};
+    uint8_t l_dram_width = 0;
 
-            for (const auto& l_rank_info : iv_rank_infos)
-            {
-                // TODO: JIRA:MSWT-216 Create API to walk through DRAM/nibble indexes
-                const uint8_t l_nibble_increment = (l_dram_width[0] / 4);
-                const uint8_t l_max_drams = mss::ody::MAX_NIBBLES_PER_PORT / l_nibble_increment;
-                const auto l_phy_rank = l_rank_info.get_phy_rank();
+    // Create MR data structs
+    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+    const auto l_mr0 = mss::ddr5::mr0_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr2 = mss::ddr5::mr2_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr3 = mss::ddr5::mr3_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr4 = mss::ddr5::mr4_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr5 = mss::ddr5::mr5_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr6 = mss::ddr5::mr6_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr32 = mss::ddr5::mr32_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr32_per_dram = mss::ddr5::mr32_per_dram_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr8 = mss::ddr5::mr8_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr10 = mss::ddr5::mr10_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr11 = mss::ddr5::mr11_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr12 = mss::ddr5::mr12_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr13 = mss::ddr5::mr13_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr14 = mss::ddr5::mr14_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr15 = mss::ddr5::mr15_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr111 = mss::ddr5::mr111_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr33 = mss::ddr5::mr33_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr33_per_dram = mss::ddr5::mr33_per_dram_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr34 = mss::ddr5::mr34_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr35 = mss::ddr5::mr35_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr37 = mss::ddr5::mr37_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr38 = mss::ddr5::mr38_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr39 = mss::ddr5::mr39_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr50 = mss::ddr5::mr50_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr51 = mss::ddr5::mr51_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr52 = mss::ddr5::mr52_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
+    const auto l_mr112 = mss::ddr5::mr112_data<mss::mc_type::ODYSSEY>(i_dimm, l_rc);
 
-                FAPI_TRY(l_mr0.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR0[l_phy_rank]));
-                FAPI_TRY(l_mr2.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR2[l_phy_rank]));
-                FAPI_TRY(l_mr4.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR4[l_phy_rank]));
-                FAPI_TRY(l_mr5.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR5[l_phy_rank]));
-                FAPI_TRY(l_mr6.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR6[l_phy_rank]));
-                FAPI_TRY(l_mr32.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR32[l_phy_rank]));
-                FAPI_TRY(l_mr32.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR32_ORG[l_phy_rank], mss::ddr5::mr::STRAPB));
-                FAPI_TRY(l_mr8.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR8[l_phy_rank]));
-                FAPI_TRY(l_mr13.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR13[l_phy_rank]));
-                FAPI_TRY(l_mr14.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR14[l_phy_rank]));
-                FAPI_TRY(l_mr15.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR15[l_phy_rank]));
-                FAPI_TRY(l_mr111.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR111[l_phy_rank]));
-                FAPI_TRY(l_mr33.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR33[l_phy_rank]));
-                FAPI_TRY(l_mr33.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR33_ORG[l_phy_rank], mss::ddr5::mr::STRAPB));
-                // Running on DRAM0 for Channel A and DRAM10 for Channel B
-                // Since these are the first DRAMS on each channel
-                FAPI_TRY(l_mr34.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR34[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_A],
-                                              mss::ddr5::mr::ATTR_DRAM_CHA_SELECT));
-                FAPI_TRY(l_mr34.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR34[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_B],
-                                              mss::ddr5::mr::ATTR_DRAM_CHB_SELECT));
-                // Running on DRAM0 for Channel A and DRAM10 for Channel B
-                // Since these are the first DRAMS on each channel
-                FAPI_TRY(l_mr35.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_A],
-                                              mss::ddr5::mr::ATTR_DRAM_CHA_SELECT));
-                FAPI_TRY(l_mr35.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_B],
-                                              mss::ddr5::mr::ATTR_DRAM_CHB_SELECT));
-                FAPI_TRY(l_mr37.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR37[l_phy_rank]));
-                FAPI_TRY(l_mr38.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR38[l_phy_rank]));
-                FAPI_TRY(l_mr39.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR39[l_phy_rank]));
-                FAPI_TRY(l_mr50.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR50[l_phy_rank]));
-                FAPI_TRY(l_mr51.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR51[l_phy_rank]));
-                FAPI_TRY(l_mr52.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR52[l_phy_rank]));
-                FAPI_TRY(l_mr112.assemble_data(l_rank_info, iv_msg_block_vars.iv_DFE_GainBias[l_phy_rank]));
+    FAPI_TRY(l_rc, TARGTIDFORMAT " Failed attribute access during MR setup", TARGTID);
 
-                // Get per-DRAM values
-                for (uint8_t l_dram = 0, l_nibble_idx = 0; l_dram < l_max_drams; l_dram++, l_nibble_idx += l_nibble_increment)
-                {
-                    FAPI_TRY(l_mr3.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR3[l_phy_rank][l_nibble_idx], l_dram));
-                    FAPI_TRY(l_mr10.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR10[l_phy_rank][l_nibble_idx], l_dram));
-                    FAPI_TRY(l_mr11.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR11[l_phy_rank][l_nibble_idx], l_dram));
-                    FAPI_TRY(l_mr12.assemble_data(l_rank_info, iv_msg_block_vars.iv_MR12[l_phy_rank][l_nibble_idx], l_dram));
-                    FAPI_TRY(l_mr33_per_dram.assemble_data(l_rank_info,
-                                                           iv_msg_block_vars.iv_MR33_per_dram[l_phy_rank][l_nibble_idx],
-                                                           l_dram));
-                    FAPI_TRY(l_mr32_per_dram.assemble_data(l_rank_info,
-                                                           iv_msg_block_vars.iv_MR32_per_dram[l_phy_rank][l_nibble_idx],
-                                                           l_dram));
-                }
-            }
+    FAPI_TRY(mss::attr::get_dram_width(i_dimm, l_dram_width));
+    FAPI_ASSERT((l_dram_width != 0),
+                fapi2::ODY_DRAMINIT_ZERO_DRAM_WIDTH()
+                .set_PORT_TARGET(i_target),
+                TARGTIDFORMAT " saw a zero value in ATTR_MEM_EFF_DRAM_WIDTH", TARGTID);
 
-            // Copies over ALL of the PHY ranks as needed
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR0));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR2));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR4));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR5));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR6));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR32));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR32_ORG));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR32_per_dram));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR8));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR13));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR14));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR15));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR111));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR33));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR33_ORG));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR33_per_dram));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR34));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR34));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR35));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR35));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR37));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR38));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR39));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR50));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR51));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR52));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_DFE_GainBias));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR3));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR10));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR11));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_MR12));
+    for (const auto& l_rank_info : i_rank_infos)
+    {
+        // TODO: JIRA:MSWT-216 Create API to walk through DRAM/nibble indexes
+        const uint8_t l_nibble_increment = (l_dram_width / 4);
+        const uint8_t l_max_drams = mss::ody::MAX_NIBBLES_PER_PORT / l_nibble_increment;
+        const auto l_phy_rank = l_rank_info.get_phy_rank();
 
-            // Reserved fields are always zero for Odyssey
-            iv_msg_block_vars.iv_ReservedF6 = 0;
-            iv_msg_block_vars.iv_ReservedF7 = 0;
-            iv_msg_block_vars.iv_ReservedF8 = 0;
-            iv_msg_block_vars.iv_ReservedF9 = 0;
+        FAPI_TRY(l_mr0.assemble_data(l_rank_info, l_MR0[l_phy_rank]));
+        FAPI_TRY(l_mr2.assemble_data(l_rank_info, l_MR2[l_phy_rank]));
+        FAPI_TRY(l_mr4.assemble_data(l_rank_info, l_MR4[l_phy_rank]));
+        FAPI_TRY(l_mr5.assemble_data(l_rank_info, l_MR5[l_phy_rank]));
+        FAPI_TRY(l_mr6.assemble_data(l_rank_info, l_MR6[l_phy_rank]));
+        FAPI_TRY(l_mr32.assemble_data(l_rank_info, l_MR32[l_phy_rank]));
+        FAPI_TRY(l_mr32.assemble_data(l_rank_info, l_MR32_ORG[l_phy_rank], mss::ddr5::mr::STRAPB));
+        FAPI_TRY(l_mr8.assemble_data(l_rank_info, l_MR8[l_phy_rank]));
+        FAPI_TRY(l_mr13.assemble_data(l_rank_info, l_MR13[l_phy_rank]));
+        FAPI_TRY(l_mr14.assemble_data(l_rank_info, l_MR14[l_phy_rank]));
+        FAPI_TRY(l_mr15.assemble_data(l_rank_info, l_MR15[l_phy_rank]));
+        FAPI_TRY(l_mr111.assemble_data(l_rank_info, l_MR111[l_phy_rank]));
+        FAPI_TRY(l_mr33.assemble_data(l_rank_info, l_MR33[l_phy_rank]));
+        FAPI_TRY(l_mr33.assemble_data(l_rank_info, l_MR33_ORG[l_phy_rank], mss::ddr5::mr::STRAPB));
+        // Running on DRAM0 for Channel A and DRAM10 for Channel B
+        // Since these are the first DRAMS on each channel
+        FAPI_TRY(l_mr34.assemble_data(l_rank_info, l_MR34[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_A],
+                                      mss::ddr5::mr::ATTR_DRAM_CHA_SELECT));
+        FAPI_TRY(l_mr34.assemble_data(l_rank_info, l_MR34[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_B],
+                                      mss::ddr5::mr::ATTR_DRAM_CHB_SELECT));
+        // Running on DRAM0 for Channel A and DRAM10 for Channel B
+        // Since these are the first DRAMS on each channel
+        FAPI_TRY(l_mr35.assemble_data(l_rank_info, l_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_A],
+                                      mss::ddr5::mr::ATTR_DRAM_CHA_SELECT));
+        FAPI_TRY(l_mr35.assemble_data(l_rank_info, l_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_B],
+                                      mss::ddr5::mr::ATTR_DRAM_CHB_SELECT));
+        FAPI_TRY(l_mr37.assemble_data(l_rank_info, l_MR37[l_phy_rank]));
+        FAPI_TRY(l_mr38.assemble_data(l_rank_info, l_MR38[l_phy_rank]));
+        FAPI_TRY(l_mr39.assemble_data(l_rank_info, l_MR39[l_phy_rank]));
+        FAPI_TRY(l_mr50.assemble_data(l_rank_info, l_MR50[l_phy_rank]));
+        FAPI_TRY(l_mr51.assemble_data(l_rank_info, l_MR51[l_phy_rank]));
+        FAPI_TRY(l_mr52.assemble_data(l_rank_info, l_MR52[l_phy_rank]));
+        FAPI_TRY(l_mr112.assemble_data(l_rank_info, l_DFE_GainBias[l_phy_rank]));
 
-            FAPI_TRY(mss::attr::get_ddr5_rtt_park_rd(iv_dimm, iv_msg_block_vars.iv_RD_RTT_PARK_attr));
-            FAPI_TRY(mss::attr::get_ddr5_rtt_park_wr(iv_dimm, iv_msg_block_vars.iv_WR_RTT_PARK_attr));
+        // Get per-DRAM values
+        for (uint8_t l_dram = 0, l_nibble_idx = 0; l_dram < l_max_drams; l_dram++, l_nibble_idx += l_nibble_increment)
+        {
+            FAPI_TRY(l_mr3.assemble_data(l_rank_info, l_MR3[l_phy_rank][l_nibble_idx], l_dram));
+            FAPI_TRY(l_mr10.assemble_data(l_rank_info, l_MR10[l_phy_rank][l_nibble_idx], l_dram));
+            FAPI_TRY(l_mr11.assemble_data(l_rank_info, l_MR11[l_phy_rank][l_nibble_idx], l_dram));
+            FAPI_TRY(l_mr12.assemble_data(l_rank_info, l_MR12[l_phy_rank][l_nibble_idx], l_dram));
+            FAPI_TRY(l_mr33_per_dram.assemble_data(l_rank_info,
+                                                   l_MR33_per_dram[l_phy_rank][l_nibble_idx],
+                                                   l_dram));
+            FAPI_TRY(l_mr32_per_dram.assemble_data(l_rank_info,
+                                                   l_MR32_per_dram[l_phy_rank][l_nibble_idx],
+                                                   l_dram));
+        }
+    }
 
-            // Swizzle DRAM index from port rank to phy rank
-            for (const auto& l_rank_info : iv_rank_infos)
-            {
-                const auto l_port_rank = l_rank_info.get_port_rank();
-                const auto l_phy_rank = l_rank_info.get_phy_rank();
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR0));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR2));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR4));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR5));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR6));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR32));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR32_ORG));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR32_per_dram));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR8));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR13));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR14));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR15));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR111));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR33));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR33_ORG));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR33_per_dram));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR34));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR34));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR35));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR35));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR37));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR38));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR39));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR50));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR51));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR52));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_DFE_GainBias));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR3));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR10));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR11));
+    FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, l_MR12));
 
-                iv_msg_block_vars.iv_RD_RTT_PARK[l_phy_rank] = iv_msg_block_vars.iv_RD_RTT_PARK_attr[l_port_rank];
-                iv_msg_block_vars.iv_WR_RTT_PARK[l_phy_rank] = iv_msg_block_vars.iv_WR_RTT_PARK_attr[l_port_rank];
-            }
+    for (uint8_t l_phy_rank = 0; l_phy_rank < mss::ody::MAX_RANK_PER_PHY; l_phy_rank++)
+    {
+        insert_MR_data_into_msg_block(l_MR0[l_phy_rank], MR0_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR2[l_phy_rank], MR2_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR3[l_phy_rank][0], MR3_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR4[l_phy_rank], MR4_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR5[l_phy_rank], MR5_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR6[l_phy_rank], MR6_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR8[l_phy_rank], MR8_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR10[l_phy_rank][0], MR10_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR11[l_phy_rank][0], MR11_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR12[l_phy_rank][0], MR12_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR13[l_phy_rank], MR13_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR14[l_phy_rank], MR14_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR15[l_phy_rank], MR15_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR32[l_phy_rank], MR32_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR32_ORG[l_phy_rank], MR32_ORG_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR33[l_phy_rank], MR33_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR33_ORG[l_phy_rank], MR33_ORG_OFFSET, l_phy_rank, io_msg_block);
+        insert_per_channel_MR_data_into_msg_block(l_MR34[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_A],
+                l_MR34[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_B],
+                MR34_OFFSET, l_phy_rank, io_msg_block);
+        insert_per_channel_MR_data_into_msg_block(l_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_A],
+                l_MR35[l_phy_rank][mss::ddr5::mr::ATTR_CHANNEL_B],
+                MR35_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR37[l_phy_rank], MR37_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR38[l_phy_rank], MR38_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR39[l_phy_rank], MR39_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR50[l_phy_rank], MR50_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR51[l_phy_rank], MR51_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR52[l_phy_rank], MR52_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_MR111[l_phy_rank], MR111_OFFSET, l_phy_rank, io_msg_block);
+        insert_MR_data_into_msg_block(l_DFE_GainBias[l_phy_rank], DFE_GainBias_OFFSET, l_phy_rank, io_msg_block);
 
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_RD_RTT_PARK));
-            FAPI_TRY(mss::ody::phy::workarounds::clone_redundant_cs_data(i_target, iv_msg_block_vars.iv_WR_RTT_PARK));
+        for (uint8_t l_phy_nibble = 0; l_phy_nibble < mss::ody::MAX_NIBBLES_PER_PORT; l_phy_nibble++)
+        {
+            // Handle the swizzle from phy to MC nibble index for attribute access
+            const uint8_t l_mc_nibble = mss::ody::PHY_TO_MC_NIBBLE[l_phy_nibble];
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_CA_DFE_TRAIN_OPTIONS, i_target, iv_msg_block_vars.iv_Reserved1E2));
-            // Reserved fields are always zero for Odyssey
-            iv_msg_block_vars.iv_Reserved1E3 = 0;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_PHY_DEBUG_TRAIN_OPTIONS, i_target, iv_msg_block_vars.iv_Reserved1E4));
-            // Reserved fields are always zero for Odyssey
-            iv_msg_block_vars.iv_Reserved1E5 = 0;
-            iv_msg_block_vars.iv_Reserved1E6 = 0;
-            iv_msg_block_vars.iv_Reserved1E7 = 0;
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_START, i_target, iv_msg_block_vars.iv_WL_ADJ_START));
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MEM_EFF_DDR5_WL_ADJ_END, i_target, iv_msg_block_vars.iv_WL_ADJ_END));
+            insert_per_nibble_MR_data_into_msg_block(l_MR10[l_phy_rank][l_mc_nibble],
+                    VrefDqR0Nib0_OFFSET, l_phy_rank, l_phy_nibble, io_msg_block);
+            insert_per_nibble_MR_data_into_msg_block(l_MR33_per_dram[l_phy_rank][l_mc_nibble],
+                    MR3R0Nib0_OFFSET, l_phy_rank, l_phy_nibble, io_msg_block);
+            insert_per_nibble_MR_data_into_msg_block(l_MR12[l_phy_rank][l_mc_nibble],
+                    VrefCSR0Nib0_OFFSET, l_phy_rank, l_phy_nibble, io_msg_block);
+            insert_per_nibble_MR_data_into_msg_block(l_MR11[l_phy_rank][l_mc_nibble],
+                    VrefCAR0Nib0_OFFSET, l_phy_rank, l_phy_nibble, io_msg_block);
+            insert_per_nibble_MR_data_into_msg_block(l_MR32_per_dram[l_phy_rank][l_mc_nibble],
+                    MR32R0Nib0_OFFSET, l_phy_rank, l_phy_nibble, io_msg_block);
+        }
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 #ifndef __PPE__
-            // Initialize the RCW to zeros
-            memset(iv_msg_block_vars.iv_RCW, 0, sizeof(iv_msg_block_vars.iv_RCW));
+///
+/// @brief msg_block structure setup for parameter RCW[N]_CHA/B_D[DIMM]
+/// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
+/// @return FAPI2_RC_SUCCESS iff okay
+///
+inline fapi2::ReturnCode setup_RCW(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+                                   PMU_SMB_DDR5U_1D_t& io_msg_block)
+{
+    uint8_t l_RCW[NUM_RCW][mss::ddr5::mr::ATTR_NUM_CHANNELS][DIMM_NUMBER] = {};
 
-            // Get the supported RCW attr values
-            for(uint8_t l_getter_index = 0; l_getter_index < NUM_SUPPORTED_RCW; l_getter_index++)
+    // Initialize the RCW to zeros
+    memset(l_RCW, 0, sizeof(l_RCW));
+
+    // Get the supported RCW attr values
+    for(uint8_t l_getter_index = 0; l_getter_index < NUM_SUPPORTED_RCW; l_getter_index++)
+    {
+        for(uint8_t l_channel = 0; l_channel < mss::ddr5::mr::ATTR_NUM_CHANNELS; l_channel++)
+        {
+            for(uint8_t l_dimm = 0; l_dimm < DIMM_NUMBER; l_dimm++)
             {
-                for(uint8_t l_channel = 0; l_channel < mss::ddr5::mr::ATTR_NUM_CHANNELS; l_channel++)
-                {
-                    for(uint8_t l_dimm = 0; l_dimm < DIMM_NUMBER; l_dimm++)
-                    {
-                        const uint64_t l_rcw_id = get_rcw[l_getter_index][l_channel][l_dimm].first;
-                        FAPI_TRY(get_rcw[l_getter_index][l_channel][l_dimm].second(i_target,
-                                 iv_msg_block_vars.iv_RCW[l_rcw_id][l_channel][l_dimm]));
-                    }
-                }
+                const uint64_t l_rcw_id = get_rcw[l_getter_index][l_channel][l_dimm].first;
+                FAPI_TRY(get_rcw[l_getter_index][l_channel][l_dimm].second(i_target,
+                         l_RCW[l_rcw_id][l_channel][l_dimm]));
             }
+        }
+    }
 
+    io_msg_block.RCW00_ChA_D0 = l_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW01_ChA_D0 = l_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW02_ChA_D0 = l_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW03_ChA_D0 = l_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW04_ChA_D0 = l_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW05_ChA_D0 = l_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW06_ChA_D0 = l_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW07_ChA_D0 = l_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW08_ChA_D0 = l_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW09_ChA_D0 = l_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW0A_ChA_D0 = l_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW0B_ChA_D0 = l_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW0C_ChA_D0 = l_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW0D_ChA_D0 = l_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW0E_ChA_D0 = l_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW0F_ChA_D0 = l_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW10_ChA_D0 = l_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW11_ChA_D0 = l_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW12_ChA_D0 = l_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW13_ChA_D0 = l_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW14_ChA_D0 = l_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW15_ChA_D0 = l_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW16_ChA_D0 = l_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW17_ChA_D0 = l_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW18_ChA_D0 = l_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW19_ChA_D0 = l_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW1A_ChA_D0 = l_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW1B_ChA_D0 = l_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW1C_ChA_D0 = l_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW1D_ChA_D0 = l_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW1E_ChA_D0 = l_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW1F_ChA_D0 = l_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW20_ChA_D0 = l_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW21_ChA_D0 = l_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW22_ChA_D0 = l_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW23_ChA_D0 = l_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW24_ChA_D0 = l_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW25_ChA_D0 = l_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW26_ChA_D0 = l_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW27_ChA_D0 = l_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW28_ChA_D0 = l_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW29_ChA_D0 = l_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW2A_ChA_D0 = l_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW2B_ChA_D0 = l_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW2C_ChA_D0 = l_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW2D_ChA_D0 = l_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW2E_ChA_D0 = l_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW2F_ChA_D0 = l_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW30_ChA_D0 = l_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW31_ChA_D0 = l_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW32_ChA_D0 = l_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW33_ChA_D0 = l_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW34_ChA_D0 = l_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW35_ChA_D0 = l_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW36_ChA_D0 = l_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW37_ChA_D0 = l_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW38_ChA_D0 = l_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW39_ChA_D0 = l_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW3A_ChA_D0 = l_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW3B_ChA_D0 = l_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW3C_ChA_D0 = l_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW3D_ChA_D0 = l_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW3E_ChA_D0 = l_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW3F_ChA_D0 = l_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW40_ChA_D0 = l_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW41_ChA_D0 = l_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW42_ChA_D0 = l_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW43_ChA_D0 = l_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW44_ChA_D0 = l_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW45_ChA_D0 = l_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW46_ChA_D0 = l_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW47_ChA_D0 = l_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW48_ChA_D0 = l_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW49_ChA_D0 = l_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW4A_ChA_D0 = l_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW4B_ChA_D0 = l_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW4C_ChA_D0 = l_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW4D_ChA_D0 = l_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW4E_ChA_D0 = l_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW4F_ChA_D0 = l_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW50_ChA_D0 = l_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW51_ChA_D0 = l_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW52_ChA_D0 = l_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW53_ChA_D0 = l_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW54_ChA_D0 = l_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW55_ChA_D0 = l_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW56_ChA_D0 = l_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW57_ChA_D0 = l_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW58_ChA_D0 = l_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW59_ChA_D0 = l_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW5A_ChA_D0 = l_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW5B_ChA_D0 = l_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW5C_ChA_D0 = l_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW5D_ChA_D0 = l_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW5E_ChA_D0 = l_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW5F_ChA_D0 = l_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW60_ChA_D0 = l_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW61_ChA_D0 = l_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW62_ChA_D0 = l_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW63_ChA_D0 = l_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW64_ChA_D0 = l_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW65_ChA_D0 = l_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW66_ChA_D0 = l_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW67_ChA_D0 = l_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW68_ChA_D0 = l_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW69_ChA_D0 = l_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW6A_ChA_D0 = l_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW6B_ChA_D0 = l_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW6C_ChA_D0 = l_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW6D_ChA_D0 = l_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW6E_ChA_D0 = l_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW6F_ChA_D0 = l_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW70_ChA_D0 = l_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW71_ChA_D0 = l_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW72_ChA_D0 = l_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW73_ChA_D0 = l_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW74_ChA_D0 = l_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW75_ChA_D0 = l_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW76_ChA_D0 = l_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW77_ChA_D0 = l_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW78_ChA_D0 = l_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW79_ChA_D0 = l_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW7A_ChA_D0 = l_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW7B_ChA_D0 = l_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW7C_ChA_D0 = l_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW7D_ChA_D0 = l_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW7E_ChA_D0 = l_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+    io_msg_block.RCW7F_ChA_D0 = l_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
+
+    io_msg_block.RCW00_ChB_D0 = l_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW01_ChB_D0 = l_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW02_ChB_D0 = l_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW03_ChB_D0 = l_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW04_ChB_D0 = l_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW05_ChB_D0 = l_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW06_ChB_D0 = l_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW07_ChB_D0 = l_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW08_ChB_D0 = l_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW09_ChB_D0 = l_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW0A_ChB_D0 = l_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW0B_ChB_D0 = l_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW0C_ChB_D0 = l_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW0D_ChB_D0 = l_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW0E_ChB_D0 = l_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW0F_ChB_D0 = l_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW10_ChB_D0 = l_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW11_ChB_D0 = l_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW12_ChB_D0 = l_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW13_ChB_D0 = l_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW14_ChB_D0 = l_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW15_ChB_D0 = l_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW16_ChB_D0 = l_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW17_ChB_D0 = l_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW18_ChB_D0 = l_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW19_ChB_D0 = l_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW1A_ChB_D0 = l_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW1B_ChB_D0 = l_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW1C_ChB_D0 = l_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW1D_ChB_D0 = l_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW1E_ChB_D0 = l_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW1F_ChB_D0 = l_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW20_ChB_D0 = l_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW21_ChB_D0 = l_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW22_ChB_D0 = l_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW23_ChB_D0 = l_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW24_ChB_D0 = l_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW25_ChB_D0 = l_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW26_ChB_D0 = l_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW27_ChB_D0 = l_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW28_ChB_D0 = l_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW29_ChB_D0 = l_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW2A_ChB_D0 = l_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW2B_ChB_D0 = l_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW2C_ChB_D0 = l_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW2D_ChB_D0 = l_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW2E_ChB_D0 = l_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW2F_ChB_D0 = l_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW30_ChB_D0 = l_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW31_ChB_D0 = l_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW32_ChB_D0 = l_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW33_ChB_D0 = l_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW34_ChB_D0 = l_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW35_ChB_D0 = l_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW36_ChB_D0 = l_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW37_ChB_D0 = l_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW38_ChB_D0 = l_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW39_ChB_D0 = l_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW3A_ChB_D0 = l_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW3B_ChB_D0 = l_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW3C_ChB_D0 = l_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW3D_ChB_D0 = l_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW3E_ChB_D0 = l_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW3F_ChB_D0 = l_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW40_ChB_D0 = l_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW41_ChB_D0 = l_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW42_ChB_D0 = l_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW43_ChB_D0 = l_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW44_ChB_D0 = l_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW45_ChB_D0 = l_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW46_ChB_D0 = l_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW47_ChB_D0 = l_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW48_ChB_D0 = l_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW49_ChB_D0 = l_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW4A_ChB_D0 = l_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW4B_ChB_D0 = l_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW4C_ChB_D0 = l_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW4D_ChB_D0 = l_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW4E_ChB_D0 = l_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW4F_ChB_D0 = l_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW50_ChB_D0 = l_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW51_ChB_D0 = l_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW52_ChB_D0 = l_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW53_ChB_D0 = l_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW54_ChB_D0 = l_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW55_ChB_D0 = l_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW56_ChB_D0 = l_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW57_ChB_D0 = l_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW58_ChB_D0 = l_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW59_ChB_D0 = l_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW5A_ChB_D0 = l_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW5B_ChB_D0 = l_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW5C_ChB_D0 = l_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW5D_ChB_D0 = l_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW5E_ChB_D0 = l_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW5F_ChB_D0 = l_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW60_ChB_D0 = l_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW61_ChB_D0 = l_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW62_ChB_D0 = l_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW63_ChB_D0 = l_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW64_ChB_D0 = l_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW65_ChB_D0 = l_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW66_ChB_D0 = l_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW67_ChB_D0 = l_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW68_ChB_D0 = l_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW69_ChB_D0 = l_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW6A_ChB_D0 = l_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW6B_ChB_D0 = l_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW6C_ChB_D0 = l_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW6D_ChB_D0 = l_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW6E_ChB_D0 = l_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW6F_ChB_D0 = l_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW70_ChB_D0 = l_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW71_ChB_D0 = l_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW72_ChB_D0 = l_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW73_ChB_D0 = l_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW74_ChB_D0 = l_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW75_ChB_D0 = l_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW76_ChB_D0 = l_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW77_ChB_D0 = l_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW78_ChB_D0 = l_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW79_ChB_D0 = l_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW7A_ChB_D0 = l_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW7B_ChB_D0 = l_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW7C_ChB_D0 = l_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW7D_ChB_D0 = l_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW7E_ChB_D0 = l_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+    io_msg_block.RCW7F_ChB_D0 = l_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
+
+    io_msg_block.RCW00_ChA_D1 = l_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW01_ChA_D1 = l_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW02_ChA_D1 = l_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW03_ChA_D1 = l_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW04_ChA_D1 = l_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW05_ChA_D1 = l_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW06_ChA_D1 = l_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW07_ChA_D1 = l_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW08_ChA_D1 = l_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW09_ChA_D1 = l_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW0A_ChA_D1 = l_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW0B_ChA_D1 = l_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW0C_ChA_D1 = l_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW0D_ChA_D1 = l_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW0E_ChA_D1 = l_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW0F_ChA_D1 = l_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW10_ChA_D1 = l_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW11_ChA_D1 = l_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW12_ChA_D1 = l_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW13_ChA_D1 = l_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW14_ChA_D1 = l_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW15_ChA_D1 = l_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW16_ChA_D1 = l_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW17_ChA_D1 = l_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW18_ChA_D1 = l_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW19_ChA_D1 = l_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW1A_ChA_D1 = l_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW1B_ChA_D1 = l_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW1C_ChA_D1 = l_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW1D_ChA_D1 = l_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW1E_ChA_D1 = l_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW1F_ChA_D1 = l_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW20_ChA_D1 = l_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW21_ChA_D1 = l_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW22_ChA_D1 = l_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW23_ChA_D1 = l_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW24_ChA_D1 = l_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW25_ChA_D1 = l_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW26_ChA_D1 = l_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW27_ChA_D1 = l_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW28_ChA_D1 = l_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW29_ChA_D1 = l_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW2A_ChA_D1 = l_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW2B_ChA_D1 = l_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW2C_ChA_D1 = l_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW2D_ChA_D1 = l_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW2E_ChA_D1 = l_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW2F_ChA_D1 = l_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW30_ChA_D1 = l_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW31_ChA_D1 = l_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW32_ChA_D1 = l_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW33_ChA_D1 = l_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW34_ChA_D1 = l_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW35_ChA_D1 = l_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW36_ChA_D1 = l_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW37_ChA_D1 = l_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW38_ChA_D1 = l_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW39_ChA_D1 = l_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW3A_ChA_D1 = l_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW3B_ChA_D1 = l_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW3C_ChA_D1 = l_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW3D_ChA_D1 = l_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW3E_ChA_D1 = l_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW3F_ChA_D1 = l_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW40_ChA_D1 = l_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW41_ChA_D1 = l_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW42_ChA_D1 = l_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW43_ChA_D1 = l_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW44_ChA_D1 = l_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW45_ChA_D1 = l_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW46_ChA_D1 = l_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW47_ChA_D1 = l_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW48_ChA_D1 = l_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW49_ChA_D1 = l_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW4A_ChA_D1 = l_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW4B_ChA_D1 = l_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW4C_ChA_D1 = l_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW4D_ChA_D1 = l_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW4E_ChA_D1 = l_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW4F_ChA_D1 = l_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW50_ChA_D1 = l_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW51_ChA_D1 = l_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW52_ChA_D1 = l_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW53_ChA_D1 = l_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW54_ChA_D1 = l_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW55_ChA_D1 = l_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW56_ChA_D1 = l_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW57_ChA_D1 = l_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW58_ChA_D1 = l_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW59_ChA_D1 = l_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW5A_ChA_D1 = l_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW5B_ChA_D1 = l_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW5C_ChA_D1 = l_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW5D_ChA_D1 = l_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW5E_ChA_D1 = l_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW5F_ChA_D1 = l_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW60_ChA_D1 = l_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW61_ChA_D1 = l_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW62_ChA_D1 = l_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW63_ChA_D1 = l_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW64_ChA_D1 = l_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW65_ChA_D1 = l_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW66_ChA_D1 = l_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW67_ChA_D1 = l_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW68_ChA_D1 = l_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW69_ChA_D1 = l_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW6A_ChA_D1 = l_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW6B_ChA_D1 = l_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW6C_ChA_D1 = l_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW6D_ChA_D1 = l_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW6E_ChA_D1 = l_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW6F_ChA_D1 = l_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW70_ChA_D1 = l_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW71_ChA_D1 = l_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW72_ChA_D1 = l_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW73_ChA_D1 = l_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW74_ChA_D1 = l_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW75_ChA_D1 = l_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW76_ChA_D1 = l_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW77_ChA_D1 = l_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW78_ChA_D1 = l_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW79_ChA_D1 = l_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW7A_ChA_D1 = l_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW7B_ChA_D1 = l_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW7C_ChA_D1 = l_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW7D_ChA_D1 = l_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW7E_ChA_D1 = l_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+    io_msg_block.RCW7F_ChA_D1 = l_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
+
+    io_msg_block.RCW00_ChB_D1 = l_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW01_ChB_D1 = l_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW02_ChB_D1 = l_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW03_ChB_D1 = l_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW04_ChB_D1 = l_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW05_ChB_D1 = l_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW06_ChB_D1 = l_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW07_ChB_D1 = l_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW08_ChB_D1 = l_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW09_ChB_D1 = l_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW0A_ChB_D1 = l_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW0B_ChB_D1 = l_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW0C_ChB_D1 = l_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW0D_ChB_D1 = l_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW0E_ChB_D1 = l_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW0F_ChB_D1 = l_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW10_ChB_D1 = l_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW11_ChB_D1 = l_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW12_ChB_D1 = l_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW13_ChB_D1 = l_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW14_ChB_D1 = l_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW15_ChB_D1 = l_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW16_ChB_D1 = l_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW17_ChB_D1 = l_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW18_ChB_D1 = l_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW19_ChB_D1 = l_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW1A_ChB_D1 = l_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW1B_ChB_D1 = l_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW1C_ChB_D1 = l_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW1D_ChB_D1 = l_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW1E_ChB_D1 = l_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW1F_ChB_D1 = l_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW20_ChB_D1 = l_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW21_ChB_D1 = l_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW22_ChB_D1 = l_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW23_ChB_D1 = l_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW24_ChB_D1 = l_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW25_ChB_D1 = l_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW26_ChB_D1 = l_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW27_ChB_D1 = l_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW28_ChB_D1 = l_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW29_ChB_D1 = l_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW2A_ChB_D1 = l_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW2B_ChB_D1 = l_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW2C_ChB_D1 = l_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW2D_ChB_D1 = l_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW2E_ChB_D1 = l_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW2F_ChB_D1 = l_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW30_ChB_D1 = l_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW31_ChB_D1 = l_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW32_ChB_D1 = l_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW33_ChB_D1 = l_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW34_ChB_D1 = l_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW35_ChB_D1 = l_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW36_ChB_D1 = l_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW37_ChB_D1 = l_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW38_ChB_D1 = l_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW39_ChB_D1 = l_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW3A_ChB_D1 = l_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW3B_ChB_D1 = l_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW3C_ChB_D1 = l_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW3D_ChB_D1 = l_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW3E_ChB_D1 = l_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW3F_ChB_D1 = l_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW40_ChB_D1 = l_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW41_ChB_D1 = l_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW42_ChB_D1 = l_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW43_ChB_D1 = l_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW44_ChB_D1 = l_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW45_ChB_D1 = l_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW46_ChB_D1 = l_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW47_ChB_D1 = l_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW48_ChB_D1 = l_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW49_ChB_D1 = l_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW4A_ChB_D1 = l_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW4B_ChB_D1 = l_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW4C_ChB_D1 = l_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW4D_ChB_D1 = l_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW4E_ChB_D1 = l_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW4F_ChB_D1 = l_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW50_ChB_D1 = l_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW51_ChB_D1 = l_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW52_ChB_D1 = l_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW53_ChB_D1 = l_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW54_ChB_D1 = l_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW55_ChB_D1 = l_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW56_ChB_D1 = l_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW57_ChB_D1 = l_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW58_ChB_D1 = l_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW59_ChB_D1 = l_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW5A_ChB_D1 = l_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW5B_ChB_D1 = l_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW5C_ChB_D1 = l_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW5D_ChB_D1 = l_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW5E_ChB_D1 = l_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW5F_ChB_D1 = l_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW60_ChB_D1 = l_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW61_ChB_D1 = l_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW62_ChB_D1 = l_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW63_ChB_D1 = l_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW64_ChB_D1 = l_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW65_ChB_D1 = l_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW66_ChB_D1 = l_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW67_ChB_D1 = l_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW68_ChB_D1 = l_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW69_ChB_D1 = l_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW6A_ChB_D1 = l_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW6B_ChB_D1 = l_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW6C_ChB_D1 = l_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW6D_ChB_D1 = l_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW6E_ChB_D1 = l_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW6F_ChB_D1 = l_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW70_ChB_D1 = l_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW71_ChB_D1 = l_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW72_ChB_D1 = l_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW73_ChB_D1 = l_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW74_ChB_D1 = l_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW75_ChB_D1 = l_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW76_ChB_D1 = l_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW77_ChB_D1 = l_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW78_ChB_D1 = l_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW79_ChB_D1 = l_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW7A_ChB_D1 = l_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW7B_ChB_D1 = l_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW7C_ChB_D1 = l_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW7D_ChB_D1 = l_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW7E_ChB_D1 = l_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+    io_msg_block.RCW7F_ChB_D1 = l_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 #endif
-
-        fapi_try_exit:
-            o_rc = fapi2::current_err;
-        }
-
-        ///
-        /// @brief default copy assignment operator
-        ///
-        msg_block_params& operator= (const msg_block_params&) = default;
-
-        ///
-        /// @brief default copy constructor
-        ///
-        msg_block_params(const msg_block_params&) = default;
-
-        ///
-        /// @brief default move assignment operator
-        ///
-        msg_block_params& operator= (msg_block_params&&) = default;
-
-        ///
-        /// @brief default move constructor
-        ///
-        msg_block_params(msg_block_params&&) = default;
-
-        ///
-        /// @brief default dtor
-        ///
-        ~msg_block_params() = default;
-
-        ///
-        /// @brief msg_block_params structure setup for parameter AdvTrainOpt
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_AdvTrainOpt(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.AdvTrainOpt = iv_msg_block_vars.iv_AdvTrainOpt;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter MsgMisc
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MsgMisc(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MsgMisc = iv_msg_block_vars.iv_MsgMisc;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter Pstate
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_Pstate(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.Pstate = iv_msg_block_vars.iv_Pstate;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter PllBypassEn
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_PllBypassEn(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.PllBypassEn = iv_msg_block_vars.iv_PllBypassEn;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter DRAMFreq
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_DRAMFreq(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.DRAMFreq = static_cast<uint16_t>(iv_msg_block_vars.iv_DRAMFreq);
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-#ifndef __PPE__
-        ///
-        /// @brief msg_block_params structure setup for parameter RCW05_next
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_RCW05_next(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.RCW05_next = iv_msg_block_vars.iv_RCW05_next;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter RCW06_next
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_RCW06_next(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.RCW06_next = iv_msg_block_vars.iv_RCW06_next;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-#endif
-
-        ///
-        /// @brief msg_block_params structure setup for parameter RXEN_ADJ
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_RXEN_ADJ(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.RXEN_ADJ = iv_msg_block_vars.iv_RXEN_ADJ;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter RX2D_DFE_Misc
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_RX2D_DFE_Misc(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.RX2D_DFE_Misc = iv_msg_block_vars.iv_RX2D_DFE_Misc;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter PhyVref
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_PhyVref(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.PhyVref = iv_msg_block_vars.iv_PhyVref;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter D5Misc
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_D5Misc(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_D5Misc);
-            uint8_t l_redundant_cs_en = 0;
-            constexpr uint8_t PARTIAL_RANK_OPTION = 6;
-
-            // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
-            constexpr uint8_t RFU5 = 2;
-
-            FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(iv_dimm, l_redundant_cs_en))
-
-            // Update D5Misc[1] depending on redundant CS mode
-            l_buffer.writeBit<PARTIAL_RANK_OPTION>(l_redundant_cs_en == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE);
-
-            // Force RFU bit to be disabled
-            l_buffer.clearBit<RFU5>();
-
-            io_msg_block.D5Misc = l_buffer;
-
-            FAPI_INF_NO_SBE(TARGTIDFORMAT "Applying overrides to D5Misc before:0x%02x after:0x%02x", GENTARGTID(iv_target),
-                            iv_msg_block_vars.iv_D5Misc, l_buffer);
-
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter WL_ADJ
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_WL_ADJ(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.WL_ADJ = iv_msg_block_vars.iv_WL_ADJ;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter SequenceCtrl
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_SequenceCtrl(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            uint16_t l_temp = 0;
-            FAPI_TRY(SequenceCtrl_helper(iv_target, iv_msg_block_vars.iv_SequenceCtrl, l_temp));
-
-            io_msg_block.SequenceCtrl = l_temp;
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter HdtCtrl
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_HdtCtrl(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.HdtCtrl = iv_msg_block_vars.iv_HdtCtrl;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter PhyCfg
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_PhyCfg(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.PhyCfg = iv_msg_block_vars.iv_PhyCfg;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter DFIMRLMargin
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_DFIMRLMargin(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.DFIMRLMargin = iv_msg_block_vars.iv_DFIMRLMargin;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter X16Present
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_X16Present(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.X16Present = iv_msg_block_vars.iv_X16Present;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter UseBroadcastMR
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_UseBroadcastMR(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.UseBroadcastMR = iv_msg_block_vars.iv_UseBroadcastMR;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter D5Quickboot
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_D5Quickboot(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.D5Quickboot = iv_msg_block_vars.iv_D5Quickboot;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter DisabledDbyte
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_DisabledDbyte(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.DisabledDbyte = iv_msg_block_vars.iv_DisabledDbyte;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter CATrainOpt
-        /// @param[in] i_sim value of ATTR_IS_SIMULATION
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_CATrainOpt(const uint8_t i_sim,
-                                           PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
-            constexpr uint8_t RFU6 = 1;
-            constexpr uint8_t CA13_TRAIN_SKIP = 3;
-            constexpr uint8_t CSCA_TRAINING_STEP_SIZE = 4;
-            constexpr uint8_t CSCA_TRAINING_STEP_SIZE_LEN = 2;
-            constexpr uint8_t CA_DFE_TRAINING = 6;
-            constexpr uint8_t CA_2D_TRAINING = 7;
-
-            fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_CATrainOpt);
-
-            bool l_has_rcd = false;
-            uint16_t l_stack_height = 0;
-            uint8_t l_density = 0;
-
-            FAPI_TRY(mss::has_rcd(iv_target, l_has_rcd));
-            FAPI_TRY(mss::attr::get_3ds_height(iv_dimm, l_stack_height));
-            FAPI_TRY(mss::attr::get_dram_density(iv_dimm, l_density));
-
-            // Make sure RDIMM-only training options are disabled for UDIMM
-            if (!l_has_rcd)
-            {
-                l_buffer.clearBit<CA_DFE_TRAINING>()
-                .clearBit<CA_2D_TRAINING>();
-            }
-
-            // Set max step size for CS and CA training for sim
-            if (i_sim)
-            {
-                l_buffer.setBit<CSCA_TRAINING_STEP_SIZE, CSCA_TRAINING_STEP_SIZE_LEN>();
-            }
-
-            // Disable the reserved bit
-            l_buffer.clearBit<RFU6>();
-
-            // We want to run CA13 training if we're an 8H stack or greater OR if the DRAM density is 64Gb or greater
-            // Skip if we're less than an 8H stack and we're less than a 64Gb
-            l_buffer.writeBit<CA13_TRAIN_SKIP>(l_stack_height < fapi2::ENUM_ATTR_MEM_3DS_HEIGHT_H8
-                                               && l_density < fapi2::ENUM_ATTR_MEM_EFF_DRAM_DENSITY_64G);
-
-            FAPI_INF_NO_SBE(TARGTIDFORMAT "Applying overrides to CATrainOpt before:0x%04x after:0x%04x", GENTARGTID(iv_target),
-                            iv_msg_block_vars.iv_CATrainOpt, l_buffer);
-
-            io_msg_block.CATrainOpt = l_buffer;
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter TX2D_DFE_Misc
-        /// @param[in] i_sim value of ATTR_IS_SIMULATION
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_TX2D_DFE_Misc(const uint8_t i_sim,
-                                              PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            constexpr uint8_t DSTEP_SIZE_X = 0;
-            constexpr uint8_t DSTEP_SIZE_X_LEN = 2;
-            constexpr uint8_t VSTEP_SIZE_X = 2;
-            constexpr uint8_t VSTEP_SIZE_X_LEN = 2;
-            constexpr uint8_t TAP_BIAS_STEP = 4;
-            constexpr uint8_t TAP_BIAS_STEP_LEN = 2;
-            constexpr uint8_t NB_TAP_M1 = 6;
-            constexpr uint8_t NB_TAP_M1_LEN = 2;
-
-            fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_TX2D_DFE_Misc);
-
-            // Set min NbTAP to train for sim
-            // Set max step size for voltage and delay training for sim
-            if (i_sim)
-            {
-                l_buffer.clearBit<NB_TAP_M1, NB_TAP_M1_LEN>()
-                .setBit<TAP_BIAS_STEP, TAP_BIAS_STEP_LEN>()
-                .setBit<DSTEP_SIZE_X, DSTEP_SIZE_X_LEN>()
-                .setBit<VSTEP_SIZE_X, VSTEP_SIZE_X_LEN>();
-            }
-
-            io_msg_block.TX2D_DFE_Misc = l_buffer;
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter RX2D_TrainOpt
-        /// @param[in] i_sim value of ATTR_IS_SIMULATION
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_RX2D_TrainOpt(const uint8_t i_sim,
-                                              PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
-            constexpr uint8_t RFU7 = 0;
-            constexpr uint8_t DELAY_STEP_SIZE = 3;
-            constexpr uint8_t DELAY_STEP_SIZE_LEN = 2;
-            constexpr uint8_t VOLTAGE_STEP_SIZE = 5;
-            constexpr uint8_t VOLTAGE_STEP_SIZE_LEN = 2;
-            constexpr uint8_t RX2D_DFE = 7;
-
-            fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_RX2D_TrainOpt);
-
-            // Set min NbTAP to train for sim
-            // Set max step size for voltage and delay training for sim
-            if (i_sim)
-            {
-                l_buffer.clearBit<RX2D_DFE>()
-                .setBit<DELAY_STEP_SIZE, DELAY_STEP_SIZE_LEN>()
-                .setBit<VOLTAGE_STEP_SIZE, VOLTAGE_STEP_SIZE_LEN>();
-            }
-
-            // Disable the reserved bit
-            l_buffer.clearBit<RFU7>();
-
-            io_msg_block.RX2D_TrainOpt = l_buffer;
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter TX2D_TrainOpt
-        /// @param[in] i_sim value of ATTR_IS_SIMULATION
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_TX2D_TrainOpt(const uint8_t i_sim,
-                                              PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // Note: naming fields after Synopsys's structure spec, and they count bits from right to left
-            constexpr uint8_t RFU7 = 0;
-            constexpr uint8_t DELAY_STEP_SIZE = 3;
-            constexpr uint8_t DELAY_STEP_SIZE_LEN = 2;
-            constexpr uint8_t VOLTAGE_STEP_SIZE = 5;
-            constexpr uint8_t VOLTAGE_STEP_SIZE_LEN = 2;
-            constexpr uint8_t TX2D_DFE = 7;
-
-            fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_TX2D_TrainOpt);
-
-            // Set min NbTAP to train for sim
-            // Set max step size for voltage and delay training for sim
-            if (i_sim)
-            {
-                l_buffer.clearBit<TX2D_DFE>()
-                .setBit<DELAY_STEP_SIZE, DELAY_STEP_SIZE_LEN>()
-                .setBit<VOLTAGE_STEP_SIZE, VOLTAGE_STEP_SIZE_LEN>();
-            }
-
-            // Disable the reserved bit
-            l_buffer.clearBit<RFU7>();
-
-            io_msg_block.TX2D_TrainOpt = l_buffer;
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter Share2DVrefResult
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_Share2DVrefResult(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.Share2DVrefResult = iv_msg_block_vars.iv_Share2DVrefResult;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter MRE_MIN_PULSE
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MRE_MIN_PULSE(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MRE_MIN_PULSE = iv_msg_block_vars.iv_MRE_MIN_PULSE;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter DWL_MIN_PULSE
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_DWL_MIN_PULSE(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.DWL_MIN_PULSE = iv_msg_block_vars.iv_DWL_MIN_PULSE;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter PhyConfigOverride
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_PhyConfigOverride(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.PhyConfigOverride = iv_msg_block_vars.iv_PhyConfigOverride;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter EnabledDQsChA
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_EnabledDQsChA(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.EnabledDQsChA = iv_msg_block_vars.iv_EnabledDQsChA;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter EnabledDQsChB
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_EnabledDQsChB(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.EnabledDQsChB = iv_msg_block_vars.iv_EnabledDQsChB;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter CsPresentChA
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_CsPresentChA(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            fapi2::buffer<uint8_t> l_ranks_configed_buf(iv_msg_block_vars.iv_CsPresentChA[0]);
-
-            l_ranks_configed_buf.reverse();
-
-            io_msg_block.CsPresentChA = l_ranks_configed_buf;
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter CsPresentChB
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_CsPresentChB(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            fapi2::buffer<uint8_t> l_ranks_configed_buf(iv_msg_block_vars.iv_CsPresentChB[0]);
-
-            l_ranks_configed_buf.reverse();
-
-            io_msg_block.CsPresentChB = l_ranks_configed_buf;
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR0_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR0(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR0_A0 = iv_msg_block_vars.iv_MR0[0];
-            io_msg_block.MR0_A1 = iv_msg_block_vars.iv_MR0[1];
-            io_msg_block.MR0_A2 = iv_msg_block_vars.iv_MR0[2];
-            io_msg_block.MR0_A3 = iv_msg_block_vars.iv_MR0[3];
-            io_msg_block.MR0_B0 = iv_msg_block_vars.iv_MR0[0];
-            io_msg_block.MR0_B1 = iv_msg_block_vars.iv_MR0[1];
-            io_msg_block.MR0_B2 = iv_msg_block_vars.iv_MR0[2];
-            io_msg_block.MR0_B3 = iv_msg_block_vars.iv_MR0[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR2_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR2(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR2_A0 = iv_msg_block_vars.iv_MR2[0];
-            io_msg_block.MR2_A1 = iv_msg_block_vars.iv_MR2[1];
-            io_msg_block.MR2_A2 = iv_msg_block_vars.iv_MR2[2];
-            io_msg_block.MR2_A3 = iv_msg_block_vars.iv_MR2[3];
-            io_msg_block.MR2_B0 = iv_msg_block_vars.iv_MR2[0];
-            io_msg_block.MR2_B1 = iv_msg_block_vars.iv_MR2[1];
-            io_msg_block.MR2_B2 = iv_msg_block_vars.iv_MR2[2];
-            io_msg_block.MR2_B3 = iv_msg_block_vars.iv_MR2[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR3_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR3(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR3_A0 = iv_msg_block_vars.iv_MR3[0][0];
-            io_msg_block.MR3_A1 = iv_msg_block_vars.iv_MR3[1][0];
-            io_msg_block.MR3_A2 = iv_msg_block_vars.iv_MR3[2][0];
-            io_msg_block.MR3_A3 = iv_msg_block_vars.iv_MR3[3][0];
-            io_msg_block.MR3_B0 = iv_msg_block_vars.iv_MR3[0][0];
-            io_msg_block.MR3_B1 = iv_msg_block_vars.iv_MR3[1][0];
-            io_msg_block.MR3_B2 = iv_msg_block_vars.iv_MR3[2][0];
-            io_msg_block.MR3_B3 = iv_msg_block_vars.iv_MR3[3][0];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR4_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR4(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR4_A0 = iv_msg_block_vars.iv_MR4[0];
-            io_msg_block.MR4_A1 = iv_msg_block_vars.iv_MR4[1];
-            io_msg_block.MR4_A2 = iv_msg_block_vars.iv_MR4[2];
-            io_msg_block.MR4_A3 = iv_msg_block_vars.iv_MR4[3];
-            io_msg_block.MR4_B0 = iv_msg_block_vars.iv_MR4[0];
-            io_msg_block.MR4_B1 = iv_msg_block_vars.iv_MR4[1];
-            io_msg_block.MR4_B2 = iv_msg_block_vars.iv_MR4[2];
-            io_msg_block.MR4_B3 = iv_msg_block_vars.iv_MR4[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR5_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR5(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR5_A0 = iv_msg_block_vars.iv_MR5[0];
-            io_msg_block.MR5_A1 = iv_msg_block_vars.iv_MR5[1];
-            io_msg_block.MR5_A2 = iv_msg_block_vars.iv_MR5[2];
-            io_msg_block.MR5_A3 = iv_msg_block_vars.iv_MR5[3];
-            io_msg_block.MR5_B0 = iv_msg_block_vars.iv_MR5[0];
-            io_msg_block.MR5_B1 = iv_msg_block_vars.iv_MR5[1];
-            io_msg_block.MR5_B2 = iv_msg_block_vars.iv_MR5[2];
-            io_msg_block.MR5_B3 = iv_msg_block_vars.iv_MR5[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR6_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR6(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR6_A0 = iv_msg_block_vars.iv_MR6[0];
-            io_msg_block.MR6_A1 = iv_msg_block_vars.iv_MR6[1];
-            io_msg_block.MR6_A2 = iv_msg_block_vars.iv_MR6[2];
-            io_msg_block.MR6_A3 = iv_msg_block_vars.iv_MR6[3];
-            io_msg_block.MR6_B0 = iv_msg_block_vars.iv_MR6[0];
-            io_msg_block.MR6_B1 = iv_msg_block_vars.iv_MR6[1];
-            io_msg_block.MR6_B2 = iv_msg_block_vars.iv_MR6[2];
-            io_msg_block.MR6_B3 = iv_msg_block_vars.iv_MR6[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR8_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR8(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR8_A0 = iv_msg_block_vars.iv_MR8[0];
-            io_msg_block.MR8_A1 = iv_msg_block_vars.iv_MR8[1];
-            io_msg_block.MR8_A2 = iv_msg_block_vars.iv_MR8[2];
-            io_msg_block.MR8_A3 = iv_msg_block_vars.iv_MR8[3];
-            io_msg_block.MR8_B0 = iv_msg_block_vars.iv_MR8[0];
-            io_msg_block.MR8_B1 = iv_msg_block_vars.iv_MR8[1];
-            io_msg_block.MR8_B2 = iv_msg_block_vars.iv_MR8[2];
-            io_msg_block.MR8_B3 = iv_msg_block_vars.iv_MR8[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR10_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR10(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR10_A0 = iv_msg_block_vars.iv_MR10[0][0];
-            io_msg_block.MR10_A1 = iv_msg_block_vars.iv_MR10[1][0];
-            io_msg_block.MR10_A2 = iv_msg_block_vars.iv_MR10[2][0];
-            io_msg_block.MR10_A3 = iv_msg_block_vars.iv_MR10[3][0];
-            io_msg_block.MR10_B0 = iv_msg_block_vars.iv_MR10[0][0];
-            io_msg_block.MR10_B1 = iv_msg_block_vars.iv_MR10[1][0];
-            io_msg_block.MR10_B2 = iv_msg_block_vars.iv_MR10[2][0];
-            io_msg_block.MR10_B3 = iv_msg_block_vars.iv_MR10[3][0];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR11_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR11(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR11_A0 = iv_msg_block_vars.iv_MR11[0][0];
-            io_msg_block.MR11_A1 = iv_msg_block_vars.iv_MR11[1][0];
-            io_msg_block.MR11_A2 = iv_msg_block_vars.iv_MR11[2][0];
-            io_msg_block.MR11_A3 = iv_msg_block_vars.iv_MR11[3][0];
-            io_msg_block.MR11_B0 = iv_msg_block_vars.iv_MR11[0][0];
-            io_msg_block.MR11_B1 = iv_msg_block_vars.iv_MR11[1][0];
-            io_msg_block.MR11_B2 = iv_msg_block_vars.iv_MR11[2][0];
-            io_msg_block.MR11_B3 = iv_msg_block_vars.iv_MR11[3][0];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR12_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR12(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR12_A0 = iv_msg_block_vars.iv_MR12[0][0];
-            io_msg_block.MR12_A1 = iv_msg_block_vars.iv_MR12[1][0];
-            io_msg_block.MR12_A2 = iv_msg_block_vars.iv_MR12[2][0];
-            io_msg_block.MR12_A3 = iv_msg_block_vars.iv_MR12[3][0];
-            io_msg_block.MR12_B0 = iv_msg_block_vars.iv_MR12[0][0];
-            io_msg_block.MR12_B1 = iv_msg_block_vars.iv_MR12[1][0];
-            io_msg_block.MR12_B2 = iv_msg_block_vars.iv_MR12[2][0];
-            io_msg_block.MR12_B3 = iv_msg_block_vars.iv_MR12[3][0];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR13_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR13(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR13_A0 = iv_msg_block_vars.iv_MR13[0];
-            io_msg_block.MR13_A1 = iv_msg_block_vars.iv_MR13[1];
-            io_msg_block.MR13_A2 = iv_msg_block_vars.iv_MR13[2];
-            io_msg_block.MR13_A3 = iv_msg_block_vars.iv_MR13[3];
-            io_msg_block.MR13_B0 = iv_msg_block_vars.iv_MR13[0];
-            io_msg_block.MR13_B1 = iv_msg_block_vars.iv_MR13[1];
-            io_msg_block.MR13_B2 = iv_msg_block_vars.iv_MR13[2];
-            io_msg_block.MR13_B3 = iv_msg_block_vars.iv_MR13[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR14_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR14(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR14_A0 = iv_msg_block_vars.iv_MR14[0];
-            io_msg_block.MR14_A1 = iv_msg_block_vars.iv_MR14[1];
-            io_msg_block.MR14_A2 = iv_msg_block_vars.iv_MR14[2];
-            io_msg_block.MR14_A3 = iv_msg_block_vars.iv_MR14[3];
-            io_msg_block.MR14_B0 = iv_msg_block_vars.iv_MR14[0];
-            io_msg_block.MR14_B1 = iv_msg_block_vars.iv_MR14[1];
-            io_msg_block.MR14_B2 = iv_msg_block_vars.iv_MR14[2];
-            io_msg_block.MR14_B3 = iv_msg_block_vars.iv_MR14[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR15_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR15(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR15_A0 = iv_msg_block_vars.iv_MR15[0];
-            io_msg_block.MR15_A1 = iv_msg_block_vars.iv_MR15[1];
-            io_msg_block.MR15_A2 = iv_msg_block_vars.iv_MR15[2];
-            io_msg_block.MR15_A3 = iv_msg_block_vars.iv_MR15[3];
-            io_msg_block.MR15_B0 = iv_msg_block_vars.iv_MR15[0];
-            io_msg_block.MR15_B1 = iv_msg_block_vars.iv_MR15[1];
-            io_msg_block.MR15_B2 = iv_msg_block_vars.iv_MR15[2];
-            io_msg_block.MR15_B3 = iv_msg_block_vars.iv_MR15[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR111_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR111(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR111_A0 = iv_msg_block_vars.iv_MR111[0];
-            io_msg_block.MR111_A1 = iv_msg_block_vars.iv_MR111[1];
-            io_msg_block.MR111_A2 = iv_msg_block_vars.iv_MR111[2];
-            io_msg_block.MR111_A3 = iv_msg_block_vars.iv_MR111[3];
-            io_msg_block.MR111_B0 = iv_msg_block_vars.iv_MR111[0];
-            io_msg_block.MR111_B1 = iv_msg_block_vars.iv_MR111[1];
-            io_msg_block.MR111_B2 = iv_msg_block_vars.iv_MR111[2];
-            io_msg_block.MR111_B3 = iv_msg_block_vars.iv_MR111[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR32_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR32(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR32_A0 = iv_msg_block_vars.iv_MR32[0];
-            io_msg_block.MR32_A1 = iv_msg_block_vars.iv_MR32[1];
-            io_msg_block.MR32_A2 = iv_msg_block_vars.iv_MR32[2];
-            io_msg_block.MR32_A3 = iv_msg_block_vars.iv_MR32[3];
-            io_msg_block.MR32_B0 = iv_msg_block_vars.iv_MR32[0];
-            io_msg_block.MR32_B1 = iv_msg_block_vars.iv_MR32[1];
-            io_msg_block.MR32_B2 = iv_msg_block_vars.iv_MR32[2];
-            io_msg_block.MR32_B3 = iv_msg_block_vars.iv_MR32[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR33_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR33(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR33_A0 = iv_msg_block_vars.iv_MR33[0];
-            io_msg_block.MR33_A1 = iv_msg_block_vars.iv_MR33[1];
-            io_msg_block.MR33_A2 = iv_msg_block_vars.iv_MR33[2];
-            io_msg_block.MR33_A3 = iv_msg_block_vars.iv_MR33[3];
-            io_msg_block.MR33_B0 = iv_msg_block_vars.iv_MR33[0];
-            io_msg_block.MR33_B1 = iv_msg_block_vars.iv_MR33[1];
-            io_msg_block.MR33_B2 = iv_msg_block_vars.iv_MR33[2];
-            io_msg_block.MR33_B3 = iv_msg_block_vars.iv_MR33[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR34_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR34(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR34_A0 = iv_msg_block_vars.iv_MR34[0][mss::ddr5::mr::ATTR_CHANNEL_A];
-            io_msg_block.MR34_A1 = iv_msg_block_vars.iv_MR34[1][mss::ddr5::mr::ATTR_CHANNEL_A];
-            io_msg_block.MR34_A2 = iv_msg_block_vars.iv_MR34[2][mss::ddr5::mr::ATTR_CHANNEL_A];
-            io_msg_block.MR34_A3 = iv_msg_block_vars.iv_MR34[3][mss::ddr5::mr::ATTR_CHANNEL_A];
-            io_msg_block.MR34_B0 = iv_msg_block_vars.iv_MR34[0][mss::ddr5::mr::ATTR_CHANNEL_B];
-            io_msg_block.MR34_B1 = iv_msg_block_vars.iv_MR34[1][mss::ddr5::mr::ATTR_CHANNEL_B];
-            io_msg_block.MR34_B2 = iv_msg_block_vars.iv_MR34[2][mss::ddr5::mr::ATTR_CHANNEL_B];
-            io_msg_block.MR34_B3 = iv_msg_block_vars.iv_MR34[3][mss::ddr5::mr::ATTR_CHANNEL_B];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR35_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR35(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR35_A0 = iv_msg_block_vars.iv_MR35[0][mss::ddr5::mr::ATTR_CHANNEL_A];
-            io_msg_block.MR35_A1 = iv_msg_block_vars.iv_MR35[1][mss::ddr5::mr::ATTR_CHANNEL_A];
-            io_msg_block.MR35_A2 = iv_msg_block_vars.iv_MR35[2][mss::ddr5::mr::ATTR_CHANNEL_A];
-            io_msg_block.MR35_A3 = iv_msg_block_vars.iv_MR35[3][mss::ddr5::mr::ATTR_CHANNEL_A];
-            io_msg_block.MR35_B0 = iv_msg_block_vars.iv_MR35[0][mss::ddr5::mr::ATTR_CHANNEL_B];
-            io_msg_block.MR35_B1 = iv_msg_block_vars.iv_MR35[1][mss::ddr5::mr::ATTR_CHANNEL_B];
-            io_msg_block.MR35_B2 = iv_msg_block_vars.iv_MR35[2][mss::ddr5::mr::ATTR_CHANNEL_B];
-            io_msg_block.MR35_B3 = iv_msg_block_vars.iv_MR35[3][mss::ddr5::mr::ATTR_CHANNEL_B];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR32_ORG_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR32_ORG(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR32_ORG_A0 = iv_msg_block_vars.iv_MR32_ORG[0];
-            io_msg_block.MR32_ORG_A1 = iv_msg_block_vars.iv_MR32_ORG[1];
-            io_msg_block.MR32_ORG_A2 = iv_msg_block_vars.iv_MR32_ORG[2];
-            io_msg_block.MR32_ORG_A3 = iv_msg_block_vars.iv_MR32_ORG[3];
-            io_msg_block.MR32_ORG_B0 = iv_msg_block_vars.iv_MR32_ORG[0];
-            io_msg_block.MR32_ORG_B1 = iv_msg_block_vars.iv_MR32_ORG[1];
-            io_msg_block.MR32_ORG_B2 = iv_msg_block_vars.iv_MR32_ORG[2];
-            io_msg_block.MR32_ORG_B3 = iv_msg_block_vars.iv_MR32_ORG[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR37_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR37(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR37_A0 = iv_msg_block_vars.iv_MR37[0];
-            io_msg_block.MR37_A1 = iv_msg_block_vars.iv_MR37[1];
-            io_msg_block.MR37_A2 = iv_msg_block_vars.iv_MR37[2];
-            io_msg_block.MR37_A3 = iv_msg_block_vars.iv_MR37[3];
-            io_msg_block.MR37_B0 = iv_msg_block_vars.iv_MR37[0];
-            io_msg_block.MR37_B1 = iv_msg_block_vars.iv_MR37[1];
-            io_msg_block.MR37_B2 = iv_msg_block_vars.iv_MR37[2];
-            io_msg_block.MR37_B3 = iv_msg_block_vars.iv_MR37[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR38_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR38(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR38_A0 = iv_msg_block_vars.iv_MR38[0];
-            io_msg_block.MR38_A1 = iv_msg_block_vars.iv_MR38[1];
-            io_msg_block.MR38_A2 = iv_msg_block_vars.iv_MR38[2];
-            io_msg_block.MR38_A3 = iv_msg_block_vars.iv_MR38[3];
-            io_msg_block.MR38_B0 = iv_msg_block_vars.iv_MR38[0];
-            io_msg_block.MR38_B1 = iv_msg_block_vars.iv_MR38[1];
-            io_msg_block.MR38_B2 = iv_msg_block_vars.iv_MR38[2];
-            io_msg_block.MR38_B3 = iv_msg_block_vars.iv_MR38[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR39_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR39(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR39_A0 = iv_msg_block_vars.iv_MR39[0];
-            io_msg_block.MR39_A1 = iv_msg_block_vars.iv_MR39[1];
-            io_msg_block.MR39_A2 = iv_msg_block_vars.iv_MR39[2];
-            io_msg_block.MR39_A3 = iv_msg_block_vars.iv_MR39[3];
-            io_msg_block.MR39_B0 = iv_msg_block_vars.iv_MR39[0];
-            io_msg_block.MR39_B1 = iv_msg_block_vars.iv_MR39[1];
-            io_msg_block.MR39_B2 = iv_msg_block_vars.iv_MR39[2];
-            io_msg_block.MR39_B3 = iv_msg_block_vars.iv_MR39[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR33_ORG_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR33_ORG(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR33_ORG_A0 = iv_msg_block_vars.iv_MR33_ORG[0];
-            io_msg_block.MR33_ORG_A1 = iv_msg_block_vars.iv_MR33_ORG[1];
-            io_msg_block.MR33_ORG_A2 = iv_msg_block_vars.iv_MR33_ORG[2];
-            io_msg_block.MR33_ORG_A3 = iv_msg_block_vars.iv_MR33_ORG[3];
-            io_msg_block.MR33_ORG_B0 = iv_msg_block_vars.iv_MR33_ORG[0];
-            io_msg_block.MR33_ORG_B1 = iv_msg_block_vars.iv_MR33_ORG[1];
-            io_msg_block.MR33_ORG_B2 = iv_msg_block_vars.iv_MR33_ORG[2];
-            io_msg_block.MR33_ORG_B3 = iv_msg_block_vars.iv_MR33_ORG[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR50_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR50(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR50_A0 = iv_msg_block_vars.iv_MR50[0];
-            io_msg_block.MR50_A1 = iv_msg_block_vars.iv_MR50[1];
-            io_msg_block.MR50_A2 = iv_msg_block_vars.iv_MR50[2];
-            io_msg_block.MR50_A3 = iv_msg_block_vars.iv_MR50[3];
-            io_msg_block.MR50_B0 = iv_msg_block_vars.iv_MR50[0];
-            io_msg_block.MR50_B1 = iv_msg_block_vars.iv_MR50[1];
-            io_msg_block.MR50_B2 = iv_msg_block_vars.iv_MR50[2];
-            io_msg_block.MR50_B3 = iv_msg_block_vars.iv_MR50[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR51_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR51(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR51_A0 = iv_msg_block_vars.iv_MR51[0];
-            io_msg_block.MR51_A1 = iv_msg_block_vars.iv_MR51[1];
-            io_msg_block.MR51_A2 = iv_msg_block_vars.iv_MR51[2];
-            io_msg_block.MR51_A3 = iv_msg_block_vars.iv_MR51[3];
-            io_msg_block.MR51_B0 = iv_msg_block_vars.iv_MR51[0];
-            io_msg_block.MR51_B1 = iv_msg_block_vars.iv_MR51[1];
-            io_msg_block.MR51_B2 = iv_msg_block_vars.iv_MR51[2];
-            io_msg_block.MR51_B3 = iv_msg_block_vars.iv_MR51[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR52_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_MR52(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.MR52_A0 = iv_msg_block_vars.iv_MR52[0];
-            io_msg_block.MR52_A1 = iv_msg_block_vars.iv_MR52[1];
-            io_msg_block.MR52_A2 = iv_msg_block_vars.iv_MR52[2];
-            io_msg_block.MR52_A3 = iv_msg_block_vars.iv_MR52[3];
-            io_msg_block.MR52_B0 = iv_msg_block_vars.iv_MR52[0];
-            io_msg_block.MR52_B1 = iv_msg_block_vars.iv_MR52[1];
-            io_msg_block.MR52_B2 = iv_msg_block_vars.iv_MR52[2];
-            io_msg_block.MR52_B3 = iv_msg_block_vars.iv_MR52[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters DFE_GainBias_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_DFE_GainBias(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.DFE_GainBias_A0 = iv_msg_block_vars.iv_DFE_GainBias[0];
-            io_msg_block.DFE_GainBias_A1 = iv_msg_block_vars.iv_DFE_GainBias[1];
-            io_msg_block.DFE_GainBias_A2 = iv_msg_block_vars.iv_DFE_GainBias[2];
-            io_msg_block.DFE_GainBias_A3 = iv_msg_block_vars.iv_DFE_GainBias[3];
-            io_msg_block.DFE_GainBias_B0 = iv_msg_block_vars.iv_DFE_GainBias[0];
-            io_msg_block.DFE_GainBias_B1 = iv_msg_block_vars.iv_DFE_GainBias[1];
-            io_msg_block.DFE_GainBias_B2 = iv_msg_block_vars.iv_DFE_GainBias[2];
-            io_msg_block.DFE_GainBias_B3 = iv_msg_block_vars.iv_DFE_GainBias[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter ReservedF6
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_ReservedF6(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // Need to set ReservedF6[6] (counting right-to-left) to get per-DRAM CK/CS/CA ODT
-            constexpr uint8_t PER_DRAM_ODT = 1;
-            fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_ReservedF6);
-
-            uint8_t l_dimm_type = 0;
-            FAPI_TRY(mss::attr::get_dimm_type(iv_dimm, l_dimm_type));
-
-            // Only impacts DDIMM
-            // Note: doing an if around the setBit to preserve the original value, just in case
-            if(fapi2::ENUM_ATTR_MEM_EFF_DIMM_TYPE_DDIMM == l_dimm_type)
-            {
-                l_buffer.setBit<PER_DRAM_ODT>();
-            }
-
-            io_msg_block.ReservedF6 = l_buffer;
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter ReservedF7
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_ReservedF7(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.ReservedF7 = iv_msg_block_vars.iv_ReservedF7;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter ReservedF8
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_ReservedF8(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.ReservedF8 = iv_msg_block_vars.iv_ReservedF8;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter ReservedF9
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_ReservedF9(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.ReservedF9 = iv_msg_block_vars.iv_ReservedF9;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters WR_RD_RTT_PARK_A/B[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_WR_RD_RTT_PARK(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            constexpr uint8_t RD_SHIFT = 4;
-
-            io_msg_block.WR_RD_RTT_PARK_A0 = (iv_msg_block_vars.iv_RD_RTT_PARK[0] << RD_SHIFT) |
-                                             iv_msg_block_vars.iv_WR_RTT_PARK[0];
-            io_msg_block.WR_RD_RTT_PARK_A1 = (iv_msg_block_vars.iv_RD_RTT_PARK[1] << RD_SHIFT) |
-                                             iv_msg_block_vars.iv_WR_RTT_PARK[1];
-            io_msg_block.WR_RD_RTT_PARK_A2 = (iv_msg_block_vars.iv_RD_RTT_PARK[2] << RD_SHIFT) |
-                                             iv_msg_block_vars.iv_WR_RTT_PARK[2];
-            io_msg_block.WR_RD_RTT_PARK_A3 = (iv_msg_block_vars.iv_RD_RTT_PARK[3] << RD_SHIFT) |
-                                             iv_msg_block_vars.iv_WR_RTT_PARK[3];
-            io_msg_block.WR_RD_RTT_PARK_B0 = (iv_msg_block_vars.iv_RD_RTT_PARK[0] << RD_SHIFT) |
-                                             iv_msg_block_vars.iv_WR_RTT_PARK[0];
-            io_msg_block.WR_RD_RTT_PARK_B1 = (iv_msg_block_vars.iv_RD_RTT_PARK[1] << RD_SHIFT) |
-                                             iv_msg_block_vars.iv_WR_RTT_PARK[1];
-            io_msg_block.WR_RD_RTT_PARK_B2 = (iv_msg_block_vars.iv_RD_RTT_PARK[2] << RD_SHIFT) |
-                                             iv_msg_block_vars.iv_WR_RTT_PARK[2];
-            io_msg_block.WR_RD_RTT_PARK_B3 = (iv_msg_block_vars.iv_RD_RTT_PARK[3] << RD_SHIFT) |
-                                             iv_msg_block_vars.iv_WR_RTT_PARK[3];
-
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter Reserved1E2
-        /// @param[in] i_sim value of ATTR_IS_SIMULATION
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_Reserved1E2(const uint8_t i_sim,
-                                            PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            constexpr uint8_t BIAS_STEP_SIZE = 4;
-            constexpr uint8_t BIAS_STEP_SIZE_LEN = 2;
-
-            fapi2::buffer<uint8_t> l_buffer(iv_msg_block_vars.iv_Reserved1E2);
-
-            // Set max bias step size for sim
-            if (i_sim)
-            {
-                l_buffer.setBit<BIAS_STEP_SIZE, BIAS_STEP_SIZE_LEN>();
-            }
-
-            io_msg_block.Reserved1E2 = l_buffer;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter Reserved1E3
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_Reserved1E3(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.Reserved1E3 = iv_msg_block_vars.iv_Reserved1E3;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter Reserved1E4
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_Reserved1E4(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.Reserved1E4 = iv_msg_block_vars.iv_Reserved1E4;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter Reserved1E5
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_Reserved1E5(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.Reserved1E5 = iv_msg_block_vars.iv_Reserved1E5;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter Reserved1E6
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_Reserved1E6(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.Reserved1E6 = iv_msg_block_vars.iv_Reserved1E6;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter Reserved1E7
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_Reserved1E7(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.Reserved1E7 = iv_msg_block_vars.iv_Reserved1E7;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter RCW[N]_CHA/B_D[DIMM]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-#ifndef __PPE__
-        fapi2::ReturnCode setup_RCW(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.RCW00_ChA_D0 = iv_msg_block_vars.iv_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW01_ChA_D0 = iv_msg_block_vars.iv_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW02_ChA_D0 = iv_msg_block_vars.iv_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW03_ChA_D0 = iv_msg_block_vars.iv_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW04_ChA_D0 = iv_msg_block_vars.iv_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW05_ChA_D0 = iv_msg_block_vars.iv_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW06_ChA_D0 = iv_msg_block_vars.iv_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW07_ChA_D0 = iv_msg_block_vars.iv_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW08_ChA_D0 = iv_msg_block_vars.iv_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW09_ChA_D0 = iv_msg_block_vars.iv_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW0A_ChA_D0 = iv_msg_block_vars.iv_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW0B_ChA_D0 = iv_msg_block_vars.iv_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW0C_ChA_D0 = iv_msg_block_vars.iv_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW0D_ChA_D0 = iv_msg_block_vars.iv_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW0E_ChA_D0 = iv_msg_block_vars.iv_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW0F_ChA_D0 = iv_msg_block_vars.iv_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW10_ChA_D0 = iv_msg_block_vars.iv_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW11_ChA_D0 = iv_msg_block_vars.iv_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW12_ChA_D0 = iv_msg_block_vars.iv_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW13_ChA_D0 = iv_msg_block_vars.iv_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW14_ChA_D0 = iv_msg_block_vars.iv_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW15_ChA_D0 = iv_msg_block_vars.iv_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW16_ChA_D0 = iv_msg_block_vars.iv_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW17_ChA_D0 = iv_msg_block_vars.iv_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW18_ChA_D0 = iv_msg_block_vars.iv_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW19_ChA_D0 = iv_msg_block_vars.iv_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW1A_ChA_D0 = iv_msg_block_vars.iv_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW1B_ChA_D0 = iv_msg_block_vars.iv_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW1C_ChA_D0 = iv_msg_block_vars.iv_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW1D_ChA_D0 = iv_msg_block_vars.iv_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW1E_ChA_D0 = iv_msg_block_vars.iv_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW1F_ChA_D0 = iv_msg_block_vars.iv_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW20_ChA_D0 = iv_msg_block_vars.iv_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW21_ChA_D0 = iv_msg_block_vars.iv_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW22_ChA_D0 = iv_msg_block_vars.iv_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW23_ChA_D0 = iv_msg_block_vars.iv_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW24_ChA_D0 = iv_msg_block_vars.iv_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW25_ChA_D0 = iv_msg_block_vars.iv_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW26_ChA_D0 = iv_msg_block_vars.iv_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW27_ChA_D0 = iv_msg_block_vars.iv_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW28_ChA_D0 = iv_msg_block_vars.iv_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW29_ChA_D0 = iv_msg_block_vars.iv_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW2A_ChA_D0 = iv_msg_block_vars.iv_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW2B_ChA_D0 = iv_msg_block_vars.iv_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW2C_ChA_D0 = iv_msg_block_vars.iv_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW2D_ChA_D0 = iv_msg_block_vars.iv_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW2E_ChA_D0 = iv_msg_block_vars.iv_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW2F_ChA_D0 = iv_msg_block_vars.iv_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW30_ChA_D0 = iv_msg_block_vars.iv_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW31_ChA_D0 = iv_msg_block_vars.iv_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW32_ChA_D0 = iv_msg_block_vars.iv_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW33_ChA_D0 = iv_msg_block_vars.iv_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW34_ChA_D0 = iv_msg_block_vars.iv_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW35_ChA_D0 = iv_msg_block_vars.iv_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW36_ChA_D0 = iv_msg_block_vars.iv_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW37_ChA_D0 = iv_msg_block_vars.iv_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW38_ChA_D0 = iv_msg_block_vars.iv_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW39_ChA_D0 = iv_msg_block_vars.iv_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW3A_ChA_D0 = iv_msg_block_vars.iv_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW3B_ChA_D0 = iv_msg_block_vars.iv_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW3C_ChA_D0 = iv_msg_block_vars.iv_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW3D_ChA_D0 = iv_msg_block_vars.iv_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW3E_ChA_D0 = iv_msg_block_vars.iv_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW3F_ChA_D0 = iv_msg_block_vars.iv_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW40_ChA_D0 = iv_msg_block_vars.iv_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW41_ChA_D0 = iv_msg_block_vars.iv_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW42_ChA_D0 = iv_msg_block_vars.iv_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW43_ChA_D0 = iv_msg_block_vars.iv_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW44_ChA_D0 = iv_msg_block_vars.iv_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW45_ChA_D0 = iv_msg_block_vars.iv_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW46_ChA_D0 = iv_msg_block_vars.iv_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW47_ChA_D0 = iv_msg_block_vars.iv_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW48_ChA_D0 = iv_msg_block_vars.iv_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW49_ChA_D0 = iv_msg_block_vars.iv_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW4A_ChA_D0 = iv_msg_block_vars.iv_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW4B_ChA_D0 = iv_msg_block_vars.iv_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW4C_ChA_D0 = iv_msg_block_vars.iv_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW4D_ChA_D0 = iv_msg_block_vars.iv_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW4E_ChA_D0 = iv_msg_block_vars.iv_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW4F_ChA_D0 = iv_msg_block_vars.iv_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW50_ChA_D0 = iv_msg_block_vars.iv_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW51_ChA_D0 = iv_msg_block_vars.iv_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW52_ChA_D0 = iv_msg_block_vars.iv_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW53_ChA_D0 = iv_msg_block_vars.iv_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW54_ChA_D0 = iv_msg_block_vars.iv_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW55_ChA_D0 = iv_msg_block_vars.iv_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW56_ChA_D0 = iv_msg_block_vars.iv_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW57_ChA_D0 = iv_msg_block_vars.iv_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW58_ChA_D0 = iv_msg_block_vars.iv_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW59_ChA_D0 = iv_msg_block_vars.iv_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW5A_ChA_D0 = iv_msg_block_vars.iv_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW5B_ChA_D0 = iv_msg_block_vars.iv_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW5C_ChA_D0 = iv_msg_block_vars.iv_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW5D_ChA_D0 = iv_msg_block_vars.iv_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW5E_ChA_D0 = iv_msg_block_vars.iv_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW5F_ChA_D0 = iv_msg_block_vars.iv_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW60_ChA_D0 = iv_msg_block_vars.iv_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW61_ChA_D0 = iv_msg_block_vars.iv_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW62_ChA_D0 = iv_msg_block_vars.iv_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW63_ChA_D0 = iv_msg_block_vars.iv_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW64_ChA_D0 = iv_msg_block_vars.iv_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW65_ChA_D0 = iv_msg_block_vars.iv_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW66_ChA_D0 = iv_msg_block_vars.iv_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW67_ChA_D0 = iv_msg_block_vars.iv_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW68_ChA_D0 = iv_msg_block_vars.iv_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW69_ChA_D0 = iv_msg_block_vars.iv_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW6A_ChA_D0 = iv_msg_block_vars.iv_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW6B_ChA_D0 = iv_msg_block_vars.iv_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW6C_ChA_D0 = iv_msg_block_vars.iv_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW6D_ChA_D0 = iv_msg_block_vars.iv_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW6E_ChA_D0 = iv_msg_block_vars.iv_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW6F_ChA_D0 = iv_msg_block_vars.iv_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW70_ChA_D0 = iv_msg_block_vars.iv_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW71_ChA_D0 = iv_msg_block_vars.iv_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW72_ChA_D0 = iv_msg_block_vars.iv_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW73_ChA_D0 = iv_msg_block_vars.iv_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW74_ChA_D0 = iv_msg_block_vars.iv_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW75_ChA_D0 = iv_msg_block_vars.iv_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW76_ChA_D0 = iv_msg_block_vars.iv_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW77_ChA_D0 = iv_msg_block_vars.iv_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW78_ChA_D0 = iv_msg_block_vars.iv_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW79_ChA_D0 = iv_msg_block_vars.iv_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW7A_ChA_D0 = iv_msg_block_vars.iv_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW7B_ChA_D0 = iv_msg_block_vars.iv_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW7C_ChA_D0 = iv_msg_block_vars.iv_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW7D_ChA_D0 = iv_msg_block_vars.iv_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW7E_ChA_D0 = iv_msg_block_vars.iv_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-            io_msg_block.RCW7F_ChA_D0 = iv_msg_block_vars.iv_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM0];
-
-            io_msg_block.RCW00_ChB_D0 = iv_msg_block_vars.iv_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW01_ChB_D0 = iv_msg_block_vars.iv_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW02_ChB_D0 = iv_msg_block_vars.iv_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW03_ChB_D0 = iv_msg_block_vars.iv_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW04_ChB_D0 = iv_msg_block_vars.iv_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW05_ChB_D0 = iv_msg_block_vars.iv_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW06_ChB_D0 = iv_msg_block_vars.iv_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW07_ChB_D0 = iv_msg_block_vars.iv_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW08_ChB_D0 = iv_msg_block_vars.iv_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW09_ChB_D0 = iv_msg_block_vars.iv_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW0A_ChB_D0 = iv_msg_block_vars.iv_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW0B_ChB_D0 = iv_msg_block_vars.iv_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW0C_ChB_D0 = iv_msg_block_vars.iv_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW0D_ChB_D0 = iv_msg_block_vars.iv_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW0E_ChB_D0 = iv_msg_block_vars.iv_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW0F_ChB_D0 = iv_msg_block_vars.iv_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW10_ChB_D0 = iv_msg_block_vars.iv_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW11_ChB_D0 = iv_msg_block_vars.iv_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW12_ChB_D0 = iv_msg_block_vars.iv_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW13_ChB_D0 = iv_msg_block_vars.iv_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW14_ChB_D0 = iv_msg_block_vars.iv_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW15_ChB_D0 = iv_msg_block_vars.iv_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW16_ChB_D0 = iv_msg_block_vars.iv_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW17_ChB_D0 = iv_msg_block_vars.iv_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW18_ChB_D0 = iv_msg_block_vars.iv_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW19_ChB_D0 = iv_msg_block_vars.iv_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW1A_ChB_D0 = iv_msg_block_vars.iv_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW1B_ChB_D0 = iv_msg_block_vars.iv_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW1C_ChB_D0 = iv_msg_block_vars.iv_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW1D_ChB_D0 = iv_msg_block_vars.iv_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW1E_ChB_D0 = iv_msg_block_vars.iv_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW1F_ChB_D0 = iv_msg_block_vars.iv_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW20_ChB_D0 = iv_msg_block_vars.iv_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW21_ChB_D0 = iv_msg_block_vars.iv_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW22_ChB_D0 = iv_msg_block_vars.iv_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW23_ChB_D0 = iv_msg_block_vars.iv_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW24_ChB_D0 = iv_msg_block_vars.iv_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW25_ChB_D0 = iv_msg_block_vars.iv_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW26_ChB_D0 = iv_msg_block_vars.iv_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW27_ChB_D0 = iv_msg_block_vars.iv_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW28_ChB_D0 = iv_msg_block_vars.iv_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW29_ChB_D0 = iv_msg_block_vars.iv_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW2A_ChB_D0 = iv_msg_block_vars.iv_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW2B_ChB_D0 = iv_msg_block_vars.iv_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW2C_ChB_D0 = iv_msg_block_vars.iv_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW2D_ChB_D0 = iv_msg_block_vars.iv_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW2E_ChB_D0 = iv_msg_block_vars.iv_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW2F_ChB_D0 = iv_msg_block_vars.iv_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW30_ChB_D0 = iv_msg_block_vars.iv_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW31_ChB_D0 = iv_msg_block_vars.iv_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW32_ChB_D0 = iv_msg_block_vars.iv_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW33_ChB_D0 = iv_msg_block_vars.iv_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW34_ChB_D0 = iv_msg_block_vars.iv_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW35_ChB_D0 = iv_msg_block_vars.iv_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW36_ChB_D0 = iv_msg_block_vars.iv_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW37_ChB_D0 = iv_msg_block_vars.iv_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW38_ChB_D0 = iv_msg_block_vars.iv_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW39_ChB_D0 = iv_msg_block_vars.iv_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW3A_ChB_D0 = iv_msg_block_vars.iv_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW3B_ChB_D0 = iv_msg_block_vars.iv_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW3C_ChB_D0 = iv_msg_block_vars.iv_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW3D_ChB_D0 = iv_msg_block_vars.iv_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW3E_ChB_D0 = iv_msg_block_vars.iv_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW3F_ChB_D0 = iv_msg_block_vars.iv_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW40_ChB_D0 = iv_msg_block_vars.iv_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW41_ChB_D0 = iv_msg_block_vars.iv_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW42_ChB_D0 = iv_msg_block_vars.iv_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW43_ChB_D0 = iv_msg_block_vars.iv_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW44_ChB_D0 = iv_msg_block_vars.iv_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW45_ChB_D0 = iv_msg_block_vars.iv_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW46_ChB_D0 = iv_msg_block_vars.iv_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW47_ChB_D0 = iv_msg_block_vars.iv_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW48_ChB_D0 = iv_msg_block_vars.iv_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW49_ChB_D0 = iv_msg_block_vars.iv_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW4A_ChB_D0 = iv_msg_block_vars.iv_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW4B_ChB_D0 = iv_msg_block_vars.iv_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW4C_ChB_D0 = iv_msg_block_vars.iv_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW4D_ChB_D0 = iv_msg_block_vars.iv_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW4E_ChB_D0 = iv_msg_block_vars.iv_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW4F_ChB_D0 = iv_msg_block_vars.iv_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW50_ChB_D0 = iv_msg_block_vars.iv_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW51_ChB_D0 = iv_msg_block_vars.iv_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW52_ChB_D0 = iv_msg_block_vars.iv_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW53_ChB_D0 = iv_msg_block_vars.iv_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW54_ChB_D0 = iv_msg_block_vars.iv_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW55_ChB_D0 = iv_msg_block_vars.iv_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW56_ChB_D0 = iv_msg_block_vars.iv_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW57_ChB_D0 = iv_msg_block_vars.iv_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW58_ChB_D0 = iv_msg_block_vars.iv_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW59_ChB_D0 = iv_msg_block_vars.iv_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW5A_ChB_D0 = iv_msg_block_vars.iv_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW5B_ChB_D0 = iv_msg_block_vars.iv_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW5C_ChB_D0 = iv_msg_block_vars.iv_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW5D_ChB_D0 = iv_msg_block_vars.iv_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW5E_ChB_D0 = iv_msg_block_vars.iv_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW5F_ChB_D0 = iv_msg_block_vars.iv_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW60_ChB_D0 = iv_msg_block_vars.iv_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW61_ChB_D0 = iv_msg_block_vars.iv_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW62_ChB_D0 = iv_msg_block_vars.iv_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW63_ChB_D0 = iv_msg_block_vars.iv_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW64_ChB_D0 = iv_msg_block_vars.iv_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW65_ChB_D0 = iv_msg_block_vars.iv_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW66_ChB_D0 = iv_msg_block_vars.iv_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW67_ChB_D0 = iv_msg_block_vars.iv_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW68_ChB_D0 = iv_msg_block_vars.iv_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW69_ChB_D0 = iv_msg_block_vars.iv_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW6A_ChB_D0 = iv_msg_block_vars.iv_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW6B_ChB_D0 = iv_msg_block_vars.iv_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW6C_ChB_D0 = iv_msg_block_vars.iv_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW6D_ChB_D0 = iv_msg_block_vars.iv_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW6E_ChB_D0 = iv_msg_block_vars.iv_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW6F_ChB_D0 = iv_msg_block_vars.iv_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW70_ChB_D0 = iv_msg_block_vars.iv_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW71_ChB_D0 = iv_msg_block_vars.iv_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW72_ChB_D0 = iv_msg_block_vars.iv_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW73_ChB_D0 = iv_msg_block_vars.iv_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW74_ChB_D0 = iv_msg_block_vars.iv_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW75_ChB_D0 = iv_msg_block_vars.iv_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW76_ChB_D0 = iv_msg_block_vars.iv_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW77_ChB_D0 = iv_msg_block_vars.iv_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW78_ChB_D0 = iv_msg_block_vars.iv_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW79_ChB_D0 = iv_msg_block_vars.iv_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW7A_ChB_D0 = iv_msg_block_vars.iv_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW7B_ChB_D0 = iv_msg_block_vars.iv_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW7C_ChB_D0 = iv_msg_block_vars.iv_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW7D_ChB_D0 = iv_msg_block_vars.iv_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW7E_ChB_D0 = iv_msg_block_vars.iv_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-            io_msg_block.RCW7F_ChB_D0 = iv_msg_block_vars.iv_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM0];
-
-            io_msg_block.RCW00_ChA_D1 = iv_msg_block_vars.iv_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW01_ChA_D1 = iv_msg_block_vars.iv_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW02_ChA_D1 = iv_msg_block_vars.iv_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW03_ChA_D1 = iv_msg_block_vars.iv_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW04_ChA_D1 = iv_msg_block_vars.iv_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW05_ChA_D1 = iv_msg_block_vars.iv_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW06_ChA_D1 = iv_msg_block_vars.iv_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW07_ChA_D1 = iv_msg_block_vars.iv_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW08_ChA_D1 = iv_msg_block_vars.iv_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW09_ChA_D1 = iv_msg_block_vars.iv_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW0A_ChA_D1 = iv_msg_block_vars.iv_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW0B_ChA_D1 = iv_msg_block_vars.iv_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW0C_ChA_D1 = iv_msg_block_vars.iv_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW0D_ChA_D1 = iv_msg_block_vars.iv_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW0E_ChA_D1 = iv_msg_block_vars.iv_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW0F_ChA_D1 = iv_msg_block_vars.iv_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW10_ChA_D1 = iv_msg_block_vars.iv_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW11_ChA_D1 = iv_msg_block_vars.iv_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW12_ChA_D1 = iv_msg_block_vars.iv_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW13_ChA_D1 = iv_msg_block_vars.iv_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW14_ChA_D1 = iv_msg_block_vars.iv_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW15_ChA_D1 = iv_msg_block_vars.iv_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW16_ChA_D1 = iv_msg_block_vars.iv_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW17_ChA_D1 = iv_msg_block_vars.iv_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW18_ChA_D1 = iv_msg_block_vars.iv_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW19_ChA_D1 = iv_msg_block_vars.iv_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW1A_ChA_D1 = iv_msg_block_vars.iv_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW1B_ChA_D1 = iv_msg_block_vars.iv_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW1C_ChA_D1 = iv_msg_block_vars.iv_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW1D_ChA_D1 = iv_msg_block_vars.iv_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW1E_ChA_D1 = iv_msg_block_vars.iv_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW1F_ChA_D1 = iv_msg_block_vars.iv_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW20_ChA_D1 = iv_msg_block_vars.iv_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW21_ChA_D1 = iv_msg_block_vars.iv_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW22_ChA_D1 = iv_msg_block_vars.iv_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW23_ChA_D1 = iv_msg_block_vars.iv_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW24_ChA_D1 = iv_msg_block_vars.iv_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW25_ChA_D1 = iv_msg_block_vars.iv_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW26_ChA_D1 = iv_msg_block_vars.iv_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW27_ChA_D1 = iv_msg_block_vars.iv_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW28_ChA_D1 = iv_msg_block_vars.iv_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW29_ChA_D1 = iv_msg_block_vars.iv_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW2A_ChA_D1 = iv_msg_block_vars.iv_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW2B_ChA_D1 = iv_msg_block_vars.iv_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW2C_ChA_D1 = iv_msg_block_vars.iv_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW2D_ChA_D1 = iv_msg_block_vars.iv_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW2E_ChA_D1 = iv_msg_block_vars.iv_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW2F_ChA_D1 = iv_msg_block_vars.iv_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW30_ChA_D1 = iv_msg_block_vars.iv_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW31_ChA_D1 = iv_msg_block_vars.iv_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW32_ChA_D1 = iv_msg_block_vars.iv_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW33_ChA_D1 = iv_msg_block_vars.iv_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW34_ChA_D1 = iv_msg_block_vars.iv_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW35_ChA_D1 = iv_msg_block_vars.iv_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW36_ChA_D1 = iv_msg_block_vars.iv_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW37_ChA_D1 = iv_msg_block_vars.iv_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW38_ChA_D1 = iv_msg_block_vars.iv_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW39_ChA_D1 = iv_msg_block_vars.iv_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW3A_ChA_D1 = iv_msg_block_vars.iv_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW3B_ChA_D1 = iv_msg_block_vars.iv_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW3C_ChA_D1 = iv_msg_block_vars.iv_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW3D_ChA_D1 = iv_msg_block_vars.iv_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW3E_ChA_D1 = iv_msg_block_vars.iv_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW3F_ChA_D1 = iv_msg_block_vars.iv_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW40_ChA_D1 = iv_msg_block_vars.iv_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW41_ChA_D1 = iv_msg_block_vars.iv_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW42_ChA_D1 = iv_msg_block_vars.iv_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW43_ChA_D1 = iv_msg_block_vars.iv_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW44_ChA_D1 = iv_msg_block_vars.iv_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW45_ChA_D1 = iv_msg_block_vars.iv_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW46_ChA_D1 = iv_msg_block_vars.iv_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW47_ChA_D1 = iv_msg_block_vars.iv_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW48_ChA_D1 = iv_msg_block_vars.iv_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW49_ChA_D1 = iv_msg_block_vars.iv_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW4A_ChA_D1 = iv_msg_block_vars.iv_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW4B_ChA_D1 = iv_msg_block_vars.iv_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW4C_ChA_D1 = iv_msg_block_vars.iv_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW4D_ChA_D1 = iv_msg_block_vars.iv_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW4E_ChA_D1 = iv_msg_block_vars.iv_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW4F_ChA_D1 = iv_msg_block_vars.iv_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW50_ChA_D1 = iv_msg_block_vars.iv_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW51_ChA_D1 = iv_msg_block_vars.iv_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW52_ChA_D1 = iv_msg_block_vars.iv_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW53_ChA_D1 = iv_msg_block_vars.iv_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW54_ChA_D1 = iv_msg_block_vars.iv_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW55_ChA_D1 = iv_msg_block_vars.iv_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW56_ChA_D1 = iv_msg_block_vars.iv_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW57_ChA_D1 = iv_msg_block_vars.iv_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW58_ChA_D1 = iv_msg_block_vars.iv_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW59_ChA_D1 = iv_msg_block_vars.iv_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW5A_ChA_D1 = iv_msg_block_vars.iv_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW5B_ChA_D1 = iv_msg_block_vars.iv_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW5C_ChA_D1 = iv_msg_block_vars.iv_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW5D_ChA_D1 = iv_msg_block_vars.iv_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW5E_ChA_D1 = iv_msg_block_vars.iv_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW5F_ChA_D1 = iv_msg_block_vars.iv_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW60_ChA_D1 = iv_msg_block_vars.iv_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW61_ChA_D1 = iv_msg_block_vars.iv_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW62_ChA_D1 = iv_msg_block_vars.iv_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW63_ChA_D1 = iv_msg_block_vars.iv_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW64_ChA_D1 = iv_msg_block_vars.iv_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW65_ChA_D1 = iv_msg_block_vars.iv_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW66_ChA_D1 = iv_msg_block_vars.iv_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW67_ChA_D1 = iv_msg_block_vars.iv_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW68_ChA_D1 = iv_msg_block_vars.iv_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW69_ChA_D1 = iv_msg_block_vars.iv_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW6A_ChA_D1 = iv_msg_block_vars.iv_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW6B_ChA_D1 = iv_msg_block_vars.iv_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW6C_ChA_D1 = iv_msg_block_vars.iv_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW6D_ChA_D1 = iv_msg_block_vars.iv_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW6E_ChA_D1 = iv_msg_block_vars.iv_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW6F_ChA_D1 = iv_msg_block_vars.iv_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW70_ChA_D1 = iv_msg_block_vars.iv_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW71_ChA_D1 = iv_msg_block_vars.iv_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW72_ChA_D1 = iv_msg_block_vars.iv_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW73_ChA_D1 = iv_msg_block_vars.iv_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW74_ChA_D1 = iv_msg_block_vars.iv_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW75_ChA_D1 = iv_msg_block_vars.iv_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW76_ChA_D1 = iv_msg_block_vars.iv_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW77_ChA_D1 = iv_msg_block_vars.iv_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW78_ChA_D1 = iv_msg_block_vars.iv_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW79_ChA_D1 = iv_msg_block_vars.iv_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW7A_ChA_D1 = iv_msg_block_vars.iv_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW7B_ChA_D1 = iv_msg_block_vars.iv_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW7C_ChA_D1 = iv_msg_block_vars.iv_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW7D_ChA_D1 = iv_msg_block_vars.iv_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW7E_ChA_D1 = iv_msg_block_vars.iv_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-            io_msg_block.RCW7F_ChA_D1 = iv_msg_block_vars.iv_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_A][DIMM1];
-
-            io_msg_block.RCW00_ChB_D1 = iv_msg_block_vars.iv_RCW[0][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW01_ChB_D1 = iv_msg_block_vars.iv_RCW[1][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW02_ChB_D1 = iv_msg_block_vars.iv_RCW[2][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW03_ChB_D1 = iv_msg_block_vars.iv_RCW[3][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW04_ChB_D1 = iv_msg_block_vars.iv_RCW[4][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW05_ChB_D1 = iv_msg_block_vars.iv_RCW[5][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW06_ChB_D1 = iv_msg_block_vars.iv_RCW[6][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW07_ChB_D1 = iv_msg_block_vars.iv_RCW[7][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW08_ChB_D1 = iv_msg_block_vars.iv_RCW[8][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW09_ChB_D1 = iv_msg_block_vars.iv_RCW[9][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW0A_ChB_D1 = iv_msg_block_vars.iv_RCW[10][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW0B_ChB_D1 = iv_msg_block_vars.iv_RCW[11][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW0C_ChB_D1 = iv_msg_block_vars.iv_RCW[12][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW0D_ChB_D1 = iv_msg_block_vars.iv_RCW[13][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW0E_ChB_D1 = iv_msg_block_vars.iv_RCW[14][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW0F_ChB_D1 = iv_msg_block_vars.iv_RCW[15][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW10_ChB_D1 = iv_msg_block_vars.iv_RCW[16][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW11_ChB_D1 = iv_msg_block_vars.iv_RCW[17][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW12_ChB_D1 = iv_msg_block_vars.iv_RCW[18][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW13_ChB_D1 = iv_msg_block_vars.iv_RCW[19][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW14_ChB_D1 = iv_msg_block_vars.iv_RCW[20][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW15_ChB_D1 = iv_msg_block_vars.iv_RCW[21][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW16_ChB_D1 = iv_msg_block_vars.iv_RCW[22][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW17_ChB_D1 = iv_msg_block_vars.iv_RCW[23][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW18_ChB_D1 = iv_msg_block_vars.iv_RCW[24][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW19_ChB_D1 = iv_msg_block_vars.iv_RCW[25][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW1A_ChB_D1 = iv_msg_block_vars.iv_RCW[26][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW1B_ChB_D1 = iv_msg_block_vars.iv_RCW[27][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW1C_ChB_D1 = iv_msg_block_vars.iv_RCW[28][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW1D_ChB_D1 = iv_msg_block_vars.iv_RCW[29][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW1E_ChB_D1 = iv_msg_block_vars.iv_RCW[30][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW1F_ChB_D1 = iv_msg_block_vars.iv_RCW[31][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW20_ChB_D1 = iv_msg_block_vars.iv_RCW[32][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW21_ChB_D1 = iv_msg_block_vars.iv_RCW[33][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW22_ChB_D1 = iv_msg_block_vars.iv_RCW[34][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW23_ChB_D1 = iv_msg_block_vars.iv_RCW[35][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW24_ChB_D1 = iv_msg_block_vars.iv_RCW[36][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW25_ChB_D1 = iv_msg_block_vars.iv_RCW[37][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW26_ChB_D1 = iv_msg_block_vars.iv_RCW[38][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW27_ChB_D1 = iv_msg_block_vars.iv_RCW[39][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW28_ChB_D1 = iv_msg_block_vars.iv_RCW[40][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW29_ChB_D1 = iv_msg_block_vars.iv_RCW[41][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW2A_ChB_D1 = iv_msg_block_vars.iv_RCW[42][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW2B_ChB_D1 = iv_msg_block_vars.iv_RCW[43][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW2C_ChB_D1 = iv_msg_block_vars.iv_RCW[44][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW2D_ChB_D1 = iv_msg_block_vars.iv_RCW[45][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW2E_ChB_D1 = iv_msg_block_vars.iv_RCW[46][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW2F_ChB_D1 = iv_msg_block_vars.iv_RCW[47][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW30_ChB_D1 = iv_msg_block_vars.iv_RCW[48][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW31_ChB_D1 = iv_msg_block_vars.iv_RCW[49][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW32_ChB_D1 = iv_msg_block_vars.iv_RCW[50][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW33_ChB_D1 = iv_msg_block_vars.iv_RCW[51][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW34_ChB_D1 = iv_msg_block_vars.iv_RCW[52][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW35_ChB_D1 = iv_msg_block_vars.iv_RCW[53][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW36_ChB_D1 = iv_msg_block_vars.iv_RCW[54][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW37_ChB_D1 = iv_msg_block_vars.iv_RCW[55][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW38_ChB_D1 = iv_msg_block_vars.iv_RCW[56][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW39_ChB_D1 = iv_msg_block_vars.iv_RCW[57][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW3A_ChB_D1 = iv_msg_block_vars.iv_RCW[58][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW3B_ChB_D1 = iv_msg_block_vars.iv_RCW[59][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW3C_ChB_D1 = iv_msg_block_vars.iv_RCW[60][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW3D_ChB_D1 = iv_msg_block_vars.iv_RCW[61][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW3E_ChB_D1 = iv_msg_block_vars.iv_RCW[62][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW3F_ChB_D1 = iv_msg_block_vars.iv_RCW[63][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW40_ChB_D1 = iv_msg_block_vars.iv_RCW[64][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW41_ChB_D1 = iv_msg_block_vars.iv_RCW[65][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW42_ChB_D1 = iv_msg_block_vars.iv_RCW[66][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW43_ChB_D1 = iv_msg_block_vars.iv_RCW[67][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW44_ChB_D1 = iv_msg_block_vars.iv_RCW[68][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW45_ChB_D1 = iv_msg_block_vars.iv_RCW[69][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW46_ChB_D1 = iv_msg_block_vars.iv_RCW[70][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW47_ChB_D1 = iv_msg_block_vars.iv_RCW[71][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW48_ChB_D1 = iv_msg_block_vars.iv_RCW[72][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW49_ChB_D1 = iv_msg_block_vars.iv_RCW[73][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW4A_ChB_D1 = iv_msg_block_vars.iv_RCW[74][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW4B_ChB_D1 = iv_msg_block_vars.iv_RCW[75][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW4C_ChB_D1 = iv_msg_block_vars.iv_RCW[76][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW4D_ChB_D1 = iv_msg_block_vars.iv_RCW[77][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW4E_ChB_D1 = iv_msg_block_vars.iv_RCW[78][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW4F_ChB_D1 = iv_msg_block_vars.iv_RCW[79][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW50_ChB_D1 = iv_msg_block_vars.iv_RCW[80][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW51_ChB_D1 = iv_msg_block_vars.iv_RCW[81][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW52_ChB_D1 = iv_msg_block_vars.iv_RCW[82][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW53_ChB_D1 = iv_msg_block_vars.iv_RCW[83][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW54_ChB_D1 = iv_msg_block_vars.iv_RCW[84][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW55_ChB_D1 = iv_msg_block_vars.iv_RCW[85][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW56_ChB_D1 = iv_msg_block_vars.iv_RCW[86][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW57_ChB_D1 = iv_msg_block_vars.iv_RCW[87][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW58_ChB_D1 = iv_msg_block_vars.iv_RCW[88][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW59_ChB_D1 = iv_msg_block_vars.iv_RCW[89][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW5A_ChB_D1 = iv_msg_block_vars.iv_RCW[90][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW5B_ChB_D1 = iv_msg_block_vars.iv_RCW[91][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW5C_ChB_D1 = iv_msg_block_vars.iv_RCW[92][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW5D_ChB_D1 = iv_msg_block_vars.iv_RCW[93][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW5E_ChB_D1 = iv_msg_block_vars.iv_RCW[94][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW5F_ChB_D1 = iv_msg_block_vars.iv_RCW[95][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW60_ChB_D1 = iv_msg_block_vars.iv_RCW[96][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW61_ChB_D1 = iv_msg_block_vars.iv_RCW[97][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW62_ChB_D1 = iv_msg_block_vars.iv_RCW[98][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW63_ChB_D1 = iv_msg_block_vars.iv_RCW[99][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW64_ChB_D1 = iv_msg_block_vars.iv_RCW[100][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW65_ChB_D1 = iv_msg_block_vars.iv_RCW[101][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW66_ChB_D1 = iv_msg_block_vars.iv_RCW[102][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW67_ChB_D1 = iv_msg_block_vars.iv_RCW[103][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW68_ChB_D1 = iv_msg_block_vars.iv_RCW[104][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW69_ChB_D1 = iv_msg_block_vars.iv_RCW[105][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW6A_ChB_D1 = iv_msg_block_vars.iv_RCW[106][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW6B_ChB_D1 = iv_msg_block_vars.iv_RCW[107][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW6C_ChB_D1 = iv_msg_block_vars.iv_RCW[108][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW6D_ChB_D1 = iv_msg_block_vars.iv_RCW[109][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW6E_ChB_D1 = iv_msg_block_vars.iv_RCW[110][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW6F_ChB_D1 = iv_msg_block_vars.iv_RCW[111][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW70_ChB_D1 = iv_msg_block_vars.iv_RCW[112][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW71_ChB_D1 = iv_msg_block_vars.iv_RCW[113][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW72_ChB_D1 = iv_msg_block_vars.iv_RCW[114][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW73_ChB_D1 = iv_msg_block_vars.iv_RCW[115][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW74_ChB_D1 = iv_msg_block_vars.iv_RCW[116][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW75_ChB_D1 = iv_msg_block_vars.iv_RCW[117][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW76_ChB_D1 = iv_msg_block_vars.iv_RCW[118][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW77_ChB_D1 = iv_msg_block_vars.iv_RCW[119][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW78_ChB_D1 = iv_msg_block_vars.iv_RCW[120][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW79_ChB_D1 = iv_msg_block_vars.iv_RCW[121][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW7A_ChB_D1 = iv_msg_block_vars.iv_RCW[122][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW7B_ChB_D1 = iv_msg_block_vars.iv_RCW[123][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW7C_ChB_D1 = iv_msg_block_vars.iv_RCW[124][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW7D_ChB_D1 = iv_msg_block_vars.iv_RCW[125][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW7E_ChB_D1 = iv_msg_block_vars.iv_RCW[126][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-            io_msg_block.RCW7F_ChB_D1 = iv_msg_block_vars.iv_RCW[127][mss::ddr5::mr::ATTR_CHANNEL_B][DIMM1];
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-#endif
-
-        ///
-        /// @brief msg_block_params structure setup for parameter BCW[N]_CHA/B_D[DIMM]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_BCW(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // BCW values are all left as zero for Odyssey
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter WL_ADJ_START
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_WL_ADJ_START(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.WL_ADJ_START = iv_msg_block_vars.iv_WL_ADJ_START;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameter WL_ADJ_END
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_WL_ADJ_END(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.WL_ADJ_END = iv_msg_block_vars.iv_WL_ADJ_END;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters VrefDqR[RANK]Nib[DRAM]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_VrefDq(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // Note the swizzle from DRAM indexing to Synopsys indexing
-            io_msg_block.VrefDqR0Nib0 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefDqR0Nib1 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefDqR0Nib2 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefDqR0Nib3 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefDqR0Nib4 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefDqR0Nib5 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefDqR0Nib6 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefDqR0Nib7 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefDqR0Nib8 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefDqR0Nib9 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefDqR0Nib10 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefDqR0Nib11 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefDqR0Nib12 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefDqR0Nib13 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefDqR0Nib14 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefDqR0Nib15 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefDqR0Nib16 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefDqR0Nib17 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefDqR0Nib18 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefDqR0Nib19 = iv_msg_block_vars.iv_MR10[0][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.VrefDqR1Nib0 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefDqR1Nib1 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefDqR1Nib2 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefDqR1Nib3 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefDqR1Nib4 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefDqR1Nib5 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefDqR1Nib6 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefDqR1Nib7 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefDqR1Nib8 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefDqR1Nib9 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefDqR1Nib10 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefDqR1Nib11 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefDqR1Nib12 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefDqR1Nib13 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefDqR1Nib14 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefDqR1Nib15 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefDqR1Nib16 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefDqR1Nib17 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefDqR1Nib18 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefDqR1Nib19 = iv_msg_block_vars.iv_MR10[1][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.VrefDqR2Nib0 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefDqR2Nib1 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefDqR2Nib2 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefDqR2Nib3 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefDqR2Nib4 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefDqR2Nib5 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefDqR2Nib6 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefDqR2Nib7 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefDqR2Nib8 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefDqR2Nib9 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefDqR2Nib10 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefDqR2Nib11 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefDqR2Nib12 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefDqR2Nib13 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefDqR2Nib14 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefDqR2Nib15 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefDqR2Nib16 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefDqR2Nib17 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefDqR2Nib18 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefDqR2Nib19 = iv_msg_block_vars.iv_MR10[2][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.VrefDqR3Nib0 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefDqR3Nib1 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefDqR3Nib2 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefDqR3Nib3 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefDqR3Nib4 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefDqR3Nib5 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefDqR3Nib6 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefDqR3Nib7 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefDqR3Nib8 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefDqR3Nib9 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefDqR3Nib10 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefDqR3Nib11 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefDqR3Nib12 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefDqR3Nib13 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefDqR3Nib14 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefDqR3Nib15 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefDqR3Nib16 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefDqR3Nib17 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefDqR3Nib18 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefDqR3Nib19 = iv_msg_block_vars.iv_MR10[3][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR3R[RANK]Nib[DRAM]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note as of the M18 software, MR3RXNibY are used to input per-device MR33 settings
-        ///
-        fapi2::ReturnCode setup_MR3_per_dram(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // Note the swizzle from DRAM indexing to Synopsys indexing
-            io_msg_block.MR3R0Nib0 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.MR3R0Nib1 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.MR3R0Nib2 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.MR3R0Nib3 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.MR3R0Nib4 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.MR3R0Nib5 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.MR3R0Nib6 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.MR3R0Nib7 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.MR3R0Nib8 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.MR3R0Nib9 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.MR3R0Nib10 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.MR3R0Nib11 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.MR3R0Nib12 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.MR3R0Nib13 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.MR3R0Nib14 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.MR3R0Nib15 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.MR3R0Nib16 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.MR3R0Nib17 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.MR3R0Nib18 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.MR3R0Nib19 = iv_msg_block_vars.iv_MR33_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.MR3R1Nib0 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.MR3R1Nib1 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.MR3R1Nib2 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.MR3R1Nib3 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.MR3R1Nib4 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.MR3R1Nib5 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.MR3R1Nib6 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.MR3R1Nib7 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.MR3R1Nib8 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.MR3R1Nib9 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.MR3R1Nib10 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.MR3R1Nib11 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.MR3R1Nib12 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.MR3R1Nib13 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.MR3R1Nib14 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.MR3R1Nib15 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.MR3R1Nib16 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.MR3R1Nib17 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.MR3R1Nib18 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.MR3R1Nib19 = iv_msg_block_vars.iv_MR33_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.MR3R2Nib0 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.MR3R2Nib1 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.MR3R2Nib2 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.MR3R2Nib3 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.MR3R2Nib4 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.MR3R2Nib5 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.MR3R2Nib6 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.MR3R2Nib7 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.MR3R2Nib8 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.MR3R2Nib9 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.MR3R2Nib10 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.MR3R2Nib11 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.MR3R2Nib12 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.MR3R2Nib13 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.MR3R2Nib14 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.MR3R2Nib15 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.MR3R2Nib16 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.MR3R2Nib17 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.MR3R2Nib18 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.MR3R2Nib19 = iv_msg_block_vars.iv_MR33_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.MR3R3Nib0 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.MR3R3Nib1 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.MR3R3Nib2 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.MR3R3Nib3 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.MR3R3Nib4 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.MR3R3Nib5 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.MR3R3Nib6 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.MR3R3Nib7 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.MR3R3Nib8 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.MR3R3Nib9 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.MR3R3Nib10 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.MR3R3Nib11 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.MR3R3Nib12 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.MR3R3Nib13 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.MR3R3Nib14 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.MR3R3Nib15 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.MR3R3Nib16 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.MR3R3Nib17 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.MR3R3Nib18 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.MR3R3Nib19 = iv_msg_block_vars.iv_MR33_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters VrefCSR[RANK]Nib[DRAM]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_VrefCS(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // Note the swizzle from DRAM indexing to Synopsys indexing
-            io_msg_block.VrefCSR0Nib0 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefCSR0Nib1 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefCSR0Nib2 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefCSR0Nib3 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefCSR0Nib4 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefCSR0Nib5 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefCSR0Nib6 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefCSR0Nib7 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefCSR0Nib8 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefCSR0Nib9 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefCSR0Nib10 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefCSR0Nib11 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefCSR0Nib12 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefCSR0Nib13 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefCSR0Nib14 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefCSR0Nib15 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefCSR0Nib16 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefCSR0Nib17 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefCSR0Nib18 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefCSR0Nib19 = iv_msg_block_vars.iv_MR12[0][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.VrefCSR1Nib0 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefCSR1Nib1 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefCSR1Nib2 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefCSR1Nib3 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefCSR1Nib4 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefCSR1Nib5 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefCSR1Nib6 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefCSR1Nib7 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefCSR1Nib8 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefCSR1Nib9 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefCSR1Nib10 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefCSR1Nib11 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefCSR1Nib12 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefCSR1Nib13 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefCSR1Nib14 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefCSR1Nib15 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefCSR1Nib16 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefCSR1Nib17 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefCSR1Nib18 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefCSR1Nib19 = iv_msg_block_vars.iv_MR12[1][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.VrefCSR2Nib0 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefCSR2Nib1 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefCSR2Nib2 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefCSR2Nib3 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefCSR2Nib4 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefCSR2Nib5 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefCSR2Nib6 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefCSR2Nib7 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefCSR2Nib8 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefCSR2Nib9 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefCSR2Nib10 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefCSR2Nib11 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefCSR2Nib12 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefCSR2Nib13 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefCSR2Nib14 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefCSR2Nib15 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefCSR2Nib16 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefCSR2Nib17 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefCSR2Nib18 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefCSR2Nib19 = iv_msg_block_vars.iv_MR12[2][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.VrefCSR3Nib0 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefCSR3Nib1 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefCSR3Nib2 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefCSR3Nib3 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefCSR3Nib4 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefCSR3Nib5 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefCSR3Nib6 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefCSR3Nib7 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefCSR3Nib8 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefCSR3Nib9 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefCSR3Nib10 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefCSR3Nib11 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefCSR3Nib12 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefCSR3Nib13 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefCSR3Nib14 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefCSR3Nib15 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefCSR3Nib16 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefCSR3Nib17 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefCSR3Nib18 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefCSR3Nib19 = iv_msg_block_vars.iv_MR12[3][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters VrefCAR[RANK]Nib[DRAM]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_VrefCA(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // Note the swizzle from DRAM indexing to Synopsys indexing
-            io_msg_block.VrefCAR0Nib0 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefCAR0Nib1 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefCAR0Nib2 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefCAR0Nib3 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefCAR0Nib4 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefCAR0Nib5 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefCAR0Nib6 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefCAR0Nib7 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefCAR0Nib8 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefCAR0Nib9 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefCAR0Nib10 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefCAR0Nib11 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefCAR0Nib12 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefCAR0Nib13 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefCAR0Nib14 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefCAR0Nib15 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefCAR0Nib16 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefCAR0Nib17 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefCAR0Nib18 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefCAR0Nib19 = iv_msg_block_vars.iv_MR11[0][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.VrefCAR1Nib0 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefCAR1Nib1 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefCAR1Nib2 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefCAR1Nib3 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefCAR1Nib4 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefCAR1Nib5 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefCAR1Nib6 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefCAR1Nib7 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefCAR1Nib8 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefCAR1Nib9 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefCAR1Nib10 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefCAR1Nib11 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefCAR1Nib12 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefCAR1Nib13 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefCAR1Nib14 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefCAR1Nib15 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefCAR1Nib16 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefCAR1Nib17 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefCAR1Nib18 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefCAR1Nib19 = iv_msg_block_vars.iv_MR11[1][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.VrefCAR2Nib0 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefCAR2Nib1 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefCAR2Nib2 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefCAR2Nib3 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefCAR2Nib4 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefCAR2Nib5 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefCAR2Nib6 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefCAR2Nib7 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefCAR2Nib8 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefCAR2Nib9 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefCAR2Nib10 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefCAR2Nib11 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefCAR2Nib12 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefCAR2Nib13 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefCAR2Nib14 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefCAR2Nib15 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefCAR2Nib16 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefCAR2Nib17 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefCAR2Nib18 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefCAR2Nib19 = iv_msg_block_vars.iv_MR11[2][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.VrefCAR3Nib0 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.VrefCAR3Nib1 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.VrefCAR3Nib2 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.VrefCAR3Nib3 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.VrefCAR3Nib4 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.VrefCAR3Nib5 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.VrefCAR3Nib6 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.VrefCAR3Nib7 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.VrefCAR3Nib8 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.VrefCAR3Nib9 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.VrefCAR3Nib10 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.VrefCAR3Nib11 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.VrefCAR3Nib12 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.VrefCAR3Nib13 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.VrefCAR3Nib14 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.VrefCAR3Nib15 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.VrefCAR3Nib16 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.VrefCAR3Nib17 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.VrefCAR3Nib18 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.VrefCAR3Nib19 = iv_msg_block_vars.iv_MR11[3][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters DisabledDB[BYTE]LaneR[RANK]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        ///
-        fapi2::ReturnCode setup_DisabledDB(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            fapi2::buffer<uint32_t> l_nibble_enables = iv_msg_block_vars.iv_nibbles_enables[0];
-            uint8_t l_byte_disables[10] = {};
-            FAPI_TRY(nibble_enable_db_disable(l_nibble_enables, l_byte_disables));
-
-            // SPD to PHY nibble swizzle is implemented in the getBits indexing
-            io_msg_block.DisabledDB0LaneR0 = l_byte_disables[0];
-            io_msg_block.DisabledDB0LaneR1 = l_byte_disables[0];
-            io_msg_block.DisabledDB0LaneR2 = l_byte_disables[0];
-            io_msg_block.DisabledDB0LaneR3 = l_byte_disables[0];
-
-            io_msg_block.DisabledDB1LaneR0 = l_byte_disables[1];
-            io_msg_block.DisabledDB1LaneR1 = l_byte_disables[1];
-            io_msg_block.DisabledDB1LaneR2 = l_byte_disables[1];
-            io_msg_block.DisabledDB1LaneR3 = l_byte_disables[1];
-
-            io_msg_block.DisabledDB2LaneR0 = l_byte_disables[2];
-            io_msg_block.DisabledDB2LaneR1 = l_byte_disables[2];
-            io_msg_block.DisabledDB2LaneR2 = l_byte_disables[2];
-            io_msg_block.DisabledDB2LaneR3 = l_byte_disables[2];
-
-            io_msg_block.DisabledDB3LaneR0 = l_byte_disables[3];
-            io_msg_block.DisabledDB3LaneR1 = l_byte_disables[3];
-            io_msg_block.DisabledDB3LaneR2 = l_byte_disables[3];
-            io_msg_block.DisabledDB3LaneR3 = l_byte_disables[3];
-
-            io_msg_block.DisabledDB4LaneR0 = l_byte_disables[4];
-            io_msg_block.DisabledDB4LaneR1 = l_byte_disables[4];
-            io_msg_block.DisabledDB4LaneR2 = l_byte_disables[4];
-            io_msg_block.DisabledDB4LaneR3 = l_byte_disables[4];
-
-            io_msg_block.DisabledDB5LaneR0 = l_byte_disables[5];
-            io_msg_block.DisabledDB5LaneR1 = l_byte_disables[5];
-            io_msg_block.DisabledDB5LaneR2 = l_byte_disables[5];
-            io_msg_block.DisabledDB5LaneR3 = l_byte_disables[5];
-
-            io_msg_block.DisabledDB6LaneR0 = l_byte_disables[6];
-            io_msg_block.DisabledDB6LaneR1 = l_byte_disables[6];
-            io_msg_block.DisabledDB6LaneR2 = l_byte_disables[6];
-            io_msg_block.DisabledDB6LaneR3 = l_byte_disables[6];
-
-            io_msg_block.DisabledDB7LaneR0 = l_byte_disables[7];
-            io_msg_block.DisabledDB7LaneR1 = l_byte_disables[7];
-            io_msg_block.DisabledDB7LaneR2 = l_byte_disables[7];
-            io_msg_block.DisabledDB7LaneR3 = l_byte_disables[7];
-
-            io_msg_block.DisabledDB8LaneR0 = l_byte_disables[8];
-            io_msg_block.DisabledDB8LaneR1 = l_byte_disables[8];
-            io_msg_block.DisabledDB8LaneR2 = l_byte_disables[8];
-            io_msg_block.DisabledDB8LaneR3 = l_byte_disables[8];
-
-            io_msg_block.DisabledDB9LaneR0 = l_byte_disables[9];
-            io_msg_block.DisabledDB9LaneR1 = l_byte_disables[9];
-            io_msg_block.DisabledDB9LaneR2 = l_byte_disables[9];
-            io_msg_block.DisabledDB9LaneR3 = l_byte_disables[9];
-
-        fapi_try_exit:
-            return fapi2::current_err;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for Vref_Sweep parameters
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note these are new in the M18 software
-        ///
-        fapi2::ReturnCode setup_vref_sweeps(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            io_msg_block.VrefCS_Sweep_Min = iv_msg_block_vars.iv_VrefCS_Sweep_Min;
-            io_msg_block.VrefCS_Sweep_Max = iv_msg_block_vars.iv_VrefCS_Sweep_Max;
-            io_msg_block.VrefCA_Sweep_Min = iv_msg_block_vars.iv_VrefCA_Sweep_Min;
-            io_msg_block.VrefCA_Sweep_Max = iv_msg_block_vars.iv_VrefCA_Sweep_Max;
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-        ///
-        /// @brief msg_block_params structure setup for parameters MR32R[RANK]Nib[DRAM]
-        /// @param[in,out] io_msg_block the PMU_SMB_DDR5U_1D_t struct
-        /// @return FAPI2_RC_SUCCESS iff okay
-        /// @note these are new in the M18 software
-        ///
-        fapi2::ReturnCode setup_MR32_per_dram(PMU_SMB_DDR5U_1D_t& io_msg_block) const
-        {
-            // Note the swizzle from DRAM indexing to Synopsys indexing
-            io_msg_block.MR32R0Nib0 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.MR32R0Nib1 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.MR32R0Nib2 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.MR32R0Nib3 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.MR32R0Nib4 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.MR32R0Nib5 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.MR32R0Nib6 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.MR32R0Nib7 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.MR32R0Nib8 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.MR32R0Nib9 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.MR32R0Nib10 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.MR32R0Nib11 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.MR32R0Nib12 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.MR32R0Nib13 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.MR32R0Nib14 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.MR32R0Nib15 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.MR32R0Nib16 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.MR32R0Nib17 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.MR32R0Nib18 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.MR32R0Nib19 = iv_msg_block_vars.iv_MR32_per_dram[0][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.MR32R1Nib0 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.MR32R1Nib1 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.MR32R1Nib2 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.MR32R1Nib3 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.MR32R1Nib4 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.MR32R1Nib5 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.MR32R1Nib6 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.MR32R1Nib7 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.MR32R1Nib8 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.MR32R1Nib9 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.MR32R1Nib10 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.MR32R1Nib11 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.MR32R1Nib12 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.MR32R1Nib13 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.MR32R1Nib14 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.MR32R1Nib15 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.MR32R1Nib16 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.MR32R1Nib17 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.MR32R1Nib18 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.MR32R1Nib19 = iv_msg_block_vars.iv_MR32_per_dram[1][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.MR32R2Nib0 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.MR32R2Nib1 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.MR32R2Nib2 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.MR32R2Nib3 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.MR32R2Nib4 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.MR32R2Nib5 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.MR32R2Nib6 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.MR32R2Nib7 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.MR32R2Nib8 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.MR32R2Nib9 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.MR32R2Nib10 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.MR32R2Nib11 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.MR32R2Nib12 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.MR32R2Nib13 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.MR32R2Nib14 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.MR32R2Nib15 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.MR32R2Nib16 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.MR32R2Nib17 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.MR32R2Nib18 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.MR32R2Nib19 = iv_msg_block_vars.iv_MR32_per_dram[2][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            io_msg_block.MR32R3Nib0 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[0]];
-            io_msg_block.MR32R3Nib1 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[1]];
-            io_msg_block.MR32R3Nib2 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[2]];
-            io_msg_block.MR32R3Nib3 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[3]];
-            io_msg_block.MR32R3Nib4 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[4]];
-            io_msg_block.MR32R3Nib5 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[5]];
-            io_msg_block.MR32R3Nib6 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[6]];
-            io_msg_block.MR32R3Nib7 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[7]];
-            io_msg_block.MR32R3Nib8 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[8]];
-            io_msg_block.MR32R3Nib9 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[9]];
-            io_msg_block.MR32R3Nib10 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[10]];
-            io_msg_block.MR32R3Nib11 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[11]];
-            io_msg_block.MR32R3Nib12 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[12]];
-            io_msg_block.MR32R3Nib13 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[13]];
-            io_msg_block.MR32R3Nib14 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[14]];
-            io_msg_block.MR32R3Nib15 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[15]];
-            io_msg_block.MR32R3Nib16 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[16]];
-            io_msg_block.MR32R3Nib17 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[17]];
-            io_msg_block.MR32R3Nib18 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[18]];
-            io_msg_block.MR32R3Nib19 = iv_msg_block_vars.iv_MR32_per_dram[3][mss::ody::PHY_TO_MC_NIBBLE[19]];
-
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-
-};
 
 ///
 /// @class rcw_id
