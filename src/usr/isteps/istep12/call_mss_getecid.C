@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -48,6 +48,7 @@
 #include    <targeting/common/commontargeting.H>
 #include    <targeting/common/utilFilter.H>
 #include    <targeting/targplatutil.H>
+#include    <targeting/common/mfgFlagAccessors.H>
 
 //Fapi Support
 #include    <config.h>
@@ -207,11 +208,10 @@ static errlHndl_t init_memory_encryption()
     return errl;
 }
 
-#define CONTEXT call_mss_getecid
 
-void* call_mss_getecid(void* io_pArgs)
+// Manually enable the PLL Unlock on Odyssey
+errlHndl_t ody_unlock_pll_fir( TargetHandle_t i_ocmb )
 {
-    IStepError l_StepError;
     errlHndl_t l_err = nullptr;
     constexpr uint64_t CHIPLET1_REGISTER  = 0x010f001e;
     constexpr uint64_t UNMASK_BIT12 = 0xFFF7FFFFFFFFFFFF;
@@ -219,10 +219,77 @@ void* call_mss_getecid(void* io_pArgs)
     uint8_t l_buf[8] = {0};
     uint64_t l_data = 0ULL;
 
-    TRACISTEP(ENTER_MRK"call_mss_getecid entry" );
+    do  {
+        if (!TARGETING::UTIL::isOdysseyChip(i_ocmb))
+        {
+            // nothing to do for Explorer
+            break;
+        }
 
-    const auto l_runOdyHwpFromHost =
-      TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_RUN_ODY_HWP_FROM_HOST>();
+        // In order to handle a specific set of downlevel parts from the vendor
+        // we need to skip this scom to avoid a known failure and allow us
+        // to get to the omi-based firmware update later in the ipl
+        if( TARGETING::areMfgThresholdsActive() )
+        {
+            ATTR_SBE_BUILD_TAG_type l_sbeLevel;
+            (void) i_ocmb->tryGetAttr<ATTR_SBE_BUILD_TAG>(l_sbeLevel);
+            // note that the full tag is truncated
+            if( !strcmp( "sbe050324a_ody.1110", l_sbeLevel ) )
+            {
+                TRACISTEP("SKIPPING PLL unlock FIR change for vendor part level %s in manufacturing on %.8X",
+                          l_sbeLevel, TARGETING::get_huid(i_ocmb));
+                break;
+            }
+        }
+
+        TRACISTEP("ody_unlock_pll_fir: UNMASKING 12th bit for target HUID 0x%.8X",
+                  get_huid(i_ocmb));
+
+        // First read the value...
+        l_numBytes = 8;
+        l_err = DeviceFW::deviceOp(DeviceFW::READ, i_ocmb, l_buf, l_numBytes,
+                                   DEVICE_SCOM_ADDRESS(CHIPLET1_REGISTER));
+        if (l_err)
+        {
+            TRACISTEP(ERR_MRK"ody_unlock_pll_fir: ERROR from Scom Read from target HUID 0x%.8X"
+                      "Address=0x%x", get_huid(i_ocmb), CHIPLET1_REGISTER);
+            break;
+        }
+
+        // Unmask the 12th bit
+        l_data = *(reinterpret_cast<uint64_t *>(l_buf));
+        TRACISTEP("ody_unlock_pll_fir: Read value=0x%llx from target=0x%.8X", l_data,
+                  get_huid(i_ocmb));
+
+        l_numBytes = 8;
+        l_data &= UNMASK_BIT12;
+        TRACISTEP("ody_unlock_pll_fir: Value after Anding with unmask value=0x%llx", l_data);
+
+        // Now write the data back to the register
+        l_err = DeviceFW::deviceOp(DeviceFW::WRITE, i_ocmb,
+                                   reinterpret_cast<uint8_t *>(&l_data),
+                                   l_numBytes,
+                                   DEVICE_SCOM_ADDRESS(CHIPLET1_REGISTER));
+        if (l_err)
+        {
+            TRACISTEP(ERR_MRK"ody_unlock_pll_fir: ERROR from Scom write to target HUID 0x%.8X"
+                      "Address=0x%x Data=0x%16x",
+                      get_huid(i_ocmb), CHIPLET1_REGISTER, l_data);
+            break;
+        }
+    } while(0);
+
+    return l_err;
+}
+
+#define CONTEXT call_mss_getecid
+
+void* call_mss_getecid(void* io_pArgs)
+{
+    IStepError l_StepError;
+    errlHndl_t l_err = nullptr;
+
+    TRACISTEP(ENTER_MRK"call_mss_getecid entry" );
 
     // Get all OCMB targets
     TargetHandleList l_ocmbTargetList;
@@ -232,55 +299,13 @@ void* call_mss_getecid(void* io_pArgs)
     {
         if (TARGETING::UTIL::isOdysseyChip(l_ocmb_target))
         {
-            TRACISTEP("ody_getecid: UNMASKING 12th bit for target HUID 0x%.8X l_runOdyHwpFromHost:%d",
-                      get_huid(l_ocmb_target), l_runOdyHwpFromHost);
-
-            // To prevent undesirable SBE updates, we need to unmask (bit 12 of 0x010F001E).
-            // To unmask we need to set that bit to 0 (as MASK bit is 1). We will do a
-            // read modify write to set the 12th bit to 0.
-
-            // First read the value...
-            // Set the num of bytes correctly for each target in this loop as it could be
-            // set to 0 by a failed scom operation in the previous iteration.
-            l_numBytes = 8;
-            l_err = DeviceFW::deviceOp(DeviceFW::READ, l_ocmb_target, l_buf, l_numBytes,
-                                       DEVICE_SCOM_ADDRESS(CHIPLET1_REGISTER));
+            // To avoid the neeed for a SBE update in a service pack, we need to
+            // manually update one of the FIR inits in Hostboot instead.
+            l_err = ody_unlock_pll_fir( l_ocmb_target );
             if (!l_err)
             {
-                // Unmask the 12th bit
-                l_data = *(reinterpret_cast<uint64_t *>(l_buf));
-                TRACISTEP("ody_getecid: Read value=0x%llx from target=0x%.8X", l_data,
-                           get_huid(l_ocmb_target));
-
-                l_numBytes = 8;
-                l_data &= UNMASK_BIT12;
-                TRACISTEP("ody_getecid: Value after Anding with unmask value=0x%llx", l_data);
-
-                // Now write the data back to the register
-                l_err = DeviceFW::deviceOp(DeviceFW::WRITE, l_ocmb_target,
-                                   reinterpret_cast<uint8_t *>(&l_data),
-                                   l_numBytes,
-                                   DEVICE_SCOM_ADDRESS(CHIPLET1_REGISTER));
-                if (!l_err)
-                {
-                    TRACISTEP("ody_getecid: Wrote value=0x%llx to target=0x%.8X", l_data,
-                               get_huid(l_ocmb_target));
-                    TRACISTEP("Running ody_getecid HWP on target HUID 0x%.8X l_runOdyHwpFromHost:%d",
-                               get_huid(l_ocmb_target), l_runOdyHwpFromHost);
-                    RUN_ODY_HWP(CONTEXT, l_StepError, l_err, l_ocmb_target,
+                RUN_ODY_HWP(CONTEXT, l_StepError, l_err, l_ocmb_target,
                                 ody_getecid, { l_ocmb_target });
-                }
-                else
-                {
-                    TRACISTEP(ERR_MRK"ERROR from ody_getecid: Scom write to target HUID 0x%.8X"
-                              "Address=0x%x Data=0x%16x",
-                              get_huid(l_ocmb_target), CHIPLET1_REGISTER, l_data);
-                }
-            }
-            else
-            {
-                TRACISTEP(ERR_MRK"ERROR from ody_getecid: Scom Read from target HUID 0x%.8X"
-                          "Address=0x%x", get_huid(l_ocmb_target), CHIPLET1_REGISTER);
             }
 
         ERROR_EXIT: // used by RUN_ODY_HWP
