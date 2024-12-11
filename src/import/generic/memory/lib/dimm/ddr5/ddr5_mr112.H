@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -60,7 +60,10 @@ namespace ddr5
 /// @note This same style of MR data is used for MR112, MR120... and can be repurposed for those MR's
 ///
 template<mss::mc_type MC>
-class mr112_data : public mr_base_data<MC>
+class mr112_data
+#ifndef __PPE__
+    : public mr_base_data<MC>
+#endif
 {
     public:
         // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -71,7 +74,10 @@ class mr112_data : public mr_base_data<MC>
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
         /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr112_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc ) : mr_base_data<MC>(iv_mr)
+        mr112_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc )
+#ifndef __PPE__
+            : mr_base_data<MC>(iv_mr)
+#endif
         {
 
             if (io_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -96,7 +102,11 @@ class mr112_data : public mr_base_data<MC>
         /// @brief Default constructor
         /// @note Default constructor is defined to allow for the use of STL data structures
         ///
+#ifndef __PPE__
         mr112_data(): mr_base_data<MC>(iv_mr) {};
+#else
+        mr112_data() {};
+#endif
 
         ///
         /// @brief Checks to ensure the DFE gain bias for a specific rank is in bounds
@@ -133,7 +143,10 @@ class mr112_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode assemble_data(const mss::rank::info<MC>& i_rank_info,
                                         uint8_t& o_mr_data,
-                                        const uint8_t i_dram_number = 0) const override
+                                        const uint8_t i_dram_number = 0) const
+#ifndef __PPE__
+        override
+#endif
         {
             // Note: not checking the rank input as it is already checked by the rank info class
             const auto l_dimm_rank = i_rank_info.get_dimm_rank();
@@ -158,7 +171,10 @@ class mr112_data : public mr_base_data<MC>
         /// @param[in] i_dram_number the DRAM on which to operate - not used for MR112 but included to keep the API common
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
+        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const
+#ifndef __PPE__
+        override
+#endif
         {
             // Note: not checking the rank input as it is already checked by the rank info class
             this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number);
@@ -175,7 +191,10 @@ class mr112_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode read_from_data(const mss::rank::info<MC>& i_rank_info,
                                          const uint8_t i_mr_data,
-                                         const uint8_t i_dram_number = 0) override
+                                         const uint8_t i_dram_number = 0)
+#ifndef __PPE__
+        override
+#endif
         {
             // Note: not checking the rank input as it is already checked by the rank info class
             const auto l_dimm_rank = i_rank_info.get_dimm_rank();
@@ -198,7 +217,10 @@ class mr112_data : public mr_base_data<MC>
         /// @param[in] i_rank_info the rank on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info)
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY( mss::attr::set_ddr5_dfe_gain_bias(i_rank_info.get_dimm_target(), iv_dfe_gain_bias),
                       "Unable to set attributes ddr5::mr112_data()" );
@@ -217,10 +239,10 @@ class mr112_data : public mr_base_data<MC>
             SIGN = 4,
         };
 
-        uint8_t iv_dfe_gain_bias[mr::ATTR_RANKS] = {};
+        uint8_t iv_dfe_gain_bias[mr::ATTR_RANKS] __attribute__ ((aligned (8))) = {};
         // Note: per JEDEC, positive is a 0, negative is a 1
         // Think 2's complement
-        uint8_t iv_dfe_sign_bit[mr::ATTR_RANKS] = {};
+        uint8_t iv_dfe_sign_bit[mr::ATTR_RANKS] __attribute__ ((aligned (8))) = {};
 
     private:
 
@@ -246,7 +268,7 @@ class mr112_data : public mr_base_data<MC>
             FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
 
-};
+} __attribute__ ((aligned (8)));
 
 } // ns ddr5
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,10 @@ namespace ddr5
 /// @tparam MC the memory controller type
 ///
 template<mss::mc_type MC>
-class mr33_per_dram_data : public mr_base_data<MC>
+class mr33_per_dram_data
+#ifndef __PPE__
+    : public mr_base_data<MC>
+#endif
 {
     public:
         // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -71,7 +74,10 @@ class mr33_per_dram_data : public mr_base_data<MC>
         /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
         mr33_per_dram_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                            fapi2::ReturnCode& io_rc ): mr_base_data<MC>(iv_mr)
+                            fapi2::ReturnCode& io_rc )
+#ifndef __PPE__
+            : mr_base_data<MC>(iv_mr)
+#endif
         {
 
             if (io_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -96,10 +102,14 @@ class mr33_per_dram_data : public mr_base_data<MC>
         /// @brief Default constructor
         /// @note Default constructor is defined to allow for the use of STL data structures
         ///
+#ifndef __PPE__
         mr33_per_dram_data(): mr_base_data<MC>(iv_mr) {};
+#else
+        mr33_per_dram_data() {};
+#endif
 
-        static const pair<uint16_t, uint8_t> ODT_TABLE[7];
-        static const pair<uint8_t, uint8_t> DQS_TABLE[8];
+        static const pair<uint16_t, uint8_t> ODT_TABLE[7]  __attribute__ ((aligned (8)));
+        static const pair<uint8_t, uint8_t> DQS_TABLE[8]  __attribute__ ((aligned (8)));
 
         ///
         /// @brief Checks to ensure the DRAM is in bounds
@@ -257,7 +267,10 @@ class mr33_per_dram_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode assemble_data(const mss::rank::info<MC>& i_rank_info,
                                         uint8_t& o_mr_data,
-                                        const uint8_t i_dram_number = 0) const override
+                                        const uint8_t i_dram_number = 0) const
+#ifndef __PPE__
+        override
+#endif
         {
             fapi2::buffer<uint8_t> l_data;
             uint8_t l_ca_field = 0;
@@ -302,7 +315,10 @@ class mr33_per_dram_data : public mr_base_data<MC>
         /// @param[in] i_dram_number the DRAM on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
+        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
             this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number);
@@ -322,7 +338,10 @@ class mr33_per_dram_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode read_from_data(const mss::rank::info<MC>& i_rank_info,
                                          const uint8_t i_mr_data,
-                                         const uint8_t i_dram_number = 0) override
+                                         const uint8_t i_dram_number = 0)
+#ifndef __PPE__
+        override
+#endif
         {
             const fapi2::buffer<uint8_t> l_data(i_mr_data);
             uint8_t l_ca_field = 0;
@@ -365,7 +384,10 @@ class mr33_per_dram_data : public mr_base_data<MC>
         /// @param[in] i_rank_info the rank on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info)
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY( mss::attr::set_ddr5_dram_ca_odt_per_dram(i_rank_info.get_dimm_target(), iv_ca_odt),
                       "Unable to set attributes for ddr5::mr33_per_dram_data()" );
@@ -385,8 +407,8 @@ class mr33_per_dram_data : public mr_base_data<MC>
             DQS_RTT_PARK_LEN = 3,
         };
 
-        uint16_t iv_ca_odt[mr::ATTR_RANKS][mr::ATTR_DRAM] = {};
-        uint8_t iv_dqs_rtt_park[mr::ATTR_RANKS][mr::ATTR_DRAM] = {};
+        uint16_t iv_ca_odt[mr::ATTR_RANKS][mr::ATTR_DRAM]  __attribute__ ((aligned (8))) = {};
+        uint8_t iv_dqs_rtt_park[mr::ATTR_RANKS][mr::ATTR_DRAM]  __attribute__ ((aligned (8))) = {};
 
     private:
 
@@ -412,11 +434,11 @@ class mr33_per_dram_data : public mr_base_data<MC>
 #pragma GCC diagnostic pop
         }
 
-};
+}  __attribute__ ((aligned (8)));
 
 // Declarations here to make the compiler happy with the linkage
 template<mss::mc_type MC>
-const pair<uint16_t, uint8_t> mr33_per_dram_data<MC>::ODT_TABLE[7] =
+const pair<uint16_t, uint8_t> mr33_per_dram_data<MC>::ODT_TABLE[7]  __attribute__ ((aligned (8))) =
 {
     pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_DISABLE , 0b000),
     pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM40   , 0b111),
@@ -427,7 +449,7 @@ const pair<uint16_t, uint8_t> mr33_per_dram_data<MC>::ODT_TABLE[7] =
     pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CA_ODT_OHM480  , 0b001),
 };
 template<mss::mc_type MC>
-const pair<uint8_t, uint8_t> mr33_per_dram_data<MC>::DQS_TABLE[8] =
+const pair<uint8_t, uint8_t> mr33_per_dram_data<MC>::DQS_TABLE[8]  __attribute__ ((aligned (8))) =
 {
     pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_DISABLE , 0b000),
     pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_DQS_RTT_PARK_OHM34   , 0b111),

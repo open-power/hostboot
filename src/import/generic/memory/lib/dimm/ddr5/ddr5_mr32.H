@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,10 @@ namespace ddr5
 /// @tparam MC the memory controller type
 ///
 template<mss::mc_type MC>
-class mr32_data : public mr_base_data<MC>
+class mr32_data
+#ifndef __PPE__
+    : public mr_base_data<MC>
+#endif
 {
     public:
         // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -70,7 +73,10 @@ class mr32_data : public mr_base_data<MC>
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
         /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr32_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc ): mr_base_data<MC>(iv_mr)
+        mr32_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc )
+#ifndef __PPE__
+            : mr_base_data<MC>(iv_mr)
+#endif
         {
 
             if (io_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -95,7 +101,11 @@ class mr32_data : public mr_base_data<MC>
         /// @brief Default constructor
         /// @note Default constructor is defined to allow for the use of STL data structures
         ///
+#ifndef __PPE__
         mr32_data(): mr_base_data<MC>(iv_mr) {};
+#else
+        mr32_data() {};
+#endif
 
         ///
         /// @brief Checks to ensure the strap value is in bounds
@@ -122,7 +132,7 @@ class mr32_data : public mr_base_data<MC>
 
         // Note the decodes are the same for CK and CS
         // Using the enums for CK for now
-        static const pair<uint16_t, uint8_t> ODT_TABLE[7];
+        static const pair<uint16_t, uint8_t> ODT_TABLE[7]  __attribute__ ((aligned (8)));
 
         ///
         /// @brief Checks and converts the attribute CA ODT value to its associated field value
@@ -212,7 +222,10 @@ class mr32_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode assemble_data(const mss::rank::info<MC>& i_rank_info,
                                         uint8_t& o_mr_data,
-                                        const uint8_t i_strap = mr::STRAPA) const override
+                                        const uint8_t i_strap = mr::STRAPA) const
+#ifndef __PPE__
+        override
+#endif
         {
             fapi2::buffer<uint8_t> l_data;
             uint8_t l_ck_field = 0;
@@ -259,7 +272,10 @@ class mr32_data : public mr_base_data<MC>
         /// @return FAPI2_RC_SUCCESS if and only if ok
         /// @note The other MR's use i_strap instead of strap value. That's ok, this should work in the API
         ///
-        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_strap = mr::STRAPA) const override
+        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_strap = mr::STRAPA) const
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY(check_strap(i_rank_info.get_dimm_target(), i_strap));
             this->display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_strap);
@@ -280,7 +296,10 @@ class mr32_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode read_from_data(const mss::rank::info<MC>& i_rank_info,
                                          const uint8_t i_mr_data,
-                                         const uint8_t i_strap = mr::STRAPA) override
+                                         const uint8_t i_strap = mr::STRAPA)
+#ifndef __PPE__
+        override
+#endif
         {
             const fapi2::buffer<uint8_t> l_data(i_mr_data);
             uint8_t l_ck_field = 0;
@@ -325,7 +344,10 @@ class mr32_data : public mr_base_data<MC>
         /// @param[in] i_rank_info the rank on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info)
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY( mss::attr::set_ddr5_dram_ck_odt(i_rank_info.get_dimm_target(), iv_ck_odt),
                       "Unable to set attributes for ddr5::mr32_data()" );
@@ -346,8 +368,8 @@ class mr32_data : public mr_base_data<MC>
             CA_ODT_STRAP = 1,
         };
 
-        uint16_t iv_ck_odt[mr::ATTR_RANKS][mr::ATTR_STRAP] = {};
-        uint16_t iv_cs_odt[mr::ATTR_RANKS][mr::ATTR_STRAP] = {};
+        uint16_t iv_ck_odt[mr::ATTR_RANKS][mr::ATTR_STRAP]  __attribute__ ((aligned (8))) = {};
+        uint16_t iv_cs_odt[mr::ATTR_RANKS][mr::ATTR_STRAP]  __attribute__ ((aligned (8))) = {};
 
     private:
 
@@ -374,10 +396,10 @@ class mr32_data : public mr_base_data<MC>
 #pragma GCC diagnostic pop
         }
 
-};
+}  __attribute__ ((aligned (8)));
 
 template<mss::mc_type MC>
-const pair<uint16_t, uint8_t> mr32_data<MC>::ODT_TABLE[7] =
+const pair<uint16_t, uint8_t> mr32_data<MC>::ODT_TABLE[7]  __attribute__ ((aligned (8))) =
 {
     pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_DISABLE , 0b000),
     pair<uint16_t, uint8_t>(fapi2::ENUM_ATTR_DDR5_DRAM_CK_ODT_OHM40   , 0b111),

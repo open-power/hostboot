@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,7 +61,10 @@ namespace ddr5
 /// @tparam MC the memory controller type
 ///
 template<mss::mc_type MC>
-class mr5_data : public mr_base_data<MC>
+class mr5_data
+#ifndef __PPE__
+    : public mr_base_data<MC>
+#endif
 {
     public:
         // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -72,7 +75,10 @@ class mr5_data : public mr_base_data<MC>
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
         /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr5_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc ) : mr_base_data<MC>(iv_mr)
+        mr5_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc )
+#ifndef __PPE__
+            : mr_base_data<MC>(iv_mr)
+#endif
         {
 
             if (io_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -98,9 +104,13 @@ class mr5_data : public mr_base_data<MC>
         /// @brief Default constructor
         /// @note Default constructor is defined to allow for the use of STL data structures
         ///
+#ifndef __PPE__
         mr5_data(): mr_base_data<MC>(iv_mr) {};
+#else
+        mr5_data() {};
+#endif
 
-        static const pair<uint8_t, uint8_t> DRV_IMP_TABLE[3];
+        static const pair<uint8_t, uint8_t> DRV_IMP_TABLE[3] __attribute__ ((aligned (8)));
 
         ///
         /// @brief Checks and converts a drive impedance attribute value to the MR field value
@@ -184,7 +194,10 @@ class mr5_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode assemble_data(const mss::rank::info<MC>& i_rank_info,
                                         uint8_t& o_mr_data,
-                                        const uint8_t i_dram_number = 0) const override
+                                        const uint8_t i_dram_number = 0) const
+#ifndef __PPE__
+        override
+#endif
         {
             fapi2::buffer<uint8_t> l_data;
             uint8_t l_pu_field = 0;
@@ -225,7 +238,10 @@ class mr5_data : public mr_base_data<MC>
         /// @param[in] i_dram_number the DRAM on which to operate - not used for MR5 but included to keep the API common
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
+        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const
+#ifndef __PPE__
+        override
+#endif
         {
             display(i_rank_info.get_dimm_target(), i_rank_info.get_dimm_rank(), i_dram_number);
             return fapi2::FAPI2_RC_SUCCESS;
@@ -240,7 +256,10 @@ class mr5_data : public mr_base_data<MC>
         /// @note This can be used for decoding mode register reads
         ///
         fapi2::ReturnCode read_from_data(const mss::rank::info<MC>& i_rank_info, const uint8_t i_mr_data,
-                                         const uint8_t i_dram_number = 0) override
+                                         const uint8_t i_dram_number = 0)
+#ifndef __PPE__
+        override
+#endif
         {
             const fapi2::buffer<uint8_t> l_data(i_mr_data);
             uint8_t l_pu_field = 0;
@@ -276,7 +295,10 @@ class mr5_data : public mr_base_data<MC>
         /// @param[in] i_rank_info the rank on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info)
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY( mss::attr::set_dram_pu_drv_imp(i_rank_info.get_dimm_target(), iv_pu_drv_imp),
                       "Unable to set attribute for ddr5::mr5_data()" );
@@ -303,8 +325,8 @@ class mr5_data : public mr_base_data<MC>
             PD_DRV_IMP_LEN = 2,
         };
 
-        uint8_t iv_pu_drv_imp[mr::ATTR_RANKS] = {};
-        uint8_t iv_pd_drv_imp[mr::ATTR_RANKS] = {};
+        uint8_t iv_pu_drv_imp[mr::ATTR_RANKS] __attribute__ ((aligned (8))) = {};
+        uint8_t iv_pd_drv_imp[mr::ATTR_RANKS] __attribute__ ((aligned (8))) = {};
         uint8_t iv_data_output_disable = 0; // Write only - will not be read
         uint8_t iv_drv_test_mode_supported_read_only = 0; // Read only - will not be written
         uint8_t iv_tdqs_enable = 0;
@@ -347,10 +369,10 @@ class mr5_data : public mr_base_data<MC>
                             i_dram_number, iv_pd_drv_imp[i_dimm_rank]);
             FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
         }
-};
+} __attribute__ ((aligned (8)));
 
 template<mss::mc_type MC>
-const pair<uint8_t, uint8_t> mr5_data<MC>::DRV_IMP_TABLE[3] =
+const pair<uint8_t, uint8_t> mr5_data<MC>::DRV_IMP_TABLE[3]  __attribute__ ((aligned (8))) =
 {
     pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DRAM_PU_DRV_IMP_OHM_34, 0b00),
     pair<uint8_t, uint8_t>(fapi2::ENUM_ATTR_DRAM_PU_DRV_IMP_OHM_40, 0b01),

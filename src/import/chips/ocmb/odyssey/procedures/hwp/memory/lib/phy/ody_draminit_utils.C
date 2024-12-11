@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1251,6 +1251,15 @@ void endian_swap_msg_block_data(const uint64_t i_address, const uint32_t* const 
 }
 
 ///
+/// @brief Bogus structure to create the proper alignment in the SBE
+///
+struct bogus_for_alignment
+{
+    uint16_t* iv_struct_data;
+    uint32_t iv_address;
+} __attribute__ ((aligned (8)));
+
+///
 /// @brief Loads the message block values into the DMEM regs
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_struct the message block
@@ -1261,8 +1270,9 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
                                  const _PMU_SMB_DDR5_1D_t& i_struct)
 {
     fapi2::buffer<uint64_t> l_data;
-    uint16_t* l_struct_data = (uint16_t*)&i_struct;
-    uint32_t l_address = 0;
+    bogus_for_alignment l_alignment_struct;
+    l_alignment_struct.iv_struct_data = (uint16_t*)&i_struct;
+    l_alignment_struct.iv_address = 0;
 
     const mss::pair<uint32_t, uint32_t> SKIP_ADDR[] =
     {
@@ -1318,34 +1328,35 @@ fapi2::ReturnCode load_msg_block(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT
     // every 2 byte of structure (16 bits) makes 1 increment in the address.
     constexpr uint32_t END_ADDR = 0x58000 + sizeof(_PMU_SMB_DDR5_1D_t) / 2;
 
-    for ( l_address = 0x58000; l_address < END_ADDR; l_address++)
+    for ( l_alignment_struct.iv_address = 0x58000; l_alignment_struct.iv_address < END_ADDR;
+          l_alignment_struct.iv_address++)
     {
         // We need to flush the buffer and write before skipping following addresses
         // to have the previous unskipped address's write become successful.
         // As write operations are successful in pair of consecutive addresses.
-        if (l_flush_it < FLUSH_END && *(l_flush_it) == l_address)
+        if (l_flush_it < FLUSH_END && *(l_flush_it) == l_alignment_struct.iv_address)
         {
             l_data.flush<0>();
             l_flush_it++;
         }
         else
         {
-            l_data = *(l_struct_data);
+            l_data = *(l_alignment_struct.iv_struct_data);
 
             // If in PPE, check if we need a data swap
 #ifdef __PPE__
-            endian_swap_msg_block_data(l_address, NO_SWAP_END, l_no_swap_it, l_data);
+            endian_swap_msg_block_data(l_alignment_struct.iv_address, NO_SWAP_END, l_no_swap_it, l_data);
 #endif
         }
 
-        FAPI_TRY(putScom_synopsys_addr_wrapper(i_target, l_address, l_data));
-        l_struct_data++ ;
+        FAPI_TRY(putScom_synopsys_addr_wrapper(i_target, l_alignment_struct.iv_address, l_data));
+        l_alignment_struct.iv_struct_data++ ;
 
-        if (l_skip_it < SKIP_END && l_address == l_skip_it->first)
+        if (l_skip_it < SKIP_END && l_alignment_struct.iv_address == l_skip_it->first)
         {
-            l_address = l_skip_it->second;
+            l_alignment_struct.iv_address = l_skip_it->second;
             const uint32_t l_struct_increment = l_skip_it->second - l_skip_it->first;
-            l_struct_data = l_struct_data + l_struct_increment;
+            l_alignment_struct.iv_struct_data = l_alignment_struct.iv_struct_data + l_struct_increment;
             l_skip_it++ ;
         }
     }

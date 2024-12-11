@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -59,7 +59,10 @@ namespace ddr5
 /// @tparam MC the memory controller type
 ///
 template<mss::mc_type MC>
-class mr12_data : public mr_base_data<MC>
+class mr12_data
+#ifndef __PPE__
+    : public mr_base_data<MC>
+#endif
 {
     public:
         // Needed as we need to know what MR for the CCS instruction created by the lab tooling
@@ -70,7 +73,10 @@ class mr12_data : public mr_base_data<MC>
         /// @param[in] a fapi2::TARGET_TYPE_DIMM target
         /// @param[in,out] fapi2::ReturnCode FAPI2_RC_SUCCESS iff ok
         ///
-        mr12_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc ) : mr_base_data<MC>(iv_mr)
+        mr12_data( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target, fapi2::ReturnCode& io_rc )
+#ifndef __PPE__
+            : mr_base_data<MC>(iv_mr)
+#endif
         {
 
             if (io_rc != fapi2::FAPI2_RC_SUCCESS)
@@ -93,7 +99,11 @@ class mr12_data : public mr_base_data<MC>
         /// @brief Default constructor
         /// @note Default constructor is defined to allow for the use of STL data structures
         ///
+#ifndef __PPE__
         mr12_data(): mr_base_data<MC>(iv_mr) {};
+#else
+        mr12_data() {};
+#endif
 
         ///
         /// @brief Checks to ensure the DRAM is in bounds
@@ -156,7 +166,10 @@ class mr12_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode assemble_data(const mss::rank::info<MC>& i_rank_info,
                                         uint8_t& o_mr_data,
-                                        const uint8_t i_dram_number = 0) const override
+                                        const uint8_t i_dram_number = 0) const
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
             // Note: not checking the rank input as it is already checked by the rank info class
@@ -181,7 +194,10 @@ class mr12_data : public mr_base_data<MC>
         /// @param[in] i_dram_number the DRAM on which to operate - not used for MR12 but included to keep the API common
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const override
+        fapi2::ReturnCode display(const mss::rank::info<MC>& i_rank_info, const uint8_t i_dram_number = 0) const
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
             // Note: not checking the rank input as it is already checked by the rank info class
@@ -202,7 +218,10 @@ class mr12_data : public mr_base_data<MC>
         ///
         fapi2::ReturnCode read_from_data(const mss::rank::info<MC>& i_rank_info,
                                          const uint8_t i_mr_data,
-                                         const uint8_t i_dram_number = 0) override
+                                         const uint8_t i_dram_number = 0)
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY(check_dram(i_rank_info.get_dimm_target(), i_dram_number));
             // Note: not checking the rank input as it is already checked by the rank info class
@@ -225,7 +244,10 @@ class mr12_data : public mr_base_data<MC>
         /// @param[in] i_rank_info the rank on which to operate
         /// @return FAPI2_RC_SUCCESS if and only if ok
         ///
-        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info) override
+        fapi2::ReturnCode attr_setter(const mss::rank::info<MC>& i_rank_info)
+#ifndef __PPE__
+        override
+#endif
         {
             FAPI_TRY( mss::attr::set_ddr5_dram_vrefcs(i_rank_info.get_dimm_target(), iv_vrefcs_value),
                       "Unable to get attributes for ddr5::mr12_data()" );
@@ -235,7 +257,7 @@ class mr12_data : public mr_base_data<MC>
             return fapi2::current_err;
         }
 
-        uint8_t iv_vrefcs_value[mr::ATTR_RANKS][mr::ATTR_DRAM] = {};
+        uint8_t iv_vrefcs_value[mr::ATTR_RANKS][mr::ATTR_DRAM]  __attribute__ ((aligned (8))) = {};
 
     private:
 
@@ -265,7 +287,7 @@ class mr12_data : public mr_base_data<MC>
 #pragma GCC diagnostic pop
         }
 
-};
+}  __attribute__ ((aligned (8)));
 
 } // ns ddr5
 
