@@ -283,7 +283,7 @@ class errludP_occ:
             for s in range(0,8):
                 i, line = errludP_occ.printSensor("CHOMCURVDDP"+str(s), data, i)
                 lines.append(line)
-            lines.append("Vdd Ceff ratio (0.01 percent):")
+            lines.append("Adjusted Vdd Ceff ratio (0.01 percent):")
             for s in range(0,8):
                 i, line = errludP_occ.printSensor("CHOMCEFFRATIOVDDP"+str(s), data, i)
                 lines.append(line)
@@ -307,6 +307,10 @@ class errludP_occ:
                 lines.append("MMA on (1.0 percent):")
                 for p in range(0,8):
                     i, line = errludP_occ.printSensor("CHOMMMAONAVGP"+str(p), data, i)
+                    lines.append(line)
+                lines.append("Raw Vdd Ceff ratio (0.01 percent):")
+                for s in range(0,8):
+                    i, line = errludP_occ.printSensor("CHOMRAWCEFFRATIOP"+str(s), data, i)
                     lines.append(line)
         # List of call home sensors END
 
