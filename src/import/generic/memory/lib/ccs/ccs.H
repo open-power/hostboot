@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -594,10 +594,9 @@ fapi_try_exit:
 /// @param[out] o_power_cntl_reg the register used for power control
 /// @return FAPI2_RC_SUCCESS iff ok
 ///
-template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType P, typename TT = ccsTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T, typename TT = ccsTraits<MC> >
 static inline fapi2::ReturnCode prelude_to_execution( const fapi2::Target<T>& i_target,
         ccs::program<MC>& io_program,
-        const std::vector< fapi2::Target<P> >& i_ports,
         fapi2::buffer<uint64_t>& o_periodics_reg,
         fapi2::buffer<uint64_t>& o_power_cntl_reg)
 {
@@ -780,7 +779,7 @@ static inline fapi2::ReturnCode execute( const fapi2::Target<T>& i_target,
     // Run prelude to execution
     fapi2::buffer<uint64_t> l_periodics_reg;
     fapi2::buffer<uint64_t> l_power_cntl_reg;
-    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports, l_periodics_reg, l_power_cntl_reg),
+    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, l_periodics_reg, l_power_cntl_reg),
               "Error setting up ccs engine before execution on " TARGTIDFORMAT, TARGTID );
 
     // Execute via standalone CCS
@@ -845,7 +844,7 @@ static inline fapi2::ReturnCode execute_parallel_ports( const fapi2::Target<T>& 
     // Run prelude to execution
     fapi2::buffer<uint64_t> l_periodics_reg;
     fapi2::buffer<uint64_t> l_power_cntl_reg;
-    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports, l_periodics_reg, l_power_cntl_reg),
+    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, l_periodics_reg, l_power_cntl_reg),
               "Error setting up ccs engine before execution on " TARGTIDFORMAT, TARGTID );
 
     // Execute via standalone CCS
@@ -1066,7 +1065,7 @@ static inline fapi2::ReturnCode execute_via_mcbist( const fapi2::Target<T>& i_ta
 
 
     // Run prelude to execution
-    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, i_ports, l_periodics_reg, l_power_cntl_reg),
+    FAPI_TRY( prelude_to_execution<MC>(i_target, io_program, l_periodics_reg, l_power_cntl_reg),
               "Error setting up ccs engine before execution on " TARGTIDFORMAT,
               TARGTID);
 
