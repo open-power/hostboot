@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1920,6 +1920,7 @@ typedef enum
 /**************************************************************************/
 typedef enum
 {
+    P9_XIP_SECTION_SBE_HEADER          = P9_XIP_SECTION_HEADER,
     P9_XIP_SECTION_SBE_LOADERTEXT      = P9_XIP_SECTIONS_PLUS(0),
     P9_XIP_SECTION_SBE_PIBREPRDATA     = P9_XIP_SECTIONS_PLUS(1),
     P9_XIP_SECTION_SBE_TEXT            = P9_XIP_SECTIONS_PLUS(2),
