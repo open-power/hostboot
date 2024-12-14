@@ -559,13 +559,13 @@ errlHndl_t UtilLidMgr::getLid(void* i_dest, size_t i_destSize,
                     }
 
 
-                     //confirm that the data fits in the allocated space
+                    //confirm that the data fits in the allocated space
                     uint32_t needed_size = ((static_cast<uint32_t>(pageNumber))*
                                             (4*KILOBYTE)) + dataSize;
                     if( needed_size > i_destSize )
                     {
                         UTIL_FT(ERR_MRK"getLid: lid=%s has size=0x%.8X, which does not fit in provided space=0x%.8X",
-                            iv_lidFileName, i_destSize, needed_size);
+                            iv_lidFileName, needed_size, i_destSize);
 
                         /*@
                          *   @errortype
