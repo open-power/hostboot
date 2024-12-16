@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2631,23 +2631,12 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundAW()
 {
     FAPI_INF(">>>>>>>>> get_mvpd_poundAW");
     uint8_t* l_fullVpdData = nullptr;
-    uint32_t l_vpdSize = 0;
+    uint32_t l_vpdSize = 4;
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     do
     {
-        // First read is to get size of VPD record, note the o_buffer is nullptr
-        FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
-                    fapi2::MVPD_KEYWORD_AW,
-                    iv_procChip,
-                    nullptr,
-                    l_vpdSize) );
-         FAPI_DBG("AW record size %d", l_vpdSize);
-
-        // Allocate memory for VPD data
-        l_fullVpdData = reinterpret_cast<uint8_t*>(malloc(l_vpdSize));
-
         ATTR_AW_STATIC_DATA_ENABLE_Type l_aw_static_data = 0;
-        const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_AW_STATIC_DATA_ENABLE,
                     FAPI_SYSTEM,
                     l_aw_static_data),
@@ -2662,11 +2651,25 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundAW()
                 0x02, 0xC6              /*VDD - 710*/,
             };
 
+            // Allocate memory for VPD data
+            l_fullVpdData = reinterpret_cast<uint8_t*>(malloc(l_vpdSize));
+
             FAPI_INF("attribute ATTR_AW_STATIC_DATA_ENABLE is set");
             memcpy(l_fullVpdData, &g_AWData, sizeof(l_vpdSize));
         }
         else
         {
+            // First read is to get size of VPD record, note the o_buffer is nullptr
+            FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
+                        fapi2::MVPD_KEYWORD_AW,
+                        iv_procChip,
+                        nullptr,
+                        l_vpdSize) );
+            FAPI_DBG("AW record size %d", l_vpdSize);
+
+            // Allocate memory for VPD data
+            l_fullVpdData = reinterpret_cast<uint8_t*>(malloc(l_vpdSize));
+
             FAPI_INF("attribute ATTR_AW_STATIC_DATA_ENABLE is NOT set");
             // Second read is to get data of VPD record
             FAPI_TRY( getMvpdField(fapi2::MVPD_RECORD_CP00,
@@ -2707,7 +2710,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
 {
     uint8_t             bucket_id    = 0;
     uint8_t*            l_buffer      =
-        reinterpret_cast<uint8_t*>(malloc(sizeof(voltageBucketData_t)) );
+    reinterpret_cast<uint8_t*>(malloc(sizeof(voltageBucketData_t)) );
     uint8_t*            l_buffer_inc  = nullptr;
     char                outstr[50];
     fapi2::ATTR_SOCKET_POWER_NOMINAL_Type l_powr_nom;
@@ -2732,6 +2735,7 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             // Bring in data for local testing
 #define __INTERNAL_POUNDV__
 #include <p10_pstate_parameter_block_int_vpd.H>
+#undef __INTERNAL_POUNDV__
 
             FAPI_INF("attribute ATTR_POUND_V_STATIC_DATA_ENABLE is set");
             memcpy(l_buffer, &g_vpd_PVData, sizeof(g_vpd_PVData));
@@ -3251,12 +3255,14 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 "Error from FAPI_ATTR_GET for attribute ATTR_SYSTEM_PDV_TDP_CURRENT_LAB_VALIDATION_MODE_Type");
             FAPI_INF("Running TDP current mark checking under Lab controls = %d", l_pdv_tdp_current_mode);
 #endif
+            /*
             if ((iv_pdv_model_data & PDV_MODEL_DATA_MODELED) == PDV_MODEL_DATA_MODELED)
             {
                 FAPI_INF("WOF will be disabled as model_data field indicates not a sorted part");
                 disable_wof();
                 disable_dds();
             }
+            */
 
             if (l_pdv_tdp_current_mode != fapi2::ENUM_ATTR_SYSTEM_PDV_TDP_CURRENT_VALIDATION_MODE_OFF )
             {
@@ -3291,12 +3297,14 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
         }
         else
         {
+            /*
             if ((iv_pdv_model_data & PDV_MODEL_DATA_MODELED) == PDV_MODEL_DATA_MODELED)
             {
                 FAPI_INF("WOF will be disabled as model_data field indicates not a sorted part");
                 disable_wof();
                 disable_dds();
             }
+            */
         }
 
         for (int i = 0; i < NUM_PV_POINTS; i++)
@@ -4385,17 +4393,6 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
             break;
         }
 
-        // clear out buffer to known value before calling fapiGetMvpdField
-        memset(l_ddscBuf, 0, sizeof(fapi2::ddscData_t));
-
-        FAPI_TRY(p10_pm_get_poundw_bucket(iv_procChip, l_ddscBuf));
-
-        bucket_id = l_ddscBuf->bucketId;
-        version_id = l_ddscBuf->version;
-
-        FAPI_INF("#W bucket_id  = %u version_id = %u", bucket_id, version_id);
-
-
         uint8_t l_poundw_static_data = 0;
         const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_POUND_W_STATIC_DATA_ENABLE,
@@ -4405,13 +4402,26 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
 
         if (l_poundw_static_data)
         {
-            FAPI_INF("attribute ATTR_POUND_W_STATIC_DATA_ENABLE is set");
+#define __INTERNAL_POUNDW__
+#include <p10_pstate_parameter_block_int_vpd.H>
+#undef __INTERNAL_POUNDW__
             // copy the data to the pound w structure from a hardcoded table
-            //            memcpy (&iv_poundW_data, &g_vpdData, sizeof (g_vpdData));
+             memcpy (&iv_poundW_data, &g_vpd_PWData, sizeof (g_vpd_PWData));
         }
         else
         {
             FAPI_INF("attribute ATTR_POUND_W_STATIC_DATA_ENABLE is NOT set");
+
+            // clear out buffer to known value before calling fapiGetMvpdField
+            memset(l_ddscBuf, 0, sizeof(fapi2::ddscData_t));
+
+            FAPI_TRY(p10_pm_get_poundw_bucket(iv_procChip, l_ddscBuf));
+
+            bucket_id = l_ddscBuf->bucketId;
+            version_id = l_ddscBuf->version;
+
+            FAPI_INF("#W bucket_id  = %u version_id = %u", bucket_id, version_id);
+
             // copy the data to the pound w structure from the actual VPD image
             memcpy (&iv_poundW_data, l_ddscBuf->ddscData, sizeof (l_ddscBuf->ddscData));
 #ifndef __HOSTBOOT_MODULE
@@ -4453,7 +4463,6 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
 #endif
 
         }
-
 
         FAPI_INF("iv_poundW_data.other.droop_freq_resp_reference_mhz %x",iv_poundW_data.other.droop_freq_resp_reference_mhz);
         FAPI_INF("iv_poundW_data.other.droop_count_control %x",iv_poundW_data.other.droop_count_control);
@@ -4539,36 +4548,64 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_iddq( void )
     uint32_t        l_bufferSize_iq  = IQ_BUFFER_ALLOC;
     fapi2::ATTR_SYSTEM_IQ_VALIDATION_MODE_Type l_iq_mode = 0;
 
-
     // --------------------------------------------
     // Process IQ Keyword (IDDQ) Data
     // --------------------------------------------
 
     const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    ATTR_IQ_STATIC_DATA_ENABLE_Type l_iq_static_data = 0;
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IQ_STATIC_DATA_ENABLE,
+                FAPI_SYSTEM,
+                l_iq_static_data),
+            "Error from FAPI_ATTR_GET for attribute ATTR_IQ_STATIC_DATA_ENABLE");
+
+    if (l_iq_static_data == 1)
+    {
+
+            FAPI_INF("attribute ATTR_IQSTATIC_DATA_ENABLE is set");
+            // Bring in data for local testing
+#define __INTERNAL_IQ__
+#include <p10_pstate_parameter_block_int_vpd.H>
+#undef __INTERNAL_IQ__
+
+        //Allocate memory for vpd data
+        l_buffer_iq_c = reinterpret_cast<uint8_t*>(malloc(l_bufferSize_iq));
+
+        //skip keyword version and
+        //copy VPD data to IQ structure table
+        memcpy(&iv_iddqt, ((void*)&g_IQData[1]), sizeof(g_IQData)-1);
+
+    }
+    else
+    {
+        FAPI_INF("attribute ATTR_IQSTATIC_DATA_ENABLE is NOT set");
+        // set l_record to appropriate cprx record
+        l_record = (uint32_t)fapi2::MVPD_RECORD_CRP0;
+
+        //First read is to get size of vpd record, note the o_buffer is nullptr
+        FAPI_TRY( getMvpdField((fapi2::MvpdRecord)l_record,
+                    fapi2::MVPD_KEYWORD_IQ,
+                    iv_procChip,
+                    nullptr,
+                    l_bufferSize_iq) );
+
+        //Allocate memory for vpd data
+        l_buffer_iq_c = reinterpret_cast<uint8_t*>(malloc(l_bufferSize_iq));
+
+        // Get Chip IQ MVPD data from the CRPx records
+        FAPI_TRY(getMvpdField((fapi2::MvpdRecord)l_record,
+                    fapi2::MVPD_KEYWORD_IQ,
+                    iv_procChip,
+                    l_buffer_iq_c,
+                    l_bufferSize_iq));
+
+        //skip keyword version and
+        //copy VPD data to IQ structure table
+        memcpy(&iv_iddqt, (l_buffer_iq_c+1), l_bufferSize_iq);
+    }
+
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_SYSTEM_IQ_VALIDATION_MODE, FAPI_SYSTEM, l_iq_mode));
-    // set l_record to appropriate cprx record
-    l_record = (uint32_t)fapi2::MVPD_RECORD_CRP0;
-
-    //First read is to get size of vpd record, note the o_buffer is nullptr
-    FAPI_TRY( getMvpdField((fapi2::MvpdRecord)l_record,
-                fapi2::MVPD_KEYWORD_IQ,
-                iv_procChip,
-                nullptr,
-                l_bufferSize_iq) );
-
-    //Allocate memory for vpd data
-    l_buffer_iq_c = reinterpret_cast<uint8_t*>(malloc(l_bufferSize_iq));
-
-    // Get Chip IQ MVPD data from the CRPx records
-    FAPI_TRY(getMvpdField((fapi2::MvpdRecord)l_record,
-                fapi2::MVPD_KEYWORD_IQ,
-                iv_procChip,
-                l_buffer_iq_c,
-                l_bufferSize_iq));
-
-    //skip keyword version and
-    //copy VPD data to IQ structure table
-    memcpy(&iv_iddqt, (l_buffer_iq_c+1), l_bufferSize_iq);
 
     //Verify Payload header data.
     if ( ( !(iv_iddqt.iddq_version) ||
@@ -6693,6 +6730,7 @@ fapi2::ReturnCode PlatPmPPB::wof_convert_tables(
                     );
             if (l_rc)
             {
+                FAPI_ERR("Update VRT failed.  Disabling WOF");
                 disable_wof();
                 FAPI_TRY(l_rc);  // Exit the function as a fail
             }
@@ -6770,8 +6808,9 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
                              uint8_t* o_buf,
                              uint32_t& io_size)
 {
-    FAPI_DBG(">> WOF initialization");
+    FAPI_INF(">> WOF initialization");
     bool b_wof_error = false;
+    wth::ECOOverrideFlags l_wth_override_flags;
 
     // Use new to avoid over-running the stack
     fapi2::ATTR_WOF_TABLE_DATA_Type* l_wof_table_data =
@@ -6788,12 +6827,14 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
 
         if (wof_get_tables(iv_procChip, l_wof_table_data))
         {
+            FAPI_ERR("WOF Get Tables error");
             b_wof_error = true;
             break;
         }
 
         if (wof_validate_header(iv_procChip, l_wof_table_data))
         {
+            FAPI_ERR("WOF Validate Header error");
             b_wof_error = true;
             break;
         }
@@ -6806,10 +6847,20 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
             break;
         }
 
+        // Given things are valid at this point, override some fields from attributes
+
+        if (wof_table_header_overrides(iv_procChip, l_wof_table_data, &l_wth_override_flags))
+        {
+            FAPI_ERR("WOF Table Header Override error");
+            b_wof_error = true;
+            break;
+        }
+
         set_reference_freq(l_wof_table_data);
 
         if (wof_convert_tables( l_wof_table_data, i_wof_table_mode, o_buf, io_size ))
         {
+            FAPI_ERR("WOF Convert Tables error");
             b_wof_error = true;
         }
     } while(0);
@@ -6820,7 +6871,7 @@ fapi2::ReturnCode PlatPmPPB::wof_init(
 
     if(b_wof_error)
     {
-        FAPI_INF("Disabling WOF");
+        FAPI_ERR("Disabling WOF");
         disable_wof();
     }
 
@@ -6830,7 +6881,7 @@ fapi_try_exit:
         delete[] l_wof_table_data;
         l_wof_table_data = nullptr;
     }
-    FAPI_DBG("<< WOF initialization");
+    FAPI_INF("<< WOF initialization");
     return  fapi2::FAPI2_RC_SUCCESS;
 }
 
@@ -6968,6 +7019,7 @@ fapi2::ReturnCode PlatPmPPB::pm_set_frequency()
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_WOF_ENABLED, iv_procChip, l_wof_enabled));
     if (l_wof_enabled == fapi2::ENUM_ATTR_WOF_ENABLED_FORCE_DISABLED)
     {
+        FAPI_INF("Disabling WOF due ATTR_WOF_ENABLED = FORCE_DISABLE");
         iv_wof_enabled = false;
         wof_state = iv_wof_enabled;
     }

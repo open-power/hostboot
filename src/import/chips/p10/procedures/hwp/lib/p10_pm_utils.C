@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -217,8 +217,10 @@ fapi2::ReturnCode wof_get_tables(
 #define __WOF_INTERNAL_HEADER__
 #define __WOF_INTERNAL_DATA__
 #include <p10_pstate_parameter_block_int_vpd.H>
+#undef __WOF_INTERNAL_HEADER__
+#undef __WOF_INTERNAL_DATA__
 
-    FAPI_DBG(">> WOF get tables");
+    FAPI_INF(">> WOF get tables");
 
     fapi2::ReturnCode l_rc = 0;
     uint16_t l_vdd_size     = 0;
@@ -409,18 +411,291 @@ fapi2::ReturnCode wof_get_tables(
     while(0);
 
 fapi_try_exit:
-    FAPI_DBG("<< WOF get tables");
+    FAPI_INF("<< WOF get tables");
     return fapi2::current_err;
 }
 
+#define WTH_GET_ATTR_8_2(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, attr_assign),"Attribute read failed");\
+    FAPI_INF("%-51s[0][0] = 0x%08x %d", #attr_name, attr_assign[0][0], attr_assign[0][0]); \
+    FAPI_INF("%-51s[0][1] = 0x%08x %d", #attr_name, attr_assign[0][1], attr_assign[0][1]); \
+    FAPI_INF("%-51s[1][0] = 0x%08x %d", #attr_name, attr_assign[1][0], attr_assign[1][0]); \
+    FAPI_INF("%-51s[1][1] = 0x%08x %d", #attr_name, attr_assign[1][1], attr_assign[1][1]); \
+    FAPI_INF("%-51s[2][0] = 0x%08x %d", #attr_name, attr_assign[2][0], attr_assign[2][0]); \
+    FAPI_INF("%-51s[2][1] = 0x%08x %d", #attr_name, attr_assign[2][1], attr_assign[2][1]); \
+    FAPI_INF("%-51s[3][0] = 0x%08x %d", #attr_name, attr_assign[3][0], attr_assign[3][0]); \
+    FAPI_INF("%-51s[3][1] = 0x%08x %d", #attr_name, attr_assign[3][1], attr_assign[3][1]); \
+    FAPI_INF("%-51s[4][0] = 0x%08x %d", #attr_name, attr_assign[4][0], attr_assign[4][0]); \
+    FAPI_INF("%-51s[4][1] = 0x%08x %d", #attr_name, attr_assign[4][1], attr_assign[4][1]); \
+    FAPI_INF("%-51s[5][0] = 0x%08x %d", #attr_name, attr_assign[5][0], attr_assign[5][0]); \
+    FAPI_INF("%-51s[5][1] = 0x%08x %d", #attr_name, attr_assign[5][1], attr_assign[5][1]); \
+    FAPI_INF("%-51s[6][0] = 0x%08x %d", #attr_name, attr_assign[6][0], attr_assign[6][0]); \
+    FAPI_INF("%-51s[6][1] = 0x%08x %d", #attr_name, attr_assign[6][1], attr_assign[6][1]); \
+    FAPI_INF("%-51s[7][0] = 0x%08x %d", #attr_name, attr_assign[7][0], attr_assign[7][0]); \
+    FAPI_INF("%-51s[7][1] = 0x%08x %d", #attr_name, attr_assign[7][1], attr_assign[7][1]);
+
+#define WTH_GET_ATTR_8_4(attr_name, target, attr_assign) \
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::attr_name, target, attr_assign),"Attribute read failed");\
+    FAPI_INF("%-51s[0][0] = 0x%08x %d", #attr_name, attr_assign[0][0], attr_assign[0][0]); \
+    FAPI_INF("%-51s[0][1] = 0x%08x %d", #attr_name, attr_assign[0][1], attr_assign[0][1]); \
+    FAPI_INF("%-51s[0][2] = 0x%08x %d", #attr_name, attr_assign[0][2], attr_assign[0][2]); \
+    FAPI_INF("%-51s[0][3] = 0x%08x %d", #attr_name, attr_assign[0][3], attr_assign[0][3]); \
+    FAPI_INF("%-51s[1][0] = 0x%08x %d", #attr_name, attr_assign[1][0], attr_assign[1][0]); \
+    FAPI_INF("%-51s[1][1] = 0x%08x %d", #attr_name, attr_assign[1][1], attr_assign[1][1]); \
+    FAPI_INF("%-51s[1][2] = 0x%08x %d", #attr_name, attr_assign[1][2], attr_assign[1][2]); \
+    FAPI_INF("%-51s[1][3] = 0x%08x %d", #attr_name, attr_assign[1][3], attr_assign[1][3]); \
+    FAPI_INF("%-51s[2][0] = 0x%08x %d", #attr_name, attr_assign[2][0], attr_assign[2][0]); \
+    FAPI_INF("%-51s[2][1] = 0x%08x %d", #attr_name, attr_assign[2][1], attr_assign[2][1]); \
+    FAPI_INF("%-51s[2][2] = 0x%08x %d", #attr_name, attr_assign[2][2], attr_assign[2][2]); \
+    FAPI_INF("%-51s[2][3] = 0x%08x %d", #attr_name, attr_assign[2][3], attr_assign[2][3]); \
+    FAPI_INF("%-51s[3][0] = 0x%08x %d", #attr_name, attr_assign[3][0], attr_assign[3][0]); \
+    FAPI_INF("%-51s[3][1] = 0x%08x %d", #attr_name, attr_assign[3][1], attr_assign[3][1]); \
+    FAPI_INF("%-51s[3][2] = 0x%08x %d", #attr_name, attr_assign[3][2], attr_assign[3][2]); \
+    FAPI_INF("%-51s[3][3] = 0x%08x %d", #attr_name, attr_assign[3][3], attr_assign[3][3]); \
+    FAPI_INF("%-51s[4][0] = 0x%08x %d", #attr_name, attr_assign[4][0], attr_assign[4][0]); \
+    FAPI_INF("%-51s[4][1] = 0x%08x %d", #attr_name, attr_assign[4][1], attr_assign[4][1]); \
+    FAPI_INF("%-51s[4][2] = 0x%08x %d", #attr_name, attr_assign[4][2], attr_assign[4][2]); \
+    FAPI_INF("%-51s[4][3] = 0x%08x %d", #attr_name, attr_assign[4][3], attr_assign[4][3]); \
+    FAPI_INF("%-51s[5][0] = 0x%08x %d", #attr_name, attr_assign[5][0], attr_assign[5][0]); \
+    FAPI_INF("%-51s[5][1] = 0x%08x %d", #attr_name, attr_assign[5][1], attr_assign[5][1]); \
+    FAPI_INF("%-51s[5][2] = 0x%08x %d", #attr_name, attr_assign[5][2], attr_assign[5][2]); \
+    FAPI_INF("%-51s[5][3] = 0x%08x %d", #attr_name, attr_assign[5][3], attr_assign[5][3]); \
+    FAPI_INF("%-51s[6][0] = 0x%08x %d", #attr_name, attr_assign[6][0], attr_assign[6][0]); \
+    FAPI_INF("%-51s[6][1] = 0x%08x %d", #attr_name, attr_assign[6][1], attr_assign[6][1]); \
+    FAPI_INF("%-51s[6][2] = 0x%08x %d", #attr_name, attr_assign[6][2], attr_assign[6][2]); \
+    FAPI_INF("%-51s[6][3] = 0x%08x %d", #attr_name, attr_assign[6][3], attr_assign[6][3]); \
+    FAPI_INF("%-51s[7][0] = 0x%08x %d", #attr_name, attr_assign[7][0], attr_assign[7][0]); \
+    FAPI_INF("%-51s[7][1] = 0x%08x %d", #attr_name, attr_assign[7][1], attr_assign[7][1]); \
+    FAPI_INF("%-51s[7][2] = 0x%08x %d", #attr_name, attr_assign[7][2], attr_assign[7][2]); \
+    FAPI_INF("%-51s[7][3] = 0x%08x %d", #attr_name, attr_assign[7][3], attr_assign[7][3]);
+
+///////////////////////////////////////////////////////////
+//////// wof_table_header_overrides
+///////////////////////////////////////////////////////////
+fapi2::ReturnCode wof_table_header_overrides(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
+    fapi2::ATTR_WOF_TABLE_DATA_Type* i_wof_table_data,
+    wth::ECOOverrideFlags* o_wth_override_flags)
+{
+    using namespace wth;
+
+    FAPI_INF(">> WOF override tables");
+
+    enum SYS_FLAGS_BITS
+    {
+        EFFIC_MODE_BIT     = 6,
+        OCS_MODE_BIT       = 7,
+    };
+
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+
+    fapi2::ATTR_WTH_OVERRIDE_TEST_CORE_COUNT_Type l_cc_test;
+    fapi2::ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX_Type l_cci;
+    fapi2::ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX_ARRAY_Type l_core_count_index_arr;    // [8]
+    fapi2::ATTR_WTH_OVERRIDE_EFFICIENCY_ALG_Type l_effic_alg;
+    fapi2::ATTR_WTH_OVERRIDE_EFFICIENCY_IDLE_TIMES_Type  l_effic_idle_times;        // [8][2]
+    fapi2::ATTR_WTH_OVERRIDE_EFFICIENCY_IDLE_THRESH_Type l_effic_idle_threshs;      // [8][2]
+    fapi2::ATTR_WTH_OVERRIDE_EFFICIENCY_CEFF_ADJUST_Type l_effic_ceff_adj;          // [8][4]
+    fapi2::ATTR_WTH_OVERRIDE_EFFICIENCY_FREQ_LIMITS_Type l_effic_freq_limits;       // [8][4]
+
+    uint8_t  l_cc_value = 0;            ///< Core Count value to search for
+    bool     b_scc_found = false;       ///< Flag that sore core count was found
+    bool     b_alg_override = false;    ///< Flag indicating that an alg change is happening
+    bool     b_alg_override_ok = false; ///<Flag indicating that an alg change is valid
+    fapi2::buffer<uint8_t>  l_sys_flags_buf = 0;    ///< Buffer to do bit manipulations
+
+    do
+    {
+        FAPI_DBG("i_wof_table_data  addr = %p size = %d",
+                 i_wof_table_data, sizeof(fapi2::ATTR_WOF_TABLE_DATA_Type));
+
+        const char* IDLE_TRANSITIONS_NAMES[] = IDLE_TRANSITIONS_NAMES_STR;
+        const char* IDLE_MODES_NAMES[] = IDLE_MODES_STR;
+
+        WofTablesHeader_t* p_wfth;
+        p_wfth = reinterpret_cast<WofTablesHeader_t*>(i_wof_table_data);
+        FAPI_INF("WFTH: %X", revle32(p_wfth->magic_number.value));
+
+        // Get the test value of core count
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_WTH_OVERRIDE_TEST_CORE_COUNT,
+                                FAPI_SYSTEM,
+                                l_cc_test));
+
+        // Use core test input if set
+        if (l_cc_test)
+        {
+            l_cc_value = l_cc_test;
+        }
+        else
+        {
+            l_cc_value = p_wfth->core_count;
+        }
+
+        // Determine the WTH override index
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX_ARRAY,
+                                FAPI_SYSTEM,
+                                l_core_count_index_arr));
+
+        for (uint32_t i = 0; i < MAX_SORTS; ++i)
+        {
+            if (l_cc_value == l_core_count_index_arr[i])
+            {
+                l_cci = i;
+                b_scc_found = true;
+                FAPI_INF("WOF Table core count %u matches at override index %u",
+                         p_wfth->core_count, l_cci);
+                break;
+            }
+        }
+
+        // Determine if a sort was found
+        if (!b_scc_found)
+        {
+            FAPI_INF("No matching WOF Table attribute override found for core count %u",
+                     p_wfth->core_count);
+            break;
+        }
+
+        // Write out the index for use in marking the overrides in trace output
+        FAPI_TRY(FAPI_ATTR_SET( fapi2::ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX,
+                                FAPI_SYSTEM,
+                                l_cci));
+
+        // Get the override attributes
+        FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_WTH_OVERRIDE_EFFICIENCY_ALG,
+                                FAPI_SYSTEM,
+                                l_effic_alg));
+        WTH_GET_ATTR_8_2(ATTR_WTH_OVERRIDE_EFFICIENCY_IDLE_TIMES,
+                         FAPI_SYSTEM,
+                         l_effic_idle_times);
+        WTH_GET_ATTR_8_2(ATTR_WTH_OVERRIDE_EFFICIENCY_IDLE_THRESH,
+                         FAPI_SYSTEM,
+                         l_effic_idle_threshs);
+        WTH_GET_ATTR_8_4(ATTR_WTH_OVERRIDE_EFFICIENCY_CEFF_ADJUST,
+                         FAPI_SYSTEM,
+                         l_effic_ceff_adj);
+        WTH_GET_ATTR_8_4(ATTR_WTH_OVERRIDE_EFFICIENCY_FREQ_LIMITS,
+                         FAPI_SYSTEM,
+                         l_effic_freq_limits);
+
+        // Determine if there is an idle mode change happening
+        l_sys_flags_buf = p_wfth->sys_flags;
+        bool b_effic_alg = l_effic_alg ? true : false;
+
+        if (l_sys_flags_buf.getBit(EFFIC_MODE_BIT) != b_effic_alg)
+        {
+            b_alg_override = true;
+            FAPI_INF("Attempting override change of WTH Efficiency mode to %s",
+                     IDLE_MODES_NAMES[l_effic_alg]);
+        }
+
+        // Check that if the Idle mode is changing, the times and thresholds
+        // in the the attributes must be valid (eg not 0xFFFF)
+        if (b_alg_override)
+        {
+            b_alg_override_ok = true;
+
+            for (uint32_t s = 0; s < MAX_SORTS; ++s)
+            {
+                for (uint32_t t = 0; t < IDLE_TRANSITIONS; ++t)
+                {
+                    if (l_effic_idle_times[s][t] == 0xFFFF)
+                    {
+                        FAPI_ERR("Efficiency Idle Times override to %s mode for Sort Index %u, Transition %u FAILED.  Value must not be 0xFFFF",
+                                 IDLE_TRANSITIONS_NAMES[l_effic_alg], s, t);
+                        b_alg_override_ok = false;
+                    }
+
+                    if (l_effic_idle_threshs[s][t] == 0xFFFF)
+                    {
+                        FAPI_ERR("Efficiency Idle Threshold override to %s mode for Sort Index %u, Transition %u FAILED.  Value must not be 0xFFFF",
+                                 IDLE_TRANSITIONS_NAMES[l_effic_alg], s, t);
+                        b_alg_override_ok = false;
+                    }
+                }
+            }
+
+            if (b_alg_override && b_alg_override_ok)
+            {
+                FAPI_INF("Changing WTH Efficiency mode in current sysflags 0x%02X to %u",
+                         p_wfth->sys_flags, l_effic_alg);
+
+                if (l_sys_flags_buf.getBit(EFFIC_MODE_BIT))
+                {
+                    l_sys_flags_buf.setBit(EFFIC_MODE_BIT);
+                }
+                else
+                {
+                    l_sys_flags_buf.clearBit(EFFIC_MODE_BIT);
+                }
+
+                p_wfth->sys_flags = l_sys_flags_buf;
+                FAPI_DBG("After changing WTH Efficiency mode sysflags 0x%02X",
+                         p_wfth->sys_flags);
+                o_wth_override_flags->set(wth::ALG, l_cci, 0xFF);
+            }
+        }
+
+        // Macro to check for a valid 1B override
+#define WTH_OVERRIDE_SET_1B(_m_member, _m_var, _m_flag, _m_sort, _m_index) \
+    if (l_effic_##_m_var[_m_sort][_m_index] != 0xFF) \
+    { \
+        FAPI_INF("Overriding WTH field %s from 0x%02X to 0x%02X", \
+                 #_m_member, p_wfth->_m_member, l_effic_##_m_var[_m_sort][_m_index]); \
+        p_wfth->_m_member = l_effic_##_m_var[_m_sort][_m_index]; \
+        o_wth_override_flags->set(_m_flag, _m_sort, _m_index); \
+    }
+
+        // Macro to check for a valid 2B override
+#define WTH_OVERRIDE_SET_2B(_m_member, _m_var, _m_flag, _m_sort, _m_index) \
+    if (l_effic_##_m_var[_m_sort][_m_index] != 0xFFFF) \
+    { \
+        FAPI_INF("Overriding WTH field %s from 0x%04X to 0x%04X", \
+                 #_m_member, p_wfth->_m_member, l_effic_##_m_var[_m_sort][_m_index]); \
+        p_wfth->_m_member = l_effic_##_m_var[_m_sort][_m_index]; \
+        o_wth_override_flags->set(_m_flag, _m_sort, _m_index); \
+    }
+
+        WTH_OVERRIDE_SET_2B(eff_mode_idle_chip_entry_time, idle_times,   IDLE_TIME,   l_cci, ENTRY);
+        WTH_OVERRIDE_SET_2B(eff_mode_idle_chip_exit_time,  idle_times,   IDLE_TIME,   l_cci, EXIT);
+        WTH_OVERRIDE_SET_2B(eff_mode_idle_chip_entry_thld, idle_threshs, IDLE_THRESH, l_cci, ENTRY);
+        WTH_OVERRIDE_SET_2B(eff_mode_idle_chip_exit_thld,  idle_threshs, IDLE_THRESH, l_cci, EXIT);
+
+        WTH_OVERRIDE_SET_1B(bal_perf_ceff_pct, ceff_adj, CEFF_ADJ, l_cci, BALANCED_PERF);
+        WTH_OVERRIDE_SET_1B(fav_perf_ceff_pct, ceff_adj, CEFF_ADJ, l_cci, FAVOR_PERF);
+        WTH_OVERRIDE_SET_1B(fav_pow_ceff_pct,  ceff_adj, CEFF_ADJ, l_cci, FAVOR_POWER);
+        WTH_OVERRIDE_SET_1B(non_det_ceff_pct,  ceff_adj, CEFF_ADJ, l_cci, NON_DETERM);
+
+        WTH_OVERRIDE_SET_2B(bal_perf_freq_limit_mhz, freq_limits, FREQ_LIMIT, l_cci, BALANCED_PERF);
+        WTH_OVERRIDE_SET_2B(fav_perf_freq_limit_mhz, freq_limits, FREQ_LIMIT, l_cci, FAVOR_PERF);
+        WTH_OVERRIDE_SET_2B(fav_pow_freq_limit_mhz,  freq_limits, FREQ_LIMIT, l_cci, FAVOR_POWER);
+        WTH_OVERRIDE_SET_2B(non_det_freq_limit_mhz,  freq_limits, FREQ_LIMIT, l_cci, NON_DETERM);
+
+    }
+    while(0);
+
+    // Put out the WOF Table Header if there are any overrides
+    if (o_wth_override_flags->are_any_set())
+    {
+        const char title[] = "* Overridden";
+        wfth_print(i_proc_target, (WofTablesHeader_t*)i_wof_table_data, o_wth_override_flags, title);
+    }
+
+fapi_try_exit:
+    FAPI_INF("<< WOF override tables");
+    return fapi2::current_err;
+}
 
 ///////////////////////////////////////////////////////////
 ////////    wfth_print
 ///////////////////////////////////////////////////////////
 void wfth_print(
     const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_proc_target,
-    WofTablesHeader_t* i_wfth)
+    WofTablesHeader_t* i_wfth,
+    wth::ECOOverrideFlags* i_wfth_override_flags,
+    const char* i_title)
 {
+    const fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
 
     FAPI_DBG("i_wfth  addr = %p size = %d",
              i_wfth, sizeof(fapi2::ATTR_WOF_TABLE_DATA_Type));
@@ -428,38 +703,64 @@ void wfth_print(
     // Put out the endian-corrected scalars
 
 #define WFTH_PRINT8_h4_d1(_member) \
-    FAPI_INF("%-25s = 0x%04X (%01d)", #_member, i_wfth->_member, i_wfth->_member);
+    FAPI_INF("%-35s = 0x%04X (%01d)", #_member, i_wfth->_member, i_wfth->_member);
 
 #define WFTH_PRINT8_h4_d2(_member) \
-    FAPI_INF("%-25s = 0x%04X (%02d)", #_member, i_wfth->_member, i_wfth->_member);
+    FAPI_INF("%-35s = 0x%04X (%02d)", #_member, i_wfth->_member, i_wfth->_member);
 
 #define WFTH_PRINT8_h4_d3(_member) \
-    FAPI_INF("%-25s = 0x%04X (%03d)", #_member, i_wfth->_member, i_wfth->_member);
+    FAPI_INF("%-35s = 0x%04X (%03d)", #_member, i_wfth->_member, i_wfth->_member);
 
 #define WFTH_PRINT8_h4_d5(_member) \
-    FAPI_INF("%-25s = 0x%04X (%05d)", #_member, i_wfth->_member, i_wfth->_member);
+    FAPI_INF("%-35s = 0x%04X (%05d)", #_member, i_wfth->_member, i_wfth->_member);
+
+#define WFTH_PRINT8_h4_d5_FLAGS(_member, _flag, _sort, _element) \
+    if (i_wfth_override_flags->get(_flag, _sort, _element)) \
+    { \
+        FAPI_INF("%-35s = 0x%04X (%05d) (*)", #_member, i_wfth->_member, i_wfth->_member); \
+    } \
+    else \
+    { \
+        FAPI_INF("%-35s = 0x%04X (%05d)", #_member, i_wfth->_member, i_wfth->_member); \
+    }
 
 #define WFTH_PRINT16_h4_d5(_member) \
-    FAPI_INF("%-25s = 0x%04X (%05d)", #_member, revle16(i_wfth->_member), revle16(i_wfth->_member));
+    FAPI_INF("%-35s = 0x%04X (%05d)", #_member, revle16(i_wfth->_member), revle16(i_wfth->_member));
+
+#define WFTH_PRINT16_h4_d5_FLAGS(_member, _flag, _sort, _element) \
+    if (i_wfth_override_flags->get(_flag, _sort, _element)) \
+    { \
+        FAPI_INF("%-35s = 0x%04X (%05d) (*)", #_member, i_wfth->_member, i_wfth->_member); \
+    } \
+    else \
+    { \
+        FAPI_INF("%-35s = 0x%04X (%05d)", #_member, i_wfth->_member, i_wfth->_member); \
+    }
 
 #define WFTH_PRINT16_h8_d0(_member) \
-    FAPI_INF("%-25s = 0x%08X", #_member, revle16(i_wfth->_member), revle16(i_wfth->_member));
+    FAPI_INF("%-35s = 0x%08X", #_member, revle16(i_wfth->_member), revle16(i_wfth->_member));
 
 #define WFTH_PRINT32(_member) \
-    FAPI_INF("%-25s = 0x%0*X (%0*d)", #_member, revle32(i_wfth->_member), revle32(i_wfth->_member));
+    FAPI_INF("%-35s = 0x%0*X (%0*d)", #_member, revle32(i_wfth->_member), revle32(i_wfth->_member));
 
-#define WFTH_PRINTS(_member) \
-    FAPI_INF("%-25s = %s", #_member, i_wfth->_member);
+#define WFTH_PRINTS(_member, _member_str) \
+    { \
+        char l_temp[8]; \
+        memcpy(&l_temp, i_wfth->_member, 4); \
+        memcpy(&l_temp[4], "", 1); \
+        FAPI_INF("%-35s = %s", #_member_str, l_temp); \
+    }
+
 
     const uint32_t BUFFSIZE = 64;
     char  l_proc_str[BUFFSIZE];
     fapi2::toString(i_proc_target, l_proc_str, BUFFSIZE);
 
     FAPI_INF("---------------------------------------------------------------------------------------");
-    FAPI_INF("WOF Table Header - %s", l_proc_str);
+    FAPI_INF("WOF Table Header - %s (%s)", l_proc_str, i_title);
     FAPI_INF("---------------------------------------------------------------------------------------");
 
-    WFTH_PRINTS       (magic_number.text     );
+    WFTH_PRINTS       (magic_number.text, magic_number );
     WFTH_PRINT8_h4_d3 (wov_credit_knob       );
     WFTH_PRINT8_h4_d1 (header_version        );
     WFTH_PRINT8_h4_d5 (vrt_block_size        );
@@ -509,14 +810,25 @@ void wfth_print(
     WFTH_PRINT8_h4_d1(cur_scale_pct[7]);
     WFTH_PRINT16_h4_d5(sort_power_save_freq_mhz);
     WFTH_PRINT16_h4_d5(sort_fixed_freq_mhz);
-    WFTH_PRINT8_h4_d5 (bal_perf_ceff_pct     );
-    WFTH_PRINT8_h4_d5 (fav_perf_ceff_pct     );
-    WFTH_PRINT8_h4_d5 (fav_pow_ceff_pct      );
-    WFTH_PRINT8_h4_d5 (non_det_ceff_pct      );
-    WFTH_PRINT16_h4_d5(bal_perf_freq_limit_mhz);
-    WFTH_PRINT16_h4_d5(fav_perf_freq_limit_mhz);
-    WFTH_PRINT16_h4_d5(fav_pow_freq_limit_mhz);
-    WFTH_PRINT16_h4_d5(non_det_freq_limit_mhz);
+
+    fapi2::ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX_Type l_cci;
+    FAPI_ATTR_GET(fapi2::ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX, FAPI_SYSTEM, l_cci);
+
+    WFTH_PRINT16_h4_d5_FLAGS(eff_mode_idle_chip_entry_time, wth::IDLE_TIME, l_cci, wth::ENTRY);
+    WFTH_PRINT16_h4_d5_FLAGS(eff_mode_idle_chip_exit_time,  wth::IDLE_TIME, l_cci, wth::EXIT);
+    WFTH_PRINT16_h4_d5_FLAGS(eff_mode_idle_chip_entry_thld, wth::IDLE_THRESH, l_cci, wth::ENTRY);
+    WFTH_PRINT16_h4_d5_FLAGS(eff_mode_idle_chip_exit_thld,  wth::IDLE_THRESH, l_cci, wth::EXIT);
+
+    WFTH_PRINT8_h4_d5_FLAGS(bal_perf_ceff_pct       , wth::CEFF_ADJ, l_cci, wth::BALANCED_PERF);
+    WFTH_PRINT8_h4_d5_FLAGS(fav_perf_ceff_pct       , wth::CEFF_ADJ, l_cci, wth::FAVOR_PERF);
+    WFTH_PRINT8_h4_d5_FLAGS(fav_pow_ceff_pct        , wth::CEFF_ADJ, l_cci, wth::FAVOR_POWER);
+    WFTH_PRINT8_h4_d5_FLAGS(non_det_ceff_pct        , wth::CEFF_ADJ, l_cci, wth::NON_DETERM);
+
+    WFTH_PRINT16_h4_d5_FLAGS(bal_perf_freq_limit_mhz, wth::FREQ_LIMIT, l_cci, wth::BALANCED_PERF);
+    WFTH_PRINT16_h4_d5_FLAGS(fav_perf_freq_limit_mhz, wth::FREQ_LIMIT, l_cci, wth::FAVOR_PERF);
+    WFTH_PRINT16_h4_d5_FLAGS(fav_pow_freq_limit_mhz , wth::FREQ_LIMIT, l_cci, wth::FAVOR_POWER);
+    WFTH_PRINT16_h4_d5_FLAGS(non_det_freq_limit_mhz , wth::FREQ_LIMIT, l_cci, wth::NON_DETERM);
+
     WFTH_PRINT16_h4_d5(max_powr_min_freq_watts);
 }
 
@@ -560,7 +872,9 @@ fapi2::ReturnCode wof_validate_header(
         WofTablesHeader_t* p_wfth;
         p_wfth = reinterpret_cast<WofTablesHeader_t*>(l_wof_table_data);
 
-        wfth_print(i_proc_target, p_wfth);
+        const char title[] = "Original";
+        wth::ECOOverrideFlags l_wfh_override_flags;
+        wfth_print(i_proc_target, p_wfth, &l_wfh_override_flags, title);
 
         bool l_wof_header_data_state = 1;
         VALIDATE_WOF_HEADER_DATA(
@@ -878,7 +1192,7 @@ fapi_try_exit:
 
     if (!l_wof_enabled)
     {
-        FAPI_INF("WOF has been disabled");
+        FAPI_INF("WOF has been disabled due to validation issues");
     }
 
     FAPI_ATTR_SET(fapi2::ATTR_WOF_ENABLED, i_proc_target, l_wof_enabled);
@@ -908,10 +1222,15 @@ fapi2::ReturnCode wof_apply_overrides(
 
     do
     {
-        if (!i_wof_state ||
-            l_wof_enabled == (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FORCE_DISABLED)
+        if (!i_wof_state)
         {
             FAPI_INF("  WOF not enabled.  No overrides are applied.");
+            break;
+        }
+
+        if (l_wof_enabled == (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FORCE_DISABLED)
+        {
+            FAPI_INF("  WOF forcibly disabled via ATTR_WOF_ENABLED.  No overrides are applied.");
             break;
         }
 

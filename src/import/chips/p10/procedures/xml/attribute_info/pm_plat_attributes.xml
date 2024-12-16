@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -900,6 +900,28 @@
     <targetType>TARGET_TYPE_SYSTEM</targetType>
     <description>
     Enables pstate parameter block code to use the static AW data
+
+    Consumer: p10_pstate_parameter_block.C
+
+    Platform default:OFF
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <enum>
+        OFF = 0x00,
+        ON = 0x01
+    </enum>
+    <default>OFF</default>
+    <overrideOnly/>
+    <group>debug</group>
+  </attribute>
+
+<!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_IQ_STATIC_DATA_ENABLE</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Enables pstate parameter block code to use the static IQ data
 
     Consumer: p10_pstate_parameter_block.C
 
@@ -3740,6 +3762,287 @@
     <default>OFF</default>
     <overrideOnly/>
     <group>enablement</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX_ARRAY</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Holds the core count for the index number represented.  The index that matches
+    the WOF Table Header "Core Count" field is then used to index all other override
+    WTH Override attributes.
+
+    Array[Index]
+
+    [Sort Index]->8 entries-:
+        0: Core Count 0;
+        1: Core Count 1;
+        2: Core Count 2;
+        3: Core Count 3;
+        4: Core Count 4;
+        5: Core Count 5;
+        6: Core Count 6;
+        7: Core Count 7;
+
+    Producer: MRW to override the WOF Tables used for the matched core count.
+
+    Consumer: p10_pstate_parameter_block.C
+    </description>
+    <valueType>uint8</valueType>
+    <array>8</array>
+    <platInit/>
+    <initToZero/>
+    <group>wthoverride</group>
+  </attribute>
+
+<!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Holds the core count index selected for the sort core number.  This value is
+    used to index all other override WTH Override attributes.
+
+    Producer: p10_pm_utils.C
+
+    Consumer: p10_pm_utils.C
+    </description>
+    <valueType>uint8</valueType>
+    <default>0xFF</default>
+    <writeable/>
+    <group>wthoverride</group>
+  </attribute>
+
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WTH_OVERRIDE_EFFICIENCY_ALG</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Defines how to intrepret ATTR_WTH_OVERRIDE_EFFICIENCY_MODE_IDLE_TIMES and
+    EFFICIENCY_MODE_IDLE_THRESHOLDS attributes as a override for the
+    WTH Flags[Efficiency Mode Algorithm] field.
+
+    CEFF:  Ceff based adjustment.
+    UTIL:  Utilization based adjustment.
+
+    Producer: MRW to override the WOF Tables used for the matched core count.
+
+    Consumer: p10_pm_utils.C
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+        UTIL = 0x00,
+        CEFF = 0x01
+    </enum>
+    <default>UTIL</default>
+    <platInit/>
+    <group>wthoverride</group>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WTH_OVERRIDE_EFFICIENCY_IDLE_TIMES</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Holds overrides for the WOF Table Header "Efficiency Mode Idle Chip Entry/Exit Time"
+    fields. The meaning of the field depends on WTH Flags[Efficiency Mode Algorithm] field.
+
+    Entry:
+    0 indicates disabled else time under entry threshold to enter idle chip frequency.
+
+    Exit:
+    Time above exit threshold to exit idle chip frequency.
+
+    For both transition types, the values are defined by:
+      If ATTR_WTH_OVERRIDE_EFFICIENCY_MODE_ALGORITHM=CEFF: time in ms.
+      If ATTR_WTH_OVERRIDE_EFFICIENCY_MODE_ALGORITHM=UTIL: number of 32ms ticks
+
+    The first dimension index is determined by the entry in
+    ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX that matches the WOF Table Header "Core Count" field.
+
+    Array[Core Count Index][Transition]
+
+    [Sort Index]->8 entries-:
+        0: Core Count 0;
+        1: Core Count 1;
+        2: Core Count 2;
+        3: Core Count 3;
+        4: Core Count 4;
+        5: Core Count 5;
+        6: Core Count 6;
+        7: Core Count 7;;
+
+    [Transition] ->2 entries-:
+        0: Entry;
+        1: Exit;
+
+    Producer: MRW to override the WOF Tables used for the matched core count.
+
+    Consumer: p10_pm_utils.C
+    </description>
+    <valueType>uint16</valueType>
+    <array>8,2</array>
+    <platInit/>
+    <default>
+    0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,
+    0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF
+     </default>
+    <group>wthoverride</group>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WTH_OVERRIDE_EFFICIENCY_IDLE_THRESH</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Holds overrides for the WOF Table Header "Efficiency Mode Idle Chip Entry/Exit Threshold"
+    fields.
+
+    Entry:
+    Threshold to be under to enter idle chip frequency.
+
+    Exit:
+    Threshold to be above to exit idle chip frequency.
+
+    For both transition types, the values are defined by:
+      If ATTR_WTH_OVERRIDE_EFFICIENCY_MODE_ALGORITHM=CEFF based Ceff in 0.01% (eg 8% -> 800).
+      If ATTR_WTH_OVERRIDE_EFFICIENCY_MODE_ALGORITHM=UTIL: utilization in 0.01% (eg 8% -> 800).
+
+    The first dimension index is determined by the entry in
+    ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX that matches the WOF Table Header "Core Count" field.
+
+    Array[Core Count Index][Transistion]
+
+    [Sort Index]->8 entries-:
+        0: Core Count 0;
+        1: Core Count 1;
+        2: Core Count 2;
+        3: Core Count 3;
+        4: Core Count 4;
+        5: Core Count 5;
+        6: Core Count 6;
+        7: Core Count 7;;
+
+    [Transistion] ->8 entries-:
+        0: Entry;
+        1: Exit;
+
+    Producer: MRW to override the WOF Tables used for the matched core count.
+
+    Consumer: p10_pm_utils.C
+    </description>
+    <valueType>uint16</valueType>
+    <array>8,2</array>
+    <platInit/>
+    <default>
+    0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,
+    0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF
+     </default>
+    <group>wthoverride</group>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WTH_OVERRIDE_EFFICIENCY_CEFF_ADJUST</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Holds overrides for the WOF Table Header "Ceff Adj Pct" values by mode.  Values
+    are in unit percentages with the following form:
+        0: sign; 1:7 percent value
+
+    The first dimension index is determined by the entry in
+    ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX that matches the WOF Table Header "Core Count" field.
+
+    Array[Core Count Index][Mode]
+
+    [Sort Index]->8 entries-:
+        0: Core Count 0;
+        1: Core Count 1;
+        2: Core Count 2;
+        3: Core Count 3;
+        4: Core Count 4;
+        5: Core Count 5;
+        6: Core Count 6;
+        7: Core Count 7;;
+
+    [Mode] ->4 entries-:
+        0: Favor Power;
+        1: Favor Performance;
+        2: Balanced Performance;
+        3: Non-determinisitic
+
+    Producer: MRW to override the WOF Tables used for the matched core count.
+
+    Consumer: p10_pm_utils.C
+    </description>
+    <valueType>uint8</valueType>
+    <array>8,4</array>
+    <platInit/>
+    0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+    0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF
+    <group>wthoverride</group>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WTH_OVERRIDE_EFFICIENCY_FREQ_LIMITS</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Holds overrides for the WOF Table Header "Freq Limit MHz" values by mode.  Values
+    are MHz units
+
+    The first dimension index is determined by the entry in
+    ATTR_WTH_OVERRIDE_CORE_COUNT_INDEX that matches the WOF Table Header "Core Count" field.
+
+    Array[Core Count Index][Frequency]
+
+    [Sort Index]->8 entries-:
+        0: Core Count 0;
+        1: Core Count 1;
+        2: Core Count 2;
+        3: Core Count 3;
+        4: Core Count 4;
+        5: Core Count 5;
+        6: Core Count 6;
+        7: Core Count 7;;
+
+    [Frequency] ->4 entries-:
+        0: Favor Power;
+        1: Favor Performance;
+        2: Balanced Performance;
+        3: Non-determinisitic
+
+    Producer: MRW to override the WOF Tables used for the matched core count.
+
+    Consumer: p10_pm_utils.C
+    </description>
+    <valueType>uint16</valueType>
+    <array>8,4</array>
+    <platInit/>
+    <default>
+    0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,
+    0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,
+    0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,
+    0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF,0xFFFF
+     </default>
+    <group>wthoverride</group>
+  </attribute>
+  <!-- ********************************************************************* -->
+  <attribute>
+    <id>ATTR_WTH_OVERRIDE_TEST_CORE_COUNT</id>
+    <targetType>TARGET_TYPE_SYSTEM</targetType>
+    <description>
+    Used for WTH override algorithm testing.  If non-0, this value will be used
+    instead of the real WOF Table Header value.
+
+    Producer: Override only
+
+    Consumer: p10_pm_utils.C
+    </description>
+    <valueType>uint8</valueType>
+    <platInit/>
+    <initToZero/>
+    <overrideOnly/>
+    <group>wthoverride</group>
   </attribute>
   <!-- *********************************************************************-->
 </attributes>

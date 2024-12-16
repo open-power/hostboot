@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -246,7 +246,7 @@ fapi2::ReturnCode pm_set_frequency(
 #ifndef FIPSODE
             if ((l_poundV_data.static_rails.modelDataFlag & 0x1) == 0x1)
             {
-                //we detected non sorted part
+                FAPI_INF("A non-sorted part (via the #V model data flag) detected.  Setting ATTR_WOF_ENABLED = FORCE_DISABLED");
                 fapi2::ATTR_WOF_ENABLED_Type l_wof_enabled =
                     (fapi2::ATTR_WOF_ENABLED_Type)fapi2::ENUM_ATTR_WOF_ENABLED_FORCE_DISABLED;
 

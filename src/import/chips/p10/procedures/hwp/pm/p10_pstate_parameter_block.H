@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1022,16 +1022,6 @@ extern "C"
     /// -------------------------------------------------------------------
     void
     iddq_print(IddqTable_t* i_iddqt);
-
-    /// -------------------------------------------------------------------
-    /// @brief  Print the WOF Table Header
-    /// @param[in]  i_iwfth pointer to wfth structure to output
-    /// @return void
-    /// -------------------------------------------------------------------
-    void
-    wfth_print(
-        const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
-        WofTablesHeader_t* i_wfth);
 
     /// -------------------------------------------------------------------
     /// @brief Populate Pstate super structure from VPD data
