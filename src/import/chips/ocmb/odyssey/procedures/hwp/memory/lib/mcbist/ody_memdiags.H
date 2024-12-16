@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -72,6 +72,17 @@ template<>
 fapi2::ReturnCode clear_and_restore_program_complete<mss::mc_type::ODYSSEY>(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
     const fapi2::buffer<uint64_t>& i_fir_mask_save );
+
+///
+/// @brief Gets the number of srank CIDs configured in the memdiags
+/// @param[in] i_port_targets A target representing ports
+/// @param[in,out] io_config_srank_bit_count number of bits required to represent a srank
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode get_configured_srank_cid_count<mss::mc_type::ODYSSEY>(
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_port_targets,
+    uint8_t& io_config_srank_bit_count );
 
 } // memdiags
 

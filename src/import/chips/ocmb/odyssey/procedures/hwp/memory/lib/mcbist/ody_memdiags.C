@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -44,7 +44,7 @@
 #include <generic/memory/lib/utils/poll.H>
 #include <generic/memory/lib/utils/mss_generic_check.H>
 #include <lib/utils/ody_bad_bits.H>
-
+#include <lib/ody_attribute_accessors_manual.H>
 
 namespace mss
 {
@@ -94,6 +94,39 @@ bool check_only_port1_exists(const std::vector<fapi2::Target<fapi2::TARGET_TYPE_
 namespace memdiags
 {
 #ifndef __PPE__
+
+///
+/// @brief Gets the number of srank CIDs configured in the memdiags
+/// @param[in] i_port_targets A target representing ports
+/// @param[in,out] io_config_srank_bit_count number of bits required to represent a srank
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template<>
+fapi2::ReturnCode get_configured_srank_cid_count<mss::mc_type::ODYSSEY>(
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_port_targets,
+    uint8_t& io_config_srank_bit_count )
+{
+    const auto& l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_port_targets[0]);
+
+    uint8_t l_num_sranks = 0;
+    // Get srank count
+    FAPI_TRY(mss::ody::get_srank_count(l_dimms[0], l_num_sranks));
+
+    // Do zero based indexing to calculate the CIDs
+    l_num_sranks = l_num_sranks - 1;
+
+    // Calculate how many CID are configured based on srank count
+    // Example for a srank of 4 , two srank CIDs would be configured in memdiags
+    while ( l_num_sranks > 0 )
+    {
+        // Right shift till it is 0
+        l_num_sranks = l_num_sranks >> 1;
+        io_config_srank_bit_count++;
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Helper to encapsualte the setting of multi-port address configurations - Odyssey specialization
@@ -451,25 +484,44 @@ fapi_try_exit:
 }
 
 ///
-/// @brief set the address map for memdiags with srank, mrank and port as the MSB
-/// @param[in] i_port port target
+/// @brief Set the address map for memdiags with a single srank, but running on all ports and mranks
+/// @param[in] i_target MC target
 /// @param[in,out] io_curr_bit_index current index that keeps track of the address
 /// @return FAPI2_RC_SUCCESS iff everything ok
 ///
 template<>
-fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::setup_memdiags_srank_mrank_port(const
-        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port, uint64_t& io_curr_bit_index)
+fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::setup_memdiags_srank_mrank_port(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    uint64_t& io_curr_bit_index )
 {
+    FAPI_DBG(TARGTIDFORMAT " Initial io_curr_bit_index: %d", GENTARGTID(iv_target), io_curr_bit_index);
 
-    FAPI_DBG(TARGTIDFORMAT  " Initial io_curr_bit_index: %d", GENTARGTID(iv_target), io_curr_bit_index);
+    const auto& l_ports = mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target);
 
-    FAPI_TRY(configure_bank_groups(i_port, io_curr_bit_index, iv_program));
-    FAPI_TRY(configure_bank(i_port, io_curr_bit_index, iv_program));
-    FAPI_TRY(configure_col(i_port, io_curr_bit_index, iv_program));
-    FAPI_TRY(configure_row(i_port, io_curr_bit_index, iv_program));
-    FAPI_TRY(configure_srank(i_port, io_curr_bit_index, iv_program));
-    FAPI_TRY(configure_mranks(i_port, io_curr_bit_index, iv_program));
-    configure_port(io_curr_bit_index, iv_program);
+    // Port bit should be the LSB in the address map if we have more than one port
+    if( l_ports.size() > 1)
+    {
+        configure_port(io_curr_bit_index, iv_program);
+    }
+
+    FAPI_TRY(configure_bank_groups(l_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_mranks(l_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_bank(l_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_col(l_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_row(l_ports[0], io_curr_bit_index, iv_program));
+    FAPI_TRY(configure_srank(l_ports[0], io_curr_bit_index, iv_program));
+
+    // Check which port exists
+    // If only port1 exists we force '1'
+    // in our start and end addresses
+    if(check_only_port1_exists(l_ports))
+    {
+        configure_port(io_curr_bit_index, iv_program);
+    }
+
+    // Do nothing if only port0 exists
+
+    FAPI_DBG(TARGTIDFORMAT " Final io_curr_bit_index: %d", GENTARGTID(iv_target), io_curr_bit_index);
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -545,56 +597,99 @@ fapi_try_exit:
 /// @brief memdiags single srank init for specific chip - Odyssey specialization
 /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
 /// in subclassed constructors more easily.
-/// @param[in] i_port port target
-/// @param[in] i_mrank mrank
 /// @param[in] i_srank srank that needs to initialized
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note init tests are write-only so we don't have to stop on rank boundaries
 ///
 template <>
-fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::single_srank_init_internal(const
-        fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
-        const uint8_t i_mrank, const uint8_t i_srank)
+fapi2::ReturnCode operation<mss::mc_type::ODYSSEY>::single_srank_init_internal( const uint8_t i_srank )
 {
     using AT = mcbistAddrTraits<mss::mc_type::ODYSSEY>;
+    using TT = mcbistMCTraits<mss::mc_type::ODYSSEY>;
+
+    FAPI_INF_NO_SBE("single-srank base impl " TARGTIDFORMAT, GENTARGTID(iv_target));
+    const auto& l_ports = mss::find_targets<TT::PORT_TYPE>(iv_target);
+
+    // Make sure we have ports, if we don't then exit out
+    if(l_ports.size() == 0)
+    {
+        // Cronus can have no ports under an MCBIST, FW deconfigures by association
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached ports skipping setup", GENTARGTID(iv_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Let's assume we are going to send out all subtest unless we are in broadcast mode,
+    // where we only send up to 2 subtests under an port ( 1 for each DIMM) which is why no const
+    // Make sure we have atleast 1 DIMM under a port
+    const auto& l_dimms = mss::find_targets<fapi2::TARGET_TYPE_DIMM>(iv_target);
+
+    if( l_dimms.size() == 0)
+    {
+        // Cronus can have no DIMMS under an MCBIST, FW deconfigures by association
+        FAPI_INF_NO_SBE(TARGTIDFORMAT " has no attached DIMMs skipping setup", GENTARGTID(iv_target));
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
     FAPI_INF_NO_SBE("single-srank init internal for " TARGTIDFORMAT, GENTARGTID(iv_target));
 
     fapi2::buffer<uint64_t> l_start_address = 0;
     fapi2::buffer<uint64_t> l_end_address = 0;
-    const uint64_t PORTBITS_LEN = 1;
-    const uint64_t SRANKBITS_LEN = 3;
-    const uint64_t MRANKBITS_LEN = 2;
-    const auto l_port_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_port);
 
-    uint64_t l_curr_bit_index = AT::MAXADDRESS_MAP_INDEX;
     uint64_t l_configured_count = 0;
+    uint64_t l_curr_bit_index = AT::MAXADDRESS_MAP_INDEX;
+
+    // MSB bit position
+    uint8_t l_msb_pos = 0;
+    // This is used to calculate the srank postiton based on single or dual port
+    uint8_t l_port_offset = 0;
+
+    // Get the number of CIDs required to represent the srank
+    uint8_t l_cnfgd_srank_bit_count = 0;
+    FAPI_TRY(get_configured_srank_cid_count<mss::mc_type::ODYSSEY>( l_ports, l_cnfgd_srank_bit_count ));
 
     // Setup the address map
-    // Addr map: PORT BANK MRANK BG COL ROW SRANK
-    FAPI_TRY(setup_memdiags_srank_mrank_port(i_port, l_curr_bit_index));
+    // Addr map: PORT BG MRANK BANK COL ROW SRANK
+    FAPI_TRY(setup_memdiags_srank_mrank_port(iv_target, l_curr_bit_index));
     l_configured_count = AT::MAXADDRESS_MAP_INDEX - l_curr_bit_index;
 
-    FAPI_DBG(TARGTIDFORMAT " l_configure_count after setting up the address map: %d", GENTARGTID(iv_target),
+    FAPI_DBG(TARGTIDFORMAT " l_configured_count after setting up the address map: %d", GENTARGTID(iv_target),
              l_configured_count);
 
     // Initialize the common sections
     FAPI_TRY( base_init() );
 
-    // The end address has all 1's
-    FAPI_TRY(l_end_address.setBit(64 - l_configured_count, l_configured_count));
+    // MSB bit position
+    l_msb_pos = 64 - l_configured_count;
 
-    // Set the start and end addresses based on the port, mrank and srank that is passed
     FAPI_INF_NO_SBE(TARGTIDFORMAT " setting the start and end address for the single srank init ", GENTARGTID(iv_target));
-    FAPI_TRY(l_start_address.insertFromRight(64 - l_configured_count + PORTBITS_LEN + MRANKBITS_LEN, SRANKBITS_LEN,
-             i_srank));
-    FAPI_TRY(l_start_address.insertFromRight(64 - l_configured_count + PORTBITS_LEN, MRANKBITS_LEN, i_mrank));
-    FAPI_TRY(l_start_address.writeBit(64 - l_configured_count, l_port_pos));
 
-    // End address should be adjusted for the port,mrank and srank
-    FAPI_TRY(l_end_address.insertFromRight(64 - l_configured_count + PORTBITS_LEN + MRANKBITS_LEN, SRANKBITS_LEN, i_srank));
-    FAPI_TRY(l_end_address.insertFromRight(64 - l_configured_count + PORTBITS_LEN, MRANKBITS_LEN, i_mrank));
-    FAPI_TRY(l_end_address.writeBit(64 - l_configured_count, l_port_pos));
+    // If only port1 exists, we force '1'
+    // in our start and end addresses
+    if(check_only_port1_exists(l_ports))
+    {
+        l_port_offset = 1;
+        // Set MSB of start and end address to 1
+        FAPI_TRY(l_start_address.setBit(l_msb_pos));
+        FAPI_TRY(l_end_address.setBit(l_msb_pos));
+    }
+
+    if ( l_cnfgd_srank_bit_count < 1)
+    {
+        // If no srank bits are configured, Start address would be all 0 and fill the end address with 1's
+        FAPI_TRY(l_end_address.setBit(l_msb_pos, l_configured_count));
+    }
+    else
+    {
+        // Set start address and end address when srank bits are configured
+        // Insert srank bits from the right in the start address based on i_srank
+        FAPI_TRY(l_start_address.insertFromRight(i_srank, l_msb_pos + l_port_offset, l_cnfgd_srank_bit_count));
+
+        // The end address has all 1's, except the srank field
+        FAPI_TRY(l_end_address.setBit(l_msb_pos + l_cnfgd_srank_bit_count + l_port_offset,
+                                      l_configured_count - l_cnfgd_srank_bit_count - l_port_offset));
+        // Insert the srank bits in the end address based on i_srank
+        FAPI_TRY(l_end_address.insertFromRight(i_srank, l_msb_pos + l_port_offset, l_cnfgd_srank_bit_count));
+    }
 
     FAPI_DBG(TARGTIDFORMAT " Start Addr:  0x%016llx", GENTARGTID(iv_target), l_start_address);
     FAPI_DBG(TARGTIDFORMAT " End Addr:  0x%016llx", GENTARGTID(iv_target), l_end_address);

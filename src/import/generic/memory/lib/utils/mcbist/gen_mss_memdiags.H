@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -450,6 +450,16 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Gets the number of srank CIDs configured in the memdiags
+/// @param[in] i_port_targets A target representing the ports
+/// @param[in,out] io_config_srank_bit_count number of bits required to represent a srank
+/// @return FAPI2_RC_SUCCESS iff ok
+///
+template< mss::mc_type MC, fapi2::TargetType T >
+fapi2::ReturnCode get_configured_srank_cid_count( const std::vector<fapi2::Target<T>>& i_port_targets,
+        uint8_t& io_config_srank_bit_count );
+
+///
 /// @class Base class for memdiags operations
 /// @tparam MC the mc type of the T
 /// @tparam T fapi2::TargetType of the MCBIST engine
@@ -537,13 +547,10 @@ class operation
         /// @brief memdiags single-rank init for specific chip
         /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
         /// in subclassed constructors more easily.
-        /// @param[in] i_port port target
-        /// @param[in] i_mrank mrank
         /// @param[in] i_srank srank that needs to initialized
         /// @return FAPI2_RC_SUCCESS iff everything ok
         ///
-        fapi2::ReturnCode single_srank_init_internal(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
-                const uint8_t i_mrank, const uint8_t i_srank);
+        fapi2::ReturnCode single_srank_init_internal( const uint8_t i_srank );
 
         ///
         /// @brief memdiags multi-port address config helper for "simple" one subtest per port setup
@@ -578,13 +585,13 @@ class operation
                 uint64_t& io_curr_bit_index);
 
         ///
-        /// @brief set the address map for memdiags with srank, mranka nad port as the MSB
-        /// @param[in] i_port port target
+        /// @brief Set the address map for memdiags with a single srank, but running on all ports and mranks
+        /// @param[in] i_target MC target
         /// @param[in,out] io_curr_bit_index current index that keeps track of the address
         /// @return FAPI2_RC_SUCCESS iff everything ok
         ///
         fapi2::ReturnCode setup_memdiags_srank_mrank_port( const
-                fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_port,
+                fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
                 uint64_t& io_curr_bit_index);
 
         ///
@@ -807,11 +814,9 @@ struct sf_init_operation : public operation<MC>
 ///
 /// @class Class for memdiags' super-fast init
 /// @tparam MC the mc type of the T
-/// @tparam T fapi2::TargetType of the MCBIST engine
-/// @tparam TT the mcbistTraits associated with T
+/// @tparam T fapi2::TargetType of TARGET_TYPE_MEM_PORT
 ///
-// TODO:JIRA:MSWT-40 Fix implementation of single rank sf_init memdiags operation
-template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::FWMS_ADDR_TARGET_TYPE, fapi2::TargetType T1 = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE , typename TT = mcbistTraits<MC, T> >
+template< mss::mc_type MC, fapi2::TargetType T = mss::mcbistMCTraits<MC>::MC_TARGET_TYPE>
 struct sf_init_per_srank_operation : public operation<MC>
 {
 
@@ -819,16 +824,14 @@ struct sf_init_per_srank_operation : public operation<MC>
     /// @brief memdiags::sf_init_per_srank_operation constructor
     /// @param[in] i_target the target of the mcbist engine
     /// @param[in] i_const mss::constraint structure
-    /// @param[in] i_port_rank mrank
     /// @param[in] i_srank srank that needs to initialized
     /// @param[out] o_rc the fapi2::ReturnCode of the intialization process
     ///
     sf_init_per_srank_operation( const fapi2::Target<T>& i_target,
                                  const constraints<MC> i_const,
-                                 const uint8_t i_port_rank,
                                  const uint8_t i_srank,
                                  fapi2::ReturnCode& o_rc):
-        operation<MC>(mss::find_target<mss::mcbistMCTraits<MC>::MC_TARGET_TYPE>(i_target), mss::mcbist::init_subtest<MC>(),
+        operation<MC>(i_target, mss::mcbist::init_subtest<MC>(),
                       i_const)
     {
         // If sf_init was passed the random data pattern, then modify the subtest to use the true random data
@@ -837,8 +840,8 @@ struct sf_init_per_srank_operation : public operation<MC>
             this->iv_subtest.change_data_mode(mss::mcbist::data_mode::RAND_FWD_MAINT);
         }
 
-        // We're single port per srank operation
-        o_rc = this->single_srank_init_internal(i_target, i_port_rank, i_srank);
+        // per srank operation accross the ports
+        o_rc = this->single_srank_init_internal( i_srank );
     }
 
     sf_init_per_srank_operation() = delete;
@@ -858,13 +861,12 @@ struct sf_init_per_srank_operation : public operation<MC>
 /// Dummy implementation required to create child classes from operation.
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType - derived
-/// @tparam TT the mcbistTraits associated with T
 /// Initializes common sections. Broken out rather than the base class ctor to enable checking return codes
 /// in subclassed constructors more easily.
 /// @return FAPI2_RC_SUCCESS iff everything ok
 ///
-template< mss::mc_type MC, fapi2::TargetType T, fapi2::TargetType T1, typename TT >
-fapi2::ReturnCode sf_init_per_srank_operation<MC, T, T1, TT>::multi_port_init_internal()
+template< mss::mc_type MC, fapi2::TargetType T>
+fapi2::ReturnCode sf_init_per_srank_operation<MC, T>::multi_port_init_internal()
 {
     FAPI_ASSERT( false,
                  fapi2::MSS_IRRELEVANT_FUNC_CALL()
@@ -1588,21 +1590,18 @@ fapi_try_exit:
 /// @tparam MC the mc type of the T
 /// @tparam T the fapi2::TargetType of the target
 /// @param[in] i_target the target behind which all memory should be initialized
-/// @param[in] i_port_rank mrank
 /// @param[in] i_srank srank that needs to initialized
 /// @param[in] i_pattern an index representing a pattern to use to init memory (defaults to 0)
 /// @return FAPI2_RC_SUCCESS iff everything ok
 /// @note The function is asynchronous, and the caller should be looking for a done attention
 ///
-// TODO:JIRA:MSWT-40 Fix implementation of single rank sf_init memdiags operation
-template<  mss::mc_type MC, fapi2::TargetType T >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode sf_init_per_srank( const fapi2::Target<T>& i_target,
-                                     const uint8_t i_port_rank,
                                      const uint8_t i_srank,
                                      const uint64_t i_pattern = PATTERN_0 )
 {
     using ET = mss::mcbistMCTraits<MC>;
-    using MC_TARGET = typename mss::mcbistMCTraits<MC>::MC_TARGET_TYPE;
+
     FAPI_INF_NO_SBE("superfast init per srank start for " TARGTIDFORMAT, TARGTID);
 
     uint8_t l_sim = false;
@@ -1614,16 +1613,16 @@ fapi2::ReturnCode sf_init_per_srank( const fapi2::Target<T>& i_target,
         // TK. Need a verification pattern. This is a not-good pattern for verification ... We don't really
         // have a good pattern for verification defined.
         FAPI_INF_NO_SBE("running mss sim init in place of sf_init_per_srank for " TARGTIDFORMAT, TARGTID);
-        return mss::mcbist::sim::sf_init<MC>(mss::find_target<MC_TARGET>(i_target), i_pattern);
+        return mss::mcbist::sim::sf_init<MC>(i_target, i_pattern);
     }
     else
     {
         fapi2::ReturnCode l_rc;
         constraints<MC> l_const(i_pattern);
-        sf_init_per_srank_operation<MC> l_init_op(i_target, l_const, i_port_rank, i_srank, l_rc);
+        sf_init_per_srank_operation<MC> l_init_op(i_target, l_const, i_srank, l_rc);
 
         FAPI_ASSERT( l_rc == fapi2::FAPI2_RC_SUCCESS,
-                     ET::memdiags_sf_init_failed_init().set_MC_TARGET(mss::find_target<MC_TARGET>(i_target)),
+                     ET::memdiags_sf_init_failed_init().set_MC_TARGET(i_target),
                      "Unable to initialize the MCBIST engine for a sf init " TARGTIDFORMAT, TARGTID );
 
         return l_init_op.execute();

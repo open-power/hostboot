@@ -634,7 +634,7 @@ fapi2::ReturnCode memory_init_via_memdiags(const mss::rank::info<mss::mc_type::O
         const uint64_t i_pattern,
         fapi2::buffer<uint64_t>& o_ecc_data)
 {
-    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_rank_info.get_port_target());
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>( i_rank_info.get_port_target() );
     fapi2::buffer<uint64_t> l_fir_mask_save;
 
     // Disable the ecc mode
@@ -644,7 +644,7 @@ fapi2::ReturnCode memory_init_via_memdiags(const mss::rank::info<mss::mc_type::O
     FAPI_TRY( mss::memdiags::mask_program_complete<mss::mc_type::ODYSSEY>(l_ocmb, l_fir_mask_save) );
 
     // Call the memdiags to initialize the memory
-    FAPI_TRY( mss::memdiags::sf_init<mss::mc_type::ODYSSEY>(l_ocmb, i_pattern) );
+    FAPI_TRY( mss::memdiags::sf_init_per_srank<mss::mc_type::ODYSSEY>(l_ocmb, i_srank, i_pattern) );
 
     // Polls for completion
     FAPI_TRY(mss::memdiags::mss_async_polling_loop<mss::mc_type::ODYSSEY>(l_ocmb));

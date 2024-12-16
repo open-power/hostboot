@@ -114,6 +114,7 @@ class mcbistMCTraits< mss::mc_type::ODYSSEY>
     public:
         static constexpr fapi2::TargetType MC_TARGET_TYPE = fapi2::TARGET_TYPE_OCMB_CHIP;
         static constexpr fapi2::TargetType FWMS_ADDR_TARGET_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
+        static constexpr fapi2::TargetType PORT_TYPE = fapi2::TARGET_TYPE_MEM_PORT;
 
         ///
         /// @brief Returns an error for memdiags compare error in last pattern
