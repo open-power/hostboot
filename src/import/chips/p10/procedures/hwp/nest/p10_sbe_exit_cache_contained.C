@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -208,8 +208,12 @@ p10_sbe_exit_cache_contained(
     fapi2::ATTR_PROC_SBE_MASTER_CHIP_Type l_is_master_sbe;
     fapi2::ATTR_IS_MPIPL_Type l_is_mpipl;
     fapi2::Target<fapi2::TARGET_TYPE_SYSTEM> FAPI_SYSTEM;
+    fapi2::ATTR_IPL_TYPE_Type l_attr_ipl_type;
 
     FAPI_DBG("Start");
+
+    FAPI_TRY(FAPI_ATTR_GET( fapi2::ATTR_IPL_TYPE, FAPI_SYSTEM, l_attr_ipl_type),
+             "Error from FAPI_ATTR_GET (ATTR_IPL_TYPE)");
 
     // validate that HWP steps should be run
     // only desire to run on the master SBE in a non-MPIPL
@@ -338,10 +342,22 @@ p10_sbe_exit_cache_contained(
             {
                 //Start Instruction in thread0, thread1 for both masterCore
                 //and associated fused Core Pair Target. T0 & T1 are fixed
-                FAPI_EXEC_HWP(l_rc,
-                              p10_sbe_instruct_start,
-                              l_master_core_target,
-                              static_cast<ThreadSpecifier>(THREAD0 | THREAD1));
+                //If in SQUBA MODE, we are expecting all threads to resume
+                //execution of the BOOT_AVP in place of HB.
+                if (l_attr_ipl_type == fapi2::ENUM_ATTR_IPL_TYPE_CRO_SQUBA)
+                {
+                    FAPI_EXEC_HWP(l_rc,
+                                  p10_sbe_instruct_start,
+                                  l_master_core_target,
+                                  static_cast<ThreadSpecifier>(ALL_THREADS));
+                }
+                else
+                {
+                    FAPI_EXEC_HWP(l_rc,
+                                  p10_sbe_instruct_start,
+                                  l_master_core_target,
+                                  static_cast<ThreadSpecifier>(THREAD0 | THREAD1));
+                }
 
                 if (l_rc)
                 {
@@ -350,10 +366,20 @@ p10_sbe_exit_cache_contained(
                     break;
                 }
 
-                FAPI_EXEC_HWP(l_rc,
-                              p10_sbe_instruct_start,
-                              l_master_core_pair_target,
-                              static_cast<ThreadSpecifier>(THREAD0 | THREAD1));
+                if (l_attr_ipl_type == fapi2::ENUM_ATTR_IPL_TYPE_CRO_SQUBA)
+                {
+                    FAPI_EXEC_HWP(l_rc,
+                                  p10_sbe_instruct_start,
+                                  l_master_core_pair_target,
+                                  static_cast<ThreadSpecifier>(ALL_THREADS));
+                }
+                else
+                {
+                    FAPI_EXEC_HWP(l_rc,
+                                  p10_sbe_instruct_start,
+                                  l_master_core_pair_target,
+                                  static_cast<ThreadSpecifier>(THREAD0 | THREAD1));
+                }
 
                 if (l_rc)
                 {

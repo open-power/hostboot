@@ -36,7 +36,7 @@
 </attribute>
 <attribute>
   <id>ATTR_SBE_MASTER_HRMOR_ADDRESS</id>
-  <targetType>TARGET_TYPE_SYSTEM</targetType>
+  <targetType>TARGET_TYPE_PROC_CHIP</targetType>
   <description>Defines value of HRMOR register for master core.
   </description>
   <valueType>uint64</valueType>
