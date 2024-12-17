@@ -3929,11 +3929,13 @@ bool DeconfigGard::reduceSpareCores( TARGETING::Target* i_target )
 {
     bool l_usedSpare = false;
     bool l_alreadySpared = false;
+    bool l_needsUnlock = false;
 
+    do {
     if ((i_target == nullptr)
        || (TARGETING::UTIL::assertGetToplevelTarget()->getAttr<ATTR_SPARE_CORE_ACTIONS_DISABLED>()))
     {
-        return false;
+        break;
     }
 
     auto l_type = i_target->getAttr<TARGETING::ATTR_TYPE>();
@@ -3943,6 +3945,7 @@ bool DeconfigGard::reduceSpareCores( TARGETING::Target* i_target )
     {
         // lock around access to ATTR_SPARE_CORES_DEPLOYED
         HWAS_MUTEX_LOCK(iv_mutex);
+        l_needsUnlock = true;
 
         auto l_numSpares = l_parentProc->getAttr<TARGETING::ATTR_SPARE_CORES>();
         auto l_spareErrors = l_parentProc->getAttr<TARGETING::ATTR_SPARE_CORES_DEPLOYED>();
@@ -3976,7 +3979,7 @@ bool DeconfigGard::reduceSpareCores( TARGETING::Target* i_target )
         // to be replaced with spares.
         if (l_sparedCores.size() && l_sparedCores[0]->getAttr<TARGETING::ATTR_ECO_MODE>() == ECO_MODE_ENABLED)
         {
-            return false;
+            break;
         }
 
         // Make sure we haven't already taken these cores into account
@@ -4020,6 +4023,11 @@ bool DeconfigGard::reduceSpareCores( TARGETING::Target* i_target )
             }
         }
 
+    }
+    } while(0);
+
+    if (l_needsUnlock)
+    {
         HWAS_MUTEX_UNLOCK(iv_mutex);
     }
 
