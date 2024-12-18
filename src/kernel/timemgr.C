@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -97,16 +97,14 @@ void TimeManager::delayTask(task_t* t, uint64_t i_sec, uint64_t i_nsec)
 
 void TimeManager::_delayTask(task_t* t, uint64_t i_sec, uint64_t i_nsec)
 {
-    _TimeManager_Delay_t* node = new _TimeManager_Delay_t();
-
-    node->key = this->getCurrentTimeBase() +
+    t->delay_node.key = this->getCurrentTimeBase() +
                 this->convertSecToTicks(i_sec, i_nsec);
-    node->task = t;
+    t->delay_node.task = t;
 
     t->state = TASK_STATE_BLOCK_SLEEP;
-    t->state_info = (void*)node->key;
+    t->state_info = (void*)t->delay_node.key;
 
-    _get_delaylist()->insert(node);
+    _get_delaylist()->insert(&t->delay_node);
 }
 
 void TimeManager::checkReleaseTasks(Scheduler* s)
@@ -122,7 +120,6 @@ void TimeManager::_checkReleaseTasks(Scheduler* s)
     while(NULL != (node = _get_delaylist()->remove_if(l_currentTime)))
     {
         s->addTask(node->task);
-        delete node;
         doorbell_broadcast();
     }
 }

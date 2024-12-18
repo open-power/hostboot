@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -32,16 +32,9 @@
 #include <util/locked/pqueue.H>
 #include <kernel/spinlock.H>
 
+// forward declare
 class Scheduler;
-
-/** Struct to hold sleeping tasks in a pqueue */
-struct _TimeManager_Delay_t
-{
-    _TimeManager_Delay_t * next;
-    _TimeManager_Delay_t * prev;
-    uint64_t key;
-    task_t* task;
-};
+class _TimeManager_Delay_t;
 
 /** @class TimeManager
  *  @brief Keeps track of sleeping of tasks and conversions between TB and time.

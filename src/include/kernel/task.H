@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2010,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2010,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -90,6 +90,15 @@ enum task_states
     // Forward declaration.
 struct task_tracking_t;
 
+/** Struct to hold sleeping tasks in a pqueue */
+struct _TimeManager_Delay_t
+{
+    _TimeManager_Delay_t * next;
+    _TimeManager_Delay_t * prev;
+    uint64_t key;
+    task_t* task;
+};
+
 /** @struct task_t
  *  @brief The kernel-level task structure.
  */
@@ -121,6 +130,9 @@ struct task_t
 
         /** Pointer to tracking tree for joining, parent info, etc. */
     task_tracking_t* tracker;
+
+        /** This is used for delaying a task, like for nanosleep */
+    _TimeManager_Delay_t delay_node;
 
         /** Detached state of the task. */
     bool detached;
