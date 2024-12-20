@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -563,6 +563,28 @@
     <deconfigure>
       <target>OCMB_TARGET</target>
     </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
+    <rc>RC_ODY_DRAMINIT_FATAL_ERROR_NOT_RECOVERED</rc>
+    <description>This DIMM took a fatal draminit error and did not successfully recover</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>ODT_REG_VALUE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
   </hwpError>
 
 </hwpErrors>

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,10 @@
 #include <fapi2.H>
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/phy/ody_phy_utils.H>
+#include <ody_scom_mp_mastr_b0.H>
 #include <lib/workarounds/ody_phy_workarounds.H>
+#include <lib/phy/ody_phy_access.H>
 #include <lib/shared/ody_consts.H>
 
 namespace mss
@@ -48,6 +51,37 @@ namespace phy
 {
 namespace workarounds
 {
+
+///
+/// @brief Catches and asserts out if the Odyssey suffered a fatal error
+/// @param[in] i_target the target on which to operate
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note Identifies a fatal error by if the ODT disable bit is set
+///
+fapi2::ReturnCode gard_fatal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target )
+{
+    // If the bit is disabled, then the ODT are enabled
+    // Enabled ODT indicates that the port trained cleanly
+    constexpr bool ODT_ENABLED = false;
+    fapi2::buffer<uint64_t> l_data;
+    // Enables scom access
+    FAPI_TRY(configure_phy_scom_access(i_target, mss::states::ON_N));
+    // Grabs the ODT register value
+    FAPI_TRY(fapi2::getScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_ODTDEBUGDISABLE, l_data));
+    // Disables scom access
+    FAPI_TRY(configure_phy_scom_access(i_target, mss::states::OFF_N));
+
+    // Checks that the register value is good
+    FAPI_ASSERT(l_data.getBit<scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_ODTDEBUGDISABLE_ODTDBYTEDEBUGDISABLE>() == ODT_ENABLED,
+                fapi2::ODY_DRAMINIT_FATAL_ERROR_NOT_RECOVERED()
+                .set_PORT_TARGET(i_target)
+                .set_ODT_REG_VALUE(l_data),
+                TARGTIDFORMAT " took a fatal error! register value:" UINT64FORMAT, TARGTID,
+                UINT64_VALUE(l_data));
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
 
 ///
 /// @brief Clones data between redundant CS for tdqstracking

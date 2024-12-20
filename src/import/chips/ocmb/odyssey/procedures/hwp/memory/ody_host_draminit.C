@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -38,6 +38,7 @@
 #include <generic/memory/mss_git_data_helper.H>
 #include <generic/memory/lib/utils/find.H>
 #include <lib/phy/ody_phy_access.H>
+#include <lib/workarounds/ody_phy_workarounds.H>
 
 extern "C"
 {
@@ -54,6 +55,9 @@ extern "C"
         for (const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
         {
             FAPI_TRY(mss::ody::phy::configure_phy_scom_access(l_port, mss::states::ON_N));
+
+            // If a fatal draminit error occurred and was not recovered from, gard out the DIMM
+            FAPI_TRY(mss::ody::phy::workarounds::gard_fatal_errors( l_port ));
 
             // Log area
             for (uint64_t l_log_idx = 0; l_log_idx < mss::ddr5::ATTR_ODY_DQS_TRACKING_LOG_ENTRIES; l_log_idx++)
