@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <fapi2.H>
 #include <lib/shared/ody_consts.H>
 #include <lib/phy/ody_ddrphy_phyinit_structs.H>
+#include <mss_generic_attribute_getters.H>
 
 
 namespace mss
@@ -50,6 +51,14 @@ namespace phy
 {
 namespace workarounds
 {
+
+///
+/// @brief Catches and asserts out if the Odyssey suffered a fatal error
+/// @param[in] i_target the target on which to operate
+/// @return FAPI2_RC_SUCCSS iff ok
+/// @note Identifies a fatal error by if the ODT disable bit is set
+///
+fapi2::ReturnCode gard_fatal_errors( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target );
 
 ///
 /// @brief Clones data between redundant CS for tdqstracking

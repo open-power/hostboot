@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,7 @@
 #include <lib/phy/ody_phy_access.H>
 #include <lib/phy/host_ody_phy_access.H>
 #include <generic/memory/lib/utils/host_scom_abstraction.H>
+#include <lib/workarounds/ody_host_phy_workarounds.H>
 
 extern "C"
 {
@@ -73,6 +74,9 @@ extern "C"
             constexpr uint64_t OFFSET = 0;
             const auto& l_target = l_port;
 #endif
+
+            // If a fatal draminit error occurred and was not recovered from, gard out the DIMM
+            FAPI_TRY(mss::ody::phy::workarounds::gard_fatal_errors( l_port ));
 
             FAPI_TRY(mss::ody::phy::host_configure_phy_scom_access(l_port, mss::states::ON_N));
 

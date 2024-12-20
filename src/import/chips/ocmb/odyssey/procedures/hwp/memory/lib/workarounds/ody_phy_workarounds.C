@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -37,7 +37,10 @@
 #include <fapi2.H>
 #include <mss_generic_attribute_getters.H>
 #include <generic/memory/lib/utils/find.H>
+#include <lib/phy/ody_phy_utils.H>
+#include <ody_scom_mp_mastr_b0.H>
 #include <lib/workarounds/ody_phy_workarounds.H>
+#include <lib/phy/host_ody_phy_access.H>
 #include <lib/shared/ody_consts.H>
 
 namespace mss
