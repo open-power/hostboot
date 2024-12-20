@@ -4518,6 +4518,9 @@ fapi2::ReturnCode handle_address_errors_internal(const mss::rank::info<mss::mc_t
     // Configure the bad bits
     FAPI_TRY(load_msg_block(l_port, io_struct));
 
+    // Cleans up as the Synopsys firmware could have returned a fatal error
+    FAPI_TRY(mss::ody::phy::workarounds::cleanup_from_draminit_fatal(i_rank_info.get_port_target()));
+
     // Run training
     FAPI_TRY(run_training_helper(l_port, io_status, io_start_bad_bits, io_struct, o_log_data, false));
 
@@ -4575,16 +4578,6 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
     fapi2::buffer<uint32_t> l_nibble_enables;
 
     std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
-
-    // Checks if this configuration supports the address recovery algorithm
-    // Cards with 2 ranks and redundant CS are taking CEs at runtimes after taking a fatal error or address error
-    // Rather than running with constant CEs at runtime, the RAS team has elected to deconfigure and gard out these parts
-    // A fatal error or address will trigger the per DRAM address recovery algorithm, so checking and asserting out here is ok to do
-    bool l_is_address_algorithm_fatal = false;
-    FAPI_TRY(mss::ody::phy::workarounds::is_2r_redundant_cs(i_target, l_is_address_algorithm_fatal));
-    FAPI_ASSERT(!l_is_address_algorithm_fatal,
-                fapi2::ODY_DRAMINIT_PERDRAM_RECOVERY_NOT_SUPPORTED()
-                .set_PORT_TARGET(i_target), TARGTIDFORMAT " per DRAM algorithm not supported on this DIMM config. Exiting", TARGTID);
 
     // Do not allow the address algorithm to run multiple times
     // The algorithm is time consuming
@@ -4652,6 +4645,9 @@ fapi2::ReturnCode handle_address_errors(const fapi2::Target<fapi2::TARGET_TYPE_M
 
     // Add a stream message to say we're running the final address recovery training
     o_log_data.put(static_cast<fapi2::hwp_data_unit>(PER_DRAM_RECOVERY_FINAL_RUN));
+
+    // Cleans up as the Synopsys firmware could have returned a fatal error
+    FAPI_TRY(mss::ody::phy::workarounds::cleanup_from_draminit_fatal(i_target));
 
     // Does another training run here
     FAPI_TRY(run_training_helper(i_target, io_status, io_start_bad_bits, io_struct, o_log_data));

@@ -125,14 +125,13 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Checks if the Odyssey 2R redundant CS workaround is needed
-/// @tparam T the target type under test
-/// @param[in] i_target the target on which to operate
-/// @param[out] o_is_workaround_needed true if the workaround is needed, otherwise false
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @brief Cleans up from a draminit fatal error
+/// @param[in] i_target the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note The Synopsys PHY is set to disable all read termination if draminit takes a fatal error
+/// To recover, simply re-enable the ODT
 ///
-template <fapi2::TargetType T>
-fapi2::ReturnCode is_2r_redundant_cs( const fapi2::Target<T>& i_target, bool& o_is_workaround_needed );
+fapi2::ReturnCode cleanup_from_draminit_fatal(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
 
 } // ns workarounds
 } // ns phy

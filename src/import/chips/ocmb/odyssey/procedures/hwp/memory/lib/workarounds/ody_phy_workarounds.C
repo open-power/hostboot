@@ -40,7 +40,7 @@
 #include <lib/phy/ody_phy_utils.H>
 #include <ody_scom_mp_mastr_b0.H>
 #include <lib/workarounds/ody_phy_workarounds.H>
-#include <lib/phy/host_ody_phy_access.H>
+#include <lib/phy/ody_phy_access.H>
 #include <lib/shared/ody_consts.H>
 
 namespace mss
@@ -80,55 +80,26 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Checks if the Odyssey 2R redundant CS workaround is needed - DIMM target type specialization
-/// @param[in] i_target the target on which to operate
-/// @param[out] o_is_workaround_needed true if the workaround is needed, otherwise false
-/// @return FAPI2_RC_SUCCSS iff ok
+/// @brief Cleans up from a draminit fatal error
+/// @param[in] i_target the memory port on which to operate
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+/// @note The Synopsys PHY is set to disable all read termination if draminit takes a fatal error
+/// To recover, simply re-enable the ODT
 ///
-template <>
-fapi2::ReturnCode is_2r_redundant_cs( const fapi2::Target<fapi2::TARGET_TYPE_DIMM>& i_target,
-                                      bool& o_is_workaround_needed )
+fapi2::ReturnCode cleanup_from_draminit_fatal(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target)
 {
-    o_is_workaround_needed = false;
+    // There are two switches to turn off the termination, one for the ANIBs and one for the DBYTEs
+    // Turning on both of these switches to ensure that the termination is as expected
+    constexpr uint64_t REENABLE_ODT = 0;
 
-    uint8_t l_redundant_cs = 0;
-    uint8_t l_mranks = 0;
+    // Enables scom access
+    FAPI_TRY(configure_phy_scom_access(i_target, mss::states::ON_N));
 
-    FAPI_TRY(mss::attr::get_ddr5_redundant_cs_en(i_target, l_redundant_cs));
-    FAPI_TRY(mss::attr::get_num_master_ranks_per_dimm(i_target, l_mranks));
+    // Re-enables the ODT
+    FAPI_TRY(fapi2::putScom(i_target, scomt::mp::DWC_DDRPHYA_MASTER0_BASE0_ODTDEBUGDISABLE, REENABLE_ODT));
 
-    // The workaround is needed for 2R, redundant CS DIMMs
-    // Note: it might be needed on just 2R DIMMs but has only been confirmed on 2R, redundant CS DIMMs
-    o_is_workaround_needed = (l_redundant_cs == fapi2::ENUM_ATTR_MEM_EFF_REDUNDANT_CS_EN_ENABLE) &&
-                             (l_mranks == fapi2::ENUM_ATTR_MEM_EFF_NUM_MASTER_RANKS_PER_DIMM_2R);
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Checks if the Odyssey 2R redundant CS workaround is needed - MEM_PORT target type specialization
-/// @param[in] i_target the target on which to operate
-/// @param[out] o_is_workaround_needed true if the workaround is needed, otherwise false
-/// @return FAPI2_RC_SUCCSS iff ok
-///
-template <>
-fapi2::ReturnCode is_2r_redundant_cs( const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
-                                      bool& o_is_workaround_needed )
-{
-    o_is_workaround_needed = false;
-
-    // Loop over and check all DIMM targets
-    for(const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(i_target))
-    {
-        FAPI_TRY(is_2r_redundant_cs(l_dimm, o_is_workaround_needed ));
-
-        // The workaround is needed, exit out
-        if(o_is_workaround_needed)
-        {
-            return fapi2::FAPI2_RC_SUCCESS;
-        }
-    }
+    // Disables scom access
+    FAPI_TRY(configure_phy_scom_access(i_target, mss::states::OFF_N));
 
 fapi_try_exit:
     return fapi2::current_err;
