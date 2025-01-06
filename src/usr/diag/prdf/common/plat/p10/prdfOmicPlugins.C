@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -417,6 +417,7 @@ int32_t CheckKvcoFix( ExtensibleChip * i_chip,
         }
     }
 
+    #ifdef __HOSTBOOT_MODULE
     // Another OMI degrade fix was applied to increase the VDD core voltage.
     // Check ATTR_MSS_OMI_VDD_UPLIFT_APPLIED on the OCMB and adjust the
     // signature if that is set to 1. A tryGetAttr is used here in case of
@@ -437,6 +438,7 @@ int32_t CheckKvcoFix( ExtensibleChip * i_chip,
                                              PRDFSIG_OmiDegradeVddUplift1);
         }
     }
+    #endif
 
     return SUCCESS;
 
