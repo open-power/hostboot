@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,11 +42,11 @@
 #include <generic/memory/lib/utils/find.H>
 #include <generic/memory/lib/utils/pos.H>
 #include <mss_generic_attribute_getters.H>
-#include <generic/memory/lib/utils/conversions.H>
 #include <generic/memory/lib/utils/shared/mss_generic_consts.H>
 #include <generic/memory/lib/utils/buffer_ops.H>
 #ifndef __PPE__
     #include <generic/memory/lib/spd/spd_fields_ddr4.H>
+    #include <generic/memory/lib/utils/conversions.H>
 #endif
 #include <generic/memory/lib/spd/spd_fields_ddr5.H>
 #include <generic/memory/lib/utils/mss_pair.H>
