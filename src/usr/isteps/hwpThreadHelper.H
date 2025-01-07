@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -103,6 +103,7 @@
             {                                                                           \
                 ocmbupd::ody_upd_event_t M_update_event = ocmbupd::OCMB_HWP_FAIL_OTHER; \
                 TARGETING::Target* const M_ocmb = TARGET;                               \
+                /* RUN_ODY_CHIPOP_errl will be committed regardless of the result */    \
                 errlOwner M_errl(RUN_ODY_CHIPOP_errl);                                  \
                 if (auto M_upd_errl = ocmbupd::ody_upd_process_event(M_ocmb,            \
                                             M_update_event,                             \
@@ -113,9 +114,10 @@
                         TRACE_ERR_FMT,                                  \
                         get_huid(M_ocmb),                               \
                         TRACE_ERR_ARGS(M_upd_errl));                    \
-                    collectOdyScratchData(TARGET,RUN_ODY_CHIPOP_errl);  \
-                    errlCommit(RUN_ODY_CHIPOP_errl, ISTEP_COMP_ID);     \
+                    collectOdyScratchData(TARGET,M_upd_errl.get());  \
+                    errlCommit(M_upd_errl, ISTEP_COMP_ID);     \
                 }                                                       \
+                RUN_ODY_CHIPOP_errl = nullptr;                          \
             }                                                           \
             else                                                        \
             {                                                           \
