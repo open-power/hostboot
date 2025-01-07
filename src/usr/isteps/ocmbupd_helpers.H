@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -119,6 +119,8 @@ inline void collectOdyScratchData( TARGETING::Target* i_ocmb,
                                                                         \
                     captureError(move(M_upd_errl), M_steperr, HWPF_COMP_ID, M_ocmb); \
                 }                                                       \
+                /* ody_upd_process_event always commits the log */      \
+                M_errl = nullptr;                                       \
             }                                                           \
         }                                                               \
     })
