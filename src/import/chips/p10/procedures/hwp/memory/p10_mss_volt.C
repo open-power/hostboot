@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -123,7 +123,7 @@ fapi2::ReturnCode p10_mss_volt( const std::vector< fapi2::Target<fapi2::TARGET_T
     // The frequency is hardcoded in cronus, so the limiting code was causing a lot of boot failures if it was updated
     // Hostboot will reboot if the frequency mismatch occurs
     // If a user wants to test the code, they can either hardcode this attribute OR set the attribute back to NOT_RUN after mss_volt
-#ifndef __HOSTBOOT__
+#ifndef __HOSTBOOT_MODULE
     FAPI_TRY(FAPI_ATTR_SET_CONST(fapi2::ATTR_MSS_CONFIG_FREQ_LIMIT,
                                  fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                                  fapi2::ENUM_ATTR_MSS_CONFIG_FREQ_LIMIT_NO_LIMIT));
