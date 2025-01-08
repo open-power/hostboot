@@ -425,12 +425,14 @@ class mr33_per_dram_data
             // As such, using pragmas to avoid the warning causing the error
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR33 rank%u. DRAM %u. CA ODT:%u.", TARGTID, i_dimm_rank,
+            FAPI_INF_NO_SBE("MR 33: CA and DQS_PARK ODT " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR33 | DRAM    | Field         | Register Type |   Operand   |  Data", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "           ---------------------------------------------------------------", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR33 | %u      | CA ODT        |         R     |    OP[2:0]  | %u   ", TARGTID,
                             i_dram_number, iv_ca_odt[i_dimm_rank][i_dram_number]);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR33 rank%u. DRAM %u. DQS RTT park:%u.", TARGTID, i_dimm_rank,
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR33 | %u      | DQS_RTT_PARK  |         R     |    OP[5:3]  | %u   ", TARGTID,
                             i_dram_number, iv_dqs_rtt_park[i_dimm_rank][i_dram_number]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
 #pragma GCC diagnostic pop
         }
 

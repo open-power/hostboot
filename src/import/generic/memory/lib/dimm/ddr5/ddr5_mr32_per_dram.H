@@ -306,6 +306,8 @@ class mr32_per_dram_data
             l_data. template extractToRight<CK_ODT, CK_ODT_LEN>(l_ck_field)
             . template extractToRight<CS_ODT, CS_ODT_LEN>(l_cs_field);
 
+            iv_ca_strap = l_data.getBit<CA_ODT_STRAP>();
+
             // Note: not checking DIMM rank as it was already checked by the rank info class
             const auto& l_dimm = i_rank_info.get_dimm_target();
             const auto l_dimm_rank = i_rank_info.get_dimm_rank();
@@ -368,6 +370,8 @@ class mr32_per_dram_data
 
         uint16_t iv_ck_odt[mr::ATTR_RANKS][mr::ATTR_DRAM]  __attribute__ ((aligned (8))) = {};
         uint16_t iv_cs_odt[mr::ATTR_RANKS][mr::ATTR_DRAM]  __attribute__ ((aligned (8))) = {};
+        // Read only value from data and not to be added to the msg block or isn't driven into assemble data
+        uint8_t iv_ca_strap = 0;
 
     private:
 
@@ -384,12 +388,17 @@ class mr32_per_dram_data
             // As such, using pragmas to avoid the warning causing the error
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Warray-bounds"
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR32 rank%u. dram%u. CK ODT:%u.", TARGTID, i_dimm_rank,
+            FAPI_INF_NO_SBE("MR 32: CK and CS ODT " TARGTIDFORMAT, TARGTID );
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR32 | DRAM    | Field        | Register Type |   Operand   |  Data", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT "           ------------------------------------------------------------", TARGTID);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR32 | %u      | CK ODT       |         R     |    OP[2:0]  | %u   ", TARGTID,
                             i_dram_number, iv_ck_odt[i_dimm_rank][i_dram_number]);
-            FAPI_INF_NO_SBE(TARGTIDFORMAT
-                            " DDR5 MR32 rank%u. dram%u. CS ODT:%u.", TARGTID, i_dimm_rank,
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR32 | %u      | CS ODT       |         R     |    OP[5:3]  | %u   ", TARGTID,
                             i_dram_number, iv_cs_odt[i_dimm_rank][i_dram_number]);
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " DDR5 MR32 | %u      | CA ODT STRAP |         R     |    OP[6]    | %u   ", TARGTID,
+                            i_dram_number, iv_ca_strap);
+
+            FAPI_INF_NO_SBE(TARGTIDFORMAT " End MR Table ", TARGTID);
 #pragma GCC diagnostic pop
         }
 
