@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -2011,57 +2011,6 @@
       </uint8_t>
     </simpleType>
     <writeable/>
-  </attribute>
-
-  <attribute>
-    <description>
-      Node Position in the FAPI_NAME attribute for this target.
-      This attribute is set by processMrw.pl and is only expected
-      for targets known to FAPI.
-    </description>
-    <id>FAPINAME_NODE</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint8_t>
-        <default>0xFF</default>
-      </uint8_t>
-    </simpleType>
-    <no_export/>
-  </attribute>
-
-  <attribute>
-    <description>
-      Chip position in the FAPI_NAME attribute for this target if applicable.
-      This attribute is set by processMrw.pl and is only expected
-      for targets known to FAPI.
-    </description>
-    <id>FAPINAME_POS</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint32_t>
-        <default>0xFFFFFFFF</default>
-      </uint32_t>
-    </simpleType>
-    <no_export/>
-  </attribute>
-
-  <attribute>
-    <description>
-      Unit position in the FAPI_NAME attribute for this target if applicable.
-      This attribute is set by processMrw.pl and is only expected
-      for targets known to FAPI.
-    </description>
-    <id>FAPINAME_UNIT</id>
-    <persistency>non-volatile</persistency>
-    <readable/>
-    <simpleType>
-      <uint8_t>
-        <default>0xFF</default>
-      </uint8_t>
-    </simpleType>
-    <no_export/>
   </attribute>
 
   <attribute>

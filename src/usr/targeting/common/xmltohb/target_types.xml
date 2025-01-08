@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2012,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2012,2025                        -->
 <!-- [+] Google Inc.                                                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
@@ -48,15 +48,6 @@
     <attribute>
       <default>0</default>
       <id>DECONFIG_GARDABLE</id>
-    </attribute>
-    <attribute>
-      <id>FAPINAME_NODE</id>
-    </attribute>
-    <attribute>
-      <id>FAPINAME_POS</id>
-    </attribute>
-    <attribute>
-      <id>FAPINAME_UNIT</id>
     </attribute>
     <attribute>
       <id>FAPI_NAME</id>

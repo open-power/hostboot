@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -126,16 +126,6 @@ bool getPosFromFapiName(ATTR_FAPI_NAME_type & i_fapiname,
         return false;
     }
 
-    // make sure type that we skipped doesnt contain numbers
-    // if it does we have invalid format
-    for (char* p = i_fapiname; p < skipType; p++)
-    {
-        if (isdigit(*p))
-        {
-            return false;
-        }
-    }
-
     // get the location of each element of fapiname string
     const char* strNode = strstr(skipType, "n");
     const char* strPos = strstr(skipType, "p");
@@ -148,18 +138,20 @@ bool getPosFromFapiName(ATTR_FAPI_NAME_type & i_fapiname,
     }
 
     // verify string format is valid
-    char fmt[16];
+    // X represents where there must be digit
+    // W represents where there could be digit
+    char fmt[32];
     if (strUnit)
     {
-        strcpy(fmt, "k0:nX:s0:pXX:cX");
+        strcpy(fmt, "k0:nXW:s0:pXXWWW:cXWW");
     }
     else if (strPos)
     {
-        strcpy(fmt, "k0:nX:s0:pXX");
+        strcpy(fmt, "k0:nXW:s0:pXXWWW");
     }
     else
     {
-        strcpy(fmt, "k0:nX:s0");
+        strcpy(fmt, "k0:nXW:s0");
     }
 
     // we want second part of string without :
@@ -168,39 +160,80 @@ bool getPosFromFapiName(ATTR_FAPI_NAME_type & i_fapiname,
     int fmtLen = strlen(fmt);
     int strLen = strlen(skipType);
 
-    if (fmtLen != strLen)
-    {
-        return false;
-    }
+    // since fmt can have more char than str
+    // represent difference with w_diff
+    int w_diff = 0;
 
     for (int i = 0; i < fmtLen; i++)
     {
+        int str_i = i - w_diff;
+
         // X in format str corresponds with digit
         if (fmt[i] == 'X')
         {
-            if (!isdigit(skipType[i]))
+            if (!isdigit(skipType[str_i]))
             {
                 return false;
             }
         }
-        else if (fmt[i] != skipType[i])
+        else if (fmt[i] == 'W')
+        {
+            // digit is wildcard, could be digit or next part of string
+            if (!isdigit(skipType[str_i]))
+            {
+                // if we arent digit but are next part of string,
+                // mark that fmt has extra char, otherwise ret false
+                if (skipType[str_i] == ':' ||
+                    skipType[str_i] == '\0')
+                {
+                    w_diff++;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        else if (fmt[i] != skipType[str_i])
         {
             // if not digit fmt must equal string
             return false;
         }
     }
 
-    // get values from each part of string
-    o_node = strtoul(strNode + 1, NULL, 10);
+    if (strLen + w_diff != fmtLen)
+    {
+        return false;
+    }
+
+    uint64_t tmp_val;
+
+    // get values from each part of string, check that they wont overflow integer
+    tmp_val = strtoul(strNode + 1, NULL, 10);
+    if (tmp_val > UINT8_MAX)
+    {
+        return false;
+    }
+    o_node = tmp_val;
 
     if (strPos)
     {
-        o_pos = strtoul(strPos + 1, NULL, 10);
+        tmp_val = strtoul(strPos + 1, NULL, 10);
+        if (tmp_val > UINT16_MAX)
+        {
+            return false;
+        }
+        o_pos = tmp_val;
     }
 
     if (strUnit)
     {
-        o_unitPos = strtoul(strUnit + 1, NULL, 10);
+        tmp_val = strtoul(strUnit + 1, NULL, 10);
+        if (tmp_val > UINT8_MAX)
+        {
+            return false;
+        }
+        o_unitPos = tmp_val;
     }
 
     return true;

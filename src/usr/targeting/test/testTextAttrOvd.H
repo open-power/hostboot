@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2024                             */
+/* Contributors Listed Below - COPYRIGHT 2024,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,16 +109,19 @@ public:
         {"k0:s0:n0:ocmb:p05",       false, NODE_NA, POS_NA, UNIT_NA},
         {"ocmb:k0:s0:n0:p05",       false, NODE_NA, POS_NA, UNIT_NA},
         {"ocmb:k0:n0:s0:p05:d4",    false, NODE_NA, POS_NA, UNIT_NA},
-        {"pu.c:k0:n0:s0:p05:c7",    true, 0, 5, 7},
-        {"pu.c:k0:n0:s0:p05:c7:d4", false, NODE_NA, POS_NA, UNIT_NA},
-        {"c0:k0:n0:s0:p05",         false, NODE_NA, POS_NA, UNIT_NA},
+        {"pc.c:k0:n0:s0:p05:c7",    true, 0, 5, 7},
+        {"pc.c:k0:n0:s0:p05:c7:d4", false, NODE_NA, POS_NA, UNIT_NA},
         {"node:k0:n1:s0",           true, 1, POS_NA, UNIT_NA},
-        {"tpm:k0:s0:n0:p320",       false, NODE_NA, POS_NA, UNIT_NA},
-        {"pu.c:k0:s0:n0:p320:c1",   false, NODE_NA, POS_NA, UNIT_NA},
-        {"pu.omi:k0:n0:s0:p20:c12", false, NODE_NA, POS_NA, UNIT_NA},
-        {"pu.omi:k0:n9:s0:p99:c8",  true, 9, 99, 8},
-        {"pu.omi:k0:n0:s0:c0",      false, NODE_NA, POS_NA, UNIT_NA},
-        {"pu.omi:k0:n0:s0:c01",     false, NODE_NA, POS_NA, UNIT_NA},
+        {"tpm:k0:n0:s0:p320",       true, 0, 320, UNIT_NA},
+        {"pc.c:k0:n0:s0:p320:c1",   true, 0, 320, 1},
+        {"pc.c:k0:n10:s0:p320:c12", true, 10, 320, 12},
+        {"ph.omi:k0:n15:s0:p65535:c255", true, 15, 65535, 255},
+        {"ph.omi:k0:n15:s0:p99999:c255", false, NODE_NA, POS_NA, UNIT_NA},
+        {"ph.omi:k0:n0:s0:p20:c12", true, 0, 20, 12},
+        {"ph.omi:k0:n9:s0:p99:c8",  true, 9, 99, 8},
+        {"ph.omi:k0:n0:s0:c0",      false, NODE_NA, POS_NA, UNIT_NA},
+        {"ph.omi:k0:n0:s0:c01",     false, NODE_NA, POS_NA, UNIT_NA},
+        {"generici2cslave:k0:n0:s0:p00", true, 0, 0, UNIT_NA},
     };
 
     /**

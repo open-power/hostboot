@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2022,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2022,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -384,14 +384,6 @@
         <default>pu:k0:n0:s0:p00</default>
     </attribute>
     <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
         <id>PROC_MASTER_TYPE</id>
         <default>ACTING_MASTER</default>
     </attribute>
@@ -488,14 +480,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu:k0:n0:s0:p01</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>1</default>
     </attribute>
     <attribute>
         <id>PROC_MASTER_TYPE</id>
@@ -4745,18 +4729,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>pu.core:k0:n0:s0:p01:c7</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>1</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_UNIT</id>
-        <default>7</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -14106,14 +14078,6 @@
         <default>ocmb:k0:n0:s0:p04</default>
     </attribute>
     <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>4</default>
-    </attribute>
-    <attribute>
         <id>FAPI_POS</id>
         <default>4</default>
     </attribute>
@@ -14162,14 +14126,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>ocmb:k0:n0:s0:p05</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>5</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -14222,14 +14178,6 @@
         <default>ocmb:k0:n0:s0:p06</default>
     </attribute>
     <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>6</default>
-    </attribute>
-    <attribute>
         <id>FAPI_POS</id>
         <default>6</default>
     </attribute>
@@ -14278,14 +14226,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>ocmb:k0:n0:s0:p07</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>7</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -14492,14 +14432,6 @@
         <default>dimm:k0:n0:s0:p16</default>
     </attribute>
     <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>16</default>
-    </attribute>
-    <attribute>
         <id>FAPI_POS</id>
         <default>16</default>
     </attribute>
@@ -14574,14 +14506,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>dimm:k0:n0:s0:p20</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>20</default>
     </attribute>
     <attribute>
         <id>FAPI_POS</id>
@@ -17542,14 +17466,6 @@
     <attribute>
         <id>FAPI_NAME</id>
         <default>tpm:k0:n0:s0:p00</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_NODE</id>
-        <default>0</default>
-    </attribute>
-    <attribute>
-        <id>FAPINAME_POS</id>
-        <default>0</default>
     </attribute>
     <attribute>
         <id>POSITION</id>
