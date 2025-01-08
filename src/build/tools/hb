@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2024
+# Contributors Listed Below - COPYRIGHT 2011,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -389,7 +389,8 @@ cd ${SANDBOXBASE}/src/hbfw/img/ \
 
         # This command will copy the output binaries generated from buildPatch and drop them in $HB_NFS_DIR if it exists.
         copyToNFS="cd ${SANDBOXBASE} && \
-cp ${SANDBOXBASE}/obj/ppc/hbfw/img/h*header.bin \$HB_NFS_DIR/test/pnor"
+cp ${SANDBOXBASE}/obj/ppc/hbfw/img/h*header.bin ${HB_NFS_DIR}/test/pnor && \
+cp ${SANDBOXBASE}/obj/ppc/hbfw/img/hbbl.header.bin ${HB_NFS_DIR}/test/pnor/hbbl.bin"
 
         # Stick the two commands together. They were separated for easier readability.
         prepareFspPatch="${buildPatch} && ${copyToNFS}"
