@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2019,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2019,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -110,10 +110,10 @@
         <default>0x0</default>
     </attribute>
     <attribute>
-      <id>POWERVS_P10_MTM</id>
-      <default>57,49,48,53,45,50,50,80,0,
-               57,48,52,51,45,77,82,80,0,
-               57,48,56,48,45,72,69,80,0,
+      <id>POWERVS_P10_FW_VER</id>
+      <default>77,88,0,
+               77,89,0,
+               77,90,0,
       </default>
     </attribute>
     <attribute>

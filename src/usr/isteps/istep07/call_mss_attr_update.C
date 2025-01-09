@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -772,7 +772,7 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 }
 
 /**
- * @brief Check the RAW_MTM and set PVR_82_MODE to OFF if appropriate
+ * @brief Check the FW Verion and set PVR_82_MODE to OFF if appropriate
  *
  * @param[in] pointer to the top-level target
  *
@@ -780,33 +780,32 @@ void check_scratch_regs_vs_attrs( IStepError & io_StepError )
 void check_PVR_82_MODE(Target *i_sys)
 {
 #ifndef CONFIG_FSP_BUILD
-    // HWSV code is responsible for setting the value on FSP systems since
-    // Hostboot doesn't have access to the MTM
+    // HWSV code is responsible for setting the value on FSP systems
 
-    // get the list of MTMs for the compare
-    ATTR_POWERVS_P10_MTM_type l_MTMArray = {0};
-    if (!i_sys->tryGetAttr<ATTR_POWERVS_P10_MTM>(l_MTMArray))
+    // get the list of FW_VERs for the compare
+    ATTR_POWERVS_P10_FW_VER_type l_fw_ver_array = {0};
+    if (!i_sys->tryGetAttr<ATTR_POWERVS_P10_FW_VER>(l_fw_ver_array))
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "check_PVR_82_MODE: ERROR: getAttr POWERVS_P10_MTM");
+                "check_PVR_82_MODE: ERROR: getAttr POWERVS_P10_FW_VER");
         return;
     }
-    const int l_MTMArray_size = sizeof(l_MTMArray) / 9; // MTMs are 9 bytes
+    const int l_fw_ver_array_size = sizeof(l_fw_ver_array) / 3; // FW_VERs are 3 bytes
 
-    // get the MTM of the machine to compare
-    ATTR_RAW_MTM_type l_rawMTM = {0};
-    if (!i_sys->tryGetAttr<ATTR_RAW_MTM>(l_rawMTM))
+    // get the FW VERSION of the machine to compare
+    ATTR_FW_RELEASE_VERSION_type l_fw_ver = {0};
+    if (!i_sys->tryGetAttr<ATTR_FW_RELEASE_VERSION>(l_fw_ver))
     {
         TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
-                "check_PVR_82_MODE: ERROR: getAttr ATTR_RAW_MTM");
+                "check_PVR_82_MODE: ERROR: getAttr ATTR_FW_RELEASE_VERSION");
         return;
     }
 
-    // if the machine MTM is in the list of MTMs, then set PVR_82_MODE to OFF
+    // if ATTR_FW_RELEASE_VERSION is in the list of FW_VERs, set PVR_82_MODE to OFF
     bool l_match{false};
-    for (int i=0; i<l_MTMArray_size; i++)
+    for (int i=0; i<l_fw_ver_array_size; i++)
     {
-        if (memcmp(l_MTMArray[i], l_rawMTM,8) == 0)
+        if (memcmp(l_fw_ver_array[i], l_fw_ver,2) == 0)
         {
             // if a match is found, turn off PVR_82_MODE
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
