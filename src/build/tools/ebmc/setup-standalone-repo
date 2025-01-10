@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2021,2024
+# Contributors Listed Below - COPYRIGHT 2021,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -103,6 +103,12 @@ function pull_pnor_xml ()
     file=pnorLayoutP10.xml
     echo "Getting the OP-BUILD PNOR defaultPnorLayout_64.xml to replace the STANDALONE $file to properly build patches for BMC"
     cp -v /afs/rchland/projects/esw/$pnor_release/Builds/$pnor_build/op-build/output/build/openpower-pnor-p11*/p11Layouts/defaultPnorLayout_64.xml $PROJECT_ROOT/src/build/buildpnor/$file
+    rc=$?
+    if [ ${rc} -ne 0 ]; then
+        return ${rc}
+    fi
+    # Commit the file changes to keep the users working tree clean and avoid user accidentally losing the changes.
+    git add $PROJECT_ROOT/src/build/buildpnor/$file && git commit -m "$file changes for $package_name"
     return $?
 }
 
