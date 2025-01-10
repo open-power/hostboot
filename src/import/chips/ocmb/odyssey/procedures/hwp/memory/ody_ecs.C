@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -51,20 +51,12 @@ extern "C"
     {
         FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_ecs: Entering...", TARGTID);
 
-        // Loops over OCMB chip targets that were defined in the associated config
-        for(const auto& l_port : mss::find_targets<fapi2::TARGET_TYPE_MEM_PORT>(i_target))
-        {
-            // Get vector of ranks
-            for (const auto& l_dimm : mss::find_targets<fapi2::TARGET_TYPE_DIMM>(l_port))
-            {
-                std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_vec_ranks;
-                FAPI_TRY(mss::rank::ranks_on_dimm<mss::mc_type::ODYSSEY>(l_dimm, l_vec_ranks));
+        std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_vec_ranks;
+        FAPI_TRY(mss::rank::ranks_on_mc<mss::mc_type::ODYSSEY>(i_target, l_vec_ranks));
 
-                // Run ECS test
-                FAPI_TRY( mss::ccs::ody::run_ecs(l_vec_ranks), TARGTIDFORMAT "Failed ody_ecs", TARGTID );
-            }
+        // Run ECS test
+        FAPI_TRY( mss::ccs::ody::run_ecs(l_vec_ranks), TARGTIDFORMAT "Failed ody_ecs", TARGTID );
 
-        }
 
         FAPI_INF_NO_SBE(TARGTIDFORMAT " ody_ecs: Exiting...", TARGTID);
 

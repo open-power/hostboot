@@ -835,7 +835,7 @@ static inline fapi2::ReturnCode execute_parallel_ports( const fapi2::Target<T>& 
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_INF_NO_SBE("Execution standalone CCS commands (%d) by running ports in parallel for " TARGTIDFORMAT,
+    FAPI_INF_NO_SBE("Executing standalone CCS commands (%d) by running selected ports for " TARGTIDFORMAT,
                     io_program.iv_instructions.size(),
                     TARGTID);
 
@@ -862,7 +862,7 @@ static inline fapi2::ReturnCode execute_parallel_ports( const fapi2::Target<T>& 
     }
 
     // Cleans up after executing the CCS program (runs workarounds if needed)
-    FAPI_TRY((cleanup_from_execute<MC>(i_target, io_program, l_periodics_reg, l_power_cntl_reg)));
+    FAPI_TRY((cleanup_from_execute<MC>(i_target, l_periodics_reg, l_power_cntl_reg)));
 
 fapi_try_exit:
     io_program.iv_instructions.clear();

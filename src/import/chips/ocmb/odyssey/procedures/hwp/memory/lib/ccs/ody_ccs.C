@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -787,7 +787,7 @@ fapi2::ReturnCode select_ports<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2
         return fapi2::FAPI2_RC_SUCCESS;
     }
 
-    FAPI_INF_NO_SBE(TARGTIDFORMAT " Selects the ports given in the vector to run in parallel", TARGTID);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " Selects the ports given in the vector and set the modeq accordingly", TARGTID);
     constexpr uint64_t PORT0_SHIFT = 2;
     fapi2::buffer<uint64_t> l_data;
     uint8_t l_port_value = 0b0000;
@@ -805,7 +805,7 @@ fapi2::ReturnCode select_ports<mss::mc_type::ODYSSEY>( const fapi2::Target<fapi2
     l_data.insertFromRight<TT::PORT_SEL, TT::PORT_SEL_LEN>(l_port_value);
     FAPI_TRY( mss::putScom(i_target, TT::MODEQ_REG, l_data) );
 
-    FAPI_INF_NO_SBE(TARGTIDFORMAT " MODEQ REG after port selections: 0x%016lx", TARGTID, l_data);
+    FAPI_INF_NO_SBE(TARGTIDFORMAT " MODEQ REG after port selections:  0x%016lx", TARGTID, l_data);
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:

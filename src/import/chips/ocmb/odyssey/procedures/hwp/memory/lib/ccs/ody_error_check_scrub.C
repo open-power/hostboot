@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -408,27 +408,36 @@ fapi_try_exit:
 
 ///
 /// @brief Setup to execute CCS
-/// @param[in] i_rank_info Rank info of the target
+/// @param[in] i_vec_rank_info vector of rank_infos for all ports on a single rank
 /// @param[in] i_srank the srank that needs to be executed
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode setup_to_execute_ecs(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode setup_to_execute_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_info,
                                        const uint8_t i_srank)
 {
+    if (i_vec_rank_info.empty())
+    {
+        FAPI_INF_NO_SBE("Vector of rank_infos is empty, exiting setup_to_execute_ecs()");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     fapi2::buffer<uint64_t> l_modeq_reg;
     fapi2::buffer<uint64_t> l_ref_overrun_reg_fir_mask;
 
-    // Get port rank and target
-    const auto& l_port_target = i_rank_info.get_port_target();
-
     // Get OCMB Target
-    const auto& l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
+    const auto& l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_vec_rank_info[0].get_port_target());
+    std::vector< fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT> > l_vec_ports;
+
+    for(const auto& l_rank_info : i_vec_rank_info)
+    {
+        l_vec_ports.push_back(l_rank_info.get_port_target());
+    }
 
     // Create Program
     mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
 
     // Setup the arrays with CCS instruction to perform ECS for the selected SRANK
-    FAPI_TRY(setup_arrays_with_ecs_instructions(i_rank_info, i_srank, l_program));
+    FAPI_TRY(setup_arrays_with_ecs_instructions(i_vec_rank_info[0], i_srank, l_program));
 
     FAPI_INF_NO_SBE(GENTARGTIDFORMAT " Deploying ecs using standalone CCS", GENTARGTID(l_ocmb_target));
 
@@ -448,8 +457,9 @@ fapi2::ReturnCode setup_to_execute_ecs(const mss::rank::info<mss::mc_type::ODYSS
     l_program.iv_poll.iv_delay = uint64_t(30) * mss::common_timings::DELAY_1S;
     // Set the poll count to be 60
     l_program.iv_poll.iv_poll_count = 60;
-    // Run CCS execution
-    FAPI_TRY( mss::ccs::execute<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target) );
+
+    // Run CCS execution for single and multiple ports
+    FAPI_TRY( mss::ccs::execute_parallel_ports<mss::mc_type::ODYSSEY>(l_ocmb_target, l_vec_ports, l_program) );
 
     // Revert CCS regs after execution
     FAPI_TRY( mss::ccs::revert_config_regs<mss::mc_type::ODYSSEY>(l_ocmb_target, l_modeq_reg) );
@@ -464,49 +474,60 @@ fapi_try_exit:
 
 ///
 /// @brief esets the error counters and initialize
-/// @param[in] i_rank_info Rank info of the target
+/// @param[in] i_rank_info  vector of rank infos for all ports on a single rank
 /// @param[in] i_srank the srank that needs to be executed
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode reset_error_counters(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode reset_error_counters(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_info,
                                        const uint8_t i_srank)
 {
+    // Exit if the vector is empty
+    if (i_vec_rank_info.empty())
+    {
+        FAPI_INF_NO_SBE("Vector of rank_infos is empty, exiting reset_error_counters() run");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     // Constant to help with readability
     constexpr bool STATIC = false;
-    const auto& l_port_target = i_rank_info.get_port_target();
-    const auto& l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
 
-    uint8_t l_mr14_value0 = 0xe0;
-    uint8_t l_mr14_value1 = 0xa0;
+    // tMRD value is taken from Table 20 of JEDEC spec revision JESD79-5B_v1.20
+    const uint64_t tMRD = 34;
 
-    // The ECC Transparency and Error Scrub counters are
-    // set to zero and the internal ECS Address Counters are
-    // initialized either by a RESET or by manually writing a 1 to MR14 OP[6].
-    // Resets counters (MR16-20) and initialize:
-    // Manual ECS mode enable: MR14 OP[7] set to 1 for Manual ECS mode
-    //                         MR14 OP[6] set to 1 then 0
-    // Row vs Code word count: MR14 OP[5] set to 1 for Code word
-    // (use Code Word for finer granularity of counts)
-    //             [CID/SRANK]
-    // 7  6  5  4  3  2  1  0
-    // 1  1  1  0  0  0  0  0 (0xE0)
-    // 1  0  1  0  0  0  0  0 (0xA0)
-    // MR OP are in reversed order so we need to reverse the CID bits
+    for (const auto& l_rank_info : i_vec_rank_info)
+    {
+        const auto& l_port_target = l_rank_info.get_port_target();
+        const auto& l_ocmb_target = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
 
-    l_mr14_value0 |= i_srank;
-    l_mr14_value1 |= i_srank;
+        uint8_t l_mr14_value0 = 0xe0;
+        uint8_t l_mr14_value1 = 0xa0;
 
-    const auto& l_port_rank = i_rank_info.get_port_rank();
-    mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
+        // The ECC Transparency and Error Scrub counters are
+        // set to zero and the internal ECS Address Counters are
+        // initialized either by a RESET or by manually writing a 1 to MR14 OP[6].
+        // Resets counters (MR16-20) and initialize:
+        // Manual ECS mode enable: MR14 OP[7] set to 1 for Manual ECS mode
+        //                         MR14 OP[6] set to 1 then 0
+        // Row vs Code word count: MR14 OP[5] set to 1 for Code word
+        // (use Code Word for finer granularity of counts)
+        //             [CID/SRANK]
+        // 7  6  5  4  3  2  1  0
+        // 1  1  1  0  0  0  0  0 (0xE0)
+        // 1  0  1  0  0  0  0  0 (0xA0)
+        // MR OP are in reversed order so we need to reverse the CID bits
 
-    l_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
-                                        (l_port_rank, MR14_ECC_CONFIG, l_mr14_value0));
-    FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target, STATIC));
+        l_mr14_value0 |= i_srank;
+        l_mr14_value1 |= i_srank;
 
-    l_program.iv_instructions.clear();
-    l_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
-                                        (l_port_rank, MR14_ECC_CONFIG, l_mr14_value1));
-    FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target, STATIC));
+        const auto& l_port_rank = l_rank_info.get_port_rank();
+        mss::ccs::program<mss::mc_type::ODYSSEY> l_program;
+
+        l_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
+                                            (l_port_rank, MR14_ECC_CONFIG, l_mr14_value0, tMRD));
+        l_program.iv_instructions.push_back(mss::ccs::ddr5::mrw_command<mss::mc_type::ODYSSEY>
+                                            (l_port_rank, MR14_ECC_CONFIG, l_mr14_value1, tMRD));
+        FAPI_TRY(mss::ccs::setup_execute_restore<mss::mc_type::ODYSSEY>(l_ocmb_target, l_program, l_port_target, STATIC));
+    }
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -601,7 +622,7 @@ fapi_try_exit:
 
 ///
 /// @brief Initialize the memory on a specific srank with a specific data pattern
-/// @param[in] i_target OCMB Chip
+/// @param[in] i_rank_info - rank_info for a single port on a single rank
 /// @param[in] i_srank the srank to initialize
 /// @param[in] i_pattern mcbist pattern
 /// @param[out] o_ecc_data output buffer to get the original ecc reg value
@@ -637,7 +658,7 @@ fapi_try_exit:
 
 ///
 /// @brief Reads the MR registers
-/// @param[in] i_port_rank the port rank
+/// @param[in] i_rank_info the rank info
 /// @param[in] i_mrs the specific MRS
 /// @param[out] o_data array of mr values per dram
 /// @return FAPI2_RC_SUCCESS iff successful
@@ -681,24 +702,30 @@ fapi_try_exit:
 
 ///
 /// @brief Run the workaround for Hynix DIMMS
-/// @param[in] i_rank_info rank info
+/// @param[in] i_vec_rank_infos vector of rank infos for all ports on a single rank
 /// @param[in] i_srank the srank that currently being executed
 /// @param[in] i_pattern data pattern to test
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode run_hynix_workaround(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode run_hynix_workaround(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_infos,
                                        const uint8_t i_srank,
                                        const uint64_t i_pattern)
 {
 
+    if (i_vec_rank_infos.empty())
+    {
+        FAPI_INF_NO_SBE("Vector of rank_infos is empty, exiting run_hynix_workaround()");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
     uint16_t l_dram_mfg_id = 0;
     fapi2::buffer<uint64_t> l_ecc_reg_data;
     fapi2::buffer<uint64_t> l_periodic_calib_data;
-    const auto& l_port = i_rank_info.get_port_target();
+    const auto& l_port = i_vec_rank_infos[0].get_port_target();
     const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
 
     // Get the dram mfg id
-    FAPI_TRY( mss::attr::get_dram_mfg_id(i_rank_info.get_dimm_target(), l_dram_mfg_id));
+    FAPI_TRY( mss::attr::get_dram_mfg_id(i_vec_rank_infos[0].get_dimm_target(), l_dram_mfg_id));
 
     // Workaround for Hynx fails, run an extra pattern
     // to get a clean MR20 for the later patterns
@@ -709,18 +736,18 @@ fapi2::ReturnCode run_hynix_workaround(const mss::rank::info<mss::mc_type::ODYSS
                         GENTARGTIDFORMAT
                         ", mrank: %u, srank: %u for pattern: %u",
                         GENTARGTID(l_port),
-                        i_rank_info.get_port_rank(), i_srank, i_pattern);
+                        i_vec_rank_infos[0].get_port_rank(), i_srank, i_pattern);
         // Do mem init for each srank
-        FAPI_TRY(memory_init_via_memdiags(i_rank_info, i_srank, mss::mcbist::PATTERN_0, l_ecc_reg_data));
+        FAPI_TRY(memory_init_via_memdiags(i_vec_rank_infos[0], i_srank, mss::mcbist::PATTERN_0, l_ecc_reg_data));
 
         // Disable periodic calibration
         FAPI_TRY(disable_periodic_cal(l_ocmb, l_periodic_calib_data));
 
         // Setup the ecs to execute
-        FAPI_TRY(setup_to_execute_ecs(i_rank_info, i_srank));
+        FAPI_TRY(setup_to_execute_ecs(i_vec_rank_infos, i_srank));
 
         // Reset the error counters MR16-MR20 for the next run
-        FAPI_TRY(reset_error_counters(i_rank_info, i_srank));
+        FAPI_TRY(reset_error_counters(i_vec_rank_infos, i_srank));
 
         // Enable periodic calibration and ecc mode
         FAPI_TRY(enable_periodic_cal_ecc_modes(l_ocmb, l_ecc_reg_data, l_periodic_calib_data));
@@ -728,8 +755,8 @@ fapi2::ReturnCode run_hynix_workaround(const mss::rank::info<mss::mc_type::ODYSS
         FAPI_INF_NO_SBE("Ending workaround for Hynix dimms running on port:  "
                         GENTARGTIDFORMAT
                         ", mrank: %u, srank: %u for pattern: %u",
-                        GENTARGTID(l_port),
-                        i_rank_info.get_port_rank(), i_srank, i_pattern);
+                        GENTARGTID(l_ocmb),
+                        i_vec_rank_infos[0].get_port_rank(), i_srank, i_pattern);
     }
 
 fapi_try_exit:
@@ -739,22 +766,25 @@ fapi_try_exit:
 
 ///
 /// @brief Run the ecs test
-/// @param[in] i_rank_info rank info
+/// @param[in] i_vec_ranks vector of rank infos
 /// @param[in] i_pattern data pattern to test
 /// @param[out] o_mr20_arr array to keep the mr20 data
 /// @param[out] o_mr16_19_arr array to keep the mr16-19 data
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode run_ecs_helper(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode run_ecs_helper(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks,
                                  const uint64_t i_pattern,
-                                 uint8_t (&o_mr20_arr)[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4],
-                                 uint32_t (&o_mr16_19_arr)[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4])
+                                 uint8_t (&o_mr20_arr)[mss::ody::MAX_PORT_PER_OCMB][mss::ody::HW_MAX_MRANK_PER_PORT][mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4],
+                                 uint32_t (
+                                     &o_mr16_19_arr)[mss::ody::MAX_PORT_PER_OCMB][mss::ody::HW_MAX_MRANK_PER_PORT][mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4])
 {
+    // Exit if the vector is empty
+    if (i_vec_ranks.empty())
+    {
+        FAPI_INF_NO_SBE("Vector of rank_infos is empty, exiting ECS run");
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
 
-    // Since we pass in the vector of ranks now we need to have a
-    // loop over the vector of rank_info and do  the rest in a for loop
-    const auto& l_port = i_rank_info.get_port_target();
-    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(l_port);
     uint8_t l_dram_splits[mss::ody::ODY_NUM_DRAM_X4] = {};
     fapi2::buffer<uint64_t> l_ecc_reg_data;
     fapi2::buffer<uint64_t> l_periodic_calib_data;
@@ -766,10 +796,14 @@ fapi2::ReturnCode run_ecs_helper(const mss::rank::info<mss::mc_type::ODYSSEY>& i
     uint8_t l_logical_ranks = 0;
     uint8_t l_num_sranks = 1;
 
+
+    const auto& l_ocmb = mss::find_target<fapi2::TARGET_TYPE_OCMB_CHIP>(i_vec_ranks[0].get_port_target());
+
+    // Assuming that the configuration is the same between ports, we are using rank_info from index 0
     // Get the logical ranks
-    FAPI_TRY( mss::attr::get_logical_ranks_per_dimm(i_rank_info.get_dimm_target(), l_logical_ranks) );
+    FAPI_TRY( mss::attr::get_logical_ranks_per_dimm(i_vec_ranks[0].get_dimm_target(), l_logical_ranks) );
     // Get the master ranks
-    FAPI_TRY( mss::attr::get_num_master_ranks_per_dimm(i_rank_info.get_dimm_target(), l_mranks) );
+    FAPI_TRY( mss::attr::get_num_master_ranks_per_dimm(i_vec_ranks[0].get_dimm_target(), l_mranks) );
 
     // Get the number of CID
     if(l_mranks != 0)
@@ -777,82 +811,114 @@ fapi2::ReturnCode run_ecs_helper(const mss::rank::info<mss::mc_type::ODYSSEY>& i
         l_num_sranks = l_logical_ranks / l_mranks;
     }
 
-    // Run this for each SRANK
-    for(uint8_t l_srank = 0; l_srank < l_num_sranks; l_srank++)
+    for(uint8_t l_mrank_idx = 0; l_mrank_idx < l_mranks; l_mrank_idx++)
     {
-        // Workaround for HYNIX DIMM
-        FAPI_TRY(run_hynix_workaround(i_rank_info, l_srank, i_pattern));
+        std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_selected_ranks;
 
-        // Do mem init for each srank
-        FAPI_TRY(memory_init_via_memdiags(i_rank_info, l_srank, i_pattern, l_ecc_reg_data));
+        // TODO: MSWT-334 Part(b) Remove this for AFTER both ranks at a time is added in.
+        // Loop over all the ranks and filter rank infos in to another vector
+        // that user selected so we run only the ones the user selected
+        for(const auto& l_rank_info : i_vec_ranks)
+        {
+            // Check if the current rank_info is the one user selected
+            if(l_rank_info.get_port_rank() == l_mrank_idx)
+            {
+                // Push that rank_info into a vector
+                l_selected_ranks.push_back(l_rank_info);
+            }
+        }
 
-        // Disable periodic calibration
-        FAPI_TRY(disable_periodic_cal(l_ocmb, l_periodic_calib_data));
+        // TODO: MSWT-334 Part(b) Remove this for AFTER the both ranks at a time is added in
+        // No matches so this wasn't selected.
+        if(l_selected_ranks.empty())
+        {
+            continue;
+        }
 
-        // Setup the ecs to execute
-        FAPI_TRY(setup_to_execute_ecs(i_rank_info, l_srank));
+        // Run this for each SRANK for the rank info that the user selected
+        for(uint8_t l_srank = 0; l_srank < l_num_sranks; l_srank++)
+        {
+            // Workaround for HYNIX DIMM
+            FAPI_TRY(run_hynix_workaround(l_selected_ranks, l_srank, i_pattern));
 
-        // Collect the mr error info into arrays
-        FAPI_TRY(read_mr_error_regs(i_rank_info, MR20_ERROR_COUNT, l_dram_splits));
-        memcpy(&o_mr20_arr[l_srank][0], &l_dram_splits[0], sizeof(o_mr20_arr[l_srank]));
+            // Do mem init for each srank
+            FAPI_TRY(memory_init_via_memdiags(l_selected_ranks[0], l_srank, i_pattern, l_ecc_reg_data));
+
+            // Disable periodic calibration
+            FAPI_TRY(disable_periodic_cal(l_ocmb, l_periodic_calib_data));
+
+            // Setup the ecs to execute
+            FAPI_TRY(setup_to_execute_ecs(l_selected_ranks, l_srank));
+
+            // Collect the mr error info into arrays from the user selected rank infos only
+            // Looping through user selected ranks
+            for (const auto& l_sel_rank_info : l_selected_ranks)
+            {
+                const auto& l_port_target = l_sel_rank_info.get_port_target();
+                const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
+
+                FAPI_INF_NO_SBE(GENTARGTIDFORMAT " In run_ecs_helper(): l_rel_pos: %d", GENTARGTID(l_port_target), l_rel_pos);
+                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR20_ERROR_COUNT, l_dram_splits));
+                memcpy(&o_mr20_arr[l_rel_pos][l_mrank_idx][l_srank][0], &l_dram_splits[0],
+                       sizeof(o_mr20_arr[l_rel_pos][l_mrank_idx][l_srank]));
 
 #ifndef __HOSTBOOT_MODULE
 
-        for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-        {
-            FAPI_INF_NO_SBE("Error count from MR20 in port: " GENTARGTIDFORMAT
-                            ", mrank: %u, srank: %d, DRAM %d, OPCODE: 0x%02x for pattern:%u",
-                            GENTARGTID(l_port),
-                            i_rank_info.get_port_rank(), l_srank, l_dram, l_dram_splits[l_dram], i_pattern);
-        }
+                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+                {
+                    FAPI_INF_NO_SBE("Error count from MR20 in port: " GENTARGTIDFORMAT
+                                    ", mrank: %u, srank: %d, DRAM %d, OPCODE: 0x%02x for pattern:%u",
+                                    GENTARGTID(l_port_target),
+                                    l_sel_rank_info.get_port_rank(), l_srank, l_dram, l_dram_splits[l_dram], i_pattern);
+                }
 
 #endif
+                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR16_ERROR_COUNT, l_dram_splits));
 
-        FAPI_TRY(read_mr_error_regs(i_rank_info, MR16_ERROR_COUNT, l_dram_splits));
+                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+                {
+                    // Each element in this array is concatenation of MR16171819
+                    // [MR16MR17MR18MR19, MR16MR17MR18MR19 ......]
+                    // Shifting the MR data to the correct position in a 32 byte value
+                    o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 24;
+                    FAPI_DBG("Added MR16:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
+                             o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
+                }
 
-        for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-        {
-            // Each element in this array is concatenation of MR16171819
-            // [MR16MR17MR18MR19, MR16MR17MR18MR19 ......]
-            // Shifting the MR data to the correct position in a 32 byte value
-            o_mr16_19_arr[l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 24;
-            FAPI_DBG("Added MR16:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
-                     o_mr16_19_arr[l_srank][l_dram]);
-        }
+                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR17_ERROR_COUNT, l_dram_splits));
 
-        FAPI_TRY(read_mr_error_regs(i_rank_info, MR17_ERROR_COUNT, l_dram_splits));
+                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+                {
+                    o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 16;
+                    FAPI_DBG("Added MR17:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
+                             o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
+                }
 
-        for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-        {
-            o_mr16_19_arr[l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 16;
-            FAPI_DBG("Added MR17:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
-                     o_mr16_19_arr[l_srank][l_dram]);
-        }
+                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR18_ERROR_COUNT, l_dram_splits));
 
-        FAPI_TRY(read_mr_error_regs(i_rank_info, MR18_ERROR_COUNT, l_dram_splits));
+                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+                {
+                    o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 8;
+                    FAPI_DBG("Added MR18:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
+                             o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
+                }
 
-        for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-        {
-            o_mr16_19_arr[l_srank][l_dram] |= static_cast<uint32_t>(l_dram_splits[l_dram]) << 8;
-            FAPI_DBG("Added MR18:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
-                     o_mr16_19_arr[l_srank][l_dram]);
-        }
+                FAPI_TRY(read_mr_error_regs(l_sel_rank_info, MR19_ERROR_COUNT, l_dram_splits));
 
-        FAPI_TRY(read_mr_error_regs(i_rank_info, MR19_ERROR_COUNT, l_dram_splits));
+                for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
+                {
+                    o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram] |= l_dram_splits[l_dram];
+                    FAPI_DBG("Added MR19:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
+                             o_mr16_19_arr[l_rel_pos][l_mrank_idx][l_srank][l_dram]);
+                }
+            } // end of rank_info vector
 
-        for (uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++)
-        {
-            o_mr16_19_arr[l_srank][l_dram] |= l_dram_splits[l_dram];
-            FAPI_DBG("Added MR19:0x%02x: to the array 0x%016lx", l_dram_splits[l_dram],
-                     o_mr16_19_arr[l_srank][l_dram]);
-        }
-
-        // Reset the error counters MR16-MR20 for the next run
-        FAPI_TRY(reset_error_counters(i_rank_info, l_srank));
-
-        // Enable periodic calibration and ecc mode
-        FAPI_TRY(enable_periodic_cal_ecc_modes(l_ocmb, l_ecc_reg_data, l_periodic_calib_data));
-    }
+            // Reset the error counters MR16-MR20 for the next run
+            FAPI_TRY(reset_error_counters(l_selected_ranks, l_srank));
+            // Enable periodic calibration and ecc mode
+            FAPI_TRY(enable_periodic_cal_ecc_modes(l_ocmb, l_ecc_reg_data, l_periodic_calib_data));
+        } // end of l_srank
+    } // end of l_mrank loop
 
 fapi_try_exit:
     return fapi2::current_err;
@@ -860,7 +926,7 @@ fapi_try_exit:
 
 ///
 /// @brief Run the ecs test
-/// @param[in] i_vec_rank vector of ranks
+/// @param[in] i_vec_rank vector of rank infos
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode run_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks)
@@ -868,31 +934,39 @@ fapi2::ReturnCode run_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSE
     uint8_t l_ecs_threshold = 0;
     bool l_errors_over_threshold = false;
 
+    // Arrays to populate MR20 data per MRANK per SRANK per DRAM
+    uint8_t l_mr20_arr_pat0[mss::ody::MAX_PORT_PER_OCMB][mss::ody::HW_MAX_MRANK_PER_PORT][mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4]
+        = {};
+    uint8_t l_mr20_arr_pat1[mss::ody::MAX_PORT_PER_OCMB][mss::ody::HW_MAX_MRANK_PER_PORT][mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4]
+        = {};
+    // Arrays to populate MR16, MR17, MR18, MR19 data per MRANK per SRANK per DRAM
+    // Each element in this array is like the following:
+    //           DRAM0             DRAM1            ......... DRAM19
+    //             |                 |
+    //             V                 V
+    // SRANK0 ->[MR16MR17MR18MR19, MR16MR17MR18MR19 ................]
+    // SRANK1 ->[MR16MR17MR18MR19, MR16MR17MR18MR19 ................]
+
+    uint32_t l_mr16_19_arr_pat0[mss::ody::MAX_PORT_PER_OCMB][mss::ody::HW_MAX_MRANK_PER_PORT][mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4]
+        = {};
+    uint32_t l_mr16_19_arr_pat1[mss::ody::MAX_PORT_PER_OCMB][mss::ody::HW_MAX_MRANK_PER_PORT][mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4]
+        = {};
+
     // Get the threshold value
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ECS_ERROR_COUNT_THRESHOLD, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                             l_ecs_threshold) );
 
-    for (const auto& l_rank_info : i_vec_ranks)
+    // Run ecs with pattern0 memory initialization
+    FAPI_TRY(run_ecs_helper(i_vec_ranks, mss::mcbist::PATTERN_0, l_mr20_arr_pat0, l_mr16_19_arr_pat0));
+
+    // Run ecs with pattern1 initialization
+    FAPI_TRY(run_ecs_helper(i_vec_ranks, mss::mcbist::PATTERN_1, l_mr20_arr_pat1, l_mr16_19_arr_pat1));
+
+    for(const auto& l_rank_info : i_vec_ranks)
     {
-        // Arrays to populate MR20 data per MRANK per SRANK per DRAM
-        uint8_t l_mr20_arr_pat0[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4] = {};
-        uint8_t l_mr20_arr_pat1[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4] = {};
-        // Arrays to populate MR16, MR17, MR18, MR19 data per MRANK per SRANK per DRAM
-        // Each element in this array is like the following:
-        //           DRAM0             DRAM1            ......... DRAM19
-        //             |                 |
-        //             V                 V
-        // SRANK0 ->[MR16MR17MR18MR19, MR16MR17MR18MR19 ................]
-        // SRANK1 ->[MR16MR17MR18MR19, MR16MR17MR18MR19 ................]
-
-        uint32_t l_mr16_19_arr_pat0[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4] = {};
-        uint32_t l_mr16_19_arr_pat1[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4] = {};
-
-        // Run ecs with pattern0 memory initialization
-        FAPI_TRY(run_ecs_helper(l_rank_info, mss::mcbist::PATTERN_0, l_mr20_arr_pat0, l_mr16_19_arr_pat0));
-
-        // Run ecs with pattern1 initialzation
-        FAPI_TRY(run_ecs_helper(l_rank_info, mss::mcbist::PATTERN_1, l_mr20_arr_pat1, l_mr16_19_arr_pat1));
+        const auto& l_port_target = l_rank_info.get_port_target();
+        const uint8_t l_mrank = l_rank_info.get_port_rank();
+        const uint8_t l_rel_pos = mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_port_target);
 
         // Check for threshold here for MR20 for pattern 0, pattern 1
         for(uint8_t l_srank_id = 0; l_srank_id < mss::ody::MAX_SRANKS; l_srank_id++)
@@ -900,9 +974,9 @@ fapi2::ReturnCode run_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSE
             // Go through all the MR20 values for each DRAM
             for(uint8_t l_dram = 0; l_dram < mss::ody::ODY_NUM_DRAM_X4; l_dram++ )
             {
-                // Check the if we are abve the threshold
-                if(l_mr20_arr_pat0[l_srank_id][l_dram] > l_ecs_threshold ||
-                   l_mr20_arr_pat1[l_srank_id][l_dram] > l_ecs_threshold)
+                // Check the if we are above the threshold
+                if(l_mr20_arr_pat0[l_rel_pos][l_mrank][l_srank_id][l_dram] > l_ecs_threshold ||
+                   l_mr20_arr_pat1[l_rel_pos][l_mrank][l_srank_id][l_dram] > l_ecs_threshold)
                 {
                     // Flag an error if we are above the threshold
                     l_errors_over_threshold = true;
@@ -912,9 +986,9 @@ fapi2::ReturnCode run_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSE
 
         FAPI_ASSERT_NOEXIT(!(l_errors_over_threshold),
                            fapi2::ODY_ECS_FAIL()
-                           .set_PORT_TARGET(l_rank_info.get_port_target())
+                           .set_PORT_TARGET(l_port_target)
                            .set_THRESHOLD(l_ecs_threshold)
-                           .set_MRANK(l_rank_info.get_port_rank())
+                           .set_MRANK(l_mrank)
                            .set_MR20_PAT0((void*)l_mr20_arr_pat0)
                            .set_MR20_PAT0_SIZE(sizeof(l_mr20_arr_pat0))
                            .set_MR16_TO_19_PAT0((void*)l_mr16_19_arr_pat0)
@@ -924,7 +998,7 @@ fapi2::ReturnCode run_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSE
                            .set_MR16_TO_19_PAT1((void*)l_mr16_19_arr_pat1)
                            .set_MR16_TO_19_PAT1_SIZE(sizeof(l_mr16_19_arr_pat1)),
                            "Error counts MR20 and MR16 to MR19 in port: " GENTARGTIDFORMAT " ecs_threshold: %d",
-                           GENTARGTID(l_rank_info.get_port_target()), l_ecs_threshold);
+                           GENTARGTID(l_port_target), l_ecs_threshold);
 
         // Reset the current error is needed here
         // As long the errors saved in the arrays this function can pass a FAPI2_RC_SUCCESS

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,21 +99,21 @@ fapi2::ReturnCode clear_and_restore_refresh_overrun(
 
 ///
 /// @brief Setup the CCS instructions for performing ECS test
-/// @param[in] i_rank_info Rank info of the target
+/// @param[in] i_vec_rank_info vector of rank_infos for all ports on a single rank
 /// @param[in] i_srank the srank that needs to be executed
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode setup_to_execute_ecs(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode setup_to_execute_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_info,
                                        const uint8_t i_srank);
 
 
 ///
 /// @brief Resets the error counters and initialize
-/// @param[in] i_rank_info Rank info of the target
+/// @param[in] i_rank_info vector of rank infos for all ports on a single rank
 /// @param[in] i_srank the srank that needs to be executed
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode reset_error_counters(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode reset_error_counters(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_info,
                                        const uint8_t i_srank);
 
 
@@ -151,7 +151,7 @@ fapi2::ReturnCode enable_periodic_cal_ecc_modes(const fapi2::Target<fapi2::TARGE
 
 ///
 /// @brief Initialize the memory on a specific srank with a specific data pattern
-/// @param[in] i_target OCMB Chip
+/// @param[in] i_rank_info - rank_info for a single port on a single rank
 /// @param[in] i_srank the srank to initialize
 /// @param[in] i_pattern mcbist pattern
 /// @param[out] o_ecc_data output buffer to get the original ecc reg value
@@ -176,24 +176,24 @@ fapi2::ReturnCode read_mr_error_regs(const mss::rank::info<mss::mc_type::ODYSSEY
 
 ///
 /// @brief Run the workaround for Hynix DIMMS
-/// @param[in] i_rank_info rank info
+/// @param[in] i_vec_rank_infos vector of rank infos for allports on a single rank
 /// @param[in] i_srank the srank that currently being executed
 /// @param[in] i_pattern data pattern to test
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode run_hynix_workaround(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode run_hynix_workaround(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_rank_infos,
                                        const uint8_t i_srank,
                                        const uint64_t i_pattern);
 
 ///
 /// @brief Run the ecs test
-/// @param[in] i_rank_info rank info
+/// @param[in] i_rank_info vector of rank info
 /// @param[in] i_pattern data pattern to test
 /// @param[out] o_mr20_arr array to keep the mr20 data
 /// @param[out] o_mr16_19_arr array to keep the mr16-19 data
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
-fapi2::ReturnCode run_ecs_helper(const mss::rank::info<mss::mc_type::ODYSSEY>& i_rank_info,
+fapi2::ReturnCode run_ecs_helper(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_rank_info,
                                  const uint64_t i_pattern,
                                  uint8_t (&o_mr20_arr)[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4],
                                  uint32_t (&o_mr16_19_arr)[mss::ody::MAX_SRANKS][mss::ody::ODY_NUM_DRAM_X4]);
@@ -201,7 +201,7 @@ fapi2::ReturnCode run_ecs_helper(const mss::rank::info<mss::mc_type::ODYSSEY>& i
 
 ///
 /// @brief Run the ecs test
-/// @param[in] i_vec_ranks vector of ranks
+/// @param[in] i_vec_ranks vector of rank infos
 /// @return FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode run_ecs(const std::vector<mss::rank::info<mss::mc_type::ODYSSEY>>& i_vec_ranks);
