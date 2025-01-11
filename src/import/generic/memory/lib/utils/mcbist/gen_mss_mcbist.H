@@ -2364,8 +2364,8 @@ class program
                         fapi2::buffer<uint64_t> l_data;
                         FAPI_TRY(fapi2::getScom(i_target, TT::MCBPARMQ_REG, l_data));
 
-                        get_current_min_cmd_gap(l_data);
-                        get_current_min_gap_timebase(l_data);
+                        read_current_min_cmd_gap(l_data);
+                        read_current_min_gap_timebase(l_data);
 
                         return fapi2::FAPI2_RC_SUCCESS;
                     }
@@ -2423,11 +2423,22 @@ class program
         }
 
         ///
+        /// @brief Get the mcbist min command gap
+        /// @return the current mcbist gap value
+        ///
+        inline uint64_t get_min_cmd_gap()
+        {
+            uint64_t l_current_min_cmd_gap = 0;
+            iv_parameters.extractToRight<TT::MIN_CMD_GAP, TT::MIN_CMD_GAP_LEN>(l_current_min_cmd_gap);
+            return l_current_min_cmd_gap;
+        }
+
+        ///
         /// @brief Get the current mcbist min command gap and set in iv_parameters
         /// @param[in] i_data the data from the MCBIST parameter register
         /// @return void
         ///
-        inline void get_current_min_cmd_gap( const fapi2::buffer<uint64_t>& i_data )
+        inline void read_current_min_cmd_gap( const fapi2::buffer<uint64_t>& i_data )
         {
             i_data.extract<TT::MIN_CMD_GAP, TT::MIN_CMD_GAP_LEN, TT::MIN_CMD_GAP>(iv_parameters);
             return;
@@ -2451,10 +2462,19 @@ class program
         /// @param[in] i_data the data from the MCBIST parameter register
         /// @return void
         ///
-        inline void get_current_min_gap_timebase( const fapi2::buffer<uint64_t>& i_data )
+        inline void read_current_min_gap_timebase( const fapi2::buffer<uint64_t>& i_data )
         {
             iv_parameters.writeBit<TT::MIN_GAP_TIMEBASE>(i_data.getBit<TT::MIN_GAP_TIMEBASE>());
             return;
+        }
+
+        ///
+        /// @brief Get the current mcbist gap timebase
+        /// @return the current mcbist gap timebase value
+        ///
+        inline bool get_min_gap_timebase()
+        {
+            return iv_parameters.getBit<TT::MIN_GAP_TIMEBASE>();
         }
 
         ///
