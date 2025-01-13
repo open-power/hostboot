@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -1855,7 +1855,6 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target,
     {
         {TYPE_CORE, MboxScratch1_t::REG_IDX, 0, 31},
         {TYPE_PEC, MboxScratch2_t::REG_IDX, 0, 1},
-        {TYPE_NMMU, MboxScratch2_t::REG_IDX, 2, 2},
         {TYPE_MC, MboxScratch2_t::REG_IDX, 4, 7},
         {TYPE_PAUC, MboxScratch2_t::REG_IDX, 8, 11},
         {TYPE_PAU, MboxScratch2_t::REG_IDX, 12, 19},
@@ -1900,24 +1899,10 @@ errlHndl_t HWASPlatVerification::verifyDeconfiguration(Target* i_target,
                     continue;
                 }
 
-                // see src/include/usr/initservice/mboxRegs.H, MboxScratch2_t
-                // There's a gard bit only for NMMU with CHIP_UNIT value
-                // of 1, therefore CHIP_UNIT value of 0 is ignored
-                if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 0)
-                {
-                    continue;
-                }
 
                 // Calculating the offset at which this l_chiplet's gard data is
                 // written in the scratch register
                 uint32_t l_chipUnitOffset = l_chipUnit + l_unitTypeOffset.startBitPosition;
-
-                if (l_unitTypeOffset.type == TYPE_NMMU && l_chipUnit == 1)
-                {
-                    // Value for TYPE_NMMU with l_chipUnit equal to 1 does not
-                    // use l_chipUnit to calculate offset
-                    l_chipUnitOffset = l_unitTypeOffset.startBitPosition;
-                }
 
                 if (l_chipUnitOffset > l_unitTypeOffset.endBitPosition)
                 {
