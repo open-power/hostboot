@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -5146,6 +5146,8 @@ errlHndl_t i2cProcessActiveMasters ( i2cProcessType      i_processType,
         int l_childsts    = 0;
         void *l_childrc = NULL;
         task_wait_tid( l_pWorkData->tid, &l_childsts, &l_childrc );
+        assert( l_childsts == TASK_STATUS_EXITED_CLEAN,
+                "i2cProcessActiveMasters worker thread crashed" );
 
         //free worker data allocated in main loop
         free(l_pWorkData);
