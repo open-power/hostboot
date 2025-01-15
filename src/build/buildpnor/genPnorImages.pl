@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2016,2024
+# Contributors Listed Below - COPYRIGHT 2016,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -651,8 +651,7 @@ sub manipulateImage
 
     # Sections that have secureboot support. Secureboot still must be
     # enabled for secureboot actions on these partitions to occur.
-    my $isNormalSecure = ($eyeCatch eq "HBBL");
-    $isNormalSecure ||= ($eyeCatch eq "PAYLOAD");
+    my $isNormalSecure ||= ($eyeCatch eq "PAYLOAD");
     $isNormalSecure ||= ($eyeCatch eq "OCC");
     $isNormalSecure ||= ($eyeCatch eq "CAPP");
     $isNormalSecure ||= ($eyeCatch eq "BOOTKERNEL");
@@ -672,6 +671,7 @@ sub manipulateImage
     $isSpecialSecure ||= ($eyeCatch eq "HCODE");
     $isSpecialSecure ||= ($eyeCatch eq "MEMD");
     $isSpecialSecure ||= ($eyeCatch eq "OCMBFW");
+    $isSpecialSecure ||= ($eyeCatch eq "HBBL");
 
     if($ENV{'HOSTBOOT_PROFILE'})
     {
@@ -799,19 +799,14 @@ sub manipulateImage
             # HBBL + ROM combination
             if ($eyeCatch eq "HBBL")
             {
-                # Ensure the HBBL partition isn't too large
+                # Ensure the HBBL data section (ie, not including headers)
+                # isn't too large
                 my $hbblRawSize = (-s $bin_file or die "Cannot get size of file $bin_file");
                 print "HBBL raw size ($bin_file) (no padding/ecc) = $hbblRawSize/$MAX_HBBL_SIZE\n";
                 if ($hbblRawSize > $MAX_HBBL_SIZE)
                 {
                     die "HBBL raw size is too large";
                 }
-
-                # Pad HBBL to max size before Header Phase
-                run_command("cp $bin_file $tempImages{TEMP_BIN}");
-                run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
-                run_command("cp $bin_file $tempImages{TEMP_BIN_V3}");
-                run_command("dd if=$tempImages{TEMP_BIN_V3} of=$bin_file ibs=$MAX_HBBL_SIZE conv=sync");
             }
 
             # Header Phase
@@ -926,6 +921,42 @@ sub manipulateImage
                                     . "--out $tempImages{PROTECTED_PAYLOAD_V3}");
 
                         run_command("cat $tempImages{PROTECTED_PAYLOAD_V3} $bin_file.unprotected > $tempImages{HDR_PHASE_V3}");
+                    }
+                    # Handle HBBL payload
+                    elsif ($eyeCatch eq "HBBL")
+                    {
+                        # The HBBL does not have a Hash Page Table, but needs to
+                        # have the V3 Header added as an "unprotected" section
+                        # to the final V1 image:
+                        # [V1 Header][HBBL data + pad to page boundary][V3 Header]
+
+                        # First pad HBBL data such that the V1 and V3 headers
+                        # can be processed on the page-aligned HBBL data
+                        # Also, overwrite the original input file $bin_file
+                        # (likely hbbl.bin) since it gets picked up in sim
+                        # environments and SBE code expects it to be on a
+                        # page/cacheline boundary
+                        run_command("cp $bin_file $tempImages{TEMP_BIN}");
+                        run_command("dd if=$tempImages{TEMP_BIN} of=$bin_file ibs=4k conv=sync");
+
+                        # Create V1 Header for HBBL data + pad
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V1 "
+                                    . "--protectedPayload $bin_file "
+                                    . "--contrHdrOut $final_header_file "
+                                    . "--out $tempImages{PROTECTED_PAYLOAD}");
+
+                        # Create the V3 Header for the HBBL data + pad
+                        run_command("$CUR_OPEN_SIGN_REQUEST_V3 "
+                                    . "--protectedPayload $bin_file "
+                                    . "--contrHdrOut $final_header_file_V3 "
+                                    . "--out $tempImages{PROTECTED_PAYLOAD_V3}");
+
+                        # Now append the V3 header to the V1 HDR_PHASE image
+                        # It will show up as "unprotected" data in the PNOR code
+                        run_command("cat $tempImages{PROTECTED_PAYLOAD} $final_header_file_V3 > $tempImages{HDR_PHASE}");
+
+                        # Nothing unique for V3 HDR_PHASE_V3 image
+                        run_command("cp $tempImages{PROTECTED_PAYLOAD_V3} $tempImages{HDR_PHASE_V3}");
                     }
                     else
                     {
@@ -1074,12 +1105,6 @@ sub manipulateImage
                 # fully padded. Size adjustments made in checkSpaceConstraints
                 run_command("dd if=$tempImages{HDR_PHASE} of=$tempImages{PAD_PHASE} ibs=4k conv=sync");
                 run_command("dd if=$tempImages{HDR_PHASE_V3} of=$tempImages{PAD_PHASE_V3} ibs=4k conv=sync");
-            }
-            # HBBL was already padded
-            elsif ($eyeCatch eq "HBBL")
-            {
-                run_command("cp $tempImages{HDR_PHASE} $tempImages{PAD_PHASE}");
-                run_command("cp $tempImages{HDR_PHASE_V3} $tempImages{PAD_PHASE_V3}");
             }
             else
             {
@@ -1256,20 +1281,19 @@ sub manipulateImage
                 }
                 # Create an empty file of all 0xFF's of $file_size
                 run_command("dd if=/dev/zero bs=$file_size count=1 | tr \"\\000\" \"\\377\" > $bin_dir/$eyeCatch.ipllid");
-                # Write the contents of tempImages[HDR_PHASE} to the begining of the file we just made
+                # Write the contents of tempImages[PAD_PHASE} to the begining of the file we just made
                 run_command("dd if=$tempImages{PAD_PHASE} conv=notrunc of=$bin_dir/$eyeCatch.ipllid");
 
+                # Do the same for V3
                 my $file_size_V3 = -s $tempImages{PAD_PHASE_V3};
                 if(($file_size_V3 % 4096) ne 0)
                 {
                     $file_size_V3 += (4096 - ($file_size_V3 % 4096));
                 }
                 # Create an empty file of all 0xFF's of $file_size
-                run_command("dd if=/dev/zero bs=$file_size count=1 | tr \"\\000\" \"\\377\" > $bin_dir/$eyeCatch.ipllid");
                 run_command("dd if=/dev/zero bs=$file_size_V3 count=1 | tr \"\\000\" \"\\377\" > $bin_dir/V3/$eyeCatch.ipllid");
 
-                # Write the contents of tempImages[HDR_PHASE} to the begining of the file we just made
-                run_command("dd if=$tempImages{PAD_PHASE} conv=notrunc of=$bin_dir/$eyeCatch.ipllid");
+                # Write the contents of tempImages[PAD_PHASE_V3} to the begining of the file we just made
                 run_command("dd if=$tempImages{PAD_PHASE_V3} conv=notrunc of=$bin_dir/V3/$eyeCatch.ipllid");
             }
             if ($eyeCatch eq "SBKT" && $emitEccless)

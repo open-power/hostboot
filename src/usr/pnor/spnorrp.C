@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -742,10 +742,11 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
             - PAGESIZE - io_rec->textSize;
         if (unprotectedPayloadSize) // only write track a non-zero range
         {
-            TRACDCOMP(g_trac_pnor,INFO_MRK " SPnorRP::verifySections "
-                "creating unprotected area (%d bytes) for section %s",
+            TRACDCOMP(g_trac_pnor,INFO_MRK "SPnorRP::verifySections "
+                "creating unprotected area (%d bytes) for section %s (l_info.hasHashTable=%d)",
                 unprotectedPayloadSize,
-                l_info.name);
+                l_info.name,
+                l_info.hasHashTable);
 
             if ((io_rec->textSize % PAGESIZE))
             {
@@ -774,7 +775,11 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                 break;
             }
 
-            if (l_info.hasHashTable)
+            // unprotectedPayloadSize should be read-only if it is the hash page
+            // table or if it is the HBBL section (where the V3 header has been
+            // added to the end as the "unprotected payload")
+            if (l_info.hasHashTable ||
+                (i_id == HB_BOOTLOADER))
             {
                 l_errhdl = setPermission(io_rec->secAddr + l_protectedSizeWithHdr,
                                          unprotectedPayloadSize,
@@ -1192,8 +1197,12 @@ void SPnorRP::waitForMessage()
 
                             size_t l_sizeWithHdr = PAGESIZE + l_rec->textSize;
 
-                            // if the section has an unsecured portion
-                            if (l_sizeWithHdr != l_rec->infoSize && !l_rec->hasHashTable)
+                            // if the section has an unsecured portion, unless
+                            // it has a hashPageTable or is the HBBL (which
+                            // has its V3 header as unprotected data)
+                            if (l_sizeWithHdr != l_rec->infoSize &&
+                                !l_rec->hasHashTable &&
+                                l_id != HB_BOOTLOADER)
                             {
                                 TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::waitForMessage> Attempting to unload an unsupported section: 0x%X textsize+hdr: 0x%llX infosize: 0x%llX (the two sizes must be equal)", l_id, l_sizeWithHdr, l_rec->infoSize);
                                 /*@
@@ -1677,3 +1686,4 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
 
     return l_errl;
 }
+
