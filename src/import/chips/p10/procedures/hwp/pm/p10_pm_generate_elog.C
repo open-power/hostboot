@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2024                             */
+/* Contributors Listed Below - COPYRIGHT 2024,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,7 @@ fapi2::ReturnCode p10_pm_generate_elog( fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
     // 4)    creator should be PM Complex component.
     fapi2::ReturnCode rc_fapi( fapi2::FAPI2_RC_SUCCESS );
     uint32_t l_logSlot = 0;
+    uint32_t l_logSrc = QME_COMP_ID;
     //Size of rounded to multiple of 16B
     uint32_t l_elogTblSize =
         ( ( (sizeof(hcode_error_table_t) + (SRAM_ROW_SIZE - 1) ) >> 4 ) << 4 );
@@ -86,7 +87,7 @@ fapi2::ReturnCode p10_pm_generate_elog( fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
                                     false ),
                   "Failed To Query Hcode Log In OCC SRAM" );
 
-        o_logData.iv_compId = XGPE_COMP_ID;
+        l_logSrc = XGPE_COMP_ID; //Source of log  is XGPE SRAM
         l_logSlot = l_pElogTbl->dw0.fields.total_log_slots;
     }
 
@@ -110,7 +111,7 @@ fapi2::ReturnCode p10_pm_generate_elog( fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
                                     l_pElogTbl->elog[l_slot].dw0.value,
                                     o_pBuf,
                                     (i_coreId >> 2 ), l_logLength,
-                                    ( o_logData.iv_compId == QME_COMP_ID ) ? true : false ),
+                                    ( l_logSrc == QME_COMP_ID ) ? true : false ),
                   "Failed To Copy Hcode Log Into Memory Buffer" );
 
         //Copying actual size of buffer used
