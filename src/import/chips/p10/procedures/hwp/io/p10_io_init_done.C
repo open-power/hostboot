@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -536,8 +536,8 @@ fapi2::ReturnCode p10_io_done::p11_isc_optimizations(const fapi2::Target<fapi2::
         // IOHS Targets
         for (auto l_iohs_target : l_iohs_targets)
         {
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_CHANNEL_LOSS, l_iohs_target, l_channel_loss),
-                     "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_LOSS)");
+            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_CHANNEL_LOSS_ISC1_WORKAROUND, l_iohs_target, l_channel_loss),
+                     "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_LOSS_ISC1_WORKAROUND)");
 
             if (l_channel_loss == fapi2::ENUM_ATTR_IO_IOHS_CHANNEL_LOSS_LOW_LOSS)
             {

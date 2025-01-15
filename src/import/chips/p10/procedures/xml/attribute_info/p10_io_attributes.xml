@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -23,6 +23,7 @@
 <!--                                                                        -->
 <!-- IBM_PROLOG_END_TAG                                                     -->
 <!-- EKB-Mirror-To: hwsv -->
+<!-- EKB-Mirror-To: hostboot-->
 <attributes>
  <!-- ******************************************************************************** -->
 
@@ -168,6 +169,23 @@
     <default>HIGH_LOSS</default>
     <platInit/>
   </attribute>
+  <attribute>
+    <id>ATTR_IO_IOHS_CHANNEL_LOSS_ISC1_WORKAROUND</id>
+    <targetType>
+      TARGET_TYPE_IOHS
+    </targetType>
+    <description>
+       Specifies the channel loss for P11 ISC1
+    </description>
+    <valueType>uint8</valueType>
+    <enum>
+      HIGH_LOSS = 0x00,
+      MID_LOSS = 0x01,
+      LOW_LOSS = 0x02
+    </enum>
+    <default>HIGH_LOSS</default>
+    <platInit/>
+  </attribute>
 
   <attribute>
     <id>ATTR_IO_OMI_CHANNEL_LOSS</id>
@@ -220,6 +238,19 @@
     </targetType>
     <description>
        IOHS PRE1 settings
+    </description>
+    <valueType>uint8</valueType>
+    <default>0x00</default>
+    <platInit/>
+  </attribute>
+
+  <attribute>
+    <id>ATTR_IO_IOHS_PRE1_ISC1_WORKAROUND</id>
+    <targetType>
+      TARGET_TYPE_IOHS
+    </targetType>
+    <description>
+       IOHS PRE1 settings for P11 ISC1
     </description>
     <valueType>uint8</valueType>
     <default>0x00</default>

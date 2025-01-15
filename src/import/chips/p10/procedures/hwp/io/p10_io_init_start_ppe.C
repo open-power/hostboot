@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -392,6 +392,7 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
     fapi2::ATTR_FREQ_IOHS_LINK_MHZ_Type l_iohs_freq;
     fapi2::ATTR_CHIP_EC_FEATURE_HW550299_Type l_hw550299;
     fapi2::ATTR_CHIP_EC_FEATURE_HW539048_Type l_hw539048;
+    fapi2::ATTR_INTERPOSER_REV_Type l_interposer_rev = fapi2::ENUM_ATTR_INTERPOSER_REV_NONE;
 
     uint64_t l_addr = 0;
     uint8_t l_lte_gain = 7;
@@ -410,6 +411,7 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_CHIP_EC_FEATURE_HW539048, i_target, l_hw539048),
              "Error from FAPI_ATTR_GET (ATTR_CHIP_EC_FEATURE_HW539048)");
 
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INTERPOSER_REV, i_target, l_interposer_rev));
 
     for (auto l_pauc_target : l_pauc_targets)
     {
@@ -433,14 +435,24 @@ fapi2::ReturnCode p10_io_init::init_regs(const fapi2::Target<fapi2::TARGET_TYPE_
             l_peak1 = 0;
             l_peak2 = 0;
 
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_PRE1, l_iohs_target, l_pre1),
-                     "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_PRE1)");
+            if (l_interposer_rev == fapi2::ENUM_ATTR_INTERPOSER_REV_REV1)
+            {
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_CHANNEL_LOSS_ISC1_WORKAROUND, l_iohs_target, l_loss),
+                         "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_LOSS_ISC1_WORKAROUND)");
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_PRE1_ISC1_WORKAROUND, l_iohs_target, l_pre1),
+                         "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_PRE1_ISC1_WORKAROUND)");
+            }
+            else
+            {
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_CHANNEL_LOSS, l_iohs_target, l_loss),
+                         "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_LOSS)");
+                FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_PRE1, l_iohs_target, l_pre1),
+                         "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_PRE1)");
+
+            }
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_PRE2, l_iohs_target, l_pre2),
                      "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_PRE2)");
-
-            FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_CHANNEL_LOSS, l_iohs_target, l_loss),
-                     "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_LOSS)");
 
             FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_IO_IOHS_XTALK, l_iohs_target, l_xtalk),
                      "Error from FAPI_ATTR_GET (ATTR_IO_IOHS_CHANNEL_XTALK)");
