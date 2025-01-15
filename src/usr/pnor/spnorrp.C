@@ -742,7 +742,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
             - PAGESIZE - io_rec->textSize;
         if (unprotectedPayloadSize) // only write track a non-zero range
         {
-            TRACDCOMP(g_trac_pnor,INFO_MRK "SPnorRP::verifySections "
+            TRACFCOMP(g_trac_pnor,INFO_MRK "SPnorRP::verifySections "
                 "creating unprotected area (%d bytes) for section %s (l_info.hasHashTable=%d)",
                 unprotectedPayloadSize,
                 l_info.name,
@@ -1683,6 +1683,108 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
     }
 
     }while(0);
+
+    return l_errl;
+}
+
+errlHndl_t SPnorRP::getHbblV3Header (uint64_t & o_hbblV3HdrAddr)
+{
+    TRACFCOMP(g_trac_pnor, ENTER_MRK"SPnorRP::getHbblV3Header");
+
+    errlHndl_t l_errl = nullptr;
+    uint64_t unprotectedPayloadSize = 0;
+    o_hbblV3HdrAddr = 0;
+
+    do {
+
+    // Find HBBL LoadRecord
+    // If not already loaded, then fail
+    auto l_item = iv_loadedSections.find(HB_BOOTLOADER);
+    if (l_item == iv_loadedSections.end())
+    {
+        // HBBL has not been securely loaded yet - which is a prerequisite
+        // for this function
+        TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::getHbblV3Header() - HBBL has not been securely loaded");
+        /*@
+         * @errortype
+         * @severity        ERRL_SEV_CRITICAL_SYS_TERM
+         * @moduleid        MOD_SPNORRP_GET_HBBL_V3_HDR
+         * @reasoncode      RC_HBBL_NOT_LOADED
+         * @userdata1       0
+         * @userdata2       0
+         * @devdesc         The HBBL has not been securely loaded
+         * @custdesc        Secureboot failure
+         */
+         l_errl = new ERRORLOG::ErrlEntry( ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                           MOD_SPNORRP_GET_HBBL_V3_HDR,
+                                           RC_HBBL_NOT_LOADED,
+                                           0,
+                                           0,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+        l_errl->collectTrace(PNOR_COMP_NAME);
+        l_errl->collectTrace(SECURE_COMP_NAME);
+        break;
+    }
+    else
+    {
+        // Securely loaded HBBL record found
+        auto l_rec = l_item->second;
+
+        // Virtual Address of the V3 Header is the start of the "unprotected"
+        // Section of the HBBL
+        // [V1 Header] <-- starts at loadRecord->secAddr; size of PAGESIZE
+        // [Protected Payload] <-- size of loadRecord->textSize
+        // [[Unprotected Payload] <-- size determined as follows:
+        unprotectedPayloadSize =
+                    l_rec->infoSize    // size of the entire partition
+                    - PAGESIZE         // size of V1 Header
+                    - l_rec->textSize; // size of protected payload,
+                                       // not including size of V1 header
+
+        // This needs to be the size of a V3 Security Header - 15KB
+        // @TODO JIRA PFHB-802 use an official const for the V3 header size
+        size_t v3_header_size = 15 * KILOBYTE;
+        if (unprotectedPayloadSize != v3_header_size)
+        {
+            TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::getHbblV3Header() - "
+                       "Size of HBBL V3 Header is not 15KB. Expected=0x%X, "
+                       "Actual=0x%X\n",
+                       v3_header_size, unprotectedPayloadSize);
+
+            /*@
+             * @errortype
+             * @severity        ERRL_SEV_CRITICAL_SYS_TERM
+             * @moduleid        MOD_SPNORRP_GET_HBBL_V3_HDR
+             * @reasoncode      RC_HBBL_V3_HDR_INVALID_SIZE
+             * @userdata1       Expected Size
+             * @userdata2       Actual Size
+             * @devdesc         The HBBL's V3 Header is not the right size
+             * @custdesc        Secureboot failure
+             */
+             l_errl = new ERRORLOG::ErrlEntry(
+                                           ERRORLOG::ERRL_SEV_CRITICAL_SYS_TERM,
+                                           MOD_SPNORRP_GET_HBBL_V3_HDR,
+                                           RC_HBBL_V3_HDR_INVALID_SIZE,
+                                           v3_header_size,
+                                           unprotectedPayloadSize,
+                                           ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+            l_errl->collectTrace(PNOR_COMP_NAME);
+            l_errl->collectTrace(SECURE_COMP_NAME);
+            break;
+        }
+
+        // Calculate virtual address offset of the "unprotected" section
+        uint8_t * unprotected_vaddr = l_rec->secAddr + PAGESIZE + l_rec->textSize;
+
+        // @TODO JIRA PFHB-802 add additional checks on the validity of the
+        // V3 header here
+
+        o_hbblV3HdrAddr = reinterpret_cast<uint64_t>(unprotected_vaddr);
+    }
+
+    }while(0);
+
+    TRACFCOMP(g_trac_pnor, EXIT_MRK"SPnorRP::getHbblV3Header: o_hbblV3HdrAddr=0x%llX, unprotectedPayloadSize=0x%llX", o_hbblV3HdrAddr, unprotectedPayloadSize);
 
     return l_errl;
 }

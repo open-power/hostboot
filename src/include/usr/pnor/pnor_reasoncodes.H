@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -113,6 +113,7 @@ namespace PNOR
         MOD_SPNORRP_BASE_EXT_VER_CHK    = 0xD7, /**< SPnorRP::baseExtVersCheck */
         MOD_SPNORRP_KEY_TRAN_CHK        = 0xD8, /**< SPnorRP::keyTransitionCheck */
         MOD_SPNORRP_REMOVE_PAGES        = 0xD9,
+        MOD_SPNORRP_GET_HBBL_V3_HDR     = 0xDA, /**< SPnorRP::getHbblV3Header */
 
         // ast_mboxdd.C
         MOD_ASTMBOXDD_DO_MESSAGE        = 0xE0, /**< astMbox::doMessage */
@@ -210,6 +211,8 @@ namespace PNOR
         RC_WRONG_SIZE_FROM_WRITE     = PNOR_COMP_ID | 0x40,
         RC_NO_LID_MAPPING            = PNOR_COMP_ID | 0x41,
         RC_INVALID_LID_ID            = PNOR_COMP_ID | 0x42,
+        RC_HBBL_NOT_LOADED           = PNOR_COMP_ID | 0x43,
+        RC_HBBL_V3_HDR_INVALID_SIZE  = PNOR_COMP_ID | 0x44,
         //@fixme-RTC:131607-Temporary value to allow HWSV compile
         //termination_rc
         RC_PNOR_CORRUPTION           = PNOR_COMP_ID | 0x99,

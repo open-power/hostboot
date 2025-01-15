@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 #include <targeting/common/target.H>  // Target
 #include <eeprom/eepromif.H>          // EEPROM_ROLE
 #include <pnor/ecc.H>                 // PNOR::ECC::eccStatus
+#include <pnor/pnor_const.H>          // PNOR::SectionId
 #include <util/utilxipimage.H>        // Util::imageBuild_t
 #include <vector>
 #include <p10_infrastruct_help.H>     // XIPC_RING_BUF{1,2,3}_SIZE
@@ -563,6 +564,35 @@ class UpdateProcessorSbes : public UpdateWorkItem
      * @return errlHndl_t    Error log handle on failure.
      */
     errlHndl_t cleanupSbeImageVmmSpace(uint64_t i_vmm_vaddr);
+
+    /**
+     * @brief Loads up pnor sections that are used by each SBE update thread
+     *
+     * @note This also creates space (via malloc) for the HBBL data and the
+     *       HBBL V1 and V3 security headers and sets up the following global
+     *       pointers to be used by the update threads:
+     *       - g_hbbl_data_ptr
+     *       - g_hbbl_data_size
+     *       - g_hbbl_v1_v3_headers_ptr
+     *
+     * @param[out] List of newly loaded sections
+     * @return error on load failure, else nullptr
+     */
+    errlHndl_t preloadPnorSections(std::vector<PNOR::SectionId> & o_loadedSections);
+
+    /**
+     * @brief Unloads pnor sections that were used for SBE update by each thread
+     *
+     * @note Also cleans up the previously setup space for the HBBL data and
+     *       the HBBL V1 and V3 security headers and clears their global pointers:
+     *       - g_hbbl_data_ptr
+     *       - g_hbbl_data_size
+     *       - g_hbbl_v1_v3_headers_ptr
+     *
+     * @param[in] List of loaded sections to be unloaded
+     * @return error on unload failure, else nullptr
+     */
+    errlHndl_t cleanupPreloadedPnorSections(const std::vector<PNOR::SectionId>& i_loadedSections);
 
     /**
      * @brief Reduces bits set in a bit mask until there is a

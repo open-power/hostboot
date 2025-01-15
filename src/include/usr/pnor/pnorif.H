@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -344,6 +344,23 @@ const std::array<uint32_t, PNOR::NUM_SECTIONS>& getLidIds();
 bool isPnorInitialized();
 #endif
 
-} // PNOR
+/**
+ * @brief Returns pointer to the V3 Header for the HBBL section.
+ *        The HBBL's V3 Header is the "unprotected" payload of the HBBL section
+ *
+ * @param[out] o_hbblV3HdrAddr: Virtual Address of the V3 Header for the
+ *                              HBBL section
+ *
+ * @pre  The HBBL section needs to already have been securely loaded (see
+ *       loadSecureSection() above); else an error log will be returned
+ *
+ * @note This function will verify that the V3 Header has the correct size
+ *       (15KB); else an error log will be returned
+ *
+ * @return errlHndl_t:    Error Log
+ */
+errlHndl_t getHbblV3Header (uint64_t & o_hbblV3HdrAddr);
+
+} // end of PNOR namespace
 
 #endif

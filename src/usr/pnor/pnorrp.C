@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -207,6 +207,12 @@ const std::array<uint32_t, PNOR::NUM_SECTIONS>& PNOR::getLidIds()
     return Singleton<PnorRP>::instance().get_lid_ids();
 }
 #endif
+
+errlHndl_t PNOR::getHbblV3Header (uint64_t & o_hbblV3HdrAddr)
+{
+    return Singleton<SPnorRP>::instance().getHbblV3Header(o_hbblV3HdrAddr);
+}
+
 
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
@@ -2088,3 +2094,5 @@ errlHndl_t PnorRP::setVirtAddrs(void)
 
     return l_errhdl;
 }
+
+

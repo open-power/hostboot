@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -121,6 +121,36 @@ static bool g_update_both_sides = false;
 static bool    g_do_hw_keys_hash_transition = false;
 static SHA512_t g_hw_keys_hash_transition_data = {0};
 
+// ----------------------------------------
+// Global Variables for HBBL Data
+// They, and the memory they point to, are initialized in
+// preloadPnorSections() and they (and again, the memory they point to)
+// are cleaned up in cleanupPreloadedPnorSections()
+static uint8_t * g_hbbl_data_ptr = nullptr;
+static size_t  g_hbbl_data_size = 0;
+
+
+
+// ----------------------------------------
+// Global Variables for HBBL V1 and V3 Headers
+// These constants and one global variable are specific to the .sbh_hbbl
+// section (aka "P9_XIP_SECTION_SBE_SBH_HBBL" SBE Section) of the SBE Image.
+// They are used to get the V1 and V3 Secureboot Headers from the
+// HBBL PNOR section and then combine them like this for the
+// customized SBE image's .sbh_hbbl section:
+//  - First 1288 bytes of HBBL V1 Header
+//  - Full HBBL V3 Header - 15KB
+constexpr uint32_t HBBL_TRUNCATED_V1_HEADER_SIZE = 1288;
+// @TODO JIRA PFHB-804 use a better constant for this
+constexpr size_t HBBL_V3_HEADER_SIZE = 15 * KILOBYTE;
+constexpr uint32_t SBH_HBBL_SECTION_SIZE = HBBL_TRUNCATED_V1_HEADER_SIZE
+                                                   + HBBL_V3_HEADER_SIZE;
+
+// This global variable, and the memory it points to, is initialized in
+// preloadPnorSections() and it (and again, the memory it points to)
+// is cleaned up in cleanupPreloadedPnorSections()
+static uint8_t * g_hbbl_v1_v3_headers_ptr = nullptr;
+
 // -----------------------------------------
 // Global Variables for threaded update
 static bool g_restart_needed = false;
@@ -171,20 +201,6 @@ namespace SBE
      * @return errlHndl_t = nullptr on success
      */
     errlHndl_t unloadPnorSection( PNOR::SectionId i_section);
-
-    /**
-     * @brief Loads up pnor sections that are used by each SBE update thread
-     * @param[out] List of newly loaded sections
-     * @return error on load failure, else nullptr
-     */
-    errlHndl_t preloadPnorSections(std::vector<PNOR::SectionId> & o_loadedSections);
-
-    /**
-     * @brief Unloads pnor sections that were used for SBE update by each thread
-     * @param[in] List of loaded sections to be unloaded
-     * @return error on unload failure, else nullptr
-     */
-    errlHndl_t cleanupPreloadedPnorSections(const std::vector<PNOR::SectionId>& i_loadedSections);
 
     /**
      * @brief Distributes the list of sbe's that might be updated amongst
@@ -997,13 +1013,14 @@ namespace SBE
             }
 
             // Get SBE PNOR section info from PNOR RP
-            err = loadPnorSection( pnorSectionId,
-                                   pnorInfo );
+            // NOTE: PNOR::SBE_IPL has been preloaded
+            err = getSectionInfo( pnorSectionId,
+                                  pnorInfo );
 
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"findSBEInPnor: Error calling "
-                           "loadPnorSection()"
+                           "getSectionInfo()"
                            TRACE_ERR_FMT,
                            TRACE_ERR_ARGS(err));
                 break;
@@ -1204,7 +1221,6 @@ namespace SBE
             }
 
         }while(0);
-
 
         TRACDCOMP( g_trac_sbe,
                    EXIT_MRK"findSBEInPnor(): o_imgPtr=%p, o_imgSize=0x%X",
@@ -2230,8 +2246,161 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             else
             {
                 o_loadedSections.push_back(id);
+
+                // Special actions for PNOR::HB_BOOTLOADER
+                if (id == PNOR::HB_BOOTLOADER)
+                {
+                    // Create the memory space and setup the global pointers for
+                    // the HBBL data and HBBL V3 headers so that each thread
+                    // does not have to repeat this action
+
+                    // (1) HBBL data is the "protected" payload that vaddr
+                    // points to
+                    g_hbbl_data_size = tmpInfo.secureProtectedPayloadSize;
+                    g_hbbl_data_ptr = static_cast<uint8_t*>(
+                                        malloc(g_hbbl_data_size));
+
+                    // Verify that the malloc worked and that the data size
+                    // isn't zero
+                    if ((g_hbbl_data_size == 0) ||
+                        (g_hbbl_data_ptr == nullptr))
+                    {
+
+                        TRACFCOMP( g_trac_sbe, ERR_MRK"preloadPnorSections() - "
+                                   "Invalid HBBL Data: size=0x%X, ptr=%p",
+                                   g_hbbl_data_size, g_hbbl_data_ptr);
+
+                        /*@
+                         * @errortype
+                         * @moduleid    SBE_PRELOAD_PNOR_SECTIONS
+                         * @reasoncode  SBE_INVALID_HBBL_DATA
+                         * @userdata1   g_hbbl_data_size
+                         * @userdata2   g_hbbl_data_ptr
+                         * @devdesc     Unable to create a valid pointer to
+                         *              HBBL data
+                         * @custdesc    A problem occurred while customizing image
+                         */
+                        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                            SBE_PRELOAD_PNOR_SECTIONS,
+                            SBE_INVALID_HBBL_DATA,
+                            g_hbbl_data_size,
+                            reinterpret_cast<uint64_t>(g_hbbl_data_ptr),
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                        l_errl->collectTrace(SBE_COMP_NAME);
+                        l_errl->collectTrace(PNOR_COMP_NAME);
+                        l_errl->collectTrace(VFS_COMP_NAME);
+
+                        break;
+                    }
+
+                    // Initizlize to zero to be safe
+                    memset(g_hbbl_data_ptr,
+                           0,
+                           g_hbbl_data_size);
+
+                    // Copy the HBBL data to the malloc'd space
+                    memcpy(g_hbbl_data_ptr,
+                           reinterpret_cast<const void*>(tmpInfo.vaddr),
+                           g_hbbl_data_size);
+
+
+                    // (2) Create the .sbh_hbbl section by getting the
+                    // V1 and V3 secureboot headers from HBBL PNOR section
+                    // and then combining them like this:
+                    //  - First 1288 bytes of HBBL V1 Header
+                    //  - Full HBBL V3 Header - 15KB
+                    g_hbbl_v1_v3_headers_ptr = static_cast<uint8_t*>(
+                                        malloc(SBH_HBBL_SECTION_SIZE));
+
+                    // Verify that the malloc worked
+                    if (g_hbbl_v1_v3_headers_ptr == nullptr)
+                    {
+
+                        TRACFCOMP( g_trac_sbe, ERR_MRK"preloadPnorSections() - "
+                                   "Invalid HBBL V1 and V3 security header "
+                                   "section: ptr=%p (size=0x%X)",
+                                   g_hbbl_v1_v3_headers_ptr,
+                                   SBH_HBBL_SECTION_SIZE);
+
+                        /*@
+                         * @errortype
+                         * @moduleid    SBE_PRELOAD_PNOR_SECTIONS
+                         * @reasoncode  SBE_INVALID_HBBL_SECURITY_HEADERS
+                         * @userdata1   g_hbbl_v1_v3_headers_ptr
+                         * @userdata2   SBH_HBBL_SECTION_SIZE
+                         * @devdesc     Unable to create a valid pointer to
+                         *              HBBL V1 and V3 security headers
+                         * @custdesc    A problem occurred while customizing image
+                         */
+                        l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                            SBE_PRELOAD_PNOR_SECTIONS,
+                            SBE_INVALID_HBBL_SECURITY_HEADERS,
+                            reinterpret_cast<uint64_t>(g_hbbl_v1_v3_headers_ptr),
+                            SBH_HBBL_SECTION_SIZE,
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                        l_errl->collectTrace(SBE_COMP_NAME);
+                        l_errl->collectTrace(PNOR_COMP_NAME);
+                        l_errl->collectTrace(VFS_COMP_NAME);
+
+                        break;
+                    }
+
+                    // Initizlize to zero to be safe
+                    memset(g_hbbl_v1_v3_headers_ptr,
+                           0,
+                           SBH_HBBL_SECTION_SIZE);
+
+                    // (2a) Get V1 header and copy truncated size
+                    // Get V1 header by backing up 1 PAGESIZE from start of
+                    // HBBL virtual address returned from getSectionInfo.
+                    memcpy(g_hbbl_v1_v3_headers_ptr,
+                           reinterpret_cast<const void*>(
+                               tmpInfo.vaddr - PAGESIZE),
+                           HBBL_TRUNCATED_V1_HEADER_SIZE);
+
+                    // (2b) Get pointer to HBBL's V3 Security Header
+                    uint64_t hbblV3HdrAddr = 0;
+                    l_errl = PNOR::getHbblV3Header( hbblV3HdrAddr );
+                    if(l_errl)
+                    {
+                        TRACFCOMP( g_trac_sbe, ERR_MRK"preloadPnorSections: Error calling "
+                                   "getHbblV3Header() rc=0x%.4X",
+                                   l_errl->reasonCode() );
+                        break;
+                    }
+
+                    // Copy the HBBL V3 Headera to the malloc'd space
+                    memcpy(g_hbbl_v1_v3_headers_ptr+HBBL_TRUNCATED_V1_HEADER_SIZE,
+                           reinterpret_cast<const void*>(hbblV3HdrAddr),
+                           HBBL_V3_HEADER_SIZE);
+
+                    TRACFCOMP( g_trac_sbe, "preloadPnorSections: HBBL globals: "
+                               "g_hbbl_data_ptr=0x%llX, "
+                               "g_hbbl_data_size=0x%X, "
+                               "g_hbbl_v1_v3_headers_ptr=0x%llX"
+                               "(HBBL_TRUNCATED_V1_HEADER_SIZE=0x%X, "
+                               "HBBL_V3_HEADER_SIZE=0x%X, "
+                               "SBH_HBBL_SECTION_SIZE=0x%X, "
+                               "getHbblV3Header returned 0x%llX)",
+                               g_hbbl_data_ptr, g_hbbl_data_size,
+                               g_hbbl_v1_v3_headers_ptr,
+                               HBBL_TRUNCATED_V1_HEADER_SIZE,
+                               HBBL_V3_HEADER_SIZE,
+                               SBH_HBBL_SECTION_SIZE, hbblV3HdrAddr);
+
+                    TRACDBIN( g_trac_sbe, "preloadPnorSections: V1",
+                              g_hbbl_v1_v3_headers_ptr, 64);
+                    TRACDBIN( g_trac_sbe, "preloadPnorSections: V3",
+                              g_hbbl_v1_v3_headers_ptr +
+                                HBBL_TRUNCATED_V1_HEADER_SIZE, 64);
+                    TRACDBIN( g_trac_sbe, "preloadPnorSections: HBBL Data",
+                              g_hbbl_data_ptr, 64);
+                }
             }
         } while (0);
+
         return l_errl;
     }
 
@@ -2515,36 +2684,53 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                      &tmp_pnorVersion,
                      sizeof(tmp_pnorVersion));
 
-
             /*******************************************/
             /*  Get PNOR HBBL Information              */
             /*******************************************/
 
             // Get HBBL PNOR section info from PNOR RP
-            PNOR::SectionInfo_t pnorInfo;
-            err = loadPnorSection( PNOR::HB_BOOTLOADER, pnorInfo );
-            if(err)
+            // NOTE: PNOR::HB_BOOTLOADER has been preloaded and
+            //       global variables should have been setup to
+            //       access the saved off HBBL Data and HBBL V3 Header
+            TRACUCOMP( g_trac_sbe, "getSbeInfoState: HBBL globals: "
+                                   "g_hbbl_data_ptr=0x%llX, "
+                                   "g_hbbl_data_size=0x%X, "
+                                   "g_hbbl_v1_v3_headers_ptr=0x%llX "
+                                   "(V3 HDR SIZE=0x%X)",
+                                   g_hbbl_data_ptr, g_hbbl_data_size,
+                                   g_hbbl_v1_v3_headers_ptr, HBBL_V3_HEADER_SIZE);
+
+
+            // Check that HBBL Data global variables are valid
+            if ((g_hbbl_data_ptr == nullptr) ||
+                (g_hbbl_data_size == 0))
             {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState: Error calling "
-                           "loadPnorSection() rc=0x%.4X",
-                           err->reasonCode() );
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Invalid HBBL Data: size=0x%X, ptr=%p",
+                           g_hbbl_data_size, g_hbbl_data_ptr);
+
+                /*@
+                 * @errortype
+                 * @moduleid    SBE_GET_TARGET_INFO_STATE
+                 * @reasoncode  SBE_INVALID_HBBL_DATA
+                 * @userdata1   g_hbbl_data_size
+                 * @userdata2   g_hbbl_data_ptr
+                 * @devdesc     Invalid global variables for HBBL data
+                 * @custdesc    A problem occurred while customizing image
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                    SBE_GET_TARGET_INFO_STATE,
+                    SBE_INVALID_HBBL_DATA,
+                    g_hbbl_data_size,
+                    reinterpret_cast<uint64_t>(g_hbbl_data_ptr),
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+
+                err->collectTrace(SBE_COMP_NAME);
+                err->collectTrace(PNOR_COMP_NAME);
+                err->collectTrace(VFS_COMP_NAME);
+
                 break;
             }
-
-            // Create a working copy of HBBL since it may need to be modified
-            // and it's not legal to update code partitions
-            uint8_t pHbbl[MAX_HBBL_SIZE]={0};
-            memcpy(pHbbl,
-                   reinterpret_cast<const void*>(pnorInfo.vaddr),
-                   sizeof(pHbbl));
-            const void* hbblPnorPtr = reinterpret_cast<const void*>(pHbbl);
-
-            // Use logical HBBL content size limit of MAX_HBBL_SIZE.  The PNOR
-            // partition size potentially includes secure header, padding, and
-            // ECC overhead which are not applicable during SBE customization.
-            TRACFCOMP( g_trac_sbe, "getSbeInfoState() - "
-                       "hbblPnorPtr=%p, hbblMaxSize=0x%08X (%d)",
-                       hbblPnorPtr, MAX_HBBL_SIZE, MAX_HBBL_SIZE);
 
             /*******************************************************/
             /*  Append HBBL Image from PNOR to SBE Image from PNOR */
@@ -2582,10 +2768,10 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             // Now append HBBL section to the SBE Image
             err = modifySbeSection(P9_XIP_SECTION_SBE_HBBL,
                                    DELETE_AND_APPEND_SECTION,
-                                   const_cast<void*>(hbblPnorPtr), // HBBL Image to append
-                                   MAX_HBBL_SIZE,                  // Size of HBBL Image
-                                   sbeHbblImgPtr,                  // SBE, HBBL Image
-                                   sbeHbblImgSize);                // Available/used
+                                   g_hbbl_data_ptr,  // HBBL Image to append
+                                   g_hbbl_data_size, // Size of HBBL Image
+                                   sbeHbblImgPtr,    // SBE, HBBL Image
+                                   sbeHbblImgSize);  // Available/used
 
             if(err)
             {
@@ -2598,33 +2784,59 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             l_latestSize = sbeHbblImgSize;
 
 
-            /*******************************************************/
-            /*  Get Secureboot Header from HBBL PNOR section,      */
-            /*  truncate it, then append it to the "sbh_hbbl" (aka */
-            /*  P9_XIP_SECTION_SBE_SBH_HBBL) SBE Section           */
-            /*******************************************************/
-            // Eventually this define will come from including a SBE file
-            const uint32_t HBBL_TRUNCATED_HEADER_SIZE = 1288;
-            uint32_t sbeSbhHbblImgSize = l_latestSize + HBBL_TRUNCATED_HEADER_SIZE;
-            uint8_t pTruncatedHbblHeader[HBBL_TRUNCATED_HEADER_SIZE]={0};
+            /***********************************************************/
+            /*  Update .sbh_hbbl Section - Secureboot Headers for HBBL */
+            /*  (aka "P9_XIP_SECTION_SBE_SBH_HBBL" SBE Section)        */
+            /*  Get Secureboot Headers from HBBL PNOR section          */
+            /*  and then combine them like this:                       */
+            /*  - First 1288 bytes of V1 Header                        */
+            /*  - Full V3 Header - 15KB                                */
+            /*  This section should have been created in the function  */
+            /*  preloadPnorSections() and all threads should use the   */
+            /*  global pointer to access this data                     */
+            /***********************************************************/
+            // Check that HBBL V1 and V3 security headers global variables
+            // is valid
+            if (g_hbbl_v1_v3_headers_ptr == nullptr)
+            {
+                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - "
+                           "Invalid HBBL V1 and V3 security header "
+                           "global variable: ptr=%p (size=0x%X)",
+                           g_hbbl_v1_v3_headers_ptr,
+                           SBH_HBBL_SECTION_SIZE);
 
-            // If CONFIG_SECUREBOOT is set then get Header by backing up 1 PAGESIZE
-            // from start of HBBL virtual address returned from getSectionInfo;
-            // Else, use all zeros set above
-#ifdef CONFIG_SECUREBOOT
-            memcpy(pTruncatedHbblHeader,
-                   reinterpret_cast<const void*>(pnorInfo.vaddr - PAGESIZE),
-                   HBBL_TRUNCATED_HEADER_SIZE);
+                /*@
+                 * @errortype
+                 * @moduleid    SBE_GET_TARGET_INFO_STATE
+                 * @reasoncode  SBE_INVALID_HBBL_SECURITY_HEADERS
+                 * @userdata1   g_hbbl_v1_v3_headers_ptr
+                 * @userdata2   SBH_HBBL_SECTION_SIZE
+                 * @devdesc     The global variable for the HBBL V1 and V3
+                 *              security headers is invalid
+                 * @custdesc    A problem occurred while customizing image
+                 */
+                err = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
+                    SBE_GET_TARGET_INFO_STATE,
+                    SBE_INVALID_HBBL_SECURITY_HEADERS,
+                    reinterpret_cast<uint64_t>(g_hbbl_v1_v3_headers_ptr),
+                    SBH_HBBL_SECTION_SIZE,
+                    ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
 
-#endif
-            TRACDBIN(g_trac_sbe, "Truncated HBBL SB Header",
-                     pTruncatedHbblHeader, HBBL_TRUNCATED_HEADER_SIZE);
+                err->collectTrace(SBE_COMP_NAME);
+                err->collectTrace(PNOR_COMP_NAME);
+                err->collectTrace(VFS_COMP_NAME);
+
+                break;
+            }
+
+            // Update the customized SBE size
+            uint32_t sbeSbhHbblImgSize = l_latestSize + SBH_HBBL_SECTION_SIZE;
 
             // Now append P9_XIP_SECTION_SBE_SBH_HBBL
             err = modifySbeSection(P9_XIP_SECTION_SBE_SBH_HBBL,
                                    DELETE_AND_APPEND_SECTION,
-                                   reinterpret_cast<void*>(pTruncatedHbblHeader),
-                                   HBBL_TRUNCATED_HEADER_SIZE, // Size of section to append
+                                   g_hbbl_v1_v3_headers_ptr,
+                                   SBH_HBBL_SECTION_SIZE, // Size of section to append
                                    sbeHbblImgPtr,     // SBE Image (now with HBBL Section)
                                    sbeSbhHbblImgSize);   // Available/used
 
@@ -2935,24 +3147,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             l_latestSize = sbeSbSettingsImgSize;
 
 
-            // We are now done with the SBE and HBBL images in PNOR, unload
-            //  them now to save memory for the other images we have to load
-            // Note: this will just decrease the in-use count held by Secure PNOR resource provider
-            err = unloadPnorSection(PNOR::SBE_IPL);
-            if (err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error from unloadPnorSection(PNOR::SBE_IPL)");
-                break;
-            }
-
-            err = unloadPnorSection(PNOR::HB_BOOTLOADER);
-            if (err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error from unloadPnorSection(PNOR::HB_BOOTLOADER)");
-                break;
-            }
-
-
             /*******************************************/
             /*  Append RINGOVD Image from PNOR to SBE  */
             /*******************************************/
@@ -2994,15 +3188,15 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
             /*******************************************/
             size_t sbeImgSize = 0;
 
-
             // get a pointer to the hcode for the .overlays
+            // NOTE: PNOR::HCODE should have already been preloaded
             PNOR::SectionInfo_t l_hcodePnorInfo;
-            err = loadPnorSection(PNOR::HCODE,l_hcodePnorInfo);
+            err = getSectionInfo(PNOR::HCODE,l_hcodePnorInfo);
 
             if(err)
             {
                 TRACFCOMP( g_trac_sbe, ERR_MRK"ge() - "
-                        "Error from loadPnorSection(HCODE), "
+                        "Error from getSectionInfo(HCODE), "
                         "RC=0x%X, EID=0x%lX",
                         ERRL_GETRC_SAFE(err),
                         ERRL_GETEID_SAFE(err));
@@ -3027,17 +3221,6 @@ errlHndl_t modifySbeSection(const p9_xip_section_sbe_t i_section,
                            "RC=0x%X, EID=0x%lX",
                            ERRL_GETRC_SAFE(err),
                            ERRL_GETEID_SAFE(err));
-                break;
-            }
-
-
-            // We are now done with the HCODE image in PNOR, unload
-            //  it now to save memory.
-            // Note: this will just decrease the in-use count held by Secure PNOR resource provider
-            err = unloadPnorSection(PNOR::HCODE);
-            if (err)
-            {
-                TRACFCOMP( g_trac_sbe, ERR_MRK"getSbeInfoState() - Error from unloadPnorSection(PNOR::HCODE)");
                 break;
             }
 
@@ -5660,6 +5843,19 @@ errlHndl_t getSeepromSideVersionViaChipOp(Target* i_target,
             if( err )
             {
                 break;
+            }
+
+            // Special actions for PNOR::HB_BOOTLOADER
+            if (id == PNOR::HB_BOOTLOADER)
+            {
+                // Cleanup the memory space and global pointers for
+                // the HBBL data and HBBL V1 and V3 headers
+                g_hbbl_data_size = 0;
+                free(g_hbbl_data_ptr);
+                g_hbbl_data_ptr = nullptr;
+
+                free(g_hbbl_v1_v3_headers_ptr);
+                g_hbbl_v1_v3_headers_ptr = nullptr;
             }
         }
 

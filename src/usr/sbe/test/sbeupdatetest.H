@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -127,7 +127,6 @@ errlHndl_t loadSbeModule(bool& o_loaded)
         {
             // Don't use g_trac_sbe - libsbe might not be loaded
             TS_FAIL("loadSbeModule() - %s load failed", SBE_LIBRARY_NAME );
-
         }
         else
         {
@@ -147,8 +146,6 @@ errlHndl_t unloadSbeModule()
     {
         // Don't use g_trac_sbe - libsbe might be unloaded
         TS_FAIL("unloadSbeModule() - %s unload failed", SBE_LIBRARY_NAME );
-
-        // No break or return - still try and unload other module
     }
 
     return err;
@@ -558,10 +555,9 @@ class SBEUpdateTest: public CxxTest::TestSuite
             {
                 total++;
                 fails++;
-                TS_FAIL("testReadSbeFromPnor() - No Functional Proc Targets found!");
+                TS_FAIL("testFindSbeInPnor() - No Functional Proc Targets found!");
                 break;
             }
-
             total++;
             err = findSBEInPnor(theTarget,
                                 sbeImgPtr,
@@ -1194,13 +1190,21 @@ class SBEUpdateTest: public CxxTest::TestSuite
             errlCommit( err, SBE_COMP_ID );
         }
 
+        std::vector<PNOR::SectionId> l_loadedPnorSections;
+        l_loadedPnorSections.clear(); // start with no loaded sections
+        err = preloadPnorSections(l_loadedPnorSections);
+        if(err)
+        {
+            TS_FAIL("SBEUpdateTest() - Constructor: Call to preloadPnorSections() failed");
+            errlCommit( err, SBE_COMP_ID );
+        }
+
         err = createSbeImageVmmSpace(VMM_VADDR_SBE_UPDATE);
         if(err)
         {
             TS_FAIL("SBEUpdateTest() - Constructor: Call to createSbeImageVmmSpace() failed");
             errlCommit( err, SBE_COMP_ID );
         }
-
     };
 
 
@@ -1215,6 +1219,17 @@ class SBEUpdateTest: public CxxTest::TestSuite
         if(err)
         {
             TS_FAIL("~SBEUpdateTest() - Destructor: Call to cleanupSbeImageVmmSpace() failed.");
+            errlCommit( err, SBE_COMP_ID );
+        }
+
+        // List should match the list in preloadPnorSections
+        std::vector<PNOR::SectionId> preloadPnorIds =
+          { PNOR::SBE_IPL, PNOR::HB_BOOTLOADER, PNOR::HCODE };
+
+        err = cleanupPreloadedPnorSections(preloadPnorIds);
+        if(err)
+        {
+            TS_FAIL("~SBEUpdateTest() - Destructor: Call to cleanupPreloadedPnorSections() failed.");
             errlCommit( err, SBE_COMP_ID );
         }
 

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -81,6 +81,25 @@ class SPnorRP
      * @note Any errors that occur will be committed within this function
      */
     SPnorRP* setupVmm(const PNOR::SectionData_t * const i_TOC);
+
+    /**
+     * @brief Returns pointer to the V3 Header for the HBBL section.
+     *        The HBBL's V3 Header is the "unprotected" payload of the HBBL section
+     *        (Function definition should by in sync with getHbblV3Header()
+     *         in src/include/usr/pnor/pnorif.H)
+     *
+     * @param[out] o_hbblV3HdrAddr: Virtual Address of the V3 Header for the
+     *                              HBBL section
+     *
+     * @pre  The HBBL section needs to already have been securely loaded (see
+     *       loadSecureSection() above); else an error log will be returned
+     *
+     * @note This function will verify that the V3 Header has the correct size
+     *       (15KB); else an error log will be returned
+     *
+     * @return errlHndl_t:    Error Log
+     */
+    errlHndl_t getHbblV3Header (uint64_t & o_hbblV3HdrPtr);
 
 
   protected:
