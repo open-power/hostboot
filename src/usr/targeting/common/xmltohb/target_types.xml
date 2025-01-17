@@ -2001,9 +2001,6 @@
       <id>POS_ON_MEM_PORT</id>
     </attribute>
     <attribute>
-      <id>PREHEAT_PERCENT</id>
-    </attribute>
-    <attribute>
       <id>REL_POS</id>
     </attribute>
     <attribute>
