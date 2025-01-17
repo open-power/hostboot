@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -2864,21 +2864,16 @@ errlHndl_t DeconfigGard::deconfigureTargetsFromGardRecordsForIpl(
             // check if we have any spares and modify the record if so.
             // This is required because the SP may add guard records for
             // a checkstop and not have any knowledge of the spares.
-            // This does not need to be run in MPIPL because the SP would
-            // not have created any new records.
-            if( !UTIL::assertGetToplevelTarget()->getAttr<ATTR_IS_MPIPL_HB>() )
+            if( reduceSpareCores(l_pTarget) )
             {
-                if( reduceSpareCores(l_pTarget) )
+                l_pErr = platCreateGardRecord( l_pTarget,
+                                                0,
+                                                GARD_Spare );
+                if (l_pErr)
                 {
-                    l_pErr = platCreateGardRecord( l_pTarget,
-                                                   0,
-                                                   GARD_Spare );
-                    if (l_pErr)
-                    {
-                        HWAS_ERR("platReLogGardError returned an error trying to modify type to be spare");
-                        // commit the log and keep going
-                        errlCommit(l_pErr, HWAS_COMP_ID);
-                    }
+                    HWAS_ERR("platReLogGardError returned an error trying to modify type to be spare");
+                    // commit the log and keep going
+                    errlCommit(l_pErr, HWAS_COMP_ID);
                 }
             }
 #endif
