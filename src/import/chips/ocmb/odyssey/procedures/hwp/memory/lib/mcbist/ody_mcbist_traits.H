@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -581,8 +581,8 @@ class mcbistTraits< mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>
             LFSR_MASK = scomt::ody::ODC_MCBIST_SCOM_MCBLFSRA0Q_CFG_LFSR_MASK_A0,
             LFSR_MASK_LEN = scomt::ody::ODC_MCBIST_SCOM_MCBLFSRA0Q_CFG_LFSR_MASK_A0_LEN,
 
-            CFG_DATA_ROT_SEED1 = scomt::ody::ODC_MCBIST_SCOM_MCBDRCRQ_CFG_DATA_ROT_SEED,
-            CFG_DATA_ROT_SEED1_LEN = scomt::ody::ODC_MCBIST_SCOM_MCBDRCRQ_CFG_DATA_ROT_SEED_LEN,
+            CFG_DATA_ROT_SEED1 = scomt::ody::ODC_MCBIST_SCOM_MCBDRSRQ_MCBDRSRQ_CFG_DATA_ROT_SEED,
+            CFG_DATA_ROT_SEED1_LEN = scomt::ody::ODC_MCBIST_SCOM_MCBDRSRQ_MCBDRSRQ_CFG_DATA_ROT_SEED_LEN,
             CFG_DATA_ROT = scomt::ody::ODC_MCBIST_SCOM_MCBDRCRQ_CFG_DATA_ROT,
             CFG_DATA_ROT_LEN = scomt::ody::ODC_MCBIST_SCOM_MCBDRCRQ_CFG_DATA_ROT_LEN,
             CFG_DATA_ROT_SEED2 = scomt::ody::ODC_MCBIST_SCOM_MCBDRCRQ_CFG_DATA_ROT_SEED,
