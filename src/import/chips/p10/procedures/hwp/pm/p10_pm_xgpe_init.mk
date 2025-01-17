@@ -29,5 +29,6 @@ lib$(PROCEDURE)_DEPLIBS+=p10_pm_pba_init
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_ocb_indir_access
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_ocb_indir_setup_linear
 lib$(PROCEDURE)_DEPLIBS+=p10_phb_hv_access
+lib$(PROCEDURE)_DEPLIBS+=p10_pcie_utils
 lib$(PROCEDURE)_DEPLIBS+=p10_pm_sram_access_utils
 $(call BUILD_PROCEDURE)

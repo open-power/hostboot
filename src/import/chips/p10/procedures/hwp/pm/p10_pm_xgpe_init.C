@@ -48,6 +48,7 @@
 #include <p10_scom_pec_f.H>
 #include <p10_scom_iohs_f.H>
 #include <multicast_group_defs.H>
+#include <p10_pcie_utils.H>
 #include <p10_phb_hv_access.H>
 #include <vector>
 #ifndef __PPE__
@@ -678,6 +679,20 @@ fapi2::ReturnCode pec_iodlr_static_config(
 
             for (const auto l_phb_target : l_pec_target.getChildren<fapi2::TARGET_TYPE_PHB>(fapi2::TARGET_STATE_FUNCTIONAL))
             {
+                // Cronus only
+#if !defined(__PPE__) && !defined(__HOSTBOOT_MODULE)
+                // Skip if PHB target is not enabled
+                bool l_phbEnabled = false;
+                FAPI_TRY(isPHBEnabled(l_phb_target, l_phbEnabled),
+                         "Error returned from isPHBEnabled()");
+
+                if (!l_phbEnabled)
+                {
+                    FAPI_DBG("PHB is disabled, skip.");
+                    continue;
+                }
+
+#endif
                 l_pci_gen_info = 0;
                 l_pci_gen_size = 0;
                 FAPI_TRY(getScom(l_phb_target, g_pcie_pasr_reg[0], l_data64));
