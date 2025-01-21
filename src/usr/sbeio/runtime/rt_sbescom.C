@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -116,6 +116,14 @@ errlHndl_t sbeScomPerformOp(DeviceFW::OperationType i_opType,
     uint64_t   l_addr = va_arg(i_args,uint64_t);
     TRACDCOMP(g_trac_sbeio,ENTER_MRK"sbeScomPerformOp HUID=0x%X l_addr=0x%X i_opType=0x%X",
                    get_huid(i_ocmb), l_addr, i_opType);
+
+    if (i_ocmb->getAttr<TARGETING::ATTR_ODY_RECOVERY_STATE>()
+        == TARGETING::ODY_RECOVERY_STATUS_DEAD)
+    {
+        TRACFCOMP(g_trac_sbeio, "sbeScomPerformOp Attempted to perform scom op on dead OCMB, skipping HUID=0x%X", get_huid(i_ocmb));
+        return l_err;
+    }
+
     do {
     // On some systems the OCC can be using the same i2c bus (for reading temperatures)
     // that the SBE will use to do the scoms out to Explorer.
