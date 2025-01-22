@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -789,10 +789,12 @@ enum fields
     SWIN_FAULT_B                   = 9,
     SWIN_FAULT_C                   = 5,
     SWIN_FAULT_D                   = 1,
-    VAUX_A_SCALER_POSITION         = 6,
-    VAUX_B_SCALER_POSITION         = 4,
-    VAUX_C_SCALER_POSITION         = 2,
-    VAUX_D_SCALER_POSITION         = 0,
+    // The VAUX A/B/C/D scaler positions have been set as FAPI2 style here instead of
+    // PMIC style
+    VAUX_A_SCALER_POSITION         = 0,
+    VAUX_B_SCALER_POSITION         = 2,
+    VAUX_C_SCALER_POSITION         = 4,
+    VAUX_D_SCALER_POSITION         = 6,
     VAUX_SCALER_LENGTH             = 2,
     // Due to endianess of DT regs and Fapi buffers the following values differ from spec
     // In the procedure we read & reverse the contiguous reg bit field into two uint8_t buffers
