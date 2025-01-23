@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020                             */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -36,6 +36,15 @@
 
 namespace XSCOM
 {
+
+/**
+ * @brief Checks whether the MPIPL bit is set in Mailbox Scratch Register 3
+ *
+ * @param[out] o_isMpipl true: boot is MPIPL. false: boot is NOT MPIPL or an error occurred.
+ *
+ * @return hbblReasonCode on error.
+ */
+Bootloader::hbblReasonCode get_mpipl_setting(bool & o_isMpipl);
 
 /**
  * @brief Performs an XSCOM operation

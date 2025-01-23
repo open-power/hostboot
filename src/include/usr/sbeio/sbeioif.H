@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -107,6 +107,10 @@ namespace SBEIO
                                     // compatibility
         RELOC_PAYLOAD_ADDR = 0x03,
         ARCH_REG_DATA_ADDR = 0x04,
+        // These xscom base addresses are used on FSP to correctly extend to the non-poisoned
+        // TPM in HBBL during MPIPL.
+        PRIMARY_TPM_XSCOM_BASE_ADDR = 0x05,
+        BACKUP_TPM_XSCOM_BASE_ADDR  = 0x06,
         //On SBE side struct is defaulted so that
         //Keys are 0xFF and Vals are 0xFFFFFFFFFFFFFFFF
         //So a key w/ FF means its empty or at its default val

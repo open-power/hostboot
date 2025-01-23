@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2017,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2017,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -46,7 +46,8 @@ namespace Bootloader{
 // Max Pairs
 #define MAX_ROW_COUNT 8
 
-// Max number of key/addr pairs
+// Max number of key/addr pairs. NOTE: While HBBL and HB has support for 256 pairs and a variable
+// number of key/addr pairs, the SBE DOES NOT and hardcodes numKeyAddrPair to 8.
 #define MAX_KEY_ADDR_PAIRS 256
 
 // Location of running copy of HBB

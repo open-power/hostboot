@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -94,6 +94,39 @@ static uint64_t waitForHMERStatus()
     } while(!l_hmer.mXSComFail && !l_hmer.mXSComDone);
 
     return l_hmer;
+}
+
+Bootloader::hbblReasonCode XSCOM::get_mpipl_setting(bool & o_isMpipl)
+{
+    o_isMpipl = false;
+    Bootloader::hbblReasonCode l_rc = Bootloader::RC_NO_ERROR;
+
+    do
+    {
+        // Get Scratch Register 3
+        uint64_t l_xscom_buffer = 0;
+        size_t l_xscom_buflen = sizeof(l_xscom_buffer);
+        l_rc = XSCOM::xscomPerformOp(DeviceFW::READ,
+                                     &l_xscom_buffer,
+                                     l_xscom_buflen,
+                                     0x0005003aull);
+        if(l_rc)
+        {
+            bl_console::putString("Could not read scratch reg 3. XSCOM RC: ");
+            bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+            bl_console::putString("\r\n");
+            break;
+        }
+
+        // Bit 2 has the mpipl setting
+        if (l_xscom_buffer & 0x2000000000000000ull)
+        {
+            o_isMpipl = true;
+        }
+
+    } while (0);
+
+    return l_rc;
 }
 
 Bootloader::hbblReasonCode XSCOM::xscomPerformOp(const DeviceFW::OperationType i_opType,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1110,6 +1110,16 @@ void* call_proc_build_smp (void *io_pArgs)
         // Get a handle to the System target
         TargetHandle_t l_systemTarget = UTIL::assertGetToplevelTarget();
         l_systemTarget->setAttr<ATTR_ATTN_CHK_ALL_PROCS>(l_useAllProcs);
+
+        // Send the XSCOM base address for the parent chips of the TPMs in the system to the SBEs.
+        // This data can only exist in live memory of the SBEs so set the data now that all SBEs are up and running.
+        l_errl = TRUSTEDBOOT::sendXscomBaseAddrsForTpms();
+        if (l_errl)
+        {
+            l_StepError.addErrorDetails(l_errl);
+            errlCommit(l_errl, TRBOOT_COMP_ID);
+        }
+
 
     } while (0);
 
