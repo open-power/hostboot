@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -76,6 +76,7 @@ const uint64_t LPC_BAR_MASK = 0xFF000000FFFFFFFFULL;
 // Offset into the secure header of the hash and size of protected payload
 const uint16_t CONTENT_HASH_OFFSET = 1085;
 const uint16_t CONTENT_PROTECTED_SIZE_OFFSET = CONTENT_HASH_OFFSET - 8;
+
 
 namespace Bootloader{
 
@@ -591,6 +592,11 @@ namespace Bootloader{
     static Bootloader::hbblReasonCode extendHashToTPM(const uint8_t* const i_hash)
     {
         Bootloader::hbblReasonCode l_rc = RC_NO_ERROR;
+
+        // Init global data before continuing.
+        g_blData->blToHbData.tdpSource = TDP_BIT_UNSET;
+        g_blData->blToHbData.tpmRc = RC_NO_ERROR;
+
         do {
 
         // If the TDP bit is set, then SBE had detected a problem with the TPM and we shouldn't
@@ -636,6 +642,33 @@ namespace Bootloader{
         return l_rc;
     }
 #endif // end of NOT CONFIG_VPO_COMPILE
+
+    /*
+     * @brief The key/addr array is stored in the memory like so:
+     *        [key0key1...keyNAddr0Addr1...AddrN]. This function will return
+     *        the pointer to the key0. The number N can be fetched via
+     *        g_blData->blToHbData.numKeyAddrPair.
+     *
+     * @return uint8_t* A Pointer to the first key in the key/addr array.
+     */
+    const uint8_t * getKeys()
+    {
+        return &(g_blData->blToHbData.keyAddrStashData[0].key);
+    }
+
+    /*
+     * @brief The key/addr array is stored in the memory like so:
+     *        [key0key1...keyNAddr0Addr1...AddrN]. This function will return
+     *        the pointer to the Addr0. The number N can be fetched via
+     *        g_blData->blToHbData.numKeyAddrPair.
+     *
+     * @return uint64_t* A Pointer to the first address in the key/addr array
+     */
+    const uint64_t * getAddresses()
+    {
+        const uint8_t * firstKey = getKeys();
+        return reinterpret_cast<const uint64_t*>(firstKey + g_blData->blToHbData.numKeyAddrPair * sizeof(*firstKey));
+    }
 
     /** Bootloader main function to work with and start HBB.
      *
@@ -872,16 +905,86 @@ namespace Bootloader{
                 uint8_t* l_hash = reinterpret_cast<uint8_t*>(l_src_addr) +
                                   CONTENT_HASH_OFFSET;
 
-                // Extend the obtained hash into TPM
-                Bootloader::hbblReasonCode l_rc = extendHashToTPM(l_hash);
+                bool isMpipl = false;
+                Bootloader::hbblReasonCode l_rc = XSCOM::get_mpipl_setting(isMpipl);
                 if(l_rc)
                 {
-                    bl_console::putString("Could not extend HBB hash to TPM. RC: ");
-                    bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
-                    bl_console::putString("\r\n");
-                    bl_console::putString("Continuing the boot.\r\n");
+                    // Just continue, worst case scenario is PHYP attestation fails later on but system will
+                    // remain functional.
                     l_rc = Bootloader::RC_NO_ERROR;
                 }
+
+                uint8_t numTpms = 1;
+                uint64_t primary_tpm_addr = 0;
+                uint64_t backup_tpm_addr = 0;
+                uint64_t original_xscom = g_blData->blToHbData.xscomBAR;
+
+                // In MPIPL when there are multiple TPMs only one will be non-poisoned and that is the primary TPM.
+                // The bootloader does not know which TPM is the primary without some investigation which it cannot
+                // do presently. To simplify the hash extend logic so that the primary TPM always gets the hash, the
+                // bootloader will find all TPMs and do a hash extend on them regardless if they were poisoned or not.
+                //
+                // For BMC systems, there is only one TPM so this logic will only extend to the sole TPM.
+                // For FSP systems, there are more than one TPM and more than one boot chip. The bootloader will extend
+                // to all TPMs.
+                if (isMpipl)
+                {
+                    // Access the key/addr store to find the primary and backup xscom addresses which will be used to
+                    // hash extend to the TPM corresponding to that address. It's ok to hash extend to a poisoned TPM
+                    // because it doesn't cause any errors.
+                    const uint8_t  * keys = getKeys();
+                    const uint64_t * addrs = getAddresses();
+                    for (size_t i = 0; i < g_blData->blToHbData.numKeyAddrPair; ++i)
+                    {
+                        const auto key = keys[i];
+                        const auto addr = addrs[i];
+                        // 0x5 corresponds to the PRIMARY xscom address used to communicate with the TPM on that chip.
+                        if (key == 0x5) // PRIMARY_TPM_XSCOM_BASE_ADDR = 0x05; see sbeioif.H
+                        {
+                            primary_tpm_addr = addr;
+                        }
+                        // 0x6 corresponds to the BACKUP xscom address used to communicate with the TPM on that chip.
+                        if (key == 0x6) // BACKUP_TPM_XSCOM_BASE_ADDR  = 0x06; see sbeioif.H
+                        {
+                            backup_tpm_addr = addr;
+                        }
+                    }
+
+                    if (primary_tpm_addr && backup_tpm_addr)
+                    {
+                        numTpms = 2;
+                        // Flip the xscom address now so that the non-local TPM will get hash extended first. That
+                        // allows the TDP bit and TPM RC of the blToHbData to be accurate for the local TPM.
+                        g_blData->blToHbData.xscomBAR = (g_blData->blToHbData.xscomBAR == primary_tpm_addr)
+                                                      ? backup_tpm_addr : primary_tpm_addr;
+                    }
+                }
+
+                for (uint8_t i = 0; i < numTpms; ++i)
+                {
+                    // Only modify the xscomBAR address when there is more than one TPM detected.
+                    if (i != 0)
+                    {
+                        g_blData->blToHbData.xscomBAR = (g_blData->blToHbData.xscomBAR == primary_tpm_addr)
+                                                      ? backup_tpm_addr : primary_tpm_addr;
+                    }
+
+                    // Extend the obtained hash into TPM
+                    l_rc = extendHashToTPM(l_hash);
+                    if(l_rc)
+                    {
+                        bl_console::putString("Could not extend HBB hash to TPM. RC: ");
+                        bl_console::displayHex(reinterpret_cast<unsigned char*>(&l_rc), sizeof(l_rc));
+                        bl_console::putString("\r\n");
+                        bl_console::putString("Continuing the boot.\r\n");
+                        l_rc = Bootloader::RC_NO_ERROR;
+                    }
+                }
+
+                // Now that hash extending is over, ensure the original xscom address is being used for the rest of
+                // HBBL.
+                g_blData->blToHbData.xscomBAR = original_xscom;
+
 #endif // CONFIG_TPMDD
 
                 // extendHashToTPM could change some vars in HBBL->HBB area, so

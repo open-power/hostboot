@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2021                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -458,6 +458,14 @@ namespace TRUSTEDBOOT
      *  @retval !NULL Failed to extend Hostboot base image to TPM
      *                                     */
     errlHndl_t extendBaseImage();
+
+    /**
+     *  @brief Sends ATTR_XSCOM_BASE_ADDRESS of the parent chip for each TPM in the system to the SBE keyValueStash
+     *         so HBBL can extend Hostboot's base image hash to each TPM instead of just the TPM connected to the boot
+     *         chip. This behavior is only used in MPIPL scenarios with systems that have redundant TPMs where the boot
+     *         chip may have a poisoned TPM.
+     */
+    errlHndl_t sendXscomBaseAddrsForTpms();
 
     /**
      *  @brief Return the primary TPM, if any

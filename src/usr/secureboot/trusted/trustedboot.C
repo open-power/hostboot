@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -77,6 +77,7 @@
 #include <hwas/hwasPlat.H>
 #include <kernel/bltohbdatamgr.H>
 #include <sys/misc.h>
+#include <sbeio/sbeioif.H> // sendPsuStashKeyAddrRequest
 
 #include <sys/msg.h> // msg_q_t
 #include <stdlib.h> // calloc
@@ -87,6 +88,7 @@
 #include <errl/hberrltypes.H> // TWO_UINT32_TO_UINT64
 #include <errno.h> // EFAULT
 #include <mbox/ipc_msg_types.H> // IPC::IPC_EXTEND_PCR
+
 
 namespace  T = TARGETING;
 namespace  TU = TARGETING::UTIL;
@@ -748,6 +750,154 @@ bool isTpmConnectedToBootProc(TARGETING::Target* i_pTpm)
     return retval;
 }
 
+errlHndl_t sendXscomBaseAddrsForTpms()
+{
+    using namespace TARGETING;
+    TRACFCOMP(g_trac_trustedboot, ENTER_MRK"sendXscomBaseAddrsForTpms()");
+    errlHndl_t err = nullptr;
+
+    // Contains metadata about the TPM used to access data to send to SBE for use by HBBL.
+    struct tpm_metadata_t {
+        TARGETING::Target * target; // The pointer to the TPM itself
+        TARGETING::Target * parentChip; // The SPI controller which has the XSCOM_BASE_ADDR.
+                                        // The xscom addr is used to talk to the TPM in HBBL
+        uint8_t             key;        // Identifies the TPM as primary/backup to distinguish
+                                        // addrs from each other.
+        tpm_metadata_t() : target(nullptr), parentChip(nullptr), key(SBEIO::SBE_DEFAULT) {}
+    };
+
+    /**
+     * @brief Sends a TPM's parent chip's XSCOM_BASE_ADDRESS to the SBE KeyAddrStash on a given destination chip.
+     *        This enables HBBL to talk to both TPMs during an MPIPL, if necessary.
+     *
+     * @param[in]  i_tpm     The metadata about the tpm to be interrogated by the function and sent to the desired
+     *                       chip's SBE.
+     * @param[in]  i_chip    The target chip to send the TPM metadata to for use by HBBL during PCR extension.
+     *
+     * @return     errlHndl_t    An error log on failure, otherwise nullptr.
+     */
+    auto sendPsuKeyAddr = [](const tpm_metadata_t & i_tpm, Target * i_chip) -> errlHndl_t
+    {
+        TRACFCOMP(g_trac_trustedboot, ENTER_MRK"sendPsuKeyAddr() "
+                  "Sending TPM[0x%X] w/ parent[0x%X] and key=0x%X to chip[0x%X]",
+                  get_huid(i_tpm.target),
+                  get_huid(i_tpm.parentChip),
+                  i_tpm.key,
+                  get_huid(i_chip));
+
+        errlHndl_t err = nullptr;
+        uint64_t addr = 0;
+        do {
+            // Make sure there is a tpm target
+            if ((i_tpm.target == nullptr)
+                || !i_tpm.target->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+            {
+                TRACFCOMP(g_trac_trustedboot, INFO_MRK"sendPsuKeyAddr() Issue with TPM. "
+                          "Sending 0 for TPM[0x%X] w/ parent[0x%X] and key=0x%x to chip[0x%X]",
+                          get_huid(i_tpm.target),
+                          get_huid(i_tpm.parentChip),
+                          i_tpm.key,
+                          get_huid(i_chip));
+                break;
+            }
+
+            // Parent chip must be functional otherwise SMP won't be up and we'll checkstop if we try to use it later
+            if ((i_tpm.parentChip != nullptr)
+                && i_tpm.parentChip->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+            {
+                addr = i_tpm.parentChip->getAttr<TARGETING::ATTR_XSCOM_BASE_ADDRESS>();
+                TRACFCOMP(g_trac_trustedboot, INFO_MRK"sendPsuKeyAddr()"
+                          "Sending 0x%X for TPM[0x%X] w/ parent[0x%X] and key=0x%x to chip[0x%X]",
+                          addr,
+                          get_huid(i_tpm.target),
+                          get_huid(i_tpm.parentChip),
+                          i_tpm.key,
+                          get_huid(i_chip));
+            }
+            else
+            {
+                TRACFCOMP(g_trac_trustedboot, INFO_MRK"sendPsuKeyAddr() Issue with parent chip. "
+                          "Sending 0 for TPM[0x%X] w/ parent[0x%X] and key=0x%x to chip[0x%X]",
+                          get_huid(i_tpm.target),
+                          get_huid(i_tpm.parentChip),
+                          i_tpm.key,
+                          get_huid(i_chip));
+            }
+
+        } while(0);
+
+        // Send the data to the SBE on the given chip. An addr == 0 is considered a "do not use" for HBBL
+        err = SBEIO::sendPsuStashKeyAddrRequest(i_tpm.key,
+                                                addr,
+                                                i_chip);
+
+        return err;
+    };
+
+    // The chips to send the PSU store op on
+    TargetHandleList chips;
+
+    // Find the Tpms
+    tpm_metadata_t primaryTpm,
+                   backupTpm;
+
+    // Set primary TPM data
+    getPrimaryTpm(primaryTpm.target);
+    primaryTpm.key = SBEIO::PRIMARY_TPM_XSCOM_BASE_ADDR;
+
+    // Set backup TPM data
+    getBackupTpm(backupTpm.target);
+    backupTpm.key = SBEIO::BACKUP_TPM_XSCOM_BASE_ADDR;
+
+    // Get their parent proc chips.
+    if (primaryTpm.target != nullptr)
+    {
+        primaryTpm.parentChip = getAffinityParent(primaryTpm.target, TARGETING::TYPE_PROC);
+        chips.push_back(primaryTpm.parentChip);
+        TRACFCOMP(g_trac_trustedboot, INFO_MRK"sendXscomBaseAddrsForTpms() "
+                  "Adding Primary TPM[0x%X] w/ parent[0x%X] to chips list",
+                  get_huid(primaryTpm.target),
+                  get_huid(primaryTpm.parentChip));
+    }
+    if (backupTpm.target != nullptr)
+    {
+        backupTpm.parentChip = getAffinityParent(backupTpm.target, TARGETING::TYPE_PROC);
+        chips.push_back(backupTpm.parentChip);
+        TRACFCOMP(g_trac_trustedboot, INFO_MRK"sendXscomBaseAddrsForTpms() "
+                  "Adding Backup TPM[0x%X] w/ parent[0x%X] to chips list",
+                  get_huid(backupTpm.target),
+                  get_huid(backupTpm.parentChip));
+    }
+
+    // Set their addrs via PSU. Need to send to all chips with TPMs since there is no way to know
+    // which chip HBBL will boot from in an MPIPL
+    for (const auto chip : chips)
+    {
+        if (!chip->getAttr<TARGETING::ATTR_HWAS_STATE>().functional)
+        {
+            TRACFCOMP(g_trac_trustedboot, INFO_MRK"sendXscomBaseAddrsForTpms() "
+                      "Skipping nonfunctional chip[0x%X]",
+                      get_huid(chip));
+            // Cannot do PSU ops to a non-functional target.
+            continue;
+        }
+
+        errlHndl_t sendErr = sendPsuKeyAddr(primaryTpm, chip);
+        if (sendErr)
+        {
+            ERRORLOG::aggregate(err, sendErr);
+        }
+        sendErr = sendPsuKeyAddr(backupTpm, chip);
+        if (sendErr)
+        {
+            ERRORLOG::aggregate(err, sendErr);
+        }
+    }
+
+    TRACFCOMP(g_trac_trustedboot, EXIT_MRK"sendXscomBaseAddrsForTpms()");
+    return err;
+}
+
 void* host_update_primary_tpm( void *io_pArgs )
 {
     errlHndl_t err = nullptr;
@@ -1402,57 +1552,6 @@ errlHndl_t tpmLogConfigEntries(TRUSTEDBOOT::TpmTarget* const i_pTpm)
     return l_err;
 }
 
-/**
- * @brief Look for special situation where on a MPIPL the Hostboot Bootloader (HBBL)
- *        measured the Hostboot Base Image (HBB) to the wrong TPM.  Specifically, since
- *        the HBBL only extends to the boot proc, this function looks for the MPIPL case
- *        where the TPM the HBB is using is actually connected to the alternate boot proc.
- *        In this case, if the PCR operation is for the HBB to log this incorrect extension
- *        of the HBBL, then it returns TRUE.
- *
- * @param[in] i_pTpm -       The TPM that the HBB is using
- * @param[in] i_pcr -        The PCR the extend operation is targeting
- * @param[in] i_logMsg -     The message to be sent to the TPM log
- * @param[in] i_logMsgSize - Size of the message to be sent to the TPM log
- *
- * @return true, if the special condition described above is found; else, false.
- */
-// @TODO 620212 - Remove this workaround when/if the HBBL can extend to the correct TPM
-// in this special case
-bool pcrExtendSpecialCaseException(TpmTarget* const i_pTpm,
-                                   const TPM_Pcr i_pcr,
-                                   const uint8_t* i_logMsg,
-                                   const size_t i_logMsgSize)
-{
-    bool retval = false;
-
-    auto isMpipl = TARGETING::UTIL::assertGetToplevelTarget()->getAttr<TARGETING::ATTR_IS_MPIPL_HB>();
-
-    TRACUCOMP(g_trac_trustedboot, "pcrExtendSpecialCaseException: TPM 0x%08X, isMpipl=%d, "
-              "i_pcr=%d, i_logMsgSize=%d",
-              TARGETING::get_huid(i_pTpm), isMpipl, i_pcr, i_logMsgSize);
-
-    // Evaluate the quick conditions first
-    if ((isMpipl == false) ||       // MPIPL check
-        (i_pcr != PCR_0) ||         // HBB only gets measured to PCR_0
-        (i_logMsgSize != 4) ||      // Make sure that it's just "HBB" and not "HBBL"
-        (i_logMsg == nullptr) ||    // Make sure there's some log message
-        ((i_logMsg != nullptr) &&   // Make sure it's "HBB"
-         (strncmp(reinterpret_cast<const char*>(i_logMsg), "HBB", 4))))
-    {
-        retval = false;
-    }
-    // Look if HBBL extended to wrong TPM (see this function header for details)
-    else if (!isTpmConnectedToBootProc(i_pTpm))
-    {
-        retval = true;
-    }
-
-    TRACUCOMP(g_trac_trustedboot, "pcrExtendSpecialCaseException: retval=%d", retval);
-
-    return retval;
-}
-
 void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                         const TPM_Pcr i_pcr,
                         const EventTypes i_eventType,
@@ -1493,19 +1592,6 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
         mutex_lock( i_pTpm->getHbMutexAttr<TARGETING::ATTR_HB_TPM_MUTEX>() ) ;
         unlock = true;
 
-        // Check for special case where HBB should get measured, rather than just getting logged
-        // - see function description for details
-        // @TODO 620212 - Remove this workaround when/if the HBBL can extend to the correct TPM
-        // in this special case
-        bool l_extendToTpm = i_extendToTpm;
-        if ((l_extendToTpm == false) &&
-            pcrExtendSpecialCaseException(i_pTpm, i_pcr,  i_logMsg, i_logMsgSize))
-        {
-            TRACFCOMP(g_trac_trustedboot, INFO_MRK
-                "pcrExtendSingleTpm: Overriding inputs to measure HBB because pcrExtendSpecialCaseException is true");
-            l_extendToTpm = true;
-        }
-
         auto hwasState = i_pTpm->getAttr<TARGETING::ATTR_HWAS_STATE>();
 
         // Log the event
@@ -1535,7 +1621,7 @@ void pcrExtendSingleTpm(TpmTarget* const i_pTpm,
                 }
             }
 
-            if (l_extendToTpm == true)
+            if (i_extendToTpm == true)
             {
                 // Perform the requested extension
                 err = tpmCmdPcrExtend2Hash(i_pTpm,
