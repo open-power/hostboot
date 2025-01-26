@@ -1260,7 +1260,20 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
             for (auto c = 0; c < MAXIMUM_CORES; c++) {
                 io_globalppb->dds[i][c].ddsc.value =  revle64(iv_poundW_data.entry[i].entry[c].ddsc.value);
                 io_globalppb->dds_tgt_act_bin[i][c].target_act_bin.value =  iv_poundW_data.entry[i].entry_tgt_act_bin[c].target_act_bin.value;
-                io_globalppb->dds_alt_cal[i][c].alt_cal.value  =  revle16(iv_poundW_data.entry[i].entry_alt_cal[c].alt_cal.value);
+
+                //If cal version is within 0x40 and 0xC0, then those fields
+                //are updated by MFT
+                if (iv_poundW_data.other.dds_calibration_version > 0x40 &&
+                    iv_poundW_data.other.dds_calibration_version < 0xC1 )
+                {
+                    io_globalppb->dds_alt_cal[i][c].alt_cal.value  =  revle16(iv_poundW_data.entry[i].entry_alt_cal[c].alt_cal.value);
+                    FAPI_IMP("Alt calibration value %x (%d)", revle16(iv_poundW_data.entry[i].entry_alt_cal[c].alt_cal.value),
+                        revle16(iv_poundW_data.entry[i].entry_alt_cal[c].alt_cal.value));
+                }
+                else
+                {
+                    io_globalppb->dds_alt_cal[i][c].alt_cal.value = 0;
+                }
             }
             io_globalppb->vdd_cal[i].cal_vdd  =  revle16(iv_poundW_data.entry[i].vdd_cal.cal_vdd);
             io_globalppb->vdd_cal[i].alt_cal_vdd =  revle16(iv_poundW_data.entry[i].vdd_cal.alt_cal_vdd);
@@ -1300,7 +1313,8 @@ fapi2::ReturnCode PlatPmPPB::gppb_init(
 
         //If ATTR_DDS_BIAS_ENABLE = ON, use the ALT_TRIP_OFFSET, ALT_CAL_ADJ,
         //ALT_DELAY values for each core instead of TRIP_OFFSET, CAL_ADJ, DELAY.
-        if (iv_attrs.attr_dds_bias_enable)
+        if (iv_poundW_data.other.dds_calibration_version > 0x40 &&
+            iv_poundW_data.other.dds_calibration_version < 0xC1 && iv_attrs.attr_dds_bias_enable)
         {
             for (uint8_t i = 0; i < NUM_OP_POINTS; i++)
             {
@@ -2910,8 +2924,8 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
             FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma,
                     iv_attr_mvpd_poundV_raw[i].rt_tdp_dc_10ma);
 
-            // rt_tdp_dc_10ma(wbyte) + spare (2byte)
             l_buffer_inc += 4;
+
         }
 
         iv_poundV_bucket_id = bucket_id;
@@ -3342,6 +3356,18 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundV()
                 FAPI_IMP("RAW IDD AC + ECO %08x (%d)",iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
                 FAPI_INF("#V data = 0x%04X  %-6d", iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma,
                         iv_attr_mvpd_poundV_raw[i].idd_tdp_ac_10ma);
+            }
+
+            if ( iv_pdv_model_data & PDV_MODEL_DATA_SLT )
+            {
+                //vrm_boost_cur_scale_pct
+                FAPI_INF("#V CF[%d] data(vrm_boost_cur_scale_pct )= 0x%04X  %-6d",i, iv_poundV_raw_data.operating_pts[i].spare[0],
+                          iv_poundV_raw_data.operating_pts[i].spare[0]);
+
+                //vdd_adj_10thpct
+                FAPI_INF("#V CF[%d] data(vdd_adj_10thpct)= 0x%04X  %-6d",i, iv_poundV_raw_data.operating_pts[i].spare[1],
+                          iv_poundV_raw_data.operating_pts[i].spare[1]);
+
             }
         }
 
@@ -4529,6 +4555,24 @@ fapi2::ReturnCode PlatPmPPB::get_mvpd_poundW (void)
         // Get any FLMR and FMMR overrides
         iv_poundW_data.other.ftc_large_droop_mode_reg_setting = flmr_value();
         iv_poundW_data.other.ftc_misc_droop_mode_reg_setting = fmmr_value();
+
+        //If dd cal version is greater than 0xC1, then trace the new
+        //SLT fields. These fields are just for tracing purpose, not used for
+        //any computation.
+        // entry_alt_cal size is 64 bytes (2 * 32)
+        //Out of 64 bytes: 58 bytes is spare, rest 6 bytes
+        if(iv_poundW_data.other.dds_calibration_version >= 0xC1)
+        {
+            for (uint8_t i = 0; i < NUM_OP_POINTS; i++)
+            {
+                FAPI_IMP("IDD current GB check value %x (%d)", revle16(iv_poundW_data.entry[i].entry_alt_cal[29].alt_cal.value),
+                        revle16(iv_poundW_data.entry[i].entry_alt_cal[29].alt_cal.value));
+                FAPI_IMP("Delay adder for guardband  %x (%d)", revle16(iv_poundW_data.entry[i].entry_alt_cal[30].alt_cal.value),
+                        revle16(iv_poundW_data.entry[i].entry_alt_cal[30].alt_cal.value));
+                FAPI_IMP("Voltage added for guardband %x (%d)",revle16(iv_poundW_data.entry[i].entry_alt_cal[31].alt_cal.value),
+                        revle16(iv_poundW_data.entry[i].entry_alt_cal[31].alt_cal.value));
+            }
+        }
     }
     while(0);
 

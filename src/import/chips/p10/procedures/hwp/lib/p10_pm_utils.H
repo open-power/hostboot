@@ -42,6 +42,7 @@
 // Masks for #V Model Data (aka Flags) field
 static const uint8_t PDV_MODEL_DATA_PNEXT           = 0x80;
 static const uint8_t PDV_MODEL_DATA_ISC             = 0x40;
+static const uint8_t PDV_MODEL_DATA_SLT             = 0x20;
 static const uint8_t PDV_MODEL_DATA_VDN_CORRECT     = 0x10;
 static const uint8_t PDV_MODEL_DATA_WOF_READY       = 0x02;
 static const uint8_t PDV_MODEL_DATA_MODELED         = 0x01;
