@@ -3943,11 +3943,13 @@ inline bool is_recovery_loop_needed(const uint8_t i_status,
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_status the status of the draminit run
 /// @param[in] i_struct the draminit message block
+/// @param[in] i_is_swizzle_error if true, error will be ODY_DRAMINIT_REPAIRS_EXCEEDED_SWIZZLE, else ODY_DRAMINIT_REPAIRS_EXCEEDED
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode check_for_dq_repairs_exceeded(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const uint64_t i_status,
-        const PMU_SMB_DDR5U_1D_t& i_struct);
+        const PMU_SMB_DDR5U_1D_t& i_struct,
+        const bool i_is_swizzle_error);
 
 
 ///

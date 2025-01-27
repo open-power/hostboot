@@ -167,6 +167,39 @@
 
   <hwpError>
     <sbeError/>
+    <rc>RC_ODY_DRAMINIT_REPAIRS_EXCEEDED_SWIZZLE</rc>
+    <description>Ody draminit's recovery algorithm exceeded available repairs during the swizzle detect procedure.</description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>MAX_REPAIRS</ffdc>
+    <ffdc>FAILING_RANK</ffdc>
+    <ffdc>DISABLES_BYTE0</ffdc>
+    <ffdc>DISABLES_BYTE1</ffdc>
+    <ffdc>DISABLES_BYTE2</ffdc>
+    <ffdc>DISABLES_BYTE3</ffdc>
+    <ffdc>DISABLES_BYTE4</ffdc>
+    <ffdc>DISABLES_BYTE5</ffdc>
+    <ffdc>DISABLES_BYTE6</ffdc>
+    <ffdc>DISABLES_BYTE7</ffdc>
+    <ffdc>DISABLES_BYTE8</ffdc>
+    <ffdc>DISABLES_BYTE9</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_REPAIRS_EXCEEDED</rc>
     <description>Ody draminit's recovery algorithm exceeded available repairs.</description>
     <ffdc>PORT_TARGET</ffdc>

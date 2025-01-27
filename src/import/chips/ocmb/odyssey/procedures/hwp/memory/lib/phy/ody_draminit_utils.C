@@ -4742,6 +4742,7 @@ fapi2::ReturnCode handle_swizzle_detect_errors(const fapi2::Target<fapi2::TARGET
         PMU_SMB_DDR5U_1D_t& io_struct,
         fapi2::hwp_data_ostream& o_log_data)
 {
+    constexpr bool SWIZZLE_ERROR = true;
     uint16_t l_swizzle_detect_fail = 0;
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_ODY_SWIZZLE_DETECT_FAIL_VALUE, i_target, l_swizzle_detect_fail));
 
@@ -4767,20 +4768,26 @@ fapi2::ReturnCode handle_swizzle_detect_errors(const fapi2::Target<fapi2::TARGET
     FAPI_TRY(run_training_helper(i_target, io_status, io_start_bad_bits, io_struct, o_log_data));
     mss::ody::phy::display_msg_block(i_target, io_struct);
 
+    // Checks to see if the number of allowable repairs was exceeded
+    FAPI_TRY(check_for_dq_repairs_exceeded(i_target, io_status, io_struct, SWIZZLE_ERROR));
+
 fapi_try_exit:
     return fapi2::current_err;
 }
+
 
 ///
 /// @brief Checks if the DQ errors have exceeded the potential number of repairs
 /// @param[in] i_target the memory port on which to operate
 /// @param[in] i_status the status of the draminit run
 /// @param[in] i_struct the draminit message block
+/// @param[in] i_is_swizzle_error if true, error will be ODY_DRAMINIT_REPAIRS_EXCEEDED_SWIZZLE, else ODY_DRAMINIT_REPAIRS_EXCEEDED
 /// @return fapi2::FAPI2_RC_SUCCESS iff successful
 ///
 fapi2::ReturnCode check_for_dq_repairs_exceeded(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
         const uint64_t i_status,
-        const PMU_SMB_DDR5U_1D_t& i_struct)
+        const PMU_SMB_DDR5U_1D_t& i_struct,
+        const bool i_is_swizzle_error)
 {
     // If there was an address related fail, then the results here cannot be trusted, skip this check
     if(mss::ody::phy::has_address_fails(i_status, i_struct))
@@ -4839,23 +4846,49 @@ fapi2::ReturnCode check_for_dq_repairs_exceeded(const fapi2::Target<fapi2::TARGE
         // Display errors here so the user can see what failed
         display_disable_bits(l_rank_info, l_bad_bits);
 
-        FAPI_ASSERT(l_num_bad_nibbles <= MAX_NIBBLE_REPAIRS,
-                    fapi2::ODY_DRAMINIT_REPAIRS_EXCEEDED()
-                    .set_PORT_TARGET(i_target)
-                    .set_MAX_REPAIRS(MAX_NIBBLE_REPAIRS)
-                    .set_FAILING_RANK(l_rank_info.get_port_rank())
-                    .set_DISABLES_BYTE0(l_bad_bits[l_rank_info.get_phy_rank()][0])
-                    .set_DISABLES_BYTE1(l_bad_bits[l_rank_info.get_phy_rank()][1])
-                    .set_DISABLES_BYTE2(l_bad_bits[l_rank_info.get_phy_rank()][2])
-                    .set_DISABLES_BYTE3(l_bad_bits[l_rank_info.get_phy_rank()][3])
-                    .set_DISABLES_BYTE4(l_bad_bits[l_rank_info.get_phy_rank()][4])
-                    .set_DISABLES_BYTE5(l_bad_bits[l_rank_info.get_phy_rank()][5])
-                    .set_DISABLES_BYTE6(l_bad_bits[l_rank_info.get_phy_rank()][6])
-                    .set_DISABLES_BYTE7(l_bad_bits[l_rank_info.get_phy_rank()][7])
-                    .set_DISABLES_BYTE8(l_bad_bits[l_rank_info.get_phy_rank()][8])
-                    .set_DISABLES_BYTE9(l_bad_bits[l_rank_info.get_phy_rank()][9]),
-                    TARGTIDFORMAT " rank%u exceeded max repairs of %u for standard training", TARGTID, l_rank_info.get_port_rank(),
-                    MAX_NIBBLE_REPAIRS);
+        // Use the swizzle error
+        if(i_is_swizzle_error)
+        {
+            FAPI_ASSERT(l_num_bad_nibbles <= MAX_NIBBLE_REPAIRS,
+                        fapi2::ODY_DRAMINIT_REPAIRS_EXCEEDED_SWIZZLE()
+                        .set_PORT_TARGET(i_target)
+                        .set_MAX_REPAIRS(MAX_NIBBLE_REPAIRS)
+                        .set_FAILING_RANK(l_rank_info.get_port_rank())
+                        .set_DISABLES_BYTE0(l_bad_bits[l_rank_info.get_phy_rank()][0])
+                        .set_DISABLES_BYTE1(l_bad_bits[l_rank_info.get_phy_rank()][1])
+                        .set_DISABLES_BYTE2(l_bad_bits[l_rank_info.get_phy_rank()][2])
+                        .set_DISABLES_BYTE3(l_bad_bits[l_rank_info.get_phy_rank()][3])
+                        .set_DISABLES_BYTE4(l_bad_bits[l_rank_info.get_phy_rank()][4])
+                        .set_DISABLES_BYTE5(l_bad_bits[l_rank_info.get_phy_rank()][5])
+                        .set_DISABLES_BYTE6(l_bad_bits[l_rank_info.get_phy_rank()][6])
+                        .set_DISABLES_BYTE7(l_bad_bits[l_rank_info.get_phy_rank()][7])
+                        .set_DISABLES_BYTE8(l_bad_bits[l_rank_info.get_phy_rank()][8])
+                        .set_DISABLES_BYTE9(l_bad_bits[l_rank_info.get_phy_rank()][9]),
+                        TARGTIDFORMAT " rank%u exceeded max repairs of %u for standard training in swizzle detect repair", TARGTID,
+                        l_rank_info.get_port_rank(),
+                        MAX_NIBBLE_REPAIRS);
+        }
+        else
+        {
+            FAPI_ASSERT(l_num_bad_nibbles <= MAX_NIBBLE_REPAIRS,
+                        fapi2::ODY_DRAMINIT_REPAIRS_EXCEEDED()
+                        .set_PORT_TARGET(i_target)
+                        .set_MAX_REPAIRS(MAX_NIBBLE_REPAIRS)
+                        .set_FAILING_RANK(l_rank_info.get_port_rank())
+                        .set_DISABLES_BYTE0(l_bad_bits[l_rank_info.get_phy_rank()][0])
+                        .set_DISABLES_BYTE1(l_bad_bits[l_rank_info.get_phy_rank()][1])
+                        .set_DISABLES_BYTE2(l_bad_bits[l_rank_info.get_phy_rank()][2])
+                        .set_DISABLES_BYTE3(l_bad_bits[l_rank_info.get_phy_rank()][3])
+                        .set_DISABLES_BYTE4(l_bad_bits[l_rank_info.get_phy_rank()][4])
+                        .set_DISABLES_BYTE5(l_bad_bits[l_rank_info.get_phy_rank()][5])
+                        .set_DISABLES_BYTE6(l_bad_bits[l_rank_info.get_phy_rank()][6])
+                        .set_DISABLES_BYTE7(l_bad_bits[l_rank_info.get_phy_rank()][7])
+                        .set_DISABLES_BYTE8(l_bad_bits[l_rank_info.get_phy_rank()][8])
+                        .set_DISABLES_BYTE9(l_bad_bits[l_rank_info.get_phy_rank()][9]),
+                        TARGTIDFORMAT " rank%u exceeded max repairs of %u for standard training", TARGTID, l_rank_info.get_port_rank(),
+                        MAX_NIBBLE_REPAIRS);
+
+        }
     }
 
 fapi_try_exit:
@@ -5171,6 +5204,7 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
                                    PMU_SMB_DDR5U_1D_t& io_struct,
                                    fapi2::hwp_data_ostream& o_log_data)
 {
+    constexpr bool DQ_ERROR = false;
     uint8_t l_current_bad_bits_phy[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]__attribute__ ((aligned (8))) = {};
     uint8_t l_dq_bad_bits_attr[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]__attribute__ ((aligned (8))) = {};
     bad_bits_per_rank_mc l_start_bad_bits_per_rank_mc;
@@ -5256,7 +5290,7 @@ fapi2::ReturnCode handle_dq_errors(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PO
     mss::ody::phy::display_msg_block(i_target, io_struct);
 
     // Checks if the number of bad bits exceeded repairs
-    FAPI_TRY(check_for_dq_repairs_exceeded(i_target, io_status, io_struct));
+    FAPI_TRY(check_for_dq_repairs_exceeded(i_target, io_status, io_struct, DQ_ERROR));
 
 fapi_try_exit:
     return fapi2::current_err;
