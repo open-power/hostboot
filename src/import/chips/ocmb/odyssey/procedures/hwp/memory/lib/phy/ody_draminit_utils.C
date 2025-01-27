@@ -5325,6 +5325,97 @@ fapi2::ReturnCode mask_PhyRxTxPPTerr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_
 }
 
 ///
+/// @brief Checks if ATTR_ODY_DRAMINIT_ERROR_ON_FAILURE is set and there are errors, if so, exits with an error
+/// @param[in] i_target
+/// @param[in] i_status the status of the last training run
+/// @param[in] i_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in] i_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode error_on_draminit_failure(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint64_t& i_status,
+        const uint8_t (&i_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        const PMU_SMB_DDR5U_1D_t& i_struct)
+{
+    uint8_t l_error_on_failure;
+    FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_ERROR_ON_FAILURE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
+                            l_error_on_failure) );
+
+    // If error on failure is disabled, exit out of the function
+    if(fapi2::ENUM_ATTR_ODY_DRAMINIT_ERROR_ON_FAILURE_DISABLE == l_error_on_failure)
+    {
+        FAPI_INF_NO_SBE(TARGTIDFORMAT
+                        " will not error on a draminit failure as ATTR_ODY_DRAMINIT_ERROR_ON_FAILURE is set to DISABLE", TARGTID);
+        return fapi2::FAPI2_RC_SUCCESS;
+    }
+
+    // Error? ID what failed and assert out
+    if(has_draminit_failure(i_status, i_start_bad_bits, i_struct))
+    {
+        uint8_t l_current_bad_bits_phy[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT]__attribute__ ((aligned (8))) = {};
+        extract_disable_bits(i_struct, l_current_bad_bits_phy);
+        bad_bits_per_rank_mc l_bad_bits_per_rank_mc;
+        bool l_bits_in_mc_perspective = false;
+        uint8_t l_has_swizzle_detect_passed = 0;
+
+        std::vector<mss::rank::info<mss::mc_type::ODYSSEY>> l_rank_infos;
+
+        uint32_t l_mail_bitmap;
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MAIL_MESSAGE_BITMAP, i_target , l_mail_bitmap));
+
+        // If swizzle detect has passed, knock out DRAM with a bad DQ0
+        // No need to count these as bad at this time, the algorithm will do that below
+        FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT, i_target, l_has_swizzle_detect_passed));
+
+        // Get the rank infos
+        FAPI_TRY(mss::rank::ranks_on_port<mss::mc_type::ODYSSEY>(i_target, l_rank_infos));
+
+        // Only do the swizzle if the
+        if(l_has_swizzle_detect_passed == fapi2::ENUM_ATTR_MSS_ODY_PASSED_SWIZZLE_DETECT_PASSED)
+        {
+            l_bits_in_mc_perspective = true;
+
+            // Loops over all configured ranks
+            for(const auto& l_rank_info : l_rank_infos)
+            {
+                const auto& l_phy_rank = l_rank_info.get_phy_rank();
+
+                for(uint8_t l_phy_byte = 0; l_phy_byte < mss::ody::MAX_BYTES_PER_PORT; ++l_phy_byte)
+                {
+                    const auto l_mc_byte = mss::ody::PHY_TO_MC_BYTE[l_phy_byte];
+                    FAPI_TRY(swizzle_bad_bits_phy_to_mc(i_target,
+                                                        l_phy_rank,
+                                                        l_phy_byte,
+                                                        l_current_bad_bits_phy[l_phy_rank][l_mc_byte],
+                                                        l_current_bad_bits_phy[l_phy_rank][l_mc_byte]));
+                }
+            }
+        }
+
+        // Get the bytes into uint32_t for rank0 and rank1 for start bad bits
+        setup_bad_bit_bytes(l_rank_infos, l_current_bad_bits_phy, l_bad_bits_per_rank_mc);
+
+        FAPI_ASSERT(false, fapi2::ODY_DRAMINIT_NOT_CLEAN()
+                    .set_PORT_TARGET(i_target)
+                    .set_BAD_BITS_R0_BYTE0_3(l_bad_bits_per_rank_mc.iv_bad_bits_byte0_3[0])
+                    .set_BAD_BITS_R0_BYTE4_7(l_bad_bits_per_rank_mc.iv_bad_bits_byte4_7[0])
+                    .set_BAD_BITS_R0_BYTE8_9(l_bad_bits_per_rank_mc.iv_bad_bits_byte8_9[0])
+                    .set_BAD_BITS_R1_BYTE0_3(l_bad_bits_per_rank_mc.iv_bad_bits_byte0_3[1])
+                    .set_BAD_BITS_R1_BYTE4_7(l_bad_bits_per_rank_mc.iv_bad_bits_byte4_7[1])
+                    .set_BAD_BITS_R1_BYTE8_9(l_bad_bits_per_rank_mc.iv_bad_bits_byte8_9[1])
+                    .set_BITS_IN_MC_PERSPECTIVE(l_bits_in_mc_perspective)
+                    .set_TRAINING_STATUS(i_status)
+                    .set_CS_TEST_FAIL(i_struct.CsTestFail)
+                    .set_MAIL_BITMAP(l_mail_bitmap),
+                    TARGTIDFORMAT " draminit took an error and exiting on an error was requested. See FFDC for details of the failure",
+                    TARGTID);
+    }
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Attempts to recover from any errors found during draminit - will not run if no errors occured
 /// @param[in] i_target the memory port on which to operate
 /// @param[in,out] io_status the status of the last training run
@@ -5343,6 +5434,10 @@ fapi2::ReturnCode handle_draminit_recovery(const fapi2::Target<fapi2::TARGET_TYP
     uint8_t l_recovery_enable;
     FAPI_TRY( FAPI_ATTR_GET(fapi2::ATTR_ODY_DRAMINIT_RECOVERY_ENABLE, fapi2::Target<fapi2::TARGET_TYPE_SYSTEM>(),
                             l_recovery_enable) );
+
+    // Checks if the system is set to error on any draminit failure and exits if we have an error
+    // If not, the code will proceed from here
+    FAPI_TRY(error_on_draminit_failure(i_target, io_status, io_start_bad_bits, io_struct));
 
     // Only run the recovery if it's requested
     // Default is to request this, but it gives the user an out for manufacturing modes or wanting to run quickly

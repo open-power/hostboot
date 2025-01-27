@@ -104,9 +104,31 @@
     </attribute>
 
     <attribute>
+        <id>ATTR_ODY_DRAMINIT_ERROR_ON_FAILURE</id>
+        <targetType>TARGET_TYPE_SYSTEM</targetType>
+        <description>Attribute to enable or disable draminit erroring if a fatal
+            Synopsys error was found or new bad bits were found in a training run.
+            This attribute takes precedence over ATTR_ODY_DRAMINIT_RECOVERY_ENABLE
+        </description>
+        <valueType>uint8</valueType>
+        <enum>
+            DISABLE = 0,
+            ENABLE = 1
+        </enum>
+        <default>0</default>
+        <writeable/>
+        <sbeAttrSync toSBE="1" fromSBE="0" chipTypes="ody">
+          <targetTypes>TARGET_TYPE_SYSTEM</targetTypes>
+        </sbeAttrSync>
+    </attribute>
+
+    <attribute>
         <id>ATTR_ODY_DRAMINIT_RECOVERY_ENABLE</id>
         <targetType>TARGET_TYPE_SYSTEM</targetType>
-        <description>Attribute to enable or disable draminit recovery</description>
+        <description>
+            Attribute to enable or disable draminit recovery.
+            ATTR_ODY_DRAMINIT_ERROR_ON_FAILURE takes precedence over this attribute
+        </description>
         <valueType>uint8</valueType>
         <enum>
             DISABLE = 0,

@@ -89,6 +89,61 @@
 
    <hwpError>
     <sbeError/>
+    <rc>RC_ODY_DRAMINIT_NOT_CLEAN</rc>
+    <description>Ody draminit run was not clean. This assert is caused by a bad training run and ATTR_ODY_DRAMINIT_ERROR_ON_FAILURE.
+    [mail_message  :           bit no (left to right)]
+    END_OF_INITILIAZATION         : 0
+    END_OF_FINE_WRITE_LEVELING    : 1
+    END_OF_READ_ENABLE_TRAINING   : 2
+    END_OF_RD_DLY_CNTR_OPT        : 3
+    END_OF_WR_DLY_CNTR_OPT        : 4
+    END_OF_2D_RD_DLY_V_CNTR_OPT   : 5
+    END_OF_2D_WR_DLY_V_CNTR_OPT   : 6
+    END_OF_MAX_RD_LAT_TRAINING    : 7
+    END_OF_RD_DQ_DSKEW_TRAINING   : 8
+    TRAINING_STAGE_RESERVED       : 9
+    END_OF_CS_CA_TRAINING        : 10
+    END_OF_RCD_QCS_QCA_TRAINING  : 11
+    END_OF_LRDIMM_MREP_TRAINING  : 12
+    END_OF_LRDIMM_DWL_TRAINING   : 13
+    END_OF_LRDIMM_MRD_TRAINING   : 14
+    END_OF_LRDIMM_MWD_TRAINING   : 15
+    GEN_WRT_NOISE_SYN            : 16
+    END_OF_MPR_RD_DLY_CNTR_OPT   : 17
+    END_OF_WR_LVL_COARSE_DLY     : 18
+    UNKNOWN_MAJOR_MESSAGE        : 19
+    SUCCESSFUL_COMPLETION        : 20
+    FAILED_COMPLETION            : 21
+    </description>
+    <ffdc>PORT_TARGET</ffdc>
+    <ffdc>BAD_BITS_R0_BYTE0_3</ffdc>
+    <ffdc>BAD_BITS_R0_BYTE4_7</ffdc>
+    <ffdc>BAD_BITS_R0_BYTE8_9</ffdc>
+    <ffdc>BAD_BITS_R1_BYTE0_3</ffdc>
+    <ffdc>BAD_BITS_R1_BYTE4_7</ffdc>
+    <ffdc>BAD_BITS_R1_BYTE8_9</ffdc>
+    <ffdc>TRAINING_STATUS</ffdc>
+    <ffdc>CS_TEST_FAIL</ffdc>
+    <ffdc>MAIL_BITMAP</ffdc>
+    <ffdc>BITS_IN_MC_PERSPECTIVE</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>LOW</priority>
+    </callout>
+    <callout>
+      <target>PORT_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>PORT_TARGET</target>
+    </deconfigure>
+    <gard>
+      <target>PORT_TARGET</target>
+    </gard>
+  </hwpError>
+
+   <hwpError>
+    <sbeError/>
     <rc>RC_ODY_DRAMINIT_NEW_BAD_BITS_FOUND</rc>
     <description>Ody draminit's recovery algorithm found new bad bits.</description>
     <ffdc>PORT_TARGET</ffdc>

@@ -3903,6 +3903,21 @@ inline bool has_new_bad_bits(const uint8_t (&i_start_bad_bits)[BAD_BITS_RANKS][B
     return memcmp(l_current_bad_bits, i_start_bad_bits, sizeof i_start_bad_bits) != MEMCMP_EQUAL;
 }
 
+///
+/// @brief Returns true if this message block contains new bad bits
+/// @param[in] i_status the status from training
+/// @param[in] i_start_bad_bits the starting bad bits
+/// @param[in] i_struct the structure containing the current bad bits
+/// @return true if the recovery loop needs to run
+///
+inline bool has_draminit_failure(const uint8_t i_status,
+                                 const uint8_t (&i_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+                                 const PMU_SMB_DDR5U_1D_t& i_struct)
+{
+    return mss::ody::phy::has_address_fails(i_status, i_struct) ||
+           mss::ody::phy::has_new_bad_bits(i_start_bad_bits, i_struct);
+}
+
 
 ///
 /// @brief Returns true if this message block contains new bad bits
@@ -3919,8 +3934,7 @@ inline bool is_recovery_loop_needed(const uint8_t i_status,
                                     const uint64_t i_loop_num,
                                     const uint64_t i_max_loop_num)
 {
-    return (mss::ody::phy::has_address_fails(i_status, i_struct) ||
-            mss::ody::phy::has_new_bad_bits(i_start_bad_bits, i_struct)) &&
+    return has_draminit_failure(i_status, i_start_bad_bits, i_struct) &&
            i_loop_num <= i_max_loop_num;
 }
 
@@ -3973,6 +3987,19 @@ fapi2::ReturnCode run_training_helper(const fapi2::Target<fapi2::TARGET_TYPE_MEM
 /// @note PhyRxTxPPTerr triggers if any DRAM failed to train and therefore is masked off in the case of training recovery was run
 ///
 fapi2::ReturnCode mask_PhyRxTxPPTerr(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target);
+
+///
+/// @brief Checks if ATTR_ODY_DRAMINIT_ERROR_ON_FAILURE is set and there are errors, if so, exits with an error
+/// @param[in] i_target
+/// @param[in] i_status the status of the last training run
+/// @param[in] i_start_bad_bits the starting bad bits before this training run - MC byte and PHY rank format
+/// @param[in] i_struct the draminit message block
+/// @return fapi2::FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode error_on_draminit_failure(const fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>& i_target,
+        const uint64_t& i_status,
+        const uint8_t (&i_start_bad_bits)[BAD_BITS_RANKS][BAD_DQ_BYTE_COUNT],
+        const PMU_SMB_DDR5U_1D_t& i_struct);
 
 ///
 /// @brief Attempts to recover from any errors found during draminit - will not run if no errors occured
