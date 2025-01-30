@@ -26,3 +26,7 @@ objdump/
 *.cppcheck
 cpptools/
 *.pyc
+.cache/
+.vscode/
+compile_commands.json
+
