@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1286,20 +1286,8 @@ void getMemPowerMessageData(Occ *i_occ,
     index += 3;
     size_t offsetNumOcmbs = index++; // fill in at end
 
-    size_t numOcmbs = 0;
-    if ((chipFanCfm > 0) && (maxDDIMMPower > 0) && (maxProcPreheatPower > 0))
-    {
-        // fill in details of the memory config
-        numOcmbs = ocmbPowerData(i_occ, o_data, index);
-    }
-    else
-    {
-        TMGT_INF("getMemPowerMessageData: CHIP_FAN_CFM=%d, MAX_DIMM_POWER=%d "
-                 "MAX_PREHEAT_POWER=%d (WOF Memory power credit disabled)",
-                 chipFanCfm, maxDDIMMPower, maxProcPreheatPower);
-    }
-
-    o_data[offsetNumOcmbs] = numOcmbs;
+    // fill in details of the memory config
+    o_data[offsetNumOcmbs] = ocmbPowerData(i_occ, o_data, index);;
     o_size = index;
 }
 

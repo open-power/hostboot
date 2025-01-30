@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -428,6 +428,13 @@ void updateDimmPowerUtil(Target *sys)
                 lastPoint = utilValue;
             }
         }
+
+        if (numPoints == 0)
+        {
+            // If no utilPoints were found, use 30% and 50%
+            utilPoints[numPoints++] = 30;
+            utilPoints[numPoints++] = 50;
+        }
     }
     else
     {
@@ -482,7 +489,8 @@ void updateDimmPowerUtil(Target *sys)
 // Calculate preheat power (and full power) for a single OCMB
 uint32_t calculatePreheatPower(fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP> i_ocmbFapiTarget,
                                bool detailedTrace,
-                               uint32_t & ocmb_full_power)
+                               uint32_t & ocmb_full_power,
+                               const uint16_t chipCfm)
 {
     uint32_t ocmb_preheat_power = 0;
     ocmb_full_power = 0;
@@ -527,18 +535,22 @@ uint32_t calculatePreheatPower(fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP> i_oc
         // Read HWP output:
         const uint32_t maxPower = l_portTarget->getAttr<ATTR_EXP_PORT_MAXPOWER>();
 
-        // Calculate the preheat power for this DIMM (PREHEAT is in c% (0.01%))
-        const uint32_t l_preheatPower = maxPower * l_preheat/10000.0;
-        if (detailedTrace)
+        uint32_t l_preheatPower = 0;
+        if (chipCfm > 0)
         {
-            // Get list of functional DIMMs associated with this MEM_PORT
-            TargetHandleList dimm_list;
-            getChildAffinityTargets(dimm_list, l_portTarget, CLASS_LOGICAL_CARD, TYPE_DIMM);
+            // Calculate the preheat power for this DIMM (PREHEAT is in c% (0.01%))
+            l_preheatPower = maxPower * l_preheat/10000.0;
+            if (detailedTrace)
+            {
+                // Get list of functional DIMMs associated with this MEM_PORT
+                TargetHandleList dimm_list;
+                getChildAffinityTargets(dimm_list, l_portTarget, CLASS_LOGICAL_CARD, TYPE_DIMM);
 
-            TMGT_INF("memPowerPreheat:   OCMB%d/port%d HUID: 0x%08X, "
-                 "preheat: %d cPercent, power: %dcW (%d dimms)",
-                 l_ocmb_pos, l_port_unit, get_huid(l_portTarget), l_preheat,
-                 l_preheatPower, dimm_list.size());
+                TMGT_INF("memPowerPreheat:   OCMB%d/port%d HUID: 0x%08X, "
+                         "preheat: %d cPercent, power: %dcW (%d dimms)",
+                         l_ocmb_pos, l_port_unit, get_huid(l_portTarget), l_preheat,
+                         l_preheatPower, dimm_list.size());
+            }
         }
 
         // Add the full power for the port (no preheat)
@@ -560,7 +572,8 @@ uint32_t calculatePreheatPower(fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP> i_oc
  * @param[in] i_fapi_target_list - list of FAPI OCMB targets
  */
 errlHndl_t memPowerPreheat(Target *sys,
-                     std::vector < fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP>> i_fapi_target_list)
+                     std::vector < fapi2::Target< fapi2::TARGET_TYPE_OCMB_CHIP>> i_fapi_target_list,
+                     const uint16_t chipCfm)
 {
     errlHndl_t err = nullptr;
     TMGT_INF("memPowerPreheat: Calculating preheat power");
@@ -593,7 +606,8 @@ errlHndl_t memPowerPreheat(Target *sys,
                     dimmPreheatPower[ocmbIndex][point] =
                         calculatePreheatPower(ocmb_fapi_target,
                                               (point == 0),
-                                              dimmFullPower[ocmbIndex][point]);
+                                              dimmFullPower[ocmbIndex][point],
+                                              chipCfm);
                     ++ocmbIndex;
                 } // for each ocmb
             }
@@ -1477,6 +1491,8 @@ errlHndl_t calcMemThrottles()
         std::vector < fapi2::Target
             < fapi2::TARGET_TYPE_OCMB_CHIP>> l_fapi_targets_this_proc;
 
+        auto chipFanCfm = proc_target->getAttr<ATTR_CHIP_FAN_CFM>();
+
         // Get functional OCMBs associated with this processor
         TargetHandleList ocmb_list;
         getChildAffinityTargets(ocmb_list, proc_target, CLASS_CHIP, TYPE_OCMB_CHIP);
@@ -1538,7 +1554,7 @@ errlHndl_t calcMemThrottles()
             {
                 //Calculate Preheat Power for DIMMs
                 // (must be run with OCMB chips under a single processor)
-                preheatErr = memPowerPreheat(sys, l_fapi_targets_this_proc);
+                preheatErr = memPowerPreheat(sys, l_fapi_targets_this_proc, chipFanCfm);
                 if (preheatErr)
                 {
                     // Collect traces at time of failure

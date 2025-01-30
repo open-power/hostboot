@@ -1018,7 +1018,7 @@
     <simpleType>
       <array>10</array>
       <uint8_t>
-        <default>25,50,75,0,0,0,0,0,0,0</default>
+        <default>30,50,0,0,0,0,0,0,0,0</default>
       </uint8_t>
     </simpleType>
     <persistency>non-volatile</persistency>
@@ -8882,7 +8882,7 @@
        The number of spareable core errors that have been seen on this proc
        chip in the current IPL.  Once this value requals ATTR_SPARE_CORES
        there are no more spares available on this chip.
-       Value is in terms of SMT4 (small) cores regardless of fused mode.  
+       Value is in terms of SMT4 (small) cores regardless of fused mode.
     </description>
     <id>SPARE_CORES_DEPLOYED</id>
     <persistency>volatile-zeroed</persistency>
