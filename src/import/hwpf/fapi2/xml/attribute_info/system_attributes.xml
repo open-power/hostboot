@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2015,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2015,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -164,7 +164,7 @@
         MNFG_IB_FREQ_BIAS_LOW               = 75,
         MNFG_POLICY_FLAG_AVAIL_34           = 79,
         MNFG_POLICY_FLAG_AVAIL_35           = 80,
-        MNFG_POLICY_FLAG_AVAIL_36           = 81,
+        MNFG_DISABLE_TWO_SYMBOL_CORRECTION  = 81,
         MNFG_TEST_SPARE_CORES               = 82,
         MNFG_DDR5_ECS_TEST                  = 83,
         MNFG_POLICY_FLAG_AVAIL_39           = 84,

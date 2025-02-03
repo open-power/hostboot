@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2018,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2018,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -452,73 +452,26 @@ fapi_try_exit:
 }
 
 ///
-/// @brief Read the read ECC Control register
+/// @brief Unit test helper for setting up TCE correction
 /// @tparam MC the memory controller type
 /// @tparam T the fapi2 target type of the target
 /// @tparam TT the class traits for the port
 /// @param[in] i_target the target
-/// @param[out] o_buffer the buffer to write the register data into
+/// @param[in] i_tce_disable value of MNFG_DISABLE_TWO_SYMBOL_CORRECTION
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
 template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode read_recr_register( const fapi2::Target<T>& i_target, fapi2::buffer<uint64_t>& o_buffer )
+fapi2::ReturnCode setup_tce_correction_helper (const fapi2::Target<T>& i_target,
+        const bool i_tce_disable)
 {
-    FAPI_TRY( fapi2::getScom(i_target, TT::ECC_REG, o_buffer) );
+    fapi2::buffer<uint64_t> l_data;
 
-    FAPI_INF_NO_SBE( "Read ECC Control register is 0x%016lx for " TARGTIDFORMAT, uint64_t(o_buffer), TARGTID );
+    FAPI_TRY(fapi2::getScom(i_target, TT::ECC_REG, l_data));
+    l_data.writeBit<TT::RECR_TCE_CORRECTION>(!i_tce_disable);
+    FAPI_TRY(fapi2::putScom(i_target, TT::ECC_REG, l_data));
 
 fapi_try_exit:
     return fapi2::current_err;
-}
-
-///
-/// @brief Write to RECR register
-/// @tparam MC the memory controller type
-/// @tparam T the fapi2 target type of the target
-/// @tparam TT the class traits for the port
-/// @param[in] i_target the target
-/// @param[in] i_buffer the buffer that holds the register data to write
-/// @return FAPI2_RC_SUCCESS if and only if ok
-///
-template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
-fapi2::ReturnCode write_recr_register( const fapi2::Target<T>& i_target, const fapi2::buffer<uint64_t>& i_buffer )
-{
-    FAPI_INF_NO_SBE( "Change Read ECC Control register to 0x%016lx for " TARGTIDFORMAT,  i_buffer, TARGTID );
-
-    FAPI_TRY( fapi2::putScom(i_target, TT::ECC_REG, i_buffer) );
-
-fapi_try_exit:
-    return fapi2::current_err;
-}
-
-///
-/// @brief Get the tce correction enable value from RECR
-/// @tparam MC the memory controller type
-/// @tparam TT the class traits for the port
-/// @param[in] i_data the data buffer containing the RECR register
-/// @param[out] o_value TCE_CORRECTION_ENABLE value (on or off)
-///
-template< mss::mc_type MC, typename TT = portTraits<MC> >
-void get_tce_correction( const fapi2::buffer<uint64_t>& i_data, mss::states& o_value )
-{
-    o_value = i_data.template getBit<TT::RECR_TCE_CORRECTION>() ? mss::states::ON : mss::states::OFF;
-
-    FAPI_INF_NO_SBE( "TCE_CORRECTION_ENABLE: %lu", o_value );
-}
-
-///
-/// @brief Sets tce correction enable in buffer
-/// @tparam MC the memory controller type
-/// @tparam TT the class traits for the port
-/// @param[in,out] io_data the target data buffer
-/// @param[in] i_value TCE_CORRECTION_ENABLE value (on or off) to set
-///
-template< mss::mc_type MC, typename TT = portTraits<MC> >
-void set_tce_correction( fapi2::buffer<uint64_t>& io_data, const mss::states i_value )
-{
-    FAPI_INF_NO_SBE( "Set TCE_CORRECTION_ENABLE to %lu", i_value);
-
-    io_data.template writeBit<TT::RECR_TCE_CORRECTION>(i_value);
 }
 
 ///
@@ -529,23 +482,14 @@ void set_tce_correction( fapi2::buffer<uint64_t>& io_data, const mss::states i_v
 /// @param[in] i_target the target
 /// @return FAPI2_RC_SUCCESS if and only if ok
 ///
-template< mss::mc_type MC, fapi2::TargetType T, typename TT = portTraits<MC> >
+template< mss::mc_type MC, fapi2::TargetType T >
 fapi2::ReturnCode setup_tce_correction (const fapi2::Target<T>& i_target)
 {
-    fapi2::buffer<uint64_t> l_data;
-    bool l_erepairs_disabled = false;
-    mss::states l_state = mss::OFF;
+    bool l_tce_disable = false;
 
     // Check for manufacturing disable dram repair flag to disable TCE correction
-    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_DISABLE_MEMORY_eREPAIR, l_erepairs_disabled));
-
-    FAPI_TRY(mss::read_recr_register<MC>(i_target, l_data ), TARGTIDFORMAT ": Failed read_recr_register",
-             TARGTID);
-    l_state = l_erepairs_disabled ? mss::OFF : mss::ON;
-    mss::set_tce_correction<MC>(l_data, l_state);
-
-    FAPI_TRY( mss::write_recr_register<MC>(i_target, l_data), TARGTIDFORMAT ": Failed write_recr_register",
-              TARGTID);
+    FAPI_TRY(mss::check_mfg_flag(fapi2::ENUM_ATTR_MFG_FLAGS_MNFG_DISABLE_TWO_SYMBOL_CORRECTION, l_tce_disable));
+    FAPI_TRY(mss::setup_tce_correction_helper<MC>(i_target, l_tce_disable));
 
 fapi_try_exit:
     return fapi2::current_err;

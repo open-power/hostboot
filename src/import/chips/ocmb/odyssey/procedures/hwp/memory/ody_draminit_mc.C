@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -67,6 +67,9 @@ extern "C"
             FAPI_INF_NO_SBE( "No DIMM's configured on " TARGTIDFORMAT " Skipping this OCMB_CHIP.", TARGTID ) ;
             return fapi2::FAPI2_RC_SUCCESS;
         }
+
+        // Disable TCE correction in MFG mode
+        FAPI_TRY(mss::setup_tce_correction<mss::mc_type::ODYSSEY>(i_target));
 
         // Enable Power management based off of mrw_power_control_requested
         FAPI_TRY( mss::enable_power_management<mss::mc_type::ODYSSEY>(i_target),
