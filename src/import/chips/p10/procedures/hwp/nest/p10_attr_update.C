@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,11 +57,14 @@ constexpr uint32_t BAD_LANE_VEC_SMP9 = 0x08040000;
 
 ///
 /// @brief Update attributes from module VPD MER0 #I
-/// @param[in] i_target   Processor chip target
+/// @param[in] i_target             Processor chip target
+/// @paran[in] i_interposer_present Flag indication presence/absence of interposer
 /// @return FAPI2_RC_SUCCESS, else error
 ///
 fapi2::ReturnCode
-p10_attr_update_mer0_pdI_mvpd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
+p10_attr_update_mer0_pdI_mvpd(
+    const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target,
+    const bool i_interposer_present)
 {
     FAPI_DBG("Start");
 
@@ -100,6 +103,18 @@ p10_attr_update_mer0_pdI_mvpd(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>&
         (l_vd_keyword_data[1] == 0x31))
     {
         FAPI_DBG("MER0 VD keyword: 0x3031, will not process #I");
+
+        if (i_interposer_present)
+        {
+            for (auto& l_iohs_target : i_target.getChildren<fapi2::TARGET_TYPE_IOHS>())
+            {
+                fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_Type l_bad_lane_vec_valid = fapi2::ENUM_ATTR_IOHS_MFG_BAD_LANE_VEC_VALID_TRUE;
+                fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_Type l_bad_lane_vec = 0;
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC_VALID, l_iohs_target, l_bad_lane_vec_valid));
+                FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_IOHS_MFG_BAD_LANE_VEC, l_iohs_target, l_bad_lane_vec));
+            }
+        }
+
         goto check_smp9;
     }
     else if ((l_vd_keyword_data[0] == 0x30) &&
@@ -243,8 +258,6 @@ p10_attr_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
 
     fapi2::ATTR_INTERPOSER_FEATURE_HW632898_Type l_hw632898 = fapi2::ENUM_ATTR_INTERPOSER_FEATURE_HW632898_FALSE;
 
-    FAPI_TRY(p10_attr_update_mer0_pdI_mvpd(i_target));
-
     FAPI_TRY(p10_get_interposer_ecid(i_target, l_interposer_ecid));
 
     FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INTERPOSER_REV, i_target, l_interposer_rev));
@@ -255,6 +268,8 @@ p10_attr_update(const fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP>& i_target)
     }
 
     FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_INTERPOSER_FEATURE_HW632898, i_target, l_hw632898));
+
+    FAPI_TRY(p10_attr_update_mer0_pdI_mvpd(i_target, (l_interposer_rev != fapi2::ENUM_ATTR_INTERPOSER_REV_NONE)));
 
 fapi_try_exit:
     FAPI_DBG("End");
