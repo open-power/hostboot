@@ -143,6 +143,17 @@ fapi2::ReturnCode pm_set_frequency(
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,
                 i_sys_target, l_sys_freq_core_ceil_mhz));
 
+        //As this attribute is platinit and writeable, more chances of
+        //data carried over during code-update.As this function is the
+        //first place to access, will init to 0 , if the value is non-zero
+        if (l_sys_freq_core_ceil_mhz)
+        {
+            l_sys_freq_core_ceil_mhz = 0;
+            FAPI_TRY(FAPI_ATTR_SET(fapi2::ATTR_FREQ_SYSTEM_CORE_CEILING_MHZ,
+                        i_sys_target, l_sys_freq_core_ceil_mhz));
+
+        }
+
         FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_FREQ_SYSTEM_CORE_FLOOR_MHZ_OVERRIDE,
                 i_sys_target, l_sys_freq_core_floor_mhz_ovr));
 
