@@ -105,7 +105,15 @@ CString::CString(char** p_buf, size_t capacity)
         m_buf        = new char[m_capacity]{};
         m_buf[m_len] = NULL;
         m_buf_ptr    = &m_buf;
-        if (p_buf) {*p_buf = m_buf;}
+        if (p_buf)
+        {
+            *p_buf = m_buf; // save the new char* to the user addr
+        }
+        else
+        {
+            // The user did not pass in an addr, so we must do the free
+            m_free = true;
+        }
         return;
     }
     m_len      = strlen(*p_buf);
@@ -353,6 +361,10 @@ size_t CString::find(const char* cstr, size_t pos) const
     {
         return npos;
     }
+    if (pos >= m_len)
+    {
+        return npos;
+    }
     char *start = m_buf+pos;
     char *p = STRSTR(start, cstr);
     if (p == nullptr)
@@ -368,6 +380,10 @@ size_t CString::find(const char* cstr, size_t pos, size_t n) const
     {
         return npos;
     }
+    if (pos >= m_len)
+    {
+        return npos;
+    }
     if (n == 0 || strlen(cstr) < n)
     {
         return npos;
@@ -378,6 +394,10 @@ size_t CString::find(const char* cstr, size_t pos, size_t n) const
 
 size_t CString::find(char c, size_t pos) const
 {
+    if (pos >= m_len)
+    {
+        return npos;
+    }
     char *start = m_buf+pos;
     char *p = STRCHR(start, c);
     if (p == nullptr)
@@ -399,6 +419,10 @@ size_t CString::find(const CString& s) const
 
 size_t CString::find(const CString& s, size_t pos) const
 {
+    if (pos >= m_len)
+    {
+        return npos;
+    }
     char *start = m_buf+pos;
     char *p = STRSTR(start, s.c_str());
     if (p == nullptr)

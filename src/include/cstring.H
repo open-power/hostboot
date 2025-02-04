@@ -117,8 +117,7 @@ class CString
      * @param[in] capacity : Size of the char array in bytes
      * @note  Any mods, including reallocs, change the Users char array.
      *        The User is responsible to free the char pointer. (m_free is false)
-     *        If p_buf is null,  then a char array is malloc'd to capacity==1
-     *        If *p_buf is null, then a char array is malloc'd to capacity
+     *        If p_buf or *p_buf is null, then a char array is malloc'd to capacity
      *        It is assumed that if *p_buf is not a nullptr, then *p_buf is a
      *        valid null terminated c-string.
      */

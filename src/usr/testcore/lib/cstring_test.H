@@ -271,6 +271,9 @@ class CStringTest : public CxxTest::TestSuite
         assert(s22 == "789");
         CString s23(s21, 8);
         assert(s23 == "");
+        CString s24((char**)nullptr, 16);
+        assert(s24.empty());
+        assert(s24.capacity() == 16);
 
         s1.resize(0);
         assert(s1 == "");
@@ -801,7 +804,6 @@ class CStringTest : public CxxTest::TestSuite
         c1.replace(0,3,"0123456",4,1);
         assert(c1 == "434");
         assert(c1.capacity() == 4);
-
         c1 = nullptr;
         c1.shrink_to_fit();
         assert(c1 == "");
@@ -866,7 +868,6 @@ class CStringTest : public CxxTest::TestSuite
         assert(strcmp(out,"abc123"));
         c1.copyout(out, 3);
         assert(strcmp(out,"abc"));
-
         s50 = "abc";
         assert(c1.find(s50, 100) == CString::npos);
         assert(c1.find(nullptr) == CString::npos);
@@ -874,7 +875,6 @@ class CStringTest : public CxxTest::TestSuite
         assert(c1.find(out, 0, 100) == CString::npos);
         assert(c1.find(s50, 100) == CString::npos);
         assert(c1.find('a', 100) == CString::npos);
-
         s50 = "abc";
         assert(c1.rfind(s50, 100) == CString::npos);
         assert(c1.rfind(nullptr) == CString::npos);
@@ -882,7 +882,6 @@ class CStringTest : public CxxTest::TestSuite
         assert(c1.rfind(out, 0, 100) == CString::npos);
         assert(c1.rfind(s50, 100) == CString::npos);
         assert(c1.rfind('a', 100) == CString::npos);
-
         assert(c1.substr(0) == "abc123");
         assert(c1.substr(1,2) == "bc");
         assert(c1.substr(5,1) == "3");
@@ -897,7 +896,6 @@ class CStringTest : public CxxTest::TestSuite
         assert(c1.compare("") == false);
         assert(c1.compare(CString("a")) == false);
         assert(c1.compare("a") == false);
-
         c1 = "";
         c1.shrink_to_fit();
         c2 = "";
@@ -906,7 +904,6 @@ class CStringTest : public CxxTest::TestSuite
         assert((c1 == nullptr) == false);
         assert(c1 == nullptr + c2);
         assert(c1 == c2 + nullptr);
-
         vec.clear();
         assert(vec.empty());
         vec = c1.split(nullptr);
