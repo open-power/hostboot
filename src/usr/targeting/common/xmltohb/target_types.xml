@@ -1411,6 +1411,12 @@
   </targetType>
 
   <targetType>
+    <!-- Adapts MRW type -->
+    <id>chip-processor-power11</id>
+    <parent>chip-processor-power10</parent>
+  </targetType>
+
+  <targetType>
     <!-- Trusted Platform Module -->
     <id>chip-tpm-cectpm</id>
     <parent>chip</parent>
