@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -40,6 +40,7 @@
 
 // TARG
 #include <targeting/targplatutil.H>
+#include <targeting/targplatreasoncodes.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/utilFilter.H>
 #include <util/misc.H> // isTargetingLoaded
@@ -144,6 +145,194 @@ void dumpHBAttrs(const uint32_t i_huid)
 
 #define TARG_NAMESPACE "TARGETING::UTIL"
 #define TARG_CLASS ""
+
+/**
+ * @brief Validate new targeting data against current/existing memory.  Check that the
+ *        TargetingHeader eyecatchers are valid, that the TargetingHeader number of
+ *        sections match, and that the types and sizes of each TargetingSection match.
+ *
+ * @param[in] Pointer to current targeting binary data, typically reserved memory.
+ * @param[in] Pointer to new targeting binary data. During HBRT this is the LID Structure.
+ *            During MPIPL this is PNOR.
+ * @param[out] Total size of all sections in the new targeting data.
+ * @return     errl on failure. Otherwise, nullptr.
+ */
+errlHndl_t validateData(void *i_pCurrentTargetingData,
+                        void *i_pNewTargetingData,
+                        size_t& o_newTotalSize)
+{
+    TRACFCOMP(g_trac_targeting, ENTER_MRK"validateData: %p %p",
+              i_pNewTargetingData, i_pCurrentTargetingData);
+
+    errlHndl_t l_errhdl = nullptr;
+
+    do
+    {
+        // Get pointers to TargetingHeader areas of each buffer
+        TargetingHeader* l_newHeader =
+            reinterpret_cast<TargetingHeader*>(i_pNewTargetingData);
+        TargetingHeader* l_currentHeader =
+            reinterpret_cast<TargetingHeader*>(i_pCurrentTargetingData);
+
+        // Validate LID Structure TargetingHeader eyecatcher
+        if (l_newHeader->eyeCatcher != PNOR_TARG_EYE_CATCHER)
+        {
+            TRACFCOMP(g_trac_targeting,
+                      "validateData: bad eyecatcher 0x%.8x found in "
+                      "LID Structure TargetingHeader",
+                      l_newHeader->eyeCatcher);
+
+            /*@
+             * @errortype
+             * @moduleid     TARGETING::TARG_RT_VALIDATEDATA
+             * @reasoncode   TARGETING::TARG_RT_BAD_EYECATCHER_LID
+             * @userdata1    Eyecatcher from new Targeting Data
+             * @userdata2    Expected eyecatcher
+             * @devdesc      Bad eyecatcher in the new data
+             * @custdesc     Firmware error doing code update
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               TARGETING::TARG_RT_VALIDATEDATA,
+                                               TARGETING::TARG_RT_BAD_EYECATCHER_LID,
+                                               l_newHeader->eyeCatcher,
+                                               PNOR_TARG_EYE_CATCHER,
+                                               true);
+
+            break;
+        }
+
+        // Validate Reserved Memory TargetingHeader eyecatcher
+        if (l_currentHeader->eyeCatcher != PNOR_TARG_EYE_CATCHER)
+        {
+            TRACFCOMP(g_trac_targeting,
+                      "validateData: bad eyecatcher 0x%.8x found in "
+                      "Reserved Memory TargetingHeader",
+                      l_currentHeader->eyeCatcher);
+
+            /*@
+             * @errortype
+             * @moduleid     TARGETING::TARG_RT_VALIDATEDATA
+             * @reasoncode   TARGETING::TARG_RT_BAD_EYECATCHER_MEM
+             * @userdata1    Eyecatcher from existing memory
+             * @userdata2    Expected eyecatcher
+             * @devdesc      Bad eyecatcher in the existing attribute data
+             * @custdesc     Firmware error doing code update
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               TARGETING::TARG_RT_VALIDATEDATA,
+                                               TARGETING::TARG_RT_BAD_EYECATCHER_MEM,
+                                               l_currentHeader->eyeCatcher,
+                                               PNOR_TARG_EYE_CATCHER,
+                                               true);
+
+            break;
+        }
+
+        // Validate TargetingHeader number of sections
+        if (l_newHeader->numSections != l_currentHeader->numSections)
+        {
+            TRACFCOMP(g_trac_targeting,
+                      "validateData: TargetingHeader number of sections "
+                      "miscompare, %d LID Structure sections, %d Reserved "
+                      "Memory sections",
+                      l_newHeader->numSections,
+                      l_currentHeader->numSections);
+
+            /*@
+             * @errortype
+             * @moduleid     TARGETING::TARG_RT_VALIDATEDATA
+             * @reasoncode   TARGETING::TARG_RT_SECTION_NUM_MISMATCH
+             * @userdata1    Number of sections in new memory
+             * @userdata2    Number of sections in existing mem
+             * @devdesc      Section number mismatch between new and old data
+             * @custdesc     Firmware error doing code update
+             */
+            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                               TARGETING::TARG_RT_VALIDATEDATA,
+                                               TARGETING::TARG_RT_SECTION_NUM_MISMATCH,
+                                               l_newHeader->numSections,
+                                               l_currentHeader->numSections,
+                                               true);
+
+            break;
+        }
+
+        // Count of attribute sections
+        size_t l_sectionCount = l_newHeader->numSections;
+        o_newTotalSize = 0;
+
+        // Find start to the first section in each buffer:
+        //          (header address + size of header + offset in header)
+        TargetingSection* l_newTargetingSection = reinterpret_cast<TargetingSection*>(
+                                                  reinterpret_cast<uint64_t>(l_newHeader)
+                                                + sizeof(TargetingHeader)
+                                                + l_newHeader->offsetToSections);
+
+        TargetingSection* l_currentTargetingSection = reinterpret_cast<TargetingSection*>(
+                                                      reinterpret_cast<uint64_t>(l_currentHeader)
+                                                    + sizeof(TargetingHeader)
+                                                    + l_currentHeader->offsetToSections);
+        // Loop on each TargetingSection
+        for (size_t i = 0;
+             i < l_sectionCount;
+             ++i, ++l_newTargetingSection, ++l_currentTargetingSection)
+        {
+            // Validate TargetingSection type
+            if (l_newTargetingSection->sectionType != l_currentTargetingSection->sectionType)
+            {
+                TRACFCOMP(g_trac_targeting,
+                          "validateData: TargetingSection types miscompare, "
+                          "LID Struct type 0x%0.2x, Rsvd Memory type 0x%0.2x",
+                          l_newTargetingSection->sectionType,
+                          l_currentTargetingSection->sectionType);
+
+                /*@
+                 * @errortype
+                 * @moduleid     TARGETING::TARG_RT_VALIDATEDATA
+                 * @reasoncode   TARGETING::TARG_RT_SECTION_MISMATCH
+                 * @userdata1    Section number
+                 * @userdata2[00:31]    Section type in the new memory
+                 * @userdata2[32:63]    Section type in the current memory
+                 * @devdesc      Section number mismatch between new and old data
+                 * @custdesc     Firmware error doing code update
+                 */
+                l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                   TARGETING::TARG_RT_VALIDATEDATA,
+                                                   TARGETING::TARG_RT_SECTION_MISMATCH,
+                                                   i,
+                                                   TWO_UINT32_TO_UINT64(l_newTargetingSection->sectionType,
+                                                                        l_currentTargetingSection->sectionType),
+                                                   true);
+
+                break;
+            }
+
+            // Validate TargetingSection size
+            if (l_newTargetingSection->sectionSize != l_currentTargetingSection->sectionSize)
+            {
+                TRACFCOMP(g_trac_targeting,
+                          "validateData: TargetingSection sizes miscompare, "
+                          "LID Struct size 0x%0.4x, Rsvd Memory size 0x%0.4x",
+                          l_newTargetingSection->sectionSize,
+                          l_currentTargetingSection->sectionSize);
+
+                // Just trace the size mismatch; Don't set rc or break
+            }
+
+            o_newTotalSize += l_newTargetingSection->sectionSize;
+        }
+        if (l_errhdl)
+        {
+            break;
+        }
+    } while(false);
+
+    TRACFCOMP(g_trac_targeting,
+              EXIT_MRK"validateData : o_newTotalSize=0x%llX",
+              o_newTotalSize);
+
+    return l_errhdl;
+}
 
 //******************************************************************************
 // createTracingError

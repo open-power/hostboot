@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -938,7 +938,7 @@ class TargetService
          *
          *  @return Target*
          */
-        Target* getTargetArray(void *i_attrData,
+        static Target* getTargetArray(void *i_attrData,
                                NODE_ID i_nodeId,
                                AttrRP *i_attrRP,
                                uint32_t &o_maxTargets);
@@ -965,10 +965,10 @@ class TargetService
          *
          *  @return Number of attributes in the arrays
          */
-        uint32_t getTargetAttributes(Target*i_target,
-                                     AttrRP *i_attrRP,
-                                     ATTRIBUTE_ID* &o_pAttrId,
-                                     AbstractPointer<void>* &o_ppAttrAddr);
+        static uint32_t getTargetAttributes(Target * i_target,
+                                            AttrRP * i_attrRP,
+                                            ATTRIBUTE_ID *& o_pAttrId,
+                                            AbstractPointer<void> *& o_ppAttrAddr);
         /**
          *  @brief Update the address that PEER_TARGET points to for a given target
          *

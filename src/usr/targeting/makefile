@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2023
+# Contributors Listed Below - COPYRIGHT 2011,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -47,6 +47,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/p10/common/include
 EXTRAINCDIR += ${ROOTPATH}/src/import/hwpf/fapi2/include/
 
 ATTR_RP_OBJS += attrrp.o
+ATTR_RP_OBJS += attrrp_common.o
 ATTR_RP_OBJS += attrsync.o
 ATTR_RP_OBJS += targplatutil.o
 

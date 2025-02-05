@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2013,2023
+# Contributors Listed Below - COPYRIGHT 2013,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -37,6 +37,7 @@ EXTRAINCDIR += ${ROOTPATH}/src/import/chips/common/utils/
 vpath %.C ${TARGETING_REL_PATH}
 
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrrp_rt.o
+HOSTBOOT_RUNTIME_SPECIFIC_OBJS += attrrp_common.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += start_rt.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += targplatutil.o
 HOSTBOOT_RUNTIME_SPECIFIC_OBJS += rt_targeting.o

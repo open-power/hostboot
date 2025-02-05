@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1915,11 +1915,17 @@ Target* TargetService::getTargetArray(void *i_attrData,
     // (FSP). The compiler should perform dead code elimination of this path on
     // platforms with 8 byte wide addresses (Hostboot), since the "if" check
     // can be statically computed at compile time.
-    if(TARG_ADDR_TRANSLATION_REQUIRED)
+    if(TARG_ADDR_TRANSLATION_REQUIRED
+#ifdef __HOSTBOOT_MODULE
+                // In MPIPL, there is an exception where we need to translate temporary instances
+                // to update the existing targeting data in reserved memory before the singletons
+                // start up. This is required to solve a rare instance when HBRT was not able to
+                // update the targeting data during a concurrent code update and PHYP had crashed.
+                || i_attrRP->shouldTranslate()
+#endif
+                )
     {
-        pNumTargets =
-            static_cast<uint32_t*>(i_attrRP->translateAddr(pNumTargets,
-                                                           i_nodeId));
+        pNumTargets = static_cast<uint32_t*>(i_attrRP->translateAddr(pNumTargets, i_nodeId));
     }
 
     TARG_ASSERT(pNumTargets, TARG_ERR_LOC
@@ -1943,7 +1949,15 @@ Target* TargetService::getTargetArray(void *i_attrData,
     // (FSP). The compiler should perform dead code elimination of this path on
     // platforms with 8 byte wide addresses (Hostboot), since the "if" check
     // can be statically computed at compile time.
-    if(TARG_ADDR_TRANSLATION_REQUIRED)
+    if(TARG_ADDR_TRANSLATION_REQUIRED
+#ifdef __HOSTBOOT_MODULE
+                // In MPIPL, there is an exception where we need to translate temporary instances
+                // to update the existing targeting data in reserved memory before the singletons
+                // start up. This is required to solve a rare instance when HBRT was not able to
+                // update the targeting data during a concurrent code update and PHYP had crashed.
+                || i_attrRP->shouldTranslate()
+#endif
+                )
     {
         l_targets =
             static_cast<Target(*)[]>(i_attrRP->translateAddr(l_targets,
@@ -1990,7 +2004,15 @@ uint32_t TargetService::getTargetAttributes(Target*i_target,
     // (FSP). The compiler should perform dead code elimination of this path on
     // platforms with 8 byte wide addresses (Hostboot), since the "if" check can
     // be statically computed at compile time.
-    if(TARG_ADDR_TRANSLATION_REQUIRED)
+    if(TARG_ADDR_TRANSLATION_REQUIRED
+#ifdef __HOSTBOOT_MODULE
+                // In MPIPL, there is an exception where we need to translate temporary instances
+                // to update the existing targeting data in reserved memory before the singletons
+                // start up. This is required to solve a rare instance when HBRT was not able to
+                // update the targeting data during a concurrent code update and PHYP had crashed.
+                || i_attrRP->shouldTranslate()
+#endif
+                )
     {
         o_pAttrId = static_cast<ATTRIBUTE_ID*>(
             i_attrRP->translateAddr(o_pAttrId, i_target));

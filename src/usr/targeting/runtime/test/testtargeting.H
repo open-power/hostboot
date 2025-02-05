@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -35,6 +35,7 @@
 #include <util/runtime/util_rt.H>
 #include <targeting/attrrp.H>
 #include <targeting/targplatreasoncodes.H>
+#include <targeting/targplatutil.H>
 
 namespace RT_TARG
 {
@@ -349,9 +350,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                         &l_headerLid->eyeCatcher));
                 *l_pEyeCatcher += 0x20202020;
                 size_t l_lidDataSize = 0;
-                l_err = RT_TARG::validateData(l_lidStruct,
-                                              l_rsvdMemPtr,
-                                              l_lidDataSize);
+                l_err = TARGETING::UTIL::validateData(l_rsvdMemPtr,
+                                                      l_lidStruct,
+                                                      l_lidDataSize);
                 if(ERRL_GETRC_SAFE(l_err) != TARG_RT_BAD_EYECATCHER_LID)
                 {
                     TS_FAIL("testValidateData> unexpected reason code from "
@@ -389,9 +390,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                     reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
                         &l_headerRsvd->eyeCatcher));
                 *l_pEyeCatcher += 0x00202020;
-                l_err = RT_TARG::validateData(l_lidStruct,
-                                              l_rsvdMemPtr,
-                                              l_lidDataSize);
+                l_err = TARGETING::UTIL::validateData(l_rsvdMemPtr,
+                                                      l_lidStruct,
+                                                      l_lidDataSize);
                 if(ERRL_GETRC_SAFE(l_err) != TARG_RT_BAD_EYECATCHER_MEM)
                 {
                     TS_FAIL("testValidateData> unexpected reason code from "
@@ -429,9 +430,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                     reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
                         &l_headerRsvd->numSections));
                 *l_pNumSections += 2;
-                l_err = RT_TARG::validateData(l_lidStruct,
-                                              l_rsvdMemPtr,
-                                              l_lidDataSize);
+                l_err = TARGETING::UTIL::validateData(l_rsvdMemPtr,
+                                                      l_lidStruct,
+                                                      l_lidDataSize);
                 if(ERRL_GETRC_SAFE(l_err) != TARG_RT_SECTION_NUM_MISMATCH)
                 {
                     TS_FAIL("testValidateData> unexpected reason code from "
@@ -482,9 +483,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 uint64_t l_expected =
                     TWO_UINT32_TO_UINT64(l_sectionLid[0].sectionType,
                                          l_sectionRsvd[0].sectionType);
-                l_err = RT_TARG::validateData(l_lidStruct,
-                                              l_rsvdMemPtr,
-                                              l_lidDataSize);
+                l_err = TARGETING::UTIL::validateData(l_rsvdMemPtr,
+                                                      l_lidStruct,
+                                                      l_lidDataSize);
                 if(ERRL_GETRC_SAFE(l_err) != TARG_RT_SECTION_MISMATCH)
                 {
                     TS_FAIL("testValidateData> unexpected reason code from "
@@ -525,9 +526,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                     reinterpret_cast<uint32_t*>(reinterpret_cast<uint64_t>(
                         &l_sectionRsvd[0].sectionSize));
                 *l_pSectionSize = l_sectionSize + 0x100;
-                l_err = RT_TARG::validateData(l_lidStruct,
-                                              l_rsvdMemPtr,
-                                              l_lidDataSize);
+                l_err = TARGETING::UTIL::validateData(l_rsvdMemPtr,
+                                                      l_lidStruct,
+                                                      l_lidDataSize);
                 if(l_err)
                 {
                     TS_FAIL("testValidateData> unexpected error log from "
@@ -540,9 +541,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                 }
 
                 // Validate LID Structure against Reserved Memory
-                l_err = RT_TARG::validateData(l_lidStruct,
-                                              l_rsvdMemPtr,
-                                              l_lidDataSize);
+                l_err = TARGETING::UTIL::validateData(l_rsvdMemPtr,
+                                                      l_lidStruct,
+                                                      l_lidDataSize);
                 if(l_err)
                 {
                     TS_FAIL("testValidateData> unexpected error log from "
@@ -598,9 +599,9 @@ class TargetingTestSuite : public CxxTest::TestSuite
                    number of sections match, and that the types of each
                    TargetingSection match. */
                 size_t l_lidDataSize = 0;
-                l_err = RT_TARG::validateData(l_lidStruct,
-                                              l_rsvdMemPtr,
-                                              l_lidDataSize);
+                l_err = TARGETING::UTIL::validateData(l_rsvdMemPtr,
+                                                      l_lidStruct,
+                                                      l_lidDataSize);
                 if(l_err)
                 {
                     TS_FAIL("testSaveRestoreAttrs> unexpected error log from "

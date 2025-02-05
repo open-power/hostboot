@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,9 +55,6 @@
 #include <secureboot/service.H>
 #include <kernel/bltohbdatamgr.H>
 #include <bootloader/bootloaderif.H>
-#include <common_ringId.H>
-#include <fapi2.H>
-#include <fapi2/plat_hwp_invoker.H>
 #include <sbeio/sbeioif.H>
 #include <util/crc32.H>
 #include <pldm/requests/pldm_fileio_requests.H>
@@ -66,13 +63,385 @@
 using namespace INITSERVICE;
 using namespace ERRORLOG;
 
-#include "attrrp_common.C"
+#define INVALID_NODE_ID iv_nodeContainer.size()
 
 namespace TARGETING
 {
 
     const char* ATTRRP_MSG_Q = "attrrpq";
     const char* ATTRRP_ATTR_SYNC_MSG_Q = "attrrpattrsyncq";
+    constexpr uint64_t MASK_OFF_UPPER_BYTE = 0x00FFFFFFFFFFFFFFULL;
+
+    errlHndl_t saveRestoreAttrs(void * i_reservedMem,
+                                void *io_pPnor)
+    {
+        errlHndl_t l_errhdl = nullptr;
+        AttrRP * l_pPnorAttrRP = nullptr;
+        AttrRP * l_pReservedAttrRP = nullptr;
+
+        do
+        {
+            // Because this is Hostboot IPL code there is only one node known to the running Hostboot instance.
+            // Since this function is only called in MPIPL before the singleton AttrRP and TargetService is initialized
+            // there isn't a clean way to get which node this HB instance running on. However, it doesn't matter for the
+            // purpose of this function. So we're just defaulting to NODE0 for the commonized interface.
+            const NODE_ID l_nodeId = NODE0;
+            const size_t SINGLE_NODE = 1;
+
+            // Create temporary AttrRP instance for current Reserved Memory data (current memory)
+            // NOTE: This funtion is called before the singleton is up since there won't be a way to update
+            //       the memory once the singleton is initialized. Hence the temporary instance.
+            l_pReservedAttrRP = new AttrRP(reinterpret_cast<TargetingHeader*>(i_reservedMem),
+                                           l_nodeId,
+                                           SINGLE_NODE);
+
+            // Create temporary AttrRP instance for new PNOR targeting data.
+            l_pPnorAttrRP = new AttrRP(reinterpret_cast<TargetingHeader*>(io_pPnor),
+                                       l_nodeId,
+                                       SINGLE_NODE);
+
+            TRACFCOMP( g_trac_targeting,
+                       ENTER_MRK"saveRestoreAttrs: %p %p %d",
+                       l_pPnorAttrRP, l_pReservedAttrRP, l_nodeId );
+
+            // Get pointer to array of targets in the targeting image (new memory)
+            uint32_t l_pnorMaxTargets = 0;
+            Target (*l_pnorTargets)[] = reinterpret_cast< Target(*)[] >(
+                TARGETING::TargetService::getTargetArray(io_pPnor,
+                                                         l_nodeId,
+                                                         l_pPnorAttrRP,
+                                                         l_pnorMaxTargets));
+
+            TRACFCOMP( g_trac_targeting,
+                       "Found %d targets in the PNOR for node %d",
+                       l_pnorMaxTargets,
+                       l_nodeId );
+
+            // Set up variables for getting attribute information for a target
+            uint32_t l_reservedAttrCount = 0;
+            ATTRIBUTE_ID* l_pReservedAttrId = nullptr;
+            AbstractPointer<void>* l_ppReservedAttrAddr = nullptr;
+
+            uint32_t l_pnorAttrCount = 0;
+            ATTRIBUTE_ID* l_pPnorAttrId = nullptr;
+            AbstractPointer<void>* l_ppPnorAttrAddr = nullptr;
+
+            // Walk through new PNOR Targets
+            for(uint32_t l_pnorTargIndex = 1;
+                (l_pnorTargIndex <= l_pnorMaxTargets);
+                ++l_pnorTargIndex)
+            {
+                // Get target for this pass through loop
+                Target *l_pnorTarget = &(*(l_pnorTargets))[l_pnorTargIndex - 1];
+
+                // Counts of how many new attribute values were kept
+                uint32_t l_kept_for_added_attr = 0;
+                uint32_t l_kept_for_unknown_size = 0;
+
+                // Get attribute information for a target in PNOR (new)
+                l_pnorAttrCount = TARGETING::TargetService::getTargetAttributes(l_pnorTarget,
+                                                               l_pPnorAttrRP,
+                                                               l_pPnorAttrId,
+                                                               l_ppPnorAttrAddr);
+
+                // Make sure that attributes were found
+                if(l_pnorAttrCount == 0)
+                {
+                    TRACFCOMP( g_trac_targeting,
+                               "Target %3d has no attributes", l_pnorTargIndex );
+                    // Continue to next target if there were no attributes
+                    continue;
+                }
+                TRACFCOMP( g_trac_targeting,
+                           "Target %3d has %d attribute(s)", l_pnorTargIndex, l_pnorAttrCount );
+
+                // Get key attributes and trace the information
+                ATTR_CLASS_type l_pnorTargetClass =
+                    l_pnorTarget->getAttr<ATTR_CLASS>(l_pPnorAttrRP,
+                                                     l_pPnorAttrId,
+                                                     l_ppPnorAttrAddr);
+                TRACDCOMP( g_trac_targeting,
+                           "Target %3d got class.", l_pnorTargIndex );
+
+                ATTR_TYPE_type l_pnorTargetType =
+                    l_pnorTarget->getAttr<ATTR_TYPE>(l_pPnorAttrRP,
+                                                    l_pPnorAttrId,
+                                                    l_ppPnorAttrAddr);
+                TRACDCOMP( g_trac_targeting,
+                           "Target %3d got type.", l_pnorTargIndex );
+
+                ATTR_HUID_type l_pnorTargetHuid =
+                    l_pnorTarget->getAttr<ATTR_HUID>(l_pPnorAttrRP,
+                                                    l_pPnorAttrId,
+                                                    l_ppPnorAttrAddr);
+                TRACDCOMP( g_trac_targeting,
+                           "Target %3d got huid.", l_pnorTargIndex );
+
+                ATTR_PHYS_PATH_type l_pnorTargetPhysPath =
+                    l_pnorTarget->getAttr<ATTR_PHYS_PATH>(l_pPnorAttrRP,
+                                                         l_pPnorAttrId,
+                                                         l_ppPnorAttrAddr);
+                TRACFCOMP( g_trac_targeting,
+                           "PNOR: Target %3d has %3d attrs, class %0.8x, type %0.8x, HUID 0x%0.8x, %s",
+                           l_pnorTargIndex,
+                           l_pnorAttrCount,
+                           l_pnorTargetClass,
+                           l_pnorTargetType,
+                           l_pnorTargetHuid,
+                           l_pnorTargetPhysPath.toString());
+
+                // Create bool used while checking if target exists in current data
+                bool targetMatched = false;
+
+                // Get pointer to array of targets in the targeting image for current Reserved Memory data
+                uint32_t l_maxTargetsReserved = 0;
+                Target (*l_targetsReserved)[] = reinterpret_cast< Target(*)[] >(
+                        TARGETING::TargetService::getTargetArray(i_reservedMem,
+                                                                l_nodeId,
+                                                                l_pReservedAttrRP,
+                                                                l_maxTargetsReserved));
+                Target * l_targetReserved = nullptr;
+
+                for(uint32_t l_reservedTargIndex = 1;
+                        (l_reservedTargIndex <= l_maxTargetsReserved);
+                        ++l_reservedTargIndex)
+                {
+                    // Get target for this pass through loop
+                    l_targetReserved = &(*(l_targetsReserved))[l_reservedTargIndex - 1];
+                    // Get attribute information for a target in Reserved Memory (cur)
+                    l_reservedAttrCount = TARGETING::TargetService::getTargetAttributes(l_targetReserved,
+                                                                                    l_pReservedAttrRP,
+                                                                                    l_pReservedAttrId,
+                                                                                    l_ppReservedAttrAddr);
+
+                    if((l_pnorTargetClass == l_targetReserved->getAttr<ATTR_CLASS>(l_pReservedAttrRP,
+                                                                                   l_pReservedAttrId,
+                                                                                   l_ppReservedAttrAddr))
+                       && (l_pnorTargetType == l_targetReserved->getAttr<ATTR_TYPE>(l_pReservedAttrRP,
+                                                                                    l_pReservedAttrId,
+                                                                                    l_ppReservedAttrAddr))
+                       && (l_pnorTargetPhysPath == l_targetReserved->getAttr<ATTR_PHYS_PATH>(l_pReservedAttrRP,
+                                                                                             l_pReservedAttrId,
+                                                                                             l_ppReservedAttrAddr)))
+                    {
+                        // Flag the match
+                        targetMatched = true;
+                        break;
+                    }
+                }
+
+                // Check if target was matched up
+                if(!targetMatched)
+                {
+                    TRACFCOMP( g_trac_targeting,
+                               "saveRestoreAttrs: Did not find target "
+                               "HUID 0x%0.8x, %s in Reserved Memory, "
+                               "Keeping targeting data from PNOR",
+                               l_pnorTargetHuid,
+                               l_pnorTargetPhysPath.toString());
+                    // Not an error
+                    // Go to next new PNOR target
+                    continue;
+                }
+
+                ATTR_HUID_type l_reservedTargetHuid = l_targetReserved->getAttr<ATTR_HUID>(l_pReservedAttrRP,
+                                                                                           l_pReservedAttrId,
+                                                                                           l_ppReservedAttrAddr);
+                TRACFCOMP( g_trac_targeting,
+                           "Rsvd Memory: HUID 0x%0.8x, attr cnt %d, AttrRP %p, pAttrId %p, ppAttrAddr %p",
+                           l_reservedTargetHuid,
+                           l_reservedAttrCount,
+                           l_pReservedAttrRP,
+                           l_pReservedAttrId,
+                           l_ppReservedAttrAddr);
+
+                // Compare attribute counts for new PNOR target and current
+                // Reserved Memory target to see if they differ or not
+                if(l_pnorAttrCount != l_reservedAttrCount)
+                {
+                    // Trace when the attribute counts differ
+                    TRACFCOMP( g_trac_targeting,
+                               "Attribute counts for target with HUID 0x%0.8x differ, "
+                               "PNOR count %d, Reserved Memory count %d",
+                               l_pnorTargetHuid,
+                               l_pnorAttrCount,
+                               l_reservedAttrCount);
+                }
+
+                // Walk through Attributes for the new PNOR target
+                for(uint32_t l_pnorAttrIndex = 0; (l_pnorAttrIndex < l_pnorAttrCount); ++l_pnorAttrIndex)
+                {
+                    // Get ID for attribute on this pass through loop
+                    ATTRIBUTE_ID* l_pComparisonAttrId = l_pPnorAttrId + l_pnorAttrIndex;
+                    TRACDCOMP( g_trac_targeting, "Attr %x", *l_pComparisonAttrId );
+
+                    // Get the Reserved Memory attribute value pointer
+                    void* l_pReservedAttr = nullptr;
+                    l_targetReserved->_getAttrPtr(*l_pComparisonAttrId,
+                                                  l_pReservedAttrRP,
+                                                  l_pReservedAttrId,
+                                                  l_ppReservedAttrAddr,
+                                                  l_pReservedAttr);
+
+                    // Check if attribute is in Reserved Memory data
+                    if(l_pReservedAttr != nullptr)
+                    {
+                        // Get the PNOR attribute value pointer
+                        void* l_pPnorAttr = nullptr;
+                        l_pnorTarget->_getAttrPtr(*l_pComparisonAttrId,
+                                                 l_pPnorAttrRP,
+                                                 l_pPnorAttrId,
+                                                 l_ppPnorAttrAddr,
+                                                 l_pPnorAttr);
+
+                        // Check if attribute is in PNOR data
+                        if(l_pPnorAttr == nullptr)
+                        {
+                            TRACFCOMP( g_trac_targeting,
+                                       ERR_MRK"saveRestoreAttrs: UNEXPECTEDLY Did "
+                                       "not find value pointer for attribute ID "
+                                       "0x%.8x, target HUID 0x%0.8x in PNOR",
+                                       *l_pComparisonAttrId,
+                                       l_pnorTargetHuid);
+                            /*@
+                             * @errortype
+                             * @moduleid     TARGETING::TARG_SAVERESTOREATTRS
+                             * @reasoncode   TARGETING::TARG_MISSING_ATTR
+                             * @userdata1    Attribute Id
+                             * @userdata2    HUID of target
+                             * @devdesc      Could not find attribute data in pnor
+                             * @custdesc     Firmware error doing code update
+                             */
+                            l_errhdl = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                                               TARGETING::TARG_SAVERESTOREATTRS,
+                                                               TARGETING::TARG_MISSING_ATTR,
+                                                               *l_pComparisonAttrId,
+                                                               l_pnorTargetHuid,
+                                                               ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
+                            break;
+                        }
+
+                        // Look up the size of the attribute
+                        uint32_t l_comparisonAttrSize = attrSizeLookup(*l_pComparisonAttrId);
+
+                        // Check that a valid size was returned for the attribute
+                        if(l_comparisonAttrSize == 0)
+                        {
+                            TRACFCOMP( g_trac_targeting,
+                                       "UNEXPECTEDLY Did not find size for "
+                                       "attribute ID 0x%.8x, target HUID 0x%0.8x "
+                                       "in Reserved Memory, Keeping value from PNOR",
+                                       *l_pComparisonAttrId,
+                                       l_reservedTargetHuid);
+
+                            // Increment for keeping value because size was unknown
+                            ++l_kept_for_unknown_size;
+
+                            // not an error
+                            // Continue with this target's next attribute
+                            continue;
+                        }
+
+                        // Check if new attribute value differs from current value
+                        if(memcmp(l_pReservedAttr, l_pPnorAttr, l_comparisonAttrSize) != 0)
+                        {
+                            TRACDCOMP( g_trac_targeting,
+                                       "Found differing values for attribute ID 0x%.8x, HUID 0x%0.8x",
+                                       *l_pComparisonAttrId,
+                                       l_pnorTargetHuid);
+
+                            TRACDBIN( g_trac_targeting,
+                                      "Reserved Memory value",
+                                      l_pReservedAttr,
+                                      l_comparisonAttrSize);
+
+                            TRACDBIN( g_trac_targeting,
+                                      "PNOR value",
+                                      l_pPnorAttr,
+                                      l_comparisonAttrSize);
+
+                            // Copy attribute value from current Reserved Memory
+                            // attribute to new PNOR attribute
+                            memcpy(l_pPnorAttr, l_pReservedAttr, l_comparisonAttrSize);
+                        }
+                    }
+                    else
+                    {
+                        TRACFCOMP( g_trac_targeting,
+                                   "Did not find attribute ID 0x%.8x, target HUID "
+                                   "0x%0.8x in Reserved Memory, Keeping value from PNOR",
+                                   *l_pComparisonAttrId,
+                                   l_pnorTargetHuid);
+
+                        // Increment for keeping value because attribute was added
+                        ++l_kept_for_added_attr;
+
+                        // not an error
+                        // Continue with this target's next attribute
+                        continue;
+                    }
+                } // for attributes
+
+                if((l_kept_for_added_attr != 0) || (l_kept_for_unknown_size != 0))
+                {
+                    TRACFCOMP( g_trac_targeting,
+                               "Kept PNOR value for %d added attribute(s) "
+                               "and for %d attribute(s) with unknown size",
+                               l_kept_for_added_attr,
+                               l_kept_for_unknown_size);
+                }
+            } // for targets
+        } while(false);
+
+        delete l_pPnorAttrRP;
+        l_pPnorAttrRP = nullptr;
+
+        delete l_pReservedAttrRP;
+        l_pReservedAttrRP = nullptr;
+
+        TRACFCOMP( g_trac_targeting, EXIT_MRK"saveRestoreAttrs");
+
+        return l_errhdl;
+    }
+
+    void* AttrRP::translateAddr(void* i_pAddress,
+                                const TARGETING::NODE_ID i_nodeId)
+    {
+        void* l_address = i_pAddress;
+        do
+        {
+            if(!shouldTranslate())
+            {
+                break;
+            }
+            l_address = reinterpret_cast<void*>( reinterpret_cast<uint64_t>(i_pAddress) & MASK_OFF_UPPER_BYTE);
+
+            if (i_nodeId >= AttrRP::INVALID_NODE_ID)
+            {
+                TRACFCOMP(g_trac_targeting, "ERROR: invalid nodeid=%d passed to translateAddr", i_nodeId);
+                break;
+            }
+
+            for (size_t i = 0; i < iv_nodeContainer[i_nodeId].sectionCount; ++i)
+            {
+                if ((iv_nodeContainer[i_nodeId].pSections[i].vmmAddress +
+                     iv_nodeContainer[i_nodeId].pSections[i].size) >=
+                     reinterpret_cast<uint64_t>(l_address))
+                {
+                    l_address = reinterpret_cast<void*>(
+                           iv_nodeContainer[i_nodeId].pSections[i].pnorAddress +
+                           reinterpret_cast<uint64_t>(l_address) -
+                           iv_nodeContainer[i_nodeId].pSections[i].vmmAddress);
+                    break;
+                }
+            }
+
+            TRACDCOMP(g_trac_targeting, "Translated %p to %p",
+                      i_pAddress, l_address);
+        } while (0);
+
+        return l_address;
+    }
 
     void* AttrRP::getBaseAddress(const NODE_ID i_nodeIdUnused)
     {
@@ -1430,10 +1799,6 @@ namespace TARGETING
     {
         do
         {
-            TRACFCOMP(g_trac_targeting, "AttrRP::populateAttrsForMpipl: "
-                      "In MPIPL, extending cache to be real memory" );
-            mm_extend(MM_EXTEND_REAL_MEMORY);
-
             // Copy RW, Heap Zero Init sections because we are not
             // running the isteps that set these attrs during MPIPL
             for (size_t i = 0; i < iv_sectionCount; ++i)
@@ -1865,7 +2230,7 @@ namespace TARGETING
                     if(l_persistedRwAttrMap[l_targetHuid].find(*l_attrId) == l_persistedRwAttrMap[l_targetHuid].end())
                     {
                         TRACFCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: HUID 0x%x  attr ID 0x%x is not found in the persistent section; keeping the new attribute value",
-                                  l_targetHuid, *l_attrId)
+                                  l_targetHuid, *l_attrId);
                         continue;
                     }
                     TRACDCOMP(g_trac_targeting, INFO_MRK"AttrRP::mergeAttributes: found attribute ID 0x%x HUID 0x%x in persistent data",

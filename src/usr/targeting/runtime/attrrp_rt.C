@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2018                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -33,7 +33,12 @@
 #include <sys/internode.h>
 #include <map>
 
-#include "../attrrp_common.C"
+#define TARG_NAMESPACE "TARGETING::"
+#define TARG_CLASS "AttrRP"
+
+// It is defined here to limit the scope within this file,
+// this file is also included in attrrp_rt.C
+#define INVALID_NODE_ID iv_nodeContainer.size()
 
 using namespace ERRORLOG;
 
@@ -281,93 +286,6 @@ namespace TARGETING
         io_taskRetErrl = l_errl;
     }
 
-    errlHndl_t AttrRP::nodeInfoInit(NodeInfo& io_nodeCont,
-                                    TargetingHeader* i_header,
-                                    const NODE_ID i_nodeId)
-    {
-        TRACFCOMP(g_trac_targeting, "AttrRP::nodeInfoInit %d", i_nodeId);
-        errlHndl_t l_errl = nullptr;
-
-        do
-        {
-            if ((NULL == i_header) ||
-                (i_header->eyeCatcher != PNOR_TARG_EYE_CATCHER))
-            {
-                /*@
-                 *   @errortype
-                 *   @moduleid          TARG_MOD_ATTRRP_RT
-                 *   @reasoncode        TARG_RC_BAD_EYECATCH
-                 *   @userdata1         Observed Header Eyecatch Value
-                 *   @userdata2         Memory address referenced.
-                 *
-                 *   @devdesc   The eyecatch value observed in memory does not
-                 *              match the expected value of
-                 *              PNOR_TARG_EYE_CATCHER and therefore the
-                 *              contents of the Attribute sections are
-                 *              unable to be parsed.
-                 *   @custdesc  A problem occurred during the IPL of the
-                 *              system.
-                 *              The eyecatch value observed in memory does not
-                 *              match the expected value and therefore the
-                 *              contents of the attribute sections are unable
-                 *              to be parsed.
-                 */
-                l_errl = new ErrlEntry(ERRL_SEV_UNRECOVERABLE,
-                                       TARG_MOD_ATTRRP_RT,
-                                       TARG_RC_BAD_EYECATCH,
-                                       NULL == i_header ?
-                                            0 : i_header->eyeCatcher,
-                                       reinterpret_cast<uint64_t>(i_header));
-                break;
-            }
-
-            // Save pointer to targeting image in reserved memory for this node
-            io_nodeCont.pTargetMap = reinterpret_cast<void*>(i_header);
-
-            // Allocate section structures based on section count in header
-            io_nodeCont.sectionCount = i_header->numSections;
-            io_nodeCont.pSections =
-                new AttrRP_Section[io_nodeCont.sectionCount]();
-
-            // Find start to the first section:
-            //          (header address + size of header + offset in header)
-            TargetingSection* l_section =
-                reinterpret_cast<TargetingSection*>(
-                    reinterpret_cast<uint64_t>(i_header) +
-                    sizeof(TargetingHeader) + i_header->offsetToSections
-                );
-
-            uint64_t l_offset = 0;
-
-            for (size_t i = 0; i < io_nodeCont.sectionCount; ++i, ++l_section)
-            {
-                io_nodeCont.pSections[i].type = l_section->sectionType;
-                io_nodeCont.pSections[i].size = l_section->sectionSize;
-
-                io_nodeCont.pSections[i].vmmAddress =
-                        static_cast<uint64_t>(
-                            TARG_TO_PLAT_PTR(i_header->vmmBaseAddress)) +
-                        i_header->vmmSectionOffset*i;
-                io_nodeCont.pSections[i].pnorAddress =
-                        reinterpret_cast<uint64_t>(i_header) + l_offset;
-
-                l_offset += ALIGN_PAGE(io_nodeCont.pSections[i].size);
-
-                TRACFCOMP(g_trac_targeting,
-                          "Decoded Attribute Section: %d, 0x%lx, 0x%lx, 0x%lx",
-                          io_nodeCont.pSections[i].type,
-                          io_nodeCont.pSections[i].vmmAddress,
-                          io_nodeCont.pSections[i].pnorAddress,
-                          io_nodeCont.pSections[i].size);
-            }
-            // mark this node container as valid
-            io_nodeCont.setIsValid(true);
-
-        } while(false);
-
-        return l_errl;
-    }
-
     void* AttrRP::getTargetMapPtr(const NODE_ID i_nodeId)
     {
         #define TARG_FN "getTargetMapPtr"
@@ -508,76 +426,6 @@ namespace TARGETING
 
         return l_nodeId;
         #undef TARG_FN
-    }
-
-    void AttrRP::getNodeId(const Target* i_pTarget, NODE_ID& o_nodeId) const
-    {
-        #define TARG_FN "getNodeId"
-
-        bool l_found = false;
-
-        // Initialize with invalid
-        o_nodeId = INVALID_NODE_ID;
-
-        // Check if we have a cached version first
-        static std::map<const Target*,NODE_ID> s_targToNodeMap;
-        auto l_nodeItr = s_targToNodeMap.find(i_pTarget);
-        if( l_nodeItr != s_targToNodeMap.end() )
-        {
-            o_nodeId = l_nodeItr->second;
-            return;
-        }
-
-        //find the node to which this target belongs
-        for(uint8_t i=0; i<INVALID_NODE_ID; ++i)
-        {
-           for(uint32_t j=0; j<iv_nodeContainer[i].sectionCount; ++j)
-           {
-               if(  iv_nodeContainer[i].pSections[j].type ==
-                                  SECTION_TYPE_PNOR_RO)
-               {
-                   TARG_DBG("%d/%d> pTargetMap=%p, end=%p", i, j, iv_nodeContainer[i].pTargetMap, (
-                        reinterpret_cast<uint8_t*>(
-                            iv_nodeContainer[i].pTargetMap) +
-                            iv_nodeContainer[i].pSections[j].size) );
-
-                 // This expects the pTarget to be always in range and !NULL.
-                 // If any invalid target is passed (which is still within the
-                 // RO Section scope) then behaviour is undefined.
-                 if( (i_pTarget >= iv_nodeContainer[i].pTargetMap) &&
-                     (i_pTarget < reinterpret_cast<Target*>((
-                        reinterpret_cast<uint8_t*>(
-                            iv_nodeContainer[i].pTargetMap) +
-                            iv_nodeContainer[i].pSections[j].size))) )
-                 {
-                     l_found = true;
-                     o_nodeId = i;
-                     s_targToNodeMap[i_pTarget] = i;
-                     TARG_DBG("Target %p is on node %d @ %p", i_pTarget, o_nodeId, &o_nodeId );
-                     break;
-                 }
-               }
-           }
-           if(l_found)
-           {
-              break;
-           }
-        }
-
-        #undef TARG_FN
-    }
-
-    void* AttrRP::translateAddr(void* i_pAddress,
-                                const Target* i_pTarget)
-    {
-        void* o_pTransAddr = i_pAddress;
-        if(i_pTarget != NULL)
-        {
-            NODE_ID l_nodeId = NODE0;
-            getNodeId(i_pTarget, l_nodeId);
-            o_pTransAddr =  translateAddr(i_pAddress, l_nodeId);
-        }
-        return o_pTransAddr;
     }
 
     void* AttrRP::translateAddr(void* i_pAddress,

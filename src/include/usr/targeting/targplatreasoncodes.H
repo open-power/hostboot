@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -71,6 +71,8 @@ enum PlatTargetingModuleId
     TARG_MOD_ATTR_TARGET_LINE_TO_DATA             = 0x8F,
     TARG_MOD_ATTR_GET_DATA_FROM_MAP               = 0x90,
     TARG_MOD_ATTR_TEXT_OVERRIDE                   = 0x91,
+    TARG_MPIPL_UPDATE_PREP                        = 0x92,
+    TARG_SAVERESTOREATTRS                         = 0x93,
 };
 
 /**
@@ -105,6 +107,8 @@ enum PlatTargetingReasonCode
     TARG_RC_MAX_ATTR_NAME_LENGTH   = TARG_COMP_ID | 0x95,
     TARG_RC_MAX_ATTR_VAL_LENGTH    = TARG_COMP_ID | 0x96,
     TARG_RC_NO_OUTPUT_GENERATED    = TARG_COMP_ID | 0x97,
+    TARG_BAD_ATTR_SIZES            = TARG_COMP_ID | 0x98,
+    TARG_MISSING_ATTR              = TARG_COMP_ID | 0x99,
 };
 
 } // End TARGETING namespace

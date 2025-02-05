@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -57,7 +57,6 @@
 //******************************************************************************
 // Forward declarations to allow friend functions to work
 //******************************************************************************
-#ifdef __HOSTBOOT_RUNTIME
 namespace ERRORLOG
 {
     class ErrlEntry;
@@ -68,7 +67,11 @@ namespace RT_TARG
                                           void *io_lidStructPtr,
                                           uint8_t i_instance);
 }
-#endif
+namespace TARGETING
+{
+    ERRORLOG::ErrlEntry* saveRestoreAttrs(void *i_rsvdMemPtr,
+                                          void *io_pnorPtr);
+}
 
 namespace fapi2
 {
@@ -969,6 +972,9 @@ class Target
         friend ERRORLOG::ErrlEntry* RT_TARG::saveRestoreAttrs(void *,
                                                               void *,
                                                               uint8_t);
+#else
+        friend ERRORLOG::ErrlEntry* TARGETING::saveRestoreAttrs(void *,
+                                                                void *);
 #endif
 
         friend class AttrRP;

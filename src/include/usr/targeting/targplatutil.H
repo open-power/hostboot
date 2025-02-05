@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -99,6 +99,21 @@ union occ_sensor_id_t
  *                      (default all targets)
  */
 void dumpHBAttrs(uint32_t i_huid = 0);
+
+/**
+ * @brief Validate new targeting data against current/existing memory.  Check that the
+ *        TargetingHeader eyecatchers are valid, that the TargetingHeader number of
+ *        sections match, and that the types and sizes of each TargetingSection match.
+ *
+ * @param[in] Pointer to current targeting binary data, typically reserved memory.
+ * @param[in] Pointer to new targeting binary data. During HBRT this is the LID Structure.
+ *            During MPIPL this is PNOR.
+ * @param[out] Total size of all sections in the new targeting data.
+ * @return     errl on failure. Otherwise, nullptr.
+ */
+errlHndl_t validateData(void *i_pCurrentTargetingData,
+                        void *i_pNewTargetingData,
+                        size_t& o_newTotalSize);
 
 /* @brief tryGetAttributes<Attrs...>
  *

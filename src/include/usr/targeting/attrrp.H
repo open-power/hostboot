@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -42,19 +42,48 @@
 #include <targeting/adapters/types.H>
 #include <targeting/common/targetservice.H>
 #include <targeting/common/attributeTank.H>
+#include <memory>
 
 namespace TARGETING
 {
 
-// Forward declaration of attribute section parsed information structure.
-struct AttrRP_Section;
+/** @struct AttrRP_Section
+ *  @brief Contains parsed information about each attribute section.
+ */
+struct AttrRP_Section
+{
+    // Section type
+    SECTION_TYPE type;
+
+    // Desired address in Attribute virtual address space
+    uint64_t     vmmAddress;
+
+    // Location in PNOR virtual address space
+    uint64_t     pnorAddress;
+
+    uint64_t     realMemAddress;
+
+    // Section size
+    uint64_t     size;
+};
+
+/**
+ * @brief Save/Restore attribute values from current Reserved Memory data into new PNOR data.
+ *        Used during MPIPL to ensure that concurrent code updates have been properly applied before
+ *        Target Service and AttrRP have started up. This is needed in rare cases when PHYP has crashed
+ *        and HBRT was not able to do this work.
+ * @param[in]     Pointer to current Reserved Memory targeting binary data
+ * @param[in/out] Pointer to new PNOR targeting binary data
+ * @return nullptr on success, else error log
+ */
+errlHndl_t saveRestoreAttrs(void * i_rsvdMemPtr,
+                            void * io_pnorPtr);
 
 // These constexprs are used by editPagePermissions function
 constexpr uint32_t DEFAULT_PERMISSIONS = 0xFFFFFFFF;
 constexpr uint8_t ALL_SECTION_TYPES = 0xFF;
 constexpr uint8_t MAX_ATTR_STR_LEN = 200;
 
-#ifdef __HOSTBOOT_RUNTIME
 /**
  *  @brief Structure used to store Node specific information
  */
@@ -94,7 +123,6 @@ struct NodeInfo
 
 };
 
-#endif
 
 /**
  *  @class AttrRP
@@ -121,6 +149,8 @@ class AttrRP
                            const SECTION_TYPE i_sectionId,
                            const TARGETING::NODE_ID i_nodeId);
 
+    friend errlHndl_t TARGETING::saveRestoreAttrs(void *,
+                                                  void *);
 #else
     friend errlHndl_t RT_TARG::saveRestoreAttrs(void *,
                                                 void *,
@@ -128,6 +158,18 @@ class AttrRP
 #endif
 
     public:
+
+        /*
+         * @brief Checks if the AttrRP is a temporary instance in MPIPL and returns true
+         *        if it is. This function acts as an override to the setting for
+         *        TARG_ADDR_TRANSLATION_REQUIRED. For temporary instances in MPIPL translation
+         *        is required because HBD has static addresses which need to be converted to offsets
+         *        whenever we don't want to interact directly with live memory.
+         */
+        bool shouldTranslate()
+        {
+            return (iv_isTempInstance && iv_isMpipl);
+        }
 
         /**
          *  @brief Returns physical address of HB data reserved mem TOC
@@ -138,9 +180,10 @@ class AttrRP
          */
         static uint64_t getHbDataTocAddr();
 
-#ifdef __HOSTBOOT_RUNTIME
         /**
-         *  @brief Initialize node struct for a given node
+         *  @brief Initialize node struct for a given node. Used for temporary AttrRP instances
+         *         when changes need to be made targeting data outside the currently running
+         *         live memory or before that memory is initialized.
          *
          *  @param[in/out] io_nodeCont
          *      Node struct to be initialized
@@ -157,6 +200,7 @@ class AttrRP
                                 TargetingHeader* i_header,
                                 const NODE_ID i_nodeId);
 
+#ifdef __HOSTBOOT_RUNTIME
         /**
          *  @brief Returns address of targeting image in reserved memory
          *
@@ -239,19 +283,6 @@ class AttrRP
          */
         void getNodeId(const Target* i_pTarget,
                        NODE_ID& o_nodeId) const;
-        /**
-         *  @brief Setup physical TOC address and read the TOC to look
-         *  for the reserved memory region
-         *
-         *  @param[out] o_phys_attr_data_addr, Physical attribute data address
-         *  @param[out] o_attr_data_size_bytes, Attribute data size
-         *
-         *  @return errlHndl_t Error log handle
-         *  @retval nullptr Success, successfully got the reserved memory region
-         *  @retval !nullptr Failure, points to a valid error log
-         */
-        static errlHndl_t getReservedMemoryRegion(uint64_t& o_phys_attr_data_addr,
-                                                  uint64_t& o_attr_data_size_bytes);
 
 #ifdef __HOSTBOOT_RUNTIME
         /**
@@ -267,60 +298,52 @@ class AttrRP
 #endif
 
         /**
-         *  @brief Translates given address, according to the resource
-         *      provider's translation algorithm
+         *  @brief Setup physical TOC address and read the TOC to look
+         *         for the reserved memory region.
          *
-         * @param[in] i_pAddress
-         *     Address to translate
+         *  @param[out] o_phys_attr_data_addr, Physical attribute data address
+         *  @param[out] o_attr_data_size_bytes, Attribute data size
          *
-         * @param[in] i_pTarget
-         *     Node target used by common code, unused in Hostboot
-         *
-         * @return void* Returns the translated address.  Common attribute
-         *     code has a static, compile time check that is used to
-         *     determine whether to call this function, however the Hostboot
-         *     compiler complains when this is not provided.  Therefore
-         *     while this method exists, Hostboot will never call it, and if
-         *     it does it will always get a no-op translation.
+         *  @return errlHndl_t Error log handle
+         *  @retval nullptr Success, successfully got the reserved memory region
+         *  @retval !nullptr Failure, points to a valid error log
          */
-        void* translateAddr(
-            void* i_pAddress,
-            const Target* i_pTarget)
-#ifndef __HOSTBOOT_RUNTIME
-        {
-            return i_pAddress;
-        }
-#else
-        ;
-#endif
+        static errlHndl_t getReservedMemoryRegion(uint64_t& o_phys_attr_data_addr,
+                                                  uint64_t& o_attr_data_size_bytes);
 
         /**
          *  @brief Translates given address, according to the resource
-         *      provider's translation algorithm
+         *         provider's translation algorithm. This can be different depending on
+         *         the platform. Generally for Hostboot, the address will be converted to an
+         *         offset so that in situations where temporary resource providers need to access
+         *         non-live memory they can without stepping on live memory addresses.
          *
-         * @param[in] i_pAddress
-         *     Address to translate
+         * @param[in] i_pAddress  Address to translate
          *
-         * @param[in] i_nodeId
-         *     Node ID used by common code, unused in Hostboot
+         * @param[in] i_pTarget  Node target used by common code.
          *
-         * @return void* Returns the translated address.  Common attribute
-         *     code has a static, compile time check that is used to
-         *     determine whether to call this function, however the Hostboot
-         *     compiler complains when this is not provided.  Therefore
-         *     while this method exists, Hostboot will never call it, and if
-         *     it does it will always get a no-op translation.
+         * @return void* Returns the translated address.
          */
         void* translateAddr(
             void* i_pAddress,
-            const TARGETING::NODE_ID i_nodeId)
-#ifndef __HOSTBOOT_RUNTIME
-        {
-            return i_pAddress;
-        }
-#else
-        ;
-#endif
+            const Target* i_pTarget);
+
+        /**
+         *  @brief Translates given address, according to the resource
+         *         provider's translation algorithm. This can be different depending on
+         *         the platform. Generally for Hostboot, the address will be converted to an
+         *         offset so that in situations where temporary resource providers need to access
+         *         non-live memory they can without stepping on live memory addresses.
+         *
+         * @param[in] i_pAddress Address to translate
+         *
+         * @param[in] i_nodeId  Node ID used by common code.
+         *
+         * @return void* Returns the translated address.
+         */
+        void* translateAddr(
+            void* i_pAddress,
+            const TARGETING::NODE_ID i_nodeId);
 
         /**
          *  @brief Initializes and starts the AttrRP daemon.
@@ -551,16 +574,18 @@ class AttrRP
 #ifndef __HOSTBOOT_RUNTIME
             : iv_msgQ(nullptr), iv_attrSyncMsgQ(msg_q_create()),
               iv_sections(nullptr), iv_sectionCount(0),
-              iv_attrSyncPrimed(false),iv_attrSyncWindowOpen(false),iv_isMpipl(false)
+              iv_attrSyncPrimed(false), iv_attrSyncWindowOpen(false),
+              iv_isTempInstance(false), iv_isMpipl(false)
 #else
             : iv_isTempInstance(false), iv_isMpipl(false)
 #endif
         {
         };
 
-#ifdef __HOSTBOOT_RUNTIME
         /**
-         *  @brief Initialize temporary attribute resource provider
+         *  @brief Initialize temporary attribute resource provider. Should only be used during
+         *         HBRT concurrent code update operations or MPIPL to ensure that new targeting
+         *         data is discovered and properly used.
          *
          *  @par Detailed Description:
          *      Ensures member variables are initialized to sane values.
@@ -572,7 +597,14 @@ class AttrRP
         AttrRP(TargetingHeader* i_header,
                NODE_ID i_nodeId,
                size_t i_nodeCount)
+#ifndef __HOSTBOOT_RUNTIME
+            : iv_msgQ(nullptr), iv_attrSyncMsgQ(nullptr),
+              iv_sections(nullptr), iv_sectionCount(0),
+              iv_attrSyncPrimed(false), iv_attrSyncWindowOpen(false),
+              iv_isTempInstance(true), iv_isMpipl(true)
+#else
             : iv_isTempInstance(true), iv_isMpipl(false)
+#endif
         {
             // Work with nodes before passed in node
             for(NODE_ID l_nodeId = NODE0; l_nodeId < i_nodeCount; ++l_nodeId)
@@ -601,7 +633,6 @@ class AttrRP
                 iv_nodeContainer.push_back(l_nodeCont);
             }
         };
-#endif
 
         /**
          *  @brief Destroy the attribute resource provider
@@ -663,7 +694,6 @@ class AttrRP
                                         uint8_t i_instance,
                                         NODE_ID &io_maxNodeId);
 #endif
-
 
     private:
 
@@ -919,15 +949,16 @@ class AttrRP
 
         // Whether service is primed to invoke attribute synchronization
         bool iv_attrSyncPrimed;
+
         // Whether presence detection is completed to allow attribute synchronization
         bool iv_attrSyncWindowOpen;
-#else
+#endif
+
+        // Node Container. Used in temporary instances
+        std::vector<NodeInfo> iv_nodeContainer;
+
         // Indicator that AttrRP instance is a temporary one, not the singleton
         bool iv_isTempInstance;
-
-        // Node Container
-        std::vector<NodeInfo> iv_nodeContainer;
-#endif
 
         bool iv_isMpipl;
 };

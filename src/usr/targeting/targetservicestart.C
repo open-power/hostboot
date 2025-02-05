@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -38,8 +38,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
-
-
 
 // Other components
 #include <kernel/console.H>
@@ -121,6 +119,123 @@ static void checkProcessorTargeting(TargetService& i_targetService);
  */
 static void adjustMemoryMap(TargetService& i_targetService);
 
+void mpipl_targeting_update()
+{
+    TARG_INF(">>mpipl_targeting_update");
+    TRACFCOMP(g_trac_targeting, "mpipl_targeting_update: "
+              "In MPIPL, extending cache to be real memory" );
+    mm_extend(MM_EXTEND_REAL_MEMORY);
+
+
+    errlOwner l_errl(nullptr);
+    uint64_t l_phys_attr_data_addr = 0;
+    uint64_t l_attr_data_size = 0;
+
+    PNOR::SectionInfo_t l_pnorSectionInfo;
+    void * l_reservedMem = nullptr;
+    size_t pnorDataSize = 0;
+    void * pnorVaddr = nullptr;
+    size_t pnorSize = 0;
+    void * l_newMem = nullptr;
+
+    l_errl = AttrRP::getReservedMemoryRegion(l_phys_attr_data_addr, l_attr_data_size);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_targeting, "Couldn't getReservedMemoryRegion");
+        goto ERROR_EXIT;
+    }
+    TRACDCOMP(g_trac_targeting, "phys=%.16X, attr=%.16X", l_phys_attr_data_addr, l_attr_data_size);
+
+    l_reservedMem = mm_block_map(reinterpret_cast<void*>(l_phys_attr_data_addr),
+                                 l_attr_data_size);
+
+    l_errl = PNOR::loadSecureSection(PNOR::HB_DATA);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_targeting, "Couldn't load HB_DATA");
+        goto ERROR_EXIT;
+    }
+
+    l_errl = PNOR::getSectionInfo(PNOR::HB_DATA, l_pnorSectionInfo);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_targeting, "Error getSectionInfo");
+        goto ERROR_EXIT;
+    }
+    pnorVaddr = reinterpret_cast<void*>(l_pnorSectionInfo.vaddr);
+    pnorSize  = l_pnorSectionInfo.size;
+
+    l_errl = TARGETING::UTIL::validateData(l_reservedMem, pnorVaddr, pnorDataSize);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_targeting, "ERROR validateData");
+        goto ERROR_EXIT;
+    }
+
+    // Need to allocate enough space for all the volatile attributes
+    if( (pnorDataSize <= l_attr_data_size)
+            && (pnorSize <= pnorDataSize) )
+    {
+        l_newMem = calloc(pnorDataSize,1);
+        memcpy( l_newMem, pnorVaddr, pnorSize );
+        // note - original PNOR data is no longer used after this,
+        //        PNOR memory is deleted as part of object destructor
+    }
+    else
+    {
+        TRACFCOMP( g_trac_targeting, "hbrt_update_prep: Size mismatches> PNOR=0x%llX, PNOR Data=0x%llX, RsvdMem=0x%llX",
+                pnorSize, pnorDataSize, l_attr_data_size );
+        goto ERROR_EXIT;
+    }
+
+    l_errl = TARGETING::saveRestoreAttrs(l_reservedMem, l_newMem);
+    if (l_errl)
+    {
+        TRACFCOMP(g_trac_targeting, "ERROR saveRestoreAttrs");
+        goto ERROR_EXIT;
+    }
+
+    {
+        // Copy new LID Structure data over current Reserved Memory data
+        size_t l_copySize = std::min(pnorDataSize,
+                                     l_attr_data_size);
+
+        TRACFCOMP(g_trac_targeting, "hbrt_update_prep: Copy 0x%0.8x bytes of targeting data",
+                  l_copySize);
+        TRACFCOMP(g_trac_targeting, "RsvdMem @ %p, PNOR mem @ %p",
+                  l_reservedMem, l_newMem);
+
+        memcpy(l_reservedMem, l_newMem, l_copySize);
+
+        // Set any remaining bytes to zero
+        //  Note: earlier checks ensure curSize >= l_copySize
+        size_t l_setSize = l_attr_data_size - l_copySize;
+        if(l_setSize)
+        {
+            TRACFCOMP(g_trac_targeting, "hbrt_update_prep: Set 0x%0.8x bytes to 0 @%p",
+                      l_setSize, reinterpret_cast<uint8_t*>(l_reservedMem) + l_copySize);
+            memset(reinterpret_cast<void *>(reinterpret_cast<uint8_t*>(l_reservedMem) + l_copySize),
+                    0,
+                    l_setSize);
+        }
+    }
+
+ERROR_EXIT:
+    if (l_newMem)
+    {
+        // Delete the scratch space for the new attributes
+        free( l_newMem );
+        l_newMem = nullptr;
+    }
+    if (l_errl)
+    {
+        l_errl->setSev(ERRORLOG::ERRL_SEV_PREDICTIVE);
+        l_errl->collectTrace(TARG_COMP_NAME);
+        errlCommit(l_errl, TARG_COMP_ID);
+    }
+    return;
+}
+
 /**
  *  @brief Entry point for initialization service to initialize the targeting
  *      code
@@ -154,6 +269,13 @@ static void initTargeting(errlHndl_t& io_pError)
         printk( "Boot is MPIPL.\n" );
         CONSOLE::displayf(CONSOLE::DEFAULT,  NULL,"Boot is MPIPL." );
         CONSOLE::flush();
+        // In order to handle cases where concurrent code updates were attempted but PHYP has crashed
+        // and HBRT did not properly complete updating the targeting binary, this function will go out
+        // to PNOR and update the reserved memory copy of targeting. This has to be done as early as possible
+        // because once the singletons for TargetService and AttrRP get started they will not see any updates
+        // and the MPIPL will crash if there have been targeting changes that were not properly applied before
+        // MPIPL was started.
+        mpipl_targeting_update();
         l_isMpipl = true;
     }
     if(l_scratch3.fwModeCtlFlags.istepMode)
@@ -212,7 +334,6 @@ static void initTargeting(errlHndl_t& io_pError)
 
         initializeAttributes(l_targetService, l_isMpipl, l_isIstepMode,
                              l_scratch);
-
 
         uint32_t l_peerTargetsAdjusted = 0;
         uint32_t l_numberMutexAttrsReset = 0;
@@ -319,6 +440,7 @@ static void initTargeting(errlHndl_t& io_pError)
 
         // set global that TARG is ready
         Util::setIsTargetingLoaded();
+
     }
 
     TARG_EXIT();
