@@ -3727,7 +3727,7 @@
      USE_RDP  = 3
      </enum>
     <platInit/>
-    <default>NEW_FREQ</default>
+    <default>USE_RDP</default>
     <overrideOnly/>
     <group>wof</group>
   </attribute>
