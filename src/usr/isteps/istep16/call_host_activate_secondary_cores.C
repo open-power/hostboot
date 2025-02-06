@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2020,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2020,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -109,6 +109,12 @@ void lookup_and_commit_pm_elog( fapi2::Target<fapi2::TARGET_TYPE_PROC_CHIP> i_pr
             TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, ERR_MRK "Failed to read hcode elog" );
             l_hwpErrl->setSev( ERRORLOG::ERRL_SEV_INFORMATIONAL );
             errlCommit( l_hwpErrl, HWPF_COMP_ID );
+            break;
+        }
+
+        if( 0 == l_logLength )
+        {
+            TRACFCOMP( ISTEPS_TRACE::g_trac_isteps_trace, "No Hcode Log Found" );
             break;
         }
 
