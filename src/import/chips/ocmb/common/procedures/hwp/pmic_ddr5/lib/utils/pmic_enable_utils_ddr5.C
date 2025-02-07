@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -950,10 +950,12 @@ fapi_try_exit:
 /// @brief Check the statuses of all PMICs present on the given OCMB chip
 ///
 /// @param[in,out] io_target_info target info struct
+/// @param[in,out] io_rc_data struct of n mode/n mode possible data for pmic return codes
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmics(target_info_redundancy_ddr5&
-        io_target_info)
+fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmics(
+    target_info_redundancy_ddr5& io_target_info,
+    pmic_enable_return_code_data& io_rc_data)
 {
     static const uint8_t HEALTH_CHECK_CYCLE = 3;
     mss::pmic::ddr5::health_check_telemetry_data l_health_check_info;
@@ -978,6 +980,18 @@ fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmi
 
         FAPI_TRY(health_check_ddr5(io_target_info, l_health_check_info, l_additional_info, l_periodic_telemetry_data,
                                    l_number_bytes_to_send));
+
+        // collect health check and additional info if in an N_MODE or N_MODE_POSSIBLE state
+        if (l_health_check_info.iv_aggregate_state == N_MODE_POSSIBLE)
+        {
+            io_rc_data.iv_n_mode_possible_health_check_info = l_health_check_info;
+            io_rc_data.iv_n_mode_possible_additional_info = l_additional_info;
+        }
+        else if (l_health_check_info.iv_aggregate_state == N_MODE)
+        {
+            io_rc_data.iv_n_mode_health_check_info = l_health_check_info;
+            io_rc_data.iv_n_mode_additional_info = l_additional_info;
+        }
     }
 
     // Check all bread crumbs. If any PMIC has bread crumb not set to ALL_GOOD, report those errors
@@ -1035,21 +1049,246 @@ void inline __attribute__((always_inline)) log_n_modes_as_recoverable_errors_ddr
 /// @param[in] i_target_info target info struct
 /// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
 /// @param[in] i_mnfg_thresholds thresholds policy setting
+/// @param[in] i_rc_data struct of n mode/n mode possible data for pmic return codes
 /// @return fapi2::ReturnCode iff no n-modes, else, relevant error FFDC
 ///
 fapi2::ReturnCode inline __attribute__((always_inline)) assert_n_mode_states_ddr5(
     const target_info_redundancy_ddr5& i_target_info,
     const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U],
-    const bool i_mnfg_thresholds)
+    const bool i_mnfg_thresholds,
+    const pmic_enable_return_code_data& i_rc_data)
 {
+    using CONSTS = mss::dt::dt_i2c_devices;
+    uint8_t l_failed_pmic_number = 0;
+
+    for (uint8_t l_dt_count = 0; l_dt_count < CONSTS::NUM_TOTAL_DEVICES; l_dt_count++)
+    {
+        if (i_target_info.iv_pmic_dt_map[l_dt_count].iv_pmic_state
+            || i_target_info.iv_pmic_dt_map[l_dt_count].iv_dt_state )
+        {
+            l_failed_pmic_number = l_dt_count;
+            break;
+        }
+    }
+
     // Check if we have lost a redundant pair :(
+    // NOTE: Only the data of the first failed PMIC will be reported here
     FAPI_ASSERT(!(mss::pmic::ddr5::check::bad_two_or_more(i_n_mode_pmic)),
                 fapi2::PMIC_REDUNDANCY_FAIL_DDR5()
                 .set_OCMB_TARGET(i_target_info.iv_ocmb)
                 .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
                 .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
                 .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
-                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
+                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3])
+                .set_N_MODE_POSSIBLE_DT0_BREADCRUMB(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT0].iv_breadcrumb)
+                .set_N_MODE_POSSIBLE_DT0_RO_INPUTS_1(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_1)
+                .set_N_MODE_POSSIBLE_DT0_RO_INPUTS_0(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_0)
+                .set_N_MODE_POSSIBLE_DT1_BREADCRUMB(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT1].iv_breadcrumb)
+                .set_N_MODE_POSSIBLE_DT1_RO_INPUTS_1(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_1)
+                .set_N_MODE_POSSIBLE_DT1_RO_INPUTS_0(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_0)
+                .set_N_MODE_POSSIBLE_DT2_BREADCRUMB(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT2].iv_breadcrumb)
+                .set_N_MODE_POSSIBLE_DT2_RO_INPUTS_1(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_1)
+                .set_N_MODE_POSSIBLE_DT2_RO_INPUTS_0(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_0)
+                .set_N_MODE_POSSIBLE_DT3_BREADCRUMB(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT3].iv_breadcrumb)
+                .set_N_MODE_POSSIBLE_DT3_RO_INPUTS_1(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_1)
+                .set_N_MODE_POSSIBLE_DT3_RO_INPUTS_0(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_0)
+                .set_N_MODE_POSSIBLE_PMIC0_R04(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r04)
+                .set_N_MODE_POSSIBLE_PMIC0_R05(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r05)
+                .set_N_MODE_POSSIBLE_PMIC0_R06(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r06)
+                .set_N_MODE_POSSIBLE_PMIC0_R07(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r07)
+                .set_N_MODE_POSSIBLE_PMIC0_R08(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r08)
+                .set_N_MODE_POSSIBLE_PMIC0_R09(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r09)
+                .set_N_MODE_POSSIBLE_PMIC0_R0A(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r0a)
+                .set_N_MODE_POSSIBLE_PMIC0_R0B(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r0b)
+                .set_N_MODE_POSSIBLE_PMIC0_SWA_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_swa_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC0_SWB_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_swb_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC0_SWC_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_swc_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC0_SWD_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_swd_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC0_R73_STATUS_5(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r73_status_5)
+                .set_N_MODE_POSSIBLE_PMIC1_R04(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r04)
+                .set_N_MODE_POSSIBLE_PMIC1_R05(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r05)
+                .set_N_MODE_POSSIBLE_PMIC1_R06(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r06)
+                .set_N_MODE_POSSIBLE_PMIC1_R07(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r07)
+                .set_N_MODE_POSSIBLE_PMIC1_R08(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r08)
+                .set_N_MODE_POSSIBLE_PMIC1_R09(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r09)
+                .set_N_MODE_POSSIBLE_PMIC1_R0A(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r0a)
+                .set_N_MODE_POSSIBLE_PMIC1_R0B(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r0b)
+                .set_N_MODE_POSSIBLE_PMIC1_SWA_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_swa_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC1_SWB_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_swb_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC1_SWC_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_swc_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC1_SWD_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_swd_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC1_R73_STATUS_5(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r73_status_5)
+                .set_N_MODE_POSSIBLE_PMIC2_R04(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r04)
+                .set_N_MODE_POSSIBLE_PMIC2_R05(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r05)
+                .set_N_MODE_POSSIBLE_PMIC2_R06(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r06)
+                .set_N_MODE_POSSIBLE_PMIC2_R07(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r07)
+                .set_N_MODE_POSSIBLE_PMIC2_R08(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r08)
+                .set_N_MODE_POSSIBLE_PMIC2_R09(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r09)
+                .set_N_MODE_POSSIBLE_PMIC2_R0A(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r0a)
+                .set_N_MODE_POSSIBLE_PMIC2_R0B(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r0b)
+                .set_N_MODE_POSSIBLE_PMIC2_SWA_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_swa_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC2_SWB_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_swb_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC2_SWC_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_swc_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC2_SWD_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_swd_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC2_R73_STATUS_5(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r73_status_5)
+                .set_N_MODE_POSSIBLE_PMIC3_R04(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r04)
+                .set_N_MODE_POSSIBLE_PMIC3_R05(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r05)
+                .set_N_MODE_POSSIBLE_PMIC3_R06(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r06)
+                .set_N_MODE_POSSIBLE_PMIC3_R07(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r07)
+                .set_N_MODE_POSSIBLE_PMIC3_R08(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r08)
+                .set_N_MODE_POSSIBLE_PMIC3_R09(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r09)
+                .set_N_MODE_POSSIBLE_PMIC3_R0A(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r0a)
+                .set_N_MODE_POSSIBLE_PMIC3_R0B(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r0b)
+                .set_N_MODE_POSSIBLE_PMIC3_SWA_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_swa_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC3_SWB_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_swb_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC3_SWC_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_swc_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC3_SWD_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_swd_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC3_R73_STATUS_5(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r73_status_5)
+                .set_N_MODE_POSSIBLE_ADC_SYSTEM_STATUS(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_system_status)
+                .set_N_MODE_POSSIBLE_ADC_GENERAL_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_general_cfg)
+                .set_N_MODE_POSSIBLE_ADC_DATA_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_data_cfg)
+                .set_N_MODE_POSSIBLE_ADC_OSR_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_osr_cfg)
+                .set_N_MODE_POSSIBLE_ADC_OPMODE_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_opmode_cfg)
+                .set_N_MODE_POSSIBLE_ADC_PIN_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_pin_cfg)
+                .set_N_MODE_POSSIBLE_ADC_GPIO_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_gpio_cfg)
+                .set_N_MODE_POSSIBLE_ADC_GPO_DRIVE_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_gpo_drive_cfg)
+                .set_N_MODE_POSSIBLE_ADC_GPO_VALUE_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_gpo_value_cfg)
+                .set_N_MODE_POSSIBLE_ADC_GPI_VALUE(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_gpi_value)
+                .set_N_MODE_POSSIBLE_DT_R90_OPS_STATE(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r90_ops_state)
+                .set_N_MODE_POSSIBLE_DT_R92_FAULTS_STATUS_0(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r92_faults_status_0)
+                .set_N_MODE_POSSIBLE_DT_R94_FAULTS_STATUS_1(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r94_faults_status_1)
+                .set_N_MODE_POSSIBLE_DT_R96_FIRST_FAULTS_STATUS_0(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r96_first_faults_status_0)
+                .set_N_MODE_POSSIBLE_DT_R98_FIRST_FAULTS_STATUS_1(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r98_first_faults_status_1)
+                .set_N_MODE_POSSIBLE_DT_RA6_INFET_MPT_ADDR(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_ra6_infet_mpt_addr)
+                .set_N_MODE_POSSIBLE_DT_RA8_NVM_DATA(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_ra8_nvm_data)
+                .set_N_MODE_POSSIBLE_DT_RB4_VCC_VIN_VINP(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_rb4_vcc_vin_vinp)
+                .set_N_MODE_POSSIBLE_PMIC_R2F_PMIC_CONFIG(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_pmic[l_failed_pmic_number].iv_r2f_pmic_config)
+                .set_N_MODE_POSSIBLE_PMIC_R32_PMIC_ENABLE(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_pmic[l_failed_pmic_number].iv_r32_pmic_enable)
+                .set_N_MODE_POSSIBLE_PMIC_R33_TEMP_STATUS(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_pmic[l_failed_pmic_number].iv_r33_temp_status)
+                .set_N_MODE_POSSIBLE_PMIC_R9C_ON_OFF_CONFIG(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_pmic[l_failed_pmic_number].iv_r9c_on_off_config)
+                .set_N_MODE_DT0_BREADCRUMB(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT0].iv_breadcrumb)
+                .set_N_MODE_DT0_RO_INPUTS_1(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_1)
+                .set_N_MODE_DT0_RO_INPUTS_0(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_0)
+                .set_N_MODE_DT1_BREADCRUMB(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT1].iv_breadcrumb)
+                .set_N_MODE_DT1_RO_INPUTS_1(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_1)
+                .set_N_MODE_DT1_RO_INPUTS_0(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_0)
+                .set_N_MODE_DT2_BREADCRUMB(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT2].iv_breadcrumb)
+                .set_N_MODE_DT2_RO_INPUTS_1(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_1)
+                .set_N_MODE_DT2_RO_INPUTS_0(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_0)
+                .set_N_MODE_DT3_BREADCRUMB(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT3].iv_breadcrumb)
+                .set_N_MODE_DT3_RO_INPUTS_1(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_1)
+                .set_N_MODE_DT3_RO_INPUTS_0(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_0)
+                .set_N_MODE_PMIC0_R04(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r04)
+                .set_N_MODE_PMIC0_R05(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r05)
+                .set_N_MODE_PMIC0_R06(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r06)
+                .set_N_MODE_PMIC0_R07(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r07)
+                .set_N_MODE_PMIC0_R08(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r08)
+                .set_N_MODE_PMIC0_R09(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r09)
+                .set_N_MODE_PMIC0_R0A(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r0a)
+                .set_N_MODE_PMIC0_R0B(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r0b)
+                .set_N_MODE_PMIC0_SWA_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_swa_current_mA)
+                .set_N_MODE_PMIC0_SWB_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_swb_current_mA)
+                .set_N_MODE_PMIC0_SWC_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_swc_current_mA)
+                .set_N_MODE_PMIC0_SWD_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_swd_current_mA)
+                .set_N_MODE_PMIC0_R73_STATUS_5(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r73_status_5)
+                .set_N_MODE_PMIC1_R04(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r04)
+                .set_N_MODE_PMIC1_R05(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r05)
+                .set_N_MODE_PMIC1_R06(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r06)
+                .set_N_MODE_PMIC1_R07(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r07)
+                .set_N_MODE_PMIC1_R08(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r08)
+                .set_N_MODE_PMIC1_R09(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r09)
+                .set_N_MODE_PMIC1_R0A(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r0a)
+                .set_N_MODE_PMIC1_R0B(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r0b)
+                .set_N_MODE_PMIC1_SWA_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_swa_current_mA)
+                .set_N_MODE_PMIC1_SWB_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_swb_current_mA)
+                .set_N_MODE_PMIC1_SWC_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_swc_current_mA)
+                .set_N_MODE_PMIC1_SWD_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_swd_current_mA)
+                .set_N_MODE_PMIC1_R73_STATUS_5(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r73_status_5)
+                .set_N_MODE_PMIC2_R04(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r04)
+                .set_N_MODE_PMIC2_R05(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r05)
+                .set_N_MODE_PMIC2_R06(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r06)
+                .set_N_MODE_PMIC2_R07(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r07)
+                .set_N_MODE_PMIC2_R08(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r08)
+                .set_N_MODE_PMIC2_R09(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r09)
+                .set_N_MODE_PMIC2_R0A(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r0a)
+                .set_N_MODE_PMIC2_R0B(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r0b)
+                .set_N_MODE_PMIC2_SWA_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_swa_current_mA)
+                .set_N_MODE_PMIC2_SWB_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_swb_current_mA)
+                .set_N_MODE_PMIC2_SWC_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_swc_current_mA)
+                .set_N_MODE_PMIC2_SWD_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_swd_current_mA)
+                .set_N_MODE_PMIC2_R73_STATUS_5(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r73_status_5)
+                .set_N_MODE_PMIC3_R04(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r04)
+                .set_N_MODE_PMIC3_R05(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r05)
+                .set_N_MODE_PMIC3_R06(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r06)
+                .set_N_MODE_PMIC3_R07(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r07)
+                .set_N_MODE_PMIC3_R08(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r08)
+                .set_N_MODE_PMIC3_R09(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r09)
+                .set_N_MODE_PMIC3_R0A(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r0a)
+                .set_N_MODE_PMIC3_R0B(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r0b)
+                .set_N_MODE_PMIC3_SWA_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_swa_current_mA)
+                .set_N_MODE_PMIC3_SWB_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_swb_current_mA)
+                .set_N_MODE_PMIC3_SWC_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_swc_current_mA)
+                .set_N_MODE_PMIC3_SWD_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_swd_current_mA)
+                .set_N_MODE_PMIC3_R73_STATUS_5(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r73_status_5)
+                .set_N_MODE_ADC_SYSTEM_STATUS(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_system_status)
+                .set_N_MODE_ADC_GENERAL_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_general_cfg)
+                .set_N_MODE_ADC_DATA_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_data_cfg)
+                .set_N_MODE_ADC_OSR_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_osr_cfg)
+                .set_N_MODE_ADC_OPMODE_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_opmode_cfg)
+                .set_N_MODE_ADC_PIN_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_pin_cfg)
+                .set_N_MODE_ADC_GPIO_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_gpio_cfg)
+                .set_N_MODE_ADC_GPO_DRIVE_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_gpo_drive_cfg)
+                .set_N_MODE_ADC_GPO_VALUE_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_gpo_value_cfg)
+                .set_N_MODE_ADC_GPI_VALUE(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_gpi_value)
+                .set_N_MODE_DT_R90_OPS_STATE(i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r90_ops_state)
+                .set_N_MODE_DT_R92_FAULTS_STATUS_0(
+                    i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r92_faults_status_0)
+                .set_N_MODE_DT_R94_FAULTS_STATUS_1(
+                    i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r94_faults_status_1)
+                .set_N_MODE_DT_R96_FIRST_FAULTS_STATUS_0(
+                    i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r96_first_faults_status_0)
+                .set_N_MODE_DT_R98_FIRST_FAULTS_STATUS_1(
+                    i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r98_first_faults_status_1)
+                .set_N_MODE_DT_RA6_INFET_MPT_ADDR(i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_ra6_infet_mpt_addr)
+                .set_N_MODE_DT_RA8_NVM_DATA(i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_ra8_nvm_data)
+                .set_N_MODE_DT_RB4_VCC_VIN_VINP(i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_rb4_vcc_vin_vinp)
+                .set_N_MODE_PMIC_R2F_PMIC_CONFIG(i_rc_data.iv_n_mode_additional_info.iv_pmic[l_failed_pmic_number].iv_r2f_pmic_config)
+                .set_N_MODE_PMIC_R32_PMIC_ENABLE(i_rc_data.iv_n_mode_additional_info.iv_pmic[l_failed_pmic_number].iv_r32_pmic_enable)
+                .set_N_MODE_PMIC_R33_TEMP_STATUS(i_rc_data.iv_n_mode_additional_info.iv_pmic[l_failed_pmic_number].iv_r33_temp_status)
+                .set_N_MODE_PMIC_R9C_ON_OFF_CONFIG(
+                    i_rc_data.iv_n_mode_additional_info.iv_pmic[l_failed_pmic_number].iv_r9c_on_off_config),
 #ifndef __PPE__
                 "Two or more PMICs have declared N-Mode. Procedure will not be able "
                 "to turn on and provide power to the OCMB " GENTARGTIDFORMAT " N-Mode States:"
@@ -1072,7 +1311,216 @@ fapi2::ReturnCode inline __attribute__((always_inline)) assert_n_mode_states_ddr
                 .set_N_MODE_PMIC0(i_n_mode_pmic[PMIC0])
                 .set_N_MODE_PMIC1(i_n_mode_pmic[PMIC1])
                 .set_N_MODE_PMIC2(i_n_mode_pmic[PMIC2])
-                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3]),
+                .set_N_MODE_PMIC3(i_n_mode_pmic[PMIC3])
+                .set_N_MODE_POSSIBLE_DT0_BREADCRUMB(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT0].iv_breadcrumb)
+                .set_N_MODE_POSSIBLE_DT0_RO_INPUTS_1(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_1)
+                .set_N_MODE_POSSIBLE_DT0_RO_INPUTS_0(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_0)
+                .set_N_MODE_POSSIBLE_DT1_BREADCRUMB(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT1].iv_breadcrumb)
+                .set_N_MODE_POSSIBLE_DT1_RO_INPUTS_1(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_1)
+                .set_N_MODE_POSSIBLE_DT1_RO_INPUTS_0(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_0)
+                .set_N_MODE_POSSIBLE_DT2_BREADCRUMB(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT2].iv_breadcrumb)
+                .set_N_MODE_POSSIBLE_DT2_RO_INPUTS_1(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_1)
+                .set_N_MODE_POSSIBLE_DT2_RO_INPUTS_0(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_0)
+                .set_N_MODE_POSSIBLE_DT3_BREADCRUMB(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT3].iv_breadcrumb)
+                .set_N_MODE_POSSIBLE_DT3_RO_INPUTS_1(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_1)
+                .set_N_MODE_POSSIBLE_DT3_RO_INPUTS_0(i_rc_data.iv_n_mode_possible_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_0)
+                .set_N_MODE_POSSIBLE_PMIC0_R04(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r04)
+                .set_N_MODE_POSSIBLE_PMIC0_R05(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r05)
+                .set_N_MODE_POSSIBLE_PMIC0_R06(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r06)
+                .set_N_MODE_POSSIBLE_PMIC0_R07(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r07)
+                .set_N_MODE_POSSIBLE_PMIC0_R08(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r08)
+                .set_N_MODE_POSSIBLE_PMIC0_R09(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r09)
+                .set_N_MODE_POSSIBLE_PMIC0_R0A(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r0a)
+                .set_N_MODE_POSSIBLE_PMIC0_R0B(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r0b)
+                .set_N_MODE_POSSIBLE_PMIC0_SWA_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_swa_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC0_SWB_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_swb_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC0_SWC_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_swc_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC0_SWD_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_swd_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC0_R73_STATUS_5(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT0].iv_r73_status_5)
+                .set_N_MODE_POSSIBLE_PMIC1_R04(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r04)
+                .set_N_MODE_POSSIBLE_PMIC1_R05(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r05)
+                .set_N_MODE_POSSIBLE_PMIC1_R06(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r06)
+                .set_N_MODE_POSSIBLE_PMIC1_R07(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r07)
+                .set_N_MODE_POSSIBLE_PMIC1_R08(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r08)
+                .set_N_MODE_POSSIBLE_PMIC1_R09(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r09)
+                .set_N_MODE_POSSIBLE_PMIC1_R0A(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r0a)
+                .set_N_MODE_POSSIBLE_PMIC1_R0B(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r0b)
+                .set_N_MODE_POSSIBLE_PMIC1_SWA_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_swa_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC1_SWB_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_swb_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC1_SWC_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_swc_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC1_SWD_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_swd_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC1_R73_STATUS_5(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT1].iv_r73_status_5)
+                .set_N_MODE_POSSIBLE_PMIC2_R04(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r04)
+                .set_N_MODE_POSSIBLE_PMIC2_R05(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r05)
+                .set_N_MODE_POSSIBLE_PMIC2_R06(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r06)
+                .set_N_MODE_POSSIBLE_PMIC2_R07(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r07)
+                .set_N_MODE_POSSIBLE_PMIC2_R08(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r08)
+                .set_N_MODE_POSSIBLE_PMIC2_R09(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r09)
+                .set_N_MODE_POSSIBLE_PMIC2_R0A(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r0a)
+                .set_N_MODE_POSSIBLE_PMIC2_R0B(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r0b)
+                .set_N_MODE_POSSIBLE_PMIC2_SWA_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_swa_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC2_SWB_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_swb_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC2_SWC_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_swc_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC2_SWD_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_swd_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC2_R73_STATUS_5(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT2].iv_r73_status_5)
+                .set_N_MODE_POSSIBLE_PMIC3_R04(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r04)
+                .set_N_MODE_POSSIBLE_PMIC3_R05(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r05)
+                .set_N_MODE_POSSIBLE_PMIC3_R06(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r06)
+                .set_N_MODE_POSSIBLE_PMIC3_R07(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r07)
+                .set_N_MODE_POSSIBLE_PMIC3_R08(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r08)
+                .set_N_MODE_POSSIBLE_PMIC3_R09(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r09)
+                .set_N_MODE_POSSIBLE_PMIC3_R0A(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r0a)
+                .set_N_MODE_POSSIBLE_PMIC3_R0B(i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r0b)
+                .set_N_MODE_POSSIBLE_PMIC3_SWA_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_swa_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC3_SWB_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_swb_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC3_SWC_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_swc_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC3_SWD_CURRENT(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_swd_current_mA)
+                .set_N_MODE_POSSIBLE_PMIC3_R73_STATUS_5(
+                    i_rc_data.iv_n_mode_possible_health_check_info.iv_pmic[CONSTS::DT3].iv_r73_status_5)
+                .set_N_MODE_POSSIBLE_ADC_SYSTEM_STATUS(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_system_status)
+                .set_N_MODE_POSSIBLE_ADC_GENERAL_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_general_cfg)
+                .set_N_MODE_POSSIBLE_ADC_DATA_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_data_cfg)
+                .set_N_MODE_POSSIBLE_ADC_OSR_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_osr_cfg)
+                .set_N_MODE_POSSIBLE_ADC_OPMODE_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_opmode_cfg)
+                .set_N_MODE_POSSIBLE_ADC_PIN_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_pin_cfg)
+                .set_N_MODE_POSSIBLE_ADC_GPIO_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_gpio_cfg)
+                .set_N_MODE_POSSIBLE_ADC_GPO_DRIVE_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_gpo_drive_cfg)
+                .set_N_MODE_POSSIBLE_ADC_GPO_VALUE_CFG(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_gpo_value_cfg)
+                .set_N_MODE_POSSIBLE_ADC_GPI_VALUE(i_rc_data.iv_n_mode_possible_additional_info.iv_adc.iv_gpi_value)
+                .set_N_MODE_POSSIBLE_DT_R90_OPS_STATE(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r90_ops_state)
+                .set_N_MODE_POSSIBLE_DT_R92_FAULTS_STATUS_0(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r92_faults_status_0)
+                .set_N_MODE_POSSIBLE_DT_R94_FAULTS_STATUS_1(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r94_faults_status_1)
+                .set_N_MODE_POSSIBLE_DT_R96_FIRST_FAULTS_STATUS_0(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r96_first_faults_status_0)
+                .set_N_MODE_POSSIBLE_DT_R98_FIRST_FAULTS_STATUS_1(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_r98_first_faults_status_1)
+                .set_N_MODE_POSSIBLE_DT_RA6_INFET_MPT_ADDR(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_ra6_infet_mpt_addr)
+                .set_N_MODE_POSSIBLE_DT_RA8_NVM_DATA(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_ra8_nvm_data)
+                .set_N_MODE_POSSIBLE_DT_RB4_VCC_VIN_VINP(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_dt[l_failed_pmic_number].iv_rb4_vcc_vin_vinp)
+                .set_N_MODE_POSSIBLE_PMIC_R2F_PMIC_CONFIG(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_pmic[l_failed_pmic_number].iv_r2f_pmic_config)
+                .set_N_MODE_POSSIBLE_PMIC_R32_PMIC_ENABLE(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_pmic[l_failed_pmic_number].iv_r32_pmic_enable)
+                .set_N_MODE_POSSIBLE_PMIC_R33_TEMP_STATUS(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_pmic[l_failed_pmic_number].iv_r33_temp_status)
+                .set_N_MODE_POSSIBLE_PMIC_R9C_ON_OFF_CONFIG(
+                    i_rc_data.iv_n_mode_possible_additional_info.iv_pmic[l_failed_pmic_number].iv_r9c_on_off_config)
+                .set_N_MODE_DT0_BREADCRUMB(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT0].iv_breadcrumb)
+                .set_N_MODE_DT0_RO_INPUTS_1(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_1)
+                .set_N_MODE_DT0_RO_INPUTS_0(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT0].iv_ro_inputs_0)
+                .set_N_MODE_DT1_BREADCRUMB(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT1].iv_breadcrumb)
+                .set_N_MODE_DT1_RO_INPUTS_1(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_1)
+                .set_N_MODE_DT1_RO_INPUTS_0(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT1].iv_ro_inputs_0)
+                .set_N_MODE_DT2_BREADCRUMB(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT2].iv_breadcrumb)
+                .set_N_MODE_DT2_RO_INPUTS_1(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_1)
+                .set_N_MODE_DT2_RO_INPUTS_0(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT2].iv_ro_inputs_0)
+                .set_N_MODE_DT3_BREADCRUMB(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT3].iv_breadcrumb)
+                .set_N_MODE_DT3_RO_INPUTS_1(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_1)
+                .set_N_MODE_DT3_RO_INPUTS_0(i_rc_data.iv_n_mode_health_check_info.iv_dt[CONSTS::DT3].iv_ro_inputs_0)
+                .set_N_MODE_PMIC0_R04(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r04)
+                .set_N_MODE_PMIC0_R05(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r05)
+                .set_N_MODE_PMIC0_R06(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r06)
+                .set_N_MODE_PMIC0_R07(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r07)
+                .set_N_MODE_PMIC0_R08(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r08)
+                .set_N_MODE_PMIC0_R09(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r09)
+                .set_N_MODE_PMIC0_R0A(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r0a)
+                .set_N_MODE_PMIC0_R0B(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r0b)
+                .set_N_MODE_PMIC0_SWA_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_swa_current_mA)
+                .set_N_MODE_PMIC0_SWB_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_swb_current_mA)
+                .set_N_MODE_PMIC0_SWC_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_swc_current_mA)
+                .set_N_MODE_PMIC0_SWD_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_swd_current_mA)
+                .set_N_MODE_PMIC0_R73_STATUS_5(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT0].iv_r73_status_5)
+                .set_N_MODE_PMIC1_R04(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r04)
+                .set_N_MODE_PMIC1_R05(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r05)
+                .set_N_MODE_PMIC1_R06(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r06)
+                .set_N_MODE_PMIC1_R07(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r07)
+                .set_N_MODE_PMIC1_R08(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r08)
+                .set_N_MODE_PMIC1_R09(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r09)
+                .set_N_MODE_PMIC1_R0A(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r0a)
+                .set_N_MODE_PMIC1_R0B(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r0b)
+                .set_N_MODE_PMIC1_SWA_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_swa_current_mA)
+                .set_N_MODE_PMIC1_SWB_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_swb_current_mA)
+                .set_N_MODE_PMIC1_SWC_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_swc_current_mA)
+                .set_N_MODE_PMIC1_SWD_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_swd_current_mA)
+                .set_N_MODE_PMIC1_R73_STATUS_5(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT1].iv_r73_status_5)
+                .set_N_MODE_PMIC2_R04(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r04)
+                .set_N_MODE_PMIC2_R05(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r05)
+                .set_N_MODE_PMIC2_R06(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r06)
+                .set_N_MODE_PMIC2_R07(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r07)
+                .set_N_MODE_PMIC2_R08(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r08)
+                .set_N_MODE_PMIC2_R09(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r09)
+                .set_N_MODE_PMIC2_R0A(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r0a)
+                .set_N_MODE_PMIC2_R0B(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r0b)
+                .set_N_MODE_PMIC2_SWA_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_swa_current_mA)
+                .set_N_MODE_PMIC2_SWB_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_swb_current_mA)
+                .set_N_MODE_PMIC2_SWC_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_swc_current_mA)
+                .set_N_MODE_PMIC2_SWD_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_swd_current_mA)
+                .set_N_MODE_PMIC2_R73_STATUS_5(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT2].iv_r73_status_5)
+                .set_N_MODE_PMIC3_R04(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r04)
+                .set_N_MODE_PMIC3_R05(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r05)
+                .set_N_MODE_PMIC3_R06(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r06)
+                .set_N_MODE_PMIC3_R07(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r07)
+                .set_N_MODE_PMIC3_R08(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r08)
+                .set_N_MODE_PMIC3_R09(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r09)
+                .set_N_MODE_PMIC3_R0A(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r0a)
+                .set_N_MODE_PMIC3_R0B(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r0b)
+                .set_N_MODE_PMIC3_SWA_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_swa_current_mA)
+                .set_N_MODE_PMIC3_SWB_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_swb_current_mA)
+                .set_N_MODE_PMIC3_SWC_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_swc_current_mA)
+                .set_N_MODE_PMIC3_SWD_CURRENT(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_swd_current_mA)
+                .set_N_MODE_PMIC3_R73_STATUS_5(i_rc_data.iv_n_mode_health_check_info.iv_pmic[CONSTS::DT3].iv_r73_status_5)
+                .set_N_MODE_ADC_SYSTEM_STATUS(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_system_status)
+                .set_N_MODE_ADC_GENERAL_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_general_cfg)
+                .set_N_MODE_ADC_DATA_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_data_cfg)
+                .set_N_MODE_ADC_OSR_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_osr_cfg)
+                .set_N_MODE_ADC_OPMODE_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_opmode_cfg)
+                .set_N_MODE_ADC_PIN_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_pin_cfg)
+                .set_N_MODE_ADC_GPIO_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_gpio_cfg)
+                .set_N_MODE_ADC_GPO_DRIVE_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_gpo_drive_cfg)
+                .set_N_MODE_ADC_GPO_VALUE_CFG(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_gpo_value_cfg)
+                .set_N_MODE_ADC_GPI_VALUE(i_rc_data.iv_n_mode_additional_info.iv_adc.iv_gpi_value)
+                .set_N_MODE_DT_R90_OPS_STATE(i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r90_ops_state)
+                .set_N_MODE_DT_R92_FAULTS_STATUS_0(
+                    i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r92_faults_status_0)
+                .set_N_MODE_DT_R94_FAULTS_STATUS_1(
+                    i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r94_faults_status_1)
+                .set_N_MODE_DT_R96_FIRST_FAULTS_STATUS_0(
+                    i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r96_first_faults_status_0)
+                .set_N_MODE_DT_R98_FIRST_FAULTS_STATUS_1(
+                    i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_r98_first_faults_status_1)
+                .set_N_MODE_DT_RA6_INFET_MPT_ADDR(i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_ra6_infet_mpt_addr)
+                .set_N_MODE_DT_RA8_NVM_DATA(i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_ra8_nvm_data)
+                .set_N_MODE_DT_RB4_VCC_VIN_VINP(i_rc_data.iv_n_mode_additional_info.iv_dt[l_failed_pmic_number].iv_rb4_vcc_vin_vinp)
+                .set_N_MODE_PMIC_R2F_PMIC_CONFIG(i_rc_data.iv_n_mode_additional_info.iv_pmic[l_failed_pmic_number].iv_r2f_pmic_config)
+                .set_N_MODE_PMIC_R32_PMIC_ENABLE(i_rc_data.iv_n_mode_additional_info.iv_pmic[l_failed_pmic_number].iv_r32_pmic_enable)
+                .set_N_MODE_PMIC_R33_TEMP_STATUS(i_rc_data.iv_n_mode_additional_info.iv_pmic[l_failed_pmic_number].iv_r33_temp_status)
+                .set_N_MODE_PMIC_R9C_ON_OFF_CONFIG(
+                    i_rc_data.iv_n_mode_additional_info.iv_pmic[l_failed_pmic_number].iv_r9c_on_off_config),
 #ifndef __PPE__
                 GENTARGTIDFORMAT " Warning: At least one of the 4 PMICs had errors which caused a drop into N-Mode. "
                 "MNFG_THRESHOLDS has asserted that we %s. N-Mode States:"
@@ -1096,12 +1544,15 @@ fapi_try_exit:
 /// @brief Process the results of the N-Mode declarations (if any)
 ///
 /// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @param[in] i_rc_data struct of n mode/n mode possible data for pmic return codes
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, or error code based on the
 ///                           n mode results
 /// @note Logs a recoverable error per bad PMIC to aid FW, but will return good/bad code
 ///       whether we are able to continue or not given those states
 ///
-fapi2::ReturnCode process_n_mode_results(const target_info_redundancy_ddr5& i_target_info)
+fapi2::ReturnCode process_n_mode_results(
+    const target_info_redundancy_ddr5& i_target_info,
+    const pmic_enable_return_code_data& i_rc_data)
 {
     using CONSTS = mss::pmic::consts<mss::pmic::product::JEDEC_COMPLIANT>;
     using mss::pmic::id;
@@ -1168,7 +1619,7 @@ fapi2::ReturnCode process_n_mode_results(const target_info_redundancy_ddr5& i_ta
     FAPI_TRY(mss::pmic::get_mnfg_thresholds(l_mnfg_thresholds));
 
     // If we have any n-modes, we will jump to fapi_try_exit
-    FAPI_TRY(assert_n_mode_states_ddr5(i_target_info, l_n_mode_pmic, l_mnfg_thresholds));
+    FAPI_TRY(assert_n_mode_states_ddr5(i_target_info, l_n_mode_pmic, l_mnfg_thresholds, i_rc_data));
 
     return fapi2::FAPI2_RC_SUCCESS;
 
@@ -1203,6 +1654,7 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
     fapi2::buffer<uint8_t> l_reg_contents;
     fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
     static constexpr uint8_t PMIC0 = 0;
+    pmic_enable_return_code_data l_rc_data;
 
     // Grab the targets as a struct, if they exist
     target_info_redundancy_ddr5 l_target_info(i_ocmb_target, l_rc);
@@ -1253,10 +1705,10 @@ fapi2::ReturnCode enable_with_redundancy(const fapi2::Target<fapi2::TARGET_TYPE_
     // Fifth, verification
     // Now, check that the PMICs were enabled properly. If any don't report on that are expected
     // to be on, declare N-mode there.
-    FAPI_TRY(mss::pmic::ddr5::redundancy_check_all_pmics(l_target_info));
+    FAPI_TRY(mss::pmic::ddr5::redundancy_check_all_pmics(l_target_info, l_rc_data));
 
     // Finally, process the N-Mode results
-    FAPI_TRY(mss::pmic::ddr5::process_n_mode_results(l_target_info));
+    FAPI_TRY(mss::pmic::ddr5::process_n_mode_results(l_target_info, l_rc_data));
 
     FAPI_INF_NO_SBE("Successfully enabled PMICs on" GENTARGTIDFORMAT " with 4U/redundancy mode", GENTARGTID(i_ocmb_target));
 

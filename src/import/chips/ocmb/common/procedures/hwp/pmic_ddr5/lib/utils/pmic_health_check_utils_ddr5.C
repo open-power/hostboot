@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -1120,7 +1120,6 @@ fapi2::ReturnCode check_and_reset_breadcrumb(mss::pmic::ddr5::target_info_redund
                     .set_ADC_GPO_DRIVE_CFG(l_additional_info.iv_adc.iv_gpo_drive_cfg)
                     .set_ADC_GPO_VALUE_CFG(l_additional_info.iv_adc.iv_gpo_value_cfg)
                     .set_ADC_GPI_VALUE(l_additional_info.iv_adc.iv_gpi_value)
-                    .set_ADC_PIN_CFG(l_additional_info.iv_adc.iv_system_status)
                     .set_DT_R90_OPS_STATE(l_additional_info.iv_dt[l_failed_pmic_number].iv_r90_ops_state)
                     .set_DT_R92_FAULTS_STATUS_0(l_additional_info.iv_dt[l_failed_pmic_number].iv_r92_faults_status_0)
                     .set_DT_R94_FAULTS_STATUS_1(l_additional_info.iv_dt[l_failed_pmic_number].iv_r94_faults_status_1)

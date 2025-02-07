@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2019,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2019,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -295,15 +295,16 @@ void inline clear_health_check_states(target_info_redundancy_ddr5& io_target_inf
     io_target_info.iv_adc_state = mss::pmic::ddr5::adc_state::ADC_ALL_GOOD;
 }
 
-
 ///
 /// @brief Check the statuses of all PMICs present on the given OCMB chip
 ///
 /// @param[in,out] io_target_info target info struct
+/// @param[in,out] io_rc_data struct of n mode/n mode possible data for pmic return codes
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, else error code
 ///
-fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmics(target_info_redundancy_ddr5&
-        io_target_info);
+fapi2::ReturnCode inline __attribute__((always_inline)) redundancy_check_all_pmics(
+    target_info_redundancy_ddr5& io_target_info,
+    pmic_enable_return_code_data& io_rc_data);
 
 ///
 /// @brief Log recoverable errors for each PMIC that declared N-mode
@@ -321,23 +322,28 @@ void inline __attribute__((always_inline)) log_n_modes_as_recoverable_errors_ddr
 /// @param[in] i_target_info target info struct
 /// @param[in] i_n_mode_pmic n-mode states for each PMIC, present or not
 /// @param[in] i_mnfg_thresholds thresholds policy setting
+/// @param[in] i_rc_data struct of n mode/n mode possible data for pmic return codes
 /// @return fapi2::ReturnCode iff no n-modes, else, relevant error FFDC
 ///
 fapi2::ReturnCode inline __attribute__((always_inline)) assert_n_mode_states_ddr5(
     const target_info_redundancy_ddr5& i_target_info,
     const mss::pmic::n_mode i_n_mode_pmic[CONSTS::NUM_PMICS_4U],
-    const bool i_mnfg_thresholds);
+    const bool i_mnfg_thresholds,
+    const pmic_enable_return_code_data& i_rc_data);
 
 ///
 /// @brief Process the results of the N-Mode declarations (if any)
 ///
 /// @param[in] i_target_info OCMB, PMIC and I2C target struct
+/// @param[in] i_rc_data struct of n mode/n mode possible data for pmic return codes
 /// @return fapi2::ReturnCode FAPI2_RC_SUCCESS iff success, or error code based on the
 ///                           n mode results
 /// @note Logs a recoverable error per bad PMIC to aid FW, but will return good/bad code
 ///       whether we are able to continue or not given those states
 ///
-fapi2::ReturnCode process_n_mode_results(const target_info_redundancy_ddr5& i_target_info);
+fapi2::ReturnCode process_n_mode_results(
+    const target_info_redundancy_ddr5& i_target_info,
+    const pmic_enable_return_code_data& i_rc_data);
 
 ///
 /// @brief Set the up DTs, ADCs, PMICs for a redundancy configuration / 4U
