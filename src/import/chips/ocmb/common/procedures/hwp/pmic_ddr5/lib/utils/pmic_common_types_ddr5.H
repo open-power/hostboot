@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2023,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2023,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -394,6 +394,18 @@ struct __attribute__ ((__packed__)) dt_periodic_telemetry_data
     uint8_t iv_neg_orfet_cnt_swd = 0;
     uint8_t iv_reserved0         = 0;
     uint16_t iv_reserved1        = 0;
+};
+
+///
+/// @brief Struct of data for pmic enable return codes
+///
+struct __attribute__ ((__packed__)) pmic_enable_return_code_data
+{
+    health_check_telemetry_data iv_n_mode_possible_health_check_info;
+    health_check_telemetry_data iv_n_mode_health_check_info;
+
+    additional_n_mode_telemetry_data iv_n_mode_possible_additional_info;
+    additional_n_mode_telemetry_data iv_n_mode_additional_info;
 };
 
 ///
