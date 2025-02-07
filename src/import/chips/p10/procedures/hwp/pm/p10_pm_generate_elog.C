@@ -89,6 +89,14 @@ fapi2::ReturnCode p10_pm_generate_elog( fapi2::Target<fapi2::TARGET_TYPE_PROC_CH
 
         l_logSrc = XGPE_COMP_ID; //Source of log  is XGPE SRAM
         l_logSlot = l_pElogTbl->dw0.fields.total_log_slots;
+
+        if( 0 == l_logSlot )
+        {
+            //did not find a log in QME SRAM as well as OCC SRAM
+            //indicate to caller through buffer length. This may
+            //prevent caller from creating a false log
+            io_bufLength = 0;
+        }
     }
 
     for( uint8_t l_slot = 0; l_slot < l_logSlot; l_slot++ )
