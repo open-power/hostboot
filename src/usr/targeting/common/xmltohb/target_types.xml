@@ -323,6 +323,9 @@
       <id>EEPROM_VPD_ACCESSIBILITY</id>
     </attribute>
     <attribute>
+      <id>EEPROM_VPD_ACTIVE_COPY</id>
+    </attribute>
+    <attribute>
       <default>
         <field>
           <value>0xFF</value>
@@ -2027,6 +2030,9 @@
     <parent>lcard-dimm</parent>
     <attribute>
       <id>EEPROM_VPD_ACCESSIBILITY</id>
+    </attribute>
+    <attribute>
+      <id>EEPROM_VPD_ACTIVE_COPY</id>
     </attribute>
     <attribute>
       <default>

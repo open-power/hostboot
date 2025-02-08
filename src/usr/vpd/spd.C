@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] Evan Lojewski                                                      */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
@@ -3006,6 +3006,171 @@ errlHndl_t readFromEepromSource(Target*          i_target,
     return err;
 }
 
+typedef struct spd_hw_data
+{
+    uint8_t  memType;
+    uint8_t *keyword;
+} spd_hw_data_t;
+
+/*
+ * @brief Data used for normal execution and for CI injects when running
+ *        cmpEecacheToEeprom
+ */
+typedef struct spd_data
+{
+    HWAS::DeconfigEnum deconfigType;
+    uint8_t            cacheMemType;
+    uint8_t           *cacheKeyword;
+    size_t             caSize;
+    spd_hw_data_t      hw[2];
+    size_t             hwSize;
+    errlHndl_t         crcErrl[2];
+} spd_data_t;
+
+constexpr uint32_t PRI = 0;
+constexpr uint32_t SEC = 1;
+
+#if defined(CONFIG_COMPILE_CXXTEST_HOOKS)
+/*
+ * @brief Set the data in spd_data_t for the different CI injects used to test
+ *        cmpEecacheToEeprom
+ */
+void do_spd_inject(spd_data_t &i_spd_data)
+{
+    using namespace CxxTest;
+
+    i_spd_data.crcErrl[PRI] = nullptr;
+    i_spd_data.crcErrl[SEC] = nullptr;
+    i_spd_data.deconfigType = HWAS::NO_DECONFIG;
+
+    if (g_cxxTestInject.isSet(SPD_VPD_INJECT_ALL_MATCH))
+    {
+        i_spd_data.cacheMemType    = 99;
+        i_spd_data.hw[PRI].memType = 99;
+        i_spd_data.hw[SEC].memType = 99;
+        memset(i_spd_data.cacheKeyword,    0x100, i_spd_data.caSize);
+        memset(i_spd_data.hw[PRI].keyword, 0x100, i_spd_data.hwSize);
+        memset(i_spd_data.hw[SEC].keyword, 0x100, i_spd_data.hwSize);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_NEW_PART))
+    {
+        i_spd_data.cacheMemType    = 5;
+        i_spd_data.hw[PRI].memType = 99;
+        i_spd_data.hw[SEC].memType = 99;
+        memset(i_spd_data.cacheKeyword,    0x200, i_spd_data.caSize);
+        memset(i_spd_data.hw[PRI].keyword, 0x100, i_spd_data.hwSize);
+        memset(i_spd_data.hw[SEC].keyword, 0x100, i_spd_data.hwSize);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_PRI_USE_SEC))
+    {
+        i_spd_data.cacheMemType    = 5;
+        i_spd_data.hw[PRI].memType = 0;
+        i_spd_data.hw[SEC].memType = 99;
+        memset(i_spd_data.cacheKeyword,    0x200, i_spd_data.caSize);
+        memset(i_spd_data.hw[PRI].keyword, 0,     i_spd_data.hwSize);
+        memset(i_spd_data.hw[SEC].keyword, 0x100, i_spd_data.hwSize);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_SEC_USE_PRI))
+    {
+        i_spd_data.cacheMemType       = 5;
+        i_spd_data.hw[PRI].memType    = 99;
+        i_spd_data.hw[SEC].memType    = 0;
+        i_spd_data.cacheKeyword[0]    = 111;
+        i_spd_data.hw[PRI].keyword[0] = 100;
+        i_spd_data.hw[SEC].keyword[0] = 0;
+        memset(i_spd_data.cacheKeyword,    0x200, i_spd_data.caSize);
+        memset(i_spd_data.hw[PRI].keyword, 0x100, i_spd_data.hwSize);
+        memset(i_spd_data.hw[SEC].keyword, 0,     i_spd_data.hwSize);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_PRI_NO_MATCH_SEC))
+    {
+        i_spd_data.cacheMemType       = 5;
+        i_spd_data.hw[PRI].memType    = 0;
+        i_spd_data.hw[SEC].memType    = 99;
+        memset(i_spd_data.cacheKeyword,    0x200, i_spd_data.caSize);
+        memset(i_spd_data.hw[PRI].keyword, 0,     i_spd_data.hwSize);
+        memset(i_spd_data.hw[SEC].keyword, 0x100, i_spd_data.hwSize);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_SEC_NO_MATCH_PRI))
+    {
+        i_spd_data.cacheMemType       = 5;
+        i_spd_data.hw[PRI].memType    = 99;
+        i_spd_data.hw[SEC].memType    = 0;
+        memset(i_spd_data.cacheKeyword,    0x200, i_spd_data.caSize);
+        memset(i_spd_data.hw[PRI].keyword, 0x100, i_spd_data.hwSize);
+        memset(i_spd_data.hw[SEC].keyword, 0,     i_spd_data.hwSize);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_PRI_BAD_SEC))
+    {
+        i_spd_data.cacheMemType       = 5;
+        i_spd_data.hw[PRI].memType    = 98;
+        i_spd_data.hw[SEC].memType    = 99;
+        memset(i_spd_data.cacheKeyword,    0x100, i_spd_data.caSize);
+        memset(i_spd_data.hw[PRI].keyword, 0x200, i_spd_data.hwSize);
+        memset(i_spd_data.hw[SEC].keyword, 0x300, i_spd_data.hwSize);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_GOOD_BUT_NO_MATCH))
+    {
+        i_spd_data.cacheMemType       = 5;
+        i_spd_data.hw[PRI].memType    = 98;
+        i_spd_data.hw[SEC].memType    = 99;
+        memset(i_spd_data.cacheKeyword,    0x200, i_spd_data.caSize);
+        memset(i_spd_data.hw[PRI].keyword, 0,     i_spd_data.hwSize);
+        memset(i_spd_data.hw[SEC].keyword, 0x100, i_spd_data.hwSize);
+    }
+}
+
+/*
+ * @brief Set the error logs in spd_data_t for the different CI injects used to
+ *        test cmpEecacheToEeprom
+ */
+void do_spd_inject_checkCRC(spd_data_t &i_spd_data)
+{
+    using namespace CxxTest;
+
+    i_spd_data.crcErrl[PRI] = nullptr;
+    i_spd_data.crcErrl[SEC] = nullptr;
+
+    if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_PRI_USE_SEC))
+    {
+        i_spd_data.crcErrl[PRI] = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_RECOVERED,
+                                                          VPD::VPD_OCMB_CHECK_CRC,
+                                                          VPD::VPD_DDIMM_SPD_CRC_MISCOMPARE);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_SEC_USE_PRI))
+    {
+        i_spd_data.crcErrl[SEC] = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_RECOVERED,
+                                                          VPD::VPD_OCMB_CHECK_CRC,
+                                                          VPD::VPD_DDIMM_SPD_CRC_MISCOMPARE);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_PRI_NO_MATCH_SEC))
+    {
+        i_spd_data.crcErrl[PRI] = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_RECOVERED,
+                                                          VPD::VPD_OCMB_CHECK_CRC,
+                                                          VPD::VPD_DDIMM_SPD_CRC_MISCOMPARE);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_SEC_NO_MATCH_PRI))
+    {
+        i_spd_data.crcErrl[SEC] = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_RECOVERED,
+                                                          VPD::VPD_OCMB_CHECK_CRC,
+                                                          VPD::VPD_DDIMM_SPD_CRC_MISCOMPARE);
+    }
+    else if (g_cxxTestInject.isSet(SPD_VPD_INJECT_BAD_PRI_BAD_SEC))
+    {
+        i_spd_data.crcErrl[PRI] = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_RECOVERED,
+                                                          VPD::VPD_OCMB_CHECK_CRC,
+                                                          VPD::VPD_DDIMM_SPD_CRC_MISCOMPARE);
+        i_spd_data.crcErrl[SEC] = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_RECOVERED,
+                                                          VPD::VPD_OCMB_CHECK_CRC,
+                                                          VPD::VPD_DDIMM_SPD_CRC_MISCOMPARE);
+    }
+}
+#define CI_INJECT_SPD(_spd_data) do_spd_inject(_spd_data)
+#define CI_INJECT_SPD_checkCRC(_spd_data) do_spd_inject_checkCRC(_spd_data)
+#else
+#define CI_INJECT_SPD(_spd_data)
+#define CI_INJECT_SPD_checkCRC(_spd_data)
+#endif
 
 // ------------------------------------------------------------------
 // cmpEecacheToEeprom
@@ -3015,227 +3180,414 @@ errlHndl_t cmpEecacheToEeprom(Target * i_target,
                               VPD::vpdKeyword i_keyword,
                               bool &o_match)
 {
-    errlHndl_t err = nullptr;
+    constexpr errlHndl_t GOOD = nullptr;
+    const uint32_t l_huid = get_huid(i_target);
+    errlHndl_t l_err = nullptr;
 
-    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom(%08X)", get_huid(i_target));
+    TRACSSCOMP(g_trac_spd, ENTER_MRK"cmpEecacheToEeprom(%08X)", l_huid);
 
     // default to a mismatch to force a refresh from the eeprom
     o_match = false;
 
     // note if we failed with unexpected data
-    bool unexpected_data = false;
+    bool restore_orig_access = true;
 
+    // declare the data storage outside the loop so we can clean it up at the end
+    std::vector<errlHndl_t> hwErrors = {nullptr,nullptr};
+
+    spd_data_t l_spd_data{ HWAS::DECONFIG,            // this struct contains data
+                           0, nullptr, 0,             // that is gathered and used
+                           {{0,nullptr},{0,nullptr}}, // in the logic below
+                           0,
+                           {nullptr,nullptr} };
+
+    //-- Setup a redundancy flag to tell if a hw secondary copy exists
+
+    ATTR_EEPROM_VPD_REDUNDANCY_type    l_redundancy_type{};
+    ATTR_EEPROM_VPD_ACCESSIBILITY_type l_orig_access{}; // Save to later restore
+    ATTR_EEPROM_VPD_ACTIVE_COPY_type   l_active_side{};
+
+    bool l_is_redundancy  = i_target->tryGetAttr<ATTR_EEPROM_VPD_REDUNDANCY>(l_redundancy_type);
+    bool l_is_access      = i_target->tryGetAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(l_orig_access);
+    bool l_is_active_side = i_target->tryGetAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(l_active_side);
+
+    bool l_redundancy{}; // true, if we can access the hw secondary copy
+
+    l_redundancy = (l_is_access      &&
+                    l_is_active_side &&
+                    l_is_redundancy  &&
+                    l_redundancy_type == EEPROM_VPD_REDUNDANCY_PRESENT);
     do
     {
-        // Read the Basic Memory Type from the Eeprom Cache
-        uint8_t memTypeCache(MEM_TYPE_INVALID);
+    //-- Start with the cache, any errors here will result in a refresh
 
-        err = getMemType(memTypeCache,
-                         i_target,
-                         i_eepromType,
-                         EEPROM::CACHE);
+    // Read the Basic Memory Type from the Eeprom Cache
+    l_err = getMemType(l_spd_data.cacheMemType,
+                       i_target,
+                       i_eepromType,
+                       EEPROM::CACHE);
+    if (l_err)
+    {
+        // CACHE may not be loaded, ignore the error
+        delete l_err;
+        l_err = nullptr;
+        TRACFCOMP(g_trac_spd, ERR_MRK" cmpEecacheToEeprom(%.8X): Error getting "
+                                     "memory type from cache", l_huid);
+        break;
+    }
 
-        if (err)
+    if (!isValidDimmType(l_spd_data.cacheMemType, i_eepromType))
+    {
+        TRACFCOMP(g_trac_spd, ERR_MRK
+                  "cmpEecacheToEeprom(%.8X): Invalid DIMM type (0x%X) found in "
+                  "cache copy of eeprom", l_huid, l_spd_data.cacheMemType);
+        break;
+    }
+
+    // Get the keyword size
+    const KeywordData* entry = nullptr;
+    l_err = getKeywordEntry(i_keyword,
+                            l_spd_data.cacheMemType,
+                            i_target,
+                            entry);
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_spd, ERR_MRK
+                  "cmpEecacheToEeprom(%.8X): getKeywordEntry failed in cache "
+                  "copy of eeprom", l_huid);
+        break;
+    }
+    l_spd_data.caSize = entry->length;
+
+    // Read the keyword from CACHE
+    l_spd_data.cacheKeyword = new uint8_t[l_spd_data.caSize];
+    l_err = readFromEepromSource(i_target,
+                                 i_eepromType,
+                                 i_keyword,
+                                 l_spd_data.cacheMemType,
+                                 l_spd_data.cacheKeyword,
+                                 l_spd_data.caSize,
+                                 EEPROM::CACHE);
+    if (l_err)
+    {
+        TRACFCOMP(g_trac_spd, ERR_MRK"cmpEecacheToEeprom(%08X) CACHE read failed", l_huid);
+        // CACHE may not be loaded, ignore the error
+        delete l_err;
+        l_err = nullptr;
+        break;
+    }
+
+    //-- Now read the hardware, potentially 2 copies
+
+    // loop through both copies if they exist
+    for( uint8_t side=0; side<(l_redundancy?2:1); side++ )
+    {
+        if (l_redundancy) // setup attr for the side we want to read
         {
-            break;
+            ATTR_EEPROM_VPD_ACCESSIBILITY_type l_access{};
+            l_access = (side == PRI) ?
+                       EEPROM_VPD_ACCESSIBILITY_SECONDARY_DISABLED :
+                       EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED;
+            i_target->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(l_access);
+        }
+        // Read the Basic Memory Type from HARDWARE-PRIMARY
+        l_spd_data.crcErrl[side] = getMemType(l_spd_data.hw[side].memType,
+                                    i_target,
+                                    i_eepromType,
+                                    EEPROM::HARDWARE);
+        if (l_spd_data.crcErrl[side])
+        {
+            // Error here could be recoverable by using the other side
+            TRACFCOMP(g_trac_spd, ERR_MRK" cmpEecacheToEeprom(): Error getting "
+                                         "memory type from side %d", side);
+            continue;
+        }
+        else if (!isValidDimmType(l_spd_data.hw[side].memType, i_eepromType))
+        {
+            // Leave o_match == false and move on to the next side.
+            TRACFCOMP(g_trac_spd, ERR_MRK
+                      "cmpEecacheToEeprom(%.8X): invalid DIMM type (0x%X) found "
+                      "in hw copy %d of eeprom ",
+                      l_huid, l_spd_data.hw[side].memType, side);
+            continue;
         }
 
-        if (!isValidDimmType(memTypeCache, i_eepromType))
+        // Get the keyword size
+        l_spd_data.crcErrl[side] = getKeywordEntry(i_keyword,
+                                         l_spd_data.hw[side].memType,
+                                         i_target,
+                                         entry);
+        if (l_spd_data.crcErrl[side])
         {
             TRACFCOMP(g_trac_spd, ERR_MRK
-                     "cmpEecacheToEeprom(): Invalid DIMM type (0x%X) found in cache copy of eeprom "
-                     "(eeprom content type 0x%X), we will not be able to understand contents",
-                     memTypeCache, i_eepromType);
-            break;
+                      "cmpEecacheToEeprom(%08X) HW getKeyword failed side:%d",
+                      l_huid, side);
+            continue;
         }
+        l_spd_data.hwSize = entry->length;
 
-        // Read the Basic Memory Type from HARDWARE
-        uint8_t memTypeHardware(MEM_TYPE_INVALID);
-        err = getMemType(memTypeHardware,
-                         i_target,
-                         i_eepromType,
-                         EEPROM::HARDWARE);
-
-        if (err)
+        // This should be impossible since the memtype matches but
+        // being paranoid...
+        if( l_spd_data.hwSize != l_spd_data.caSize )
         {
-            break;
-        }
-
-        if (!isValidDimmType(memTypeHardware, i_eepromType))
-        {
-            // Leave o_match == false and exit.
+            // Leave o_match == false and move on.
             TRACFCOMP(g_trac_spd, ERR_MRK
-                     "cmpEecacheToEeprom(): Invalid DIMM type (0x%X) found in hw copy of eeprom "
-                     "(eeprom content type 0x%X)",
-                     memTypeHardware, i_eepromType);
-            unexpected_data = true;
-            break;
+                      "cmpEecacheToEeprom(%.8X): Inconsistent keyword size found "
+                      "in hw copy %d of eeprom",
+                      l_huid, side);
+            continue;
         }
-
-        if (memTypeCache != memTypeHardware)
-        {
-            // CACHE and HARDWARE don't match.
-            // Leave o_match == false and exit.
-            TRACFCOMP(g_trac_spd, ERR_MRK
-                     "cmpEecacheToEeprom(): memTypeCache (0x%X) != memTypeHardware (0x%X)",
-                     memTypeCache, memTypeHardware);
-            break;
-        }
-
-         // Get the keyword size
-        const KeywordData* entry = nullptr;
-        err = getKeywordEntry(i_keyword,
-                              memTypeHardware,
-                              i_target,
-                              entry);
-        if (err)
-        {
-            break;
-        }
-        size_t dataSize = entry->length;
-
 
         // Read the keyword from HARDWARE
-        size_t sizeHardware = dataSize;
-        uint8_t dataHardware[sizeHardware];
-        err = readFromEepromSource(i_target,
-                                   i_eepromType,
-                                   i_keyword,
-                                   memTypeHardware,
-                                   dataHardware,
-                                   sizeHardware,
-                                   EEPROM::HARDWARE);
-        if (err)
+        l_spd_data.hw[side].keyword = new uint8_t[l_spd_data.hwSize];
+        memset(l_spd_data.hw[side].keyword, side, l_spd_data.hwSize);
+        l_spd_data.crcErrl[side] = readFromEepromSource(i_target,
+                                              i_eepromType,
+                                              i_keyword,
+                                              l_spd_data.hw[side].memType,
+                                              l_spd_data.hw[side].keyword,
+                                              l_spd_data.hwSize,
+                                              EEPROM::HARDWARE);
+        if (l_spd_data.crcErrl[side])
         {
-            break;
+            TRACFCOMP(g_trac_spd, ERR_MRK
+                      "cmpEecacheToEeprom(%08X) HW read failed side:%d",
+                      l_huid, side);
+            continue;
         }
+    }
 
-        // Read the keyword from CACHE
-        size_t sizeCache = dataSize;
-        uint8_t dataCache[sizeCache];
-        err = readFromEepromSource(i_target,
-                                   i_eepromType,
-                                   i_keyword,
-                                   memTypeHardware,
-                                   dataCache,
-                                   sizeCache,
-                                   EEPROM::CACHE);
-        if (err)
-        {
-            // CACHE may not be loaded, ignore the error
-            delete err;
-            err = nullptr;
-            break;
-        }
+    CI_INJECT_SPD(l_spd_data); // if CI, then override the data we just read
+                               // with the CI inject data
 
-        TRACDBIN(g_trac_spd, "Hardware data : ", dataHardware, sizeHardware);
-        TRACDBIN(g_trac_spd, "Cache data : ", dataCache, sizeCache);
+    //-- Now compare the HW and Cache data
 
-        // Compare the HARDWARE/CACHE keyword size/data
-        if (sizeHardware != sizeCache)
-        {
-            // CACHE and HARDWARE don't match.
-            // Leave o_match == false and exit.
-            TRACFCOMP( g_trac_spd,
-                       "cmpEecacheToEeprom(): CACHE size (0x%X) and HARDWARE "
-                       "size (0x%X) are differnt for 0x%08X",
-                       sizeCache, sizeHardware, get_huid(i_target) );
-            break;
-        }
-        if (memcmp(dataHardware, dataCache, sizeHardware))
-        {
-            // CACHE and HARDWARE don't match.
-            // Leave o_match == false and exit.
-            TRACFCOMP( g_trac_spd,
-                       "cmpEecacheToEeprom(): CACHE and HARDWARE "
-                       "data don't match for 0x%08X",
-                       get_huid(i_target) );
-            unexpected_data = true;
-            break;
-        }
-
+    bool l_cache_and_active_match =
+            ( (l_spd_data.cacheMemType == l_spd_data.hw[l_active_side].memType) &&
+               (memcmp(l_spd_data.cacheKeyword,
+                       l_spd_data.hw[l_active_side].keyword,
+                       l_spd_data.hwSize) == 0));
+    // MATCH
+    if (l_cache_and_active_match)
+    {
         o_match = true;
+        break;
+    }
+
+    // NO REDUNDANCY
+    if (!l_redundancy)
+    {
+        // if there is no hw secondary copy, then we are done here
+        o_match = false;
+        break;
+    }
+
+    //-- Now compare the HW PRI and SEC data
+
+    bool l_pri_and_sec_match =
+            ((l_spd_data.hw[PRI].memType == l_spd_data.hw[SEC].memType) &&
+            (memcmp(l_spd_data.hw[PRI].keyword,
+                    l_spd_data.hw[SEC].keyword,
+                    l_spd_data.hwSize) == 0));
+    // NEW_PART
+    if (l_pri_and_sec_match)
+    {
+        // Leave o_match == false and exit.
+        TRACFCOMP(g_trac_spd,
+                  "cmpEecacheToEeprom(): memTypeCache (0x%X) != memTypeHardware "
+                  " NEW_PART (0x%X,0x%X)",
+                  l_spd_data.cacheMemType,
+                  l_spd_data.hw[PRI].memType,
+                  l_spd_data.hw[SEC].memType);
+        // since the hw match, default back to using the primary copy
+        i_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(0);
+        break;
+    }
+
+    // CHECK_CRC
+    //-- Something looked funny with Cache/PRI/SEC, figure out what is broken
+
+    std::vector<std::vector<crc_section_t>> l_crc_sections;
+    std::vector<crc_section_t> l_side0_sections;
+    std::vector<crc_section_t> l_side1_sections;
+    l_crc_sections.push_back(l_side0_sections);
+    l_crc_sections.push_back(l_side1_sections);
+
+    // enable both PRI/SEC so we can check the CRC
+    i_target->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED);
+
+    for( uint8_t side = PRI; side < 2; side++ )
+    {
+        EEPROM::EEPROM_ROLE l_role{};
+
+        // only do the CRC check if we haven't already hit some other error
+        if( !l_spd_data.crcErrl[side] )
+        {
+            l_role = (side==PRI) ? EEPROM::VPD_PRIMARY : EEPROM::VPD_BACKUP;
+            l_spd_data.crcErrl[side] = SPD::checkCRC( i_target,
+                                                      SPD::CHECK,
+                                                      l_role,
+                                                      EEPROM::HARDWARE,
+                                                      l_crc_sections[side] );
+            if( l_spd_data.crcErrl[side] )
+            {
+                TRACFCOMP(g_trac_spd, ERR_MRK
+                          "cmpEecacheToEeprom(%.8X)> CRC errors "
+                          "found in hardware on side %d", l_huid, side);
+            }
+        }
+    }
+
+    CI_INJECT_SPD_checkCRC(l_spd_data); // if CI, then setup the CRC errl for inject
+
+    TRACSSCOMP(g_trac_spd, "cmpEecacheToEeprom(%08X) active:%d CRC PRI:%p SEC:%p",
+            l_huid, l_active_side, l_spd_data.crcErrl[PRI], l_spd_data.crcErrl[SEC]);
+
+    if (l_spd_data.crcErrl[PRI] != GOOD &&
+        l_spd_data.crcErrl[SEC] == GOOD && l_active_side == PRI)
+    {
+        TRACFCOMP(g_trac_spd, "cmpEecacheToEeprom(%08X) BAD_PRI_USE_SEC next boot", l_huid);
+        // primary is bad, use the backup as the default next boot
+        i_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(1);
+        // disable the primary for the rest of this boot
+        i_target->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>
+                                (EEPROM_VPD_ACCESSIBILITY_PRIMARY_DISABLED);
+        restore_orig_access = false;
+        // commit the crc error as recovered
+        l_spd_data.crcErrl[PRI]->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+        errlCommit(l_spd_data.crcErrl[PRI], VPD_COMP_ID);
+        // force a refresh in case we had been using bad data from the primary
+        break;
+    }
+    if (l_spd_data.crcErrl[PRI] != GOOD &&
+        l_spd_data.crcErrl[SEC] == GOOD && l_active_side == SEC)
+    {
+        TRACFCOMP(g_trac_spd, "cmpEecacheToEeprom(%08X) BAD_PRI_NO_MATCH_SEC", l_huid);
+        // commit the crc error as recovered
+        l_spd_data.crcErrl[PRI]->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+        errlCommit(l_spd_data.crcErrl[PRI], VPD_COMP_ID);
+        break;
+    }
+    if (l_spd_data.crcErrl[PRI] == GOOD &&
+        l_spd_data.crcErrl[SEC] != GOOD && l_active_side == SEC)
+    {
+        TRACFCOMP(g_trac_spd, "cmpEecacheToEeprom(%08X) BAD_SEC_USE_PRI next boot", l_huid);
+        // primary is good so use that as the default next boot
+        i_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(0);
+        // disable the secondary for the rest of this boot
+        i_target->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>
+                                  (EEPROM_VPD_ACCESSIBILITY_SECONDARY_DISABLED);
+        restore_orig_access = false;
+        // commit the crc error as recovered
+        l_spd_data.crcErrl[SEC]->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+        errlCommit(l_spd_data.crcErrl[SEC], VPD_COMP_ID);
+        // force a refresh in case we had been using bad data from the primary
+        break;
+    }
+    if (l_spd_data.crcErrl[PRI] == GOOD &&
+        l_spd_data.crcErrl[SEC] != GOOD && l_active_side == PRI)
+    {
+        TRACFCOMP(g_trac_spd, "cmpEecacheToEeprom(%08X) BAD_SEC_NO_MATCH_PRI", l_huid);
+        // commit the crc error as recovered
+        l_spd_data.crcErrl[SEC]->setSev(ERRORLOG::ERRL_SEV_RECOVERED);
+        errlCommit(l_spd_data.crcErrl[SEC], VPD_COMP_ID);
+        break;
+    }
+    if (l_spd_data.crcErrl[PRI] != GOOD &&
+        l_spd_data.crcErrl[SEC] != GOOD)
+    {
+        TRACFCOMP(g_trac_spd, "cmpEecacheToEeprom(%08X) BAD_PRI_BAD_SEC, bad part", l_huid);
+
+        l_spd_data.crcErrl[SEC]->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        l_spd_data.crcErrl[PRI]->aggregate(l_spd_data.crcErrl[SEC]);
+        l_spd_data.crcErrl[PRI]->setSev(ERRORLOG::ERRL_SEV_UNRECOVERABLE);
+        l_spd_data.crcErrl[PRI]->addHwCallout( i_target,
+                                               HWAS::SRCI_PRIORITY_HIGH,
+                                               l_spd_data.deconfigType,
+                                               HWAS::GARD_Predictive );
+        l_spd_data.crcErrl[PRI]->collectTrace( "SPD", 1024 );
+        errlCommit(l_spd_data.crcErrl[PRI], VPD_COMP_ID);
+        break;
+    }
+
+    // ELSE, CRCs are good
+    TRACFCOMP(g_trac_spd, "cmpEecacheToEeprom(%08X) GOOD_BUT_NO_MATCH", l_huid);
+
+    // loop through all of the CRC sections to find and trace any mismatch
+    //  if the CRC of a section doesnt match PRI/SEC, then the sections dont match
+    size_t l_num_mismatches = 0;
+    for( auto primary : l_crc_sections[PRI] )
+    {
+        for( auto seconday : l_crc_sections[SEC] )
+        {
+            if( primary.start == seconday.start )
+            {
+                if( primary.crcActual != seconday.crcActual )
+                {
+                    TRACFCOMP(g_trac_spd, ERR_MRK
+                              "cmpEecacheToEeprom(%.8X)> CRC "
+                              "mismatch for byte %d : 0=%.X, 1=%.X",
+                               l_huid,
+                               primary.start,
+                               primary.crcActual,
+                               seconday.crcActual );
+                    l_num_mismatches++;
+                }
+                break;
+            }
+        }
+    }
+    /*@
+     * @errortype
+     * @moduleid         VPD::SPD_CMP_EECACHE_TO_EEPROM
+     * @reasoncode       VPD::VPD_OCMB_CRC_MISMATCH
+     * @userdata1        Target HUID
+     * @userdata2        Number of sections with different CRCs
+     * @devdesc          CRC mismatch between redundant SPD copies.
+     * @custdesc         A hardware error problem occurred during
+     *                   the IPL of the system.
+     */
+    l_err = new ERRORLOG::ErrlEntry(ERRORLOG::ERRL_SEV_UNRECOVERABLE,
+                                    VPD::SPD_CMP_EECACHE_TO_EEPROM,
+                                    VPD::VPD_OCMB_CRC_MISMATCH,
+                                    l_huid,
+                                    l_num_mismatches);
+    l_err->addHwCallout( i_target,
+                         HWAS::SRCI_PRIORITY_HIGH,
+                         l_spd_data.deconfigType,
+                         HWAS::GARD_Predictive );
+    l_err->collectTrace( "SPD", 1024 );
+    errlCommit(l_err, VPD_COMP_ID);
+    l_err = nullptr;
+    break;
 
     } while(0);
 
-    //P10 DD1 Workaround
-    // There is a bug on P10 DD1 that can cause SPD corruption
-    // due to some floating i2c lines.  To help out the lab, we
-    // want to avoid rereading the data from the physical spd eeprom
-    // unless the part is completely new.  If we find a mismatch or
-    // other unexpected data we will do a CRC check.  If we find a
-    // miscompare we will assume corruption and return that the
-    // data is in sync.  Downstream code will then push the cached
-    // copy out to the hardware.
-    if( !err && unexpected_data )
+    if (restore_orig_access && l_redundancy)
     {
-        if ((i_eepromType == EEPROM_CONTENT_TYPE_DDIMM) ||
-            (i_eepromType == EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD))
-        {
-            // do CRC check
-            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on 0x%08X, checking CRC",
-               get_huid(i_target) );
-            //TODO - check for p10 dd1 here
-            std::vector<crc_section_t> l_sections;
-            errlHndl_t errHW = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::HARDWARE, l_sections );
-            if( errHW )
-            {
-                TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in hardware" );
-            }
-            errlHndl_t errCACHE = SPD::checkCRC( i_target, SPD::CHECK, EEPROM::VPD_PRIMARY, EEPROM::CACHE, l_sections );
-            if( errCACHE )
-            {
-                TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> CRC errors found in cache" );
-            }
-            // If the cache is bad, force a resync
-            // Otherwise if the cache is okay and the HW is bad, assume a match so that
-            //  the cache gets pushed out to the HW
-            if( !errCACHE && !errHW )
-            {
-                TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> No CRC errors found, must be new HW" );
-            }
-            else
-            {
-                TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Found some CRC errors, forcing cache refresh" );
-                // errCACHE error
-                // cache is either missing or bad, we want to refresh from the hardware
-
-                // errHW error
-                // this could mean a bitflip in the SN/PN itself, or it can mean
-                //  we have a new part installed that had bad SPD to begin with
-                // To be safe and avoid whacking SPD with old cache, we will just
-                //  let this fail out and require repair
-
-                o_match = false;
-
-                // commit any logs we hit as informational, just in case
-                if( errCACHE )
-                {
-                    errCACHE->collectTrace( "SPD", 256);
-                    errCACHE->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    ERRORLOG::errlCommit(errCACHE, VPD_COMP_ID );
-                }
-                if( errHW )
-                {
-                    errHW->collectTrace( "SPD", 256);
-                    errHW->setSev(ERRORLOG::ERRL_SEV_INFORMATIONAL);
-                    ERRORLOG::errlCommit(errHW, VPD_COMP_ID );
-                }
-            }
-        }
-        else // other EEPROM_CONTENT_TYPEs
-        {
-            // don't do the CRC check, only valid for DDIMM and PLANAR_OCMB_SPD
-            TRACFCOMP( g_trac_spd, "cmpEecacheToEeprom> Unexpected data found on 0x%08X, must be new HW",
-                       get_huid(i_target));
-        }
-
+        // Restore the attribute we messed up unless we actually found a problem
+        i_target->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(l_orig_access);
     }
 
-    TRACSSCOMP( g_trac_spd, EXIT_MRK"cmpEecacheToEeprom(): returning %s errors. o_match = %s",
-                (err ? "with" : "with no"), o_match ? "True" : "False");
+    for( auto hw : l_spd_data.hw )         // cleanup
+    {
+        free(hw.keyword);
+    }
+    for( auto hwerr : l_spd_data.crcErrl ) // cleanup
+    {
+        if( hwerr )
+        {
+            // the severity should have been set appropriately above
+            errlCommit(hwerr, VPD_COMP_ID);
+        }
+    }
 
-    return err;
+    TRACFCOMP( g_trac_spd, EXIT_MRK"cmpEecacheToEeprom(): returning %s errors. "
+                                   "o_match = %s",
+                                   l_err ? "with" : "with no",
+                                   o_match ? "True" : "False");
+
+    return l_err;
 }
 
 // In addition to the regular SPD driver, we also want to register against

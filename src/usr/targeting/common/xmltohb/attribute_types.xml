@@ -1621,6 +1621,24 @@
   </enumerationType>
 
   <attribute>
+    <id>EEPROM_VPD_ACTIVE_COPY</id>
+    <description>
+      A persistent attribute used to remember which copy of the VPD
+      data should be used as the initial copy on the next IPL.
+      The value will be cleared whenever a new part is detected.
+    </description>
+    <simpleType>
+      <uint8_t>
+        <default>0</default>
+      </uint8_t>
+    </simpleType>
+    <persistency>non-volatile</persistency>
+    <readable/>
+    <writeable/>
+    <no_export/>
+  </attribute>
+
+  <attribute>
     <complexType>
       <description>Structure to define the addressing for an attached I2C
           eeprom device that contains secondary VPD info.

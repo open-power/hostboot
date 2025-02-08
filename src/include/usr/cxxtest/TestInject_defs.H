@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -55,6 +55,14 @@ namespace CxxTest
         SBEIO_INJECT_HRESET_ThermalSensorPolling,
         SBEIO_INJECT_HRESET_TWO_FAILS,
         SBEIO_INJECT_HRESET_SKIP_DUMP,
+        SPD_VPD_INJECT_ALL_MATCH,
+        SPD_VPD_INJECT_NEW_PART,
+        SPD_VPD_INJECT_BAD_PRI_USE_SEC,
+        SPD_VPD_INJECT_BAD_SEC_USE_PRI,
+        SPD_VPD_INJECT_BAD_PRI_NO_MATCH_SEC,
+        SPD_VPD_INJECT_BAD_SEC_NO_MATCH_PRI,
+        SPD_VPD_INJECT_BAD_PRI_BAD_SEC,
+        SPD_VPD_INJECT_GOOD_BUT_NO_MATCH,
         MAX_CXX_TEST_INJECTS = 63,
     };
 

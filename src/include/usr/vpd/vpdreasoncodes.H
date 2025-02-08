@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] Google Inc.                                                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
@@ -120,11 +120,11 @@ enum vpdModuleId
     // OCMB SPD
     VPD_OCMB_GET_SPD                        = 0x90,
     VPD_OCMB_SPD_PERFORM_OP                 = 0x91,
-    // 0x92, 0x93 used
-    VPD_OCMB_CHECK_CRC                      = 0x94,
-
     VPD_READ_FROM_EEPROM_SOURCE             = 0x92,
     VPD_GET_MEMTYPE                         = 0x93,
+    VPD_OCMB_CHECK_CRC                      = 0x94,
+    SPD_CMP_EECACHE_TO_EEPROM               = 0x95,
+
 
 };
 
@@ -205,6 +205,7 @@ enum vpdReasonCode
     VPD_ISDIMM_PROBLEM_READING_SPD_SIZE = VPD_COMP_ID | 0x55,
     VPD_ISDIMM_PROBLEM_READING_SPD      = VPD_COMP_ID | 0x56,
     VPD_ISDIMM_UNSUPPORTED_FN_FOR_CCIN  = VPD_COMP_ID | 0x57,
+    VPD_OCMB_CRC_MISMATCH               = VPD_COMP_ID | 0x58,
 };
 
 

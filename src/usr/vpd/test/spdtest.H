@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -39,6 +39,7 @@
 #include <devicefw/driverif.H>
 #include <targeting/common/predicates/predicates.H>
 #include <targeting/common/utilFilter.H>
+#include <eeprom/eepromif.H>
 
 #include <vpd/vpdreasoncodes.H>
 #include <vpd/spdenums.H>
@@ -87,10 +88,364 @@ class SPDTest: public CxxTest::TestSuite
 {
   public:
 
-   // Compile out this code because it uses data types from TestInject_defs.H
-   //  and TestInject.C
-   // Those data types are compiled out using this flag in those files, so this
-   //  code must be compiled out also.
+    void pre_check_crc(Target *i_target)
+    {
+        vector<crc_section_t> l_sections;
+        errlHndl_t l_errl = SPD::checkCRC(i_target,
+                                          SPD::CHECK_AND_FIX,
+                                          EEPROM::VPD_PRIMARY,
+                                          EEPROM::HARDWARE,
+                                          l_sections);
+        if (l_errl)
+        {
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+    }
+
+    /**
+     * @brief This test ensures the correct handling in cmpEecacheToEeprom when
+     *        matching the cache copy to hw copies.
+     */
+    void test_cmpEecacheToEeprom(void)
+    {
+#ifndef __HOSTBOOT_RUNTIME // do not run these tests in HBRT
+
+#ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+        // Compile out this code because it uses CxxTestInject data types. Those data
+        // types are compiled out using this flag in those files, so this code must
+        // be compiled out also.
+
+        TRACFCOMP( g_trac_spd, ENTER_MRK"test_cmpEecacheToEeprom" );
+
+        TargetHandleList      l_dimmList{};
+        Target               *l_target{nullptr};
+        errlHndl_t            l_errl{nullptr};
+        uint8_t               l_mem_type{0};
+        uint32_t              l_huid{};
+        bool                  l_match{false};
+
+        constexpr uint8_t PRI = 0;
+        constexpr uint8_t SEC = 1;
+
+        getDIMMTargets(l_dimmList);
+
+        for (auto l_dimm : l_dimmList)
+        {
+            l_errl = getMemType( l_dimm, l_mem_type );
+            if (l_errl)
+            {
+                TS_FAIL("test_cmpEecacheToEeprom - failed to read memtype %x", get_huid(l_dimm));
+                l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+                errlCommit(l_errl, CXXTEST_COMP_ID);
+                continue;
+            }
+            if (l_mem_type == SPD::DDR5_TYPE)
+            {
+                l_target = l_dimm;
+                break;
+            }
+        }
+        if (!l_target)
+        {
+            TS_INFO("test_cmpEecacheToEeprom - No DDR5 DIMM target found");
+            TRACFCOMP( g_trac_spd, EXIT_MRK"test_cmpEecacheToEeprom" );
+            return;
+        }
+        l_huid = get_huid(l_target);
+
+        // fix any errors injected by other testcases
+        pre_check_crc(l_target);
+
+        auto l_needs_refresh = EECACHE_VPD_STATE_VPD_NEEDS_REFRESH;
+        auto l_none_disabled = EEPROM_VPD_ACCESSIBILITY_NONE_DISABLED;
+        auto l_orig_access   = l_target->getAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>();
+
+        // Init to a known good state
+        l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(0);
+        l_target->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(l_none_disabled);
+
+        // force a copy of the hw eeprom to be pushed into the cache
+        l_target->setAttr<ATTR_EECACHE_VPD_STATE>(l_needs_refresh);
+        EEPROM::cacheEepromVpd(l_target, true);
+
+        //----------------------------------------------------------------------
+        // TC1_ALL_MATCH
+        //----------------------------------------------------------------------
+        TS_INFO("test_cmpEecacheToEeprom: TC1_ALL_MATCH 0x%x", l_huid);
+
+        l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(0);
+        g_cxxTestInject.set(SPD_VPD_INJECT_ALL_MATCH);
+        l_match = false;
+
+        l_errl = SPD::cmpEecacheToEeprom(l_target,
+                                         EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD,
+                                         SPD::EXPLORER_FW_VERSION,
+                                         l_match);
+        if (l_errl)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC1_ALL_MATCH 0x%x: "
+                    "error log not expected", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (!l_match)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC1_ALL_MATCH 0x%x", l_huid);
+        }
+        g_cxxTestInject.clear(SPD_VPD_INJECT_ALL_MATCH);
+
+        //----------------------------------------------------------------------
+        // TC2_NEW_PART
+        //----------------------------------------------------------------------
+        TS_INFO("test_cmpEecacheToEeprom: TC2_NEW_PART 0x%x", l_huid);
+
+        l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(0);
+        g_cxxTestInject.set(SPD_VPD_INJECT_NEW_PART);
+        l_match = false;
+
+        l_errl = SPD::cmpEecacheToEeprom(l_target,
+                                         EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD,
+                                         SPD::EXPLORER_FW_VERSION,
+                                         l_match);
+        if (l_errl)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC2_NEW_PART 0x%x: "
+                    "error log not expected", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (l_match)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC2_NEW_PART 0x%x: false match", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        auto l_active_side = l_target->getAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>();
+        if (l_active_side != PRI)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC2_NEW_PART - INCORRECT "
+                    "VPD ACCESS side:%d", l_active_side);
+        }
+        g_cxxTestInject.clear(SPD_VPD_INJECT_NEW_PART);
+
+        //----------------------------------------------------------------------
+        // TC3_BAD_PRI_USE_SEC
+        //----------------------------------------------------------------------
+        TS_INFO("test_cmpEecacheToEeprom: TC3_BAD_PRI_USE_SEC 0x%x", l_huid);
+
+        l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(PRI);
+        g_cxxTestInject.set(SPD_VPD_INJECT_BAD_PRI_USE_SEC);
+        l_match = false;
+
+        l_errl = SPD::cmpEecacheToEeprom(l_target,
+                                         EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD,
+                                         SPD::EXPLORER_FW_VERSION,
+                                         l_match);
+        if (l_errl)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC3_BAD_PRI_USE_SEC 0x%x: "
+                    "error log not expected", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (l_match)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC3_BAD_PRI_USE_SEC 0x%x: false match", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_active_side = l_target->getAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>();
+        if (l_active_side != SEC)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC3_BAD_PRI_USE_SEC - INCORRECT "
+                    "VPD ACCESS side:%d", l_active_side);
+        }
+        g_cxxTestInject.clear(SPD_VPD_INJECT_BAD_PRI_USE_SEC);
+
+        //----------------------------------------------------------------------
+        // TC4_BAD_SEC_USE_PRI
+        //----------------------------------------------------------------------
+        TS_INFO("test_cmpEecacheToEeprom: TC4_BAD_SEC_USE_PRI 0x%x", l_huid);
+
+        l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(SEC);
+        g_cxxTestInject.set(SPD_VPD_INJECT_BAD_SEC_USE_PRI);
+        l_match = false;
+
+        l_errl = SPD::cmpEecacheToEeprom(l_target,
+                                         EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD,
+                                         SPD::EXPLORER_FW_VERSION,
+                                         l_match);
+        if (l_errl)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC4_BAD_SEC_USE_PRI 0x%x: "
+                    "error log not expected", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (l_match)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC4_BAD_SEC_USE_PRI 0x%x: false match", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_active_side = l_target->getAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>();
+        if (l_active_side != PRI)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC4_BAD_SEC_USE_PRI - INCORRECT "
+                    "VPD ACCESS side:%d", l_active_side);
+        }
+        g_cxxTestInject.clear(SPD_VPD_INJECT_BAD_SEC_USE_PRI);
+
+        //----------------------------------------------------------------------
+        // TC5_BAD_PRI_NO_MATCH_SEC
+        //----------------------------------------------------------------------
+        TS_INFO("test_cmpEecacheToEeprom: TC5_BAD_PRI_NO_MATCH_SEC 0x%x", l_huid);
+
+        l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(SEC);
+        g_cxxTestInject.set(SPD_VPD_INJECT_BAD_PRI_NO_MATCH_SEC);
+        l_match = false;
+
+        l_errl = SPD::cmpEecacheToEeprom(l_target,
+                                         EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD,
+                                         SPD::EXPLORER_FW_VERSION,
+                                         l_match);
+        if (l_errl)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC5_BAD_PRI_NO_MATCH_SEC 0x%x: "
+                    "error log not expected", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (l_match)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC5_BAD_PRI_NO_MATCH_SEC 0x%x: false match", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_active_side = l_target->getAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>();
+        if (l_active_side != SEC)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC5_BAD_PRI_NO_MATCH_SEC - INCORRECT "
+                    "VPD ACCESS side:%d", l_active_side);
+        }
+        g_cxxTestInject.clear(SPD_VPD_INJECT_BAD_PRI_NO_MATCH_SEC);
+
+        //----------------------------------------------------------------------
+        // TC6_BAD_SEC_NO_MATCH_PRI
+        //----------------------------------------------------------------------
+        TS_INFO("test_cmpEecacheToEeprom: TC6_BAD_SEC_NO_MATCH_PRI 0x%x", l_huid);
+
+        l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(PRI);
+        g_cxxTestInject.set(SPD_VPD_INJECT_BAD_SEC_NO_MATCH_PRI);
+        l_match = false;
+
+        l_errl = SPD::cmpEecacheToEeprom(l_target,
+                                         EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD,
+                                         SPD::EXPLORER_FW_VERSION,
+                                         l_match);
+        if (l_errl)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC6_BAD_SEC_NO_MATCH_PRI 0x%x: "
+                    "error log not expected", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (l_match)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC6_BAD_SEC_NO_MATCH_PRI 0x%x: false match", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_active_side = l_target->getAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>();
+        if (l_active_side != PRI)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC6_BAD_SEC_NO_MATCH_PRI - INCORRECT "
+                    "VPD ACCESS side:%d", l_active_side);
+        }
+        g_cxxTestInject.clear(SPD_VPD_INJECT_BAD_SEC_NO_MATCH_PRI);
+
+        //----------------------------------------------------------------------
+        // TC7_BAD_PRI_BAD_SEC
+        //----------------------------------------------------------------------
+        TS_INFO("test_cmpEecacheToEeprom: TC7_BAD_PRI_BAD_SEC 0x%x", l_huid);
+
+        l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(PRI);
+        g_cxxTestInject.set(SPD_VPD_INJECT_BAD_PRI_BAD_SEC);
+        l_match = false;
+
+        l_errl = SPD::cmpEecacheToEeprom(l_target,
+                                         EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD,
+                                         SPD::EXPLORER_FW_VERSION,
+                                         l_match);
+        if (l_errl)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC7_BAD_PRI_BAD_SEC 0x%x: "
+                    "error log not expected", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (l_match)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC7_BAD_PRI_BAD_SEC 0x%x: false match", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_active_side = l_target->getAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>();
+        if (l_active_side != PRI)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC7_BAD_PRI_BAD_SEC - INCORRECT "
+                    "VPD ACCESS side:%d", l_active_side);
+        }
+        g_cxxTestInject.clear(SPD_VPD_INJECT_BAD_PRI_BAD_SEC);
+
+        //----------------------------------------------------------------------
+        // TC8_GOOD_BUT_NO_MATCH
+        //----------------------------------------------------------------------
+        TS_INFO("test_cmpEecacheToEeprom: TC8_GOOD_BUT_NO_MATCH 0x%x", l_huid);
+
+        l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(PRI);
+        g_cxxTestInject.set(SPD_VPD_INJECT_GOOD_BUT_NO_MATCH);
+        l_match = false;
+
+        l_errl = SPD::cmpEecacheToEeprom(l_target,
+                                         EEPROM_CONTENT_TYPE_PLANAR_OCMB_SPD,
+                                         SPD::EXPLORER_FW_VERSION,
+                                         l_match);
+        if (l_errl)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC8_GOOD_BUT_NO_MATCH 0x%x: "
+                    "error log not expected", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        if (l_match)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC8_GOOD_BUT_NO_MATCH 0x%x: false match", l_huid);
+            l_errl->setSev(ERRL_SEV_INFORMATIONAL);
+            errlCommit(l_errl, CXXTEST_COMP_ID);
+        }
+        l_active_side = l_target->getAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>();
+        if (l_active_side != PRI)
+        {
+            TS_FAIL("test_cmpEecacheToEeprom: TC8_GOOD_BUT_NO_MATCH - INCORRECT "
+                    "VPD ACCESS side:%d", l_active_side);
+        }
+        g_cxxTestInject.clear(SPD_VPD_INJECT_GOOD_BUT_NO_MATCH);
+
+        if (l_target)
+        {
+            // cleanup - restore to a known good state
+            l_target->setAttr<ATTR_EEPROM_VPD_ACTIVE_COPY>(0);
+            l_target->setAttr<ATTR_EEPROM_VPD_ACCESSIBILITY>(l_orig_access);
+        }
+
+        TRACFCOMP( g_trac_spd, EXIT_MRK"test_cmpEecacheToEeprom" );
+#endif
+#endif // ifndef __HOSTBOOT_RUNTIME
+
+        return;
+    }
 
     /**
      * @brief This test ensures the correct CRC handling for the DDR5 End_User VPD
@@ -98,6 +453,10 @@ class SPDTest: public CxxTest::TestSuite
     void testCRCforDDR5(void)
     {
 #ifdef CONFIG_COMPILE_CXXTEST_HOOKS
+        // Compile out this code because it uses CxxTestInject data types. Those data
+        // types are compiled out using this flag in those files, so this code must
+        // be compiled out also.
+
         /*----------------------------------------------------------------------
           These testcases manipulate the End_User section of the vpd, in order
           to verify that its CRC is handled correctly.
@@ -177,6 +536,9 @@ class SPDTest: public CxxTest::TestSuite
             TS_INFO("testCRCforDDR5 - No DDR5 DIMM target found");
             goto EXIT;
         }
+
+        // fix any errors injected by other testcases
+        pre_check_crc(l_target);
 
         // add the End_User section to the l_sections
         l_sections.push_back(l_end_user);
