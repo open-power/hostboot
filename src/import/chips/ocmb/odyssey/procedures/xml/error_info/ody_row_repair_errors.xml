@@ -5,7 +5,7 @@
 <!--                                                                        -->
 <!-- OpenPOWER HostBoot Project                                             -->
 <!--                                                                        -->
-<!-- Contributors Listed Below - COPYRIGHT 2018,2024                        -->
+<!-- Contributors Listed Below - COPYRIGHT 2018,2025                        -->
 <!-- [+] International Business Machines Corp.                              -->
 <!--                                                                        -->
 <!--                                                                        -->
@@ -47,6 +47,28 @@
     </callout>
     <deconfigure>
       <target>DIMM_TARGET</target>
+    </deconfigure>
+  </hwpError>
+
+  <hwpError>
+    <sbeError/>
+    <rc>RC_ODY_PORT_INDEX_OUT_OF_BOUNDS</rc>
+    <description>
+        Port index supplied to row repair function out of bounds.
+    </description>
+    <ffdc>OCMB_TARGET</ffdc>
+    <ffdc>PORT_INDEX</ffdc>
+    <ffdc>PORTS_ON_OCMB_CHIP</ffdc>
+    <callout>
+      <procedure>CODE</procedure>
+      <priority>MEDIUM</priority>
+    </callout>
+    <callout>
+      <target>OCMB_TARGET</target>
+      <priority>HIGH</priority>
+    </callout>
+    <deconfigure>
+      <target>OCMB_TARGET</target>
     </deconfigure>
   </hwpError>
 

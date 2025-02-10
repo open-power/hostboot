@@ -1348,6 +1348,51 @@ fapi_try_exit:
 }
 
 ///
+/// @brief Check and return port position from sPPR chip-op input data
+/// @param[in] i_target ocmb target
+/// @param[in] i_ports vector of ports in the given ocmb target
+/// @param[in] i_repair_buf the repair data
+/// @param[out] o_port_pos the port position of the requested sPPR
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode find_port_pos_from_sppr_input(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports,
+    const fapi2::buffer<uint64_t>& i_repair_buf,
+    uint8_t& o_port_pos )
+{
+    using TT = ccsTraits<mss::mc_type::ODYSSEY>;
+
+    const uint8_t l_ports_on_ocmb = i_ports.size();
+    bool l_found_port_pos = false;
+
+    const uint8_t l_desired_port_pos = i_repair_buf.getBit<TT::ROW_REPAIR_CHIPOP_PORT>();
+
+    for (o_port_pos = 0; o_port_pos < l_ports_on_ocmb; o_port_pos++)
+    {
+        if (l_desired_port_pos == mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(i_ports[o_port_pos]))
+        {
+            l_found_port_pos = true;
+            break;
+        }
+    }
+
+    // Fail if we didn't find our port position
+    FAPI_ASSERT(l_found_port_pos,
+                fapi2::ODY_PORT_INDEX_OUT_OF_BOUNDS().
+                set_OCMB_TARGET(i_target).
+                set_PORT_INDEX(l_desired_port_pos).
+                set_PORTS_ON_OCMB_CHIP(l_ports_on_ocmb),
+                "Port index %d supplied to sppe_dynamic_row_repair is out of bounds on " TARGTIDFORMAT,
+                l_desired_port_pos, TARGTID);
+
+    return fapi2::FAPI2_RC_SUCCESS;
+
+fapi_try_exit:
+    return fapi2::current_err;
+}
+
+///
 /// @brief Deploy a single sPPR at runtime (call via chip-op)
 /// @param[in] i_target ocmb target
 /// @param[in] i_repair_buf the repair data
@@ -1355,7 +1400,7 @@ fapi_try_exit:
 ///
 fapi2::ReturnCode sppe_dynamic_row_repair(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    const fapi2::buffer<uint64_t> i_repair_buf )
+    const fapi2::buffer<uint64_t>& i_repair_buf )
 {
     using TT = ccsTraits<mss::mc_type::ODYSSEY>;
 
@@ -1369,36 +1414,27 @@ fapi2::ReturnCode sppe_dynamic_row_repair(
     uint8_t l_mrank = 0;
     uint8_t l_port_pos = 0;
 
-    // Get port target for given port_pos
-    uint8_t l_desired_port_pos = i_repair_buf.getBit<TT::ROW_REPAIR_CHIPOP_PORT>();
-
-    for (l_port_pos = 0; l_port_pos < l_ports.size(); l_port_pos++)
-    {
-        if (l_desired_port_pos == mss::relative_pos<mss::mc_type::ODYSSEY, fapi2::TARGET_TYPE_OCMB_CHIP>(l_ports[l_port_pos]))
-        {
-            break;
-        }
-    }
-
     // Create a repair_entry from the input arguments
     mss::row_repair::repair_entry<mss::mc_type::ODYSSEY> l_repair(i_repair_buf);
 
-    // Create a rank_info from the given port and mrank inputs
-    fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
-    i_repair_buf.extractToRight<TT::ROW_REPAIR_CHIPOP_MRANK, TT::ROW_REPAIR_CHIPOP_MRANK_LEN>(l_mrank);
-    mss::rank::info<mss::mc_type::ODYSSEY> l_rank_info(l_ports[l_port_pos], l_mrank, l_rc);
-    FAPI_TRY(l_rc, GENTARGTIDFORMAT " Failed to create rank_info instance", GENTARGTID(l_ports[l_port_pos]))
+    // Get port target for given port_pos
+    FAPI_TRY(find_port_pos_from_sppr_input(i_target, l_ports, i_repair_buf, l_port_pos));
 
-
-    if (i_repair_buf.getBit<TT::ROW_REPAIR_CHIPOP_REVERSED>())
     {
-        swizzle_repair_entry(l_repair);
-    }
+        // Create a rank_info from the given port and mrank inputs
+        fapi2::ReturnCode l_rc = fapi2::FAPI2_RC_SUCCESS;
+        i_repair_buf.extractToRight<TT::ROW_REPAIR_CHIPOP_MRANK, TT::ROW_REPAIR_CHIPOP_MRANK_LEN>(l_mrank);
+        mss::rank::info<mss::mc_type::ODYSSEY> l_rank_info(l_ports[l_port_pos], l_mrank, l_rc);
+        FAPI_TRY(l_rc, GENTARGTIDFORMAT " Failed to create rank_info instance", GENTARGTID(l_ports[l_port_pos]))
 
-    // Apply a dynamic row repair at the given address
-    FAPI_TRY( dynamic_row_repair(l_rank_info, l_repair),
-              "Failed dynamic_row_repair on " GENTARGTIDFORMAT " mrank %d",
-              GENTARGTID(l_ports[l_port_pos]), l_mrank );
+        if (i_repair_buf.getBit<TT::ROW_REPAIR_CHIPOP_REVERSED>())
+        {
+            swizzle_repair_entry(l_repair);
+        }
+
+        // Apply a dynamic row repair at the given address
+        return dynamic_row_repair(l_rank_info, l_repair);
+    }
 
 fapi_try_exit:
     return fapi2::current_err;

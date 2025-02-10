@@ -320,6 +320,20 @@ fapi2::ReturnCode deploy_mapped_repairs( const fapi2::Target<fapi2::TARGET_TYPE_
         const bool i_runtime );
 
 ///
+/// @brief Check and return port position from sPPR chip-op input data
+/// @param[in] i_target ocmb target
+/// @param[in] i_ports vector of ports in the given ocmb target
+/// @param[in] i_repair_buf the repair data
+/// @param[out] o_port_pos the port position of the requested sPPR
+/// @return FAPI2_RC_SUCCESS iff successful
+///
+fapi2::ReturnCode find_port_pos_from_sppr_input(
+    const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
+    const std::vector<fapi2::Target<fapi2::TARGET_TYPE_MEM_PORT>>& i_ports,
+    const fapi2::buffer<uint64_t>& i_repair_buf,
+    uint8_t& o_port_pos );
+
+///
 /// @brief Deploy a single sPPR at runtime (call via chip-op)
 /// @param[in] i_target ocmb target
 /// @param[in] i_repair_buf the repair data
@@ -327,7 +341,7 @@ fapi2::ReturnCode deploy_mapped_repairs( const fapi2::Target<fapi2::TARGET_TYPE_
 ///
 fapi2::ReturnCode sppe_dynamic_row_repair(
     const fapi2::Target<fapi2::TARGET_TYPE_OCMB_CHIP>& i_target,
-    const fapi2::buffer<uint64_t> i_repair_buf );
+    const fapi2::buffer<uint64_t>& i_repair_buf );
 
 } // row repair
 } // ody
