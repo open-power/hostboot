@@ -318,6 +318,16 @@ fapi2::ReturnCode p10_omi_fix_cdr_bw(const fapi2::Target<fapi2::TARGET_TYPE_PROC
     using namespace scomt::omi;
     int l_num_lanes = P10_IO_LIB_NUMBER_OF_OMI_LANES;
     auto l_pauc_targets = i_target.getChildren<fapi2::TARGET_TYPE_PAUC>();
+    fapi2::ATTR_INTERPOSER_REV_Type l_interposer_rev = fapi2::ENUM_ATTR_INTERPOSER_REV_NONE;
+    uint8_t l_cdr_bw = 0x10;
+
+    FAPI_TRY(FAPI_ATTR_GET(fapi2::ATTR_INTERPOSER_REV, i_target, l_interposer_rev));
+
+    // Update CDR BW on P11 ISC2
+    if (l_interposer_rev == fapi2::ENUM_ATTR_INTERPOSER_REV_REV2)
+    {
+        l_cdr_bw = 0x18;
+    }
 
     for (auto l_pauc_target : l_pauc_targets)
     {
@@ -335,7 +345,7 @@ fapi2::ReturnCode p10_omi_fix_cdr_bw(const fapi2::Target<fapi2::TARGET_TYPE_PROC
                                                 RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP,
                                                 RXPACKS_0_DEFAULT_RD_RX_BIT_REGS_MODE4_PL_PHASE_STEP_LEN,
                                                 l_num_lanes,
-                                                0x10));
+                                                l_cdr_bw));
             }
         }
     }
