@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -437,73 +437,6 @@ void* host_gard( void *io_pArgs )
             TRACFCOMP(ISTEPS_TRACE::g_trac_isteps_trace,
                       "host_gard: proc HUID 0x%X has functional core mask: 0x%8X",
                       get_huid(l_proc), l_funcCoreMask);
-
-            // creates info error log in case there arent remaining spares on any given proc
-            const ATTR_SPARE_CORES_type l_specified_spares =
-                l_proc->getAttr<ATTR_SPARE_CORES>();
-            const ATTR_SPARE_CORES_DEPLOYED_type l_deployed_spares =
-                l_proc->getAttr<ATTR_SPARE_CORES_DEPLOYED>();
-
-            if ((l_specified_spares != 0) && (l_deployed_spares >= l_specified_spares))
-            {
-                TargetHandleList cores;
-                getChildChiplets(cores, l_proc, TYPE_CORE, false);
-
-                // We want to count deconfigured cores except for FCO deconfig
-                uint32_t l_decnfgd_cores = 0;
-                for (const auto core : cores)
-                {
-                    HwasState hwasState = core->getAttr<ATTR_HWAS_STATE>();
-                    if (!(
-                    (hwasState.deconfiguredByEid ==
-                        HWAS::DeconfigGard::INVALID_DECONFIGURED_BY_REASON) ||
-                    (hwasState.deconfiguredByEid ==
-                        HWAS::DeconfigGard::DECONFIGURED_BY_FIELD_CORE_OVERRIDE)
-                    ))
-                    {
-                        l_decnfgd_cores++;
-                    }
-                }
-
-                using namespace errl_util;
-                /*@
-                    * @errortype
-                    * @severity          ERRL_SEV_INFORMATIONAL
-                    * @moduleid          ISTEP::MOD_HOST_GARD
-                    * @reasoncode        ISTEP::RC_ALL_AVAILABLE_SPARES_DEPLOYED
-                    * @devdesc           All available spare cores have been deployed
-                    * @custdesc          All available spare cores have been deployed
-                    * @userdata1         Proc HUID
-                    * @userdata2[0:31]   Number of deconfigured cores
-                    * @userdata2[32:39]  Number of specified spare cores
-                    */
-                l_err = new ERRORLOG::ErrlEntry
-                    (ERRORLOG::ERRL_SEV_INFORMATIONAL,
-                    ISTEP::MOD_HOST_GARD,
-                    ISTEP::RC_ALL_AVAILABLE_SPARES_DEPLOYED,
-                    get_huid(l_proc),
-                    SrcUserData(bits{0,31}, l_decnfgd_cores,
-                                bits{32,39}, l_specified_spares));
-
-                l_err->addHwCallout(l_proc,
-                                    HWAS::SRCI_PRIORITY_LOW,
-                                    HWAS::NO_DECONFIG,
-                                    HWAS::GARD_NULL);
-
-                for (const auto core : cores) {
-                    if (core->getAttr<TARGETING::ATTR_CORE_IS_SPARE>())
-                    {
-                        l_err->addHwCallout(core,
-                                            HWAS::SRCI_PRIORITY_LOW,
-                                            HWAS::NO_DECONFIG,
-                                            HWAS::GARD_NULL);
-                    }
-                }
-
-                l_err->updateActionFlags(ERRORLOG::ERRL_ACTIONS_HMC_CALL_HOME);
-
-                errlCommit(l_err, ISTEP_COMP_ID);
-            }
         }
 
 #if (!defined(CONFIG_CONSOLE_OUTPUT_TRACE) && defined(CONFIG_CONSOLE))

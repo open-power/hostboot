@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -95,6 +95,7 @@ namespace ISTEP
         MOD_FINISH_PDR_EXCHANGE                           = 0x41,
         MOD_MSS_ATTR_CLEANUP                              = 0x42,
         MOD_HOST_SET_IPL_PARMS                            = 0x43,
+        MOD_HOST_IPL_COMPLETE                             = 0x44,
     };
 
     /**
