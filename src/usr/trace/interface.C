@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -41,6 +41,8 @@
 #include <trace/service.H>
 #include <trace/buffer.H>
 #include <vector>
+
+#include <targeting/common/commontargeting.H>
 
 #if  __HOSTBOOT_RUNTIME
 #include "runtime/rt_rsvdtracebufservice.H"
@@ -292,4 +294,66 @@ namespace TRACE
         l_comp->enableDebug(i_enable);
     }
 
+    void evaluateAttributes(ComponentDesc* i_td)
+    {
+        // Iterate through all the trace buffers if asked
+        if( i_td == nullptr )
+        {
+            ComponentList* l_compList = &(Singleton<ComponentList>::instance());
+            ComponentList::List::iterator itr;
+
+            bool more = l_compList->first(itr);
+            while (more)
+            {
+                // recursive call for every trace buffer individually
+                evaluateAttributes(&(*itr));
+
+                more = l_compList->next(itr);
+            }
+
+            return;
+        }
+
+        // Now check if the component should be enabled or not
+        if(0 == memcmp(i_td->iv_compName, "SCAN", 5))
+        {
+            TARGETING::Target* sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(sys);
+
+            TARGETING::HbSettings hbSettings =
+              sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
+
+            auto traceEnable =
+              sys->getAttr<TARGETING::ATTR_HB_SETTINGS_OVERRIDE>();
+
+            i_td->iv_debugEnabled = (hbSettings.traceScanDebug
+                                     || (reinterpret_cast<TARGETING::HbSettings*>
+                                         (&traceEnable))->traceScanDebug);
+        }
+        else if(0 == memcmp(i_td->iv_compName, "FAPI_DBG", 9))
+        {
+            TARGETING::Target* sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(sys);
+
+            TARGETING::HbSettings hbSettings =
+              sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
+
+            auto traceEnable =
+              sys->getAttr<TARGETING::ATTR_HB_SETTINGS_OVERRIDE>();
+
+            i_td->iv_debugEnabled =(hbSettings.traceFapiDebug
+                                    || (reinterpret_cast<TARGETING::HbSettings*>
+                                        (&traceEnable))->traceFapiDebug);
+        }
+        else if(0 == memcmp(i_td->iv_compName, "FAPI_MFG",9))
+        {
+            TARGETING::Target* sys = NULL;
+            TARGETING::targetService().getTopLevelTarget(sys);
+
+            TARGETING::ATTR_MFG_TRACE_ENABLE_type l_mfgTraceEnable =
+              sys->getAttr<TARGETING::ATTR_MFG_TRACE_ENABLE>();
+
+            i_td->iv_debugEnabled = l_mfgTraceEnable;
+        }
+    }
 };

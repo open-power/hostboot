@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -28,7 +28,6 @@
 #include <string.h>
 #include <string_ext.h>
 
-#include <targeting/common/commontargeting.H>
 
 namespace TRACE
 {
@@ -104,54 +103,16 @@ namespace TRACE
             l_rc = &iv_components.back();
         }
 
+        // Need to unlock before calling out because
+        // evaluateAttributes may also try to lock it
+        mutex_unlock(&iv_mutex);
+
 #ifndef __HOSTBOOT_RUNTIME  // TODO: RTC 79408
         // Check for special SCAN and FAPI_MFG component to
         // force enable debug trace on.
-        if (l_rc && !l_rc->iv_debugEnabled)
-        {
-            if(0 == memcmp(l_compName, "SCAN", 5))
-            {
-                TARGETING::Target* sys = NULL;
-                TARGETING::targetService().getTopLevelTarget(sys);
-
-                TARGETING::HbSettings hbSettings =
-                    sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
-
-                if (hbSettings.traceScanDebug)
-                {
-                    l_rc->iv_debugEnabled = true;
-                }
-            }
-            else if(0 == memcmp(l_compName, "FAPI_DBG", 9))
-            {
-                TARGETING::Target* sys = NULL;
-                TARGETING::targetService().getTopLevelTarget(sys);
-
-                TARGETING::HbSettings hbSettings =
-                    sys->getAttr<TARGETING::ATTR_HB_SETTINGS>();
-
-                if (hbSettings.traceFapiDebug)
-                {
-                    l_rc->iv_debugEnabled = true;
-                }
-            }
-            else if(0 == memcmp(l_compName, "FAPI_MFG",9))
-            {
-                TARGETING::Target* sys = NULL;
-                TARGETING::targetService().getTopLevelTarget(sys);
-
-                TARGETING::ATTR_MFG_TRACE_ENABLE_type l_mfgTraceEnable =
-                    sys->getAttr<TARGETING::ATTR_MFG_TRACE_ENABLE>();
-
-                if (l_mfgTraceEnable)
-                {
-                    l_rc->iv_debugEnabled = true;
-                }
-            }
-        }
+        evaluateAttributes(l_rc);
 #endif
 
-        mutex_unlock(&iv_mutex);
         return l_rc;
     }
 

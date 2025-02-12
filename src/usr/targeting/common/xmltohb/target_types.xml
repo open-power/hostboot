@@ -2567,6 +2567,9 @@
       <id>HB_SETTINGS</id>
     </attribute>
     <attribute>
+      <id>HB_SETTINGS_OVERRIDE</id>
+    </attribute>
+    <attribute>
       <id>HDAT_HBRT_NUM_SECTIONS</id>
     </attribute>
     <attribute>

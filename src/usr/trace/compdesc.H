@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2012,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2012,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -56,6 +56,7 @@ namespace TRACE
             friend class Service;
             friend class Buffer;
             friend class TRACEDAEMON::Daemon;
+            friend void evaluateAttributes(ComponentDesc* i_td);
 
             bool isDebugEnabled()
             {

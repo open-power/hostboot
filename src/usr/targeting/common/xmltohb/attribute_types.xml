@@ -2625,6 +2625,19 @@
   </attribute>
 
   <attribute>
+    <id>HB_SETTINGS_OVERRIDE</id>
+    <description>
+        Enable various TRACS traces in Hostboot. This mirrors ATTR_HB_SETTINGS
+        but the separate attribute allows overriding without HWSV support.        
+    </description>
+    <simpleType>
+      <uint8_t/>
+    </simpleType>
+    <persistency>volatile-zeroed</persistency>
+    <readable/>
+  </attribute>
+
+  <attribute>
     <description>
        Indicates the chip's EC level, distinct from ATTR_EC to handle
        non-standard mini-ECs, e.g. 1.01, separate from the real

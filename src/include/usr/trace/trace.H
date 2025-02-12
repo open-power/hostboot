@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -258,6 +258,15 @@ namespace TRACE
      */
     void enableDebug(const char* i_comp,
                      bool i_enable = true);
+
+    /**
+     *  @brief Determine status of debug trace enablement
+     *     that is based on attributes.
+     *
+     *  @param [in] i_td Trace descriptor to evaluate or
+                    nullptr to check all components
+     */
+    void evaluateAttributes(ComponentDesc* i_td = nullptr);
 
 };
 

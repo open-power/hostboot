@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2014,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2014,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -352,6 +352,11 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                                   AttributeTank::layerToString(
                                      static_cast<AttributeTank::TankLayer>(i+1)),
                                   i+1);
+                TRACFCOMP(g_trac_targeting,"**Found %d attribute overrides in Tank %s(%d)",
+                          l_pOverTanks[i]->size(),
+                          AttributeTank::layerToString(
+                             static_cast<AttributeTank::TankLayer>(i+1)),
+                          i+1);
 
                 AttributeTank::AttributeHeader last_hdr;
                 std::list<AttributeTank::Attribute*> l_attrList;
@@ -404,6 +409,7 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                             strcat( outstr, tmpstr );
                         }
                         CONSOLE::displayf(CONSOLE::DEFAULT, "TARG",outstr);
+                        TRACFCOMP(g_trac_targeting,"%s",outstr);
                         last_hdr = hdr;
                     }
 
@@ -425,10 +431,16 @@ errlHndl_t getAttrOverrides(PNOR::SectionInfo_t &i_sectionInfo,
                         strcat( outstr, "..." );
                     }
                     CONSOLE::displayf(CONSOLE::DEFAULT, "TARG",outstr);
+                    TRACFCOMP(g_trac_targeting,"%s",outstr);
                 }
                 CONSOLE::flush();
             }
         }
+
+        // Refresh trace settings since we may have just applied an
+        // override to enable more
+        TRACE::evaluateAttributes();
+
     } while(0);
 
     TRACFCOMP(g_trac_targeting,"attrPlatOverride::getAttrOverrides EXIT");
