@@ -228,9 +228,9 @@ Layout Description
         <ecc/>
     </section>
     <section>
-        <description>SecureBoot Key Transition Partition (16K)</description>
+        <description>SecureBoot Key Transition Partition (40K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalRegionSize>0x4000</physicalRegionSize>
+        <physicalRegionSize>0xA000</physicalRegionSize>
         <side>sideless</side>
         <ecc/>
     </section>

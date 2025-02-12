@@ -183,9 +183,9 @@ Layout Description - Used when building an FSP driver
         <ecc/>
     </section>
     <section>
-        <description>SecureBoot Key Transition Partition (16K)</description>
+        <description>SecureBoot Key Transition Partition (40K)</description>
         <eyeCatch>SBKT</eyeCatch>
-        <physicalRegionSize>0x4000</physicalRegionSize>
+        <physicalRegionSize>0xA000</physicalRegionSize>
         <sha512Version/>
         <side>sideless</side>
         <ecc/>
