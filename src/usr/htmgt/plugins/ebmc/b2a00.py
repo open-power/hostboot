@@ -5,7 +5,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2020,2024
+# Contributors Listed Below - COPYRIGHT 2020,2025
 # [+] International Business Machines Corp.
 #
 #
@@ -79,10 +79,16 @@ class errludP_occ:
 
     # Print Call Home Sensor Data
     def printSensor(head, data, i):
+        # defined in occ/src/occ_405_chom.h
+        # 2B last sample value during the polling period
         scur,i = memConcat(data, i, i+2)
+        # 2B min sample value recorded during polling period
         smin,i = memConcat(data, i, i+2)
+        # 2B max sample value recorded during polling period
         smax,i = memConcat(data, i, i+2)
+        # 2B average sample value during polling period
         savg,i = memConcat(data, i, i+2)
+        # 4B accumulator register to compute the average
         saccum,i = memConcat(data, i, i+4)
         if head == "":
             head="sensor"
@@ -90,6 +96,31 @@ class errludP_occ:
              "] Avg:["+str(int(savg,16)).rjust(5)+ \
              "] Min:["+str(int(smin,16)).rjust(5)+ \
              "] Max:["+str(int(smax,16)).rjust(5)+"]"
+
+        return i, line
+
+    # Print Call Home Acceleration Factor Data
+    def printAF(head, data, i):
+        # 4B samples - Number of AF samples in the accumulator
+        afsamples,i     = memConcat(data, i, i+4)
+        # 4B accumulator - accumulator of AF samples (AF = AFv * AFt)
+        afaccumulator,i = memConcat(data, i, i+4)
+        # 2B min AF
+        afmin,i = memConcat(data, i, i+2)
+        # 2B 2B minAFv - associated AFv for min AF (user can calculate AFt)
+        afminv,i = memConcat(data, i, i+2)
+        # 2B max AF
+        afmax,i = memConcat(data, i, i+2)
+        # 2B maxAFv - associated AFv for max AF (user can calculate AFt)
+        afmaxv,i = memConcat(data, i, i+2)
+        if head == "":
+            head="AF"
+        line="  "+head.ljust(20)+": Number of Samples:["+str(int(afsamples,16)).rjust(10)+ \
+             "] Accumulator:["+str(int(afaccumulator,16)).rjust(10)+ \
+             "] MinAF:["+str(int(afmin,16)).rjust(5)+ \
+             ": AFv "+str(int(afminv,16)).ljust(5)+ \
+             "] MaxAF:["+str(int(afmax,16)).rjust(5)+ \
+             ": AFv "+str(int(afmaxv,16)).ljust(5)+"]"
 
         return i, line
 
@@ -120,7 +151,7 @@ class errludP_occ:
             lines.append("Invalid number of modes (using 2)")
             nummodes = 2
 
-        if version < 16 or version > 17:
+        if version < 16 or version > 18:
             lines.append("Unsupported Call Home Version")
 
         funcIdOffset = i
@@ -312,6 +343,13 @@ class errludP_occ:
                 for s in range(0,8):
                     i, line = errludP_occ.printSensor("CHOMRAWCEFFRATIOP"+str(s), data, i)
                     lines.append(line)
+            # Acceleration Factor section for 8 processors
+            if version >= 18: # this is for version 18 and above.
+                lines.append("Acceleration Factor:B1")
+                for p in range(0,8):
+                    i, line = errludP_occ.printAF("CHOMAFP"+str(p), data, i)
+                    lines.append(line)
+
         # List of call home sensors END
 
         return i, lines
