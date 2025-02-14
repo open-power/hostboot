@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2022,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2022,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -753,7 +753,6 @@ fapi2::ReturnCode set_nm_support<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi
 
     l_data.insertFromRight<TT::RUNTIME_N_SLOT, TT::RUNTIME_N_SLOT_LEN>(l_run_slot);
     l_data.insertFromRight<TT::RUNTIME_N_PORT, TT::RUNTIME_N_PORT_LEN>(l_run_port);
-    l_data.insertFromRight<TT::RUNTIME_M, TT::RUNTIME_M_LEN>(l_throttle_denominator);
     l_data.insertFromRight<TT::CFG_RAS_WEIGHT, TT::CFG_RAS_WEIGHT_LEN>(TT::NM_RAS_WEIGHT);
     l_data.insertFromRight<TT::CFG_CAS_WEIGHT, TT::CFG_CAS_WEIGHT_LEN>(TT::NM_CAS_WEIGHT);
 
@@ -762,6 +761,13 @@ fapi2::ReturnCode set_nm_support<mss::mc_type::ODYSSEY>(const fapi2::Target<fapi
     l_data.writeBit<TT::CFG_NM_CHANGE_AFTER_SYNC>(TT::CFG_NM_CHANGE_AFTER_SYNC_VALUE);
 
     FAPI_TRY(fapi2::putScom(i_target, TT::FARB3Q_REG, l_data));
+
+    // Needed a separate write to the register because of stability
+    // issues see on certain DIMMS when running at 4800 memory speed
+    FAPI_TRY(fapi2::getScom(i_target, TT::FARB3Q_REG, l_data));
+    l_data.insertFromRight<TT::RUNTIME_M, TT::RUNTIME_M_LEN>(l_throttle_denominator);
+    FAPI_TRY(fapi2::putScom(i_target, TT::FARB3Q_REG, l_data));
+
 
     return fapi2::FAPI2_RC_SUCCESS;
 fapi_try_exit:
