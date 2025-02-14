@@ -990,6 +990,7 @@ hb_flags()
     echo "HB_FORCE_REBUILD_EKB (='"$HB_FORCE_REBUILD_EKB"'): Force rebuild of hcode submodule regardless of existing images"
     echo "HB_FORCE_REBUILD_ODY (='"$HB_FORCE_REBUILD_ODY"'): Force rebuild of odyssey sbe submodule regardless of existing images"
     echo "HB_FORCE_REBUILD_SBE (='"$HB_FORCE_REBUILD_SBE"'): Force rebuild of proc ppe submodule regardless of existing images"
+    echo "HB_GEN_PNOR_IMAGES_MAX_PARALLEL_PROCESSES (='"$HB_GEN_PNOR_IMAGES_MAX_PARALLEL_PROCESSES"'): Set to 1 to disable parallelism in prime"
     echo "HB_NFS_DIR (="$HB_NFS_DIR"): Copies FSP patch data after prime"
     echo "HB_PRESERVE_SUBMODULES (='"$HB_PRESERVE_SUBMODULES"'): Set to 1 to skip submodule updates, i.e. preserves current tree"
     echo "HB_SKIP_GEN_HCODE (='"$HB_SKIP_GEN_HCODE"'): Will not attempt to rebuild the ekb submodule (included in HB_FAST_PRIME)"
