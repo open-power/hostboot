@@ -6,7 +6,7 @@
 #
 # OpenPOWER HostBoot Project
 #
-# Contributors Listed Below - COPYRIGHT 2011,2024
+# Contributors Listed Below - COPYRIGHT 2011,2025
 # [+] Google Inc.
 # [+] International Business Machines Corp.
 #
@@ -172,8 +172,13 @@ class DebugFrameworkProcess:
         addr = int(match.group(1))
         size = int(match.group(2))
 
-        data = "".join(map(chr,
-            conf.system_cmp0.phys_mem.memory[[addr , addr+size-1]]))
+        try:
+            data = "".join(map(chr,
+                conf.system_cmp0.phys_mem.memory[[addr , addr+size-1]]))
+        except:
+            print("*** Error reading addr=0x%X for 0x%X bytes ***" %(addr, size));
+            data = "FF"*size
+
         self.sendMsg("data-response", data)
 
     # Write data to memory.
