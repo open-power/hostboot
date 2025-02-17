@@ -118,9 +118,11 @@ use constant RAND_PREFIX => "rand-";
 
 # Signing modes
 my $DEVELOPMENT = "development";
-my $IMPRINT = "imprint";
 my $PRODUCTION = "production";
 my $INDEPENDENT = "independent";
+my $V1 = "V1";
+my $V3 = "V3";
+my $PRODTOPROD = "prod-prod";
 
 
 ################################################################################
@@ -190,7 +192,8 @@ if ($help)
 # Put mode transition input into a hash and ensure a valid signing mode
 my %signMode = ( $DEVELOPMENT => 1,
                  $PRODUCTION => 0,
-                 $INDEPENDENT => 0 );
+                 $INDEPENDENT => 0);
+
 if ($sign_mode =~ m/^$DEVELOPMENT/i)
 {}
 elsif ($sign_mode =~ m/^$PRODUCTION/i)
@@ -212,11 +215,15 @@ else
 
 # Put key transition input into a hash and ensure a valid key transition mode
 my %keyTransition = ( enabled => 0,
-                      $IMPRINT => 0,
-                      $PRODUCTION => 0 );
-if ($key_transition =~ m/^$IMPRINT/i)
+                      $DEVELOPMENT => 0,
+                      $PRODUCTION => 0,
+                      $PRODTOPROD => 0,
+                      $V1 => 0,
+                      $V3 => 0);
+
+if ($key_transition =~ m/^$DEVELOPMENT/i)
 {
-    $keyTransition{$IMPRINT} = 1;
+    $keyTransition{$DEVELOPMENT} = 1;
     $keyTransition{enabled} = 1;
 }
 elsif ($key_transition =~ m/^$PRODUCTION/i)
@@ -224,9 +231,30 @@ elsif ($key_transition =~ m/^$PRODUCTION/i)
     $keyTransition{$PRODUCTION} = 1;
     $keyTransition{enabled} = 1;
 }
+elsif ($key_transition =~ m/^$PRODTOPROD/i)
+{
+    $keyTransition{$PRODTOPROD} = 1;
+    $keyTransition{enabled} = 1;
+}
 elsif ($key_transition ne "")
 {
     die "Invalid key transition mode = $key_transition";
+}
+
+# Put security version transition input into a hash and ensure a valid security version transition mode
+if ($key_transition =~ m/.*-$V1/i)
+{
+    $keyTransition{$V1} = 1;
+    $keyTransition{enabled} = 1;
+}
+elsif ($key_transition =~ m/.*-$V3/i)
+{
+    $keyTransition{$V3} = 1;
+    $keyTransition{enabled} = 1;
+}
+elsif ($key_transition ne "")
+{
+    die "Invalid key transition mode, sign security version incorrectly specified = $key_transition";
 }
 
 my $labSecurityOverrideFlag = 0;
@@ -236,7 +264,7 @@ if($labSecurityOverride)
     if($signMode{$DEVELOPMENT})
     {
         $labSecurityOverrideFlag = LAB_SECURITY_OVERRIDE_FLAG;
-        if($keyTransition{$IMPRINT})
+        if($keyTransition{$DEVELOPMENT})
         {
             $ktSecurityOverrideFlag = LAB_SECURITY_OVERRIDE_FLAG;
         }
@@ -368,17 +396,21 @@ else
     $OPEN_SIGN_REQUEST_V3 .= " --security-version $secureVersionStr ";
 }
 
-# By default key transition container is unused
-my $OPEN_SIGN_KEY_TRANS_REQUEST = $OPEN_SIGN_REQUEST_V1;
 
 # Production signing parameters
-my $OPEN_PRD_SIGN_PARAMS = "--mode production "
+my $OPEN_PRD_SIGN_PARAMS_V1 = "--mode production "
     . "--hwKeyA __get "
     . "--hwKeyB __get "
     . "--hwKeyC __get "
     . "--swKeyP __get ";
 
-# Imprint key signing parameters.  In a non-secure compile, omit the keys to
+my $OPEN_PRD_SIGN_PARAMS_V3 = "--mode production "
+    . "--hwKeyA __get "
+    . "--hwKeyD __get "
+    . "--swKeyP __get "
+    . "--swKeyS __get ";
+
+# Development key signing parameters.  In a non-secure compile, omit the keys to
 # generate a secure header without signatures
 my $OPEN_DEV_SIGN_PARAMS_V1 = "";
 my $OPEN_DEV_SIGN_PARAMS_V3 = "";
@@ -388,48 +420,64 @@ if($secureboot)
     . "--hwKeyA $DEV_KEY_DIR_V1/hw_key_a.key "
     . "--hwKeyB $DEV_KEY_DIR_V1/hw_key_b.key "
     . "--hwKeyC $DEV_KEY_DIR_V1/hw_key_c.key "
-    . "--swKeyP $DEV_KEY_DIR_V1/sw_key_a.key";
+    . "--swKeyP $DEV_KEY_DIR_V1/sw_key_a.key ";
 
     $OPEN_DEV_SIGN_PARAMS_V3 = "--mode $sign_mode "
     . "--hwKeyA $DEV_KEY_DIR_V3/runtime_hw_key_a.key "
     . "--hwKeyD $DEV_KEY_DIR_V3/runtime_hw_key_d.key "
     . "--swKeyP $DEV_KEY_DIR_V3/runtime_sw_key_p.key "
-    . "--swKeyS $DEV_KEY_DIR_V3/runtime_sw_key_s.key";
+    . "--swKeyS $DEV_KEY_DIR_V3/runtime_sw_key_s.key ";
 }
+
+# By default key transition container is unused
+my $OPEN_SIGN_KEY_TRANS_NEW = "";
+my $OPEN_SIGN_KEY_TRANS_OLD = "";
 
 # Handle key transition and production signing logic
-# If in production mode, key transition is not supported yet
-# If in developement mode, key transition can move to either imprint or
-#   production keys
-if ($signMode{$PRODUCTION})
+if ($keyTransition{enabled})
 {
-    # Production to Production key transition not supported yet
-    $OPEN_SIGN_REQUEST_V1 .= $OPEN_PRD_SIGN_PARAMS;
-    $OPEN_SIGN_KEY_TRANS_REQUEST = "";
-}
-elsif ($keyTransition{enabled} && $signMode{$DEVELOPMENT})
-{
-    $OPEN_SIGN_REQUEST_V1 .= $OPEN_DEV_SIGN_PARAMS_V1;
+    # Allowed transition drivers:
+    # 1. V3 dev to V3 dev
+    # 2. V3 dev to V3 prod
+    # 3. V1 prod to V3 prod
 
+    if ($signMode{$DEVELOPMENT} && $keyTransition{$V3} && $keyTransition{$DEVELOPMENT})
+    {
+        $OPEN_SIGN_KEY_TRANS_OLD = "$OPEN_SIGN_REQUEST_V3 $OPEN_DEV_SIGN_PARAMS_V3";
+        $OPEN_SIGN_KEY_TRANS_NEW = "$OPEN_SIGN_REQUEST_V3 $OPEN_DEV_SIGN_PARAMS_V3";
+    }
+    elsif ($signMode{$DEVELOPMENT} && $keyTransition{$V3} && $keyTransition{$PRODUCTION})
+    {
+        $OPEN_SIGN_KEY_TRANS_OLD = "$OPEN_SIGN_REQUEST_V3 $OPEN_DEV_SIGN_PARAMS_V3";
+        $OPEN_SIGN_KEY_TRANS_NEW = "$OPEN_SIGN_REQUEST_V3 $OPEN_PRD_SIGN_PARAMS_V3";
+    }
+    elsif ($signMode{$PRODUCTION} && $keyTransition{$V3} && $keyTransition{$PRODTOPROD})
+    {
+        $OPEN_SIGN_KEY_TRANS_OLD = "$OPEN_SIGN_REQUEST_V1 $OPEN_PRD_SIGN_PARAMS_V1";
+        $OPEN_SIGN_KEY_TRANS_NEW = "$OPEN_SIGN_REQUEST_V3 $OPEN_PRD_SIGN_PARAMS_V3";
+    }
+    else
+    {
+        die "Attempted to create image for illegal transition ($sign_mode -> $key_transition)\n";
+    }
     # Since this request signs 4k of random data for SBKT, but is not a named
     # section, we'll make up a component ID of "SBKTRAND"
-    my $sbktDataComponentIdArg = "--sign-project-FW-token SBKTRAND";
-    if ($keyTransition{$IMPRINT})
-    {
-        $OPEN_SIGN_KEY_TRANS_REQUEST .=
-            "$OPEN_DEV_SIGN_PARAMS_V1 $sbktDataComponentIdArg";
-    }
-    elsif ($keyTransition{$PRODUCTION})
-    {
-        $OPEN_SIGN_KEY_TRANS_REQUEST .=
-            "$OPEN_PRD_SIGN_PARAMS $sbktDataComponentIdArg";
-    }
+    $OPEN_SIGN_KEY_TRANS_NEW .=  "--sign-project-FW-token SBKTRAND ";
+
+    print "Creating transition image ($sign_mode -> $key_transition)\n";
+    print "New security settings: $OPEN_SIGN_KEY_TRANS_NEW\n";
+    print "Old security settings: $OPEN_SIGN_KEY_TRANS_OLD\n";
+}
+
+if ($signMode{$PRODUCTION})
+{
+    $OPEN_SIGN_REQUEST_V1 .= $OPEN_PRD_SIGN_PARAMS_V1;
+    $OPEN_SIGN_REQUEST_V3 .= $OPEN_PRD_SIGN_PARAMS_V3;
 }
 else
 {
     $OPEN_SIGN_REQUEST_V1 .= $OPEN_DEV_SIGN_PARAMS_V1;
     $OPEN_SIGN_REQUEST_V3 .= $OPEN_DEV_SIGN_PARAMS_V3;
-    $OPEN_SIGN_KEY_TRANS_REQUEST = "";
 }
 
 ### Secureboot headers
@@ -1688,14 +1736,14 @@ sub gen_test_containers
 
 ################################################################################
 # create_sb_key_transition_container
-#       Generate sb key transition container used for transitioning from an
-#       imprint to production key.
+#       Generate sb key transition container used for transitioning the
+#       security keys of a system between development-production and v1-v3
 #       Format:
-#           SB_HDR_IMPRINT_KEY[SB_HDR_PRD_KEY[4K rand blob]]
+#           SB_HDR_OLD_KEY[SB_HDR_NEW_KEY[4K rand blob]]
 #       Steps:
 #           1. Generate 4K blob of random data
-#           2. Sign #1 with production keys
-#           3. Sign #2 with the imprint keys
+#           2. Sign #1 with new keys
+#           3. Sign combination of #1 and #2 with the old keys
 ################################################################################
 sub create_sb_key_transition_container
 {
@@ -1710,18 +1758,16 @@ sub create_sb_key_transition_container
     # Gen 4K blob of random data
     run_command("dd if=/dev/urandom of=$tempImages{RAND_BLOB} count=1 bs=4k");
 
-    die "Key transition not allowed in $sign_mode mode" if ($OPEN_SIGN_KEY_TRANS_REQUEST eq "");
+    die "Key transition not allowed in $sign_mode mode" if ($OPEN_SIGN_KEY_TRANS_NEW eq "");
 
-    # Create a signed container with new production keys
-    run_command("$OPEN_SIGN_KEY_TRANS_REQUEST".OP_SIGNING_FLAG
+    # Create a signed container with new keys
+    run_command("$OPEN_SIGN_KEY_TRANS_NEW".OP_SIGNING_FLAG
         . "$sb_hdrs{SBKT}{inner}{flags} --protectedPayload $tempImages{RAND_BLOB} "
         . "--out $tempImages{PRD_KEY_FILE}");
 
-    # Sign new production key container with imprint keys
-    # At this time only signing with V1 algorithm.
-    # @TODO PFHB-686 will add V3 support
+    # Sign new production key container with old keys
     my $sbktComponentIdArg = "--sign-project-FW-token SBKT ";
-    run_command("$OPEN_SIGN_REQUEST_V1 ".$sbktComponentIdArg.OP_SIGNING_FLAG
+    run_command("$OPEN_SIGN_KEY_TRANS_OLD ".$sbktComponentIdArg.OP_SIGNING_FLAG
         . "$sb_hdrs{SBKT}{outer}{flags} --protectedPayload $tempImages{PRD_KEY_FILE} "
         . "--out $o_file");
 
@@ -2002,10 +2048,13 @@ print <<"ENDUSAGE";
                         Multiple '--corrupt' options are allowed, but note the system will checkstop on the
                             first bad partition so multiple may not be that useful.
                         Example: --corrupt HBI --corrupt HBD=unpro
-    --sign-mode <development|production>   Indicates how to sign partitions with either development keys or production keys
-    --key-transition <imprint|production>   Indicates a key transition is needed and creates a secureboot key transition container.
-                                            Note: "--sign-mode production" is not allowed with "--key-transition imprint"
-                                            With [--test] will transition to test dev keys, which are a fixed permutation of imprint keys.
+    --sign-mode <development|production>                       
+                                  Indicates how to sign partitions with either development keys or production keys
+    --key-transition <development|production|prod-prod>-V3     
+                                  Indicates a key transition is needed and creates a secureboot key transition container.
+                                  Note: Transition images to V1 are not supported, but for clarity "-V3" must be appended to argument
+                                  Note: "--sign-mode production" is not allowed with "--key-transition development"
+                                  With [--test] will transition to test dev keys, which are a fixed permutation of development keys.
     --lab-security-override       If signing SBE image, set bit in signing
                                       header which turns on security override
                                       checking in the SBE the next time it is
@@ -2015,7 +2064,7 @@ print <<"ENDUSAGE";
                                       if set, disable security.  Otherwise, it
                                       will retain the existing security
                                       settings.  NOTE: Only allowed for
-                                      development/imprint signed images.
+                                      development signed images.
     --no-lab-security-override    If signing SBE image, clear bit in signing
                                       header which disables security override
                                       checking in the SBE the next time it is
