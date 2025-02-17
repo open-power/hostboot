@@ -745,7 +745,9 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                     TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: setheader failed");
                     break;
                 }
+
                 payloadTextSize = l_conHdr.payloadTextSize();
+
                 if ( payloadTextSize <= 0)
                 {
                     TRACFCOMP(g_trac_pnor, ERR_MRK"PnorRP::getSectionInfo: non-zero protected payload text size expected for section %s",
@@ -774,13 +776,20 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                     break;
                 }
 
-                // skip secure header for secure sections at this point in time
-                o_info.vaddr += PAGESIZE;
-                // now that we've skipped the header we also need to adjust the
-                // size of the section to reflect that.
+                // Since the header has been set and parsed, use the header
+                // information to determine if this section starts with a V3
+                // Secure header
+                o_info.hasV3Header = l_conHdr.isV3();
+
+                // Skip secure header for secure sections at this point in time
+                // --AND-- adjust the size of the section to reflect that.
                 // Note: For unsecured sections, the header skip and size decrement
                 // was done previously in pnor_common.C
-                o_info.size -= PAGESIZE;
+                size_t l_contHdrSize = l_conHdr.isV3() ? V3_SECURE_HEADER_SIZE
+                                                        : PAGESIZE;
+
+                o_info.vaddr += l_contHdrSize;
+                o_info.size -= l_contHdrSize;
 
                 // Need to change size to accommodate for hash table
                 if (l_conHdr.sb_flags()->sw_hash)
@@ -788,8 +797,8 @@ errlHndl_t PnorRP::getSectionInfo( PNOR::SectionId i_section,
                     o_info.vaddr += payloadTextSize;
                     // Hash page table needs to use containerSize as the base
                     // and subtract off header and hash table size
-                    o_info.size = l_conHdr.totalContainerSize() - PAGE_SIZE -
-                                  payloadTextSize;
+                    o_info.size = l_conHdr.totalContainerSize() - l_contHdrSize
+                                  - payloadTextSize;
                     o_info.hasHashTable = true;
                 }
 

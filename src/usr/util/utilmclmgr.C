@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2021,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2021,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -405,6 +405,8 @@ void MasterContainerLidMgr::parseMcl()
     // If MCL has a header make sure to skip over it for parsing
     if (iv_hasHeader)
     {
+        // Can use PAGESIZE since MCL will always have a V1 header
+        // of size PAGESIZE (aka V1_MAX_SECURE_HEADER_SIZE in ROM.H)
         l_pMcl += PAGESIZE;
     }
 

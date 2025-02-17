@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -470,6 +470,7 @@ errlHndl_t extendPnorSectionHash(
     {
         // If secureboot is not enabled, measure protected section
         SHA512_t hash = {0};
+        // @TODO JIRA:PFHB-680 Add support for V3 hashing
         SECUREBOOT::hashBlob(i_vaddr, protectedSize, hash);
         pError = TRUSTEDBOOT::pcrExtend(pnorHashPcr,
                 pnorHashEventType,

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2015,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2015,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -80,6 +80,7 @@ enum SectionId
     HCODE_LID,      /**< HCODE_LID Reference image */
     HB_DATA_RW,     /**< Hostboot Data RW */
     PSPD,           /**< Planar SPD Data  */
+    HB_HLL,         /**< HB Hash Lid List (for V3 containers) */
 #endif
     NUM_SECTIONS,   /**< Number of defined sections */
 
@@ -117,7 +118,8 @@ struct SectionInfo_t
       Volatile(false),
       secure(false),
       clearOnEccErr(false),
-      hasHashTable(false)
+      hasHashTable(false),
+      hasV3Header(false)
       {}
     SectionId id;       /**< Identifier for this section */
     const char* name;   /**< Name of the section */
@@ -134,6 +136,8 @@ struct SectionInfo_t
     bool secure;        /**< Indicates if a section is secure */
     bool clearOnEccErr; /**< Indicates on ECC errors, clear and reboot*/
     bool hasHashTable;  /**< Indicates if there exists a hash page table*/
+    bool hasV3Header;   /**< Indicates if section starts with a V3 secure
+                             header */
     size_t secureProtectedPayloadSize; /**< Cache the secure payload size so
                                             that the secure container only
                                             needs to be parsed once */

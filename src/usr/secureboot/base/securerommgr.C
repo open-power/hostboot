@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -83,7 +83,6 @@ errlHndl_t verifyContainer(      void * i_container,
                                                        i_hwKeyHash,
                                                        i_secureVersion,
                                                        i_signMode);
-
     return l_errl;
 }
 
@@ -366,7 +365,6 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
         // is not the case as system is in a bad state
         assert(iv_securerom != nullptr);
 
-
         // Declare local input struct
         ROM_hw_params l_hw_parms;
 
@@ -374,15 +372,15 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
         // struct elements my_ecid, entry_point and log
         memset(&l_hw_parms, 0, sizeof(ROM_hw_params));
 
-        // Now set hw_key_hash, which is of type SHA512_t, to iv_key_hash
+        // Set hw_key_hash
         if (i_hwKeyHash == nullptr)
         {
-            // Use current hw hash key
+            // Use current (aka system) hw key hash
             memcpy (&l_hw_parms.hw_key_hash, iv_key_hash, sizeof(SHA512_t));
         }
         else
         {
-            // Use custom hw hash key passed in by the caller
+            // Use custom hw key hash passed in by the caller
             memcpy (&l_hw_parms.hw_key_hash, i_hwKeyHash, sizeof(SHA512_t));
         }
 
@@ -399,6 +397,7 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
         }
 
         // Determine which signing mode - V1 or V3 - is going to be used below
+        // based on what caller passed in
         uint8_t l_signModeToUse = 0; // default to SB_SIGNING_SYSTEM_CONTAINER
         uint8_t l_system_signing_mode = g_BlToHbDataManager.getSecurebootSigningMode();
         if (i_signMode == TARGETING::SB_SIGNING_SYSTEM_CONTAINER)
@@ -413,11 +412,33 @@ errlHndl_t SecureRomManager::verifyContainer(      void * i_container,
         {
             // Use input value
             l_signModeToUse = i_signMode;
-            TRACUCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
+            TRACFCOMP(g_trac_secure,"SecureRomManager::verifyContainer(): "
                       "Using i_signMode SB Signing Mode 0x%.2X. "
                       "Ignoring system mode 0x%.2X",
                       l_signModeToUse, l_system_signing_mode);
         }
+
+        // Now check that the header of the container passed in matches the
+        // signing mode determined above
+        ContainerHeader l_conHdr;
+        l_errl = l_conHdr.setHeader(i_container);
+        if (l_errl)
+        {
+            TRACFCOMP(g_trac_secure, ERR_MRK"SecureRomManager::verifyContainer(): setheader failed");
+
+            // Add UD data without data needed from Container Header
+            UdVerifyInfo("UNKNOWN", 0, i_ids, {}, {}, 0, 0, 0).addToLog(l_errl);
+            break;
+        }
+        // @TODO JIRA:PFHB-680 Complete the check by comparing l_signModeToUse
+        // to l_conHdr.isV3(); create an error log if the signing mode and the
+        // container version are out of sync. Something like this:
+        // if ( (l_signModeToUse == TARGETING::SB_SIGNING_V3_CONTAINER)
+        //      && (l_conHdr.isV3() == false)
+        //      ||
+        //      (l_signModeToUse == TARGETING::SB_SIGNING_V1_CONTAINER)
+        //      && (l_conHdr.isV3() == true))
+        //  {create error log}
 
         /*******************************************************************/
         /* Call ROM_verify() function via an assembly call                 */

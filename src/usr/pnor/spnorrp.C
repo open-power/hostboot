@@ -414,7 +414,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                                    PNOR::RC_UNSIGNED_PNOR_SECTION,
                                    TO_UINT64(i_id),
                                    0,
-                                   true /*Add HB SW Callout*/);
+                                   ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
             l_errhdl->collectTrace(SECURE_COMP_NAME);
             break;
@@ -435,8 +435,14 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
             io_rec->hashTableVaddr = l_info.vaddr;
         }
 
-        l_info.vaddr -= PAGESIZE; // back up a page to expose the secure header
-        l_info.size += PAGESIZE; // add a page to size to account for the header
+        // getSectionInfo already determined if the partition starts with a
+        // V3 secure header.  If it doesn't, then expect a V1 secure header.
+        size_t l_contHdrSize = l_info.hasV3Header ? V3_SECURE_HEADER_SIZE
+                                                  : PAGESIZE;
+
+
+        l_info.vaddr -= l_contHdrSize; // back up to expose the secure header
+        l_info.size += l_contHdrSize; // add size to account for the header
 
         // it's a coding error if l_info.vaddr is not in secure space
         if (l_info.vaddr < SBASE_VADDR)
@@ -459,7 +465,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                             PNOR::RC_SECURE_VADDR_MISMATCH,
                             TO_UINT64(i_id),
                             l_info.vaddr,
-                            true);
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             SECUREBOOT::addSecureUserDetailsToErrlog(l_errhdl);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
             l_errhdl->collectTrace(SECURE_COMP_NAME);
@@ -483,9 +489,10 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                     "in temp space l_tempAddr=0x%.16llX, "
                     "section start address in unsecured space l_unsecureAddr=0x%.16llX, "
                     "l_info.size = 0x%.16llX, "
-                    "l_info.secureProtectedPayloadSize = 0x%.16llX, ",
+                    "l_info.secureProtectedPayloadSize = 0x%.16llX, "
+                    "l_contHdrSize = 0x%X",
                     l_tempAddr, l_unsecuredAddr, l_info.size,
-                    l_info.secureProtectedPayloadSize);
+                    l_info.secureProtectedPayloadSize, l_contHdrSize);
 
         TRACDBIN(g_trac_pnor,"SPnorRP::verifySections unsecured mem now: ",
                              l_unsecuredAddr, 128);
@@ -494,10 +501,10 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                     "SPnorRP::verifySections Doing setPermission for address "
                               "0x%llX of length 0x%llX",
                        l_tempAddr,
-                       l_info.secureProtectedPayloadSize + PAGESIZE);
+                       l_info.secureProtectedPayloadSize + l_contHdrSize);
 
         l_errhdl = setPermission(l_tempAddr,
-                                 l_info.secureProtectedPayloadSize + PAGESIZE,
+                                 l_info.secureProtectedPayloadSize + l_contHdrSize,
                                  WRITABLE | ALLOCATE_FROM_ZERO);
 
         if (l_errhdl)
@@ -507,7 +514,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                               "setPermission failed for address "
                               "0x%llX of length 0x%llX",
                        l_tempAddr,
-                       l_info.secureProtectedPayloadSize + PAGESIZE);
+                       l_info.secureProtectedPayloadSize + l_contHdrSize);
             break;
         }
 
@@ -516,7 +523,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
 
         // copy from unsecured PNOR space to temp PNOR space
         memcpy(l_tempAddr, l_unsecuredAddr, l_info.secureProtectedPayloadSize
-                                          + PAGESIZE); // plus header size
+                                          + l_contHdrSize); // plus header size
 
         SECUREBOOT::ContainerHeader l_conHdr;
         l_errhdl = l_conHdr.setHeader(l_tempAddr);
@@ -536,12 +543,13 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                 "Total container size = 0x%.16llX", l_totalContainerSize);
 
         if (l_totalContainerSize <
-            (PAGESIZE + l_info.secureProtectedPayloadSize))
+            (l_contHdrSize + l_info.secureProtectedPayloadSize))
         {
             TRACFCOMP(g_trac_pnor,ERR_MRK"SPnorRP::verifySections For section %s, total container size (%d) was less than header "
-                      "size (4096) + payload text size (%d)",
+                      "size (%d) + payload text size (%d)",
                       l_info.name,
                       l_totalContainerSize,
+                      l_contHdrSize,
                       l_info.secureProtectedPayloadSize)
             /*@
              * @errortype
@@ -558,8 +566,8 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                             PNOR::MOD_SPNORRP_VERIFYSECTIONS,
                             PNOR::RC_SECURE_TOTAL_SIZE_INVAL,
                             TO_UINT64(i_id),
-                            PAGESIZE + l_info.secureProtectedPayloadSize,
-                            true);
+                            l_contHdrSize + l_info.secureProtectedPayloadSize,
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             SECUREBOOT::addSecureUserDetailsToErrlog(l_errhdl);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
             l_errhdl->collectTrace(SECURE_COMP_NAME);
@@ -588,7 +596,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
                             PNOR::RC_SECURE_SIZE_MISMATCH,
                             TO_UINT64(i_id),
                             l_totalContainerSize,
-                            true);
+                            ERRORLOG::ErrlEntry::ADD_SW_CALLOUT);
             SECUREBOOT::addSecureUserDetailsToErrlog(l_errhdl);
             l_errhdl->collectTrace(PNOR_COMP_NAME);
             l_errhdl->collectTrace(SECURE_COMP_NAME);
@@ -682,7 +690,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         }
 
         // Size of data loaded into Secure PnorRP vaddr space (Includes Header)
-        size_t l_protectedSizeWithHdr = PAGESIZE + io_rec->textSize;
+        size_t l_protectedSizeWithHdr = l_contHdrSize + io_rec->textSize;
         TRACFCOMP(g_trac_pnor, "SPnorRP::verifySections Total Protected size with Header = 0x%.16llX",
                   l_protectedSizeWithHdr);
 
@@ -703,7 +711,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         {
             // pcr extension of PNOR hash
             l_errhdl = TRUSTEDBOOT::extendPnorSectionHash(l_conHdr,
-                                        (l_tempAddr + PAGESIZE),
+                                        (l_tempAddr + l_contHdrSize),
                                         i_id);
             if(l_errhdl)
             {
@@ -739,7 +747,7 @@ uint64_t SPnorRP::verifySections(SectionId i_id,
         // set permissions on the unsecured pages to write tracked so that any
         // unprotected payload pages with dirty writes can flow back to PNOR.
         uint64_t unprotectedPayloadSize = l_totalContainerSize
-            - PAGESIZE - io_rec->textSize;
+            - l_contHdrSize - io_rec->textSize;
         if (unprotectedPayloadSize) // only write track a non-zero range
         {
             TRACFCOMP(g_trac_pnor,INFO_MRK "SPnorRP::verifySections "
@@ -1663,8 +1671,13 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
         break;
     }
 
-    // Validate nested container is properly signed using new hw keys
-    uint8_t * l_nestedVaddr = const_cast<uint8_t*>(i_vaddr) + PAGESIZE;
+    // Get size of outer container so we know where nested container starts
+    size_t l_contHdrSize = l_outerConHdr.isV3() ? V3_SECURE_HEADER_SIZE
+                                                : PAGESIZE;
+
+    // Validate nested container is properly signed using its new hw keys and
+    // signing mode
+    uint8_t * l_nestedVaddr = const_cast<uint8_t*>(i_vaddr) + l_contHdrSize;
     SECUREBOOT::ContainerHeader l_nestedConHdr;
     l_errl = l_nestedConHdr.setHeader(l_nestedVaddr);
     if (l_errl)
@@ -1673,9 +1686,17 @@ errlHndl_t SPnorRP::keyTransitionCheck(const uint8_t *i_vaddr) const
         break;
     }
 
+    uint8_t l_secureVersion = INVALID_SECURE_VERSION; // use the system's secure version
+    const ATTR_SB_SIGNING_MODE_type l_signMode = l_nestedConHdr.isV3()
+                                                 ? TARGETING::SB_SIGNING_V3_CONTAINER
+                                                 : TARGETING::SB_SIGNING_V1_CONTAINER;
+
     l_errl = SECUREBOOT::verifyContainer(l_nestedVaddr,
                                          {PNOR::SBKT},
-                                         l_nestedConHdr.hwKeyHash());
+                                         l_nestedConHdr.hwKeyHash(),
+                                         l_secureVersion,
+                                         l_signMode);
+
     if (l_errl)
     {
         TRACFCOMP( g_trac_pnor, ERR_MRK"SPnorRP::keyTransitionCheck() - failed verifyContainer");

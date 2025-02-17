@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2016,2020                        */
+/* Contributors Listed Below - COPYRIGHT 2016,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -61,9 +61,9 @@ class ContainerHeader
          * @brief Default Constructor
          */
         ContainerHeader():
-            iv_componentId{}, iv_headerInfo{}, iv_isValid(false),
+            iv_headerInfo{}, iv_v3_headerInfo{}, iv_componentId{}, iv_isValid(false),
             iv_pHdrStart(nullptr), iv_hdrBytesRead(0), iv_totalSwKeysSize(0),
-            iv_sbFlags{}, iv_hwKeyHash{}, iv_fakeHeader{}
+            iv_sbFlags{}, iv_hwKeyHash{}, iv_isV3(false), iv_fakeHeader{}
         {}
 
         /**
@@ -121,8 +121,14 @@ class ContainerHeader
 
         /**
          * @brief Total size of all hw keys concatenated
+         *        One value for V1 container headers; one value for
+         *        V3 container headers.
          */
+        // V1
         static const size_t totalHwKeysSize = HW_KEY_COUNT*sizeof(ecc_key_t);
+        // V3
+        static const size_t v3_totalHwKeysSize = sizeof(ecc_key_t) // hw_pkey_a;
+                                                 + sizeof(mldsa_pub_key_t); // hw_pkey_d;
 
         /**
          * @brief Retrieves payload text size
@@ -168,7 +174,7 @@ class ContainerHeader
         const sb_flags_t* sb_flags() const;
 
         /**
-         * @brief Retrieves hw public key hash
+         * @brief Retrieves hw public key hash from the container
          * @return SHA512_t* - ptr to hash of hw public keys
          */
         const SHA512_t* hwKeyHash() const;
@@ -204,10 +210,19 @@ class ContainerHeader
          */
         const uint8_t secureVersion() const;
 
+        /**
+         *  @brief Returns if the container is a V3 container (true)
+         *         or a V1 container(false)
+         *
+         *  @return bool - whether or not the container is a V3 container
+         */
+        bool isV3() const;
+
     private:
 
         /**
-         *  @brief Complete container header structure based on ROM structures
+         *  @brief Complete V1 container header structure based on
+         *         ROM structures
          */
         struct SecureHeaderInfo
         {
@@ -218,15 +233,45 @@ class ContainerHeader
             ROM_sw_sig_raw sw_sig;
         };
 
+        // Entire cached V1 container header content
+        SecureHeaderInfo iv_headerInfo;
+
+
+        /**
+         *  @brief Complete V3 container header structure based on
+         *         ROM structures
+         */
+        struct V3_SecureHeaderInfo
+        {
+            ROM_v3_container_raw v3_hw_hdr;
+            ROM_v3_prefix_header_raw v3_hw_prefix_hdr;
+            ROM_v3_prefix_data_raw v3_hw_prefix_data;
+            ROM_v3_sw_header_raw v3_sw_hdr;
+            ROM_v3_sw_sig_raw v3_sw_sig;
+        };
+
+        // entire cached V3 container header content
+        V3_SecureHeaderInfo iv_v3_headerInfo;
+
+        /**
+         *  @brief Common Header between V1 ROM_container_raw and
+         *         V3 ROM_v3_container_raw. See src/include/securerom/ROM.H
+         *         for details
+         */
+        ROM_common_container_fields iv_commonRawHdr;
+
         /**
          *  @brief Container's component ID (one byte larger than associated
          *      container header field to allow for a NULL terminator)
+         *
+         *  @note this is the same size for V1 and V3; confirmed with
+         *        static_assert check below
          */
         char iv_componentId[  sizeof(ROM_sw_header_raw::component_id)
                             + sizeof(uint8_t) ];
-
-        // Entire cached container header content
-        SecureHeaderInfo iv_headerInfo;
+        static_assert(sizeof(ROM_sw_header_raw::component_id) ==
+                      sizeof(ROM_v3_sw_header_raw::component_id),
+                      "V1 and V3 component_id sizes do not match!");
 
         // Indicates if container header is a valid, in a very loose sense,
         // secureboot header.
@@ -236,6 +281,7 @@ class ContainerHeader
         const uint8_t* iv_pHdrStart;
 
         // Counter for bytes read while parsing the container header
+        // Set in safeMemCpyAndInc()
         size_t iv_hdrBytesRead;
 
         // Total size of all software keys concatenated
@@ -246,6 +292,21 @@ class ContainerHeader
 
         // HW keys' hash for current container.
         SHA512_t iv_hwKeyHash;
+
+        // While V1 uses SHA512_t for the HW Keys' Hash type, V3 uses sha3_t.
+        // The size for both is the same (64 bytes), and the logic in
+        // containerheader.H/C assumes that.  So do a static_assert to catch if
+        // something ever changes.
+        static_assert(sizeof(SHA512_t) == sizeof(sha3_t),
+                      "sizeof(SHA512_t) and sizeof(sha3_t) differ!");
+        static_assert(SHA512_DIGEST_LENGTH == SHA3_DIGEST_LENGTH,
+                      "SHA512_DIGEST_LENGTH and SHA3_DIGEST_LENGTH differ!");
+        static_assert(sizeof(SHA512_t) == SHA3_DIGEST_LENGTH,
+                      "sizeof(SHA512_t) and SHA3_DIGEST_LENGTH differ!");
+
+        // Indicates if container header is for a V3 container (true) or
+        // for a V1 header (false)
+        bool iv_isV3;
 
         /**
          * @brief Determines what flags are set based on the hw and sw flag bit
@@ -307,8 +368,9 @@ class ContainerHeader
          * @brief Checks bounds of parsing before mempy and increments pointer
          *
          * Ensures that we don't memcpy more bytes than the max size of a
-         * secure container header.  Optionally ensures that the requested copy
-         * does not exceed a supplied maximum size, in order to prevent
+         * secure container header (will check iv_isV3 to use the proper
+         * header size).  Optionally ensures that the requested copy does not
+         * exceed a supplied maximum transaction size, in order to prevent
          * dynamically sized data area overruns.  Error log created on any
          * violation of the above constraints.
          *
@@ -318,7 +380,9 @@ class ContainerHeader
          *                      nullptr input will assert
          * @param[in] i_size    Number of bytes to copy
          * @param[in] i_maxSize Maximum transaction size in bytes for this
-         *     single copy.  Default=secure header size.
+         *                      single copy.  Default is V1 secure header size,
+         *                      but can pass in V3_SECURE_HEADER_SIZE for V3
+         *                      headers
          *
          * @return Error handle if error; otherwise nullptr
          */
@@ -332,8 +396,10 @@ class ContainerHeader
         std::array<uint8_t,PAGE_SIZE> iv_fakeHeader;
 
         /**
-         * @brief Generate fake header with minimal information and stores in
-         *        instance variable
+         * @brief Generate fake V1 container header with minimal information
+         *        and stores in instance variable.
+         *
+         * @note  This does not support V3 container headers
          *
          * @param[in] i_size        Size of content to add header to
          * @param[in] i_compId      Component ID

@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2011,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2011,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -372,7 +372,8 @@ bool PNOR::isEnforcedSecureSection(const uint32_t i_section)
                i_section == CAPP ||
                i_section == TESTLOAD ||
                i_section == VERSION ||
-               i_section == OCMBFW;
+               i_section == OCMBFW ||
+               i_section == HB_HLL;
     #endif
 #else
     return false;
@@ -389,7 +390,8 @@ bool PNOR::isCoreRootOfTrustSection(const PNOR::SectionId i_section)
                i_section == HB_EXT_CODE ||
                i_section == HB_DATA ||
                i_section == SBE_IPL ||
-               i_section == HB_BASE_CODE;
+               i_section == HB_BASE_CODE ||
+               i_section == HB_HLL;
     #endif
 #else
     return false;
@@ -449,6 +451,7 @@ const char * PNOR::SectionIdToString( uint32_t i_secIdIndex )
         "HCODE_LID",   /**< PNOR::HCODE_LID      : HCODE_LID Reference image */
         "HBD_RW",      /**< PNOR::HB_DATA_RW     : Hostboot Data ReadWrite   */
         "PSPD",        /**< PNOR::PSPD           : Hostboot Planar SPD       */
+        "HB_HLL",      /**< PNOR::HB_HLL         : HB Hash List Lid for V3 headers */
 #endif
     };
 

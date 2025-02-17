@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2022                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -617,6 +617,34 @@ class SecureRomManagerTest : public CxxTest::TestSuite
         }
         } while(0);
     }
+
+    void test_simple_v3_header(void)
+    {
+        TRACFCOMP(g_trac_secure,"SecureRomManagerTest::test_simple_v3_header");
+
+        // A simple "good path" test for the V3 container header support is
+        // to simply securely load the HB_HLL PNOR partition which has a V3
+        // container header at the top of the partition.
+        // However, this will only work if the system is in V3 mode (ie, the
+        // system has and is using V3 HW Keys' Hash)
+        uint8_t l_signModeToUse = g_BlToHbDataManager.getSecurebootSigningMode();
+        if (l_signModeToUse == TARGETING::SB_SIGNING_V3_CONTAINER)
+        {
+            errlHndl_t l_errl = loadSecureSection(PNOR::HB_HLL);
+            if (l_errl)
+            {
+                TS_FAIL("SecureRomManagerTest::test_simple_v3_header: failed to load HB_HLL");
+                errlCommit(l_errl, SECURE_COMP_ID);
+            }
+        }
+        else
+        {
+            TRACFCOMP(g_trac_secure,"SecureRomManagerTest::test_simple_v3_header: "
+                      "Skipping loading HB_HLL because system is not in V3 mode "
+                      "(sys sign mode = %d)", l_signModeToUse);
+        }
+    }
+
 };
 
 /**********************************************************************/

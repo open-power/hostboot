@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2024                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -158,6 +158,10 @@ namespace SECUREBOOT
         RC_PHYS_PRES_REIPL                  = SECURE_COMP_ID | 0x45,
         RC_CLEARING_KEY_CLEAR_SENSOR_FAILED = SECURE_COMP_ID | 0x46, // deprecated
         RC_KEY_CLEAR_REQUEST_MFG            = SECURE_COMP_ID | 0x47,
+
+        // Since 0x00 to 0x1F is full, continuing common ones here
+        RC_INVALID_HEADER_VERSION          = SECURE_COMP_ID | 0x50,
+
 
         // Reason codes 0xA0 - 0xEF reserved for trustedboot_reasoncodes.H
     };

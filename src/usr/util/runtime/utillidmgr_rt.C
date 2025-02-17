@@ -5,7 +5,7 @@
 /*                                                                        */
 /* OpenPOWER HostBoot Project                                             */
 /*                                                                        */
-/* Contributors Listed Below - COPYRIGHT 2013,2023                        */
+/* Contributors Listed Below - COPYRIGHT 2013,2025                        */
 /* [+] International Business Machines Corp.                              */
 /*                                                                        */
 /*                                                                        */
@@ -249,22 +249,28 @@ errlHndl_t UtilLidMgr::loadLid()
                     break;
                 }
 
+                // With the container header set and parsed, determine what
+                // the header size should be
+                size_t l_contHdrSize = l_conHdr.isV3()
+                                           ? V3_SECURE_HEADER_SIZE
+                                           : PAGESIZE;
+
                 UTIL_FT("UtilLidMgr::loadLid - resv mem section has secure header");
                 if (l_conHdr.sb_flags()->sw_hash)
                 {
                     // Size of lid has to be size of unprotected data. So we
                     // need to take out header and hash table sizes
-                    iv_lidSize = l_conHdr.totalContainerSize() - PAGESIZE -
+                    iv_lidSize = l_conHdr.totalContainerSize() - l_contHdrSize -
                         l_conHdr.payloadTextSize();
                     iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +
-                                   PAGESIZE + l_conHdr.payloadTextSize();
+                                   l_contHdrSize + l_conHdr.payloadTextSize();
                 }
                 else
                 {
                     iv_lidSize = l_conHdr.payloadTextSize();
-                    // Increment by page size to not expose secure header
+                    // Increment by header size to not expose secure header
                     iv_lidBuffer = static_cast<uint8_t*>(iv_lidBuffer) +
-                                   PAGESIZE;
+                                   l_contHdrSize;
                 }
             }
         }

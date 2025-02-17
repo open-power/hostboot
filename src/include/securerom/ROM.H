@@ -448,6 +448,10 @@ constexpr uint8_t SW_KEY_COUNT_MAX = 3;
 constexpr size_t MAX_SECURE_HEADER_SIZE = 4096;
 constexpr size_t V1_MAX_SECURE_HEADER_SIZE = MAX_SECURE_HEADER_SIZE;
 constexpr size_t V1_SECURE_HEADER_SIZE = 1288; // Truncated V1 Size
+// There is a lot of code that assumes that the V1 container header size
+// is PAGESIZE so do a static_assert here to keep things insync
+static_assert(V1_MAX_SECURE_HEADER_SIZE == PAGESIZE,
+              "V1_MAX_SECURE_HEADER_SIZE != PAGESIZE");
 
 /**
  * Secure Header V3 macro
